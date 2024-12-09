@@ -13,6 +13,7 @@
                #:common-doc
                #:common-html
                #:scriba
-               #:common-doc-inspector-views)
+               #:common-doc-inspector-views
+               #:uiop)
   :components ((:file "package")
                (:file "hyperdoc")))
