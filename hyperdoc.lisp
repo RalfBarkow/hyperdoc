@@ -59,9 +59,14 @@
                                  "Expanded document")
                     :highlight t)
         (:hr))
-      (common-doc.format:emit-document (make-instance 'common-html:html)
-                                       document
-                                       html-inspector-views::*html-stream*))))
+      ;; Don't use common-doc.format:emit-document here. It creates an
+      ;; HTML string for the document and in the end sends it to the
+      ;; specified output string. This interferes with the implementation
+      ;; of object references. Moreover, it creates a !DOCTYPE tag for
+      ;; an independent document, whereas we want a snippet that goes
+      ;; into a view.
+      (common-html.emitter:node-to-stream (common-doc:children document)
+                                          html-inspector-views::*html-stream*))))
 
 (defview 👀source (page hyperdoc-page)
   (-> page

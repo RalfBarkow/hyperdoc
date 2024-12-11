@@ -5,23 +5,6 @@
 (in-package :html-inspector-views/hyperdoc)
 
 ;;
-;; Define a new node for raw HTML code inside a document
-;; This is what an object reference is transformed to
-;; for HTML rendering.
-;;
-
-(common-doc:define-node html-node (common-doc:text-node) ())
-
-(defun make-html (string &key metadata reference)
-  (make-instance 'html-node
-                 :text string
-                 :metadata metadata
-                 :reference reference))
-
-(common-html.emitter::define-emitter (node html-node)
-  (write-string (common-doc:text node) common-html.emitter::*output-stream*))
-
-;;
 ;; Define a new node for embedded object references.
 ;; The text of the node is interpreted as Lisp code in the
 ;; specified package (defaults to cl-user) and evaluated.
@@ -29,7 +12,7 @@
 ;; html-inspector-views:object-ref.
 ;;
 
-(common-doc:define-node object-reference (common-doc.macro:macro-node)
+(common-doc:define-node object-reference (common-doc:content-node)
   ((label :reader ref-label
           :initarg :label
           :type string
@@ -46,9 +29,9 @@
             :attribute-name "view"
             :documentation "The view to preselect for inspecting the value"))
   (:tag-name "object")
-  (:documentation "Reference to a Lisp object"))
+  (:documentation "Inspectable reference to a Lisp object"))
 
-(defmethod common-doc.macro:expand-macro ((ref object-reference))
+(common-html.emitter::define-emitter (ref object-reference)
   (let* ((text (common-doc.ops:collect-all-text ref))
          (label (slot-value ref 'label))
          (view (slot-value ref 'view))
@@ -57,7 +40,13 @@
                       p
                       (find-package :cl-user)))
          (form (with-input-from-string (input text) (read input)))
-         (value (eval form)))
-    (make-html (if label
-                   label
-                   (object-ref value :highlight t :select view)))))
+         (value (eval form))
+         (html-id (inspect-id value :select view)))
+    (format t "common-html.emitter::*output-stream*: ~A~%html-inspector-views::*html-stream*:~A~%"
+            common-html.emitter::*output-stream*
+            html-inspector-views::*html-stream*)
+    (object-ref value :select view :highlight t)))
+
+
+(defmethod common-html.emitter::emit :before ((node t))
+  (format t "Emitting ~A~%" node))
