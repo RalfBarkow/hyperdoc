@@ -27,6 +27,6 @@ The real numbers have these properties, among others:
 @def($x + y = y + x$)
 @end(deflist)
 
-The answer is @object[label=sum package=html-inspector-views/hyperdoc]((+ 2 3)).
+The answer is @object[view=Print](42).
 
 @end(section)

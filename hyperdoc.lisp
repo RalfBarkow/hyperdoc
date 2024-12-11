@@ -25,7 +25,7 @@
     hd))
 
 (defun make-page (file)
-  (make-instance 'hyperdoc-page:file file))
+  (make-instance 'hyperdoc-page :file file))
 
 (defun page-document (page)
   (let* ((document (common-doc.format:parse-document (make-instance 'scriba:scriba)
@@ -39,29 +39,29 @@
       👀items
       (rename :title "Pages" :priority 1))))
 
-(defmethod text-representation ((page hyperdoc-page))
-  (common-doc:title (slot-value page 'document)))
+;; (defmethod text-representation ((page hyperdoc-page))
+;;   (common-doc:title (slot-value page 'document)))
 
 (defview 👀content (page hyperdoc-page)
-  (let ((document (page-document page)))
-    (html-view :title "Content" :priority 1
-               (html
-                 (object-ref (common-doc.format:parse-document (make-instance 'scriba:scriba)
-                                                               (slot-value page 'file))
-                             :display #'(lambda (_)
-                                          (declare (ignore _))
-                                          "Document")
-                             :highlight t)
-                 (:span "&nbsp;")
-                 (object-ref document
-                             :display #'(lambda (_)
-                                          (declare (ignore _))
-                                          "Expanded document")
-                             :highlight t)
-                 (:hr))
-               (common-doc.format:emit-document (make-instance 'common-html:html)
-                                                document
-                                                html-inspector-views::*html-stream*))))
+  (html-view :title "Content" :priority 1
+    (let ((document (page-document page)))
+      (html
+        (object-ref (common-doc.format:parse-document (make-instance 'scriba:scriba)
+                                                      (slot-value page 'file))
+                    :display #'(lambda (_)
+                                 (declare (ignore _))
+                                 "Document")
+                    :highlight t)
+        (:span "&nbsp;")
+        (object-ref document
+                    :display #'(lambda (_)
+                                 (declare (ignore _))
+                                 "Expanded document")
+                    :highlight t)
+        (:hr))
+      (common-doc.format:emit-document (make-instance 'common-html:html)
+                                       document
+                                       html-inspector-views::*html-stream*))))
 
 (defview 👀source (page hyperdoc-page)
   (-> page
