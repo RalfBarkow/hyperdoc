@@ -27,6 +27,6 @@ The real numbers have these properties, among others:
 @def($x + y = y + x$)
 @end(deflist)
 
-The answer is @object[view=Print](42).
+The answer is @object[display="\"a number\"" view=Print](42).
 
 @end(section)

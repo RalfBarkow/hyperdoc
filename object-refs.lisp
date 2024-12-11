@@ -13,10 +13,10 @@
 ;;
 
 (common-doc:define-node object-reference (common-doc:content-node)
-  ((label :reader ref-label
-          :initarg :label
+  ((display :reader ref-display
+          :initarg :display
           :type string
-          :attribute-name "label"
+          :attribute-name "display"
           :documentation "Label on the reference button")
    (package :reader ref-package
             :initarg :package
@@ -32,21 +32,25 @@
   (:documentation "Inspectable reference to a Lisp object"))
 
 (common-html.emitter::define-emitter (ref object-reference)
-  (let* ((text (common-doc.ops:collect-all-text ref))
-         (label (slot-value ref 'label))
-         (view (slot-value ref 'view))
-         (package-name (str:upcase (slot-value ref 'package)))
+  (let* ((package-name (str:upcase (slot-value ref 'package)))
          (*package* (if-let (p (find-package package-name))
                       p
                       (find-package :cl-user)))
-         (form (with-input-from-string (input text) (read input)))
-         (value (eval form))
-         (html-id (inspect-id value :select view)))
-    (format t "common-html.emitter::*output-stream*: ~A~%html-inspector-views::*html-stream*:~A~%"
-            common-html.emitter::*output-stream*
-            html-inspector-views::*html-stream*)
-    (object-ref value :select view :highlight t)))
+         (text (common-doc.ops:collect-all-text ref))
+         (value (parse-and-eval text))
+         (display-text (slot-value ref 'display))
+         (_ (format t "Display: ~S~%" display-text))
+         (display (when display-text
+                    (parse-and-eval (str:replace-all "\\" ""  display-text))))
+         (_ (format t "Display value: ~S~%" display))
+         (display-fn (cond
+                       ((typep display 'function) display)
+                       ((null display) nil)
+                       (t #'(lambda (_) (declare (ignore _)) display))))
+         (view (slot-value ref 'view)))
+    (format t "Display fn: ~S~%" display-fn)
+    (object-ref value :display display-fn :select view :highlight t)))
 
-
-(defmethod common-html.emitter::emit :before ((node t))
-  (format t "Emitting ~A~%" node))
+(defun parse-and-eval (string)
+  (let ((form (with-input-from-string (input string) (read input))))
+    (eval form)))
