@@ -11,7 +11,7 @@
 
 (defclass hyperdoc ()
   ((directory :initarg :directory)
-   (title :initarg :title
+   (title :initarg :title)
    (pages :initform (make-hash-table :test #'equal))))
 
 (defun make-hyperdoc (directory)
