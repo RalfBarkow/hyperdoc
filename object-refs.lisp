@@ -39,17 +39,10 @@
          (text (common-doc.ops:collect-all-text ref))
          (value (parse-and-eval text))
          (display-text (slot-value ref 'display))
-         (_ (format t "Display: ~S~%" display-text))
          (display (when display-text
                     (parse-and-eval (str:replace-all "\\" ""  display-text))))
-         (_ (format t "Display value: ~S~%" display))
-         (display-fn (cond
-                       ((typep display 'function) display)
-                       ((null display) nil)
-                       (t #'(lambda (_) (declare (ignore _)) display))))
          (view (slot-value ref 'view)))
-    (format t "Display fn: ~S~%" display-fn)
-    (object-ref value :display display-fn :select view :highlight t)))
+    (object-ref value :display display :select view :highlight t)))
 
 (defun parse-and-eval (string)
   (let ((form (with-input-from-string (input string) (read input))))

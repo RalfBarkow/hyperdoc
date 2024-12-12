@@ -11,54 +11,98 @@
 
 (defclass hyperdoc ()
   ((directory :initarg :directory)
-   (pages :initform nil)))
-
-(defclass hyperdoc-page ()
-  ((file :initarg :file)))
+   (title :initarg :title
+   (pages :initform (make-hash-table :test #'equal))))
 
 (defun make-hyperdoc (directory)
-  (let ((hd (make-instance 'hyperdoc :directory directory)))
-    (let ((common-doc.file:*base-directory* directory))
-      (dolist (page-file (uiop:directory-files directory))
-        (let ((page (make-page page-file)))
-          (push page (slot-value hd 'pages)))))
-    hd))
+  (-> (make-instance 'hyperdoc :directory directory)
+    load-hyperdoc))
 
-(defun make-page (file)
-  (make-instance 'hyperdoc-page :file file))
+(defmethod text-representation ((hdoc hyperdoc))
+  (slot-value hdoc 'title))
 
-(defun page-document (page)
-  (let* ((document (common-doc.format:parse-document (make-instance 'scriba:scriba)
-                                                     (slot-value page 'file)))
-         (expanded (common-doc.macro:expand-macros document)))
-    expanded))
+(defmethod title-bar-action-buttons ((hdoc hyperdoc))
+  (action-button "Reload"
+                 (thunk (load-hyperdoc hdoc)
+                        t)))
+
+(defun load-hyperdoc (hdoc)
+  (with-slots (directory title pages) hdoc
+    (setf title "(untitled)")
+    (let ((page-files))
+      (dolist (file (uiop:directory-files directory))
+        (cond
+          ;; File "title.txt" stores the title
+          ((and (string= "title" (pathname-name file))
+                (string= "txt" (pathname-type file)))
+           (setf (slot-value hdoc 'title)
+                 (-> file
+                   alexandria:read-file-into-string
+                   str:trim)))
+          ;; Scriba files store the pages
+          ((string= "scr" (pathname-type file))
+           (let ((page (gethash file pages)))
+             (unless page
+               (setf page (make-page hdoc file))
+               (setf (gethash file pages) page))
+             (load-page page)
+             (push file page-files)))))
+      (loop for file being the hash-keys in pages
+            do (unless (member file page-files :test #'equal)
+                 (remhash file pages)))))  
+  hdoc)
 
 (defview 👀items (hd hyperdoc)
   (with-slots (pages) hd
     (-> pages
+      alexandria:hash-table-values
       👀items
       (rename :title "Pages" :priority 1))))
 
-;; (defmethod text-representation ((page hyperdoc-page))
-;;   (common-doc:title (slot-value page 'document)))
+(defview 👀files (hd hyperdoc)
+  (with-slots (directory) hd
+    (-> directory
+      👀items
+      (rename :title "Files" :priority 3))))
+
+;;
+;; A hyperdoc-page instance refers to a Scriba file in the
+;; hyperdoc directory.
+;;
+
+(defclass hyperdoc-page ()
+  ((hyperdoc :initarg :hyperdoc)
+   (file :initarg :file)
+   (document :initarg :document :initform nil)))
+
+(defun make-page (hdoc file)
+  (make-instance 'hyperdoc-page :hyperdoc hdoc :file file))
+
+(defun load-page (page)
+  (with-slots (hyperdoc file document) page
+    (let ((common-doc.file:*base-directory* (slot-value hyperdoc 'directory)))
+      (setf document (parse-and-expand file))))
+  page)
+
+(defun parse-and-expand (file)
+  (let* ((document (common-doc.format:parse-document (make-instance 'scriba:scriba)
+                                                     file))
+         ;; CommonDoc macro expansion is not used in plain Hyperdoc,
+         ;; but it makes the syntax extensible by other packages.
+         (expanded (common-doc.macro:expand-macros document)))
+    expanded))
+
+(defmethod title-bar-action-buttons ((page hyperdoc-page))
+  (action-button "Reload"
+                 (thunk (load-page page)
+                        t)))
+
+(defmethod text-representation ((page hyperdoc-page))
+  (common-doc:title (slot-value page 'document)))
 
 (defview 👀content (page hyperdoc-page)
   (html-view :title "Content" :priority 1
-    (let ((document (page-document page)))
-      (html
-        (object-ref (common-doc.format:parse-document (make-instance 'scriba:scriba)
-                                                      (slot-value page 'file))
-                    :display #'(lambda (_)
-                                 (declare (ignore _))
-                                 "Document")
-                    :highlight t)
-        (:span "&nbsp;")
-        (object-ref document
-                    :display #'(lambda (_)
-                                 (declare (ignore _))
-                                 "Expanded document")
-                    :highlight t)
-        (:hr))
+    (let ((document (slot-value page 'document)))
       ;; Don't use common-doc.format:emit-document here. It creates an
       ;; HTML string for the document and in the end sends it to the
       ;; specified output string. This interferes with the implementation
@@ -74,6 +118,12 @@
     👀content
     (rename :title "Source" :priority 3)))
 
+(defview 👀document (page hyperdoc-page)
+  (-> page
+    (slot-value 'document)
+    👀items
+    (rename :title "Document" :priority 4)))
+
 (defvar *doc*
   (make-hyperdoc (asdf:system-relative-pathname
-                  :html-inspector-views-hyperdoc "doc")))
+                  :html-inspector-views-hyperdoc "doc/")))
