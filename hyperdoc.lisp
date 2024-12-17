@@ -39,8 +39,8 @@
                  (-> file
                    alexandria:read-file-into-string
                    str:trim)))
-          ;; Scriba files store the pages
-          ((string= "scr" (pathname-type file))
+          ;; Scriba and VerTeX files store the pages
+          ((member (pathname-type file) '("scr" "tex") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
                (setf page (make-page hdoc file))
@@ -85,8 +85,10 @@
   page)
 
 (defun parse-and-expand (file)
-  (let* ((document (common-doc.format:parse-document (make-instance 'scriba:scriba)
-                                                     file))
+  (let* ((format (if (string= (pathname-type file) "scr")
+                     (make-instance 'scriba:scriba)
+                     (make-instance 'vertex:vertex)))
+         (document (common-doc.format:parse-document format file))
          ;; CommonDoc macro expansion is not used in plain Hyperdoc,
          ;; but it makes the syntax extensible by other packages.
          (expanded (common-doc.macro:expand-macros document)))

@@ -13,6 +13,7 @@
                #:common-doc
                #:common-html
                #:scriba
+               #:vertex
                #:common-doc-inspector-views
                #:uiop)
   :components ((:file "package")
