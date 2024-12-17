@@ -17,5 +17,6 @@
                #:common-doc-inspector-views
                #:uiop)
   :components ((:file "package")
+               (:file "in-package")
                (:file "object-refs")
                (:file "hyperdoc")))

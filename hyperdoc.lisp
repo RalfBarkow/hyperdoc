@@ -104,15 +104,24 @@
 
 (defview 👀content (page hyperdoc-page)
   (html-view :title "Content" :priority 1
-    (let ((document (slot-value page 'document)))
-      ;; Don't use common-doc.format:emit-document here. It creates an
-      ;; HTML string for the document and in the end sends it to the
-      ;; specified output string. This interferes with the implementation
-      ;; of object references. Moreover, it creates a !DOCTYPE tag for
-      ;; an independent document, whereas we want a snippet that goes
-      ;; into a view.
-      (common-html.emitter:node-to-stream (common-doc:children document)
-                                          html-inspector-views::*html-stream*))))
+    (emit-html (slot-value page 'document))))
+
+(defclass emitter-state ()
+  ((package :initarg :package)))
+
+(defvar *emitter-state* nil)
+
+(defun emit-html (document)
+  (let ((*emitter-state* (make-instance 'emitter-state
+                                        :package (find-package "CL-USER"))))
+    ;; Don't use common-doc.format:emit-document here. It creates an
+    ;; HTML string for the document and in the end sends it to the
+    ;; specified output string. This interferes with the implementation
+    ;; of object references. Moreover, it creates a !DOCTYPE tag for
+    ;; an independent document, whereas we want a snippet that goes
+    ;; into a view.
+    (common-html.emitter:node-to-stream (common-doc:children document)
+                                        html-inspector-views::*html-stream*)))
 
 (defview 👀source (page hyperdoc-page)
   (-> page
@@ -124,7 +133,7 @@
   (-> page
     (slot-value 'document)
     👀items
-    (rename :title "Document" :priority 4)))
+    (rename :title "CommonDoc" :priority 4)))
 
 (defvar *doc*
   (make-hyperdoc (asdf:system-relative-pathname

@@ -1,5 +1,7 @@
 @title(An example page from CommonDoc)
 
+@package(cl-user)
+
 @begin(section)
 @title(Lists)
 

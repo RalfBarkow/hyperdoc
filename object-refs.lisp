@@ -35,7 +35,7 @@
   (let* ((package-name (str:upcase (slot-value ref 'package)))
          (*package* (if-let (p (find-package package-name))
                       p
-                      (find-package :cl-user)))
+                      (slot-value *emitter-state* 'package)))
          (text (common-doc.ops:collect-all-text ref))
          (value (parse-and-eval text))
          (display-text (slot-value ref 'display))
