@@ -1,6 +1,6 @@
 ;;;; System definitions
 ;;
-;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (defsystem #:hyperdoc
   :description "Hypertext documentation system"
@@ -16,7 +16,8 @@
                #:vertex
                #:common-doc-inspector-views
                #:uiop)
-  :components ((:file "package")
-               (:file "in-package")
-               (:file "object-refs")
-               (:file "hyperdoc")))
+  :components ((:module "hyperdoc"
+                :components ((:file "package")
+                             (:file "in-package")
+                             (:file "object-refs")
+                             (:file "hyperdoc")))))

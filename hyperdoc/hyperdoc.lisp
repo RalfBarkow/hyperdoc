@@ -1,6 +1,6 @@
-;;;; Hyperdoc
+;;;; Hyperdoc classes and views
 ;;
-;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperdoc)
 
@@ -12,45 +12,49 @@
 (defclass hyperdoc ()
   ((directory :initarg :directory)
    (title :initarg :title)
-   (pages :initform (make-hash-table :test #'equal))))
+   (pages :initarg :pages)
+   (code-files :initarg :code-files)))
 
-(defun make-hyperdoc (directory)
-  (-> (make-instance 'hyperdoc :directory directory)
-    load-hyperdoc))
+(defun make-hyperdoc (asdf-system-name directory title)
+  (let* ((system (asdf:find-system asdf-system-name))
+         (component (asdf:find-component system directory))
+         (directory (asdf:component-pathname component))
+         (pages (make-hash-table :test #'equal))
+         (code-files (remove-if-not #'(lambda (c) (typep c 'asdf:cl-source-file))
+                                    (asdf:component-children component)))
+         (hyperdoc (make-instance 'hyperdoc
+                                  :directory directory
+                                  :title title
+                                  :pages pages
+                                  :code-files code-files)))
+    (load-pages hyperdoc)
+    hyperdoc))
 
 (defmethod text-representation ((hdoc hyperdoc))
   (slot-value hdoc 'title))
 
 (defmethod title-bar-action-buttons ((hdoc hyperdoc))
   (action-button "Reload"
-                 (thunk (load-hyperdoc hdoc)
+                 (thunk (load-pages hdoc)
                         t)))
 
-(defun load-hyperdoc (hdoc)
-  (with-slots (directory title pages) hdoc
-    (setf title "(untitled)")
-    (let ((page-files))
+(defun load-pages (hdoc)
+  (with-slots (directory pages) hdoc
+    (let ((common-doc.file:*base-directory* directory)
+          (page-files))
       (dolist (file (uiop:directory-files directory))
         (cond
-          ;; File "title.txt" stores the title
-          ((and (string= "title" (pathname-name file))
-                (string= "txt" (pathname-type file)))
-           (setf (slot-value hdoc 'title)
-                 (-> file
-                   alexandria:read-file-into-string
-                   str:trim)))
           ;; Scriba and VerTeX files store the pages
           ((member (pathname-type file) '("scr" "tex") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
-               (setf page (make-page hdoc file))
+               (setf page (make-page file))
                (setf (gethash file pages) page))
              (load-page page)
              (push file page-files)))))
       (loop for file being the hash-keys in pages
             do (unless (member file page-files :test #'equal)
-                 (remhash file pages)))))  
-  hdoc)
+                 (remhash file pages))))))
 
 (defview 👀items (hd hyperdoc)
   (with-slots (pages) hd
@@ -58,6 +62,20 @@
       alexandria:hash-table-values
       👀items
       (rename :title "Pages" :priority 1))))
+
+(defview 👀code (hd hyperdoc)
+  (with-slots (code-files) hd
+    (enumerated-list-view code-files
+                          :title "Code"
+                          :priority 2
+                          :display #'code-file-title)))
+
+(defun code-file-title (cl-source-file)
+  (-> cl-source-file
+    asdf:component-pathname
+    uiop:read-file-lines
+    first
+    (str:trim-left :char-bag " ;")))
 
 (defview 👀files (hd hyperdoc)
   (with-slots (directory) hd
@@ -71,17 +89,15 @@
 ;;
 
 (defclass hyperdoc-page ()
-  ((hyperdoc :initarg :hyperdoc)
-   (file :initarg :file)
+  ((file :initarg :file)
    (document :initarg :document :initform nil)))
 
-(defun make-page (hdoc file)
-  (make-instance 'hyperdoc-page :hyperdoc hdoc :file file))
+(defun make-page (file)
+  (make-instance 'hyperdoc-page :file file))
 
 (defun load-page (page)
-  (with-slots (hyperdoc file document) page
-    (let ((common-doc.file:*base-directory* (slot-value hyperdoc 'directory)))
-      (setf document (parse-and-expand file))))
+  (with-slots (file document) page
+    (setf document (parse-and-expand file)))
   page)
 
 (defun parse-and-expand (file)
@@ -136,5 +152,4 @@
     (rename :title "CommonDoc" :priority 4)))
 
 (defvar *doc*
-  (make-hyperdoc (asdf:system-relative-pathname
-                  :hyperdoc "doc/")))
+  (make-hyperdoc "hyperdoc" "hyperdoc" "HyperDoc"))

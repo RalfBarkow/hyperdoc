@@ -1,6 +1,6 @@
 ;;;; Embedded object references 
 ;;
-;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperdoc)
 
