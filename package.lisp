@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defpackage :html-inspector-views/hyperdoc
+(defpackage :hyperdoc
   (:use :cl :html-inspector-views)
   (:import-from :alexandria
    :if-let :when-let :compose)

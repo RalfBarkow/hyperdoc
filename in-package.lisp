@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :html-inspector-views/hyperdoc)
+(in-package :hyperdoc)
 
 (common-doc:define-node package-reference (common-doc:content-node)
   ()

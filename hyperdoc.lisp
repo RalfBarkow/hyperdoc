@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :html-inspector-views/hyperdoc)
+(in-package :hyperdoc)
 
 ;;
 ;; A Hyperdoc instance refers to a collection of pages
@@ -137,4 +137,4 @@
 
 (defvar *doc*
   (make-hyperdoc (asdf:system-relative-pathname
-                  :html-inspector-views-hyperdoc "doc/")))
+                  :hyperdoc "doc/")))

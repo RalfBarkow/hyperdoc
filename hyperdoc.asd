@@ -2,8 +2,8 @@
 ;;
 ;;;; Copyright (c) 2024 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defsystem #:html-inspector-views-hyperdoc
-  :description "Hypertext documentation add-on for HTML inspector views"
+(defsystem #:hyperdoc
+  :description "Hypertext documentation system"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
   :license  "BSD"
   :version "0.0.1"
