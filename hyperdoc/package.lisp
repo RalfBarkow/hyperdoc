@@ -7,4 +7,5 @@
   (:import-from :alexandria
    :if-let :when-let :compose)
   (:import-from :arrow-macros
-   :-> :-<> :->> :-<>> :<> :some-> :some->>))
+   :-> :-<> :->> :-<>> :<> :some-> :some->>)
+  (:export :*hyperdoc*))

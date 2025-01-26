@@ -18,6 +18,7 @@
                #:uiop)
   :components ((:module "hyperdoc"
                 :components ((:file "package")
+                             (:file "hyperdoc")
                              (:file "in-package")
                              (:file "object-refs")
-                             (:file "hyperdoc")))))
+                             (:file "exported-variables")))))

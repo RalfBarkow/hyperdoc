@@ -15,13 +15,14 @@
    (pages :initarg :pages)
    (code-files :initarg :code-files)))
 
-(defun make-hyperdoc (asdf-system-name directory title)
+(defun make-hyperdoc (&key title asdf-system-name subdirectory)
   (let* ((system (asdf:find-system asdf-system-name))
-         (component (asdf:find-component system directory))
-         (directory (asdf:component-pathname component))
+         (directory (asdf:system-relative-pathname asdf-system-name subdirectory))
          (pages (make-hash-table :test #'equal))
-         (code-files (remove-if-not #'(lambda (c) (typep c 'asdf:cl-source-file))
-                                    (asdf:component-children component)))
+         (component (asdf:find-component system subdirectory))
+         (code-files (when component
+                       (remove-if-not #'(lambda (c) (typep c 'asdf:cl-source-file))
+                                      (asdf:component-children component))))
          (hyperdoc (make-instance 'hyperdoc
                                   :directory directory
                                   :title title
@@ -84,7 +85,7 @@
       (rename :title "Files" :priority 3))))
 
 ;;
-;; A hyperdoc-page instance refers to a Scriba file in the
+;; A hyperdoc-page instance refers to a Scriba or VerTeX file in the
 ;; hyperdoc directory.
 ;;
 
@@ -150,6 +151,3 @@
     (slot-value 'document)
     👀items
     (rename :title "CommonDoc" :priority 4)))
-
-(defvar *doc*
-  (make-hyperdoc "hyperdoc" "hyperdoc" "HyperDoc"))
