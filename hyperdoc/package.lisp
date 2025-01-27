@@ -8,4 +8,7 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export :*hyperdoc*))
+  (:import-from :html-inspector-views/standard
+   :var-definition)
+  (:export :*hyperdoc*
+           :find-page))

@@ -17,7 +17,8 @@
 
 (defun make-hyperdoc (&key title asdf-system-name subdirectory)
   (let* ((system (asdf:find-system asdf-system-name))
-         (directory (asdf:system-relative-pathname asdf-system-name subdirectory))
+         (directory (asdf:system-relative-pathname asdf-system-name
+                                                   (str:concat subdirectory "/")))
          (pages (make-hash-table :test #'equal))
          (component (asdf:find-component system subdirectory))
          (code-files (when component
@@ -57,12 +58,17 @@
             do (unless (member file page-files :test #'equal)
                  (remhash file pages))))))
 
+(defun find-page (hdoc title)
+  (with-slots (pages) hdoc
+    (loop for page being the hash-values of pages
+          when (equal title (page-title page))
+            do (return page))))
+
 (defview 👀items (hd hyperdoc)
   (with-slots (pages) hd
     (-> pages
       alexandria:hash-table-values
-      👀items
-      (rename :title "Pages" :priority 1))))
+      (list-view :title "Pages" :priority 1))))
 
 (defview 👀code (hd hyperdoc)
   (with-slots (code-files) hd
@@ -111,13 +117,16 @@
          (expanded (common-doc.macro:expand-macros document)))
     expanded))
 
+(defun page-title (page)
+  (common-doc:title (slot-value page 'document)))
+
 (defmethod title-bar-action-buttons ((page hyperdoc-page))
   (action-button "Reload"
                  (thunk (load-page page)
                         t)))
 
 (defmethod text-representation ((page hyperdoc-page))
-  (common-doc:title (slot-value page 'document)))
+  (page-title page))
 
 (defview 👀content (page hyperdoc-page)
   (html-view :title "Content" :priority 1

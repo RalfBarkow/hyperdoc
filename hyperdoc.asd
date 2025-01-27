@@ -9,6 +9,7 @@
   :version "0.0.1"
   :serial t
   :depends-on (#:html-inspector-views
+               #:html-inspector-views/standard
                #:arrow-macros
                #:common-doc
                #:common-html
@@ -17,6 +18,7 @@
                #:common-doc-inspector-views
                #:uiop)
   :components ((:module "hyperdoc"
+                :serial t
                 :components ((:file "package")
                              (:file "hyperdoc")
                              (:file "in-package")
