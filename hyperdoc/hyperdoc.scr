@@ -13,4 +13,4 @@ Documentation consists of any combination of:
 
 All of these items can cross-reference each other.
 
-Learn how to @object[display="\"create a HyperDoc\""]((find-page *hyperdoc* "Creating a HyperDoc")).
+Learn how to @page[label="create a HyperDoc"](Creating a HyperDoc)

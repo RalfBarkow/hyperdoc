@@ -23,4 +23,5 @@
                              (:file "hyperdoc")
                              (:file "in-package")
                              (:file "object-refs")
+                             (:file "page-refs")
                              (:file "exported-variables")))))
