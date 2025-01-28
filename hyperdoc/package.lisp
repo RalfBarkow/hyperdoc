@@ -10,5 +10,9 @@
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:import-from :html-inspector-views/standard
    :var-definition)
-  (:export :*hyperdoc*
-           :find-page))
+  (:export :*catalog*
+           :*hyperdoc*
+           :make-hyperdoc
+           :find-page
+           :find-hyperdoc
+           :register))

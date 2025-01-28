@@ -16,6 +16,7 @@
                #:scriba
                #:vertex
                #:common-doc-inspector-views
+               #:fset
                #:uiop)
   :components ((:module "hyperdoc"
                 :serial t
@@ -24,4 +25,5 @@
                              (:file "in-package")
                              (:file "object-refs")
                              (:file "page-refs")
-                             (:file "exported-variables")))))
+                             (:file "catalog")
+                             (:file "hyperdoc-hyperdoc")))))

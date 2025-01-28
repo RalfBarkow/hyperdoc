@@ -5,8 +5,8 @@
 (in-package :hyperdoc)
 
 (common-doc:define-node page-reference (common-doc.macro:macro-node)
-  ((hyperdoc :reader hyperdoc
-             :initarg :hyperdoc
+  ((hyperdoc-title :reader hyperdoc-title
+             :initarg :hyperdoc-title
              :type string
              :attribute-name "hyperdoc"
              :documentation "Title of the hyperdoc containing the page")
@@ -19,11 +19,14 @@
   (:documentation "Reference to a HyperDoc page"))
 
 (defmethod common-doc.macro:expand-macro ((ref page-reference))
-  (let* ((title (common-doc.ops:collect-all-text ref))
-         (label (or (slot-value ref 'label) title))
-         (hyperdoc (slot-value ref 'hyperdoc))
+  (let* ((page-title (common-doc.ops:collect-all-text ref))
+         (label (or (label ref) page-title))
+         (hyperdoc-title (or (hyperdoc-title ref)
+                             (title (hyperdoc *current-page*))))
          (text (common-doc:make-text
-                (format nil "(hyperdoc:find-page hyperdoc:*hyperdoc* \"~a\")" title)))
+                (format nil
+                        "(hyperdoc:find-page (hyperdoc:find-hyperdoc \"~a\") \"~a\")"
+                        hyperdoc-title page-title)))
          (display (when label (str:concat "\"" label "\""))))
     (make-instance 'object-reference
                    :children (list text)

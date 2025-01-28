@@ -10,11 +10,11 @@
 ;;
 
 (defclass hyperdoc ()
-  ((directory :initarg :directory)
-   (title :initarg :title)
-   (pages :initarg :pages)
-   (code-files :initarg :code-files)
-   (entry :initarg :entry)))
+  ((directory :reader hyperdoc-directory :initarg :directory)
+   (title :reader title :initarg :title)
+   (pages :reader pages :initarg :pages)
+   (code-files :reader code-files :initarg :code-files)
+   (entry :reader entry :initarg :entry)))
 
 (defun make-hyperdoc (&key title asdf-system-name subdirectory entry)
   (let* ((system (asdf:find-system asdf-system-name))
@@ -52,7 +52,7 @@
           ((member (pathname-type file) '("scr" "tex") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
-               (setf page (make-page file))
+               (setf page (make-page hdoc file))
                (setf (gethash file pages) page))
              (load-page page)
              (push file page-files)))))
@@ -99,20 +99,24 @@
       (rename :title "Files" :priority 5))))
 
 ;;
-;; A hyperdoc-page instance refers to a Scriba or VerTeX file in the
+;; A page instance refers to a Scriba or VerTeX file in the
 ;; hyperdoc directory.
 ;;
 
-(defclass hyperdoc-page ()
-  ((file :initarg :file)
-   (document :initarg :document :initform nil)))
+(defclass page ()
+  ((hyperdoc :reader hyperdoc :initarg :hyperdoc)
+   (file :reader file :initarg :file)
+   (document :reader document :initarg :document :initform nil)))
 
-(defun make-page (file)
-  (make-instance 'hyperdoc-page :file file))
+(defun make-page (hdoc file)
+  (make-instance 'page :hyperdoc hdoc :file file))
+
+(defvar *current-page* nil)
 
 (defun load-page (page)
   (with-slots (file document) page
-    (setf document (parse-and-expand file)))
+    (let ((*current-page* page))
+      (setf document (parse-and-expand file))))
   page)
 
 (defun parse-and-expand (file)
@@ -120,50 +124,48 @@
                      (make-instance 'scriba:scriba)
                      (make-instance 'vertex:vertex)))
          (document (common-doc.format:parse-document format file))
-         ;; CommonDoc macro expansion is not used in plain Hyperdoc,
-         ;; but it makes the syntax extensible by other packages.
          (expanded (common-doc.macro:expand-macros document)))
     expanded))
 
 (defun page-title (page)
   (common-doc:title (slot-value page 'document)))
 
-(defmethod title-bar-action-buttons ((page hyperdoc-page))
+(defmethod title-bar-action-buttons ((page page))
   (action-button "Reload"
                  (thunk (load-page page)
                         t)))
 
-(defmethod text-representation ((page hyperdoc-page))
+(defmethod text-representation ((page page))
   (page-title page))
 
-(defview 👀content (page hyperdoc-page)
-  (html-view :title "Content" :priority 1
-    (emit-html (slot-value page 'document))))
-
 (defclass emitter-state ()
-  ((package :initarg :package)))
+  ((package :initarg :package)
+   (page :initarg :page)))
 
 (defvar *emitter-state* nil)
 
-(defun emit-html (document)
-  (let ((*emitter-state* (make-instance 'emitter-state
-                                        :package (find-package "CL-USER"))))
-    ;; Don't use common-doc.format:emit-document here. It creates an
-    ;; HTML string for the document and in the end sends it to the
-    ;; specified output string. This interferes with the implementation
-    ;; of object references. Moreover, it creates a !DOCTYPE tag for
-    ;; an independent document, whereas we want a snippet that goes
-    ;; into a view.
-    (common-html.emitter:node-to-stream (common-doc:children document)
-                                        html-inspector-views::*html-stream*)))
+(defview 👀content (page page)
+  (html-view :title "Content" :priority 1
+    (with-slots (hyperdoc document) page
+      (let ((*emitter-state* (make-instance 'emitter-state
+                                            :package (find-package "CL-USER")
+                                            :page page)))
+        ;; Don't use common-doc.format:emit-document here. It creates an
+        ;; HTML string for the document and in the end sends it to the
+        ;; specified output string. This interferes with the implementation
+        ;; of object references. Moreover, it creates a !DOCTYPE tag for
+        ;; an independent document, whereas we want a snippet that goes
+        ;; into a view.
+        (common-html.emitter:node-to-stream (common-doc:children document)
+                                            html-inspector-views::*html-stream*)))))
 
-(defview 👀source (page hyperdoc-page)
+(defview 👀source (page page)
   (-> page
     (slot-value 'file)
     👀content
     (rename :title "Source" :priority 3)))
 
-(defview 👀document (page hyperdoc-page)
+(defview 👀document (page page)
   (-> page
     (slot-value 'document)
     👀items

@@ -1,8 +1,12 @@
-;;;; Exported variables
+;;;; HyperDoc's own HyperDoc
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperdoc)
+
+;;
+;; The HyperDoc for HyperDoc
+;;
 
 (defvar *hyperdoc*
   (make-hyperdoc
@@ -14,3 +18,5 @@
    :subdirectory "hyperdoc"
    ;; The title of the page to be displayed as the main entry point
    :entry "HyperDoc"))
+
+(register *hyperdoc*)
