@@ -9,7 +9,7 @@
 ;;
 
 (defclass catalog ()
-  ((hyperdocs :reader hyperdocs :initform (fset:empty-set))))
+  ((hyperdocs :accessor hyperdocs :initform (fset:empty-set))))
 
 (defvar *catalog*
   (make-instance 'catalog))
@@ -22,7 +22,7 @@
 ;;
 
 (defun register (hdoc)
-  (fset:includef (slot-value *catalog* 'hyperdocs) hdoc))
+  (fset:includef (hyperdocs *catalog*) hdoc))
 
 ;;
 ;; Lookup

@@ -32,16 +32,16 @@
   (:documentation "Inspectable reference to a Lisp object"))
 
 (common-html.emitter::define-emitter (ref object-reference)
-  (let* ((package-name (str:upcase (slot-value ref 'package)))
+  (let* ((package-name (str:upcase (ref-package ref)))
          (*package* (if-let (p (find-package package-name))
                       p
                       (slot-value *emitter-state* 'package)))
          (text (common-doc.ops:collect-all-text ref))
          (value (parse-and-eval text))
-         (display-text (slot-value ref 'display))
+         (display-text (ref-display ref))
          (display (when display-text
                     (parse-and-eval (str:replace-all "\\" ""  display-text))))
-         (view (slot-value ref 'view)))
+         (view (ref-view ref)))
     (object-ref value :display display :select view :highlight t)))
 
 (defun parse-and-eval (string)

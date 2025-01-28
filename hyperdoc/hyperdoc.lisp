@@ -35,7 +35,7 @@
     hyperdoc))
 
 (defmethod text-representation ((hdoc hyperdoc))
-  (slot-value hdoc 'title))
+  (title hdoc))
 
 (defmethod title-bar-action-buttons ((hdoc hyperdoc))
   (action-button "Reload"
@@ -61,29 +61,27 @@
                  (remhash file pages))))))
 
 (defun find-page (hdoc title)
-  (with-slots (pages) hdoc
-    (loop for page being the hash-values of pages
-          when (equal title (page-title page))
-            do (return page))))
+  (loop for page being the hash-values of (pages hdoc)
+        when (equal title (page-title page))
+          do (return page)))
 
 (defview 👀entry (hd hyperdoc)
-  (with-slots (entry pages) hd
-    (when entry
-      (when-let (entry-page (find-page hd entry))
-        (👀content entry-page)))))
+  (when-let (entry (entry hd))
+    (when-let (entry-page (find-page hd entry))
+      (👀content entry-page))))
 
 (defview 👀items (hd hyperdoc)
-  (with-slots (pages) hd
-    (-> pages
+  (-> hd
+      pages
       alexandria:hash-table-values
-      (list-view :title "Pages" :priority 2))))
+      (list-view :title "Pages" :priority 2)))
 
 (defview 👀code (hd hyperdoc)
-  (with-slots (code-files) hd
-    (enumerated-list-view code-files
-                          :title "Code"
-                          :priority 3
-                          :display #'code-file-title)))
+  (-> hd
+      code-files
+      (enumerated-list-view :title "Code"
+                            :priority 3
+                            :display #'code-file-title)))
 
 (defun code-file-title (cl-source-file)
   (-> cl-source-file
@@ -93,10 +91,10 @@
     (str:trim-left :char-bag " ;")))
 
 (defview 👀files (hd hyperdoc)
-  (with-slots (directory) hd
-    (-> directory
+  (-> hd
+      hyperdoc-directory
       👀items
-      (rename :title "Files" :priority 5))))
+      (rename :title "Files" :priority 5)))
 
 ;;
 ;; A page instance refers to a Scriba or VerTeX file in the
@@ -114,9 +112,9 @@
 (defvar *current-page* nil)
 
 (defun load-page (page)
-  (with-slots (file document) page
+  (with-slots (document) page
     (let ((*current-page* page))
-      (setf document (parse-and-expand file))))
+      (setf document (parse-and-expand (file page)))))
   page)
 
 (defun parse-and-expand (file)
@@ -128,7 +126,9 @@
     expanded))
 
 (defun page-title (page)
-  (common-doc:title (slot-value page 'document)))
+  (-> page
+      document
+      common-doc:title))
 
 (defmethod title-bar-action-buttons ((page page))
   (action-button "Reload"
@@ -146,27 +146,26 @@
 
 (defview 👀content (page page)
   (html-view :title "Content" :priority 1
-    (with-slots (hyperdoc document) page
-      (let ((*emitter-state* (make-instance 'emitter-state
-                                            :package (find-package "CL-USER")
-                                            :page page)))
-        ;; Don't use common-doc.format:emit-document here. It creates an
-        ;; HTML string for the document and in the end sends it to the
-        ;; specified output string. This interferes with the implementation
-        ;; of object references. Moreover, it creates a !DOCTYPE tag for
-        ;; an independent document, whereas we want a snippet that goes
-        ;; into a view.
-        (common-html.emitter:node-to-stream (common-doc:children document)
-                                            html-inspector-views::*html-stream*)))))
+    (let ((*emitter-state* (make-instance 'emitter-state
+                                          :package (find-package "CL-USER")
+                                          :page page)))
+      ;; Don't use common-doc.format:emit-document here. It creates an
+      ;; HTML string for the document and in the end sends it to the
+      ;; specified output string. This interferes with the implementation
+      ;; of object references. Moreover, it creates a !DOCTYPE tag for
+      ;; an independent document, whereas we want a snippet that goes
+      ;; into a view.
+      (common-html.emitter:node-to-stream (common-doc:children (document page))
+                                          html-inspector-views::*html-stream*))))
 
 (defview 👀source (page page)
   (-> page
-    (slot-value 'file)
+    file
     👀content
     (rename :title "Source" :priority 3)))
 
 (defview 👀document (page page)
   (-> page
-    (slot-value 'document)
+    document
     👀items
     (rename :title "CommonDoc" :priority 4)))
