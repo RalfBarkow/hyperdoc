@@ -14,4 +14,4 @@ See for example the @object[display="\"directory for the HyperDoc you are lookin
 
 The source code files in the ASDF module should be loaded serially, in order to ensure that the order in which the source code files are listed in the @object[view="Code" display="\"Code view\""](*hyperdoc*) corresponds to the order in which they have been loaded by ASDF.
 
-The title of the HyperDoc is defined in the call to @object(#'make-hyperdoc). See the definition of @object((var-definition '*hyperdoc*)).
+The title of the HyperDoc is defined in the call to @object(#'make-hyperdoc). See the definition of @object((var-definition '*hyperdoc*)) for an example.

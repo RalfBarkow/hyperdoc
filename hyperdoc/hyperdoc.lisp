@@ -13,9 +13,10 @@
   ((directory :initarg :directory)
    (title :initarg :title)
    (pages :initarg :pages)
-   (code-files :initarg :code-files)))
+   (code-files :initarg :code-files)
+   (entry :initarg :entry)))
 
-(defun make-hyperdoc (&key title asdf-system-name subdirectory)
+(defun make-hyperdoc (&key title asdf-system-name subdirectory entry)
   (let* ((system (asdf:find-system asdf-system-name))
          (directory (asdf:system-relative-pathname asdf-system-name
                                                    (str:concat subdirectory "/")))
@@ -28,7 +29,8 @@
                                   :directory directory
                                   :title title
                                   :pages pages
-                                  :code-files code-files)))
+                                  :code-files code-files
+                                  :entry entry)))
     (load-pages hyperdoc)
     hyperdoc))
 
@@ -64,17 +66,23 @@
           when (equal title (page-title page))
             do (return page))))
 
+(defview 👀entry (hd hyperdoc)
+  (with-slots (entry pages) hd
+    (when entry
+      (when-let (entry-page (find-page hd entry))
+        (👀content entry-page)))))
+
 (defview 👀items (hd hyperdoc)
   (with-slots (pages) hd
     (-> pages
       alexandria:hash-table-values
-      (list-view :title "Pages" :priority 1))))
+      (list-view :title "Pages" :priority 2))))
 
 (defview 👀code (hd hyperdoc)
   (with-slots (code-files) hd
     (enumerated-list-view code-files
                           :title "Code"
-                          :priority 2
+                          :priority 3
                           :display #'code-file-title)))
 
 (defun code-file-title (cl-source-file)
@@ -88,7 +96,7 @@
   (with-slots (directory) hd
     (-> directory
       👀items
-      (rename :title "Files" :priority 3))))
+      (rename :title "Files" :priority 5))))
 
 ;;
 ;; A hyperdoc-page instance refers to a Scriba or VerTeX file in the
