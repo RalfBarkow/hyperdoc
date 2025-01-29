@@ -1,3 +1,7 @@
+.hyperdoc-page-title {
+  font-size: 1.3em;
+  font-weight: bold;
+}
 .hyperdoc-computed-value {
   background-color: #e8e8e8;
 }

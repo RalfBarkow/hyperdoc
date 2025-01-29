@@ -151,6 +151,9 @@
                      :hyperdoc
                      "assets/hyperdoc"))
     (include-css "/hyperdoc/css/hyperdoc.css")
+    (html
+      (:h1 :class "hyperdoc-page-title"
+           (esc (page-title page))))
     (let ((*emitter-state* (make-instance 'emitter-state
                                           :package (find-package "CL-USER")
                                           :page page)))
