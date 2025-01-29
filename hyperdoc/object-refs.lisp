@@ -5,7 +5,7 @@
 (in-package :hyperdoc)
 
 ;;
-;; Define a new node for embedded object references.
+;; Define a new node "object" for embedded object references.
 ;; The text of the node is interpreted as Lisp code in the
 ;; specified package (defaults to cl-user) and evaluated.
 ;; An inspector reference to the result is inserted vie
@@ -14,10 +14,10 @@
 
 (common-doc:define-node object-reference (common-doc:content-node)
   ((display :reader ref-display
-          :initarg :display
-          :type string
-          :attribute-name "display"
-          :documentation "Label on the reference button")
+            :initarg :display
+            :type string
+            :attribute-name "display"
+            :documentation "Label on the reference button")
    (package :reader ref-package
             :initarg :package
             :type string
