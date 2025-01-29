@@ -61,9 +61,12 @@
                  (remhash file pages))))))
 
 (defun find-page (hdoc title)
-  (loop for page being the hash-values of (pages hdoc)
-        when (equal title (page-title page))
-          do (return page)))
+  (or (loop for page being the hash-values of (pages hdoc)
+            when (equal title (page-title page))
+              do (return page))
+      (loop for code-file in (code-files hdoc)
+            when (equal title (code-file-title code-file))
+              do (return code-file))))
 
 (defview 👀entry (hd hyperdoc)
   (when-let (entry (entry hd))
