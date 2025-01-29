@@ -9,7 +9,7 @@ A HyperDoc is defined by
 @item(Optionally: the title of a page to be displayed as the entry page)
 @end(list)
 
-A HyperDoc is part of system defined via ASDF, its directory resides next to the .asd file in the file system. The directory contains both the text pages (formats @link[uri="http://commondoc.github.io/scriba/docs/reference.html"](Scriba) or @link[uri="https://github.com/CommonDoc/vertex"](VerTeX)) and the source code files, which must be loaded as a module in the system component list.
+A HyperDoc is part of system defined via ASDF, its directory resides next to the .asd file in the file system. The directory contains both the text pages (in the @link[uri="http://commondoc.github.io/scriba/docs/reference.html"](Scriba) format) and the source code files, which must be loaded as a module in the system component list.
 
 See for example the @object[display="\"directory for the HyperDoc you are looking at\""]((asdf:system-relative-pathname "hyperdoc" "hyperdoc/")), and the @object[display="\"system definition file\""]((asdf:system-source-file "hyperdoc")) that lists the module "hyperdoc" among its components.
 

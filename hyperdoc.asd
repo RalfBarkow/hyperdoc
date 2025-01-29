@@ -14,7 +14,6 @@
                #:common-doc
                #:common-html
                #:scriba
-               #:vertex
                #:common-doc-inspector-views
                #:fset
                #:uiop)

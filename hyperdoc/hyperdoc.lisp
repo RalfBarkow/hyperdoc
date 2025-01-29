@@ -48,8 +48,8 @@
           (page-files))
       (dolist (file (uiop:directory-files directory))
         (cond
-          ;; Scriba and VerTeX files store the pages
-          ((member (pathname-type file) '("scr" "tex") :test #'string=)
+          ;; Scriba files store the pages
+          ((member (pathname-type file) '("scr") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
                (setf page (make-page hdoc file))
@@ -97,7 +97,7 @@
       (rename :title "Files" :priority 5)))
 
 ;;
-;; A page instance refers to a Scriba or VerTeX file in the
+;; A page instance refers to a Scriba file in the
 ;; hyperdoc directory.
 ;;
 
@@ -118,9 +118,7 @@
   page)
 
 (defun parse-and-expand (file)
-  (let* ((format (if (string= (pathname-type file) "scr")
-                     (make-instance 'scriba:scriba)
-                     (make-instance 'vertex:vertex)))
+  (let* ((format (make-instance 'scriba:scriba))
          (document (common-doc.format:parse-document format file))
          (expanded (common-doc.macro:expand-macros document)))
     expanded))
