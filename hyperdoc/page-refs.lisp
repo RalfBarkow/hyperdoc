@@ -10,28 +10,27 @@
              :type string
              :attribute-name "hyperdoc"
              :documentation "Title of the hyperdoc containing the page")
-   (label :reader label
-          :initarg :label
+   (text :reader text
+          :initarg :text
           :type string
-          :attribute-name "label"
-          :documentation "Label displayed in the reference, replacing the page's title"))
+          :attribute-name "text"
+          :documentation "Text displayed in the reference, replacing the page's title"))
   (:tag-name "page")
   (:documentation "Reference to a HyperDoc page"))
 
 (defmethod common-doc.macro:expand-macro ((ref page-reference))
   (let* ((page-title (common-doc.ops:collect-all-text ref))
-         (label (or (label ref) page-title))
+         (text (or (text ref) page-title))
          (hyperdoc-title (or (hyperdoc-title ref)
                              (title (hyperdoc *current-page*))))
-         (text (common-doc:make-text
+         (expr (common-doc:make-text
                 (format nil
                         "(hyperdoc:find-page (hyperdoc:find-hyperdoc \"~a\") \"~a\")"
-                        hyperdoc-title page-title)))
-         (display (when label (str:concat "\"" label "\""))))
+                        hyperdoc-title page-title))))
     (make-instance 'object-reference
-                   :children (list text)
+                   :children (list expr)
                    :metadata nil
                    :reference nil
-                   :display display
-                   :package nil
+                   :display nil
+                   :text text
                    :view nil)))

@@ -17,22 +17,30 @@
             :initarg :display
             :type string
             :attribute-name "display"
-            :documentation "Label on the reference button")
+            :documentation "Function that computes the displayed text")
+   (text :reader ref-text
+          :initarg :text
+          :type string
+          :attribute-name "text"
+          :documentation "Text displayed in the reference, replacing the object's print string")
    (view :reader ref-view
-            :initarg :view
-            :type string
-            :attribute-name "view"
-            :documentation "The view to preselect for inspecting the value"))
+         :initarg :view
+         :type string
+         :attribute-name "view"
+         :documentation "The view to preselect for inspecting the value"))
   (:tag-name "object")
   (:documentation "Inspectable reference to a Lisp object"))
 
 (common-html.emitter::define-emitter (ref object-reference)
   (let* ((*package* (slot-value *emitter-state* 'package))
-         (text (common-doc.ops:collect-all-text ref))
-         (value (parse-and-eval text))
-         (display-text (ref-display ref))
-         (display (when display-text
-                    (parse-and-eval (str:replace-all "\\" ""  display-text))))
+         (expr (common-doc.ops:collect-all-text ref))
+         (value (parse-and-eval expr))
+         (text (ref-text ref))
+         (display-expr (ref-display ref))
+         (display (if text
+                      text
+                      (when display-expr
+                        (parse-and-eval (str:replace-all "\\" ""  display-expr)))))
          (view (ref-view ref)))
     (object-ref value :display display :select view :highlight t)))
 
