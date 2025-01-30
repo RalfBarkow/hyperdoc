@@ -1,0 +1,9 @@
+@title(HyperDoc Core)
+
+@in:package(hyperdoc/core)
+
+HyperDoc is a hypertext documentation module for computational systems.
+
+Its core contains the minimum of definitions that HyperDoc-containing systems must depend on in order to be able to create and register HyperDocs.
+
+For more information about HyperDoc, see @hyperdoc[text="the HyperDoc of the main part"](HyperDoc).

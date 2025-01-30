@@ -5,37 +5,13 @@
 (in-package :hyperdoc)
 
 ;;
-;; The global catalog of HyperDocs
+;; The catalog class is defined in hyperdoc/core.
+;; Views are defined here, because hyperdoc/core
+;; does not depend on html-inspector-views.
 ;;
-
-(defclass catalog ()
-  ((hyperdocs :accessor hyperdocs :initform (fset:empty-set))))
-
-(defvar *catalog*
-  (make-instance 'catalog))
 
 (defmethod text-representation ((catalog catalog))
   "Registered HyperDocs")
-
-;;
-;; Registration
-;;
-
-(defun register (hdoc)
-  (fset:includef (hyperdocs *catalog*) hdoc))
-
-;;
-;; Lookup
-;;
-
-(defun find-hyperdoc (title)
-  (fset:do-set (hd (hyperdocs *catalog*))
-    (when (string= title (title hd))
-        (return hd))))
-
-;;
-;; Item view
-;;
 
 (defview 👀items (hdcat catalog)
   (-> hdcat
