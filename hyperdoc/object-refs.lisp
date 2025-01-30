@@ -7,7 +7,7 @@
 ;;
 ;; Define a new node "object" for embedded object references.
 ;; The text of the node is interpreted as Lisp code in the
-;; specified package (defaults to cl-user) and evaluated.
+;; current package and evaluated.
 ;; An inspector reference to the result is inserted vie
 ;; html-inspector-views:object-ref.
 ;;
@@ -18,11 +18,6 @@
             :type string
             :attribute-name "display"
             :documentation "Label on the reference button")
-   (package :reader ref-package
-            :initarg :package
-            :type string
-            :attribute-name "package"
-            :documentation "Package in which the code is evaluated")
    (view :reader ref-view
             :initarg :view
             :type string
@@ -32,10 +27,7 @@
   (:documentation "Inspectable reference to a Lisp object"))
 
 (common-html.emitter::define-emitter (ref object-reference)
-  (let* ((package-name (str:upcase (ref-package ref)))
-         (*package* (if-let (p (find-package package-name))
-                      p
-                      (slot-value *emitter-state* 'package)))
+  (let* ((*package* (slot-value *emitter-state* 'package))
          (text (common-doc.ops:collect-all-text ref))
          (value (parse-and-eval text))
          (display-text (ref-display ref))
