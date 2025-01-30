@@ -1,6 +1,6 @@
 @title(HyperDoc)
 
-@package(hyperdoc)
+@in:package(hyperdoc)
 
 HyperDoc is a hypertext documentation module for computational systems.
 

@@ -6,7 +6,7 @@
 
 (common-doc:define-node package-reference (common-doc:content-node)
   ()
-  (:tag-name "package")
+  (:tag-name "in:package")
   (:documentation "Package specification for embedded Lisp code"))
 
 (common-html.emitter::define-emitter (ref package-reference)

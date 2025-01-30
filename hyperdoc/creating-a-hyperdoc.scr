@@ -1,6 +1,6 @@
 @title(Creating a HyperDoc)
 
-@package(hyperdoc)
+@in:package(hyperdoc)
 
 A HyperDoc is defined by
 @begin(list)
