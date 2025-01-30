@@ -24,6 +24,7 @@
                              (:file "in-package")
                              (:file "object-refs")
                              (:file "page-refs")
+                             (:file "hyperdoc-refs")
                              (:file "inline-computations")
                              (:file "catalog")
                              (:file "hyperdoc-hyperdoc")))))
