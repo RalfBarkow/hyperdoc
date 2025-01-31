@@ -42,7 +42,9 @@
                       (when display-expr
                         (parse-and-eval (str:replace-all "\\" ""  display-expr)))))
          (view (ref-view ref)))
-    (object-ref value :display display :select view :highlight t)))
+    (html
+     (:span :class "hyperdoc-reference"
+            (object-ref value :display display :select view)))))
 
 (defun parse-and-eval (string)
   (let ((form (with-input-from-string (input string) (read input))))

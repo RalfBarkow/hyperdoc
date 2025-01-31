@@ -50,6 +50,7 @@
               do (return code-file))))
 
 (defview 👀entry (hd hyperdoc)
+  (ensure-pages-loaded hd)
   (when-let (entry (entry hd))
     (when-let (entry-page (find-page hd entry))
       (👀content entry-page))))
