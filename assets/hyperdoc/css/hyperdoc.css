@@ -1,6 +1,23 @@
-.hyperdoc-page-title {
+.hyperdoc-page h1 {
   font-size: 1.3em;
   font-weight: bold;
+}
+.hyperdoc-page h2 {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.hyperdoc-page h3 {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.hyperdoc-page h4 {
+  font-size: 1.1em;
+}
+.hyperdoc-page h5 {
+  font-size: 1.1em;
+}
+.hyperdoc-page h5 {
+  font-size: 1.1em;
 }
 .hyperdoc-computed-value {
   text-decoration-line: underline;

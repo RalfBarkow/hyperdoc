@@ -136,19 +136,22 @@
                      "assets/hyperdoc"))
     (include-css "/hyperdoc/css/hyperdoc.css")
     (html
-      (:h1 :class "hyperdoc-page-title"
-           (esc (page-title page))))
-    (let ((*emitter-state* (make-instance 'emitter-state
-                                          :package (find-package "CL-USER")
-                                          :page page)))
-      ;; Don't use common-doc.format:emit-document here. It creates an
-      ;; HTML string for the document and in the end sends it to the
-      ;; specified output string. This interferes with the implementation
-      ;; of object references. Moreover, it creates a !DOCTYPE tag for
-      ;; an independent document, whereas we want a snippet that goes
-      ;; into a view.
-      (common-html.emitter:node-to-stream (common-doc:children (document page))
-                                          html-inspector-views::*html-stream*))))
+      (:div :class "hyperdoc-page"
+            (:h1 (esc (page-title page)))
+            (let ((*emitter-state* (make-instance 'emitter-state
+                                                  :package (find-package "CL-USER")
+                                                  :page page))
+                  ;; The page title is <h1>, so section titles need to start with <h2>
+                  (common-html.emitter::*section-depth* 2)
+                  ;; The output stream is the one used by cl-who
+                  (common-html.emitter::*output-stream* html-inspector-views::*html-stream*))
+              ;; Don't use common-doc.format:emit-document here. It creates an
+              ;; HTML string for the document and in the end sends it to the
+              ;; specified output string. This interferes with the implementation
+              ;; of object references. Moreover, it creates a !DOCTYPE tag for
+              ;; an independent document, whereas we want a snippet that goes
+              ;; into a view.
+              (common-html.emitter::emit (common-doc:children (document page))))))))
 
 (defview 👀source (page page)
   (-> page
