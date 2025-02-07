@@ -46,4 +46,5 @@
                              (:file "page-refs")
                              (:file "hyperdoc-refs")
                              (:file "inline-computations")
+                             (:file "transclusions")
                              (:file "hyperdoc-hyperdoc")))))
