@@ -4,6 +4,7 @@
 
 (defpackage :hyperdoc
   (:use :cl :hyperdoc/core :html-inspector-views)
+  (:shadow :*hyperdoc*)
   (:import-from :alexandria
    :if-let :when-let :compose)
   (:import-from :arrow-macros
