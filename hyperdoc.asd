@@ -47,4 +47,5 @@
                              (:file "hyperdoc-refs")
                              (:file "inline-computations")
                              (:file "transclusions")
+                             (:file "source-transclusions")
                              (:file "hyperdoc-hyperdoc")))))

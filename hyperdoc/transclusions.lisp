@@ -1,4 +1,4 @@
-;;;; Transclusions
+;;;; Transclusions of views
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
