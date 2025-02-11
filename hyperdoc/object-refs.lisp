@@ -28,7 +28,7 @@
          :type string
          :attribute-name "view"
          :documentation "The view to preselect for inspecting the value"))
-  (:tag-name "object")
+  (:tag-name "reference")
   (:documentation "Inspectable reference to a Lisp object"))
 
 (common-html.emitter::define-emitter (ref object-reference)
