@@ -118,8 +118,3 @@
     👀content
     (rename :title "Source" :priority 3)))
 
-(defview 👀document (page page)
-  (-> page
-    document
-    👀items
-    (rename :title "CommonDoc" :priority 4)))

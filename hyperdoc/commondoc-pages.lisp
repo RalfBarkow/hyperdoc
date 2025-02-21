@@ -5,7 +5,7 @@
 (in-package :hyperdoc)
 
 (defclass commondoc-page (page)
-  ((document :reader document :initarg :document :initform nil)))
+  ((document :reader document :initform nil)))
 
 (defclass scriba-page (commondoc-page)
   ())
@@ -14,9 +14,9 @@
   (find-class 'scriba-page))
 
 (defmethod load-page ((page scriba-page))
-  (with-slots (document) page
+  (with-slots (file document) page
     (let ((*current-page* page))
-      (setf document (parse-and-expand (file page)))))
+      (setf document (parse-and-expand file))))
   page)
 
 (defun parse-and-expand (file)
@@ -59,3 +59,9 @@
               ;; an independent document, whereas we want a snippet that goes
               ;; into a view.
               (common-html.emitter::emit (common-doc:children (document page))))))))
+
+(defview 👀document (page commondoc-page)
+  (-> page
+      document
+      👀items
+      (rename :title "CommonDoc" :priority 4)))

@@ -5,16 +5,31 @@
 (in-package :hyperdoc)
 
 (defclass html-page (page)
-   ())
+  ((parse-tree :reader parse-tree :initform nil)))
 
 (defmethod page-class ((filetype (eql :html)))
   (find-class 'html-page))
 
 (defmethod load-page ((page html-page))
+  (with-slots (file parse-tree) page
+    (let ((plump:*tag-dispatchers* plump:*html-tags*))
+      (setf parse-tree (plump:parse file))))
   page)
 
 (defmethod page-title ((page html-page))
-  "HTML page title")
+  (-> page
+      parse-tree
+      (plump:get-elements-by-tag-name "title")
+      first
+      plump:text))
 
 (defview 👀content (page html-page)
-  nil)
+  (html-view :title "Content" :priority 1
+    (plump:serialize (parse-tree page)
+                     html-inspector-views::*html-stream*)))
+
+(defview 👀parse-tree (page page)
+  (-> page
+      parse-tree
+      plump-inspector-views::👀children
+      (rename :title "Parse tree" :priority 4)))

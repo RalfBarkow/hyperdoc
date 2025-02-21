@@ -34,6 +34,8 @@
                #:common-html
                #:scriba
                #:common-doc-inspector-views
+               #:plump
+               #:plump-inspector-views
                #:fset
                #:uiop)
   :components ((:module "hyperdoc"
