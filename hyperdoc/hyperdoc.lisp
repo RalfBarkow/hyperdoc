@@ -23,8 +23,8 @@
           (page-files))
       (dolist (file (uiop:directory-files directory))
         (cond
-          ;; Scriba files store the pages
-          ((member (pathname-type file) '("scr") :test #'string=)
+          ;; Pages can be Scriba or HTML files
+          ((member (pathname-type file) '("scr" "html") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
                (setf page (make-page hdoc file))
@@ -89,30 +89,20 @@
 
 (defclass page ()
   ((hyperdoc :reader hyperdoc :initarg :hyperdoc)
-   (file :reader file :initarg :file)
-   (document :reader document :initarg :document :initform nil)))
+   (file :reader file :initarg :file)))
+
+(defgeneric page-class (filetype))
 
 (defun make-page (hdoc file)
-  (make-instance 'page :hyperdoc hdoc :file file))
+  (let* ((type (pathname-type file))
+         (type-as-kw (alexandria:make-keyword (str:upcase type))))
+    (make-instance (page-class type-as-kw) :hyperdoc hdoc :file file)))
 
 (defvar *current-page* nil)
 
-(defun load-page (page)
-  (with-slots (document) page
-    (let ((*current-page* page))
-      (setf document (parse-and-expand (file page)))))
-  page)
+(defgeneric load-page (page))
 
-(defun parse-and-expand (file)
-  (let* ((format (make-instance 'scriba:scriba))
-         (document (common-doc.format:parse-document format file))
-         (expanded (common-doc.macro:expand-macros document)))
-    expanded))
-
-(defun page-title (page)
-  (-> page
-      document
-      common-doc:title))
+(defgeneric page-title (page))
 
 (defmethod title-bar-action-buttons ((page page))
   (action-button "Reload"
@@ -121,37 +111,6 @@
 
 (defmethod text-representation ((page page))
   (page-title page))
-
-(defclass emitter-state ()
-  ((package :initarg :package)
-   (page :initarg :page)))
-
-(defvar *emitter-state* nil)
-
-(defview 👀content (page page)
-  (html-view :title "Content" :priority 1
-    (add-asset-path "/hyperdoc/"
-                    (asdf:system-relative-pathname
-                     :hyperdoc
-                     "assets/hyperdoc"))
-    (include-css "/hyperdoc/css/hyperdoc.css")
-    (html
-      (:div :class "hyperdoc-page"
-            (:h1 (esc (page-title page)))
-            (let ((*emitter-state* (make-instance 'emitter-state
-                                                  :package (find-package "CL-USER")
-                                                  :page page))
-                  ;; The page title is <h1>, so section titles need to start with <h2>
-                  (common-html.emitter::*section-depth* 2)
-                  ;; The output stream is the one used by cl-who
-                  (common-html.emitter::*output-stream* html-inspector-views::*html-stream*))
-              ;; Don't use common-doc.format:emit-document here. It creates an
-              ;; HTML string for the document and in the end sends it to the
-              ;; specified output string. This interferes with the implementation
-              ;; of object references. Moreover, it creates a !DOCTYPE tag for
-              ;; an independent document, whereas we want a snippet that goes
-              ;; into a view.
-              (common-html.emitter::emit (common-doc:children (document page))))))))
 
 (defview 👀source (page page)
   (-> page

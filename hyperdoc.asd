@@ -40,6 +40,8 @@
                 :serial t
                 :components ((:file "package")
                              (:file "hyperdoc")
+                             (:file "commondoc-pages")
+                             (:file "html-pages")
                              (:file "catalog")
                              (:file "in-package")
                              (:file "object-refs")
