@@ -36,6 +36,7 @@
                #:common-doc-inspector-views
                #:plump
                #:plump-inspector-views
+               #:3bmd
                #:fset
                #:uiop)
   :components ((:module "hyperdoc"
@@ -44,6 +45,7 @@
                              (:file "hyperdoc")
                              (:file "commondoc-pages")
                              (:file "html-pages")
+                             (:file "markdown-pages")
                              (:file "catalog")
                              (:file "in-package")
                              (:file "object-refs")

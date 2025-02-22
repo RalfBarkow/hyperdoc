@@ -24,7 +24,7 @@
       (dolist (file (uiop:directory-files directory))
         (cond
           ;; Pages can be Scriba or HTML files
-          ((member (pathname-type file) '("scr" "html") :test #'string=)
+          ((member (pathname-type file) '("scr" "html" "md") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
                (setf page (make-page hdoc file))
