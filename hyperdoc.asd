@@ -43,10 +43,11 @@
                 :serial t
                 :components ((:file "package")
                              (:file "hyperdoc")
-                             (:file "commondoc-pages")
+                             (:file "catalog")
+                             (:file "parse-expr")
                              (:file "html-pages")
                              (:file "markdown-pages")
-                             (:file "catalog")
+                             (:file "commondoc-pages")
                              (:file "in-package")
                              (:file "object-refs")
                              (:file "page-refs")

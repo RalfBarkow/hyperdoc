@@ -25,10 +25,76 @@
                    (return (-> elements first plump:text)))))
       "Untitled"))
 
+(defclass page-state ()
+  ((package :initarg :package)
+   (page :initarg :page)))
+
+(defvar *page-state* nil)
+
+(defgeneric serialize-hyperdoc-element (tag element)
+  (:method ((tag t) element)
+    nil)
+  (:method ((tag (eql :in-package)) element)
+    (setf (slot-value *page-state* 'package)
+          (-> element plump:text str:upcase find-package))
+    t)
+  (:method ((tag (eql :value-of)) element)
+    (let* ((*package* (slot-value *page-state* 'package))
+           (text (-> element plump:text))
+           (value (-> text parse-and-eval)))
+      (html
+        (:span :class "hyperdoc-computed-value"
+               :title text
+               (html-representation value)))))
+  (:method ((tag (eql :view-transclusion)) element)
+    (let* ((*package* (slot-value *page-state* 'package))
+           (expr (plump:text element))
+           (value (parse-and-eval expr)))
+      (transclusion value)))
+  (:method ((tag (eql :a)) element)
+    (let ((expr (plump:attribute element "expr"))
+          (view (plump:attribute element "view"))
+          (hyperdoc (plump:attribute element "hyperdoc"))
+          (page (plump:attribute element "page"))
+          (text (plump:text element)))
+      (cond
+        (expr
+         (assert (and (null hyperdoc) (null page)))
+         (let ((value (parse-and-eval expr)))
+           (html
+             (:span :class "hyperdoc-reference"
+                    (object-ref value :display text :select view)))
+           t))
+        (page
+         (let* ((hyperdoc (or (and hyperdoc (find-hyperdoc hyperdoc))
+                              (hyperdoc (slot-value *page-state* 'page))))
+                (value (find-page hyperdoc page)))
+           (html
+             (:span :class "hyperdoc-reference"
+                    (object-ref value :display text :select view)))
+           t))
+        (hyperdoc
+         (let ((value (find-hyperdoc hyperdoc)))
+           (html
+             (:span :class "hyperdoc-reference"
+                    (object-ref value :display text :select view)))
+           t))))))
+
+(defmethod plump:serialize-object :around ((element plump:element))
+  (let ((tag-as-kw (-> element
+                       plump:tag-name
+                       str:upcase
+                       alexandria:make-keyword)))
+    (unless (serialize-hyperdoc-element tag-as-kw element)
+      (call-next-method))))
+
 (defview 👀content (page html-page)
   (html-view :title "Content" :priority 1
-    (plump:serialize (parse-tree page)
-                     html-inspector-views::*html-stream*)))
+    (let ((*page-state* (make-instance 'page-state
+                                       :package (find-package "CL-USER")
+                                       :page page)))
+      (plump:serialize (parse-tree page)
+                       html-inspector-views::*html-stream*))))
 
 (defview 👀parse-tree (page html-page)
   (-> page
