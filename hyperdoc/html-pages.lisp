@@ -72,7 +72,8 @@
       (cond
         (expr
          (assert (and (null hyperdoc) (null page)))
-         (let ((value (parse-and-eval expr)))
+         (let* ((*package* (slot-value *page-state* 'package))
+                (value (parse-and-eval expr)))
            (html
              (:span :class "hyperdoc-reference"
                     (object-ref value :display text :select view)))
