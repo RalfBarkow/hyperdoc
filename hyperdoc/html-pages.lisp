@@ -32,12 +32,19 @@
 (defvar *page-state* nil)
 
 (defgeneric serialize-hyperdoc-element (tag element)
+
+  ;; Most elements are handled by plump:serialize-object.
   (:method ((tag t) element)
     nil)
+
+  ;; in-package elements set the current package but
+  ;; are not rendered.
   (:method ((tag (eql :in-package)) element)
     (setf (slot-value *page-state* 'package)
           (-> element plump:text str:upcase find-package))
     t)
+
+  ;; value-of elements are rendered here.
   (:method ((tag (eql :value-of)) element)
     (let* ((*package* (slot-value *page-state* 'package))
            (text (-> element plump:text))
@@ -46,11 +53,16 @@
         (:span :class "hyperdoc-computed-value"
                :title text
                (html-representation value)))))
+
+  ;; transclusion elements are rendered here.
   (:method ((tag (eql :view-transclusion)) element)
     (let* ((*package* (slot-value *page-state* 'package))
            (expr (plump:text element))
            (value (parse-and-eval expr)))
       (transclusion value)))
+
+  ;; a elements with hyperdoc-specific attributes are
+  ;; rendered here. Others are handled by plump:serialize-object.
   (:method ((tag (eql :a)) element)
     (let ((expr (plump:attribute element "expr"))
           (view (plump:attribute element "view"))
@@ -78,7 +90,8 @@
            (html
              (:span :class "hyperdoc-reference"
                     (object-ref value :display text :select view)))
-           t))))))
+           t))
+        (t nil)))))
 
 (defmethod plump:serialize-object :around ((element plump:element))
   (let ((tag-as-kw (-> element
@@ -93,8 +106,10 @@
     (let ((*page-state* (make-instance 'page-state
                                        :package (find-package "CL-USER")
                                        :page page)))
-      (plump:serialize (parse-tree page)
-                       html-inspector-views::*html-stream*))))
+      (html
+        (:div :class "hyperdoc-page"
+              (plump:serialize (parse-tree page)
+                               html-inspector-views::*html-stream*))))))
 
 (defview 👀parse-tree (page html-page)
   (-> page
