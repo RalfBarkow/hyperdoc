@@ -104,6 +104,11 @@
 
 (defview 👀content (page html-page)
   (html-view :title "Content" :priority 1
+    (add-asset-path "/hyperdoc/"
+                    (asdf:system-relative-pathname
+                     :hyperdoc
+                     "assets/hyperdoc"))
+    (include-css "/hyperdoc/css/hyperdoc.css")
     (let ((*page-state* (make-instance 'page-state
                                        :package (find-package "CL-USER")
                                        :page page)))
