@@ -1,8 +1,13 @@
-;;;; HTML pages
+;;;; Markdown pages
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperdoc)
+
+;;
+;; Markdown pages are parsed, serialized as HTML, and
+;; then processed just like HTML pages.
+;;
 
 (defclass markdown-page (html-page) ())
 

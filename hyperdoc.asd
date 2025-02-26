@@ -30,10 +30,6 @@
                #:html-inspector-views/standard
                #:alexandria
                #:arrow-macros
-               #:common-doc
-               #:common-html
-               #:scriba
-               #:common-doc-inspector-views
                #:plump
                #:plump-inspector-views
                #:3bmd
@@ -47,12 +43,4 @@
                              (:file "parse-expr")
                              (:file "html-pages")
                              (:file "markdown-pages")
-                             (:file "commondoc-pages")
-                             (:file "in-package")
-                             (:file "object-refs")
-                             (:file "page-refs")
-                             (:file "hyperdoc-refs")
-                             (:file "inline-computations")
-                             (:file "transclusions")
-                             (:file "source-transclusions")
                              (:file "hyperdoc-hyperdoc")))))

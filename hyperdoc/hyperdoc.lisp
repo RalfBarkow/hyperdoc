@@ -23,8 +23,8 @@
           (page-files))
       (dolist (file (uiop:directory-files directory))
         (cond
-          ;; Pages can be Scriba or HTML files
-          ((member (pathname-type file) '("scr" "html" "md") :test #'string=)
+          ;; Pages can be HTML or Markdown files
+          ((member (pathname-type file) '("html" "md") :test #'string=)
            (let ((page (gethash file pages)))
              (unless page
                (setf page (make-page hdoc file))
@@ -83,7 +83,7 @@
       (rename :title "Files" :priority 5)))
 
 ;;
-;; A page instance refers to a Scriba file in the
+;; A page instance refers to a file in the
 ;; hyperdoc directory.
 ;;
 
