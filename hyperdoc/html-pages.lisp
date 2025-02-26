@@ -52,14 +52,32 @@
       (html
         (:span :class "hyperdoc-computed-value"
                :title text
-               (html-representation value)))))
+               (html-representation value)))
+      t))
 
-  ;; transclusion elements are rendered here.
+  ;; view-transclusion elements are rendered here.
   (:method ((tag (eql :view-transclusion)) element)
     (let* ((*package* (slot-value *page-state* 'package))
            (expr (plump:text element))
            (value (parse-and-eval expr)))
-      (transclusion value)))
+      (transclusion value))
+    t)
+
+  ;; source-of-class elements are rendered here.
+  (:method ((tag (eql :source-of-class)) element)
+    (let* ((*package* (slot-value *page-state* 'package))
+           (name (plump:text element))
+           (class (parse-and-eval (format nil "(find-class '~a)" name))))
+      (transclusion (html-inspector-views/standard:source-code-view class)))
+    t)
+
+  ;; source-of-function elements are rendered here.
+  (:method ((tag (eql :source-of-function)) element)
+    (let* ((*package* (slot-value *page-state* 'package))
+           (name (plump:text element))
+           (fn (parse-and-eval (format nil "(function ~a)" name))))
+      (transclusion (html-inspector-views/standard:source-code-view fn)))
+    t)
 
   ;; a elements with hyperdoc-specific attributes are
   ;; rendered here. Others are handled by plump:serialize-object.
