@@ -9,15 +9,6 @@
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :*hyperdoc*
-           :*catalog* :catalog
+           :*catalog*
            :make-hyperdoc
-           :load-pages
-           :find-page
-           :find-hyperdoc
-           :register
-           :hyperdoc :page
-           :hyperdoc-directory
-           :title
-           :pages
-           :code-files
-           :entry))
+           :register))

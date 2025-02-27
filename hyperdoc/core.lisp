@@ -6,8 +6,9 @@
 
 ;;
 ;; The core consists of just the definitions that are required to
-;; create HyperDocs, in order to keep HyperDoc a small dependency.
-;; The code for viewing and navigation is in hyperdoc/explore.
+;; create HyperDocs, in order to keep the system "hyperdoc" a small
+;; dependency.  The code for viewing and navigation is in
+;; "hyperdoc/explorer".
 ;;
 
 ;;
