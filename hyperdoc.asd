@@ -2,8 +2,8 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defsystem #:hyperdoc/core
-  :description "Core of the hypertext documentation system"
+(defsystem #:hyperdoc
+  :description "Hypertext documentation system"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
   :license  "BSD"
   :version "0.0.1"
@@ -11,21 +11,20 @@
   :depends-on (#:alexandria
                #:arrow-macros
                #:fset
-               #:uiop)
-  :components ((:module "hyperdoc-core"
+               #:asdf #:uiop)
+  :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
-                             (:file "hyperdoc")
-                             (:file "catalog")
-                             (:file "core-hyperdoc")))))
+                             (:file "core")
+                             (:file "hyperdoc")))))
 
-(defsystem #:hyperdoc
-  :description "Hypertext documentation system"
+(defsystem #:hyperdoc/explorer
+  :description "Explorer for HyperDocs"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
   :license  "BSD"
   :version "0.0.1"
   :serial t
-  :depends-on (#:hyperdoc/core
+  :depends-on (#:hyperdoc
                #:html-inspector-views
                #:html-inspector-views/standard
                #:alexandria
@@ -34,13 +33,11 @@
                #:plump-inspector-views
                #:3bmd
                #:fset
-               #:uiop)
-  :components ((:module "hyperdoc"
+               #:asdf #:uiop)
+  :components ((:module "hyperdoc-explorer"
                 :serial t
-                :components ((:file "package")
-                             (:file "hyperdoc")
+                :components ((:file "explorer")
                              (:file "catalog")
                              (:file "parse-expr")
                              (:file "html-pages")
-                             (:file "markdown-pages")
-                             (:file "hyperdoc-hyperdoc")))))
+                             (:file "markdown-pages")))))

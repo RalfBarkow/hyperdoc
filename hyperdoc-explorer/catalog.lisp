@@ -1,20 +1,14 @@
-;;;; Catalog of registered HyperDocs
+;;;; Views on the catalog
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperdoc)
 
-;;
-;; The catalog class is defined in hyperdoc/core.
-;; Views are defined here, because hyperdoc/core
-;; does not depend on html-inspector-views.
-;;
-
 (defmethod text-representation ((catalog catalog))
   "Registered HyperDocs")
 
-(defview 👀items (hdcat catalog)
-  (-> hdcat
+(defview 👀items (catalog catalog)
+  (-> catalog
       hyperdocs
       (fset:sort #'string< :key #'title)
       👀items
