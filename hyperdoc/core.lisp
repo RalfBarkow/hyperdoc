@@ -126,3 +126,8 @@
   (fset:do-set (hd (hyperdocs *catalog*))
     (when (string= title (title hd))
         (return hd))))
+
+(defun find-hyperdoc-in-directory (pathname)
+  (fset:do-set (hd (hyperdocs *catalog*))
+    (when (equal pathname (hyperdoc-directory hd))
+        (return hd))))

@@ -11,4 +11,5 @@
   (:export :*hyperdoc*
            :*catalog*
            :make-hyperdoc
-           :register))
+           :register
+           :see :page :hyperdoc))

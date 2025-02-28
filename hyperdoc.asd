@@ -16,6 +16,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "core")
+                             (:file "links-in-code")
                              (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/explorer
@@ -40,4 +41,5 @@
                              (:file "catalog")
                              (:file "parse-expr")
                              (:file "html-pages")
-                             (:file "markdown-pages")))))
+                             (:file "markdown-pages")
+                             (:file "links-in-code")))))
