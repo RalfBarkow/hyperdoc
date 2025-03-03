@@ -98,7 +98,9 @@
            t))
         (page
          (let* ((hyperdoc (or (and hyperdoc (find-hyperdoc hyperdoc))
-                              (hyperdoc (slot-value *page-state* 'page))))
+                              (-> *page-state*
+                                (slot-value 'page)
+                                (slot-value 'hyperdoc))))
                 (value (find-page hyperdoc page)))
            (html
              (:span :class "hyperdoc-reference"

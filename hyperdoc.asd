@@ -17,6 +17,7 @@
                 :components ((:file "package")
                              (:file "core")
                              (:file "links-in-code")
+                             (:file "examples")
                              (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/explorer
@@ -42,4 +43,5 @@
                              (:file "parse-expr")
                              (:file "html-pages")
                              (:file "markdown-pages")
-                             (:file "links-in-code")))))
+                             (:file "links-in-code")
+                             (:file "examples")))))

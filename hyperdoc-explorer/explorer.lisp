@@ -55,7 +55,7 @@
 
 (defview 👀source (page page)
   (-> page
-    file
+    (slot-value 'file)
     👀content
     (rename :title "Source" :priority 3)))
 

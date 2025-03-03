@@ -12,4 +12,5 @@
            :*catalog*
            :make-hyperdoc
            :register
-           :see :page :hyperdoc))
+           :see :page :hyperdoc
+           :defexample))

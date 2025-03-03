@@ -82,8 +82,8 @@
 ;;
 
 (defclass page ()
-  ((hyperdoc :reader hyperdoc :initarg :hyperdoc)
-   (file :reader file :initarg :file)))
+  ((hyperdoc :initarg :hyperdoc)
+   (file :initarg :file)))
 
 (defun make-page (hdoc file)
   (let* ((type (pathname-type file))
@@ -119,7 +119,7 @@
   (fset:includef (hyperdocs *catalog*) hdoc))
 
 ;;
-;; Lookup in the catalog
+;; Catalog lookup
 ;;
 
 (defun find-hyperdoc (title)
