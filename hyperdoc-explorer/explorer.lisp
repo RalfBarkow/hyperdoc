@@ -58,6 +58,3 @@
     (slot-value 'file)
     👀content
     (rename :title "Source" :priority 3)))
-
-;; Import a symbol that's useful in HyperDoc pages
-(import 'html-inspector-views/standard:var-definition)

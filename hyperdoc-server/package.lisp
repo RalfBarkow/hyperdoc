@@ -2,15 +2,10 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defpackage :hyperdoc
+(defpackage :hyperdoc/server
   (:use :cl)
   (:import-from :alexandria
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export :*hyperdoc*
-           :*catalog*
-           :make-hyperdoc
-           :register
-           :see :page :hyperdoc
-           :defexample))
+  (:export :serve-catalog))
