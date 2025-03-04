@@ -1,0 +1,39 @@
+<h1>Dependencies of HyperDoc</h1>
+
+<p>
+  Dependencies are software libraries and tools that a piece of
+  software requires to be present in order to function. Dependencies
+  provide ready-to-use functionality but, as their name indicates,
+  they are also liabilities. They take up space in memory, but perhaps
+  more importantly, they can become inaccessible or change in
+  incompatible ways, making the dependent piece of software difficult
+  or even impossible to use.
+</p>
+
+<p>
+  If you choose to use HyperDoc, it becomes a dependency of your
+  code. And HyperDoc's dependencies become your indirect
+  dependencies. You should thus know what these dependencies are.
+</p>
+
+<p>
+  HyperDoc is implemented as two ASDF systems:
+  <ul>
+    <li>
+      <a expr="(asdf:find-system &quot;hyperdoc&quot;)">hyperdoc</a> contains
+      just the code required to set up a HyperDoc. This is what your
+      code will depend on even for users of your code that don't care
+      about HyperDoc. You can see its direct and indirect dependencies
+      <a expr="(asdf:find-system &quot;hyperdoc&quot;)" view="Dependencies">here</a>.
+    </li>
+  </ul>
+  <ul>
+    <li>
+      <a expr="(asdf:find-system &quot;hyperdoc/explorer&quot;)">hyperdoc/explorer</a>
+      contains the core required to display and navigate a HyperDoc. This is what
+      developers and users of your code need to have to actually profit from the
+      HyperCode. You can see its direct and indirect dependencies
+      <a expr="(asdf:find-system &quot;hyperdoc/explorer&quot;)" view="Dependencies">here</a>.
+    </li>
+  </ul>
+</p>

@@ -10,3 +10,8 @@
 
 (defmacro defexample (name &body body)
   `(defun ,name () ,@body))
+
+; An example example function
+(defexample the-answer
+  "The answer to the question of life, the universe, and everything."
+  42)
