@@ -8,9 +8,10 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export :*hyperdoc*
-           :*catalog*
-           :make-hyperdoc
-           :register
-           :see :page :hyperdoc
-           :defexample))
+  (:export #:*hyperdoc*
+           #:*catalog*
+           #:make-hyperdoc
+           #:register
+           #:see :page :hyperdoc
+           #:defexample
+           #:assert-test #:assert-equalp #:assert-equal #:assert-eql))
