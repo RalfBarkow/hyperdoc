@@ -5,9 +5,6 @@
 (in-package :hyperdoc/server)
 
 (defun serve-catalog (&key (port 8080))
-  (clog:initialize
-   #'(lambda (body)
-       (clog-moldable-inspector::on-new-inspector body
-                                                  :object hyperdoc:*catalog*
-                                                  :pane-width 750))
-   :port port))
+  (clog-moldable-inspector:clog-serve-inspector hyperdoc:*catalog*
+                                                :pane-width "750px"
+                                                :port port))
