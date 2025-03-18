@@ -11,6 +11,7 @@
   :depends-on (#:alexandria
                #:arrow-macros
                #:fset
+               #:str
                #:asdf #:uiop)
   :components ((:module "hyperdoc"
                 :serial t
