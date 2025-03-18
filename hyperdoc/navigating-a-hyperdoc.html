@@ -1,39 +1,41 @@
 <h1>Navigating a HyperDoc</h1>
 
-<p>
-  Navigation through a HyperDoc is not very different from browsing
+<in-package>hyperdoc</in-package>
+
+<p> Navigation through a HyperDoc is not very different from browsing
   the Web, but there are a few important features that are not easily
-  discoverable.
-</p>
+  discoverable.  </p>
 
 <h3>Panes</h3>
 
-<p>
-  When you click on a link, the panes to the right of the current one
-  are closed, and a new pane is opened for the link destination to the
-  right of the current one.
-</p>
-<p>
-  Shift-clicking opens the link destination in a new pane to the right
-  of the rightmost open panes. No panes are closed. This is
-  particularly useful for opening multiple panes for the same object
-  and compare view side by side.
-</p>
+<p> When you click on a link, the panes to the right of the current
+  one are closed, and a new pane is opened for the link destination to
+  the right of the current one.  </p> <p> Shift-clicking opens the
+  link destination in a new pane to the right of the rightmost open
+  panes. No panes are closed. This is particularly useful for opening
+  multiple panes for the same object and compare view side by side.
+  </p>
 
 <h3>Looking behind the scenes</h3>
 
-<p>
-  Alt-clicking provides access to background information. If you
+<p> Alt-clicking provides access to background information. If you
   alt-click on an action button, you see the code that is run when you
   click the button. If you alt-click a transclusion, you get a pane
   for the object that is displayed in the transcluded view. If you
   alt-click the title tab of a view, you see the view definition,
-  including in particular its source code.
-</p>
-<p>
-  You can even access the implementation details of the object
-  inspector that HyperDoc is built on. If you alt-click on the title
-  bar of a pane, you get to inspect the pane object, from which you
-  can navigate to the view objects and to their representation in the
-  DOM or as HTML.
-</p>
+  including in particular its source code.  </p> <p> You can even
+  access the implementation details of the object inspector that
+  HyperDoc is built on. If you alt-click on the title bar of a pane,
+  you get to inspect the pane object, from which you can navigate to
+  the view objects and to their representation in the DOM or as HTML.
+  </p>
+
+<h3>Code examples</h3>
+
+<p> Code examples, introduced by a <code>defexample</code> form, are
+  shown with a play button ► in front of the definition. You can run the
+  example and inspect the result by clicking on this button. </p>
+
+<p>Example:</p>
+
+<source-of-function>the-answer</source-of-function>
