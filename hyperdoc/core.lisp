@@ -131,3 +131,11 @@
   (fset:do-set (hd (hyperdocs *catalog*))
     (when (equal pathname (hyperdoc-directory hd))
         (return hd))))
+
+;;
+;; This variable can be set to nil when HyperDoc is run in a public
+;; Web server. Page reloading is then disabled. HyperDocs can also query
+;; this variable to selectively enable development functionality.
+;;
+
+(defvar *development-features* t)

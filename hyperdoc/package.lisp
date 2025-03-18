@@ -14,4 +14,5 @@
            #:register
            #:see :page :hyperdoc
            #:defexample
-           #:assert-test #:assert-equalp #:assert-equal #:assert-eql))
+           #:assert-test #:assert-equalp #:assert-equal #:assert-eql
+           #:*development-features*))

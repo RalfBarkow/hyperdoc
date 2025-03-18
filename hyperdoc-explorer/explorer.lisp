@@ -13,9 +13,10 @@
   (title hdoc))
 
 (defmethod title-bar-action-buttons ((hdoc hyperdoc))
-  (action-button "Reload"
-                 (thunk (load-pages hdoc)
-                        t)))
+  (when *development-features*
+    (action-button "Reload"
+                   (thunk (load-pages hdoc)
+                     t))))
 
 (defview 👀entry (hd hyperdoc)
   (ensure-pages-loaded hd)
@@ -46,9 +47,10 @@
 (defvar *current-page* nil)
 
 (defmethod title-bar-action-buttons ((page page))
-  (action-button "Reload"
-                 (thunk (load-page page)
-                        t)))
+  (when *development-features*
+    (action-button "Reload"
+                   (thunk (load-page page)
+                     t))))
 
 (defmethod text-representation ((page page))
   (page-title page))
