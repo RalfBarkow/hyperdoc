@@ -16,6 +16,7 @@
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
+                             (:file "errors")
                              (:file "core")
                              (:file "links-in-code")
                              (:file "examples")

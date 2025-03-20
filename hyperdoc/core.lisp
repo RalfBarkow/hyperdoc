@@ -60,14 +60,16 @@
     (setf (slot-value hdoc 'pages) (make-hash-table :test #'equal))
     (load-pages hdoc)))
 
-(defun find-page (hdoc title)
+(defun find-page (hdoc title &key signal-error?)
   (ensure-pages-loaded hdoc)
   (or (loop for page being the hash-values of (pages hdoc)
             when (equal title (page-title page))
               do (return page))
       (loop for code-file in (code-files hdoc)
             when (equal title (code-file-title code-file))
-              do (return code-file))))
+              do (return code-file))
+      (and signal-error?
+           (error 'page-lookup-failure :hyperdoc hdoc :title title))))
 
 (defun code-file-title (cl-source-file)
   (-> cl-source-file
@@ -122,15 +124,19 @@
 ;; Catalog lookup
 ;;
 
-(defun find-hyperdoc (title)
-  (fset:do-set (hd (hyperdocs *catalog*))
-    (when (string= title (title hd))
-        (return hd))))
+(defun find-hyperdoc (title &key signal-error?)
+  (or (fset:do-set (hd (hyperdocs *catalog*))
+        (when (string= title (title hd))
+          (return hd)))
+      (and signal-error?
+           (error 'hyperdoc-lookup-failure :title title))))
 
-(defun find-hyperdoc-in-directory (pathname)
-  (fset:do-set (hd (hyperdocs *catalog*))
-    (when (equal pathname (hyperdoc-directory hd))
-        (return hd))))
+(defun find-hyperdoc-in-directory (pathname  &key signal-error?)
+  (or (fset:do-set (hd (hyperdocs *catalog*))
+        (when (equal pathname (hyperdoc-directory hd))
+          (return hd)))
+      (and signal-error?
+           (error 'directory-lookup-failure :catalog *catalog* :pathname pathname))))
 
 ;;
 ;; This variable can be set to nil when HyperDoc is run in a public
