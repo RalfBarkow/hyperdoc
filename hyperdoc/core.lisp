@@ -76,7 +76,8 @@
     asdf:component-pathname
     uiop:read-file-lines
     first
-    (str:trim-left :char-bag " ;")))
+    (str:trim-left :char-bag " ;")
+    (str:trim-right)))
 
 ;;
 ;; A page instance refers to a file in the

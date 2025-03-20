@@ -47,7 +47,8 @@
                              (:file "html-pages")
                              (:file "markdown-pages")
                              (:file "links-in-code")
-                             (:file "examples")))))
+                             (:file "examples")
+                             (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/server
   :description "Web server for HyperDocs"

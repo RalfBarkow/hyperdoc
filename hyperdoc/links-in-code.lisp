@@ -4,22 +4,32 @@
 
 (in-package :hyperdoc)
 
-;; Wrap the expression in a lambda to get it compiled and checked,
-;; but not run.
+;;
+;; The macro "see" has special rendering support in HyperDoc.
+;; Clicking on its argument opens an inspector on its value.
+;; The implementation of "see" is very basic. It wraps the argument
+;; expression in a lambda to get it compiled and checked, but not run.
+;;
+
 (defmacro see (&body body)
   `(lambda () ,@body))
 
 ;;
-;; Find a page from its title and HyperDoc title
-;; The implementation is in hyperdoc/explorer.
+;; Find pages and HyperDocs from their titles, for use with "see".
 ;;
+
+;; In order to reduce the dependencies of the core HyperDoc system,
+;; these are unimplemented generic functions.
 
 (defgeneric page (title &key hyperdoc))
-
-;;
-;; Find a HyperDoc from its title
-;; The implementation is in hyperdoc/explorer.
-;;
-
 (defgeneric hyperdoc (title))
+
+;; The implementation methods are in the system hyperdoc/explorer:
+
+(see (page "Implementation of page and HyperDoc links embedded in Lisp code"
+           :hyperdoc "HyperDoc Explorer"))
+
+;; The use of embedded links is explained in:
+
+(see (page "Writing HyperDoc source code files"))
 

@@ -8,6 +8,8 @@
 ;; Example functions
 ;;
 
+(see (page "Writing HyperDoc source code files"))
+
 (defmacro defexample (name &body body)
   `(defun ,name () ,@body))
 

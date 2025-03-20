@@ -4,6 +4,10 @@
 
 (in-package :hyperdoc)
 
+;;
+;; Add a play button before a top-level defexample form.
+;;
+
 (defmethod html-inspector-views/standard:render-toplevel-cst :around
     ((head (eql 'defexample)) cst source position)
   (eval-button "►"
