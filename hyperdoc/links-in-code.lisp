@@ -31,5 +31,5 @@
 
 ;; The use of embedded links is explained in:
 
-(see (page "Writing HyperDoc source code files"))
+(see (page "Writing HyperDoc source code pages"))
 

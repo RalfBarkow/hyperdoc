@@ -1,0 +1,98 @@
+<h1>HyperDoc design</h1>
+
+<p>
+  The goal of HyperDoc is to support the creation of explainable and
+  explorable software systems from composable units.
+</p>
+
+<p>
+  One source of inspiration is Bret Victor's <a href="https://worrydream.com/ExplorableExplanations/" target="_blank">"Explorable Explanations"</a> (read
+  in particular the "Postscript from 2024" at the end). HyperDoc wants
+  to enable explorable explanations, but emphasizes the context of
+  peer-to-peer communication, as in scientific research, over the
+  context of expert-to-non-expert communication. Every reader is thus also
+  a potential author, and readers should be able to explore not only the
+  subject of the author's exposition, but also the implementation techniques,
+  in order to learn from them. This leads to a somewhat <a href="http://www.call-with-current-continuation.org/articles/brutalist-manifesto.txt">brutalist</a> approach
+  that values transparency of implementation over the aesthetics
+  of presentation. As you read this page, the title bar of its pane in the
+  viewer shows you the name of the Common Lisp class that implements the page
+  in memory. That's intentional!
+</p>
+
+<p>
+  Another source of inspiration is <a href="http://literateprogramming.com/" target="_blank"> literate programming</a>. Its
+  goal is to make software source code more readable for humans, by
+  embedding it into a narrative. In my opinion, experience has shown
+  that this doesn't work out for non-trivial software. One reason is
+  that understanding complex software system requires <i>exploration</i>
+  rather than passive reading. The explorer must be able to execute
+  code and inspect its results. Another reason is the linear structure
+  of a narrative, which is insufficient for complex software, and
+  often in conflict with the requirements of a programming
+  language. This is why literate programming tools usually have to
+  re-structure the code before compilation..
+</p>
+
+<p>
+  HyperDoc presents explorable software systems as <a href="https://en.wikipedia.org/wiki/Hypertext" target="_blank">hypertext</a>,
+  i.e. sets of interlinked pages. There are code pages, which are
+  valid source code files according to the rules of the underlying
+  programming language, and text pages, which are
+  narratives. Moreover, both code and text pages can contain links to
+  arbitrary objects in memory, and thus in particular results of
+  example code. Code and results can also be transcluded into text
+  pages (see <a page="Writing HyperDoc text pages">here</a>).
+</p>
+
+<p>
+  Code pages are subject to a few conventions (see <a page="Writing HyperDoc source code pages">here</a>),
+  but they do not require any preprocessing, unlike with literate
+  programming.  HyperDoc embraces its implementation language and adds
+  to it, rather than making a slightly different one. The code you see
+  is the code the compiler sees as well. To add explanations to the
+  source code, you use comments, not fancy additional mechanisms.  You
+  can also add links to text pages, where you can explain whatever is
+  too long or too differently structured to fit into source code
+  comments.
+</p>
+
+<p>
+  Composability is realized by implementing HyperDocs a value-added ASDF systems.
+  The software units you write using HyperDoc are plain ASDF systems. They can
+  depend on any other ASDF system, and they can become dependencies of any other
+  ASDF system. Using HyperDoc does not force anyone else to use HyperDoc,
+  just to deploy your code.
+</p>
+
+<p>
+  Another aspect of composability is that link targets are in-memory
+  Common Lisp data objects. HyperDoc provides some syntactic
+  shorthands to make it easier to link to HyperDoc pages or entire
+  HyperDocs, but ultimately these become links to data objects as well.
+  This means that you can easily implement your own HyperDoc page types,
+  if you like neither HTML nor Markdown. It also means that you can
+  implement your own HyperDoc-like documentation system, and cross-link
+  seamlessly.
+</p>
+
+<p>
+  An additional advantage resulting from an architecture based on plain data
+  objects is the possibility to use different tools for exploring HyperDocs.
+  Right now, you are using an in-browser object inspector that presents
+  objects in lineups of panes. But other object inspectors using
+  HTML-based views are imaginable. For example an inspector presenting
+  objects in boxes placed on an infinite canvas, which users can arrange
+  as they see fit.
+</p>
+
+<p>
+  Examples are another key ingredient of HyperDoc, although their
+  implementation remains basic for now. Examples produce inspectable
+  results, which permit explorers to better understand the software
+  system. But examples can also contain assertions, taking the role of
+  traditional unit tests. A testing framework that automatically runs
+  all examples in a HyperDoc remains to be implemented. See
+  <a href="http://arxiv.org/abs/2409.00514">this paper on example-driven development</a>
+  to learn more about this approach.
+</p>

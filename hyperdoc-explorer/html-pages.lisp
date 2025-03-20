@@ -135,7 +135,8 @@
       (html
         (:div :class "hyperdoc-page"
               (plump:serialize (parse-tree page)
-                               html-inspector-views::*html-stream*))))))
+                               html-inspector-views::*html-stream*)
+              (:br))))))
 
 (defview 👀parse-tree (page html-page)
   (-> page

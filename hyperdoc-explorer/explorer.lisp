@@ -24,17 +24,17 @@
     (when-let (entry-page (find-page hd entry))
       (👀content entry-page))))
 
-(defview 👀items (hd hyperdoc)
+(defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
   (-> hd
       pages
       alexandria:hash-table-values
-      (list-view :title "Pages" :priority 2)))
+      (list-view :title "Text pages" :priority 2)))
 
-(defview 👀code (hd hyperdoc)
+(defview 👀code-pages (hd hyperdoc)
   (-> hd
       code-files
-      (enumerated-list-view :title "Code"
+      (enumerated-list-view :title "Code pages"
                             :priority 3
                             :display #'code-file-title)))
 
