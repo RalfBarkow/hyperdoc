@@ -16,6 +16,7 @@
           html-inspector-views:html-representation
           html-inspector-views:title-bar-action-buttons
           html-inspector-views:html
+          html-inspector-views:str
           html-inspector-views:html-view
           html-inspector-views:action-button
           html-inspector-views:eval-button

@@ -112,7 +112,10 @@
              (:span :class "hyperdoc-reference"
                     (object-ref value :display text :select view)))
            t))
-        (t nil)))))
+        ;; Add target="_blank" to href links that don't specify a target
+        (t (unless (plump:attribute element "target")
+             (plump:set-attribute element "target" "_blank"))
+           nil)))))
 
 (defmethod plump:serialize-object :around ((element plump:element))
   (let ((tag-as-kw (-> element
