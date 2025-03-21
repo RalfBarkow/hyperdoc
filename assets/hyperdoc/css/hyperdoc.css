@@ -30,3 +30,6 @@
 .hyperdoc-reference:hover {
   background-color: #ddd;
 }
+.hyperdoc-error {
+  color: red;
+}

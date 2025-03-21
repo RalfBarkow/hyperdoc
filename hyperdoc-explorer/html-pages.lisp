@@ -97,21 +97,33 @@
                     (object-ref value :display text :select view)))
            t))
         (page
-         (let* ((hyperdoc (or (and hyperdoc (find-hyperdoc hyperdoc))
-                              (-> *page-state*
-                                (slot-value 'page)
-                                (slot-value 'hyperdoc))))
-                (value (find-page hyperdoc page)))
-           (html
-             (:span :class "hyperdoc-reference"
-                    (object-ref value :display text :select view)))
-           t))
+         (handler-case
+             (let* ((hyperdoc (or (and hyperdoc
+                                       (find-hyperdoc hyperdoc
+                                                      :signal-error? t))
+                                  (-> *page-state*
+                                      (slot-value 'page)
+                                      (slot-value 'hyperdoc))))
+                    (value (find-page hyperdoc page :signal-error? t)))
+               (html
+                 (:span :class "hyperdoc-reference"
+                        (object-ref value :display text :select view))))
+           (lookup-failure (c)
+             (html
+               (:span :class "hyperdoc-reference hyperdoc-error"
+                      (object-ref c :display text)))))
+         t)
         (hyperdoc
-         (let ((value (find-hyperdoc hyperdoc)))
-           (html
-             (:span :class "hyperdoc-reference"
-                    (object-ref value :display text :select view)))
-           t))
+         (handler-case
+             (let ((value (find-hyperdoc hyperdoc :signal-error? t)))
+               (html
+                 (:span :class "hyperdoc-reference"
+                        (object-ref value :display text :select view))))
+           (lookup-failure (c)
+             (html
+               (:span :class "hyperdoc-reference hyperdoc-error"
+                      (object-ref c :display text))))))
+
         ;; Add target="_blank" to href links that don't specify a target
         (t (unless (plump:attribute element "target")
              (plump:set-attribute element "target" "_blank"))
