@@ -1,4 +1,4 @@
-# Writing HyperDoc text pages
+# Writing text pages
 
 <in-package>hyperdoc</in-package>
 

@@ -4,8 +4,8 @@
 
 A HyperDoc is defined by
 
- - A directory containing <a page="Writing HyperDoc text pages">text
-   pages</a> and <a page="Writing HyperDoc source code pages">source
+ - A directory containing <a page="Writing text pages">text
+   pages</a> and <a page="Writing source code pages">source
    code pages</a>
  - A title
  - Optionally: the title of a page to be displayed as the entry page

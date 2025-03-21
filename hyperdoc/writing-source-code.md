@@ -1,4 +1,4 @@
-# Writing HyperDoc source code pages
+# Writing source code pages
 
 <in-package>hyperdoc</in-package>
 

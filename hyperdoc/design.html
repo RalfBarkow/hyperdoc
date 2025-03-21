@@ -1,82 +1,63 @@
-<h1>HyperDoc design</h1>
+<h1>Design</h1>
 
 <p>
   The main goal of HyperDoc is to support the creation of explainable and
-  explorable convivial software systems from composable units. See <a page="Goals and values">here</a> for
-  a more detailed discussion.
+  explorable convivial software systems from composable units.
+  See <a page="Goals and values">here</a> for
+  a more detailed discussion of goals and values.
 </p>
-
 <p>
-  One source of inspiration is Bret Victor's <a href="https://worrydream.com/ExplorableExplanations/">"Explorable Explanations"</a> (read
-  in particular the "Postscript from 2024" at the end). HyperDoc wants
-  to enable explorable explanations, but emphasizes the context of
-  peer-to-peer communication, as in scientific research, over the
-  context of expert-to-non-expert communication. Every reader is thus also
-  a potential author, and readers should be able to explore not only the
-  subject of the author's exposition, but also the implementation techniques,
-  in order to learn from them. This leads to a somewhat <a href="http://www.call-with-current-continuation.org/articles/brutalist-manifesto.txt">brutalist</a> approach
-  that values transparency of implementation over the aesthetics
-  of presentation. As you read this page, the title bar of its pane in the
-  viewer shows you the name of the Common Lisp class that implements the page
-  in memory. That's intentional!
+  One source of inspiration is Bret Victor's
+  <a href="https://worrydream.com/ExplorableExplanations/">"Explorable Explanations"</a>
+  (read in particular the "Postscript from 2024" at the end). HyperDoc
+  wants to enable explorable explanations, but emphasizes the context
+  of peer-to-peer communication, as in scientific research or among
+  collaborators, over the context of expert-to-non-expert
+  communication. This leads to a <a page="Goals and values">focus on conviviality</a>
+  that is absent from Bret Victor's work.
 </p>
-
 <p>
-  Another source of inspiration is <a href="http://literateprogramming.com/"> literate programming</a>. Its
-  goal is to make software source code more readable for humans, by
-  embedding it into a narrative. In my opinion, experience has shown
-  that this doesn't work out for non-trivial software. One reason is
-  that understanding complex software system requires <i>exploration</i>
-  rather than passive reading. The explorer must be able to execute
-  code and inspect its results. Another reason is the linear structure
-  of a narrative, which is insufficient for complex software, and
-  often in conflict with the requirements of a programming
+  Another source of inspiration is
+  <a href="http://literateprogramming.com/">literate programming</a>.
+  Its goal is to make software source code more readable for humans,
+  by embedding it into a narrative. In my opinion, experience has
+  shown that this doesn't work very well except for small
+  software. One reason is that understanding complex software system
+  requires <a page="Goals and values"> <i>exploration</i></a>
+  rather than passive reading. Another reason is the linear structure
+  of a narrative, which is not adapted to complex software, and
+  often in conflict with the formal requirements of a programming
   language. This is why literate programming tools usually have to
-  re-structure the code before compilation..
+  re-structure the code before compilation. HyperDoc shows you
+  the code exactly as the compiler sees it.
 </p>
-
 <p>
-  HyperDoc presents explorable software systems as <a href="https://en.wikipedia.org/wiki/Hypertext">hypertext</a>,
-  i.e. sets of interlinked pages. There are code pages, which are
-  valid source code files according to the rules of the underlying
-  programming language, and text pages, which are
-  narratives. Moreover, both code and text pages can contain links to
-  arbitrary objects in memory, and thus in particular results of
+  A third source of inspiration are
+  <a href="https://en.wikipedia.org/wiki/Notebook_interface">notebook interfaces</a>,
+  which are similar to literate programming but embed a <i>computation</i> rather than
+  a <i>program</i> into the narrative. This makes it possible to include computed
+  results as well. Notebook interfaces are an evolution of the
+  <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">read–eval–print loop</a>,
+  and thus primarily a tool for performing explorative computations. They have
+  recently been advocated as a medium for publishing explorable
+  computations as well, but fail in this role by their restriction to
+  a single linear narrative and computation. Notebooks are not
+  composable. <a page="Goals and values">HyperDocs are</a>.
+</p>
+<p>
+  HyperDoc uses <a href="https://en.wikipedia.org/wiki/Hypertext">hypertext</a>,
+  i.e. sets of interlinked pages, to represent explorable software
+  systems. There are <a page="Writing source code pages">code pages</a>,
+  which are valid source code files according to the rules of the
+  underlying programming language, and <a page="Writing text pages">text pages</a>,
+  which are narratives. Moreover, both code and text pages can contain
+  links to arbitrary data objects, and thus in particular results of
   example code. Code and results can also be transcluded into text
-  pages (see <a page="Writing HyperDoc text pages">here</a>).
+  pages. More generally, all links in HyperDoc refer to plain data
+  objects.  This means that you can implement your own HyperDoc page
+  types, or even your own HyperDoc-like documentation system, and
+  cross-link seamlessly.
 </p>
-
-<p>
-  Code pages are subject to a few conventions (see <a page="Writing HyperDoc source code pages">here</a>),
-  but they do not require any preprocessing, unlike with literate
-  programming.  HyperDoc embraces its implementation language and adds
-  to it, rather than making a slightly different one. The code you see
-  is the code the compiler sees as well. To add explanations to the
-  source code, you use comments, not fancy additional mechanisms.  You
-  can also add links to text pages, where you can explain whatever is
-  too long or too differently structured to fit into source code
-  comments.
-</p>
-
-<p>
-  Composability is realized by implementing HyperDocs a value-added ASDF systems.
-  The software units you write using HyperDoc are plain ASDF systems. They can
-  depend on any other ASDF system, and they can become dependencies of any other
-  ASDF system. Using HyperDoc does not force anyone else to use HyperDoc,
-  just to deploy your code.
-</p>
-
-<p>
-  Another aspect of composability is that link targets are in-memory
-  Common Lisp data objects. HyperDoc provides some syntactic
-  shorthands to make it easier to link to HyperDoc pages or entire
-  HyperDocs, but ultimately these become links to data objects as well.
-  This means that you can easily implement your own HyperDoc page types,
-  if you like neither HTML nor Markdown. It also means that you can
-  implement your own HyperDoc-like documentation system, and cross-link
-  seamlessly.
-</p>
-
 <p>
   An additional advantage resulting from an architecture based on plain data
   objects is the possibility to use different tools for exploring HyperDocs.
@@ -86,7 +67,6 @@
   objects in boxes placed on an infinite canvas, which users can arrange
   as they see fit.
 </p>
-
 <p>
   Examples are another key ingredient of HyperDoc, although their
   implementation remains basic for now. Examples produce inspectable

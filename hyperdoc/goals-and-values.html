@@ -1,0 +1,85 @@
+<h1>Goals and values</h1>
+
+<h4>Explorability</h4>
+
+<p>
+  Software should support users in exploring its design and
+  implementation with the goal of understanding it as far as the user
+  considers desirable.
+</p>
+<p>
+  Explorability can be in conflict with optimization and with the
+  reuse of commodity components that add complexity in exchange for
+  developer convenience.
+</p>
+<p>
+  HyperDoc's main role in software systems is to provide guidance to
+  the code, through explanatory narratives and interactive execution
+  of code examples.
+</p>
+
+<h4>Conviviality</h4>
+
+<p>
+  Convivial software, named in reference to Ivan Illich's book
+  <a href="https://archive.org/details/illich-conviviality/mode/2up">"Tools
+    for conviviality"</a>, is software that aims at ensuring its
+  users' agency over their computation. It is software that users can
+  adapt to their needs. Conviviality implies Open Source but goes
+  beyond it. Convivial software must be forkable by users who are
+  neither software professionals nor able to dedicate significant
+  resources to maintenance. Software that has unstable dependencies is
+  not convivial. Software that is overly opaque is not convivial
+  either. Conviviality is therefore often associated with <a href="https://en.wikipedia.org/wiki/Minimalism_(computing)">minimalism</a>
+  or <a href="http://www.call-with-current-continuation.org/articles/brutalist-manifesto.txt">brutalism</a>
+</p>
+<p>
+  Conviviality is often in conflict with the use of mainstream
+  technology and established best practices of software
+  engineering. Since the 1980s, both academic computer science and the
+  tech industry have focused on industrially produced software
+  products, developed by trained professionals for users who value
+  convenience over understanding and agency. This is what most of today's
+  development tools and processes are made for.
+</p>
+<p>
+  HyperDoc implements conviviality by building on <a href="https://boringtechnology.club/">boring technology</a> that
+  goes back to the 1950s and has been stable since the 1990s: <a href="https://en.wikipedia.org/wiki/Common_Lisp">Common Lisp</a>. It
+  also adopts a brutalist approach in not attemting to hide its
+  implementation. As you read this page, the title bar of its pane in
+  the viewer shows you the name of the Common Lisp class that
+  implements the page's representation in memory. That's intentional!
+</p>
+
+<h4>Composability</h4>
+
+<p>
+  Software is built in layers from components. Published software
+  should aim at being a good component in a larger software
+  system. Others should be able to build on your work, with as few
+  constraints as technically possible. Ideally, your software
+  should be fit for inclusion into large-scale software distributions
+  such as <a href="https://www.debian.org/">Debian</a> or
+  <a href="https://guix.gnu.org/">Guix</a>, even if you don't provide
+  the packaging yourself.
+</p>
+<p>
+  Composability is violated by media that cannot be integrated
+  into a larger whole, such as
+  <a href="https://jupyter.org/">Jupyter notebooks</a>. It is also
+  often constrained by build tools and packaging ecosystems that
+  focus on a single programming language.
+</p>
+<p>
+  HyperDoc builds on
+  <a href="https://asdf.common-lisp.dev/asdf.html">ASDF</a>,
+  the <i>de-facto</i> standard build system for Common Lisp.
+  This means that HyperDocs can be easily integrated into
+  Lisp-specific distributions such as
+  <a href="https://www.quicklisp.org/beta/">Quicklisp</a>,
+  but also into system-wide distributions such as
+  <a href="https://guix.gnu.org/">Guix</a>. Cross references
+  in HyperDoc use plain Lisp data objects, meaning that there
+  are no constraints on linking to other HyperDocs or even to
+  different HyperDoc-like systems.
+</p>
