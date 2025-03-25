@@ -23,15 +23,26 @@
       <a expr="(asdf:find-system &quot;hyperdoc&quot;)">hyperdoc</a> contains
       just the code required to set up a HyperDoc. This is what your
       code will depend on even for users of your code that don't care
-      about HyperDoc. You can see its direct and indirect dependencies
-      <a expr="(asdf:find-system &quot;hyperdoc&quot;)" view="Dependencies">here</a>.
-    </li>
+      about HyperDoc. Its direct and indirect dependencies are:
+      <div style="margin-top: 5px; margin-bottom: 7px">
+        <view-transclusion>
+          (html-inspector-views/standard::👀dependencies
+            (asdf:find-system "hyperdoc"))
+        </view-transclusion>
+      </div>
+   </li>
     <li>
       <a expr="(asdf:find-system &quot;hyperdoc/explorer&quot;)">hyperdoc/explorer</a>
-      contains the core required to display and navigate a HyperDoc. This is what
-      developers and users of your code need to have to actually profit from the
-      HyperCode. You can see its direct and indirect dependencies
-      <a expr="(asdf:find-system &quot;hyperdoc/explorer&quot;)" view="Dependencies">here</a>.
+      contains the code required to display and navigate a HyperDoc. This is what
+      developers and users of your code need to load to actually profit from the
+      HyperCode, but it does not become a dependency of your code. Its direct
+      and indirect dependencies are:
+      <div style="margin-top: 5px; margin-bottom: 7px">
+        <view-transclusion>
+          (html-inspector-views/standard::👀dependencies
+          (asdf:find-system "hyperdoc/explorer"))
+        </view-transclusion>
+      </div>
     </li>
   </ul>
 </p>
