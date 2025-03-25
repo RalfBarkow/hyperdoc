@@ -110,7 +110,7 @@
 ;;
 
 (defclass catalog ()
-  ((hyperdocs :accessor hyperdocs :initform (fset:empty-set))))
+  ((hyperdocs :accessor hyperdocs :initform nil)))
 
 (defvar *catalog*
   (make-instance 'catalog))
@@ -120,21 +120,21 @@
 ;;
 
 (defun register (hdoc)
-  (fset:includef (hyperdocs *catalog*) hdoc))
+  (push hdoc (hyperdocs *catalog*)))
 
 ;;
 ;; Catalog lookup
 ;;
 
 (defun find-hyperdoc (title &key signal-error?)
-  (or (fset:do-set (hd (hyperdocs *catalog*))
+  (or (dolist (hd (hyperdocs *catalog*))
         (when (string= title (title hd))
           (return hd)))
       (and signal-error?
            (error 'hyperdoc-lookup-failure :title title))))
 
 (defun find-hyperdoc-in-directory (pathname  &key signal-error?)
-  (or (fset:do-set (hd (hyperdocs *catalog*))
+  (or (dolist (hd (hyperdocs *catalog*))
         (when (equal pathname (hyperdoc-directory hd))
           (return hd)))
       (and signal-error?

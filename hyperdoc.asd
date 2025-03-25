@@ -10,7 +10,6 @@
   :serial t
   :depends-on (#:alexandria
                #:arrow-macros
-               #:fset
                #:asdf #:uiop)
   :components ((:module "hyperdoc"
                 :serial t
@@ -35,7 +34,6 @@
                #:plump
                #:plump-inspector-views
                #:3bmd
-               #:fset
                #:asdf #:uiop)
   :components ((:module "hyperdoc-explorer"
                 :serial t

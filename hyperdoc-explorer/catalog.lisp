@@ -10,7 +10,7 @@
 (defview 👀items (catalog catalog)
   (-> catalog
       hyperdocs
-      (fset:sort #'string< :key #'title)
+      (sort #'string< :key #'title)
       👀items
       (rename :title "HyperDocs" :priority 1)))
 
