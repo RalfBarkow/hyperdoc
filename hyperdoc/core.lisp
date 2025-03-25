@@ -25,8 +25,9 @@
 
 (defun make-hyperdoc (&key title asdf-system-name subdirectory entry)
   (let* ((system (asdf:find-system asdf-system-name))
-         (directory (asdf:system-relative-pathname asdf-system-name
-                                                   (str:concat subdirectory "/")))
+         (directory (asdf:system-relative-pathname
+                       asdf-system-name
+                       (concatenate 'string subdirectory "/")))
          (component (asdf:find-component system subdirectory))
          (code-files (when component
                        (remove-if-not #'(lambda (c) (typep c 'asdf:cl-source-file))
@@ -72,12 +73,12 @@
            (error 'page-lookup-failure :hyperdoc hdoc :title title))))
 
 (defun code-file-title (cl-source-file)
-  (-> cl-source-file
+  (->> cl-source-file
     asdf:component-pathname
     uiop:read-file-lines
     first
-    (str:trim-left :char-bag " ;")
-    (str:trim-right)))
+    (string-left-trim " ;")
+    (string-right-trim " ")))
 
 ;;
 ;; A page instance refers to a file in the
@@ -90,7 +91,7 @@
 
 (defun make-page (hdoc file)
   (let* ((type (pathname-type file))
-         (type-as-kw (alexandria:make-keyword (str:upcase type))))
+         (type-as-kw (alexandria:make-keyword (string-upcase type))))
     (make-instance (page-class type-as-kw) :hyperdoc hdoc :file file)))
 
 ;;

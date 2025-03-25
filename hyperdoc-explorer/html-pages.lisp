@@ -41,7 +41,7 @@
   ;; are not rendered.
   (:method ((tag (eql :in-package)) element)
     (setf (slot-value *page-state* 'package)
-          (-> element plump:text str:upcase find-package))
+          (-> element plump:text string-upcase find-package))
     t)
 
   ;; value-of elements are rendered here.
@@ -132,7 +132,7 @@
 (defmethod plump:serialize-object :around ((element plump:element))
   (let ((tag-as-kw (-> element
                        plump:tag-name
-                       str:upcase
+                       string-upcase
                        alexandria:make-keyword)))
     (unless (serialize-hyperdoc-element tag-as-kw element)
       (call-next-method))))
