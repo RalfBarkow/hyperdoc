@@ -26,10 +26,10 @@
     (find-page hyperdoc title :signal-error? t)))
 
 (defun current-hyperdoc ()
-  (let ((directory (make-pathname
-                    :directory (pathname-directory
-                                html-inspector-views/standard:*current-source-code-file*))))
-    (find-hyperdoc-in-directory directory :signal-error? t)))
+  (when-let (source html-inspector-views/standard:*current-source-code-file*)
+    (let ((directory (make-pathname
+                      :directory (pathname-directory source))))
+      (find-hyperdoc-in-directory directory :signal-error? t))))
 
 (defmethod hyperdoc ((title string))
   (find-hyperdoc title :signal-error? t))

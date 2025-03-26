@@ -62,6 +62,8 @@
     (load-pages hdoc)))
 
 (defun find-page (hdoc title &key signal-error?)
+  (unless hdoc
+    (error 'page-lookup-failure :hyperdoc hdoc :title title))
   (ensure-pages-loaded hdoc)
   (or (loop for page being the hash-values of (pages hdoc)
             when (equal title (page-title page))
