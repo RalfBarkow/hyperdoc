@@ -94,6 +94,7 @@
                 (value (parse-and-eval expr)))
            (html
              (:span :class "hyperdoc-reference"
+                    :title expr
                     (object-ref value :display text :select view)))
            t))
         (page
@@ -107,6 +108,9 @@
                     (value (find-page hyperdoc page :signal-error? t)))
                (html
                  (:span :class "hyperdoc-reference"
+                        :title (format nil "Page \"~A\"~%HyperDoc \"~A\""
+                                       page
+                                       (title hyperdoc))
                         (object-ref value :display text :select view))))
            (lookup-failure (c)
              (html
@@ -118,6 +122,7 @@
              (let ((value (find-hyperdoc hyperdoc :signal-error? t)))
                (html
                  (:span :class "hyperdoc-reference"
+                        :title (format nil "HyperDoc \"~A\"" hyperdoc)
                         (object-ref value :display text :select view))))
            (lookup-failure (c)
              (html
