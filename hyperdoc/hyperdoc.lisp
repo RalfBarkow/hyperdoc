@@ -8,15 +8,13 @@
 ;; The HyperDoc for HyperDoc
 ;;
 
-(defvar *hyperdoc*
-  (make-hyperdoc
-   ;; The title of the HyperDoc
-   :title "HyperDoc"
-   ;; The ASDF system in which it is located
-   :asdf-system-name "hyperdoc"
-   ;; The subdirectory and ASDF module name containing the  text and code pages
-   :subdirectory "hyperdoc"
-   ;; The title of the page to be displayed as the main entry point
-   :entry "HyperDoc"))
+(defhyperdoc *hyperdoc*
+  ;; The title of the HyperDoc
+  :title "HyperDoc"
+  ;; The ASDF system in which it is located
+  :asdf-system-name "hyperdoc"
+  ;; The subdirectory and ASDF module name containing the  text and code pages
+  :subdirectory "hyperdoc"
+  ;; The title of the page to be displayed as the main entry point
+  :entry "HyperDoc")
 
-(register *hyperdoc*)

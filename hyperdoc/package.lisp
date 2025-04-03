@@ -11,8 +11,11 @@
   (:export #:*hyperdoc*
            #:*catalog*
            #:make-hyperdoc
+           #:title #:directory
            #:register
-           #:see :page :hyperdoc
+           #:defhyperdoc
+           #:hyperdocs
+           #:see #:page #:hyperdoc
            #:defexample
            #:assert-test #:assert-equalp #:assert-equal #:assert-eql
            #:*development-features*))

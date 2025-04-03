@@ -17,6 +17,8 @@
                              (:file "errors")
                              (:file "core")
                              (:file "links-in-code")
+                             (:file "catalog")
+                             (:file "defining")
                              (:file "examples")
                              (:file "hyperdoc")))))
 
