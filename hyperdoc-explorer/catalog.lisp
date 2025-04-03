@@ -13,11 +13,3 @@
       (sort #'string< :key #'title)
       👀items
       (rename :title "HyperDocs" :priority 1)))
-
-;; Add a Catalog view to HyperDoc objects
-
-(defview 👀catalog (hd hyperdoc)
-  (ensure-pages-loaded hd)
-  (-> *catalog*
-      👀items
-      (rename :title "Catalog" :priority 5)))
