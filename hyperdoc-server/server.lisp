@@ -38,8 +38,10 @@
 
 (views:defview 👀url (hd hyperdoc:hyperdoc)
   (views:html-view :title "URL" :priority 7
-    (let ((url (str:concat "/" (slug hd))))
-      (views:html
-        (:a :href url
-            :target "_blank"
-            (views:esc url))))))
+    (views:add-asset-path "/hyperdoc-server/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc/server
+                           "assets/hyperdoc-server"))
+  (views:include-js "/hyperdoc-server/js/url.js")
+  (views:include-script "makeUrl(window.currentInspectorView)")
+  (views:html (:hyperdoc-slug (views:esc (slug hd))))))
