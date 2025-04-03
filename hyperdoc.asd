@@ -7,6 +7,7 @@
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
   :license  "BSD"
   :version "0.0.1"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:alexandria
                #:arrow-macros
@@ -27,6 +28,7 @@
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
   :license  "BSD"
   :version "0.0.1"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperdoc
                #:html-inspector-views
@@ -53,6 +55,7 @@
   :description "Web server for HyperDocs"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
   :license  "BSD"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :version "0.0.1"
   :serial t
   :depends-on (#:hyperdoc
