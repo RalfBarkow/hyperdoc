@@ -8,4 +8,9 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export :serve-catalog))
+  (:export :serve-catalog
+           :serve-hyperdocs
+           :slug))
+
+(trivial-package-local-nicknames:add-package-local-nickname
+ :views :html-inspector-views :hyperdoc/server)

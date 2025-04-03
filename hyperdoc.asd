@@ -57,8 +57,12 @@
   :serial t
   :depends-on (#:hyperdoc
                #:hyperdoc/explorer
+               #:html-inspector-views
                #:clog
-               #:clog-moldable-inspector)
+               #:clog-moldable-inspector
+               #:cl-slug
+               #:sha1
+               #:trivial-package-local-nicknames)
   :components ((:module "hyperdoc-server"
                 :serial t
                 :components ((:file "package")
