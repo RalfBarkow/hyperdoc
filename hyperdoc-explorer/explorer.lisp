@@ -44,6 +44,13 @@
       👀items
       (rename :title "Files" :priority 5)))
 
+(defview 👀repository (hd hyperdoc)
+  (-> hd
+      asdf-system-name
+      asdf:find-system
+      👀repository
+      (rename :title "Repository" :priority 6)))
+
 (defvar *current-page* nil)
 
 (defmethod title-bar-action-buttons ((page page))
@@ -60,3 +67,4 @@
     (slot-value 'file)
     👀content
     (rename :title "Source" :priority 3)))
+

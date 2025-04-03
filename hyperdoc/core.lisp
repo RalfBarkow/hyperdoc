@@ -17,7 +17,8 @@
 ;;
 
 (defclass hyperdoc ()
-  ((directory :reader hyperdoc-directory :initarg :directory)
+  ((asdf-system-name :reader asdf-system-name :initarg :asdf-system-name)
+   (directory :reader hyperdoc-directory :initarg :directory)
    (title :reader title :initarg :title)
    (pages :reader pages :initarg :pages)
    (code-files :reader code-files :initarg :code-files)
@@ -33,6 +34,7 @@
                        (remove-if-not #'(lambda (c) (typep c 'asdf:cl-source-file))
                                       (asdf:component-children component)))))
     (make-instance 'hyperdoc
+                   :asdf-system-name asdf-system-name
                    :directory directory
                    :title title
                    :pages nil

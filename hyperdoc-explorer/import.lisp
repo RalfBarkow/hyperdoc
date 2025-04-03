@@ -30,4 +30,5 @@
           html-inspector-views:enumerated-list-view
           html-inspector-views:👀content
           html-inspector-views:👀items
+          html-inspector-views/standard:👀repository
           html-inspector-views/standard:var-definition))
