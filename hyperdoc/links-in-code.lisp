@@ -21,8 +21,13 @@
 ;; In order to reduce the dependencies of the core HyperDoc system,
 ;; these are unimplemented generic functions.
 
-(defgeneric page (title &key hyperdoc))
-(defgeneric hyperdoc (title))
+(defgeneric page (title &key hyperdoc)
+  (:documentation "Look up the page entitled TITLE in HYPERDOC, if given,
+or else in the HyperDoc that contains the function call."))
+
+(defgeneric hyperdoc (title)
+  (:documentation "Look up the HyperDoc entitled TITLE in catalog of
+registered HyperDocs."))
 
 ;; The implementation methods are in the system hyperdoc/explorer:
 

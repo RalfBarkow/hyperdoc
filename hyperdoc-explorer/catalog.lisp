@@ -4,6 +4,10 @@
 
 (in-package :hyperdoc)
 
+;;
+;; Title bar and items view for catalog inspectors
+;;
+
 (defmethod text-representation ((catalog catalog))
   "Registered HyperDocs")
 

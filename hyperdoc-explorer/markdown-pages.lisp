@@ -9,10 +9,19 @@
 ;; then processed just like HTML pages.
 ;;
 
+;; The Markdown page class adds nothing to the HTML page
+;; class, it just provides a different name for dispatching.
+
 (defclass markdown-page (html-page) ())
+
+;; The page class for file type "md" is markdown-page.
 
 (defmethod page-class ((filetype (eql :md)))
   (find-class 'markdown-page))
+
+;;
+;; Load a Markdown page into an HTML parse tree.
+;;
 
 (defmethod load-page ((page markdown-page))
   (with-slots (file parse-tree) page

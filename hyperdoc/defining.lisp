@@ -10,6 +10,10 @@
 
 (defmacro defhyperdoc (var-symbol
                        &key title asdf-system-name subdirectory entry)
+  "Define and register a HyperDoc from TITLE, the HyperDoc's title,
+ASDF-SYSTEM-NAME and SUBDIRECTORY to define the HyperDoc's directory,
+and optionally ENTRY, the title of the entry page. The HyperDoc
+becomes the value bound to VAR-SYMBOL."
   `(progn
      (defvar ,var-symbol
        (make-hyperdoc :title ,title

@@ -6,7 +6,11 @@
 
 ;;
 ;; The classes for HyperDocs and their pages, as well as the code
-;; to create a HyperDoc, are in hyperdoc.
+;; to create a HyperDoc, are in system "hyperdoc".
+;;
+
+;;
+;; The title bar of inspectors on HyperDocs
 ;;
 
 (defmethod text-representation ((hdoc hyperdoc))
@@ -18,11 +22,19 @@
                    (thunk (load-pages hdoc)
                      t))))
 
+;;
+;; View showing the entry page
+;;
+
 (defview 👀entry (hd hyperdoc)
   (ensure-pages-loaded hd)
   (when-let (entry (entry hd))
     (when-let (entry-page (find-page hd entry))
       (👀content entry-page))))
+
+;;
+;; Views listing the text and code pages
+;;
 
 (defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
@@ -38,11 +50,19 @@
                             :priority 3
                             :display #'code-file-title)))
 
+;;
+;; The files in the HyperDocs's directory
+;;
+
 (defview 👀files (hd hyperdoc)
   (-> hd
       hyperdoc-directory
       👀items
       (rename :title "Files" :priority 5)))
+
+;;
+;; The source code repositories for the HyperDoc
+;;
 
 (defview 👀repository (hd hyperdoc)
   (-> hd
@@ -51,7 +71,9 @@
       👀repository
       (rename :title "Repository" :priority 6)))
 
-(defvar *current-page* nil)
+;;
+;; The title bar for HyperDoc page inspectors
+;;
 
 (defmethod title-bar-action-buttons ((page page))
   (when *development-features*
@@ -61,6 +83,10 @@
 
 (defmethod text-representation ((page page))
   (page-title page))
+
+;;
+;; Source code view for pages
+;;
 
 (defview 👀source (page page)
   (-> page

@@ -17,7 +17,7 @@
 
 ;;
 ;; Implementations of the page and hyperdoc lookup functions
-;; for use with "see"
+;; for use with "see".
 ;;
 
 (defmethod page ((title string) &key hyperdoc)

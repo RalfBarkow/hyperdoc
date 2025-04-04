@@ -4,6 +4,10 @@
 
 (in-package :hyperdoc)
 
+;;
+;; Error conditions for various lookup failures
+;;
+
 (define-condition lookup-failure (error)
   ())
 

@@ -5,7 +5,7 @@
 (in-package :hyperdoc)
 
 ;;
-;; The HyperDoc catalog has only one global instance ("singleton").
+;; The HyperDoc catalog has only one global instance (singleton).
 ;;
 
 (defclass catalog ()
@@ -20,6 +20,7 @@
 ;;
 
 (defun register (hdoc)
+  "Register HyperDoc HDOC in the globale HyperDoc catalog."
   (push hdoc (hyperdocs *catalog*)))
 
 ;;
@@ -27,6 +28,9 @@
 ;;
 
 (defun find-hyperdoc (title &key signal-error?)
+  "Look up the HyperDoc entitled TITLE in the global catalog. If no such HyperDoc
+exists, then return NIL if SIGNAL-ERROR? is nil, else signal
+hyperdoc-lookup-failure."
   (or (dolist (hd (hyperdocs *catalog*))
         (when (string= title (title hd))
           (return hd)))
@@ -34,6 +38,9 @@
            (error 'hyperdoc-lookup-failure :title title))))
 
 (defun find-hyperdoc-in-directory (pathname  &key signal-error?)
+  "Look up the HyperDoc whose directory is PATHNAME in the global catalog.
+If no such HyperDoc exists, then return NIL if SIGNAL-ERROR? is nil, else
+signal directory-lookup-failure."
   (or (dolist (hd (hyperdocs *catalog*))
         (when (equal pathname (hyperdoc-directory hd))
           (return hd)))

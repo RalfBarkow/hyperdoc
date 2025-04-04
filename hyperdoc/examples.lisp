@@ -10,7 +10,12 @@
 
 (see (page "Writing HyperDoc source code pages"))
 
+;; An example is a function of zero arguments.
+
 (defmacro defexample (name &body body)
+  "Define an example function NAME with BODY. The syntax is the same as for
+DEFUN, except that there is no lambda list because example functions take no
+arguments."
   `(defun ,name () ,@body))
 
 ;;

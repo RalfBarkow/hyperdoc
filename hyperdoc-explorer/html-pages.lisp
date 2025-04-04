@@ -4,17 +4,37 @@
 
 (in-package :hyperdoc)
 
+;;
+;; An HTML page stores the page contents as the parse tree
+;; returned by the plump parser.
+;;
+
 (defclass html-page (page)
   ((parse-tree :reader parse-tree :initform nil)))
 
+;;
+;; The page class for file type "html" is html-page.
+;;
+
 (defmethod page-class ((filetype (eql :html)))
   (find-class 'html-page))
+
+;;
+;; Load an HTML page (which implies parsing it)
+;;
 
 (defmethod load-page ((page html-page))
   (with-slots (file parse-tree) page
     (let ((plump:*tag-dispatchers* plump:*html-tags*))
       (setf parse-tree (plump:parse file))))
   page)
+
+;;
+;; Obtain the title of an HTML page as the value of the
+;; TITLE tag, if one exists, or else as the value of the
+;; highest-level header tag in the page. If neither TITLE
+;; nor any header tag exists, return "Untitled".
+;;
 
 (defmethod page-title ((page html-page))
   (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
@@ -25,13 +45,26 @@
                    (return (-> elements first plump:text)))))
       "Untitled"))
 
+;;
+;; Render HTML pages
+;;
+
+;; A class for holding the renderer state.
+
 (defclass page-state ()
   ((package :initarg :package)
    (page :initarg :page)))
 
+;; The current renderer state.
+
 (defvar *page-state* nil)
 
+;; Render special tags
+
 (defgeneric serialize-hyperdoc-element (tag element)
+  (:documentation "Render ELEMENT by dispatching on its TAG. Return
+T if the element has been rendered, NIL if it should be rendered as a
+standard HTML tag.")
 
   ;; Most elements are handled by plump:serialize-object.
   (:method ((tag t) element)
@@ -134,6 +167,8 @@
              (plump:set-attribute element "target" "_blank"))
            nil)))))
 
+;; Add the special-tag renderer to plump's generic serializer.
+
 (defmethod plump:serialize-object :around ((element plump:element))
   (let ((tag-as-kw (-> element
                        plump:tag-name
@@ -141,6 +176,10 @@
                        alexandria:make-keyword)))
     (unless (serialize-hyperdoc-element tag-as-kw element)
       (call-next-method))))
+
+;;
+;; Content view on HTML pages
+;;
 
 (defview 👀content (page html-page)
   (html-view :title "Content" :priority 1
@@ -157,6 +196,10 @@
               (plump:serialize (parse-tree page)
                                html-inspector-views::*html-stream*)
               (:br))))))
+
+;;
+;; Parse tree view
+;;
 
 (defview 👀parse-tree (page html-page)
   (-> page
