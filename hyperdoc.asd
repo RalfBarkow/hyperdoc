@@ -37,6 +37,7 @@
                #:html-inspector-views/standard
                #:alexandria
                #:arrow-macros
+               #:njson/jzon
                #:plump
                #:plump-inspector-views
                #:3bmd
@@ -50,6 +51,7 @@
                              (:file "html-pages")
                              (:file "markdown-pages")
                              (:file "links-in-code")
+                             (:file "codemeta")
                              (:file "examples")
                              (:file "hyperdoc")))))
 

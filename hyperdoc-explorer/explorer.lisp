@@ -41,13 +41,13 @@
   (-> hd
       pages
       alexandria:hash-table-values
-      (list-view :title "Text pages" :priority 2)))
+      (list-view :title "Text pages" :priority 3)))
 
 (defview 👀code-pages (hd hyperdoc)
   (-> hd
       code-files
       (enumerated-list-view :title "Code pages"
-                            :priority 3
+                            :priority 4
                             :display #'code-file-title)))
 
 ;;

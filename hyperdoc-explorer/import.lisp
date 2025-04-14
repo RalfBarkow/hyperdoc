@@ -17,6 +17,7 @@
           html-inspector-views:title-bar-action-buttons
           html-inspector-views:html
           html-inspector-views:str
+          html-inspector-views:esc
           html-inspector-views:html-view
           html-inspector-views:action-button
           html-inspector-views:eval-button
@@ -25,6 +26,7 @@
           html-inspector-views:thunk
           html-inspector-views:rename
           html-inspector-views:add-asset-path
+          html-inspector-views:html-view
           html-inspector-views:include-css
           html-inspector-views:list-view
           html-inspector-views:enumerated-list-view
