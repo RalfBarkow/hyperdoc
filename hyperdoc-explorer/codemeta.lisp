@@ -9,32 +9,33 @@
 ;;
 
 (defun codemeta-data (hd)
-  (-> hd
-    asdf-system-name 
-    (asdf:system-relative-pathname "codemeta.json")
-    njson:decode))
+  (let ((codemeta-filename  (-> hd
+                              asdf-system-name 
+                              (asdf:system-relative-pathname "codemeta.json"))))
+    (when (probe-file codemeta-filename)
+      (njson:decode codemeta-filename))))
 
 ;;
 ;; Author view
 ;;
 
 (defun codemeta-authors (hd)
-  (->> hd
-    codemeta-data
-    (njson:jget "author")))
+  (when-let (metadata (codemeta-data hd))
+    (njson:jget "author" metadata)))
 
 (defview 👀authors (hd hyperdoc)
-  (html-view :title "Authors" :priority 2
-    (loop for author across (codemeta-authors hd)
-          do (html
-               (:div
-                (:a :href (str:concat "mailto:" (njson:jget "email" author))
-                    (esc (njson:jget "givenName" author))
-                    (esc " ")
-                    (esc (njson:jget "familyName" author)))
-                (:br)
-                (:a :href (njson:jget "id" author)
-                    :target "_blank"
-                    (esc (njson:jget "id" author)))
-                (:br)
-                (:br))))))
+  (when-let (authors (codemeta-authors hd))
+    (html-view :title "Authors" :priority 2
+      (loop for author across authors
+            do (html
+                 (:div
+                  (:a :href (str:concat "mailto:" (njson:jget "email" author))
+                      (esc (njson:jget "givenName" author))
+                      (esc " ")
+                      (esc (njson:jget "familyName" author)))
+                  (:br)
+                  (:a :href (njson:jget "id" author)
+                      :target "_blank"
+                      (esc (njson:jget "id" author)))
+                  (:br)
+                  (:br)))))))
