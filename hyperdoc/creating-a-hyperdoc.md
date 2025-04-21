@@ -34,3 +34,4 @@ expr="(var-definition '*hyperdoc*)">`*hyperdoc*`</a> for an example.
 An ASDF system can contain any number of HyperDocs, but in most cases
 a single one is sufficient.
 
+The repository [hyperdoc-template](https://codeberg.org/khinsen/hyperdoc-template) is a convenient starting point for creating a HyperDoc.
