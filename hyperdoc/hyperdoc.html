@@ -1,5 +1,7 @@
 <h1>HyperDoc</h1>
 
+<in-package>hyperdoc</in-package>
+
 <p>
   HyperDoc is a hypertext documentation component for computational
   systems.
@@ -35,4 +37,13 @@
   <a page="Goals and values">overview of the goals  and values</a>
   of HyperDoc, an summary of the <a page="Design">design criteria</a>,
   and a list of <a page="Acknowledgements">acknowledgements</a>.
+</p>
+<p>
+  For serving HyperDocs from a Web server, see
+  <a expr="
+     (handler-case (hyperdoc &quot;HyperDoc Server&quot;)
+       (lookup-failure (c)
+         (declare (ignore c))
+         (asdf:find-system &quot;hyperdoc/server&quot;)))
+      ">HyperDoc Server</a>.
 </p>

@@ -74,4 +74,5 @@
   :components ((:module "hyperdoc-server"
                 :serial t
                 :components ((:file "package")
-                             (:file "server")))))
+                             (:file "server")
+                             (:file "hyperdoc")))))
