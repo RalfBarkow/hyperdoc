@@ -19,6 +19,15 @@
    (code-files :reader code-files :initarg :code-files)
    (entry :reader entry :initarg :entry)))
 
+;; Accessor for the ASDF system
+;; (a generic function that appears in the "Operations" view)
+
+(defgeneric asdf-system (hd)
+  (:method ((hd hyperdoc))
+    (-> hd
+      asdf-system-name
+      asdf:find-system)))
+
 ;;
 ;; Create a HyperDoc instance.
 ;;

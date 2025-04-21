@@ -11,7 +11,7 @@
   (:export #:*hyperdoc*
            #:*catalog*
            #:make-hyperdoc
-           #:title #:directory
+           #:title #:directory #:asdf-system
            #:register
            #:defhyperdoc
            #:hyperdocs
