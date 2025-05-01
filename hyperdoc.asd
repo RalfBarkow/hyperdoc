@@ -66,6 +66,7 @@
   :depends-on (#:hyperdoc
                #:hyperdoc/explorer
                #:html-inspector-views
+               #:babel
                #:clog
                #:clog-moldable-inspector
                #:cl-slug
