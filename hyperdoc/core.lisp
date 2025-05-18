@@ -17,7 +17,10 @@
    (title :reader title :initarg :title)
    (pages :reader pages :initarg :pages)
    (code-files :reader code-files :initarg :code-files)
-   (entry :reader entry :initarg :entry)))
+   (entry :reader entry :initarg :entry)
+   ;; The packages used in the HyperDoc are deduced
+   ;; from the code files in hyperdoc-explorer.
+   (packages :reader packages :initform nil)))
 
 ;; Accessor for the ASDF system
 ;; (a generic function that appears in the "Operations" view)

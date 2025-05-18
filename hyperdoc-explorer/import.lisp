@@ -33,4 +33,6 @@
           html-inspector-views:👀content
           html-inspector-views:👀items
           html-inspector-views/standard:👀repository
+          html-inspector-views/standard:parse-lisp-code
+          html-inspector-views/standard:s-exp
           html-inspector-views/standard:var-definition))

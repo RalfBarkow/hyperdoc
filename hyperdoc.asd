@@ -46,6 +46,7 @@
                 :serial t
                 :components ((:file "import")
                              (:file "explorer")
+                             (:file "packages")
                              (:file "catalog")
                              (:file "parse-expr")
                              (:file "html-pages")

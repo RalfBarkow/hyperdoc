@@ -58,7 +58,7 @@
   (-> hd
       hyperdoc-directory
       👀items
-      (rename :title "Files" :priority 5)))
+      (rename :title "Files" :priority 6)))
 
 ;;
 ;; The source code repositories for the HyperDoc
@@ -69,7 +69,7 @@
       asdf-system-name
       asdf:find-system
       👀repository
-      (rename :title "Repository" :priority 6)))
+      (rename :title "Repository" :priority 7)))
 
 ;;
 ;; The title bar for HyperDoc page inspectors
