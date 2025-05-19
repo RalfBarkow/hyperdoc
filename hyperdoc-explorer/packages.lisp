@@ -15,12 +15,11 @@
 
 (defun find-packages-used-in-file (source-file)
   (let* ((pathname (asdf:component-pathname source-file))
-         (tlfs (html-inspector-views/standard::concrete-syntax-tree-of (parse-lisp-code pathname))))
+         (tlfs (s-exp (parse-lisp-code pathname))))
     (remove-duplicates
      (loop for tlf in tlfs
-           for form = (s-exp (html-inspector-views/standard::cst-of tlf))
-           when (eq (car form) 'in-package)
-             collect (find-package (cadr form)))
+           when (eq (car tlf) 'in-package)
+             collect (find-package (cadr tlf)))
      :test #'eq)))
 
 (defun packages-used (hd)
