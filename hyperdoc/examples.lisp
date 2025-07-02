@@ -35,6 +35,13 @@ arguments."
 (defun assert-eql (x y &key (key #'identity))
   (assert-test #'eql x y :key key))
 
+(defun assert-within-tolerance (x y tolerance &key (key #'identity))
+  (declare (type number y tolerance))
+  (assert-test #'(lambda (x y)
+                   (declare (type number x y))
+                   (<= (abs (- x y)) tolerance))
+               x y :key key))
+
 ;;
 ;; An example example function
 ;;

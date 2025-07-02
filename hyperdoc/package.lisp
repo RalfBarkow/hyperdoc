@@ -17,5 +17,6 @@
            #:hyperdocs
            #:see #:page #:hyperdoc
            #:defexample
-           #:assert-test #:assert-equalp #:assert-equal #:assert-eql
+           #:assert-test #:assert-equalp #:assert-equal
+           #:assert-eql #:assert-within-tolerance
            #:*development-features*))
