@@ -41,6 +41,7 @@
                #:plump
                #:plump-inspector-views
                #:3bmd
+               #:trivial-package-local-nicknames
                #:asdf #:uiop)
   :components ((:module "hyperdoc-explorer"
                 :serial t

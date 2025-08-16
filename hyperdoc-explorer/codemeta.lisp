@@ -23,19 +23,19 @@
   (when-let (metadata (codemeta-data hd))
     (njson:jget "author" metadata)))
 
-(defview 👀authors (hd hyperdoc)
+(views:defview 👀authors (hd hyperdoc)
   (when-let (authors (codemeta-authors hd))
-    (html-view :title "Authors" :priority 2
+    (views:html-view :title "Authors" :priority 2
       (loop for author across authors
-            do (html
+            do (views:html
                  (:div
                   (:a :href (str:concat "mailto:" (njson:jget "email" author))
-                      (esc (njson:jget "givenName" author))
-                      (esc " ")
-                      (esc (njson:jget "familyName" author)))
+                      (views:esc (njson:jget "givenName" author))
+                      (views:esc " ")
+                      (views:esc (njson:jget "familyName" author)))
                   (:br)
                   (:a :href (njson:jget "id" author)
                       :target "_blank"
-                      (esc (njson:jget "id" author)))
+                      (views:esc (njson:jget "id" author)))
                   (:br)
                   (:br)))))))

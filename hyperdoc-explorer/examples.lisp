@@ -10,6 +10,7 @@
 
 (defmethod html-inspector-views/standard:render-toplevel-cst :around
     ((head (eql 'defexample)) cst source position)
-  (eval-button "►"
-               (thunk (-> cst cst:second cst:raw symbol-function funcall)))
+  (views:eval-button "►"
+                     (views:thunk
+                       (-> cst cst:second cst:raw symbol-function funcall)))
   (call-next-method))

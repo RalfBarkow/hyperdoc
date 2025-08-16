@@ -11,9 +11,9 @@
 (defmethod text-representation ((catalog catalog))
   "Registered HyperDocs")
 
-(defview 👀items (catalog catalog)
+(views:defview views:👀items (catalog catalog)
   (-> catalog
-      hyperdocs
-      (sort #'string< :key #'title)
-      👀items
-      (rename :title "HyperDocs" :priority 1)))
+    hyperdocs
+    (sort #'string< :key #'title)
+    views:👀items
+    (views:rename :title "HyperDocs" :priority 1)))

@@ -13,84 +13,84 @@
 ;; The title bar of inspectors on HyperDocs
 ;;
 
-(defmethod text-representation ((hdoc hyperdoc))
+(defmethod views:text-representation ((hdoc hyperdoc))
   (title hdoc))
 
-(defmethod title-bar-action-buttons ((hdoc hyperdoc))
+(defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
   (when *development-features*
-    (action-button "Reload"
-                   (thunk (load-pages hdoc)
-                     t))))
+    (views:action-button "Reload"
+                         (views:thunk (load-pages hdoc)
+                           t))))
 
 ;;
 ;; View showing the entry page
 ;;
 
-(defview 👀entry (hd hyperdoc)
+(views:defview 👀entry (hd hyperdoc)
   (ensure-pages-loaded hd)
   (when-let (entry (entry hd))
     (when-let (entry-page (find-page hd entry))
-      (👀content entry-page))))
+      (views:👀content entry-page))))
 
 ;;
 ;; Views listing the text and code pages
 ;;
 
-(defview 👀text-pages (hd hyperdoc)
+(views:defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
   (-> hd
-      pages
-      alexandria:hash-table-values
-      (list-view :title "Text pages" :priority 3)))
+    pages
+    alexandria:hash-table-values
+    (views:list-view :title "Text pages" :priority 3)))
 
-(defview 👀code-pages (hd hyperdoc)
+(views:defview 👀code-pages (hd hyperdoc)
   (-> hd
-      code-files
-      (enumerated-list-view :title "Code pages"
-                            :priority 4
-                            :display #'code-file-title)))
+    code-files
+    (views:enumerated-list-view :title "Code pages"
+                                :priority 4
+                                :display #'code-file-title)))
 
 ;;
 ;; The files in the HyperDocs's directory
 ;;
 
-(defview 👀files (hd hyperdoc)
+(views:defview 👀files (hd hyperdoc)
   (-> hd
-      hyperdoc-directory
-      👀items
-      (rename :title "Files" :priority 6)))
+    hyperdoc-directory
+    views:👀items
+    (views:rename :title "Files" :priority 6)))
 
 ;;
 ;; The source code repositories for the HyperDoc
 ;;
 
-(defview 👀repository (hd hyperdoc)
+(views:defview 👀repository (hd hyperdoc)
   (-> hd
-      asdf-system-name
-      asdf:find-system
-      👀repository
-      (rename :title "Repository" :priority 7)))
+    asdf-system-name
+    asdf:find-system
+    👀repository
+    (views:rename :title "Repository" :priority 7)))
 
 ;;
 ;; The title bar for HyperDoc page inspectors
 ;;
 
-(defmethod title-bar-action-buttons ((page page))
+(defmethod views:title-bar-action-buttons ((page page))
   (when *development-features*
-    (action-button "Reload"
-                   (thunk (load-page page)
-                     t))))
+    (views:action-button "Reload"
+                         (views:thunk (load-page page)
+                           t))))
 
-(defmethod text-representation ((page page))
+(defmethod views:text-representation ((page page))
   (page-title page))
 
 ;;
 ;; Source code view for pages
 ;;
 
-(defview 👀source (page page)
+(views:defview 👀source (page page)
   (-> page
     (slot-value 'file)
-    👀content
-    (rename :title "Source" :priority 3)))
+    views:👀content
+    (views:rename :title "Source" :priority 3)))
 

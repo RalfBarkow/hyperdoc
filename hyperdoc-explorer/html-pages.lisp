@@ -82,10 +82,10 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (text (-> element plump:text))
            (value (-> text parse-and-eval)))
-      (html
+      (views:html
         (:span :class "hyperdoc-computed-value"
                :title text
-               (html-representation value)))
+               (views:html-representation value)))
       t))
 
   ;; view-transclusion elements are rendered here.
@@ -93,7 +93,7 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (expr (plump:text element))
            (value (parse-and-eval expr)))
-      (transclusion value))
+      (views:transclusion value))
     t)
 
   ;; source-of-class elements are rendered here.
@@ -101,7 +101,7 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (name (plump:text element))
            (class (parse-and-eval (format nil "(find-class '~a)" name))))
-      (transclusion (html-inspector-views/standard:source-code-view class)))
+      (views:transclusion (html-inspector-views/standard:source-code-view class)))
     t)
 
   ;; source-of-function elements are rendered here.
@@ -109,7 +109,7 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (name (plump:text element))
            (fn (parse-and-eval (format nil "(function ~a)" name))))
-      (transclusion (html-inspector-views/standard:source-code-view fn)))
+      (views:transclusion (html-inspector-views/standard:source-code-view fn)))
     t)
 
   ;; a elements with hyperdoc-specific attributes are
@@ -125,10 +125,10 @@ standard HTML tag.")
          (assert (and (null hyperdoc) (null page)))
          (let* ((*package* (slot-value *page-state* 'package))
                 (value (parse-and-eval expr)))
-           (html
+           (views:html
              (:span :class "hyperdoc-reference"
                     :title expr
-                    (object-ref value :display text :select view)))
+                    (views:object-ref value :display text :select view)))
            t))
         (page
          (handler-case
@@ -139,28 +139,28 @@ standard HTML tag.")
                                       (slot-value 'page)
                                       (slot-value 'hyperdoc))))
                     (value (find-page hyperdoc page :signal-error? t)))
-               (html
+               (views:html
                  (:span :class "hyperdoc-reference"
                         :title (format nil "Page \"~A\"~%HyperDoc \"~A\""
                                        page
                                        (title hyperdoc))
-                        (object-ref value :display text :select view))))
+                        (views:object-ref value :display text :select view))))
            (lookup-failure (c)
-             (html
+             (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
-                      (object-ref c :display text)))))
+                      (views:object-ref c :display text)))))
          t)
         (hyperdoc
          (handler-case
              (let ((value (find-hyperdoc hyperdoc :signal-error? t)))
-               (html
+               (views:html
                  (:span :class "hyperdoc-reference"
                         :title (format nil "HyperDoc \"~A\"" hyperdoc)
-                        (object-ref value :display text :select view))))
+                        (views:object-ref value :display text :select view))))
            (lookup-failure (c)
-             (html
+             (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
-                      (object-ref c :display text))))))
+                      (views:object-ref c :display text))))))
 
         ;; Add target="_blank" to href links that don't specify a target
         (t (unless (plump:attribute element "target")
@@ -181,28 +181,28 @@ standard HTML tag.")
 ;; Content view on HTML pages
 ;;
 
-(defview 👀content (page html-page)
-  (html-view :title "Content" :priority 1
-    (add-asset-path "/hyperdoc/"
-                    (asdf:system-relative-pathname
-                     :hyperdoc
-                     "assets/hyperdoc"))
-    (include-css "/hyperdoc/css/hyperdoc.css")
+(views:defview views:👀content (page html-page)
+  (views:html-view :title "Content" :priority 1
+    (views:add-asset-path "/hyperdoc/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc
+                           "assets/hyperdoc"))
+    (views:include-css "/hyperdoc/css/hyperdoc.css")
     (let ((*page-state* (make-instance 'page-state
                                        :package (find-package "CL-USER")
                                        :page page)))
-      (html
+      (views:html
         (:div :class "hyperdoc-page"
               (plump:serialize (parse-tree page)
-                               html-inspector-views::*html-stream*)
+                               views::*html-stream*)
               (:br))))))
 
 ;;
 ;; Parse tree view
 ;;
 
-(defview 👀parse-tree (page html-page)
+(views:defview 👀parse-tree (page html-page)
   (-> page
       parse-tree
       plump-inspector-views::👀children
-      (rename :title "Parse tree" :priority 4)))
+      (views:rename :title "Parse tree" :priority 4)))

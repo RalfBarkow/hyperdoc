@@ -15,7 +15,8 @@
 
 (defun find-packages-used-in-file (source-file)
   (let* ((pathname (asdf:component-pathname source-file))
-         (tlfs (s-exp (parse-lisp-code pathname))))
+         (tlfs (html-inspector-views/standard:s-exp
+                (html-inspector-views/standard:parse-lisp-code pathname))))
     (remove-duplicates
      (loop for tlf in tlfs
            when (eq (car tlf) 'in-package)
@@ -27,8 +28,8 @@
       (setf (slot-value hd 'packages)
             (find-packages-used hd))))
 
-(defview 👀packages (hd hyperdoc)
+(views:defview 👀packages (hd hyperdoc)
   (-> hd
-      packages-used
-      👀items
-      (rename :title "Packages" :priority 5)))
+    packages-used
+    views:👀items
+    (views:rename :title "Packages" :priority 5)))
