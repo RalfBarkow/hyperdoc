@@ -33,7 +33,7 @@
       (views:👀content entry-page))))
 
 ;;
-;; Views listing the text and code pages
+;; Views listing the text and code pages and the tools
 ;;
 
 (views:defview 👀text-pages (hd hyperdoc)
@@ -43,11 +43,18 @@
     alexandria:hash-table-values
     (views:list-view :title "Text pages" :priority 3)))
 
+(views:defview 👀tools (hd hyperdoc)
+  (ensure-pages-loaded hd)
+  (-<> hd
+    tools
+    (mapcar #'find-tool <>)
+    (views:list-view :title "Tools" :priority 4)))
+
 (views:defview 👀code-pages (hd hyperdoc)
   (-> hd
     code-files
     (views:enumerated-list-view :title "Code pages"
-                                :priority 4
+                                :priority 5
                                 :display #'code-file-title)))
 
 ;;

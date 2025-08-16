@@ -22,6 +22,7 @@
                              (:file "catalog")
                              (:file "defining")
                              (:file "examples")
+                             (:file "tools")
                              (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/explorer
@@ -53,6 +54,7 @@
                              (:file "html-pages")
                              (:file "markdown-pages")
                              (:file "links-in-code")
+                             (:file "tools")
                              (:file "codemeta")
                              (:file "examples")
                              (:file "hyperdoc")))))

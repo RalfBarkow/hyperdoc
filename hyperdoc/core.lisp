@@ -17,6 +17,7 @@
    (title :reader title :initarg :title)
    (pages :reader pages :initarg :pages)
    (code-files :reader code-files :initarg :code-files)
+   (tools :reader tools :initarg :tools)
    (entry :reader entry :initarg :entry)
    ;; The packages used in the HyperDoc are deduced
    ;; from the code files in hyperdoc-explorer.
@@ -35,28 +36,33 @@
 ;; Create a HyperDoc instance.
 ;;
 
-(defun make-hyperdoc (&key title asdf-system-name subdirectory entry)
+(defun make-hyperdoc (&key title asdf-system-name subdirectory entry tools)
   "Create a HyperDoc instance with TITLE for the text and code pages
 located in SUBDIRECTORY relative to the base directory for ASDF-SYSTEM-NAME.
 The entry page for the HyperDoc is the one whose titles is ENTRY.
+TOOLS is a list of package names, each package defining one HyperDoc tool.
 
 Note that the recommended way to create and register a HyperDoc is
 the macro DEFHYPERDOC."
   (let* ((system (asdf:find-system asdf-system-name))
          (directory (asdf:system-relative-pathname
-                       asdf-system-name
-                       (concatenate 'string subdirectory "/")))
+                     asdf-system-name
+                     (concatenate 'string subdirectory "/")))
          (component (asdf:find-component system subdirectory))
          (code-files (when component
                        (remove-if-not #'(lambda (c) (typep c 'asdf:cl-source-file))
                                       (asdf:component-children component)))))
-    (make-instance 'hyperdoc
-                   :asdf-system-name asdf-system-name
-                   :directory directory
-                   :title title
-                   :pages nil
-                   :code-files code-files
-                   :entry entry)))
+    (let ((hyperdoc (make-instance 'hyperdoc
+                                   :asdf-system-name asdf-system-name
+                                   :directory directory
+                                   :title title
+                                   :pages nil
+                                   :code-files code-files
+                                   :tools tools
+                                   :entry entry)))
+      (dolist (tool tools)
+        (setf (hyperdoc-of (find-tool tool)) hyperdoc))
+      hyperdoc)))
 
 ;;
 ;; Load text and code pages.
@@ -104,6 +110,10 @@ PAGE-LOOKUP-FAILURE."
       (loop for code-file in (code-files hdoc)
             when (equal title (code-file-title code-file))
               do (return code-file))
+      (loop for tool-name in (tools hdoc)
+            for tool = (find-tool tool-name)
+            when (equal title (title-of tool))
+              do (return tool))
       (and signal-error?
            (error 'page-lookup-failure :hyperdoc hdoc :title title))))
 
