@@ -19,5 +19,5 @@
            #:defexample
            #:assert-test #:assert-equalp #:assert-equal
            #:assert-eql #:assert-within-tolerance
-           #:tool #:html #:markdown #:html-generator
+           #:deftool #:html #:markdown #:html-generator
            #:*development-features*))

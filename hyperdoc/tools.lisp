@@ -12,29 +12,38 @@
 
 (defvar *tools* (make-hash-table :test #'eq))
 
-(defun find-tool (package-or-name)
-  (if (typep package-or-name 'package)
-      (gethash package-or-name *tools*)
-      (gethash (find-package package-or-name) *tools*)))
+(defun get-tool (name)
+  (gethash name *tools*))
 
-(defun tool (title)
-  (setf (gethash *package* *tools*) 
-        (make-instance 'tool
-                       :title title
-                       :package *package*))
-  (html (str:concat "<h1>" title "</h1>")))
+(defun make-tool (symbol title)
+  (let ((tool (make-instance 'tool
+                             :title title
+                             :package *package*)))
+    (setf (gethash symbol *tools*) tool)
+    (push (cons :html (str:concat "<h1>" title "</h1>"))
+          (parts-of tool))
+    tool))
+
+(defvar *current-tool*)
+
+(defmacro deftool (symbol title &body body)
+  `(let ((*current-tool* (make-tool ',symbol, title)))
+     ,@body))
 
 (defun html-generator* (fn)
+  (assert (typep *current-tool* 'tool))
   (push (cons :generator fn)
-        (parts-of (find-tool *package*))))
+        (parts-of *current-tool*)))
 
 (defmacro html-generator (&body body)
   `(html-generator* #'(lambda () ,@body)))
 
 (defun html (s)
+  (assert (typep *current-tool* 'tool))
   (push (cons :html s)
-        (parts-of (find-tool *package*))))
+        (parts-of *current-tool*)))
 
 (defun markdown (s)
+  (assert (typep *current-tool* 'tool))
   (push (cons :markdown s)
-        (parts-of (find-tool *package*))))
+        (parts-of *current-tool*)))

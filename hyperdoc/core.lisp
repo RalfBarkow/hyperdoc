@@ -61,7 +61,7 @@ the macro DEFHYPERDOC."
                                    :tools tools
                                    :entry entry)))
       (dolist (tool tools)
-        (setf (hyperdoc-of (find-tool tool)) hyperdoc))
+        (setf (hyperdoc-of (get-tool tool)) hyperdoc))
       hyperdoc)))
 
 ;;
@@ -111,7 +111,7 @@ PAGE-LOOKUP-FAILURE."
             when (equal title (code-file-title code-file))
               do (return code-file))
       (loop for tool-name in (tools hdoc)
-            for tool = (find-tool tool-name)
+            for tool = (get-tool tool-name)
             when (equal title (title-of tool))
               do (return tool))
       (and signal-error?

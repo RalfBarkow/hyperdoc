@@ -47,7 +47,7 @@
   (ensure-pages-loaded hd)
   (-<> hd
     tools
-    (mapcar #'find-tool <>)
+    (mapcar #'get-tool <>)
     (views:list-view :title "Tools" :priority 4)))
 
 (views:defview 👀code-pages (hd hyperdoc)
