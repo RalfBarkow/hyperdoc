@@ -54,9 +54,9 @@ When using this tag in Markdown, watch out for parts of the Lisp code being inte
 
 The custom tag `view-transclusion` has a Lisp expression as its text content. Its value must be an instance of <a expr="(find-class 'html-inspector-views:html-view)">`html-inspector-views:html-view`</a>. The HTML code corresponding to that view is inserted at the point of transclusion.
 
-As an example, this is the <a expr="#'👀items">items view</a> of the vector <a expr="#(1 2)">`#(1 2)`</a>:
+As an example, this is the <a expr="#'html-inspector-views:👀items">items view</a> of the vector <a expr="#(1 2)">`#(1 2)`</a>:
 
-<view-transclusion>(👀items #(1 2))</view-transclusion>
+<view-transclusion>(html-inspector-views:👀items #(1 2))</view-transclusion>
 
 When using this tag in Markdown, watch out for parts of the Lisp code being interpreted as Markdown markup. In particular, the ear-muff convention for special variables is interpreted as italic. Asterisks therefore need to be written as `&#42;`.
 
