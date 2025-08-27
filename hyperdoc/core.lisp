@@ -117,6 +117,18 @@ PAGE-LOOKUP-FAILURE."
       (and signal-error?
            (error 'page-lookup-failure :hyperdoc hdoc :title title))))
 
+(defun all-pages (hdoc)
+  (ensure-pages-loaded hdoc)
+  (let ((result (make-hash-table :test #'equal)))
+    (loop for page being the hash-values of (pages hdoc)
+          do (setf (gethash (page-title page) result) page))
+    (loop for code-file in (code-files hdoc)
+          do (setf (gethash (code-file-title code-file) result) code-file))
+    (loop for tool-name in (tools hdoc)
+          for tool = (get-tool tool-name)
+          do (setf (gethash (title-of tool) result) tool))
+    result))
+
 (defun code-file-title (cl-source-file)
   (->> cl-source-file
     asdf:component-pathname

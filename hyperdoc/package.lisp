@@ -12,7 +12,9 @@
            #:*catalog*
            #:make-hyperdoc
            #:title #:directory #:asdf-system
+           #:page-title
            #:register
+           #:all-pages
            #:defhyperdoc
            #:hyperdocs
            #:see #:page #:hyperdoc
