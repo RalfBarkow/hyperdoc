@@ -45,10 +45,10 @@
 
 (views:defview 👀tools (hd hyperdoc)
   (ensure-pages-loaded hd)
-  (-<> hd
-    tools
-    (mapcar #'get-tool <>)
-    (views:list-view :title "Tools" :priority 4)))
+  (when-let (tools (tools hd))
+    (-<> tools
+      (mapcar #'get-tool <>)
+      (views:list-view :title "Tools" :priority 4))))
 
 (views:defview 👀code-pages (hd hyperdoc)
   (-> hd
