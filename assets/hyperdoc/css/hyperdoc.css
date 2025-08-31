@@ -33,3 +33,19 @@
 .hyperdoc-error {
   color: red;
 }
+a::after {
+  content: '';
+  background-image: url("/hyperdoc/icons/external-link.svg");
+  background-repeat: no-repeat;
+  background-size: 70%;
+  background-position: center bottom;
+  padding-right: 1.1em;
+}
+a[href*='wikipedia.org']::after {
+  content: '';
+  background-image: url("/hyperdoc/icons/wikipedia.svg");
+  background-repeat: no-repeat;
+  background-size: 70%;
+  background-position: center bottom;
+  padding-right: 1.1em;
+}

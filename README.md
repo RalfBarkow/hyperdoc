@@ -17,3 +17,7 @@ This will serve a catalog containing a single HyperDoc, the one for HyperDoc its
 ## License
 
 [BSD](./LICENSE)
+
+Copyright (c) 2025 Konrad Hinsen
+
+The SVG icons in the directory [assets/hyperdoc/icons](./assets/hyperdoc/icons) are from the [Font Awesome](https://fontawesome.com) collection, and are subject to its [license](https://fontawesome.com/license/free).
