@@ -12,8 +12,7 @@
   "Registered HyperDocs")
 
 (views:defview views:👀items (catalog catalog)
-  (-> catalog
-    hyperdocs
-    (sort #'string< :key #'title)
+  (-> (hyperdocs-of catalog)
+    (sort #'string< :key #'title-of)
     views:👀items
     (views:rename :title "HyperDocs" :priority 1)))

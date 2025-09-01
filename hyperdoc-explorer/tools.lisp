@@ -4,10 +4,7 @@
 
 (in-package :hyperdoc)
 
-(defmethod views:text-representation ((tool tool))
-  (title-of tool))
-
-(views:defview views:👀content (tool tool)
+(views:defview views:👀content (tool tool-page)
   (views:html-view :title "Live" :priority 1
     (views:add-asset-path "/hyperdoc/"
                           (asdf:system-relative-pathname

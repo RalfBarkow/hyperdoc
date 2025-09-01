@@ -5,13 +5,12 @@
 (in-package :hyperdoc)
 
 (defun find-packages-used (hd)
-  (let ((packages nil))
-    (dolist (source-file (code-files hd))
-      (setf packages
-            (union packages
-                   (find-packages-used-in-file source-file)
-                   :test #'eq)))
-    packages))
+  (reduce #'(lambda (acc cp)
+              (union acc
+                     (find-packages-used-in-file (file-of cp))
+                     :test #'eq))
+          (code-pages-of hd)
+          :initial-value nil))
 
 (defun find-packages-used-in-file (source-file)
   (let* ((pathname (asdf:component-pathname source-file))
@@ -24,7 +23,7 @@
      :test #'eq)))
 
 (defun packages-used (hd)
-  (or (packages hd)
+  (or (packages-of hd)
       (setf (slot-value hd 'packages)
             (find-packages-used hd))))
 

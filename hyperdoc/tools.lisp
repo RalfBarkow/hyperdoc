@@ -4,10 +4,8 @@
 
 (in-package :hyperdoc)
 
-(defclass tool ()
-  ((hyperdoc :accessor hyperdoc-of :initarg :hyperdoc)
-   (title :reader title-of :initarg :title)
-   (package :reader package-of :initarg :package)
+(defclass tool-page (page)
+  ((package :reader package-of :initarg :package)
    (parts :accessor parts-of :initform nil)))
 
 (defvar *tools* (make-hash-table :test #'eq))
@@ -16,11 +14,11 @@
   (gethash name *tools*))
 
 (defun make-tool (symbol title)
-  (let ((tool (make-instance 'tool
+  (let ((tool (make-instance 'tool-page
                              :title title
                              :package *package*)))
     (setf (gethash symbol *tools*) tool)
-    (push (cons :html (str:concat "<h1>" title "</h1>"))
+    (push (cons :html (concatenate 'string "<h1>" title "</h1>"))
           (parts-of tool))
     tool))
 
@@ -31,7 +29,7 @@
      ,@body))
 
 (defun html-generator* (fn)
-  (assert (typep *current-tool* 'tool))
+  (assert (typep *current-tool* 'tool-page))
   (push (cons :generator fn)
         (parts-of *current-tool*)))
 
@@ -39,11 +37,11 @@
   `(html-generator* #'(lambda () ,@body)))
 
 (defun html (s)
-  (assert (typep *current-tool* 'tool))
+  (assert (typep *current-tool* 'tool-page))
   (push (cons :html s)
         (parts-of *current-tool*)))
 
 (defun markdown (s)
-  (assert (typep *current-tool* 'tool))
+  (assert (typep *current-tool* 'tool-page))
   (push (cons :markdown s)
         (parts-of *current-tool*)))

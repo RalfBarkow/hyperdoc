@@ -9,9 +9,8 @@
 ;;
 
 (defun codemeta-data (hd)
-  (let ((codemeta-filename  (-> hd
-                              asdf-system-name 
-                              (asdf:system-relative-pathname "codemeta.json"))))
+  (let ((codemeta-filename (-> (asdf-system-name-of hd)
+                               (asdf:system-relative-pathname "codemeta.json"))))
     (when (probe-file codemeta-filename)
       (njson:decode codemeta-filename))))
 

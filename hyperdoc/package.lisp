@@ -8,18 +8,24 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export #:*hyperdoc*
-           #:*catalog*
-           #:make-hyperdoc
-           #:title #:directory #:asdf-system
-           #:page-title
-           #:register
-           #:all-pages
+  (:export ;; Creating and registering HyperDocs
            #:defhyperdoc
-           #:hyperdocs
+           #:register
+           #:make-hyperdoc
+           ;; Referencing HyperDocs and pages from code files
            #:see #:page #:hyperdoc
+           ;; Defining examples and using assertions in them
            #:defexample
            #:assert-test #:assert-equalp #:assert-equal
            #:assert-eql #:assert-within-tolerance
+           ;; Defining tools
            #:deftool #:html #:markdown #:html-generator
-           #:*development-features*))
+           ;; Access to the global catalog of registered HyperDocs
+           #:*catalog* #:hyperdocs-of
+           ;; Access to HyperDoc data
+           #:title-of #:directory-of #:asdf-system-of #:pages-of
+           #:hyperdoc-of #:file-of
+           ;; Server interface
+           #:*development-features*
+           ;; HyperDoc's own HyperDoc
+           #:*hyperdoc*))

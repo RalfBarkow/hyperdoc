@@ -9,7 +9,7 @@
 ;;
 
 (defclass catalog ()
-  ((hyperdocs :accessor hyperdocs :initform nil)))
+  ((hyperdocs :accessor hyperdocs-of :initform nil)))
 
 (defvar *catalog*
   (make-instance 'catalog))
@@ -21,7 +21,7 @@
 
 (defun register (hdoc)
   "Register HyperDoc HDOC in the globale HyperDoc catalog."
-  (push hdoc (hyperdocs *catalog*)))
+  (push hdoc (hyperdocs-of *catalog*)))
 
 ;;
 ;; Catalog lookup

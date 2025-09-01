@@ -9,8 +9,8 @@
 ;; returned by the plump parser.
 ;;
 
-(defclass html-page (page)
-  ((parse-tree :reader parse-tree :initform nil)))
+(defclass html-page (text-page)
+  ((parse-tree :reader parse-tree-of :initform nil)))
 
 ;;
 ;; The page class for file type "html" is html-page.
@@ -38,8 +38,7 @@
 
 (defmethod page-title ((page html-page))
   (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
-            do (let ((elements (-> page
-                                   parse-tree
+            do (let ((elements (-> (parse-tree-of page)
                                    (plump:get-elements-by-tag-name tag))))
                  (when elements
                    (return (-> elements first plump:text)))))
@@ -143,7 +142,7 @@ standard HTML tag.")
                  (:span :class "hyperdoc-reference"
                         :title (format nil "Page \"~A\"~%HyperDoc \"~A\""
                                        page
-                                       (title hyperdoc))
+                                       (title-of hyperdoc))
                         (views:object-ref value :display text :select view))))
            (lookup-failure (c)
              (views:html
@@ -193,7 +192,7 @@ standard HTML tag.")
                                        :page page)))
       (views:html
         (:div :class "hyperdoc-page"
-              (plump:serialize (parse-tree page)
+              (plump:serialize (parse-tree-of page)
                                views::*html-stream*)
               (:br))))))
 
@@ -202,7 +201,6 @@ standard HTML tag.")
 ;;
 
 (views:defview 👀parse-tree (page html-page)
-  (-> page
-      parse-tree
+  (-> (parse-tree-of page)
       plump-inspector-views::👀children
       (views:rename :title "Parse tree" :priority 4)))

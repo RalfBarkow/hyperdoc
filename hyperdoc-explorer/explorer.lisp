@@ -14,12 +14,12 @@
 ;;
 
 (defmethod views:text-representation ((hdoc hyperdoc))
-  (title hdoc))
+  (title-of hdoc))
 
 (defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
   (when *development-features*
     (views:action-button "Reload"
-                         (views:thunk (load-pages hdoc)
+                         (views:thunk (reload-pages hdoc)
                            t))))
 
 ;;
@@ -28,7 +28,7 @@
 
 (views:defview 👀entry (hd hyperdoc)
   (ensure-pages-loaded hd)
-  (when-let (entry (entry hd))
+  (when-let (entry (entry-of hd))
     (when-let (entry-page (find-page hd entry))
       (views:👀content entry-page))))
 
@@ -38,32 +38,29 @@
 
 (views:defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
-  (-> hd
-    pages
-    alexandria:hash-table-values
-    (views:list-view :title "Text pages" :priority 3)))
+  (when-let (text-pages (-> (text-pages-of hd)
+                            alexandria:hash-table-values))
+    (views:list-view text-pages :title "Text pages" :priority 3)))
 
 (views:defview 👀tools (hd hyperdoc)
   (ensure-pages-loaded hd)
-  (when-let (tools (tools hd))
+  (when-let (tools (tools-of hd))
     (-<> tools
       (mapcar #'get-tool <>)
-      (views:list-view :title "Tools" :priority 4))))
+      (views:list-view :title "Tool pages" :priority 4))))
 
 (views:defview 👀code-pages (hd hyperdoc)
-  (-> hd
-    code-files
-    (views:enumerated-list-view :title "Code pages"
-                                :priority 5
-                                :display #'code-file-title)))
+  (when-let (pages (code-pages-of hd))
+    (views:enumerated-list-view pages
+                                :title "Code pages"
+                                :priority 5)))
 
 ;;
 ;; The files in the HyperDocs's directory
 ;;
 
 (views:defview 👀files (hd hyperdoc)
-  (-> hd
-    hyperdoc-directory
+  (-> (directory-of hd)
     views:👀items
     (views:rename :title "Files" :priority 6)))
 
@@ -72,32 +69,41 @@
 ;;
 
 (views:defview 👀repository (hd hyperdoc)
-  (-> hd
-    asdf-system-name
+  (-> (asdf-system-name-of hd)
     asdf:find-system
     👀repository
     (views:rename :title "Repository" :priority 7)))
 
 ;;
-;; The title bar for HyperDoc page inspectors
+;; The title bar for HyperDoc pages
 ;;
 
-(defmethod views:title-bar-action-buttons ((page page))
+(defmethod views:text-representation ((page page))
+  (title-of page))
+
+(defmethod views:title-bar-action-buttons ((page text-page))
   (when *development-features*
     (views:action-button "Reload"
                          (views:thunk (load-page page)
                            t))))
 
-(defmethod views:text-representation ((page page))
-  (page-title page))
-
 ;;
-;; Source code view for pages
+;; Source code view for text pages
 ;;
 
-(views:defview 👀source (page page)
+(views:defview 👀source (page text-page)
   (-> page
-    (slot-value 'file)
-    views:👀content
-    (views:rename :title "Source" :priority 3)))
+      file-of
+      views:👀content
+      (views:rename :title "Source" :priority 3)))
+
+;;
+;; Source code view for code pages
+;;
+
+(views:defview 👀source (page code-page)
+  (-> page
+      file-of
+      views:👀source
+      (views:rename :title "Source" :priority 3)))
 
