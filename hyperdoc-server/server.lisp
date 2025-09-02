@@ -26,16 +26,16 @@ arbitrary Lisp code."
                                                  :title title
                                                  :playground? development))
    :port port)
-  (dolist (hd (hyperdoc:hyperdocs hyperdoc:*catalog*))
+  (dolist (hd (hyperdoc:hyperdocs-of hyperdoc:*catalog*))
     (clog:set-on-new-window
      #'(lambda (body)
          (clog-moldable-inspector:on-new-inspector body
                                                    :object hd
                                                    :pane-width pane-width
-                                                   :title (hyperdoc:title hd)
+                                                   :title (hyperdoc:title-of hd)
                                                    :playground? development))
-     :path (str:concat "/" (-> hd hyperdoc:title slug)))
-    (loop for page-title being the hash-keys in (hyperdoc:all-pages hd)
+     :path (str:concat "/" (-> hd hyperdoc:title-of slug)))
+    (loop for page-title being the hash-keys in (hyperdoc:pages-of hd)
             using (hash-value object)
           do (let ((page-title* page-title)
                    (object* object))
@@ -46,7 +46,7 @@ arbitrary Lisp code."
                                                               :pane-width pane-width
                                                               :title page-title*
                                                               :playground? development))
-                :path (str:concat "/" (-> hd hyperdoc:title slug)
+                :path (str:concat "/" (-> hd hyperdoc:title-of slug)
                                   "/" (-> page-title* slug)))))))
 
 (defun serve-catalog (&key (port 8080) (pane-width "700px") (development nil))
@@ -82,24 +82,14 @@ are not allowed in URLs."
 ;;
 
 (views:defview 👀url (hd hyperdoc:hyperdoc)
-  (url-view-from-slug (-> hd hyperdoc:title slug)))
+  (url-view-from-slug (-> hd hyperdoc:title-of slug)))
 
 (views:defview 👀url (hd-page hyperdoc:page)
   (let ((hd (slot-value hd-page 'hyperdoc:hyperdoc)))
     (url-view-from-slug
-     (str:concat (-> hd hyperdoc:title slug)
+     (str:concat (-> hd hyperdoc:title-of slug)
                  "/"
-                 (-> hd-page hyperdoc:page-title slug)))))
-
-;; Can't do this for code-file because it doesn't hold a reference to
-;; a HyperDoc.
-
-(views:defview 👀url (hd-tool hyperdoc::tool)
-  (let ((hd (slot-value hd-tool 'hyperdoc:hyperdoc)))
-    (url-view-from-slug
-     (str:concat (-> hd hyperdoc:title slug)
-                 "/"
-                 (-> hd-tool hyperdoc::title-of slug)))))
+                 (-> hd-page hyperdoc:title-of slug)))))
 
 (defun url-view-from-slug (slug)
   (views:html-view :title "URL" :priority 20

@@ -31,8 +31,8 @@
   "Look up the HyperDoc entitled TITLE in the global catalog. If no such HyperDoc
 exists, then return NIL if SIGNAL-ERROR? is nil, else signal
 hyperdoc-lookup-failure."
-  (or (dolist (hd (hyperdocs *catalog*))
-        (when (string= title (title hd))
+  (or (dolist (hd (hyperdocs-of *catalog*))
+        (when (string= title (title-of hd))
           (return hd)))
       (and signal-error?
            (error 'hyperdoc-lookup-failure :title title))))
@@ -41,8 +41,8 @@ hyperdoc-lookup-failure."
   "Look up the HyperDoc whose directory is PATHNAME in the global catalog.
 If no such HyperDoc exists, then return NIL if SIGNAL-ERROR? is nil, else
 signal directory-lookup-failure."
-  (or (dolist (hd (hyperdocs *catalog*))
-        (when (equal pathname (hyperdoc-directory hd))
+  (or (dolist (hd (hyperdocs-of *catalog*))
+        (when (equal pathname (directory-of hd))
           (return hd)))
       (and signal-error?
            (error 'directory-lookup-failure :catalog *catalog* :pathname pathname))))
