@@ -13,6 +13,7 @@
 
 (views:defview views:👀items (catalog catalog)
   (-> (hyperdocs-of catalog)
+    copy-list
     (sort #'string< :key #'title-of)
     views:👀items
     (views:rename :title "HyperDocs" :priority 1)))
