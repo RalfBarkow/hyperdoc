@@ -17,7 +17,7 @@
   (title-of hdoc))
 
 (defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
-  (when *development-features*
+  (when (writable-of hdoc)
     (views:action-button "Reload"
                          (views:thunk (reload-pages hdoc)
                            t))))
@@ -82,7 +82,7 @@
   (title-of page))
 
 (defmethod views:title-bar-action-buttons ((page text-page))
-  (when *development-features*
+  (when (writable-of (hyperdoc-of page))
     (views:action-button "Reload"
                          (views:thunk (load-page page)
                            t))))

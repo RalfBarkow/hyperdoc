@@ -25,7 +25,5 @@
            ;; Access to HyperDoc data
            #:title-of #:directory-of #:asdf-system-of #:pages-of
            #:hyperdoc-of #:file-of
-           ;; Server interface
-           #:*development-features*
            ;; HyperDoc's own HyperDoc
            #:*hyperdoc*))

@@ -19,6 +19,7 @@
 (defclass hyperdoc ()
   ((asdf-system-name :reader asdf-system-name-of :initarg :asdf-system-name)
    (directory :reader directory-of :initarg :directory)
+   (writable :reader writable-of :initarg :writable)
    (title :reader title-of :initarg :title)
    (entry :reader entry-of :initarg :entry)
    ;; Slots holding the pages (or their sources) of the HyperDoc
@@ -55,6 +56,7 @@ the macro DEFHYPERDOC."
          (directory (asdf:system-relative-pathname
                      asdf-system-name
                      (concatenate 'string subdirectory "/")))
+         (writable (is-writable? directory))
          (component (asdf:find-component system subdirectory))
          (code-files (when component
                        (remove-if-not #'(lambda (c)
@@ -66,6 +68,7 @@ the macro DEFHYPERDOC."
     (let ((hyperdoc (make-instance 'hyperdoc
                                    :asdf-system-name asdf-system-name
                                    :directory directory
+                                   :writable writable
                                    :title title
                                    :entry entry
                                    :code-pages code-pages
@@ -83,6 +86,19 @@ the macro DEFHYPERDOC."
           (setf (hyperdoc-of tool) hyperdoc)
           (setf (gethash title pages) tool)))
       hyperdoc)))
+
+;; This is most probably not the best way to test if the HyperDoc
+;; directory is writeable, but Common Lisp doesn't have an obvious
+;; good way to do this and I'd like to avoid OS-dependent dependencies
+;; such as osicat.
+(defun is-writable? (directory)
+  (let ((filename (merge-pathnames directory "unlikely-filename.xxx")))
+    (handler-case
+        (when-let (stream (open filename :direction :output :if-exists nil))
+          (close stream)
+          (delete-file filename)
+          t)
+      (file-error nil))))
 
 ;;
 ;; Load text pages.
@@ -199,11 +215,3 @@ PAGE-LOOKUP-FAILURE."
 (defgeneric load-page (page))
 
 (defgeneric page-title (page))
-
-;;
-;; This variable can be set to nil when HyperDoc is run in a public
-;; Web server. Page reloading is then disabled. HyperDocs can also query
-;; this variable to selectively enable development functionality.
-;;
-
-(defvar *development-features* t)

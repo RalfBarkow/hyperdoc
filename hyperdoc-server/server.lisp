@@ -18,7 +18,6 @@ pages are served at the URL defined by their slug. If DEVELOPMENT is non-nil,
 enable playgrounds and other development tools. This is not
 recommended on public servers because it allows the execution of
 arbitrary Lisp code."
-  (setf hyperdoc:*development-features* development)
   (clog:initialize
    #'(lambda (body)
        (clog-moldable-inspector:on-new-inspector body
