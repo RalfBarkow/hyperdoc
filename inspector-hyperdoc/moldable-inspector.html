@@ -1,0 +1,63 @@
+<h1>Moldable inspector</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<h4>What is a moldable inspector?</h4>
+
+<p>
+  As a Common Lisp user, you have probably seen an inspector
+  before. But what makes an inspector <i>moldable</i>?
+</p>
+
+<p>
+  <a href="https://moldabledevelopment.com/">Moldable development</a>
+  is about development tools being customizable to fit the
+  needs of a specific situation, or even a specific problem being investigated.
+  This requires customization to be cheap, to the point that it becomes feasible
+  to write single-use tools. You can think of a Unix shell as an early moldable
+  tool, since it can be customized by writing shell scripts.
+</p>
+
+<p>
+  This inspector is customizable by adding or overriding <i>views</i>
+  for specific classes or objects. In an inspector pane, such as the one you
+  are looking at, each view occupies one tab. By clicking on a tab,
+  you switch to a different view.
+</p>
+
+<p>
+  A view consists of HTML code with embedded references
+  (to other objects) and action buttons.
+  <a page="Defining views">Learn how to define your own views.</a>
+</p>
+
+<h4>Basic usage</h4>
+
+<p>
+  To open an inspector, call the function
+  <a expr="#'clog-inspect">#'clog-inspect</a>
+  and give it the object to inspect as keyword argument
+  <code>:object</code>. Without that argument, you get an inspector
+  showing <a expr="hvs:*image*">the systems, packages, and features</a>
+  present in your image.
+</p>
+
+<p>Click on the function name above to inspect the function!</p>
+
+<p>
+  If you use the inspector often, it is worth defining a shortcut in your
+  default workspace package. Here is mine:
+</p>
+<pre><code>
+(defun inspect (object)
+  (clog-moldable-inspector:clog-inspect :object object))")))
+</code></pre>
+
+<p>
+  There are a few convenience functions as well (again, click on the function names):
+</p>
+<ul>
+  <li><a expr="#'clog-inspect-package"><code>#'clog-inspect-package</code></a></li>
+  <li><a expr="#'clog-inspect-system"><code>#'clog-inspect-system</code></a></li>
+  <li><a expr="#'clog-inspect-class"><code>#'clog-inspect-class</code></a></li>
+</ul>
