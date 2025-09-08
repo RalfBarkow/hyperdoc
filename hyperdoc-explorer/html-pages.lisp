@@ -105,6 +105,15 @@ standard HTML tag.")
                (views:html-representation value)))
       t))
 
+  ;; html-expr elements are rendered here.
+  (:method ((tag (eql :html-expr)) element)
+    (let* ((*package* (slot-value *page-state* 'package))
+           (text (-> element plump:text))
+           (value (-> text parse-and-eval)))
+      (views:html
+        (views:str value))
+      t))
+
   ;; view-transclusion elements are rendered here.
   (:method ((tag (eql :view-transclusion)) element)
     (let* ((*package* (slot-value *page-state* 'package))

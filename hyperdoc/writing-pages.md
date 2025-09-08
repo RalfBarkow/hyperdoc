@@ -55,6 +55,10 @@ The custom tag `value-of` permits embedding the text representation (as defined 
 
 When using this tag in Markdown, watch out for parts of the Lisp code being interpreted as Markdown markup. In particular, the ear-muff convention for special variables is interpreted as italic. Asterisks therefore need to be written as `&#42;`.
 
+## Computed HTML code
+
+The custom tag `html-expr` permits inserting HTML code that is computed. The text content of the tag is evaluated and the result replaces the `html-expr` element.
+
 ## View transclusions
 
 The custom tag `view-transclusion` has a Lisp expression as its text content. Its value must be an instance of <a expr="(find-class 'html-inspector-views:html-view)">`html-inspector-views:html-view`</a>. The HTML code corresponding to that view is inserted at the point of transclusion.
