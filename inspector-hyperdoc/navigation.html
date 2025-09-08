@@ -1,0 +1,77 @@
+<h1>Interface</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<h4>Navigation</h4>
+
+<p>
+  Each pane of the inspector shows all the views for one object.
+  There are two kinds of objects: GUI objects, and standard objects.
+</p>
+
+<p>
+  GUI objects exist only as a support for inspector panes.
+  This tutorial is an example. The title bar for GUI objects shows just a title.</p>
+
+<p>The title bar for standars objects shows the object's class
+  in italics, followed by a textual representation that is customizable. You
+  can click on the class name to inspect the class, and click on the textual
+  representation to open a second pane for the same object.
+</p>
+<p>
+  There are three buttons on the right-hand side of the title bar:
+</p>
+<table class="inspector-table">
+  <tbody>
+    <tr>
+      <td> <html-expr>*icon-refresh*</html-expr> </td>
+      <td>redraws the pane.</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>Use it when the object has
+        changed, or after modifying one of its views.</td>
+    </tr>
+    <tr>
+      <td> <html-expr>*icon-maximize*</html-expr> </td>
+      <td>expands the pane to full width.</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>The button then turns into
+        <html-expr>*icon-minimize*</html-expr>
+        for reducing the pane to its standard size.
+      </td>
+    </tr>
+    <tr>
+      <td> <html-expr>*icon-close*</html-expr> </td>
+      <td>closes the pane.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  Below the title bar, a tab bar shows one tab for each view.
+  Click on any tab to display its view.
+</p>
+
+<p>
+  When you click on an object to inspect it in a new pane,
+  by default the new pane replaces all the panes to the right. Use shift-click
+  to keep all panes, and add the new one to the right.
+</p>
+
+<h4>Introspection</h4>
+
+<p>
+  Alt-click on a view tab inspects the view itself. You
+  will see in particular the source code of the method that generated the view,
+  but also its HTML code.
+</p>
+
+<p>
+  Alt-click on the title bar (outside of the class name, the
+  textual representation, and the three buttons) to inspect the pane object.
+  This provides access to the title bar, the views, and the CLOG proxy object
+  for the DOM element representing the pane.
+</p>
