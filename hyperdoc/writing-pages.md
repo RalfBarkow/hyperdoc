@@ -34,6 +34,11 @@ attributes for HyperDoc-specific links:
    destination of the link. See <a expr="(asdf:find-system
    &quot;hyperdoc&quot;)">here</a> for an example.
 
+ - As a shorthand for a frequent use case, an `expr-from-text` attribute
+   (no value required) behaves like `expr` but takes the Lisp expression
+   from the text of the `<a>` element. The rendered code is wrapped in
+   `<tt>` and `<code>` elements.
+
  - A `view` attribute names a specific view to be selected in the
    panel for the link destination. See <a expr="(asdf:find-system
    &quot;hyperdoc&quot;)" view="Dependency graph">here</a> for an
@@ -54,7 +59,7 @@ When using this tag in Markdown, watch out for parts of the Lisp code being inte
 
 The custom tag `view-transclusion` has a Lisp expression as its text content. Its value must be an instance of <a expr="(find-class 'html-inspector-views:html-view)">`html-inspector-views:html-view`</a>. The HTML code corresponding to that view is inserted at the point of transclusion.
 
-As an example, this is the <a expr="#'html-inspector-views:👀items">items view</a> of the vector <a expr="#(1 2)">`#(1 2)`</a>:
+As an example, this is the <a expr="#'html-inspector-views:👀items">items view</a> of the vector <a expr-from-text>#(1 2)</a>:
 
 <view-transclusion>(html-inspector-views:👀items #(1 2))</view-transclusion>
 

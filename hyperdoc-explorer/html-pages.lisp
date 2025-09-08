@@ -58,6 +58,24 @@
 
 (defvar *page-state* nil)
 
+;; A wrapper for rendering HTML trees as objects
+
+(defclass html-expr ()
+  ((nodes :accessor nodes-of :initarg :nodes)
+   (style :accessor style-of :initarg :style)))
+
+(defmethod views:html-representation ((html-expr html-expr) &optional id)
+  (views:html
+    (:span :id id
+           (if (eql (style-of html-expr) :code)
+               (views:html
+                 (:tt
+                  (:code
+                   (loop for node across (nodes-of html-expr)
+                         do (plump:serialize-object node)))))
+               (loop for node across (nodes-of html-expr)
+                     do (plump:serialize-object node))))))
+
 ;; Render special tags
 
 (defgeneric serialize-hyperdoc-element (tag element)
@@ -118,7 +136,13 @@ standard HTML tag.")
           (view (plump:attribute element "view"))
           (hyperdoc (plump:attribute element "hyperdoc"))
           (page (plump:attribute element "page"))
-          (text (plump:text element)))
+          (text (plump:text element))
+          (render-children (make-instance 'html-expr
+                                          :nodes (plump:children element)
+                                          :style :normal)))
+      (when-let (expr-from-text (plump:attribute element "expr-from-text"))
+        (setf expr text)
+        (setf (style-of render-children) :code))
       (cond
         (expr
          (assert (and (null hyperdoc) (null page)))
@@ -127,7 +151,7 @@ standard HTML tag.")
            (views:html
              (:span :class "hyperdoc-reference"
                     :title expr
-                    (views:object-ref value :display text :select view)))
+                    (views:object-ref value :display render-children :select view)))
            t))
         (page
          (handler-case
@@ -143,7 +167,7 @@ standard HTML tag.")
                         :title (format nil "Page \"~A\"~%HyperDoc \"~A\""
                                        page
                                        (title-of hyperdoc))
-                        (views:object-ref value :display text :select view))))
+                        (views:object-ref value :display render-children :select view))))
            (lookup-failure (c)
              (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
@@ -155,7 +179,7 @@ standard HTML tag.")
                (views:html
                  (:span :class "hyperdoc-reference"
                         :title (format nil "HyperDoc \"~A\"" hyperdoc)
-                        (views:object-ref value :display text :select view))))
+                        (views:object-ref value :display render-children :select view))))
            (lookup-failure (c)
              (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
