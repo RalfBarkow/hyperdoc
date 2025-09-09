@@ -54,6 +54,7 @@
                #:hyperdoc/inspector
                #:html-inspector-views
                #:html-inspector-views/standard
+               #:cl-who
                #:alexandria
                #:arrow-macros
                #:njson/jzon

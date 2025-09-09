@@ -165,7 +165,7 @@ standard HTML tag.")
                 (value (parse-and-eval expr)))
            (views:html
              (:span :class "hyperdoc-reference"
-                    :title expr
+                    :title (cl-who:escape-string-all expr)
                     (views:object-ref value :display render-children :select view)))
            t))
         (page
