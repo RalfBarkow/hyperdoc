@@ -153,12 +153,11 @@ standard HTML tag.")
           (hyperdoc (plump:attribute element "hyperdoc"))
           (page (plump:attribute element "page"))
           (text (plump:text element))
-          (render-children (make-instance 'html-expr
-                                          :nodes (plump:children element)
-                                          :style :normal)))
-      (when-let (expr-from-text (plump:attribute element "expr-from-text"))
-        (setf expr text)
-        (setf (style-of render-children) :code))
+          (render-children (let ((children (plump:children element)))
+                             (unless (zerop (length children))
+                                 (make-instance 'html-expr
+                                                :nodes children
+                                                :style :normal)))))
       (cond
         (expr
          (assert (and (null hyperdoc) (null page)))
