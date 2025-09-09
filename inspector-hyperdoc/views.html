@@ -1,0 +1,73 @@
+<h1>Views</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<h4>Standard views</h4>
+
+<p>
+  All standard objects (i.e. all except GUI objects) have four
+  standard views.
+</p>
+
+<p>
+  <b>Slots</b> shows the slots of the object with their values.
+</p>
+
+<p>
+  <b>Print</b> shows the object's print representation,
+  as defined by the generic function
+  <a expr="#'print-object"><tt>print-object</tt></a>.
+</p>
+
+<p>
+  <b>Operations</b> shows all generic functions in the image that have a
+  one-argument method specialized for the object's class or one of its
+  superclasses. The functions are grouped by package name. You can click
+  on the function name to inspect the method for the object's class.
+  You can also click on the triangle on the left to run the method and
+  inspect its return value.
+</p>
+
+<p>
+  <b>Playground</b> shows a text editor in which you  can enter Lisp code.
+  When you click on the "Eval" button (top right), or press
+  Shift-Enter on the keyboard, the top-level form on which the cursor is
+  positioned is evaluated and its return value is inspected in a new pane.
+  When playground text is selected, the code being evaluated is the largest
+  subform of a top-level form that fully contains the selection.
+</p>
+
+<p>
+  Playground code is evaluated with <tt>*</tt> bound to the object inspected
+  in the current pane.
+</p>
+
+<p>
+  The playground contents are stored as one Lisp code
+  file per class, in the directory
+  <a expr="(hvs:playground-cache-directory)">
+    <value-of>(hvs:playground-cache-directory)</value-of>
+  </a>
+</p>
+
+<h4>Custom views</h4>
+
+<p>
+  Non-standard views are defined for each class (and,
+  implicitly, its subclasses), via a
+  <a expr="(symbol-function 'hv:defview)"><tt>defview</tt></a>
+  form. This is a thin wrapper around <tt>defgeneric</tt>/<tt>defmethod</tt>
+  whose main role is to add the generic function to a global registry of
+  view-generating functions. When an inspector pane is created,
+  all known view generators are called on the object to be inspected, and
+  those that return an instance of
+  <a expr="(find-class 'hv:html-view)"><tt>html-view</tt></a>
+  (rather than <a expr-from-text>nil</a>) are added to the pane, sorted by priority.
+</p>
+
+<p>
+  There are many views for classes that are part of the
+  Common Lisp standard, such as numbers, strings, functions, pathnames, etc.
+  You can add views for your own classes, but also for classes from other
+  packages that you use.
+</p>

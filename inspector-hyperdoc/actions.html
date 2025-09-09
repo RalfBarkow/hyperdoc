@@ -1,0 +1,37 @@
+<h1>Actions</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<h4>Action buttons</h4>
+
+<p>
+  You can put action buttons anywhere in a view.
+  An action button has a thunk attached to it that is executed when
+  the button is clicked. If the thunk returns non-nil, the inspector
+  pane is refreshed after the action. This is intended for actions that
+  change the object and thus invalidate its views.
+</p>
+
+<p>
+  Action buttons can also be added to a pane's title bar,
+  by specializing the generic function
+  <a expr="#'hv:title-bar-action-buttons"><tt>html-inspector-views/standard:title-bar-action-buttons</tt></a>.
+  An example is the <html-expr>hvs::*icon-copy*</html-expr> button on pathnames,
+  which copies the pathname to the system clipboard. Check it out here:
+  <a expr="(user-homedir-pathname)"><value-of>(user-homedir-pathname)</value-of></a>.
+</p>
+
+<p>
+  By alt-clicking an action button, you can inspect the
+  thunk that represents the action. Try it on the
+  <html-expr>hvs::*icon-copy*</html-expr> button
+  of the inspector pane for the pathname that you just opened!
+</p>
+
+<h4>Eval buttons</h4>
+
+<p>
+  Eval buttons differ from action buttons in one respect:
+  the return value of the action thunk is inspected in a new pane. The
+  arrow buttons in each object's "Operations" view are good examples.
+</p>

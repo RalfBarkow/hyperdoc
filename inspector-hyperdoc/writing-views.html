@@ -1,0 +1,96 @@
+<h1>Writing views</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<h4>View objects</h4>
+
+<p>
+  A view defined by <tt>defview</tt> must return <tt>nil</tt> or an instance of class
+  <a expr="(find-class 'hv:view)"><tt>'html-inspector-views:view</tt></a>,
+  which has two subclasses:
+</p>
+<ul>
+  <li><a expr="(find-class 'clog-moldable-inspector:clog-view)"><tt>clog-moldable-inspector:clog-view</tt></a>
+    <p>
+      is for views defined by Lisp code using the CLOG API.
+      This is the most flexible form of view, but also the most laborious to write.
+      For an example, see
+      <a expr="#'clog-moldable-inspector::👀playground">clog-moldable-inspector::👀playground</a>.
+    </p>
+  </li>
+  <li><a expr="(find-class 'hv:html-view)"><tt>html-inspector-views:html-view</tt></a>
+    <p>
+      is for views defined in terms of HTML code plus
+      an ALIST mapping HTML ids to Lisp objects. This ALIST is used to define
+      clickable references inside a view, in particular links to other objects
+      to be inspected, action buttons, and eval buttons.
+    </p>
+  </li>
+</ul>
+
+<h4>Writing HTML view definitions</h4>
+
+<p>
+  Since HTML + ALIST is the most common type of view,
+  there is an extensive support library for writing them, which is best explored
+  by looking at view definitions by alt-clicking. This support code uses the
+  <a expr="(asdf:find-system :cl-who)"><tt>cl-who</tt></a> library for producing
+  HTML code, so it's recommended to read its
+  <a href="https://edicl.github.io/cl-who/">manual</a>.
+</p>
+
+<h4>Transclusions</h4>
+
+<p>
+  You can insert a view into another view, a process known as
+  <a href="https://en.wikipedia.org/wiki/Transclusion">transclusion</a>.
+  As a simple example, here is a transcluded view showing the
+  items of the list <a expr-from-text>'(a b)</a>:
+</p>
+<view-transclusion>(hv:👀items '(a b))</view-transclusion>
+
+<p>
+  Transclusion is particularly useful for inserting the source
+  code of classes or functions in the system. For example, this is the source
+  code for the function <tt>transclusion</tt>:
+</p>
+<source-of-function>hv:transclusion</source-of-function>
+
+<h4>Title bars</h4>
+
+<p>
+  The title bar of an inspector pane consists of two single-line
+  HTML views, constructed by methods of two generic functions:
+</p>
+<ul>
+  <li><a expr="#'hv:title-bar"><tt>html-inspector-views:title-bar</tt></a>
+    <p>
+      constructs the left-hand part, containing by default the class
+      and the object's textual representation.
+    </p>
+  </li>
+  <li><a expr="#'hv:title-bar-action-buttons"><tt>html-inspector-views:title-bar-action-buttons</tt></a>
+    <p>
+      constructs the right-hand part, placed right before the
+      refresh/maximize/close buttons, which is empty by default. It is
+      meant to be used only for placing action buttons into the title bar.
+    </p>
+  </li>
+</ul>
+
+<p>
+  There are very few specializers for 
+  <a expr="#'hv:title-bar"><tt>html-inspector-views:title-bar</tt></a>
+  because most often it is only the textual representation that needs to be
+  customized. It is constructed by the generic function
+  <a expr="#'hv:title-bar-representation"><tt>html-inspector-views:title-bar-representation</tt></a>,
+  which by default simply calls
+  <a expr="#'hv:html-representation"><tt>html-inspector-views:html-representation</tt></a>,
+  the generic function that is also used by several HTML views, e.g. to show an
+  object as an item of a list or a vector. Its default implementation calls
+  <a expr="#'hv:text-representation"><tt>html-inspector-views:text-representation</tt></a>,
+  which returns a plain-text representation of an object.
+  In most cases, specializing this function is sufficient. Check out its
+  <a expr="#'hv:text-representation" view="Methods">"Methods" view</a>
+  to see examples!
+</p>

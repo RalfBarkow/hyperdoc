@@ -1,0 +1,120 @@
+<h1>Forms</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<p>
+  You can use input elements in views, and retrieve their values
+  in the code run by action and eval buttons. Here are some examples.
+</p>
+
+<div>
+  <html-generator>
+    (let ((text-cell (hvr:input :label "Text: " :type :text)))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref text-cell))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((search-cell (hvr:input :label "Search: " :type :search)))
+    (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref search-cell))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((number-cell (hvr:input :label "Number: " :type :number)))
+    (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref number-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((range-cell (hvr:input :label "Range: " :type :range :min "1" :max "10")))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref range-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((email-cell (hvr:input :label "E-mail: " :type :email)))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref email-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((pwd-cell (hvr:input :label "Password: " :type :password)))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref pwd-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((date-cell (hvr:input :label "Date: " :type :date)))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref date-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((datetime-cell (hvr:input :label "Date/time: " :type :datetime-local)))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref datetime-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((color-cell (hvr:input :label "Color: " :type :color)))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref color-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((checkbox-cell (hvr:checkboxes '(("One" . "one")
+                                           ("Two" . "two"))
+                                         :label "Select your choices:")))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref checkbox-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((radio-cell (hvr:radio-buttons '(("One" . "one")
+                                           ("Two" . "two"))
+                                          :label "Make your choice:")))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref radio-cell)))))
+  </html-generator>
+</div>
+
+<br/>
+
+<div>
+  <html-generator>
+    (let ((select-cell (hvr:select '(("One" . "one")
+                                     ("Two" . "two"))
+                                   :label "Make your choice:")))
+      (hv:eval-button "Get value" (hv:thunk (lwcells:cell-ref select-cell))))
+  </html-generator>
+</div>
