@@ -138,6 +138,13 @@ standard HTML tag.")
       (views:transclusion (html-inspector-views/standard:source-code-view fn)))
     t)
 
+  ;; html-generator elements are rendered here.
+  (:method ((tag (eql :html-generator)) element)
+    (let* ((*package* (slot-value *page-state* 'package))
+           (expr (plump:text element)))
+      (parse-and-eval expr))
+    t)
+
   ;; a elements with hyperdoc-specific attributes are
   ;; rendered here. Others are handled by plump:serialize-object.
   (:method ((tag (eql :a)) element)
