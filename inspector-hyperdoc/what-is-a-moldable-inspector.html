@@ -1,0 +1,41 @@
+<h1>What is a moldable inspector?</h1>
+
+<p>
+  As a Common Lisp programmer, you have probably seen an inspector
+  before. Your Lisp implementation has one, invoked by <a expr="#'cl:inspect"/>,
+  but it is probably very basic. <a href="https://slime.common-lisp.dev/">SLIME</a>
+  has a widely used one. <a href="https://mcclim.common-lisp.dev/">McCLIM</a> has
+  one as well:
+  <a href="https://codeberg.org/McCLIM/McCLIM/src/branch/master/Apps/Clouseau">Clouseau</a>.
+</p>
+
+<p>
+  A <i>moldable</i> inspector is customizable. You can add specific views
+  and interactive elements for objects (CLOS classes) that you define in your own code.
+  This is an application of the more general idea of <a href="https://moldabledevelopment.com/">Moldable development</a>.
+  <a href="https://mcclim.common-lisp.dev/static/manual/mcclim.html#Extending-Clouseau">Clouseau is moldable</a>, SLIME's inspector is not.
+</p>
+
+<p>
+  Moldable development results from making customization a routine activity in
+  software development. Developers write custom views for their objects as part
+  of designing and implementing these objects, in order to enhance their own
+  understanding of the code they are working on.
+  This requires customization to be cheap, to the point that it becomes feasible
+  to write single-use tools. You can think of a Unix shell as an early moldable
+  tool, since it can be customized by writing shell scripts.
+</p>
+
+<p>
+  This inspector is customizable by adding or overriding <i>views</i>
+  for specific classes or objects. In an inspector pane, such as the one you
+  are looking at, each view occupies one tab. By clicking on a tab,
+  you switch to a different view.
+</p>
+
+<p>
+  A view consists of HTML code with embedded references
+  (to other objects) and action buttons.
+  <a page="Defining custom views">Learn how to define your own views.</a>
+</p>
+

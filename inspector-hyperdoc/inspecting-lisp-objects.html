@@ -1,0 +1,33 @@
+<h1>Inspecting Lisp objects</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<p>
+  To open an inspector, call the function
+  <a expr="#'clog-inspect"/>
+  and give it the object to inspect as keyword argument
+  <code>:object</code>. Without that argument, you get an inspector
+  showing <a expr="hvs:*image*">the systems, packages, and features</a>
+  present in your image.
+</p>
+
+<p>Click on the function name above to inspect the function!</p>
+
+<p>
+  If you use the inspector often, it is worth defining a shortcut in your
+  default workspace package. Here is mine:
+</p>
+<lisp-code>
+  (defun inspect (object)
+  (clog-moldable-inspector:clog-inspect :object object))
+</lisp-code>
+
+<p>
+  There are a few convenience functions as well (again, click on the function
+  names to see the code):
+</p>
+<ul>
+  <li><a expr="#'clog-inspect-package"/></li>
+  <li><a expr="#'clog-inspect-system"/></li>
+  <li><a expr="#'clog-inspect-class"/></li>
+</ul>

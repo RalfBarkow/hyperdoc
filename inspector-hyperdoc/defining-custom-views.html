@@ -1,16 +1,16 @@
-<h1>Writing views</h1>
+<h1>Defining custom views</h1>
 
 <in-package>clog-moldable-inspector</in-package>
 
 <h4>View objects</h4>
 
 <p>
-  A view defined by <tt>defview</tt> must return <tt>nil</tt> or an instance of class
-  <a expr="(find-class 'hv:view)"><tt>'html-inspector-views:view</tt></a>,
-  which has two subclasses:
+  A view defined by <a expr="(symbol-function 'hv:defview)">defview</a> must return
+  <a expr="nil"/> or an instance of class
+  <a expr="(find-class 'hv:view)"/>, which has two subclasses:
 </p>
 <ul>
-  <li><a expr="(find-class 'clog-moldable-inspector:clog-view)"><tt>clog-moldable-inspector:clog-view</tt></a>
+  <li><a expr="(find-class 'clog-moldable-inspector:clog-view)"/>
     <p>
       is for views defined by Lisp code using the CLOG API.
       This is the most flexible form of view, but also the most laborious to write.
@@ -18,10 +18,10 @@
       <a expr="#'clog-moldable-inspector::👀playground">clog-moldable-inspector::👀playground</a>.
     </p>
   </li>
-  <li><a expr="(find-class 'hv:html-view)"><tt>html-inspector-views:html-view</tt></a>
+  <li><a expr="(find-class 'hv:html-view)"/>
     <p>
       is for views defined in terms of HTML code plus
-      an ALIST mapping HTML ids to Lisp objects. This ALIST is used to define
+      an ALIST mapping HTML ids to Lisp objects. The ALIST is used to define
       clickable references inside a view, in particular links to other objects
       to be inspected, action buttons, and eval buttons.
     </p>

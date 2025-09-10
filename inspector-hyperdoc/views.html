@@ -5,8 +5,10 @@
 <h4>Standard views</h4>
 
 <p>
-  All standard objects (i.e. all except GUI objects) have four
-  standard views.
+  All standard objects (i.e. all except for
+  <a expr="(find-class 'hv:gui-class)">GUI objects</a>) have four
+  standard views. They are the last views in the tab bar, and their
+  title is dimmed.
 </p>
 
 <p>
@@ -53,10 +55,10 @@
 <h4>Custom views</h4>
 
 <p>
-  Non-standard views are defined for each class (and,
+  Custom views are defined for each class (and,
   implicitly, its subclasses), via a
-  <a expr="(symbol-function 'hv:defview)"><tt>defview</tt></a>
-  form. This is a thin wrapper around <tt>defgeneric</tt>/<tt>defmethod</tt>
+  <a expr="(symbol-function 'hv:defview)">defview</a> form.
+  This is a thin wrapper around <tt>defgeneric</tt>/<tt>defmethod</tt>
   whose main role is to add the generic function to a global registry of
   view-generating functions. When an inspector pane is created,
   all known view generators are called on the object to be inspected, and
