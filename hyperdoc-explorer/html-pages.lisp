@@ -20,29 +20,24 @@
   (find-class 'html-page))
 
 ;;
-;; Load an HTML page (which implies parsing it)
+;; Load an HTML page, parse it, and set the title.
 ;;
-
-(defmethod load-page ((page html-page))
-  (with-slots (file parse-tree) page
-    (let ((plump:*tag-dispatchers* plump:*html-tags*))
-      (setf parse-tree (plump:parse file))))
-  page)
-
-;;
-;; Obtain the title of an HTML page as the value of the
-;; TITLE tag, if one exists, or else as the value of the
-;; highest-level header tag in the page. If neither TITLE
+;; The title is given by a TITLE tag, if one exists, or else as the text
+;; of the highest-level header tag in the page. If neither TITLE
 ;; nor any header tag exists, return "Untitled".
 ;;
 
-(defmethod page-title ((page html-page))
-  (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
-            do (let ((elements (-> (parse-tree-of page)
-                                   (plump:get-elements-by-tag-name tag))))
-                 (when elements
-                   (return (-> elements first plump:text)))))
-      "Untitled"))
+(defmethod load-page ((page html-page))
+  (with-slots (file parse-tree title) page
+    (let ((plump:*tag-dispatchers* plump:*html-tags*))
+      (setf parse-tree (plump:parse file))
+      (setf title (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
+                            do (let ((elements (-> (parse-tree-of page)
+                                                   (plump:get-elements-by-tag-name tag))))
+                                 (when elements
+                                   (return (-> elements first plump:text)))))
+                      "Untitled"))))
+  page)
 
 ;;
 ;; Render HTML pages
@@ -191,7 +186,7 @@ standard HTML tag.")
            (lookup-failure (c)
              (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
-                      (views:object-ref c :display text)))))
+                      (views:object-ref c :display render-children)))))
          t)
         (hyperdoc
          (handler-case

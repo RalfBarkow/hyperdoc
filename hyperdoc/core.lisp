@@ -135,12 +135,12 @@ that were loaded previously."
   "Reload the text pages of HyperDoc HDOC."
   (load-text-pages hdoc)
   (with-slots (pages text-pages) hdoc
-    ;; Remove the stale text page entries
-    (loop for file being the hash-keys of pages 
+    ;; Remove the potentially stale text page entries
+    (loop for title being the hash-keys of pages
           using (hash-value page)
           when (typep page 'text-page)
-          do (remhash file pages))
-    ;; Add fresh text page entries
+          do (remhash title pages))
+    ;; Add the current text page entries
     (loop for page being the hash-values of text-pages
           do (setf (gethash (title-of page) pages) page))))
 
@@ -184,7 +184,6 @@ PAGE-LOOKUP-FAILURE."
                               :hyperdoc hdoc
                               :file file)))
     (load-page page)
-    (setf (slot-value page 'title) (page-title page))
     page))
 
 (defclass code-page (page)
@@ -206,12 +205,9 @@ PAGE-LOOKUP-FAILURE."
     (string-right-trim " ")))
 
 ;;
-;; The implementations of these three generic functions
+;; The implementations of these two generic functions
 ;; are in hyperdoc/explorer.
 ;;
 
 (defgeneric page-class (filetype))
-
 (defgeneric load-page (page))
-
-(defgeneric page-title (page))
