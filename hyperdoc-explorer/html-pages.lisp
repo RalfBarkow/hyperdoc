@@ -138,6 +138,11 @@ standard HTML tag.")
       (views:transclusion (html-inspector-views/standard:source-code-view fn)))
     t)
 
+  ;; unloaded Lisp code with syntax highlighting
+  (:method ((tag (eql :lisp-code)) element)
+    (views:lisp-snippet (str:trim (plump:text element)))
+    t)
+
   ;; html-generator elements are rendered here.
   (:method ((tag (eql :html-generator)) element)
     (let* ((*package* (slot-value *page-state* 'package))

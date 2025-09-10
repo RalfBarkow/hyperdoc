@@ -80,6 +80,10 @@ As an example, this is the source code of the <a expr="(find-class 'hyperdoc)">c
 
 <source-of-class>hyperdoc</source-of-class>
 
+### Lisp code
+
+Source code transclusions can be used only for functions and classes that have already been added to the image. An element with tag `<lisp-code>` inserts arbitrary Lisp code with syntax highlighting, but without loading or even properly parsing it. Syntax highlighting is applied in the browser.
+
 ## Lisp code generating HTML code
 
 An element with tag `html-generator` is rendered by evaluating its text
