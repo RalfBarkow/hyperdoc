@@ -31,13 +31,17 @@
   (with-slots (file parse-tree title) page
     (let ((plump:*tag-dispatchers* plump:*html-tags*))
       (setf parse-tree (plump:parse file))
-      (setf title (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
-                            do (let ((elements (-> (parse-tree-of page)
-                                                   (plump:get-elements-by-tag-name tag))))
-                                 (when elements
-                                   (return (-> elements first plump:text)))))
-                      "Untitled"))))
+      (set-title page)))
   page)
+
+(defun set-title (page)
+  (with-slots (parse-tree title) page
+    (setf title (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
+                          do (let ((elements (-> (parse-tree-of page)
+                                               (plump:get-elements-by-tag-name tag))))
+                               (when elements
+                                 (return (-> elements first plump:text)))))
+                    "Untitled"))))
 
 ;;
 ;; Render HTML pages

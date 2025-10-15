@@ -24,11 +24,11 @@
 ;;
 
 (defmethod load-page ((page markdown-page))
-  (with-slots (file parse-tree) page
+  (with-slots (file parse-tree title) page
     (let* ((plump:*tag-dispatchers* plump:*html-tags*)
-          (text (alexandria:read-file-into-string file))
-          (html (with-output-to-string (str)
-                  (3bmd:parse-string-and-print-to-stream text str))))
-      (setf parse-tree (plump:parse html))))
+           (text (alexandria:read-file-into-string file))
+           (html (with-output-to-string (str)
+                   (3bmd:parse-string-and-print-to-stream text str))))
+      (setf parse-tree (plump:parse html))
+      (set-title page)))
   page)
-
