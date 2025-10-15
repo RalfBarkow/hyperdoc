@@ -12,3 +12,5 @@
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperdoc)
+(trivial-package-local-nicknames:add-package-local-nickname
+ :views/standard :html-inspector-views/standard :hyperdoc)

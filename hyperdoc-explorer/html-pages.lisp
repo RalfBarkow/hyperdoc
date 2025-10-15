@@ -135,7 +135,11 @@ standard HTML tag.")
 
   ;; unloaded Lisp code with syntax highlighting
   (:method ((tag (eql :lisp-code)) element)
-    (views:lisp-snippet (str:trim (plump:text element)))
+    (-> element
+        plump:text
+        str:trim
+        views/standard:parse-lisp-code
+        views/standard:render-as-html)
     t)
 
   ;; html-generator elements are rendered here.
