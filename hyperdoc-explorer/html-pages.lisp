@@ -139,11 +139,15 @@ standard HTML tag.")
 
   ;; unloaded Lisp code with syntax highlighting
   (:method ((tag (eql :lisp-code)) element)
-    (-> element
-        plump:text
-        str:trim
-        views/standard:parse-lisp-code
-        views/standard:render-as-html)
+    (let* ((package-name (plump:attribute element "package"))
+           (package (or (and package-name
+                             (find-package (str:upcase package-name)))
+                        (slot-value *page-state* 'package))))
+      (-> element
+          plump:text
+          str:trim
+          (views/standard:parse-lisp-code package)
+          views/standard:render-as-html))
     t)
 
   ;; html-generator elements are rendered here.
@@ -163,9 +167,9 @@ standard HTML tag.")
           (text (plump:text element))
           (render-children (let ((children (plump:children element)))
                              (unless (zerop (length children))
-                                 (make-instance 'html-expr
-                                                :nodes children
-                                                :style :normal)))))
+                               (make-instance 'html-expr
+                                              :nodes children
+                                              :style :normal)))))
       (cond
         (expr
          (assert (and (null hyperdoc) (null page)))
