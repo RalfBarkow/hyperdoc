@@ -49,7 +49,3 @@ a[href*='wikipedia.org']::after {
   background-position: center bottom;
   padding-right: 1.1em;
 }
-
-.hyperdoc-page p {
-  font-family: "Latin Modern Math", math;
-}
