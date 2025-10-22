@@ -12,5 +12,6 @@
     ((head (eql 'defexample)) cst source position)
   (views:eval-button "►"
                      (views:thunk
-                       (-> cst cst:second cst:raw symbol-function funcall)))
+                       (-> cst cst:second cst:raw symbol-function funcall))
+                     "Run example")
   (call-next-method))
