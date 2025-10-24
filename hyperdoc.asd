@@ -60,6 +60,7 @@
                #:njson/jzon
                #:plump
                #:plump-inspector-views
+               #:puri
                #:3bmd
                #:trivial-package-local-nicknames
                #:asdf #:uiop)

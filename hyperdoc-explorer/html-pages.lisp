@@ -215,7 +215,28 @@ standard HTML tag.")
         ;; Add target="_blank" to href links that don't specify a target
         (t (unless (plump:attribute element "target")
              (plump:set-attribute element "target" "_blank"))
-           nil)))))
+           nil))))
+
+  (:method ((tag (eql :img)) element)
+    (let* ((src (plump:attribute element "src"))
+           (uri (puri:parse-uri src)))
+      ;; If the src has a URI scheme, leave as a img element.
+      ;; If the src starts with "/", do the same.
+      ;; Otherwise, it's a local file that a browser cannot access,
+      ;; replace it with a data URL.
+      (unless (or (puri:uri-scheme uri) (str:starts-with? "/" src))
+        (let* ((hyperdoc (-> *page-state*
+                             (slot-value 'page)
+                             (slot-value 'hyperdoc)))
+               (directory (directory-of hyperdoc))
+               (pathname (merge-pathnames src directory))
+               (bytes (alexandria:read-file-into-byte-vector pathname))
+               (encoded (base64:usb8-array-to-base64-string bytes))
+               (image-type (-> pathname pathname-type str:downcase))
+               (mime-type (if (equal image-type "jpg") "jpeg" image-type))
+               (data-url (str:concat "data:image/" mime-type ";base64," encoded)))
+          (plump:set-attribute element "src" data-url)))
+      nil)))
 
 ;; Add the special-tag renderer to plump's generic serializer.
 
