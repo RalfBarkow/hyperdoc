@@ -32,3 +32,15 @@
                          (3bmd:parse-string-and-print-to-stream content str))))
     (:generator
      (funcall content))))
+
+(views:defview views:👀playground (pg playground-page)
+  (let ((view (call-next-method)))
+    ;; Move playground view to the first position,
+    ;; with its tab in non-dimmed text.
+    (views:rename view :title "Playground" :priority 1)))
+
+(defmethod views/standard:playground-package ((pg playground-page))
+  (find-package "CL-USER"))
+
+(defmethod views/standard:initial-playground-content ((pg playground-page))
+  (initial-content-of pg))

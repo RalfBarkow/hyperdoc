@@ -20,6 +20,7 @@
            #:assert-eql #:assert-within-tolerance
            ;; Defining tools
            #:deftool #:html #:markdown #:html-generator
+           #:defplayground
            ;; Access to the global catalog of registered HyperDocs
            #:*catalog* #:hyperdocs-of
            ;; Access to HyperDoc data

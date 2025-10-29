@@ -25,7 +25,7 @@
 (defvar *current-tool*)
 
 (defmacro deftool (symbol title &body body)
-  `(let ((*current-tool* (make-tool ',symbol, title)))
+  `(let ((*current-tool* (make-tool ',symbol ,title)))
      ,@body))
 
 (defun html-generator* (fn)
@@ -45,3 +45,21 @@
   (assert (typep *current-tool* 'tool-page))
   (push (cons :markdown s)
         (parts-of *current-tool*)))
+
+;;
+;; Playgrounds as tool pages
+;;
+
+(defclass playground-page (page)
+  ((initial-content :reader initial-content-of :initarg :initial-content)))
+
+(defun make-playground (symbol title initial-content)
+  (let ((page (make-instance symbol
+                             :title title
+                             :initial-content initial-content)))
+    (setf (gethash symbol *tools*) page)
+    page))
+
+(defmacro defplayground (symbol title initial-content)
+  `(progn (defclass ,symbol (playground-page) ())
+          (make-playground ',symbol ,title ,initial-content)))
