@@ -11,7 +11,8 @@
 (defvar *tools* (make-hash-table :test #'eq))
 
 (defun get-tool (name)
-  (gethash name *tools*))
+  (or (gethash name *tools*)
+      (error "No tool named ~A" name)))
 
 (defun make-tool (symbol title)
   (let ((tool (make-instance 'tool-page
