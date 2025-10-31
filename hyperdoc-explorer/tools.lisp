@@ -44,3 +44,10 @@
 
 (defmethod views/standard:initial-playground-content ((pg playground-page))
   (initial-content-of pg))
+
+(defmethod views:title-bar-action-buttons ((pg playground-page))
+  (views:action-button "Reset"
+                       (views:thunk (views/standard:store-playground-content
+                                     pg (initial-content-of pg))
+                         t)
+                       "Reset to initial content"))
