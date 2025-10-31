@@ -19,6 +19,9 @@
 .hyperdoc-page h5 {
   font-size: 1.1em;
 }
+.hyperdoc-page .code-snippet {
+  margin-left: 10px;
+}
 .hyperdoc-computed-value {
   text-decoration-line: underline;
   text-decoration-style: dashed;  
