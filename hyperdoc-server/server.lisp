@@ -35,6 +35,7 @@ arbitrary Lisp code."
                                                    :title (hyperdoc:title-of hd)
                                                    :playground? development))
      :path (str:concat "/" (-> hd hyperdoc:title-of slug)))
+    (hyperdoc::ensure-pages-loaded hd)
     (loop for page-title being the hash-keys in (hyperdoc:pages-of hd)
             using (hash-value object)
           do (let ((page-title* page-title)
