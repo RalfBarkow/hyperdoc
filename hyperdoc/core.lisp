@@ -64,7 +64,8 @@ the macro DEFHYPERDOC."
                                       (asdf:component-children component))))
          (pages (make-hash-table :test #'equal))
          (code-pages (make-array (length code-files)
-                                 :element-type 'code-page)))
+                                 :element-type (or 'null 'code-page)
+                                 :initial-element nil)))
     (let ((hyperdoc (make-instance 'hyperdoc
                                    :asdf-system-name asdf-system-name
                                    :directory directory
