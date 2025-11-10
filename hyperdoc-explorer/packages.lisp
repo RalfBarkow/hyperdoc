@@ -31,4 +31,4 @@
   (-> hd
     packages-used
     views:👀items
-    (views:rename :title "Packages" :priority 8)))
+    (views:rename :title "Packages" :priority 12)))

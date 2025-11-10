@@ -71,7 +71,7 @@
 (views:defview 👀files (hd hyperdoc)
   (-> (directory-of hd)
     views:👀items
-    (views:rename :title "Files" :priority 6)))
+    (views:rename :title "Files" :priority 10)))
 
 ;;
 ;; The source code repositories for the HyperDoc
