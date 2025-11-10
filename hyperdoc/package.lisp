@@ -12,6 +12,7 @@
            #:defhyperdoc
            #:register
            #:make-hyperdoc
+           #:data-of
            ;; Referencing HyperDocs and pages from code files
            #:see #:page #:hyperdoc
            ;; Defining examples and using assertions in them

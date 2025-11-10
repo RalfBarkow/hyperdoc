@@ -48,7 +48,19 @@ arbitrary Lisp code."
                                                               :title page-title*
                                                               :playground? development))
                 :path (str:concat "/" (-> hd hyperdoc:title-of slug)
-                                  "/" (-> page-title* slug)))))))
+                                  "/" (-> page-title* slug)))))
+    (loop for (variable . title) in (hyperdoc:data-of hd)
+          do (let ((variable* variable)
+                   (title* title))
+               (clog:set-on-new-window
+                #'(lambda (body)
+                    (clog-moldable-inspector:on-new-inspector body
+                                                              :object (symbol-value variable*)
+                                                              :pane-width pane-width
+                                                              :title title*
+                                                              :playground? development))
+                :path (str:concat "/" (-> hd hyperdoc:title-of slug)
+                                  "/" (-> title* slug)))))))
 
 (defun serve-catalog (&key (port 8080) (pane-width "700px") (development nil))
   "Start a Web server on PORT that serves the HyperDoc catalog at path \"/\"
@@ -101,3 +113,38 @@ are not allowed in URLs."
     (views:include-js "/hyperdoc-server/js/url.js")
     (views:include-script "makeUrl(window.currentInspectorView)")
     (views:html (:hyperdoc-slug (views:esc slug)))))
+
+;;
+;; Extended dataset view with URLs
+;;
+
+(defclass slug-wrapper () (slug))
+
+(defmethod views:html-representation ((w slug-wrapper) &optional id)
+  (declare (ignore id))
+  (views:html (:hyperdoc-slug (views:esc (slot-value w 'slug)))))
+
+(views:defview 👀url (w slug-wrapper)
+  (url-view-from-slug (slot-value w 'slug)))
+
+(views:defview hyperdoc::👀data (hd hyperdoc:hyperdoc)
+  (when-let (data (hyperdoc:data-of hd))
+    (views:html-view :title "Data" :priority 6
+      (views:add-asset-path "/hyperdoc-server/"
+                            (asdf:system-relative-pathname
+                             :hyperdoc/server
+                             "assets/hyperdoc-server"))
+      (views:include-js "/hyperdoc-server/js/url.js")
+      (views:include-script "makeUrl(window.currentInspectorView)")
+      (views:html-table data
+                        :columns '("Title" "URL" "Value")
+                        :display (list #'cdr
+                                       #'(lambda (p)
+                                           (let ((wrapper (make-instance 'slug-wrapper)))
+                                             (setf (slot-value wrapper 'slug)
+                                                   (str:concat (-> hd hyperdoc:title-of slug)
+                                                               "/" 
+                                                              (-> p cdr slug)))
+                                             wrapper))
+                                       #'(lambda (p) (symbol-value (car p))))
+                        :inspect-items :by-column))))

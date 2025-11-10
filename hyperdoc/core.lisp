@@ -26,6 +26,7 @@
    (text-pages :reader text-pages-of :initarg :text-pages)
    (code-pages :reader code-pages-of :initarg :code-pages)
    (tools :reader tools-of :initarg :tools)
+   (data :reader data-of :initarg :data)
    (pages :reader pages-of :initarg :pages)
    ;; The packages used in the HyperDoc are deduced
    ;; from the code files in hyperdoc-explorer.
@@ -44,11 +45,14 @@
 ;; Create a HyperDoc instance.
 ;;
 
-(defun make-hyperdoc (&key title asdf-system-name subdirectory entry tools)
+(defun make-hyperdoc (&key title asdf-system-name subdirectory entry tools data)
   "Create a HyperDoc instance with TITLE for the text and code pages
 located in SUBDIRECTORY relative to the base directory for ASDF-SYSTEM-NAME.
 The entry page for the HyperDoc is the one whose titles is ENTRY.
-TOOLS is a list of symbols naming HyperDoc tools.
+TOOLS is a list of symbols naming HyperDoc tools. DATA is a list of
+(SYMBOL . STRING) cons pairs in which SYMBOL names a global variable
+and STRING is the title under which the variable's data is listed in
+the HyperDoc's list of datasets.
 
 Note that the recommended way to create and register a HyperDoc is
 the macro DEFHYPERDOC."
@@ -74,6 +78,7 @@ the macro DEFHYPERDOC."
                                    :entry entry
                                    :code-pages code-pages
                                    :tools tools
+                                   :data data
                                    :text-pages (make-hash-table :test #'equal)
                                    :pages pages)))
       (loop for file in code-files

@@ -55,6 +55,15 @@
                                 :title "Code pages"
                                 :priority 5)))
 
+(views:defview 👀data (hd hyperdoc)
+  (when-let (data (data-of hd))
+    (views:html-view :title "Data" :priority 6
+      (views:html-table data
+                  :columns '("Title" "Value")
+                  :display (list #'cdr
+                                 #'(lambda (p) (symbol-value (car p))))
+                  :inspect-items :by-column))))
+
 ;;
 ;; The files in the HyperDocs's directory
 ;;
