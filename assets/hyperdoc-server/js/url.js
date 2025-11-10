@@ -4,8 +4,8 @@
 //
 makeUrl = function(element) {
     var slugElements = element.getElementsByTagName('hyperdoc-slug');
-    for(var i = 0; i < slugElements.length; ++ i) {
-        var slug = slugElements[i];
+    while (slugElements.length > 0) {
+        var slug = slugElements[0];
         var url = window.location.origin + '/' + slug.textContent;
         var link = document.createElement('a');
         var linkText = document.createTextNode(url);
