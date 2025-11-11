@@ -51,4 +51,4 @@ signal hyperdoc-lookup-failure."
     (cond
       ((null package) name)
       ((string= (package-name package) "KEYWORD") name)
-      (t (str:concat (package-name package) ":" name)))))
+      (t (concatenate 'string (package-name package) ":" name)))))
