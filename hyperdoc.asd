@@ -25,6 +25,26 @@
                              (:file "tools")
                              (:file "hyperdoc")))))
 
+
+(defsystem #:hyperdoc/wikipedia
+  :description "HyperDoc interface to Wikipedia"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc
+               #:html-inspector-views
+               #:trivial-package-local-nicknames
+               #:alexandria
+               #:arrow-macros
+               #:str)
+  :components ((:module "hyperdoc-wikipedia"
+                :serial t
+                :components ((:file "package")
+                             (:file "wikipedia")))))
+
 (defsystem #:hyperdoc/inspector
   :description "HyperDoc for the moldable inspector"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -34,6 +54,7 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperdoc
+               #:hyperdoc/wikipedia
                #:html-inspector-views
                #:clog-moldable-inspector
                #:trivial-package-local-nicknames)
@@ -101,22 +122,3 @@
                 :components ((:file "package")
                              (:file "server")
                              (:file "hyperdoc")))))
-
-(defsystem #:hyperdoc/wikipedia
-  :description "HyperDoc interface to Wikipedia"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
-  :license  "BSD"
-  :version "0.0.1"
-  :homepage "https://codeberg.org/khinsen/hyperdoc"
-  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
-  :serial t
-  :depends-on (#:hyperdoc
-               #:html-inspector-views
-               #:trivial-package-local-nicknames
-               #:alexandria
-               #:arrow-macros
-               #:str)
-  :components ((:module "hyperdoc-wikipedia"
-                :serial t
-                :components ((:file "package")
-                             (:file "wikipedia")))))

@@ -8,7 +8,11 @@
 ;; The HyperDoc for the moldable inspector on which HyperDoc is based
 ;;
 
+(hyperdoc/wikipedia:request-wikipedia :en)
+
 (hyperdoc:defhyperdoc *hyperdoc*
+  ;; The ID of the HyperDoc
+  :id :moldable-inspector
   ;; The title of the HyperDoc
   :title "Moldable inspector"
   ;; The ASDF system in which it is located
