@@ -16,10 +16,10 @@
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
-                             (:file "errors")
+                             (:file "abstract-interface")
+                             (:file "catalog")
                              (:file "core")
                              (:file "links-in-code")
-                             (:file "catalog")
                              (:file "defining")
                              (:file "examples")
                              (:file "tools")

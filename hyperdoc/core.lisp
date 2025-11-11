@@ -16,7 +16,7 @@
 ;; pages are created by code, so their list is also fixed at load time.
 ;;
 
-(defclass hyperdoc ()
+(defclass hyperdoc (abstract-hyperdoc)
   ((asdf-system-name :reader asdf-system-name-of :initarg :asdf-system-name)
    (directory :reader directory-of :initarg :directory)
    (writable :reader writable-of :initarg :writable)
@@ -45,7 +45,7 @@
 ;; Create a HyperDoc instance.
 ;;
 
-(defun make-hyperdoc (&key title asdf-system-name subdirectory entry tools data)
+(defun make-hyperdoc (&key id title asdf-system-name subdirectory entry tools data)
   "Create a HyperDoc instance with TITLE for the text and code pages
 located in SUBDIRECTORY relative to the base directory for ASDF-SYSTEM-NAME.
 The entry page for the HyperDoc is the one whose titles is ENTRY.
@@ -71,6 +71,7 @@ the macro DEFHYPERDOC."
                                  :element-type (or 'null 'code-page)
                                  :initial-element nil)))
     (let ((hyperdoc (make-instance 'hyperdoc
+                                   :id (or id (gensym "HYPERDOC"))
                                    :asdf-system-name asdf-system-name
                                    :directory directory
                                    :writable writable
@@ -159,7 +160,7 @@ that were loaded previously."
 ;; Look up a page in a HyperDoc
 ;;
 
-(defun find-page (hdoc title &key signal-error?)
+(defmethod find-page ((hdoc hyperdoc) title &key signal-error?)
   "Look up TITLE in HyperDoc HDOC and return the page if found. If no page with
 TITLE exists, return NIL if SIGNAL-ERROR is NIL, otherwise signal
 PAGE-LOOKUP-FAILURE."
@@ -175,7 +176,7 @@ PAGE-LOOKUP-FAILURE."
 ;; slot(s) for storing the page's content.
 ;;
 
-(defclass page ()
+(defclass page (abstract-page)
   ((hyperdoc :accessor hyperdoc-of :initarg :hyperdoc)
    (title :reader title-of :initarg :title)))
 

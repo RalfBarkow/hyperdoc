@@ -9,7 +9,7 @@
 ;;
 
 (defclass catalog ()
-  ((hyperdocs :accessor hyperdocs-of :initform nil)))
+  ((hyperdocs :accessor hyperdocs-of :initform nil :type list)))
 
 (defvar *catalog*
   (make-instance 'catalog))
@@ -20,29 +20,35 @@
 ;;
 
 (defun register (hdoc)
-  "Register HyperDoc HDOC in the globale HyperDoc catalog."
+  "Register HyperDoc HDOC in the global HyperDoc catalog."
   (push hdoc (hyperdocs-of *catalog*)))
 
 ;;
 ;; Catalog lookup
 ;;
 
-(defun find-hyperdoc (title &key signal-error?)
-  "Look up the HyperDoc entitled TITLE in the global catalog. If no such HyperDoc
-exists, then return NIL if SIGNAL-ERROR? is nil, else signal
-hyperdoc-lookup-failure."
-  (or (dolist (hd (hyperdocs-of *catalog*))
-        (when (string= title (title-of hd))
-          (return hd)))
-      (and signal-error?
-           (error 'hyperdoc-lookup-failure :title title))))
+(define-condition hyperdoc-lookup-failure (lookup-failure)
+  ((title-or-id :initarg :title-or-id)))
 
-(defun find-hyperdoc-in-directory (pathname  &key signal-error?)
-  "Look up the HyperDoc whose directory is PATHNAME in the global catalog.
-If no such HyperDoc exists, then return NIL if SIGNAL-ERROR? is nil, else
-signal directory-lookup-failure."
+(declaim (ftype (function (string &key (:signal-error? boolean))
+                          (or abstract-hyperdoc null))
+                find-hyperdoc))
+
+(defun find-hyperdoc (title-or-id &key signal-error?)
+  "Look up the TITLE-OR-ID in the global catalog. If no HyperDoc with
+that title or id exists, then return NIL if SIGNAL-ERROR? is nil, else
+signal hyperdoc-lookup-failure."
   (or (dolist (hd (hyperdocs-of *catalog*))
-        (when (equal pathname (directory-of hd))
+        (when (or (string= title-or-id (title-of hd))
+                  (string-equal title-or-id (id-as-string (id-of hd))))
           (return hd)))
       (and signal-error?
-           (error 'directory-lookup-failure :catalog *catalog* :pathname pathname))))
+           (error 'hyperdoc-lookup-failure :title-or-id title-or-id))))
+
+(defun id-as-string (symbol)
+  (let ((package (symbol-package symbol))
+        (name (symbol-name symbol)))
+    (cond
+      ((null package) name)
+      ((string= (package-name package) "KEYWORD") name)
+      (t (str:concat (package-name package) ":" name)))))

@@ -31,5 +31,19 @@
                       :directory (pathname-directory source))))
       (find-hyperdoc-in-directory directory :signal-error? t))))
 
+(define-condition directory-lookup-failure (lookup-failure)
+  ((catalog :initarg :catalog)
+   (pathname :initarg :pathname)))
+
+(defun find-hyperdoc-in-directory (pathname  &key signal-error?)
+  "Look up the HyperDoc whose directory is PATHNAME in the global catalog.
+If no such HyperDoc exists, then return NIL if SIGNAL-ERROR? is nil, else
+signal directory-lookup-failure."
+  (or (dolist (hd (hyperdocs-of *catalog*))
+        (when (equal pathname (directory-of hd))
+          (return hd)))
+      (and signal-error?
+           (error 'directory-lookup-failure :catalog *catalog* :pathname pathname))))
+
 (defmethod hyperdoc ((title string))
   (find-hyperdoc title :signal-error? t))

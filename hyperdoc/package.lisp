@@ -8,9 +8,14 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export ;; Creating and registering HyperDocs
-           #:defhyperdoc
+  (:export ;; Implementing HyperDoc variants
+           #:abstract-hyperdoc #:abstract-page
            #:register
+           #:title-of #:entry-of
+           #:find-page
+           #:lookup-failure #:page-lookup-failure
+           ;; Creating and registering HyperDocs
+           #:defhyperdoc
            #:make-hyperdoc
            #:data-of
            ;; Referencing HyperDocs and pages from code files

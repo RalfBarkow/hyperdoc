@@ -9,7 +9,7 @@
 ;;
 
 (defmacro defhyperdoc (var-symbol
-                       &key title asdf-system-name subdirectory entry tools data)
+                       &key id title asdf-system-name subdirectory entry tools data)
   "Define and register a HyperDoc from TITLE, the HyperDoc's title,
 ASDF-SYSTEM-NAME and SUBDIRECTORY to define the HyperDoc's directory.
 Optional data are ENTRY, the title of the entry page, TOOLS, a list
@@ -19,7 +19,8 @@ title under which the variable's data is listed in the HyperDoc's
 list of datasets. The HyperDoc becomes the value bound to VAR-SYMBOL."
   `(progn
      (defvar ,var-symbol
-       (make-hyperdoc :title ,title
+       (make-hyperdoc :id ,id
+                      :title ,title
                       :asdf-system-name ,asdf-system-name
                       :subdirectory ,subdirectory
                       :entry ,entry
