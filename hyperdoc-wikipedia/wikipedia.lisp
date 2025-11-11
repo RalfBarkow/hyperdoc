@@ -24,7 +24,7 @@
                  :title title))
 
 (defmethod hyperdoc:entry-of ((wp wikipedia))
-  (find-page wp (main-page-of wp)))
+  (hyperdoc:find-page wp (main-page-of wp)))
 
 (defmethod hyperdoc:title-of ((wp wikipedia))
   (title-of wp))
@@ -91,7 +91,7 @@
                :style "border:none;width:100%;height:100%" ))))
 
 (views:defview views:👀content (wp wikipedia)
-  (let ((entry (entry-of wp)))
+  (let ((entry (hyperdoc:entry-of wp)))
     (views:rename (views:👀content entry)
                   :title (title-of entry)
                   :priority 1)))
