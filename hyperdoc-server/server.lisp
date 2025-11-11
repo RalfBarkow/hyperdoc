@@ -35,32 +35,46 @@ arbitrary Lisp code."
                                                    :title (hyperdoc:title-of hd)
                                                    :playground? development))
      :path (str:concat "/" (-> hd hyperdoc:title-of slug)))
-    (hyperdoc::ensure-pages-loaded hd)
-    (loop for page-title being the hash-keys in (hyperdoc:pages-of hd)
-            using (hash-value object)
-          do (let ((page-title* page-title)
-                   (object* object))
-               (clog:set-on-new-window
-                #'(lambda (body)
-                    (clog-moldable-inspector:on-new-inspector body
-                                                              :object object*
-                                                              :pane-width pane-width
-                                                              :title page-title*
-                                                              :playground? development))
-                :path (str:concat "/" (-> hd hyperdoc:title-of slug)
-                                  "/" (-> page-title* slug)))))
-    (loop for (variable . title) in (hyperdoc:data-of hd)
-          do (let ((variable* variable)
-                   (title* title))
-               (clog:set-on-new-window
-                #'(lambda (body)
-                    (clog-moldable-inspector:on-new-inspector body
-                                                              :object (symbol-value variable*)
-                                                              :pane-width pane-width
-                                                              :title title*
-                                                              :playground? development))
-                :path (str:concat "/" (-> hd hyperdoc:title-of slug)
-                                  "/" (-> title* slug)))))))
+    (register-pages hd :pane-width pane-width :development development)
+    (register-data hd :pane-width pane-width :development development)))
+
+(defgeneric register-pages (hyperdoc &key pane-width development)
+  (:method ((hd hyperdoc:abstract-hyperdoc) &key pane-width development)
+    (declare (ignore pane-width development))))
+
+(defgeneric register-data (hyperdoc &key pane-width development)
+  (:method ((hd hyperdoc:abstract-hyperdoc) &key pane-width development)
+    (declare (ignore pane-width development))))
+
+(defmethod register-pages ((hd hyperdoc:hyperdoc) &key pane-width development)
+  (hyperdoc::ensure-pages-loaded hd)
+  (loop for page-title being the hash-keys in (hyperdoc:pages-of hd)
+          using (hash-value object)
+        do (let ((page-title* page-title)
+                 (object* object))
+             (clog:set-on-new-window
+              #'(lambda (body)
+                  (clog-moldable-inspector:on-new-inspector body
+                                                            :object object*
+                                                            :pane-width pane-width
+                                                            :title page-title*
+                                                            :playground? development))
+              :path (str:concat "/" (-> hd hyperdoc:title-of slug)
+                                "/" (-> page-title* slug))))))
+
+(defmethod register-data ((hd hyperdoc:hyperdoc) &key pane-width development)
+  (loop for (variable . title) in (hyperdoc:data-of hd)
+        do (let ((variable* variable)
+                 (title* title))
+             (clog:set-on-new-window
+              #'(lambda (body)
+                  (clog-moldable-inspector:on-new-inspector body
+                                                            :object (symbol-value variable*)
+                                                            :pane-width pane-width
+                                                            :title title*
+                                                            :playground? development))
+              :path (str:concat "/" (-> hd hyperdoc:title-of slug)
+                                "/" (-> title* slug)))))  )
 
 (defun serve-catalog (&key (port 8080) (pane-width "700px") (development nil))
   "Start a Web server on PORT that serves the HyperDoc catalog at path \"/\"
