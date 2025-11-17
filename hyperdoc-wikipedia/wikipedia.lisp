@@ -70,7 +70,10 @@
   (format nil
           "https://~A.m.wikipedia.org/wiki/~A"
           (-> edition symbol-name str:downcase)
-          (str:replace-all " " "_" page-title)))
+          (-> page-title encode-page-title-for-url)))
+
+(defun encode-page-title-for-url (page-title)
+  (str:replace-all " " "_" page-title))
 
 ;;
 ;; Views
@@ -96,3 +99,40 @@
                   :title (title-of entry)
                   :priority 1)))
 
+(views:defview views:👀source (page wikipedia-page)
+  (views:html-view :title "Source" :priority 3
+    (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
+                                        :method :get
+                                        :parameters `(("action" . "parse")
+                                                      ("page" . ,(-> page title-of
+                                                                   encode-page-title-for-url))
+                                                      ("prop" . "wikitext")
+                                                      ("format" . "json"))
+                                        :want-stream t))
+           (data (shasht:read-json stream))
+           (wikitext (->> data
+                       (gethash "parse")
+                       (gethash "wikitext")
+                       (gethash "*"))))
+      (views:html
+        (:pre (views:esc wikitext))))))
+
+(views:defview 👀parse-tree (page wikipedia-page)
+  (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
+                                      :method :get
+                                      :parameters `(("action" . "parse")
+                                                    ("page" . ,(-> page title-of
+                                                                 encode-page-title-for-url))
+                                                    ("prop" . "parsetree")
+                                                    ("format" . "json"))
+                                      :want-stream t))
+         (data (shasht:read-json stream)))
+    (-<> data
+      (gethash "parse" <>)
+      (gethash "parsetree" <>)
+      (gethash "*" <>)
+      (plump:parse)
+      (plump:get-elements-by-tag-name <> "root")
+      (first)
+      (plump-inspector-views::👀children)
+      (views:rename :title "Parse tree" :priority 5))))

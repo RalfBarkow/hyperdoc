@@ -36,6 +36,7 @@
   :serial t
   :depends-on (#:hyperdoc
                #:html-inspector-views
+               #:plump-inspector-views
                #:trivial-package-local-nicknames
                #:alexandria
                #:arrow-macros
