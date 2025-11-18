@@ -275,4 +275,116 @@ standard HTML tag.")
 (views:defview 👀parse-tree (page html-page)
   (-> (parse-tree-of page)
       plump-inspector-views::👀children
-      (views:rename :title "Parse tree" :priority 4)))
+      (views:rename :title "Parse tree" :priority 11)))
+
+;;
+;; Link view
+;;
+
+(views:defview 👀links (page html-page)
+  (when-let (links (extract-links page))
+    (views:html-view :title "Links" :priority 5
+      (when-let (local-pages (cdr (assoc :local-page links)))
+        (views:html
+          (:details :open t
+                    (:summary "Local pages")
+                    (views:html-table (mapcar #'second local-pages)))))
+      (when-let (hyperdocs (cdr (assoc :hyperdoc links)))
+        (views:html
+          (:details :open t
+                    (:summary "HyperDocs")
+                    (views:html-table hyperdocs
+                                      :display (list #'first)
+                                      :inspect #'second))))
+      (when-let (hyperdoc-pages (cdr (assoc :hyperdoc-page links)))
+        (views:html
+          (:details :open t
+                    (:summary "HyperDoc pages")
+                    (views:html-table hyperdoc-pages
+                                      :columns '("HyperDoc" "Page")
+                                      :display (list #'(lambda (spec)
+                                                         (-> spec first first
+                                                                  find-hyperdoc))
+                                                     #'second)
+                                      :inspect-items :by-column))))
+      (when-let (exprs (cdr (assoc :expr links)))
+        (views:html
+          (:details :open t
+                    (:summary "Expressions")
+                    (views:html-table exprs
+                                      :inspect #'second
+                                      :columns '("Expr" "Package")
+                                      :display (list #'caar #'cdar)))))
+      (when-let (web-links (cdr (assoc :web links)))
+        (views:html
+          (:details :open t
+                    (:summary "Web links")
+                    (:table :class "inspector-table"
+                      (dolist (link (mapcar #'first web-links))
+                        (views:html
+                          (:tr (:td (:a :href link :target "_blank"
+                                        (views:esc link)))))))))))))
+
+(defun extract-links (page)
+  (let ((current-package (find-package "CL-USER"))
+        (this-hyperdoc (hyperdoc-of page))
+        page-links hyperdoc-links hyperdoc-page-links web-links expr-links)
+    (labels ((walk (node)
+               (loop for child across (plump:children node)
+                     do (when (plump:element-p child)
+                          (cond
+                            ((string-equal "in-package" (plump:tag-name child))
+                             (setf current-package
+                                   (-> child plump:text string-upcase find-package)))
+                            ((string-equal "a" (plump:tag-name child))
+                             (collect-link child)))
+                          (walk child))))
+             (collect-link (element)
+               (let ((href (plump:attribute element "href"))
+                     (expr (plump:attribute element "expr"))
+                     (hyperdoc (plump:attribute element "hyperdoc"))
+                     (page (plump:attribute element "page"))
+                     (view (plump:attribute element "view")))
+                 (cond
+                   ;; For expression links, store a cons with the expression
+                   ;; plus the package in which it can be evaluated.
+                   (expr
+                    (let* ((*package* current-package)
+                           (value (-> expr parse-and-eval)))
+                      (pushnew (list (cons expr *package*) value view)
+                               expr-links
+                               :test #'equal :key #'first)))
+                   ;; For Web links, store the URL as a string.
+                   (href
+                    (pushnew (list href nil view) web-links
+                             :test #'equal :key #'first))
+                   ;; Remaining link types are combinations of page and
+                   ;; hyperdoc attributes, so if there's neither, raise
+                   ;; an error.
+                   ((not (or page hyperdoc))
+                    (error "Unknown link type: ~A" element))
+                   ;; For a hyperdoc link, store the hyperdoc reference
+                   ;; (title or id).
+                   ((and hyperdoc (not page))
+                    (pushnew (list hyperdoc (find-hyperdoc hyperdoc) view)
+                             hyperdoc-links
+                             :test #'equal :key #'first))
+                   ;; For a page in the current hyperdoc, store the page title.
+                   ((or (not hyperdoc)
+                        (equal hyperdoc (title-of this-hyperdoc)))
+                    (pushnew (list page (find-page this-hyperdoc page) view)
+                             page-links
+                             :test #'equal :key #'first))
+                   ;; For a page in another hyperdoc, store a cons combining
+                   ;; the hyperdoc reference and the page title.
+                   (t
+                    (pushnew (list (cons hyperdoc page)
+                                   (find-page (find-hyperdoc hyperdoc) page) view)
+                             hyperdoc-page-links
+                             :test #'equal :key #'first))))))
+      (walk (parse-tree-of page))
+      `((:local-page  ,@(nreverse page-links))
+        (:hyperdoc  ,@(nreverse hyperdoc-links))
+        (:hyperdoc-page  ,@(nreverse hyperdoc-page-links))
+        (:web  ,@(nreverse web-links))
+        (:expr ,@(nreverse expr-links))))))

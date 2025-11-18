@@ -104,7 +104,7 @@
   (-> page
       file-of
       views:👀content
-      (views:rename :title "Source" :priority 3)))
+      (views:rename :title "Source" :priority 10)))
 
 ;;
 ;; Source code view for code pages
@@ -114,5 +114,5 @@
   (-> page
       file-of
       views:👀source
-      (views:rename :title "Source" :priority 3)))
+      (views:rename :title "Source" :priority 10)))
 

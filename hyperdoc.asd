@@ -1,11 +1,11 @@
-;;;; System definitions
+;;;; system definitions
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; copyright (c) 2025 konrad hinsen <konrad.hinsen@fastmail.net>
 
 (defsystem #:hyperdoc
-  :description "Hypertext documentation system"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
-  :license  "BSD"
+  :description "hypertext documentation system"
+  :author "konrad hinsen <konrad.hinsen@fastmail.net>"
+  :license  "bsd"
   :version "0.0.1"
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
@@ -27,9 +27,9 @@
 
 
 (defsystem #:hyperdoc/wikipedia
-  :description "HyperDoc interface to Wikipedia"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
-  :license  "BSD"
+  :description "hyperdoc interface to wikipedia"
+  :author "konrad hinsen <konrad.hinsen@fastmail.net>"
+  :license  "bsd"
   :version "0.0.1"
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
