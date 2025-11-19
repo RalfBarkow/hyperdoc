@@ -109,8 +109,9 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (text (-> element plump:text))
            (value (-> text parse-and-eval)))
-      (views:html
-        (views:str value))
+      (if (typep value 'condition)
+          (views:html-representation value)
+          (views:html (views:str value)))
       t))
 
   ;; view-transclusion elements are rendered here.
@@ -118,7 +119,9 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (expr (plump:text element))
            (value (parse-and-eval expr)))
-      (views:transclusion value))
+      (if (typep value 'condition)
+          (views:html-representation value)
+          (views:transclusion value)))
     t)
 
   ;; source-of-class elements are rendered here.
@@ -126,7 +129,10 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (name (plump:text element))
            (class (parse-and-eval (format nil "(find-class '~a)" name))))
-      (views:transclusion (html-inspector-views/standard:source-code-view class)))
+      (if (typep class 'condition)
+          (views:html-representation class)
+          (views:transclusion
+           (html-inspector-views/standard:source-code-view class))))
     t)
 
   ;; source-of-function elements are rendered here.
@@ -134,7 +140,10 @@ standard HTML tag.")
     (let* ((*package* (slot-value *page-state* 'package))
            (name (plump:text element))
            (fn (parse-and-eval (format nil "(function ~a)" name))))
-      (views:transclusion (html-inspector-views/standard:source-code-view fn)))
+      (if (typep fn 'condition)
+          (views:html-representation fn)
+          (views:transclusion
+           (html-inspector-views/standard:source-code-view fn))))
     t)
 
   ;; unloaded Lisp code with syntax highlighting
@@ -154,7 +163,9 @@ standard HTML tag.")
   (:method ((tag (eql :html-generator)) element)
     (let* ((*package* (slot-value *page-state* 'package))
            (expr (plump:text element)))
-      (parse-and-eval expr))
+      (let ((result (parse-and-eval expr)))
+        (when (typep result 'condition)
+          (views:html-representation result))))
     t)
 
   ;; a elements with hyperdoc-specific attributes are
@@ -350,7 +361,7 @@ standard HTML tag.")
                    ;; plus the package in which it can be evaluated.
                    (expr
                     (let* ((*package* current-package)
-                           (value (-> expr parse-and-eval)))
+                           (value (parse-and-eval expr)))
                       (pushnew (list (cons expr *package*) value view)
                                expr-links
                                :test #'equal :key #'first)))
