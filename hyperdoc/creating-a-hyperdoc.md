@@ -29,7 +29,7 @@ corresponds to the order in which they have been loaded by ASDF.
 
 The title of the HyperDoc is defined in the call to <a
 expr="#'make-hyperdoc">`make-hyperdoc`</a>. See the definition of <a
-expr="(var-definition '*hyperdoc*)">`*hyperdoc*`</a> for an example.
+expr="(html-inspector-views/standard:var-definition '*hyperdoc*)">`*hyperdoc*`</a> for an example.
 
 An ASDF system can contain any number of HyperDocs, but in most cases
 a single one is sufficient.

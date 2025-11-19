@@ -62,7 +62,7 @@
                   :columns '("Title" "Value")
                   :display (list #'cdr
                                  #'(lambda (p) (symbol-value (car p))))
-                  :inspect-items :by-column))))
+                  :inspect #'(lambda (p) (symbol-value (car p)))))))
 
 ;;
 ;; The files in the HyperDocs's directory

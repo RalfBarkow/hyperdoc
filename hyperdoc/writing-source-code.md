@@ -6,7 +6,7 @@ Source code pages are standard Lisp files, which however need to respect a few c
 
  - The first line of the file must be a comment. Its text, after stripping away
    leading semi-colons and whitespace, becomes the title displayed in the
-   <a hyperdoc="HyperDoc" view="Code">source code file list</a>, which is also
+   <a hyperdoc="HyperDoc" view="Code pages">source code file list</a>, which is also
    what you can use in the `page` attribute of a link (see above).
 
  - Each source code page must start with an `in-package` form, to ensure that the

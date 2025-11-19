@@ -9,8 +9,9 @@
 ;;
 
 (defhyperdoc *hyperdoc*
-  ;; The title of the HyperDoc
+  ;; The title and id of the HyperDoc
   :title "HyperDoc"
+  :id :hyperdoc
   ;; The ASDF system in which it is located
   :asdf-system-name "hyperdoc"
   ;; The subdirectory and ASDF module name containing the  text and code pages
