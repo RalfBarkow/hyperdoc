@@ -19,7 +19,7 @@
 (defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
   (when (writable-of hdoc)
     (views:action-button "Reload"
-                         (views:thunk (reload-pages hdoc)
+                         (views:thunk (reload-text-pages hdoc)
                            t))))
 
 ;;
@@ -110,7 +110,7 @@
 ;; Source code view for code pages
 ;;
 
-(views:defview 👀source (page code-page)
+(views:defview views:👀source (page code-page)
   (-> page
       file-of
       views:👀source
