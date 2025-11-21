@@ -42,6 +42,14 @@
       asdf:find-system)))
 
 ;;
+;; Make directory-of work for other implementations of abstract-hyperdoc
+;;
+
+(defmethod directory-of ((hd abstract-hyperdoc))
+  (declare (ignore hd))
+  nil)
+
+;;
 ;; Page classes. text-class is still quite abstract, concrete
 ;; subclasses for HTML and Markdown pages follow later.
 ;;

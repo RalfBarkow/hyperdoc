@@ -30,6 +30,5 @@
            (html (with-output-to-string (str)
                    (3bmd:parse-string-and-print-to-stream text str))))
       (setf parse-tree (plump:parse html))
-      (set-title page)
-      (extract-links page)))
+      (set-title page)))
   page)

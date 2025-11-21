@@ -32,8 +32,7 @@
   (with-slots (file parse-tree title) page
     (let ((plump:*tag-dispatchers* plump:*html-tags*))
       (setf parse-tree (plump:parse file))
-      (set-title page)
-      (extract-links page)))
+      (set-title page)))
   page)
 
 (defun set-title (page)
@@ -45,7 +44,7 @@
                                  (return (-> elements first plump:text)))))
                     "Untitled"))))
 
-(defun extract-links (page)
+(defmethod extract-links ((page html-page))
   (let ((current-package (find-package "CL-USER"))
         (this-hyperdoc (hyperdoc-of page))
         page-links hyperdoc-links hyperdoc-page-links web-links expr-links)
@@ -365,51 +364,3 @@ standard HTML tag.")
   (-> (parse-tree-of page)
       plump-inspector-views::👀children
       (views:rename :title "Parse tree" :priority 11)))
-
-;;
-;; Link view
-;;
-
-(views:defview 👀links (page html-page)
-  (when-let (links (links-of page))
-    (views:html-view :title "Links" :priority 5
-      (when-let (local-pages (cdr (assoc :page links)))
-        (views:html
-          (:details :open t
-                    (:summary "Local pages")
-                    (views:html-table (mapcar #'second local-pages)))))
-      (when-let (hyperdocs (cdr (assoc :hyperdoc links)))
-        (views:html
-          (:details :open t
-                    (:summary "HyperDocs")
-                    (views:html-table hyperdocs
-                                      :display (list #'first)
-                                      :inspect #'second))))
-      (when-let (hyperdoc-pages (cdr (assoc :hyperdoc-page links)))
-        (views:html
-          (:details :open t
-                    (:summary "HyperDoc pages")
-                    (views:html-table hyperdoc-pages
-                                      :columns '("HyperDoc" "Page")
-                                      :display (list #'(lambda (spec)
-                                                         (-> spec first first
-                                                                  find-hyperdoc))
-                                                     #'second)
-                                      :inspect-items :by-column))))
-      (when-let (exprs (cdr (assoc :expr links)))
-        (views:html
-          (:details :open t
-                    (:summary "Expressions")
-                    (views:html-table exprs
-                                      :inspect #'second
-                                      :columns '("Expr" "Package")
-                                      :display (list #'caar #'cdar)))))
-      (when-let (web-links (cdr (assoc :web links)))
-        (views:html
-          (:details :open t
-                    (:summary "Web links")
-                    (:table :class "inspector-table"
-                      (dolist (link (mapcar #'first web-links))
-                        (views:html
-                          (:tr (:td (:a :href link :target "_blank"
-                                        (views:esc link)))))))))))))

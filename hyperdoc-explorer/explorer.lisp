@@ -43,7 +43,12 @@
             do (remhash title pages))
     ;; Add the current text page entries
     (loop for page being the hash-values of text-pages
-          do (setf (gethash (title-of page) pages) page))))
+          do (setf (gethash (title-of page) pages) page))
+    ;; Extract the links from each page
+    (loop for page being the hash-values of pages
+          do (extract-links page))))
+
+(defgeneric extract-links (page))
 
 (defun ensure-pages-loaded (hdoc)
   "Load the pages of HyperDoc HDOC unless they have already been loaded."
@@ -163,13 +168,4 @@ PAGE-LOOKUP-FAILURE."
       views:👀content
       (views:rename :title "Source" :priority 10)))
 
-;;
-;; Source code view for code pages
-;;
-
-(views:defview views:👀source (page code-page)
-  (-> page
-      file-of
-      views:👀source
-      (views:rename :title "Source" :priority 10)))
 

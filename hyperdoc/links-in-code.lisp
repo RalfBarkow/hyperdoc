@@ -37,4 +37,3 @@ registered HyperDocs."))
 ;; The use of embedded links is explained in:
 
 (see (page "Writing source code pages"))
-

@@ -8,7 +8,7 @@
 ;; Example functions
 ;;
 
-(see (page "Writing HyperDoc source code pages"))
+(see (page "Writing source code pages"))
 
 ;; An example is a function of zero arguments.
 
