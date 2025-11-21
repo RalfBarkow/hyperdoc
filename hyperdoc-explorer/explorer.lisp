@@ -10,6 +10,63 @@
 ;;
 
 ;;
+;; Load text pages
+;;
+
+(defun reload-text-pages (hdoc)
+  "(Re-)load the text pages of HyperDoc HDOC."
+  ;; The simplest strategy would be to reconstruct the internal
+  ;; representation of text pages completely. However, this would
+  ;; invalidate page objects that the user has opened in an inspector.
+  ;; Therefore we keep the in-memory object tree and only update what
+  ;; must be updated.
+  (with-slots (directory pages text-pages) hdoc
+    (let (page-files)
+      (dolist (file (uiop:directory-files directory))
+        (cond
+          ;; Pages can be HTML or Markdown files
+          ((member (pathname-type file) '("html" "md") :test #'string=)
+           (let ((page (gethash file text-pages)))
+             (unless page
+               (setf page (make-text-page hdoc file))
+               (setf (gethash file text-pages) page))
+             (load-page page)
+             (push file page-files)))))
+      ;; Remove pages whose files have been deleted.
+      (loop for file being the hash-keys in text-pages
+            do (unless (member file page-files :test #'equal)
+                 (remhash file text-pages))))
+    ;; Remove the potentially stale text page entries
+    (loop for title being the hash-keys of pages
+            using (hash-value page)
+          when (typep page 'text-page)
+            do (remhash title pages))
+    ;; Add the current text page entries
+    (loop for page being the hash-values of text-pages
+          do (setf (gethash (title-of page) pages) page))))
+
+(defun ensure-pages-loaded (hdoc)
+  "Load the pages of HyperDoc HDOC unless they have already been loaded."
+  (when (zerop (hash-table-count (text-pages-of hdoc)))
+    (reload-text-pages hdoc)))
+
+
+;;
+;; Look up a page in a HyperDoc
+;;
+
+(defmethod find-page ((hdoc hyperdoc) title &key signal-error?)
+  "Look up TITLE in HyperDoc HDOC and return the page if found. If no page with
+TITLE exists, return NIL if SIGNAL-ERROR is NIL, otherwise signal
+PAGE-LOOKUP-FAILURE."
+  (unless hdoc
+    (error 'page-lookup-failure :hyperdoc hdoc :title title))
+  (ensure-pages-loaded hdoc)
+  (or (gethash title (pages-of hdoc))
+      (and signal-error?
+           (error 'page-lookup-failure :hyperdoc hdoc :title title))))
+
+;;
 ;; The title bar of inspectors on HyperDocs
 ;;
 
