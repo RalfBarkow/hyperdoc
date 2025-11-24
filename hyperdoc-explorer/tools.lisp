@@ -33,6 +33,10 @@
     (:generator
      (funcall content))))
 
+(defmethod extract-links ((page tool-page))
+  ;; TODO
+  ())
+
 (views:defview views:👀playground (pg playground-page)
   (let ((view (call-next-method)))
     ;; Move playground view to the first position,
@@ -51,3 +55,6 @@
                                      pg (initial-content-of pg))
                          t)
                        "Reset to initial content"))
+
+(defmethod extract-links ((pg playground-page))
+  ())

@@ -11,23 +11,20 @@
 (defclass wikipedia (hyperdoc:abstract-hyperdoc)
   ((edition :reader edition-of :type keyword :initarg :edition
             :documentation "Edition code")
-   (title :reader title-of :type string :initarg :title)
+   (title :reader hyperdoc:title-of :type string :initarg :title)
    (main-page :reader main-page-of :type string :initarg :main-page)))
 
 (defclass wikipedia-page (hyperdoc:abstract-page)
-  ((wikipedia :reader wikipedia-of :type wikipedia :initarg :wikipedia)
-   (title :reader title-of :type string :initarg :title)))
+  ((title :reader hyperdoc:title-of :type string :initarg :title)))
 
 (defmethod hyperdoc:find-page ((wp wikipedia) title  &key signal-error?)
+  (declare (ignore signal-error?))
   (make-instance 'wikipedia-page
-                 :wikipedia wp
+                 :hyperdoc wp
                  :title title))
 
 (defmethod hyperdoc:entry-of ((wp wikipedia))
   (hyperdoc:find-page wp (main-page-of wp)))
-
-(defmethod hyperdoc:title-of ((wp wikipedia))
-  (title-of wp))
 
 ;;
 ;; Make and manage wikipedia objects
@@ -80,31 +77,31 @@
 ;;
 
 (defmethod views:text-representation ((wp wikipedia))
-  (-> wp title-of))
+  (-> wp hyperdoc:title-of))
 
 (defmethod views:text-representation ((page wikipedia-page))
-  (-> page title-of))
+  (-> page hyperdoc:title-of))
 
 (views:defview views:👀content (page wikipedia-page)
   (views:html-view :title "Content" :priority 1
     (views:html
-      (:iframe :src (page-url (-> page wikipedia-of edition-of)
-                              (-> page title-of))
-               :title (-> page title-of)
+      (:iframe :src (page-url (-> page hyperdoc:hyperdoc-of edition-of)
+                              (-> page hyperdoc:title-of))
+               :title (-> page hyperdoc:title-of)
                :style "border:none;width:100%;height:100%" ))))
 
 (views:defview views:👀content (wp wikipedia)
   (let ((entry (hyperdoc:entry-of wp)))
     (views:rename (views:👀content entry)
-                  :title (title-of entry)
+                  :title (hyperdoc:title-of entry)
                   :priority 1)))
 
 (views:defview views:👀source (page wikipedia-page)
-  (views:html-view :title "Source" :priority 3
+  (views:html-view :title "Source" :priority 10
     (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
                                         :method :get
                                         :parameters `(("action" . "parse")
-                                                      ("page" . ,(-> page title-of
+                                                      ("page" . ,(-> page hyperdoc:title-of
                                                                    encode-page-title-for-url))
                                                       ("prop" . "wikitext")
                                                       ("format" . "json"))
@@ -121,7 +118,7 @@
   (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
                                       :method :get
                                       :parameters `(("action" . "parse")
-                                                    ("page" . ,(-> page title-of
+                                                    ("page" . ,(-> page hyperdoc:title-of
                                                                  encode-page-title-for-url))
                                                     ("prop" . "parsetree")
                                                     ("format" . "json"))
@@ -135,4 +132,22 @@
       (plump:get-elements-by-tag-name <> "root")
       (first)
       (plump-inspector-views::👀children)
-      (views:rename :title "Parse tree" :priority 5))))
+      (views:rename :title "Parse tree" :priority 11))))
+
+;;
+;; Find backlinks
+;;
+
+(defmethod hyperdoc:find-link-sources ((wp wikipedia) hyperdoc-id page-title)
+  nil)
+
+;;
+;; Backlink view
+;; (not yet including backlinks inside Wikipedia)
+;;
+
+(views:defview 👀backlinks (page wikipedia-page)
+  (-> (hyperdoc:find-backlink-sources (-> page hyperdoc:hyperdoc-of hyperdoc:id-of)
+                                      (-> page hyperdoc:title-of))
+      views:👀items
+      (views:rename :title "Backlinks" :priority 6)))

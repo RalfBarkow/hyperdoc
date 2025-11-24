@@ -10,7 +10,10 @@
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export ;; Implementing HyperDoc variants
            #:abstract-hyperdoc #:abstract-page
-           #:register
+           #:id-of
+           ;; The catalog API
+           #:register #:find-backlink-sources #:find-link-sources
+           ;; Accessing items
            #:title-of #:entry-of
            #:find-page
            #:lookup-failure #:page-lookup-failure

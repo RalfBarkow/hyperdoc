@@ -16,7 +16,8 @@
 (defclass abstract-hyperdoc ()
   ((id :reader id-of :type symbol :initarg :id)))
 
-(defclass abstract-page () ())
+(defclass abstract-page ()
+  ((hyperdoc :reader hyperdoc-of :type abstract-hyperdoc :initarg :hyperdoc)))
 
 ;;
 ;; Retrieving the title of a HyperDoc

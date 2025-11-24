@@ -55,8 +55,7 @@
 ;;
 
 (defclass page (abstract-page)
-  ((hyperdoc :accessor hyperdoc-of :initarg :hyperdoc)
-   (title :reader title-of :initarg :title)
+  ((title :reader title-of :initarg :title)
    (links :reader links-of :initarg :links :initform nil)))
 
 (defclass text-page (page)
@@ -120,7 +119,7 @@ the macro DEFHYPERDOC."
       (dolist (tool-name tools)
         (let* ((tool (get-tool tool-name))
                (title (title-of tool)))
-          (setf (hyperdoc-of tool) hyperdoc)
+          (setf (slot-value tool 'hyperdoc) hyperdoc)
           (setf (gethash title pages) tool)))
       hyperdoc)))
 

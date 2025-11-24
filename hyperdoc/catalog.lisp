@@ -52,3 +52,16 @@ signal hyperdoc-lookup-failure."
       ((null package) name)
       ((string= (package-name package) "KEYWORD") name)
       (t (concatenate 'string (package-name package) ":" name)))))
+
+;;
+;; Link lookup (for backlinks)
+;;
+
+(defgeneric find-link-sources (target hyperdoc-id page-title))
+
+(defmethod find-link-sources ((target catalog) hyperdoc-id page-title)
+  (loop for hd in (hyperdocs-of target)
+        append (find-link-sources hd hyperdoc-id page-title)))
+
+(defun find-backlink-sources (hyperdoc-id page-title)
+  (find-link-sources *catalog* hyperdoc-id page-title))
