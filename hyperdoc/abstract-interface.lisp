@@ -14,7 +14,7 @@
 ;; Abstract base classes for HyperDocs and their pages
 ;;
 (defclass abstract-hyperdoc ()
-  ((id :reader id-of :type symbol :initarg :id)))
+  ((id :reader id-of :type keyword :initarg :id)))
 
 (defclass abstract-page ()
   ((hyperdoc :reader hyperdoc-of :type abstract-hyperdoc :initarg :hyperdoc)))

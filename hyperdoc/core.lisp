@@ -93,8 +93,15 @@ the macro DEFHYPERDOC."
          (code-pages (make-array (length code-files)
                                  :element-type '(or null code-page)
                                  :initial-element nil)))
+    (assert (typep id 'keyword))
+    (assert (typep title 'string))
+    (assert (typep asdf-system-name '(or string symbol)))
+    (assert (typep subdirectory '(or pathname string)))
+    (assert (typep entry '(or string null)))
+    (assert (typep tools 'list))
+    (assert (typep data 'list))
     (let ((hyperdoc (make-instance 'hyperdoc
-                                   :id (or id (gensym "HYPERDOC"))
+                                   :id id
                                    :asdf-system-name asdf-system-name
                                    :directory directory
                                    :writable writable

@@ -10,6 +10,7 @@
 
 (defhyperdoc *explorer-hyperdoc*
   ;; The title of the HyperDoc
+  :id :hyperdoc/explorer
   :title "HyperDoc Explorer"
   ;; The ASDF system in which it is located
   :asdf-system-name "hyperdoc/explorer"
