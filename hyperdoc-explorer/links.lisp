@@ -10,52 +10,57 @@
 
 (views:defview 👀links (page page)
   (when-let (links (links-of page))
-    (views:html-view :title "Links" :priority 5
-      (when-let (local-pages (cdr (assoc :page links)))
-        (views:html
-          (:details :open t
-                    (:summary "Local pages")
-                    (views:html-table (mapcar #'second local-pages)))))
-      (when-let (hyperdocs (cdr (assoc :hyperdoc links)))
-        (views:html
-          (:details :open t
-                    (:summary "HyperDocs")
-                    (views:html-table hyperdocs
-                                      :display (list #'first)
-                                      :inspect #'second))))
-      (when-let (hyperdoc-pages (cdr (assoc :hyperdoc-page links)))
-        (views:html
-          (:details :open t
-                    (:summary "HyperDoc pages")
-                    (views:html-table hyperdoc-pages
-                                      :columns '("HyperDoc" "Page")
-                                      :display (list #'(lambda (spec)
-                                                         (-> spec first first
-                                                                  find-hyperdoc))
-                                                     #'second)
-                                      :inspect-items :by-column))))
-      (when-let (exprs (cdr (assoc :expr links)))
-        (views:html
-          (:details :open t
-                    (:summary "Expressions")
-                    (views:html-table exprs
-                                      :inspect #'second
-                                      :columns '("Expr" "Package")
-                                      :display (list #'caar #'cdar)))))
-      (when-let (web-links (cdr (assoc :web links)))
-        (views:html
-          (:details :open t
-                    (:summary "Web links")
-                    (:table :class "inspector-table"
-                      (dolist (link (mapcar #'first web-links))
-                        (views:html
-                          (:tr (:td (:a :href link :target "_blank"
-                                        (views:esc link)))))))))))))
+    (link-view links)))
 
 (views:defview 👀backlinks (page page)
-  (-> (find-backlink-sources (-> page hyperdoc-of id-of) (-> page title-of))
-      views:👀items
-      (views:rename :title "Backlinks" :priority 6)))
+  (let* ((pages (find-backlink-sources (-> page hyperdoc-of id-of)
+                                       (-> page title-of)))
+         (page-links (mapcar #'(lambda (page)
+                                 (list (cons (-> page hyperdoc-of title-of)
+                                             (-> page title-of))
+                                       page
+                                       nil))
+                             pages)))
+    (-> (when page-links `((:page ,@page-links)))
+        link-view
+        (views:rename :title "Backlinks" :priority 6))))
+
+(defun link-view (links)
+  (views:html-view :title "Links" :priority 5
+    (when-let (pages (cdr (assoc :page links)))
+      (views:html
+        (:h3 (views:esc "Pages"))
+        (let ((by-hyperdoc (make-hash-table)))
+          (dolist (page-link pages)
+            (let* ((page (-> page-link second))
+                   (hd (-> page hyperdoc-of)))
+              (alexandria:ensure-gethash hd by-hyperdoc nil)
+              (pushnew page (gethash hd by-hyperdoc))))
+          (loop for hd being the hash-keys of by-hyperdoc
+                  using (hash-value pages)
+                do (views:html
+                     (:h4 (views:object-ref hd))
+                     (views:html-table pages))))))
+    (when-let (hyperdocs (cdr (assoc :hyperdoc links)))
+      (views:html
+        (:h3 (views:esc "HyperDocs"))
+        (views:html-table (mapcar #'second hyperdocs))))
+    (when-let (web-links (cdr (assoc :web links)))
+      (views:html
+        (:h3 (views:esc "Web links"))
+        (:table :class "inspector-table"
+          (dolist (link (mapcar #'first web-links))
+            (views:html
+              (:tr (:td (:a :href link :target "_blank"
+                            (views:esc link)))))))))
+    (when-let (exprs (cdr (assoc :expr links)))
+      (views:html
+        (:h3 (Views:esc "Expressions"))
+        (views:html-table exprs
+                          :inspect #'second
+                          :display (list #'first))))
+    (unless links
+      (views:html (views:esc "None"))))  )
 
 ;;
 ;; Find links to pages

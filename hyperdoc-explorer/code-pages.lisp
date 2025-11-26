@@ -21,7 +21,7 @@
 (defmethod extract-links ((page code-page))
   (let ((html-inspector-views/standard:*current-source-code-file*
           (source-code-pathname page))
-        page-links hyperdoc-links hyperdoc-page-links web-links expr-links)
+        page-links hyperdoc-links web-links expr-links)
     (dolist (tlf (parsed-toplevel-forms page))
       (let ((cst (-> tlf views/standard:cst-of)))
         (when (and (cst:consp cst)
@@ -31,16 +31,12 @@
                              (eval (cst:raw target-form))
                            (error (c) c))))
             (typecase target
-              (page (if (eq (hyperdoc-of target) (hyperdoc-of page))
-                        (pushnew (list (title-of target) target nil)
-                                 page-links
-                                 :test #'equal :key #'first)
-                      (pushnew (list (cons (title-of (hyperdoc-of target))
-                                           (title-of target))
-                                     target
-                                     nil)
-                               hyperdoc-page-links
-                               :test #'equal :key #'first)))
+              (page  (pushnew (list (cons (title-of (hyperdoc-of target))
+                                          (title-of target))
+                                    target
+                                    nil)
+                              page-links
+                              :test #'equal :key #'first))
               (hyperdoc (pushnew (list (title-of target) target nil)
                                  hyperdoc-links
                                  :test #'equal :key #'first))
@@ -55,8 +51,6 @@
         (push (cons :page (nreverse page-links)) links))
       (when hyperdoc-links
         (push (cons :hyperdoc (nreverse hyperdoc-links)) links))
-      (when hyperdoc-page-links
-        (push (cons :hyperdoc-page (nreverse hyperdoc-page-links)) links))
       (when web-links
         (push (cons :web (nreverse web-links)) links))
       (when expr-links

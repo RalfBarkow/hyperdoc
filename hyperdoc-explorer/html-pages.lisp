@@ -46,8 +46,7 @@
 
 (defmethod extract-links ((page html-page))
   (let ((current-package (find-package "CL-USER"))
-        (this-hyperdoc (hyperdoc-of page))
-        page-links hyperdoc-links hyperdoc-page-links web-links expr-links)
+        page-links hyperdoc-links web-links expr-links)
     (labels ((walk (node)
                (loop for child across (plump:children node)
                      do (when (plump:element-p child)
@@ -59,62 +58,55 @@
                              (collect-link child)))
                           (walk child))))
              (collect-link (element)
-               (let ((href (plump:attribute element "href"))
-                     (expr (plump:attribute element "expr"))
-                     (hyperdoc (plump:attribute element "hyperdoc"))
-                     (page (plump:attribute element "page"))
-                     (view (plump:attribute element "view")))
+               (let ((href-attr (plump:attribute element "href"))
+                     (expr-attr (plump:attribute element "expr"))
+                     (hyperdoc-attr (plump:attribute element "hyperdoc"))
+                     (page-attr (plump:attribute element "page"))
+                     (view-attr (plump:attribute element "view")))
                  (cond
                    ;; For expression links, store a cons with the expression
                    ;; plus the package in which it can be evaluated.
-                   (expr
+                   (expr-attr
                     (let* ((*package* current-package)
-                           (value (parse-and-eval expr)))
-                      (pushnew (list (cons expr *package*) value view)
+                           (parsed-expr (parse expr-attr))
+                           (value (parse-and-eval expr-attr)))
+                      (pushnew (list parsed-expr value view-attr)
                                expr-links
                                :test #'equal :key #'first)))
                    ;; For Web links, store the URL as a string.
-                   (href
-                    (pushnew (list href nil view) web-links
+                   (href-attr
+                    (pushnew (list href-attr nil view-attr) web-links
                              :test #'equal :key #'first))
                    ;; Remaining link types are combinations of page and
                    ;; hyperdoc attributes, so if there's neither, raise
                    ;; an error.
-                   ((not (or page hyperdoc))
+                   ((not (or page-attr hyperdoc-attr))
                     (error "Unknown link type: ~A" element))
+                   ;; For a page in a hyperdoc, store a cons combining
+                   ;; the hyperdoc reference and the page title.
+                   (page-attr
+                    (let* ((hd (if hyperdoc-attr
+                                   (find-hyperdoc hyperdoc-attr)
+                                   (hyperdoc-of page)))
+                           (page-object (handler-case
+                                               (find-page hd page-attr :signal-error? t)
+                                             (lookup-failure (c) c))))
+                      (pushnew (list (cons hyperdoc-attr page-attr) page-object view-attr)
+                               page-links
+                               :test #'equal :key #'first)))
                    ;; For a hyperdoc link, store the hyperdoc reference
                    ;; (title or id).
-                   ((and hyperdoc (not page))
-                    (pushnew (list hyperdoc (find-hyperdoc hyperdoc) view)
+                   (t
+                    (pushnew (list hyperdoc-attr (find-hyperdoc hyperdoc-attr) view-attr)
                              hyperdoc-links
                              :test #'equal :key #'first))
-                   ;; For a page in the current hyperdoc, store the page title.
-                   ((or (not hyperdoc)
-                        (equal hyperdoc (title-of this-hyperdoc)))
-                    (let ((page-object (handler-case
-                                           (find-page this-hyperdoc page
-                                                      :signal-error? t)
-                                         (lookup-failure (c) c))))
-                      (pushnew (list page page-object view) page-links
-                               :test #'equal :key #'first)))
-                   ;; for a page in another hyperdoc, store a cons combining
-                   ;; the hyperdoc reference and the page title.
-                   (t
-                    (let ((page-object (handler-case
-                                           (find-page (find-hyperdoc hyperdoc) page
-                                                      :signal-error? t)
-                                         (lookup-failure (c) c))))
-                      (pushnew (list (cons hyperdoc page) page-object view)
-                               hyperdoc-page-links
-                               :test #'equal :key #'first)))))))
+))))
       (walk (parse-tree-of page))
       (with-slots (links) page
         (when page-links
           (push (cons :page (nreverse page-links)) links))
         (when hyperdoc-links
           (push (cons :hyperdoc (nreverse hyperdoc-links)) links))
-        (when hyperdoc-page-links
-          (push (cons :hyperdoc-page (nreverse hyperdoc-page-links)) links))
         (when web-links
           (push (cons :web (nreverse web-links)) links))
         (when expr-links
