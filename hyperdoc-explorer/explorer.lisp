@@ -72,6 +72,26 @@ PAGE-LOOKUP-FAILURE."
            (error 'page-lookup-failure :hyperdoc hdoc :title title))))
 
 ;;
+;; Better display of lookup failures
+;;
+
+(defmethod views:html-representation ((condition page-lookup-failure) &optional id)
+  (views:html
+    (:span :id id :class "inspector-error"
+           (views:esc "No page \"")
+           (views:esc (slot-value condition 'page-title))
+           (views:esc "\" in HyperDoc \"")
+           (views:esc (title-of (slot-value condition 'hyperdoc)))
+           (views:esc "\""))))
+
+(defmethod views:html-representation ((condition hyperdoc-lookup-failure) &optional id)
+  (views:html
+    (:span :id id :class "inspector-error"
+           (views:esc "No HyperDoc \"")
+           (views:esc (slot-value condition 'title-or-id))
+           (views:esc "\""))))
+
+;;
 ;; The title bar of inspectors on HyperDocs
 ;;
 
