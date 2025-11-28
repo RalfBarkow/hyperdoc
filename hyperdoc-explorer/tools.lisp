@@ -33,9 +33,27 @@
     (:generator
      (funcall content))))
 
-(defmethod extract-links ((page tool-page))
-  ;; TODO
-  ())
+(defmethod parse-tree-of ((page tool-page))
+  (let ((root (plump:make-root)))
+    (dolist (part (reverse (parts-of page)))
+      (when-let (parsed-part (parse-tool-part page (car part) (cdr part)))
+        (loop for element across (plump:children parsed-part)
+              do (plump:append-child root element))))
+    root))
+
+(defun parse-tool-part (tool kind content)
+  (ccase kind
+    (:html
+      (let ((*page-state* (make-instance 'page-state
+                                         :package (package-of tool)
+                                         :page tool)))
+        (let ((plump:*tag-dispatchers* plump:*html-tags*))
+          (plump:parse content))))
+    (:markdown
+     (parse-tool-part tool :html
+                      (with-output-to-string (str)
+                        (3bmd:parse-string-and-print-to-stream content str))))
+    (:generator)))
 
 (views:defview views:👀playground (pg playground-page)
   (let ((view (call-next-method)))

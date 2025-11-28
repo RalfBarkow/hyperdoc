@@ -174,9 +174,14 @@ the macro DEFHYPERDOC."
 
 
 ;;
-;; The implementations of these two generic functions
+;; The implementations of these generic functions
 ;; are in hyperdoc/explorer.
 ;;
 
 (defgeneric page-class (filetype))
-(defgeneric load-page (page))
+
+(defgeneric load-page (page)
+  (:method ((page page))
+    (declare (ignore page))))
+
+(defgeneric parse-tree-of (page))

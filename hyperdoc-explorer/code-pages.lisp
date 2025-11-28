@@ -15,6 +15,15 @@
       (views:rename :title "Source" :priority 1)))
 
 ;;
+;; HTML parse tree
+;;
+
+(defmethod parse-tree-of ((page code-page))
+  (declare (ignore page))
+  ;; TODO
+  nil)
+
+;;
 ;; Link extraction
 ;;
 
