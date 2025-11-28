@@ -30,17 +30,24 @@
     (when-let (pages (cdr (assoc :page links)))
       (views:html
         (:h3 (views:esc "Pages"))
-        (let ((by-hyperdoc (make-hash-table)))
+        (let ((by-hyperdoc (make-hash-table))
+              lookup-failures)
           (dolist (page-link pages)
-            (let* ((page (-> page-link second))
-                   (hd (-> page hyperdoc-of)))
-              (alexandria:ensure-gethash hd by-hyperdoc nil)
-              (pushnew page (gethash hd by-hyperdoc))))
+            (let ((page (-> page-link second)))
+              (if (typep page 'abstract-page)
+                (let ((hd (-> page hyperdoc-of)))
+                  (alexandria:ensure-gethash hd by-hyperdoc nil)
+                  (pushnew page (gethash hd by-hyperdoc)))
+                (pushnew page lookup-failures))))
           (loop for hd being the hash-keys of by-hyperdoc
                   using (hash-value pages)
                 do (views:html
                      (:h4 (views:object-ref hd))
-                     (views:html-table pages))))))
+                     (views:html-table pages)))
+          (when lookup-failures
+            (views:html
+              (:h4 "Bad links")
+              (views:html-table lookup-failures))))))
     (when-let (hyperdocs (cdr (assoc :hyperdoc links)))
       (views:html
         (:h3 (views:esc "HyperDocs"))
@@ -76,7 +83,8 @@
     (dolist (page-link (and (eq hyperdoc-id (-> page hyperdoc-of id-of))
                             (cdr (assoc :page links))))
       (let ((linked-page (second page-link)))
-        (when (equal page-title (title-of linked-page))
+        (when (and (typep linked-page 'page) ;; could be a lookup failure
+                   (equal page-title (title-of linked-page)))
           (pushnew page link-sources :test #'eq))))
     (dolist (hyperdoc-page-link (cdr (assoc :hyperdoc-page links)))
       (let* ((linked-page (second hyperdoc-page-link))
