@@ -44,7 +44,7 @@
                                  (return (-> elements first plump:text)))))
                     "Untitled"))))
 
-(defmethod extract-links ((page html-page))
+(defmethod extract-links ((page page))
   (let ((current-package (find-package "CL-USER"))
         page-links hyperdoc-links web-links expr-links)
     (labels ((walk (node)
