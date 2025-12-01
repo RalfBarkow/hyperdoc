@@ -13,7 +13,7 @@
     (views:add-asset-path "/hyperdoc/"
                           (asdf:system-relative-pathname
                            :hyperdoc
-                           "assets/hyperdoc"))
+                           "assets/hyperdoc/"))
     (views:include-css "/hyperdoc/css/hyperdoc.css")
     (views:html
       (:div :class "hyperdoc-page"

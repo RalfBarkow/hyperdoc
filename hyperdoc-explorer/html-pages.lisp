@@ -329,7 +329,7 @@ standard HTML tag.")
     (views:add-asset-path "/hyperdoc/"
                           (asdf:system-relative-pathname
                            :hyperdoc
-                           "assets/hyperdoc"))
+                           "assets/hyperdoc/"))
     (views:include-css "/hyperdoc/css/hyperdoc.css")
     (let ((*page-state* (make-instance 'page-state
                                        :package (find-package "CL-USER")

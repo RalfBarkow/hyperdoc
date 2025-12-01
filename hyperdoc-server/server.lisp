@@ -123,7 +123,7 @@ are not allowed in URLs."
     (views:add-asset-path "/hyperdoc-server/"
                           (asdf:system-relative-pathname
                            :hyperdoc/server
-                           "assets/hyperdoc-server"))
+                           "assets/hyperdoc-server/"))
     (views:include-js "/hyperdoc-server/js/url.js")
     (views:include-script "makeUrl(window.currentInspectorView)")
     (views:html (:hyperdoc-slug (views:esc slug)))))
@@ -147,7 +147,7 @@ are not allowed in URLs."
       (views:add-asset-path "/hyperdoc-server/"
                             (asdf:system-relative-pathname
                              :hyperdoc/server
-                             "assets/hyperdoc-server"))
+                             "assets/hyperdoc-server/"))
       (views:include-js "/hyperdoc-server/js/url.js")
       (views:include-script "makeUrl(window.currentInspectorView)")
       (views:html-table data
