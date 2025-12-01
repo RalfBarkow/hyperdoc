@@ -124,48 +124,56 @@
 
 (defun link-view (links)
   (views:html-view :title "Links" :priority 5
-    (when-let (page-links (cdr (assoc :page links)))
-      (views:html
-        (:h3 (views:esc "Pages"))
-        (let ((by-hyperdoc (make-hash-table))
-              lookup-failures)
-          (dolist (page-link page-links)
-            (let ((page (-> page-link thunk-of views:eval-thunk)))
-              (if (typep page 'abstract-page)
-                (let ((hd (-> page hyperdoc-of)))
-                  (alexandria:ensure-gethash hd by-hyperdoc nil)
-                  (pushnew page (gethash hd by-hyperdoc)))
-                (pushnew page lookup-failures))))
-          (loop for hd being the hash-keys of by-hyperdoc
-                  using (hash-value pages)
-                do (views:html
-                     (:h4 (views:object-ref hd))
-                     (views:html-table pages)))
-          (when lookup-failures
-            (views:html
-              (:h4 "Bad links")
-              (views:html-table lookup-failures))))))
-    (when-let (hyperdoc-links (cdr (assoc :hyperdoc links)))
-      (views:html
-        (:h3 (views:esc "HyperDocs"))
-        (views:html-table (mapcar #'(lambda (l)
-                                      (-> l thunk-of views:eval-thunk))
-                                  hyperdoc-links))))
-    (when-let (web-links (cdr (assoc :web links)))
-      (views:html
-        (:h3 (views:esc "Web links"))
-        (:table :class "inspector-table"
-          (dolist (link (mapcar #'url-of web-links))
-            (views:html
-              (:tr (:td (:a :href link :target "_blank"
-                            (views:esc link)))))))))
-    (when-let (expr-links (cdr (assoc :expr links)))
-      (views:html
-        (:h3 (Views:esc "Expressions"))
-        (views:html-table expr-links
-                          :inspect #'(lambda (l)
-                                       (-> l thunk-of views:eval-thunk))
-                          :display (list #'form-of))))
+    (views:add-asset-path "/hyperdoc/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc
+                           "assets/hyperdoc/"))
+    (views:include-css "/hyperdoc/css/hyperdoc.css")
+    (views:html
+      (:div :class "hyperdoc-page"
+            (when-let (page-links (cdr (assoc :page links)))
+              (views:html
+                (:h2 (views:esc "Pages"))
+                (let ((by-hyperdoc (make-hash-table))
+                      lookup-failures)
+                  (dolist (page-link page-links)
+                    (let ((page (-> page-link thunk-of views:eval-thunk)))
+                      (if (typep page 'abstract-page)
+                          (let ((hd (-> page hyperdoc-of)))
+                            (alexandria:ensure-gethash hd by-hyperdoc nil)
+                            (pushnew page (gethash hd by-hyperdoc)))
+                          (pushnew page lookup-failures))))
+                  (loop for hd being the hash-keys of by-hyperdoc
+                          using (hash-value pages)
+                        do (views:html
+                             (:table :class "inspector-table"
+                               (:tr (:td (:i (views:object-ref hd))))
+                               (:tr (:td (views:html-table pages))))))
+                  (when lookup-failures
+                    (views:html
+                      (:h4 "Bad links")
+                      (views:html-table lookup-failures))))))
+            (when-let (hyperdoc-links (cdr (assoc :hyperdoc links)))
+              (views:html
+                (:h2 (views:esc "HyperDocs"))
+                (views:html-table (mapcar #'(lambda (l)
+                                              (-> l thunk-of views:eval-thunk))
+                                          hyperdoc-links))))
+            (when-let (web-links (cdr (assoc :web links)))
+              (views:html
+                (:h2 (views:esc "Web links"))
+                (:table :class "inspector-table"
+                  (dolist (link (mapcar #'url-of web-links))
+                    (views:html
+                      (:tr (:td (:a :href link :target "_blank"
+                                    (views:esc link)))))))))
+            (when-let (expr-links (cdr (assoc :expr links)))
+              (views:html
+                (:h2 (Views:esc "Expressions"))
+                (views:html-table expr-links
+                                  :inspect #'(lambda (l)
+                                               (-> l thunk-of views:eval-thunk))
+                                  :display (list #'form-of))))))
     (unless links
       (views:html (views:esc "None"))))  )
 
