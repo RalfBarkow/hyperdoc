@@ -4,6 +4,10 @@
 
 (in-package :hyperdoc)
 
+;;
+;; Tool pages
+;;
+
 (views:defview views:👀content (tool tool-page)
   (views:html-view :title "Live" :priority 1
     (views:add-asset-path "/hyperdoc/"
@@ -42,7 +46,7 @@
     root))
 
 (defun parse-tool-part (tool kind content)
-  (ccase kind
+  (case kind
     (:html
       (let ((*page-state* (make-instance 'page-state
                                          :package (package-of tool)
@@ -53,7 +57,14 @@
      (parse-tool-part tool :html
                       (with-output-to-string (str)
                         (3bmd:parse-string-and-print-to-stream content str))))
-    (:generator)))
+    (:generator nil)))
+
+(defmethod load-page ((page tool-page))
+  (extract-links page))
+
+;;
+;; Playground pages
+;;
 
 (views:defview views:👀playground (pg playground-page)
   (let ((view (call-next-method)))
@@ -74,5 +85,5 @@
                          t)
                        "Reset to initial content"))
 
-(defmethod extract-links ((pg playground-page))
-  ())
+(defmethod load-page ((page playground-page))
+  (declare (ignore page)))

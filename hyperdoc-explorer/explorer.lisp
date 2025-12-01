@@ -45,7 +45,6 @@
     (loop for page being the hash-values of text-pages
           do (setf (gethash (title-of page) pages) page))))
 
-(defgeneric extract-links (page))
 
 (defun ensure-pages-loaded (hdoc)
   "Load the pages of HyperDoc HDOC unless they have already been loaded."
@@ -55,10 +54,7 @@
     ;; Load non-text pages, just once
     (loop for page being the hash-values of (pages-of hdoc)
           unless (typep page 'text-page)
-            do (load-page page))
-    ;; Extract links a first time, for all pages
-    (loop for page being the hash-values of (pages-of hdoc)
-          do (extract-links page))))
+            do (load-page page))))
 
 ;;
 ;; Look up a page in a HyperDoc
@@ -181,7 +177,6 @@ PAGE-LOOKUP-FAILURE."
     (views:action-button "Reload"
                          (views:thunk
                            (load-page page)
-                           (extract-links page)
                            t))))
 
 ;;

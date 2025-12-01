@@ -9,7 +9,8 @@
 ;;
 
 (hyperdoc:defhyperdoc *hyperdoc*
-  ;; The title of the HyperDoc
+  ;; The title and id of the HyperDoc
+  :id "hyperdoc/server"
   :title "HyperDoc Server"
   ;; The ASDF system in which it is located
   :asdf-system-name "hyperdoc/server"

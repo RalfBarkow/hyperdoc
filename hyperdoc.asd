@@ -89,6 +89,7 @@
   :components ((:module "hyperdoc-explorer"
                 :serial t
                 :components ((:file "import")
+                             (:file "links")
                              (:file "explorer")
                              (:file "packages")
                              (:file "catalog")
@@ -97,7 +98,6 @@
                              (:file "markdown-pages")
                              (:file "code-pages")
                              (:file "links-in-code")
-                             (:file "links")
                              (:file "tools")
                              (:file "codemeta")
                              (:file "examples")

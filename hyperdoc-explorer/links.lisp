@@ -5,7 +5,105 @@
 (in-package :hyperdoc)
 
 ;;
-;; Link view
+;; Link classes
+;;
+
+(defclass link ()
+  ((from-hyperdoc :reader from-hyperdoc-of :initarg :from-hyperdoc
+                  :type string)
+   (from-page :reader from-page-of :initarg :from-page
+              :type string)))
+
+(defgeneric key-of (link))
+
+(defclass object-link (link)
+  ((thunk :reader thunk-of :initarg :thunk :type function)
+   (view :reader view-of :initarg :view :type (or string null))))
+
+;; Page links
+
+(defclass page-link (object-link)
+  ((to-hyperdoc :reader to-hyperdoc-of :initarg :to-hyperdoc
+                :type string)
+   (to-page :reader to-page-of :initarg :to-page
+            :type string)))
+
+(defmethod key-of ((link page-link))
+  (cons (to-hyperdoc-of link) (to-page-of link)))
+
+(defmacro result-or-condition (&body body)
+  `(handler-case (progn ,@body)
+     (error (c) c)))
+
+(defun make-page-link (page to-hyperdoc to-page &optional view)
+  (make-instance 'page-link
+                 :from-hyperdoc (-> page hyperdoc-of id-of)
+                 :from-page (-> page title-of)
+                 :to-hyperdoc to-hyperdoc
+                 :to-page to-page
+                 :thunk (views:thunk
+                          (let ((hyperdoc (result-or-condition
+                                           (find-hyperdoc to-hyperdoc))))
+                            (result-or-condition
+                             (find-page hyperdoc to-page))))
+                 :view view))
+
+;; HyperDoc links
+
+(defclass hyperdoc-link (object-link)
+  ((to-hyperdoc :reader to-hyperdoc-of :initarg :to-hyperdoc
+                :type string)))
+
+(defmethod key-of ((link hyperdoc-link))
+  (to-hyperdoc-of link))
+
+(defun make-hyperdoc-link (page to-hyperdoc &optional view)
+  (make-instance 'hyperdoc-link
+                 :from-hyperdoc (-> page hyperdoc-of id-of)
+                 :from-page (-> page title-of)
+                 :to-hyperdoc to-hyperdoc
+                 :thunk (views:thunk
+                          (result-or-condition
+                            (find-hyperdoc to-hyperdoc)))
+                 :view view))
+
+;; Web links
+
+(defclass web-link (link)
+  ((url :reader url-of :initarg :url :type string)))
+
+(defmethod key-of ((link web-link))
+  (url-of link))
+
+(defun make-web-link (page url)
+  (make-instance 'web-link
+                 :from-hyperdoc (-> page hyperdoc-of id-of)
+                 :from-page (-> page title-of)
+                 :url url))
+
+;; Expression links
+
+(defclass expr-link (object-link)
+  ((form :reader form-of :initarg :form)
+   (package :reader package-of :initarg :package :type package)))
+
+(defmethod key-of ((link expr-link))
+  (cons (form-of link) (package-of link)))
+
+(defun make-expr-link (page expr package &optional view)
+  (let* ((*package* package)
+         (form (parse expr)))
+    (make-instance 'expr-link
+                   :from-hyperdoc (-> page hyperdoc-of id-of)
+                   :from-page (-> page title-of)
+                   :form form
+                   :package package
+                   :thunk (views:thunk (let ((*package* package))
+                                         (eval-parsed form)))
+                   :view view)))
+
+;;
+;; Link views
 ;;
 
 (views:defview 👀links (page page)
@@ -16,10 +114,9 @@
   (let* ((pages (find-backlink-sources (-> page hyperdoc-of id-of)
                                        (-> page title-of)))
          (page-links (mapcar #'(lambda (page)
-                                 (list (cons (-> page hyperdoc-of title-of)
-                                             (-> page title-of))
-                                       page
-                                       nil))
+                                 (make-page-link page
+                                                 (-> page hyperdoc-of id-of)
+                                                 (-> page title-of)))
                              pages)))
     (-> (when page-links `((:page ,@page-links)))
         link-view
@@ -27,13 +124,13 @@
 
 (defun link-view (links)
   (views:html-view :title "Links" :priority 5
-    (when-let (pages (cdr (assoc :page links)))
+    (when-let (page-links (cdr (assoc :page links)))
       (views:html
         (:h3 (views:esc "Pages"))
         (let ((by-hyperdoc (make-hash-table))
               lookup-failures)
-          (dolist (page-link pages)
-            (let ((page (-> page-link second)))
+          (dolist (page-link page-links)
+            (let ((page (-> page-link thunk-of views:eval-thunk)))
               (if (typep page 'abstract-page)
                 (let ((hd (-> page hyperdoc-of)))
                   (alexandria:ensure-gethash hd by-hyperdoc nil)
@@ -48,24 +145,27 @@
             (views:html
               (:h4 "Bad links")
               (views:html-table lookup-failures))))))
-    (when-let (hyperdocs (cdr (assoc :hyperdoc links)))
+    (when-let (hyperdoc-links (cdr (assoc :hyperdoc links)))
       (views:html
         (:h3 (views:esc "HyperDocs"))
-        (views:html-table (mapcar #'second hyperdocs))))
+        (views:html-table (mapcar #'(lambda (l)
+                                      (-> l thunk-of views:eval-thunk))
+                                  hyperdoc-links))))
     (when-let (web-links (cdr (assoc :web links)))
       (views:html
         (:h3 (views:esc "Web links"))
         (:table :class "inspector-table"
-          (dolist (link (mapcar #'first web-links))
+          (dolist (link (mapcar #'url-of web-links))
             (views:html
               (:tr (:td (:a :href link :target "_blank"
                             (views:esc link)))))))))
-    (when-let (exprs (cdr (assoc :expr links)))
+    (when-let (expr-links (cdr (assoc :expr links)))
       (views:html
         (:h3 (Views:esc "Expressions"))
-        (views:html-table exprs
-                          :inspect #'second
-                          :display (list #'first))))
+        (views:html-table expr-links
+                          :inspect #'(lambda (l)
+                                       (-> l thunk-of views:eval-thunk))
+                          :display (list #'form-of))))
     (unless links
       (views:html (views:esc "None"))))  )
 
@@ -77,20 +177,19 @@
   (loop for page being the hash-values of (pages-of hd)
         append (find-link-sources page hyperdoc-id page-title)))
 
-(defmethod find-link-sources ((page page) hyperdoc-id page-title)
+(defmethod find-link-sources ((page page) (hyperdoc-id string) (page-title string))
   (let ((links (links-of page))
         (link-sources ()))
-    (dolist (page-link (and (eq hyperdoc-id (-> page hyperdoc-of id-of))
-                            (cdr (assoc :page links))))
-      (let ((linked-page (second page-link)))
-        (when (and (typep linked-page 'page) ;; could be a lookup failure
-                   (equal page-title (title-of linked-page)))
-          (pushnew page link-sources :test #'eq))))
-    (dolist (hyperdoc-page-link (cdr (assoc :hyperdoc-page links)))
-      (let* ((linked-page (second hyperdoc-page-link))
-             (linked-hyperdoc (hyperdoc-of linked-page)))
-        (when (and (eq hyperdoc-id (id-of linked-hyperdoc))
-                   (equal page-title (title-of linked-page)))
-          (pushnew page link-sources :test #'eq))))
+    (dolist (page-link (cdr (assoc :page links)))
+      (when (and (string-equal (to-hyperdoc-of page-link) hyperdoc-id)
+                 (equal (to-page-of page-link) page-title))
+        (pushnew page link-sources :test #'eq)))
     link-sources))
 
+(defmethod find-link-sources ((page page) (hyperdoc-id string) (page-title null))
+  (let ((links (links-of page))
+        (link-sources ()))
+    (dolist (link (cdr (assoc :hyperdoc links)))
+      (when (string-equal (to-hyperdoc-of link) hyperdoc-id)
+        (pushnew page link-sources :test #'eq)))
+    link-sources))

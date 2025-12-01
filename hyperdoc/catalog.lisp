@@ -55,5 +55,5 @@ signal hyperdoc-lookup-failure."
   (loop for hd in (hyperdocs-of target)
         append (find-link-sources hd hyperdoc-id page-title)))
 
-(defun find-backlink-sources (hyperdoc-id page-title)
+(defun find-backlink-sources (hyperdoc-id &optional page-title)
   (find-link-sources *catalog* hyperdoc-id page-title))

@@ -32,7 +32,8 @@
   (with-slots (file parse-tree title) page
     (let ((plump:*tag-dispatchers* plump:*html-tags*))
       (setf parse-tree (plump:parse file))
-      (set-title page)))
+      (set-title page)
+      (extract-links page)))
   page)
 
 (defun set-title (page)
@@ -44,7 +45,7 @@
                                  (return (-> elements first plump:text)))))
                     "Untitled"))))
 
-(defmethod extract-links ((page page))
+(defun extract-links (page)
   (let ((current-package (find-package "CL-USER"))
         page-links hyperdoc-links web-links expr-links)
     (labels ((walk (node)
@@ -64,45 +65,36 @@
                      (page-attr (plump:attribute element "page"))
                      (view-attr (plump:attribute element "view")))
                  (cond
-                   ;; For expression links, store a cons with the expression
-                   ;; plus the package in which it can be evaluated.
+                   ;; Expression link
                    (expr-attr
-                    (let* ((*package* current-package)
-                           (parsed-expr (parse expr-attr))
-                           (value (parse-and-eval expr-attr)))
-                      (pushnew (list parsed-expr value view-attr)
-                               expr-links
-                               :test #'equal :key #'first)))
-                   ;; For Web links, store the URL as a string.
+                    (pushnew (make-expr-link page expr-attr current-package view-attr)
+                             expr-links
+                             :test #'equal :key #'key-of))
+                   ;; Web link
                    (href-attr
-                    (pushnew (list href-attr nil view-attr) web-links
-                             :test #'equal :key #'first))
+                    (pushnew (make-web-link page href-attr) web-links
+                             :test #'equal :key #'key-of))
                    ;; Remaining link types are combinations of page and
                    ;; hyperdoc attributes, so if there's neither, raise
                    ;; an error.
                    ((not (or page-attr hyperdoc-attr))
                     (error "Unknown link type: ~A" element))
-                   ;; For a page in a hyperdoc, store a cons combining
-                   ;; the hyperdoc reference and the page title.
+                   ;; Page link
                    (page-attr
-                    (let* ((hd (if hyperdoc-attr
-                                   (find-hyperdoc hyperdoc-attr)
-                                   (hyperdoc-of page)))
-                           (page-object (handler-case
-                                               (find-page hd page-attr :signal-error? t)
-                                             (lookup-failure (c) c))))
-                      (pushnew (list (cons hyperdoc-attr page-attr) page-object view-attr)
-                               page-links
-                               :test #'equal :key #'first)))
-                   ;; For a hyperdoc link, store the hyperdoc reference
-                   ;; (title or id).
+                    (pushnew (make-page-link page
+                                             (if hyperdoc-attr
+                                                 hyperdoc-attr
+                                                 (-> page hyperdoc-of id-of))
+                                             page-attr
+                                             view-attr)
+                             page-links :test #'equal :key #'key-of))
+                   ;; HyperDoc link
                    (t
-                    (pushnew (list hyperdoc-attr (find-hyperdoc hyperdoc-attr) view-attr)
-                             hyperdoc-links
-                             :test #'equal :key #'first))
-))))
+                    (pushnew (make-hyperdoc-link page hyperdoc-attr view-attr)
+                             hyperdoc-links :test #'equal :key #'key-of))))))
       (walk (parse-tree-of page))
       (with-slots (links) page
+        (setf links nil)
         (when page-links
           (push (cons :page (nreverse page-links)) links))
         (when hyperdoc-links

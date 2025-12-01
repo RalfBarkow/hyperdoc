@@ -27,7 +27,7 @@
 ;; Link extraction
 ;;
 
-(defmethod extract-links ((page code-page))
+(defmethod load-page ((page code-page))
   (let ((html-inspector-views/standard:*current-source-code-file*
           (source-code-pathname page))
         page-links hyperdoc-links web-links expr-links)
@@ -40,21 +40,19 @@
                              (eval (cst:raw target-form))
                            (error (c) c))))
             (typecase target
-              (page  (pushnew (list (cons (title-of (hyperdoc-of target))
-                                          (title-of target))
-                                    target
-                                    nil)
+              (page  (pushnew (make-page-link page
+                                              (id-of (hyperdoc-of target))
+                                              (title-of target))
                               page-links
-                              :test #'equal :key #'first))
-              (hyperdoc (pushnew (list (title-of target) target nil)
+                              :test #'equal :key #'key-of))
+              (hyperdoc (pushnew (make-hyperdoc-link page (id-of target))
                                  hyperdoc-links
-                                 :test #'equal :key #'first))
-              (t (pushnew (list (cons (princ-to-string (cst:raw target-form))
-                                      (views/standard:package-of tlf))
-                                target
-                                nil)
+                                 :test #'equal :key #'key-of))
+              (t (pushnew (make-expr-link page
+                                          (princ-to-string (cst:raw target-form))
+                                          (views/standard:package-of tlf))
                           expr-links
-                          :test #'equal :key #'first)))))))
+                          :test #'equal :key #'key-of)))))))
     (with-slots (links) page
       (when page-links
         (push (cons :page (nreverse page-links)) links))

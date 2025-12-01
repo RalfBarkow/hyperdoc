@@ -69,9 +69,10 @@
 ;;
 
 (defun make-hyperdoc (&key id title asdf-system-name subdirectory entry tools data)
-  "Create a HyperDoc instance with TITLE for the text and code pages
-located in SUBDIRECTORY relative to the base directory for ASDF-SYSTEM-NAME.
-The entry page for the HyperDoc is the one whose titles is ENTRY.
+  "Create a HyperDoc instance with unique identifier ID (a string) and TITLE
+for the text and code pages located in SUBDIRECTORY relative to the base
+directory for ASDF-SYSTEM-NAME. The entry page for the HyperDoc is the
+one whose title is ENTRY.
 TOOLS is a list of symbols naming HyperDoc tools. DATA is a list of
 (SYMBOL . STRING) cons pairs in which SYMBOL names a global variable
 and STRING is the title under which the variable's data is listed in
@@ -93,7 +94,7 @@ the macro DEFHYPERDOC."
          (code-pages (make-array (length code-files)
                                  :element-type '(or null code-page)
                                  :initial-element nil)))
-    (assert (typep id 'keyword))
+    (assert (typep id 'string))
     (assert (typep title 'string))
     (assert (typep asdf-system-name '(or string symbol)))
     (assert (typep subdirectory '(or pathname string)))
@@ -180,8 +181,6 @@ the macro DEFHYPERDOC."
 
 (defgeneric page-class (filetype))
 
-(defgeneric load-page (page)
-  (:method ((page page))
-    (declare (ignore page))))
+(defgeneric load-page (page))
 
 (defgeneric parse-tree-of (page))
