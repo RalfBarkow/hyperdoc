@@ -40,18 +40,10 @@ that title or id exists, then return NIL if SIGNAL-ERROR? is nil, else
 signal hyperdoc-lookup-failure."
   (or (dolist (hd (hyperdocs-of *catalog*))
         (when (or (string= title-or-id (title-of hd))
-                  (string-equal title-or-id (id-as-string (id-of hd))))
+                  (string-equal title-or-id (id-of hd)))
           (return hd)))
       (and signal-error?
            (error 'hyperdoc-lookup-failure :title-or-id title-or-id))))
-
-(defun id-as-string (symbol)
-  (let ((package (symbol-package symbol))
-        (name (symbol-name symbol)))
-    (cond
-      ((null package) name)
-      ((string= (package-name package) "KEYWORD") name)
-      (t (concatenate 'string (package-name package) ":" name)))))
 
 ;;
 ;; Link lookup (for backlinks)

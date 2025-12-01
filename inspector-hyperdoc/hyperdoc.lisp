@@ -12,7 +12,7 @@
 
 (hyperdoc:defhyperdoc *hyperdoc*
   ;; The ID of the HyperDoc
-  :id :moldable-inspector
+  :id "moldable-inspector"
   ;; The title of the HyperDoc
   :title "Moldable inspector"
   ;; The ASDF system in which it is located
