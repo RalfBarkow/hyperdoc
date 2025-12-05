@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hypertext-cluster-interface)
 
 ;;
 ;; The HyperDoc catalog has only one global instance (singleton).
@@ -27,7 +27,7 @@
 ;; Catalog lookup
 ;;
 
-(define-condition hyperdoc-lookup-failure (lookup-failure)
+(define-condition cluster-lookup-failure (lookup-failure)
   ((title-or-id :initarg :title-or-id)))
 
 (declaim (ftype (function (string &key (:signal-error? boolean))
@@ -37,13 +37,13 @@
 (defun find-hyperdoc (title-or-id &key signal-error?)
   "Look up the TITLE-OR-ID in the global catalog. If no HyperDoc with
 that title or id exists, then return NIL if SIGNAL-ERROR? is nil, else
-signal hyperdoc-lookup-failure."
+signal cluster-lookup-failure."
   (or (dolist (hd (hyperdocs-of *catalog*))
         (when (or (string= title-or-id (title-of hd))
                   (string-equal title-or-id (id-of hd)))
           (return hd)))
       (and signal-error?
-           (error 'hyperdoc-lookup-failure :title-or-id title-or-id))))
+           (error 'cluster-lookup-failure :title-or-id title-or-id))))
 
 ;;
 ;; Link lookup (for backlinks)

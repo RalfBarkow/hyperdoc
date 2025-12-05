@@ -84,7 +84,7 @@ PAGE-LOOKUP-FAILURE."
            (views:esc (title-of (slot-value condition 'hyperdoc)))
            (views:esc "\""))))
 
-(defmethod views:html-representation ((condition hyperdoc-lookup-failure) &optional id)
+(defmethod views:html-representation ((condition cluster-lookup-failure) &optional id)
   (views:html
     (:span :id id :class "inspector-error"
            (views:esc "No HyperDoc \"")
