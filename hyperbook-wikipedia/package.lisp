@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defpackage :hypertext/wikipedia
+(defpackage :hyperbook/wikipedia
   (:use :cl)
   (:import-from :alexandria
    :if-let :when-let :compose)
@@ -11,7 +11,7 @@
   (:export :request-wikipedia))
 
 (trivial-package-local-nicknames:add-package-local-nickname
- :views :html-inspector-views :hypertext/wikipedia)
+ :views :html-inspector-views :hyperbook/wikipedia)
 
 (trivial-package-local-nicknames:add-package-local-nickname
- :hci :hypertext-cluster-interface :hypertext/wikipedia)
+ :hb :hyperbook :hyperbook/wikipedia)

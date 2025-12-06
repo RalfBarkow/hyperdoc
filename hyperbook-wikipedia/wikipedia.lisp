@@ -2,29 +2,29 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hypertext/wikipedia)
+(in-package :hyperbook/wikipedia)
 
 ;;
 ;; Implementation of the abstract HyperDoc interface
 ;;
 
-(defclass wikipedia (hci:abstract-hyperdoc)
+(defclass wikipedia (hb:abstract-hyperdoc)
   ((edition :reader edition-of :type keyword :initarg :edition
             :documentation "Edition code")
-   (title :reader hci:title-of :type string :initarg :title)
+   (title :reader hb:title-of :type string :initarg :title)
    (main-page :reader main-page-of :type string :initarg :main-page)))
 
-(defclass wikipedia-page (hci:abstract-page)
-  ((title :reader hci:title-of :type string :initarg :title)))
+(defclass wikipedia-page (hb:abstract-page)
+  ((title :reader hb:title-of :type string :initarg :title)))
 
-(defmethod hci:find-page ((wp wikipedia) title  &key signal-error?)
+(defmethod hb:find-page ((wp wikipedia) title  &key signal-error?)
   (declare (ignore signal-error?))
   (make-instance 'wikipedia-page
                  :hyperdoc wp
                  :title title))
 
-(defmethod hci:entry-of ((wp wikipedia))
-  (hci:find-page wp (main-page-of wp)))
+(defmethod hb:entry-of ((wp wikipedia))
+  (hb:find-page wp (main-page-of wp)))
 
 ;;
 ;; Make and manage wikipedia objects
@@ -42,7 +42,7 @@
                          :edition edition
                          :title title
                          :main-page main-page))
-    (hci:register (gethash edition *wikipedias*))))
+    (hb:register (gethash edition *wikipedias*))))
 
 ;; It should be possible to retrieve a complete list from
 ;; https://en.wikipedia.org/wiki/List_of_Wikipedias
@@ -77,23 +77,23 @@
 ;;
 
 (defmethod views:text-representation ((wp wikipedia))
-  (-> wp hci:title-of))
+  (-> wp hb:title-of))
 
 (defmethod views:text-representation ((page wikipedia-page))
-  (-> page hci:title-of))
+  (-> page hb:title-of))
 
 (views:defview views:👀content (page wikipedia-page)
   (views:html-view :title "Content" :priority 1
     (views:html
-      (:iframe :src (page-url (-> page hci:hyperdoc-of edition-of)
-                              (-> page hci:title-of))
-               :title (-> page hci:title-of)
+      (:iframe :src (page-url (-> page hb:hyperdoc-of edition-of)
+                              (-> page hb:title-of))
+               :title (-> page hb:title-of)
                :style "border:none;width:100%;height:100%" ))))
 
 (views:defview views:👀content (wp wikipedia)
-  (let ((entry (hci:entry-of wp)))
+  (let ((entry (hb:entry-of wp)))
     (views:rename (views:👀content entry)
-                  :title (hci:title-of entry)
+                  :title (hb:title-of entry)
                   :priority 1)))
 
 (views:defview views:👀source (page wikipedia-page)
@@ -101,7 +101,7 @@
     (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
                                         :method :get
                                         :parameters `(("action" . "parse")
-                                                      ("page" . ,(-> page hci:title-of
+                                                      ("page" . ,(-> page hb:title-of
                                                                    encode-page-title-for-url))
                                                       ("prop" . "wikitext")
                                                       ("format" . "json"))
@@ -118,7 +118,7 @@
   (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
                                       :method :get
                                       :parameters `(("action" . "parse")
-                                                    ("page" . ,(-> page hci:title-of
+                                                    ("page" . ,(-> page hb:title-of
                                                                  encode-page-title-for-url))
                                                     ("prop" . "parsetree")
                                                     ("format" . "json"))
@@ -138,7 +138,7 @@
 ;; Find backlinks
 ;;
 
-(defmethod hci:find-link-sources ((wp wikipedia) hyperdoc-id page-title)
+(defmethod hb:find-link-sources ((wp wikipedia) hyperdoc-id page-title)
   nil)
 
 ;;
@@ -147,7 +147,7 @@
 ;;
 
 (views:defview 👀backlinks (page wikipedia-page)
-  (-> (hci:find-backlink-sources (-> page hci:hyperdoc-of hci:id-of)
-                                 (-> page hci:title-of))
+  (-> (hb:find-backlink-sources (-> page hb:hyperdoc-of hb:id-of)
+                                 (-> page hb:title-of))
       views:👀items
       (views:rename :title "Backlinks" :priority 6)))

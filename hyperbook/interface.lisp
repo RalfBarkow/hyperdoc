@@ -1,8 +1,8 @@
-;;;; Abstract HyperDoc interface
+;;;; HyperBook interface
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hypertext-cluster-interface)
+(in-package :hyperbook)
 
 ;;
 ;; An abstract interface for minimal HyperDoc functionality.

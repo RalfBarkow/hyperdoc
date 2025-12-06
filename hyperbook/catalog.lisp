@@ -1,8 +1,8 @@
-;;;; The HyperDoc catalog
+;;;; The HyperBook catalog
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hypertext-cluster-interface)
+(in-package :hyperbook)
 
 ;;
 ;; The HyperDoc catalog has only one global instance (singleton).

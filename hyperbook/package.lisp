@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defpackage :hypertext-cluster-interface
+(defpackage :hyperbook
   (:use :cl)
   (:import-from :alexandria
    :if-let :when-let :compose)

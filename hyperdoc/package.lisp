@@ -8,7 +8,7 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:import-from :hypertext-cluster-interface
+  (:import-from :hyperbook
                 #:abstract-hyperdoc #:abstract-page
                 #:id-of
                 ;; The catalog API

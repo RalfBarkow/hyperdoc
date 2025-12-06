@@ -2,8 +2,8 @@
 ;;
 ;;;; copyright (c) 2025 konrad hinsen <konrad.hinsen@fastmail.net>
 
-(defsystem #:hypertext-cluster-interface
-  :description "Hypertext cluster interface"
+(defsystem #:hyperbook
+  :description "Hyperbook interface"
   :author "konrad hinsen <konrad.hinsen@fastmail.net>"
   :license  "bsd"
   :version "0.0.1"
@@ -13,10 +13,10 @@
   :depends-on (#:alexandria
                #:arrow-macros
                #:asdf #:uiop)
-  :components ((:module "hypertext-cluster"
+  :components ((:module "hyperbook"
                         :serial t
                         :components ((:file "package")
-                                     (:file "abstract-interface")
+                                     (:file "interface")
                                      (:file "catalog")))))
 
 (defsystem #:hyperdoc
@@ -30,7 +30,7 @@
   :depends-on (#:alexandria
                #:arrow-macros
                #:asdf #:uiop
-               #:hypertext-cluster-interface)
+               #:hyperbook)
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
@@ -42,22 +42,22 @@
                              (:file "hyperdoc")))))
 
 
-(defsystem #:hyperdoc/wikipedia
-  :description "HyperDoc interface to Wikipedia"
+(defsystem #:hyperbook/wikipedia
+  :description "HyperBook interface to Wikipedia"
   :author "konrad hinsen <konrad.hinsen@fastmail.net>"
   :license  "bsd"
   :version "0.0.1"
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
-  :depends-on (#:hypertext-cluster-interface
+  :depends-on (#:hyperbook
                #:html-inspector-views
                #:plump-inspector-views
                #:trivial-package-local-nicknames
                #:alexandria
                #:arrow-macros
                #:str)
-  :components ((:module "hyperdoc-wikipedia"
+  :components ((:module "hyperbook-wikipedia"
                 :serial t
                 :components ((:file "package")
                              (:file "wikipedia")))))
@@ -71,7 +71,7 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperdoc
-               #:hyperdoc/wikipedia
+               #:hyperbook/wikipedia
                #:html-inspector-views
                #:clog-moldable-inspector
                #:trivial-package-local-nicknames)
