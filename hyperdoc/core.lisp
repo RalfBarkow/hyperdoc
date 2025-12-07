@@ -5,7 +5,7 @@
 (in-package :hyperdoc)
 
 ;;
-;; A Hyperdoc instance refers to a collection of pages (text, code, tool).
+;; A HyperDoc instance refers to a collection of pages (text, code, tool).
 ;; stored in a directory. It also has a title, used for references,
 ;; and optionally the title of an entry page that is shown by default
 ;; in an inspector.
@@ -16,7 +16,7 @@
 ;; pages are created by code, so their list is also fixed at load time.
 ;;
 
-(defclass hyperdoc (abstract-hyperdoc)
+(defclass hyperdoc (hb:hyperbook)
   ((asdf-system-name :reader asdf-system-name-of :initarg :asdf-system-name)
    (directory :reader directory-of :initarg :directory)
    (writable :reader writable-of :initarg :writable)
@@ -42,21 +42,12 @@
       asdf:find-system)))
 
 ;;
-;; Make directory-of work for other implementations of abstract-hyperdoc
-;;
-
-(defmethod directory-of ((hd abstract-hyperdoc))
-  (declare (ignore hd))
-  nil)
-
-;;
 ;; Page classes. text-class is still quite abstract, concrete
 ;; subclasses for HTML and Markdown pages follow later.
 ;;
 
-(defclass page (abstract-page)
-  ((title :reader title-of :initarg :title)
-   (links :reader links-of :initarg :links :initform nil)))
+(defclass page (hb:page)
+  ((links :reader links-of :initarg :links :initform nil)))
 
 (defclass text-page (page)
   ((file :reader file-of :initarg :file)))
@@ -127,7 +118,7 @@ the macro DEFHYPERDOC."
       (dolist (tool-name tools)
         (let* ((tool (get-tool tool-name))
                (title (title-of tool)))
-          (setf (slot-value tool 'hyperdoc) hyperdoc)
+          (setf (slot-value tool 'hyperbook) hyperdoc)
           (setf (gethash title pages) tool)))
       hyperdoc)))
 
@@ -153,17 +144,18 @@ the macro DEFHYPERDOC."
   (let* ((type (pathname-type file))
          (type-as-kw (alexandria:make-keyword (string-upcase type)))
          (page (make-instance (page-class type-as-kw)
-                              :hyperdoc hdoc
+                              :hyperbook hdoc
                               :file file)))
     (load-page page)
     page))
 
 (defun make-code-page (hdoc code-file)
   "Create a page instance in HyperDoc HDOC for CODE-FILE"
-  (make-instance 'code-page
-                 :hyperdoc hdoc
-                 :title (code-file-title code-file)
-                 :file code-file))
+  (let ((title (code-file-title code-file)))
+    (make-instance 'code-page
+                   :hyperbook hdoc
+                   :id title
+                   :file code-file)))
 
 (defun code-file-title (cl-source-file)
   (->> cl-source-file

@@ -5,55 +5,54 @@
 (in-package :hyperbook)
 
 ;;
-;; The HyperDoc catalog has only one global instance (singleton).
+;; The HyperBook catalog has only one global instance (singleton).
 ;;
 
 (defclass catalog ()
-  ((hyperdocs :accessor hyperdocs-of :initform nil :type list)))
+  ((hyperbooks :accessor hyperbooks-of :initform nil :type list)))
 
 (defvar *catalog*
   (make-instance 'catalog))
 
 
 ;;
-;; Registration of HyperDocs
+;; Registration of HyperBooks
 ;;
 
-(defun register (hdoc)
-  "Register HyperDoc HDOC in the global HyperDoc catalog."
-  (push hdoc (hyperdocs-of *catalog*)))
+(defun register (hbook)
+  "Register HyperBook HBOOK in the global HyperBook catalog."
+  (push hbook (hyperbooks-of *catalog*)))
 
 ;;
 ;; Catalog lookup
 ;;
 
-(define-condition cluster-lookup-failure (lookup-failure)
-  ((title-or-id :initarg :title-or-id)))
+(define-condition hyperbook-lookup-failure (lookup-failure)
+  ((id :initarg :id)))
 
 (declaim (ftype (function (string &key (:signal-error? boolean))
-                          (or abstract-hyperdoc null))
-                find-hyperdoc))
+                          (or hyperbook null))
+                find-hyperbook))
 
-(defun find-hyperdoc (title-or-id &key signal-error?)
-  "Look up the TITLE-OR-ID in the global catalog. If no HyperDoc with
-that title or id exists, then return NIL if SIGNAL-ERROR? is nil, else
+(defun find-hyperbook (id &key signal-error?)
+  "Look up ID in the global catalog. If no HyperBook with
+that id exists, then return NIL if SIGNAL-ERROR? is nil, else
 signal cluster-lookup-failure."
-  (or (dolist (hd (hyperdocs-of *catalog*))
-        (when (or (string= title-or-id (title-of hd))
-                  (string-equal title-or-id (id-of hd)))
-          (return hd)))
+  (or (dolist (hb (hyperbooks-of *catalog*))
+        (when (equal id (id-of hb))
+          (return hb)))
       (and signal-error?
-           (error 'cluster-lookup-failure :title-or-id title-or-id))))
+           (error 'hyperbook-lookup-failure :id id))))
 
 ;;
 ;; Link lookup (for backlinks)
 ;;
 
-(defgeneric find-link-sources (target hyperdoc-id page-title))
+(defgeneric find-link-sources (target hyperbook-id page-id))
 
-(defmethod find-link-sources ((target catalog) hyperdoc-id page-title)
-  (loop for hd in (hyperdocs-of target)
-        append (find-link-sources hd hyperdoc-id page-title)))
+(defmethod find-link-sources ((target catalog) hyperbook-id page-id)
+  (loop for hd in (hyperbooks-of target)
+        append (find-link-sources hd hyperbook-id page-id)))
 
-(defun find-backlink-sources (hyperdoc-id &optional page-title)
-  (find-link-sources *catalog* hyperdoc-id page-title))
+(defun find-backlink-sources (hyperbook-id &optional page-id)
+  (find-link-sources *catalog* hyperbook-id page-id))

@@ -9,16 +9,15 @@
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:import-from :hyperbook
-                #:abstract-hyperdoc #:abstract-page
-                #:id-of
+                #:id #:hyperbook
+                #:id-of #:hyperbook-of #:title-of #:main-page-id-of
                 ;; The catalog API
                 #:catalog #:*catalog*
                 #:register #:find-backlink-sources #:find-link-sources
-                #:hyperdocs-of
                 ;; Accessing items
-                #:hyperdoc-of #:title-of #:entry-of
-                #:find-page #:find-hyperdoc
-                #:lookup-failure #:page-lookup-failure #:cluster-lookup-failure)
+                #:find-page #:find-hyperbook
+                ;; Conditions and their accessors
+                #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure)
   (:export ;; Creating and registering HyperDocs
            #:defhyperdoc
            #:make-hyperdoc
@@ -39,3 +38,6 @@
            #:hyperdoc-of #:file-of
            ;; HyperDoc's own HyperDoc
            #:*hyperdoc*))
+
+(trivial-package-local-nicknames:add-package-local-nickname
+ :hb :hyperbook :hyperdoc)

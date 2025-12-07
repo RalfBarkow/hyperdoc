@@ -37,8 +37,8 @@
   page)
 
 (defun set-title (page)
-  (with-slots (parse-tree title) page
-    (setf title (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
+  (with-slots (parse-tree id) page
+    (setf id (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
                           do (let ((elements (-> (parse-tree-of page)
                                                (plump:get-elements-by-tag-name tag))))
                                (when elements
@@ -84,7 +84,7 @@
                     (pushnew (make-page-link page
                                              (if hyperdoc-attr
                                                  hyperdoc-attr
-                                                 (-> page hyperdoc-of id-of))
+                                                 (-> page hyperbook-of id-of))
                                              page-attr
                                              view-attr)
                              page-links :test #'equal :key #'key-of))
@@ -255,11 +255,11 @@ standard HTML tag.")
         (page
          (handler-case
              (let* ((hyperdoc (or (and hyperdoc
-                                       (find-hyperdoc hyperdoc
-                                                      :signal-error? t))
+                                       (find-hyperbook hyperdoc
+                                                       :signal-error? t))
                                   (-> *page-state*
                                       (slot-value 'page)
-                                      (slot-value 'hyperdoc))))
+                                      (slot-value 'hyperbook))))
                     (value (find-page hyperdoc page :signal-error? t)))
                (views:html
                  (:span :class "hyperdoc-reference"
@@ -274,7 +274,7 @@ standard HTML tag.")
          t)
         (hyperdoc
          (handler-case
-             (let ((value (find-hyperdoc hyperdoc :signal-error? t)))
+             (let ((value (find-hyperbook hyperdoc :signal-error? t)))
                (views:html
                  (:span :class "hyperdoc-reference"
                         :title (format nil "HyperDoc \"~A\"" hyperdoc)

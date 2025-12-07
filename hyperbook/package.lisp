@@ -8,14 +8,14 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export ;; Implementing HyperDoc variants
-           #:abstract-hyperdoc #:abstract-page
-           #:id-of
+  (:export ;; The abstract classes and their accessors
+           #:hyperbook #:page
+           #:id-of #:hyperbook-of #:title-of #:main-page-id-of
            ;; The catalog API
            #:catalog #:*catalog*
            #:register #:find-backlink-sources #:find-link-sources
-           #:hyperdocs-of
+           #:hyperbooks-of
            ;; Accessing items
-           #:hyperdoc-of #:title-of #:entry-of
-           #:find-page #:find-hyperdoc
-           #:lookup-failure #:page-lookup-failure #:cluster-lookup-failure))
+           #:find-page #:find-hyperbook
+           ;; Conditions and their accessors
+           #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure))

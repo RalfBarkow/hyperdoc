@@ -84,11 +84,11 @@ PAGE-LOOKUP-FAILURE."
            (views:esc (title-of (slot-value condition 'hyperdoc)))
            (views:esc "\""))))
 
-(defmethod views:html-representation ((condition cluster-lookup-failure) &optional id)
+(defmethod views:html-representation ((condition hyperbook-lookup-failure) &optional id)
   (views:html
     (:span :id id :class "inspector-error"
            (views:esc "No HyperDoc \"")
-           (views:esc (slot-value condition 'title-or-id))
+           (views:esc (slot-value condition 'id))
            (views:esc "\""))))
 
 ;;
@@ -173,7 +173,7 @@ PAGE-LOOKUP-FAILURE."
   (title-of page))
 
 (defmethod views:title-bar-action-buttons ((page text-page))
-  (when (writable-of (hyperdoc-of page))
+  (when (writable-of (hyperbook-of page))
     (views:action-button "Reload"
                          (views:thunk
                            (load-page page)

@@ -37,13 +37,13 @@
 
 (defun make-page-link (page to-hyperdoc to-page &optional view)
   (make-instance 'page-link
-                 :from-hyperdoc (-> page hyperdoc-of id-of)
+                 :from-hyperdoc (-> page hyperbook-of id-of)
                  :from-page (-> page title-of)
                  :to-hyperdoc to-hyperdoc
                  :to-page to-page
                  :thunk (views:thunk
                           (let ((hyperdoc (result-or-condition
-                                           (find-hyperdoc to-hyperdoc))))
+                                           (find-hyperbook to-hyperdoc))))
                             (result-or-condition
                              (find-page hyperdoc to-page))))
                  :view view))
@@ -59,12 +59,12 @@
 
 (defun make-hyperdoc-link (page to-hyperdoc &optional view)
   (make-instance 'hyperdoc-link
-                 :from-hyperdoc (-> page hyperdoc-of id-of)
+                 :from-hyperdoc (-> page hyperbook-of id-of)
                  :from-page (-> page title-of)
                  :to-hyperdoc to-hyperdoc
                  :thunk (views:thunk
                           (result-or-condition
-                            (find-hyperdoc to-hyperdoc)))
+                            (find-hyperbook to-hyperdoc)))
                  :view view))
 
 ;; Web links
@@ -77,7 +77,7 @@
 
 (defun make-web-link (page url)
   (make-instance 'web-link
-                 :from-hyperdoc (-> page hyperdoc-of id-of)
+                 :from-hyperdoc (-> page hyperbook-of id-of)
                  :from-page (-> page title-of)
                  :url url))
 
@@ -94,7 +94,7 @@
   (let* ((*package* package)
          (form (parse expr)))
     (make-instance 'expr-link
-                   :from-hyperdoc (-> page hyperdoc-of id-of)
+                   :from-hyperdoc (-> page hyperbook-of id-of)
                    :from-page (-> page title-of)
                    :form form
                    :package package
@@ -111,11 +111,11 @@
     (link-view links)))
 
 (views:defview 👀backlinks (page page)
-  (let* ((pages (find-backlink-sources (-> page hyperdoc-of id-of)
+  (let* ((pages (find-backlink-sources (-> page hyperbook-of id-of)
                                        (-> page title-of)))
          (page-links (mapcar #'(lambda (page)
                                  (make-page-link page
-                                                 (-> page hyperdoc-of id-of)
+                                                 (-> page hyperbook-of id-of)
                                                  (-> page title-of)))
                              pages)))
     (-> (when page-links `((:page ,@page-links)))
@@ -138,8 +138,8 @@
                       lookup-failures)
                   (dolist (page-link page-links)
                     (let ((page (-> page-link thunk-of views:eval-thunk)))
-                      (if (typep page 'abstract-page)
-                          (let ((hd (-> page hyperdoc-of)))
+                      (if (typep page 'hb:page)
+                          (let ((hd (-> page hyperbook-of)))
                             (alexandria:ensure-gethash hd by-hyperdoc nil)
                             (pushnew page (gethash hd by-hyperdoc)))
                           (pushnew page lookup-failures))))

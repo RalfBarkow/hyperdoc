@@ -20,10 +20,10 @@
 ;; for use with "see".
 ;;
 
-(defmethod page ((title string) &key hyperdoc)
-  (let ((hyperdoc (or (and hyperdoc (find-hyperdoc hyperdoc :signal-error? t))
-                      (current-hyperdoc))))
-    (find-page hyperdoc title :signal-error? t)))
+(defmethod page ((title string) &key hyperbook)
+  (let ((hyperbook (or (and hyperbook (find-hyperbook hyperbook :signal-error? t))
+                       (current-hyperdoc))))
+    (find-page hyperbook title :signal-error? t)))
 
 (defun current-hyperdoc ()
   (when-let (source html-inspector-views/standard:*current-source-code-file*)
@@ -39,11 +39,12 @@
   "Look up the HyperDoc whose directory is PATHNAME in the global catalog.
 If no such HyperDoc exists, then return NIL if SIGNAL-ERROR? is nil, else
 signal directory-lookup-failure."
-  (or (dolist (hd (hyperdocs-of *catalog*))
-        (when (equal pathname (directory-of hd))
+  (or (dolist (hd (hb:hyperbooks-of *catalog*))
+        (when (and (typep hd 'hyperdoc)
+                   (equal pathname (directory-of hd)))
           (return hd)))
       (and signal-error?
            (error 'directory-lookup-failure :catalog *catalog* :pathname pathname))))
 
 (defmethod hyperdoc ((title string))
-  (find-hyperdoc title :signal-error? t))
+  (find-hyperbook title :signal-error? t))

@@ -30,7 +30,7 @@
 (defmethod load-page ((page code-page))
   (let ((html-inspector-views/standard:*current-source-code-file*
           (source-code-pathname page))
-        page-links hyperdoc-links web-links expr-links)
+        page-links hyperbook-links web-links expr-links)
     (dolist (tlf (parsed-toplevel-forms page))
       (let ((cst (-> tlf views/standard:cst-of)))
         (when (and (cst:consp cst)
@@ -41,12 +41,12 @@
                            (error (c) c))))
             (typecase target
               (page  (pushnew (make-page-link page
-                                              (id-of (hyperdoc-of target))
+                                              (id-of (hyperbook-of target))
                                               (title-of target))
                               page-links
                               :test #'equal :key #'key-of))
               (hyperdoc (pushnew (make-hyperdoc-link page (id-of target))
-                                 hyperdoc-links
+                                 hyperbook-links
                                  :test #'equal :key #'key-of))
               (t (pushnew (make-expr-link page
                                           (princ-to-string (cst:raw target-form))
@@ -56,8 +56,8 @@
     (with-slots (links) page
       (when page-links
         (push (cons :page (nreverse page-links)) links))
-      (when hyperdoc-links
-        (push (cons :hyperdoc (nreverse hyperdoc-links)) links))
+      (when hyperbook-links
+        (push (cons :hyperbook (nreverse hyperbook-links)) links))
       (when web-links
         (push (cons :web (nreverse web-links)) links))
       (when expr-links

@@ -1,18 +1,17 @@
-;;;; system definitions
+;;;; System definitions
 ;;
-;;;; copyright (c) 2025 konrad hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (defsystem #:hyperbook
   :description "Hyperbook interface"
-  :author "konrad hinsen <konrad.hinsen@fastmail.net>"
-  :license  "bsd"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
   :version "0.0.1"
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:alexandria
-               #:arrow-macros
-               #:asdf #:uiop)
+               #:arrow-macros)
   :components ((:module "hyperbook"
                         :serial t
                         :components ((:file "package")
@@ -21,8 +20,8 @@
 
 (defsystem #:hyperdoc
   :description "Hypertext documentation system"
-  :author "konrad hinsen <konrad.hinsen@fastmail.net>"
-  :license  "bsd"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
   :version "0.0.1"
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
@@ -41,11 +40,10 @@
                              (:file "tools")
                              (:file "hyperdoc")))))
 
-
 (defsystem #:hyperbook/wikipedia
   :description "HyperBook interface to Wikipedia"
-  :author "konrad hinsen <konrad.hinsen@fastmail.net>"
-  :license  "bsd"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
   :version "0.0.1"
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")

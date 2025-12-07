@@ -9,11 +9,11 @@
 ;;
 
 (defmethod text-representation ((catalog catalog))
-  "Registered HyperDocs")
+  "Registered HyperBooks")
 
 (views:defview views:👀items (catalog catalog)
-  (-> (hyperdocs-of catalog)
+  (-> (hb:hyperbooks-of catalog)
     copy-list
     (sort #'string< :key #'title-of)
     views:👀items
-    (views:rename :title "HyperDocs" :priority 1)))
+    (views:rename :title "HyperBooks" :priority 1)))

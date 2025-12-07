@@ -21,18 +21,18 @@
 ;; In order to reduce the dependencies of the core HyperDoc system,
 ;; these are unimplemented generic functions.
 
-(defgeneric page (title &key hyperdoc)
-  (:documentation "Look up the page entitled TITLE in HYPERDOC, if given,
+(defgeneric page (id &key hyperbook)
+  (:documentation "Look up the page with ID in HYPERBOOK, if given,
 or else in the HyperDoc that contains the function call."))
 
-(defgeneric hyperdoc (title)
-  (:documentation "Look up the HyperDoc entitled TITLE in catalog of
-registered HyperDocs."))
+(defgeneric hyperbook (id)
+  (:documentation "Look up the HyperBook specified by ID in the catalog of
+registered HyperBooks."))
 
 ;; The implementation methods are in the system hyperdoc/explorer:
 
-(see (page "Implementation of page and HyperDoc links embedded in Lisp code"
-           :hyperdoc "HyperDoc Explorer"))
+(see (page "Implementation of page and HyperBook links embedded in Lisp code"
+           :hyperbook "HyperDoc Explorer"))
 
 ;; The use of embedded links is explained in:
 

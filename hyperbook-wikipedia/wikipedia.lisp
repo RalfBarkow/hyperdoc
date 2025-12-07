@@ -1,30 +1,28 @@
-;;;; HyperDoc interface to Wikipedia
+;;;; HyperBook interface to Wikipedia
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperbook/wikipedia)
 
 ;;
-;; Implementation of the abstract HyperDoc interface
+;; Implementation of the HyperBook interface
 ;;
 
-(defclass wikipedia (hb:abstract-hyperdoc)
+(defclass wikipedia (hb:hyperbook)
   ((edition :reader edition-of :type keyword :initarg :edition
             :documentation "Edition code")
    (title :reader hb:title-of :type string :initarg :title)
-   (main-page :reader main-page-of :type string :initarg :main-page)))
+   (main-page-id :reader hb:main-page-id-of :type string :initarg :main-page)))
 
-(defclass wikipedia-page (hb:abstract-page)
+(defclass wikipedia-page (hb:page)
   ((title :reader hb:title-of :type string :initarg :title)))
 
-(defmethod hb:find-page ((wp wikipedia) title  &key signal-error?)
+(defmethod hb:find-page ((wp wikipedia) id  &key signal-error?)
   (declare (ignore signal-error?))
   (make-instance 'wikipedia-page
-                 :hyperdoc wp
-                 :title title))
-
-(defmethod hb:entry-of ((wp wikipedia))
-  (hb:find-page wp (main-page-of wp)))
+                 :hyperbook wp
+                 :id id
+                 :title id))
 
 ;;
 ;; Make and manage wikipedia objects
@@ -85,15 +83,16 @@
 (views:defview views:👀content (page wikipedia-page)
   (views:html-view :title "Content" :priority 1
     (views:html
-      (:iframe :src (page-url (-> page hb:hyperdoc-of edition-of)
+      (:iframe :src (page-url (-> page hb:hyperbook-of edition-of)
                               (-> page hb:title-of))
                :title (-> page hb:title-of)
                :style "border:none;width:100%;height:100%" ))))
 
 (views:defview views:👀content (wp wikipedia)
-  (let ((entry (hb:entry-of wp)))
-    (views:rename (views:👀content entry)
-                  :title (hb:title-of entry)
+  (let* ((main-page-id (hb:main-page-id-of wp))
+         (main-page (hb:find-page wp main-page-id)))
+    (views:rename (views:👀content main-page)
+                  :title (hb:title-of main-page)
                   :priority 1)))
 
 (views:defview views:👀source (page wikipedia-page)
@@ -138,7 +137,7 @@
 ;; Find backlinks
 ;;
 
-(defmethod hb:find-link-sources ((wp wikipedia) hyperdoc-id page-title)
+(defmethod hb:find-link-sources ((wp wikipedia) hyperbook-id page-id)
   nil)
 
 ;;
@@ -147,7 +146,7 @@
 ;;
 
 (views:defview 👀backlinks (page wikipedia-page)
-  (-> (hb:find-backlink-sources (-> page hb:hyperdoc-of hb:id-of)
-                                 (-> page hb:title-of))
+  (-> (hb:find-backlink-sources (-> page hb:hyperbook-of hb:id-of)
+                                (-> page hb:title-of))
       views:👀items
       (views:rename :title "Backlinks" :priority 6)))
