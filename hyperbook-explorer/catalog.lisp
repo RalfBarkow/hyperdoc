@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hyperbook/explorer)
 
 ;;
 ;; Title bar and items view for catalog inspectors
@@ -12,7 +12,7 @@
   "Registered HyperBooks")
 
 (views:defview views:👀items (catalog catalog)
-  (-> (hb:hyperbooks-of catalog)
+  (-> (hyperbooks-of catalog)
     copy-list
     (sort #'string< :key #'title-of)
     views:👀items

@@ -28,7 +28,7 @@
 ;;
 
 (define-condition hyperbook-lookup-failure (lookup-failure)
-  ((id :initarg :id)))
+  ((hyperbook-id :initarg :hyperbook-id)))
 
 (declaim (ftype (function (string &key (:signal-error? boolean))
                           (or hyperbook null))
@@ -42,7 +42,7 @@ signal cluster-lookup-failure."
         (when (equal id (id-of hb))
           (return hb)))
       (and signal-error?
-           (error 'hyperbook-lookup-failure :id id))))
+           (error 'hyperbook-lookup-failure :hyperbook-id id))))
 
 ;;
 ;; Link lookup (for backlinks)

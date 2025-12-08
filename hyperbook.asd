@@ -15,8 +15,30 @@
   :components ((:module "hyperbook"
                         :serial t
                         :components ((:file "package")
-                                     (:file "interface")
+                                     (:file "hyperbooks")
                                      (:file "catalog")))))
+
+(defsystem #:hyperbook/explorer
+  :description "Explorer for HyperBooks"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperbook
+               #:html-inspector-views
+               #:html-inspector-views/standard
+               #:alexandria
+               #:arrow-macros
+               #:trivial-package-local-nicknames
+               #:asdf #:uiop)
+  :components ((:module "hyperbook-explorer"
+                :serial t
+                :components ((:file "package")
+                             (:file "links")
+                             (:file "explorer")
+                             (:file "catalog")))))
 
 (defsystem #:hyperbook/wikipedia
   :description "HyperBook interface to Wikipedia"

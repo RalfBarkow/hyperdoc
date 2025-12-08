@@ -52,6 +52,7 @@
   :serial t
   :depends-on (#:hyperdoc
                #:hyperdoc/inspector
+               #:hyperbook/explorer
                #:html-inspector-views
                #:html-inspector-views/standard
                #:cl-who
@@ -66,11 +67,10 @@
                #:asdf #:uiop)
   :components ((:module "hyperdoc-explorer"
                 :serial t
-                :components ((:file "import")
+                :components ((:file "package")
                              (:file "links")
                              (:file "explorer")
                              (:file "packages")
-                             (:file "catalog")
                              (:file "parse-expr")
                              (:file "html-pages")
                              (:file "markdown-pages")

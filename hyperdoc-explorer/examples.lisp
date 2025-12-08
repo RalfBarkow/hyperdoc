@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hyperdoc/explorer)
 
 ;;
 ;; Add a play button before a top-level defexample form.

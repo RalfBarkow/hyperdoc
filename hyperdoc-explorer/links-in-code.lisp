@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hyperdoc/explorer)
 
 ;;
 ;; Find the linked object in a top-level see form. If an error occurs
@@ -31,7 +31,7 @@
                       :directory (pathname-directory source))))
       (find-hyperdoc-in-directory directory :signal-error? t))))
 
-(define-condition directory-lookup-failure (lookup-failure)
+(define-condition directory-lookup-failure (hb:lookup-failure)
   ((catalog :initarg :catalog)
    (pathname :initarg :pathname)))
 

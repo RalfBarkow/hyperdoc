@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hyperdoc/explorer)
 
 ;;
 ;; Markdown pages are parsed, serialized as HTML, and

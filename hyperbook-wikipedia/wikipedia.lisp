@@ -32,15 +32,15 @@
 
 (defun make-wikipedia (edition title main-page)
   (assert (eq (type-of edition) 'keyword))
-  (let* ((edition-name (symbol-name edition))
-         (id (alexandria:make-keyword (str:concat "WIKIPEDIA-" edition-name))))
+  (let ((id (str:concat "WIKIPEDIA-" (symbol-name edition))))
     (setf (gethash edition *wikipedias*)
           (make-instance 'wikipedia
                          :id id
                          :edition edition
                          :title title
                          :main-page main-page))
-    (hb:register (gethash edition *wikipedias*))))
+    (hb:register (gethash edition *wikipedias*))
+    (gethash edition *wikipedias*)))
 
 ;; It should be possible to retrieve a complete list from
 ;; https://en.wikipedia.org/wiki/List_of_Wikipedias

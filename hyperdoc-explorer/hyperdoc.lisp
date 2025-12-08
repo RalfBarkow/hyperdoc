@@ -2,13 +2,13 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hyperdoc/explorer)
 
 ;;
 ;; The HyperDoc for HyperDoc
 ;;
 
-(defhyperdoc *explorer-hyperdoc*
+(defhyperdoc *hyperdoc*
   ;; The title of the HyperDoc
   :id "hyperdoc/explorer"
   :title "HyperDoc Explorer"

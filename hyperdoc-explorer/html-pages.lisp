@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc)
+(in-package :hyperdoc/explorer)
 
 ;;
 ;; An HTML page stores the page contents as the parse tree
@@ -61,9 +61,13 @@
              (collect-link (element)
                (let ((href-attr (plump:attribute element "href"))
                      (expr-attr (plump:attribute element "expr"))
+                     (hyperbook-attr (plump:attribute element "hyperbook"))
                      (hyperdoc-attr (plump:attribute element "hyperdoc"))
                      (page-attr (plump:attribute element "page"))
                      (view-attr (plump:attribute element "view")))
+                 ;; Allow "hyperdoc" as a synonym for "hyperbook"
+                 (when (and hyperdoc-attr (not hyperbook-attr))
+                   (setf hyperbook-attr hyperdoc-attr))
                  (cond
                    ;; Expression link
                    (expr-attr
@@ -75,22 +79,22 @@
                     (pushnew (make-web-link page href-attr) web-links
                              :test #'equal :key #'key-of))
                    ;; Remaining link types are combinations of page and
-                   ;; hyperdoc attributes, so if there's neither, raise
+                   ;; hyperbook attributes, so if there's neither, raise
                    ;; an error.
-                   ((not (or page-attr hyperdoc-attr))
+                   ((not (or page-attr hyperbook-attr))
                     (error "Unknown link type: ~A" element))
                    ;; Page link
                    (page-attr
                     (pushnew (make-page-link page
-                                             (if hyperdoc-attr
-                                                 hyperdoc-attr
+                                             (if hyperbook-attr
+                                                 hyperbook-attr
                                                  (-> page hyperbook-of id-of))
                                              page-attr
                                              view-attr)
                              page-links :test #'equal :key #'key-of))
-                   ;; HyperDoc link
+                   ;; HyperBook link
                    (t
-                    (pushnew (make-hyperdoc-link page hyperdoc-attr view-attr)
+                    (pushnew (make-hyperbook-link page hyperbook-attr view-attr)
                              hyperdoc-links :test #'equal :key #'key-of))))))
       (walk (parse-tree-of page))
       (with-slots (links) page
@@ -234,6 +238,7 @@ standard HTML tag.")
   (:method ((tag (eql :a)) element)
     (let ((expr (plump:attribute element "expr"))
           (view (plump:attribute element "view"))
+          (hyperbook (plump:attribute element "hyperdoc"))
           (hyperdoc (plump:attribute element "hyperdoc"))
           (page (plump:attribute element "page"))
           (text (plump:text element))
@@ -242,9 +247,12 @@ standard HTML tag.")
                                (make-instance 'html-expr
                                               :nodes children
                                               :style :normal)))))
+      ;; Allow "hyperdoc" as a synonym for "hyperbook"
+      (when (and hyperdoc (not hyperbook))
+        (setf hyperbook hyperdoc))
       (cond
         (expr
-         (assert (and (null hyperdoc) (null page)))
+         (assert (and (null hyperbook) (null page)))
          (let* ((*package* (slot-value *page-state* 'package))
                 (value (parse-and-eval expr)))
            (views:html
@@ -254,32 +262,32 @@ standard HTML tag.")
            t))
         (page
          (handler-case
-             (let* ((hyperdoc (or (and hyperdoc
-                                       (find-hyperbook hyperdoc
-                                                       :signal-error? t))
-                                  (-> *page-state*
-                                      (slot-value 'page)
-                                      (slot-value 'hyperbook))))
-                    (value (find-page hyperdoc page :signal-error? t)))
+             (let* ((hyperbook (or (and hyperbook
+                                        (find-hyperbook hyperbook
+                                                        :signal-error? t))
+                                   (-> *page-state*
+                                       (slot-value 'page)
+                                       (slot-value 'hyperbook))))
+                    (value (find-page hyperbook page :signal-error? t)))
                (views:html
                  (:span :class "hyperdoc-reference"
-                        :title (format nil "Page \"~A\"~%HyperDoc \"~A\""
+                        :title (format nil "Page \"~A\"~%HyperBook \"~A\""
                                        page
-                                       (title-of hyperdoc))
+                                       (title-of hyperbook))
                         (views:object-ref value :display render-children :select view))))
-           (lookup-failure (c)
+           (hb:lookup-failure (c)
              (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
                       (views:object-ref c :display render-children)))))
          t)
-        (hyperdoc
+        (hyperbook
          (handler-case
-             (let ((value (find-hyperbook hyperdoc :signal-error? t)))
+             (let ((value (find-hyperbook hyperbook :signal-error? t)))
                (views:html
                  (:span :class "hyperdoc-reference"
-                        :title (format nil "HyperDoc \"~A\"" hyperdoc)
+                        :title (format nil "HyperBook \"~A\"" hyperbook)
                         (views:object-ref value :display render-children :select view))))
-           (lookup-failure (c)
+           (hb:lookup-failure (c)
              (views:html
                (:span :class "hyperdoc-reference hyperdoc-error"
                       (views:object-ref c :display text))))))
