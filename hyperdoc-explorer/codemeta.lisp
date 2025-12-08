@@ -2,14 +2,14 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 ;;
 ;; Read codemeta.json
 ;;
 
 (defun codemeta-data (hd)
-  (let ((codemeta-filename (-> (hd::asdf-system-name-of hd)
+  (let ((codemeta-filename (-> (asdf-system-name-of hd)
                                (asdf:system-relative-pathname "codemeta.json"))))
     (when (probe-file codemeta-filename)
       (njson:decode codemeta-filename))))

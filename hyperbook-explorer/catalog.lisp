@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperbook/explorer)
+(in-package :hyperbook)
 
 ;;
 ;; Title bar and items view for catalog inspectors

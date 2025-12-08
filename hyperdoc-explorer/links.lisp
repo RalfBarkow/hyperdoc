@@ -2,11 +2,11 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 ;; Expression links
 
-(defclass expr-link (hbe::object-link)
+(defclass expr-link (object-link)
   ((form :reader form-of :initarg :form)
    (package :reader package-of :initarg :package :type package)))
 
@@ -30,7 +30,7 @@
 ;;
 
 (views:defview 👀links (page page)
-  (when-let (links (hd::links-of page))
+  (when-let (links (links-of page))
     (link-view links)))
 
 (views:defview 👀backlinks (page page)
@@ -60,7 +60,7 @@
                 (let ((by-hyperdoc (make-hash-table))
                       lookup-failures)
                   (dolist (page-link page-links)
-                    (let ((page (-> page-link hbe::thunk-of views:eval-thunk)))
+                    (let ((page (-> page-link thunk-of views:eval-thunk)))
                       (if (typep page 'hb:page)
                           (let ((hd (-> page hyperbook-of)))
                             (alexandria:ensure-gethash hd by-hyperdoc nil)
@@ -86,7 +86,7 @@
               (views:html
                 (:h2 (views:esc "Web links"))
                 (:table :class "inspector-table"
-                  (dolist (link (mapcar #'hbe::url-of web-links))
+                  (dolist (link (mapcar #'url-of web-links))
                     (views:html
                       (:tr (:td (:a :href link :target "_blank"
                                     (views:esc link)))))))))
@@ -109,18 +109,18 @@
         append (find-link-sources page hyperdoc-id page-id)))
 
 (defmethod find-link-sources ((page page) (hyperdoc-id string) (page-id string))
-  (let ((links (hd::links-of page))
+  (let ((links (links-of page))
         (link-sources ()))
     (dolist (page-link (cdr (assoc :page links)))
-      (when (and (string-equal (hbe::target-hyperbook-of page-link) hyperdoc-id)
-                 (equal (hbe::target-page-of page-link) page-id))
+      (when (and (string-equal (target-hyperbook-of page-link) hyperdoc-id)
+                 (equal (target-page-of page-link) page-id))
         (pushnew page link-sources :test #'eq)))
     link-sources))
 
 (defmethod find-link-sources ((page page) (hyperdoc-id string) (page-id null))
-  (let ((links (hd::links-of page))
+  (let ((links (links-of page))
         (link-sources ()))
     (dolist (link (cdr (assoc :hyperdoc links)))
-      (when (string-equal (hbe::target-hyperbook-of link) hyperdoc-id)
+      (when (string-equal (target-hyperbook-of link) hyperdoc-id)
         (pushnew page link-sources :test #'eq)))
     link-sources))

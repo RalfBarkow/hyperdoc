@@ -2,14 +2,14 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 (defun find-packages-used (hd)
   (reduce #'(lambda (acc cp)
               (union acc
                      (find-packages-used-in-file (file-of cp))
                      :test #'eq))
-          (hd::code-pages-of hd)
+          (code-pages-of hd)
           :initial-value nil))
 
 (defun find-packages-used-in-file (source-file)
@@ -23,7 +23,7 @@
      :test #'eq)))
 
 (defun packages-used (hd)
-  (or (hd::packages-of hd)
+  (or (packages-of hd)
       (setf (slot-value hd 'packages)
             (find-packages-used hd))))
 

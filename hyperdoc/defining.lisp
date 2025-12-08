@@ -9,10 +9,11 @@
 ;;
 
 (defmacro defhyperdoc (var-symbol
-                       &key id title asdf-system-name subdirectory entry tools data)
+                       &key id title asdf-system-name subdirectory
+                            main-page-id tools data)
   "Define and register a HyperDoc from TITLE, the HyperDoc's title,
 ASDF-SYSTEM-NAME and SUBDIRECTORY to define the HyperDoc's directory.
-Optional data are ENTRY, the title of the entry page, TOOLS, a list
+Optional data are MAIN-PAGE-ID, the id of the main page, TOOLS, a list
 of packages defining HyperDoc tools, and DATA, a list of (SYMBOL . STRING)
 cons pairs in which SYMBOL names a global variable and STRING is the
 title under which the variable's data is listed in the HyperDoc's
@@ -23,7 +24,7 @@ list of datasets. The HyperDoc becomes the value bound to VAR-SYMBOL."
                       :title ,title
                       :asdf-system-name ,asdf-system-name
                       :subdirectory ,subdirectory
-                      :entry ,entry
+                      :main-page-id ,main-page-id
                       :tools ,tools
                       :data ,data))
      (eval-when (:load-toplevel)

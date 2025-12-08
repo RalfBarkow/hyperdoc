@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 ;;
 ;; The classes for HyperDocs and their pages, as well as the code
@@ -28,7 +28,7 @@
           ((member (pathname-type file) '("html" "md") :test #'string=)
            (let ((page (gethash file text-pages)))
              (unless page
-               (setf page (hd::make-text-page hdoc file))
+               (setf page (make-text-page hdoc file))
                (setf (gethash file text-pages) page))
              (load-page page)
              (push file page-files)))))
@@ -39,7 +39,7 @@
     ;; Remove the potentially stale text page entries
     (loop for title being the hash-keys of pages
             using (hash-value page)
-          when (typep page 'hd::text-page)
+          when (typep page 'text-page)
             do (remhash title pages))
     ;; Add the current text page entries
     (loop for page being the hash-values of text-pages
@@ -48,12 +48,12 @@
 
 (defun ensure-pages-loaded (hdoc)
   "Load the pages of HyperDoc HDOC unless they have already been loaded."
-  (when (zerop (hash-table-count (hd::text-pages-of hdoc)))
+  (when (zerop (hash-table-count (text-pages-of hdoc)))
     ;; Load text pages a first time
     (reload-text-pages hdoc)
     ;; Load non-text pages, just once
     (loop for page being the hash-values of (pages-of hdoc)
-          unless (typep page 'hd::text-page)
+          unless (typep page 'text-page)
             do (load-page page))))
 
 ;;
@@ -79,12 +79,12 @@ PAGE-LOOKUP-FAILURE."
   (title-of hdoc))
 
 (defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
-  (when (hd::writable-of hdoc)
+  (when (writable-of hdoc)
     (views:action-button "Reload"
                          (views:thunk (reload-text-pages hdoc)
                            t))))
 
-(views:defview hbe::👀main-page (hd hyperdoc)
+(views:defview hb::👀main-page (hd hyperdoc)
   (ensure-pages-loaded hd)
   (call-next-method))
 
@@ -94,19 +94,19 @@ PAGE-LOOKUP-FAILURE."
 
 (views:defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
-  (when-let (text-pages (-> (hd::text-pages-of hd)
+  (when-let (text-pages (-> (text-pages-of hd)
                             alexandria:hash-table-values))
     (views:list-view text-pages :title "Text pages" :priority 3)))
 
 (views:defview 👀tools (hd hyperdoc)
   (ensure-pages-loaded hd)
-  (when-let (tools (hd::tools-of hd))
+  (when-let (tools (tools-of hd))
     (-<> tools
-      (mapcar #'hd::get-tool <>)
+      (mapcar #'get-tool <>)
       (views:list-view :title "Tool pages" :priority 4))))
 
 (views:defview 👀code-pages (hd hyperdoc)
-  (when-let (pages (hd::code-pages-of hd))
+  (when-let (pages (code-pages-of hd))
     (views:enumerated-list-view pages
                                 :title "Code pages"
                                 :priority 5)))
@@ -134,7 +134,7 @@ PAGE-LOOKUP-FAILURE."
 ;;
 
 (views:defview 👀repository (hd hyperdoc)
-  (-> (hd::asdf-system-name-of hd)
+  (-> (asdf-system-name-of hd)
     asdf:find-system
     👀repository
     (views:rename :title "Repository" :priority 7)))
@@ -146,8 +146,8 @@ PAGE-LOOKUP-FAILURE."
 (defmethod views:text-representation ((page page))
   (title-of page))
 
-(defmethod views:title-bar-action-buttons ((page hd::text-page))
-  (when (hd::writable-of (hyperbook-of page))
+(defmethod views:title-bar-action-buttons ((page text-page))
+  (when (writable-of (hyperbook-of page))
     (views:action-button "Reload"
                          (views:thunk
                            (load-page page)
@@ -157,7 +157,7 @@ PAGE-LOOKUP-FAILURE."
 ;; Source code view for text pages
 ;;
 
-(views:defview 👀source (page hd::text-page)
+(views:defview 👀source (page text-page)
   (-> page
       file-of
       views:👀content

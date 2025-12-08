@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 ;;
 ;; An HTML page stores the page contents as the parse tree

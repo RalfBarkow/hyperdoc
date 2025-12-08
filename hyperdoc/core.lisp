@@ -7,7 +7,7 @@
 ;;
 ;; A HyperDoc instance refers to a collection of pages (text, code, tool).
 ;; stored in a directory. It also has a title, used for references,
-;; and optionally the title of an entry page that is shown by default
+;; and optionally the id of a main page that is shown by default
 ;; in an inspector.
 ;;
 ;; Text pages are stored in HTML or Markdown files. They can be reloaded
@@ -21,7 +21,7 @@
    (directory :reader directory-of :initarg :directory)
    (writable :reader writable-of :initarg :writable)
    (title :reader title-of :initarg :title)
-   (entry :reader entry-of :initarg :entry)
+   (main-page-id :reader main-page-id-of :initarg :main-page-id)
    ;; Slots holding the pages (or their sources) of the HyperDoc
    (text-pages :reader text-pages-of :initarg :text-pages)
    (code-pages :reader code-pages-of :initarg :code-pages)
@@ -59,11 +59,12 @@
 ;; Create a HyperDoc instance.
 ;;
 
-(defun make-hyperdoc (&key id title asdf-system-name subdirectory entry tools data)
+(defun make-hyperdoc (&key id title asdf-system-name subdirectory
+                           main-page-id tools data)
   "Create a HyperDoc instance with unique identifier ID (a string) and TITLE
 for the text and code pages located in SUBDIRECTORY relative to the base
-directory for ASDF-SYSTEM-NAME. The entry page for the HyperDoc is the
-one whose title is ENTRY.
+directory for ASDF-SYSTEM-NAME. The main page for the HyperDoc is the
+one whose id is MAIN-PAGE-ID.
 TOOLS is a list of symbols naming HyperDoc tools. DATA is a list of
 (SYMBOL . STRING) cons pairs in which SYMBOL names a global variable
 and STRING is the title under which the variable's data is listed in
@@ -89,7 +90,7 @@ the macro DEFHYPERDOC."
     (assert (typep title 'string))
     (assert (typep asdf-system-name '(or string symbol)))
     (assert (typep subdirectory '(or pathname string)))
-    (assert (typep entry '(or string null)))
+    (assert (typep main-page-id '(or null string)))
     (assert (typep tools 'list))
     (assert (typep data 'list))
     (let ((hyperdoc (make-instance 'hyperdoc
@@ -98,7 +99,7 @@ the macro DEFHYPERDOC."
                                    :directory directory
                                    :writable writable
                                    :title title
-                                   :entry entry
+                                   :main-page-id main-page-id
                                    :code-pages code-pages
                                    :tools tools
                                    :data data

@@ -2,13 +2,13 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 ;;
 ;; The HyperDoc for HyperDoc
 ;;
 
-(defhyperdoc *hyperdoc*
+(defhyperdoc *explorer-hyperdoc*
   ;; The title of the HyperDoc
   :id "hyperdoc/explorer"
   :title "HyperDoc Explorer"
@@ -16,5 +16,5 @@
   :asdf-system-name "hyperdoc/explorer"
   ;; The subdirectory and ASDF module name containing the  text and code pages
   :subdirectory "hyperdoc-explorer"
-  ;; The title of the page to be displayed as the main entry point
-  :entry "HyperDoc Explorer")
+  ;; The id of the page to be displayed as the main entry point
+  :main-page-id "HyperDoc Explorer")

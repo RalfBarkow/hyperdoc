@@ -2,13 +2,13 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperdoc/explorer)
+(in-package :hyperdoc)
 
 ;;
 ;; Source code view
 ;;
 
-(views:defview views:👀source (page hd::code-page)
+(views:defview views:👀source (page code-page)
   (-> page
       file-of
       views:👀source
@@ -18,7 +18,7 @@
 ;; HTML parse tree
 ;;
 
-(defmethod parse-tree-of ((page hd::code-page))
+(defmethod parse-tree-of ((page code-page))
   (declare (ignore page))
   ;; TODO
   nil)
@@ -27,7 +27,7 @@
 ;; Link extraction
 ;;
 
-(defmethod load-page ((page hd::code-page))
+(defmethod load-page ((page code-page))
   (let ((html-inspector-views/standard:*current-source-code-file*
           (source-code-pathname page))
         page-links hyperbook-links expr-links)
@@ -76,7 +76,7 @@
 ;; Parse tree view
 ;;
 
-(views:defview 👀parse-tree (page hd::code-page)
+(views:defview 👀parse-tree (page code-page)
   (let ((source (-> page source-code-pathname alexandria:read-file-into-string))
         (forms (-> page parsed-toplevel-forms)))
     (views:html-view :title "Parse tree" :priority 11

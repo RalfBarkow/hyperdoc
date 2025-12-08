@@ -16,5 +16,5 @@
   :asdf-system-name "hyperdoc/server"
   ;; The subdirectory and ASDF module name containing the  text and code pages
   :subdirectory "hyperdoc-server"
-  ;; The title of the page to be displayed as the main entry point
-  :entry "HyperDoc Server")
+  ;; The id of the page to be displayed as the main entry point
+  :main-page-id "HyperDoc Server")

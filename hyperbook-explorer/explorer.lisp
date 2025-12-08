@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(in-package :hyperbook/explorer)
+(in-package :hyperbook)
 
 ;;
 ;; Better display of lookup failures
