@@ -87,7 +87,7 @@ Source code transclusions can be used only for functions and classes that have a
 ## Lisp code generating HTML code
 
 An element with tag `html-generator` is rendered by evaluating its text
-as Lisp code. See <a page="Forms" hyperdoc="Moldable inspector">this page</a>
+as Lisp code. See <a page="Forms" hyperdoc="moldable-inspector">this page</a>
 for examples. The Lisp code should follow the principles outlined in
-<a page="Defining custom views" hyperdoc="Moldable inspector">the inspector tutorial</a>,
+<a page="Defining custom views" hyperdoc="moldable-inspector">the inspector tutorial</a>,
 which implies calling functions from the libraries <a expr="(asdf:find-system :html-inspector-views)"><tt>html-inspector-views</tt></a> and <a expr="(asdf:find-system :cl-who)"><tt>cl-who</tt></a>.
