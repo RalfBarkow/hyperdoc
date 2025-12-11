@@ -37,6 +37,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "links")
+                             (:file "link-views")
                              (:file "explorer")
                              (:file "catalog")))))
 

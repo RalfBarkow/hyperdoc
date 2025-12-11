@@ -32,7 +32,7 @@
 
 (defun make-wikipedia (edition title main-page)
   (assert (eq (type-of edition) 'keyword))
-  (let ((id (str:concat "WIKIPEDIA-" (symbol-name edition))))
+  (let ((id (str:concat "wikipedia-" (-> edition symbol-name str:downcase))))
     (setf (gethash edition *wikipedias*)
           (make-instance 'wikipedia
                          :id id
@@ -88,13 +88,6 @@
                :title (-> page hb:title-of)
                :style "border:none;width:100%;height:100%" ))))
 
-(views:defview views:👀content (wp wikipedia)
-  (let* ((main-page-id (hb:main-page-id-of wp))
-         (main-page (hb:find-page wp main-page-id)))
-    (views:rename (views:👀content main-page)
-                  :title (hb:title-of main-page)
-                  :priority 1)))
-
 (views:defview views:👀source (page wikipedia-page)
   (views:html-view :title "Source" :priority 10
     (let* ((stream (drakma:http-request "https://en.wikipedia.org/w/api.php"
@@ -134,19 +127,13 @@
       (views:rename :title "Parse tree" :priority 11))))
 
 ;;
-;; Find backlinks
+;; Links and backlinks
 ;;
 
-(defmethod hb:find-link-sources ((wp wikipedia) hyperbook-id page-id)
+(defmethod hb:links-of ((page wikipedia-page))
+  ;; TODO
   nil)
 
-;;
-;; Backlink view
-;; (not yet including backlinks inside Wikipedia)
-;;
-
-(views:defview 👀backlinks (page wikipedia-page)
-  (-> (hb:find-backlink-sources (-> page hb:hyperbook-of hb:id-of)
-                                (-> page hb:title-of))
-      views:👀items
-      (views:rename :title "Backlinks" :priority 6)))
+(defmethod hb:find-link-sources ((wp wikipedia) hyperbook-id page-id)
+  ;; TODO
+  nil)

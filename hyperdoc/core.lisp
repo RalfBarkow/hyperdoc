@@ -47,7 +47,7 @@
 ;;
 
 (defclass page (hb:page)
-  ((links :reader links-of :initarg :links :initform nil)))
+  ((links :reader hb:links-of :initarg :links :initform nil)))
 
 (defclass text-page (page)
   ((file :reader file-of :initarg :file)))

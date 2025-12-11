@@ -263,8 +263,7 @@ standard HTML tag.")
         (page
          (handler-case
              (let* ((hyperbook (or (and hyperbook
-                                        (find-hyperbook hyperbook
-                                                        :signal-error? t))
+                                        (find-hyperbook hyperbook))
                                    (-> *page-state*
                                        (slot-value 'page)
                                        (slot-value 'hyperbook))))

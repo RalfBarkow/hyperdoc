@@ -21,7 +21,7 @@
 
 (defun register (hbook)
   "Register HyperBook HBOOK in the global HyperBook catalog."
-  (push hbook (hyperbooks-of *catalog*)))
+  (pushnew hbook (hyperbooks-of *catalog*) :key #'id-of :test #'equal))
 
 ;;
 ;; Catalog lookup

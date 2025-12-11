@@ -60,23 +60,20 @@
 ;; Look up a page in a HyperDoc
 ;;
 
-(defmethod find-page ((hdoc hyperdoc) title &key signal-error?)
-  "Look up TITLE in HyperDoc HDOC and return the page if found. If no page with
-TITLE exists, return NIL if SIGNAL-ERROR is NIL, otherwise signal
+(defmethod find-page ((hdoc hyperdoc) id &key signal-error?)
+  "Look up ID in HyperDoc HDOC and return the page if found. If no page with
+ID exists, return NIL if SIGNAL-ERROR? is NIL, otherwise signal
 PAGE-LOOKUP-FAILURE."
   (unless hdoc
-    (error 'page-lookup-failure :hyperdoc hdoc :title title))
+    (error 'page-lookup-failure :hyperbook hdoc :page-id id))
   (ensure-pages-loaded hdoc)
-  (or (gethash title (pages-of hdoc))
+  (or (gethash id (pages-of hdoc))
       (and signal-error?
-           (error 'page-lookup-failure :hyperdoc hdoc :title title))))
+           (error 'page-lookup-failure :hyperbook hdoc :page-id id))))
 
 ;;
-;; The title bar of inspectors on HyperDocs
+;; The inspector title bar for HyperDocs
 ;;
-
-(defmethod views:text-representation ((hdoc hyperdoc))
-  (title-of hdoc))
 
 (defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
   (when (writable-of hdoc)
@@ -140,11 +137,8 @@ PAGE-LOOKUP-FAILURE."
     (views:rename :title "Repository" :priority 7)))
 
 ;;
-;; The title bar for HyperDoc pages
+;; The title bar for HyperDoc text pages
 ;;
-
-(defmethod views:text-representation ((page page))
-  (title-of page))
 
 (defmethod views:title-bar-action-buttons ((page text-page))
   (when (writable-of (hyperbook-of page))

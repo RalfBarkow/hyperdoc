@@ -4,7 +4,9 @@
 
 (in-package :hyperdoc)
 
+;;
 ;; Expression links
+;;
 
 (defclass expr-link (object-link)
   ((form :reader form-of :initarg :form)
@@ -26,79 +28,17 @@
                    :view view)))
 
 ;;
-;; Link views
+;; View section for expression links
 ;;
 
-(views:defview 👀links (page page)
-  (when-let (links (links-of page))
-    (link-view links)))
-
-(views:defview 👀backlinks (page page)
-  (let* ((pages (hb:find-backlink-sources (-> page hyperbook-of id-of)
-                                          (-> page title-of)))
-         (page-links (mapcar #'(lambda (page)
-                                 (make-page-link page
-                                                 (-> page hyperbook-of id-of)
-                                                 (-> page title-of)))
-                             pages)))
-    (-> (when page-links `((:page ,@page-links)))
-        link-view
-        (views:rename :title "Backlinks" :priority 6))))
-
-(defun link-view (links)
-  (views:html-view :title "Links" :priority 5
-    (views:add-asset-path "/hyperdoc/"
-                          (asdf:system-relative-pathname
-                           :hyperdoc
-                           "assets/hyperdoc/"))
-    (views:include-css "/hyperdoc/css/hyperdoc.css")
-    (views:html
-      (:div :class "hyperdoc-page"
-            (when-let (page-links (cdr (assoc :page links)))
-              (views:html
-                (:h2 (views:esc "Pages"))
-                (let ((by-hyperdoc (make-hash-table))
-                      lookup-failures)
-                  (dolist (page-link page-links)
-                    (let ((page (-> page-link thunk-of views:eval-thunk)))
-                      (if (typep page 'hb:page)
-                          (let ((hd (-> page hyperbook-of)))
-                            (alexandria:ensure-gethash hd by-hyperdoc nil)
-                            (pushnew page (gethash hd by-hyperdoc)))
-                          (pushnew page lookup-failures))))
-                  (loop for hd being the hash-keys of by-hyperdoc
-                          using (hash-value pages)
-                        do (views:html
-                             (:table :class "inspector-table"
-                               (:tr (:td (:i (views:object-ref hd))))
-                               (:tr (:td (views:html-table pages))))))
-                  (when lookup-failures
-                    (views:html
-                      (:h4 "Bad links")
-                      (views:html-table lookup-failures))))))
-            (when-let (hyperdoc-links (cdr (assoc :hyperdoc links)))
-              (views:html
-                (:h2 (views:esc "HyperDocs"))
-                (views:html-table (mapcar #'(lambda (l)
-                                              (-> l thunk-of views:eval-thunk))
-                                          hyperdoc-links))))
-            (when-let (web-links (cdr (assoc :web links)))
-              (views:html
-                (:h2 (views:esc "Web links"))
-                (:table :class "inspector-table"
-                  (dolist (link (mapcar #'url-of web-links))
-                    (views:html
-                      (:tr (:td (:a :href link :target "_blank"
-                                    (views:esc link)))))))))
-            (when-let (expr-links (cdr (assoc :expr links)))
-              (views:html
-                (:h2 (Views:esc "Expressions"))
-                (views:html-table expr-links
-                                  :inspect #'(lambda (l)
-                                               (-> l thunk-of views:eval-thunk))
-                                  :display (list #'form-of))))))
-    (unless links
-      (views:html (views:esc "None"))))  )
+(defmethod hyperbook::link-view-section ((kind (eql :expr)) links)
+  (views:html
+   (:h2 (Views:esc "Expressions"))
+   (views:html-table
+    links
+    :inspect #'(lambda (l)
+                 (-> l thunk-of views:eval-thunk))
+    :display (list #'form-of))))
 
 ;;
 ;; Find links to pages

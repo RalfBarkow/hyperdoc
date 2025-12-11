@@ -51,6 +51,17 @@
   (:documentation "The ID of the main page of HYPERBOOK."))
 
 ;;
+;; A generic function to retrieve the links for a page.
+;; The return value is an alist whose keys are keywords
+;; indicating the link type. Standard link types are
+;; :page (to a HyperBook page), :hyperbook (to a hyperbook),
+;; and :web (a URL). Subclasses can define additional link
+;; types.
+;;
+
+(defgeneric links-of (page))
+
+;;
 ;; Finding a page in a HyperBook
 ;;
 

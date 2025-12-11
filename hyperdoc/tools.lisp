@@ -14,12 +14,12 @@
   (or (gethash name *tools*)
       (error "No tool named ~A" name)))
 
-(defun make-tool (symbol title)
+(defun make-tool (symbol id)
   (let ((tool (make-instance 'tool-page
-                             :title title
+                             :id id
                              :package *package*)))
     (setf (gethash symbol *tools*) tool)
-    (push (cons :html (concatenate 'string "<h1>" title "</h1>"))
+    (push (cons :html (concatenate 'string "<h1>" id "</h1>"))
           (parts-of tool))
     tool))
 
@@ -54,9 +54,9 @@
 (defclass playground-page (page)
   ((initial-content :reader initial-content-of :initarg :initial-content)))
 
-(defun make-playground (symbol title initial-content)
+(defun make-playground (symbol id initial-content)
   (let ((page (make-instance symbol
-                             :title title
+                             :id id
                              :initial-content initial-content)))
     (setf (gethash symbol *tools*) page)
     page))

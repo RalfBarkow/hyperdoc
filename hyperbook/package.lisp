@@ -11,6 +11,7 @@
   (:export ;; The abstract classes and their accessors
            #:hyperbook #:page
            #:id-of #:hyperbook-of #:title-of #:main-page-id-of
+           #:links-of
            ;; The catalog API
            #:catalog #:*catalog*
            #:register #:find-backlink-sources #:find-link-sources

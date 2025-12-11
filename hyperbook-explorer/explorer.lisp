@@ -5,6 +5,27 @@
 (in-package :hyperbook)
 
 ;;
+;; View showing the main page
+;;
+
+(views:defview 👀main-page (hb hyperbook)
+  (when-let (main-page-id (main-page-id-of hb))
+    (when-let (main-page (find-page hb main-page-id))
+      (-> main-page
+          views:👀content
+          (views:rename :title "Main page" :priority 1)))))
+
+;;
+;; The inspector title bar for HyperBooks and their pages
+;;
+
+(defmethod views:text-representation ((hbook hyperbook))
+  (title-of hbook))
+
+(defmethod views:text-representation ((page page))
+  (title-of page))
+
+;;
 ;; Better display of lookup failures
 ;;
 
@@ -21,16 +42,7 @@
   (views:html
     (:span :id id :class "inspector-error"
            (views:esc "No HyperBook \"")
-           (views:esc (slot-value condition 'id))
+           (views:esc (slot-value condition 'hyperbook-id))
            (views:esc "\""))))
 
-
-;;
-;; View showing the main page
-;;
-
-(views:defview 👀main-page (hb hyperbook)
-  (when-let (main-page-id (main-page-id-of hb))
-    (when-let (main-page (find-page hb main-page-id))
-      (views:👀content main-page))))
 
