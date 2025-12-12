@@ -26,24 +26,24 @@ arbitrary Lisp code."
                                                  :title title
                                                  :playground? development))
    :port port)
-  (dolist (hd (hyperdoc:hyperdocs-of hyperdoc:*catalog*))
+  (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
     (clog:set-on-new-window
      #'(lambda (body)
          (clog-moldable-inspector:on-new-inspector body
-                                                   :object hd
+                                                   :object hb
                                                    :pane-width pane-width
-                                                   :title (hyperdoc:title-of hd)
+                                                   :title (hyperbook:title-of hb)
                                                    :playground? development))
-     :path (str:concat "/" (-> hd hyperdoc:title-of slug)))
-    (register-pages hd :pane-width pane-width :development development)
-    (register-data hd :pane-width pane-width :development development)))
+     :path (str:concat "/" (-> hb hyperbook:title-of slug)))
+    (register-pages hb :pane-width pane-width :development development)
+    (register-data hb :pane-width pane-width :development development)))
 
-(defgeneric register-pages (hyperdoc &key pane-width development)
-  (:method ((hd hyperdoc:abstract-hyperdoc) &key pane-width development)
+(defgeneric register-pages (hyperbook &key pane-width development)
+  (:method ((hb hyperbook:hyperbook) &key pane-width development)
     (declare (ignore pane-width development))))
 
-(defgeneric register-data (hyperdoc &key pane-width development)
-  (:method ((hd hyperdoc:abstract-hyperdoc) &key pane-width development)
+(defgeneric register-data (hyperbook &key pane-width development)
+  (:method ((hb hyperbook:hyperbook) &key pane-width development)
     (declare (ignore pane-width development))))
 
 (defmethod register-pages ((hd hyperdoc:hyperdoc) &key pane-width development)
@@ -93,10 +93,10 @@ allows the execution of arbitrary Lisp code."
 ;;
 
 (defun slug (title)
-  "Return a character string derived from the title of HyperDoc HD that is suitable
-for use in a URL. It is computed as the first five characters of the title's SHA1
-followed by the first 30 characters of the title after removal of characters that
-are not allowed in URLs."
+  "Return a character string derived from TITLE that is suitable
+for use in a URL. It is computed as the first five characters of the
+title's SHA1 followed by the first 30 characters of the title after
+removal of characters that are not allowed in URLs."
   (str:concat
    (str:substring 0 5
                   (sha1:sha1-hex (babel:string-to-octets title)))
@@ -112,7 +112,7 @@ are not allowed in URLs."
   (url-view-from-slug (-> hd hyperdoc:title-of slug)))
 
 (views:defview 👀url (hd-page hyperdoc:page)
-  (let ((hd (slot-value hd-page 'hyperdoc:hyperdoc)))
+  (let ((hd (slot-value hd-page 'hyperbook:hyperbook)))
     (url-view-from-slug
      (str:concat (-> hd hyperdoc:title-of slug)
                  "/"
