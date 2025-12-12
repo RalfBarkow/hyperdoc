@@ -89,5 +89,4 @@
                                                  cst:source)))
                             (str:substring (car source-refs)
                                            (cdr source-refs)
-                                           source))))))
-))
+                                           source))))))))
