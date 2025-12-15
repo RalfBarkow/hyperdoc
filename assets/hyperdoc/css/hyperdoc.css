@@ -44,7 +44,7 @@
 }
 a::after {
   content: '';
-  background-image: url("/hyperdoc/icons/external-link.svg");
+  background-image: url("/hyperbook/icons/external-link.svg");
   background-repeat: no-repeat;
   background-size: 70%;
   background-position: center bottom;
@@ -52,7 +52,7 @@ a::after {
 }
 a[href*='wikipedia.org']::after {
   content: '';
-  background-image: url("/hyperdoc/icons/wikipedia.svg");
+  background-image: url("/hyperbook/icons/wikipedia.svg");
   background-repeat: no-repeat;
   background-size: 70%;
   background-position: center bottom;
