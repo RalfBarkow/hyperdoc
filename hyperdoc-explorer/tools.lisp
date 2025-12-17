@@ -10,25 +10,25 @@
 
 (views:defview views:👀content (tool tool-page)
   (views:html-view :title "Live" :priority 1
-    (views:add-asset-path "/hyperdoc/"
+    (views:add-asset-path "/hyperbook/"
                           (asdf:system-relative-pathname
                            :hyperdoc
-                           "assets/hyperdoc/"))
-    (views:include-css "/hyperdoc/css/hyperdoc.css")
+                           "assets/hyperbook/"))
+    (views:include-css "/hyperbook/css/hyperbook.css")
     (views:html
-      (:div :class "hyperdoc-page"
-            (dolist (part (reverse (parts-of tool)))
-              (render-tool-part tool (car part) (cdr part)))))))
+      (:div :class "hyperbook-page"
+            (let ((hb::*current-page* tool)
+                  (*current-package* (package-of tool))
+                  (plump:*tag-dispatchers* *hyperdoc-tags*))
+              (dolist (part (reverse (parts-of tool)))
+                (render-tool-part tool (car part) (cdr part))))))))
 
 (defun render-tool-part (tool kind content)
   (ccase kind
     (:html
-      (let ((hb::*current-page* tool)
-            (*current-package* (package-of tool)))
-        (plump:serialize
-         (let ((plump:*tag-dispatchers* plump:*html-tags*))
-           (plump:parse content))
-         views::*html-stream*)))
+      (let ((dom (let ((plump:*tag-dispatchers* plump:*html-tags*))
+                   (plump:parse content))))
+        (plump:serialize dom views::*html-stream*)))
     (:markdown
      (render-tool-part tool :html
                        (with-output-to-string (str)
