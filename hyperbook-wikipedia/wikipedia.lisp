@@ -49,6 +49,9 @@
   ;; Remove the links for editing each section
   (lquery:$ dom ".mw-editsection"
     (remove))
+  ;; Remove style nodes
+  (lquery:$ dom "style"
+    (remove))
   ;; Replace internal Wikipedia links by HyperBook links
   (lquery:$ dom "a[href^=/wiki/]"
     (map #'(lambda(el)
