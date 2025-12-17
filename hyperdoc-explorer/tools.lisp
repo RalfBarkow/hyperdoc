@@ -23,9 +23,8 @@
 (defun render-tool-part (tool kind content)
   (ccase kind
     (:html
-      (let ((*page-state* (make-instance 'page-state
-                                         :package (package-of tool)
-                                         :page tool)))
+      (let ((hb::*current-page* tool)
+            (*current-package* (package-of tool)))
         (plump:serialize
          (let ((plump:*tag-dispatchers* plump:*html-tags*))
            (plump:parse content))
@@ -37,7 +36,7 @@
     (:generator
      (funcall content))))
 
-(defmethod parse-tree-of ((page tool-page))
+(defmethod dom-of ((page tool-page))
   (let ((root (plump:make-root)))
     (dolist (part (reverse (parts-of page)))
       (when-let (parsed-part (parse-tool-part page (car part) (cdr part)))
@@ -48,9 +47,8 @@
 (defun parse-tool-part (tool kind content)
   (case kind
     (:html
-      (let ((*page-state* (make-instance 'page-state
-                                         :package (package-of tool)
-                                         :page tool)))
+      (let ((hb::*current-page* tool)
+            (*current-package* (package-of tool)))
         (let ((plump:*tag-dispatchers* plump:*html-tags*))
           (plump:parse content))))
     (:markdown

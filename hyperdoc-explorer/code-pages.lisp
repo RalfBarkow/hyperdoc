@@ -18,7 +18,7 @@
 ;; HTML parse tree
 ;;
 
-(defmethod parse-tree-of ((page code-page))
+(defmethod dom-of ((page code-page))
   (declare (ignore page))
   ;; TODO
   nil)

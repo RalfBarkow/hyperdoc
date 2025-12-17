@@ -176,4 +176,3 @@ the macro DEFHYPERDOC."
 
 (defgeneric load-page (page))
 
-(defgeneric parse-tree-of (page))

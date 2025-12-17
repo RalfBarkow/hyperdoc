@@ -18,7 +18,8 @@
           hyperbook:url-of
           hyperbook:make-page-link
           hyperbook:make-hyperbook-link
-          hyperbook:make-web-link))
+          hyperbook:make-web-link
+          hyperbook:dom-of))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :hb :hyperbook :hyperdoc)

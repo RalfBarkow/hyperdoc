@@ -10,7 +10,7 @@
 ;;
 
 (defclass html-page (text-page)
-  ((parse-tree :reader parse-tree-of :initform nil)))
+  ((parse-tree :reader dom-of :initform nil)))
 
 ;;
 ;; The page class for file type "html" is html-page.
@@ -39,7 +39,7 @@
 (defun set-title (page)
   (with-slots (parse-tree id) page
     (setf id (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
-                          do (let ((elements (-> (parse-tree-of page)
+                          do (let ((elements (-> (dom-of page)
                                                (plump:get-elements-by-tag-name tag))))
                                (when elements
                                  (return (-> elements first plump:text)))))
@@ -96,7 +96,7 @@
                    (t
                     (pushnew (make-hyperbook-link page hyperbook-attr view-attr)
                              hyperdoc-links :test #'equal :key #'key-of))))))
-      (walk (parse-tree-of page))
+      (walk (dom-of page))
       (with-slots (links) page
         (setf links nil)
         (when page-links
@@ -112,126 +112,159 @@
 ;; Render HTML pages
 ;;
 
-;; A class for holding the renderer state.
+;; The tags with special treatment in serialization
 
-(defclass page-state ()
-  ((package :initarg :package)
-   (page :initarg :page)))
+(defvar *hyperdoc-tags* hb::*hyperbook-tags*)
 
-;; The current renderer state.
+;; A special variable holding the current package
 
-(defvar *page-state* nil)
+(defvar *current-package* nil)
 
-;; A wrapper for rendering HTML trees as objects
+;;
+;; Process special tags
+;;
 
-(defclass html-expr ()
-  ((nodes :accessor nodes-of :initarg :nodes)
-   (style :accessor style-of :initarg :style)))
+;; in-package: set the current package, no not render
 
-(defmethod views:html-representation ((html-expr html-expr) &optional id)
-  (views:html
-    (:span :id id
-           (if (eql (style-of html-expr) :code)
-               (views:html
-                 (:tt
-                  (:code
-                   (loop for node across (nodes-of html-expr)
-                         do (plump:serialize-object node)))))
-               (loop for node across (nodes-of html-expr)
-                     do (plump:serialize-object node))))))
+(plump:define-tag-dispatcher (in-package *hyperdoc-tags*) (name)
+  (string-equal name "in-package"))
 
-;; Render special tags
+(plump:define-tag-printer in-package (element)
+  (setf *current-package*
+        (-> element plump:text string-upcase find-package))
+  t)
+
+;; value-of: parse and eval text, render result
+
+(plump:define-tag-dispatcher (value-of *hyperdoc-tags*) (name)
+  (string-equal name "value-of"))
+
+(plump:define-tag-printer value-of (element)
+  (let* ((*package* *current-package*)
+         (text (-> element plump:text))
+         (value (-> text parse-and-eval)))
+    (views:html
+      (:span :class "hyperdoc-computed-value"
+             :title text
+             (views:html-representation value))))
+  t)
+
+;; html-expr: parse and eval text, insert result as HTML
+
+(plump:define-tag-dispatcher (html-expr *hyperdoc-tags*) (name)
+  (string-equal name "html-expr"))
+
+(plump:define-tag-printer html-expr (element)
+  (let* ((*package* *current-package*)
+         (text (-> element plump:text))
+         (value (-> text parse-and-eval)))
+    (if (typep value 'condition)
+        (views:html-representation value)
+        (views:html (views:str value))))
+  t)
+
+;; html-generator: parse and eval text, which generates HTML as an effect
+
+(plump:define-tag-dispatcher (html-generator *hyperdoc-tags*) (name)
+  (string-equal name "html-generator"))
+
+(plump:define-tag-printer html-generator (element)
+  (let* ((*package* *current-package*)
+         (expr (plump:text element)))
+    (let ((result (parse-and-eval expr)))
+      (when (typep result 'condition)
+        (views:html-representation result))))
+  t)
+
+;; view-transclusion: parse and eval text, transclude result
+
+(plump:define-tag-dispatcher (view-transclusion *hyperdoc-tags*) (name)
+  (string-equal name "view-transclusion"))
+
+(plump:define-tag-printer view-transclusion (element)
+  (let* ((*package* *current-package*)
+         (expr (plump:text element))
+         (value (parse-and-eval expr)))
+    (if (typep value 'condition)
+        (views:html-representation value)
+        (views:transclusion value)))
+  t)
+
+;; source-of-class: find class named by text, transclude its source view
+
+(plump:define-tag-dispatcher (source-of-class *hyperdoc-tags*) (name)
+  (string-equal name "source-of-class"))
+
+(plump:define-tag-printer source-of-class (element)
+  (let* ((*package* *current-package*)
+         (name (plump:text element))
+         (class (parse-and-eval (format nil "(find-class '~a)" name))))
+    (if (typep class 'condition)
+        (views:html-representation class)
+        (views:transclusion
+         (html-inspector-views/standard:source-code-view class))))
+  t)
+
+;; source-of-class: find function named by text, transclude its source view
+
+(plump:define-tag-dispatcher (source-of-function *hyperdoc-tags*) (name)
+  (string-equal name "source-of-function"))
+
+(plump:define-tag-printer source-of-function (element)
+  (let* ((*package* *current-package*)
+         (name (plump:text element))
+         (fn (parse-and-eval (format nil "(function ~a)" name))))
+    (if (typep fn 'condition)
+        (views:html-representation fn)
+        (views:transclusion
+         (html-inspector-views/standard:source-code-view fn))))
+  t)
+
+;; lisp-code: parse text as Lisp, render with syntax highlighting
+
+(plump:define-tag-dispatcher (lisp-code *hyperdoc-tags*) (name)
+  (string-equal name "lisp-code"))
+
+(plump:define-tag-printer lisp-code (element)
+  (let* ((package-name (plump:attribute element "package"))
+         (package (or (and package-name
+                           (find-package (str:upcase package-name)))
+                      *current-package*)))
+    (-> element
+        plump:text
+        str:trim
+        (views/standard:parse-lisp-code package)
+        views/standard:render-as-html))
+  t)
+
+
+(plump:define-tag-dispatcher (img *hyperdoc-tags*) (name)
+  (string-equal name "img"))
+
+(plump:define-tag-printer img (element)
+  (let* ((src (plump:attribute element "src"))
+         (uri (puri:parse-uri src)))
+    ;; If the src has a URI scheme, leave as a img element.  If the
+    ;; src starts with "/", do the same.  Otherwise, it's a local file
+    ;; that a browser cannot access, replace it with a data URL.
+    (unless (or (puri:uri-scheme uri) (str:starts-with? "/" src))
+      (let* ((hyperdoc (-> hb::*current-page*
+                           (slot-value 'hyperbook)))
+             (directory (directory-of hyperdoc))
+             (pathname (merge-pathnames src directory))
+             (bytes (alexandria:read-file-into-byte-vector pathname))
+             (encoded (base64:usb8-array-to-base64-string bytes))
+             (image-type (-> pathname pathname-type str:downcase))
+             (mime-type (if (equal image-type "jpg") "jpeg" image-type))
+             (data-url (str:concat "data:image/" mime-type ";base64," encoded)))
+        (plump:set-attribute element "src" data-url)
+        (hb:render-node element))))
+  t)
 
 (defgeneric serialize-hyperdoc-element (tag element)
   (:documentation "Render ELEMENT by dispatching on its TAG. Return
 T if the element has been rendered, NIL if it should be rendered as a
 standard HTML tag.")
-
-  ;; Most elements are handled by plump:serialize-object.
-  (:method ((tag t) element)
-    nil)
-
-  ;; in-package elements set the current package but
-  ;; are not rendered.
-  (:method ((tag (eql :in-package)) element)
-    (setf (slot-value *page-state* 'package)
-          (-> element plump:text string-upcase find-package))
-    t)
-
-  ;; value-of elements are rendered here.
-  (:method ((tag (eql :value-of)) element)
-    (let* ((*package* (slot-value *page-state* 'package))
-           (text (-> element plump:text))
-           (value (-> text parse-and-eval)))
-      (views:html
-        (:span :class "hyperdoc-computed-value"
-               :title text
-               (views:html-representation value)))
-      t))
-
-  ;; html-expr elements are rendered here.
-  (:method ((tag (eql :html-expr)) element)
-    (let* ((*package* (slot-value *page-state* 'package))
-           (text (-> element plump:text))
-           (value (-> text parse-and-eval)))
-      (if (typep value 'condition)
-          (views:html-representation value)
-          (views:html (views:str value)))
-      t))
-
-  ;; view-transclusion elements are rendered here.
-  (:method ((tag (eql :view-transclusion)) element)
-    (let* ((*package* (slot-value *page-state* 'package))
-           (expr (plump:text element))
-           (value (parse-and-eval expr)))
-      (if (typep value 'condition)
-          (views:html-representation value)
-          (views:transclusion value)))
-    t)
-
-  ;; source-of-class elements are rendered here.
-  (:method ((tag (eql :source-of-class)) element)
-    (let* ((*package* (slot-value *page-state* 'package))
-           (name (plump:text element))
-           (class (parse-and-eval (format nil "(find-class '~a)" name))))
-      (if (typep class 'condition)
-          (views:html-representation class)
-          (views:transclusion
-           (html-inspector-views/standard:source-code-view class))))
-    t)
-
-  ;; source-of-function elements are rendered here.
-  (:method ((tag (eql :source-of-function)) element)
-    (let* ((*package* (slot-value *page-state* 'package))
-           (name (plump:text element))
-           (fn (parse-and-eval (format nil "(function ~a)" name))))
-      (if (typep fn 'condition)
-          (views:html-representation fn)
-          (views:transclusion
-           (html-inspector-views/standard:source-code-view fn))))
-    t)
-
-  ;; unloaded Lisp code with syntax highlighting
-  (:method ((tag (eql :lisp-code)) element)
-    (let* ((package-name (plump:attribute element "package"))
-           (package (or (and package-name
-                             (find-package (str:upcase package-name)))
-                        (slot-value *page-state* 'package))))
-      (-> element
-          plump:text
-          str:trim
-          (views/standard:parse-lisp-code package)
-          views/standard:render-as-html))
-    t)
-
-  ;; html-generator elements are rendered here.
-  (:method ((tag (eql :html-generator)) element)
-    (let* ((*package* (slot-value *page-state* 'package))
-           (expr (plump:text element)))
-      (let ((result (parse-and-eval expr)))
-        (when (typep result 'condition)
-          (views:html-representation result))))
-    t)
 
   ;; a elements with hyperdoc-specific attributes are
   ;; rendered here. Others are handled by plump:serialize-object.
@@ -253,7 +286,7 @@ standard HTML tag.")
       (cond
         (expr
          (assert (and (null hyperbook) (null page)))
-         (let* ((*package* (slot-value *page-state* 'package))
+         (let* ((*package* *current-package*)
                 (value (parse-and-eval expr)))
            (views:html
              (:span :class "hyperdoc-reference"
@@ -264,8 +297,7 @@ standard HTML tag.")
          (handler-case
              (let* ((hyperbook (or (and hyperbook
                                         (find-hyperbook hyperbook))
-                                   (-> *page-state*
-                                       (slot-value 'page)
+                                   (-> hb::*current-page*
                                        (slot-value 'hyperbook))))
                     (value (find-page hyperbook page :signal-error? t)))
                (views:html
@@ -294,64 +326,22 @@ standard HTML tag.")
         ;; Add target="_blank" to href links that don't specify a target
         (t (unless (plump:attribute element "target")
              (plump:set-attribute element "target" "_blank"))
-           nil))))
-
-  (:method ((tag (eql :img)) element)
-    (let* ((src (plump:attribute element "src"))
-           (uri (puri:parse-uri src)))
-      ;; If the src has a URI scheme, leave as a img element.
-      ;; If the src starts with "/", do the same.
-      ;; Otherwise, it's a local file that a browser cannot access,
-      ;; replace it with a data URL.
-      (unless (or (puri:uri-scheme uri) (str:starts-with? "/" src))
-        (let* ((hyperdoc (-> *page-state*
-                             (slot-value 'page)
-                             (slot-value 'hyperdoc)))
-               (directory (directory-of hyperdoc))
-               (pathname (merge-pathnames src directory))
-               (bytes (alexandria:read-file-into-byte-vector pathname))
-               (encoded (base64:usb8-array-to-base64-string bytes))
-               (image-type (-> pathname pathname-type str:downcase))
-               (mime-type (if (equal image-type "jpg") "jpeg" image-type))
-               (data-url (str:concat "data:image/" mime-type ";base64," encoded)))
-          (plump:set-attribute element "src" data-url)))
-      nil)))
-
-;; Add the special-tag renderer to plump's generic serializer.
-
-(defmethod plump:serialize-object :around ((element plump:element))
-  (let ((tag-as-kw (-> element
-                       plump:tag-name
-                       string-upcase
-                       alexandria:make-keyword)))
-    (unless (serialize-hyperdoc-element tag-as-kw element)
-      (call-next-method))))
+           nil)))))
 
 ;;
 ;; Content view on HTML pages
 ;;
 
 (views:defview views:👀content (page html-page)
-  (views:html-view :title "Content" :priority 1
-    (views:add-asset-path "/hyperdoc/"
-                          (asdf:system-relative-pathname
-                           :hyperdoc
-                           "assets/hyperdoc/"))
-    (views:include-css "/hyperdoc/css/hyperdoc.css")
-    (let ((*page-state* (make-instance 'page-state
-                                       :package (find-package "CL-USER")
-                                       :page page)))
-      (views:html
-        (:div :class "hyperdoc-page"
-              (plump:serialize (parse-tree-of page)
-                               views::*html-stream*)
-              (:br))))))
+  (let ((*current-package* (find-package "CL-USER"))
+        (plump:*tag-dispatchers* *hyperdoc-tags*))
+    (hb:content-view page)))
 
 ;;
 ;; Parse tree view
 ;;
 
 (views:defview 👀parse-tree (page html-page)
-  (-> (parse-tree-of page)
+  (-> (dom-of page)
       plump-inspector-views::👀children
       (views:rename :title "Parse tree" :priority 11)))

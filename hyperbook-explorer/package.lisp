@@ -11,7 +11,10 @@
           web-link url-of
           make-page-link
           make-hyperbook-link
-          make-web-link))
+          make-web-link
+          dom-of
+          content-view
+          render-node))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperbook)

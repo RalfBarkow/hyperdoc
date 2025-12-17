@@ -1,0 +1,48 @@
+.hyperbook-page h1 {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin: 12px 0px 6px;
+}
+.hyperbook-page h2 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 10px 0px 5px;
+}
+.hyperbook-page h3 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 8px 0px 4px;
+}
+.hyperbook-page h4 {
+  font-size: 1.1em;
+  margin: 6px 0px 3px;
+}
+.hyperbook-page h5 {
+  font-size: 1em;
+  margin: 4px 0px 2px;
+}
+.hyperbook-page h6 {
+  font-size: 1em;
+  margin: 2px 0px 1px;
+}
+.hyperbook-page .code-snippet {
+  margin-left: 10px;
+}
+.hyperbook-reference {
+  text-decoration-line: underline;
+  text-decoration-style: solid;  
+}
+.hyperbook-reference:hover {
+  background-color: #ddd;
+}
+.hyperbook-error {
+  color: red;
+}
+a::after {
+  content: '';
+  background-image: url("/hyperbook/icons/external-link.svg");
+  background-repeat: no-repeat;
+  background-size: 70%;
+  background-position: center bottom;
+  padding-right: 1.1em;
+}

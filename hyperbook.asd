@@ -39,7 +39,8 @@
                              (:file "links")
                              (:file "link-views")
                              (:file "explorer")
-                             (:file "catalog")))))
+                             (:file "catalog")
+                             (:file "rendering")))))
 
 (defsystem #:hyperbook/wikipedia
   :description "HyperBook interface to Wikipedia"
@@ -51,10 +52,13 @@
   :serial t
   :depends-on (#:hyperbook
                #:html-inspector-views
+               #:plump
                #:plump-inspector-views
+               #:lquery
                #:trivial-package-local-nicknames
                #:alexandria
                #:arrow-macros
+               #:shasht
                #:str)
   :components ((:module "hyperbook-wikipedia"
                 :serial t
