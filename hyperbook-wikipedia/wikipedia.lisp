@@ -79,11 +79,9 @@
       (plump:parse))))
 
 (defun get-page-data (wp page-title)
-  (let* ((url (format nil "https://~A.wikipedia.org/w/api.php"
-                      (-> wp edition-of str:downcase)))
-         (response
+  (let* ((response
            (multiple-value-list
-            (drakma:http-request url
+            (drakma:http-request (api-url wp)
                                  :method :get
                                  :parameters `(("action" . "parse")
                                                ("page" . ,page-title)
@@ -128,15 +126,20 @@
 ;; URLs
 ;;
 
-;; The mobile site is better adapted to inspector panes
-(defun page-url (edition page-title)
-  (format nil
-          "https://~A.m.wikipedia.org/wiki/~A"
-          (-> edition symbol-name str:downcase)
-          (-> page-title encode-page-title-for-url)))
+(defun page-url (page)
+  (let ((edition (-> page hb:hyperbook-of edition-of))
+        (page-title (-> page hb:title-of)))
+    (format nil
+            "https://~A.wikipedia.org/wiki/~A"
+            (-> edition symbol-name str:downcase)
+            (-> page-title encode-page-title-for-url))))
 
 (defun encode-page-title-for-url (page-title)
   (str:replace-all " " "_" page-title))
+
+(defun api-url (wikipedia)
+  (format nil "https://~A.wikipedia.org/w/api.php"
+          (-> wikipedia edition-of str:downcase)))
 
 ;;
 ;; Views
@@ -148,20 +151,15 @@
 (defmethod views:text-representation ((page wikipedia-page))
   (-> page hb:title-of))
 
-(views:defview 👀iframe (page wikipedia-page)
-  (views:html-view :title "IFrame" :priority 2
-    (views:html
-      (:iframe :src (page-url (-> page hb:hyperbook-of edition-of)
-                              (-> page hb:title-of))
-               :title (-> page hb:title-of)
-               :style "border:none;width:100%;height:100%" ))))
+(defmethod views:title-bar-action-buttons ((page wikipedia-page))
+  (views:action-button "Open in browser"
+                       (views:thunk (clog:open-browser :url (page-url page))
+                         nil)))
 
 (views:defview views:👀source (page wikipedia-page)
   (views:html-view :title "Source" :priority 10
-    (let* ((url (format nil "https://~A.wikipedia.org/w/api.php"
-                      (-> page hb:hyperbook-of edition-of str:downcase)))
-           (stream (drakma:http-request
-                    url
+    (let* ((stream (drakma:http-request
+                    (-> page hb:hyperbook-of api-url)
                     :method :get
                     :parameters `(("action" . "parse")
                                   ("page" . ,(-> page hb:id-of
@@ -179,10 +177,8 @@
           (:pre (views:esc wikitext)))))))
 
 (views:defview 👀parse-tree (page wikipedia-page)
-  (let* ((url (format nil "https://~A.wikipedia.org/w/api.php"
-                      (-> page hb:hyperbook-of edition-of str:downcase)))
-         (stream (drakma:http-request
-                  url
+  (let* ((stream (drakma:http-request
+                  (-> page hb:hyperbook-of api-url)
                   :method :get
                   :parameters `(("action" . "parse")
                                 ("page" . ,(-> page hb:id-of
