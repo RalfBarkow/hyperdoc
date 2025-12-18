@@ -17,7 +17,9 @@
 (defclass wikipedia-page (hb:page)
   ((title :reader hb:title-of :type string :initarg :title)
    (page-data :reader page-data-of :type string :initarg :page-data)
-   (dom :reader hb:dom-of :type plump:node :initarg :dom)))
+   (wikipedia-pageid :reader wikipedia-pageid-of :type integer :initform 0)
+   (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
+   (links :reader hb:links-of :type (or null hb:links) :initform nil)))
 
 (defmethod hb:find-page ((wp wikipedia) id  &key signal-error?)
   (declare (ignore signal-error?))
@@ -27,9 +29,7 @@
   (make-instance 'wikipedia-page
                  :hyperbook wp
                  :id id
-                 :title id
-                 :page-data nil
-                 :dom nil))
+                 :title id))
 
 (defun load-page (page)
   (unless (hb:dom-of page)
@@ -39,9 +39,18 @@
            (dom (make-dom page-data)))
       (adapt-dom dom id)
       (setf (slot-value page 'dom) dom)
+      (setf (slot-value page 'wikipedia-pageid)
+            (some->> page-data
+              (gethash "parse")
+              (gethash "pageid")))
+      (setf (slot-value page 'links) (hb:extract-links page))
       (setf (slot-value page 'page-data) page-data))))
 
 (defmethod views:👀content ((page wikipedia-page))
+  (load-page page)
+  (call-next-method))
+
+(defmethod hb:👀links ((page wikipedia-page))
   (load-page page)
   (call-next-method))
 
@@ -199,14 +208,27 @@
         (plump-inspector-views::👀children)
         (views:rename :title "Parse tree" :priority 11)))))
 
-;;
-;; Links and backlinks
-;;
-
-(defmethod hb:links-of ((page wikipedia-page))
-  ;; TODO
-  nil)
 
 (defmethod hb:find-link-sources ((wp wikipedia) hyperbook-id page-id)
-  ;; TODO
-  nil)
+  ;; We are not interested in links between different Wikipedia
+  ;; instances (editions), and the API wouldn't allow to retrieve
+  ;; them anyway. Therefore HYPERBOOK-ID must match the wikipedia
+  ;; instance, and PAGE-ID must be non-nil.
+  (when (and (equal (hb:id-of wp) hyperbook-id)
+             page-id)
+    (let* ((stream (drakma:http-request
+                    (-> wp api-url)
+                    :method :get
+                    :parameters `(("action" . "query")
+                                  ("list" . "backlinks")
+                                  ("bltitle" . ,page-id)
+                                  ("bllimit" . "500")
+                                  ("format" . "json"))
+                    :want-stream t))
+           (data (shasht:read-json stream))
+           (links (some->> data
+                    (gethash "query")
+                    (gethash "backlinks"))))
+      (loop for link across links
+            when (zerop (gethash "ns" link))
+              collect (hb:find-page wp (gethash "title" link))))))

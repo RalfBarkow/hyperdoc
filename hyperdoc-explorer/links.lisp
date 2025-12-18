@@ -41,26 +41,9 @@
     :display (list #'form-of))))
 
 ;;
-;; Find links to pages
+;; Gather link sources across all pages
 ;;
 
-(defmethod find-link-sources ((hd hyperdoc) hyperdoc-id page-id)
+(defmethod find-link-sources ((hd hyperdoc) hyperbook-id page-id)
   (loop for page being the hash-values of (pages-of hd)
-        append (find-link-sources page hyperdoc-id page-id)))
-
-(defmethod find-link-sources ((page page) (hyperdoc-id string) (page-id string))
-  (let ((links (links-of page))
-        (link-sources ()))
-    (dolist (page-link (cdr (assoc :page links)))
-      (when (and (string-equal (target-hyperbook-of page-link) hyperdoc-id)
-                 (equal (target-page-of page-link) page-id))
-        (pushnew page link-sources :test #'eq)))
-    link-sources))
-
-(defmethod find-link-sources ((page page) (hyperdoc-id string) (page-id null))
-  (let ((links (links-of page))
-        (link-sources ()))
-    (dolist (link (cdr (assoc :hyperdoc links)))
-      (when (string-equal (target-hyperbook-of link) hyperdoc-id)
-        (pushnew page link-sources :test #'eq)))
-    link-sources))
+        append (find-link-sources page hyperbook-id page-id)))

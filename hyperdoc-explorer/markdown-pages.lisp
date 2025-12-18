@@ -31,5 +31,5 @@
                    (3bmd:parse-string-and-print-to-stream text str))))
       (setf parse-tree (plump:parse html))
       (set-title page)
-      (extract-links page)))
+      (setf links (hb:extract-links page))))
   page)

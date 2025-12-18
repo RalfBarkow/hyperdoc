@@ -58,7 +58,8 @@
     (:generator nil)))
 
 (defmethod load-page ((page tool-page))
-  (extract-links page))
+  (with-slots (links) page
+    (setf links (hb:extract-links page))))
 
 ;;
 ;; Playground pages

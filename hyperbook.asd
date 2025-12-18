@@ -31,6 +31,7 @@
                #:html-inspector-views/standard
                #:alexandria
                #:arrow-macros
+               #:lquery
                #:trivial-package-local-nicknames
                #:asdf #:uiop)
   :components ((:module "hyperbook-explorer"

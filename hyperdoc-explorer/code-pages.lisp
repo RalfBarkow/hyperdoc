@@ -54,12 +54,14 @@
                           expr-links
                           :test #'equal :key #'key-of)))))))
     (with-slots (links) page
-      (when page-links
-        (push (cons :page (nreverse page-links)) links))
-      (when hyperbook-links
-        (push (cons :hyperbook (nreverse hyperbook-links)) links))
-      (when expr-links
-        (push (cons :expr (nreverse expr-links)) links)))))
+      (setf links
+            (make-instance 'hb:links
+                           :page-links (nreverse page-links)
+                           :hyperbook-links (nreverse hyperbook-links)
+                           :web-links nil))
+      ;; (when expr-links
+      ;;   (push (cons :expr (nreverse expr-links)) links))
+      )))
 
 (defun parsed-toplevel-forms (page)
   (-> page

@@ -12,6 +12,10 @@
           make-page-link
           make-hyperbook-link
           make-web-link
+          links
+          extract-links
+          👀links
+          👀backlinks
           dom-of
           html-nodes
           render-node
