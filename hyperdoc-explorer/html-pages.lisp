@@ -261,81 +261,50 @@
         (hb:render-node element))))
   t)
 
-(defgeneric serialize-hyperdoc-element (tag element)
-  (:documentation "Render ELEMENT by dispatching on its TAG. Return
-T if the element has been rendered, NIL if it should be rendered as a
-standard HTML tag.")
+(defmethod hb:serialize-a-element ((attr (eql ':expr)) element)
+  (serialize-a-expr-element element))
 
-  ;; a elements with hyperdoc-specific attributes are
-  ;; rendered here. Others are handled by plump:serialize-object.
-  (:method ((tag (eql :a)) element)
-    (let ((expr (plump:attribute element "expr"))
-          (view (plump:attribute element "view"))
-          (hyperbook (plump:attribute element "hyperbook"))
-          (hyperdoc (plump:attribute element "hyperdoc"))
-          (page (plump:attribute element "page"))
-          (text (plump:text element))
-          (render-children (let ((children (plump:children element)))
-                             (unless (zerop (length children))
-                               (make-instance 'html-expr
-                                              :nodes children
-                                              :style :normal)))))
-      ;; Allow "hyperdoc" as a synonym for "hyperbook"
-      (when (and hyperdoc (not hyperbook))
-        (setf hyperbook hyperdoc))
-      (cond
-        (expr
-         (assert (and (null hyperbook) (null page)))
-         (let* ((*package* *current-package*)
-                (value (parse-and-eval expr)))
-           (views:html
-             (:span :class "hyperdoc-reference"
-                    :title (cl-who:escape-string-all expr)
-                    (views:object-ref value :display render-children :select view)))
-           t))
-        (page
-         (handler-case
-             (let* ((hyperbook (or (and hyperbook
-                                        (find-hyperbook hyperbook))
-                                   (-> hb::*current-page*
-                                       (slot-value 'hyperbook))))
-                    (value (find-page hyperbook page :signal-error? t)))
-               (views:html
-                 (:span :class "hyperdoc-reference"
-                        :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                                       page
-                                       (title-of hyperbook))
-                        (views:object-ref value :display render-children :select view))))
-           (hb:lookup-failure (c)
-             (views:html
-               (:span :class "hyperdoc-reference hyperdoc-error"
-                      (views:object-ref c :display render-children)))))
-         t)
-        (hyperbook
-         (handler-case
-             (let ((value (find-hyperbook hyperbook :signal-error? t)))
-               (views:html
-                 (:span :class "hyperdoc-reference"
-                        :title (format nil "HyperBook \"~A\"" hyperbook)
-                        (views:object-ref value :display render-children :select view))))
-           (hb:lookup-failure (c)
-             (views:html
-               (:span :class "hyperdoc-reference hyperdoc-error"
-                      (views:object-ref c :display text))))))
+(defmethod hb:serialize-a-element ((attr (eql ':expr.view)) element)
+  (serialize-a-expr-element element))
 
-        ;; Add target="_blank" to href links that don't specify a target
-        (t (unless (plump:attribute element "target")
-             (plump:set-attribute element "target" "_blank"))
-           nil)))))
+(defun serialize-a-expr-element (element)
+  (let* ((expr-attr (plump:attribute element "expr"))
+         (view-attr (plump:attribute element "view"))
+         (*package* *current-package*)
+         (value (parse-and-eval expr-attr))
+         (render-children (let ((children (plump:children element)))
+                            (unless (zerop (length children))
+                              (make-instance 'hb:html-nodes
+                                             :nodes children)))))
+    (views:html
+      (:span :class "hyperbook-reference"
+             :title (cl-who:escape-string-all expr-attr)
+             (views:object-ref value :display render-children :select view-attr)))))
 
 ;;
 ;; Content view on HTML pages
 ;;
 
 (views:defview views:👀content (page html-page)
-  (let ((*current-package* (find-package "CL-USER"))
-        (plump:*tag-dispatchers* *hyperdoc-tags*))
-    (hb:content-view page)))
+  (views:html-view :title "Content" :priority 1
+    (views:add-asset-path "/hyperbook/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc
+                           "assets/hyperbook/"))
+    (views:add-asset-path "/hyperdoc/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc
+                           "assets/hyperdoc/"))
+    (views:include-css "/hyperbook/css/hyperbook.css")
+    (views:include-css "/hyperbook/css/hyperdoc.css")
+    (let ((hb::*current-page* page)
+          (*current-package* (find-package "CL-USER")))
+      (when-let (dom (dom-of page))
+        (views:html
+          (:div :class "hyperbook-page"
+                (let ((plump:*tag-dispatchers* *hyperdoc-tags*))
+                  (plump:serialize dom views::*html-stream*))
+                (:br)))))))
 
 ;;
 ;; Parse tree view

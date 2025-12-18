@@ -13,8 +13,9 @@
           make-hyperbook-link
           make-web-link
           dom-of
-          content-view
-          render-node))
+          html-nodes
+          render-node
+          serialize-a-element))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperbook)

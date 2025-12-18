@@ -53,6 +53,7 @@
   (let ((hyperbook-attr (plump:attribute element "hyperbook"))
         (page-attr (plump:attribute element "page"))
         (view-attr (plump:attribute element "view"))
+        (href-attr (plump:attribute element "href"))
         (text (plump:text element))
         (render-children (let ((children (plump:children element)))
                            (unless (zerop (length children))
@@ -92,40 +93,42 @@
            (views:html
              (:span :class "hyperbook-reference hyperbook-error"
                     (views:object-ref c :display text))))))
-
-      ;; Force target="_blank" for href links
-      (t (when-let (href (plump:get-attribute element "href"))
-           (format plump:*stream* "<a href=\"~A\" target=\"_blank\"" href)
-           (if (< 0 (length (plump:children element)))
-               (progn
-                 (write-string ">"  plump:*stream*)
-                 (loop for child across (plump:children element)
-                       do (plump:serialize child plump:*stream*))
-                 (write-string "</a>" plump:*stream*))
-               (write-string "/>" plump:*stream*))))))
+      (href-attr
+       ;; Force target="_blank" for href links
+       (views:html
+         (:a :href href-attr :target "_blank"
+             (loop for child across (plump:children element)
+                   do (plump:serialize child plump:*stream*)))))
+      (t
+       ;; Nonstandard links, i.e. neither hrefs nor HyperBook links.
+       ;; Provide a generic function for extensions, with dispatch
+       ;; on the elements attribute names.
+       (let* ((attrs (sort (-> element plump:attributes alexandria:hash-table-keys)
+                           #'string<))
+              (kw (alexandria:make-keyword 
+                   (str:upcase (str:join "." attrs)))))
+         (serialize-a-element kw element)))))
   t)
+
+(defgeneric serialize-a-element (attrs element)
+  (:method ((attrs t) element)
+    (render-node element)))
 
 ;;
 ;; Content view for pages
 ;;
 
 (views:defview views:👀content (page page)
-  (let ((plump:*tag-dispatchers* *hyperbook-tags*))
-    (content-view page)))
-
-(defgeneric content-view (page)
-  (:method ((page page))
-    (let ((tag-dispatchers plump:*tag-dispatchers*))
-      (views:html-view :title "Content" :priority 1
-        (views:add-asset-path "/hyperbook/"
-                              (asdf:system-relative-pathname
-                               :hyperdoc
-                               "assets/hyperbook/"))
-        (views:include-css "/hyperbook/css/hyperbook.css")
-        (let ((*current-page* page))
-          (when-let (dom (dom-of page))
-            (views:html
-              (:div :class "hyperbook-page"
-                    (let ((plump:*tag-dispatchers* tag-dispatchers))
-                      (plump:serialize dom views::*html-stream*))
-                    (:br)))))))))
+  (views:html-view :title "Content" :priority 1
+    (views:add-asset-path "/hyperbook/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc
+                           "assets/hyperbook/"))
+    (views:include-css "/hyperbook/css/hyperbook.css")
+    (let ((*current-page* page))
+      (when-let (dom (dom-of page))
+        (views:html
+          (:div :class "hyperbook-page"
+                (let ((plump:*tag-dispatchers* *hyperbook-tags*))
+                  (plump:serialize dom views::*html-stream*))
+                (:br)))))))

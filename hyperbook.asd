@@ -51,15 +51,16 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperbook
+               #:Hyperbook/explorer
                #:html-inspector-views
                #:plump
                #:plump-inspector-views
                #:lquery
-               #:trivial-package-local-nicknames
                #:alexandria
                #:arrow-macros
                #:shasht
-               #:str)
+               #:str
+               #:trivial-package-local-nicknames)
   :components ((:module "hyperbook-wikipedia"
                 :serial t
                 :components ((:file "package")
