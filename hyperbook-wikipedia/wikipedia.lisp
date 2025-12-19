@@ -120,10 +120,10 @@
 ;; It should be possible to retrieve a complete list from
 ;; https://en.wikipedia.org/wiki/List_of_Wikipedias
 (defparameter *editions*
-  '((:de "Wikipedia" "Hauptseite")
-    (:en "Wikipedia" "Main page")
-    (:es "Wikipedia" "Portada")
-    (:fr "Wikipédia" "Accueil principal")
+  '((:de "Wikipedia" "Wikipedia:Hauptseite")
+    (:en "Wikipedia" "Main Page")
+    (:es "Wikipedia" "Wikipedia:Portada")
+    (:fr "Wikipédia" "Wikipédia:Accueil principal")
     (:it "Wikipedia" "Pagina principale")))
 
 (defun request-wikipedia (edition)
