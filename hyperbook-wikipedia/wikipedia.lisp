@@ -81,13 +81,18 @@
                                     (str:concat (base-url wikipedia)
                                                 href))
                (plump:set-attribute el "target" "_blank")))))
-  ;; Remove (for now) links to anchors inside the page
+  ;; Remove links to anchors inside the page, replace by hover text
   (let ((root (plump:make-root)))
     (lquery:$ dom "a[href^=#]"
       (map #'(lambda (el)
-               (let* ((text (plump:text el))
-                      (text-node (plump:make-text-node root text)))
-                 (plump:replace-child el text-node))))))
+               (let* ((html-id (str:substring 1 nil (plump:get-attribute el "href")))
+                      (target (plump:get-element-by-id dom html-id))
+                      (target-text (plump:text target))
+                      (text (plump:text el))
+                      (span (plump:make-element root "span")))
+                 (plump:set-attribute span "title" target-text)
+                 (plump:make-text-node span text)
+                 (plump:replace-child el span))))))
   ;; Add the page title
   (lquery:$ dom ".mw-parser-output"
     (before (format nil "<h1>~A</h1>" page-title))))
