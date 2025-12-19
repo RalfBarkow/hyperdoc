@@ -39,8 +39,7 @@
                    (or (page-links-of links)
                        (hyperbook-links-of links)
                        (web-links-of links)))
-        (views:html (views:esc "None"))))
-    (link-view links)))
+        (views:html (views:esc "None"))))))
 
 (views:defview 👀backlinks (page page)
   (views:html-view :title "Backlinks" :priority 6
