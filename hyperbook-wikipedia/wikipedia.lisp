@@ -73,6 +73,13 @@
                  (plump:set-attribute el "page" page-id) 
                  (plump:remove-attribute el "href")
                  (plump:remove-attribute el "title"))))))
+  ;; Remove (for now) links to anchors inside the page
+  (let ((root (plump:make-root)))
+    (lquery:$ dom "a[href^=#]"
+      (map #'(lambda (el)
+               (let* ((text (plump:text el))
+                      (text-node (plump:make-text-node root text)))
+                 (plump:replace-child el text-node))))))
   ;; Add the page title
   (lquery:$ dom ".mw-parser-output"
     (before (format nil "<h1>~A</h1>" page-title))))
