@@ -58,7 +58,7 @@
       (views:html
         (:div :class "hyperbook-page"
               (if page-links
-                  (link-view-section :page page-links)
+                  (page-link-section pages)
                   (views:html (views:esc "None"))))))))
 
 (defmethod page-link-section (pages)
