@@ -37,7 +37,7 @@
            (id (hb:id-of page))
            (page-data (get-page-data wp id))
            (dom (make-dom page-data)))
-      (adapt-dom dom id)
+      (adapt-dom dom (hb:hyperbook-of page) id)
       (setf (slot-value page 'dom) dom)
       (setf (slot-value page 'wikipedia-pageid)
             (some->> page-data
@@ -54,7 +54,7 @@
   (load-page page)
   (call-next-method))
 
-(defun adapt-dom (dom page-title)
+(defun adapt-dom (dom wikipedia page-title)
   ;; Remove the links for editing each section
   (lquery:$ dom ".mw-editsection"
     (remove))
@@ -63,7 +63,7 @@
     (remove))
   ;; Replace internal Wikipedia links by HyperBook links
   (lquery:$ dom "a[href^=/wiki/]"
-    (map #'(lambda(el)
+    (map #'(lambda (el)
              (let* ((href (plump:get-attribute el "href"))
                     (page-id (str:replace-all
                               "_" " "
@@ -73,6 +73,14 @@
                  (plump:set-attribute el "page" page-id) 
                  (plump:remove-attribute el "href")
                  (plump:remove-attribute el "title"))))))
+  ;; Add Wikipedia base URL to the remaining internal links
+  (lquery:$ dom "a[href^=/wiki/]"
+    (map #'(lambda (el)
+             (let ((href (plump:get-attribute el "href")))
+               (plump:set-attribute el "href"
+                                    (str:concat (base-url wikipedia)
+                                                href))
+               (plump:set-attribute el "target" "_blank")))))
   ;; Remove (for now) links to anchors inside the page
   (let ((root (plump:make-root)))
     (lquery:$ dom "a[href^=#]"
@@ -141,6 +149,10 @@
 ;;
 ;; URLs
 ;;
+
+(defun base-url (wikipedia)
+  (format nil "https://~A.wikipedia.org"
+          (-> wikipedia edition-of symbol-name str:downcase)))
 
 (defun page-url (page)
   (let ((edition (-> page hb:hyperbook-of edition-of))
