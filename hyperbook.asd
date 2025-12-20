@@ -59,6 +59,7 @@
                #:lquery
                #:alexandria
                #:arrow-macros
+               #:drakma
                #:shasht
                #:str
                #:trivial-package-local-nicknames)
