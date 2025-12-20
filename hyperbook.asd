@@ -52,8 +52,9 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperbook
-               #:Hyperbook/explorer
+               #:hyperbook/explorer
                #:html-inspector-views
+               #:clog
                #:plump
                #:plump-inspector-views
                #:lquery
