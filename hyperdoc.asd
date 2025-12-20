@@ -10,10 +10,11 @@
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
-  :depends-on (#:alexandria
+  :depends-on (#:hyperbook
+               #:alexandria
                #:arrow-macros
                #:asdf #:uiop
-               #:hyperbook)
+               #:trivial-package-local-nicknames)
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
