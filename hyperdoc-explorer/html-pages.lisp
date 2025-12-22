@@ -45,69 +45,6 @@
                                  (return (-> elements first plump:text)))))
                     "Untitled"))))
 
-;; (defun extract-links (page)
-;;   (let ((current-package (find-package "CL-USER"))
-;;         page-links hyperdoc-links web-links expr-links)
-;;     (labels ((walk (node)
-;;                (loop for child across (plump:children node)
-;;                      do (when (plump:element-p child)
-;;                           (cond
-;;                             ((string-equal "in-package" (plump:tag-name child))
-;;                              (setf current-package
-;;                                    (-> child plump:text string-upcase find-package)))
-;;                             ((string-equal "a" (plump:tag-name child))
-;;                              (collect-link child)))
-;;                           (walk child))))
-;;              (collect-link (element)
-;;                (let ((href-attr (plump:attribute element "href"))
-;;                      (expr-attr (plump:attribute element "expr"))
-;;                      (hyperbook-attr (plump:attribute element "hyperbook"))
-;;                      (hyperdoc-attr (plump:attribute element "hyperdoc"))
-;;                      (page-attr (plump:attribute element "page"))
-;;                      (view-attr (plump:attribute element "view")))
-;;                  ;; Allow "hyperdoc" as a synonym for "hyperbook"
-;;                  (when (and hyperdoc-attr (not hyperbook-attr))
-;;                    (setf hyperbook-attr hyperdoc-attr))
-;;                  (cond
-;;                    ;; Expression link
-;;                    (expr-attr
-;;                     (pushnew (make-expr-link page expr-attr current-package view-attr)
-;;                              expr-links
-;;                              :test #'equal :key #'key-of))
-;;                    ;; Web link
-;;                    (href-attr
-;;                     (pushnew (make-web-link page href-attr) web-links
-;;                              :test #'equal :key #'key-of))
-;;                    ;; Remaining link types are combinations of page and
-;;                    ;; hyperbook attributes, so if there's neither, raise
-;;                    ;; an error.
-;;                    ((not (or page-attr hyperbook-attr))
-;;                     (error "Unknown link type: ~A" element))
-;;                    ;; Page link
-;;                    (page-attr
-;;                     (pushnew (make-page-link page
-;;                                              (if hyperbook-attr
-;;                                                  hyperbook-attr
-;;                                                  (-> page hyperbook-of id-of))
-;;                                              page-attr
-;;                                              view-attr)
-;;                              page-links :test #'equal :key #'key-of))
-;;                    ;; HyperBook link
-;;                    (t
-;;                     (pushnew (make-hyperbook-link page hyperbook-attr view-attr)
-;;                              hyperdoc-links :test #'equal :key #'key-of))))))
-;;       (walk (dom-of page))
-;;       (with-slots (links) page
-;;         (setf links nil)
-;;         (when page-links
-;;           (push (cons :page (nreverse page-links)) links))
-;;         (when hyperdoc-links
-;;           (push (cons :hyperdoc (nreverse hyperdoc-links)) links))
-;;         (when web-links
-;;           (push (cons :web (nreverse web-links)) links))
-;;         (when expr-links
-;;           (push (cons :expr (nreverse expr-links)) links))))))
-
 ;;
 ;; Render HTML pages
 ;;
@@ -126,10 +63,10 @@
 
 ;; in-package: set the current package, no not render
 
-(plump:define-tag-dispatcher (in-package *hyperdoc-tags*) (name)
+(plump:define-tag-dispatcher (in-package-tag *hyperdoc-tags*) (name)
   (string-equal name "in-package"))
 
-(plump:define-tag-printer in-package (element)
+(plump:define-tag-printer in-package-tag (element)
   (setf *current-package*
         (-> element plump:text string-upcase find-package))
   t)
