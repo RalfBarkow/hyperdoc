@@ -87,5 +87,5 @@ the object, which can be a page or something else.")
   ;; returns the hyperbook itself. This means that URL suffixes are
   ;; not accepted.
   (:method ((hyperbook hyperbook) path)
-    (assert (str:empty? path))
+    (assert (string= "" path))
     hyperbook))
