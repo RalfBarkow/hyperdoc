@@ -25,16 +25,23 @@ arbitrary Lisp code."
                                                  :pane-width pane-width
                                                  :title title
                                                  :playground? development))
-   :port port)
+   :port port
+   :extended-routing t)
   (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
-    (clog:set-on-new-window
-     #'(lambda (body)
-         (clog-moldable-inspector:on-new-inspector body
-                                                   :object hb
-                                                   :pane-width pane-width
-                                                   :title (hyperbook:title-of hb)
-                                                   :playground? development))
-     :path (str:concat "/" (-> hb hyperbook:title-of slug)))
+    (let ((path (str:concat "/" (-> hb hyperbook:title-of slug))))
+      (clog:set-on-new-window
+       #'(lambda (body)
+           (let* ((full-path (clog:property (clog:location body) "pathname"))
+                  (_ (assert (str:starts-with? path full-path)))
+                  (suffix (str:substring (length path)  nil full-path))
+                  (object (hyperbook:lookup-path hb suffix)))
+             (declare (ignore _))
+             (clog-moldable-inspector:on-new-inspector body
+                                                       :object object
+                                                       :pane-width pane-width
+                                                       :title (hyperbook:title-of hb)
+                                                       :playground? development)))
+       :path path))
     (register-pages hb :pane-width pane-width :development development)
     (register-data hb :pane-width pane-width :development development)))
 

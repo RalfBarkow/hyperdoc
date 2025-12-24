@@ -76,3 +76,16 @@
 If no page with PAGE-ID exists, return NIL if SIGNAL-ERROR is NIL,
 otherwise signal PAGE-LOOKUP-FAILURE."))
 
+;;
+;; Looking up a relative path in a HyperBook
+;;
+
+(defgeneric lookup-path (hyperbook path)
+  (:documentation "Look up PATH (a relative URL) in HYPERBOOK and return
+the object, which can be a page or something else.")
+  ;; The default implementation checks that the path is empty and
+  ;; returns the hyperbook itself. This means that URL suffixes are
+  ;; not accepted.
+  (:method ((hyperbook hyperbook) path)
+    (assert (str:empty? path))
+    hyperbook))
