@@ -233,7 +233,7 @@
                            :hyperdoc
                            "assets/hyperdoc/"))
     (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:include-css "/hyperbook/css/hyperdoc.css")
+    (views:include-css "/hyperdoc/css/hyperdoc.css")
     (let ((hb::*current-page* page)
           (*current-package* (find-package "CL-USER")))
       (when-let (dom (dom-of page))
