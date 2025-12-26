@@ -5,7 +5,8 @@
 (in-package :hyperbook)
 
 (defclass html-page (page)
-  ((dom :reader dom-of :initarg :dom)
+  ((file :reader file-of :initarg :file)
+   (dom :reader dom-of :initarg :dom)
    (links :reader links-of :initarg :links :initform nil)))
 
 (defmethod find-page ((hb html-hyperbook) page-id &key signal-error?)
@@ -28,6 +29,7 @@
              (page (make-instance 'html-page
                                   :hyperbook hb
                                   :id title
+                                  :file file
                                   :dom dom)))
         (setf (slot-value page 'links) (extract-links page))
         (setf (gethash title (pages-of hb)) page)
@@ -41,3 +43,17 @@
 (views:defview 👀main-page (hb html-hyperbook)
   (load-pages hb)
   (call-next-method))
+
+(views:defview views:👀items (hb html-hyperbook)
+  (-> hb
+      pages-of
+      alexandria:hash-table-values
+      (sort #'string< :key #'id-of)
+      views:👀items
+      (views:rename :title "Pages" :priority 3)))
+
+(views:defview views:👀source (page html-page)
+  (-> page
+      file-of
+      views:👀content
+      (views:rename :title "Source" :priority 10)))
