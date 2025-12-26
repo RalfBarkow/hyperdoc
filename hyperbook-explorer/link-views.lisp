@@ -7,9 +7,9 @@
 (views:defview 👀links (page page)
   (when-let (links (links-of page))
     (views:html-view :title "Links" :priority 5
-      (views:add-asset-path "/hyperdoc/"
+      (views:add-asset-path "/hyperbook/"
                             (asdf:system-relative-pathname
-                             :hyperdoc
+                             :hyperbook
                              "assets/hyperbook/"))
       (views:include-css "/hyperbook/css/hyperbook.css")
       (views:html
@@ -43,9 +43,9 @@
 
 (views:defview 👀backlinks (page page)
   (views:html-view :title "Backlinks" :priority 6
-    (views:add-asset-path "/hyperdoc/"
+    (views:add-asset-path "/hyperbook/"
                           (asdf:system-relative-pathname
-                           :hyperdoc
+                           :hyperbook
                            "assets/hyperbook/"))
     (views:include-css "/hyperbook/css/hyperbook.css")
     (let* ((pages (find-backlink-sources (-> page hyperbook-of id-of)

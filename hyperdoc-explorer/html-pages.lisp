@@ -226,7 +226,7 @@
   (views:html-view :title "Content" :priority 1
     (views:add-asset-path "/hyperbook/"
                           (asdf:system-relative-pathname
-                           :hyperdoc
+                           :hyperbook
                            "assets/hyperbook/"))
     (views:add-asset-path "/hyperdoc/"
                           (asdf:system-relative-pathname
