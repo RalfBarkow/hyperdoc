@@ -82,25 +82,3 @@
                              (:file "examples")
                              (:file "hyperdoc")))))
 
-(defsystem #:hyperdoc/server
-  :description "Web server for HyperDocs"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
-  :license  "BSD"
-  :version "0.0.1"
-  :homepage "https://codeberg.org/khinsen/hyperdoc"
-  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
-  :serial t
-  :depends-on (#:hyperdoc
-               #:hyperdoc/explorer
-               #:html-inspector-views
-               #:babel
-               #:clog
-               #:clog-moldable-inspector
-               #:cl-slug
-               #:sha1
-               #:trivial-package-local-nicknames)
-  :components ((:module "hyperdoc-server"
-                :serial t
-                :components ((:file "package")
-                             (:file "server")
-                             (:file "hyperdoc")))))
