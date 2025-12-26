@@ -1,22 +1,28 @@
 <h1>HyperBook Server</h1>
 
 <p>
+  The HyperBook Web server is defined in a separate sytem
+  <a hyperbook="asdf-systems" page="hyperbook/server"/>.
+</p>
+
+<p>
   To start a Web server serving HyperBooks, use one of
   <ul>
-    <li> <a expr="#'serve-catalog"/> </li>
-    <li> <a expr="#'serve-hyperbooks"/> </li>
+    <li> <a hyperbook="lisp-functions" page="hyperbook/server:serve-catalog"/> </li>
+    <li> <a hyperbook="lisp-functions" page="hyperbook/server:serve-hyperbooks"/> </li>
   </ul>
 </p>
 
 <p>
   In both cases, the server will serve all registered HyperBooks from URLs
   computed from their titles.
-  <a expr="#'serve-catalog"/> will serve a catalog
-  of all registered HyperBooks at the root URL of the server, whereas
-  <a expr="#'serve-hyperbooks"/> will serve an
-  inspector on another object of your choosing. This is typically a HyperBook
-  with an introduction to the topics covered by the server, but it can be any
-  Lisp object.
+  <a hyperbook="lisp-functions" page="hyperbook/server:serve-catalog"/>
+  will serve a catalog of all registered HyperBooks at the root URL of the server,
+  whereas
+  <a hyperbook="lisp-functions" page="hyperbook/server:serve-hyperbooks"/>
+  will serve an inspector on another object of your choosing. This is typically
+  a HyperBook with an introduction to the topics covered by the server, but it
+  can be any Lisp object.
 </p>
 
 <p>
