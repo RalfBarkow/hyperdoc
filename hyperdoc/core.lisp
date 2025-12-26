@@ -176,3 +176,13 @@ the macro DEFHYPERDOC."
 
 (defgeneric load-page (page))
 
+;;
+;; Server interface: add named data items
+;;
+
+(defmethod hb:lookup-path ((hd hyperdoc) path)
+  (and (= 1 (length path))
+       (or (find-page hd (first path))
+           (loop for (variable . title) in (data-of hd)
+                 when (equal title (first path))
+                   return (symbol-value variable)))))
