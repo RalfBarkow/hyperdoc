@@ -18,6 +18,6 @@
            #:hyperbooks-of
            ;; Accessing items
            #:find-page #:find-hyperbook
-           #:lookup-path
+           #:lookup-path #:path-item-of
            ;; Conditions and their accessors
            #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure))

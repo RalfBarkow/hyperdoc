@@ -81,11 +81,17 @@ otherwise signal PAGE-LOOKUP-FAILURE."))
 ;;
 
 (defgeneric lookup-path (hyperbook path)
-  (:documentation "Look up PATH (a relative URL) in HYPERBOOK and return
-the object, which can be a page or something else.")
-  ;; The default implementation checks that the path is empty and
-  ;; returns the hyperbook itself. This means that URL suffixes are
-  ;; not accepted.
+  (:documentation "Look up PATH (a list of strings) in HYPERBOOK and return
+the object to be shown, which can be a page or something else. A return
+value of NIL indicates a lookup failure.")
+  ;; The default implementation accepts only one-element paths. It
+  ;; interprets the string as a page id and returns the page.
   (:method ((hyperbook hyperbook) path)
-    (assert (string= "" path))
-    hyperbook))
+    (and (= 1 (length path))
+         (find-page hyperbook (first path)))))
+
+(defgeneric path-item-of (page)
+  (:documentation "Return the path item that resolves to PAGE.")
+  ;; The default implementation returns the page id.
+  (:method ((page page))
+    (id-of page)))
