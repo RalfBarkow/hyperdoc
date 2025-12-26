@@ -16,7 +16,8 @@
                         :serial t
                         :components ((:file "package")
                                      (:file "hyperbooks")
-                                     (:file "catalog")))))
+                                     (:file "catalog")
+                                     (:file "html-books")))))
 
 (defsystem #:hyperbook/explorer
   :description "Explorer for HyperBooks"
@@ -41,7 +42,8 @@
                              (:file "link-views")
                              (:file "explorer")
                              (:file "catalog")
-                             (:file "rendering")))))
+                             (:file "rendering")
+                             (:file "html-books")))))
 
 (defsystem #:hyperbook/server
   :description "Web server for HyperBooks"

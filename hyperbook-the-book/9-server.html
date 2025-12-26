@@ -1,0 +1,26 @@
+<h1>HyperBook Server</h1>
+
+<p>
+  To start a Web server serving HyperBooks, use one of
+  <ul>
+    <li> <a expr="#'serve-catalog"/> </li>
+    <li> <a expr="#'serve-hyperbooks"/> </li>
+  </ul>
+</p>
+
+<p>
+  In both cases, the server will serve all registered HyperBooks from URLs
+  computed from their titles.
+  <a expr="#'serve-catalog"/> will serve a catalog
+  of all registered HyperBooks at the root URL of the server, whereas
+  <a expr="#'serve-hyperbooks"/> will serve an
+  inspector on another object of your choosing. This is typically a HyperBook
+  with an introduction to the topics covered by the server, but it can be any
+  Lisp object.
+</p>
+
+<p>
+  You must load the HyperBooks you want to serve before starting a server.
+  HyperBooks added to the catalog after the server has been started can be accessed
+  from the catalog user interface, but are not assigned URLs for direct access.
+</p>

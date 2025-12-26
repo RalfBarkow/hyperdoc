@@ -20,4 +20,8 @@
            #:find-page #:find-hyperbook
            #:lookup-path #:path-item-of
            ;; Conditions and their accessors
-           #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure))
+           #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure
+           ;; HTML HyperBooks
+           #:html-hyperbook #:html-files-of
+           ;; Documentation
+           #:*hyperbook*))

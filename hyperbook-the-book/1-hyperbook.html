@@ -1,0 +1,41 @@
+<h1>HyperBook</h1>
+
+<p>
+  A hyperbook is a collection of somehow related and usually interlinked hypertext pages
+  in which each page has a unique identifier, which is often a page title. Some examples
+  of HyperBooks are:
+</p>
+<ul>
+  <li>a <a hyperbook="hyperdoc" page="HyperDoc">HyperDoc</a></li>
+  <li>a <a hyperbook="wikipedia-en" page="List of Wikipedias">Wikipedia edition</a></li>
+  <li>a <a href="http://fed.wiki/">Federated Wiki site</a></li>
+  <li>collections of linked notes:
+    <a hyperbook="wikipedia-en" page="Zettelkasten"/>,
+    <a href="https://logseq.com/">Logseq</a>,
+    <a href="https://protesilaos.com/emacs/denote">Denote</a>,
+    etc.
+  </li>
+  <li>a <a href="https://forgejo.org/docs/latest/user/wiki/">Wiki</a> attached to a
+    <a href="https://codeberg.org/">Codeberg</a>repository</li>
+</ul>
+
+<p>
+  Each of the hyperbook types mentioned above has its own conventions for
+  establishing links between its pages, and none of them provides a bridge
+  to other hyperbooks that would allow seamless browsing. This is what the
+  HyperBook framework provides: conventions for linking between different
+  hyperbooks, and a unified, extensible browser.
+</p>
+
+<p>
+  The conventions are very simple:
+  <ol>
+    <li>Each hyperbook has a unique identifier.</li>
+    <li>Each hyperbook page has an identifier that is unique inside the hyperbook.</li>
+  </ol>
+</p>
+
+<p>
+  Integration of a hyperbook type with the HyperBook browser requires a bit of
+  code to be written.
+</p>
