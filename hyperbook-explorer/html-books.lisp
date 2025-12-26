@@ -37,3 +37,7 @@
 (views:defview views:👀content (hb html-hyperbook)
   (load-pages hb)
   (call-next-method))
+
+(views:defview 👀main-page (hb html-hyperbook)
+  (load-pages hb)
+  (call-next-method))
