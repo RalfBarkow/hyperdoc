@@ -44,7 +44,8 @@
                              (:file "catalog")
                              (:file "rendering")
                              (:file "html-books")
-                             (:file "hyperbook-the-book")))))
+                             (:file "hyperbook-the-book")
+                             (:file "asdf-systems")))))
 
 (defsystem #:hyperbook/server
   :description "Web server for HyperBooks"

@@ -44,11 +44,14 @@
 
 ;;
 ;; HyperBooks have a main page that is shown when viewing the
-;; HyperBook. Retrieve the ID of that page.
+;; HyperBook. Retrieve the ID of that page. If it is NIL,
+;; the HyperBook has no main page.
 ;;
 
 (defgeneric main-page-id-of (hyperbook)
-  (:documentation "The ID of the main page of HYPERBOOK."))
+  (:documentation "The ID of the main page of HYPERBOOK.")
+  (:method ((hb hyperbook))
+    nil))
 
 ;;
 ;; A generic function to retrieve the links for a page.
