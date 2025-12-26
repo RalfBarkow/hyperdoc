@@ -43,7 +43,8 @@
                              (:file "explorer")
                              (:file "catalog")
                              (:file "rendering")
-                             (:file "html-books")))))
+                             (:file "html-books")
+                             (:file "hyperbook-the-book")))))
 
 (defsystem #:hyperbook/server
   :description "Web server for HyperBooks"
