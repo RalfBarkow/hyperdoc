@@ -3,28 +3,35 @@
 <p>
   A hyperbook is a collection of somehow related and usually interlinked hypertext pages
   in which each page has a unique identifier, which is often a page title. Some examples
-  of HyperBooks are:
+  of hyperbooks are:
 </p>
 <ul>
-  <li>a <a hyperbook="hyperdoc" page="HyperDoc">HyperDoc</a></li>
-  <li>a <a hyperbook="wikipedia-en" page="List of Wikipedias">Wikipedia edition</a></li>
-  <li>a <a href="http://fed.wiki/">Federated Wiki site</a></li>
-  <li>collections of linked notes:
+  <li>a <a hyperbook="wikipedia-en" page="Blog"/></li>
+  <li>a collection of linked notes:
     <a hyperbook="wikipedia-en" page="Zettelkasten"/>,
     <a href="https://logseq.com/">Logseq</a>,
     <a href="https://protesilaos.com/emacs/denote">Denote</a>,
     etc.
   </li>
+  <li>a <a hyperbook="wikipedia-en" page="List of Wikipedias">Wikipedia edition</a></li>
+  <li>a <a href="http://fed.wiki/">Federated Wiki site</a></li>
   <li>a <a href="https://forgejo.org/docs/latest/user/wiki/">Wiki</a> attached to a
     <a href="https://codeberg.org/">Codeberg</a>repository</li>
+  <li>a <a hyperbook="hyperdoc" page="HyperDoc">HyperDoc</a></li>
 </ul>
+
+<p>
+  Given the ubiquity of hyperbooks, it is surprising that there seems to be
+  no commonly used term for this concept so far.
+</p>
 
 <p>
   Each of the hyperbook types mentioned above has its own conventions for
   establishing links between its pages, and none of them provides a bridge
   to other hyperbooks that would allow seamless browsing. This is what the
   HyperBook framework provides: conventions for linking between different
-  hyperbooks, and a unified, extensible browser.
+  hyperbooks, and a browser that makes navigation across diverse hyperbooks
+  straighforward.
 </p>
 
 <p>
@@ -37,5 +44,14 @@
 
 <p>
   Integration of a hyperbook type with the HyperBook browser requires a bit of
-  code to be written.
+  code to be written. Click <a page="Implementing a HyperBook interface">here</a>
+  to learn more about this.
+</p>
+
+<p>
+  Many kinds of data can be represented as hyperbooks, even though they are
+  not really collections of related and interlinked pages. This can be
+  useful to allow linking to data items from hyperbooks. Click
+  <a page="Special hyperbooks">here</a> to learn more about these
+  "special" hyperbooks.
 </p>

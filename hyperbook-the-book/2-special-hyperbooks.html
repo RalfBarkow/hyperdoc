@@ -1,0 +1,27 @@
+<h1>Special hyperbooks</h1>
+
+<p>
+  The HyperBook system comes with three built-in special hyperbooks that
+  provide an easy mechanism to link to code in the Lisp image. This is
+  particularly useful for software documentation.
+</p>
+
+<ul>
+  <li>
+    <a hyperbook="asdf-systems"/> is used for linking to ASDF systems
+    that have been loaded or are available for loading. The page id is the
+    system name. Example: <a hyperbook="asdf-systems" page="alexandria"/>.
+  </li>
+  <li>
+    <a hyperbook="lisp-functions"/> is used for linking to Lisp functions,
+    including generic functions. The page id is the function name, meaning
+    the package-qualified symbol that names the function.
+    Example: <a hyperbook="lisp-functions" page="alexandria:ensure-list"/>.
+  </li>
+  <li>
+    <a hyperbook="lisp-classes"/> is used for linking to Lisp classes.
+    The page id is the class name, meaning the package-qualified symbol
+    that names the function.
+    Example: <a hyperbook="lisp-classes" page="plump:element"/>.
+  </li>
+</ul>

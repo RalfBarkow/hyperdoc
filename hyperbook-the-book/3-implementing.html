@@ -1,0 +1,63 @@
+<h1>Implementing a HyperBook interface</h1>
+
+<p>
+  Implementing a HyperBook interface to a data collection that satisfies
+  the two HyperBook conventions, the following steps are required:
+</p>
+
+<ul>
+  <li>
+    Define a subclass of <a hyperbook="lisp-classes" page="hyperbook:hyperbook"/>
+    for your hyperbook type.
+  </li>
+  <li>
+    Define a subclass of <a hyperbook="lisp-classes" page="hyperbook:page"/>
+    for pages in your hyperbook.
+  </li>
+  <li>
+    Implement the generic function <a hyperbook="lisp-functions" page="hyperbook:find-page"/>
+    for your hyperbook class.
+  </li>
+</ul>
+
+<p>
+  Additional generic functions can be implemented for optional functionality:
+</p>
+
+<ul>
+  <li>
+    <a hyperbook="lisp-functions" page="hyperbook:title-of"/> is called to
+    obtain a human-friendly title for a HyperBook or one of its pages.
+    The default implementation returns the id.
+  </li>
+  <li>
+    <a hyperbook="lisp-functions" page="hyperbook:main-page-id-of"/> is called
+    to retrieve the id of the main page (home page, entry page) of a HyperBook
+    for display. The default implementation returns nil, indicating the
+    absence of a main page.
+  </li>
+  <li>
+    <a hyperbook="lisp-functions" page="hyperbook:links-of"/> is called on a
+    page object to retrieve the links contained in the page. See
+    <a hyperbook="lisp-classes" page="hyperbook:link"/> and its subclasses
+    and related functions to see how links are constructed.
+  </li>
+  <li>
+    If <a hyperbook="lisp-functions" page="hyperbook:dom-of"/> returns
+    a tree of <a hyperbook="lisp-classes" page="plump:node"/> when called
+    on a page object, HTML rendering is automatically provided and
+    <a hyperbook="lisp-functions" page="hyperbook:extract-links"/>
+    takes care of retrieving the links in the page.
+  </li>
+  <li>
+    <a hyperbook="lisp-functions" page="hyperbook:lookup-path"/> is used
+    by the <a page="HyperBook Server"/> to resolve a path extracted from a URL.
+    The default implementation accepts only one-element paths and interprets
+    the path item as a page id.
+  </li>
+  <li>
+    <a hyperbook="lisp-functions" page="hyperbook:path-item-of"/> is used
+    by the <a page="HyperBook Server"/> to display the URL for a page.
+    The default implementation returns the page id.
+  </li>
+</ul>
