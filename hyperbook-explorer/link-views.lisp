@@ -6,7 +6,7 @@
 
 (views:defview 👀links (page page)
   (when-let (links (links-of page))
-    (views:html-view :title "Links" :priority 5
+    (views:html-view :title "Links" :priority 10
       (views:add-asset-path "/hyperbook/"
                             (asdf:system-relative-pathname
                              :hyperbook
@@ -42,7 +42,7 @@
         (views:html (views:esc "None"))))))
 
 (views:defview 👀backlinks (page page)
-  (views:html-view :title "Backlinks" :priority 6
+  (views:html-view :title "Backlinks" :priority 11
     (views:add-asset-path "/hyperbook/"
                           (asdf:system-relative-pathname
                            :hyperbook
