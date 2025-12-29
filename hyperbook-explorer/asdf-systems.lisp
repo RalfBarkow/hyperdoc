@@ -32,17 +32,6 @@
                    :id page-id
                    :system system)))
 
-(defmethod dom-of ((page asdf-system-page))
-  (plump:make-root))
-
-(defmethod links-of ((page asdf-system-page))
-  (declare (ignore page))
-  nil)
-
-(defmethod find-link-sources ((hb asdf-systems) hyperbook-id page-id)
-  (declare (ignore hb))
-  nil)
-
 (views:defview 👀system-views (page asdf-system-page)
   (views:specific-views (system-of page)))
 
@@ -64,15 +53,3 @@
        (mapcar #'asdf:find-system <>)
        (views:list-view :title "Registered unloaded systems"
                         :priority 2)))
-
-;;
-;; Remove the "content" views of hyperbooks and pages
-;;
-
-(views:defview views:👀content (hb asdf-systems)
-  (declare (ignore hb))
-  nil)
-
-(views:defview views:👀content (page asdf-system-page)
-  (declare (ignore page))
-  nil)

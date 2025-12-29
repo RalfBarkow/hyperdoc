@@ -54,5 +54,9 @@ signal cluster-lookup-failure."
   (loop for hd in (hyperbooks-of target)
         append (find-link-sources hd hyperbook-id page-id)))
 
+(defmethod find-link-sources ((target hyperbook) hyperbook-id page-id)
+  (declare (ignore target hyperbook-id page-id))
+  nil)
+
 (defun find-backlink-sources (hyperbook-id &optional page-id)
   (find-link-sources *catalog* hyperbook-id page-id))

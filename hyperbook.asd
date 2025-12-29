@@ -46,7 +46,8 @@
                              (:file "html-books")
                              (:file "hyperbook-the-book")
                              (:file "asdf-systems")
-                             (:file "lisp-functions")))))
+                             (:file "lisp-functions")
+                             (:file "lisp-classes")))))
 
 (defsystem #:hyperbook/server
   :description "Web server for HyperBooks"

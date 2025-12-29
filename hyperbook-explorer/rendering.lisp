@@ -6,7 +6,9 @@
 
 ;; A generic function for retrieving the DOM tree to be rendered
 
-(defgeneric dom-of (page))
+(defgeneric dom-of (page)
+  (:method ((page page))
+    nil))
 
 ;; The tags with special treatment in serialization
 
@@ -119,14 +121,14 @@
 ;;
 
 (views:defview views:👀content (page page)
-  (views:html-view :title "Content" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (let ((*current-page* page))
-      (when-let (dom (dom-of page))
+  (when-let (dom (dom-of page))
+    (views:html-view :title "Content" :priority 1
+      (views:add-asset-path "/hyperbook/"
+                            (asdf:system-relative-pathname
+                             :hyperbook
+                             "assets/hyperbook/"))
+      (views:include-css "/hyperbook/css/hyperbook.css")
+      (let ((*current-page* page))
         (views:html
           (:div :class "hyperbook-page"
                 (let ((plump:*tag-dispatchers* *hyperbook-tags*))

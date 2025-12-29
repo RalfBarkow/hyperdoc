@@ -26,46 +26,44 @@
   ((function :reader function-of :initarg :function :type function)))
 
 (defmethod find-page ((hb lisp-functions) page-id &key signal-error?)
-  (let* ((*package* (find-package "CL-USER"))
-         (symbol
-           (handler-case
-               (multiple-value-bind (object pos)
-                   (read-from-string page-id)
-                 (if (>= pos (length page-id))
-                     object
-                     (and signal-error?
-                          (error (str:concat "Unprocessed part of expression: \""
-                                             (str:substring pos (length page-id) page-id)
-                                             "\"")))))
-             (error (c) (and signal-error?
-                             (error c))))))
-    (make-instance 'lisp-function-page
-                   :hyperbook hb
-                   :id page-id
-                   :function (symbol-function symbol))))
+  (make-instance 'lisp-function-page
+                 :hyperbook hb
+                 :id page-id
+                 :function (symbol-function (read-symbol page-id signal-error?))))
 
-(defmethod dom-of ((page lisp-function-page))
-  (plump:make-root))
-
-(defmethod links-of ((page lisp-function-page))
-  (declare (ignore page))
-  nil)
-
-(defmethod find-link-sources ((hb lisp-functions) hyperbook-id page-id)
-  (declare (ignore hb))
-  nil)
+(defun read-symbol (string signal-error?)
+  (let ((*package* (find-package "CL")))
+    (handler-case
+        (multiple-value-bind (object pos)
+            (read-from-string string)
+          (assert (typep object 'symbol))
+          (if (>= pos (length string))
+              object
+              (and signal-error?
+                   (error (str:concat "Unprocessed part of expression: \""
+                                      (str:substring pos (length string) string)
+                                      "\"")))))
+      (error (c) (and signal-error?
+                      (error c))))))
 
 (views:defview 👀function-views (page lisp-function-page)
   (views:specific-views (function-of page)))
 
 ;;
-;; Remove the "content" views of hyperbooks and pages
+;; Add an explanatory page
 ;;
 
-(views:defview views:👀content (hb lisp-functions)
+(views:defview 👀overview (hb lisp-functions)
   (declare (ignore hb))
-  nil)
-
-(views:defview views:👀content (page lisp-function-page)
-  (declare (ignore page))
-  nil)
+  (views:html-view :title "Overview" :priority 1
+    (views:add-asset-path "/hyperbook/"
+                          (asdf:system-relative-pathname
+                           :hyperbook
+                           "assets/hyperbook/"))
+    (views:include-css "/hyperbook/css/hyperbook.css")
+    (views:html
+      (:div :class "hyperbook-page"
+            (:h1 (views:esc "Lisp functions"))
+            (:p (views:esc "This hyperbook contains one page for each symbol
+in the Lisp image that has a function definition attached to it.
+It is used for linking to Lisp code."))))))

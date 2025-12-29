@@ -62,7 +62,10 @@
 ;; types.
 ;;
 
-(defgeneric links-of (page))
+(defgeneric links-of (page)
+  (:method ((page page))
+    (declare (ignore page))
+    nil))
 
 ;;
 ;; Finding a page in a HyperBook
