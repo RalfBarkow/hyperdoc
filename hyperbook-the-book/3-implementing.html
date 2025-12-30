@@ -61,3 +61,35 @@
     The default implementation returns the page id.
   </li>
 </ul>
+
+<h4>Examples</h4>
+
+<p>
+  There are a few example implementations that you can study:
+</p>
+
+<ul>
+  <li>
+    Class <a hyperbook="lisp-classes" page="hyperbook:html-hyperbook"/>
+    implements a hyperbook whose pages are the HTML files in a
+    directory. The hyperbook you are currently reading is written
+    this way. Most of the actual implementation is in the
+    system <a hyperbook="asdf-systems" page="hyperbook/explorer"/>
+    to keep dependencies of the basic HyperBook code to a minimum.
+    Look at <a hyperbook="lisp-classes" page="hyperbook::html-page"/>
+    and the surrounding code.
+  </li>
+  <li>
+    The three <a page="Special hyperbooks">special hyperbooks</a>
+    are implemented in the classes
+    <a hyperbook="lisp-classes" page="hyperbook::asdf-systems"/>
+    <a hyperbook="lisp-classes" page="hyperbook::lisp-functions"/>, and
+    <a hyperbook="lisp-classes" page="hyperbook::lisp-classes"/>.
+  </li>
+  <li>
+    The <a hyperbook="wikipedia-en"/> interface is implemented in
+    a separate system, <a hyperbook="asdf-systems" page="hyperbook/wikipedia"/>.
+    See class <a hyperbook="lisp-classes" page="hyperbook/wikipedia::wikipedia"/>
+    and surrounding code.
+  </li>
+</ul>
