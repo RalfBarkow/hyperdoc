@@ -45,6 +45,7 @@
   (call-next-method))
 
 (views:defview views:👀items (hb html-hyperbook)
+  (load-pages hb)
   (-> hb
       pages-of
       alexandria:hash-table-values
@@ -59,5 +60,6 @@
       (views:rename :title "Source" :priority 10)))
 
 (defmethod find-link-sources ((hb html-hyperbook) hyperbook-id page-id)
+  (load-pages hb)
   (loop for page being the hash-values of (pages-of hb)
         append (find-link-sources page hyperbook-id page-id)))
