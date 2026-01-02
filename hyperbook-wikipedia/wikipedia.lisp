@@ -23,13 +23,52 @@
 
 (defmethod hb:find-page ((wp wikipedia) id  &key signal-error?)
   (declare (ignore signal-error?))
-  (make-page wp id))
+  (get-page wp id))
 
-(defun make-page (wp id)
-  (make-instance 'wikipedia-page
-                 :hyperbook wp
-                 :id id
-                 :title id))
+;;
+;; Pages are created as empty stubs, their content is loaded only when
+;; needed by a view. This is done because (1) find-page is called
+;; whenever a link is processed, even if the user never follows that
+;; link, and (2) loading the HTML content of a Wikipedia page is
+;; rather slow. For the same reason, pages are cached and kept for a
+;; day.
+;;
+
+(defvar *page-cache* nil)
+
+(defparameter *page-cache-retention-delay* (* 24 60 60))
+
+(defclass page-cache ()
+  ((pages :reader pages-of :initarg :pages :type hash-table)
+   (timestamps :reader timestamps-of :initarg :timestamps :type hash-table)))
+
+(defun ensure-page-cache ()
+  (unless *page-cache*
+    (setf *page-cache* (make-instance 'page-cache
+                                      :pages (make-hash-table :test #'equal)
+                                      :timestamps (make-hash-table :test #'equal)))))
+
+(defun purge-page-cache ()
+  (let ((now (get-universal-time)))
+    (loop for id being the hash-keys
+            using (hash-value ts)
+              of (timestamps-of *page-cache*)
+          do (when (> (- now ts) *page-cache-retention-delay*)
+               (remhash id (timestamps-of *page-cache*))
+               (remhash id (pages-of *page-cache*))))))
+
+(defun get-page (wp id)
+  (ensure-page-cache)
+  (purge-page-cache)
+  (when-let (page (gethash id (pages-of *page-cache*)))
+    (return-from get-page page))
+  (let ((page (make-instance 'wikipedia-page
+                             :hyperbook wp
+                             :id id
+                             :title id)))
+    (setf (gethash id (pages-of *page-cache*)) page)
+    (setf (gethash id (timestamps-of *page-cache*)) (get-universal-time))
+    page))
 
 (defun load-page (page)
   (unless (hb:dom-of page)
@@ -45,6 +84,10 @@
               (gethash "pageid")))
       (setf (slot-value page 'links) (hb:extract-links page))
       (setf (slot-value page 'page-data) page-data))))
+
+;;
+;; Views
+;;
 
 (defmethod views:👀content ((page wikipedia-page))
   (load-page page)
