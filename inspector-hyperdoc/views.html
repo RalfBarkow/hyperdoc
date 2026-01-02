@@ -6,7 +6,7 @@
 
 <p>
   All standard objects (i.e. all except for
-  <a expr="(find-class 'hv:gui-class)">GUI objects</a>) have four
+  <a hyperbook="lisp-classes" page="html-inspector-views:gui-class">GUI objects</a>) have four
   standard views. They are the last views in the tab bar, and their
   title is dimmed.
 </p>
@@ -18,7 +18,7 @@
 <p>
   <b>Print</b> shows the object's print representation,
   as defined by the generic function
-  <a expr="#'print-object"><tt>print-object</tt></a>.
+  <a hyperbook="lisp-functions" page="print-object"><tt>print-object</tt></a>.
 </p>
 
 <p>
@@ -63,7 +63,7 @@
   view-generating functions. When an inspector pane is created,
   all known view generators are called on the object to be inspected, and
   those that return an instance of class
-  <a expr="(find-class 'hv:html-view)"/>
+  <a hyperbook="lisp-classes" page="html-inspector-views:html-view"/>
   (rather than <a expr="nil"/>) are added to the pane, sorted by priority.
 </p>
 

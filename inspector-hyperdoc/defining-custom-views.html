@@ -7,18 +7,18 @@
 <p>
   A view defined by <a expr="(symbol-function 'hv:defview)">defview</a> must return
   <a expr="nil"/> or an instance of class
-  <a expr="(find-class 'hv:view)"/>, which has two subclasses:
+  <a hyperbook="lisp-classes" page="html-inspector-views:view"/>, which has two subclasses:
 </p>
 <ul>
-  <li><a expr="(find-class 'clog-moldable-inspector:clog-view)"/>
+  <li><a hyperbook="lisp-classes" page="clog-moldable-inspector:clog-view"/>
     <p>
       is for views defined by Lisp code using the CLOG API.
       This is the most flexible form of view, but also the most laborious to write.
       For an example, see
-      <a expr="#'clog-moldable-inspector::👀playground">clog-moldable-inspector::👀playground</a>.
+      <a hyperbook="lisp-functions" page="html-inspector-views::👀playground"/>.
     </p>
   </li>
-  <li><a expr="(find-class 'hv:html-view)"/>
+  <li><a hyperbook="lisp-classes" page="html-inspector-views:html-view"/>
     <p>
       is for views defined in terms of HTML code plus
       an ALIST mapping HTML ids to Lisp objects. The ALIST is used to define
@@ -63,13 +63,13 @@
   HTML views, constructed by methods of two generic functions:
 </p>
 <ul>
-  <li><a expr="#'hv:title-bar"><tt>html-inspector-views:title-bar</tt></a>
+  <li><a hyperbook="lisp-functions" page="html-inspector-views:title-bar"><tt>html-inspector-views:title-bar</tt></a>
     <p>
       constructs the left-hand part, containing by default the class
       and the object's textual representation.
     </p>
   </li>
-  <li><a expr="#'hv:title-bar-action-buttons"><tt>html-inspector-views:title-bar-action-buttons</tt></a>
+  <li><a hyperbook="lisp-functions" page="html-inspector-views:title-bar-action-buttons"><tt>html-inspector-views:title-bar-action-buttons</tt></a>
     <p>
       constructs the right-hand part, placed right before the
       refresh/maximize/close buttons, which is empty by default. It is
@@ -80,17 +80,17 @@
 
 <p>
   There are very few specializers for 
-  <a expr="#'hv:title-bar"><tt>html-inspector-views:title-bar</tt></a>
+  <a hyperbook="lisp-functions" page="html-inspector-views:title-bar"><tt>html-inspector-views:title-bar</tt></a>
   because most often it is only the textual representation that needs to be
   customized. It is constructed by the generic function
-  <a expr="#'hv:title-bar-representation"><tt>html-inspector-views:title-bar-representation</tt></a>,
+  <a hyperbook="lisp-functions" page="html-inspector-views:title-bar-representation"><tt>html-inspector-views:title-bar-representation</tt></a>,
   which by default simply calls
-  <a expr="#'hv:html-representation"><tt>html-inspector-views:html-representation</tt></a>,
+  <a hyperbook="lisp-functions" page="html-inspector-views:html-representation"><tt>html-inspector-views:html-representation</tt></a>,
   the generic function that is also used by several HTML views, e.g. to show an
   object as an item of a list or a vector. Its default implementation calls
-  <a expr="#'hv:text-representation"><tt>html-inspector-views:text-representation</tt></a>,
+  <a hyperbook="lisp-functions" page="html-inspector-views:text-representation"><tt>html-inspector-views:text-representation</tt></a>,
   which returns a plain-text representation of an object.
   In most cases, specializing this function is sufficient. Check out its
-  <a expr="#'hv:text-representation" view="Methods">"Methods" view</a>
+  <a hyperbook="lisp-functions" page="html-inspector-views:text-representation" view="Methods" >"Methods" view</a>
   to see examples!
 </p>
