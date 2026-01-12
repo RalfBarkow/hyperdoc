@@ -26,7 +26,7 @@
   (hb:id-of page))
 
 (defmethod hb:main-page-id-of ((wiki fedwiki))
-  "Welcome")
+  "Welcome Visitors")
 
 (defmethod hb:find-page ((wiki fedwiki) id  &key signal-error?)
   (or (gethash id (pages-of wiki))
@@ -56,7 +56,8 @@
                                           (gethash "date" page-spec))
                                     :synopsis (gethash "synopsis" page-spec))
           do (setf (gethash (hb:id-of page) (pages-of wiki)) page)
-             (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page)))
+             (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page))
+             (setf (gethash (hb:id-of page) (slugs-of wiki)) (slug-of page)))
     wiki))
 
 (defun make-wiki-url (domain-name local-url)
@@ -67,3 +68,34 @@
 (defun wiki-date-to-timestamp (date)
   (and date
        (local-time:unix-to-timestamp (round (/ date 1000)))))
+
+;;
+;; Load and display pages
+;;
+
+(defmethod views:👀content ((page fedwiki-page))
+  (load-page page)
+  (call-next-method))
+
+(defmethod hb:👀links ((page fedwiki-page))
+  (load-page page)
+  (call-next-method))
+
+(defun load-page (page)
+  (unless (hb:dom-of page)
+    (let* ((wiki (hb:hyperbook-of page))
+           (id (hb:id-of page))
+           (page-html (get-page-html wiki id))
+           (dom (plump:parse page-html)))
+      ;; (adapt-dom dom (hb:hyperbook-of page) id)
+      (setf (slot-value page 'dom) dom)
+      (setf (slot-value page 'links) (hb:extract-links page)))))
+
+(defun get-page-html (wiki page-title)
+  (let* ((slug (gethash page-title (slugs-of wiki)))
+         (url (make-wiki-url (domain-name-of wiki)
+                             (str:concat "/" slug ".html"))))
+    (drakma:http-request url :method :get)))
+
+(defun domain-name-of (wiki)
+  (hb:id-of wiki))
