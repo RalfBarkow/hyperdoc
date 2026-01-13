@@ -145,4 +145,19 @@
                  (plump:set-attribute el "page" page-id) 
                  (plump:remove-attribute el "href")
                  (plump:remove-attribute el "class")
+                 (plump:remove-attribute el "title")
                  (plump:remove-attribute el "data-page-name")))))))
+
+;;
+;; JSON view
+;;
+
+(views:defview 👀json (page fedwiki-page)
+  (let* ((stream (drakma:http-request
+                  (make-wiki-url (-> page hb:hyperbook-of domain-name-of)
+                                 (str:concat "/" (slug-of page) ".json"))
+                  :method :get
+                  :want-stream t))
+         (data (shasht:read-json stream)))
+    (-> (views:👀items data)
+      (views:rename :title "JSON" :priority 7))))
