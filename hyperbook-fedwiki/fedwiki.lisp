@@ -87,7 +87,7 @@
            (id (hb:id-of page))
            (page-html (get-page-html wiki id))
            (dom (plump:parse page-html)))
-      ;; (adapt-dom dom (hb:hyperbook-of page) id)
+      (adapt-dom dom (hb:hyperbook-of page) id)
       (setf (slot-value page 'dom) dom)
       (setf (slot-value page 'links) (hb:extract-links page)))))
 
@@ -99,3 +99,35 @@
 
 (defun domain-name-of (wiki)
   (hb:id-of wiki))
+
+(defun adapt-dom (dom fedwiki page-title)
+  ;; Remove the DOCTYPE node
+  (plump:remove-child (elt (plump:children dom) 0))
+  ;; Unwrap the HTML element
+  (lquery:$ dom "html"
+    (children)
+    (first)
+    (unwrap))
+  ;; Remove the HEAD node
+  (lquery:$ dom "head"
+    (remove))
+  ;; Unwrap the BODY node
+  (lquery:$ dom "body"
+    (children)
+    (first)
+    (unwrap))
+  ;; Remove style nodes
+  (lquery:$ dom "style"
+    (remove))
+  ;; Remove script nodes
+  (lquery:$ dom "script"
+    (remove))
+  ;; Remove footer
+  (lquery:$ dom "footer"
+    (remove))
+  ;; Remove icon with link to the Wiki
+  (lquery:$ dom "a[href=/]"
+    (remove))
+  ;; Remove external link image
+  (lquery:$ dom "img[src=/images/external-link-ltr-icon.png]"
+    (remove)))
