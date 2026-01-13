@@ -87,7 +87,7 @@
            (id (hb:id-of page))
            (page-html (get-page-html wiki id))
            (dom (plump:parse page-html)))
-      (adapt-dom dom (hb:hyperbook-of page) id)
+      (adapt-dom dom (hb:hyperbook-of page))
       (setf (slot-value page 'dom) dom)
       (setf (slot-value page 'links) (hb:extract-links page)))))
 
@@ -100,7 +100,7 @@
 (defun domain-name-of (wiki)
   (hb:id-of wiki))
 
-(defun adapt-dom (dom fedwiki page-title)
+(defun adapt-dom (dom wiki)
   ;; Remove the DOCTYPE node
   (plump:remove-child (elt (plump:children dom) 0))
   ;; Unwrap the HTML element
@@ -130,4 +130,19 @@
     (remove))
   ;; Remove external link image
   (lquery:$ dom "img[src=/images/external-link-ltr-icon.png]"
-    (remove)))
+    (remove))
+  ;; Replace internal links by hyperbook links
+  (lquery:$ dom "a.internal"
+    (map #'(lambda (el)
+             (let* ((href (plump:get-attribute el "href"))
+                    ;; Strip off initial "/" and trailing ".html"
+                    (slug (str:substring 1 -5 href))
+                    (page-id (gethash slug (slugs-of wiki))))
+               ;; page-id is NIL for links to missing pages,
+               ;; including pages retrieved from the federation.
+               ;; Keep the original link for now.
+               (when page-id
+                 (plump:set-attribute el "page" page-id) 
+                 (plump:remove-attribute el "href")
+                 (plump:remove-attribute el "class")
+                 (plump:remove-attribute el "data-page-name")))))))
