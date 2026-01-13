@@ -16,6 +16,7 @@
  ((slug :reader slug-of :type string :initarg :slug)
   (date :reader date-of :type (or null local-time:timestamp) :initarg :date)
   (synopsis :reader synopsis-of :type string :initarg :synopsis)
+  (journal :reader journal-of :type vector)
   (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
   (links :reader hb:links-of :type (or null hb:links) :initform nil)))
 
@@ -85,8 +86,11 @@
   (unless (hb:dom-of page)
     (let* ((wiki (hb:hyperbook-of page))
            (id (hb:id-of page))
+           (page-json (get-page-json wiki id))
            (page-html (get-page-html wiki id))
            (dom (plump:parse page-html)))
+      (setf (slot-value page 'journal)
+            (make-journal (gethash "journal" page-json)))
       (adapt-dom dom (hb:hyperbook-of page))
       (setf (slot-value page 'dom) dom)
       (setf (slot-value page 'links) (hb:extract-links page)))))
@@ -96,6 +100,15 @@
          (url (make-wiki-url (domain-name-of wiki)
                              (str:concat "/" slug ".html"))))
     (drakma:http-request url :method :get)))
+
+(defun get-page-json (wiki page-title)
+  (let* ((slug (gethash page-title (slugs-of wiki)))
+         (url (make-wiki-url (domain-name-of wiki)
+                             (str:concat "/" slug ".json")))
+         (stream (drakma:http-request url
+                                      :method :get
+                                      :want-stream t)))
+    (shasht:read-json stream)))
 
 (defun domain-name-of (wiki)
   (hb:id-of wiki))
@@ -149,15 +162,32 @@
                  (plump:remove-attribute el "data-page-name")))))))
 
 ;;
+;; Page journal
+;;
+
+(defclass journal-entry ()
+  ((entry-type :reader entry-type-of :type keyword :initarg :entry-type)
+   (date :reader date-of :type local-time:timestamp :initarg :date)
+   (data :reader data-of :type hash-table :initarg :data)))
+
+(defun make-journal (entries)
+  (map 'vector #'make-journal-entry entries))
+
+(defun make-journal-entry (entry)
+  (let ((type (alexandria:make-keyword (gethash "type" entry)))
+        (date (wiki-date-to-timestamp (gethash "date" entry))))
+    (remhash "type" entry)
+    (remhash "date" entry)
+    (make-instance 'journal-entry
+                   :entry-type type
+                   :date date
+                   :data entry)))
+
+;;
 ;; JSON view
 ;;
 
 (views:defview 👀json (page fedwiki-page)
-  (let* ((stream (drakma:http-request
-                  (make-wiki-url (-> page hb:hyperbook-of domain-name-of)
-                                 (str:concat "/" (slug-of page) ".json"))
-                  :method :get
-                  :want-stream t))
-         (data (shasht:read-json stream)))
-    (-> (views:👀items data)
-      (views:rename :title "JSON" :priority 7))))
+  (-> (get-page-json (hb:hyperbook-of page) (hb:id-of page))
+    views:👀items
+    (views:rename :title "JSON" :priority 7)))
