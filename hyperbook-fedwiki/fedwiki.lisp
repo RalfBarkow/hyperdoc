@@ -16,9 +16,10 @@
  ((slug :reader slug-of :type string :initarg :slug)
   (date :reader date-of :type (or null local-time:timestamp) :initarg :date)
   (synopsis :reader synopsis-of :type string :initarg :synopsis)
-  (journal :reader journal-of :type vector)
   (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
-  (links :reader hb:links-of :type (or null hb:links) :initform nil)))
+  (links :reader hb:links-of :type (or null hb:links) :initform nil)
+  (journal :reader journal-of :type vector)
+  (context :reader context-of :type list)))
 
 (defmethod hb:title-of ((wiki fedwiki))
   (hb:id-of wiki))
@@ -71,6 +72,19 @@
        (local-time:unix-to-timestamp (round (/ date 1000)))))
 
 ;;
+;; Global register of visited FedWiki sites
+;; stored as a mapping from domain name to fedwiki object
+;;
+
+(defvar *neighborhood* (make-hash-table :test #'equal))
+
+(defun get-fedwiki (domain-name)
+  (if-let (fedwiki (gethash domain-name *neighborhood*))
+    fedwiki
+    (setf (gethash domain-name *neighborhood*)
+          (make-fedwiki domain-name))))
+
+;;
 ;; Load and display pages
 ;;
 
@@ -91,6 +105,8 @@
            (dom (plump:parse page-html)))
       (setf (slot-value page 'journal)
             (make-journal (gethash "journal" page-json)))
+      (setf (slot-value page 'context)
+            (extract-context (journal-of page)))
       (adapt-dom dom (hb:hyperbook-of page))
       (setf (slot-value page 'dom) dom)
       (setf (slot-value page 'links) (hb:extract-links page)))))
@@ -167,7 +183,7 @@
 
 (defclass journal-entry ()
   ((entry-type :reader entry-type-of :type keyword :initarg :entry-type)
-   (date :reader date-of :type local-time:timestamp :initarg :date)
+   (date :reader date-of :type (or null local-time:timestamp) :initarg :date)
    (data :reader data-of :type hash-table :initarg :data)))
 
 (defun make-journal (entries)
@@ -182,6 +198,37 @@
                    :entry-type type
                    :date date
                    :data entry)))
+
+(defmethod views:text-representation ((entry journal-entry))
+  (format nil "~A ~@[~A~]"
+          (-> entry entry-type-of symbol-name str:downcase)
+          (-> entry date-of)))
+
+(views:defview 👀journal (page fedwiki-page)
+  (load-page page)
+  (-> page
+    journal-of
+    views:👀items
+    (views:rename :title "Journal" :priority 3)))
+
+(defun site-of (entry)
+  (->> entry
+    data-of
+    (gethash "site")))
+
+(defun extract-context (journal)
+  (nreverse
+   (loop for entry across journal
+         for site = (site-of entry)
+         when site
+           collect (get-fedwiki site))))
+
+(views:defview 👀context (page fedwiki-page)
+  (load-page page)
+  (when-let (context (context-of page))
+    (-> context
+      views:👀items
+      (views:rename :title "Context" :priority 4))))
 
 ;;
 ;; JSON view
