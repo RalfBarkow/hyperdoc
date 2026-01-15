@@ -196,8 +196,13 @@
   (map 'vector #'make-journal-entry entries))
 
 (defun make-journal-entry (entry)
-  (let ((type (alexandria:make-keyword (gethash "type" entry)))
-        (date (wiki-date-to-timestamp (gethash "date" entry))))
+  (let ((type (->> entry
+                (gethash "type")
+                (str:upcase)
+                alexandria:make-keyword))
+        (date (->> entry
+                (gethash "date")
+                wiki-date-to-timestamp)))
     (remhash "type" entry)
     (remhash "date" entry)
     (make-instance 'journal-entry
@@ -223,11 +228,12 @@
     (gethash "site")))
 
 (defun extract-context (journal)
-  (nreverse
-   (loop for entry across journal
-         for site = (site-of entry)
-         when site
-           collect (get-fedwiki site))))
+  (let (fork-sites)
+    (loop for entry across journal
+          for site = (site-of entry)
+          when site
+          do (pushnew site fork-sites :test #'equal))
+    (mapcar #'get-fedwiki fork-sites)))
 
 (views:defview 👀context (page fedwiki-page)
   (load-page page)
