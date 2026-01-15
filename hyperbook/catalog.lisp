@@ -9,19 +9,31 @@
 ;;
 
 (defclass catalog ()
-  ((hyperbooks :accessor hyperbooks-of :initform nil :type list)))
+  ((hyperbooks :accessor hyperbooks-of
+               :initform nil
+               :type list)
+   (factories :accessor factories-of
+              :initform (make-hash-table :test #'equal)
+              :type hash-table)))
 
 (defvar *catalog*
   (make-instance 'catalog))
 
 
 ;;
-;; Registration of HyperBooks
+;; Registration of HyperBooks and HyperBook schemes
+;;
+;; HyperBook ids are URIs. A non-empty scheme means that the id
+;; is passed to the factory registered for that scheme.
 ;;
 
 (defun register (hbook)
   "Register HyperBook HBOOK in the global HyperBook catalog."
   (pushnew hbook (hyperbooks-of *catalog*) :key #'id-of :test #'equal))
+
+(defun register-scheme (scheme factory)
+  "Register FACTORY for SCHEME."
+  (setf (gethash scheme (factories-of *catalog*)) factory))
 
 ;;
 ;; Catalog lookup
@@ -38,11 +50,22 @@
   "Look up ID in the global catalog. If no HyperBook with
 that id exists, then return NIL if SIGNAL-ERROR? is nil, else
 signal cluster-lookup-failure."
-  (or (dolist (hb (hyperbooks-of *catalog*))
-        (when (equal id (id-of hb))
-          (return hb)))
-      (and signal-error?
-           (error 'hyperbook-lookup-failure :hyperbook-id id))))
+  (let* ((uri (puri:parse-uri id))
+         (scheme (puri:uri-scheme uri))
+         (path (puri:uri-path uri)))
+    (if scheme
+        ;; With scheme
+        (let ((factory (gethash scheme (factories-of *catalog*))))
+          (or (and factory
+                   (funcall factory path signal-error?))
+              (and signal-error?
+                   (error 'hyperbook-lookup-failure :hyperbook-id id))))
+        ;; No scheme
+        (or (dolist (hb (hyperbooks-of *catalog*))
+              (when (equal id (id-of hb))
+                (return hb)))
+            (and signal-error?
+                 (error 'hyperbook-lookup-failure :hyperbook-id id))))))
 
 ;;
 ;; Link lookup (for backlinks)

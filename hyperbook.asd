@@ -11,7 +11,8 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:alexandria
-               #:arrow-macros)
+               #:arrow-macros
+               #:puri)
   :components ((:module "hyperbook"
                         :serial t
                         :components ((:file "package")

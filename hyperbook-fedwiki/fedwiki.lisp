@@ -21,8 +21,14 @@
   (journal :reader journal-of :type vector)
   (context :reader context-of :type list)))
 
+(defun domain-name-of (wiki)
+  (->> wiki
+    hb:id-of
+    (str:split ":")
+    second))
+
 (defmethod hb:title-of ((wiki fedwiki))
-  (hb:id-of wiki))
+  (domain-name-of wiki))
 
 (defmethod hb:title-of ((page fedwiki-page))
   (hb:id-of page))
@@ -39,9 +45,11 @@
 ;; Create a fedwiki proxy
 ;;
 
+(defparameter *uri-scheme* "fedwiki:")
+
 (defun make-fedwiki (domain-name)
   (let* ((wiki (make-instance 'fedwiki
-                              :id domain-name))
+                              :id (str:concat *uri-scheme* domain-name)))
          (response  (multiple-value-list
                      (drakma:http-request (make-wiki-url domain-name
                                                          "/system/sitemap.json")
@@ -78,7 +86,8 @@
 
 (defvar *neighborhood* (make-hash-table :test #'equal))
 
-(defun get-fedwiki (domain-name)
+(defun get-fedwiki (domain-name &optional signal-error?)
+  (declare (ignore signal-error?))
   (if-let (fedwiki (gethash domain-name *neighborhood*))
     fedwiki
     (setf (gethash domain-name *neighborhood*)
@@ -125,9 +134,6 @@
                                       :method :get
                                       :want-stream t)))
     (shasht:read-json stream)))
-
-(defun domain-name-of (wiki)
-  (hb:id-of wiki))
 
 (defun adapt-dom (dom wiki)
   ;; Remove the DOCTYPE node
@@ -238,3 +244,9 @@
   (-> (get-page-json (hb:hyperbook-of page) (hb:id-of page))
     views:👀items
     (views:rename :title "JSON" :priority 7)))
+
+;;
+;; Register factory
+;;
+
+(hb:register-scheme :fedwiki #'get-fedwiki)
