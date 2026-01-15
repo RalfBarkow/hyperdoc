@@ -115,6 +115,7 @@
                #:lquery
                #:alexandria
                #:arrow-macros
+               #:bordeaux-threads
                #:drakma
                #:shasht
                #:str

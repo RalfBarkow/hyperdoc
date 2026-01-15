@@ -10,7 +10,8 @@
 
 (defclass fedwiki (hb:hyperbook)
   ((pages :reader pages-of :type hash-table :initform (make-hash-table :test #'equal))
-   (slugs :reader slugs-of :type hash-table :initform (make-hash-table :test #'equal))))
+   (slugs :reader slugs-of :type hash-table :initform (make-hash-table :test #'equal))
+   (status :accessor status-of :initform nil)))
 
 (defclass fedwiki-page (hb:page)
  ((slug :reader slug-of :type string :initarg :slug)
@@ -37,6 +38,9 @@
   "Welcome Visitors")
 
 (defmethod hb:find-page ((wiki fedwiki) id  &key signal-error?)
+  (let ((status (status-of wiki)))
+    (when (typep status 'bt:thread)
+      (bt:join-thread status)))
   (or (gethash id (pages-of wiki))
       (and signal-error?
            (error 'page-lookup-failure :hyperbook wiki :page-id id))))
@@ -49,26 +53,34 @@
 
 (defun make-fedwiki (domain-name)
   (let* ((wiki (make-instance 'fedwiki
-                              :id (str:concat *uri-scheme* domain-name)))
-         (response  (multiple-value-list
-                     (drakma:http-request (make-wiki-url domain-name
-                                                         "/system/sitemap.json")
-                                          :method :get
-                                          :want-stream t)))
-         (stream (first response))
-         (sitemap (shasht:read-json stream)))
-    (loop for page-spec across sitemap
-          for page = (make-instance 'fedwiki-page
-                                    :hyperbook wiki
-                                    :id (gethash "title" page-spec)
-                                    :slug (gethash "slug" page-spec)
-                                    :date (wiki-date-to-timestamp
-                                          (gethash "date" page-spec))
-                                    :synopsis (gethash "synopsis" page-spec))
-          do (setf (gethash (hb:id-of page) (pages-of wiki)) page)
-             (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page))
-             (setf (gethash (hb:id-of page) (slugs-of wiki)) (slug-of page)))
+                              :id (str:concat *uri-scheme* domain-name))))
+    (setf (status-of wiki)
+          (bt:make-thread #'(lambda () (get-sitemap wiki))))
     wiki))
+
+(defun get-sitemap (wiki)
+  (handler-case
+      (let* ((response  (multiple-value-list
+                         (drakma:http-request (make-wiki-url (domain-name-of wiki)
+                                                             "/system/sitemap.json")
+                                              :method :get
+                                              :want-stream t)))
+             (stream (first response))
+             (sitemap (shasht:read-json stream)))
+        (loop for page-spec across sitemap
+              for page = (make-instance 'fedwiki-page
+                                        :hyperbook wiki
+                                        :id (gethash "title" page-spec)
+                                        :slug (gethash "slug" page-spec)
+                                        :date (wiki-date-to-timestamp
+                                               (gethash "date" page-spec))
+                                        :synopsis (gethash "synopsis" page-spec))
+              do (setf (gethash (hb:id-of page) (pages-of wiki)) page)
+                 (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page))
+                 (setf (gethash (hb:id-of page) (slugs-of wiki)) (slug-of page)))
+        (setf (status-of wiki) t))
+    ((or usocket:timeout-error usocket:ns-host-not-found-error) (c)
+      (setf (status-of wiki) c))))
 
 (defun make-wiki-url (domain-name local-url)
   (assert (str:starts-with? "/" local-url))
