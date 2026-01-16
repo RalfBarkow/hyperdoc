@@ -79,7 +79,9 @@
                  (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page))
                  (setf (gethash (hb:id-of page) (slugs-of wiki)) (slug-of page)))
         (setf (status-of wiki) t))
-    ((or usocket:timeout-error usocket:ns-host-not-found-error) (c)
+    ((or stream-error
+      usocket:timeout-error
+      usocket:ns-host-not-found-error) (c)
       (setf (status-of wiki) c))))
 
 (defun make-wiki-url (domain-name local-url)

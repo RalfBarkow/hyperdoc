@@ -116,7 +116,7 @@
                #:alexandria
                #:arrow-macros
                #:bordeaux-threads
-               #:drakma
+               #:drakma #:usocket
                #:shasht
                #:str
                #:local-time
