@@ -38,12 +38,15 @@
   "Welcome Visitors")
 
 (defmethod hb:find-page ((wiki fedwiki) id  &key signal-error?)
-  (let ((status (status-of wiki)))
-    (when (typep status 'bt:thread)
-      (bt:join-thread status)))
+  (wait-for-sitemap wiki)
   (or (gethash id (pages-of wiki))
       (and signal-error?
            (error 'page-lookup-failure :hyperbook wiki :page-id id))))
+
+(defun wait-for-sitemap (wiki)
+  (let ((status (status-of wiki)))
+    (when (typep status 'bt:thread)
+      (bt:join-thread status))))
 
 ;;
 ;; Create a fedwiki proxy
@@ -128,10 +131,12 @@
            (dom (plump:parse page-html)))
       (setf (slot-value page 'journal)
             (make-journal (gethash "journal" page-json)))
+      ;; The context is used in adapting the DOM, so it
+      ;; must be prepared first.
       (setf (slot-value page 'context)
             (extract-context (journal-of page)))
-      (adapt-dom dom (hb:hyperbook-of page))
       (setf (slot-value page 'dom) dom)
+      (adapt-dom page)
       (setf (slot-value page 'links) (hb:extract-links page)))))
 
 (defun get-page-html (wiki page-title)
@@ -149,53 +154,70 @@
                                       :want-stream t)))
     (shasht:read-json stream)))
 
-(defun adapt-dom (dom wiki)
-  ;; Remove the DOCTYPE node
-  (plump:remove-child (elt (plump:children dom) 0))
-  ;; Unwrap the HTML element
-  (lquery:$ dom "html"
-    (children)
-    (first)
-    (unwrap))
-  ;; Remove the HEAD node
-  (lquery:$ dom "head"
-    (remove))
-  ;; Unwrap the BODY node
-  (lquery:$ dom "body"
-    (children)
-    (first)
-    (unwrap))
-  ;; Remove style nodes
-  (lquery:$ dom "style"
-    (remove))
-  ;; Remove script nodes
-  (lquery:$ dom "script"
-    (remove))
-  ;; Remove footer
-  (lquery:$ dom "footer"
-    (remove))
-  ;; Remove icon with link to the Wiki
-  (lquery:$ dom "a[href=/]"
-    (remove))
-  ;; Remove external link image
-  (lquery:$ dom "img[src=/images/external-link-ltr-icon.png]"
-    (remove))
-  ;; Replace internal links by hyperbook links
-  (lquery:$ dom "a.internal"
-    (map #'(lambda (el)
-             (let* ((href (plump:get-attribute el "href"))
-                    ;; Strip off initial "/" and trailing ".html"
-                    (slug (str:substring 1 -5 href))
-                    (page-id (gethash slug (slugs-of wiki))))
-               ;; page-id is NIL for links to missing pages,
-               ;; including pages retrieved from the federation.
-               ;; Keep the original link for now.
-               (when page-id
-                 (plump:set-attribute el "page" page-id) 
-                 (plump:remove-attribute el "href")
-                 (plump:remove-attribute el "class")
-                 (plump:remove-attribute el "title")
-                 (plump:remove-attribute el "data-page-name")))))))
+(defun adapt-dom (page)
+  (let ((dom (hb:dom-of page))
+        (wiki (hb:hyperbook-of page)))
+    ;; Remove the DOCTYPE node
+    (plump:remove-child (elt (plump:children dom) 0))
+    ;; Unwrap the HTML element
+    (lquery:$ dom "html"
+      (children)
+      (first)
+      (unwrap))
+    ;; Remove the HEAD node
+    (lquery:$ dom "head"
+      (remove))
+    ;; Unwrap the BODY node
+    (lquery:$ dom "body"
+      (children)
+      (first)
+      (unwrap))
+    ;; Remove style nodes
+    (lquery:$ dom "style"
+      (remove))
+    ;; Remove script nodes
+    (lquery:$ dom "script"
+      (remove))
+    ;; Remove footer
+    (lquery:$ dom "footer"
+      (remove))
+    ;; Remove icon with link to the Wiki
+    (lquery:$ dom "a[href=/]"
+      (remove))
+    ;; Remove external link image
+    (lquery:$ dom "img[src=/images/external-link-ltr-icon.png]"
+      (remove))
+    ;; Replace internal links by hyperbook links
+    (lquery:$ dom "a.internal"
+      (map #'(lambda (el)
+               (let* ((href (plump:get-attribute el "href"))
+                      ;; Strip off initial "/" and trailing ".html"
+                      (slug (str:substring 1 -5 href))
+                      (hyperbook-id nil)
+                      (page-id (gethash slug (slugs-of wiki))))
+                 ;; page-id is NIL for links to missing pages,
+                 ;; including pages retrieved from the federation.
+                 ;; Search the sites in the page context.
+                 (unless page-id
+                   (loop for remote in (context-of page)
+                         for remote-page-id = (find-page-id-from-slug remote slug)
+                         when remote-page-id
+                           do (setf page-id remote-page-id)
+                              (setf hyperbook-id (hb:id-of remote))
+                              (return)))
+                 ;; Replace links pointing to wiki pages by hyperbook links
+                 (when page-id
+                   (when hyperbook-id
+                     (plump:set-attribute el "hyperbook" hyperbook-id))
+                   (plump:set-attribute el "page" page-id) 
+                   (plump:remove-attribute el "href")
+                   (plump:remove-attribute el "class")
+                   (plump:remove-attribute el "title")
+                   (plump:remove-attribute el "data-page-name"))))))))
+
+(defmethod find-page-id-from-slug (wiki slug)
+  (wait-for-sitemap wiki)
+  (gethash slug (slugs-of wiki)))
 
 ;;
 ;; Page journal
