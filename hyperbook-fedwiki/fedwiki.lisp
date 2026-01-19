@@ -16,11 +16,11 @@
 (defclass fedwiki-page (hb:page)
  ((slug :reader slug-of :type string :initarg :slug)
   (date :reader date-of :type (or null local-time:timestamp) :initarg :date)
-  (synopsis :reader synopsis-of :type string :initarg :synopsis)
-  (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
-  (links :reader hb:links-of :type (or null hb:links) :initform nil)
+  (story :reader story-of :type :vector)
   (journal :reader journal-of :type vector)
-  (context :reader context-of :type list)))
+  (context :reader context-of :type list)
+  (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
+  (links :reader hb:links-of :type (or null hb:links) :initform nil)))
 
 (defun domain-name-of (wiki)
   (->> wiki
@@ -76,8 +76,7 @@
                                         :id (gethash "title" page-spec)
                                         :slug (gethash "slug" page-spec)
                                         :date (wiki-date-to-timestamp
-                                               (gethash "date" page-spec))
-                                        :synopsis (gethash "synopsis" page-spec))
+                                               (gethash "date" page-spec)))
               do (setf (gethash (hb:id-of page) (pages-of wiki)) page)
                  (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page))
                  (setf (gethash (hb:id-of page) (slugs-of wiki)) (slug-of page)))
@@ -129,6 +128,8 @@
            (page-json (get-page-json wiki id))
            (page-html (get-page-html wiki id))
            (dom (plump:parse page-html)))
+      (setf (slot-value page 'story)
+            (make-story (gethash "story" page-json)))
       (setf (slot-value page 'journal)
             (make-journal (gethash "journal" page-json)))
       ;; The context is used in adapting the DOM, so it
@@ -220,6 +221,39 @@
   (gethash slug (slugs-of wiki)))
 
 ;;
+;; Page story
+;;
+
+(defclass story-item ()
+  ((item-type :reader item-type-of :type keyword :initarg :item-type)
+   (id :reader id-of :type string :initarg :id)
+   (text :reader text-of :type string :initarg :text)
+   (data :reader data-of :type hash-table :initarg :data)))
+
+(defun make-story (items)
+  (map 'vector #'make-story-item items))
+
+(defun make-story-item (item)
+  (let ((type (->> item
+                (gethash "type")
+                (str:upcase)
+                alexandria:make-keyword))
+        (id (->> item
+                (gethash "id")))
+        (text (->> item
+                (gethash "text"))))
+    (remhash "type" item)
+    (remhash "id" item)
+    (remhash "text" item)
+    (when (zerop (hash-table-size item))
+      (setf item nil))
+    (make-instance 'story-item
+                   :item-type type
+                   :id (or id "")
+                   :text (or text "")
+                   :data item)))
+
+;;
 ;; Page journal
 ;;
 
@@ -246,18 +280,6 @@
                    :date date
                    :data entry)))
 
-(defmethod views:text-representation ((entry journal-entry))
-  (format nil "~A ~@[~A~]"
-          (-> entry entry-type-of symbol-name str:downcase)
-          (-> entry date-of)))
-
-(views:defview 👀journal (page fedwiki-page)
-  (load-page page)
-  (-> page
-    journal-of
-    views:👀items
-    (views:rename :title "Journal" :priority 3)))
-
 (defun site-of (entry)
   (->> entry
     data-of
@@ -283,6 +305,40 @@
        (clog:open-browser :url (make-wiki-url (domain-name-of wiki)
                                               (str:concat "/" slug ".html")))))
     nil))
+
+(views:defview 👀story (page fedwiki-page)
+  (load-page page)
+  (-> page
+    story-of
+    (views:multi-column-list-view
+     :title "Story" :priority 2
+     :display (list #'(lambda (item)
+                        (-> item item-type-of symbol-name str:downcase))
+                    #'(lambda (item)
+                        (let* ((text (text-of item))
+                               (length (length text))
+                               (length-limit 60)
+                               (excerpt (str:substring 0 length-limit text)))
+                          (if (<= length length-limit)
+                              excerpt
+                              (str:concat excerpt "..."))))))))
+
+(defmethod views:text-representation ((entry journal-entry))
+  (format nil "~A ~@[~A~]"
+          (-> entry entry-type-of symbol-name str:downcase)
+          (-> entry date-of)))
+
+(views:defview 👀journal (page fedwiki-page)
+  (load-page page)
+  (-> page
+    journal-of
+    (views:multi-column-list-view
+     :title "Journal" :priority 3
+     :display (list #'(lambda (entry)
+                        (-> entry entry-type-of symbol-name str:downcase))
+                    #'(lambda (entry)
+                        (or (-> entry date-of)
+                            ""))))))
 
 (views:defview 👀context (page fedwiki-page)
   (load-page page)
