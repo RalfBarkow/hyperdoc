@@ -271,16 +271,25 @@
           do (pushnew site fork-sites :test #'equal))
     (mapcar #'get-fedwiki fork-sites)))
 
+;;
+;; Views on pages
+;;
+
+(defmethod views:title-bar-action-buttons ((page fedwiki-page))
+  (views:action-button "Open in browser"
+    (let ((wiki (hb:hyperbook-of page))
+          (slug (slug-of page)))
+      (views:thunk
+       (clog:open-browser :url (make-wiki-url (domain-name-of wiki)
+                                              (str:concat "/" slug ".html")))))
+    nil))
+
 (views:defview 👀context (page fedwiki-page)
   (load-page page)
   (when-let (context (context-of page))
     (-> context
       views:👀items
       (views:rename :title "Context" :priority 4))))
-
-;;
-;; JSON view
-;;
 
 (views:defview 👀json (page fedwiki-page)
   (-> (get-page-json (hb:hyperbook-of page) (hb:id-of page))
