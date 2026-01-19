@@ -294,6 +294,18 @@
     (mapcar #'get-fedwiki fork-sites)))
 
 ;;
+;; Views on wikis
+;;
+
+(views:defview 👀pages (wiki fedwiki)
+  (unless (zerop (hash-table-size (pages-of wiki)))
+    (-> wiki
+      pages-of
+      alexandria:hash-table-values
+      (sort #'string< :key #'hb:title-of)
+      (views:list-view :title "Pages" :priority 5))))
+
+;;
 ;; Views on pages
 ;;
 
