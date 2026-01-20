@@ -37,8 +37,11 @@ that occurred when reading the site map.")))
 ;; and journal are lightly transformed into something more Lispy.
 
 (defclass fedwiki-page (hb:page)
- ((story :reader story-of :type :vector)
-  (journal :reader journal-of :type vector)
+ ((story :reader story-of :type :vector
+         :documentation "A sequence of story items such as paragraphs,
+images, etc.")
+  (journal :reader journal-of :type vector
+           :documentation "A sequence of events such as edits, forks, etc.")
   ;; The page context is constructed from the fork entries of
   ;; the journal. It is used for resolving page links in the
   ;; federation.
@@ -48,6 +51,15 @@ that occurred when reading the site map.")))
   (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
   ;; The list of link is extracted from the DOM.
   (links :reader hb:links-of :type (or null hb:links) :initform nil)))
+
+;; A remote page is referenced but not stored in the wiki it belongs to.
+(defclass remote-fedwiki-page (fedwiki-page)
+  ((origin :reader origin-of :type fedwiki :initarg :origin
+           :documentation "The wiki in which the page is stored")))
+
+;; For non-remote pages, the origin is the containing wiki.
+(defmethod origin-of ((page fedwiki-page))
+  (hb:hyperbook-of page))
 
 (defun domain-name-of (wiki)
   (->> wiki
@@ -67,6 +79,7 @@ that occurred when reading the site map.")))
 (defmethod hb:find-page ((wiki fedwiki) id  &key signal-error?)
   (wait-for-sitemap wiki)
   (or (gethash id (pages-of wiki))
+      (get-remote-page wiki id)
       (and signal-error?
            (error 'page-lookup-failure :hyperbook wiki :page-id id))))
 
@@ -74,6 +87,19 @@ that occurred when reading the site map.")))
   (let ((status (status-of wiki)))
     (when (typep status 'bt:thread)
       (bt:join-thread status))))
+
+(defun get-remote-page (wiki page-id)
+  (let* ((id-parts (str:split " 「" page-id) )
+         (local-id (first id-parts)))
+    (when (and (= 2 (length id-parts))
+               (str:ends-with? "」" (second id-parts)))
+      (let* ((domain-name (str:substring 0 -1 (second id-parts)))
+             (page (make-instance 'remote-fedwiki-page
+                                  :hyperbook wiki
+                                  :id local-id
+                                  :origin (get-fedwiki domain-name))))
+        (setf (gethash page-id (pages-of wiki)) page)
+        page))))
 
 ;;
 ;; Create a fedwiki proxy
@@ -100,12 +126,9 @@ that occurred when reading the site map.")))
         (loop for page-spec across sitemap
               for slug = (gethash "slug" page-spec)
               for title = (gethash "title" page-spec)
-              for date = (gethash "date" page-spec)
               for page = (make-instance 'fedwiki-page
                                         :hyperbook wiki
-                                        :id title
-                                        :date (wiki-date-to-timestamp
-                                               date))
+                                        :id title)
               do (setf (gethash (hb:id-of page) (pages-of wiki))
                        page)
                  (setf (gethash slug (slugs-of wiki))
@@ -155,10 +178,10 @@ that occurred when reading the site map.")))
 
 (defun load-page (page)
   (unless (hb:dom-of page)
-    (let* ((wiki (hb:hyperbook-of page))
+    (let* ((origin (origin-of page))
            (id (hb:id-of page))
-           (page-json (get-page-json wiki id))
-           (page-html (get-page-html wiki id))
+           (page-json (get-page-json origin id))
+           (page-html (get-page-html origin id))
            (dom (plump:parse page-html)))
       (setf (slot-value page 'story)
             (make-story (gethash "story" page-json)))
@@ -226,7 +249,6 @@ that occurred when reading the site map.")))
                (let* ((href (plump:get-attribute el "href"))
                       ;; Strip off initial "/" and trailing ".html"
                       (slug (str:substring 1 -5 href))
-                      (hyperbook-id nil)
                       (page-id (gethash slug (slugs-of wiki))))
                  ;; page-id is NIL for links to missing pages,
                  ;; including pages retrieved from the federation.
@@ -235,13 +257,13 @@ that occurred when reading the site map.")))
                    (loop for remote in (context-of page)
                          for remote-page-id = (find-page-id-from-slug remote slug)
                          when remote-page-id
-                           do (setf page-id remote-page-id)
-                              (setf hyperbook-id (hb:id-of remote))
+                           do (setf page-id (str:concat remote-page-id
+                                                        " 「"
+                                                        (domain-name-of remote)
+                                                        "」"))
                               (return)))
                  ;; Replace links pointing to wiki pages by hyperbook links
                  (when page-id
-                   (when hyperbook-id
-                     (plump:set-attribute el "hyperbook" hyperbook-id))
                    (plump:set-attribute el "page" page-id) 
                    (plump:remove-attribute el "href")
                    (plump:remove-attribute el "class")
@@ -253,7 +275,7 @@ that occurred when reading the site map.")))
   (gethash slug (slugs-of wiki)))
 
 (defun slug-of (page)
-  (gethash (hb:id-of page)  (slugs-of (hb:hyperbook-of page))))
+  (gethash (hb:id-of page) (slugs-of (origin-of page))))
 
 ;;
 ;; Page story
@@ -345,14 +367,43 @@ that occurred when reading the site map.")))
 ;; Views on pages
 ;;
 
+(defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
+  (views:html (:span :id id
+                     (views:esc (hb:title-of page))
+                     (views:esc " ")
+                     (:small (views:esc (-> page origin-of domain-name-of))))))
+
 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
-  (views:action-button "Open in browser"
+  (views:action-button html-inspector-views/standard:*icon-open-external*
     (let ((wiki (hb:hyperbook-of page))
           (slug (slug-of page)))
       (views:thunk
        (clog:open-browser :url (make-wiki-url (domain-name-of wiki)
                                               (str:concat "/" slug ".html")))))
     nil))
+
+(defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (views:thunk
+      (clog:open-browser :url (make-wiki-view-url page)))
+    nil))
+
+(defgeneric make-wiki-view-url (page))
+
+(defmethod make-wiki-view-url ((page fedwiki-page))
+  (let ((wiki (hb:hyperbook-of page)))
+    (format nil "http://~A/~A.html"
+            (domain-name-of wiki)
+            (slug-of page))))
+
+(defmethod make-wiki-view-url ((page remote-fedwiki-page))
+  (let ((wiki (hb:hyperbook-of page))
+        (origin (origin-of page)))
+    (format nil "http://~A/~A/~A"
+            (domain-name-of wiki)
+            (domain-name-of origin)
+            (slug-of page))))
+
 
 (views:defview 👀story (page fedwiki-page)
   (load-page page)
@@ -396,7 +447,7 @@ that occurred when reading the site map.")))
       (views:rename :title "Context" :priority 4))))
 
 (views:defview 👀json (page fedwiki-page)
-  (-> (get-page-json (hb:hyperbook-of page) (hb:id-of page))
+  (-> (get-page-json (-> page origin-of) (hb:id-of page))
     views:👀items
     (views:rename :title "JSON" :priority 7)))
 
