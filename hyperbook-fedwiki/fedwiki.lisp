@@ -363,6 +363,12 @@ images, etc.")
 ;; Views on wikis
 ;;
 
+(defmethod views:title-bar-action-buttons ((wiki fedwiki))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (views:thunk
+      (clog:open-browser :url (make-wiki-url (domain-name-of wiki) "/")))
+    nil))
+
 (views:defview 👀pages (wiki fedwiki)
   (wait-for-sitemap wiki)
   (unless (zerop (hash-table-size (pages-of wiki)))
