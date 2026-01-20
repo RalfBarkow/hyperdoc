@@ -8,17 +8,45 @@
 ;; Implementation of the HyperBook interface
 ;;
 
+;; A fedwiki object stores the information retrieved from
+;; a wiki's site map. The HyperBook id is "fedwiki:"
+;; followed by the wiki's domain name. Page ids are
+;; the page titles for local pages.
+;;
+;; The map from slugs to page titles is stored because
+;; (1) the title -> slug function is not invertible, and
+;; (2) we retrieve rendered HTML from the server,
+;; and therefore have to handle page references expressed
+;; as slugs rather than titles.
+
 (defclass fedwiki (hb:hyperbook)
-  ((pages :reader pages-of :type hash-table :initform (make-hash-table :test #'equal))
-   (slugs :reader slugs-of :type hash-table :initform (make-hash-table :test #'equal))
-   (status :accessor status-of :initform nil)))
+  ((pages :reader pages-of :type hash-table
+          :initform (make-hash-table :test #'equal)
+          :documentation "A map from page ids to page objects")
+   (slugs :reader slugs-of :type hash-table
+          :initform (make-hash-table :test #'equal)
+          :documentation "A map from slugs to page ids and back")
+   (status :accessor status-of :initform nil
+           :documentation "The initialization status of the wiki,
+one of (1) the thread loading the site map, (2) t for a fully
+loaded site map, or (3) a conditon object recording an error
+that occurred when reading the site map.")))
+
+;; A wiki page is a JSON data structure with three fields: title,
+;; story, and journal. The title becomes the HyperBook page id. Story
+;; and journal are lightly transformed into something more Lispy.
 
 (defclass fedwiki-page (hb:page)
- ((date :reader date-of :type (or null local-time:timestamp) :initarg :date)
-  (story :reader story-of :type :vector)
+ ((story :reader story-of :type :vector)
   (journal :reader journal-of :type vector)
+  ;; The page context is constructed from the fork entries of
+  ;; the journal. It is used for resolving page links in the
+  ;; federation.
   (context :reader context-of :type list)
+  ;; The DOM is a parse tree of the HTML representation of the page.
+  ;; It is retrieved from the server and heavily modified.
   (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
+  ;; The list of link is extracted from the DOM.
   (links :reader hb:links-of :type (or null hb:links) :initform nil)))
 
 (defun domain-name-of (wiki)
@@ -305,6 +333,7 @@
 ;;
 
 (views:defview 👀pages (wiki fedwiki)
+  (wait-for-sitemap wiki)
   (unless (zerop (hash-table-size (pages-of wiki)))
     (-> wiki
       pages-of
