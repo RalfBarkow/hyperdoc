@@ -14,8 +14,7 @@
    (status :accessor status-of :initform nil)))
 
 (defclass fedwiki-page (hb:page)
- ((slug :reader slug-of :type string :initarg :slug)
-  (date :reader date-of :type (or null local-time:timestamp) :initarg :date)
+ ((date :reader date-of :type (or null local-time:timestamp) :initarg :date)
   (story :reader story-of :type :vector)
   (journal :reader journal-of :type vector)
   (context :reader context-of :type list)
@@ -71,20 +70,25 @@
              (stream (first response))
              (sitemap (shasht:read-json stream)))
         (loop for page-spec across sitemap
+              for slug = (gethash "slug" page-spec)
+              for title = (gethash "title" page-spec)
+              for date = (gethash "date" page-spec)
               for page = (make-instance 'fedwiki-page
                                         :hyperbook wiki
-                                        :id (gethash "title" page-spec)
-                                        :slug (gethash "slug" page-spec)
+                                        :id title
                                         :date (wiki-date-to-timestamp
-                                               (gethash "date" page-spec)))
-              do (setf (gethash (hb:id-of page) (pages-of wiki)) page)
-                 (setf (gethash (slug-of page) (slugs-of wiki)) (hb:id-of page))
-                 (setf (gethash (hb:id-of page) (slugs-of wiki)) (slug-of page)))
+                                               date))
+              do (setf (gethash (hb:id-of page) (pages-of wiki))
+                       page)
+                 (setf (gethash slug (slugs-of wiki))
+                       (hb:id-of page))
+                 (setf (gethash (hb:id-of page) (slugs-of wiki))
+                       slug))
         (setf (status-of wiki) t))
     ((or stream-error
-      usocket:timeout-error
-      usocket:ns-host-not-found-error) (c)
-      (setf (status-of wiki) c))))
+         usocket:timeout-error
+         usocket:ns-host-not-found-error) (c)
+         (setf (status-of wiki) c))))
 
 (defun make-wiki-url (domain-name local-url)
   (assert (str:starts-with? "/" local-url))
@@ -219,6 +223,9 @@
 (defmethod find-page-id-from-slug (wiki slug)
   (wait-for-sitemap wiki)
   (gethash slug (slugs-of wiki)))
+
+(defun slug-of (page)
+  (gethash (hb:id-of page)  (slugs-of (hb:hyperbook-of page))))
 
 ;;
 ;; Page story
