@@ -81,7 +81,7 @@ images, etc.")
   (or (gethash id (pages-of wiki))
       (get-remote-page wiki id)
       (and signal-error?
-           (error 'page-lookup-failure :hyperbook wiki :page-id id))))
+           (error 'hb:page-lookup-failure :hyperbook wiki :page-id id))))
 
 (defun wait-for-sitemap (wiki)
   (let ((status (status-of wiki)))
@@ -181,17 +181,18 @@ images, etc.")
     (let* ((origin (origin-of page))
            (id (hb:id-of page))
            (page-json (get-page-json origin id))
+           (story (make-story (gethash "story" page-json)))
+           (journal (make-journal (gethash "journal" page-json)))
+           (context (extract-context journal))
            (page-html (get-page-html origin id))
            (dom (plump:parse page-html)))
-      (setf (slot-value page 'story)
-            (make-story (gethash "story" page-json)))
-      (setf (slot-value page 'journal)
-            (make-journal (gethash "journal" page-json)))
-      ;; The context is used in adapting the DOM, so it
-      ;; must be prepared first.
-      (setf (slot-value page 'context)
-            (extract-context (journal-of page)))
+      (setf (slot-value page 'story) story)
+      (setf (slot-value page 'journal) journal)
+      (unless (eq origin (hb:hyperbook-of page))
+        (push origin context))
+      (setf (slot-value page 'context) context)
       (setf (slot-value page 'dom) dom)
+      ;; DOM adaptation uses the context
       (adapt-dom page)
       (setf (slot-value page 'links) (hb:extract-links page)))))
 
@@ -262,13 +263,19 @@ images, etc.")
                                                         (domain-name-of remote)
                                                         "」"))
                               (return)))
-                 ;; Replace links pointing to wiki pages by hyperbook links
-                 (when page-id
-                   (plump:set-attribute el "page" page-id) 
-                   (plump:remove-attribute el "href")
-                   (plump:remove-attribute el "class")
-                   (plump:remove-attribute el "title")
-                   (plump:remove-attribute el "data-page-name"))))))))
+                 ;; If page-id is still NIL, there is no matching
+                 ;; page in the page context. Ideally, we would use
+                 ;; the page title as the page-id in the link, causing
+                 ;; a lookup failure with the correct page name. But
+                 ;; all we have is the slug.
+                 (unless page-id
+                   (setf page-id slug))
+                 ;; Replace link by hyperbook link
+                 (plump:set-attribute el "page" page-id) 
+                 (plump:remove-attribute el "href")
+                 (plump:remove-attribute el "class")
+                 (plump:remove-attribute el "title")
+                 (plump:remove-attribute el "data-page-name")))))))
 
 (defmethod find-page-id-from-slug (wiki slug)
   (wait-for-sitemap wiki)
@@ -347,7 +354,9 @@ images, etc.")
     (loop for entry across journal
           for site = (site-of entry)
           when site
-          do (pushnew site fork-sites :test #'equal))
+            do (setf fork-sites
+                     (cons site
+                           (remove site fork-sites :test #'equal))))
     (mapcar #'get-fedwiki fork-sites)))
 
 ;;
