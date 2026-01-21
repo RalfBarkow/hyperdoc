@@ -27,9 +27,10 @@
 ;; is passed to the factory registered for that scheme.
 ;;
 
-(defun register (hbook)
-  "Register HyperBook HBOOK in the global HyperBook catalog."
-  (pushnew hbook (hyperbooks-of *catalog*) :key #'id-of :test #'equal))
+(defgeneric register (hbook)
+  (:documentation  "Register HyperBook HBOOK in the global HyperBook catalog.")
+  (:method ((hbook hyperbook))
+    (pushnew hbook (hyperbooks-of *catalog*) :key #'id-of :test #'equal)))
 
 (defun register-scheme (scheme factory)
   "Register FACTORY for SCHEME."

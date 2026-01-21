@@ -8,6 +8,8 @@
 ;; Start a server for HyperBooks
 ;;
 
+(defvar *server-parameters* nil)
+
 (defun serve-hyperbooks (root-object &key (port 8080)
                                        (title "Inspector")
                                        (pane-width "700px")
@@ -28,27 +30,35 @@ arbitrary Lisp code."
    :port port
    :extended-routing t)
   (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
-    (let ((path (str:concat "/" (-> hb slug)))
-          (hb* hb))
-      (clog:set-on-new-window
-       #'(lambda (body)
-           (let* ((full-path (clog:property (clog:location body) "pathname"))
-                  (_ (assert (str:starts-with? path full-path)))
-                  (suffix (str:substring (length path)  nil full-path))
-                  (rel-path (mapcar #'tbnl:url-decode (rest (str:split "/" suffix))))
-                  (object (or (and (or (equal '() rel-path)    ;; example.org/hyperbook
-                                       (equal '("") rel-path)) ;; example.org/hyperbook/
-                                   hb)
-                              (hyperbook:lookup-path hb rel-path)
-                              (make-instance 'notfound :hyperbook hb*
-                                                       :path rel-path))))
-             (declare (ignore _))
-             (clog-moldable-inspector:on-new-inspector body
-                                                       :object object
-                                                       :pane-width pane-width
-                                                       :title (hyperbook:title-of hb)
-                                                       :playground? development)))
-       :path path))))
+    (add-path-to-hyperbook hb pane-width development))
+  (setf *server-parameters* (list pane-width development)))
+
+(defun add-path-to-hyperbook (hb pane-width development)
+  (let ((path (str:concat "/" (-> hb slug)))
+        (hb* hb))
+    (clog:set-on-new-window
+     #'(lambda (body)
+         (let* ((full-path (clog:property (clog:location body) "pathname"))
+                (_ (assert (str:starts-with? path full-path)))
+                (suffix (str:substring (length path)  nil full-path))
+                (rel-path (mapcar #'tbnl:url-decode (rest (str:split "/" suffix))))
+                (object (or (and (or (equal '() rel-path) ;; example.org/hyperbook
+                                     (equal '("") rel-path)) ;; example.org/hyperbook/
+                                 hb)
+                            (hyperbook:lookup-path hb rel-path)
+                            (make-instance 'notfound :hyperbook hb*
+                                                     :path rel-path))))
+           (declare (ignore _))
+           (clog-moldable-inspector:on-new-inspector body
+                                                     :object object
+                                                     :pane-width pane-width
+                                                     :title (hyperbook:title-of hb)
+                                                     :playground? development)))
+     :path path)))
+
+(defmethod hyperbook:register :after ((hb hyperbook:hyperbook))
+  (when *server-parameters*
+    (apply #'add-path-to-hyperbook (cons hb *server-parameters*))))
 
 (defclass notfound ()
   ((hyperbook :reader hyperbook-of :initarg :hyperbook)
