@@ -55,11 +55,17 @@ images, etc.")
 ;; A remote page is referenced but not stored in the wiki it belongs to.
 (defclass remote-fedwiki-page (fedwiki-page)
   ((origin :reader origin-of :type fedwiki :initarg :origin
-           :documentation "The wiki in which the page is stored")))
+           :documentation "The wiki in which the page is stored")
+   (origin-id :reader origin-id-of :type string :initarg :origin-id
+              :documentation "The page id in the origin wiki")))
 
 ;; For non-remote pages, the origin is the containing wiki.
+
 (defmethod origin-of ((page fedwiki-page))
   (hb:hyperbook-of page))
+
+(defmethod origin-id-of ((page fedwiki-page))
+  (hb:id-of page))
 
 (defun domain-name-of (wiki)
   (->> wiki
@@ -72,6 +78,9 @@ images, etc.")
 
 (defmethod hb:title-of ((page fedwiki-page))
   (hb:id-of page))
+
+(defmethod hb:title-of ((page remote-fedwiki-page))
+  (origin-id-of page))
 
 (defmethod hb:main-page-id-of ((wiki fedwiki))
   "Welcome Visitors")
@@ -90,14 +99,15 @@ images, etc.")
 
 (defun get-remote-page (wiki page-id)
   (let* ((id-parts (str:split " 「" page-id) )
-         (local-id (first id-parts)))
+         (origin-id (first id-parts)))
     (when (and (= 2 (length id-parts))
                (str:ends-with? "」" (second id-parts)))
       (let* ((domain-name (str:substring 0 -1 (second id-parts)))
              (page (make-instance 'remote-fedwiki-page
                                   :hyperbook wiki
-                                  :id local-id
-                                  :origin (get-fedwiki domain-name))))
+                                  :id page-id
+                                  :origin (get-fedwiki domain-name)
+                                  :origin-id origin-id)))
         (setf (gethash page-id (pages-of wiki)) page)
         page))))
 
@@ -179,7 +189,7 @@ images, etc.")
 (defun load-page (page)
   (unless (hb:dom-of page)
     (let* ((origin (origin-of page))
-           (id (hb:id-of page))
+           (id (origin-id-of page))
            (page-json (get-page-json origin id))
            (story (make-story (gethash "story" page-json)))
            (journal (make-journal (gethash "journal" page-json)))
