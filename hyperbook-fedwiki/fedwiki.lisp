@@ -378,6 +378,17 @@ images, etc.")
       (sort #'string< :key #'hb:title-of)
       (views:list-view :title "Pages" :priority 5))))
 
+(views:defview 👀plugins (wiki fedwiki)
+  (views:list-view
+   (views:thunk
+    (let* ((url (make-wiki-url (domain-name-of wiki) "/system/plugins.json"))
+           (stream (drakma:http-request url
+                                        :method :get
+                                        :want-stream t)))
+      (-> (shasht:read-json stream)
+        (sort #'string<))))
+   :title "Plugins" :priority 7))
+
 ;;
 ;; Views on pages
 ;;
