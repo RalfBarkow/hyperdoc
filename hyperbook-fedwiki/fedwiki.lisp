@@ -461,11 +461,6 @@ images, etc.")
       views:👀items
       (views:rename :title "Context" :priority 4))))
 
-(views:defview 👀json (page fedwiki-page)
-  (-> (get-page-json (-> page origin-of) (hb:id-of page))
-    views:👀items
-    (views:rename :title "JSON" :priority 7)))
-
 ;;
 ;; Register factory
 ;;
