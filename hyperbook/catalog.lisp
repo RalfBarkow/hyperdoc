@@ -53,19 +53,18 @@ signal cluster-lookup-failure."
   (let* ((uri (puri:parse-uri id))
          (scheme (puri:uri-scheme uri))
          (path (puri:uri-path uri)))
-    (if scheme
-        ;; With scheme
-        (let ((factory (gethash scheme (factories-of *catalog*))))
-          (or (and factory
-                   (funcall factory path signal-error?))
-              (and signal-error?
-                   (error 'hyperbook-lookup-failure :hyperbook-id id))))
-        ;; No scheme
-        (or (dolist (hb (hyperbooks-of *catalog*))
-              (when (equal id (id-of hb))
-                (return hb)))
-            (and signal-error?
-                 (error 'hyperbook-lookup-failure :hyperbook-id id))))))
+    ;; First, look up the id in the catalog.
+    (or (find id (hyperbooks-of *catalog*) :key #'id-of :test #'equal)
+        ;; If not found, but the id has a scheme,
+        ;; call the factory function.
+        (when scheme
+          (when-let (factory (gethash scheme (factories-of *catalog*)))
+            (when-let (hb (funcall factory path signal-error?))
+              (register hb)
+              hb)))
+        ;; Otherwise, signal an error if requested.
+        (and signal-error?
+             (error 'hyperbook-lookup-failure :hyperbook-id id)))))
 
 ;;
 ;; Link lookup (for backlinks)
