@@ -363,12 +363,6 @@ images, etc.")
 ;; Views on wikis
 ;;
 
-(defmethod views:title-bar-action-buttons ((wiki fedwiki))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (make-wiki-url (domain-name-of wiki) "/")))
-    nil))
-
 (views:defview 👀pages (wiki fedwiki)
   (wait-for-sitemap wiki)
   (unless (zerop (hash-table-size (pages-of wiki)))
@@ -389,15 +383,68 @@ images, etc.")
         (sort #'string<))))
    :title "Plugins" :priority 7))
 
-;;
-;; Views on pages
-;;
-
 (defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
   (views:html (:span :id id
                      (views:esc (hb:title-of page))
                      (views:esc " ")
                      (:small (views:esc (-> page origin-of domain-name-of))))))
+
+;;
+;; Title bar customization for wikis
+;;
+
+(defmethod views:title-bar-action-buttons ((wiki fedwiki))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (views:thunk
+      (clog:open-browser :url (make-wiki-url (domain-name-of wiki) "/")))
+    nil))
+
+;;
+;; Views on pages
+;;
+
+(views:defview 👀story (page fedwiki-page)
+  (load-page page)
+  (views:multi-column-list-view
+   (story-of page)
+   :title "Story" :priority 2
+   :display (list #'(lambda (item)
+                      (-> item item-type-of symbol-name str:downcase))
+                  #'(lambda (item)
+                      (let* ((text (text-of item))
+                             (length (length text))
+                             (length-limit 60)
+                             (excerpt (str:substring 0 length-limit text)))
+                        (if (<= length length-limit)
+                            excerpt
+                            (str:concat excerpt "...")))))))
+
+(defmethod views:text-representation ((entry journal-entry))
+  (format nil "~A ~@[~A~]"
+          (-> entry entry-type-of symbol-name str:downcase)
+          (-> entry date-of)))
+
+(views:defview 👀journal (page fedwiki-page)
+  (load-page page)
+  (views:multi-column-list-view
+     (journal-of page)
+     :title "Journal" :priority 3
+     :display (list #'(lambda (entry)
+                        (-> entry entry-type-of symbol-name str:downcase))
+                    #'(lambda (entry)
+                        (or (-> entry date-of)
+                            "")))))
+
+(views:defview 👀context (page fedwiki-page)
+  (load-page page)
+  (when-let (context (context-of page))
+    (-> context
+      views:👀items
+      (views:rename :title "Context" :priority 4))))
+
+;;
+;; Title bar customization for pages
+;;
 
 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
   (views:action-button html-inspector-views/standard:*icon-open-external*
@@ -430,50 +477,8 @@ images, etc.")
             (domain-name-of origin)
             (slug-of page))))
 
-
-(views:defview 👀story (page fedwiki-page)
-  (load-page page)
-  (-> page
-    story-of
-    (views:multi-column-list-view
-     :title "Story" :priority 2
-     :display (list #'(lambda (item)
-                        (-> item item-type-of symbol-name str:downcase))
-                    #'(lambda (item)
-                        (let* ((text (text-of item))
-                               (length (length text))
-                               (length-limit 60)
-                               (excerpt (str:substring 0 length-limit text)))
-                          (if (<= length length-limit)
-                              excerpt
-                              (str:concat excerpt "..."))))))))
-
-(defmethod views:text-representation ((entry journal-entry))
-  (format nil "~A ~@[~A~]"
-          (-> entry entry-type-of symbol-name str:downcase)
-          (-> entry date-of)))
-
-(views:defview 👀journal (page fedwiki-page)
-  (load-page page)
-  (-> page
-    journal-of
-    (views:multi-column-list-view
-     :title "Journal" :priority 3
-     :display (list #'(lambda (entry)
-                        (-> entry entry-type-of symbol-name str:downcase))
-                    #'(lambda (entry)
-                        (or (-> entry date-of)
-                            ""))))))
-
-(views:defview 👀context (page fedwiki-page)
-  (load-page page)
-  (when-let (context (context-of page))
-    (-> context
-      views:👀items
-      (views:rename :title "Context" :priority 4))))
-
 ;;
-;; Register factory
+;; Register a HyperBook factory
 ;;
 
 (hb:register-scheme :fedwiki #'get-fedwiki)
