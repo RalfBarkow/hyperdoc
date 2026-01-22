@@ -187,34 +187,41 @@ images, etc.")
   (call-next-method))
 
 (defun load-page (page)
-  (unless (hb:dom-of page)
-    (let* ((origin (origin-of page))
-           (id (origin-id-of page))
-           (page-json (get-page-json origin id))
-           (story (make-story (gethash "story" page-json)))
-           (journal (make-journal (gethash "journal" page-json)))
-           (context (extract-context journal))
-           (page-html (get-page-html origin id))
-           (dom (plump:parse page-html)))
-      (setf (slot-value page 'story) story)
-      (setf (slot-value page 'journal) journal)
+  (let* ((origin (origin-of page))
+         (id (origin-id-of page)))
+    (unless (story-of page)
+      (set-page-data page (get-page-json origin :page-title id))
       (unless (eq origin (hb:hyperbook-of page))
-        (push origin context))
-      (setf (slot-value page 'context) context)
-      (setf (slot-value page 'dom) dom)
-      ;; DOM adaptation uses the context
-      (adapt-dom page)
-      (setf (slot-value page 'links) (hb:extract-links page)))))
+        (push origin (slot-value page 'context))))
+    (unless (hb:dom-of page)
+      (set-page-html page (get-page-html origin :page-title id)))))
 
-(defun get-page-html (wiki page-title)
-  (let* ((slug (gethash page-title (slugs-of wiki)))
-         (url (make-wiki-url (domain-name-of wiki)
-                             (str:concat "/" slug ".html"))))
+(defun set-page-data (page json)
+  (let* ((story (make-story (gethash "story" json)))
+         (journal (make-journal (gethash "journal" json)))
+         (context (extract-context journal)))
+    (setf (slot-value page 'story) story)
+    (setf (slot-value page 'journal) journal)
+    (setf (slot-value page 'context) context)))
+
+(defun set-page-html (page html)
+  (setf (slot-value page 'dom) (plump:parse html))
+  (adapt-dom page)
+  (setf (slot-value page 'links) (hb:extract-links page)))
+
+(defun get-page-html (wiki &key page-title slug)
+  (assert (or page-title slug))
+  (unless slug
+    (setf slug (gethash page-title (slugs-of wiki))))
+  (let ((url (make-wiki-url (domain-name-of wiki)
+                            (str:concat "/" slug ".html"))))
     (drakma:http-request url :method :get)))
 
-(defun get-page-json (wiki page-title)
-  (let* ((slug (gethash page-title (slugs-of wiki)))
-         (url (make-wiki-url (domain-name-of wiki)
+(defun get-page-json (wiki &key page-title slug)
+  (assert (or page-title slug))
+  (unless slug
+    (setf slug (gethash page-title (slugs-of wiki))))
+  (let* ((url (make-wiki-url (domain-name-of wiki)
                              (str:concat "/" slug ".json")))
          (stream (drakma:http-request url
                                       :method :get
@@ -388,10 +395,25 @@ images, etc.")
     (let* ((url (make-wiki-url (domain-name-of wiki) "/system/plugins.json"))
            (stream (drakma:http-request url
                                         :method :get
-                                        :want-stream t)))
-      (-> (shasht:read-json stream)
-        (sort #'string<))))
+                                        :want-stream t))
+           (names (shasht:read-json stream))
+           (sorted-names (sort names #'string<)))
+      (loop for name across sorted-names
+            collect (get-plugin-page wiki name))))
    :title "Plugins" :priority 7))
+
+(defun get-plugin-page (wiki plugin-name)
+  (handler-case
+      (let* ((slug (str:concat "about-" plugin-name "-plugin"))
+             (json (get-page-json wiki :slug slug))
+             (title (gethash "title" json))
+             (page (make-instance 'fedwiki-page
+                                  :hyperbook wiki
+                                  :id title)))
+        (set-page-data page json)
+        (set-page-html page (get-page-html wiki :slug slug))
+        page)
+    (error (c) c)))
 
 (defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
   (views:html (:span :id id
