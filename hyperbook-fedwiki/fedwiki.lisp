@@ -75,8 +75,10 @@ images, etc.")
 ;;
 
 (defclass fedwiki-plugin ()
-  ((name :reader name-of :initarg :name
-         :type string )
+  ((wiki :reader wiki-of :initarg :wiki
+         :type fedwiki)
+   (name :reader name-of :initarg :name
+         :type string)
    (pages :reader pages-of :initform (make-hash-table :test #'equal)
           :type hash-table)))
 
@@ -170,7 +172,9 @@ images, etc.")
                  (setf (gethash (hb:id-of page) (slugs-of wiki))
                        slug))
         (setf (slot-value wiki 'plugins)
-              (map 'vector #'make-plugin sorted-plugin-names))
+              (map 'vector #'(lambda (pn)
+                               (make-plugin wiki pn))
+                   sorted-plugin-names))
         ;; (loop for name across sorted-names
         ;;       collect (get-plugin-about-page wiki plugin))
         (setf (status-of wiki) t))
@@ -192,8 +196,8 @@ images, etc.")
   (and date
        (local-time:unix-to-timestamp (round (/ date 1000)))))
 
-(defun make-plugin (name)
-  (make-instance 'fedwiki-plugin :name name))
+(defun make-plugin (wiki name)
+  (make-instance 'fedwiki-plugin :wiki wiki :name name))
 
 ;;
 ;; Global register of visited FedWiki sites
@@ -363,7 +367,7 @@ images, etc.")
     (remhash "type" item)
     (remhash "id" item)
     (remhash "text" item)
-    (when (zerop (hash-table-size item))
+    (when (zerop (hash-table-count item))
       (setf item nil))
     (make-instance 'story-item
                    :item-type type
@@ -419,7 +423,7 @@ images, etc.")
 
 (views:defview 👀pages (wiki fedwiki)
   (wait-for-sitemap wiki)
-  (unless (zerop (hash-table-size (pages-of wiki)))
+  (unless (zerop (hash-table-count (pages-of wiki)))
     (-> wiki
       pages-of
       alexandria:hash-table-values
@@ -434,24 +438,28 @@ images, etc.")
    :title "Plugins" :priority 7))
 
 (defun get-plugin-page (wiki slug)
-  (let* ((json (get-page-json wiki :slug slug))
-         (title (gethash "title" json))
-         (page (make-instance 'fedwiki-plugin-page
-                              :hyperbook wiki
-                              :id title)))
-    (set-page-data page json)
-    (setf (gethash (hb:id-of page) (pages-of wiki))
-          page)
-    (setf (gethash slug (slugs-of wiki))
-          (hb:id-of page))
-    (setf (gethash (hb:id-of page) (slugs-of wiki))
-          slug)
-    page))
+  (if-let (page-id (gethash slug (slugs-of wiki)))
+    (gethash page-id (pages-of wiki))
+    (let* ((json (get-page-json wiki :slug slug))
+           (title (gethash "title" json))
+           (page (make-instance 'fedwiki-plugin-page
+                                :hyperbook wiki
+                                :id title)))
+      (set-page-data page json)
+      (setf (gethash (hb:id-of page) (pages-of wiki))
+            page)
+      (setf (gethash slug (slugs-of wiki))
+            (hb:id-of page))
+      (setf (gethash (hb:id-of page) (slugs-of wiki))
+            slug)
+      page)))
 
 (defun get-plugin-about-page (wiki plugin)
   (let* ((slug (str:concat "about-" (name-of plugin) "-plugin"))
          (page (get-plugin-page wiki slug)))
     (setf (slot-value page 'plugin) plugin)
+    (setf (gethash (hb:id-of page) (pages-of plugin))
+          page)
     page))
 
 (defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
@@ -554,6 +562,20 @@ images, etc.")
 
 (defmethod views:text-representation ((plugin fedwiki-plugin))
   (name-of plugin))
+
+(views:defview 👀pages (plugin fedwiki-plugin)
+  (views:list-view
+   (views:thunk
+     (load-plugin-pages plugin)
+     (-> plugin
+       pages-of
+       alexandria:hash-table-values
+       (sort #'string< :key #'hb:title-of)))
+   :title "Pages" :priority 1))
+
+(defun load-plugin-pages (plugin)
+  (when (zerop (hash-table-count (pages-of plugin)))
+    (get-plugin-about-page (wiki-of plugin) plugin)))
 
 ;;
 ;; Register a HyperBook factory
