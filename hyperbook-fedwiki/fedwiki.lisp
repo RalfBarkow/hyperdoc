@@ -23,6 +23,8 @@
   ((pages :reader pages-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from page ids to page objects")
+   (plugins :reader plugins-of :type vector
+            :documentation "The list of plugins proposed by the server")
    (slugs :reader slugs-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from slugs to page ids and back")
@@ -37,22 +39,23 @@ that occurred when reading the site map.")))
 ;; and journal are lightly transformed into something more Lispy.
 
 (defclass fedwiki-page (hb:page)
- ((story :reader story-of :type :vector
-         :documentation "A sequence of story items such as paragraphs,
+  ((story :reader story-of :type (or null vector) :initform nil
+          :documentation "A sequence of story items such as paragraphs,
 images, etc.")
-  (journal :reader journal-of :type vector
-           :documentation "A sequence of events such as edits, forks, etc.")
-  ;; The page context is constructed from the fork entries of
-  ;; the journal. It is used for resolving page links in the
-  ;; federation.
-  (context :reader context-of :type list)
-  ;; The DOM is a parse tree of the HTML representation of the page.
-  ;; It is retrieved from the server and heavily modified.
-  (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
-  ;; The list of link is extracted from the DOM.
-  (links :reader hb:links-of :type (or null hb:links) :initform nil)))
+   (journal :reader journal-of :type (or null vector) :initform nil
+            :documentation "A sequence of events such as edits, forks, etc.")
+   ;; The page context is constructed from the fork entries of
+   ;; the journal. It is used for resolving page links in the
+   ;; federation.
+   (context :reader context-of :type list)
+   ;; The DOM is a parse tree of the HTML representation of the page.
+   ;; It is retrieved from the server and heavily modified.
+   (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
+   ;; The list of link is extracted from the DOM.
+   (links :reader hb:links-of :type (or null hb:links) :initform nil)))
 
 ;; A remote page is referenced but not stored in the wiki it belongs to.
+
 (defclass remote-fedwiki-page (fedwiki-page)
   ((origin :reader origin-of :type fedwiki :initarg :origin
            :documentation "The wiki in which the page is stored")
@@ -66,6 +69,23 @@ images, etc.")
 
 (defmethod origin-id-of ((page fedwiki-page))
   (hb:id-of page))
+
+;;
+;; Plugins and their pages
+;;
+
+(defclass fedwiki-plugin ()
+  ((name :reader name-of :initarg :name
+         :type string )
+   (pages :reader pages-of :initform (make-hash-table :test #'equal)
+          :type hash-table)))
+
+(defclass fedwiki-plugin-page (fedwiki-page)
+  ((plugin :reader plugin-of :type fedwiki-plugin :initarg :plugin)))
+
+;;
+;; Computed attributes of wikis and their pages
+;;
 
 (defun domain-name-of (wiki)
   (->> wiki
@@ -84,6 +104,10 @@ images, etc.")
 
 (defmethod hb:main-page-id-of ((wiki fedwiki))
   "Welcome Visitors")
+
+;;
+;; Page lookup
+;;
 
 (defmethod hb:find-page ((wiki fedwiki) id  &key signal-error?)
   (wait-for-sitemap wiki)
@@ -126,13 +150,13 @@ images, etc.")
 
 (defun get-sitemap (wiki)
   (handler-case
-      (let* ((response  (multiple-value-list
-                         (drakma:http-request (make-wiki-url (domain-name-of wiki)
-                                                             "/system/sitemap.json")
-                                              :method :get
-                                              :want-stream t)))
-             (stream (first response))
-             (sitemap (shasht:read-json stream)))
+      (let* ((sitemap-url (make-wiki-url (domain-name-of wiki)
+                                         "/system/sitemap.json"))
+            (sitemap (fetch-json sitemap-url))
+            (plugin-url (make-wiki-url (domain-name-of wiki)
+                                       "/system/plugins.json"))
+            (plugin-names (fetch-json plugin-url))
+            (sorted-plugin-names (sort plugin-names #'string<)))
         (loop for page-spec across sitemap
               for slug = (gethash "slug" page-spec)
               for title = (gethash "title" page-spec)
@@ -145,11 +169,19 @@ images, etc.")
                        (hb:id-of page))
                  (setf (gethash (hb:id-of page) (slugs-of wiki))
                        slug))
+        (setf (slot-value wiki 'plugins)
+              (map 'vector #'make-plugin sorted-plugin-names))
+        ;; (loop for name across sorted-names
+        ;;       collect (get-plugin-about-page wiki plugin))
         (setf (status-of wiki) t))
     ((or stream-error
          usocket:timeout-error
          usocket:ns-host-not-found-error) (c)
          (setf (status-of wiki) c))))
+
+(defun fetch-json (url)
+  (let ((stream (drakma:http-request url :method :get :want-stream t)))
+    (shasht:read-json stream)))
 
 (defun make-wiki-url (domain-name local-url)
   (assert (str:starts-with? "/" local-url))
@@ -159,6 +191,9 @@ images, etc.")
 (defun wiki-date-to-timestamp (date)
   (and date
        (local-time:unix-to-timestamp (round (/ date 1000)))))
+
+(defun make-plugin (name)
+  (make-instance 'fedwiki-plugin :name name))
 
 ;;
 ;; Global register of visited FedWiki sites
@@ -221,12 +256,8 @@ images, etc.")
   (assert (or page-title slug))
   (unless slug
     (setf slug (gethash page-title (slugs-of wiki))))
-  (let* ((url (make-wiki-url (domain-name-of wiki)
-                             (str:concat "/" slug ".json")))
-         (stream (drakma:http-request url
-                                      :method :get
-                                      :want-stream t)))
-    (shasht:read-json stream)))
+  (fetch-json (make-wiki-url (domain-name-of wiki)
+                             (str:concat "/" slug ".json"))))
 
 (defun adapt-dom (page)
   (let ((dom (hb:dom-of page))
@@ -280,11 +311,17 @@ images, etc.")
                                                         (domain-name-of remote)
                                                         "」"))
                               (return)))
-                 ;; If page-id is still NIL, there is no matching
-                 ;; page in the page context. Ideally, we would use
-                 ;; the page title as the page-id in the link, causing
-                 ;; a lookup failure with the correct page name. But
-                 ;; all we have is the slug.
+                 ;; If page-id is still NIL, it could refer to a plugin
+                 ;; page, which is not listed in the site map.
+                 (unless page-id
+                   (let ((page (get-plugin-page wiki slug)))
+                     (when page
+                       (setf page-id (hb:id-of page)))))
+                 ;; If page-id is still NIL, there is no matching page
+                 ;; anywhere. Ideally, we would use the page title as
+                 ;; the page-id in the link, causing a lookup failure
+                 ;; with the correct page name. But all we have is the
+                 ;; slug.
                  (unless page-id
                    (setf page-id slug))
                  ;; Replace link by hyperbook link
@@ -392,28 +429,30 @@ images, etc.")
 (views:defview 👀plugins (wiki fedwiki)
   (views:list-view
    (views:thunk
-    (let* ((url (make-wiki-url (domain-name-of wiki) "/system/plugins.json"))
-           (stream (drakma:http-request url
-                                        :method :get
-                                        :want-stream t))
-           (names (shasht:read-json stream))
-           (sorted-names (sort names #'string<)))
-      (loop for name across sorted-names
-            collect (get-plugin-page wiki name))))
+     (wait-for-sitemap wiki)
+     (plugins-of wiki))
    :title "Plugins" :priority 7))
 
-(defun get-plugin-page (wiki plugin-name)
-  (handler-case
-      (let* ((slug (str:concat "about-" plugin-name "-plugin"))
-             (json (get-page-json wiki :slug slug))
-             (title (gethash "title" json))
-             (page (make-instance 'fedwiki-page
-                                  :hyperbook wiki
-                                  :id title)))
-        (set-page-data page json)
-        (set-page-html page (get-page-html wiki :slug slug))
-        page)
-    (error (c) c)))
+(defun get-plugin-page (wiki slug)
+  (let* ((json (get-page-json wiki :slug slug))
+         (title (gethash "title" json))
+         (page (make-instance 'fedwiki-plugin-page
+                              :hyperbook wiki
+                              :id title)))
+    (set-page-data page json)
+    (setf (gethash (hb:id-of page) (pages-of wiki))
+          page)
+    (setf (gethash slug (slugs-of wiki))
+          (hb:id-of page))
+    (setf (gethash (hb:id-of page) (slugs-of wiki))
+          slug)
+    page))
+
+(defun get-plugin-about-page (wiki plugin)
+  (let* ((slug (str:concat "about-" (name-of plugin) "-plugin"))
+         (page (get-plugin-page wiki slug)))
+    (setf (slot-value page 'plugin) plugin)
+    page))
 
 (defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
   (views:html (:span :id id
@@ -508,6 +547,13 @@ images, etc.")
             (domain-name-of wiki)
             (domain-name-of origin)
             (slug-of page))))
+
+;;
+;; Views on plugins
+;;
+
+(defmethod views:text-representation ((plugin fedwiki-plugin))
+  (name-of plugin))
 
 ;;
 ;; Register a HyperBook factory
