@@ -340,9 +340,8 @@ images, etc.")
                  ;; If page-id is still NIL, it could refer to a plugin
                  ;; page, which is not listed in the site map.
                  (unless page-id
-                   (let ((page (get-plugin-page wiki slug)))
-                     (when page
-                       (setf page-id (hb:id-of page)))))
+                   (when-let (page (get-plugin-page wiki slug))
+                     (setf page-id (hb:id-of page))))
                  ;; If page-id is still NIL, there is no matching page
                  ;; anywhere. Ideally, we would use the page title as
                  ;; the page-id in the link, causing a lookup failure
@@ -465,26 +464,34 @@ images, etc.")
 (defun get-plugin-page (wiki slug)
   (if-let (page-id (gethash slug (slugs-of wiki)))
     (gethash page-id (pages-of wiki))
-    (let* ((json (fetch-page-json wiki :slug slug))
-           (title (gethash "title" json))
-           (page (make-instance 'fedwiki-plugin-page
-                                :hyperbook wiki
-                                :id title)))
-      (set-page-data page json)
-      (setf (gethash (hb:id-of page) (pages-of wiki))
-            page)
-      (setf (gethash slug (slugs-of wiki))
-            (hb:id-of page))
-      (setf (gethash (hb:id-of page) (slugs-of wiki))
-            slug)
-      page)))
+    (handler-case
+        (let* ((json (fetch-page-json wiki :slug slug))
+               (title (gethash "title" json))
+               (page (make-instance 'fedwiki-plugin-page
+                                    :hyperbook wiki
+                                    :id title)))
+          (set-page-data page json)
+          (setf (gethash (hb:id-of page) (pages-of wiki))
+                page)
+          (setf (gethash slug (slugs-of wiki))
+                (hb:id-of page))
+          (setf (gethash (hb:id-of page) (slugs-of wiki))
+                slug)
+          page)
+      ;; For missing pages, the server returns
+      ;; "Page not found", for which shasht raises
+      ;; an error because it is not valid JSON.
+      (shasht:shasht-invalid-char (c)
+        (declare (ignore c))
+        nil))))
 
 (defun get-plugin-about-page (wiki plugin)
   (let* ((slug (str:concat "about-" (name-of plugin) "-plugin"))
          (page (get-plugin-page wiki slug)))
-    (setf (slot-value page 'plugin) plugin)
-    (setf (gethash (hb:id-of page) (pages-of plugin))
-          page)
+    (when page
+      (setf (slot-value page 'plugin) plugin)
+      (setf (gethash (hb:id-of page) (pages-of plugin))
+            page))
     page))
 
 (defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
