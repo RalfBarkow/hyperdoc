@@ -23,8 +23,9 @@
   ((pages :reader pages-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from page ids to page objects")
-   (plugins :reader plugins-of :type vector
-            :documentation "The list of plugins proposed by the server")
+   (plugins :reader plugins-of :type hash-table
+            :initform (make-hash-table :test #'equal)
+            :documentation "The map from plugin names to plugins")
    (slugs :reader slugs-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from slugs to page ids and back")
@@ -147,10 +148,10 @@ images, etc.")
   (let* ((wiki (make-instance 'fedwiki
                               :id (str:concat *uri-scheme* domain-name))))
     (setf (status-of wiki)
-          (bt:make-thread #'(lambda () (get-sitemap wiki))))
+          (bt:make-thread #'(lambda () (fetch-sitemap wiki))))
     wiki))
 
-(defun get-sitemap (wiki)
+(defun fetch-sitemap (wiki)
   (handler-case
       (let* ((sitemap-url (make-wiki-url (domain-name-of wiki)
                                          "/system/sitemap.json"))
@@ -171,12 +172,11 @@ images, etc.")
                        (hb:id-of page))
                  (setf (gethash (hb:id-of page) (slugs-of wiki))
                        slug))
-        (setf (slot-value wiki 'plugins)
-              (map 'vector #'(lambda (pn)
-                               (make-plugin wiki pn))
-                   sorted-plugin-names))
-        ;; (loop for name across sorted-names
-        ;;       collect (get-plugin-about-page wiki plugin))
+        (loop for pn across sorted-plugin-names
+              do (setf (gethash pn (plugins-of wiki))
+                       (make-plugin wiki pn)))
+        (when (find "plugmatic" sorted-plugin-names :test #'equal)
+          (fetch-plugmatic-info wiki))
         (setf (status-of wiki) t))
     ((or stream-error
          usocket:timeout-error
@@ -198,6 +198,28 @@ images, etc.")
 
 (defun make-plugin (wiki name)
   (make-instance 'fedwiki-plugin :wiki wiki :name name))
+
+(defun fetch-plugmatic-info (wiki)
+  (let ((plugin-data (->> "/plugin/plugmatic/plugins"
+                       (make-wiki-url (domain-name-of wiki))
+                       fetch-json
+                       (gethash "install"))))
+    (loop for p across plugin-data
+          for plugin-name = (gethash "plugin" p)
+          for plugin = (gethash plugin-name (plugins-of wiki))
+          for pages = (gethash "pages" p)
+          when plugin
+            do (loop for page across pages
+                     do (let* ((slug (gethash "slug" page))
+                               (title (gethash "title" page))
+                               (page (make-instance 'fedwiki-plugin-page
+                                                    :hyperbook wiki
+                                                    :id title
+                                                    :plugin plugin)))
+                          (setf (gethash title (pages-of wiki)) page)
+                          (setf (gethash slug (slugs-of wiki)) title)
+                          (setf (gethash title (slugs-of wiki)) slug)
+                          (setf (gethash title (pages-of plugin)) page))))))
 
 ;;
 ;; Global register of visited FedWiki sites
@@ -229,11 +251,11 @@ images, etc.")
   (let* ((origin (origin-of page))
          (id (origin-id-of page)))
     (unless (story-of page)
-      (set-page-data page (get-page-json origin :page-title id))
+      (set-page-data page (fetch-page-json origin :page-title id))
       (unless (eq origin (hb:hyperbook-of page))
         (push origin (slot-value page 'context))))
     (unless (hb:dom-of page)
-      (set-page-html page (get-page-html origin :page-title id)))))
+      (set-page-html page (fetch-page-html origin :page-title id)))))
 
 (defun set-page-data (page json)
   (let* ((story (make-story (gethash "story" json)))
@@ -248,7 +270,7 @@ images, etc.")
   (adapt-dom page)
   (setf (slot-value page 'links) (hb:extract-links page)))
 
-(defun get-page-html (wiki &key page-title slug)
+(defun fetch-page-html (wiki &key page-title slug)
   (assert (or page-title slug))
   (unless slug
     (setf slug (gethash page-title (slugs-of wiki))))
@@ -256,7 +278,7 @@ images, etc.")
                             (str:concat "/" slug ".html"))))
     (drakma:http-request url :method :get)))
 
-(defun get-page-json (wiki &key page-title slug)
+(defun fetch-page-json (wiki &key page-title slug)
   (assert (or page-title slug))
   (unless slug
     (setf slug (gethash page-title (slugs-of wiki))))
@@ -434,13 +456,16 @@ images, etc.")
   (views:list-view
    (views:thunk
      (wait-for-sitemap wiki)
-     (plugins-of wiki))
+     (-> wiki
+       plugins-of
+       alexandria:hash-table-values
+       (sort #'string< :key #'name-of)))
    :title "Plugins" :priority 7))
 
 (defun get-plugin-page (wiki slug)
   (if-let (page-id (gethash slug (slugs-of wiki)))
     (gethash page-id (pages-of wiki))
-    (let* ((json (get-page-json wiki :slug slug))
+    (let* ((json (fetch-page-json wiki :slug slug))
            (title (gethash "title" json))
            (page (make-instance 'fedwiki-plugin-page
                                 :hyperbook wiki
