@@ -4,42 +4,45 @@
 
 (in-package :hyperbook)
 
+(views:defview 👀links (links links)
+  (views:html-view :title "Links" :priority 10
+    (views:add-asset-path "/hyperbook/"
+                          (asdf:system-relative-pathname
+                           :hyperbook
+                           "assets/hyperbook/"))
+    (views:include-css "/hyperbook/css/hyperbook.css")
+    (views:html
+      (:div :class "hyperbook-page"
+            (when-let (links (page-links-of links))
+              (views:html
+                (:h2 (views:esc "Pages")))
+              (page-link-section
+               (mapcar #'(lambda (link)
+                           (-> link thunk-of views:eval-thunk))
+                       links)))
+            (when-let (links (hyperbook-links-of links))
+              (views:html
+                (:h2 (views:esc "HyperDocs")))
+              (views:html-table (mapcar #'(lambda (link)
+                                            (-> link thunk-of views:eval-thunk))
+                                        links)))
+            (when-let (links (web-links-of links))
+              (views:html
+                (:h2 (views:esc "Web links"))
+                (:table :class "inspector-table"
+                        (dolist (link (mapcar #'url-of links))
+                          (views:html
+                            (:tr (:td (:a :href link :target "_blank"
+                                          (views:esc link)))))))))))
+                   (unless (and links
+                                (or (page-links-of links)
+                                    (hyperbook-links-of links)
+                                    (web-links-of links)))
+                     (views:html (views:esc "None")))))
+
 (views:defview 👀links (page page)
   (when-let (links (links-of page))
-    (views:html-view :title "Links" :priority 10
-      (views:add-asset-path "/hyperbook/"
-                            (asdf:system-relative-pathname
-                             :hyperbook
-                             "assets/hyperbook/"))
-      (views:include-css "/hyperbook/css/hyperbook.css")
-      (views:html
-        (:div :class "hyperbook-page"
-              (when-let (links (page-links-of links))
-                (views:html
-                  (:h2 (views:esc "Pages")))
-                (page-link-section
-                 (mapcar #'(lambda (link)
-                             (-> link thunk-of views:eval-thunk))
-                         links)))
-              (when-let (links (hyperbook-links-of links))
-                (views:html
-                  (:h2 (views:esc "HyperDocs")))
-                (views:html-table (mapcar #'(lambda (link)
-                                              (-> link thunk-of views:eval-thunk))
-                                          links)))
-              (when-let (links (web-links-of links))
-                (views:html
-                  (:h2 (views:esc "Web links"))
-                  (:table :class "inspector-table"
-                    (dolist (link (mapcar #'url-of links))
-                      (views:html
-                        (:tr (:td (:a :href link :target "_blank"
-                                      (views:esc link)))))))))))
-      (unless (and links
-                   (or (page-links-of links)
-                       (hyperbook-links-of links)
-                       (web-links-of links)))
-        (views:html (views:esc "None"))))))
+    (👀links links)))
 
 (views:defview 👀backlinks (page page)
   (views:html-view :title "Backlinks" :priority 11
