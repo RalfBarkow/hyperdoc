@@ -124,4 +124,6 @@
   :components ((:module "hyperbook-fedwiki"
                 :serial t
                 :components ((:file "package")
-                             (:file "fedwiki")))))
+                             (:file "fedwiki")
+                             (:file "plugins")
+                             (:file "views")))))

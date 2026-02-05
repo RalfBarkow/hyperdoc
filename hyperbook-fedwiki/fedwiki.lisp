@@ -72,21 +72,6 @@ images, etc.")
   (hb:id-of page))
 
 ;;
-;; Plugins and their pages
-;;
-
-(defclass fedwiki-plugin ()
-  ((wiki :reader wiki-of :initarg :wiki
-         :type fedwiki)
-   (name :reader name-of :initarg :name
-         :type string)
-   (pages :reader pages-of :initform (make-hash-table :test #'equal)
-          :type hash-table)))
-
-(defclass fedwiki-plugin-page (fedwiki-page)
-  ((plugin :reader plugin-of :type fedwiki-plugin :initarg :plugin)))
-
-;;
 ;; Computed attributes of wikis and their pages
 ;;
 
@@ -148,40 +133,37 @@ images, etc.")
   (let* ((wiki (make-instance 'fedwiki
                               :id (str:concat *uri-scheme* domain-name))))
     (setf (status-of wiki)
-          (bt:make-thread #'(lambda () (fetch-sitemap wiki))))
+          (bt:make-thread
+           #'(lambda ()
+               (handler-case
+                   (progn (fetch-sitemap wiki)
+                          (fetch-plugin-data wiki)
+                          (setf (status-of wiki) t))
+                 ((or stream-error
+                      usocket:timeout-error
+                      usocket:ns-host-not-found-error) (c)
+                      (setf (status-of wiki) c))))))
     wiki))
 
 (defun fetch-sitemap (wiki)
-  (handler-case
-      (let* ((sitemap-url (make-wiki-url (domain-name-of wiki)
-                                         "/system/sitemap.json"))
-            (sitemap (fetch-json sitemap-url))
-            (plugin-url (make-wiki-url (domain-name-of wiki)
-                                       "/system/plugins.json"))
-            (plugin-names (fetch-json plugin-url))
-            (sorted-plugin-names (sort plugin-names #'string<)))
-        (loop for page-spec across sitemap
-              for slug = (gethash "slug" page-spec)
-              for title = (gethash "title" page-spec)
-              for page = (make-instance 'fedwiki-page
-                                        :hyperbook wiki
-                                        :id title)
-              do (setf (gethash (hb:id-of page) (pages-of wiki))
-                       page)
-                 (setf (gethash slug (slugs-of wiki))
-                       (hb:id-of page))
-                 (setf (gethash (hb:id-of page) (slugs-of wiki))
-                       slug))
-        (loop for pn across sorted-plugin-names
-              do (setf (gethash pn (plugins-of wiki))
-                       (make-plugin wiki pn)))
-        (when (find "plugmatic" sorted-plugin-names :test #'equal)
-          (fetch-plugmatic-info wiki))
-        (setf (status-of wiki) t))
-    ((or stream-error
-         usocket:timeout-error
-         usocket:ns-host-not-found-error) (c)
-         (setf (status-of wiki) c))))
+  (let* ((sitemap-url (make-wiki-url (domain-name-of wiki)
+                                     "/system/sitemap.json"))
+         (sitemap (fetch-json sitemap-url)))
+    (loop for page-spec across sitemap
+          for slug = (gethash "slug" page-spec)
+          for title = (gethash "title" page-spec)
+          for links = (some->> page-spec
+                               (gethash "links")
+                               alexandria:hash-table-keys)
+          for page = (make-instance 'fedwiki-page
+                                    :hyperbook wiki
+                                    :id title)
+          do (setf (gethash (hb:id-of page) (pages-of wiki))
+                   page)
+          (setf (gethash slug (slugs-of wiki))
+                (hb:id-of page))
+          (setf (gethash (hb:id-of page) (slugs-of wiki))
+                slug))))
 
 (defun fetch-json (url)
   (let ((stream (drakma:http-request url :method :get :want-stream t)))
@@ -196,30 +178,6 @@ images, etc.")
   (and date
        (local-time:unix-to-timestamp (round (/ date 1000)))))
 
-(defun make-plugin (wiki name)
-  (make-instance 'fedwiki-plugin :wiki wiki :name name))
-
-(defun fetch-plugmatic-info (wiki)
-  (let ((plugin-data (->> "/plugin/plugmatic/plugins"
-                       (make-wiki-url (domain-name-of wiki))
-                       fetch-json
-                       (gethash "install"))))
-    (loop for p across plugin-data
-          for plugin-name = (gethash "plugin" p)
-          for plugin = (gethash plugin-name (plugins-of wiki))
-          for pages = (gethash "pages" p)
-          when plugin
-            do (loop for page across pages
-                     do (let* ((slug (gethash "slug" page))
-                               (title (gethash "title" page))
-                               (page (make-instance 'fedwiki-plugin-page
-                                                    :hyperbook wiki
-                                                    :id title
-                                                    :plugin plugin)))
-                          (setf (gethash title (pages-of wiki)) page)
-                          (setf (gethash slug (slugs-of wiki)) title)
-                          (setf (gethash title (slugs-of wiki)) slug)
-                          (setf (gethash title (pages-of plugin)) page))))))
 
 ;;
 ;; Global register of visited FedWiki sites
@@ -437,177 +395,6 @@ images, etc.")
                      (cons site
                            (remove site fork-sites :test #'equal))))
     (mapcar #'get-fedwiki fork-sites)))
-
-;;
-;; Views on wikis
-;;
-
-(views:defview 👀pages (wiki fedwiki)
-  (wait-for-sitemap wiki)
-  (unless (zerop (hash-table-count (pages-of wiki)))
-    (-> wiki
-      pages-of
-      alexandria:hash-table-values
-      (sort #'string< :key #'hb:title-of)
-      (views:list-view :title "Pages" :priority 5))))
-
-(views:defview 👀plugins (wiki fedwiki)
-  (views:list-view
-   (views:thunk
-     (wait-for-sitemap wiki)
-     (-> wiki
-       plugins-of
-       alexandria:hash-table-values
-       (sort #'string< :key #'name-of)))
-   :title "Plugins" :priority 7))
-
-(defun get-plugin-page (wiki slug)
-  (if-let (page-id (gethash slug (slugs-of wiki)))
-    (gethash page-id (pages-of wiki))
-    (handler-case
-        (let* ((json (fetch-page-json wiki :slug slug))
-               (title (gethash "title" json))
-               (page (make-instance 'fedwiki-plugin-page
-                                    :hyperbook wiki
-                                    :id title)))
-          (set-page-data page json)
-          (setf (gethash (hb:id-of page) (pages-of wiki))
-                page)
-          (setf (gethash slug (slugs-of wiki))
-                (hb:id-of page))
-          (setf (gethash (hb:id-of page) (slugs-of wiki))
-                slug)
-          page)
-      ;; For missing pages, the server returns
-      ;; "Page not found", for which shasht raises
-      ;; an error because it is not valid JSON.
-      (shasht:shasht-invalid-char (c)
-        (declare (ignore c))
-        nil))))
-
-(defun get-plugin-about-page (wiki plugin)
-  (let* ((slug (str:concat "about-" (name-of plugin) "-plugin"))
-         (page (get-plugin-page wiki slug)))
-    (when page
-      (setf (slot-value page 'plugin) plugin)
-      (setf (gethash (hb:id-of page) (pages-of plugin))
-            page))
-    page))
-
-(defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
-  (views:html (:span :id id
-                     (views:esc (hb:title-of page))
-                     (views:esc " ")
-                     (:small (views:esc (-> page origin-of domain-name-of))))))
-
-;;
-;; Title bar customization for wikis
-;;
-
-(defmethod views:title-bar-action-buttons ((wiki fedwiki))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (make-wiki-url (domain-name-of wiki) "/")))
-    nil))
-
-;;
-;; Views on pages
-;;
-
-(views:defview 👀story (page fedwiki-page)
-  (load-page page)
-  (views:multi-column-list-view
-   (story-of page)
-   :title "Story" :priority 2
-   :display (list #'(lambda (item)
-                      (-> item item-type-of symbol-name str:downcase))
-                  #'(lambda (item)
-                      (let* ((text (text-of item))
-                             (length (length text))
-                             (length-limit 60)
-                             (excerpt (str:substring 0 length-limit text)))
-                        (if (<= length length-limit)
-                            excerpt
-                            (str:concat excerpt "...")))))))
-
-(defmethod views:text-representation ((entry journal-entry))
-  (format nil "~A ~@[~A~]"
-          (-> entry entry-type-of symbol-name str:downcase)
-          (-> entry date-of)))
-
-(views:defview 👀journal (page fedwiki-page)
-  (load-page page)
-  (views:multi-column-list-view
-     (journal-of page)
-     :title "Journal" :priority 3
-     :display (list #'(lambda (entry)
-                        (-> entry entry-type-of symbol-name str:downcase))
-                    #'(lambda (entry)
-                        (or (-> entry date-of)
-                            "")))))
-
-(views:defview 👀context (page fedwiki-page)
-  (load-page page)
-  (when-let (context (context-of page))
-    (-> context
-      views:👀items
-      (views:rename :title "Context" :priority 4))))
-
-;;
-;; Title bar customization for pages
-;;
-
-(defmethod views:title-bar-action-buttons ((page fedwiki-page))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (let ((wiki (hb:hyperbook-of page))
-          (slug (slug-of page)))
-      (views:thunk
-       (clog:open-browser :url (make-wiki-url (domain-name-of wiki)
-                                              (str:concat "/" slug ".html")))))
-    nil))
-
-(defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (make-wiki-view-url page)))
-    nil))
-
-(defgeneric make-wiki-view-url (page))
-
-(defmethod make-wiki-view-url ((page fedwiki-page))
-  (let ((wiki (hb:hyperbook-of page)))
-    (format nil "http://~A/~A.html"
-            (domain-name-of wiki)
-            (slug-of page))))
-
-(defmethod make-wiki-view-url ((page remote-fedwiki-page))
-  (let ((wiki (hb:hyperbook-of page))
-        (origin (origin-of page)))
-    (format nil "http://~A/~A/~A"
-            (domain-name-of wiki)
-            (domain-name-of origin)
-            (slug-of page))))
-
-;;
-;; Views on plugins
-;;
-
-(defmethod views:text-representation ((plugin fedwiki-plugin))
-  (name-of plugin))
-
-(views:defview 👀pages (plugin fedwiki-plugin)
-  (views:list-view
-   (views:thunk
-     (load-plugin-pages plugin)
-     (-> plugin
-       pages-of
-       alexandria:hash-table-values
-       (sort #'string< :key #'hb:title-of)))
-   :title "Pages" :priority 1))
-
-(defun load-plugin-pages (plugin)
-  (when (zerop (hash-table-count (pages-of plugin)))
-    (get-plugin-about-page (wiki-of plugin) plugin)))
 
 ;;
 ;; Register a HyperBook factory
