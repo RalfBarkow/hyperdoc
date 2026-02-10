@@ -9,7 +9,7 @@
 ;;
 
 (defclass wikipedia (hb:hyperbook)
-  ((edition :reader edition-of :type keyword :initarg :edition
+  ((edition :reader edition-of :type string :initarg :edition
             :documentation "Edition code")
    (title :reader hb:title-of :type string :initarg :title)
    (main-page-id :reader hb:main-page-id-of :type string :initarg :main-page)))
@@ -166,33 +166,43 @@
 ;; Make and manage wikipedia objects
 ;;
 
-(defvar *wikipedias* (make-hash-table))
+(defvar *wikipedias* (make-hash-table :test #'equal))
 
 (defun make-wikipedia (edition title main-page)
-  (assert (eq (type-of edition) 'keyword))
-  (let ((id (str:concat "wikipedia-" (-> edition symbol-name str:downcase))))
-    (setf (gethash edition *wikipedias*)
-          (make-instance 'wikipedia
-                         :id id
-                         :edition edition
-                         :title title
-                         :main-page main-page))
-    (hb:register (gethash edition *wikipedias*))
-    (gethash edition *wikipedias*)))
+  (assert (typep edition 'string))
+  (let* ((ed-code (-> edition str:downcase))
+         (id (str:concat "wikipedia:" ed-code))
+         (wp (make-instance 'wikipedia
+                            :id id
+                            :edition ed-code
+                            :title title
+                            :main-page main-page)))
+    (setf (gethash edition *wikipedias*) wp)
+    (hb:register wp)
+    wp))
 
 ;; It should be possible to retrieve a complete list from
-;; https://en.wikipedia.org/wiki/List_of_Wikipedias
-(defparameter *editions*
-  '((:de "Wikipedia" "Wikipedia:Hauptseite")
-    (:en "Wikipedia" "Main Page")
-    (:es "Wikipedia" "Wikipedia:Portada")
-    (:fr "Wikipédia" "Wikipédia:Accueil principal")
-    (:it "Wikipedia" "Pagina principale")))
+;; https://en.wikipedia.org/wiki/List_of_Wikipedias, but
+;; there doesn't seem to be a uniform way to obtain the
+;; name of the main page.
 
-(defun request-wikipedia (edition)
-  (or (gethash edition *wikipedias*)
-      (let ((wp-spec (assoc edition *editions*)))
-        (make-wikipedia edition (second wp-spec) (third wp-spec)))))
+(defparameter *editions*
+  '(("de" "Wikipedia" "Wikipedia:Hauptseite")
+    ("en" "Wikipedia" "Main Page")
+    ("es" "Wikipedia" "Wikipedia:Portada")
+    ("fr" "Wikipédia" "Wikipédia:Accueil principal")
+    ("it" "Wikipedia" "Pagina principale")))
+
+(defun get-wikipedia (edition &optional signal-error?)
+  (declare (ignore signal-error?))
+  (let ((ed-code (str:downcase edition)))
+    (or (gethash ed-code *wikipedias*)
+        (when-let (wp-spec (assoc ed-code *editions* :test #'equal))
+          (make-wikipedia edition (second wp-spec) (third wp-spec))))))
+
+;; Register a HyperBook factory
+
+(hb:register-scheme :wikipedia #'get-wikipedia)
 
 ;;
 ;; URLs
@@ -200,14 +210,14 @@
 
 (defun base-url (wikipedia)
   (format nil "https://~A.wikipedia.org"
-          (-> wikipedia edition-of symbol-name str:downcase)))
+          (-> wikipedia edition-of)))
 
 (defun page-url (page)
   (let ((edition (-> page hb:hyperbook-of edition-of))
         (page-title (-> page hb:title-of)))
     (format nil
             "https://~A.wikipedia.org/wiki/~A"
-            (-> edition symbol-name str:downcase)
+            edition
             (-> page-title encode-page-title-for-url))))
 
 (defun encode-page-title-for-url (page-title)
@@ -215,7 +225,7 @@
 
 (defun api-url (wikipedia)
   (format nil "https://~A.wikipedia.org/w/api.php"
-          (-> wikipedia edition-of str:downcase)))
+          (-> wikipedia edition-of)))
 
 ;;
 ;; Views
