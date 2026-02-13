@@ -26,7 +26,7 @@
   ((system :reader system-of :initarg :system :type asdf:system)))
 
 (defmethod find-page ((hb asdf-systems) page-id &key signal-error?)
-  (when-let(system (asdf:find-system page-id signal-error?))
+  (when-let (system (asdf:find-system page-id signal-error?))
     (make-instance 'asdf-system-page
                    :hyperbook hb
                    :id page-id
