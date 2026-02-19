@@ -25,6 +25,9 @@
   font-size: 1em;
   margin: 2px 0px 1px;
 }
+.hyperbook-page pre {
+  margin: 0px 0px 0px;
+}
 .hyperbook-page .code-snippet {
   margin-left: 10px;
 }
