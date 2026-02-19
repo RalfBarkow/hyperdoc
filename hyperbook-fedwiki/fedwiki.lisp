@@ -52,7 +52,8 @@ images, etc.")
    ;; The DOM is a parse tree of the HTML representation of the page.
    ;; It is retrieved from the server and heavily modified.
    (dom :reader hb:dom-of :type (or null plump:node) :initform nil)
-   ;; The list of link is extracted from the DOM.
+   ;; The list of links is extracted from the DOM (if available),
+   ;; or from the sitemap.
    (links :reader hb:links-of :type (or null hb:links) :initform nil)))
 
 ;; A remote page is referenced but not stored in the wiki it belongs to.
@@ -153,17 +154,19 @@ images, etc.")
           for slug = (gethash "slug" page-spec)
           for title = (gethash "title" page-spec)
           for links = (some->> page-spec
-                               (gethash "links")
-                               alexandria:hash-table-keys)
+                        (gethash "links")
+                        alexandria:hash-table-keys)
           for page = (make-instance 'fedwiki-page
                                     :hyperbook wiki
                                     :id title)
           do (setf (gethash (hb:id-of page) (pages-of wiki))
                    page)
-          (setf (gethash slug (slugs-of wiki))
-                (hb:id-of page))
-          (setf (gethash (hb:id-of page) (slugs-of wiki))
-                slug))))
+             (setf (gethash slug (slugs-of wiki))
+                   (hb:id-of page))
+             (setf (gethash (hb:id-of page) (slugs-of wiki))
+                   slug)
+             (setf (slot-value page 'links)
+                   (make-links page links)))))
 
 (defun fetch-json (url)
   (let ((stream (drakma:http-request url :method :get :want-stream t)))
@@ -178,6 +181,14 @@ images, etc.")
   (and date
        (local-time:unix-to-timestamp (round (/ date 1000)))))
 
+(defun make-links (page link-slugs)
+  (format t "Page: ~A~%" (hb:id-of page))
+  (format t "Link slugs: ~A~%" link-slugs)
+  (unless (hb:links-of page)
+    (make-instance 'wiki-links
+                   :wiki-links (loop for slug in link-slugs
+                                     collect (make-wiki-link
+                                              page :target-slug slug)))))
 
 ;;
 ;; Global register of visited FedWiki sites

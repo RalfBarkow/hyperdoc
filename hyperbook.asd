@@ -125,5 +125,6 @@
                 :serial t
                 :components ((:file "package")
                              (:file "fedwiki")
+                             (:file "wiki-links")
                              (:file "plugins")
                              (:file "views")))))

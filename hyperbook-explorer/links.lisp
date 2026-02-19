@@ -29,7 +29,7 @@
 
 (defclass object-link (link)
   ((thunk :reader thunk-of :initarg :thunk :type function)
-   (view :reader view-of :initarg :view :type (or string null))))
+   (view :reader view-of :initarg :view :initform nil :type (or string null))))
 
 ;;
 ;; Page links point to a HyperBook page, defined like the source
