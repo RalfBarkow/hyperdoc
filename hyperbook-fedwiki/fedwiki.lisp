@@ -170,6 +170,7 @@ images, etc.")
 
 (defun fetch-json (url)
   (let ((stream (drakma:http-request url :method :get :want-stream t)))
+    (setf (flexi-streams:flexi-stream-external-format stream) :utf-8)
     (shasht:read-json stream)))
 
 (defun make-wiki-url (domain-name local-url)
@@ -331,81 +332,6 @@ images, etc.")
 
 (defun slug-of (page)
   (gethash (hb:id-of page) (slugs-of (origin-of page))))
-
-;;
-;; Page story
-;;
-
-(defclass story-item ()
-  ((item-type :reader item-type-of :type keyword :initarg :item-type)
-   (id :reader id-of :type string :initarg :id)
-   (text :reader text-of :type string :initarg :text)
-   (data :reader data-of :type hash-table :initarg :data)))
-
-(defun make-story (items)
-  (map 'vector #'make-story-item items))
-
-(defun make-story-item (item)
-  (let ((type (->> item
-                (gethash "type")
-                (str:upcase)
-                alexandria:make-keyword))
-        (id (->> item
-                (gethash "id")))
-        (text (->> item
-                (gethash "text"))))
-    (remhash "type" item)
-    (remhash "id" item)
-    (remhash "text" item)
-    (when (zerop (hash-table-count item))
-      (setf item nil))
-    (make-instance 'story-item
-                   :item-type type
-                   :id (or id "")
-                   :text (or text "")
-                   :data item)))
-
-;;
-;; Page journal
-;;
-
-(defclass journal-entry ()
-  ((entry-type :reader entry-type-of :type keyword :initarg :entry-type)
-   (date :reader date-of :type (or null local-time:timestamp) :initarg :date)
-   (data :reader data-of :type hash-table :initarg :data)))
-
-(defun make-journal (entries)
-  (map 'vector #'make-journal-entry entries))
-
-(defun make-journal-entry (entry)
-  (let ((type (->> entry
-                (gethash "type")
-                (str:upcase)
-                alexandria:make-keyword))
-        (date (->> entry
-                (gethash "date")
-                wiki-date-to-timestamp)))
-    (remhash "type" entry)
-    (remhash "date" entry)
-    (make-instance 'journal-entry
-                   :entry-type type
-                   :date date
-                   :data entry)))
-
-(defun site-of (entry)
-  (->> entry
-    data-of
-    (gethash "site")))
-
-(defun extract-context (journal)
-  (let (fork-sites)
-    (loop for entry across journal
-          for site = (site-of entry)
-          when site
-            do (setf fork-sites
-                     (cons site
-                           (remove site fork-sites :test #'equal))))
-    (mapcar #'get-fedwiki fork-sites)))
 
 ;;
 ;; Register a HyperBook factory

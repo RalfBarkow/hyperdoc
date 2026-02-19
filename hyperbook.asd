@@ -33,6 +33,7 @@
                #:html-inspector-views/standard
                #:alexandria
                #:arrow-macros
+               #:cl-who
                #:lquery
                #:trivial-package-local-nicknames
                #:asdf #:uiop)
@@ -116,6 +117,8 @@
                #:alexandria
                #:arrow-macros
                #:bordeaux-threads
+               #:cl-ppcre
+               #:cl-who
                #:drakma #:usocket
                #:shasht
                #:str
@@ -126,5 +129,6 @@
                 :components ((:file "package")
                              (:file "fedwiki")
                              (:file "wiki-links")
+                             (:file "pages")
                              (:file "plugins")
                              (:file "views")))))

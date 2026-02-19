@@ -48,22 +48,6 @@
 ;; Views on pages
 ;;
 
-(views:defview 👀story (page fedwiki-page)
-  (load-page page)
-  (views:multi-column-list-view
-   (story-of page)
-   :title "Story" :priority 2
-   :display (list #'(lambda (item)
-                      (-> item item-type-of symbol-name str:downcase))
-                  #'(lambda (item)
-                      (let* ((text (text-of item))
-                             (length (length text))
-                             (length-limit 60)
-                             (excerpt (str:substring 0 length-limit text)))
-                        (if (<= length length-limit)
-                            excerpt
-                            (str:concat excerpt "...")))))))
-
 (defmethod views:text-representation ((entry journal-entry))
   (format nil "~A ~@[~A~]"
           (-> entry entry-type-of symbol-name str:downcase)
