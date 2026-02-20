@@ -28,12 +28,6 @@
        (sort #'string< :key #'name-of)))
    :title "Plugins" :priority 7))
 
-(defmethod views:html-representation ((page remote-fedwiki-page) &optional id)
-  (views:html (:span :id id
-                     (views:esc (hb:title-of page))
-                     (views:esc " ")
-                     (:small (views:esc (-> page origin-of domain-name-of))))))
-
 ;;
 ;; Title bar customization for wikis
 ;;
@@ -41,7 +35,7 @@
 (defmethod views:title-bar-action-buttons ((wiki fedwiki))
   (views:action-button html-inspector-views/standard:*icon-open-external*
     (views:thunk
-      (clog:open-browser :url (make-wiki-url (domain-name-of wiki) "/")))
+      (clog:open-browser :url (wiki-url (domain-name-of wiki) "/")))
     nil))
 
 ;;
@@ -80,8 +74,8 @@
     (let ((wiki (hb:hyperbook-of page))
           (slug (slug-of page)))
       (views:thunk
-       (clog:open-browser :url (make-wiki-url (domain-name-of wiki)
-                                              (str:concat "/" slug ".html")))))
+       (clog:open-browser :url (wiki-url (domain-name-of wiki)
+                                         (str:concat "/" slug ".html")))))
     nil))
 
 (defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))

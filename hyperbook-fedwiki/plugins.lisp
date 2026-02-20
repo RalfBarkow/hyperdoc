@@ -26,8 +26,8 @@
 ;;
 
 (defun fetch-plugin-data (wiki)
-  (let* ((plugin-url (make-wiki-url (domain-name-of wiki)
-                                    "/system/plugins.json"))
+  (let* ((plugin-url (wiki-url (domain-name-of wiki)
+                               "/system/plugins.json"))
          (plugin-names (fetch-json plugin-url))
          (sorted-plugin-names (sort plugin-names #'string<)))
     (loop for pn across sorted-plugin-names
@@ -38,7 +38,7 @@
 
 (defun fetch-plugmatic-info (wiki)
   (let ((plugin-data (->> "/plugin/plugmatic/plugins"
-                       (make-wiki-url (domain-name-of wiki))
+                       (wiki-url (domain-name-of wiki))
                        fetch-json
                        (gethash "install"))))
     (loop for p across plugin-data
@@ -72,17 +72,17 @@
   (if-let (page-id (gethash slug (slugs-of wiki)))
     (gethash page-id (pages-of wiki))
     (handler-case
-        (let* ((json (fetch-page-json wiki :slug slug))
+        (let* ((json (fetch-page-json (domain-name-of wiki) slug))
                (title (gethash "title" json))
                (page (make-instance 'fedwiki-plugin-page
                                     :hyperbook wiki
-                                    :id title)))
+                                    :id slug)))
           (set-page-data page json)
-          (setf (gethash (hb:id-of page) (pages-of wiki))
+          (setf (gethash title (pages-of wiki))
                 page)
           (setf (gethash slug (slugs-of wiki))
-                (hb:id-of page))
-          (setf (gethash (hb:id-of page) (slugs-of wiki))
+                title)
+          (setf (gethash title (slugs-of wiki))
                 slug)
           page)
       ;; For missing pages, the server returns

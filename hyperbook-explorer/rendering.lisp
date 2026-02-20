@@ -72,8 +72,8 @@
              (views:html
                (:span :class "hyperbook-reference"
                       :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                                     page-attr
-                                     (title-of hyperbook))
+                                     (cl-who:escape-string page-attr)
+                                     (cl-who:escape-string (title-of hyperbook)))
                       (views:object-ref page
                                         :display render-children
                                         :select view-attr))))
@@ -87,7 +87,8 @@
            (let ((hyperbook (find-hyperbook hyperbook-attr :signal-error? t)))
              (views:html
                (:span :class "hyperbook-reference"
-                      :title (format nil "HyperBook \"~A\"" hyperbook-attr)
+                      :title (format nil "HyperBook \"~A\""
+                                     (cl-who:escape-string hyperbook-attr))
                       (views:object-ref hyperbook
                                         :display render-children
                                         :select view-attr))))
