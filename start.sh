@@ -140,8 +140,6 @@ sbcl --no-userinit --non-interactive \
   --eval '(require :sb-introspect)' \
   --eval '(unless (asdf:find-system "html-inspector-views/standard" nil)
             (error "ASDF cannot find html-inspector-views/standard. Registry not pointing at its .asd."))' \
-  --eval '(unless (asdf:find-system "named-closure" nil)
-            (error "ASDF cannot find named-closure. Registry not pointing at a provided named-closure system."))' \
   --eval '(flet ((truthy (s)
                    (and s (member (string-downcase s)
                                   (quote ("1" "true" "yes" "on"))
