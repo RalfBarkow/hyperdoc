@@ -1,0 +1,146 @@
+{
+  "nodes": {
+    "arrows-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1530603080,
+        "narHash": "sha256-3osay4kofa/FBWrVMu7u7X1BUv2Nk3ChTR1nredOUxA=",
+        "owner": "Harleqin",
+        "repo": "arrows",
+        "rev": "df7cf0067e0132d9697ac8b1a4f1b9c88d4f5382",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Harleqin",
+        "repo": "arrows",
+        "type": "github"
+      }
+    },
+    "clog-moldable-inspector-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764616980,
+        "narHash": "sha256-NsmOHUj3dw73rtnr5afdlxH4DadZjD3Ozk0mZUvwfag=",
+        "ref": "refs/heads/main",
+        "rev": "b369f0a4251c5c96472dc674811fb8f5d0184976",
+        "revCount": 219,
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/clog-moldable-inspector.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/clog-moldable-inspector.git"
+      }
+    },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "html-inspector-views-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768922589,
+        "narHash": "sha256-gyBXfjv1SGzdxZgimbRChDSVz3bxfEv/AJ8LtQJcXuE=",
+        "ref": "refs/heads/main",
+        "rev": "5816eaaf445f0f9dbae67cf07d7706b4fb678b3b",
+        "revCount": 362,
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/html-inspector-views.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/html-inspector-views.git"
+      }
+    },
+    "lwcells-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1728184003,
+        "narHash": "sha256-zI67bTVQ6gP7Qm17k9PydnOetTPM+H4NJ+HqKIosCt0=",
+        "owner": "kchanqvq",
+        "repo": "lwcells",
+        "rev": "e7446ac146a31b630e74c9bce7dab34b50cc333d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kchanqvq",
+        "repo": "lwcells",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1751274312,
+        "narHash": "sha256-/bVBlRpECLVzjV19t5KMdMFWSwKLtb5RyXdjz3LJT+g=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "50ab793786d9de88ee30ec4e4c24fb4236fc2674",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-24.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "plump-inspector-views-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768292280,
+        "narHash": "sha256-PapF0m5tiIhPC6OH/eL4SrEtb3mlQ0wf2WPWZ1X3vvo=",
+        "ref": "refs/heads/main",
+        "rev": "dd3969d6e38dbfb1eb131a5559f3b5b26d67ca13",
+        "revCount": 9,
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/plump-inspector-views.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/plump-inspector-views.git"
+      }
+    },
+    "root": {
+      "inputs": {
+        "arrows-src": "arrows-src",
+        "clog-moldable-inspector-src": "clog-moldable-inspector-src",
+        "flake-utils": "flake-utils",
+        "html-inspector-views-src": "html-inspector-views-src",
+        "lwcells-src": "lwcells-src",
+        "nixpkgs": "nixpkgs",
+        "plump-inspector-views-src": "plump-inspector-views-src"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
