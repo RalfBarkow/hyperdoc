@@ -160,17 +160,16 @@ sbcl --no-userinit --non-interactive \
                 (setf sb-ext::*break-on-signals* (quote (and error (not file-error)))))
               (handler-case
                   (progn
-                    (let* ((port (parse-integer (or (uiop:getenv "HYPERDOC_PORT") "8080")))
-                           (host (or (uiop:getenv "HYPERDOC_BIND_ADDRESS") "127.0.0.1"))
-                           (development (truthy (uiop:getenv "HYPERDOC_DEVELOPMENT"))))
-                      (format t "HyperDoc server: ~a:~d~%" host port)
-                      (format t "Development mode: ~a~%" (if development "ON" "OFF"))
-                      ;; IMPORTANT:
-                      ;; Playground evaluation is controlled by the existing :development switch.
-                      (funcall (read-from-string "hyperbook/server:serve-catalog")
-                               :host host
-                               :port port
-                               :development development))
+                      (let* ((port (parse-integer (or (uiop:getenv "HYPERDOC_PORT") "8080")))
+                             (host (or (uiop:getenv "HYPERDOC_BIND_ADDRESS") "127.0.0.1"))
+                             (development (truthy (uiop:getenv "HYPERDOC_DEVELOPMENT"))))
+                        (format t "HyperDoc server: ~a:~d~%" host port)
+                        (format t "Development mode: ~a~%" (if development "ON" "OFF"))
+                        ;; NOTE: On this upstream base, serve-catalog has no :host argument.
+                        ;; Playground evaluation is controlled by the existing :development switch.
+                        (funcall (read-from-string "hyperbook/server:serve-catalog")
+                                 :port port
+                                 :development development))
                     ;; Keep the process alive; serve-catalog starts async server threads.
                     (loop (sleep 3600)))
                 (error (c)

@@ -127,6 +127,6 @@ exec nix develop --command sbcl --no-userinit \
   --eval '(format t "~&Swank listening.~%")' \
   --eval '(asdf:load-system "hyperbook/server")' \
   --eval "(when (= ${LOAD_EXPLORER} 1) (asdf:load-system \"hyperbook/explorer\"))" \
-  --eval "(hyperbook/server:serve-catalog :host \"${HYPERDOC_BIND_ADDRESS}\" :port ${HYPERDOC_PORT} :development t)" \
+  --eval "(hyperbook/server:serve-catalog :port ${HYPERDOC_PORT} :development t)" \
   --eval '(format t "~&HyperDoc up.~%")' \
   --eval '(loop (sleep 3600))'
