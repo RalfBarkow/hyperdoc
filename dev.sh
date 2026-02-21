@@ -98,6 +98,12 @@ EOF2
 # Run SBCL inside nix develop so CL_SOURCE_REGISTRY etc. are correct.
 exec nix develop --command sbcl --no-userinit \
   --eval '(require :asdf)' \
+  --eval '(sb-sys:enable-interrupt
+            sb-unix:sigint
+            (lambda (signal code scp)
+              (declare (ignore signal code scp))
+              (format t "~&Stopping HyperDoc dev server (Ctrl-C).~%")
+              (sb-ext:exit :code 130 :abort t)))' \
   --eval '(asdf:clear-source-registry)' \
   --eval '(asdf:clear-configuration)' \
   --eval '(setf *print-circle* t)' \
@@ -129,4 +135,9 @@ exec nix develop --command sbcl --no-userinit \
   --eval "(when (= ${LOAD_EXPLORER} 1) (asdf:load-system \"hyperbook/explorer\"))" \
   --eval "(hyperbook/server:serve-catalog :port ${HYPERDOC_PORT} :development t)" \
   --eval '(format t "~&HyperDoc up.~%")' \
-  --eval '(loop (sleep 3600))'
+  --eval '(handler-bind ((sb-sys:interactive-interrupt
+                          (lambda (c)
+                            (declare (ignore c))
+                            (format t "~&Stopping HyperDoc dev server (Ctrl-C).~%")
+                            (sb-ext:exit :code 130 :abort t))))
+            (loop (sleep 3600)))'
