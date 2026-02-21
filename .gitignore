@@ -17,3 +17,7 @@
 *.wx64fsl
 *.wx32fsl
 
+# ---> Local dev artifacts
+.direnv/
+.flake-deps/
+repomix-output-hyperdoc.md
