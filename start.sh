@@ -153,7 +153,6 @@ sbcl --no-userinit --non-interactive \
                        (uiop:quit 1)))))
             (handler-bind ((error (function cl-user::hyperdoc-report-signal)))
               (load-or-die :html-inspector-views/standard)
-              (load-or-die :hyperdoc/explorer)
               (load-or-die :hyperbook/server)
               (when (uiop:getenv "HYPERDOC_BREAK_ON_SIGNALS")
                 (format *error-output* "~&Enabling *BREAK-ON-SIGNALS* (late) for ERROR...~%")
