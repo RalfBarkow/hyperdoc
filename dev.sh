@@ -119,7 +119,7 @@ exec nix develop --command sbcl --no-userinit \
                     (list :tree deps)
                     (list :tree flake-deps))
               (mapcar (lambda (p) (list :tree p)) extra-paths)
-              (list :ignore-inherited-configuration)))
+              (list :inherit-configuration)))
             (format t \"~&ASDF ready. root=~A~%\" root))" \
   --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
   --eval '(asdf:load-system "swank")' \
