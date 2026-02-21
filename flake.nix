@@ -32,6 +32,7 @@
         pkgs = import nixpkgs {
           inherit system;
         };
+        namedClosurePkg = pkgs.callPackage ./nix/sbcl-named-closure.nix { };
         arrowsSrc = arrows-src;
         clogMoldableInspectorSrc = clog-moldable-inspector-src;
         htmlInspectorViewsSrc = html-inspector-views-src;
@@ -82,6 +83,7 @@
         devShells.default = pkgs.mkShell {
           packages = [
             sbclEnv
+            namedClosurePkg
             pkgs.python3
             pkgs.git
             pkgs.rlwrap
@@ -95,6 +97,7 @@
             export PATH="${sbclEnv}/bin:$PATH"
             current_registry="''${CL_SOURCE_REGISTRY:-}"
             project_tree="$PWD//"
+            named_closure_tree="${namedClosurePkg}//"
             export ARROWS_SRC="${arrowsSrc}"
             export CLOG_MOLDABLE_INSPECTOR_SRC="${clogMoldableInspectorSrc}"
             export HTML_INSPECTOR_VIEWS_SRC="${htmlInspectorViewsSrc}"
@@ -128,15 +131,16 @@
             fi
 
             if [ -n "$current_registry" ]; then
-              export CL_SOURCE_REGISTRY="$project_tree:$current_registry"
+              export CL_SOURCE_REGISTRY="$project_tree:$current_registry:$named_closure_tree"
             else
-              export CL_SOURCE_REGISTRY="$project_tree"
+              export CL_SOURCE_REGISTRY="$project_tree:$named_closure_tree"
             fi
             if [ -n "$current_registry" ]; then
-              export HYPERDOC_ASDF_TREES="$project_tree:$current_registry"
+              export HYPERDOC_ASDF_TREES="$project_tree:$current_registry:$named_closure_tree"
             else
-              export HYPERDOC_ASDF_TREES="$project_tree"
+              export HYPERDOC_ASDF_TREES="$project_tree:$named_closure_tree"
             fi
+            unset named_closure_tree
             unset current_registry
             unset project_tree
 
