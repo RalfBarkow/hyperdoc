@@ -82,3 +82,6 @@
                              (:file "examples")
                              (:file "hyperdoc")))))
 
+;; Compatibility alias: runtime server implementation lives in hyperbook/server.
+(defsystem #:hyperdoc/server
+  :depends-on (#:hyperbook/server))
