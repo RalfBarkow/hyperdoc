@@ -72,7 +72,7 @@
 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
   (views:action-button html-inspector-views/standard:*icon-open-external*
     (let ((wiki (hb:hyperbook-of page))
-          (slug (slug-of page)))
+          (slug (origin-id-of page)))
       (views:thunk
        (clog:open-browser :url (wiki-url (domain-name-of wiki)
                                          (str:concat "/" slug ".html")))))
@@ -90,7 +90,7 @@
   (let ((wiki (hb:hyperbook-of page)))
     (format nil "http://~A/~A.html"
             (domain-name-of wiki)
-            (slug-of page))))
+            (origin-id-of page))))
 
 (defmethod make-wiki-view-url ((page remote-fedwiki-page))
   (let ((wiki (hb:hyperbook-of page))
@@ -98,7 +98,7 @@
     (format nil "http://~A/~A/~A"
             (domain-name-of wiki)
             (domain-name-of origin)
-            (slug-of page))))
+            (origin-id-of page))))
 
 ;;
 ;; Views on plugins

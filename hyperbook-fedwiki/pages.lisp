@@ -104,7 +104,8 @@ images, etc.")
     (setf (slot-value page 'title) title)
     (setf (slot-value page 'story) story)
     (setf (slot-value page 'journal) journal)
-    (setf (slot-value page 'context) context)))
+    (setf (slot-value page 'context) context)
+    (setf (slot-value page 'links) (extract-links page))))
 
 ;;
 ;; Page story
@@ -194,18 +195,59 @@ images, etc.")
       (:pre :style "background-color: #eee;"
        (views:esc (text-of item))))))
 
+(defgeneric extract-links-from-story-item (type item page)
+  ;; Default: no links
+  (:method ((type t) item page)
+    (declare (ignore type item page))
+    nil))
+
+(defun extract-links (page)
+  (let (wiki-links web-links)
+    (loop for item across (story-of page)
+          do (loop for link in (extract-links-from-story-item (item-type-of item) item page)
+                   do (typecase link
+                        (wiki-link (pushnew link wiki-links
+                                            :test #'equal
+                                            :key #'target-slug-of))
+                        (hb:web-link (pushnew link web-links
+                                              :test #'equal
+                                              :key #'hb:url-of)))))
+    (make-instance 'fedwiki-links
+                   :wiki-links (sort wiki-links #'string< :key #'target-slug-of)
+                   :web-links (sort web-links #'string< :key #'hb:url-of))))
+
+;; Paragraphs
+
 (defmethod render-story-item ((type (eql :paragraph)) item page)
   (views:html
     (:p (render-wiki-text (text-of item) page))))
 
+(defmethod extract-links-from-story-item ((type (eql :paragraph)) item page)
+  (extract-links-from-wiki-text (text-of item) page))
+
 (defmethod render-wiki-text (text page)
+  (process-text-and-links text page
+                          #'(lambda (chunk page)
+                              (declare (ignore page))
+                              (views:html (views:esc chunk)))
+                          #'render-link))
+
+(defmethod extract-links-from-wiki-text (text page)
+  (process-text-and-links text page
+                          #'(lambda (chunk page)
+                              (declare (ignore chunk page))
+                              nil)
+                          #'collect-link))
+
+(defun process-text-and-links (text page text-fn link-fn)
   (let ((link-positions (cl-ppcre:all-matches *link-regex* text)))
     (loop for (start end) on (cons 0 link-positions)
           for chunk = (str:substring start end text)
           for is-link? = nil then (not is-link?)
-          do (if is-link?
-                 (render-link chunk page)
-                 (views:html (views:esc chunk))))))
+          if is-link?
+            collect (funcall link-fn chunk page)
+          else
+            collect (funcall text-fn chunk page))))
 
 (defun render-link (link-text page)
   (if (str:starts-with? "[[" link-text)
@@ -214,6 +256,14 @@ images, etc.")
              (url (first parts))
              (text (str:join " " (rest parts))))
         (render-external-link url text page))))
+
+(defun collect-link (link-text page)
+  (if (str:starts-with? "[[" link-text)
+      (let ((link (str:substring 2 -2 link-text)))
+        (make-wiki-link page :target-title link :target-slug (slug link)))
+      (let* ((parts (str:split " " (str:substring 1 -1 link-text)))
+             (url (first parts)))
+        (hb:make-web-link page url))))
 
 (defun render-wiki-link (link-text page)
   (handler-case
@@ -231,6 +281,7 @@ images, etc.")
                (views:object-ref c :display link-text))))))
 
 (defun render-external-link (url link-text page)
+  (declare (ignore page))
   (views:html
     (:a :href url :target "_blank"
         (views:esc link-text))))
@@ -255,6 +306,9 @@ images, etc.")
        (views:esc " — ")
        (render-wiki-text (text-of item) page)))))
 
+(defmethod extract-links-from-story-item ((type (eql :reference)) item page)
+  (extract-links-from-wiki-text (text-of item) page))
+
 (defmethod render-story-item ((type (eql :pagefold)) item page)
   (views:html
     (:div :style "top-margin: 5pt;"
@@ -277,6 +331,11 @@ images, etc.")
                   do (views:html
                        (:div :title (-> item item-type-of symbol-name str:downcase)
                              (render-story-item (item-type-of item) item page))))))))
+
+(defmethod hb:👀links ((page fedwiki-page))
+  (load-page page)
+  (when-let (links (hb:links-of page))
+    (👀links links)))
 
 ;;
 ;; Page journal
@@ -319,4 +378,3 @@ images, etc.")
                      (cons site
                            (remove site fork-sites :test #'equal))))
     (mapcar #'get-fedwiki fork-sites)))
-

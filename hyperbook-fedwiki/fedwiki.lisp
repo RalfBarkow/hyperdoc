@@ -134,23 +134,14 @@ that occurred when reading the site map.")))
       (bt:join-thread status))))
 
 ;;
-;; Load and display pages
+;; Main page
 ;;
 
-(defmethod views:👀content ((page fedwiki-page))
-  (load-page page)
-  (call-next-method))
-
-(defmethod hb:👀links ((page fedwiki-page))
-  (load-page page)
-  (call-next-method))
-
-(defmethod find-page-id-from-slug (wiki slug)
-  (wait-for-sitemap wiki)
-  (gethash slug (slugs-of wiki)))
-
-(defun slug-of (page)
-  (gethash (hb:id-of page) (slugs-of (origin-of page))))
+(views:defview 👀main-page (wiki fedwiki)
+  (when-let (main-page (hb:find-page wiki "welcome-visitors"))
+    (-> main-page
+      👀story
+      (views:rename :title "Main page" :priority 1))))
 
 ;;
 ;; Register a HyperBook factory
