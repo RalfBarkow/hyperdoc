@@ -1,0 +1,56 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 2000000
+  },
+  "output": {
+    "filePath": "repomix-output-hyperdoc.md",
+    "style": "markdown",
+    "parsableStyle": false,
+    "compress": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "topFilesLength": 20,
+    "includeFullDirectoryStructure": true,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 200,
+      "includeDiffs": false,
+      "includeLogs": false,
+      "includeLogsCount": 50
+    }
+  },
+  "include": [
+    "**/*"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDotIgnore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      ".direnv/**",
+      ".cache/**",
+      "repomix-output*.xml",
+      ".DS_Store",
+      "**/quicklisp.lisp",
+      "**/*.fasl",
+      "**/*.min.js",
+      "**/*.min.css",
+      "**/*.map",
+      "**/*.png",
+      "**/*.jpg",
+      "**/*.jpeg",
+      "**/*.gif",
+      "**/*.webp",
+      "**/*.ico",
+      "deps/**/assets/**"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
