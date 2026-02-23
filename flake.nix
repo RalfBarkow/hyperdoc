@@ -67,7 +67,7 @@
           ps."s-graphviz"
           ps.sha1
           ps.shasht
-          ps.jzon
+          jzon
           ps.str
           ps.swank
           ps."trivial-clipboard"
