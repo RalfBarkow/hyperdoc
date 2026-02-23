@@ -51,9 +51,11 @@
   "Look up ID in the global catalog. If no HyperBook with
 that id exists, then return NIL if SIGNAL-ERROR? is nil, else
 signal cluster-lookup-failure."
-  (let* ((uri (puri:parse-uri id))
-         (scheme (puri:uri-scheme uri))
-         (path (puri:uri-path uri)))
+  ;; IDs may be human-readable titles, not URIs. URI parsing is optional.
+  (let* ((uri (handler-case (puri:parse-uri id)
+                (error () nil)))
+         (scheme (and uri (puri:uri-scheme uri)))
+         (path (and uri (puri:uri-path uri))))
     ;; First, look up the id in the catalog.
     (or (find id (hyperbooks-of *catalog*) :key #'id-of :test #'equal)
         ;; If not found, but the id has a scheme,
@@ -83,3 +85,7 @@ signal cluster-lookup-failure."
 
 (defun find-backlink-sources (hyperbook-id &optional page-id)
   (find-link-sources *catalog* hyperbook-id page-id))
+
+;; Quick regression check (REPL):
+;;   (hyperbook:find-hyperbook "HyperDoc Server") ; => NIL, no parse error
+;;   (hyperbook:find-hyperbook "fedwiki:wiki.ralfbarkow.ch" :signal-error? nil)

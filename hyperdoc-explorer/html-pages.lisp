@@ -180,22 +180,45 @@
 
 (plump:define-tag-printer img (element)
   (let* ((src (plump:attribute element "src"))
-         (uri (puri:parse-uri src)))
+         (uri (handler-case (and src (puri:parse-uri src))
+                (error () nil))))
     ;; If the src has a URI scheme, leave as a img element.  If the
     ;; src starts with "/", do the same.  Otherwise, it's a local file
     ;; that a browser cannot access, replace it with a data URL.
-    (unless (or (puri:uri-scheme uri) (str:starts-with? "/" src))
-      (let* ((hyperdoc (-> hb::*current-page*
-                           (slot-value 'hyperbook)))
-             (directory (directory-of hyperdoc))
-             (pathname (merge-pathnames src directory))
-             (bytes (alexandria:read-file-into-byte-vector pathname))
-             (encoded (base64:usb8-array-to-base64-string bytes))
-             (image-type (-> pathname pathname-type str:downcase))
-             (mime-type (if (equal image-type "jpg") "jpeg" image-type))
-             (data-url (str:concat "data:image/" mime-type ";base64," encoded)))
-        (plump:set-attribute element "src" data-url)
-        (hb:render-node element))))
+    (unless (or (and uri (puri:uri-scheme uri))
+                (and src (str:starts-with? "/" src)))
+      (let* ((page-base-directory
+               (ignore-errors
+                 (let ((file-of-symbol (find-symbol "FILE-OF" :hyperbook)))
+                   (when (and (boundp 'hb::*current-page*)
+                              hb::*current-page*
+                              file-of-symbol
+                              (fboundp file-of-symbol))
+                     (uiop:pathname-directory-pathname
+                      (funcall file-of-symbol hb::*current-page*))))))
+             (hyperdoc-base-directory
+               (ignore-errors
+                 (when (and (boundp 'hb::*current-page*)
+                            hb::*current-page*)
+                   (-> hb::*current-page*
+                       (slot-value 'hyperbook)
+                       directory-of))))
+             (candidate
+               (cond ((and src page-base-directory)
+                      (merge-pathnames src page-base-directory))
+                     ((and src hyperdoc-base-directory)
+                      (merge-pathnames src hyperdoc-base-directory))
+                     (src
+                      (ignore-errors (pathname src)))))
+             (existing (and candidate (probe-file candidate))))
+        (when existing
+          (let* ((bytes (alexandria:read-file-into-byte-vector existing))
+                 (encoded (base64:usb8-array-to-base64-string bytes))
+                 (image-type (-> existing pathname-type str:downcase))
+                 (mime-type (if (equal image-type "jpg") "jpeg" image-type))
+                 (data-url (str:concat "data:image/" mime-type ";base64," encoded)))
+            (plump:set-attribute element "src" data-url)
+            (hb:render-node element))))))
   t)
 
 (defmethod hb:serialize-a-element ((attr (eql ':expr)) element)
