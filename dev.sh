@@ -131,8 +131,11 @@ exec nix develop --command sbcl --no-userinit \
   --eval '(asdf:load-system "swank")' \
   --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
   --eval '(format t "~&Swank listening.~%")' \
+  --eval '(asdf:load-system "hyperdoc")' \
   --eval '(asdf:load-system "hyperbook/server")' \
-  --eval "(when (= ${LOAD_EXPLORER} 1) (asdf:load-system \"hyperbook/explorer\"))" \
+  --eval "(when (= ${LOAD_EXPLORER} 1)
+            (asdf:load-system \"hyperbook/explorer\")
+            (asdf:load-system \"hyperdoc/explorer\"))" \
   --eval "(hyperbook/server:serve-catalog :port ${HYPERDOC_PORT} :development t)" \
   --eval '(format t "~&HyperDoc up.~%")' \
   --eval '(handler-bind ((sb-sys:interactive-interrupt
