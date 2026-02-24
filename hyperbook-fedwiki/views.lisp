@@ -61,9 +61,14 @@
 (views:defview 👀context (page fedwiki-page)
   (load-page page)
   (when-let (context (context-of page))
-    (-> context
-      views:👀items
-      (views:rename :title "Context" :priority 4))))
+    (html-inspector-views:multi-column-list-view
+     context
+     :title "Context" :priority 4
+     :columns '("Site" "Owner")
+     :display (list #'identity
+                    #'(lambda (wiki)
+                        (or (get-site-owner wiki)
+                            ""))))))
 
 ;;
 ;; Title bar customization for pages

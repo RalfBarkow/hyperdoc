@@ -23,6 +23,8 @@
    (plugins :reader plugins-of :type hash-table
             :initform (make-hash-table :test #'equal)
             :documentation "The map from plugin names to plugins")
+   (owner :reader owner-of :type (or null string) :initform nil
+          :documentation "The name of the owner of the site")
    (slugs :reader slugs-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from slugs to titles and back")
@@ -63,9 +65,10 @@ that occurred when reading the site map.")))
                           ;; (fetch-plugin-data wiki)
                           (setf (status-of wiki) t))
                  ((or stream-error
-                      usocket:timeout-error
-                      usocket:ns-host-not-found-error) (c)
-                      (setf (status-of wiki) c))))))
+                   usocket:timeout-error
+                   usocket:ns-host-not-found-error
+                   shasht:shasht-invalid-char) (c)
+                   (setf (status-of wiki) c))))))
     wiki))
 
 (defun fetch-sitemap (wiki)
@@ -89,6 +92,29 @@ that occurred when reading the site map.")))
              ;;       (make-links page links))
           )))
 
+;; see https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$4MOZVD4F5_BMRwWv6GjsfrCTPqJlmrFZ7qxIhtSapzU
+;; and https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$hdhNbB8kOl5kOYghNwaudGVbk1JlnqCWlbB8lS2bgXo
+(defparameter *magic-owner-item-id* "63ad2e58eecdd9e5")
+
+(defun get-site-owner (wiki)
+  (wait-for-sitemap wiki)
+  (or (owner-of wiki)
+      (when-let (welcome-page (hb:find-page wiki "welcome-visitors"))
+        (load-page welcome-page)
+        (when-let (item (find *magic-owner-item-id*
+                              (story-of welcome-page)
+                              :test #'equal :key #'id-of))
+          (let (owner)
+            (process-text-and-links (text-of item) welcome-page
+                                    #'(lambda (chunk page)
+                                        (declare (ignore chunk page))
+                                        nil)
+                                    #'(lambda (chunk page)
+                                        (declare (ignore page))
+                                        (unless owner
+                                          (setf owner (str:substring 2 -2 chunk)))))
+            (setf (slot-value wiki 'owner) owner)
+            owner)))))
 
 ;; (defun make-links (page link-slugs)
 ;;   (format t "Page: ~A~%" (hb:id-of page))
