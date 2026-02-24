@@ -80,6 +80,19 @@
       (error 'wiki-lookup-failure :slug slug)))
 
 ;;
+;; Find backlinks
+;;
+
+(defmethod hb:find-link-sources ((target fedwiki) hyperbook-id page-id)
+  (loop for page being the hash-values of (pages-of target)
+        append (hb:find-link-sources page hyperbook-id page-id)))
+
+(defmethod hb:find-link-sources ((target fedwiki-page) hyperbook-id page-id)
+  (when (str:starts-with? "fedwiki:" hyperbook-id)
+    (loop for link in (-> target hb:links-of wiki-links-of)
+          when (equal page-id (target-slug-of link))
+            collect target)))
+;;
 ;; Link view
 ;;
 

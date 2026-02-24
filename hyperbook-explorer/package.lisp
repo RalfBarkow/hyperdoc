@@ -6,7 +6,7 @@
 
 (in-package :hyperbook)
 
-(export '(link target-hyperbook-of target-page-of key-of
+(export '(link source-page-of target-hyperbook-of target-page-of key-of
           object-link thunk-of view-of
           web-link url-of
           make-page-link

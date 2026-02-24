@@ -88,9 +88,8 @@ that occurred when reading the site map.")))
                    title)
              (setf (gethash title (slugs-of wiki))
                    slug)
-             ;; (setf (slot-value page 'links)
-             ;;       (make-links page links))
-          )))
+             (setf (slot-value page 'links)
+                   (make-links page links)))))
 
 ;; see https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$4MOZVD4F5_BMRwWv6GjsfrCTPqJlmrFZ7qxIhtSapzU
 ;; and https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$hdhNbB8kOl5kOYghNwaudGVbk1JlnqCWlbB8lS2bgXo
@@ -116,14 +115,12 @@ that occurred when reading the site map.")))
             (setf (slot-value wiki 'owner) owner)
             owner)))))
 
-;; (defun make-links (page link-slugs)
-;;   (format t "Page: ~A~%" (hb:id-of page))
-;;   (format t "Link slugs: ~A~%" link-slugs)
-;;   (unless (hb:links-of page)
-;;     (make-instance 'wiki-links
-;;                    :wiki-links (loop for slug in link-slugs
-;;                                      collect (make-wiki-link
-;;                                               page :target-slug slug)))))
+(defun make-links (page link-slugs)
+  (unless (hb:links-of page)
+    (make-instance 'fedwiki-links
+                   :wiki-links (loop for slug in link-slugs
+                                     collect (make-wiki-link
+                                              page :target-slug slug)))))
 
 ;;
 ;; Global register of visited FedWiki sites
