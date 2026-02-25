@@ -88,13 +88,17 @@ images, etc.")
       page)))
 
 (defun load-page (page)
+  (unless (story-of page)
+    (reload-page page)))
+
+(defun reload-page (page)
   (let* ((origin (origin-of page))
-         (id (origin-id-of page)))
-    (unless (story-of page)
-      (set-page-data page (fetch-page-json (domain-name-of origin) id))
-      ;; For remote pages, add the origin to the page context
-      (unless (eq origin (hb:hyperbook-of page))
-        (push origin (slot-value page 'context))))))
+         (id (origin-id-of page))
+         (page-data (fetch-page-json (domain-name-of origin) id)))
+    (set-page-data page page-data)
+    ;; For remote pages, add the origin to the page context
+    (unless (eq origin (hb:hyperbook-of page))
+      (push origin (slot-value page 'context)))))
 
 (defun set-page-data (page json)
   (let* ((title (gethash "title" json))
@@ -381,3 +385,41 @@ images, etc.")
                      (cons site
                            (remove site fork-sites :test #'equal))))
     (mapcar #'get-fedwiki fork-sites)))
+
+;;
+;; Title bar customization for pages
+;;
+
+(defmethod views:title-bar-action-buttons ((page fedwiki-page))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (let ((wiki (hb:hyperbook-of page))
+          (slug (origin-id-of page)))
+      (views:action-button "Reload"
+                           (views:thunk (reload-page page)
+                             t))
+      (views:thunk
+       (clog:open-browser :url (wiki-url (domain-name-of wiki)
+                                         (str:concat "/" slug ".html")))))
+    nil))
+
+(defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (views:thunk
+      (clog:open-browser :url (make-wiki-view-url page)))
+    nil))
+
+(defgeneric make-wiki-view-url (page))
+
+(defmethod make-wiki-view-url ((page fedwiki-page))
+  (let ((wiki (hb:hyperbook-of page)))
+    (format nil "http://~A/~A.html"
+            (domain-name-of wiki)
+            (origin-id-of page))))
+
+(defmethod make-wiki-view-url ((page remote-fedwiki-page))
+  (let ((wiki (hb:hyperbook-of page))
+        (origin (origin-of page)))
+    (format nil "http://~A/~A/~A"
+            (domain-name-of wiki)
+            (domain-name-of origin)
+            (origin-id-of page))))

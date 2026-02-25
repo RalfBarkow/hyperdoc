@@ -71,41 +71,6 @@
                             ""))))))
 
 ;;
-;; Title bar customization for pages
-;;
-
-(defmethod views:title-bar-action-buttons ((page fedwiki-page))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (let ((wiki (hb:hyperbook-of page))
-          (slug (origin-id-of page)))
-      (views:thunk
-       (clog:open-browser :url (wiki-url (domain-name-of wiki)
-                                         (str:concat "/" slug ".html")))))
-    nil))
-
-(defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (make-wiki-view-url page)))
-    nil))
-
-(defgeneric make-wiki-view-url (page))
-
-(defmethod make-wiki-view-url ((page fedwiki-page))
-  (let ((wiki (hb:hyperbook-of page)))
-    (format nil "http://~A/~A.html"
-            (domain-name-of wiki)
-            (origin-id-of page))))
-
-(defmethod make-wiki-view-url ((page remote-fedwiki-page))
-  (let ((wiki (hb:hyperbook-of page))
-        (origin (origin-of page)))
-    (format nil "http://~A/~A/~A"
-            (domain-name-of wiki)
-            (domain-name-of origin)
-            (origin-id-of page))))
-
-;;
 ;; Views on plugins
 ;;
 
