@@ -326,7 +326,10 @@ images, etc.")
     (views:include-css "/hyperbook/css/hyperbook.css")
     (views:html
       (:div :class "hyperbook-page"
-            (:h1 (views:esc (hb:title-of page)))
+            (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
+                                      "/favicon.png"))
+                 (views:esc " ")
+                 (views:esc (hb:title-of page)))
             (loop for item across (story-of page)
                   do (views:html
                        (:div :title (-> item item-type-of symbol-name str:downcase)
