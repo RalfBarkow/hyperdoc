@@ -19,7 +19,9 @@
                     (clog:create-div parent-element :class "inspector-error"
                                      :content "Playground evaluation disabled for security reasons. You must install the software on your own computer to run code in the playground.")))
          (ace (clog-ace:create-clog-ace-element parent-element))
-         (tool-bar (clog:create-div parent-element :style "display:flex; justify-content:space-between; align-items:center; gap:8px; margin:2px")))
+         (tool-bar (clog:create-div parent-element :style "display:flex; justify-content:space-between; align-items:center; gap:8px; margin:2px"))
+         (debug-marker (clog:create-div parent-element
+                                        :style "font-size: 12px; color: #944; margin: 2px 2px 6px 2px;")))
     (flet ((selected-result ()
              (multiple-value-bind (pos1 pos2)
                  (playground-selection-positions ace)
@@ -32,39 +34,78 @@
                       (end (min (length text) (max pos1 pos2))))
                  (if (< start end)
                      (subseq text start end)
-                     "<no explicit selection; evaluator uses form at cursor>")))))
+                     "<no explicit selection; evaluator uses form at cursor>"))))
+           (debug-log (format-string &rest args)
+             (apply #'format *error-output* format-string args)
+             (finish-output *error-output*))
       (let* ((eval-action-thunk (hv:thunk
-                                  (format *trace-output* "~&[PLAYGROUND] Eval clicked~%")
+                                  (debug-log "~&[PLAYGROUND] Eval clicked~%")
                                   (handler-case
                                       (let* ((code (selected-source))
                                              (result (progn
-                                                       (format *trace-output* "~&[PLAYGROUND] Evaluating:~%~A~%" code)
+                                                       (debug-log "~&[PLAYGROUND] Evaluating:~%~A~%" code)
                                                        (selected-result))))
-                                        (format *trace-output* "~&[PLAYGROUND] Result: ~S~%" result)
+                                        (debug-log "~&[PLAYGROUND] Result: ~S~%" result)
                                         (format t "~&Eval executed.~%"))
                                     (error (e)
-                                      (format *trace-output* "~&[PLAYGROUND] ERROR: ~A~%" e)))
+                                      (debug-log "~&[PLAYGROUND] ERROR: ~A~%" e)))
+                                  nil))
+             (ping-action-thunk (hv:thunk
+                                  (debug-log "~&[PLAYGROUND] Ping clicked~%")
                                   nil))
              (eval-inspect-thunk (hv:thunk
                                    (selected-result)))
              (button-refs nil)
+             (ping-button-id nil)
              (eval-button-id nil)
              (eval-inspect-button-id nil)
+             (ping-button nil)
              (eval-button nil)
              (eval-inspect-button nil))
         (multiple-value-bind (buttons-html references assets)
             (hv:html-and-references
+              (hv:action-button "Ping" ping-action-thunk)
               (hv:action-button "Eval" eval-action-thunk)
               (hv:eval-button "Eval + Inspect" eval-inspect-thunk))
           (declare (ignore assets))
           (setf (clog:inner-html tool-bar) buttons-html
                 button-refs references))
-        (setf eval-button-id
+        (setf ping-button-id
+              (car (rassoc ping-action-thunk button-refs :test #'eq))
+              eval-button-id
               (car (rassoc eval-action-thunk button-refs :test #'eq))
               eval-inspect-button-id
               (car (rassoc eval-inspect-thunk button-refs :test #'eq)))
-        (setf eval-button (clog:attach-as-child tool-bar eval-button-id)
+        (setf ping-button (clog:attach-as-child tool-bar ping-button-id)
+              eval-button (clog:attach-as-child tool-bar eval-button-id)
               eval-inspect-button (clog:attach-as-child tool-bar eval-inspect-button-id))
+        (setf (clog:inner-html debug-marker)
+              (format nil "Playground wiring: override active | Ping=~A | Eval=~A | Eval+Inspect=~A"
+                      ping-button-id
+                      eval-button-id
+                      eval-inspect-button-id))
+        (clog:js-execute
+         tool-bar
+         (format nil
+                 "(function(){
+                    function hook(id){
+                      var el = document.getElementById(id);
+                      if(!el){ console.log('[PLAYGROUND] missing element', id); return; }
+                      console.log('[PLAYGROUND] hooked', id);
+                      el.addEventListener('mousedown', function(){ console.log('[PLAYGROUND] mousedown', id); });
+                      el.addEventListener('click', function(){
+                        console.log('[PLAYGROUND] click', id);
+                        el.style.outline = '3px solid red';
+                        setTimeout(function(){ el.style.outline = ''; }, 300);
+                      });
+                    }
+                    hook(~S);
+                    hook(~S);
+                    hook(~S);
+                  })();"
+                 ping-button-id
+                 eval-button-id
+                 eval-inspect-button-id))
         (clog:set-geometry ace
                            :width (- (clog:client-width parent-element) 2)
                            :height (- (clog:client-height parent-element)
@@ -78,11 +119,16 @@
               (hvs:get-playground-content (pane-object pane)))
         (setf (clog-ace:mode ace) "ace/mode/lisp")
         (unless enabled?
+          (setf (clog:attribute ping-button "disabled") t)
           (setf (clog:attribute eval-button "disabled") t)
           (setf (clog:attribute eval-inspect-button "disabled") t))
         (when enabled?
           (set-event-handlers pane tool-bar button-refs)
-          (format *trace-output* "~&[PLAYGROUND] Event handlers installed~%")
+          (debug-log "~&[PLAYGROUND] Event handlers installed refs=~D ping=~A eval=~A eval+inspect=~A~%"
+                     (length button-refs)
+                     ping-button-id
+                     eval-button-id
+                     eval-inspect-button-id)
           (clog:js-execute ace
                            (format nil
                                    "~A.commands.addCommand(
