@@ -8,12 +8,11 @@ The basic command for SBCL is:
 ```
 sbcl --no-userinit \
      --eval '(require :asdf)' \
-     --eval '(asdf:load-system "hyperdoc")' \
-     --eval '(asdf:load-system "hyperbook/server")' \
+     --eval '(asdf:load-system "hyperdoc/server")' \
      --eval '(hyperbook/server:serve-catalog)'
 ```
 
-This will serve a catalog containing a single HyperDoc, the one for HyperDoc itself. In practice, you will load additional systems providing HyperDocs, before the last `--eval` line.
+This will serve a catalog containing a single HyperDoc, the one for HyperDoc itself, with explorer methods loaded for navigation.
 
 ## License
 

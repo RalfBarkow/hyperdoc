@@ -5,11 +5,10 @@ set -euo pipefail
 # - runs inside nix develop
 # - always enables development mode by default (playground eval)
 # - chooses a free Swank port (unless SWANK_PORT is explicitly set)
-# - optional --explorer loads hyperbook/explorer
+# - always loads hyperdoc/server (includes explorer systems)
 #
 # Usage:
 #   ./dev.sh
-#   ./dev.sh --explorer
 #
 # Env:
 #   HYPERDOC_DEVELOPMENT=0|1   (default 1; informational banner only)
@@ -17,11 +16,6 @@ set -euo pipefail
 #   HYPERDOC_BIND_ADDRESS=127.0.0.1 (default 127.0.0.1)
 #   SWANK_PORT=4005            (optional; if set and busy, we auto-pick another)
 #   SWANK_INTERFACE=127.0.0.1  (default 127.0.0.1)
-
-LOAD_EXPLORER=0
-if [[ "${1-}" == "--explorer" ]]; then
-  LOAD_EXPLORER=1
-fi
 
 export HYPERDOC_DEVELOPMENT="${HYPERDOC_DEVELOPMENT:-1}"
 HYPERDOC_BIND_ADDRESS="${HYPERDOC_BIND_ADDRESS:-127.0.0.1}"
@@ -117,11 +111,7 @@ exec nix develop --command sbcl --no-userinit \
   --eval '(asdf:load-system "swank")' \
   --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
   --eval '(format t "~&Swank listening.~%")' \
-  --eval '(asdf:load-system "hyperdoc")' \
-  --eval '(asdf:load-system "hyperbook/server")' \
-  --eval "(when (= ${LOAD_EXPLORER} 1)
-            (asdf:load-system \"hyperbook/explorer\")
-            (asdf:load-system \"hyperdoc/explorer\"))" \
+  --eval '(asdf:load-system "hyperdoc/server")' \
   --eval "(hyperbook/server:serve-catalog :port ${HYPERDOC_PORT} :development t)" \
   --eval '(format t "~&HyperDoc up.~%")' \
   --eval '(handler-bind ((sb-sys:interactive-interrupt
