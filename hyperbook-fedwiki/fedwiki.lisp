@@ -62,7 +62,7 @@ that occurred when reading the site map.")))
            #'(lambda ()
                (handler-case
                    (progn (fetch-sitemap wiki)
-                          ;; (fetch-plugin-data wiki)
+                          (fetch-plugin-data wiki)
                           (setf (status-of wiki) t))
                  ((or stream-error
                    usocket:timeout-error
@@ -98,22 +98,25 @@ that occurred when reading the site map.")))
 (defun get-site-owner (wiki)
   (wait-for-sitemap wiki)
   (or (owner-of wiki)
-      (when-let (welcome-page (hb:find-page wiki "welcome-visitors"))
-        (load-page welcome-page)
-        (when-let (item (find *magic-owner-item-id*
-                              (story-of welcome-page)
-                              :test #'equal :key #'id-of))
-          (let (owner)
-            (process-text-and-links (text-of item) welcome-page
-                                    #'(lambda (chunk page)
-                                        (declare (ignore chunk page))
-                                        nil)
-                                    #'(lambda (chunk page)
-                                        (declare (ignore page))
-                                        (unless owner
-                                          (setf owner (str:substring 2 -2 chunk)))))
-            (setf (slot-value wiki 'owner) owner)
-            owner)))))
+      (setf (slot-value wiki 'owner)
+            (fetch-site-owner wiki))))
+
+(defun fetch-site-owner (wiki)
+  (when-let (welcome-page (hb:find-page wiki "welcome-visitors"))
+    (load-page welcome-page)
+    (when-let (item (find *magic-owner-item-id*
+                          (story-of welcome-page)
+                          :test #'equal :key #'id-of))
+      (let (owner)
+        (process-text-and-links (text-of item) welcome-page
+                                #'(lambda (chunk page)
+                                    (declare (ignore chunk page))
+                                    nil)
+                                #'(lambda (chunk page)
+                                    (declare (ignore page))
+                                    (unless owner
+                                      (setf owner (str:substring 2 -2 chunk)))))
+        owner))))
 
 (defun make-links (page link-slugs)
   (unless (hb:links-of page)
