@@ -23,7 +23,25 @@ diff --git a/static-files/js/boot.js b/static-files/js/boot.js
  function Ping_ws() {
      if (ws.readyState == 1) {
          ws.send ('0');
-@@ -115,5 +130,6 @@ function Open_ws() {
+@@ -46,7 +61,16 @@ function Setup_ws() {
+             }
+             eval (event.data);
+         } catch (e) {
+-            console.error (e.message);
++            const payload = (event && typeof event.data === 'string')
++                ? event.data
++                : String(event && event.data);
++            if (!window.__clog_eval_seq) window.__clog_eval_seq = 0;
++            window.__clog_eval_seq += 1;
++            const seq = window.__clog_eval_seq;
++            window.__clog_last_eval_seq = seq;
++            window.__clog_last_eval_payload = payload;
++            console.error("[CLOG] eval error seq=", seq, e);
++            console.error("[CLOG] eval error payload(first 800 chars)=", payload.slice(0, 800));
+         }
+     }
+ 
+@@ -115,5 +139,6 @@ function Open_ws() {
  }
  
  $( document ).ready(function() {
