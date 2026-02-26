@@ -72,6 +72,7 @@
   :components ((:module "hyperbook-server"
                 :serial t
                 :components ((:file "package")
+                             (:file "playground-eval")
                              (:file "server")))))
 
 (defsystem #:hyperbook/wikipedia
