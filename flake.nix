@@ -34,6 +34,11 @@
         };
         namedClosurePkg = pkgs.callPackage ./nix/sbcl-named-closure.nix { };
         arrowsSrc = arrows-src;
+        clogSrcPatched = pkgs.applyPatches {
+          name = "clog-src-patched";
+          src = pkgs.sbclPackages.clog.src;
+          patches = [ ./nix/patches/clog-boot-ignore-empty-ids.patch ];
+        };
         clogMoldableInspectorSrc = clog-moldable-inspector-src;
         htmlInspectorViewsSrc = html-inspector-views-src;
         plumpInspectorViewsSrc = plump-inspector-views-src;
@@ -97,8 +102,11 @@
             export PATH="${sbclEnv}/bin:$PATH"
             current_registry="''${CL_SOURCE_REGISTRY:-}"
             project_tree="$PWD//"
+            deps_tree="$PWD/.flake-deps//"
             named_closure_tree="${namedClosurePkg}//"
             export ARROWS_SRC="${arrowsSrc}"
+            export CLOG_SRC="${clogSrcPatched}"
+            clog_tree="$CLOG_SRC//"
             export CLOG_MOLDABLE_INSPECTOR_SRC="${clogMoldableInspectorSrc}"
             export HTML_INSPECTOR_VIEWS_SRC="${htmlInspectorViewsSrc}"
             export PLUMP_INSPECTOR_VIEWS_SRC="${plumpInspectorViewsSrc}"
@@ -122,6 +130,7 @@
 
             mkdir -p .flake-deps
             ln -snf "$HTML_INSPECTOR_VIEWS_SRC" .flake-deps/html-inspector-views
+            ln -snf "$CLOG_SRC" .flake-deps/clog
             ln -snf "$PLUMP_INSPECTOR_VIEWS_SRC" .flake-deps/plump-inspector-views
             ln -snf "$CLOG_MOLDABLE_INSPECTOR_SRC" .flake-deps/clog-moldable-inspector
             ln -snf "$LWCELLS_SRC" .flake-deps/lwcells
@@ -131,15 +140,17 @@
             fi
 
             if [ -n "$current_registry" ]; then
-              export CL_SOURCE_REGISTRY="$project_tree:$current_registry:$named_closure_tree"
+              export CL_SOURCE_REGISTRY="$clog_tree:$deps_tree:$project_tree:$current_registry:$named_closure_tree"
             else
-              export CL_SOURCE_REGISTRY="$project_tree:$named_closure_tree"
+              export CL_SOURCE_REGISTRY="$clog_tree:$deps_tree:$project_tree:$named_closure_tree"
             fi
             if [ -n "$current_registry" ]; then
-              export HYPERDOC_ASDF_TREES="$project_tree:$current_registry:$named_closure_tree"
+              export HYPERDOC_ASDF_TREES="$clog_tree:$deps_tree:$project_tree:$current_registry:$named_closure_tree"
             else
-              export HYPERDOC_ASDF_TREES="$project_tree:$named_closure_tree"
+              export HYPERDOC_ASDF_TREES="$clog_tree:$deps_tree:$project_tree:$named_closure_tree"
             fi
+            unset clog_tree
+            unset deps_tree
             unset named_closure_tree
             unset current_registry
             unset project_tree

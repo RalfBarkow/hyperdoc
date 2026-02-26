@@ -1,0 +1,32 @@
+diff --git a/static-files/js/boot.js b/static-files/js/boot.js
+--- a/static-files/js/boot.js
++++ b/static-files/js/boot.js
+@@ -19,6 +19,21 @@ if (typeof clog_debug == 'undefined') {
+     clog_debug = false;
+ }
+ 
++function Guard_empty_selector() {
++    if (typeof jQuery == 'undefined' || !jQuery.find || !jQuery.find.error) {
++        return;
++    }
++
++    var original = jQuery.find.error;
++    jQuery.find.error = function (msg) {
++        if (msg === "#") {
++            console.warn("Ignoring empty jQuery selector \"#\"");
++            return;
++        }
++        return original.call(this, msg);
++    }
++}
++
+ function Ping_ws() {
+     if (ws.readyState == 1) {
+         ws.send ('0');
+@@ -115,5 +130,6 @@ function Open_ws() {
+ }
+ 
+ $( document ).ready(function() {
++    Guard_empty_selector();
+     if (ws == null) { Open_ws(); }
+ });
