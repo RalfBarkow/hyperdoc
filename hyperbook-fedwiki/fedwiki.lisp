@@ -61,9 +61,11 @@ that occurred when reading the site map.")))
           (bt:make-thread
            #'(lambda ()
                (handler-case
-                   (progn (fetch-sitemap wiki)
-                          ;; (fetch-plugin-data wiki)
-                          (setf (status-of wiki) t))
+                   (progn
+                     (fetch-sitemap wiki)
+                     ;; Non-fatal: plugin endpoint may be missing on some wikis.
+                     (ignore-errors (fetch-plugin-data wiki))
+                     (setf (status-of wiki) t))
                  ((or stream-error
                    usocket:timeout-error
                    usocket:ns-host-not-found-error

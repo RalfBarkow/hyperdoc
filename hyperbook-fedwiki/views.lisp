@@ -22,6 +22,8 @@
   (views:list-view
    (views:thunk
      (wait-for-sitemap wiki)
+     (when (zerop (hash-table-count (plugins-of wiki)))
+       (ignore-errors (fetch-plugin-data wiki)))
      (-> wiki
        plugins-of
        alexandria:hash-table-values
