@@ -22,7 +22,7 @@
 (defmethod hv:text-representation ((r playground-debug-report))
   (format nil "Debug: ~A" (condition-of r)))
 
-(hv:defview hv:👀debug (r playground-debug-report)
+(hv:defview 👀debug (r playground-debug-report)
   (hv:html-view :title "Debug" :priority 1
     (hv:html
       (:h3 (hv:esc "Condition"))
@@ -250,4 +250,4 @@
            ace
            #'(lambda (obj)
                (declare (ignore obj))
-               (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace))))))))))
+               (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace)))))))))
