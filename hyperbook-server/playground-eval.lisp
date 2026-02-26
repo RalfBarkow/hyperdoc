@@ -75,10 +75,11 @@
                                   (debug-log "~&[PLAYGROUND] Ping clicked~%")
                                   nil))
              (eval-inspect-thunk (hv:thunk
-                                   (multiple-value-bind (ok? result)
+                                   (multiple-value-bind (ok? result err)
                                        (run-selection-eval)
-                                     (when ok?
-                                       result))))
+                                     (if ok?
+                                         result
+                                         err))))
              (debug-thunk (hv:thunk
                             (let ((code (selected-source)))
                               (multiple-value-bind (ok? result err)
@@ -86,7 +87,9 @@
                                 (if ok?
                                     result
                                     (and err
-                                         (make-playground-debug-report err code)))))))
+                                         (progn
+                                           (set-status "Debugger opened")
+                                           (make-playground-debug-report err code))))))))
              (button-refs nil)
              (sanitized-refs nil)
              (ping-button-id nil)
