@@ -250,4 +250,4 @@
            ace
            #'(lambda (obj)
                (declare (ignore obj))
-               (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace)))))))))
+               (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace))))))))
