@@ -10,28 +10,41 @@
 
 (defvar *server-parameters* nil)
 
+(defun env-truthy-p (name &optional (default nil))
+  (let ((v (uiop:getenv name)))
+    (cond
+      ((null v) default)
+      ((member (string-downcase v)
+               '("1" "true" "yes" "on")
+               :test #'string=)
+       t)
+      (t nil))))
+
 (defun serve-hyperbooks (root-object &key (port 8080)
                                        (title "Inspector")
                                        (pane-width "700px")
-                                       (development nil))
+                                       (development :auto))
   "Start a Web server on PORT that serves an inspector on ROOT-OBJECT at path \"/\"
 with the given TITLE and PANE-WIDTH. All registered HyperBooks are
 served at the URL defined by their slug. If DEVELOPMENT is non-nil,
 enable playgrounds and other development tools. This is not
 recommended on public servers because it allows the execution of
 arbitrary Lisp code."
-  (clog:initialize
-   #'(lambda (body)
-       (clog-moldable-inspector:on-new-inspector body
-                                                 :object root-object
-                                                 :pane-width pane-width
-                                                 :title title
-                                                 :playground? development))
-   :port port
-   :extended-routing t)
-  (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
-    (add-path-to-hyperbook hb pane-width development))
-  (setf *server-parameters* (list pane-width development)))
+  (let ((development* (if (eq development :auto)
+                          (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
+                          development)))
+    (clog:initialize
+     #'(lambda (body)
+         (clog-moldable-inspector:on-new-inspector body
+                                                   :object root-object
+                                                   :pane-width pane-width
+                                                   :title title
+                                                   :playground? development*))
+     :port port
+     :extended-routing t)
+    (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
+      (add-path-to-hyperbook hb pane-width development*))
+    (setf *server-parameters* (list pane-width development*))))
 
 (defun add-path-to-hyperbook (hb pane-width development)
   (let ((path (str:concat "/" (-> hb slug)))
@@ -75,17 +88,20 @@ arbitrary Lisp code."
             (:h1 "Not found")
             (:p (views:esc (str:join "/" (path-of notfound))))))))
 
-(defun serve-catalog (&key (port 8080) (pane-width "700px") (development nil))
+(defun serve-catalog (&key (port 8080) (pane-width "700px") (development :auto))
   "Start a Web server on PORT that serves the HyperBook catalog at path \"/\"
 with the given PANE-WIDTH. All registered HyperBooks are served at the
 URL defined by their slug. If DEVELOPMENT is non-nil, enable
 playgrounds and other development tools. This is not recommended on
 public servers because it allows the execution of arbitrary Lisp code."
-  (serve-hyperbooks hyperbook:*catalog*
-                   :port port
-                   :title "HyperBook Catalog"
-                   :development development
-                   :pane-width pane-width))
+  (let ((development* (if (eq development :auto)
+                          (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
+                          development)))
+    (serve-hyperbooks hyperbook:*catalog*
+                     :port port
+                     :title "HyperBook Catalog"
+                     :development development*
+                     :pane-width pane-width)))
 
 ;;
 ;; Compute a slug for a HyperBook from its title and id
