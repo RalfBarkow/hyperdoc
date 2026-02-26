@@ -25,7 +25,8 @@
     (flet ((selected-result ()
              (multiple-value-bind (pos1 pos2)
                  (playground-selection-positions ace)
-               (hvs:playground-eval (pane-object pane) pos1 pos2)))
+               (with-slots (object) pane
+                 (hvs:playground-eval object pos1 pos2))))
            (selected-source ()
              (multiple-value-bind (pos1 pos2)
                  (playground-selection-positions ace)
@@ -37,7 +38,7 @@
                      "<no explicit selection; evaluator uses form at cursor>"))))
            (debug-log (format-string &rest args)
              (apply #'format *error-output* format-string args)
-             (finish-output *error-output*))
+             (finish-output *error-output*)))
       (let* ((eval-action-thunk (hv:thunk
                                   (debug-log "~&[PLAYGROUND] Eval clicked~%")
                                   (handler-case
