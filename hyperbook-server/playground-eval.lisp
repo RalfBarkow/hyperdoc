@@ -19,60 +19,62 @@
                     (clog:create-div parent-element :class "inspector-error"
                                      :content "Playground evaluation disabled for security reasons. You must install the software on your own computer to run code in the playground.")))
          (ace (clog-ace:create-clog-ace-element parent-element))
-         (tool-bar (clog:create-div parent-element :style "display:flex; justify-content:space-between; align-items:center; gap:8px; margin:2px"))
-         ;; Primary action: evaluate code without switching away from the current object.
-         (eval-button (clog:create-button tool-bar
-                                          :style "border-style:solid; border-width:2px; padding:2px 8px"
-                                          :content "Eval"))
-         ;; Secondary action: keep previous behavior and inspect the returned value.
-         (eval-inspect-button (clog:create-button tool-bar
-                                                  :style "border-style:solid; border-width:1px; padding:2px 8px"
-                                                  :content "Eval + Inspect")))
+         (tool-bar (clog:create-div parent-element :style "display:flex; justify-content:space-between; align-items:center; gap:8px; margin:2px")))
     (flet ((selected-result ()
              (multiple-value-bind (pos1 pos2)
                  (playground-selection-positions ace)
                (hvs:playground-eval (pane-object pane) pos1 pos2))))
-      (clog:set-geometry ace
-                         :width (- (clog:client-width parent-element) 2)
-                         :height (- (clog:client-height parent-element)
-                                    (clog:client-height tool-bar)
-                                    (if warning
-                                        (clog:client-height warning)
-                                        0)))
-      (clog-ace:resize ace)
-      (setf (clog-ace:font-size ace) 14)
-      (setf (clog-ace:text-value ace)
-            (hvs:get-playground-content (pane-object pane)))
-      (setf (clog-ace:mode ace) "ace/mode/lisp")
-      (unless enabled?
-        (setf (clog:attribute eval-button "disabled") t)
-        (setf (clog:attribute eval-inspect-button "disabled") t))
-      (when enabled?
-        (clog:set-on-mouse-click
-         eval-button
-         #'(lambda (obj event)
-             (declare (ignore obj event))
-             (selected-result)
-             nil))
-        (clog:set-on-mouse-click
-         eval-inspect-button
-         #'(lambda (obj event)
-             (declare (ignore obj))
-             (with-slots (inspector) pane
-               (unless (getf event :shift-key)
-                 (close-panes-after inspector pane))
-               (create-pane inspector (selected-result)))))
-        (clog:js-execute ace
-                         (format nil
-                                 "~A.commands.addCommand(
+      (let* ((eval-action-thunk (hv:thunk
+                                  (selected-result)
+                                  nil))
+             (eval-inspect-thunk (hv:thunk
+                                   (selected-result)))
+             (button-refs nil)
+             (eval-button-id nil)
+             (eval-inspect-button-id nil)
+             (eval-button nil)
+             (eval-inspect-button nil))
+        (multiple-value-bind (buttons-html references assets)
+            (hv:html-and-references
+              (hv:action-button "Eval" eval-action-thunk)
+              (hv:eval-button "Eval + Inspect" eval-inspect-thunk))
+          (declare (ignore assets))
+          (setf (clog:inner-html tool-bar) buttons-html
+                button-refs references))
+        (setf eval-button-id
+              (car (rassoc eval-action-thunk button-refs :test #'eq))
+              eval-inspect-button-id
+              (car (rassoc eval-inspect-thunk button-refs :test #'eq)))
+        (setf eval-button (clog:attach-as-child tool-bar eval-button-id)
+              eval-inspect-button (clog:attach-as-child tool-bar eval-inspect-button-id))
+        (clog:set-geometry ace
+                           :width (- (clog:client-width parent-element) 2)
+                           :height (- (clog:client-height parent-element)
+                                      (clog:client-height tool-bar)
+                                      (if warning
+                                          (clog:client-height warning)
+                                          0)))
+        (clog-ace:resize ace)
+        (setf (clog-ace:font-size ace) 14)
+        (setf (clog-ace:text-value ace)
+              (hvs:get-playground-content (pane-object pane)))
+        (setf (clog-ace:mode ace) "ace/mode/lisp")
+        (unless enabled?
+          (setf (clog:attribute eval-button "disabled") t)
+          (setf (clog:attribute eval-inspect-button "disabled") t))
+        (when enabled?
+          (set-event-handlers pane tool-bar button-refs)
+          (clog:js-execute ace
+                           (format nil
+                                   "~A.commands.addCommand(
                                     {name: \"evalLisp\",
                                      bindKey: \"Shift-Enter\",
                                      exec: function(editor) {
                                        clog['~A'].click();}});"
-                                 (clog-ace::js-ace ace)
-                                 (clog:html-id eval-button)))
-        (clog:set-on-change
-         ace
-         #'(lambda (obj)
-             (declare (ignore obj))
-             (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace))))))))
+                                   (clog-ace::js-ace ace)
+                                   eval-button-id))
+          (clog:set-on-change
+           ace
+           #'(lambda (obj)
+               (declare (ignore obj))
+               (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace)))))))))
