@@ -62,6 +62,7 @@
   :depends-on (#:hyperbook
                #:hyperbook/explorer
                #:html-inspector-views
+               #:html-inspector-views/standard
                #:babel
                #:clog
                #:clog-moldable-inspector
