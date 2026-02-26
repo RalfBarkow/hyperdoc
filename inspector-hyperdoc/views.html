@@ -31,10 +31,27 @@
 </p>
 
 <p>
-  <b>Playground</b> shows a text editor in which you  can enter Lisp code.
-  When you click on the "Eval" button (top right), or press
-  Shift-Enter on the keyboard, the top-level form on which the cursor is
-  positioned is evaluated and its return value is inspected in a new pane.
+  <b>Playground</b> shows a text editor in which you can enter Lisp code.
+  It offers three actions:
+</p>
+
+<ul>
+  <li>
+    <b>Evaluate</b> evaluates the selected code (or the current top-level form)
+    for its effects and keeps you in the current pane. Shortcut: <b>Shift-Enter</b>.
+  </li>
+  <li>
+    <b>Evaluate and Inspect</b> evaluates the selected code (or the current top-level form)
+    and inspects its return value in a new pane.
+  </li>
+  <li>
+    <b>Debug</b> evaluates the selected code (or the current top-level form).
+    If evaluation signals an error, it opens a debug report (condition, source, backtrace)
+    in a new pane; otherwise it inspects the return value.
+  </li>
+</ul>
+
+<p>
   When playground text is selected, the code being evaluated is the largest
   subform of a top-level form that fully contains the selection.
 </p>
