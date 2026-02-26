@@ -61,11 +61,9 @@ that occurred when reading the site map.")))
           (bt:make-thread
            #'(lambda ()
                (handler-case
-                   (progn
-                     (fetch-sitemap wiki)
-                     ;; Non-fatal: plugin endpoint may be missing on some wikis.
-                     (ignore-errors (fetch-plugin-data wiki))
-                     (setf (status-of wiki) t))
+                   (progn (fetch-sitemap wiki)
+                          (fetch-plugin-data wiki)
+                          (setf (status-of wiki) t))
                  ((or stream-error
                    usocket:timeout-error
                    usocket:ns-host-not-found-error
@@ -100,22 +98,25 @@ that occurred when reading the site map.")))
 (defun get-site-owner (wiki)
   (wait-for-sitemap wiki)
   (or (owner-of wiki)
-      (when-let (welcome-page (hb:find-page wiki "welcome-visitors"))
-        (load-page welcome-page)
-        (when-let (item (find *magic-owner-item-id*
-                              (story-of welcome-page)
-                              :test #'equal :key #'id-of))
-          (let (owner)
-            (process-text-and-links (text-of item) welcome-page
-                                    #'(lambda (chunk page)
-                                        (declare (ignore chunk page))
-                                        nil)
-                                    #'(lambda (chunk page)
-                                        (declare (ignore page))
-                                        (unless owner
-                                          (setf owner (str:substring 2 -2 chunk)))))
-            (setf (slot-value wiki 'owner) owner)
-            owner)))))
+      (setf (slot-value wiki 'owner)
+            (fetch-site-owner wiki))))
+
+(defun fetch-site-owner (wiki)
+  (when-let (welcome-page (hb:find-page wiki "welcome-visitors"))
+    (load-page welcome-page)
+    (when-let (item (find *magic-owner-item-id*
+                          (story-of welcome-page)
+                          :test #'equal :key #'id-of))
+      (let (owner)
+        (process-text-and-links (text-of item) welcome-page
+                                #'(lambda (chunk page)
+                                    (declare (ignore chunk page))
+                                    nil)
+                                #'(lambda (chunk page)
+                                    (declare (ignore page))
+                                    (unless owner
+                                      (setf owner (str:substring 2 -2 chunk)))))
+        owner))))
 
 (defun make-links (page link-slugs)
   (unless (hb:links-of page)
@@ -173,3 +174,21 @@ that occurred when reading the site map.")))
 ;;
 
 (hb:register-scheme :fedwiki #'get-fedwiki)
+
+;;
+;; Find pages that contain a specific item type
+;; (development tool, not used for browsing Wikis)
+;;
+
+(defgeneric find-pages-with-items-of-type (collection item-type))
+
+(defmethod find-pages-with-items-of-type ((collection null) item-type)
+  (loop for wiki being the hash-values of *neighborhood*
+        append (find-pages-with-items-of-type wiki item-type)))
+
+(defmethod find-pages-with-items-of-type ((wiki fedwiki) item-type)
+  (loop for page being the hash-values of (pages-of wiki)
+        when (loop for item across (or (story-of page) #())
+                   when (equal (item-type-of item) item-type)
+                     return t)
+          collect page))

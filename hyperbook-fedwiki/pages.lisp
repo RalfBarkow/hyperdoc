@@ -171,178 +171,6 @@ images, etc.")
                       do (views:html
                            (:tr (:td (views:esc key))
                                 (:td (views:object-ref value))))))))))
-;;
-;; Render story items as HTML
-;;
-
-(defparameter *url-regex* "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?")
-
-(defparameter *any-except-closing-bracket-regex* "(?:[^\\]]*)")
-
-(defparameter *link-regex*
-  (str:concat "\\["
-              "(?:"
-              ;; Wiki links
-              "(?:\\[" *any-except-closing-bracket-regex* "\\])"
-              "|"
-              ;; external links
-              "(?:" *url-regex* "\\s*" *any-except-closing-bracket-regex* ")"
-              ")"
-              "\\]"))
-
-(defgeneric render-story-item (type item page)
-  (:method ((type t) item page)
-    (declare (ignore page))
-    (views:html
-      (:div (:i (:small (views:object-ref item
-                                          :display (-> type symbol-name str:downcase)))))
-      (:pre :style "background-color: #eee;"
-       (views:esc (text-of item))))))
-
-(defgeneric extract-links-from-story-item (type item page)
-  ;; Default: no links
-  (:method ((type t) item page)
-    (declare (ignore type item page))
-    nil))
-
-(defun extract-links (page)
-  (let (wiki-links web-links)
-    (loop for item across (story-of page)
-          do (loop for link in (extract-links-from-story-item (item-type-of item) item page)
-                   do (typecase link
-                        (wiki-link (pushnew link wiki-links
-                                            :test #'equal
-                                            :key #'target-slug-of))
-                        (hb:web-link (pushnew link web-links
-                                              :test #'equal
-                                              :key #'hb:url-of)))))
-    (make-instance 'fedwiki-links
-                   :wiki-links (sort wiki-links #'string< :key #'target-slug-of)
-                   :web-links (sort web-links #'string< :key #'hb:url-of))))
-
-;; Paragraphs
-
-(defmethod render-story-item ((type (eql :paragraph)) item page)
-  (views:html
-    (:p (render-wiki-text (text-of item) page))))
-
-(defmethod extract-links-from-story-item ((type (eql :paragraph)) item page)
-  (extract-links-from-wiki-text (text-of item) page))
-
-(defmethod render-wiki-text (text page)
-  (process-text-and-links text page
-                          #'(lambda (chunk page)
-                              (declare (ignore page))
-                              (views:html (views:esc chunk)))
-                          #'render-link))
-
-(defmethod extract-links-from-wiki-text (text page)
-  (process-text-and-links text page
-                          #'(lambda (chunk page)
-                              (declare (ignore chunk page))
-                              nil)
-                          #'collect-link))
-
-(defun process-text-and-links (text page text-fn link-fn)
-  (let ((link-positions (cl-ppcre:all-matches *link-regex* text)))
-    (loop for (start end) on (cons 0 link-positions)
-          for chunk = (str:substring start end text)
-          for is-link? = nil then (not is-link?)
-          if is-link?
-            collect (funcall link-fn chunk page)
-          else
-            collect (funcall text-fn chunk page))))
-
-(defun render-link (link-text page)
-  (if (str:starts-with? "[[" link-text)
-      (render-wiki-link (str:substring 2 -2 link-text) page)
-      (let* ((parts (str:split " " (str:substring 1 -1 link-text)))
-             (url (first parts))
-             (text (str:join " " (rest parts))))
-        (render-external-link url text page))))
-
-(defun collect-link (link-text page)
-  (if (str:starts-with? "[[" link-text)
-      (let ((link (str:substring 2 -2 link-text)))
-        (make-wiki-link page :target-title link :target-slug (slug link)))
-      (let* ((parts (str:split " " (str:substring 1 -1 link-text)))
-             (url (first parts)))
-        (hb:make-web-link page url))))
-
-(defun render-wiki-link (link-text page)
-  (handler-case
-      (let ((target (find-target-by-title link-text page)))
-        (views:html
-          (:span :class "hyperbook-reference"
-                 :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                                (cl-who:escape-string (hb:title-of target))
-                                (cl-who:escape-string
-                                 (hb:title-of (hb:hyperbook-of target))))
-                 (views:object-ref target :display link-text))))
-    (hb:lookup-failure (c)
-      (views:html
-        (:span :class "hyperbook-reference hyperbook-error"
-               (views:object-ref c :display link-text))))))
-
-(defun render-external-link (url link-text page)
-  (declare (ignore page))
-  (views:html
-    (:a :href url :target "_blank"
-        (views:esc link-text))))
-
-(defmethod render-story-item ((type (eql :reference)) item page)
-  (let* ((data (data-of item))
-         (site (gethash "site" data))
-         (title (gethash "title" data))
-         (slug (gethash "slug" data)))
-    (views:html
-      (:p
-       (:span :class "hyperbook-reference"
-              :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                             (cl-who:escape-string title)
-                             (cl-who:escape-string (hb:title-of (hb:hyperbook-of page))))
-              (views:object-ref
-               (handler-case
-                   (get-remote-page (hb:hyperbook-of page)
-                                    (str:concat site "/" slug)
-                                    title)
-                 (error (c) c))))
-       (views:esc " — ")
-       (render-wiki-text (text-of item) page)))))
-
-(defmethod extract-links-from-story-item ((type (eql :reference)) item page)
-  (extract-links-from-wiki-text (text-of item) page))
-
-(defmethod render-story-item ((type (eql :pagefold)) item page)
-  (views:html
-    (:div :style "top-margin: 5pt;"
-          (:hr :style "color: gray;")
-          (:span :style "color: gray;"
-                 (views:esc (text-of item))))))
-
-(views:defview 👀story (page fedwiki-page)
-  (load-page page)
-  (views:html-view :title "Story" :priority 2
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
-                                      "/favicon.png"))
-                 (views:esc " ")
-                 (views:esc (hb:title-of page)))
-            (loop for item across (story-of page)
-                  do (views:html
-                       (:div :title (-> item item-type-of symbol-name str:downcase)
-                             (render-story-item (item-type-of item) item page))))))))
-
-(defmethod hb:👀links ((page fedwiki-page))
-  (load-page page)
-  (when-let (links (hb:links-of page))
-    (👀links links)))
 
 ;;
 ;; Page journal
@@ -387,7 +215,35 @@ images, etc.")
     (mapcar #'get-fedwiki fork-sites)))
 
 ;;
-;; Title bar customization for pages
+;; Views
+;;
+
+(views:defview 👀story (page fedwiki-page)
+  (load-page page)
+  (views:html-view :title "Story" :priority 2
+    (views:add-asset-path "/hyperbook/"
+                          (asdf:system-relative-pathname
+                           :hyperbook
+                           "assets/hyperbook/"))
+    (views:include-css "/hyperbook/css/hyperbook.css")
+    (views:html
+      (:div :class "hyperbook-page"
+            (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
+                                      "/favicon.png"))
+                 (views:esc " ")
+                 (views:esc (hb:title-of page)))
+            (loop for item across (story-of page)
+                  do (views:html
+                       (:div :title (-> item item-type-of symbol-name str:downcase)
+                             (render-story-item (item-type-of item) item page))))))))
+
+(defmethod hb:👀links ((page fedwiki-page))
+  (load-page page)
+  (when-let (links (hb:links-of page))
+    (👀links links)))
+
+;;
+;; Title bar customization
 ;;
 
 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
