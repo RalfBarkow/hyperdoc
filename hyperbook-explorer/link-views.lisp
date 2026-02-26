@@ -65,19 +65,19 @@
                   (views:html (views:esc "None"))))))))
 
 (defmethod page-link-section (pages)
-  (let ((by-hyperdoc (make-hash-table))
+  (let ((by-hyperbook (make-hash-table))
         lookup-failures)
     (dolist (page pages)
       (if (typep page 'page)
-          (let ((hd (-> page hyperbook-of)))
-            (alexandria:ensure-gethash hd by-hyperdoc nil)
-            (pushnew page (gethash hd by-hyperdoc)))
+          (let ((hb (-> page hyperbook-of)))
+            (alexandria:ensure-gethash hb by-hyperbook nil)
+            (pushnew page (gethash hb by-hyperbook)))
           (pushnew page lookup-failures)))
-    (loop for hd being the hash-keys of by-hyperdoc
+    (loop for hb being the hash-keys of by-hyperbook
             using (hash-value pages)
           do (views:html
                (:table :class "inspector-table"
-                 (:tr (:td (:i (views:object-ref hd))))
+                 (:tr (:td (:i (views:object-ref hb))))
                  (:tr (:td (views:html-table pages))))))
     (when lookup-failures
       (views:html

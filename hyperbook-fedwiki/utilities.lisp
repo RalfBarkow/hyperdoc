@@ -6,7 +6,7 @@
 
 (defun fetch-json (url)
   "Load JSON data from URL and return it as Lisp data structures."
-  (format t "Fetching JSON from ~A~%" url)
+  ;; (format t "Fetching JSON from ~A~%" url)
   (let ((stream (drakma:http-request url :method :get :want-stream t)))
     (setf (flexi-streams:flexi-stream-external-format stream) :utf-8)
     (shasht:read-json stream)))

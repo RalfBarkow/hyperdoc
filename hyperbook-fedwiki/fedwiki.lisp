@@ -23,6 +23,8 @@
    (plugins :reader plugins-of :type hash-table
             :initform (make-hash-table :test #'equal)
             :documentation "The map from plugin names to plugins")
+   (owner :reader owner-of :type (or null string) :initform nil
+          :documentation "The name of the owner of the site")
    (slugs :reader slugs-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from slugs to titles and back")
@@ -59,13 +61,16 @@ that occurred when reading the site map.")))
           (bt:make-thread
            #'(lambda ()
                (handler-case
-                   (progn (fetch-sitemap wiki)
-                          ;; (fetch-plugin-data wiki)
-                          (setf (status-of wiki) t))
+                   (progn
+                     (fetch-sitemap wiki)
+                     ;; Non-fatal: plugin endpoint may be missing on some wikis.
+                     (ignore-errors (fetch-plugin-data wiki))
+                     (setf (status-of wiki) t))
                  ((or stream-error
-                      usocket:timeout-error
-                      usocket:ns-host-not-found-error) (c)
-                      (setf (status-of wiki) c))))))
+                   usocket:timeout-error
+                   usocket:ns-host-not-found-error
+                   shasht:shasht-invalid-char) (c)
+                   (setf (status-of wiki) c))))))
     wiki))
 
 (defun fetch-sitemap (wiki)
@@ -85,19 +90,39 @@ that occurred when reading the site map.")))
                    title)
              (setf (gethash title (slugs-of wiki))
                    slug)
-             ;; (setf (slot-value page 'links)
-             ;;       (make-links page links))
-          )))
+             (setf (slot-value page 'links)
+                   (make-links page links)))))
 
+;; see https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$4MOZVD4F5_BMRwWv6GjsfrCTPqJlmrFZ7qxIhtSapzU
+;; and https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$hdhNbB8kOl5kOYghNwaudGVbk1JlnqCWlbB8lS2bgXo
+(defparameter *magic-owner-item-id* "63ad2e58eecdd9e5")
 
-;; (defun make-links (page link-slugs)
-;;   (format t "Page: ~A~%" (hb:id-of page))
-;;   (format t "Link slugs: ~A~%" link-slugs)
-;;   (unless (hb:links-of page)
-;;     (make-instance 'wiki-links
-;;                    :wiki-links (loop for slug in link-slugs
-;;                                      collect (make-wiki-link
-;;                                               page :target-slug slug)))))
+(defun get-site-owner (wiki)
+  (wait-for-sitemap wiki)
+  (or (owner-of wiki)
+      (when-let (welcome-page (hb:find-page wiki "welcome-visitors"))
+        (load-page welcome-page)
+        (when-let (item (find *magic-owner-item-id*
+                              (story-of welcome-page)
+                              :test #'equal :key #'id-of))
+          (let (owner)
+            (process-text-and-links (text-of item) welcome-page
+                                    #'(lambda (chunk page)
+                                        (declare (ignore chunk page))
+                                        nil)
+                                    #'(lambda (chunk page)
+                                        (declare (ignore page))
+                                        (unless owner
+                                          (setf owner (str:substring 2 -2 chunk)))))
+            (setf (slot-value wiki 'owner) owner)
+            owner)))))
+
+(defun make-links (page link-slugs)
+  (unless (hb:links-of page)
+    (make-instance 'fedwiki-links
+                   :wiki-links (loop for slug in link-slugs
+                                     collect (make-wiki-link
+                                              page :target-slug slug)))))
 
 ;;
 ;; Global register of visited FedWiki sites
@@ -134,23 +159,14 @@ that occurred when reading the site map.")))
       (bt:join-thread status))))
 
 ;;
-;; Load and display pages
+;; Main page
 ;;
 
-(defmethod views:👀content ((page fedwiki-page))
-  (load-page page)
-  (call-next-method))
-
-(defmethod hb:👀links ((page fedwiki-page))
-  (load-page page)
-  (call-next-method))
-
-(defmethod find-page-id-from-slug (wiki slug)
-  (wait-for-sitemap wiki)
-  (gethash slug (slugs-of wiki)))
-
-(defun slug-of (page)
-  (gethash (hb:id-of page) (slugs-of (origin-of page))))
+(views:defview 👀main-page (wiki fedwiki)
+  (when-let (main-page (hb:find-page wiki "welcome-visitors"))
+    (-> main-page
+      👀story
+      (views:rename :title "Main page" :priority 1))))
 
 ;;
 ;; Register a HyperBook factory
