@@ -42,7 +42,7 @@
            usocket:timeout-error
            usocket:ns-host-not-found-error
            usocket:connection-refused-error
-           drakma:http-error
+           drakma:drakma-error
            shasht:shasht-invalid-char) (c)
         (format *error-output*
                 "~&[FEDWIKI] plugin discovery failed for ~A: ~A~%"
