@@ -174,3 +174,21 @@ that occurred when reading the site map.")))
 ;;
 
 (hb:register-scheme :fedwiki #'get-fedwiki)
+
+;;
+;; Find pages that contain a specific item type
+;; (development tool, not used for browsing Wikis)
+;;
+
+(defgeneric find-pages-with-items-of-type (collection item-type))
+
+(defmethod find-pages-with-items-of-type ((collection null) item-type)
+  (loop for wiki being the hash-values of *neighborhood*
+        append (find-pages-with-items-of-type wiki item-type)))
+
+(defmethod find-pages-with-items-of-type ((wiki fedwiki) item-type)
+  (loop for page being the hash-values of (pages-of wiki)
+        when (loop for item across (or (story-of page) #())
+                   when (equal (item-type-of item) item-type)
+                     return t)
+          collect page))

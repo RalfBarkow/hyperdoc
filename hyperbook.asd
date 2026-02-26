@@ -129,6 +129,7 @@
                 :components ((:file "package")
                              (:file "utilities")
                              (:file "pages")
+                             (:file "story-items")
                              (:file "fedwiki")
                              (:file "wiki-links")
                              (:file "plugins")
