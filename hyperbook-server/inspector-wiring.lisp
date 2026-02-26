@@ -1,0 +1,63 @@
+(in-package :clog-moldable-inspector)
+
+(defun valid-reference-id-p (id)
+  (and (stringp id)
+       (let ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return) id)))
+         (and (> (length trimmed) 0)
+              (not (string= trimmed "#"))))))
+
+;; Override upstream wiring to ignore invalid reference ids that would
+;; otherwise trigger jQuery selector errors for "#".
+(defun set-event-handlers (pane element references)
+  (with-slots (object inspector clog-obj) pane
+    (dolist (ref references)
+      (let* ((target (cdr ref))
+             (html-id (car ref)))
+        (if (not (valid-reference-id-p html-id))
+            (progn
+              (format *error-output*
+                      "~&[INSPECTOR] dropped empty ref id for ~S~%"
+                      object)
+              (finish-output *error-output*))
+            (let* ((html-id-parts (str:split "-" html-id))
+                   (ref-type (first html-id-parts))
+                   (ref-element (clog:attach-as-child element html-id)))
+              (cond
+                ((string= ref-type "inspect")
+                 (let ((view-ref nil))
+                   (when (eql (length html-id-parts) 3)
+                     (setf view-ref (hv:decode-base32 (third html-id-parts))))
+                   (clog:set-on-mouse-click
+                    ref-element
+                    #'(lambda (obj event)
+                        (declare (ignore obj))
+                        (when (getf event :alt-key)
+                          (clog:jquery-trigger (clog:parent element) "click"))
+                        (unless (getf event :alt-key)
+                          (unless (getf event :shift-key)
+                            (close-panes-after inspector pane))
+                          (create-pane inspector target :select view-ref)))
+                    :cancel-event t)))
+                ((string= ref-type "action")
+                 (clog:set-on-mouse-click
+                  ref-element
+                  #'(lambda (obj event)
+                      (if (getf event :alt-key)
+                          (progn
+                            (unless (getf event :shift-key)
+                              (close-panes-after inspector pane))
+                            (create-pane inspector target))
+                          (when (eval-thunk-with-active-button clog-obj obj target)
+                            (refresh pane))))
+                  :cancel-event t))
+                ((string= ref-type "eval")
+                 (clog:set-on-mouse-click
+                  ref-element
+                  #'(lambda (obj event)
+                      (unless (getf event :shift-key)
+                        (close-panes-after inspector pane))
+                      (if (getf event :alt-key)
+                          (create-pane inspector target)
+                          (create-pane inspector
+                                       (eval-thunk-with-active-button clog-obj obj target))))
+                  :cancel-event t)))))))))

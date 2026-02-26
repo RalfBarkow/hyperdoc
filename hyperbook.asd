@@ -73,6 +73,7 @@
   :components ((:module "hyperbook-server"
                 :serial t
                 :components ((:file "package")
+                             (:file "inspector-wiring")
                              (:file "playground-debug")
                              (:file "playground-eval")
                              (:file "server")))))
