@@ -90,8 +90,8 @@
         (multiple-value-bind (buttons-html references assets)
             (hv:html-and-references
               (hv:action-button "Ping" ping-action-thunk)
-              (hv:action-button "Eval" eval-action-thunk)
-              (hv:eval-button "Eval + Inspect" eval-inspect-thunk))
+              (hv:action-button "Evaluate" eval-action-thunk)
+              (hv:eval-button "Evaluate and inspect" eval-inspect-thunk))
           (declare (ignore assets))
           (setf (clog:inner-html tool-bar) buttons-html
                 button-refs references))
