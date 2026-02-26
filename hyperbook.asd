@@ -75,6 +75,7 @@
                 :components ((:file "package")
                              (:file "inspector-wiring")
                              (:file "playground-debug")
+                             (:file "playground-package")
                              (:file "playground-eval")
                              (:file "server")))))
 
