@@ -13,7 +13,12 @@
 
 (views:defview views:👀items (catalog catalog)
   (-> (hyperbooks-of catalog)
-    copy-list
-    (sort #'string< :key #'title-of)
-    views:👀items
-    (views:rename :title "HyperBooks" :priority 1)))
+      copy-list
+      (sort #'string< :key #'title-of)
+      views:👀items
+      (views:rename :title "HyperBooks" :priority 1)))
+
+;; Ensure Playground evaluation has a real package context for the catalog.
+;; Without this, the evaluator can end up trying to READ with a NIL package.
+(defmethod views/standard:playground-package ((catalog catalog))
+  (find-package "CL-USER"))
