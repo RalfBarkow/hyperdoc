@@ -109,23 +109,13 @@ exec nix develop --command sbcl --no-userinit \
   --eval '(setf *print-circle* t)' \
   --eval "(let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
                  (deps (uiop:ensure-directory-pathname (merge-pathnames \"deps/\" root)))
-                 (flake-deps (uiop:ensure-directory-pathname (merge-pathnames \".flake-deps/\" root)))
-                 (extra-env (remove nil (list (uiop:getenv \"CL_SOURCE_REGISTRY\")
-                                              (uiop:getenv \"HYPERDOC_ASDF_TREES\"))))
-                 (extra-paths
-                   (loop for entry in extra-env append
-                     (loop for s in (uiop:split-string entry :separator \":\")
-                           for p = (and (> (length s) 0)
-                                        (ignore-errors (uiop:ensure-directory-pathname s)))
-                           when p collect p))))
+                 (flake-deps (uiop:ensure-directory-pathname (merge-pathnames \".flake-deps/\" root))))
             (asdf:initialize-source-registry
-             (append
-              (list :source-registry
-                    (list :tree root)
-                    (list :tree deps)
-                    (list :tree flake-deps))
-              (mapcar (lambda (p) (list :tree p)) extra-paths)
-              (list :inherit-configuration)))
+             (list :source-registry
+                   (list :tree root)
+                   (list :tree deps)
+                   (list :tree flake-deps)
+                   :inherit-configuration))
             (format t \"~&ASDF ready. root=~A~%\" root))" \
   --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
   --eval '(asdf:load-system "swank")' \
