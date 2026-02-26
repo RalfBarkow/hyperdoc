@@ -106,6 +106,10 @@ exec nix develop --command sbcl --no-userinit \
               (sb-ext:exit :code 130 :abort t)))' \
   --eval '(asdf:clear-source-registry)' \
   --eval '(asdf:clear-configuration)' \
+  --eval '(asdf:initialize-output-translations
+            (list :output-translations
+                  :inherit-configuration
+                  (list t (uiop:xdg-cache-home "common-lisp/asdf-fasl-cache/"))))' \
   --eval '(setf *print-circle* t)' \
   --eval "(let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
                  (deps (uiop:ensure-directory-pathname (merge-pathnames \"deps/\" root)))
