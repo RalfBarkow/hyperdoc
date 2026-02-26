@@ -96,6 +96,7 @@ URL (expected):
 EOF2
 
 # Run SBCL inside nix develop so CL_SOURCE_REGISTRY etc. are correct.
+unset ASDF_OUTPUT_TRANSLATIONS
 exec nix develop --command sbcl --no-userinit \
   --eval '(require :asdf)' \
   --eval '(sb-sys:enable-interrupt
@@ -104,23 +105,14 @@ exec nix develop --command sbcl --no-userinit \
               (declare (ignore signal code scp))
               (format t "~&Stopping HyperDoc dev server (Ctrl-C).~%")
               (sb-ext:exit :code 130 :abort t)))' \
-  --eval '(asdf:clear-source-registry)' \
-  --eval '(asdf:clear-configuration)' \
   --eval '(asdf:initialize-output-translations
             (list :output-translations
-                  :inherit-configuration
-                  (list t (uiop:xdg-cache-home "common-lisp/asdf-fasl-cache/"))))' \
+                  :ignore-inherited-configuration
+                  (list t
+                        (list (uiop:xdg-cache-home "common-lisp/asdf-fasl-cache/")
+                              :implementation))))' \
   --eval '(setf *print-circle* t)' \
-  --eval "(let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
-                 (deps (uiop:ensure-directory-pathname (merge-pathnames \"deps/\" root)))
-                 (flake-deps (uiop:ensure-directory-pathname (merge-pathnames \".flake-deps/\" root))))
-            (asdf:initialize-source-registry
-             (list :source-registry
-                   (list :tree root)
-                   (list :tree deps)
-                   (list :tree flake-deps)
-                   :inherit-configuration))
-            (format t \"~&ASDF ready. root=~A~%\" root))" \
+  --eval '(format t "~&ASDF ready.~%")' \
   --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
   --eval '(asdf:load-system "swank")' \
   --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
