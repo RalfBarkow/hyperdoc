@@ -23,9 +23,27 @@
     (flet ((selected-result ()
              (multiple-value-bind (pos1 pos2)
                  (playground-selection-positions ace)
-               (hvs:playground-eval (pane-object pane) pos1 pos2))))
+               (hvs:playground-eval (pane-object pane) pos1 pos2)))
+           (selected-source ()
+             (multiple-value-bind (pos1 pos2)
+                 (playground-selection-positions ace)
+               (let* ((text (clog-ace:text-value ace))
+                      (start (max 0 (1- (min pos1 pos2))))
+                      (end (min (length text) (max pos1 pos2))))
+                 (if (< start end)
+                     (subseq text start end)
+                     "<no explicit selection; evaluator uses form at cursor>")))))
       (let* ((eval-action-thunk (hv:thunk
-                                  (selected-result)
+                                  (format *trace-output* "~&[PLAYGROUND] Eval clicked~%")
+                                  (handler-case
+                                      (let* ((code (selected-source))
+                                             (result (progn
+                                                       (format *trace-output* "~&[PLAYGROUND] Evaluating:~%~A~%" code)
+                                                       (selected-result))))
+                                        (format *trace-output* "~&[PLAYGROUND] Result: ~S~%" result)
+                                        (format t "~&Eval executed.~%"))
+                                    (error (e)
+                                      (format *trace-output* "~&[PLAYGROUND] ERROR: ~A~%" e)))
                                   nil))
              (eval-inspect-thunk (hv:thunk
                                    (selected-result)))
@@ -64,6 +82,7 @@
           (setf (clog:attribute eval-inspect-button "disabled") t))
         (when enabled?
           (set-event-handlers pane tool-bar button-refs)
+          (format *trace-output* "~&[PLAYGROUND] Event handlers installed~%")
           (clog:js-execute ace
                            (format nil
                                    "~A.commands.addCommand(
