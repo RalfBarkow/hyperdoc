@@ -57,6 +57,7 @@
              (eval-inspect-thunk (hv:thunk
                                    (selected-result)))
              (button-refs nil)
+             (sanitized-refs nil)
              (ping-button-id nil)
              (eval-button-id nil)
              (eval-inspect-button-id nil)
@@ -124,9 +125,28 @@
           (setf (clog:attribute eval-button "disabled") t)
           (setf (clog:attribute eval-inspect-button "disabled") t))
         (when enabled?
-          (set-event-handlers pane tool-bar button-refs)
+          (let ((dropped 0))
+            (setf sanitized-refs
+                  (remove-if
+                   #'(lambda (ref)
+                       (let ((id (car ref)))
+                         (when (or (null id)
+                                   (and (stringp id)
+                                        (zerop (length id))))
+                           (incf dropped)
+                           t)))
+                   button-refs))
+            (debug-log "~&[PLAYGROUND] refs=~D (dropped ~D bad ids)~%"
+                       (length button-refs)
+                       dropped)
+            (dolist (ref button-refs)
+              (debug-log "~&[PLAYGROUND] ref id=~S id-type=~S target-type=~S~%"
+                         (car ref)
+                         (type-of (car ref))
+                         (type-of (cdr ref)))))
+          (set-event-handlers pane tool-bar sanitized-refs)
           (debug-log "~&[PLAYGROUND] Event handlers installed refs=~D ping=~A eval=~A eval+inspect=~A~%"
-                     (length button-refs)
+                     (length sanitized-refs)
                      ping-button-id
                      eval-button-id
                      eval-inspect-button-id)
