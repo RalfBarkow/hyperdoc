@@ -10,12 +10,82 @@
 
 (defvar *server-parameters* nil)
 
+(defun known-wikis-pathname ()
+  (merge-pathnames #P"hyperbook/known-wikis.sexp"
+                   (uiop:xdg-config-home)))
+
+(defun load-known-wikis ()
+  (let ((pathname (known-wikis-pathname)))
+    (if (probe-file pathname)
+        (values
+         (with-open-file (stream pathname :direction :input)
+           (read stream nil nil))
+         t)
+        (values nil nil))))
+
 (defun static-root-pathname ()
   (let ((root (uiop:ensure-directory-pathname
                (asdf:system-relative-pathname :clog "static-files/"))))
     (assert (typep root 'pathname) (root)
             "Static root must be a pathname, got ~S" root)
     root))
+
+(defun register-known-hyperbooks ()
+  (let ((path (known-wikis-pathname)))
+    (multiple-value-bind (entries exists?)
+        (load-known-wikis)
+      (unless exists?
+        (format t "~&[HYPERBOOK] no known-wikis config found at ~A~%" path)
+        (return-from register-known-hyperbooks nil))
+
+      (labels
+          ((ensure-scheme-loaded (id)
+             ;; Load the scheme provider before FIND-HYPERBOOK resolves the id.
+             (let* ((uri (handler-case (puri:parse-uri id) (error () nil)))
+                    (scheme (and uri (puri:uri-scheme uri))))
+               (when scheme
+                 (case (intern (string-upcase scheme) :keyword)
+                   (:FEDWIKI (asdf:load-system :hyperbook/fedwiki))
+                   (otherwise nil)))))
+
+           (entry->id (entry)
+             (cond
+               ((stringp entry)
+                entry)
+               ((and (consp entry) (stringp (first entry)))
+                (first entry))
+               ((and (consp entry) (keywordp (first entry)))
+                (destructuring-bind (kind host &key plugmatic &allow-other-keys) entry
+                  (when plugmatic
+                    (format t "~&[HYPERBOOK] note: ignoring :plugmatic in ~S (use id-only entry)~%"
+                            entry))
+                  (case kind
+                    (:fedwiki (format nil "fedwiki:~A" host))
+                    (otherwise
+                     (format t "~&[HYPERBOOK] ignoring unsupported known wiki entry ~S~%"
+                             entry)
+                     nil))))
+               (t
+                (format t "~&[HYPERBOOK] ignoring malformed known wiki entry ~S~%" entry)
+                nil)))
+
+           (register-id (id)
+             (ensure-scheme-loaded id)
+             (let ((hb (hyperbook:find-hyperbook id)))
+               (unless hb
+                 (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
+                         id))
+               hb)))
+
+        (dolist (entry entries)
+          (handler-case
+              (let ((id (entry->id entry)))
+                (when id
+                  (unless (hyperbook:find-hyperbook id)
+                    (format t "~&[HYPERBOOK] ensuring ~A~%" id))
+                  (register-id id)))
+            (error (c)
+              (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c))))))))
 
 (defun env-truthy-p (name &optional (default nil))
   (let ((v (uiop:getenv name)))
@@ -106,6 +176,7 @@ public servers because it allows the execution of arbitrary Lisp code."
   (let ((development* (if (eq development :auto)
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
                           development)))
+    (register-known-hyperbooks)
     (serve-hyperbooks hyperbook:*catalog*
                      :port port
                      :title "HyperBook Catalog"
