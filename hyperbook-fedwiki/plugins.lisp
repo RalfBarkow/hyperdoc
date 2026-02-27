@@ -51,12 +51,13 @@
                                (title (gethash "title" page))
                                (page (make-instance 'fedwiki-plugin-page
                                                     :hyperbook wiki
-                                                    :id title
+                                                    :id slug
+                                                    :title title
                                                     :plugin plugin)))
-                          (setf (gethash title (pages-of wiki)) page)
+                          (setf (gethash slug (pages-of wiki)) page)
                           (setf (gethash slug (slugs-of wiki)) title)
                           (setf (gethash title (slugs-of wiki)) slug)
-                          (setf (gethash title (pages-of plugin)) page)))
+                          (setf (gethash slug (pages-of plugin)) page)))
                (remhash "pages" p)
                (setf (slot-value plugin 'plugmatic-data) p))))
 
@@ -69,28 +70,27 @@
     (get-plugin-about-page (wiki-of plugin) plugin)))
 
 (defun get-plugin-page (wiki slug)
-  (if-let (page-id (gethash slug (slugs-of wiki)))
-    (gethash page-id (pages-of wiki))
-    (handler-case
-        (let* ((json (fetch-page-json (domain-name-of wiki) slug))
-               (title (gethash "title" json))
-               (page (make-instance 'fedwiki-plugin-page
-                                    :hyperbook wiki
-                                    :id slug)))
-          (set-page-data page json)
-          (setf (gethash title (pages-of wiki))
-                page)
-          (setf (gethash slug (slugs-of wiki))
-                title)
-          (setf (gethash title (slugs-of wiki))
-                slug)
-          page)
-      ;; For missing pages, the server returns
-      ;; "Page not found", for which shasht raises
-      ;; an error because it is not valid JSON.
-      (shasht:shasht-invalid-char (c)
-        (declare (ignore c))
-        nil))))
+  (or (gethash slug (pages-of wiki))
+      (handler-case
+          (let* ((json (fetch-page-json (domain-name-of wiki) slug))
+                 (title (gethash "title" json))
+                 (page (make-instance 'fedwiki-plugin-page
+                                      :hyperbook wiki
+                                      :id slug)))
+            (set-page-data page json)
+            (setf (gethash slug (pages-of wiki))
+                  page)
+            (setf (gethash slug (slugs-of wiki))
+                  title)
+            (setf (gethash title (slugs-of wiki))
+                  slug)
+            page)
+        ;; For missing pages, the server returns
+        ;; "Page not found", for which shasht raises
+        ;; an error because it is not valid JSON.
+        (shasht:shasht-invalid-char (c)
+          (declare (ignore c))
+          nil))))
 
 (defun get-plugin-about-page (wiki plugin)
   (let* ((slug (str:concat "about-" (name-of plugin) "-plugin"))
