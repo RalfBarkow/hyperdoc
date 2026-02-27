@@ -10,6 +10,13 @@
 
 (defvar *server-parameters* nil)
 
+(defun static-root-pathname ()
+  (let ((root (uiop:ensure-directory-pathname
+               (asdf:system-relative-pathname :clog "static-files/"))))
+    (assert (typep root 'pathname) (root)
+            "Static root must be a pathname, got ~S" root)
+    root))
+
 (defun env-truthy-p (name &optional (default nil))
   (let ((v (uiop:getenv name)))
     (cond
@@ -29,10 +36,11 @@ with the given TITLE and PANE-WIDTH. All registered HyperBooks are
 served at the URL defined by their slug. If DEVELOPMENT is non-nil,
 enable playgrounds and other development tools. This is not
 recommended on public servers because it allows the execution of
-arbitrary Lisp code."
+  arbitrary Lisp code."
   (let ((development* (if (eq development :auto)
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
-                          development)))
+                          development))
+        (static-root (static-root-pathname)))
     (clog:initialize
      #'(lambda (body)
          (clog-moldable-inspector:on-new-inspector body
@@ -41,6 +49,7 @@ arbitrary Lisp code."
                                                    :title title
                                                    :playground? development*))
      :port port
+     :static-root static-root
      :extended-routing t)
     (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
       (add-path-to-hyperbook hb pane-width development*))
