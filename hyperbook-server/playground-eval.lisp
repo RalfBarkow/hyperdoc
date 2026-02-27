@@ -55,41 +55,55 @@
                    (return-from run-selection-eval (values nil nil nil)))
                  (handler-case
                      (let ((result (selected-result)))
-                       (set-status "Eval executed")
-                       (values t result nil))
+                       (if (playground-eval-error-p result)
+                           (let ((condition (playground-eval-error-condition result)))
+                             (set-status (format nil "~A" condition))
+                             (debug-log "~&[PLAYGROUND] ERROR: ~A~%" condition)
+                             (values nil nil result))
+                           (progn
+                             (set-status "Eval executed")
+                             (values t result nil))))
                    (error (e)
                      (set-status (format nil "~A" e))
                      (debug-log "~&[PLAYGROUND] ERROR: ~A~%" e)
                      (values nil nil e)))))))
-      (let* ((eval-action-thunk (hv:thunk
-                                  (debug-log "~&[PLAYGROUND] Eval clicked~%")
-                                  (let ((code (selected-source)))
-                                    (debug-log "~&[PLAYGROUND] Evaluating:~%~A~%" code)
-                                    (multiple-value-bind (ok? result)
-                                        (run-selection-eval)
-                                      (when ok?
-                                        (debug-log "~&[PLAYGROUND] Result: ~S~%" result)
-                                        (format t "~&Eval executed.~%"))))
-                                  nil))
-             (ping-action-thunk (hv:thunk
-                                  (debug-log "~&[PLAYGROUND] Ping clicked~%")
-                                  nil))
-             (eval-inspect-thunk (hv:thunk
-                                   (multiple-value-bind (ok? result err)
-                                       (run-selection-eval)
-                                     (if ok?
-                                         result
-                                         err))))
-             (debug-thunk (hv:thunk
-                            (let ((code (selected-source)))
-                              (multiple-value-bind (ok? result err)
-                                  (run-selection-eval)
-                                (if ok?
-                                    result
-                                    (and err
-                                         (progn
-                                           (set-status "Debugger opened")
-                                           (make-playground-debug-report err code))))))))
+      (let* ((eval-action-thunk
+               (hv:thunk
+                 (debug-log "~&[PLAYGROUND] Eval clicked~%")
+                 (let ((code (selected-source)))
+                   (debug-log "~&[PLAYGROUND] Evaluating:~%~A~%" code)
+                   (multiple-value-bind (ok? result)
+                       (run-selection-eval)
+                     (when ok?
+                       (debug-log "~&[PLAYGROUND] Result: ~S~%" result)
+                       (format t "~&Eval executed.~%"))))
+                 nil))
+             (ping-action-thunk
+               (hv:thunk
+                 (debug-log "~&[PLAYGROUND] Ping clicked~%")
+                 nil))
+             (eval-inspect-thunk
+               (hv:thunk
+                 (multiple-value-bind (ok? result err)
+                     (run-selection-eval)
+                   (if ok?
+                       result
+                       err))))
+             (debug-thunk
+               (hv:thunk
+                 (let ((code (selected-source)))
+                   (multiple-value-bind (ok? result err)
+                       (run-selection-eval)
+                     (if ok?
+                         result
+                         (progn
+                           (set-status "Debugger opened")
+                           (cond
+                             ((playground-eval-error-p err)
+                              (make-playground-debug-report-from-eval-error err code))
+                             (err
+                              (make-playground-debug-report err code))
+                             (t nil))))))))
              (button-refs nil)
              (sanitized-refs nil)
              (ping-button-id nil)
