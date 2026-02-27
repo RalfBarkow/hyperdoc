@@ -76,6 +76,7 @@
                              (:file "inspector-wiring")
                              (:file "playground-debug")
                              (:file "playground-package")
+                             (:file "playground-bindings")
                              (:file "playground-eval")
                              (:file "server")))))
 
