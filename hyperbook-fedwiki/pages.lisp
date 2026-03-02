@@ -242,21 +242,40 @@ images, etc.")
   (when-let (links (hb:links-of page))
     (👀links links)))
 
+(defun normalize-browser-url (raw)
+  (let* ((normalized (if (or (str:starts-with? "http://" raw)
+                             (str:starts-with? "https://" raw))
+                         raw
+                         (format nil "http://~A" raw)))
+         (uri (quri:uri normalized))
+         (scheme (quri:uri-scheme uri))
+         (host (quri:uri-host uri))
+         (path (or (quri:uri-path uri) "/")))
+    (when (and host
+               (member scheme '("http" "https") :test #'string=))
+      (format nil "~A://~A~A" scheme host path))))
+
 ;;
 ;; Title bar customization
 ;;
 
 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (let ((wiki (hb:hyperbook-of page))
-          (slug (origin-id-of page)))
+  (let* ((wiki (hb:hyperbook-of page))
+         (slug (origin-id-of page))
+         (url (normalize-browser-url
+               (wiki-url (domain-name-of wiki)
+                         (str:concat "/" slug ".html")))))
+    (views:html
       (views:action-button "Reload"
-                           (views:thunk (reload-page page)
+                           (views:thunk
+                             (reload-page page)
                              t))
-      (views:thunk
-       (clog:open-browser :url (wiki-url (domain-name-of wiki)
-                                         (str:concat "/" slug ".html")))))
-    nil))
+      " "
+      (views:action-button html-inspector-views/standard:*icon-open-external*
+                           (views:thunk
+                             (when url
+                               (clog:open-browser :url url)))
+                           nil))))
 
 (defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
   (views:action-button html-inspector-views/standard:*icon-open-external*
