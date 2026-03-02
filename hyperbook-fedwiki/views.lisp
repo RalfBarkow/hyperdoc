@@ -38,13 +38,19 @@
   (views:action-button html-inspector-views/standard:*icon-open-external*
     (views:thunk
       (let* ((raw (wiki-url (domain-name-of wiki) "/"))
-             (uri (quri:uri raw))
-             (scheme (or (quri:uri-scheme uri) "http"))
+             (normalized
+               (if (or (str:starts-with? "http://" raw)
+                       (str:starts-with? "https://" raw))
+                   raw
+                   (format nil "http://~A" raw)))
+             (uri (quri:uri normalized))
+             (scheme (quri:uri-scheme uri))
              (host (quri:uri-host uri))
-             (path (or (quri:uri-path uri) "/"))
-             (final-url (format nil "~A://~A~A" scheme host path)))
-        (when (member scheme '("http" "https") :test #'string=)
-          (clog:open-browser :url final-url))))
+             (path (or (quri:uri-path uri) "/")))
+        (when (and host
+                   (member scheme '("http" "https") :test #'string=))
+          (clog:open-browser
+           :url (format nil "~A://~A~A" scheme host path)))))
     nil))
 
 ;;
