@@ -1,0 +1,88 @@
+<h1>Opening external FedWiki sites</h1>
+
+<p>
+  The FedWiki inspector adds an “open external” title-bar action for wiki objects
+  via <tt>views:title-bar-action-buttons</tt>. It used to pass
+  <tt>(wiki-url ...)</tt> directly to <tt>clog:open-browser</tt>.
+</p>
+
+<p>
+  Chromium-class browsers are stricter about missing or implicit schemes than a
+  Lisp-side URL helper. We also want to avoid scheme-relative URLs such as
+  <tt>//host/...</tt>, which can behave badly across mixed-content or secure-context
+  boundaries.
+</p>
+
+<h4>What we changed</h4>
+
+<p>
+  The FedWiki method on
+  <a hyperbook="lisp-functions" page="html-inspector-views:title-bar-action-buttons"><tt>views:title-bar-action-buttons</tt></a>
+  now normalizes the URL before calling <tt>clog:open-browser</tt>.
+</p>
+
+<ul>
+  <li>Ensure there is an explicit scheme before parsing.</li>
+  <li>Accept only <tt>http</tt> and <tt>https</tt>.</li>
+  <li>Never emit a scheme-relative URL.</li>
+  <li>Guard against <tt>quri</tt> parsing a schemeless <tt>host/path</tt> as a path-only URI with host <tt>NIL</tt>.</li>
+</ul>
+
+<p>
+  That last point is the subtle one: <tt>(quri:uri "wiki.ralfbarkow.ch/")</tt> is
+  treated as a path-only URI, not as a host, so <tt>quri:uri-host</tt> becomes
+  <tt>NIL</tt>. The fix is to prepend <tt>http://</tt> before parsing when the
+  string has no scheme.
+</p>
+
+<h4>Code</h4>
+
+<p>Before:</p>
+
+<pre>
+(defmethod views:title-bar-action-buttons ((wiki fedwiki))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (views:thunk
+      (clog:open-browser :url (wiki-url (domain-name-of wiki) "/")))
+    nil))
+</pre>
+
+<p>After:</p>
+
+<pre>
+(defmethod views:title-bar-action-buttons ((wiki fedwiki))
+  (views:action-button html-inspector-views/standard:*icon-open-external*
+    (views:thunk
+      (let* ((raw (wiki-url (domain-name-of wiki) "/"))
+             (normalized
+               (if (or (str:starts-with? "http://" raw)
+                       (str:starts-with? "https://" raw))
+                   raw
+                   (format nil "http://~A" raw)))
+             (uri (quri:uri normalized))
+             (scheme (quri:uri-scheme uri))
+             (host (quri:uri-host uri))
+             (path (or (quri:uri-path uri) "/")))
+        (when (and host
+                   (member scheme '("http" "https") :test #'string=))
+          (clog:open-browser
+           :url (format nil "~A://~A~A" scheme host path)))))
+    nil))
+</pre>
+
+<p>
+  The helper
+  <a hyperbook="lisp-functions" page="hyperbook/fedwiki:wiki-url"><tt>wiki-url</tt></a>
+  in <tt>hyperbook-fedwiki/utilities.lisp</tt> has historically returned
+  <tt>http://...</tt> URLs. The inspector still needs to be defensive because title-bar
+  actions are a browser boundary, and browser-safe URL handling is stricter than
+  simple string concatenation.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><tt>hyperbook-fedwiki/views.lisp</tt> — the <tt>views:title-bar-action-buttons ((wiki fedwiki))</tt> method.</li>
+  <li><tt>hyperbook-fedwiki/utilities.lisp</tt> — <a hyperbook="lisp-functions" page="hyperbook/fedwiki:wiki-url"><tt>hyperbook/fedwiki:wiki-url</tt></a>.</li>
+  <li><tt>hyperbook-server/server.lisp</tt> — the HyperBook “URL” view definitions, for related URL generation patterns.</li>
+</ul>
