@@ -96,6 +96,7 @@
              (debug-thunk
                (hv:thunk
                  (let ((code (selected-source)))
+                   (let ((retry (make-playground-retry (pane-object pane) code)))
                    (multiple-value-bind (ok? result err)
                        (run-selection-eval)
                      (if ok?
@@ -104,10 +105,14 @@
                            (set-status "Debugger opened")
                            (cond
                              ((playground-eval-error-p err)
-                              (make-playground-debug-report-from-eval-error err code))
+                              (make-playground-debug-report-from-eval-error err
+                                                                            code
+                                                                            :retry retry))
                              (err
-                              (make-playground-debug-report err code))
-                             (t nil))))))))
+                              (make-playground-debug-report err
+                                                            code
+                                                            :retry retry))
+                             (t nil)))))))))
              (sessions-thunk
                (hv:thunk
                  (web-debugger-registry)))

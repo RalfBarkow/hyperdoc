@@ -1,0 +1,41 @@
+<h1>Playground restarts</h1>
+
+<in-package>clog-moldable-inspector</in-package>
+
+<p>
+  The Playground <b>Debug</b> action opens a debug report when evaluation fails.
+  That report is intentionally lightweight: it keeps the condition, the captured
+  source, a backtrace, and a small recovery surface that fits the normal
+  inspector UI.
+</p>
+
+<p>
+  The recovery actions are:
+</p>
+
+<ul>
+  <li><b>Retry</b> re-evaluates the captured source with the same object bound to <tt>*</tt>.</li>
+  <li><b>Abort</b> keeps the report visible but marks the recovery attempt as stopped.</li>
+</ul>
+
+<p>
+  This is restart-inspired rather than a live dynamic Common Lisp restart.
+  HyperBook does not keep the original evaluation frame paused for Playground
+  debug reports. If you need the paused-thread model with live restart objects,
+  use the <b>Sessions</b> entry and inspect a full debugger session.
+</p>
+
+<p>
+  Relevant implementation files:
+</p>
+
+<ul>
+  <li><tt>hyperbook-server/playground-eval.lisp</tt></li>
+  <li><tt>hyperbook-server/playground-debug.lisp</tt></li>
+  <li><tt>hyperbook-server/web-debugger.lisp</tt></li>
+</ul>
+
+<p>
+  You can alt-click the <b>Retry</b> or <b>Abort</b> button to inspect the action
+  thunk and see how the recovery flow is implemented.
+</p>
