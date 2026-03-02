@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ASD_PATH="${SCRIPT_DIR}/hyperbook.asd"
+
 # HyperDoc dev launcher:
 # - runs inside nix develop
 # - always enables development mode by default (playground eval)
@@ -107,11 +110,11 @@ exec nix develop --command sbcl --no-userinit \
                               :implementation))))' \
   --eval '(setf *print-circle* t)' \
   --eval '(format t "~&ASDF ready.~%")' \
-  --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
+  --eval "(asdf:load-asd #P\"${ASD_PATH}\")" \
   --eval '(asdf:load-system "swank")' \
   --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
   --eval '(format t "~&Swank listening.~%")' \
-  --eval '(asdf:load-system "hyperdoc/server")' \
+  --eval '(asdf:load-system "hyperbook/server")' \
   --eval "(hyperbook/server:serve-catalog :port ${HYPERDOC_PORT} :development t)" \
   --eval '(format t "~&HyperDoc up.~%")' \
   --eval '(handler-bind ((sb-sys:interactive-interrupt
