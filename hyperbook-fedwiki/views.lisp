@@ -39,10 +39,13 @@
     (views:thunk
       (let* ((raw (wiki-url (domain-name-of wiki) "/"))
              (normalized
-               (if (or (str:starts-with? "http://" raw)
-                       (str:starts-with? "https://" raw))
-                   raw
-                   (format nil "http://~A" raw)))
+               (cond
+                 ((str:starts-with? "https://" raw)
+                  raw)
+                 ((str:starts-with? "http://" raw)
+                  (format nil "https://~A" (str:substring 7 nil raw)))
+                 (t
+                  (format nil "https://~A" raw))))
              (uri (quri:uri normalized))
              (scheme (quri:uri-scheme uri))
              (host (quri:uri-host uri))

@@ -243,10 +243,13 @@ images, etc.")
     (👀links links)))
 
 (defun normalize-browser-url (raw)
-  (let* ((normalized (if (or (str:starts-with? "http://" raw)
-                             (str:starts-with? "https://" raw))
-                         raw
-                         (format nil "http://~A" raw)))
+  (let* ((normalized (cond
+                       ((str:starts-with? "https://" raw)
+                        raw)
+                       ((str:starts-with? "http://" raw)
+                        (format nil "https://~A" (str:substring 7 nil raw)))
+                       (t
+                        (format nil "https://~A" raw))))
          (uri (quri:uri normalized))
          (scheme (quri:uri-scheme uri))
          (host (quri:uri-host uri))
@@ -287,14 +290,16 @@ images, etc.")
 
 (defmethod make-wiki-view-url ((page fedwiki-page))
   (let ((wiki (hb:hyperbook-of page)))
-    (format nil "http://~A/~A.html"
-            (domain-name-of wiki)
-            (origin-id-of page))))
+    (normalize-browser-url
+     (format nil "http://~A/~A.html"
+             (domain-name-of wiki)
+             (origin-id-of page)))))
 
 (defmethod make-wiki-view-url ((page remote-fedwiki-page))
   (let ((wiki (hb:hyperbook-of page))
         (origin (origin-of page)))
-    (format nil "http://~A/~A/~A"
-            (domain-name-of wiki)
-            (domain-name-of origin)
-            (origin-id-of page))))
+    (normalize-browser-url
+     (format nil "http://~A/~A/~A"
+             (domain-name-of wiki)
+             (domain-name-of origin)
+             (origin-id-of page)))))
