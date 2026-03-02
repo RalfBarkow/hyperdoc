@@ -86,6 +86,18 @@
             (error (c)
               (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c))))))))
 
+(defun ensure-startup-hyperbooks ()
+  (let ((ids '("hyperdoc/explorer"
+               "moldable-inspector"
+               "wikipedia:en")))
+    (asdf:load-system :hyperdoc/explorer)
+    (dolist (id ids)
+      (unless (hyperbook:find-hyperbook id)
+        (format t "~&[HYPERBOOK] ensuring ~A~%" id)
+        (unless (hyperbook:find-hyperbook id)
+          (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
+                  id))))))
+
 (defun env-truthy-p (name &optional (default nil))
   (let ((v (uiop:getenv name)))
     (cond
@@ -179,6 +191,7 @@ public servers because it allows the execution of arbitrary Lisp code."
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
                           development)))
     (register-known-hyperbooks)
+    (ensure-startup-hyperbooks)
     (serve-hyperbooks hyperbook:*catalog*
                       :port port
                       :title "HyperBook Catalog"
