@@ -101,6 +101,7 @@
             export HYPERDOC_ROOT="$PWD"
             export PATH="${sbclEnv}/bin:$PATH"
             current_registry="''${CL_SOURCE_REGISTRY:-}"
+            filtered_registry=""
             project_tree="$PWD//"
             deps_tree="$PWD/.flake-deps//"
             named_closure_tree="${namedClosurePkg}//"
@@ -116,6 +117,16 @@
             if [ -n "$current_registry" ]; then
               IFS=':' read -r -a _registry_parts <<< "$current_registry"
               for _part in "''${_registry_parts[@]}"; do
+                case "$_part" in
+                  *-sbcl-mgl-pax-bootstrap-*//|*-sbcl-mgl-pax-bootstrap-*/)
+                    continue
+                    ;;
+                esac
+                if [ -n "$filtered_registry" ]; then
+                  filtered_registry="$filtered_registry:$_part"
+                else
+                  filtered_registry="$_part"
+                fi
                 case "$_part" in
                   *-sbcl-cl-markup-*//|*-sbcl-cl-markup-*/)
                     CL_MARKUP_SRC="''${_part%/}"
@@ -139,18 +150,19 @@
               ln -snf "$CL_MARKUP_SRC" .flake-deps/cl-markup
             fi
 
-            if [ -n "$current_registry" ]; then
-              export CL_SOURCE_REGISTRY="$clog_tree:$deps_tree:$project_tree:$current_registry:$named_closure_tree"
+            if [ -n "$filtered_registry" ]; then
+              export CL_SOURCE_REGISTRY="$clog_tree:$deps_tree:$project_tree:$filtered_registry:$named_closure_tree"
             else
               export CL_SOURCE_REGISTRY="$clog_tree:$deps_tree:$project_tree:$named_closure_tree"
             fi
-            if [ -n "$current_registry" ]; then
-              export HYPERDOC_ASDF_TREES="$clog_tree:$deps_tree:$project_tree:$current_registry:$named_closure_tree"
+            if [ -n "$filtered_registry" ]; then
+              export HYPERDOC_ASDF_TREES="$clog_tree:$deps_tree:$project_tree:$filtered_registry:$named_closure_tree"
             else
               export HYPERDOC_ASDF_TREES="$clog_tree:$deps_tree:$project_tree:$named_closure_tree"
             fi
             unset clog_tree
             unset deps_tree
+            unset filtered_registry
             unset named_closure_tree
             unset current_registry
             unset project_tree
