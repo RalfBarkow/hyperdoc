@@ -1,0 +1,91 @@
+<h1>Graph-Rooted Publishing</h1>
+
+<p>
+  The phrase <tt>graph-rooted publishing</tt> means that the primary publishing
+  object is not a single self-sufficient document. The primary object is a set
+  of connected pages and the traversal rules that define which part of that page
+  graph belongs to the current artifact.
+</p>
+
+<h4>Document-rooted publishing</h4>
+
+<p>
+  In document-rooted publishing, one document is primary.
+</p>
+
+<ul>
+  <li>The document defines its own boundary.</li>
+  <li>Links are secondary references.</li>
+  <li>Publishing starts from <tt>render this document</tt>.</li>
+  <li>Scope is mostly defined by file or chapter boundaries.</li>
+</ul>
+
+<p>
+  In that model, links are useful, but they do not define the artifact.
+</p>
+
+<h4>Graph-rooted publishing</h4>
+
+<p>
+  In graph-rooted publishing, the primary object is a connected page graph.
+</p>
+
+<ul>
+  <li>Seed pages define the entry points.</li>
+  <li>Traversal rules define the scope.</li>
+  <li>Links are part of the publishing structure.</li>
+  <li>Publishing starts from <tt>extract and materialize this neighborhood</tt>.</li>
+</ul>
+
+<p>
+  The artifact is therefore a projection of a graph, not merely a rendering of
+  one document.
+</p>
+
+<h4>Why Story Neighborhood Workflow is graph-rooted</h4>
+
+<p>
+  In the Story Neighborhood workflow, the story is not just an article to be
+  rendered. It is a graph entry point.
+</p>
+
+<ul>
+  <li>The story defines the seed set.</li>
+  <li><tt>WALK</tt> defines how far to traverse from that seed.</li>
+  <li><tt>PRINT</tt> materializes the resulting connected subgraph.</li>
+</ul>
+
+<p>
+  So the publishing unit is not “this page alone” but “this neighborhood derived
+  from the page graph”.
+</p>
+
+<h4>Why this matters editorially</h4>
+
+<ul>
+  <li>Scope becomes explicit.</li>
+  <li>Boundary problems show up as graph problems, such as dangling references.</li>
+  <li>Repair work focuses on neighborhood structure, not only local page wording.</li>
+  <li>A book can be derived from relations among pages, not assembled manually from isolated files.</li>
+</ul>
+
+<h4>Compact contrast</h4>
+
+<pre>
+document-rooted: page -> render
+graph-rooted: seed pages -> traverse graph -> materialize result
+</pre>
+
+<p>
+  This distinction matters because it changes what counts as the source of
+  truth. In document-rooted publishing, the source of truth is the document. In
+  graph-rooted publishing, the source of truth is the page graph plus the rules
+  used to select a neighborhood from it.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">Collaborative Link Model and Resolution</a></li>
+</ul>
