@@ -37,7 +37,14 @@
 (defmethod views:title-bar-action-buttons ((wiki fedwiki))
   (views:action-button html-inspector-views/standard:*icon-open-external*
     (views:thunk
-      (clog:open-browser :url (wiki-url (domain-name-of wiki) "/")))
+      (let* ((raw (wiki-url (domain-name-of wiki) "/"))
+             (uri (quri:uri raw))
+             (scheme (or (quri:uri-scheme uri) "http"))
+             (host (quri:uri-host uri))
+             (path (or (quri:uri-path uri) "/"))
+             (final-url (format nil "~A://~A~A" scheme host path)))
+        (when (member scheme '("http" "https") :test #'string=)
+          (clog:open-browser :url final-url))))
     nil))
 
 ;;
