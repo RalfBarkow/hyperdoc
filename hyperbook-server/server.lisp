@@ -40,7 +40,6 @@
 
       (labels
           ((ensure-scheme-loaded (id)
-             ;; Load the scheme provider before FIND-HYPERBOOK resolves the id.
              (let* ((uri (handler-case (puri:parse-uri id) (error () nil)))
                     (scheme (and uri (puri:uri-scheme uri))))
                (when scheme
@@ -111,6 +110,8 @@ recommended on public servers because it allows the execution of
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
                           development))
         (static-root (static-root-pathname)))
+    (when development*
+      (ignore-errors (clog-moldable-inspector::enable-web-debugger)))
     (clog:initialize
      #'(lambda (body)
          (clog-moldable-inspector:on-new-inspector body
@@ -134,8 +135,8 @@ recommended on public servers because it allows the execution of
                 (_ (assert (str:starts-with? path full-path)))
                 (suffix (str:substring (length path)  nil full-path))
                 (rel-path (mapcar #'tbnl:url-decode (rest (str:split "/" suffix))))
-                (object (or (and (or (equal '() rel-path) ;; example.org/hyperbook
-                                     (equal '("") rel-path)) ;; example.org/hyperbook/
+                (object (or (and (or (equal '() rel-path)
+                                     (equal '("") rel-path))
                                  hb)
                             (hyperbook:lookup-path hb rel-path)
                             (make-instance 'notfound :hyperbook hb*
@@ -162,7 +163,8 @@ recommended on public servers because it allows the execution of
                           (asdf:system-relative-pathname
                            :hyperbook
                            "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")    (views:html
+    (views:include-css "/hyperbook/css/hyperbook.css")
+    (views:html
       (:div :class "hyperbook-page"
             (:h1 "Not found")
             (:p (views:esc (str:join "/" (path-of notfound))))))))
@@ -178,14 +180,10 @@ public servers because it allows the execution of arbitrary Lisp code."
                           development)))
     (register-known-hyperbooks)
     (serve-hyperbooks hyperbook:*catalog*
-                     :port port
-                     :title "HyperBook Catalog"
-                     :development development*
-                     :pane-width pane-width)))
-
-;;
-;; Compute a slug for a HyperBook from its title and id
-;;
+                      :port port
+                      :title "HyperBook Catalog"
+                      :development development*
+                      :pane-width pane-width)))
 
 (defun slug (hyperbook)
   "Return a character string derived from HYPERBOOK that is suitable
@@ -198,10 +196,6 @@ removal of characters that are not allowed in URLs."
    "-"
    (str:substring 0 30
                   (-> hyperbook hyperbook:title-of slug:slugify))))
-
-;;
-;; URL view on HyperBooks and their pages
-;;
 
 (views:defview 👀url (hb hyperbook:hyperbook)
   (url-view-from-slug (-> hb slug)))
@@ -222,10 +216,6 @@ removal of characters that are not allowed in URLs."
     (views:include-js "/hyperbook-server/js/url.js")
     (views:include-script "makeUrl(window.currentInspectorView)")
     (views:html (:hyperbook-slug (views:esc slug)))))
-
-;;
-;; Extended dataset view with URLs
-;;
 
 (defclass slug-wrapper () (slug))
 

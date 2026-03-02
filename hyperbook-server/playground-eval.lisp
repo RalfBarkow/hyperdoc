@@ -23,50 +23,50 @@
          (debug-marker (clog:create-div parent-element
                                         :style "font-size: 12px; color: #944; margin: 2px 2px 6px 2px;")))
     (labels ((selection-bounds ()
-             (playground-selection-positions ace))
-           (selected-result ()
-             (multiple-value-bind (pos1 pos2)
-                 (selection-bounds)
-               (with-slots (object) pane
-                 (hvs:playground-eval object pos1 pos2))))
-           (selected-source ()
-             (multiple-value-bind (pos1 pos2)
-                 (selection-bounds)
-               (let* ((text (clog-ace:text-value ace))
-                      (start (max 0 (1- (min pos1 pos2))))
-                      (end (min (length text) (max pos1 pos2))))
-                 (if (< start end)
-                     (subseq text start end)
-                     ""))))
-           (set-status (message)
-             (setf (clog:inner-html debug-marker)
-                   (format nil "Playground wiring: override active | ~A" message)))
-           (debug-log (format-string &rest args)
-             (apply #'format *error-output* format-string args)
-             (finish-output *error-output*))
-           (run-selection-eval ()
-             (multiple-value-bind (pos1 pos2)
-                 (selection-bounds)
-               (let* ((source (selected-source))
-                      (selection? (/= pos1 pos2))
-                      (trimmed (string-trim '(#\Space #\Tab #\Newline #\Return #\Page) source)))
-                 (when (and selection? (zerop (length trimmed)))
-                   (set-status "Empty selection")
-                   (return-from run-selection-eval (values nil nil nil)))
-                 (handler-case
-                     (let ((result (selected-result)))
-                       (if (playground-eval-error-p result)
-                           (let ((condition (playground-eval-error-condition result)))
-                             (set-status (format nil "~A" condition))
-                             (debug-log "~&[PLAYGROUND] ERROR: ~A~%" condition)
-                             (values nil nil result))
-                           (progn
-                             (set-status "Eval executed")
-                             (values t result nil))))
-                   (error (e)
-                     (set-status (format nil "~A" e))
-                     (debug-log "~&[PLAYGROUND] ERROR: ~A~%" e)
-                     (values nil nil e)))))))
+               (playground-selection-positions ace))
+             (selected-result ()
+               (multiple-value-bind (pos1 pos2)
+                   (selection-bounds)
+                 (with-slots (object) pane
+                   (hvs:playground-eval object pos1 pos2))))
+             (selected-source ()
+               (multiple-value-bind (pos1 pos2)
+                   (selection-bounds)
+                 (let* ((text (clog-ace:text-value ace))
+                        (start (max 0 (1- (min pos1 pos2))))
+                        (end (min (length text) (max pos1 pos2))))
+                   (if (< start end)
+                       (subseq text start end)
+                       ""))))
+             (set-status (message)
+               (setf (clog:inner-html debug-marker)
+                     (format nil "Playground wiring: override active | ~A" message)))
+             (debug-log (format-string &rest args)
+               (apply #'format *error-output* format-string args)
+               (finish-output *error-output*))
+             (run-selection-eval ()
+               (multiple-value-bind (pos1 pos2)
+                   (selection-bounds)
+                 (let* ((source (selected-source))
+                        (selection? (/= pos1 pos2))
+                        (trimmed (string-trim '(#\Space #\Tab #\Newline #\Return #\Page) source)))
+                   (when (and selection? (zerop (length trimmed)))
+                     (set-status "Empty selection")
+                     (return-from run-selection-eval (values nil nil nil)))
+                   (handler-case
+                       (let ((result (selected-result)))
+                         (if (playground-eval-error-p result)
+                             (let ((condition (playground-eval-error-condition result)))
+                               (set-status (format nil "~A" condition))
+                               (debug-log "~&[PLAYGROUND] ERROR: ~A~%" condition)
+                               (values nil nil result))
+                             (progn
+                               (set-status "Eval executed")
+                               (values t result nil))))
+                     (error (e)
+                       (set-status (format nil "~A" e))
+                       (debug-log "~&[PLAYGROUND] ERROR: ~A~%" e)
+                       (values nil nil e)))))))
       (let* ((eval-action-thunk
                (hv:thunk
                  (debug-log "~&[PLAYGROUND] Eval clicked~%")
@@ -89,6 +89,10 @@
                    (if ok?
                        result
                        err))))
+             (step-thunk
+               (hv:thunk
+                 (make-playground-stepper (pane-object pane)
+                                          (selected-source))))
              (debug-thunk
                (hv:thunk
                  (let ((code (selected-source)))
@@ -104,22 +108,31 @@
                              (err
                               (make-playground-debug-report err code))
                              (t nil))))))))
+             (sessions-thunk
+               (hv:thunk
+                 (web-debugger-registry)))
              (button-refs nil)
              (sanitized-refs nil)
              (ping-button-id nil)
              (eval-button-id nil)
              (eval-inspect-button-id nil)
+             (step-button-id nil)
              (debug-button-id nil)
+             (sessions-button-id nil)
              (ping-button nil)
              (eval-button nil)
              (eval-inspect-button nil)
-             (debug-button nil))
+             (step-button nil)
+             (debug-button nil)
+             (sessions-button nil))
         (multiple-value-bind (buttons-html references assets)
             (hv:html-and-references
               (hv:action-button "Ping" ping-action-thunk)
               (hv:action-button "Evaluate" eval-action-thunk)
               (hv:eval-button "Evaluate and Inspect" eval-inspect-thunk)
-              (hv:eval-button "Debug" debug-thunk))
+              (hv:eval-button "Step" step-thunk)
+              (hv:eval-button "Debug" debug-thunk)
+              (hv:eval-button "Sessions" sessions-thunk))
           (declare (ignore assets))
           (setf (clog:inner-html tool-bar) buttons-html
                 button-refs references))
@@ -129,18 +142,26 @@
               (car (rassoc eval-action-thunk button-refs :test #'eq))
               eval-inspect-button-id
               (car (rassoc eval-inspect-thunk button-refs :test #'eq))
+              step-button-id
+              (car (rassoc step-thunk button-refs :test #'eq))
               debug-button-id
-              (car (rassoc debug-thunk button-refs :test #'eq)))
+              (car (rassoc debug-thunk button-refs :test #'eq))
+              sessions-button-id
+              (car (rassoc sessions-thunk button-refs :test #'eq)))
         (setf ping-button (clog:attach-as-child tool-bar ping-button-id)
               eval-button (clog:attach-as-child tool-bar eval-button-id)
               eval-inspect-button (clog:attach-as-child tool-bar eval-inspect-button-id)
-              debug-button (clog:attach-as-child tool-bar debug-button-id))
+              step-button (clog:attach-as-child tool-bar step-button-id)
+              debug-button (clog:attach-as-child tool-bar debug-button-id)
+              sessions-button (clog:attach-as-child tool-bar sessions-button-id))
         (setf (clog:inner-html debug-marker)
-              (format nil "Playground wiring: override active | Ping=~A | Evaluate=~A | Evaluate+Inspect=~A | Debug=~A"
+              (format nil "Playground wiring: override active | Ping=~A | Evaluate=~A | Evaluate+Inspect=~A | Step=~A | Debug=~A | Sessions=~A"
                       ping-button-id
                       eval-button-id
                       eval-inspect-button-id
-                      debug-button-id))
+                      step-button-id
+                      debug-button-id
+                      sessions-button-id))
         (clog:js-execute
          tool-bar
          (format nil
@@ -160,11 +181,15 @@
                     hook(~S);
                     hook(~S);
                     hook(~S);
+                    hook(~S);
+                    hook(~S);
                   })();"
                  ping-button-id
                  eval-button-id
                  eval-inspect-button-id
-                 debug-button-id))
+                 step-button-id
+                 debug-button-id
+                 sessions-button-id))
         (clog:set-geometry ace
                            :width (- (clog:client-width parent-element) 2)
                            :height (- (clog:client-height parent-element)
@@ -181,7 +206,9 @@
           (setf (clog:attribute ping-button "disabled") t)
           (setf (clog:attribute eval-button "disabled") t)
           (setf (clog:attribute eval-inspect-button "disabled") t)
-          (setf (clog:attribute debug-button "disabled") t))
+          (setf (clog:attribute step-button "disabled") t)
+          (setf (clog:attribute debug-button "disabled") t)
+          (setf (clog:attribute sessions-button "disabled") t))
         (when enabled?
           (let ((dropped 0))
             (setf sanitized-refs
@@ -203,12 +230,14 @@
                          (type-of (car ref))
                          (type-of (cdr ref)))))
           (set-event-handlers pane tool-bar sanitized-refs)
-          (debug-log "~&[PLAYGROUND] Event handlers installed refs=~D ping=~A eval=~A eval+inspect=~A debug=~A~%"
+          (debug-log "~&[PLAYGROUND] Event handlers installed refs=~D ping=~A eval=~A eval+inspect=~A step=~A debug=~A sessions=~A~%"
                      (length sanitized-refs)
                      ping-button-id
                      eval-button-id
                      eval-inspect-button-id
-                     debug-button-id)
+                     step-button-id
+                     debug-button-id
+                     sessions-button-id)
           (clog:js-execute ace
                            (format nil
                                    "~A.commands.addCommand(
@@ -223,3 +252,14 @@
            #'(lambda (obj)
                (declare (ignore obj))
                (hvs:store-playground-content (pane-object pane) (clog-ace:text-value ace)))))))))
+
+(defun ace-get-range (ace)
+  (let* ((ace-ref (clog-ace::js-ace ace))
+         (r1 (clog:js-query ace (format nil "~A.selection.getRange().start.row" ace-ref)))
+         (c1 (clog:js-query ace (format nil "~A.selection.getRange().start.column" ace-ref)))
+         (r2 (clog:js-query ace (format nil "~A.selection.getRange().end.row" ace-ref)))
+         (c2 (clog:js-query ace (format nil "~A.selection.getRange().end.column" ace-ref))))
+    (values (clog:js-to-integer r1)
+            (clog:js-to-integer c1)
+            (clog:js-to-integer r2)
+            (clog:js-to-integer c2))))
