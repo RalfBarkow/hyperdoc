@@ -78,6 +78,11 @@
 (defmethod extract-links-from-story-item ((type (eql :paragraph)) item page)
   (extract-links-from-wiki-text (text-of item) page))
 
+;; Markdown
+
+(defmethod extract-links-from-story-item ((type (eql :markdown)) item page)
+  (extract-links-from-wiki-text (text-of item) page))
+
 ;; References
 
 (defmethod extract-links-from-story-item ((type (eql :reference)) item page)
