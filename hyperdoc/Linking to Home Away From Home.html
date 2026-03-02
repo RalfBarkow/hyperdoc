@@ -1,0 +1,78 @@
+<h1>Linking to Home Away From Home</h1>
+
+<p>
+  The FedWiki page <tt>Home Away From Home</tt> should ideally be linked from
+  HyperDoc as a FedWiki page inside a named HyperBook, not merely as a raw
+  browser URL.
+</p>
+
+<h2>Preferred form</h2>
+
+<p>
+  The preferred conceptual link form is:
+</p>
+
+<pre>
+&lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="home-away-from-home"&gt;
+  Home Away From Home
+&lt;/a&gt;
+</pre>
+
+<p>
+  This is the right shape because it keeps three things explicit:
+</p>
+
+<ul>
+  <li>the owning site: <tt>fedwiki:wiki.ralfbarkow.ch</tt></li>
+  <li>the page identity: <tt>home-away-from-home</tt></li>
+  <li>the intention to stay inside the HyperBook and inspector model</li>
+</ul>
+
+<p>
+  The page slug is a better fit than a title-only reference because FedWiki link
+  resolution is fundamentally site-plus-slug oriented.
+</p>
+
+<h2>Current limitation</h2>
+
+<p>
+  This is the preferred model, but current HyperDoc page-link resolution may not
+  yet support arbitrary <tt>fedwiki:...</tt> HyperBook ids in all HTML page
+  contexts. So the conceptual form is correct even if the runtime support is not
+  complete yet.
+</p>
+
+<h2>Fallback</h2>
+
+<p>
+  If the HyperBook-style link does not resolve, use the explicit local server
+  URL:
+</p>
+
+<pre>
+&lt;a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/home-away-from-home"&gt;
+  Home Away From Home
+&lt;/a&gt;
+</pre>
+
+<p>
+  This is less satisfactory because it hardcodes the current local server URL
+  and slug path, but it is operationally clear.
+</p>
+
+<h2>Why this matters</h2>
+
+<p>
+  The page <tt>Home Away From Home</tt> is relevant when discussing alternative
+  landing pages such as <tt>home/index.html</tt>. If HyperDoc can link to that
+  FedWiki page through the HyperBook model, then the documentation remains
+  inspectable and navigable inside the same environment instead of dropping to a
+  plain external browser hop.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Landing Page Redirect to Local Boot">Landing Page Redirect to Local Boot</a></li>
+  <li><a page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+</ul>

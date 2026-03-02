@@ -1,0 +1,145 @@
+<h1>HyperDoc Server</h1>
+
+<in-package>hyperbook/server</in-package>
+
+<p>
+  This page explains the practical path for serving HyperDoc from the local
+  web server used in this repository.
+</p>
+
+<h2>What runs</h2>
+
+<p>
+  The runtime entry point is
+  <a hyperbook="lisp-functions" page="hyperbook/server:serve-catalog"><tt>hyperbook/server:serve-catalog</tt></a>.
+  The compatibility system <tt>hyperdoc/server</tt> depends on
+  <tt>hyperbook/server</tt>, so loading <tt>:hyperdoc/server</tt> or
+  <tt>:hyperbook/server</tt> reaches the same server implementation.
+</p>
+
+<p>
+  The server exposes a HyperBook catalog at the root path and assigns one URL
+  path per registered HyperBook.
+</p>
+
+<h2>Fast path</h2>
+
+<p>
+  For normal local use, start the development launcher from the repository root:
+</p>
+
+<pre>
+./dev.sh
+</pre>
+
+<p>
+  Then open:
+</p>
+
+<pre>
+http://127.0.0.1:8080/boot.html
+</pre>
+
+<p>
+  The launcher enters the Nix development shell first, so the Common Lisp
+  source registry and other runtime dependencies are configured before SBCL is
+  started.
+</p>
+
+<h2>Manual start</h2>
+
+<p>
+  If you want to start the server directly, load the server system and call
+  <tt>serve-catalog</tt> yourself:
+</p>
+
+<pre>
+sbcl --no-userinit \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperbook/server)' \
+  --eval '(hyperbook/server:serve-catalog)'
+</pre>
+
+<p>
+  The default server URL is still <tt>http://localhost:8080/boot.html</tt>.
+</p>
+
+<h2>Development mode</h2>
+
+<p>
+  The server supports a development flag via
+  <tt>HYPERDOC_DEVELOPMENT</tt> or the <tt>:development</tt> argument to
+  <tt>serve-catalog</tt> and
+  <a hyperbook="lisp-functions" page="hyperbook/server:serve-hyperbooks"><tt>hyperbook/server:serve-hyperbooks</tt></a>.
+</p>
+
+<p>
+  In development mode, the Playground is executable and additional debugging
+  tools are enabled. The view remains visible outside development mode, but code
+  evaluation is disabled.
+</p>
+
+<h2>What appears in the catalog</h2>
+
+<p>
+  On startup, the server now ensures the core built-in HyperBooks needed for a
+  useful local session:
+</p>
+
+<ul>
+  <li><tt>HyperDoc</tt></li>
+  <li><tt>HyperDoc Explorer</tt></li>
+  <li><tt>Moldable inspector</tt></li>
+  <li><tt>Wikipedia</tt> (English edition)</li>
+</ul>
+
+<p>
+  Additional external books can be loaded from the known-wikis configuration
+  file:
+</p>
+
+<pre>
+~/.config/hyperbook/known-wikis.sexp
+</pre>
+
+<p>
+  Example:
+</p>
+
+<pre>
+(("fedwiki:wiki.ralfbarkow.ch")
+ ("fedwiki:hyperdoc.dreyeck.ch"))
+</pre>
+
+<p>
+  Each configured id is resolved through
+  <a hyperbook="lisp-functions" page="hyperbook:find-hyperbook"><tt>hyperbook:find-hyperbook</tt></a>
+  during startup.
+</p>
+
+<h2>URL structure</h2>
+
+<p>
+  Each registered HyperBook gets a slug-based URL. The catalog is the root, and
+  individual books and pages appear below their slug. The URL view in the
+  inspector shows the exact generated path for a HyperBook or page.
+</p>
+
+<h2>When to use this page</h2>
+
+<p>
+  Use this page when you need to answer one of these operational questions:
+</p>
+
+<ul>
+  <li>Which system do I load to run the local server?</li>
+  <li>What is the server entry point?</li>
+  <li>Why is the Playground visible but not executable?</li>
+  <li>Why are some HyperBooks present in the catalog and others missing?</li>
+  <li>Where do persistent known FedWiki entries come from?</li>
+</ul>
+<p>
+  For the specific question of using a non-wiki landing page to hand off to the
+  local HyperDoc boot page, see
+  <a page="Landing Page Redirect to Local Boot">Landing Page Redirect to Local Boot</a>.
+</p>

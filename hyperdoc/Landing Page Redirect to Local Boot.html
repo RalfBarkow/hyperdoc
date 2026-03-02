@@ -1,0 +1,85 @@
+<h1>Landing Page Redirect to Local Boot</h1>
+
+<p>
+  A non-wiki landing page can redirect the browser to the local HyperDoc entry
+  point <tt>boot.html</tt>. That part is viable.
+</p>
+
+<p>
+  What does <b>not</b> work is treating a remote landing page as if it were the
+  local HyperDoc boot page and having it connect directly to a localhost CLOG
+  websocket endpoint.
+</p>
+
+<h2>Viable pattern</h2>
+
+<ol>
+  <li>A remote HTML landing page is served from some public origin.</li>
+  <li>That page redirects the browser to the local HyperDoc URL, for example <tt>http://127.0.0.1:8080/boot.html</tt>.</li>
+  <li>The browser leaves the remote origin and navigates to the local origin.</li>
+  <li>The local <tt>boot.html</tt> page loads <tt>boot.js</tt> and starts the normal local CLOG session.</li>
+</ol>
+
+<p>
+  This is ordinary browser navigation. The important point is that the browser
+  is no longer running code from the remote origin once it reaches the local
+  HyperDoc page.
+</p>
+
+<h2>Non-viable pattern</h2>
+
+<ol>
+  <li>A remote page remains loaded at its original public origin.</li>
+  <li>That remote page tries to connect directly to <tt>ws://127.0.0.1:.../clog</tt>.</li>
+</ol>
+
+<p>
+  This crosses the same origin and private-network boundary that already blocks
+  direct public-origin to localhost interaction in other FedWiki bridge cases.
+  The remote page is still remote; it has not become the local HyperDoc boot
+  page.
+</p>
+
+<h2>Why the distinction matters</h2>
+
+<p>
+  The local HyperDoc boot page and the local CLOG websocket endpoint belong to
+  the same local runtime. That pairing is intentional. The remote landing page
+  can point the browser toward that runtime, but it should not try to act as the
+  runtime itself.
+</p>
+
+<h2>Practical advice</h2>
+
+<ul>
+  <li>Redirect to <tt>http://127.0.0.1:8080/boot.html</tt> or whatever local HTTP entry point you control.</li>
+  <li>Do not hardcode a transient websocket port in the remote landing page.</li>
+  <li>Let the local <tt>boot.html</tt> and <tt>boot.js</tt> discover and establish the websocket session the normal way.</li>
+</ul>
+
+<h2>Link to the FedWiki page</h2>
+
+<p>
+  The FedWiki page <tt>Home Away From Home</tt> should ideally be linked as a
+  page inside the FedWiki HyperBook:
+</p>
+
+<p>
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="home-away-from-home">Home Away From Home</a>
+</p>
+
+<p>
+  If that form does not resolve in the current implementation, use the explicit
+  local server URL as a fallback:
+</p>
+
+<p>
+  <a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/home-away-from-home">Home Away From Home</a>
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="HyperDoc Server">HyperDoc Server</a></li>
+  <li><a page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+</ul>
