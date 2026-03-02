@@ -1,31 +1,34 @@
 ;;;; Playground stepper (GT-inspired, but pragmatic)
 ;;
-;;;; This is not SBCL's instruction-level stepper.
-;;;; It steps through the *top-level forms* of the current Playground selection:
+;;;; Steps through the *top-level forms* of the current Playground selection:
 ;;;;   - parse selection into a list of forms
 ;;;;   - evaluate one form at a time (with * bound to the current object)
 ;;;;   - keep last value / last error as inspectable objects
 ;;
-;;;; This gives you a "moldable" stepping experience in HyperBook's own terms.
+;;;; Unlike the previous version, this one does NOT silently swallow reader errors.
+;;;; Reader/parse failures are captured and shown as an inspectable debug report.
 ;;
 ;;;; Copyright (c) 2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :clog-moldable-inspector)
 
 (defclass playground-stepper ()
-  ((object     :initarg :object   :reader playground-stepper-object)
-   (package    :initarg :package  :reader playground-stepper-package)
-   (source     :initarg :source   :reader playground-stepper-source)
-   (forms      :initarg :forms    :accessor playground-stepper-forms)
-   (index      :initform 0        :accessor playground-stepper-index)
-   (last-value :initform nil      :accessor playground-stepper-last-value)
-   (last-error :initform nil      :accessor playground-stepper-last-error)
-   (done?      :initform nil      :accessor playground-stepper-done?)))
+  ((object       :initarg :object   :reader playground-stepper-object)
+   (package      :initarg :package  :reader playground-stepper-package)
+   (source       :initarg :source   :reader playground-stepper-source)
+   (forms        :initarg :forms    :accessor playground-stepper-forms)
+   (index        :initform 0        :accessor playground-stepper-index)
+   (last-value   :initform nil      :accessor playground-stepper-last-value)
+   (last-error   :initform nil      :accessor playground-stepper-last-error)
+   (parse-report :initform nil      :accessor playground-stepper-parse-report)
+   (done?        :initform nil      :accessor playground-stepper-done?)))
 
 (defmethod hv:text-representation ((s playground-stepper))
-  (format nil "Step (~D/~D)"
-          (playground-stepper-index s)
-          (length (playground-stepper-forms s))))
+  (if (playground-stepper-parse-report s)
+      (format nil "Step (parse error)")
+      (format nil "Step (~D/~D)"
+              (playground-stepper-index s)
+              (length (playground-stepper-forms s)))))
 
 (defun read-all-forms (source package)
   (let ((*package* package))
@@ -44,26 +47,33 @@
 (defun make-playground-stepper (object source)
   (let* ((pkg (or (ignore-errors (html-inspector-views/standard:playground-package object))
                   (find-package "CL-USER")))
-         (forms (handler-case
-                    (read-all-forms source pkg)
-                  (error (e)
-                    (declare (ignore e))
-                    nil))))
-    (make-instance 'playground-stepper
-                   :object object
-                   :package pkg
-                   :source source
-                   :forms (or forms '()))))
+         (stepper (make-instance 'playground-stepper
+                                 :object object
+                                 :package pkg
+                                 :source source
+                                 :forms '())))
+    (handler-case
+        (let ((forms (read-all-forms source pkg)))
+          (setf (playground-stepper-forms stepper) (or forms '()))
+          (when (null forms)
+            (setf (playground-stepper-done? stepper) t)))
+      (error (e)
+        (setf (playground-stepper-parse-report stepper)
+              (make-playground-debug-report e source))
+        (setf (playground-stepper-forms stepper) '())
+        (setf (playground-stepper-done? stepper) t)))
+    stepper))
 
 (defun playground-stepper-reset (stepper)
   (setf (playground-stepper-index stepper) 0
         (playground-stepper-last-value stepper) nil
         (playground-stepper-last-error stepper) nil
-        (playground-stepper-done? stepper) nil)
+        (playground-stepper-done? stepper) (null (playground-stepper-forms stepper)))
   t)
 
 (defun playground-stepper-step (stepper)
-  (when (playground-stepper-done? stepper)
+  (when (or (playground-stepper-done? stepper)
+            (playground-stepper-parse-report stepper))
     (return-from playground-stepper-step t))
   (let* ((forms (playground-stepper-forms stepper))
          (i (playground-stepper-index stepper)))
@@ -90,7 +100,8 @@
 
 (defun playground-stepper-run (stepper &key (limit 1000))
   (loop repeat limit
-        while (not (playground-stepper-done? stepper))
+        while (and (not (playground-stepper-done? stepper))
+                   (not (playground-stepper-parse-report stepper)))
         do (playground-stepper-step stepper))
   t)
 
@@ -101,7 +112,7 @@
       (:p
        (hv:action-button "Reset"
                          (hv:thunk (playground-stepper-reset s) t)
-                         "Reset to first form")
+                         "Reset to first parsed form")
        " "
        (hv:action-button "Next"
                          (hv:thunk (playground-stepper-step s) t)
@@ -115,6 +126,18 @@
                             (playground-stepper-index s)
                             (length (playground-stepper-forms s))
                             (package-name (playground-stepper-package s)))))
+      (let ((pr (playground-stepper-parse-report s)))
+        (when pr
+          (hv:html
+            (:h3 "Parse / reader error")
+            (:p "The selection could not be READ into forms. Common cause: using single-colon with a non-exported symbol, e.g. "
+                (:code "hyperbook/fedwiki:get-fedwiki")
+                " - use "
+                (:code "hyperbook/fedwiki::get-fedwiki")
+                " or call it unqualified inside the package.")
+            (hv:eval-button "Inspect parse error report"
+                            (hv:thunk pr)
+                            "Open the captured reader error and backtrace"))))
       (:h3 "Source selection")
       (:pre :style "white-space: pre-wrap"
             (hv:esc (or (playground-stepper-source s) "")))
