@@ -1,0 +1,82 @@
+<h1>Linking HyperDoc pages to FedWiki pages</h1>
+
+<p>
+  HyperDoc pages can already link well to Lisp objects and HyperBooks, but they
+  currently have no first-class link form for FedWiki pages such as
+  <tt>FIND</tt>, <tt>WALK</tt>, <tt>PRINT</tt>, or <tt>REVIEW</tt>.
+</p>
+
+<p>
+  The immediate problem is not rendering a URL. It is choosing a link model that
+  respects federation. A FedWiki page is not identified by title alone; it lives
+  at a site, has a slug, and may have remote/local variants.
+</p>
+
+<h4>Requirements</h4>
+
+<ul>
+  <li>A HyperDoc author should be able to name a FedWiki page explicitly.</li>
+  <li>The link must preserve the owning site, not just the page title.</li>
+  <li>The same syntax should work for local and remote FedWiki pages.</li>
+  <li>The link target should remain inspectable inside HyperBook, not only as an external browser URL.</li>
+</ul>
+
+<h4>Proposed model</h4>
+
+<p>
+  Add a HyperDoc link form that names a FedWiki page by hyperbook id plus page
+  slug or title. Conceptually it should look like one of these:
+</p>
+
+<pre>
+&lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="find"&gt;FIND&lt;/a&gt;
+&lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="walk"&gt;WALK&lt;/a&gt;
+&lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="print"&gt;PRINT&lt;/a&gt;
+&lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="review"&gt;REVIEW&lt;/a&gt;
+</pre>
+
+<p>
+  In other words: treat the FedWiki site as the HyperBook id and the page as a
+  normal HyperBook page lookup inside that book.
+</p>
+
+<h4>Why this is the right level</h4>
+
+<ul>
+  <li>It reuses the existing HyperBook linking model instead of inventing a second link system.</li>
+  <li>It keeps site identity explicit.</li>
+  <li>It fits startup auto-registration of known FedWiki books.</li>
+  <li>It allows the same destination to be inspected through normal HyperBook views such as Story, Links, and Context.</li>
+</ul>
+
+<h4>What must exist for this to work smoothly</h4>
+
+<ul>
+  <li>The relevant FedWiki hyperbook must already be registered or auto-loadable from its id.</li>
+  <li>HyperDoc page linking should accept non-local HyperBook ids such as <tt>fedwiki:wiki.ralfbarkow.ch</tt>.</li>
+  <li>Page lookup should resolve slug/title consistently for FedWiki pages.</li>
+</ul>
+
+<h4>Fallback behavior</h4>
+
+<p>
+  If the FedWiki hyperbook is not yet present, the link system should prefer to
+  create or resolve it through <tt>hyperbook:find-hyperbook</tt> rather than fall
+  back immediately to an external browser URL. External open remains useful, but
+  it should be the secondary path, not the only path.
+</p>
+
+<h4>Why this matters for Story Neighborhood Workflow</h4>
+
+<p>
+  The workflow around <tt>FIND</tt>, <tt>WALK</tt>, <tt>PRINT</tt>, and
+  <tt>REVIEW</tt> is most useful when the pages themselves are directly
+  inspectable from HyperDoc. That would let a conceptual HyperDoc page describe
+  the workflow and also open the concrete FedWiki pages that implement or
+  demonstrate each step.
+</p>
+
+<p>
+  This would make HyperDoc documentation less isolated from the live federated
+  material it is describing.
+</p>

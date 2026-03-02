@@ -1,0 +1,105 @@
+<h1>Mechs at Sea</h1>
+
+<p>
+  We consider how large Federated Wiki sites could be cached and synchronized
+  over short messages on slow or even intermittent connections. The motivating
+  case is ocean sailing, but the same approach could apply in other
+  low-bandwidth environments.
+</p>
+
+<p>
+  Discussion context:
+  <a href="https://app.element.io/#/room/#fedwiki:matrix.org/$171775948735628JhRfM:matrix.org">matrix discussion</a>
+</p>
+
+<p>
+  An admin-savvy sailor could cache whole sites onboard and proxy DNS to browse
+  them while at sea. Public sites owned by the sailor could then be updated from
+  cache when they return to port.
+</p>
+
+<p>
+  One proposed direction is to design Mech blocks that synchronize the cache
+  over ham radio by sending only journal actions. That same pattern could also
+  support server-side Mechs for other low-bandwidth applications.
+</p>
+
+<h4>How Mechs talk</h4>
+
+<p>
+  A specific Mech is identified by site, slug, and item id. A Mech that includes
+  GET or PUT blocks can both send and handle those requests. The sender runs
+  client-side, while the handler runs server-side.
+</p>
+
+<p>
+  A Mech is connected to its twin when forked from the serving site. When the
+  Mech runs GET client-side, the nested blocks run server-side on the remote
+  site. Similarly for PUT.
+</p>
+
+<p>
+  One example is an additional block named <tt>DELTA</tt> that collects changes
+  when run client-side and distributes changes server-side.
+</p>
+
+<h4>Example: sending changes</h4>
+
+<pre>
+CLICK
+ NEIGHBORS self
+ DELTA daily actions
+ PUT
+  DELTA expand
+  APPLY
+</pre>
+
+<p>
+  The reverse direction uses GET and moves the two versions of DELTA around.
+</p>
+
+<h4>Example: receiving changes</h4>
+
+<pre>
+CLICK
+ GET
+  NEIGHBORS self
+  DELTA daily actions
+ DELTA expand
+ APPLY
+</pre>
+
+<p>
+  The server-side handlers could also be implemented by other applications,
+  such as DATALOG, as long as they match the protocol requirements. In that
+  case, the client-side run of the Mech acts as a test that the endpoint works
+  as intended.
+</p>
+
+<p>
+  This implementation would stay inside the Mech plugin itself. The existing
+  server-side routing is already sufficient to support this pattern. Other
+  protocols have already been implemented as server-side plugins, notably RSS.
+</p>
+
+<p>
+  The ham-radio connection suggested above would first be implemented on the
+  live internet and then bridged to Winlink Global Radio Email for operation at
+  sea.
+  <a href="https://en.wikipedia.org/wiki/Winlink">Wikipedia: Winlink</a>
+</p>
+
+<h4>Source note</h4>
+
+<pre>
+pages/mechs-at-sea
+
+curl -s http://found.ward.fed.wiki/mechs-at-sea.json |\
+ jq -r '.story[].text+"\n"' >\
+ mechs-at-sea.txt
+</pre>
+
+<p>
+  A trial implementation proceeds at <tt>[[Sea Sync Mechs]]</tt>. The original
+  note says to click and run the block from a fork of a now updated page.
+</p>

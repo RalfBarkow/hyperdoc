@@ -1,0 +1,85 @@
+<h1>Why Title-Based FedWiki Links Are Not Enough</h1>
+
+<p>
+  The claim is that a purely title-based HyperDoc link model would not match the
+  FedWiki reference implementation closely enough. This page supports that
+  claim.
+</p>
+
+<h4>The reference implementation resolves by slug</h4>
+
+<p>
+  In the fedwiki-java reference implementation, collaborative link text is read
+  from <tt>[[...]]</tt> and converted into a slug. The operational lookup target
+  is therefore not the displayed title alone but the derived slug.
+</p>
+
+<p>
+  A title-only HyperDoc link model hides that step. Once the slug derivation is
+  hidden, it becomes easy to misdescribe what the system actually resolves.
+</p>
+
+<h4>Site identity matters</h4>
+
+<p>
+  A FedWiki page does not live in an abstract global title space. It lives at a
+  site. The same visible title may appear on several sites. The reference
+  implementation therefore searches across origin and context sites in a defined
+  order.
+</p>
+
+<p>
+  A title-only link model does not carry enough information to explain or expose
+  this site-sensitive lookup behavior.
+</p>
+
+<h4>Context affects the result</h4>
+
+<p>
+  Collaborative link resolution is not purely local and not purely global. It is
+  context-sensitive. The current page journal contributes a list of candidate
+  sites, and item-level site data can reprioritize that list.
+</p>
+
+<p>
+  This means the same visible link text can resolve differently depending on the
+  current page context. A title-only model suggests that title alone is the
+  decisive identity key, which is not how the reference implementation behaves.
+</p>
+
+<h4>Ghost pages and failure modes</h4>
+
+<p>
+  When lookup fails, the interesting question is not simply whether a title
+  exists somewhere. The interesting question is whether the slug can be resolved
+  within the current origin/context boundary. Again, this is resolution-model
+  behavior, not title-matching behavior.
+</p>
+
+<h4>Design consequence</h4>
+
+<p>
+  For HyperDoc, a purely title-based FedWiki link model would be too weak if the
+  goal is to represent collaborative-link semantics faithfully. A richer model
+  should make room for at least:
+</p>
+
+<ul>
+  <li>site</li>
+  <li>slug</li>
+  <li>origin/context assumptions</li>
+</ul>
+
+<p>
+  Without those, HyperDoc could still offer a convenient link syntax, but it
+  would be an approximation rather than a close match to the reference
+  implementation.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Fedwiki Java Reference Implementation">Fedwiki Java Reference Implementation</a></li>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">Collaborative Link Model and Resolution</a></li>
+  <li><a hyperbook="hyperdoc" page="When Title-Based FedWiki Links May Be Enough">When Title-Based FedWiki Links May Be Enough</a></li>
+</ul>

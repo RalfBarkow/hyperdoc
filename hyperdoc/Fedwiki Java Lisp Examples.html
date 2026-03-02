@@ -1,0 +1,50 @@
+<h1>Fedwiki Java Lisp Examples</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  These examples translate small but important pieces of the
+  <tt>fedwiki-java</tt> reference implementation into runnable HyperDoc Lisp
+  examples.
+</p>
+
+<p>
+  The goal is not to reproduce the whole interpreter. The goal is to make the
+  core semantics inspectable in HyperDoc terms.
+</p>
+
+<h4>Slug derivation</h4>
+
+<p>
+  The Java reference implementation derives a slug from collaborative link text.
+  This example shows the corresponding Lisp translation.
+</p>
+
+<source-of-function>fedwiki-java-slug-example</source-of-function>
+
+<h4>Journal-derived context</h4>
+
+<p>
+  The page context comes from journal <tt>site</tt> entries, read backward with
+  duplicates removed. This example shows that logic directly.
+</p>
+
+<source-of-function>fedwiki-java-context-example</source-of-function>
+
+<h4>Resolution order</h4>
+
+<p>
+  Collaborative-link resolution tries the origin site first, then the current
+  item site if present, then the remaining context sites in order. This example
+  makes that search order explicit.
+</p>
+
+<source-of-function>fedwiki-java-resolution-order-example</source-of-function>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Fedwiki Java Reference Implementation">Fedwiki Java Reference Implementation</a></li>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">Collaborative Link Model and Resolution</a></li>
+  <li><a hyperbook="hyperdoc" page="Writing source code pages">Writing source code pages</a></li>
+</ul>

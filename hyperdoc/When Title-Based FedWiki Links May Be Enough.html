@@ -1,0 +1,76 @@
+<h1>When Title-Based FedWiki Links May Be Enough</h1>
+
+<p>
+  The claim that title-based HyperDoc links are insufficient is strong, but it
+  is not always wrong to start with titles. This page qualifies the claim.
+</p>
+
+<h4>Documentation often starts from reader intent</h4>
+
+<p>
+  A documentation page usually wants to point a reader toward a concept they can
+  recognize. In that context, a page title is often the most legible identifier.
+  Readers think in terms of <tt>FIND</tt>, <tt>WALK</tt>, or <tt>PRINT</tt>, not
+  in terms of slugs and context stacks.
+</p>
+
+<h4>A title-based model can be good enough for a first approximation</h4>
+
+<p>
+  If the goal is only to create a convenient bridge from HyperDoc into a known,
+  already-registered FedWiki hyperbook, title-based lookup may be adequate as an
+  interface layer. Internally, the system could still resolve that title to a
+  slug using the site's own mappings.
+</p>
+
+<p>
+  In that limited case, titles can be a user-facing entry point rather than the
+  real identity model.
+</p>
+
+<h4>Where this approximation breaks down</h4>
+
+<ul>
+  <li>the same title exists across multiple sites</li>
+  <li>the title-to-slug mapping is ambiguous or stale</li>
+  <li>context-sensitive resolution is important</li>
+  <li>the goal is to model collaborative-link semantics, not just offer a shortcut</li>
+</ul>
+
+<p>
+  Once any of those conditions matters, title-only linking stops being a close
+  enough representation.
+</p>
+
+<h4>Pragmatic compromise</h4>
+
+<p>
+  A reasonable design may therefore have two layers:
+</p>
+
+<ul>
+  <li>a reader-friendly title-oriented surface</li>
+  <li>a site/slug/context-aware resolution model underneath</li>
+</ul>
+
+<p>
+  This would let HyperDoc stay readable without pretending that titles alone are
+  the full operational identity.
+</p>
+
+<h4>Conclusion</h4>
+
+<p>
+  Title-based links may be enough for documentation ergonomics or a first-pass
+  UI, but they are not enough if the goal is to match the FedWiki reference
+  implementation closely. They are useful as a surface, not sufficient as the
+  whole model.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Why Title-Based FedWiki Links Are Not Enough">Why Title-Based FedWiki Links Are Not Enough</a></li>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">Collaborative Link Model and Resolution</a></li>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+</ul>

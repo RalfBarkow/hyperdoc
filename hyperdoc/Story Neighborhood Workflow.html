@@ -1,0 +1,176 @@
+<h1>Story Neighborhood Workflow</h1>
+
+<p>
+  What Ward describes is a tightening of the feedback loop between story,
+  neighborhood, book artifact, and editorial repair inside Federated Wiki,
+  driven by Mech blocks.
+</p>
+
+<p>
+  This page summarizes that workflow structurally rather than historically.
+  The key point is that the workflow starts from a page of links and treats it
+  as the seed for bounded graph expansion, artifact generation, and repair.
+</p>
+
+<h4>The Story as executable spine</h4>
+
+<p>
+  At the center is a page of links: the story. This is not prose-first. It is a
+  curated graph frontier.
+</p>
+
+<ul>
+  <li><tt>FIND</tt> retrieves the story by slug.</li>
+  <li>The story defines a seed set of pages.</li>
+  <li><tt>WALK</tt>, <tt>PRINT</tt>, and <tt>PREVIEW</tt> operate relative to that seed.</li>
+</ul>
+
+<p>
+  This is graph-rooted publishing rather than document-rooted publishing.
+</p>
+
+<h4>WALK as controlled graph expansion</h4>
+
+<p>
+  The upgraded <tt>WALK</tt> explores via sitemaps, not inline links alone.
+</p>
+
+<pre>
+WALK 2 clicks
+</pre>
+
+<p>
+  This defines a radius in the page graph.
+</p>
+
+<ul>
+  <li>1 click = gateway</li>
+  <li>2 clicks = neighborhood</li>
+  <li>3 clicks = aspirational book scope</li>
+</ul>
+
+<p>
+  In abstract form:
+</p>
+
+<pre>
+Given seed S
+Return nodes within distance &lt;= N
+</pre>
+
+<p>
+  Editorially, this is powerful because scope is explicit, drift is visible, and
+  expansion is intentional. The book becomes a bounded graph extraction rather
+  than an accidental crawl.
+</p>
+
+<h4>Aspects as residue</h4>
+
+<p>
+  <tt>WALK</tt> leaves graph aspects. These are reusable structural artifacts
+  that downstream steps can consume.
+</p>
+
+<ul>
+  <li><tt>PREVIEW</tt> can summarize them.</li>
+  <li><tt>SOLO</tt> can browse them.</li>
+  <li><tt>PRINT</tt> can render them.</li>
+</ul>
+
+<p>
+  This is compositional publishing: the exploration step produces metadata that
+  later steps reuse, without needing to traverse the graph again.
+</p>
+
+<h4>PRINT as deterministic materialization</h4>
+
+<p>
+  The newer <tt>PRINT</tt> block has three editorial surfaces:
+</p>
+
+<ul>
+  <li><tt>PRINT outline</tt> for structure only</li>
+  <li><tt>PRINT draft</tt> for full content aggregation</li>
+  <li>a warnings list for structural quality reporting</li>
+</ul>
+
+<p>
+  This turns a wiki neighborhood into a single HTML artifact that can then be
+  converted to PDF, EPUB, or print-on-demand formats. The important step is not
+  just generation but diagnostics: <tt>PRINT</tt> emits warnings.
+</p>
+
+<h4>Dangling references as boundary signals</h4>
+
+<p>
+  A dangling reference is not merely an error. It signals a mismatch between the
+  current graph boundary and the references found within it.
+</p>
+
+<p>
+  Typical resolutions are:
+</p>
+
+<ol>
+  <li>Enlarge the neighborhood.</li>
+  <li>Investigate the page origin.</li>
+  <li>Repair the reference.</li>
+  <li>Accept the boundary.</li>
+</ol>
+
+<p>
+  This is editorial topology rather than simple link checking.
+</p>
+
+<h4>The ghost page insight</h4>
+
+<p>
+  When a page cannot be found, a ghost page opens and the same interface can be
+  used to inspect backlinks such as "pages link here". Instead of a dead-end
+  404, the system turns the missing page into a diagnostic object.
+</p>
+
+<p>
+  That is workflow-aware error handling: the structural hole remains inspectable
+  with the same UI affordances used elsewhere.
+</p>
+
+<h4>Conceptual pipeline</h4>
+
+<pre>
+Story (seed links)
+   -&gt;
+WALK (bounded graph expansion)
+   -&gt;
+Aspects (structured representation)
+   -&gt;
+PRINT (materialization + diagnostics)
+   -&gt;
+PREVIEW (targeted repair)
+</pre>
+
+<p>
+  The ghost page closes the loop by making missing nodes inspectable.
+</p>
+
+<h4>Why this matters here</h4>
+
+<p>
+  This model aligns well with work that emphasizes journal integrity,
+  provenance preservation, neighborhood correctness, and local versus remote
+  authority. The same mechanism that supports book assembly can also support
+  federation hygiene.
+</p>
+
+<ul>
+  <li><tt>PRINT</tt> could become a journal-aware export.</li>
+  <li><tt>WALK</tt> radius could encode replication boundaries.</li>
+  <li>Dangling slugs could signal fork-provenance gaps.</li>
+</ul>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+</ul>
+

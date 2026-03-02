@@ -1,0 +1,122 @@
+<h1>Collaborative Link Model and Resolution</h1>
+
+<p>
+  Three ideas need to stay connected when discussing Federated Wiki links in
+  HyperDoc:
+</p>
+
+<ul>
+  <li>the <b>link model</b></li>
+  <li>the <b>navigation semantics</b> of collaborative links</li>
+  <li>the <b>resolution model</b> that decides which page is actually loaded</li>
+</ul>
+
+<p>
+  If these are discussed separately, the design becomes misleading. A link is
+  not just a piece of syntax, and navigation is not just URL construction.
+  Collaborative linking is a compact user gesture backed by federation-aware
+  resolution rules.
+</p>
+
+<h4>1. Link model</h4>
+
+<p>
+  The link model defines what a link <i>is</i>. In Federated Wiki, a
+  collaborative link begins as visible page text inside <tt>[[...]]</tt>.
+  In the Java reference implementation, the visible text is converted into a
+  slug. This means the operational identity of the link target is not only the
+  displayed title but also the derived slug.
+</p>
+
+<p>
+  For HyperDoc, this means a FedWiki link model cannot stop at “page title”. It
+  must account for site and slug as first-class parts of the target model.
+</p>
+
+<h4>2. Navigation semantics</h4>
+
+<p>
+  Navigation semantics describe what should happen when a user follows a
+  collaborative link. In the reference implementation, following a link is not a
+  simple open-by-title action. It means:
+</p>
+
+<ol>
+  <li>extract the collaborative link from the current item</li>
+  <li>derive a slug from the link text</li>
+  <li>collect the current page context from journal provenance</li>
+  <li>search origin and then context sites in a defined order</li>
+  <li>open the first page that resolves successfully</li>
+</ol>
+
+<p>
+  So the navigation semantics are federation-aware. The same visible link text
+  may resolve differently depending on origin, context, and item-level site
+  hints.
+</p>
+
+<h4>3. Resolution model</h4>
+
+<p>
+  The resolution model is the concrete lookup algorithm. In the fedwiki-java
+  reference implementation it is roughly:
+</p>
+
+<pre>
+slug := collaborative-link text normalized to slug
+context := sites from current page journal
+if current item has site, prioritize that site in context
+try origin site first
+then try each context site in order
+load the first site/slug pair that returns a page
+</pre>
+
+<p>
+  This model explains why collaborative linking is more than local wiki
+  navigation. It is a lightweight federation protocol embedded in page text.
+</p>
+
+<h4>Why these three belong together</h4>
+
+<p>
+  A poor design can get one layer right while breaking the others.
+</p>
+
+<ul>
+  <li>A title-only link model loses slug and site identity.</li>
+  <li>A URL-only navigation model loses provenance-aware lookup.</li>
+  <li>A resolution algorithm without a clear link model becomes opaque to authors.</li>
+</ul>
+
+<p>
+  The design goal is therefore not merely “link to a FedWiki page”. It is:
+  represent the same conceptual link object that the collaborative-link system
+  expects, and make its navigation and resolution behavior inspectable.
+</p>
+
+<h4>Implication for HyperDoc</h4>
+
+<p>
+  A HyperDoc page that wants to point to concrete FedWiki concepts such as
+  <tt>FIND</tt>, <tt>WALK</tt>, <tt>PRINT</tt>, or <tt>REVIEW</tt> should not use
+  a naive title-only convention. It should eventually expose or derive:
+</p>
+
+<ul>
+  <li>the FedWiki site</li>
+  <li>the target slug</li>
+  <li>the current origin/context assumptions</li>
+</ul>
+
+<p>
+  Only then will the HyperDoc design match the actual semantics of
+  collaborative links instead of approximating them.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Fedwiki Java Reference Implementation">Fedwiki Java Reference Implementation</a></li>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+</ul>

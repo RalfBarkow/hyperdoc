@@ -1,0 +1,131 @@
+<h1>Fedwiki Java Reference Implementation</h1>
+
+<p>
+  The repository <tt>~/workspace/fedwiki-java</tt> is a small Java interpreter
+  for Federated Wiki navigation. In practice it is useful as an executable
+  reference for collaborative link resolution, context handling, lineup
+  behavior, and neighborhood discovery.
+</p>
+
+<p>
+  It is not a full wiki server or browser UI. Its value is that the navigation
+  semantics are compact enough to inspect directly in code.
+</p>
+
+<h4>What it implements</h4>
+
+<ul>
+  <li>read page JSON over HTTP</li>
+  <li>maintain a lineup of visited panels</li>
+  <li>follow the first collaborative link in the current item</li>
+  <li>derive page context from journal <tt>site</tt> entries</li>
+  <li>accumulate a neighborhood via <tt>/system/sitemap.json</tt></li>
+</ul>
+
+<p>
+  The command-line interface described in <tt>README.md</tt> includes commands
+  such as <tt>find</tt>, <tt>link</tt>, <tt>back</tt>, and <tt>next</tt>.
+</p>
+
+<h4>Why it matters</h4>
+
+<p>
+  For HyperDoc and HyperBook work, this code is valuable because it exposes a
+  minimal, explicit version of collaborative link semantics. It shows what is
+  primary in resolution and what is secondary.
+</p>
+
+<h4>Collaborative link extraction</h4>
+
+<p>
+  In <tt>Main.java</tt>, the <tt>Item.links()</tt> method parses the first
+  <tt>[[...]]</tt> occurrence from item text and converts the visible text into
+  a slug by:
+</p>
+
+<ul>
+  <li>replacing whitespace with <tt>-</tt></li>
+  <li>removing non-alphanumeric characters except <tt>-</tt></li>
+  <li>lowercasing the result</li>
+</ul>
+
+<p>
+  This means the reference implementation resolves collaborative links by slug,
+  not by page title.
+</p>
+
+<h4>Context derivation</h4>
+
+<p>
+  A page's context is derived from its journal. The <tt>Page.context()</tt>
+  method walks journal entries backward and collects distinct <tt>site</tt>
+  values. This makes context provenance-based rather than purely local-page
+  based.
+</p>
+
+<p>
+  That matches the idea that context is about the page's federation history,
+  not simply the current server or owner.
+</p>
+
+<h4>Resolution order</h4>
+
+<p>
+  The core collaborative-link resolution lives in
+  <tt>Panel.load(Panel from, String slug)</tt>.
+</p>
+
+<p>
+  Resolution proceeds as follows:
+</p>
+
+<ol>
+  <li>Start with the page context derived from the current page journal.</li>
+  <li>If the current item has its own <tt>site</tt>, move that site to the front of the context list.</li>
+  <li>Try the origin site first.</li>
+  <li>If not found, try each context site in order.</li>
+  <li>Fetch <tt>http://site/slug.json</tt> at each step.</li>
+  <li>The first successful fetch wins.</li>
+</ol>
+
+<p>
+  If no site resolves the slug, the program stops with
+  <tt>can't find page in current context</tt>.
+</p>
+
+<h4>Neighborhood is related but separate</h4>
+
+<p>
+  The code also accumulates a neighborhood by fetching
+  <tt>/system/sitemap.json</tt> for encountered sites. That supports broader site
+  awareness, but it is not the primary clicked-link resolution path. Direct page
+  fetch by slug across origin and context sites remains primary.
+</p>
+
+<h4>Implication for HyperDoc design</h4>
+
+<p>
+  Any HyperDoc feature that wants to link to concrete FedWiki pages should be
+  grounded in this resolution model. The important fields are:
+</p>
+
+<ul>
+  <li>target slug</li>
+  <li>origin site</li>
+  <li>context site list</li>
+  <li>optional item-level site override</li>
+</ul>
+
+<p>
+  A purely title-based HyperDoc link model would not match the reference
+  implementation closely enough.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><tt>~/workspace/fedwiki-java/README.md</tt></li>
+  <li><tt>~/workspace/fedwiki-java/Main.java</tt></li>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+</ul>
