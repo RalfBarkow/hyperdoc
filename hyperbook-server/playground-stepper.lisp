@@ -130,9 +130,8 @@
         (when pr
           (hv:html
             (:h3 "Parse / reader error")
-            (:p "The selection could not be read into Lisp forms.")
-            (:p "This failed in the Lisp reader before evaluation started. A common cause is a package-qualified symbol that cannot be resolved, for example because the package is not loaded yet or because the symbol is not exported.")
-            (:p "Verify the package prefix in the selected code and load the relevant system first if needed.")
+            (:p "The current source selection could not be read as Lisp.")
+            (:p "Evaluation did not start. The selected text is not a complete readable form in its current boundaries.")
             (hv:eval-button "Inspect parse error report"
                             (hv:thunk pr)
                             "Open the captured reader error and backtrace"))))
