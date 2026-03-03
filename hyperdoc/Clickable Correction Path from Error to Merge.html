@@ -1,0 +1,101 @@
+<h1>Clickable Correction Path from Error to Merge</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A credible maintenance story should not stop at classifying a visible error.
+  The error should lead to the source change, the verification step, and then
+  the merge decision.
+</p>
+
+<p>
+  For the current <tt>kioskberrli</tt> failure, the path should be:
+</p>
+
+<pre>
+visible error
+  -&gt;
+remove obsolete option in source
+  -&gt;
+rerun the SD-image build
+  -&gt;
+merge the verified correction
+</pre>
+
+<h4>1. Visible error</h4>
+
+<p>
+  The starting point is the normalized failure object:
+  <a expr="(kioskberrli-sd-image-failure-context)"><tt>kioskberrli-sd-image-failure-context</tt></a>
+</p>
+
+<p>
+  This object classifies the failure and records the pinned upstream context.
+</p>
+
+<h4>2. Suggested patch</h4>
+
+<p>
+  The next click should not be another abstract explanation. It should point to
+  the source edit that removes the obsolete option:
+  <a expr="(suggested-patch (kioskberrli-sd-image-failure-context))"><tt>suggested-patch</tt></a>
+</p>
+
+<p>
+  For this topic, the patch is intentionally minimal: remove the
+  <tt>sdImage.imageSize</tt> setting from <tt>kiosk.nix</tt>. The important
+  point is not to guess a replacement too early, but to clear the known
+  invalid option first.
+</p>
+
+<h4>3. Verification command</h4>
+
+<p>
+  The correction is not credible until the pinned build target is rerun:
+  <a expr="(repro-build-command (kioskberrli-sd-image-failure-context))"><tt>repro-build-command</tt></a>
+</p>
+
+<p>
+  This is the step that turns the repair from a source edit into a verified
+  maintenance move.
+</p>
+
+<h4>4. Merge step</h4>
+
+<p>
+  Once the verification build succeeds, the final step is not another local
+  inspection but the normal repository decision:
+</p>
+
+<ul>
+  <li>commit the correction</li>
+  <li>review the result in the branch context</li>
+  <li>merge the verified fix</li>
+</ul>
+
+<p>
+  The correction path object should therefore remain explicit about the final
+  step:
+  <a expr="(correction-path (kioskberrli-sd-image-failure-context))"><tt>correction-path</tt></a>
+</p>
+
+<h4>Why this matters</h4>
+
+<p>
+  The maintenance story becomes credible only when the visible error can drive
+  the whole repair sequence without forcing the maintainer to reconstruct the
+  path from memory.
+</p>
+
+<p>
+  In that sense, the error object should behave less like a dead report and
+  more like a small workflow capsule.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
+  <li><a page="Understanding Kioskberrli sdImage Failure Context">Understanding Kioskberrli sdImage Failure Context</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+</ul>

@@ -150,6 +150,36 @@ arguments."
             (topic-of object)
             (removed-option-of object))))
 
+(defclass kioskberrli-patch-suggestion ()
+  ((file :initarg :file :reader file-of)
+   (change-kind :initarg :change-kind :reader change-kind-of)
+   (target-option :initarg :target-option :reader target-option-of)
+   (old-form :initarg :old-form :reader old-form-of)
+   (new-form :initarg :new-form :reader new-form-of)
+   (explanation :initarg :explanation :reader explanation-of)))
+
+(defmethod print-object ((object kioskberrli-patch-suggestion) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A in ~A"
+            (change-kind-of object)
+            (file-of object))))
+
+(defclass kioskberrli-build-command ()
+  ((command :initarg :command :reader command-of)
+   (purpose :initarg :purpose :reader purpose-of)))
+
+(defmethod print-object ((object kioskberrli-build-command) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (command-of object))))
+
+(defclass kioskberrli-correction-path ()
+  ((steps :initarg :steps :reader steps-of)
+   (summary :initarg :summary :reader summary-of)))
+
+(defmethod print-object ((object kioskberrli-correction-path) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (summary-of object))))
+
 (defun kioskberrli-flake-lock-pathname ()
   #P"/Users/rgb/workspace/hauptsache/kioskberrli/flake.lock")
 
@@ -177,6 +207,16 @@ arguments."
   (:documentation "Return evidence for whether the context's relevant option
 belongs to the pinned upstream API."))
 
+(defgeneric suggested-patch (object)
+  (:documentation "Return the next mechanical edit suggested by the failure
+context."))
+
+(defgeneric repro-build-command (object)
+  (:documentation "Return the build command used to verify the correction."))
+
+(defgeneric correction-path (object)
+  (:documentation "Return the correction path from visible failure to merge."))
+
 (defmethod option-exists? ((context kioskberrli-sd-image-failure-context))
   (make-instance 'kioskberrli-option-existence-evidence
                  :option-name (removed-option-of context)
@@ -186,6 +226,37 @@ belongs to the pinned upstream API."))
                  (format nil
                          "The failure context records ~A as removed or absent in the pinned upstream SD-image API, so setting it should fail option evaluation."
                          (removed-option-of context))))
+
+(defmethod suggested-patch ((context kioskberrli-sd-image-failure-context))
+  (make-instance 'kioskberrli-patch-suggestion
+                 :file #P"/Users/rgb/workspace/hauptsache/kioskberrli/kiosk.nix"
+                 :change-kind :remove-obsolete-option
+                 :target-option (removed-option-of context)
+                 :old-form "sdImage.imageSize = 4096;"
+                 :new-form nil
+                 :explanation
+                 "Remove the obsolete option from kiosk.nix, then rerun the SD-image build against the pinned flake lock."))
+
+(defmethod repro-build-command ((context kioskberrli-sd-image-failure-context))
+  (declare (ignore context))
+  (make-instance 'kioskberrli-build-command
+                 :command "nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage"
+                 :purpose "Verify that the kiosk SD-image target now evaluates and builds on the pinned module set."))
+
+(defmethod correction-path ((context kioskberrli-sd-image-failure-context))
+  (make-instance 'kioskberrli-correction-path
+                 :summary "visible error -> patch -> verify -> merge"
+                 :steps
+                 (list
+                  (list :step :visible-error
+                        :object context)
+                  (list :step :patch
+                        :object (suggested-patch context))
+                  (list :step :verify
+                        :object (repro-build-command context))
+                  (list :step :merge
+                        :object
+                        "After a successful verification build, commit the correction and merge it through the normal repo workflow."))))
 
 (defun kioskberrli-sd-image-failure-context ()
   (make-instance 'kioskberrli-sd-image-failure-context
