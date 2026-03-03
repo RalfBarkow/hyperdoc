@@ -122,6 +122,80 @@ arguments."
           :resolution-order order)))
 
 ;;
+;; hauptsache / kioskberrli reference objects
+;;
+
+(defclass kioskberrli-option-existence-evidence ()
+  ((option-name :initarg :option-name :reader option-name-of)
+   (exists-p :initarg :exists-p :reader exists-p-of)
+   (evidence-kind :initarg :evidence-kind :reader evidence-kind-of)
+   (explanation :initarg :explanation :reader explanation-of)))
+
+(defmethod print-object ((object kioskberrli-option-existence-evidence) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A => ~:[absent~;present~]"
+            (option-name-of object)
+            (exists-p-of object))))
+
+(defclass kioskberrli-sd-image-failure-context ()
+  ((topic :initarg :topic :reader topic-of)
+   (flake-lock :initarg :flake-lock :reader flake-lock-of)
+   (nixpkgs :initarg :nixpkgs :reader nixpkgs-of)
+   (modules :initarg :modules :reader modules-of)
+   (removed-option :initarg :removed-option :reader removed-option-of)))
+
+(defmethod print-object ((object kioskberrli-sd-image-failure-context) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A ~A"
+            (topic-of object)
+            (removed-option-of object))))
+
+(defun kioskberrli-flake-lock-pathname ()
+  #P"/Users/rgb/workspace/hauptsache/kioskberrli/flake.lock")
+
+(defun kioskberrli-nixpkgs-lock-object ()
+  (list :input "nixpkgs"
+        :flake-lock (kioskberrli-flake-lock-pathname)
+        :revision "cf59864ef8aa2e178cccedbe2c178185b0365705"
+        :ref "nixos-unstable"
+        :repo "NixOS/nixpkgs"))
+
+(defun kioskberrli-sd-image-module-reference (kind)
+  (ecase kind
+    (:aarch64
+     (list :module :sd-image-aarch64
+           :relative-path "nixos/modules/installer/sd-card/sd-image-aarch64.nix"))
+    (:core
+     (list :module :sd-image
+           :relative-path "nixos/modules/installer/sd-card/sd-image.nix"))))
+
+(defun kioskberrli-sd-image-module-references ()
+  (list (kioskberrli-sd-image-module-reference :aarch64)
+        (kioskberrli-sd-image-module-reference :core)))
+
+(defgeneric option-exists? (object)
+  (:documentation "Return evidence for whether the context's relevant option
+belongs to the pinned upstream API."))
+
+(defmethod option-exists? ((context kioskberrli-sd-image-failure-context))
+  (make-instance 'kioskberrli-option-existence-evidence
+                 :option-name (removed-option-of context)
+                 :exists-p nil
+                 :evidence-kind :failure-context
+                 :explanation
+                 (format nil
+                         "The failure context records ~A as removed or absent in the pinned upstream SD-image API, so setting it should fail option evaluation."
+                         (removed-option-of context))))
+
+(defun kioskberrli-sd-image-failure-context ()
+  (make-instance 'kioskberrli-sd-image-failure-context
+                 :topic :sdimage-imagesize-failure
+                 :flake-lock (kioskberrli-flake-lock-pathname)
+                 :nixpkgs (kioskberrli-nixpkgs-lock-object)
+                 :modules (kioskberrli-sd-image-module-references)
+                 :removed-option "sdImage.imageSize"))
+
+;;
 ;; journalmatic translation helpers
 ;;
 

@@ -1,0 +1,105 @@
+<h1>s-graphviz Dependency Boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The current <tt>s-graphviz</tt> problem is not a generic ASDF registry issue.
+  It is a real dependency boundary in the HyperDoc stack.
+</p>
+
+<h4>What is required</h4>
+
+<p>
+  <tt>html-inspector-views/standard</tt> depends on <tt>s-graphviz</tt>.
+</p>
+
+<p>
+  This is visible in the local source tree:
+</p>
+
+<ul>
+  <li><tt>html-inspector-views.asd</tt> declares <tt>#:s-graphviz</tt></li>
+  <li><tt>s-graphviz.lisp</tt> provides the integration layer</li>
+  <li>system and dependency views call Graphviz-related support functions</li>
+</ul>
+
+<p>
+  So <tt>s-graphviz</tt> is not an optional shell extra in the current design.
+</p>
+
+<h4>What went wrong</h4>
+
+<p>
+  The packaged Nix version of <tt>s-graphviz</tt> currently fails with a
+  circular dependency involving <tt>literate-lisp</tt>.
+</p>
+
+<p>
+  Removing <tt>s-graphviz</tt> from the HyperDoc dev shell was therefore the
+  wrong fix. It only changed the failure mode from:
+</p>
+
+<ul>
+  <li>broken <tt>s-graphviz</tt> load</li>
+</ul>
+
+<p>
+  to:
+</p>
+
+<ul>
+  <li>missing dependency for <tt>html-inspector-views/standard</tt></li>
+</ul>
+
+<p>
+  In other words, the system did not become healthier. The dependency simply
+  became absent instead of broken.
+</p>
+
+<h4>Why this matters</h4>
+
+<p>
+  This is a useful example of a credible maintenance boundary. The problem is
+  not “some shell package is inconvenient”. The problem is that the current
+  runtime design really expects Graphviz support to be present.
+</p>
+
+<p>
+  That means any fix must address the dependency boundary itself.
+</p>
+
+<h4>Current boundary</h4>
+
+<ul>
+  <li><tt>s-graphviz</tt> must remain in the dev environment as long as <tt>html-inspector-views/standard</tt> requires it.</li>
+  <li>The packaged Nix <tt>s-graphviz</tt> is currently broken in this environment.</li>
+  <li>No local checkout of <tt>s-graphviz</tt> or <tt>literate-lisp</tt> is currently available for override.</li>
+</ul>
+
+<h4>Real next options</h4>
+
+<ul>
+  <li>Provide a working source checkout of <tt>s-graphviz</tt> and likely <tt>literate-lisp</tt>, then override it in the ASDF source registry.</li>
+  <li>Patch <tt>html-inspector-views</tt> so Graphviz support becomes optional instead of a hard ASDF dependency.</li>
+</ul>
+
+<p>
+  The first option is operationally smaller. The second option is the cleaner
+  architectural change, but it reaches into a dependency boundary rather than
+  only the local dev shell.
+</p>
+
+<h4>Pragmatic conclusion</h4>
+
+<p>
+  The immediate local correction is simple: keep <tt>s-graphviz</tt> in the
+  dev shell. The actual repair still remains open.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
+  <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
+  <li><a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a></li>
+</ul>

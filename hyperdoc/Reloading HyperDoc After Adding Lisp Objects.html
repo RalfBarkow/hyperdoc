@@ -1,0 +1,76 @@
+<h1>Reloading HyperDoc After Adding Lisp Objects</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A HyperDoc page can be correct in the repo and still fail at runtime if the
+  running Lisp image was started before the referenced helper functions or
+  objects existed.
+</p>
+
+<p>
+  The typical symptom is an error such as:
+</p>
+
+<pre>
+The function HYPERDOC::KIOSKBERRLI-NIXPKGS-LOCK-OBJECT is undefined.
+</pre>
+
+<h4>What this means</h4>
+
+<p>
+  The page markup is being read correctly, but the current image does not yet
+  contain the Lisp definition named in the page.
+</p>
+
+<p>
+  In practice this usually means one of two things:
+</p>
+
+<ul>
+  <li>the running image is stale and needs <tt>:hyperdoc</tt> reloaded</li>
+  <li>the referenced definition is not part of the loaded ASDF system</li>
+</ul>
+
+<h4>How to check</h4>
+
+<p>
+  In the Playground, reload the system and check whether the function is now
+  bound:
+</p>
+
+<lisp-code>
+(progn
+  (asdf:load-system :hyperdoc)
+  (fboundp 'hyperdoc::kioskberrli-nixpkgs-lock-object))
+</lisp-code>
+
+<p>
+  Expected result: a non-<tt>NIL</tt> value.
+</p>
+
+<h4>Pragmatic fix</h4>
+
+<p>
+  Reload the system and reopen the page in a fresh pane:
+</p>
+
+<lisp-code>
+(progn
+  (asdf:load-system :hyperdoc)
+  nil)
+</lisp-code>
+
+<p>
+  If the function is still undefined after reload, then the problem is not a
+  stale image. The next thing to inspect is the ASDF system definition and
+  whether the file containing the function is actually part of the loaded
+  system.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
+</ul>
