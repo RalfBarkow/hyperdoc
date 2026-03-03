@@ -1,0 +1,81 @@
+<h1>Two Installation Models: SD Image vs Classic Installer</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  NixOS on Raspberry Pi has two different workflows. They should not be mixed.
+</p>
+
+<h2>Decision Table</h2>
+
+<table>
+  <tr>
+    <th>Model</th>
+    <th>Starting Point</th>
+    <th>Main File</th>
+    <th>Main Command</th>
+  </tr>
+  <tr>
+    <td>SD image model</td>
+    <td>preinstalled SD image already flashed</td>
+    <td><tt>/etc/nixos/configuration.nix</tt></td>
+    <td><tt>nixos-rebuild boot</tt></td>
+  </tr>
+  <tr>
+    <td>classic installer model</td>
+    <td>target root mounted under <tt>/mnt</tt></td>
+    <td><tt>/mnt/etc/nixos/configuration.nix</tt></td>
+    <td><tt>nixos-install</tt></td>
+  </tr>
+</table>
+
+<h2>SD Image Model</h2>
+
+<p>
+  Use this when you flashed an official Raspberry Pi SD image. The machine boots
+  into an already installed NixOS system. The correct path is:
+</p>
+
+<pre>
+edit /etc/nixos/configuration.nix
+nixos-rebuild boot
+reboot
+</pre>
+
+<h2>Classic Installer Model</h2>
+
+<p>
+  Use this when you are performing a normal installation to a mounted target
+  filesystem. The correct path is:
+</p>
+
+<pre>
+mount target under /mnt
+nixos-generate-config --root /mnt
+nixos-install
+</pre>
+
+<h2>Do Not Mix Models</h2>
+
+<p>
+  Do not run installer commands on a machine that is following the preinstalled
+  SD-image workflow. Do not assume that <tt>nixos-rebuild boot</tt> can replace
+  <tt>nixos-install</tt> in a classic install.
+</p>
+
+<p>
+  The practical rule is simple:
+</p>
+
+<ul>
+  <li>If you flashed an official SD image, stay in the SD-image model.</li>
+  <li>If you are building a system under <tt>/mnt</tt>, stay in the installer model.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Official Tutorial NixOS SD Image on Raspberry Pi 4 400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Invariant Boot Partition Must Be Big Enough">Invariant: Boot Partition Must Be Big Enough</a></li>
+  <li><a page="Preflight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a></li>
+</ul>

@@ -1,0 +1,66 @@
+<h1>Pre-flight Checklist for Raspberry Pi NixOS SD Images</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Run these checks before trusting a flashed SD image or before rebuilding the
+  first generation on a Raspberry Pi 4 or Pi 400.
+</p>
+
+<h2>Commands</h2>
+
+<pre>
+df -h /boot
+ls -la /boot/extlinux
+ls -la /boot/nixos
+ls -la /dev/disk/by-label | grep -E 'FIRMWARE|NIXOS_SD' || true
+</pre>
+
+<h2>Rules</h2>
+
+<ul>
+  <li>If <tt>/boot</tt> is below <tt>128MB</tt>, stop and re-image.</li>
+  <li>If <tt>/boot/extlinux</tt> is missing or truncated, reboot is unsafe.</li>
+  <li>If labels <tt>FIRMWARE</tt> and <tt>NIXOS_SD</tt> are missing, verify that this is really the SD-image model.</li>
+  <li>Prefer <tt>nixos-rebuild boot</tt> first, not <tt>switch</tt>.</li>
+</ul>
+
+<h2>Why These Checks Exist</h2>
+
+<p>
+  They catch the most expensive class of early mistakes:
+</p>
+
+<ul>
+  <li>wrong image</li>
+  <li>wrong partition layout</li>
+  <li>too-small boot partition</li>
+  <li>extlinux already broken before reboot</li>
+</ul>
+
+<h2>How This Fits the Official Tutorial</h2>
+
+<p>
+  The official tutorial assumes a valid preinstalled SD image. This checklist is
+  the maintenance-story version of that assumption: verify the invariant before
+  betting a reboot on it.
+</p>
+
+<h2>References</h2>
+
+<ul>
+  <li><a href="https://nix.dev/tutorials/nixos/installing-nixos-on-a-raspberry-pi">https://nix.dev/tutorials/nixos/installing-nixos-on-a-raspberry-pi</a></li>
+  <li><a href="https://search.nixos.org/options">https://search.nixos.org/options</a></li>
+  <li><a href="https://hydra.nixos.org/jobset/nixos/">https://hydra.nixos.org/jobset/nixos/</a></li>
+  <li><a href="https://github.com/NixOS/nixos-hardware/tree/master/raspberry-pi/4">https://github.com/NixOS/nixos-hardware/tree/master/raspberry-pi/4</a></li>
+  <li><a href="https://nixos.org/manual/nixos/stable/">https://nixos.org/manual/nixos/stable/</a></li>
+  <li>Hydra branch names to expect in practice: <tt>nixos-24.11</tt>, <tt>nixos-unstable</tt></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Official Tutorial NixOS SD Image on Raspberry Pi 4 400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Two Installation Models SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
+  <li><a page="Invariant Boot Partition Must Be Big Enough">Invariant: Boot Partition Must Be Big Enough</a></li>
+</ul>

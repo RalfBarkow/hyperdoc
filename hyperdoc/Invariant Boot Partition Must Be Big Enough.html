@@ -1,0 +1,64 @@
+<h1>Invariant: Boot Partition Must Be Big Enough</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The Raspberry Pi SD-image workflow assumes that <tt>/boot</tt> is large enough
+  to hold kernel, initrd, boot metadata, and multiple generations.
+</p>
+
+<h2>Operational Thresholds</h2>
+
+<ul>
+  <li><tt>&gt;= 256MB</tt>: recommended baseline</li>
+  <li><tt>&lt; 128MB</tt>: stop and re-image</li>
+</ul>
+
+<h2>Why This Matters</h2>
+
+<p>
+  A successful <tt>nixos-rebuild boot</tt> needs room for:
+</p>
+
+<ul>
+  <li>kernel copies</li>
+  <li>initrd copies</li>
+  <li><tt>/boot/nixos/</tt> generation files</li>
+  <li><tt>/boot/extlinux/extlinux.conf</tt> rewrite</li>
+</ul>
+
+<p>
+  If the partition is too small, the kernel copy can fail and extlinux can be
+  left truncated. That makes reboot unsafe.
+</p>
+
+<h2>Observable Symptoms</h2>
+
+<ul>
+  <li><tt>cp: ... No space left on device</tt></li>
+  <li><tt>Failed to install bootloader</tt></li>
+  <li>only <tt>extlinux.conf.tmp.*</tt> exists</li>
+  <li><tt>extlinux.conf</tt> reduced to a short header-only file</li>
+</ul>
+
+<h2>Reboot Unsafe Criteria</h2>
+
+<ul>
+  <li><tt>/boot</tt> is below the minimum threshold</li>
+  <li><tt>/boot/extlinux</tt> is missing</li>
+  <li><tt>extlinux.conf</tt> is missing or clearly truncated</li>
+  <li><tt>/boot/nixos</tt> does not contain a complete new generation after rebuild</li>
+</ul>
+
+<p>
+  In these cases, do not reboot. Re-image first or repair the boot partition
+  layout before continuing.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Official Tutorial NixOS SD Image on Raspberry Pi 4 400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Two Installation Models SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
+  <li><a page="Preflight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a></li>
+</ul>

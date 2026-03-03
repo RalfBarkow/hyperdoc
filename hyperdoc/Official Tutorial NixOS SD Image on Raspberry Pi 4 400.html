@@ -1,0 +1,114 @@
+<h1>Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page captures the official Raspberry Pi SD-image workflow described on
+  <tt>nix.dev</tt>. It is the preinstalled SD-image model, not the classic
+  installer model.
+</p>
+
+<h2>Official Workflow</h2>
+
+<ol>
+  <li>Download a prebuilt <tt>nixos-sd-image-*-aarch64-linux.img.zst</tt>.</li>
+  <li>Flash it to an SD card.</li>
+  <li>Boot the Raspberry Pi 4 or Pi 400 from that card.</li>
+  <li>Connect to the machine and edit <tt>/etc/nixos/configuration.nix</tt>.</li>
+  <li>Run <tt>nixos-rebuild boot</tt>.</li>
+  <li>Reboot into the new generation.</li>
+  <li>Only later use <tt>nixos-rebuild switch</tt> once the system is known to reboot safely.</li>
+</ol>
+
+<p>
+  The decisive point in the tutorial is that NixOS is already installed in the
+  SD image. The first task after flashing is configuration and rebuild, not
+  installation.
+</p>
+
+<h2>Representative Configuration</h2>
+
+<p>
+  The official path assumes a configuration shaped roughly like this:
+</p>
+
+<pre>
+{ config, pkgs, ... }:
+{
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_rpi4;
+  boot.loader.generic-extlinux-compatible.enable = true;
+
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/NIXOS_SD";
+    fsType = "ext4";
+  };
+
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-label/FIRMWARE";
+    fsType = "vfat";
+  };
+
+  networking.networkmanager.enable = true;
+  networking.wireless.enable = false;
+
+  services.openssh.enable = true;
+
+  users.users.kiosk = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+  };
+
+  hardware.enableRedistributableFirmware = true;
+
+  system.stateVersion = "24.11";
+}
+</pre>
+
+<p>
+  Secrets such as Wi-Fi credentials and SSH keys should be added locally, not
+  copied from documentation.
+</p>
+
+<h2>Implicit Invariants</h2>
+
+<ul>
+  <li>The flashed image must actually be an official SD image, not an arbitrary installer or reused card layout.</li>
+  <li><tt>/boot</tt> must be large enough for kernel, initrd, and extlinux state to be written safely.</li>
+  <li>The labels <tt>FIRMWARE</tt> and <tt>NIXOS_SD</tt> must match the mounted partitions.</li>
+  <li>The correct first rebuild mode is <tt>boot</tt>, not <tt>switch</tt>.</li>
+</ul>
+
+<h2>Failure Modes That Matter Early</h2>
+
+<ul>
+  <li><tt>/boot</tt> too small for a new generation</li>
+  <li>missing or truncated <tt>/boot/extlinux/extlinux.conf</tt></li>
+  <li>wrong partition labels or reused non-NixOS image layout</li>
+  <li>mixing SD-image workflow commands with installer workflow commands</li>
+</ul>
+
+<p>
+  For the model split, see
+  <a page="Two Installation Models SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a>.
+</p>
+
+<p>
+  For the boot-partition invariant, see
+  <a page="Invariant Boot Partition Must Be Big Enough">Invariant: Boot Partition Must Be Big Enough</a>.
+</p>
+
+<p>
+  For a command-level pre-flight check, see
+  <a page="Preflight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a>.
+</p>
+
+<h2>References</h2>
+
+<ul>
+  <li><a href="https://nix.dev/tutorials/nixos/installing-nixos-on-a-raspberry-pi">https://nix.dev/tutorials/nixos/installing-nixos-on-a-raspberry-pi</a></li>
+  <li><a href="https://search.nixos.org/options">https://search.nixos.org/options</a></li>
+  <li><a href="https://hydra.nixos.org/jobset/nixos/">https://hydra.nixos.org/jobset/nixos/</a></li>
+  <li><a href="https://github.com/NixOS/nixos-hardware/tree/master/raspberry-pi/4">https://github.com/NixOS/nixos-hardware/tree/master/raspberry-pi/4</a></li>
+  <li><a href="https://nixos.org/manual/nixos/stable/">https://nixos.org/manual/nixos/stable/</a></li>
+  <li>Hydra branch names to expect in practice: <tt>nixos-24.11</tt>, <tt>nixos-unstable</tt></li>
+</ul>
