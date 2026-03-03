@@ -1,0 +1,57 @@
+<h1>Journalmatic Plugin</h1>
+
+<p>
+  <tt>~/workspace/wiki-plugin-journalmatic</tt> is a Federated Wiki plugin that
+  exposes journal-checking and journal-repair operations through frame plugins.
+</p>
+
+<p>
+  It is useful for HyperDoc work because it already defines a compact tool
+  vocabulary for exactly the kinds of failures we have been seeing in localhost
+  pages.
+</p>
+
+<h4>What it contains</h4>
+
+<ul>
+  <li><tt>client/modules/journal-checker.js</tt>: checker logic</li>
+  <li><tt>client/modules/revision.js</tt>: replay journal actions into page state</li>
+  <li><tt>client/modules/chrono-fix.js</tt>: sort a journal by date</li>
+  <li><tt>client/modules/compact-gentle.js</tt>: collapse short runs of edits</li>
+  <li>page surfaces such as <tt>Scan Site</tt>, <tt>Scan Page</tt>, <tt>Rectify Chronology</tt>, and <tt>Gentle Compactor</tt></li>
+</ul>
+
+<h4>Why it matters here</h4>
+
+<p>
+  Journalmatic is not a Lisp implementation, but it is still a valuable design
+  reference. It shows that journal maintenance can be made operationally simple:
+  scan, inspect findings, apply a bounded repair, and inspect the resulting
+  page again.
+</p>
+
+<h4>Example vocabulary</h4>
+
+<ul>
+  <li><tt>creation</tt>: page creation is missing or not first</li>
+  <li><tt>chronology</tt>: dates run backward</li>
+  <li><tt>malformed</tt>: an action shape is wrong</li>
+  <li><tt>revision</tt>: replay does not reconstruct the current page</li>
+  <li><tt>huge</tt> and <tt>bloated</tt>: size heuristics for oversized journals</li>
+</ul>
+
+<h4>HyperDoc implication</h4>
+
+<p>
+  HyperBook does not need to copy the frame-plugin UI. It does need the same
+  operations in object form. The plugin therefore serves as a specification of
+  useful journal tools, not as the final user interface.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
+</ul>

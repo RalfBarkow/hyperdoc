@@ -1,0 +1,50 @@
+<h1>Journalmatic Journal Checker</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The checker in <tt>client/modules/journal-checker.js</tt> is the center of the
+  plugin. It computes a set of findings over a page and its journal.
+</p>
+
+<h4>What it checks</h4>
+
+<ul>
+  <li>null story items</li>
+  <li>huge combined page/journal size</li>
+  <li>bloated journals relative to story size</li>
+  <li>malformed actions missing expected keys</li>
+  <li>chronology errors when dates go backward</li>
+  <li>creation errors when <tt>create</tt> is missing or not first</li>
+  <li>revision errors when replayed journal state does not match current story</li>
+</ul>
+
+<p>
+  The important move is that the checker does not stop at syntax. It also asks
+  whether the journal can still reconstruct the page.
+</p>
+
+<h4>Example</h4>
+
+<p>
+  This example models the checker result for a page whose journal dates are out
+  of order and whose replay therefore does not match the current story.
+</p>
+
+<source-of-function>journalmatic-checker-example</source-of-function>
+
+<h4>Design lesson</h4>
+
+<p>
+  A HyperBook journal checker should return findings as inspectable values,
+  ideally keywords or condition-like report objects, rather than only printing a
+  diagnostic string.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Journal Object Extensions">Journal Object Extensions</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
+</ul>

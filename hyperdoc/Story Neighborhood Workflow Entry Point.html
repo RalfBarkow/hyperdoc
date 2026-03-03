@@ -1,0 +1,170 @@
+<h1>Story Neighborhood Workflow Entry Point</h1>
+
+<p>
+  This page is a practical entry point into the <tt>Story Neighborhood Workflow</tt>
+  narrative. The goal is not to flatten everything into one page. The goal is
+  to make the topic traversable one idea at a time.
+</p>
+
+<p>
+  The representation pattern used here is simple:
+</p>
+
+<ul>
+  <li>one idea per section</li>
+  <li>one HyperDoc concept link per section</li>
+  <li>one localhost FedWiki page link per section when a concrete page exists</li>
+  <li>one note about missing pieces instead of pretending they already exist</li>
+</ul>
+
+<h2>The solution</h2>
+
+<p>
+  Treat HyperDoc as the stable narrative spine and use it as the start page.
+  Then attach concrete FedWiki pages and later Zettel references as secondary
+  links under each idea. This keeps the entry point readable while still
+  allowing the narrative to open into live material.
+</p>
+
+<p>
+  In short:
+</p>
+
+<pre>
+HyperDoc idea page
+  -> concrete localhost FedWiki page
+  -> optional Zettel / note trail
+</pre>
+
+<h2>1. Workflow as graph-rooted publishing</h2>
+
+<p>
+  Start with the core claim that the workflow is graph-rooted rather than
+  document-rooted.
+</p>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">HyperDoc: Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">HyperDoc: Graph-Rooted Publishing</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/story-neighborhood-workflow">localhost FedWiki: Story Neighborhood Workflow</a></li>
+</ul>
+
+<h2>2. Story as seed set</h2>
+
+<p>
+  The next idea is that the story is the executable spine: the seed from which a
+  neighborhood is expanded.
+</p>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">HyperDoc: story as executable spine</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/find">localhost FedWiki: find</a></li>
+</ul>
+
+<h2>3. Neighborhood expansion</h2>
+
+<p>
+  Once the seed exists, the next idea is explicit expansion by graph distance.
+</p>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">HyperDoc: WALK as controlled graph expansion</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/walk">localhost FedWiki: Walk</a></li>
+</ul>
+
+<h2>4. Link semantics and resolution</h2>
+
+<p>
+  A workflow page is only useful if its links mean something precise. This is
+  where collaborative link semantics and resolution order enter the picture.
+</p>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">HyperDoc: Collaborative Link Model and Resolution</a></li>
+  <li><a hyperbook="hyperdoc" page="Fedwiki Java Reference Implementation">HyperDoc: Fedwiki Java Reference Implementation</a></li>
+  <li><a hyperbook="hyperdoc" page="Fedwiki Java Lisp Examples">HyperDoc: Fedwiki Java Lisp Examples</a></li>
+</ul>
+
+<h2>5. HyperDoc to FedWiki linking</h2>
+
+<p>
+  The next idea is representational: how should a HyperDoc page point to a live
+  FedWiki page without collapsing back to raw browser URLs too early?
+</p>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc pages to FedWiki pages">HyperDoc: Linking HyperDoc pages to FedWiki pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Why Title-Based FedWiki Links Are Not Enough">HyperDoc: Why Title-Based FedWiki Links Are Not Enough</a></li>
+  <li><a hyperbook="hyperdoc" page="When Title-Based FedWiki Links May Be Enough">HyperDoc: When Title-Based FedWiki Links May Be Enough</a></li>
+</ul>
+
+<h2>6. Landing pages and local handoff</h2>
+
+<p>
+  When the narrative reaches operational questions such as <tt>home/index.html</tt>
+  and local boot handoff, stay explicit about the browser boundary.
+</p>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Landing Page Redirect to Local Boot">HyperDoc: Landing Page Redirect to Local Boot</a></li>
+  <li><a hyperbook="hyperdoc" page="Linking to Home Away From Home">HyperDoc: Linking to Home Away From Home</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/home-away-from-home">localhost FedWiki: Home Away from Home</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/landing-page-registration">localhost FedWiki: Landing Page Registration</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/portaldreyeckch">localhost FedWiki: portal.dreyeck.ch</a></li>
+  <li><a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/bridge-localhost-forking-to-remote-via-caddy">localhost FedWiki: Bridge Localhost Forking to Remote via Caddy</a></li>
+</ul>
+
+<h2>7. Missing workflow pages</h2>
+
+<p>
+  The workflow mentions <tt>PRINT</tt> and <tt>REVIEW</tt>, but current localhost
+  pages for those steps were not found under the expected slugs. This should be
+  represented explicitly, not hidden.
+</p>
+
+<ul>
+  <li><tt>PRINT</tt>: localhost page not yet linked here</li>
+  <li><tt>REVIEW</tt>: localhost page not yet linked here</li>
+</ul>
+
+<p>
+  That missingness is useful information. It tells you where the narrative still
+  depends on verbal description instead of linked concrete pages.
+</p>
+
+<h2>8. Zettel as the fourth layer</h2>
+
+<p>
+  Zettel should not replace the HyperDoc entry page. They should be attached as
+  a fourth layer once a stable idea page and a stable concrete page already
+  exist.
+</p>
+
+<p>
+  The intended order is:
+</p>
+
+<pre>
+idea page -> live page -> implementation note -> Zettel
+</pre>
+
+<p>
+  This keeps the start page readable and prevents the narrative from collapsing
+  into a note dump.
+</p>
+
+<h2>Recommendation</h2>
+
+<p>
+  Use this page as the start of the narrative. Extend it conservatively:
+  whenever a new related topic appears, attach it under the single idea it
+  clarifies instead of adding another undifferentiated related-links list.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">Collaborative Link Model and Resolution</a></li>
+</ul>

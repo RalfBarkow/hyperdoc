@@ -1,85 +1,62 @@
 <h1>Landing Page Redirect to Local Boot</h1>
 
 <p>
-  A non-wiki landing page can redirect the browser to the local HyperDoc entry
-  point <tt>boot.html</tt>. That part is viable.
+  This page records one boundary clearly: a remote landing page may redirect the
+  browser to local <tt>boot.html</tt>, but it must not try to act as the local
+  boot page itself.
 </p>
 
+<h2>Idea 1: redirect is viable</h2>
+
 <p>
-  What does <b>not</b> work is treating a remote landing page as if it were the
-  local HyperDoc boot page and having it connect directly to a localhost CLOG
-  websocket endpoint.
+  A non-wiki landing page can send the browser to the local HyperDoc entry
+  point.
 </p>
 
-<h2>Viable pattern</h2>
-
-<ol>
-  <li>A remote HTML landing page is served from some public origin.</li>
-  <li>That page redirects the browser to the local HyperDoc URL, for example <tt>http://127.0.0.1:8080/boot.html</tt>.</li>
-  <li>The browser leaves the remote origin and navigates to the local origin.</li>
-  <li>The local <tt>boot.html</tt> page loads <tt>boot.js</tt> and starts the normal local CLOG session.</li>
-</ol>
+<pre>
+remote landing page
+  -> http://127.0.0.1:8080/boot.html
+</pre>
 
 <p>
-  This is ordinary browser navigation. The important point is that the browser
-  is no longer running code from the remote origin once it reaches the local
-  HyperDoc page.
+  Once the browser has navigated, the local page loads <tt>boot.js</tt> and
+  starts the normal local CLOG session.
 </p>
 
-<h2>Non-viable pattern</h2>
-
-<ol>
-  <li>A remote page remains loaded at its original public origin.</li>
-  <li>That remote page tries to connect directly to <tt>ws://127.0.0.1:.../clog</tt>.</li>
-</ol>
+<h2>Idea 2: direct remote-to-local websocket boot is not viable</h2>
 
 <p>
-  This crosses the same origin and private-network boundary that already blocks
-  direct public-origin to localhost interaction in other FedWiki bridge cases.
-  The remote page is still remote; it has not become the local HyperDoc boot
-  page.
+  A remote page that stays on its public origin must not try to connect directly
+  to <tt>ws://127.0.0.1:.../clog</tt>. That crosses the same browser boundary
+  already seen in the bridge and private-network cases.
 </p>
 
-<h2>Why the distinction matters</h2>
+<h2>Idea 3: link the relevant FedWiki page in HyperBook form</h2>
 
 <p>
-  The local HyperDoc boot page and the local CLOG websocket endpoint belong to
-  the same local runtime. That pairing is intentional. The remote landing page
-  can point the browser toward that runtime, but it should not try to act as the
-  runtime itself.
-</p>
-
-<h2>Practical advice</h2>
-
-<ul>
-  <li>Redirect to <tt>http://127.0.0.1:8080/boot.html</tt> or whatever local HTTP entry point you control.</li>
-  <li>Do not hardcode a transient websocket port in the remote landing page.</li>
-  <li>Let the local <tt>boot.html</tt> and <tt>boot.js</tt> discover and establish the websocket session the normal way.</li>
-</ul>
-
-<h2>Link to the FedWiki page</h2>
-
-<p>
-  The FedWiki page <tt>Home Away From Home</tt> should ideally be linked as a
-  page inside the FedWiki HyperBook:
+  The operational discussion belongs next to the FedWiki page that describes the
+  custom landing-page pattern.
 </p>
 
 <p>
   <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="home-away-from-home">Home Away From Home</a>
 </p>
 
-<p>
-  If that form does not resolve in the current implementation, use the explicit
-  local server URL as a fallback:
-</p>
+<h2>Idea 4: keep the fallback only as an operational note</h2>
 
 <p>
-  <a href="http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/home-away-from-home">Home Away From Home</a>
+  If the HyperBook link does not resolve yet, the local server URL remains the
+  operational fallback, but it should not replace the preferred representation.
 </p>
+
+<pre>
+http://127.0.0.1:8080/89661-wiki-ralfbarkow-ch/home-away-from-home
+</pre>
 
 <h2>Related</h2>
 
 <ul>
   <li><a page="HyperDoc Server">HyperDoc Server</a></li>
   <li><a page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+  <li><a page="Linking to Home Away From Home">Linking to Home Away From Home</a></li>
 </ul>

@@ -1,0 +1,70 @@
+<h1>Journal Object Extensions</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A Lisp journal object in HyperBook should be more than a slot containing raw
+  FedWiki actions. It should carry operations that make journal integrity and
+  repair inspectable.
+</p>
+
+<h4>Core idea</h4>
+
+<p>
+  Instead of treating a journal as opaque JSON, treat it as a first-class object
+  with operations comparable to the tools exposed by Journalmatic.
+</p>
+
+<h4>Possible extensions</h4>
+
+<ul>
+  <li><tt>journal-revision</tt>: replay actions up to a given point and produce a page state</li>
+  <li><tt>journal-check</tt>: return a set of findings such as <tt>creation</tt>, <tt>chronology</tt>, <tt>malformed</tt>, or <tt>revision</tt></li>
+  <li><tt>journal-rectify-chronology</tt>: reorder actions by date when that is a defensible repair</li>
+  <li><tt>journal-gentle-compact</tt>: collapse runs of adjacent edits while preserving visible page state</li>
+  <li><tt>journal-diff</tt>: compare current page state with replayed page state</li>
+</ul>
+
+<p>
+  These need not all be generic functions on day one, but they define the right
+  conceptual boundary. HyperBook should ask journals what can be checked or
+  repaired, rather than scattering journal logic through ad hoc page tools.
+</p>
+
+<h4>Why this belongs in the object model</h4>
+
+<p>
+  The current failures on pages such as <tt>find</tt> and <tt>walk</tt> are not
+  UI problems. They are failures of journal reconstruction. If the journal is a
+  first-class object, a page can expose its own health, replay behavior, and
+  repair affordances in the inspector.
+</p>
+
+<h4>A minimal Lisp shape</h4>
+
+<pre>
+(defclass journal ()
+  ((actions :initarg :actions :reader actions-of)))
+
+(defgeneric journal-revision (journal &amp;key rev-index title))
+(defgeneric journal-check (journal page))
+(defgeneric journal-rectify-chronology (journal))
+(defgeneric journal-gentle-compact (journal &amp;key entry-time-span))
+</pre>
+
+<p>
+  The point is not the exact names. The point is to establish a stable place in
+  the model where these operations live.
+</p>
+
+<h4>Example</h4>
+
+<source-of-function>journalmatic-checker-example</source-of-function>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+</ul>

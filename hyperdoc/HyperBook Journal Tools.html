@@ -1,0 +1,54 @@
+<h1>HyperBook Journal Tools</h1>
+
+<p>
+  A journal-aware HyperBook should expose more than page content. It should also
+  expose operations over the journal itself: replay, checking, chronology repair,
+  and compaction.
+</p>
+
+<p>
+  The immediate reference for this is the local plugin repository
+  <tt>~/workspace/wiki-plugin-journalmatic</tt>. That plugin already defines a
+  concrete tool set for scanning and repairing Federated Wiki journals. This
+  page uses it as the reference surface for thinking about Lisp-side journal
+  objects and tools in HyperDoc/HyperBook.
+</p>
+
+<h4>Why this matters</h4>
+
+<p>
+  HyperBook already treats pages, links, and views as inspectable objects. A
+  page journal should get the same treatment. Many of the hard failures seen in
+  localhost FedWiki pages are not content problems. They are journal problems:
+  malformed actions, missing creation, chronology drift, or a journal that can
+  no longer replay the current page state.
+</p>
+
+<p>
+  A journal checker is therefore not an optional maintenance script. It is part
+  of the object model for a writable wiki page.
+</p>
+
+<h4>One idea at a time</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Journal Object Extensions">Journal Object Extensions</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Plugin">Journalmatic Plugin</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
+</ul>
+
+<h4>Scope</h4>
+
+<p>
+  These pages are descriptive, not yet an implementation patch. The goal is to
+  define a workable Lisp-side model before changing HyperBook runtime behavior.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+</ul>

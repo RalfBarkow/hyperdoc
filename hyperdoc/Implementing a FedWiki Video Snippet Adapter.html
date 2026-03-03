@@ -1,0 +1,57 @@
+<h1>Implementing a FedWiki Video Snippet Adapter</h1>
+
+<p>
+  This page outlines the first implementation slice for handling FedWiki video
+  snippets in HyperDoc.
+</p>
+
+<h2>Idea 1: add one adapter type only</h2>
+
+<p>
+  Start with the FedWiki <tt>video</tt> item and only the form:
+</p>
+
+<pre>
+YOUTUBE &lt;video-id&gt;
+caption...
+</pre>
+
+<p>
+  Do not generalize further until this path works.
+</p>
+
+<h2>Idea 2: parse into a small object</h2>
+
+<p>
+  The adapter should parse the first line into provider and video id, and treat
+  the remaining lines as caption text.
+</p>
+
+<h2>Idea 3: render two views</h2>
+
+<ul>
+  <li>preferred: embedded player plus caption</li>
+  <li>fallback: external canonical link plus caption</li>
+</ul>
+
+<h2>Idea 4: make the conversion hook reusable</h2>
+
+<p>
+  The implementation should create a reusable conversion boundary for FedWiki
+  snippet types, not bury the logic directly inside one page renderer.
+</p>
+
+<h2>Idea 5: stop after the first working slice</h2>
+
+<p>
+  The first goal is only to make one concrete page such as
+  <a hyperbook="hyperdoc" page="Video of Liquid Oxygen">Video of Liquid Oxygen</a>
+  render the FedWiki video snippet meaningfully.
+</p>
+
+<h2>Back to concept</h2>
+
+<p>
+  See
+  <a hyperbook="hyperdoc" page="FedWiki Video Snippet Plugin for HyperDoc">FedWiki Video Snippet Plugin for HyperDoc</a>.
+</p>

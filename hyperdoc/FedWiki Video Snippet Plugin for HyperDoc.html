@@ -1,0 +1,100 @@
+<h1>FedWiki Video Snippet Plugin for HyperDoc</h1>
+
+<p>
+  HyperDoc needs a principled way to represent FedWiki video snippets such as:
+</p>
+
+<pre>
+video
+
+YOUTUBE UjPxDOEdsX8
+Published Dec 1, 2007.
+</pre>
+
+<p>
+  The right model is not to paste arbitrary HTML into a page. The right model is
+  to treat the snippet as a typed FedWiki story item and adapt it into a
+  HyperDoc-visible object.
+</p>
+
+<h2>Idea 1: a video snippet is a typed story item</h2>
+
+<p>
+  A FedWiki <tt>video</tt> item should be represented explicitly, just like a
+  paragraph, markdown block, or reference.
+</p>
+
+<p>
+  The minimal information is:
+</p>
+
+<ul>
+  <li>provider</li>
+  <li>video id</li>
+  <li>caption or body text</li>
+  <li>source item metadata</li>
+</ul>
+
+<h2>Idea 2: convert the snippet before rendering</h2>
+
+<p>
+  The adapter should parse the FedWiki item first and only then decide how to
+  render it in HyperDoc.
+</p>
+
+<p>
+  For the example above, the conversion result is conceptually:
+</p>
+
+<pre>
+provider = youtube
+video-id = UjPxDOEdsX8
+caption = Published Dec 1, 2007.
+</pre>
+
+<h2>Idea 3: rendering should have a safe fallback</h2>
+
+<p>
+  The preferred rendering is an embedded video player plus caption.
+  The fallback rendering is a canonical external link to the video plus the same
+  caption text.
+</p>
+
+<p>
+  That keeps the page useful even when embedding is not possible or not desired.
+</p>
+
+<h2>Idea 4: make this a plugin boundary, not a one-off special case</h2>
+
+<p>
+  The video snippet should be the first example of a more general adapter layer
+  for FedWiki snippet types. That same layer can later handle other plugin-like
+  story items such as <tt>frame</tt>, <tt>graphviz</tt>, or <tt>html</tt>.
+</p>
+
+<p>
+  So the implementation should start from a generic conversion hook, then add a
+  single concrete adapter for <tt>video</tt>.
+</p>
+
+<h2>Idea 5: keep the page copy faithful</h2>
+
+<p>
+  The HyperDoc page should remain a faithful copy of the FedWiki page's meaning.
+  The plugin should improve the affordances, not rewrite the content model.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  The implementation path is described separately in
+  <a hyperbook="hyperdoc" page="Implementing a FedWiki Video Snippet Adapter">Implementing a FedWiki Video Snippet Adapter</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc pages to FedWiki pages">Linking HyperDoc pages to FedWiki pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Video of Liquid Oxygen">Video of Liquid Oxygen</a></li>
+</ul>

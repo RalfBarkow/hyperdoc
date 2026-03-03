@@ -1,0 +1,67 @@
+<h1>Running HyperDoc Examples</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc examples are not run by clicking on source code text. They are run by
+  clicking the small <tt>►</tt> button that HyperDoc inserts before a top-level
+  <tt>defexample</tt> form.
+</p>
+
+<p>
+  The relevant mechanism is the method in
+  <tt>hyperdoc-explorer/examples.lisp</tt> that extends
+  <tt>html-inspector-views/standard:render-toplevel-cst</tt> for
+  <tt>defexample</tt>.
+</p>
+
+<h4>What happens</h4>
+
+<ol>
+  <li>A HyperDoc page contains <tt>&lt;source-of-function&gt;...&lt;/source-of-function&gt;</tt>.</li>
+  <li>HyperDoc transcludes the source view for that function.</li>
+  <li>If the transcluded top-level form is a <tt>defexample</tt>, HyperDoc adds a <tt>►</tt> play button.</li>
+  <li>Clicking <tt>►</tt> runs the example and opens its result in a new pane.</li>
+</ol>
+
+<p>
+  Clicking the code itself does not run the example. The runnable affordance is
+  the play button, not the source text.
+</p>
+
+<h4>Known-good examples</h4>
+
+<p>
+  These examples should run directly when the current image has loaded
+  <tt>:hyperdoc</tt>.
+</p>
+
+<p>Example:</p>
+
+<source-of-function>the-answer</source-of-function>
+
+<p>Example:</p>
+
+<source-of-function>fedwiki-java-slug-example</source-of-function>
+
+<h4>Reloading the running image</h4>
+
+<p>
+  If a page shows an example as undefined, the usual cause is that the running
+  image was started before the new example function existed. In that case reload
+  the system and reopen the page.
+</p>
+
+<lisp-code>
+(progn
+  (asdf:load-system :hyperdoc)
+  nil)
+</lisp-code>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Writing source code pages">Writing source code pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+  <li><a hyperbook="hyperdoc" page="Fedwiki Java Lisp Examples">Fedwiki Java Lisp Examples</a></li>
+</ul>

@@ -1,0 +1,144 @@
+<h1>Ensuring Localhost FedWiki Counterparts for HyperDoc Pages</h1>
+
+<p>
+  A practical way to keep HyperDoc and localhost FedWiki aligned is to treat the
+  HyperDoc page set as the authoritative inventory, then ensure that each
+  current HyperDoc HTML page has a localhost FedWiki counterpart.
+</p>
+
+<p>
+  The point is not to force the two forms to be identical in markup. The point
+  is to ensure that each HyperDoc topic also exists as a writable localhost wiki
+  page that can participate in everyday linking, journaling, and editing.
+</p>
+
+<h4>Inventory first</h4>
+
+<p>
+  Start from the repository directory <tt>hyperdoc/</tt> and collect the current
+  <tt>*.html</tt> pages. That gives the authoritative set of HyperDoc text
+  pages that should be mirrored.
+</p>
+
+<p>
+  For each page, derive its title from the page's <tt>&lt;h1&gt;</tt> text rather
+  than from the filename. The title is the stable content identity used inside
+  both HyperDoc and FedWiki.
+</p>
+
+<h4>Title to localhost slug</h4>
+
+<p>
+  The corresponding localhost FedWiki page can be addressed by a slug derived
+  from the title. A simple, defensible rule is:
+</p>
+
+<pre>
+lowercase title
+replace non-alphanumeric runs with '-'
+collapse repeated '-'
+trim leading and trailing '-'
+</pre>
+
+<p>
+  This yields slugs such as:
+</p>
+
+<ul>
+  <li><tt>HyperBook Journal Tools</tt> -&gt; <tt>hyperbook-journal-tools</tt></li>
+  <li><tt>Running HyperDoc Examples</tt> -&gt; <tt>running-hyperdoc-examples</tt></li>
+  <li><tt>Story Neighborhood Workflow</tt> -&gt; <tt>story-neighborhood-workflow</tt></li>
+</ul>
+
+<h4>Non-destructive rule</h4>
+
+<p>
+  Do not overwrite an existing localhost page automatically. If the page already
+  exists, assume it may contain local edits or journal history that should be
+  preserved.
+</p>
+
+<p>
+  The safe default is therefore:
+</p>
+
+<ol>
+  <li>detect all HyperDoc page titles</li>
+  <li>compute the expected localhost slug for each title</li>
+  <li>check whether that slug already exists in <tt>~/.wiki/.../pages/</tt></li>
+  <li>create only the missing localhost pages</li>
+</ol>
+
+<h4>Structural conversion</h4>
+
+<p>
+  A generated localhost page should preserve the topic structure, not the exact
+  HTML. A simple conversion is sufficient for the first pass:
+</p>
+
+<ul>
+  <li>paragraphs stay paragraphs</li>
+  <li><tt>&lt;h4&gt;</tt> sections become markdown headings</li>
+  <li>lists become markdown lists</li>
+  <li><tt>&lt;pre&gt;</tt> and code blocks become fenced code</li>
+  <li>HyperDoc page links become FedWiki links by page title</li>
+</ul>
+
+<p>
+  This keeps the conceptual contents aligned while respecting the affordances of
+  each medium.
+</p>
+
+<h4>Journal shape</h4>
+
+<p>
+  Generated localhost pages should have a minimal valid FedWiki journal:
+</p>
+
+<ul>
+  <li>one <tt>create</tt> action first</li>
+  <li>one <tt>add</tt> action per story item</li>
+  <li>correct <tt>after</tt> chaining</li>
+  <li>stable item ids</li>
+</ul>
+
+<p>
+  This matters because malformed journals are harder to repair later than pages
+  with simple but valid initial histories.
+</p>
+
+<h4>How to keep it current</h4>
+
+<p>
+  This can be done as a repeatable maintenance step rather than a one-off import:
+</p>
+
+<ol>
+  <li>scan <tt>hyperdoc/*.html</tt></li>
+  <li>compare against localhost slugs</li>
+  <li>report the missing set</li>
+  <li>generate only those pages</li>
+  <li>optionally add index links from a current daily page</li>
+</ol>
+
+<p>
+  The key point is idempotence: rerunning the process should fill gaps without
+  erasing local wiki work.
+</p>
+
+<h4>Why this works</h4>
+
+<p>
+  HyperDoc remains the stable, inspectable narrative source. Localhost FedWiki
+  remains the editable, journaled working surface. Ensuring a counterpart for
+  each current HyperDoc page gives you coverage across both without forcing one
+  representation to dominate the other.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="HyperDoc Server">HyperDoc Server</a></li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow Entry Point">Story Neighborhood Workflow Entry Point</a></li>
+  <li><a hyperbook="hyperdoc" page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
+</ul>

@@ -1,0 +1,49 @@
+<h1>Journalmatic Repair Tools</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Journalmatic currently ships two bounded repair operations: rectify chronology
+  and gentle compaction.
+</p>
+
+<h4>Rectify Chronology</h4>
+
+<p>
+  The chronology fixer in <tt>client/modules/chrono-fix.js</tt> sorts journal
+  actions by date. It is intentionally narrow. It does not claim to repair every
+  journal problem. It only addresses chronology drift.
+</p>
+
+<source-of-function>journalmatic-rectify-chronology-example</source-of-function>
+
+<h4>Gentle Compactor</h4>
+
+<p>
+  The gentle compactor in <tt>client/modules/compact-gentle.js</tt> keeps the
+  last edit in a short run of edits to the same item, while leaving create, add,
+  move, remove, and site-attributed fork actions intact.
+</p>
+
+<p>
+  This is not arbitrary compression. It is a conservative policy aimed at
+  reducing journal bloat without changing the visible page state.
+</p>
+
+<source-of-function>journalmatic-gentle-compactor-example</source-of-function>
+
+<h4>Why these tools matter</h4>
+
+<p>
+  The two operations define a useful repair style for HyperBook as well:
+  constrained, named, inspectable repairs rather than one opaque “fix journal”
+  command.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Plugin">Journalmatic Plugin</a></li>
+</ul>

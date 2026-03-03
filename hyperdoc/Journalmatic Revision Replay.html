@@ -1,0 +1,51 @@
+<h1>Journalmatic Revision Replay</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The replay logic in <tt>client/modules/revision.js</tt> is the basis for both
+  checking and repair. It applies journal actions in order and reconstructs the
+  page state at a chosen revision index.
+</p>
+
+<h4>Why replay matters</h4>
+
+<p>
+  The strongest journal integrity test is not “does the JSON look plausible?” It
+  is “does replay produce the current page?” If replay fails, the journal is no
+  longer a trustworthy history of the page.
+</p>
+
+<h4>Supported action shapes</h4>
+
+<ul>
+  <li><tt>create</tt></li>
+  <li><tt>add</tt></li>
+  <li><tt>edit</tt></li>
+  <li><tt>move</tt></li>
+  <li><tt>remove</tt></li>
+</ul>
+
+<p>
+  Journalmatic's <tt>revision</tt> function is small enough to serve as an
+  implementation sketch for a Lisp-side replay function.
+</p>
+
+<h4>Example</h4>
+
+<source-of-function>journalmatic-revision-example</source-of-function>
+
+<h4>HyperBook implication</h4>
+
+<p>
+  A Lisp journal object should expose replay directly. Repair tools such as a
+  chronology fixer or compactor should be validated by replaying the result and
+  comparing it to the visible page state.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
+</ul>
