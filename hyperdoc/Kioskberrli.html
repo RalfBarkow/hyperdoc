@@ -1,0 +1,145 @@
+<h1>Kioskberrli</h1>
+
+<p>
+  <tt>Kioskberrli</tt> is the Swiss German working title for the hardware and
+  system slice of the <tt>hauptsache</tt> project: a Raspberry Pi 4 Model B
+  based kiosk that displays the landing page inside the hairdressing salon.
+</p>
+
+<p>
+  The concrete target is not a generic browser on a developer laptop. It is a
+  wall-mounted screen in the salon that should reliably show
+  <tt>https://hauptsache.dreyeck.ch/assets/home/index.html</tt>.
+</p>
+
+<h4>Idea 1: treat the kiosk as part of the project</h4>
+
+<p>
+  The landing page is only half of the system. The other half is the device that
+  turns that page into a persistent public presence in the physical space of the
+  salon.
+</p>
+
+<p>
+  That means the kiosk hardware and operating system are not deployment details
+  outside the project. They are part of the project boundary.
+</p>
+
+<h4>Idea 2: start with Raspberry Pi 4 Model B on ARM64</h4>
+
+<p>
+  The first implementation target is a Raspberry Pi 4 Model B. That is the
+  hardware baseline for the first <tt>Kioskberrli</tt> and fixes the target
+  architecture as ARM64 (<tt>aarch64-linux</tt>).
+</p>
+
+<p>
+  The immediate task is not to generalize across many devices. The immediate
+  task is to make one reproducible kiosk image that boots, connects, starts a
+  browser, and displays the landing page reliably.
+</p>
+
+<h4>Idea 3: build the kiosk from a NixOS SD card</h4>
+
+<p>
+  The system should be provisioned from a NixOS-based SD card rather than by a
+  manually configured mutable install.
+</p>
+
+<p>
+  This gives the project a reproducible system image and a clear boundary
+  between:
+</p>
+
+<ul>
+  <li>the public landing page content</li>
+  <li>the FedWiki working surface</li>
+  <li>the kiosk operating system that renders the landing page in the salon</li>
+</ul>
+
+<h4>Idea 4: the first system goal is modest</h4>
+
+<p>
+  The first kiosk image does not need to solve every management problem. It only
+  needs to do these things reliably:
+</p>
+
+<ul>
+  <li>boot on the Raspberry Pi 4 Model B</li>
+  <li>bring up the network</li>
+  <li>start a browser or kiosk shell automatically</li>
+  <li>open <tt>https://hauptsache.dreyeck.ch/assets/home/index.html</tt></li>
+  <li>recover cleanly after reboot or power loss</li>
+</ul>
+
+<p>
+  That is enough to turn the landing page into a working physical installation.
+</p>
+
+<h4>Idea 5: the NixOS work belongs in the same story</h4>
+
+<p>
+  The NixOS SD-card work is therefore not a side experiment. It is the concrete
+  implementation path for the salon use case.
+</p>
+
+<p>
+  In project terms, the next question becomes:
+</p>
+
+<pre>
+What NixOS configuration and SD-image build output are needed to turn a
+Raspberry Pi 4 Model B into the first Kioskberrli?
+</pre>
+
+<h4>Idea 6: the kiosk and the wiki still have different roles</h4>
+
+<p>
+  Even in the kiosk setup, the landing page and the wiki should remain distinct.
+</p>
+
+<ul>
+  <li>The kiosk should display the landing page by default.</li>
+  <li>The FedWiki remains the working memory and editorial surface behind it.</li>
+</ul>
+
+<p>
+  The kiosk should not collapse those roles into one screen unless that is a
+  later deliberate design decision.
+</p>
+
+<h4>Pragmatic next step</h4>
+
+<p>
+  The next concrete deliverable for <tt>Kioskberrli</tt> is a NixOS flake that
+  can build or describe the SD-card system for the Raspberry Pi 4 Model B.
+</p>
+
+<p>
+  At minimum, that flake should build:
+</p>
+
+<pre>
+.#nixosConfigurations.kioskberrli.config.system.build.sdImage
+</pre>
+
+<p>
+  and make explicit:
+</p>
+
+<ul>
+  <li>target hardware</li>
+  <li>target architecture (<tt>aarch64-linux</tt>)</li>
+  <li>boot behavior</li>
+  <li>network assumptions</li>
+  <li>automatic browser start</li>
+  <li>the landing-page URL</li>
+</ul>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
+  <li><a page="Landing Page Redirect to Local Boot">Landing Page Redirect to Local Boot</a></li>
+  <li><a page="Linking to Home Away From Home">Linking to Home Away From Home</a></li>
+</ul>
