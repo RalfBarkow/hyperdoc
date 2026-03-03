@@ -12,6 +12,7 @@
 <ul>
   <li><tt>&gt;= 256MB</tt>: recommended baseline</li>
   <li><tt>&lt; 128MB</tt>: stop and re-image</li>
+  <li><tt>30 MiB</tt>: incompatible with NixOS boot asset copying in practice</li>
 </ul>
 
 <h2>Why This Matters</h2>
@@ -40,6 +41,12 @@
   <li>only <tt>extlinux.conf.tmp.*</tt> exists</li>
   <li><tt>extlinux.conf</tt> reduced to a short header-only file</li>
 </ul>
+
+<p>
+  A successful <tt>nixos-rebuild test</tt> does not imply that the next reboot
+  is safe. The failure only becomes visible when boot assets must actually be
+  copied into <tt>/boot</tt>.
+</p>
 
 <h2>Reboot Unsafe Criteria</h2>
 
