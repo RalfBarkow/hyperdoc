@@ -111,9 +111,9 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 <h4>Pragmatic next step</h4>
 
 <p>
-  The first concrete deliverable now exists: the <tt>hauptsache</tt> project
-  has a dedicated <tt>kioskberrli/</tt> flake that can build the SD-card
-  system for the Raspberry Pi 4 Model B.
+  The first concrete repository step now exists: the <tt>hauptsache</tt>
+  project has a dedicated <tt>kioskberrli/</tt> flake that declares an
+  SD-card image build path for the Raspberry Pi 4 Model B.
 </p>
 
 <p>
@@ -125,8 +125,9 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 </pre>
 
 <p>
-  That gives the project a concrete system artifact rather than only a design
-  intention. The remaining work is now hardening and operations.
+  This is not yet the same as a demonstrated kiosk artifact. A credible
+  maintenance story still requires build, flash, boot, network, kiosk-startup,
+  and landing-page evidence on the target hardware.
 </p>
 
 <p>
@@ -144,6 +145,11 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 <p>
   The repo root can also provide a development shell for this work, but the SD
   image artifact itself belongs in <tt>hauptsache/kioskberrli</tt>.
+</p>
+
+<p>
+  For the concrete next checklist, see
+  <a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a>.
 </p>
 
 <h4>Related</h4>

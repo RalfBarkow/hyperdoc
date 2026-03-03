@@ -1,0 +1,125 @@
+<h1>Salon Pi 4 Kiosk Hardening Checklist</h1>
+
+<p>
+  This page is a practical checklist for turning the declared
+  <tt>Kioskberrli</tt> build target into a credible maintenance story.
+  The target is a wall-mounted Raspberry Pi 4 Model B in the
+  <tt>hauptsache</tt> hairdressing salon.
+</p>
+
+<p>
+  The current repository state gives a declared SD-image build path. That is
+  necessary, but it is not yet the same as a demonstrated kiosk artifact.
+</p>
+
+<h4>1. Build evidence</h4>
+
+<ul>
+  <li>Run the build target successfully at least once.</li>
+  <li>Record the exact command and resulting artifact name.</li>
+  <li>Record the nixpkgs input revision used for the image.</li>
+</ul>
+
+<pre>
+cd kioskberrli
+nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
+</pre>
+
+<h4>2. Flash and boot evidence</h4>
+
+<ul>
+  <li>Flash the image to an SD card.</li>
+  <li>Boot it on the actual Raspberry Pi 4 Model B with HDMI attached.</li>
+  <li>Confirm that the system reaches a usable graphical kiosk session.</li>
+</ul>
+
+<p>
+  Without this step, the image is only a declaration, not a maintained system.
+</p>
+
+<h4>3. Network practicality</h4>
+
+<ul>
+  <li>Confirm salon network bring-up on first boot.</li>
+  <li>Decide whether Ethernet is primary and Wi-Fi is fallback.</li>
+  <li>Decide how NetworkManager should be provisioned for on-site recovery.</li>
+</ul>
+
+<p>
+  A kiosk that needs a developer laptop for routine reconnects is not yet a
+  credible salon installation.
+</p>
+
+<h4>4. Remote maintenance</h4>
+
+<ul>
+  <li>Add SSH key-based maintenance access.</li>
+  <li>Disable password login once key access is confirmed.</li>
+  <li>Verify that the device can be recovered without on-site keyboard use.</li>
+</ul>
+
+<p>
+  This is the minimum operational standard for a wall-mounted device.
+</p>
+
+<h4>5. Browser and session recovery</h4>
+
+<ul>
+  <li>Verify that Cage restarts after browser failure.</li>
+  <li>Verify that Chromium returns to the landing page after crash or reboot.</li>
+  <li>Consider additional Chromium kiosk flags only after the basic loop works.</li>
+</ul>
+
+<p>
+  The proof here is observed behavior on the target device, not only service
+  declarations in <tt>kiosk.nix</tt>.
+</p>
+
+<h4>6. SD-card durability</h4>
+
+<ul>
+  <li>Keep generated image artifacts out of Git.</li>
+  <li>Plan for rebuild-and-reflash as the normal recovery path.</li>
+  <li>Consider read-only or reduced-write patterns only after the first kiosk is stable.</li>
+</ul>
+
+<p>
+  Durability work should follow a working kiosk, not replace it with theory.
+</p>
+
+<h4>7. Landing-page handoff</h4>
+
+<ul>
+  <li>Verify the exact URL loaded in the salon.</li>
+  <li>Verify what the visitor can do next from that page.</li>
+  <li>Keep the distinction clear between landing page, FedWiki, and kiosk device.</li>
+</ul>
+
+<p>
+  The kiosk is not just a browser. It is the physical expression of the
+  project entry model.
+</p>
+
+<h4>8. Definition of done for the first kiosk</h4>
+
+<ul>
+  <li>The image builds.</li>
+  <li>The SD card boots on the real Pi 4.</li>
+  <li>The network comes up in the salon.</li>
+  <li>The kiosk session starts automatically.</li>
+  <li>The landing page is displayed after reboot and after crash recovery.</li>
+  <li>SSH maintenance works without a local keyboard.</li>
+</ul>
+
+<p>
+  Only after these points are demonstrated do we have the beginning of a
+  credible maintenance story for <tt>Kioskberrli</tt>.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Kioskberrli">Kioskberrli</a></li>
+  <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
+  <li><a page="Landing Page Redirect to Local Boot">Landing Page Redirect to Local Boot</a></li>
+</ul>
