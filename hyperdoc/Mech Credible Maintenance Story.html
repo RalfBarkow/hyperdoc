@@ -1,0 +1,222 @@
+<h1>Mech Credible Maintenance Story</h1>
+
+<p>
+  A credible maintenance story for Mech should be told in the same terms as
+  <tt>Drawing Automation</tt>: the workflow should make it possible to move from
+  a visible defect in an automatically generated artifact to the precise source
+  location that must be changed, and then to review that change through normal
+  version-control practice.
+</p>
+
+<p>
+  In the Mech repository <tt>~/workspace/wiki-plugin-mech</tt>, the commit range
+  from <tt>4b8051417dec6b0eff40878290a703b1fa60fb52</tt> up to current
+  <tt>upstream/main</tt> does not tell one continuous story from the beginning.
+  The credible maintenance story emerges later, once a bounded neighborhood
+  workflow is assembled and then made diagnostic.
+</p>
+
+<h4>Why 4b80514 is only a baseline</h4>
+
+<p>
+  Commit <tt>4b80514</tt> is a small environment adjustment:
+  <tt>chore(nix): default wiki port to 80</tt>. It is part of the history, but
+  it is not yet part of the maintenance story. It establishes a working base,
+  not the narrative of maintainable generated output.
+</p>
+
+<h4>The credible sequence</h4>
+
+<p>
+  The maintenance story becomes visible in this later sequence on
+  <tt>upstream/main</tt>:
+</p>
+
+<ol>
+  <li><tt>007a9db add WALK clicks</tt></li>
+  <li><tt>2d7c6b3 add PRINT block</tt></li>
+  <li><tt>37c34a2 Use FROM to identify story</tt></li>
+  <li><tt>1cb65e6 fetch and expand page json</tt></li>
+  <li><tt>6083e07 expand links as anchors</tt></li>
+  <li><tt>4ed345e systematic tally; download in api</tt></li>
+</ol>
+
+<p>
+  This is the point where Mech stops being just a block toy and starts looking
+  like a maintainable workflow for bounded graph extraction and accountable
+  output.
+</p>
+
+<h4>How this matches Drawing Automation</h4>
+
+<p>
+  In <tt>Drawing Automation</tt>, the key claim is that diagrams should be
+  generated from maintained source annotations, and that a visible mistake in a
+  generated drawing should lead back to the source that generated it. The repair
+  path is:</n></p>
+
+<pre>
+visible defect
+  -&gt;
+linked generated artifact
+  -&gt;
+source location / annotation
+  -&gt;
+edit
+  -&gt;
+pull request
+</pre>
+
+<p>
+  The Mech sequence above does not yet produce that exact drawing workflow, but
+  it does establish the same maintenance discipline for story-neighborhood
+  artifacts.
+</p>
+
+<h4>Step 1: bounded neighborhood extraction</h4>
+
+<p>
+  <tt>WALK clicks</tt> gives the workflow a bounded graph expansion primitive.
+  This is the Mech equivalent of saying: start from a defined seed and derive a
+  neighborhood rather than wandering the whole federation.
+</p>
+
+<p>
+  Without that bounded scope, there is no believable maintenance story because
+  there is no stable claim about what the generated artifact covers.
+</p>
+
+<h4>Step 2: artifact generation</h4>
+
+<p>
+  <tt>PRINT</tt> turns the bounded neighborhood into a concrete artifact. At
+  first this is mainly generative: collect story slugs, collect garden slugs,
+  emit HTML. Useful, but still not yet credible maintenance.
+</p>
+
+<p>
+  A generated artifact alone is not enough. A maintenance story needs the
+  artifact to expose what it could and could not account for.
+</p>
+
+<h4>Step 3: identify the actual story source</h4>
+
+<p>
+  <tt>Use FROM to identify story</tt> tightens the provenance of the workflow.
+  The story is no longer inferred only from surrounding state. It becomes an
+  explicit source in the block language itself.
+</p>
+
+<p>
+  This matters because a credible repair path needs traceable origin.
+</p>
+
+<h4>Step 4: fetch the actual page material</h4>
+
+<p>
+  <tt>fetch and expand page json</tt> moves the workflow closer to maintained
+  source. Instead of printing from partial neighborhood summaries alone, it
+  fetches page JSON and expands what it can from the real page content.
+</p>
+
+<p>
+  That is analogous to the Drawing Automation move from detached diagram editing
+  toward generated views over maintained source.
+</p>
+
+<h4>Step 5: make links actionable</h4>
+
+<p>
+  <tt>expand links as anchors</tt> is easy to underestimate, but it is central to
+  maintenance. A visible relation in the output becomes a navigable reference.
+</p>
+
+<p>
+  This is the beginning of the same pattern seen in raw linked SVG in
+  <tt>Drawing Automation</tt>: a generated artifact becomes a navigable surface
+  for inspection and repair.
+</p>
+
+<h4>Step 6: account for what the workflow could not do</h4>
+
+<p>
+  Commit <tt>4ed345e systematic tally; download in api</tt> is where the
+  credible maintenance story becomes explicit.
+</p>
+
+<p>
+  Instead of keeping only one flat missing-page list, <tt>PRINT</tt> now keeps a
+  structured tally of:
+</p>
+
+<ul>
+  <li>missing pages</li>
+  <li>referenced domains</li>
+  <li>item-type wishes</li>
+  <li>runtime errors</li>
+</ul>
+
+<p>
+  This is the decisive step. The generated output now comes with an account of
+  its own limits. That makes the workflow reviewable and maintainable rather than
+  merely productive.
+</p>
+
+<h4>What makes the story credible</h4>
+
+<p>
+  The story is credible because each improvement narrows the gap between output
+  and its generating source:
+</p>
+
+<ul>
+  <li>scope is explicit</li>
+  <li>source is identified</li>
+  <li>page material is fetched from real JSON</li>
+  <li>references become actionable anchors</li>
+  <li>failures are tallied by type instead of hidden</li>
+</ul>
+
+<p>
+  That is exactly the maintenance discipline described in the Drawing Automation
+  cluster, translated from diagrams into story-neighborhood publication.
+</p>
+
+<h4>What is still missing</h4>
+
+<p>
+  This is still not the full Drawing Automation model.
+</p>
+
+<ul>
+  <li>Mech <tt>PRINT</tt> does not yet carry source-location links back to the exact relation or annotation that generated each output fragment.</li>
+  <li>non-paragraph item types are tallied as wishes rather than rendered with their own first-class adapters.</li>
+  <li>the report is still assembled inside the browser block implementation rather than surfaced as an inspectable object model.</li>
+</ul>
+
+<p>
+  So the progress is real, but the final maintenance story remains incomplete.
+</p>
+
+<h4>Pragmatic conclusion</h4>
+
+<p>
+  The credible maintenance story for Mech does not begin at
+  <tt>4b80514</tt>. That commit is part of the background. The real story begins
+  when Mech acquires a bounded extraction workflow and then learns to report its
+  own boundaries and losses.
+</p>
+
+<p>
+  That is why the commits from <tt>007a9db</tt> through <tt>4ed345e</tt> matter
+  more than the earlier infrastructure changes when judged by the standards of
+  <tt>Drawing Automation</tt>.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Mech Plugin Progress March 2026">Mech Plugin Progress March 2026</a></li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+</ul>

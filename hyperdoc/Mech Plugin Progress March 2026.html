@@ -1,0 +1,162 @@
+<h1>Mech Plugin Progress March 2026</h1>
+
+<p>
+  This page records the current state of the local repository
+  <tt>~/workspace/wiki-plugin-mech</tt> with specific attention to upstream
+  commit <tt>4ed345e1aa902947173c34a71e0114da320ba75a</tt> on
+  <tt>upstream/main</tt>.
+</p>
+
+<p>
+  The latest upstream commit is <tt>systematic tally; download in api</tt>. It is a
+  focused change in <tt>src/client/blocks.js</tt>, but it matters mainly as the
+  final step in a more credible maintenance sequence. See
+  <a hyperbook="hyperdoc" page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a>
+  for that sequence in the terms of <tt>Drawing Automation</tt>.
+</p>
+
+<h4>Current local plugin shape</h4>
+
+<p>
+  The local Mech repository is already structured as a modernized plugin rather
+  than a single script. It has:
+</p>
+
+<ul>
+  <li>client entry points such as <tt>src/client/mech.js</tt> and <tt>src/client/blocks.js</tt></li>
+  <li>a small API surface exposed through <tt>api</tt></li>
+  <li>tests for parsing, edges, folds, neighborhoods, and walk scope</li>
+  <li>wiki pages such as <tt>About Mech Plugin</tt> and <tt>Catalog of Mech Blocks</tt></li>
+</ul>
+
+<p>
+  That means the interesting question is not whether Mech exists, but how its
+  workflows are being made more inspectable and more report-oriented.
+</p>
+
+<h4>What commit 4ed345e changes</h4>
+
+<p>
+  Commit <tt>4ed345e</tt> changes only one file, but the conceptual shift is
+  clear.
+</p>
+
+<ul>
+  <li><tt>download</tt> is added to the exported Mech <tt>api</tt> instead of being local to the <tt>PRINT</tt> block.</li>
+  <li><tt>PRINT</tt> stops keeping only a flat <tt>missing</tt> list.</li>
+  <li><tt>PRINT</tt> now accumulates a structured <tt>tally</tt> with categories for missing pages, referenced domains, item-type wishes, and runtime errors.</li>
+  <li><tt>PRINT</tt> can publish those findings into <tt>state.items</tt> as report objects rather than only burying them in console output or one generated HTML file.</li>
+</ul>
+
+<p>
+  In short: the commit turns <tt>PRINT</tt> from a mostly generative step into a
+  generative-plus-diagnostic step.
+</p>
+
+<h4>Before and after</h4>
+
+<p>
+  Before this commit, the block mostly did three things:
+</p>
+
+<ol>
+  <li>collect story slugs</li>
+  <li>collect garden slugs</li>
+  <li>record only one broad failure bucket: missing pages</li>
+</ol>
+
+<p>
+  After this commit, the same process also keeps a more systematic account of
+  what happened while materializing the neighborhood:
+</p>
+
+<ul>
+  <li>which domains were actually referenced</li>
+  <li>which slugs were missing, grouped by section</li>
+  <li>which non-paragraph item types were encountered and therefore represent rendering wishes</li>
+  <li>which runtime errors occurred while fetching or printing pages</li>
+</ul>
+
+<h4>Why this matters</h4>
+
+<p>
+  This is aligned with the Story Neighborhood Workflow. A workflow like
+  <tt>Story -&gt; WALK -&gt; PRINT -&gt; PREVIEW</tt> is stronger when the print stage
+  not only emits an artifact but also emits a structured account of its own
+  boundaries and losses.
+</p>
+
+<p>
+  The new tally categories are especially important because they separate
+  different kinds of editorial work:
+</p>
+
+<ul>
+  <li><b>missing pages</b> are neighborhood boundary problems</li>
+  <li><b>domains</b> show federation spread</li>
+  <li><b>item type wishes</b> show rendering gaps</li>
+  <li><b>errors</b> show program failures rather than editorial boundaries</li>
+</ul>
+
+<p>
+  That separation is the real progress. It makes the output more inspectable and
+  more actionable.
+</p>
+
+<h4>Connection to HyperDoc and HyperBook</h4>
+
+<p>
+  This is relevant for HyperDoc work because the same shift is needed here as
+  well: workflows should surface structured findings as objects, not only as
+  files or ad hoc console logs.
+</p>
+
+<ul>
+  <li>Story-neighborhood export should produce diagnostics alongside artifacts.</li>
+  <li>Rendering wishes should become inspectable categories, not incidental observations.</li>
+  <li>Federation spread should be made visible as domains and source sites.</li>
+  <li>Errors should be distinguished from boundary conditions.</li>
+</ul>
+
+<p>
+  In that sense, <tt>4ed345e</tt> is small in code but significant in workflow
+  semantics.
+</p>
+
+<h4>Current limitations still visible</h4>
+
+<p>
+  The commit does not solve everything.
+</p>
+
+<ul>
+  <li><tt>PRINT</tt> still privileges paragraph text in the generated draft.</li>
+  <li>non-paragraph items are only tallied as wishes, not rendered.</li>
+  <li>the tally is still assembled inside the block implementation rather than exposed as a first-class report object API.</li>
+  <li>the underlying workflow is still browser/plugin-centric rather than inspectable in Lisp object terms.</li>
+</ul>
+
+<p>
+  So this is progress, not completion.
+</p>
+
+<h4>Pragmatic reading of the commit</h4>
+
+<p>
+  The key move is: make the printing workflow account for what it could not do,
+  not just what it successfully emitted.
+</p>
+
+<p>
+  That is the same discipline needed for journal checking, collaborative-link
+  resolution, and neighborhood-aware publishing more generally.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+  <li><a hyperbook="hyperdoc" page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
+</ul>
