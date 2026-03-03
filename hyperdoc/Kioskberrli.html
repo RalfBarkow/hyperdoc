@@ -111,12 +111,13 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 <h4>Pragmatic next step</h4>
 
 <p>
-  The next concrete deliverable for <tt>Kioskberrli</tt> is a NixOS flake that
-  can build or describe the SD-card system for the Raspberry Pi 4 Model B.
+  The first concrete deliverable now exists: the <tt>hauptsache</tt> project
+  has a dedicated <tt>kioskberrli/</tt> flake that can build the SD-card
+  system for the Raspberry Pi 4 Model B.
 </p>
 
 <p>
-  At minimum, that flake should build:
+  The current build target is:
 </p>
 
 <pre>
@@ -124,17 +125,26 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 </pre>
 
 <p>
-  and make explicit:
+  That gives the project a concrete system artifact rather than only a design
+  intention. The remaining work is now hardening and operations.
+</p>
+
+<p>
+  The next checklist should make explicit:
 </p>
 
 <ul>
-  <li>target hardware</li>
-  <li>target architecture (<tt>aarch64-linux</tt>)</li>
-  <li>boot behavior</li>
-  <li>network assumptions</li>
-  <li>automatic browser start</li>
-  <li>the landing-page URL</li>
+  <li>SSH-based maintenance without on-site keyboard use</li>
+  <li>browser/session recovery after crashes and power loss</li>
+  <li>network fallback in salon conditions</li>
+  <li>SD-card durability and image rebuild workflow</li>
+  <li>the exact landing-page handoff behavior in production</li>
 </ul>
+
+<p>
+  The repo root can also provide a development shell for this work, but the SD
+  image artifact itself belongs in <tt>hauptsache/kioskberrli</tt>.
+</p>
 
 <h4>Related</h4>
 
