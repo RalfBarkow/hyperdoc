@@ -46,6 +46,53 @@ ls -la /dev/disk/by-label | grep -E 'FIRMWARE|NIXOS_SD' || true
   betting a reboot on it.
 </p>
 
+<h2>Pre-flight Script</h2>
+
+<pre>
+#!/bin/sh
+set -eu
+
+boot_kib=$(df -k /boot | awk 'NR==2 {print $2}')
+boot_avail_kib=$(df -k /boot | awk 'NR==2 {print $4}')
+
+if [ "${boot_kib:-0}" -lt 131072 ]; then
+  echo "unsafe: /boot smaller than 128 MiB"
+  exit 1
+fi
+
+if [ "${boot_avail_kib:-0}" -lt 51200 ]; then
+  echo "unsafe: /boot has less than 50 MiB free"
+  exit 1
+fi
+
+if [ ! -f /boot/extlinux/extlinux.conf ]; then
+  echo "unsafe: extlinux.conf missing"
+  exit 1
+fi
+
+if ls /boot/extlinux/extlinux.conf.tmp.* >/dev/null 2>&1; then
+  echo "unsafe: temporary extlinux file still present"
+  exit 1
+fi
+
+if [ ! -d /boot/nixos ] || ! ls /boot/nixos/* >/dev/null 2>&1; then
+  echo "unsafe: /boot/nixos missing or empty"
+  exit 1
+fi
+
+if ! ls -la /dev/disk/by-label | grep -Eq 'FIRMWARE|NIXOS_SD'; then
+  echo "unsafe: expected labels FIRMWARE/NIXOS_SD not found"
+  exit 1
+fi
+
+echo "preflight ok"
+</pre>
+
+<p>
+  This script is intentionally simple. It is a deterministic gate for “reboot
+  looks safe enough to attempt”, not a full hardware validation tool.
+</p>
+
 <h2>References</h2>
 
 <ul>
@@ -60,7 +107,7 @@ ls -la /dev/disk/by-label | grep -E 'FIRMWARE|NIXOS_SD' || true
 <h2>Related</h2>
 
 <ul>
-  <li><a page="Official Tutorial NixOS SD Image on Raspberry Pi 4 400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
-  <li><a page="Two Installation Models SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
-  <li><a page="Invariant Boot Partition Must Be Big Enough">Invariant: Boot Partition Must Be Big Enough</a></li>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Two Installation Models: SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
+  <li><a page="Invariant: Boot Partition Must Be Big Enough">Invariant: Boot Partition Must Be Big Enough</a></li>
 </ul>

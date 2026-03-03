@@ -62,10 +62,19 @@
   layout before continuing.
 </p>
 
+<h2>Correction Path</h2>
+
+<ul>
+  <li><b>Visible error:</b> <tt>No space left on device</tt> during bootloader or kernel copy, or <tt>Failed to install bootloader</tt>.</li>
+  <li><b>Local diagnosis:</b> <tt>df -h /boot</tt> shows a too-small or full partition, and <tt>extlinux.conf</tt> is missing or only <tt>extlinux.conf.tmp.*</tt> remains.</li>
+  <li><b>Corrective action:</b> re-image with an official NixOS SD image that provides a large enough boot partition, or explicitly resize the boot partition before retrying.</li>
+  <li><b>Verification:</b> <tt>/boot/extlinux/extlinux.conf</tt> exists, <tt>/boot/nixos</tt> contains non-<tt>.tmp</tt> kernel and initrd assets, and the machine reboots successfully.</li>
+</ul>
+
 <h2>Related</h2>
 
 <ul>
-  <li><a page="Official Tutorial NixOS SD Image on Raspberry Pi 4 400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
-  <li><a page="Two Installation Models SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
-  <li><a page="Preflight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a></li>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Two Installation Models: SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
+  <li><a page="Pre-flight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a></li>
 </ul>
