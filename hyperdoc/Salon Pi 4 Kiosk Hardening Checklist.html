@@ -19,14 +19,15 @@
 
 <p>
   In that case, the local fix has already been applied. What remains is
-  verification that the build now completes against the locked upstream module
-  set.
+  verification that the build now completes in a valid build environment
+  against the locked upstream module set.
 </p>
 
 <h4>1. Build evidence</h4>
 
 <ul>
   <li>Run the build target successfully at least once.</li>
+  <li>Run it on a valid Linux builder for the declared <tt>aarch64-linux</tt> target.</li>
   <li>Record the exact command and resulting artifact name.</li>
   <li>Record the nixpkgs input revision used for the image.</li>
 </ul>
@@ -131,6 +132,7 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
 <ul>
   <li><a page="Kioskberrli">Kioskberrli</a></li>
+  <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>
   <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
   <li><a page="Landing Page Redirect to Local Boot">Landing Page Redirect to Local Boot</a></li>
 </ul>

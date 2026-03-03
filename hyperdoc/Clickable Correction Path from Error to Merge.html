@@ -19,7 +19,9 @@ remove obsolete option in source
   -&gt;
 rerun the SD-image build
   -&gt;
-merge the verified correction
+either reach a verified build or expose the next distinct failure
+  -&gt;
+merge only after the verified correction
 </pre>
 
 <h4>1. Visible error</h4>
@@ -60,11 +62,19 @@ merge the verified correction
   maintenance move.
 </p>
 
+<p>
+  In the current case, rerunning the build did not yet yield a successful
+  image build. It did, however, prove that the original
+  <tt>sdImage.imageSize</tt> failure is gone and expose the next concrete
+  blocker:
+  <a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a>.
+</p>
+
 <h4>4. Merge step</h4>
 
 <p>
-  Once the verification build succeeds, the final step is not another local
-  inspection but the normal repository decision:
+  Only once the verification build succeeds is the final step the normal
+  repository decision:
 </p>
 
 <ul>
@@ -96,6 +106,7 @@ merge the verified correction
 
 <ul>
   <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
+  <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>
   <li><a page="Understanding Kioskberrli sdImage Failure Context">Understanding Kioskberrli sdImage Failure Context</a></li>
   <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
 </ul>
