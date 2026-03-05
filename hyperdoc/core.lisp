@@ -55,6 +55,89 @@
 (defclass code-page (page)
   ((file :reader file-of :initarg :file)))
 
+;; Inspectable topic objects used by expr links in HyperDoc pages.
+(defclass topic ()
+  ((id :reader id-of :initarg :id)
+   (title :reader title-of :initarg :title)
+   (summary :reader summary-of :initarg :summary)
+   (references :reader references-of :initarg :references :initform nil)))
+
+(defun make-topic (&key id title summary references)
+  (make-instance 'topic
+                 :id id
+                 :title title
+                 :summary summary
+                 :references references))
+
+;; Core topic objects for Concepts/DMX/Topic Maps page.
+(defun concept-operational-definition ()
+  (make-topic
+   :id "concept-operational-definition"
+   :title "Concept"
+   :summary "A concept is an identifiable subject with stable identity, names, occurrences, and associations."
+   :references '("Operational Definition of Subject Identity"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
+(defun topic-map-operational-definition ()
+  (make-topic
+   :id "topic-map-operational-definition"
+   :title "Topic Map"
+   :summary "A topic map is a graph of topics that separates subject identity from any single document or rendering."
+   :references '("Concepts, DMX Topics, and Topic Maps")))
+
+(defun dmx-topic-operational-definition ()
+  (make-topic
+   :id "dmx-topic-operational-definition"
+   :title "DMX Topic"
+   :summary "A DMX topic is an addressable runtime topic object with type/value/association structure."
+   :references '("Concepts, DMX Topics, and Topic Maps")))
+
+;; Topic objects for AArch64 SD-image preparation flow.
+(defun prepare-aarch64-image-topic ()
+  (make-topic
+   :id "prepare-aarch64-image"
+   :title "Prepare the AArch64 image"
+   :summary "Preparation phase for obtaining and validating an aarch64 NixOS SD-image artifact before flashing."
+   :references '("Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Pre-flight Checklist for Raspberry Pi NixOS SD Images"
+                 "Two Installation Models: SD Image vs Classic Installer")))
+
+(defun runbook-build-and-flash-sd-image-topic ()
+  (make-topic
+   :id "runbook-build-and-flash-sd-image"
+   :title "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+   :summary "Operational sequence to build/obtain, flash, boot, and validate the SD image on Pi 4."
+   :references '("Prepare the AArch64 image")))
+
+(defun official-rpi-sd-image-tutorial-topic ()
+  (make-topic
+   :id "official-rpi-sd-image-tutorial"
+   :title "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+   :summary "Upstream nix.dev SD-image workflow: preinstalled image, first rebuild with nixos-rebuild boot, then reboot."
+   :references '("Prepare the AArch64 image")))
+
+(defun preflight-rpi-sd-image-checklist-topic ()
+  (make-topic
+   :id "preflight-rpi-sd-image-checklist"
+   :title "Pre-flight Checklist for Raspberry Pi NixOS SD Images"
+   :summary "Checks before reboot to verify boot partition state, extlinux files, and partition labels."
+   :references '("Prepare the AArch64 image")))
+
+(defun two-installation-models-topic ()
+  (make-topic
+   :id "two-installation-models-sd-vs-classic"
+   :title "Two Installation Models: SD Image vs Classic Installer"
+   :summary "Distinguishes prebuilt SD-image workflow from classic installer workflow to avoid command-model drift."
+   :references '("Prepare the AArch64 image")))
+
+(defun dmx-topic-912138 ()
+  (make-topic
+   :id "dmx-topic-912138"
+   :title "DMX Topic 912138"
+   :summary "External DMX topic reference for the AArch64 image preparation context."
+   :references '("https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/912102/topic/912138/info")))
+
 ;;
 ;; Create a HyperDoc instance.
 ;;
