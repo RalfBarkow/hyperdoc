@@ -30,7 +30,7 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
 - `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages`: localhost FedWiki pages related to HyperDoc page workflows
 - `hyperdoc-explorer/`: explorer implementation for HyperDoc
 - `hyperbook-server/`: server implementation and playground/debug wiring
-- `inspector-hyperdoc/`: inspector-facing HyperDoc views/docs
+- `hyperdoc-inspector/`: inspector-facing HyperDoc views/docs
 - `assets/`: shared CSS, JS, icons
 - `tools/`: utility scripts
 
