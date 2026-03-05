@@ -299,4 +299,69 @@
                  "Stepper Debugger Surface"
                  "Playground restarts")))
 
+;; Topic objects for Konrad feedback thread (2026-03-05).
+(defun graph-based-discovery-and-traversal-topic ()
+  (make-topic
+   :id "graph-based-discovery-and-traversal"
+   :title "Graph-based discovery and traversal"
+   :summary "HyperDoc/HyperBook usage where humans and programs discover and traverse content through graph links."
+   :references '("Konrad Feedback on Communication Pages"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
+(defun hyperbook-interface-no-media-discontinuity-topic ()
+  (make-topic
+   :id "hyperbook-interface-no-media-discontinuity"
+   :title "HyperBook interface without media discontinuity"
+   :summary "The HyperBook interface keeps browsing, running, and inspecting in one medium instead of splitting prose and runtime."
+   :references '("Konrad Feedback on Communication Pages"
+                 "HyperDoc Server")))
+
+(defun uniform-robot-access-topic ()
+  (make-topic
+   :id "uniform-robot-access"
+   :title "Uniform robot access"
+   :summary "Robot code can access the same graph and objects as humans, through the same interface conventions."
+   :references '("Konrad Feedback on Communication Pages"
+                 "Communication Surfaces Policy")))
+
+(defun human-written-robot-code-topic ()
+  (make-topic
+   :id "human-written-robot-code"
+   :title "Human-written robot code"
+   :summary "Processing code is authored by humans and stored as first-class HyperDoc content."
+   :references '("Konrad Feedback on Communication Pages")))
+
+(defun processing-code-inside-hyperdoc-topic ()
+  (make-topic
+   :id "processing-code-inside-hyperdoc"
+   :title "Processing code inside HyperDoc"
+   :summary "Processing code should live inside HyperDoc and be browsable, runnable, and inspectable by other code."
+   :references '("Konrad Feedback on Communication Pages"
+                 "Stepper Debugger Surface"
+                 "Playground restarts")))
+
+(defun topic-map-work-alignment-topic ()
+  (make-topic
+   :id "topic-map-work-alignment"
+   :title "Topic-map work alignment"
+   :summary "Existing topic-map work aligns with HyperDoc's graph-centric discovery and traversal model."
+   :references '("Konrad Feedback on Communication Pages"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
+(defun concept-graph-leaf-for-humans-and-robots-topic ()
+  (make-topic
+   :id "concept-graph-leaf-for-humans-and-robots"
+   :title "Concept-graph leaf for humans and robots"
+   :summary "A page is a leaf in a larger concept graph that both humans and robots can reach via search/traversal."
+   :references '("Konrad Feedback on Communication Pages"
+                 "Communication Surfaces Policy")))
+
+(defun second-order-hypertext-topic ()
+  (make-topic
+   :id "second-order-hypertext"
+   :title "Second-order hypertext"
+   :summary "Hypertext where pages describe and operationalize the graph and traversal logic that produces their own context."
+   :references '("Konrad Feedback on Communication Pages"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
 ;;
