@@ -484,4 +484,43 @@
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
                  "Konrad Feedback on Communication Pages")))
 
+;; Topic objects for Ward Cunningham input on Smalltalk tooling lineage.
+(defun ward-beck-diagram-1986-topic ()
+  (make-topic
+   :id "ward-beck-diagram-1986"
+   :title "Ward/Beck diagram for object-oriented programs (1986)"
+   :summary "Cunningham and Beck's OOPSLA 1986 diagram work frames object collaboration as first-class explanatory structure."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "https://c2.com/doc/case87.html")))
+
+(defun ward-collaborating-objects-topic ()
+  (make-topic
+   :id "ward-collaborating-objects"
+   :title "Collaborating objects diagrams"
+   :summary "Hand-drawn collaboration diagrams were used to explain object behavior across tool boundaries."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun class-browser-inspector-debugger-triangulation-topic ()
+  (make-topic
+   :id "class-browser-inspector-debugger-triangulation"
+   :title "Class browser/inspector/debugger triangulation"
+   :summary "Behavior understanding required combining three windows: class browser, object inspector, and single-step debugger."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Stepper Debugger Surface")))
+
+(defun compiledmethod-interpretnextinstruction-topic ()
+  (make-topic
+   :id "compiledmethod-interpretnextinstruction"
+   :title "CompiledMethod interpretNextInstructionFor: aContext"
+   :summary "The stepping primitive exposed execution semantics that enabled direct diagram extraction from runtime behavior."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun expanding-tools-literate-environment-topic ()
+  (make-topic
+   :id "expanding-tools-literate-environment"
+   :title "Expanding the Role of Tools in a Literate Programming Environment"
+   :summary "CASE'87 line of work: tools should compose around explanation, not just editing, anticipating scene-level workflow support."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "https://c2.com/doc/case87.html")))
+
 ;;
