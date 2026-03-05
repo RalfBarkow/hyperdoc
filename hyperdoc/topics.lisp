@@ -364,4 +364,124 @@
    :references '("Konrad Feedback on Communication Pages"
                  "Concepts, DMX Topics, and Topic Maps")))
 
+;; Topic objects for Smalltalk browser frame/scene discussion and HyperDoc adaptation.
+(defun four-pane-browser-metaphor-topic ()
+  (make-topic
+   :id "four-pane-browser-metaphor"
+   :title "Four-pane browser metaphor"
+   :summary "The enduring class/category/protocol/method browser frame that preserves static code context."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun static-context-frame-topic ()
+  (make-topic
+   :id "static-context-frame"
+   :title "Static context frame"
+   :summary "A structured code frame (class/package/method neighborhood) that keeps local orientation while editing."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun dynamic-investigation-scene-topic ()
+  (make-topic
+   :id "dynamic-investigation-scene"
+   :title "Dynamic investigation scene"
+   :summary "The evolving thread across debugger, inspector, senders/implementors, playground, and decisions."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Stepper Debugger Surface")))
+
+(defun message-flow-navigation-topic ()
+  (make-topic
+   :id "message-flow-navigation"
+   :title "Message-flow navigation"
+   :summary "Behavior understanding by following call/message flow across objects and tools rather than within one browser pane."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Stepper Debugger Surface")))
+
+(defun ide-composition-gap-topic ()
+  (make-topic
+   :id "ide-composition-gap"
+   :title "IDE composition gap"
+   :summary "Tools coexist but do not carry context seamlessly, creating friction between powerful islands."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Communication Surfaces Policy")))
+
+(defun investigation-thread-memory-topic ()
+  (make-topic
+   :id "investigation-thread-memory"
+   :title "Investigation thread memory"
+   :summary "Need to preserve where we came from, what we tried, and why decisions were made."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun frankenstein-tool-problem-topic ()
+  (make-topic
+   :id "frankenstein-tool-problem"
+   :title "Frankenstein tool problem"
+   :summary "Feature accretion without holistic redesign yields powerful but hard-to-master tools."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun hermit-tool-problem-topic ()
+  (make-topic
+   :id "hermit-tool-problem"
+   :title "Hermit tool problem"
+   :summary "Each tool behaves like an island; transitions lose context."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun alien-tool-problem-topic ()
+  (make-topic
+   :id "alien-tool-problem"
+   :title "Alien tool problem"
+   :summary "Image-local workflows can clash with OS conventions where mismatch is accidental rather than essential."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun saturated-environment-problem-topic ()
+  (make-topic
+   :id "saturated-environment-problem"
+   :title "Saturated environment problem"
+   :summary "Scale growth raises navigation/discoverability costs and lowers signal-to-noise."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun workspace-as-graph-topic ()
+  (make-topic
+   :id "workspace-as-graph"
+   :title "Workspace as graph"
+   :summary "Treat active work as a graph of related tools, objects, and steps rather than independent windows."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Graph-Rooted Publishing")))
+
+(defun scene-graph-node-topic ()
+  (make-topic
+   :id "scene-graph-node"
+   :title "Scene graph node"
+   :summary "A node in the investigation scene graph: tool state, object, code location, experiment, or decision."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun scene-graph-edge-topic ()
+  (make-topic
+   :id "scene-graph-edge"
+   :title "Scene graph edge"
+   :summary "Typed relation between scene nodes (e.g. led-to, inspected, retried, rejected, superseded)."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
+(defun scene-graph-edit-cycle-topic ()
+  (make-topic
+   :id "scene-graph-edit-cycle"
+   :title "Scene graph edit cycle"
+   :summary "Operational cycle: capture step -> link to prior state -> annotate outcome -> branch or merge."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun hyperdoc-scene-graph-adaptation-topic ()
+  (make-topic
+   :id "hyperdoc-scene-graph-adaptation"
+   :title "HyperDoc scene graph adaptation"
+   :summary "Adapt Smalltalk IDE lessons by making navigation/debugging steps first-class inspectable graph objects in HyperDoc."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Konrad Feedback on Communication Pages")))
+
+(defun human-written-robot-process-graphs-topic ()
+  (make-topic
+   :id "human-written-robot-process-graphs"
+   :title "Human-written robot process graphs"
+   :summary "Human-authored process graphs guide automated traversal while staying inspectable/editable by humans."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Konrad Feedback on Communication Pages")))
+
 ;;

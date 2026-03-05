@@ -1,0 +1,83 @@
+<h1>Smalltalk Browser Frame and Scene in HyperDoc</h1>
+
+<p>
+  Source article:
+  <a href="https://blog.lorenzano.eu/smalltalks-browser-unbeatable-yet-not-enough/">
+    Smalltalk's Browser: Unbeatable, Yet Not Enough
+  </a>
+  by Esteban Lorenzano.
+</p>
+
+<p>
+  The key distinction is useful for HyperDoc:
+  the browser frame preserves static code context,
+  but daily work also needs the dynamic investigation scene across tools.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::four-pane-browser-metaphor-topic)"><tt>Four-pane browser metaphor</tt></a></li>
+  <li><a expr="(hyperdoc::static-context-frame-topic)"><tt>Static context frame</tt></a></li>
+  <li><a expr="(hyperdoc::dynamic-investigation-scene-topic)"><tt>Dynamic investigation scene</tt></a></li>
+  <li><a expr="(hyperdoc::message-flow-navigation-topic)"><tt>Message-flow navigation</tt></a></li>
+  <li><a expr="(hyperdoc::ide-composition-gap-topic)"><tt>IDE composition gap</tt></a></li>
+  <li><a expr="(hyperdoc::investigation-thread-memory-topic)"><tt>Investigation thread memory</tt></a></li>
+  <li><a expr="(hyperdoc::frankenstein-tool-problem-topic)"><tt>Frankenstein tool problem</tt></a></li>
+  <li><a expr="(hyperdoc::hermit-tool-problem-topic)"><tt>Hermit tool problem</tt></a></li>
+  <li><a expr="(hyperdoc::alien-tool-problem-topic)"><tt>Alien tool problem</tt></a></li>
+  <li><a expr="(hyperdoc::saturated-environment-problem-topic)"><tt>Saturated environment problem</tt></a></li>
+  <li><a expr="(hyperdoc::workspace-as-graph-topic)"><tt>Workspace as graph</tt></a></li>
+  <li><a expr="(hyperdoc::scene-graph-node-topic)"><tt>Scene graph node</tt></a></li>
+  <li><a expr="(hyperdoc::scene-graph-edge-topic)"><tt>Scene graph edge</tt></a></li>
+  <li><a expr="(hyperdoc::scene-graph-edit-cycle-topic)"><tt>Scene graph edit cycle</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-scene-graph-adaptation-topic)"><tt>HyperDoc scene graph adaptation</tt></a></li>
+  <li><a expr="(hyperdoc::human-written-robot-process-graphs-topic)"><tt>Human-written robot process graphs</tt></a></li>
+</ul>
+
+<h2>Evaluation for HyperDoc</h2>
+
+<p>
+  The article's diagnosis maps well to HyperDoc:
+  static pages and code browsers are necessary but not sufficient for dynamic work.
+  HyperDoc already has the right primitives (links, inspectable objects, debugger/stepper surfaces, and graph-rooted publishing).
+  The missing piece is to persist investigation context as first-class objects.
+</p>
+
+<p>
+  Adaptation verdict:
+  <b>yes, applicable now</b>, if we treat each investigation step as a topic-like object and connect those steps by typed relations.
+</p>
+
+<h2>How to edit scene graphs in HyperDoc</h2>
+
+<ol>
+  <li>Create a scene node per meaningful step: entry point, object inspected, stack frame, experiment, decision.</li>
+  <li>Create typed edges (<tt>led-to</tt>, <tt>inspected</tt>, <tt>retried</tt>, <tt>rejected</tt>, <tt>superseded</tt>) between nodes.</li>
+  <li>Record outcome metadata in each node (status, confidence, next question, references).</li>
+  <li>Render from the graph, not from a single linear narrative: derive task views, chronology views, and decision trails.</li>
+  <li>Allow humans and robots to traverse the same graph; keep robot procedures human-written and inspectable.</li>
+</ol>
+
+<p>
+  This preserves Smalltalk's strength (context frame) while adding the missing IDE-level composition:
+  scene-level continuity across tools and time.
+</p>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="Smalltalk Browser Frame and Scene in HyperDoc">
+    Smalltalk Browser Frame and Scene in HyperDoc
+  </a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+  <li><a hyperbook="hyperdoc" page="Stepper Debugger Surface">Stepper Debugger Surface</a></li>
+</ul>
