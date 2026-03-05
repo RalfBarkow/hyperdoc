@@ -38,6 +38,27 @@
 &lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="find"&gt;FIND&lt;/a&gt;
 </pre>
 
+<h3>How localhost reaches a remote site</h3>
+
+<p>
+  A localhost HyperDoc page reaches a remote FedWiki site by putting the remote
+  site id in the HyperBook prefix:
+</p>
+
+<pre>
+hyperbook="fedwiki:wiki.ralfbarkow.ch"
+</pre>
+
+<p>
+  Resolution model:
+</p>
+
+<ul>
+  <li><tt>fedwiki</tt> selects the FedWiki provider.</li>
+  <li><tt>wiki.ralfbarkow.ch</tt> selects the remote site within that provider.</li>
+  <li><tt>page="..."</tt> selects the page key on that site.</li>
+</ul>
+
 <h2>Idea 2: the slug is the stable page handle</h2>
 
 <p>
@@ -48,6 +69,25 @@
 
 <pre>
 &lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="walk"&gt;WALK&lt;/a&gt;
+</pre>
+
+<h3>Troubleshooting lookup failures</h3>
+
+<p>
+  If you see an error like:
+  <tt>No page "Smalltalk Browser Frame and Scene in HyperDoc" in HyperBook "wiki.ralfbarkow.ch"</tt>,
+  the link is usually using a title instead of the page slug.
+</p>
+
+<p>
+  Use the slug/file key for <tt>page=</tt>, and keep the title only as link text:
+</p>
+
+<pre>
+&lt;a hyperbook="fedwiki:wiki.ralfbarkow.ch"
+   page="smalltalk-browser-frame-and-scene-in-hyperdoc"&gt;
+  Smalltalk Browser Frame and Scene in HyperDoc
+&lt;/a&gt;
 </pre>
 
 <h2>Idea 3: stay inside the HyperBook model first</h2>
