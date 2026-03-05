@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ASD_PATH="${SCRIPT_DIR}/hyperbook.asd"
-
 # HyperDoc dev launcher:
 # - runs inside nix develop
 # - always enables development mode by default (playground eval)
@@ -94,7 +91,19 @@ EOF2
 
 # Run SBCL inside nix develop so CL_SOURCE_REGISTRY etc. are correct.
 unset ASDF_OUTPUT_TRANSLATIONS
-exec nix develop --command sbcl --no-userinit \
+
+child_pid=""
+terminate_dev() {
+  echo "[dev] terminated"
+  if [[ -n "${child_pid}" ]]; then
+    kill -KILL "${child_pid}" 2>/dev/null || true
+    wait "${child_pid}" 2>/dev/null || true
+  fi
+  exit 124
+}
+trap terminate_dev INT TERM
+
+nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(require :asdf)' \
   --eval '(sb-sys:enable-interrupt
             sb-unix:sigint
@@ -110,16 +119,97 @@ exec nix develop --command sbcl --no-userinit \
                               :implementation))))' \
   --eval '(setf *print-circle* t)' \
   --eval '(format t "~&ASDF ready.~%")' \
-  --eval "(asdf:load-asd #P\"${ASD_PATH}\")" \
+  --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
   --eval '(asdf:load-system "swank")' \
   --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
   --eval '(format t "~&Swank listening.~%")' \
-  --eval '(asdf:load-system "hyperbook/server")' \
-  --eval "(hyperbook/server:serve-catalog :port ${HYPERDOC_PORT} :development t)" \
+  --eval "(let ((port ${HYPERDOC_PORT}))
+           (format t \"~&[dev] preflight port=~D development=~S debug=~S~%\"
+                   port
+                   (uiop:getenv \"HYPERDOC_DEVELOPMENT\")
+                   (uiop:getenv \"HYPERDOC_DEBUG\"))
+           (finish-output))" \
+  --eval "(let* ((port ${HYPERDOC_PORT})
+                (entry nil))
+           (handler-case
+               (progn
+                 (asdf:load-system :hyperbook/server)
+                 (flet ((maybe-load (sys)
+                          (handler-case
+                              (if (asdf:find-system sys nil)
+                                  (progn
+                                    (asdf:load-system sys)
+                                    (format t \"~&[dev] optional ~S loaded~%\" sys))
+                                  (format t \"~&[dev] optional ~S skipped (not found)~%\" sys))
+                            (error (c)
+                              (format t \"~&[dev] optional ~S failed: ~A~%\" sys c)))))
+                   (let* ((names
+                           (sort
+                            (remove-duplicates
+                             (handler-case
+                                 (loop for s in (asdf:registered-systems)
+                                       for n = (string-downcase (string s))
+                                       when (and (<= (length \"hyperbook/\") (length n))
+                                                 (string= \"hyperbook/\" n :end2 (length \"hyperbook/\")))
+                                         collect n)
+                               (error () '()))
+                             :test #'string=)
+                            #'string<)))
+                     (dolist (n names)
+                       (unless (string= n \"hyperbook/server\")
+                         (maybe-load (intern (string-upcase n) :keyword))))))
+                 (let* ((pkg (or (find-package :hyperbook/server)
+                                 (error \"Package HYPERBOOK/SERVER not found\")))
+                        (preferred '(\"SERVE-CATALOG\" \"SERVE\")))
+                   (setf entry
+                         (or
+                          (loop for name in preferred
+                                for sym = (find-symbol name pkg)
+                                when (and sym (fboundp sym))
+                                return sym)
+                          (let* ((candidates
+                                  (loop for sym being the symbols of pkg
+                                        for sname = (symbol-name sym)
+                                        when (and (fboundp sym)
+                                                  (<= 6 (length sname))
+                                                  (string= \"SERVE-\" sname :end2 6))
+                                        collect sym))
+                                 (sorted (sort candidates #'string< :key #'symbol-name)))
+                            (or (first sorted)
+                                (error \"No SERVE-* entrypoint found in ~A\" (package-name pkg)))))))
+                 (format t \"~&[dev] entrypoint=~S port=~D~%\" entry port)
+                 (finish-output)
+                 (funcall entry :port port))
+             (error (c)
+               (format *error-output* \"~&[dev] ERROR ~A~%~A~%\"
+                       (type-of c) c)
+               (finish-output *error-output*)
+               (uiop:quit 1))))" \
   --eval '(format t "~&HyperDoc up.~%")' \
   --eval '(handler-bind ((sb-sys:interactive-interrupt
                           (lambda (c)
                             (declare (ignore c))
                             (format t "~&Stopping HyperDoc dev server (Ctrl-C).~%")
                             (sb-ext:exit :code 130 :abort t))))
-            (loop (sleep 3600)))'
+            (loop (sleep 3600)))' &
+child_pid=$!
+wait "${child_pid}"
+status=$?
+trap - INT TERM
+exit "${status}"
+
+# Minimal reproduction template (copy/paste):
+# sbcl --no-userinit --disable-debugger --non-interactive \
+#   --eval '(require :asdf)' \
+#   --eval '(handler-case
+#              (progn
+#                (asdf:load-system :hyperbook/server)
+#                (format t "~&MR: load ok~%")
+#                (uiop:quit 0))
+#            (error (c)
+#              (format *error-output* "~&MR ERROR ~A~%~A~%"
+#                      (type-of c) c)
+#              (uiop:quit 1)))'
+#
+# Bounded startup check (startup witness, teardown ignored):
+# timeout --signal=TERM --kill-after=2s 45s ./dev.sh |& rg '^\[dev\] (preflight|entrypoint=|terminated)'
