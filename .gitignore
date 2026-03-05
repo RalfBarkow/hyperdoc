@@ -20,4 +20,6 @@
 # ---> Local dev artifacts
 .direnv/
 .flake-deps/
+node_modules/
+test-results/
 repomix-output-hyperdoc.md
