@@ -1,0 +1,60 @@
+<h1>Stepper Debugger Surface</h1>
+
+<in-package>hyperbook/server</in-package>
+
+<p>
+  This page documents the existing stepper/debugger surface used by HyperDoc
+  Playground evaluation in development mode.
+</p>
+
+<h2>What this surface is</h2>
+
+<p>
+  The stepper/debugger surface is the set of runtime objects and views that
+  allow you to run code incrementally, inspect intermediate results, and handle
+  errors without collapsing the whole server session.
+</p>
+
+<p>
+  It is analogous in spirit to GT's monitor/runner flow:
+  start a run, observe step state, inspect errors, stop or reset safely.
+</p>
+
+<h2>Runtime components</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::playground-stepper-surface-topic)"><tt>Playground stepper surface</tt></a>: stepper model and step/run/reset operations</li>
+  <li><a expr="(hyperdoc::playground-debug-report-surface-topic)"><tt>Playground debug report surface</tt></a>: structured debug report object and debug view</li>
+  <li><a expr="(hyperdoc::web-debugger-surface-topic)"><tt>Web debugger surface</tt></a>: debugger registry and web-facing handoff</li>
+  <li><a expr="(hyperdoc::playground-eval-surface-topic)"><tt>Playground eval surface</tt></a>: Playground wiring for eval/inspect/step/debug actions</li>
+</ul>
+
+<h2>Operational flow</h2>
+
+<ol>
+  <li>Load server in development mode (<tt>HYPERDOC_DEVELOPMENT=1</tt>).</li>
+  <li>Open a Playground-enabled inspector pane.</li>
+  <li>Use step/eval controls to run selected forms.</li>
+  <li>If evaluation fails, inspect the debug report object and retry/abort.</li>
+  <li>Reset or stop the stepper state when done.</li>
+</ol>
+
+<h2>Design boundary</h2>
+
+<p>
+  The stepper/debugger surface belongs to runtime and interaction wiring
+  (<tt>hyperbook-server</tt>), not to static page rendering.
+</p>
+
+<p>
+  This keeps page content declarative while execution control remains explicit,
+  inspectable, and bounded.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="HyperDoc Server">HyperDoc Server</a></li>
+  <li><a hyperbook="moldable-inspector" page="Playground restarts">Playground restarts</a></li>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+</ul>

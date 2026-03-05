@@ -30,12 +30,23 @@
 </p>
 
 <ul>
-  <li><tt>hyperbook-server/playground-eval.lisp</tt></li>
-  <li><tt>hyperbook-server/playground-debug.lisp</tt></li>
-  <li><tt>hyperbook-server/web-debugger.lisp</tt></li>
+  <li><a expr="(hyperdoc::playground-eval-surface-topic)"><tt>Playground eval surface</tt></a></li>
+  <li><a expr="(hyperdoc::playground-debug-report-surface-topic)"><tt>Playground debug report surface</tt></a></li>
+  <li><a expr="(hyperdoc::web-debugger-surface-topic)"><tt>Web debugger surface</tt></a></li>
 </ul>
 
 <p>
   You can alt-click the <b>Retry</b> or <b>Abort</b> button to inspect the action
   thunk and see how the recovery flow is implemented.
 </p>
+
+<h2>Dependency graph</h2>
+
+<p>
+  Yes, there is already a dependency graph view. You can inspect it directly on
+  the inspector system object:
+</p>
+
+<ul>
+  <li><a expr="(asdf:find-system :hyperdoc/inspector)" view="Dependency graph"><tt>:hyperdoc/inspector dependency graph</tt></a></li>
+</ul>

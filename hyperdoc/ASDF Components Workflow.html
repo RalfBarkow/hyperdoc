@@ -1,0 +1,68 @@
+<h1>ASDF Components Workflow</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents how to work with ASDF systems/components in this
+  repository and how to diagnose undefined-function failures in a running image.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::asdf-system-topic)"><tt>ASDF system</tt></a></li>
+  <li><a expr="(hyperdoc::asdf-component-topic)"><tt>ASDF component</tt></a></li>
+  <li><a expr="(hyperdoc::asdf-module-serial-order-topic)"><tt>ASDF module serial order</tt></a></li>
+  <li><a expr="(hyperdoc::asdf-load-system-force-topic)"><tt>asdf:load-system :force t</tt></a></li>
+  <li><a expr="(hyperdoc::asdf-find-system-topic)"><tt>asdf:find-system</tt></a></li>
+  <li><a expr="(hyperdoc::undefined-function-triage-topic)"><tt>Undefined-function triage</tt></a></li>
+</ul>
+
+<h2>Working model</h2>
+
+<ol>
+  <li>Find the system in the current image: <tt>(asdf:find-system :hyperdoc)</tt></li>
+  <li>Open the corresponding <tt>.asd</tt> file and locate the module/component list.</li>
+  <li>Confirm the file containing your new definition is listed as an ASDF component.</li>
+  <li>Confirm component order is correct when <tt>:serial t</tt> is used.</li>
+  <li>Reload the system with force and re-check function availability.</li>
+</ol>
+
+<h2>Minimal checks</h2>
+
+<pre>
+(require :asdf)
+(asdf:find-system :hyperdoc)
+(asdf:load-system :hyperdoc :force t)
+(fboundp 'hyperdoc::prepare-aarch64-image-topic)
+</pre>
+
+<h2>Undefined-function path</h2>
+
+<p>
+  If <tt>fboundp</tt> is still <tt>NIL</tt> after reload, treat it as a
+  component wiring issue first:
+</p>
+
+<ul>
+  <li>wrong package name in the function reference</li>
+  <li>file not included in the ASDF component list</li>
+  <li>component order places use before definition</li>
+  <li>different server process/image than the one you reloaded</li>
+</ul>
+
+<h2>Operational note</h2>
+
+<p>
+  For this repository, run checks through the Nix development shell
+  (<tt>nix develop</tt> or <tt>./dev.sh</tt>) so ASDF source registry and
+  dependency resolution are consistent.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
+  <li><a page="Creating a HyperDoc">Creating a HyperDoc</a></li>
+  <li><a page="HyperDoc Server">HyperDoc Server</a></li>
+</ul>
