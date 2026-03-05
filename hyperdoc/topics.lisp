@@ -531,4 +531,12 @@
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
                  "http://code.fed.wiki.org/view/diagramming-debugger")))
 
+(defun python-json-tool-source-topic ()
+  (make-topic
+   :id "python-json-tool-source"
+   :title "Python json.tool source"
+   :summary "The json.tool CLI lives in the Python standard library module json/tool.py and can be inspected locally via json.tool.__file__."
+   :references '("Python json.tool Source and Usage"
+                 "https://github.com/python/cpython/blob/main/Lib/json/tool.py")))
+
 ;;

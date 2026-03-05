@@ -1,0 +1,63 @@
+<h1>Python json.tool Source and Usage</h1>
+
+<p>
+  <tt>python3 -m json.tool</tt> is useful as a fast syntax check for FedWiki page JSON files.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::python-json-tool-source-topic)"><tt>Python json.tool source</tt></a></li>
+</ul>
+
+<h2>Where is the source code?</h2>
+
+<p>
+  In CPython, the module source is:
+  <a href="https://github.com/python/cpython/blob/main/Lib/json/tool.py">Lib/json/tool.py</a>.
+</p>
+
+<p>
+  On a local machine, print the installed module path with:
+</p>
+
+<pre>
+python3 - &lt;&lt;'PY'
+import json.tool
+print(json.tool.__file__)
+PY
+</pre>
+
+<p>
+  Example local path observed in this environment:
+  <tt>/usr/local/Cellar/python@3.14/3.14.0/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/tool.py</tt>.
+</p>
+
+<h2>Usage in this workflow</h2>
+
+<p>
+  Validate a FedWiki page file:
+</p>
+
+<pre>
+python3 -m json.tool /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/&lt;slug&gt; >/tmp/&lt;slug&gt;.json
+</pre>
+
+<p>
+  This validates JSON syntax/parsing only. It does not validate journal chronology/replay semantics.
+</p>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="python-json-tool-source-and-usage">python-json-tool-source-and-usage</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
+  <li><a hyperbook="hyperdoc" page="Linking HyperDoc Pages to FedWiki Pages">Linking HyperDoc Pages to FedWiki Pages</a></li>
+</ul>

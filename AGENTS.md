@@ -68,3 +68,67 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
   - put durable architecture/reference content in HyperDoc pages,
   - keep fast-moving collaborative trail in localhost FedWiki pages,
   - maintain navigable links/counterparts per topic instead of forcing identical content in both places.
+
+## Routine: Update HyperDoc + FedWiki Twins + Topics
+
+When adding/updating a concept cluster (e.g. new external input, architecture note, workflow correction), update all three surfaces together:
+
+1. HyperDoc page(s): update or add `hyperdoc/*.html` page content.
+2. Lisp topic objects: update `hyperdoc/topics.lisp` with inspectable topic constructors.
+3. Localhost FedWiki twins: update/add pages in `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages`.
+
+### Topic object requirements
+
+- Define one topic function per inspectable concept in `hyperdoc/topics.lisp`.
+- Each topic must include:
+  - `:id` (stable slug/key),
+  - `:title` (human label),
+  - `:summary` (one-sentence synopsis),
+  - `:references` (HyperDoc pages and/or URLs).
+- HyperDoc pages should expose these via `expr="(hyperdoc::...-topic)"` in an `Inspectable objects` section.
+
+### FedWiki twin requirements
+
+- For each topic id, maintain a FedWiki page with:
+  - `slug` = topic `:id` (filename in pages store),
+  - `title` = topic `:title`,
+  - first paragraph = topic `:summary`,
+  - references section linking each `:references` entry
+    (`[[Page]]` for internal pages, `[url url]` for external links).
+- Keep the related narrative twin page updated (if one exists), and add an anchor note to the relevant daily page (e.g. `2026-03-05`).
+
+### Linking and lookup rules
+
+- Prefer slug-keyed links for FedWiki hyperbooks:
+  - `hyperbook="fedwiki:wiki.ralfbarkow.ch" page="<slug>"`
+- Use title only for visible link text.
+- If you see `No page "<Title>" in HyperBook "wiki.ralfbarkow.ch"`, switch `page=` to the slug/file key.
+
+### Verification checklist
+
+- `asdf:load-system :hyperdoc` succeeds.
+- New topic functions are `fboundp`.
+- FedWiki JSON files parse (`python3 -m json.tool`).
+- HyperDoc page links to FedWiki use slug-based `page=...`.
+- Commit HyperDoc repo and FedWiki pages repo separately.
+
+### JSON validation with `python3 -m json.tool`
+
+Use `json.tool` as a syntax/structure guard before committing FedWiki page files.
+
+- Validate a single page file:
+  - `python3 -m json.tool /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/<slug> >/tmp/<slug>.json`
+- Validate multiple touched files:
+  - `python3 -m json.tool /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/2026-03-05 >/tmp/2026-03-05.json`
+  - `python3 -m json.tool /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/<other-slug> >/tmp/<other-slug>.json`
+
+What this check guarantees:
+
+- valid JSON syntax
+- parsable object structure
+
+What it does not guarantee:
+
+- FedWiki semantic correctness of `journal` action ordering/consistency
+- page-link correctness (slug/title mapping)
+- chronology/replay validity (those require journalmatic checks)
