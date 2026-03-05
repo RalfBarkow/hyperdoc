@@ -523,4 +523,12 @@
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
                  "https://c2.com/doc/case87.html")))
 
+(defun ward-diagramming-debugger-remembrance-topic ()
+  (make-topic
+   :id "ward-diagramming-debugger-remembrance"
+   :title "Ward diagramming-debugger remembrance"
+   :summary "Ward's later recollection ties diagram generation directly to debugger stepping and executable explanation."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "http://code.fed.wiki.org/view/diagramming-debugger")))
+
 ;;
