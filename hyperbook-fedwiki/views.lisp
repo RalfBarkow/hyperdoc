@@ -88,6 +88,26 @@
                         (or (get-site-owner wiki)
                             ""))))))
 
+(views:defview 👀context (page remote-fedwiki-page)
+  (load-page page)
+  (when-let (context (context-of page))
+    (let ((slug (origin-id-of page))
+          (local-wiki (hb:hyperbook-of page)))
+      (views:html-view :title "Context" :priority 4
+        (views:html
+          (:table :class "inspector-table"
+                  (dolist (wiki context)
+                    (let* ((target-page (ignore-errors (hb:find-page wiki slug)))
+                           (target (and target-page
+                                        (ignore-errors (make-remote local-wiki target-page))))
+                           (owner (or (get-site-owner wiki)
+                                      "")))
+                      (views:html
+                        (:tr (:td (if target
+                                      (views:object-ref target :display (domain-name-of wiki))
+                                      (views:object-ref wiki :display (domain-name-of wiki))))
+                             (:td (views:esc owner))))))))))))
+
 ;;
 ;; Views on plugins
 ;;
