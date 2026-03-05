@@ -74,12 +74,9 @@
                 :serial t
                 :components ((:file "package")
                              (:file "inspector-wiring")
-                             (:file "playground-debug")
-                             (:file "web-debugger")
                              (:file "playground-stepper")
                              (:file "playground-package")
                              (:file "playground-bindings")
-                             (:file "playground-eval")
                              (:file "server")))))
 
 (defsystem #:hyperbook/wikipedia

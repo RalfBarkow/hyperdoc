@@ -19,6 +19,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "core")
+                             (:file "topics")
                              (:file "links-in-code")
                              (:file "defining")
                              (:file "examples")
@@ -34,14 +35,18 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperdoc
+               #:hyperbook/server
                #:hyperbook/wikipedia
                #:html-inspector-views
                #:clog-moldable-inspector
                #:trivial-package-local-nicknames)
-  :components ((:module "inspector-hyperdoc"
+  :components ((:module "hyperdoc-inspector"
                 :serial t
                 :components ((:file "package")
-                             (:file "hyperdoc")))))
+                             (:file "playground-debug")
+                             (:file "web-debugger")
+                             (:file "playground-eval")
+                             (:file "inspector")))))
 
 (defsystem #:hyperdoc/explorer
   :description "Explorer for HyperDocs"
