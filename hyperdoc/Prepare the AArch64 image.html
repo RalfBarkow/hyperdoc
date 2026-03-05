@@ -1,0 +1,115 @@
+<h1>Prepare the AArch64 image</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This topic defines the preparation phase before flashing an SD card for
+  Raspberry Pi 4/400 (aarch64).
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::prepare-aarch64-image-topic)"><tt>Prepare the AArch64 image</tt></a></li>
+  <li><a expr="(hyperdoc::runbook-build-and-flash-sd-image-topic)"><tt>Runbook: Build and Flash NixOS SD Image for Kioskberrli</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-sd-image-tutorial-topic)"><tt>Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</tt></a></li>
+  <li><a expr="(hyperdoc::preflight-rpi-sd-image-checklist-topic)"><tt>Pre-flight Checklist for Raspberry Pi NixOS SD Images</tt></a></li>
+  <li><a expr="(hyperdoc::two-installation-models-topic)"><tt>Two Installation Models: SD Image vs Classic Installer</tt></a></li>
+  <li><a expr="(hyperdoc::dmx-topic-912138)"><tt>DMX Topic 912138</tt></a></li>
+</ul>
+
+<h2>Function: HYPERDOC::PREPARE-AARCH64-IMAGE-TOPIC</h2>
+
+<p>
+  <tt>HYPERDOC::PREPARE-AARCH64-IMAGE-TOPIC</tt> returns an inspectable
+  <tt>hyperdoc::topic</tt> object representing this preparation topic.
+</p>
+
+<pre>
+(hyperdoc::prepare-aarch64-image-topic)
+</pre>
+
+<p>
+  Quick check:
+</p>
+
+<pre>
+(fboundp 'hyperdoc::prepare-aarch64-image-topic)
+</pre>
+
+<h2>Fix: undefined-function error</h2>
+
+<p>
+  If you get <tt>undefined-function HYPERDOC::PREPARE-AARCH64-IMAGE-TOPIC</tt>,
+  the running Lisp image does not yet have the updated <tt>hyperdoc/core.lisp</tt>
+  definitions loaded.
+</p>
+
+<p>
+  1. Reload HyperDoc systems in the same image:
+</p>
+
+<pre>
+(require :asdf)
+(asdf:load-system :hyperdoc :force t)
+(asdf:load-system :hyperdoc/server :force t)
+</pre>
+
+<p>
+  2. Re-check function availability:
+</p>
+
+<pre>
+(fboundp 'hyperdoc::prepare-aarch64-image-topic)
+</pre>
+
+<p>
+  3. If still <tt>NIL</tt>, restart the server process (or <tt>./dev.sh</tt>) and retry.
+</p>
+
+<h2>Goal</h2>
+
+<p>
+  Produce a verified <tt>*.img</tt> artifact from a known aarch64 source,
+  ready to flash and boot.
+</p>
+
+<h2>Inputs</h2>
+
+<ul>
+  <li>target architecture: <tt>aarch64-linux</tt></li>
+  <li>source path:
+    <ul>
+      <li>official prebuilt image (<tt>nixos-sd-image-*-aarch64-linux.img.zst</tt>)</li>
+      <li>or project build output (<tt>...system.build.sdImage</tt>)</li>
+    </ul>
+  </li>
+  <li>host toolchain for decompression/checksum verification</li>
+</ul>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Select one source of truth (official prebuilt or project build).</li>
+  <li>Download/build the artifact and record provenance (URL/commit/date).</li>
+  <li>Decompress (<tt>zstd -d</tt>) when needed.</li>
+  <li>Verify artifact integrity (size/checksum if available).</li>
+  <li>Confirm filename and architecture include <tt>aarch64-linux</tt>.</li>
+</ol>
+
+<h2>Acceptance</h2>
+
+<ul>
+  <li>artifact exists as <tt>.img</tt> and is readable</li>
+  <li>architecture is confirmed as aarch64 target</li>
+  <li>provenance is recorded for later replay/debugging</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a></li>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Pre-flight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a></li>
+  <li><a page="Two Installation Models: SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
+</ul>
