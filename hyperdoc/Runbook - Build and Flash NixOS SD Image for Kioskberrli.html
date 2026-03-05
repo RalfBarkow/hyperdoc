@@ -1,0 +1,106 @@
+<h1>Runbook - Build and Flash NixOS SD Image for Kioskberrli</h1>
+
+<p>
+  This runbook is the operational sequence for creating an SD card for the
+  Raspberry Pi 4 kiosk. It follows the SD-image model from the nix.dev tutorial.
+</p>
+
+<h2>Scope</h2>
+
+<ul>
+  <li>build or obtain a NixOS ARM64 SD image</li>
+  <li>flash it safely to a physical SD card</li>
+  <li>boot and apply first configuration changes</li>
+  <li>run pre-flight checks before first reboot</li>
+</ul>
+
+<h2>Inputs</h2>
+
+<ul>
+  <li>target hardware: Raspberry Pi 4 Model B (aarch64)</li>
+  <li>image source: either official prebuilt SD image or project build target</li>
+  <li>project build target: <tt>.#nixosConfigurations.kioskberrli.config.system.build.sdImage</tt></li>
+</ul>
+
+<h2>Path A - Official Prebuilt Image</h2>
+
+<ol>
+  <li>Download <tt>nixos-sd-image-*-aarch64-linux.img.zst</tt>.</li>
+  <li>Decompress with <tt>zstd -d</tt>.</li>
+  <li>Flash the resulting <tt>.img</tt> to the SD card.</li>
+</ol>
+
+<h2>Path B - Build Project Image</h2>
+
+<pre>
+cd ~/workspace/hauptsache/kioskberrli
+nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
+ls -lah result/sd-image/
+</pre>
+
+<p>
+  Use the generated image artifact from <tt>result/sd-image/</tt> for flashing.
+</p>
+
+<h2>Flash Procedure (macOS host)</h2>
+
+<pre>
+# 1) Identify target disk
+diskutil list
+
+# 2) Unmount target disk (replace diskN)
+diskutil unmountDisk /dev/diskN
+
+# 3) Flash image (replace IMAGE and diskN)
+sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync
+sync
+
+# 4) Eject
+diskutil eject /dev/diskN
+</pre>
+
+<p>
+  Safety rule: verify <tt>diskN</tt> twice before running <tt>dd</tt>.
+</p>
+
+<h2>First Boot on Pi</h2>
+
+<ol>
+  <li>Boot from flashed SD card.</li>
+  <li>Edit <tt>/etc/nixos/configuration.nix</tt> for local network/SSH settings.</li>
+  <li>Run first rebuild with <tt>nixos-rebuild boot</tt> (not <tt>switch</tt>).</li>
+  <li>Reboot into the new generation.</li>
+</ol>
+
+<h2>Pre-flight Gate Before Reboot</h2>
+
+<pre>
+df -h /boot
+ls -la /boot/extlinux
+ls -la /boot/nixos
+ls -la /dev/disk/by-label | grep -E 'FIRMWARE|NIXOS_SD' || true
+</pre>
+
+<p>
+  If <tt>/boot</tt> is below 128MB, or <tt>extlinux.conf</tt> is missing,
+  stop and re-image.
+</p>
+
+<h2>Acceptance Criteria</h2>
+
+<ul>
+  <li>image build/download is reproducible and recorded</li>
+  <li>SD card boots on physical Pi 4</li>
+  <li>network and SSH come up</li>
+  <li>kiosk session shows landing page after reboot</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Pre-flight Checklist for Raspberry Pi NixOS SD Images">Pre-flight Checklist for Raspberry Pi NixOS SD Images</a></li>
+  <li><a page="Two Installation Models: SD Image vs Classic Installer">Two Installation Models: SD Image vs Classic Installer</a></li>
+  <li><a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a></li>
+  <li><a page="Kioskberrli">Kioskberrli</a></li>
+</ul>

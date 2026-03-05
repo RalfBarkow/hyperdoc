@@ -1,0 +1,225 @@
+<h1>Concepts, DMX Topics, and Topic Maps</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page gives an operational definition of a <tt>concept</tt> and relates it
+  to DMX topics and topic maps.
+</p>
+
+<p>
+  The weaker starting point here is not yet a fully stabilized subject. The
+  weaker starting point is a distinction that can be marked and revisited, plus
+  a boundary that keeps it from collapsing into neighboring distinctions.
+</p>
+
+<p>
+  The strongest topic-map reading is: <b>everything is a topic</b>. That does
+  not mean every topic is equally important. It means every identifiable
+  distinction can be treated as a topic candidate, and some of those candidates
+  later become subjects with identity, names, occurrences, and associations.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::concept-operational-definition)"><tt>Concept</tt></a></li>
+  <li><a expr="(hyperdoc::topic-map-operational-definition)"><tt>Topic Map</tt></a></li>
+  <li><a expr="(hyperdoc::dmx-topic-operational-definition)"><tt>DMX Topic</tt></a></li>
+</ul>
+
+<h2>Operational definition of concept</h2>
+
+<p>
+  A concept begins as a distinction the system can mark and revisit,
+  independent of any one rendering, file, page, or implementation shortcut.
+</p>
+
+<p>
+  Operationally, a concept should have at least:
+</p>
+
+<ul>
+  <li>distinguishability: this is not that</li>
+  <li>a boundary that keeps the distinction from collapsing into adjacent ones</li>
+  <li>a re-addressable marker, handle, or name that lets the distinction be revisited</li>
+</ul>
+
+<p>
+  Subject identity is a stronger later commitment. It becomes relevant when the
+  system needs to preserve sameness across occurrences, names, contexts, or
+  relations.
+</p>
+
+<p>
+  That means a concept is not merely a string and not merely a page title. It
+  may begin as a distinction marker, and only later become the identifiable
+  subject that different pages, views, and objects may refer to as the same
+  thing.
+</p>
+
+<p>
+  In topic-map terms, this is exactly the point of saying that everything is a
+  topic: persons, pages, tools, reports, workflows, and even relations can all
+  first appear as distinctions worth marking, and some of them then mature into
+  identifiable subjects instead of being reduced to document fragments.
+</p>
+
+<p>
+  The key strengthening is this: associations are also topics. An association is
+  not merely an edge drawn between two already-real topics. It can itself be a
+  first-class subject with identity, names, occurrences, and further
+  associations.
+</p>
+
+<h2>Operational definition of subject identity</h2>
+
+<p>
+  Subject identity is the rule that lets a system decide when two references
+  are about the same subject even when they appear under different names,
+  pages, views, or representations.
+</p>
+
+<p>
+  This is not the minimum starting point. It is the stronger rule you add once
+  the system needs to preserve sameness across multiple occurrences of the same
+  distinction.
+</p>
+
+<p>
+  Operationally, a subject has identity if it can remain the same subject
+  across:
+</p>
+
+<ul>
+  <li>different names</li>
+  <li>different documents</li>
+  <li>different views</li>
+  <li>different relations</li>
+  <li>different moments in time</li>
+</ul>
+
+<p>
+  So subject identity is not the current page title or one label string. It is
+  the stable reference point that multiple names, occurrences, and associations
+  point to.
+</p>
+
+<p>
+  For this as a standalone anchor, see
+  <a page="Operational Definition of Subject Identity">Operational Definition of Subject Identity</a>.
+</p>
+
+<p>
+  For the larger question of preserving sameness when names, pages, views, and
+  associations vary, see
+  <a page="Preserving Sameness Across Representations">Preserving Sameness Across Representations</a>.
+</p>
+
+<h2>Lisp object for concept</h2>
+
+<p>
+  In Lisp terms, that means a concept object should be able to represent both:
+</p>
+
+<p>
+  a distinction/boundary stage, and
+  a stronger subject-identity stage when required.
+</p>
+
+<p>
+  The object model on this page is therefore easier to read if you treat
+  identity as one possible strengthening of a concept, not as the minimum
+  condition for calling something a concept at all.
+</p>
+
+<h2>Relation to topic maps</h2>
+
+<p>
+  Topic maps make this explicit. A topic map is not only a collection of pages.
+  It is a graph of topics, where each topic represents a subject and can have:
+</p>
+
+<ul>
+  <li>names</li>
+  <li>occurrences</li>
+  <li>associations</li>
+</ul>
+
+<p>
+  In the stronger reading relevant here, an association is not only a link
+  field inside another topic. It can itself be treated as a topic whenever the
+  relation has its own meaning and needs to be inspected, named, or related to
+  other things.
+</p>
+
+<p>
+  This is useful here because it separates the subject from any one document or
+  user interface. That is close to the distinction already needed in HyperDoc:
+  the concept is not identical to the page that documents it.
+</p>
+
+<p>
+  The phrase "everything is a topic" is therefore not inflationary rhetoric. It
+  means the system can mark distinctions and boundaries first, and only then
+  decide where stronger subject identity is worth preserving. Page/document
+  structure still comes later.
+</p>
+
+<h2>Relation to DMX topics</h2>
+
+<p>
+  A DMX topic can be read as a concrete runtime realization of the stronger
+  stage of the same idea. It is an addressable object that stands for one
+  subject and carries type, values, and associations.
+</p>
+
+<p>
+  In that sense, a DMX topic is not just inspired by topic maps. It is a direct
+  operationalization of the topic-map idea once a distinction has been promoted
+  into an identifiable subject rather than left as only a page fragment or
+  string label.
+</p>
+
+<h2>Why this matters for ownership and architecture</h2>
+
+<p>
+  The question "which layer owns the concept?" becomes clearer once a concept is
+  treated as a subject with stable identity rather than as a paragraph in a page.
+</p>
+
+<p>
+  A layer owns a concept when it defines that subject's meaning, rules, and
+  lifecycle. Other layers may host it or document it, but they do not thereby
+  become its owner.
+</p>
+
+<h2>Pragmatic conclusion</h2>
+
+<p>
+  A concept should first be treatable as an inspectable distinction with a
+  boundary. Topic maps and DMX topics then provide a useful stronger model
+  whenever identity, occurrences, and associations need to be made explicit
+  instead of left implicit in page structure.
+</p>
+
+<p>
+  Put more strongly: if everything important can be treated as a topic, then
+  the architecture can stay oriented around subjects and relations rather than
+  around whichever page or package happened to mention them first.
+</p>
+
+<p>
+  That includes relations themselves. Once associations are also topics, the
+  system can talk about relations in the same explicit way that it talks about
+  entities, pages, tools, and workflows.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Drawing Automation and First-Class Associations">Drawing Automation and First-Class Associations</a></li>
+  <li><a page="Where This Functionality Belongs">Where This Functionality Belongs</a></li>
+  <li><a page="Candidate Control Surface for Narrowly Defined Workflows">Candidate Control Surface for Narrowly Defined Workflows</a></li>
+  <li><a page="Public Block Execution Contract">Public Block Execution Contract</a></li>
+</ul>
