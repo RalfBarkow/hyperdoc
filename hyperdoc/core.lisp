@@ -138,6 +138,71 @@
    :summary "External DMX topic reference for the AArch64 image preparation context."
    :references '("https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/912102/topic/912138/info")))
 
+;; Command and artifact topics for the tutorial sequence.
+(defun nix-shell-topic ()
+  (make-topic
+   :id "nix-shell"
+   :title "nix-shell"
+   :summary "Ephemeral environment launcher used to provide wget/zstd for image preparation."
+   :references '("Prepare the AArch64 image")))
+
+(defun wget-topic ()
+  (make-topic
+   :id "wget"
+   :title "wget"
+   :summary "Downloader used to fetch the selected Hydra SD-image artifact."
+   :references '("Prepare the AArch64 image")))
+
+(defun zstd-topic ()
+  (make-topic
+   :id "zstd"
+   :title "zstd"
+   :summary "Compression tool used for .img.zst artifacts."
+   :references '("Prepare the AArch64 image")))
+
+(defun unzstd-topic ()
+  (make-topic
+   :id "unzstd-d"
+   :title "unzstd -d"
+   :summary "Decompression command to convert .img.zst into a flashable .img."
+   :references '("Prepare the AArch64 image")))
+
+(defun dmesg-follow-topic ()
+  (make-topic
+   :id "dmesg-follow"
+   :title "dmesg --follow"
+   :summary "Kernel log follow mode used to observe SD-card device attach events."
+   :references '("Prepare the AArch64 image")))
+
+(defun hydra-latest-job-topic ()
+  (make-topic
+   :id "hydra-latest-job"
+   :title "Hydra latest SD-image job"
+   :summary "Hydra unstable job endpoint used to select the latest successful aarch64 SD-image build."
+   :references '("https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux")))
+
+(defun hydra-build-323111513-topic ()
+  (make-topic
+   :id "hydra-build-323111513"
+   :title "Hydra build 323111513"
+   :summary "Concrete chosen build artifact for the current preparation pass."
+   :references '("https://hydra.nixos.org/build/323111513")))
+
+(defun hydra-latest-download-link-topic ()
+  (make-topic
+   :id "hydra-latest-download-link"
+   :title "Hydra latest download link"
+   :summary "Stable 'latest' download-by-type link for SD-image artifacts."
+   :references '("https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download-by-type/file/sd-image"
+                 "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")))
+
+(defun hydra-sha256-topic ()
+  (make-topic
+   :id "hydra-sha256"
+   :title "Hydra artifact SHA-256"
+   :summary "Integrity hash used to verify the downloaded .img.zst artifact before decompression and flashing."
+   :references '("6c0f8bffdac01aa95e66505180d51b3557b04f3ad43cf0900376528837b62d0f")))
+
 ;;
 ;; Create a HyperDoc instance.
 ;;
