@@ -19,6 +19,10 @@
   <tt>*.html</tt> pages. That gives the authoritative set of HyperDoc text
   pages that should be mirrored.
 </p>
+<p>
+  The target localhost FedWiki page store in this setup is
+  <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages</tt>.
+</p>
 
 <p>
   For each page, derive its title from the page's <tt>&lt;h1&gt;</tt> text rather
@@ -65,7 +69,7 @@ trim leading and trailing '-'
 <ol>
   <li>detect all HyperDoc page titles</li>
   <li>compute the expected localhost slug for each title</li>
-  <li>check whether that slug already exists in <tt>~/.wiki/.../pages/</tt></li>
+  <li>check whether that slug already exists in <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages</tt></li>
   <li>create only the missing localhost pages</li>
 </ol>
 

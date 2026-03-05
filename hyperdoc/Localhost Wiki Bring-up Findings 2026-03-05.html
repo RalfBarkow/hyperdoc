@@ -1,0 +1,72 @@
+<h1>Localhost Wiki Bring-up Findings 2026-03-05</h1>
+
+<p>
+  This page records findings from bringing up the localhost wiki stack on
+  2026-03-05.
+</p>
+
+<h2>Execution context observations</h2>
+
+<ul>
+  <li>A shell/environment attribute dump appeared at start (including entries like <tt>buildInputs</tt>, <tt>nativeBuildInputs</tt>, <tt>shellHook</tt>, <tt>~PATH</tt>, and <tt>~XDG_DATA_DIRS</tt>).</li>
+  <li>In <tt>~/P/R/wiki</tt> with fish shell, <tt>./dev.sh</tt> failed with <tt>Unknown command</tt>, indicating no executable <tt>dev.sh</tt> at that location.</li>
+  <li><tt>git fetch --all</tt> succeeded; <tt>origin/dreyeck.ch</tt> advanced from <tt>3a06e87</tt> to <tt>548ee4c</tt>.</li>
+</ul>
+
+<h2>Build and startup findings</h2>
+
+<ul>
+  <li><tt>nix build #.wiki</tt> completed successfully.</li>
+  <li><tt>./result/bin/wiki --port 3000</tt> started the wiki in farm mode.</li>
+  <li>Runtime confirms data paths under <tt>/Users/rgb/.wiki/localhost</tt>, including:
+    <tt>db=/Users/rgb/.wiki/localhost/pages</tt>,
+    <tt>assets=/Users/rgb/.wiki/localhost/assets</tt>,
+    <tt>status=/Users/rgb/.wiki/localhost/status</tt>.
+  </li>
+  <li>Site served startup and core resources successfully (HTML, CSS, JS, system JSON endpoints).</li>
+</ul>
+
+<h2>Proxy error findings</h2>
+
+<ul>
+  <li>Repeated proxy requests for <tt>https://localhost/favicon.png</tt> and fallback <tt>http://localhost/favicon.png</tt> failed.</li>
+  <li>Failure mode: <tt>TypeError: fetch failed</tt> with <tt>ECONNREFUSED</tt> from Node/undici.</li>
+  <li>Client-facing effect: repeated <tt>GET /proxy/localhost/favicon.png?... 502</tt>.</li>
+  <li>Despite proxy errors, primary wiki endpoints remained available (e.g. <tt>/welcome-visitors.json</tt>, <tt>/system/sitemap.json</tt>, <tt>/system/site-index.json</tt>).</li>
+</ul>
+
+<h2>Interpretation</h2>
+
+<p>
+  Core localhost wiki service on port 3000 is up and serving content. The
+  observed failures are specific to proxying localhost favicon URLs, not a full
+  server startup failure.
+</p>
+<p>
+  More explicitly, the failing path is the proxy endpoint
+  <tt>/proxy/localhost/favicon.png?... </tt>, where the server attempts outgoing
+  fetches to <tt>https://localhost/favicon.png</tt> and
+  <tt>http://localhost/favicon.png</tt> and receives <tt>ECONNREFUSED</tt>.
+  In contrast, direct non-proxy requests to the same wiki process continue to
+  succeed (startup page, page JSON, sitemap, and site index).
+</p>
+<p>
+  This narrows the problem scope to localhost self-proxy/reachability for that
+  asset path (or its protocol/host resolution assumptions), rather than database
+  loading, plugin initialization, page serving, or overall farm startup.
+</p>
+
+<h2>Daily FedWiki link</h2>
+
+<p>
+  Related daily page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="2026-03-05">2026-03-05</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a hyperbook="hyperdoc" page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a></li>
+  <li><a hyperbook="hyperdoc" page="Ensuring Localhost FedWiki Counterparts for HyperDoc Pages">Ensuring Localhost FedWiki Counterparts for HyperDoc Pages</a></li>
+</ul>
