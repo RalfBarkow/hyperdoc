@@ -17,6 +17,51 @@ that has the same function as the special form `in-package` in Lisp
 code. See <a page="Creating a HyperDoc" view="Source">the Markdown
 file for this page</a> for an example.
 
+## Page lifecycle and communication
+
+In this project, many pages are created first as communication artifacts
+between collaborators. Their first purpose is to capture proposals,
+feedback, and decisions in a form that can be linked, reviewed, and
+revised.
+
+When a page stabilizes, extract its durable parts into:
+
+ - developer-facing architecture or workflow documentation in HyperDoc,
+ - operational guidance for assistants (for example in `AGENTS.md`).
+
+This means pages like "Where This Functionality Belongs" are valid and
+useful even when they are narrow in scope: they support active
+collaboration first, and can later be consolidated into broader
+reference material.
+
+There is also a second relation to FedWiki working pages: topics can be
+mirrored or linked to localhost FedWiki pages in
+`/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages` when journaling and rapid
+collaborative editing are needed. See
+<a page="Communication Surfaces Policy">Communication Surfaces Policy</a>.
+
+### Connected communication surfaces
+
+HyperDoc pages and localhost FedWiki pages are two surfaces for the same
+collaboration, with different strengths:
+
+ - HyperDoc is the stable, inspectable reference surface for concepts,
+   architecture, and implementation context.
+ - localhost FedWiki is the fast, journaled working surface for
+   day-to-day iteration, notes, and collaborative edits.
+
+The connection is topic-based. For important topics, keep both surfaces
+reachable by links or counterparts, so readers can move between durable
+reference and active working history.
+
+Use this practical rule:
+
+ - if the content is still moving quickly, start or continue in FedWiki;
+ - if the content has stabilized enough to guide implementation, ensure a
+   HyperDoc page exists;
+ - when both exist, keep titles and links aligned, but do not force
+   identical markup or identical structure.
+
 ## Links
 
 Links are written using standard `<a>` tags, using non-standard

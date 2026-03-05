@@ -1,0 +1,38 @@
+<h1>Everything in Git? Identity Across Systems</h1>
+
+<p>
+  Question: The wish for complete versioning, reproducibility, and
+  referability often appears as "everything in Git?".
+</p>
+
+<p>
+  Core problem: how to identify things reliably when they move across
+  systems, instances, and communication surfaces.
+</p>
+
+<h2>Working answer</h2>
+
+<ul>
+  <li>Identity is not absolute; it is scoped by context and protocol.</li>
+  <li>IDs are reliable inside an instance, but become ambiguous when exported without context anchors.</li>
+  <li>Cross-system referability needs both identifier and context (origin, protocol, and resolution rule).</li>
+  <li>Git helps with versioned artifacts, but does not by itself solve cross-system semantic identity.</li>
+</ul>
+
+<h2>Practical implications for HyperDoc and FedWiki</h2>
+
+<ul>
+  <li>Use HyperDoc pages for durable conceptual framing and stable references.</li>
+  <li>Use localhost FedWiki pages for ongoing negotiation, journaling, and revisions.</li>
+  <li>Keep both surfaces connected by explicit topic links and counterpart pages.</li>
+  <li>When moving material across systems, preserve context anchors (where it came from, how to resolve it).</li>
+</ul>
+
+<h2>Related discussion</h2>
+
+<ul>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="z8570">z8570</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="2026-03-05">2026-03-05</a></li>
+  <li><a hyperbook="hyperdoc" page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a hyperbook="hyperdoc" page="Collaborative Link Model and Resolution">Collaborative Link Model and Resolution</a></li>
+</ul>
