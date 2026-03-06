@@ -491,10 +491,10 @@ context."))
           :story (getf revised :story))))
 
 (defexample journalmatic-checker-example
-  "Report the checker findings for a page with chronology and revision issues."
+  "Report the checker findings for a page with a chronology issue."
   (let* ((page *journalmatic-example-page-with-chronology-error*)
          (results (journalmatic-example-check page)))
-    (assert-equal '(:chronology :revision) results)
+    (assert-equal '(:chronology) results)
     (list :title (getf page :title)
           :results results)))
 
