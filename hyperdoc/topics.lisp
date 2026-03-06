@@ -287,6 +287,15 @@
                  "Journalmatic Repair Tools"
                  "Journalmatic Journal Checker")))
 
+(defun fedwiki-id-normalization-map-topic ()
+  (make-topic
+   :id "fedwiki-id-normalization-map"
+   :title "FedWiki id normalization map"
+   :summary "Old-to-new story/journal id mapping artifacts preserve lookup after bulk semantic-to-opaque id normalization."
+   :references '("FedWiki Story Item IDs"
+                 "fedwiki-story-id-normalization-map-2026-03-06"
+                 "Journalmatic Journal Checker")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-system-topic ()
   (make-topic
