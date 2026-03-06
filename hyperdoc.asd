@@ -13,8 +13,11 @@
   :depends-on (#:hyperbook
                #:alexandria
                #:arrow-macros
+               #:drakma
+               #:shasht
                #:asdf #:uiop
                #:trivial-package-local-nicknames)
+  :in-order-to ((test-op (test-op "hyperdoc/tests")))
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
@@ -43,6 +46,7 @@
   :components ((:module "hyperdoc-inspector"
                 :serial t
                 :components ((:file "package")
+                             (:file "dmx-topics")
                              (:file "playground-debug")
                              (:file "web-debugger")
                              (:file "playground-eval")
@@ -93,3 +97,18 @@
                #:hyperbook/explorer
                #:hyperdoc/explorer
                #:html-inspector-views/standard))
+
+(defsystem #:hyperdoc/tests
+  :description "Smoke tests for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:hyperdoc)
+  :components ((:module "tests"
+                :serial t
+                :components ((:file "dmx-topic-proxy-smoke"))))
+  :perform (test-op (op c)
+             (declare (ignore op c))
+             (uiop:symbol-call :hyperdoc/tests
+                               :run-dmx-topic-proxy-smoke-tests)))
