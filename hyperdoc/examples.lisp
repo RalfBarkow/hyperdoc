@@ -498,7 +498,7 @@ Raw list structure is preserved as a secondary view."
                           :title "Decompress .zstd image to .img"
                           :summary "Convert the downloaded compressed image artifact into the raw .img artifact required by the flashing step."
                           :commands (list "unzstd -d nixos-image-sd-card-*.img.zst")
-                          :verification "Confirm a .img artifact exists and is the input used by the flashing step."))
+                          :verification "Confirm a .img artifact exists and is the flash input; .img.zst and .img may both be present after decompression."))
          (flash-step
            (make-instance 'sd-card-procedure-step
                           :id "official-flash-sd-card"
@@ -748,7 +748,7 @@ Raw list structure is preserved as a secondary view."
           :patch-target (id-of patch))))
 
 (defexample hydra-filename-outcome-states-example
-  "Contrast historical filename-loss outcome with current expected preserved-filename outcome."
+  "Contrast historical filename-loss with corrected download and post-decompression state progression."
   (let* ((bad-outcome (list :mode :historical-failure
                             :saved-as "1"
                             :provenance :lost-at-download-time))
@@ -757,7 +757,16 @@ Raw list structure is preserved as a secondary view."
                              :saved-as good-filename
                              :timestamp "2026-03-06 14:54:30"
                              :size-bytes 1377718373
-                             :provenance :preserved-at-download-time)))
+                             :provenance :preserved-at-download-time))
+         (decompressed-filename "nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img")
+         (decompressed-outcome (list :mode :post-decompression
+                                     :produced decompressed-filename
+                                     :size-bytes 3490607104
+                                     :compressed-still-present t
+                                     :compressed-filename good-filename
+                                     :compressed-size-bytes 1377718373
+                                     :flash-input decompressed-filename
+                                     :download-artifact good-filename)))
     (assert-equal "1" (getf bad-outcome :saved-as))
     (assert (let ((name (getf good-outcome :saved-as)))
               (and (>= (length name) (length ".img.zst"))
@@ -768,8 +777,19 @@ Raw list structure is preserved as a secondary view."
                             :start2 (- (length name) (length ".img.zst"))
                             :end2 (length name)))))
     (assert (search "aarch64-linux" (getf good-outcome :saved-as)))
+    (assert (let ((name (getf decompressed-outcome :produced)))
+              (and (>= (length name) (length ".img"))
+                   (string= ".img"
+                            name
+                            :start1 0
+                            :end1 (length ".img")
+                            :start2 (- (length name) (length ".img"))
+                            :end2 (length name)))))
+    (assert (not (search ".img.zst" (getf decompressed-outcome :produced))))
+    (assert (eq t (getf decompressed-outcome :compressed-still-present)))
     (list :historical bad-outcome
-          :current-expected good-outcome)))
+          :current-expected good-outcome
+          :post-decompression decompressed-outcome)))
 
 (defexample official-rpi-zstd-to-img-handoff-adjacency-regression-example
   "Regression check: flash step must be immediately preceded by the decompression handoff step."

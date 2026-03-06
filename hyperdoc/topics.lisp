@@ -93,7 +93,7 @@
   (make-topic
    :id "runbook-build-and-flash-sd-image"
    :title "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
-   :summary "Operational sequence to build/obtain, flash, boot, and validate the SD image on Pi 4."
+   :summary "Operational sequence to obtain a named .img.zst artifact, decompress to .img, flash the .img, boot, and validate on Pi 4."
    :references '("Prepare the AArch64 image")))
 
 (defun official-rpi-sd-image-tutorial-topic ()
@@ -107,7 +107,7 @@
   (make-topic
    :id "sd-image-zstd-to-img-handoff-defect"
    :title "SD-image zstd-to-img handoff defect"
-   :summary "Relation bug between official steps 1 and 2: download produces .zstd while flash requires .img; fixed by explicit decompression step."
+   :summary "Relation bug between official steps 1 and 2: download produces .zstd while flash requires .img; fixed by explicit decompression step, with .img.zst/.img coexistence treated as normal."
    :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
                  "Create NixOS SD Card from HyperDoc Playground"
                  "Violated handoff"
@@ -238,12 +238,24 @@
   (make-topic
    :id "hydra-download-artifact-procedure"
    :title "Download artifact from Hydra"
-   :summary "Normative successful path: use wget --trust-server-names so the redirected Hydra URL filename is kept as nixos-image-sd-card-*.img.zst, then verify and decompress."
+   :summary "Normative successful path: download named .img.zst via wget --trust-server-names, verify it, decompress to .img, and use .img as flash input while .img.zst may remain as preserved download identity."
    :references '("Prepare the AArch64 image"
                  "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Hydra artifact to flashable image handoff"
                  "Hydra latest SD-image job"
                  "Hydra latest download link"
-                 "Hydra filename loss")))
+                 "Hydra filename loss"
+                 "hydra-filename-outcome-states-example")))
+
+(defun hydra-artifact-to-flashable-image-handoff-topic ()
+  (make-topic
+   :id "hydra-artifact-to-flashable-image-handoff"
+   :title "Hydra artifact to flashable image handoff"
+   :summary "Decompression handoff transforms the downloaded .img.zst artifact into a flashable .img; both files may coexist afterward and only .img is flash input."
+   :references '("Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "hydra-filename-outcome-states-example")))
 
 (defun hydra-sha256-topic ()
   (make-topic
@@ -275,7 +287,7 @@
   (make-topic
    :id "aarch64-procedure-decompress"
    :title "Procedure step 3: decompress image"
-   :summary "Decompress the .img.zst artifact into a flashable .img using zstd/unzstd."
+   :summary "Decompress the .img.zst artifact into a flashable .img using zstd/unzstd; .img.zst and .img may coexist afterward."
    :references '("Prepare the AArch64 image"
                  "zstd"
                  "unzstd -d")))

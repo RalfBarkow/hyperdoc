@@ -66,11 +66,12 @@
 </p>
 
 <ul>
-  <li>Failure classification (historical): plain <tt>wget</tt> on the indirect latest URL may save as <tt>1</tt>.</li>
-  <li>Current normative path: use <tt>wget --trust-server-names "$LATEST_URL"</tt> so <tt>wget</tt> adopts the redirected URL filename for the local artifact.</li>
+  <li>Historical broken download state: plain <tt>wget</tt> on the indirect latest URL may save as <tt>1</tt>.</li>
+  <li>Corrected current download state: use <tt>wget --trust-server-names "$LATEST_URL"</tt> so <tt>wget</tt> adopts the redirected URL filename and saves a named <tt>.img.zst</tt> artifact.</li>
   <li>Mechanism in this path: the redirect target URL ends with <tt>nixos-image-sd-card-*.img.zst</tt>; filename preservation comes from trusting redirected server names.</li>
-  <li>Postcondition (primary path): local directory contains a newly downloaded <tt>nixos-image-sd-card-*.img.zst</tt> file and does not require manual rename from <tt>1</tt>.</li>
-  <li>Observed successful outcome (2026-03-06): <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt> (1377718373 bytes).</li>
+  <li>Postcondition after download: local directory contains <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt> (1377718373 bytes) and does not require manual rename from <tt>1</tt>.</li>
+  <li>Post-decompression state: <tt>unzstd -d nixos-image-sd-card-*.img.zst</tt> produces <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img</tt> (3490607104 bytes), and both <tt>.img.zst</tt> and <tt>.img</tt> may be present.</li>
+  <li>Operational distinction: <tt>.img.zst</tt> is preserved download artifact identity; <tt>.img</tt> is the flash input.</li>
   <li>Defect object: <a expr="(hyperdoc::official-hydra-latest-filename-handoff-defect)"><tt>official-hydra-latest-filename-handoff-defect</tt></a></li>
   <li>Patch target object: <a expr="(hyperdoc::official-hydra-latest-filename-handoff-patch-target)"><tt>official-hydra-latest-filename-handoff-patch-target</tt></a></li>
 </ul>

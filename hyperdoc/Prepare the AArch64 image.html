@@ -28,6 +28,7 @@
   <li><a expr="(hyperdoc::nixos-image-sd-card-26-05pre958232-80bdc1e5ce51-aarch64-linux-img-zst-topic)"><tt>nixos-image-sd-card-26.05pre958232.80bdc1e5ce51-aarch64-linux.img.zst</tt></a></li>
   <li><a expr="(hyperdoc::hydra-latest-download-link-topic)"><tt>Hydra latest download link</tt></a></li>
   <li><a expr="(hyperdoc::hydra-download-artifact-procedure-topic)"><tt>Download artifact from Hydra</tt></a></li>
+  <li><a expr="(hyperdoc::hydra-artifact-to-flashable-image-handoff-topic)"><tt>Hydra artifact to flashable image handoff</tt></a></li>
   <li><a expr="(hyperdoc::hydra-filename-loss-topic)"><tt>Hydra filename loss</tt></a></li>
   <li><a expr="(hyperdoc::hydra-sha256-topic)"><tt>Hydra artifact SHA-256</tt></a></li>
   <li><a expr="(hyperdoc::hydra-filename-outcome-states-example)"><tt>Hydra filename outcome states</tt></a></li>
@@ -186,6 +187,9 @@ shasum -a 256 "$ARTIFACT"
 # 6) Decompress into .img
 unzstd -d "$ARTIFACT"
 
+# 6a) Inspect directory state (portable command)
+ls -la
+
 # 7) Record provenance for replay/debugging
 {
   echo "hydra_job=https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux"
@@ -197,6 +201,11 @@ unzstd -d "$ARTIFACT"
 </pre>
 
 <p>
+  Use <tt>ls -la</tt> for directory inspection in this runbook. Do not assume
+  a local alias such as <tt>la</tt> exists.
+</p>
+
+<p>
   Postcondition (primary path): local directory contains a newly downloaded
   file named <tt>nixos-image-sd-card-*.img.zst</tt>, and no manual rename from
   <tt>1</tt> is required.
@@ -206,6 +215,13 @@ unzstd -d "$ARTIFACT"
   Comparison note: naive <tt>wget "$LATEST_URL"</tt> may save as
   <tt>1</tt>; corrected <tt>wget --trust-server-names "$LATEST_URL"</tt>
   saves as the concrete artifact filename.
+</p>
+
+<p>
+  Postcondition (decompression handoff): after
+  <tt>unzstd -d nixos-image-sd-card-*.img.zst</tt>, the working directory can
+  contain both the preserved compressed artifact and the decompressed flashable
+  image. This coexistence is normal, not an error state.
 </p>
 
 <h3>Observed successful outcome</h3>
@@ -225,6 +241,20 @@ unzstd -d "$ARTIFACT"
   Expected result: <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt>.
   This preserves artifact identity directly in the filesystem name.
   Recovery steps are only for the older/broken path.
+</p>
+
+<p>
+  Observed host state after decompression on 2026-03-06 showed both the
+  downloaded artifact
+  <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt>
+  (1377718373 bytes) and the decompressed flashable image
+  <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img</tt>
+  (3490607104 bytes) in the working directory.
+</p>
+
+<p>
+  The <tt>.img.zst</tt> file is the preserved download artifact; the
+  <tt>.img</tt> file is the flash input.
 </p>
 
 <p>
