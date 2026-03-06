@@ -1,0 +1,43 @@
+<h1>Violated handoff</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A violated handoff is a collaboration failure mode: a sender declares a
+  transfer complete, but the receiver cannot continue without re-deriving
+  hidden context.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::violated-handoff-topic)"><tt>Violated handoff</tt></a></li>
+  <li><a expr="(hyperdoc::express-both-sides-of-handoff-without-manually-reversing-perspective-topic)"><tt>Express both sides of a handoff without manually reversing perspective</tt></a></li>
+  <li><a expr="(hyperdoc::surface-answer-topic)"><tt>Surface Answer</tt></a></li>
+  <li><a expr="(hyperdoc::artifact-answer-topic)"><tt>Artifact Answer</tt></a></li>
+  <li><a expr="(hyperdoc::reconstruction-protocol-topic)"><tt>Reconstruction protocol</tt></a></li>
+</ul>
+
+<h2>Operational definition</h2>
+
+<ul>
+  <li>Claimed completion without required artifacts.</li>
+  <li>Missing links between surface claim and durable objects.</li>
+  <li>No replayable verification path for the receiver.</li>
+</ul>
+
+<h2>Minimum repair</h2>
+
+<ul>
+  <li>State what was done (process trace).</li>
+  <li>Point to exact artifact deltas (files/pages/topics/twins).</li>
+  <li>Provide replay checks that prove current state.</li>
+</ul>
+
+<h2>References</h2>
+
+<ul>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a page="Express both sides of a handoff without manually reversing perspective">Express both sides of a handoff without manually reversing perspective</a></li>
+</ul>
