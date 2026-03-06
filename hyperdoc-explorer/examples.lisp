@@ -28,6 +28,15 @@
     (t
      (views:object-ref value))))
 
+(defmethod views:text-representation ((runbook sd-card-runbook))
+  (format nil "Runbook: ~A" (title-of runbook)))
+
+(defmethod views:text-representation ((section sd-card-runbook-section))
+  (format nil "Section: ~A" (title-of section)))
+
+(defmethod views:text-representation ((step sd-card-procedure-step))
+  (format nil "Step: ~A" (title-of step)))
+
 (views:defview 👀summary (runbook sd-card-runbook)
   (views:html-view :title "Summary" :priority 1
     (views:html
@@ -37,8 +46,13 @@
       (:ol
        (loop for section in (sections-of runbook)
              do (views:html
-                  (:li (views:object-ref section
-                                         :display (views:str (title-of section))))))))))
+                  (:li
+                   (views:object-ref section
+                                     :display (views:str (title-of section)))
+                   (when (summary-of section)
+                     (views:html
+                       (:div :style "font-size: 0.92em; opacity: 0.85;"
+                             (views:esc (summary-of section))))))))))))
 
 (views:defview 👀items (runbook sd-card-runbook)
   (views:html-view :title "Items" :priority 10

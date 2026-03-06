@@ -380,6 +380,18 @@ Raw list structure is preserved as a secondary view."
   (with-output-to-string (stream)
     (sd-card-creation-dry-run :stream stream)))
 
+(defexample sd-card-primary-semantic-entrypoints-example
+  "Regression check: primary page entrypoints resolve to semantic objects, not raw cons lists."
+  (let* ((runbook (sd-card-creation-command-plan))
+         (correction (sd-card-creation-command-plan-step "sdimage-imagesize-correction"))
+         (raw (sd-card-creation-command-plan-raw)))
+    (assert-eql 'sd-card-runbook (type-of runbook))
+    (assert-eql 'sd-card-correction-step (type-of correction))
+    (assert-eql 'cons (type-of raw))
+    (list :primary-runbook-type (type-of runbook)
+          :primary-correction-type (type-of correction)
+          :raw-type (type-of raw))))
+
 ;;
 ;; hauptsache / kioskberrli reference objects
 ;;
