@@ -133,6 +133,23 @@ What it does not guarantee:
 - page-link correctness (slug/title mapping)
 - chronology/replay validity (those require journalmatic checks)
 
+### Mandatory pre-commit: Journal Checker (FedWiki pages)
+
+For any commit touching localhost FedWiki page JSON files, run journalmatic
+checks before commit, not after:
+
+1. Syntax gate (json.tool):
+   - `python3 -m json.tool /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/<slug> >/tmp/<slug>.json`
+2. Semantic gate (journal checker findings):
+   - Must be clear of: `CREATION`, `CHRONOLOGY`, `REVISION`, `MALFORMED`
+3. If findings exist:
+   - repair journal first (e.g. restore `create` first, fix monotonic dates, rebuild replayable journal),
+   - rerun checker until clear.
+4. Commit slicing:
+   - commit repair-only journal fixes separately from content/topic updates,
+   - keep HyperDoc repo commit(s) separate from localhost FedWiki repo commit(s),
+   - do not push unless explicitly requested.
+
 ## Mandatory: Every Answer Reconstruction Protocol
 
 This is not optional and does not apply only to code-change turns.

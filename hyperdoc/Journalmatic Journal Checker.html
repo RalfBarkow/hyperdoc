@@ -48,9 +48,25 @@
   diagnostic string.
 </p>
 
+<h4>Commit routine integration</h4>
+
+<p>
+  Treat the checker as a commit gate for localhost FedWiki page edits.
+  <tt>python3 -m json.tool</tt> checks syntax only; journalmatic must still be
+  clear of <tt>CREATION</tt>, <tt>CHRONOLOGY</tt>, <tt>REVISION</tt>, and
+  <tt>MALFORMED</tt> findings before commit.
+</p>
+
+<p>
+  Keep commits in meaningful slices: journal repair-only commits first, then
+  separate content/topic updates. Keep HyperDoc and localhost FedWiki commits in
+  separate repositories and avoid push unless explicitly requested.
+</p>
+
 <h4>Related</h4>
 
 <ul>
+  <li><a expr="(hyperdoc::journal-checker-commit-gate-topic)"><tt>Journal checker commit gate</tt></a></li>
   <li><a hyperbook="hyperdoc" page="Journal Object Extensions">Journal Object Extensions</a></li>
   <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
   <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>

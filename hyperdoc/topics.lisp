@@ -214,6 +214,15 @@
                  "Journalmatic Revision Replay"
                  "journalmatic-checker-example")))
 
+(defun journal-checker-commit-gate-topic ()
+  (make-topic
+   :id "journal-checker-commit-gate"
+   :title "Journal checker commit gate"
+   :summary "FedWiki page commits must pass creation/chronology/revision/malformed checks; syntax-only json.tool is not sufficient."
+   :references '("Journalmatic Journal Checker"
+                 "HyperBook Journal Tools"
+                 "Python json.tool Source and Usage")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-system-topic ()
   (make-topic
@@ -431,6 +440,51 @@
    :summary "Recurring workflow extraction into callable Lisp/skill routines so repeated tasks move from ad-hoc execution to reusable runtime behavior."
    :references '("Surface and Artifact Answers"
                  "ASDF Components Workflow")))
+
+;; Kioskberrli hardware context topics.
+(defun satechi-usbc-pro-hub-4k-hdmi-topic ()
+  (make-topic
+   :id "satechi-usbc-pro-hub-4k-hdmi"
+   :title "Satechi USB-C Pro Hub (4K HDMI)"
+   :summary "Display and peripheral adapter used in the Kioskberrli setup to provide HDMI output and hub functionality from USB-C."
+   :references '("Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun sd-card-topic ()
+  (make-topic
+   :id "sd-card"
+   :title "SD card"
+   :summary "Primary removable storage medium for flashing and booting kiosk images in the Kioskberrli workflow."
+   :references '("Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Prepare the AArch64 image")))
+
+(defun micro-sd-card-topic ()
+  (make-topic
+   :id "micro-sd-card"
+   :title "Micro SD card"
+   :summary "Physical microSD form-factor card used by Raspberry Pi platforms for NixOS image boot media."
+   :references '("Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Pre-flight Checklist for Raspberry Pi NixOS SD Images")))
+
+(defun transcend-16gb-micro-sd-card-topic ()
+  (make-topic
+   :id "transcend-16gb-micro-sd-card"
+   :title "Transcend 16GB Micro SD Card"
+   :summary "Concrete selected boot medium for the current Kioskberrli image/flash task."
+   :references '("Kioskberrli"
+                 "Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun dita-task-topic-topic ()
+  (make-topic
+   :id "dita-task-topic"
+   :title "DITA task topic"
+   :summary "Task representation style using DITA task-topic structure (context, prerequisites, steps, result) for operational runbooks."
+   :references '("Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Surface and Artifact Answers")))
 
 ;; Topic objects for Smalltalk browser frame/scene discussion and HyperDoc adaptation.
 (defun four-pane-browser-metaphor-topic ()
