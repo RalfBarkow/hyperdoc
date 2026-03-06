@@ -1,0 +1,104 @@
+<h1>Create NixOS SD Card from HyperDoc Playground</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Task topic: create and flash a Raspberry Pi aarch64 NixOS SD card using a
+  runbook-aligned command plan generated from HyperDoc Playground.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::create-sd-card-from-playground-task-topic)"><tt>Create NixOS SD card from HyperDoc Playground task</tt></a></li>
+  <li><a expr="(hyperdoc::sd-card-command-plan-playground-topic)"><tt>SD card command plan in Playground</tt></a></li>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan)"><tt>SD-card runbook object (semantic root)</tt></a></li>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan-step &quot;sdimage-imagesize-correction&quot;)"><tt>sdImage.imageSize correction step</tt></a></li>
+  <li><a expr="(hyperdoc::prepare-aarch64-image-topic)"><tt>Prepare the AArch64 image</tt></a></li>
+  <li><a expr="(hyperdoc::runbook-build-and-flash-sd-image-topic)"><tt>Runbook: Build and Flash NixOS SD Image for Kioskberrli</tt></a></li>
+</ul>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>Run inside the Nix development shell.</li>
+  <li>HyperDoc server and Playground are available.</li>
+  <li>A target SD card is inserted and identifiable on the host.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  This task does not replace the runbook. It provides Playground functions that
+  emit the same command sequence as the existing runbook so execution can be
+  prepared and reviewed in one inspectable place.
+</p>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Open Playground and evaluate the semantic runbook object:</li>
+</ol>
+
+<source-of-function>sd-card-creation-command-plan-example</source-of-function>
+
+<p>
+  Direct semantic object:
+  <a expr="(hyperdoc::sd-card-creation-command-plan)"><tt>sd-card-creation-command-plan</tt></a>.
+  This opens <tt>Summary</tt> first; raw list data is available in <tt>Raw Structure</tt>.
+</p>
+
+<ol start="2">
+  <li>Generate a human-readable dry-run transcript (no shell execution):</li>
+</ol>
+
+<source-of-function>sd-card-creation-dry-run-example</source-of-function>
+
+<ol start="3">
+  <li>
+    Choose exactly one artifact source path:
+    <a expr="(hyperdoc::sd-card-creation-command-plan-section &quot;path-a-official-prebuilt-image&quot;)"><tt>Path A</tt></a>
+    or
+    <a expr="(hyperdoc::sd-card-creation-command-plan-section &quot;path-b-build-project-image&quot;)"><tt>Path B</tt></a>.
+  </li>
+  <li>Execute the selected commands in the host shell, preserving runbook order.</li>
+  <li>Before flashing, replace <tt>diskN</tt> with the verified SD-card device identifier.</li>
+</ol>
+
+<h2>Correction path from visible error to integration</h2>
+
+<p>
+  When the build fails on <tt>sdImage.imageSize</tt>, inspect this semantic correction step:
+  <a expr="(hyperdoc::sd-card-creation-command-plan-step &quot;sdimage-imagesize-correction&quot;)"><tt>sdimage-imagesize-correction</tt></a>.
+</p>
+
+<ul>
+  <li>Failure capsule: <a expr="(hyperdoc::kioskberrli-sd-image-failure-context)"><tt>kioskberrli-sd-image-failure-context</tt></a></li>
+  <li>Source/edit target: <a expr="(hyperdoc::suggested-patch (hyperdoc::kioskberrli-sd-image-failure-context))"><tt>suggested-patch</tt></a></li>
+  <li>Verification command: <a expr="(hyperdoc::repro-build-command (hyperdoc::kioskberrli-sd-image-failure-context))"><tt>repro-build-command</tt></a></li>
+  <li>Integration note: <a expr="(hyperdoc::correction-path (hyperdoc::kioskberrli-sd-image-failure-context))"><tt>correction-path</tt></a></li>
+</ul>
+
+<h2>Result</h2>
+
+<ul>
+  <li>A verified <tt>.img</tt> artifact is available.</li>
+  <li>The SD card is flashed and ejected safely.</li>
+  <li>The command sequence used is reconstructible from HyperDoc functions and runbook text.</li>
+</ul>
+
+<h2>Safety and quality checks</h2>
+
+<ul>
+  <li>Never run <tt>dd</tt> until the target disk id has been verified twice.</li>
+  <li>Use checksum and size checks before flashing.</li>
+  <li>Keep the runbook as source of truth; update Playground helpers only when runbook changes.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a></li>
+  <li><a page="Prepare the AArch64 image">Prepare the AArch64 image</a></li>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+</ul>
