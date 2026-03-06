@@ -80,7 +80,14 @@
 <source-of-function>sd-card-creation-dry-run-example</source-of-function>
 
 <ol start="3">
-  <li>Choose exactly one artifact source path: Path A (official prebuilt image) or Path B (project build).</li>
+  <li>
+    Choose exactly one artifact source path:
+    <a expr="(hyperdoc::sd-card-creation-command-plan-section &quot;path-a-official-prebuilt-image&quot;)"><tt>Path A</tt></a>
+    (official prebuilt image)
+    or
+    <a expr="(hyperdoc::sd-card-creation-command-plan-section &quot;path-b-build-project-image&quot;)"><tt>Path B</tt></a>
+    (project build).
+  </li>
   <li>Execute the selected commands in the host shell, preserving runbook order.</li>
   <li>Before flashing, replace <tt>diskN</tt> with the verified SD-card device identifier.</li>
 </ol>
