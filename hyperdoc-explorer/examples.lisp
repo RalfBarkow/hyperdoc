@@ -28,6 +28,12 @@
     (t
      (views:object-ref value))))
 
+(defun raw-structure-value (object)
+  (handler-case
+      (raw-structure object)
+    (error ()
+      (ignore-errors (raw-structure-of object)))))
+
 (defmethod views:text-representation ((runbook sd-card-runbook))
   (format nil "Runbook: ~A" (title-of runbook)))
 
@@ -66,7 +72,7 @@
 
 (views:defview 👀raw-structure (runbook sd-card-runbook)
   (views:html-view :title "Raw Structure" :priority 90
-    (views:html (:pre (views:esc (format nil "~S" (raw-structure-of runbook)))))))
+    (views:html (:pre (views:esc (format nil "~S" (raw-structure-value runbook)))))))
 
 (views:defview 👀summary (section sd-card-runbook-section)
   (views:html-view :title "Summary" :priority 1
@@ -90,7 +96,7 @@
 
 (views:defview 👀raw-structure (section sd-card-runbook-section)
   (views:html-view :title "Raw Structure" :priority 90
-    (views:html (:pre (views:esc (format nil "~S" (raw-structure-of section)))))))
+    (views:html (:pre (views:esc (format nil "~S" (raw-structure-value section)))))))
 
 (views:defview 👀summary (step sd-card-procedure-step)
   (views:html-view :title "Summary" :priority 1
@@ -174,7 +180,7 @@
 
 (views:defview 👀raw-structure (step sd-card-procedure-step)
   (views:html-view :title "Raw Structure" :priority 90
-    (views:html (:pre (views:esc (format nil "~S" (raw-structure-of step)))))))
+    (views:html (:pre (views:esc (format nil "~S" (raw-structure-value step)))))))
 
 (views:defview 👀summary (transcript sd-card-dry-run-transcript)
   (views:html-view :title "Summary" :priority 1

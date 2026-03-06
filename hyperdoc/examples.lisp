@@ -159,6 +159,30 @@ arguments."
    (transcript :initarg :transcript :reader transcript-of)
    (runbook :initarg :runbook :reader runbook-of)))
 
+(defgeneric raw-structure (object)
+  (:documentation "Return a structural representation of OBJECT suitable for inspector raw-structure views."))
+
+(defmethod raw-structure ((object standard-object))
+  "Fallback for objects that expose a raw-structure slot via RAW-STRUCTURE-OF."
+  (ignore-errors (raw-structure-of object)))
+
+(defmethod raw-structure ((step sd-card-procedure-step))
+  "Compute raw structure from semantic step slots; omit NIL entries."
+  (let ((pairs (list (list :id (id-of step))
+                     (list :title (title-of step))
+                     (list :summary (summary-of step))
+                     (list :diagnosis (diagnosis-of step))
+                     (list :source-target (source-target-of step))
+                     (list :patch-target (patch-target-of step))
+                     (list :verification (verification-of step))
+                     (list :merge-notes (merge-notes-of step))
+                     (list :failure-capsule (failure-capsule-of step))
+                     (list :commands (commands-of step)))))
+    (loop for (key value) in pairs
+          when (or (member key '(:id :title :summary) :test #'eq)
+                   value)
+            append (list key value))))
+
 (defmethod print-object ((object sd-card-procedure-step) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -502,6 +526,20 @@ Raw list structure is preserved as a secondary view."
     (list :workflow-type (type-of workflow)
           :step-types (mapcar #'type-of steps)
           :step-titles (mapcar #'title-of steps))))
+
+(defexample official-rpi-tutorial-step-raw-structure-regression-example
+  "Regression check: procedure-step raw structure is computed and includes core keys."
+  (let* ((step (official-rpi-tutorial-step "official-reboot-new-generation"))
+         (structure (raw-structure step)))
+    (assert structure)
+    (assert-equal "official-reboot-new-generation" (getf structure :id))
+    (assert-equal "Reboot into the new generation" (getf structure :title))
+    (assert-equal
+     "Reboot and confirm the system starts with the freshly built generation."
+     (getf structure :summary))
+    (assert (getf structure :commands))
+    (list :step-id (id-of step)
+          :raw-structure structure)))
 
 (defexample official-rpi-tutorial-expr-quoting-regression-example
   "Regression check: HTML expr string arguments must use &quot; and evaluate to step objects."
