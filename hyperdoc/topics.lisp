@@ -191,6 +191,16 @@
    :references '("https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download-by-type/file/sd-image"
                  "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")))
 
+(defun hydra-download-artifact-procedure-topic ()
+  (make-topic
+   :id "hydra-download-artifact-procedure"
+   :title "Download artifact from Hydra"
+   :summary "Operational command sequence for selecting, downloading, verifying, and decompressing the latest aarch64 SD-image artifact."
+   :references '("Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Hydra latest SD-image job"
+                 "Hydra latest download link")))
+
 (defun hydra-sha256-topic ()
   (make-topic
    :id "hydra-sha256"

@@ -25,10 +25,27 @@
 <h2>Path A - Official Prebuilt Image</h2>
 
 <ol>
-  <li>Download <tt>nixos-sd-image-*-aarch64-linux.img.zst</tt>.</li>
-  <li>Decompress with <tt>zstd -d</tt>.</li>
+  <li>Open Hydra job <tt>nixos.sd_image.aarch64-linux</tt> and select latest successful build.</li>
+  <li>Download artifact URL ending in <tt>aarch64-linux.img.zst</tt>.</li>
+  <li>Record build URL, artifact URL, and SHA-256 from Hydra build page.</li>
+  <li>Verify checksum, then decompress to <tt>.img</tt>.</li>
   <li>Flash the resulting <tt>.img</tt> to the SD card.</li>
 </ol>
+
+<pre>
+nix-shell -p wget zstd
+
+LATEST_URL="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
+wget "$LATEST_URL"
+ARTIFACT="$(ls -t *.img.zst | head -n1)"
+
+echo "$ARTIFACT" | grep 'aarch64-linux\\.img\\.zst$'
+
+EXPECTED_SHA256="REPLACE_WITH_HYDRA_SHA256"
+shasum -a 256 "$ARTIFACT"
+
+unzstd -d "$ARTIFACT"
+</pre>
 
 <h2>Path B - Build Project Image</h2>
 

@@ -27,6 +27,7 @@
   <li><a expr="(hyperdoc::hydra-build-323111513-topic)"><tt>Hydra build 323111513</tt></a></li>
   <li><a expr="(hyperdoc::nixos-image-sd-card-26-05pre958232-80bdc1e5ce51-aarch64-linux-img-zst-topic)"><tt>nixos-image-sd-card-26.05pre958232.80bdc1e5ce51-aarch64-linux.img.zst</tt></a></li>
   <li><a expr="(hyperdoc::hydra-latest-download-link-topic)"><tt>Hydra latest download link</tt></a></li>
+  <li><a expr="(hyperdoc::hydra-download-artifact-procedure-topic)"><tt>Download artifact from Hydra</tt></a></li>
   <li><a expr="(hyperdoc::hydra-sha256-topic)"><tt>Hydra artifact SHA-256</tt></a></li>
   <li><a expr="(hyperdoc::transcend-16gb-micro-sd-card-topic)"><tt>Transcend 16GB Micro SD Card</tt></a></li>
   <li><a expr="(hyperdoc::dita-task-topic-topic)"><tt>DITA task topic</tt></a></li>
@@ -110,6 +111,94 @@
   <li><a expr="(hyperdoc::aarch64-procedure-verify-integrity-topic)">Verify artifact integrity (size/checksum if available).</a></li>
   <li><a expr="(hyperdoc::aarch64-procedure-confirm-architecture-topic)">Confirm filename and architecture include <tt>aarch64-linux</tt>.</a></li>
 </ol>
+
+<h2>Download Artifact from Hydra (Path A)</h2>
+
+<p>
+  Use this when you want the latest official prebuilt SD image instead of a
+  project-local build.
+</p>
+
+<h3>Decision boundary: Hydra download vs local build</h3>
+
+<ul>
+  <li><b>Use Hydra download</b> when you want the fastest path to a known-good upstream image baseline.</li>
+  <li><b>Use local build (Path B)</b> when you must include project-specific modules, patches, or pinned flake inputs.</li>
+</ul>
+
+<ol>
+  <li>
+    Open the Hydra job page:
+    <a href="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux"><tt>nixos.sd_image.aarch64-linux</tt></a>.
+  </li>
+  <li>Open the latest successful build (green checkmark).</li>
+  <li>
+    On the build page, copy:
+    <ul>
+      <li>artifact URL (<tt>...download/1/...aarch64-linux.img.zst</tt>)</li>
+      <li>published SHA-256 value</li>
+      <li>build URL and timestamp for provenance notes</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>Command Sequence</h3>
+
+<pre>
+# 0) Tooling
+nix-shell -p wget zstd
+
+# 1) Optional: resolve current "latest" endpoint
+LATEST_URL="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
+
+# 2) Download artifact
+wget "$LATEST_URL"
+
+# 3) Determine artifact filename (works when redirected filename is used)
+ARTIFACT="$(ls -t *.img.zst | head -n1)"
+echo "artifact=$ARTIFACT"
+
+# 4) Confirm architecture marker in filename
+echo "$ARTIFACT" | grep 'aarch64-linux\\.img\\.zst$'
+
+# 5) Verify SHA-256 (replace EXPECTED_SHA256 from Hydra build page)
+EXPECTED_SHA256="REPLACE_WITH_HYDRA_SHA256"
+shasum -a 256 "$ARTIFACT"
+# Linux alternative:
+# sha256sum "$ARTIFACT"
+
+# 6) Decompress into .img
+unzstd -d "$ARTIFACT"
+
+# 7) Record provenance for replay/debugging
+{
+  echo "hydra_job=https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux"
+  echo "latest_download=$LATEST_URL"
+  echo "artifact=$ARTIFACT"
+  echo "sha256_expected=$EXPECTED_SHA256"
+  date -u +"download_utc=%Y-%m-%dT%H:%M:%SZ"
+} > aarch64-image-provenance.txt
+</pre>
+
+<p>
+  <tt>aarch64-image-provenance.txt</tt> is the replay anchor: it records which
+  exact artifact was chosen, from which Hydra path, and when. Keep it next to
+  the downloaded image while flashing and post-boot verification.
+</p>
+
+<h3>Reader flow: missing assumptions checklist</h3>
+
+<ol>
+  <li>Assume your host can run <tt>nix-shell</tt>, <tt>wget</tt>, and <tt>zstd</tt>; if not, stop and install tooling first.</li>
+  <li>Assume network access to <tt>hydra.nixos.org</tt>; if not, switch to local build Path B.</li>
+  <li>Assume checksum is available from the selected build page; if missing, do not flash.</li>
+  <li>Assume target media is the intended SD card; verify device identity before any destructive write step.</li>
+</ol>
+
+<p>
+  If checksum verification fails, stop immediately and retry from the Hydra
+  build page. Do not flash an unverified image.
+</p>
 
 <h2>Acceptance</h2>
 
