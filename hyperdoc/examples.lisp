@@ -392,6 +392,21 @@ Raw list structure is preserved as a secondary view."
           :primary-correction-type (type-of correction)
           :raw-type (type-of raw))))
 
+(defexample sd-card-runbook-section-navigation-example
+  "Regression check: runbook summary section navigation targets semantic section objects."
+  (let* ((runbook (sd-card-creation-command-plan))
+         (ids '("path-a-official-prebuilt-image"
+                "path-b-build-project-image"
+                "flash-procedure-macos-host"
+                "safety-checks"))
+         (sections (loop for id in ids
+                         collect (sd-card-creation-command-plan-section id))))
+    (dolist (section sections)
+      (assert-eql 'sd-card-runbook-section (type-of section)))
+    (list :runbook-type (type-of runbook)
+          :section-types (mapcar #'type-of sections)
+          :section-titles (mapcar #'title-of sections))))
+
 ;;
 ;; hauptsache / kioskberrli reference objects
 ;;
