@@ -1,0 +1,51 @@
+<h1>Journal Gate Script and Lisp Implementation</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the commit gate script used for localhost FedWiki page
+  edits and exposes the Lisp implementation source as inspectable functions.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::journal-checker-commit-gate-topic)"><tt>Journal checker commit gate</tt></a></li>
+  <li><a expr="(hyperdoc::journal-gate-script-lisp-topic)"><tt>Journal gate script and Lisp implementation</tt></a></li>
+</ul>
+
+<h2>Gate rule</h2>
+
+<p>
+  A page is commit-blocked when checker findings include any of:
+  <tt>CREATION</tt>, <tt>CHRONOLOGY</tt>, <tt>REVISION</tt>, or
+  <tt>MALFORMED</tt>.
+</p>
+
+<h2>Lisp source</h2>
+
+<p>
+  These functions define the gate findings set, derive page-level gate findings,
+  and return a pass/fail gate decision.
+</p>
+
+<source-of-function>journalmatic-commit-gate-findings</source-of-function>
+<source-of-function>journalmatic-commit-gate-pass-p</source-of-function>
+<source-of-function>journalmatic-commit-gate-script-example</source-of-function>
+
+<h2>Operational sequence</h2>
+
+<ol>
+  <li>Run <tt>python3 -m json.tool</tt> for JSON syntax and structure.</li>
+  <li>Run journal checker and compute commit-gate findings.</li>
+  <li>If any gate findings remain, repair journal before commit.</li>
+  <li>Commit journal repairs separately from docs/topic updates.</li>
+</ol>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
+  <li><a page="FedWiki Story Item IDs">FedWiki Story Item IDs</a></li>
+</ul>

@@ -266,8 +266,19 @@
    :title "Journal checker commit gate"
    :summary "FedWiki page commits must pass creation/chronology/revision/malformed checks; syntax-only json.tool is not sufficient."
    :references '("Journalmatic Journal Checker"
+                 "Journal Gate Script and Lisp Implementation"
                  "HyperBook Journal Tools"
                  "Python json.tool Source and Usage")))
+
+(defun journal-gate-script-lisp-topic ()
+  (make-topic
+   :id "journal-gate-script-lisp"
+   :title "Journal gate script and Lisp implementation"
+   :summary "Lisp gate functions expose commit blocking for CREATION/CHRONOLOGY/REVISION/MALFORMED and provide inspectable pass/fail results."
+   :references '("Journalmatic Journal Checker"
+                 "Journal Gate Script and Lisp Implementation"
+                 "HyperBook Journal Tools"
+                 "journalmatic-commit-gate-script-example")))
 
 (defun fedwiki-story-item-id-policy-topic ()
   (make-topic

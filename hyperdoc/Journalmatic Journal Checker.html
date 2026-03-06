@@ -13,6 +13,8 @@
   <li><a expr="(hyperdoc::chronology-violation-topic)"><tt>Chronology violation</tt></a></li>
   <li><a expr="(hyperdoc::replay-precondition-violation-topic)"><tt>Replay precondition violation</tt></a></li>
   <li><a expr="(hyperdoc::fedwiki-story-item-id-policy-topic)"><tt>FedWiki story item id policy</tt></a></li>
+  <li><a expr="(hyperdoc::journal-checker-commit-gate-topic)"><tt>Journal checker commit gate</tt></a></li>
+  <li><a expr="(hyperdoc::journal-gate-script-lisp-topic)"><tt>Journal gate script and Lisp implementation</tt></a></li>
 </ul>
 
 <h4>What it checks</h4>
@@ -64,10 +66,21 @@
   separate repositories and avoid push unless explicitly requested.
 </p>
 
+<h4>Lisp gate script source</h4>
+
+<p>
+  HyperDoc now includes an inspectable Lisp gate implementation for commit
+  blocking logic over checker findings:
+</p>
+
+<source-of-function>journalmatic-commit-gate-findings</source-of-function>
+<source-of-function>journalmatic-commit-gate-pass-p</source-of-function>
+<source-of-function>journalmatic-commit-gate-script-example</source-of-function>
+
 <h4>Related</h4>
 
 <ul>
-  <li><a expr="(hyperdoc::journal-checker-commit-gate-topic)"><tt>Journal checker commit gate</tt></a></li>
+  <li><a page="Journal Gate Script and Lisp Implementation">Journal Gate Script and Lisp Implementation</a></li>
   <li><a hyperbook="hyperdoc" page="FedWiki Story Item IDs">FedWiki Story Item IDs</a></li>
   <li><a hyperbook="hyperdoc" page="Journal Object Extensions">Journal Object Extensions</a></li>
   <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
