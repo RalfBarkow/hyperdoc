@@ -105,6 +105,16 @@ trap terminate_dev INT TERM
 
 nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(require :asdf)' \
+  --eval '(let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
+                 (flake-deps (uiop:ensure-directory-pathname
+                              (merge-pathnames ".flake-deps/" root))))
+            ;; Keep project trees first, but inherit Nix/ASDF defaults so packaged
+            ;; systems (e.g. alexandria) remain discoverable at runtime.
+            (asdf:initialize-source-registry
+             (list :source-registry
+                   (list :tree root)
+                   (list :tree flake-deps)
+                   :inherit-configuration)))' \
   --eval '(sb-sys:enable-interrupt
             sb-unix:sigint
             (lambda (signal code scp)
