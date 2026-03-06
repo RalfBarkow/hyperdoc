@@ -94,7 +94,9 @@ images, etc.")
 (defun reload-page (page)
   (let* ((origin (origin-of page))
          (id (origin-id-of page))
-         (page-data (fetch-page-json (domain-name-of origin) id)))
+         (page-data (fetch-page-json (domain-name-of origin)
+                                     (protocol-of origin)
+                                     id)))
     (set-page-data page page-data)
     ;; For remote pages, add the origin to the page context
     (unless (eq origin (hb:hyperbook-of page))
@@ -229,6 +231,7 @@ images, etc.")
     (views:html
       (:div :class "hyperbook-page"
             (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
+                                      (-> page origin-of protocol-of)
                                       "/favicon.png"))
                  (views:esc " ")
                  (views:esc (hb:title-of page)))
@@ -242,22 +245,6 @@ images, etc.")
   (when-let (links (hb:links-of page))
     (👀links links)))
 
-(defun normalize-browser-url (raw)
-  (let* ((normalized (cond
-                       ((str:starts-with? "https://" raw)
-                        raw)
-                       ((str:starts-with? "http://" raw)
-                        (format nil "https://~A" (str:substring 7 nil raw)))
-                       (t
-                        (format nil "https://~A" raw))))
-         (uri (quri:uri normalized))
-         (scheme (quri:uri-scheme uri))
-         (host (quri:uri-host uri))
-         (path (or (quri:uri-path uri) "/")))
-    (when (and host
-               (member scheme '("http" "https") :test #'string=))
-      (format nil "~A://~A~A" scheme host path))))
-
 ;;
 ;; Title bar customization
 ;;
@@ -265,9 +252,9 @@ images, etc.")
 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
   (let* ((wiki (hb:hyperbook-of page))
          (slug (origin-id-of page))
-         (url (normalize-browser-url
-               (wiki-url (domain-name-of wiki)
-                         (str:concat "/" slug ".html")))))
+         (url (wiki-url (domain-name-of wiki)
+                        (protocol-of wiki)
+                        (str:concat "/" slug ".html"))))
     (views:html
       (views:action-button "Reload"
                            (views:thunk
@@ -290,16 +277,16 @@ images, etc.")
 
 (defmethod make-wiki-view-url ((page fedwiki-page))
   (let ((wiki (hb:hyperbook-of page)))
-    (normalize-browser-url
-     (format nil "http://~A/~A.html"
-             (domain-name-of wiki)
-             (origin-id-of page)))))
+    (format nil "~A://~A/~A.html"
+            (protocol-of wiki)
+            (domain-name-of wiki)
+            (origin-id-of page))))
 
 (defmethod make-wiki-view-url ((page remote-fedwiki-page))
   (let ((wiki (hb:hyperbook-of page))
         (origin (origin-of page)))
-    (normalize-browser-url
-     (format nil "http://~A/~A/~A"
-             (domain-name-of wiki)
-             (domain-name-of origin)
-             (origin-id-of page)))))
+    (format nil "~A://~A/~A/~A"
+            (protocol-of wiki)
+            (domain-name-of wiki)
+            (domain-name-of origin)
+            (origin-id-of page))))

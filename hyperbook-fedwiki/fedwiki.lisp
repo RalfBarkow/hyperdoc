@@ -28,6 +28,8 @@
    (slugs :reader slugs-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from slugs to titles and back")
+   (protocol :reader protocol-of :initform "https" :type string
+             :documentation "Either 'https' is the server supports it, else 'http'")
    (status :accessor status-of :initform nil
            :documentation "The initialization status of the wiki,
 one of (1) the thread loading the site map, (2) t for a fully
@@ -60,6 +62,17 @@ that occurred when reading the site map.")))
     (setf (status-of wiki)
           (bt:make-thread
            #'(lambda ()
+               ;; Check if the site supports HTTPS. Use low-level USOCKET
+               ;; for this because high-level access via drakma waits for
+               ;; a connection timeout rather than detecting the immediate
+               ;; connection-refused error.
+               (handler-case
+                   (-> domain-name
+                     (usocket:socket-connect 443)
+                     (usocket:socket-close))
+                 (usocket:connection-refused-error (c)
+                   (declare (ignore c))
+                   (setf (slot-value wiki 'protocol) "http")))
                (handler-case
                    (progn (fetch-sitemap wiki)
                           (fetch-plugin-data wiki)
@@ -73,6 +86,7 @@ that occurred when reading the site map.")))
 
 (defun fetch-sitemap (wiki)
   (let* ((sitemap-url (wiki-url (domain-name-of wiki)
+                                (protocol-of wiki)
                                 "/system/sitemap.json"))
          (sitemap (fetch-json sitemap-url)))
     (loop for page-spec across sitemap
