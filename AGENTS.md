@@ -61,6 +61,7 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
 ## Notes for Agents
 
 - Prefer loading `hyperdoc/server` or `hyperbook/server` via ASDF, depending on scope.
+- Run all git steps through `nix shell nixpkgs#git -c ...` to ensure git is available and consistent in this environment.
 - Use `dev.sh` for local iteration and debugging; use `start.sh` for stricter startup behavior.
 - Content updates are often in `hyperdoc/`; runtime behavior typically lives in `hyperbook-server/` and `hyperdoc-explorer/`.
 - Treat HyperDoc pages and localhost FedWiki pages as connected communication surfaces. HyperDoc pages can be mirrored or linked to FedWiki counterparts in `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages` when workflows depend on wiki journaling/editing.
@@ -145,7 +146,14 @@ checks before commit, not after:
 3. If findings exist:
    - repair journal first (e.g. restore `create` first, fix monotonic dates, rebuild replayable journal),
    - rerun checker until clear.
-4. Commit slicing:
+4. Binding workflow rule for page edits:
+   - all FedWiki page changes are journal actions recorded after the fact, so the
+     `story` remains reconstructable by replaying `journal`,
+   - `create` must be first action,
+   - action dates use runtime epoch millis with monotonic rule:
+     `max(now, last-date + 1)`,
+   - never hardcode fixed/future date constants in generated journals.
+5. Commit slicing:
    - commit repair-only journal fixes separately from content/topic updates,
    - keep HyperDoc repo commit(s) separate from localhost FedWiki repo commit(s),
    - do not push unless explicitly requested.

@@ -1,78 +1,53 @@
 <h1>Opening external FedWiki sites</h1>
 
 <p>
-  The FedWiki inspector adds an open-external title-bar action for wiki objects
-  via
-  <a hyperbook="lisp-functions" page="html-inspector-views:title-bar-action-buttons"><tt>views:title-bar-action-buttons</tt></a>.
-  It used to pass <tt>(wiki-url ...)</tt> directly to <tt>clog:open-browser</tt>.
+  HyperDoc federates with Wiki sites that are not uniform about transport:
+  some support HTTPS, some only HTTP. A fixed scheme breaks interoperability.
 </p>
 
 <p>
-  Chromium-class browsers are stricter about missing or implicit schemes than a
-  Lisp-side URL helper. HyperBook also must not emit scheme-relative URLs such as
-  <tt>//host/...</tt>, because those can behave badly across mixed-content or
-  secure-context boundaries.
+  Upstream change:
+  <a href="https://codeberg.org/khinsen/hyperdoc/commit/a07b7dbbad58077f36904afd8040046bc5ccbf49"><tt>a07b7db</tt></a>
+  (Konrad Hinsen, 2026-03-06).
 </p>
 
-<h4>What changed</h4>
+<h4>Problem</h4>
 
 <ul>
-  <li>Ensure there is an explicit scheme before parsing.</li>
-  <li>Accept only <tt>http</tt> and <tt>https</tt>.</li>
-  <li>Never emit a scheme-relative URL.</li>
-  <li>Guard against <tt>quri</tt> parsing a schemeless <tt>host/path</tt> as a path-only URI with host <tt>NIL</tt>.</li>
+  <li>Mixed HTTP/HTTPS deployments in the FedWiki neighborhood.</li>
+  <li>Choosing one scheme globally can fail for specific sites.</li>
 </ul>
 
-<p>
-  The subtle case is <tt>(quri:uri "wiki.ralfbarkow.ch/")</tt>. Without a scheme,
-  it is parsed as a path-only URI, not as a host, so <tt>quri:uri-host</tt>
-  becomes <tt>NIL</tt>. The fix is to prepend <tt>http://</tt> before parsing
-  when the string has no scheme.
-</p>
+<h4>Previous behavior</h4>
 
-<h4>Before</h4>
+<ul>
+  <li>URL construction used a fixed scheme path in core access points.</li>
+  <li>Behavior effectively assumed one scheme instead of site capability detection.</li>
+</ul>
 
-<pre>
-(defmethod views:title-bar-action-buttons ((wiki fedwiki))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (wiki-url (domain-name-of wiki) "/")))
-    nil))
-</pre>
-
-<h4>After</h4>
+<h4>New behavior</h4>
 
 <pre>
-(defmethod views:title-bar-action-buttons ((wiki fedwiki))
-  (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (let* ((raw (wiki-url (domain-name-of wiki) "/"))
-             (normalized
-               (if (or (str:starts-with? "http://" raw)
-                       (str:starts-with? "https://" raw))
-                   raw
-                   (format nil "http://~A" raw)))
-             (uri (quri:uri normalized))
-             (scheme (quri:uri-scheme uri))
-             (host (quri:uri-host uri))
-             (path (or (quri:uri-path uri) "/")))
-        (when (and host
-                   (member scheme '("http" "https") :test #'string=))
-          (clog:open-browser
-           :url (format nil "~A://~A~A" scheme host path)))))
-    nil))
+On first contact (during sitemap loading), HyperDoc probes port 443.
+If HTTPS is available, protocol stays "https".
+If connection is refused, protocol is set to "http".
+
+All later Wiki requests use (protocol-of wiki), including:
+- /system/sitemap.json
+- /system/plugins.json
+- page .json/.html loads
+- external browser links from inspector views
 </pre>
 
 <p>
-  The helper <tt>wiki-url</tt> is defined in <tt>hyperbook-fedwiki/utilities.lisp</tt>.
-  Historically it has returned <tt>http://...</tt> URLs, but the inspector still
-  needs to be defensive because the title-bar action crosses into browser URL handling.
+  This maximizes interoperability while keeping a per-site stable protocol choice
+  after initial detection.
 </p>
 
 <h4>Related</h4>
 
 <ul>
-  <li><tt>hyperbook-fedwiki/views.lisp</tt> - the <tt>views:title-bar-action-buttons ((wiki fedwiki))</tt> method.</li>
-  <li><tt>hyperbook-fedwiki/utilities.lisp</tt> - the <tt>wiki-url</tt> helper.</li>
-  <li><tt>hyperbook-server/server.lisp</tt> - the HyperBook URL view definitions, for related URL generation patterns.</li>
+  <li><tt>hyperbook-fedwiki/fedwiki.lisp</tt> - protocol slot and first-contact detection.</li>
+  <li><tt>hyperbook-fedwiki/utilities.lisp</tt> - protocol-aware <tt>wiki-url</tt>.</li>
+  <li><tt>hyperbook-fedwiki/pages.lisp</tt>, <tt>plugins.lisp</tt>, <tt>views.lisp</tt> - protocol propagation through runtime calls.</li>
 </ul>
