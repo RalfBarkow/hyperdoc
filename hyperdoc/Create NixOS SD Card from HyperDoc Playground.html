@@ -7,15 +7,32 @@
   runbook-aligned command plan generated from HyperDoc Playground.
 </p>
 
+<h2>Primary actions</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan)"><b>Open semantic runbook</b></a></li>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan-step &quot;sdimage-imagesize-correction&quot;)"><b>Open sdImage.imageSize correction path</b></a></li>
+</ul>
+
+<p>
+  These are the two intended semantic entry points. Both open semantic objects
+  with <tt>Summary</tt> as the default tab.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
   <li><a expr="(hyperdoc::create-sd-card-from-playground-task-topic)"><tt>Create NixOS SD card from HyperDoc Playground task</tt></a></li>
   <li><a expr="(hyperdoc::sd-card-command-plan-playground-topic)"><tt>SD card command plan in Playground</tt></a></li>
-  <li><a expr="(hyperdoc::sd-card-creation-command-plan)"><tt>SD-card runbook object (semantic root)</tt></a></li>
-  <li><a expr="(hyperdoc::sd-card-creation-command-plan-step &quot;sdimage-imagesize-correction&quot;)"><tt>sdImage.imageSize correction step</tt></a></li>
-  <li><a expr="(hyperdoc::prepare-aarch64-image-topic)"><tt>Prepare the AArch64 image</tt></a></li>
   <li><a expr="(hyperdoc::runbook-build-and-flash-sd-image-topic)"><tt>Runbook: Build and Flash NixOS SD Image for Kioskberrli</tt></a></li>
+</ul>
+
+<h2>Raw structure (secondary)</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan-raw)"><tt>Open raw section list</tt></a></li>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan)" view="raw-structure"><tt>Open raw structure (runbook view)</tt></a></li>
+  <li><a expr="(hyperdoc::sd-card-creation-command-plan-step &quot;sdimage-imagesize-correction&quot;)" view="raw-structure"><tt>Open raw structure (correction-step view)</tt></a></li>
 </ul>
 
 <h2>Prerequisites</h2>
@@ -55,12 +72,7 @@
 <source-of-function>sd-card-creation-dry-run-example</source-of-function>
 
 <ol start="3">
-  <li>
-    Choose exactly one artifact source path:
-    <a expr="(hyperdoc::sd-card-creation-command-plan-section &quot;path-a-official-prebuilt-image&quot;)"><tt>Path A</tt></a>
-    or
-    <a expr="(hyperdoc::sd-card-creation-command-plan-section &quot;path-b-build-project-image&quot;)"><tt>Path B</tt></a>.
-  </li>
+  <li>Choose exactly one artifact source path: Path A (official prebuilt image) or Path B (project build).</li>
   <li>Execute the selected commands in the host shell, preserving runbook order.</li>
   <li>Before flashing, replace <tt>diskN</tt> with the verified SD-card device identifier.</li>
 </ol>
