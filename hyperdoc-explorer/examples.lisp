@@ -40,16 +40,6 @@
 (defmethod views:text-representation ((transcript sd-card-dry-run-transcript))
   (title-of transcript))
 
-;; Keep link labels clean inside Summary lists while preserving explicit
-;; pane titles from text-representation.
-(defmethod views:html-representation ((section sd-card-runbook-section) &optional id)
-  (declare (ignore id))
-  (views:html (:span (views:esc (title-of section)))))
-
-(defmethod views:html-representation ((step sd-card-procedure-step) &optional id)
-  (declare (ignore id))
-  (views:html (:span (views:esc (title-of step)))))
-
 (views:defview 👀summary (runbook sd-card-runbook)
   (views:html-view :title "Summary" :priority 1
     (views:html
@@ -60,7 +50,8 @@
        (loop for section in (sections-of runbook)
              do (views:html
                   (:li
-                   (:b (views:object-ref section))
+                   (:b (views:object-ref section
+                                         :display (views:str (title-of section))))
                    (when (summary-of section)
                      (views:html
                        (:div :style "font-size: 0.92em; opacity: 0.85;"
@@ -88,7 +79,8 @@
       (:ol
        (loop for step in (steps-of section)
              do (views:html
-                  (:li (views:object-ref step))))))))
+                  (:li (views:object-ref step
+                                         :display (views:str (title-of step))))))))))
 
 (views:defview 👀items (section sd-card-runbook-section)
   (views:html-view :title "Items" :priority 10
