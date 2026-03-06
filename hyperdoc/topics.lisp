@@ -683,6 +683,18 @@
    :references '("Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
 
+(defun hyperdoc-operating-environment-assessment-2026-03-06-topic ()
+  (make-topic
+   :id "hyperdoc-operating-environment-assessment-2026-03-06"
+   :title "HyperDoc Operating Environment Assessment 2026-03-06"
+   :summary "Assessment that frames HyperDoc as a documented operating environment with explicit maintenance doctrine, highlights three-surface drift risk, and recommends stronger semantic indexing and routine smoke checks."
+   :references '("HyperDoc Operating Environment Assessment 2026-03-06"
+                 "Communication Surfaces Policy"
+                 "ASDF Components Workflow"
+                 "HyperDoc Server"
+                 "Stepper Debugger Surface"
+                 "Diagramming Debugger Surface")))
+
 (defun violated-handoff-topic ()
   (make-topic
    :id "violated-handoff"

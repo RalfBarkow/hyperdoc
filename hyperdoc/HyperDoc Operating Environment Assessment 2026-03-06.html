@@ -1,0 +1,61 @@
+<h1>HyperDoc Operating Environment Assessment 2026-03-06</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This assessment captures the current project-state reading: the repository
+  now operates as a documented environment with explicit maintenance rules,
+  not only as a codebase.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::hyperdoc-operating-environment-assessment-2026-03-06-topic)"><tt>HyperDoc operating environment assessment 2026-03-06</tt></a></li>
+  <li><a expr="(hyperdoc::reconstruction-protocol-topic)"><tt>Reconstruction protocol</tt></a></li>
+  <li><a expr="(hyperdoc::surface-answer-topic)"><tt>Surface Answer</tt></a></li>
+  <li><a expr="(hyperdoc::artifact-answer-topic)"><tt>Artifact Answer</tt></a></li>
+  <li><a expr="(hyperdoc::playground-eval-surface-topic)"><tt>Playground eval surface</tt></a></li>
+  <li><a expr="(hyperdoc::playground-debug-report-surface-topic)"><tt>Playground debug report surface</tt></a></li>
+  <li><a expr="(hyperdoc::playground-stepper-surface-topic)"><tt>Playground stepper surface</tt></a></li>
+  <li><a expr="(hyperdoc::web-debugger-surface-topic)"><tt>Web debugger surface</tt></a></li>
+  <li><a expr="(hyperdoc::diagramming-debugger-surface-topic)"><tt>Diagramming debugger surface</tt></a></li>
+</ul>
+
+<h2>Current read</h2>
+
+<ul>
+  <li>The repository now encodes its own operating policy in <tt>AGENTS.md</tt>.</li>
+  <li>The runtime stack and entry paths are explicit: <tt>dev.sh</tt> for iteration and <tt>start.sh</tt> for stricter launch.</li>
+  <li>The two-surface rule is explicit: durable architecture in HyperDoc, fast-moving collaboration in localhost FedWiki, linked by counterparts.</li>
+  <li>Inspectable topic objects are now first-class documentation primitives via <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li>The playground/debugger line is now a subsystem surface (eval, reports, stepper, diagramming, web debugger) documented and wired on the HyperDoc side.</li>
+</ul>
+
+<h2>Main risk</h2>
+
+<p>
+  The bottleneck has shifted from architecture capability to discoverability
+  and synchronization discipline across three surfaces (HyperDoc page, Lisp
+  topic object, FedWiki twin).
+</p>
+
+<h2>Recommendations</h2>
+
+<ol>
+  <li>Treat <tt>topics.lisp</tt> as canonical semantic index and keep extending inspectable coverage for operational pages.</li>
+  <li>Consolidate the playground/debugger narrative so eval/restarts/reports/stepper/diagramming/web-debugger read as one toolchain.</li>
+  <li>Automate lightweight smoke checks already defined by policy: <tt>asdf:load-system :hyperdoc</tt>, topic <tt>fboundp</tt>, slug-based FedWiki links, and launcher bring-up.</li>
+</ol>
+
+<h2>References</h2>
+
+<ul>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a page="HyperDoc Server">HyperDoc Server</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="Create NixOS SD Card from HyperDoc Playground">Create NixOS SD Card from HyperDoc Playground</a></li>
+  <li><a page="Stepper Debugger Surface">Stepper Debugger Surface</a></li>
+  <li><a page="Diagramming Debugger Surface">Diagramming Debugger Surface</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="hyperdoc-operating-environment-assessment-2026-03-06">FedWiki twin: hyperdoc-operating-environment-assessment-2026-03-06</a></li>
+</ul>
