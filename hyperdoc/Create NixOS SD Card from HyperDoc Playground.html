@@ -24,6 +24,7 @@
 <ul>
   <li><a expr="(hyperdoc::create-sd-card-from-playground-task-topic)"><tt>Create NixOS SD card from HyperDoc Playground task</tt></a></li>
   <li><a expr="(hyperdoc::sd-card-command-plan-playground-topic)"><tt>SD card command plan in Playground</tt></a></li>
+  <li><a expr="(hyperdoc::sd-card-procedure-step-raw-structure-fix-topic)"><tt>SD-card procedure-step raw-structure fix</tt></a></li>
   <li><a expr="(hyperdoc::semantic-navigation-visible-clickable-topic)"><tt>Semantic navigation visible and clickable</tt></a></li>
   <li><a expr="(hyperdoc::semantic-object-ref-renderer-topic)"><tt>Semantic object-ref renderer</tt></a></li>
   <li><a expr="(hyperdoc::runbook-build-and-flash-sd-image-topic)"><tt>Runbook: Build and Flash NixOS SD Image for Kioskberrli</tt></a></li>
@@ -43,6 +44,70 @@
   <tt>object-ref</tt> links for primary navigation. Raw-structure views remain
   available only for diagnostics.
 </p>
+
+<h2>Maintenance Capsule: Raw Structure Fix</h2>
+
+<p>
+  Root cause: the Raw Structure tab rendered the stored
+  <tt>raw-structure</tt> slot directly. For many
+  <tt>sd-card-procedure-step</tt> objects, that slot was <tt>NIL</tt> even when
+  semantic slots (<tt>id</tt>, <tt>title</tt>, <tt>summary</tt>,
+  <tt>commands</tt>) were populated. The UI therefore showed
+  <tt>COMMON-LISP:NIL</tt>.
+</p>
+
+<p>
+  Fix: add computed <tt>raw-structure</tt> protocol support and derive step
+  structure from semantic slots, omitting <tt>NIL</tt> fields. Explorer now
+  prefers computed raw structure and only falls back to
+  <tt>raw-structure-of</tt> if needed.
+</p>
+
+<p>
+  Regression check:
+  <a expr="(hyperdoc::official-rpi-tutorial-step-raw-structure-regression-example)"><tt>official-rpi-tutorial-step-raw-structure-regression-example</tt></a>.
+  It verifies non-<tt>NIL</tt> raw structure for
+  <tt>official-reboot-new-generation</tt> with <tt>:id</tt>, <tt>:title</tt>,
+  <tt>:summary</tt>, and <tt>:commands</tt>.
+</p>
+
+<h3>Reconstruction Addendum</h3>
+
+<h4>Process trace</h4>
+<ol>
+  <li>Observe Raw Structure showing <tt>COMMON-LISP:NIL</tt> for procedure-step objects.</li>
+  <li>Identify direct slot rendering (<tt>raw-structure-of</tt>) as root cause.</li>
+  <li>Add computed <tt>raw-structure</tt> protocol.</li>
+  <li>Specialize for <tt>sd-card-procedure-step</tt> from semantic slots.</li>
+  <li>Update explorer Raw Structure views to prefer computed structure and fallback to slot value.</li>
+  <li>Add regression example for <tt>official-reboot-new-generation</tt>.</li>
+  <li>Run runtime verification in SBCL with <tt>:hyperdoc/explorer</tt>.</li>
+</ol>
+
+<h4>HyperDoc/FedWiki deltas</h4>
+<ul>
+  <li>Code: <tt>hyperdoc/examples.lisp</tt>, <tt>hyperdoc-explorer/examples.lisp</tt>.</li>
+  <li>Documentation topic/page updates: this page, official tutorial page, topic/twin notes.</li>
+  <li>FedWiki twins: <tt>create-sd-card-from-playground-task</tt>, <tt>sd-card-procedure-step-raw-structure-fix</tt>.</li>
+</ul>
+
+<h4>Canonical replay check</h4>
+<pre>
+nix develop --command sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/explorer :force t)' \
+  --eval '(hyperdoc::official-rpi-tutorial-step-raw-structure-regression-example)' \
+  --eval '(uiop:quit 0)'
+</pre>
+
+<h4>Commits (chronological)</h4>
+<pre>
+fix(hyperdoc): compute raw structure for sd-card-procedure-step instead of relying on nil slot
+included in a735927 on this branch
+
+test(hyperdoc): cover computed raw structure for procedure steps
+a735927
+</pre>
 
 <h2>Raw structure (diagnostics only)</h2>
 
@@ -115,6 +180,18 @@
   <li>Integration note: <a expr="(hyperdoc::correction-path (hyperdoc::kioskberrli-sd-image-failure-context))"><tt>correction-path</tt></a></li>
 </ul>
 
+<h2>Missing handoff correction</h2>
+
+<p>
+  A decompression step is missing between the download step and the flashing
+  step. The relation defect is modeled explicitly as:
+  <a expr="(hyperdoc::official-zstd-to-img-handoff-defect)"><tt>official-zstd-to-img-handoff-defect</tt></a>,
+  with patch target
+  <a expr="(hyperdoc::official-zstd-to-img-handoff-patch-target)"><tt>official-zstd-to-img-handoff-patch-target</tt></a>,
+  and inserted step
+  <a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-decompress-zstd-to-img&quot;)"><tt>official-decompress-zstd-to-img</tt></a>.
+</p>
+
 <h2>Result</h2>
 
 <ul>
@@ -137,4 +214,5 @@
   <li><a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a></li>
   <li><a page="Prepare the AArch64 image">Prepare the AArch64 image</a></li>
   <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Queued batch runbook diagnostics">Queued batch runbook diagnostics</a></li>
 </ul>
