@@ -1,0 +1,73 @@
+<h1>SBCL Process</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This topic documents the operational model of one running SBCL process in the
+  HyperDoc workflow.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::sbcl-topic)"><tt>SBCL</tt></a></li>
+  <li><a expr="(hyperdoc::sbcl-process-topic)"><tt>SBCL process</tt></a></li>
+  <li><a expr="(hyperdoc::asdf-system-topic)"><tt>ASDF system</tt></a></li>
+  <li><a expr="(hyperdoc::asdf-find-system-topic)"><tt>asdf:find-system</tt></a></li>
+  <li><a expr="(hyperdoc::undefined-function-triage-topic)"><tt>Undefined-function triage</tt></a></li>
+  <li><a expr="(hyperdoc::isolated-evaluation-workers-topic)"><tt>Isolated evaluation workers</tt></a></li>
+  <li><a expr="(hyperdoc::fedwiki-content-runtime-policy-split-topic)"><tt>FedWiki content and runtime policy split</tt></a></li>
+</ul>
+
+<h2>Process model</h2>
+
+<ol>
+  <li>Each SBCL process has its own image state and does not share loaded definitions with other processes.</li>
+  <li><tt>asdf:load-system</tt> affects only the current process image.</li>
+  <li>Package/function visibility depends on what has been loaded in that exact process.</li>
+  <li>A Playground/CLOG event handler runs inside the server process and sees only that process state.</li>
+</ol>
+
+<h2>Operational checks</h2>
+
+<pre>
+(require :asdf)
+(asdf:find-system :hyperdoc)
+(asdf:load-system :hyperdoc)
+(fboundp 'hyperdoc::journal-checker-commit-gate-topic)
+</pre>
+
+<p>
+  If this succeeds in one shell but fails in the UI, the UI is connected to a
+  different SBCL process/image.
+</p>
+
+<h2>Failure signatures</h2>
+
+<ul>
+  <li><tt>Package ... does not exist</tt>: system/package not loaded in this process.</li>
+  <li><tt>function ... is undefined</tt>: symbol may exist but function definition is absent in this image.</li>
+  <li><tt>COMPILE-FILE-ERROR</tt> while loading: dependency resolution or compile-time failure in current process context.</li>
+</ul>
+
+<h2>Runtime policy</h2>
+
+<ul>
+  <li>Isolate risky evaluation in worker processes or sandboxes only where needed.</li>
+  <li>Keep page identity/content in FedWiki; keep runtime execution policy in HyperDoc/inspector tooling.</li>
+</ul>
+
+<p>
+  This split keeps collaborative content durable and journaled while making
+  execution behavior explicit, inspectable, and replaceable without rewriting
+  page identity.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="SBCL">SBCL</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="HyperDoc Server">HyperDoc Server</a></li>
+  <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
+</ul>

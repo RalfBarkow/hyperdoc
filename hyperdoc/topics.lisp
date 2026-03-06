@@ -586,6 +586,15 @@
                  "Writing text pages"
                  "Defining custom views")))
 
+(defun semantic-object-ref-renderer-topic ()
+  (make-topic
+   :id "semantic-object-ref-renderer"
+   :title "Semantic object-ref renderer"
+   :summary "Confirmed: the SD-card command-plan renderer uses semantic object-ref links for navigation, with raw structure kept as diagnostics-only."
+   :references '("Create NixOS SD Card from HyperDoc Playground"
+                 "Surface and Artifact Answers"
+                 "sd-card-primary-semantic-entrypoints-example")))
+
 ;; Kioskberrli hardware context topics.
 (defun satechi-usbc-pro-hub-4k-hdmi-topic ()
   (make-topic

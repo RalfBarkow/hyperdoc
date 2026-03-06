@@ -30,6 +30,15 @@
               (playground-stepper-index s)
               (length (playground-stepper-forms s)))))
 
+(defun maybe-make-playground-debug-report (condition source)
+  "Optional seam into the HyperDoc inspector debug report object.
+If that extension is unavailable, fall back to the raw condition."
+  (let ((sym (find-symbol "MAKE-PLAYGROUND-DEBUG-REPORT"
+                          :clog-moldable-inspector)))
+    (if (and sym (fboundp sym))
+        (funcall sym condition source)
+        condition)))
+
 (defun read-all-forms (source package)
   (let ((*package* package))
     (with-input-from-string (in source)
@@ -59,7 +68,7 @@
             (setf (playground-stepper-done? stepper) t)))
       (error (e)
         (setf (playground-stepper-parse-report stepper)
-              (make-playground-debug-report e source))
+              (maybe-make-playground-debug-report e source))
         (setf (playground-stepper-forms stepper) '())
         (setf (playground-stepper-done? stepper) t)))
     stepper))
@@ -94,7 +103,7 @@
                t)
            (error (e)
              (setf (playground-stepper-last-error stepper)
-                   (make-playground-debug-report e (prin1-to-string form)))
+                   (maybe-make-playground-debug-report e (prin1-to-string form)))
              (setf (playground-stepper-done? stepper) t)
              t)))))))
 

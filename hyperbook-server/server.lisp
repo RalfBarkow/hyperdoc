@@ -10,6 +10,13 @@
 
 (defvar *server-parameters* nil)
 
+(defun maybe-enable-web-debugger ()
+  "Optional seam into CLOG-MOLDABLE-INSPECTOR.
+Enable web debugger only when that extension is loaded."
+  (let ((sym (find-symbol "ENABLE-WEB-DEBUGGER" :clog-moldable-inspector)))
+    (when (and sym (fboundp sym))
+      (funcall sym))))
+
 (defun known-wikis-pathname ()
   (merge-pathnames #P"hyperbook/known-wikis.sexp"
                    (uiop:xdg-config-home)))
@@ -123,7 +130,7 @@ recommended on public servers because it allows the execution of
                           development))
         (static-root (static-root-pathname)))
     (when development*
-      (ignore-errors (clog-moldable-inspector::enable-web-debugger)))
+      (ignore-errors (maybe-enable-web-debugger)))
     (clog:initialize
      #'(lambda (body)
          (clog-moldable-inspector:on-new-inspector body

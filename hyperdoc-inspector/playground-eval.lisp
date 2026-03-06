@@ -1,4 +1,7 @@
 ;;;; Override playground Eval behavior to avoid replacing the current pane
+;;;; and to expose Step/Debug/Sessions actions in the same toolbar.
+;;;; Load order matters: this file intentionally replaces upstream
+;;;; CLOG-MOLDABLE-INSPECTOR entry points.
 ;;
 ;;;; Copyright (c) 2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 

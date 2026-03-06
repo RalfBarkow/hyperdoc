@@ -8,6 +8,8 @@
 
 ;; Override upstream wiring to ignore invalid reference ids that would
 ;; otherwise trigger jQuery selector errors for "#".
+;; Load order matters: this file is loaded after CLOG-MOLDABLE-INSPECTOR
+;; so this definition intentionally replaces the upstream one.
 (defun set-event-handlers (pane element references)
   (with-slots (object inspector clog-obj) pane
     (dolist (ref references)
