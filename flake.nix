@@ -43,6 +43,24 @@
         htmlInspectorViewsSrc = html-inspector-views-src;
         plumpInspectorViewsSrc = plump-inspector-views-src;
         lwcellsSrc = lwcells-src;
+        alexandriaSrc = pkgs.sbclPackages.alexandria.src;
+        arrowMacrosSrc = pkgs.sbclPackages.arrow-macros.src;
+        puriSrc = pkgs.sbclPackages.puri.src;
+        clWhoSrc = pkgs.sbclPackages.cl-who.src;
+        hunchentootSrc = pkgs.sbclPackages.hunchentoot.src;
+        drakmaSrc = pkgs.sbclPackages.drakma.src;
+        clPpcreSrc = pkgs.sbclPackages."cl-ppcre".src;
+        bordeauxThreadsSrc = pkgs.sbclPackages.bordeaux-threads.src;
+        localTimeSrc = pkgs.sbclPackages."local-time".src;
+        shashtSrc = pkgs.sbclPackages.shasht.src;
+        strSrc = pkgs.sbclPackages.str.src;
+        usocketSrc = pkgs.sbclPackages.usocket.src;
+        tpnSrc = pkgs.sbclPackages.trivial-package-local-nicknames.src;
+        clSlugSrc = pkgs.sbclPackages."cl-slug".src;
+        sha1Src = pkgs.sbclPackages.sha1.src;
+        lquerySrc = pkgs.sbclPackages.lquery.src;
+        plumpSrc = pkgs.sbclPackages.plump.src;
+        babelSrc = pkgs.sbclPackages.babel.src;
 
         sbclEnv = pkgs.sbcl.withPackages (ps: with ps; [
           alexandria
@@ -146,6 +164,24 @@
             ln -snf "$CLOG_MOLDABLE_INSPECTOR_SRC" .flake-deps/clog-moldable-inspector
             ln -snf "$LWCELLS_SRC" .flake-deps/lwcells
             ln -snf "$ARROWS_SRC" .flake-deps/arrows
+            ln -snf "${alexandriaSrc}" .flake-deps/alexandria
+            ln -snf "${arrowMacrosSrc}" .flake-deps/arrow-macros
+            ln -snf "${puriSrc}" .flake-deps/puri
+            ln -snf "${clWhoSrc}" .flake-deps/cl-who
+            ln -snf "${hunchentootSrc}" .flake-deps/hunchentoot
+            ln -snf "${drakmaSrc}" .flake-deps/drakma
+            ln -snf "${clPpcreSrc}" .flake-deps/cl-ppcre
+            ln -snf "${bordeauxThreadsSrc}" .flake-deps/bordeaux-threads
+            ln -snf "${localTimeSrc}" .flake-deps/local-time
+            ln -snf "${shashtSrc}" .flake-deps/shasht
+            ln -snf "${strSrc}" .flake-deps/str
+            ln -snf "${usocketSrc}" .flake-deps/usocket
+            ln -snf "${tpnSrc}" .flake-deps/trivial-package-local-nicknames
+            ln -snf "${clSlugSrc}" .flake-deps/cl-slug
+            ln -snf "${sha1Src}" .flake-deps/sha1
+            ln -snf "${lquerySrc}" .flake-deps/lquery
+            ln -snf "${plumpSrc}" .flake-deps/plump
+            ln -snf "${babelSrc}" .flake-deps/babel
             if [ -n "$CL_MARKUP_SRC" ]; then
               ln -snf "$CL_MARKUP_SRC" .flake-deps/cl-markup
             fi
