@@ -820,3 +820,31 @@ context."))
                   types-and-ids)
     (list :title (getf compacted :title)
           :journal-actions types-and-ids)))
+
+(defparameter +journalmatic-commit-gate-findings+
+  '(:creation :chronology :revision :malformed))
+
+(defun journalmatic-commit-gate-findings (page)
+  (let ((findings (journalmatic-example-check page)))
+    (remove-if-not #'(lambda (finding)
+                       (member finding +journalmatic-commit-gate-findings+))
+                   findings)))
+
+(defun journalmatic-commit-gate-pass-p (page)
+  (null (journalmatic-commit-gate-findings page)))
+
+(defexample journalmatic-commit-gate-script-example
+  "Gate FedWiki page commits on creation/chronology/revision/malformed findings."
+  (let* ((bad-page *journalmatic-example-page-with-chronology-error*)
+         (good-page *journalmatic-example-page*)
+         (bad-findings (journalmatic-commit-gate-findings bad-page))
+         (good-findings (journalmatic-commit-gate-findings good-page)))
+    (assert-equal '(:chronology) bad-findings)
+    (assert-equal '() good-findings)
+    (list :gate-findings +journalmatic-commit-gate-findings+
+          :bad-page (list :title (getf bad-page :title)
+                          :findings bad-findings
+                          :pass? (journalmatic-commit-gate-pass-p bad-page))
+          :good-page (list :title (getf good-page :title)
+                           :findings good-findings
+                           :pass? (journalmatic-commit-gate-pass-p good-page)))))
