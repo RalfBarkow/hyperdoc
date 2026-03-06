@@ -68,6 +68,7 @@ that occurred when reading the site map.")))
                ;; connection-refused error.
                (handler-case
                    (-> domain-name
+                     copy-seq ;; ensure simple-string
                      (usocket:socket-connect 443)
                      (usocket:socket-close))
                  (usocket:connection-refused-error (c)

@@ -42,6 +42,7 @@
                 :components ((:file "package")
                              (:file "links")
                              (:file "link-views")
+                             (:file "link-redirection")
                              (:file "explorer")
                              (:file "catalog")
                              (:file "rendering")
@@ -123,7 +124,6 @@
                #:local-time
                #:shasht
                #:str
-               #:usocket
                #:trivial-package-local-nicknames)
   :components ((:module "hyperbook-fedwiki"
                 :serial t

@@ -8,6 +8,9 @@
   ((target-title :reader target-title-of :type (or null string) :initarg :target-title)
    (target-slug :reader target-slug-of :type string :initarg :target-slug)))
 
+(defmethod hb:key-of ((link wiki-link))
+  (target-slug-of link))
+
 (defun make-wiki-link (source-page &key target-title target-slug)
   (make-instance 'wiki-link
                  :source-hyperbook (-> source-page hb:hyperbook-of hb:id-of)
@@ -19,9 +22,15 @@
                               (find-target-by-title target-slug source-page)
                             (error (c) c)))))
 
-(defclass fedwiki-links ()
-  ((wiki-links :reader wiki-links-of :initarg :wiki-links :initform nil)
-   (web-links :reader web-links-of :initarg :web-links :initform nil)))
+(defclass fedwiki-links (hb:links)
+  ((wiki-links :reader wiki-links-of :initarg :wiki-links :initform nil)))
+
+(defmethod wiki-links-of ((links null))
+  nil)
+
+(defmethod hb:no-links? ((links fedwiki-links))
+  (and (null (wiki-links-of links))
+       (call-next-method)))
 
 ;;
 ;; Resolve a Wiki link, i.e. a slug in the context of a page
@@ -115,11 +124,4 @@
                                 (target (-> link hb:thunk-of views:eval-thunk)))
                             (views:html
                               (:tr (:td (views:object-ref target :display text)))))))))
-            (when-let (wlinks (web-links-of links))
-              (views:html
-                (:h2 (views:esc "Web links"))
-                (:table :class "inspector-table"
-                        (dolist (link (mapcar #'hb:url-of wlinks))
-                          (views:html
-                            (:tr (:td (:a :href link :target "_blank"
-                                          (views:esc link)))))))))))))
+            (views:transclusion (hb::👀links links))))))

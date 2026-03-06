@@ -34,10 +34,7 @@
                           (views:html
                             (:tr (:td (:a :href link :target "_blank"
                                           (views:esc link)))))))))))
-                   (unless (and links
-                                (or (page-links-of links)
-                                    (hyperbook-links-of links)
-                                    (web-links-of links)))
+                   (when (no-links? links)
                      (views:html (views:esc "None")))))
 
 (views:defview 👀links (page page)

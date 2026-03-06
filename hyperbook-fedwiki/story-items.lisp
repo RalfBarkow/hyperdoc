@@ -44,18 +44,27 @@
     nil))
 
 (defun extract-links (page)
-  (let (wiki-links web-links)
+  (let (wiki-links web-links page-links hyperbook-links)
     (loop for item across (story-of page)
           do (loop for link in (extract-links-from-story-item (item-type-of item) item page)
                    do (typecase link
                         (wiki-link (pushnew link wiki-links
                                             :test #'equal
-                                            :key #'target-slug-of))
+                                            :key #'hb:key-of))
+                        (hb:hyperbook-link (pushnew link hyperbook-links
+                                                    :test #'equal
+                                                    :key #'hb:key-of))
+                        (hb:page-link (pushnew link page-links
+                                              :test #'equal
+                                              :key #'hb:key-of))
                         (hb:web-link (pushnew link web-links
                                               :test #'equal
-                                              :key #'hb:url-of)))))
+                                              :key #'hb:key-of)))))
     (make-instance 'fedwiki-links
                    :wiki-links (sort wiki-links #'string< :key #'target-slug-of)
+                   :page-links page-links
+                   :hyperbook-links (sort hyperbook-links #'string<
+                                          :key #'hb:target-hyperbook-of)
                    :web-links (sort web-links #'string< :key #'hb:url-of))))
 
 (defmethod extract-links-from-wiki-text (text page)
@@ -70,8 +79,13 @@
       (let ((link (str:substring 2 -2 link-text)))
         (make-wiki-link page :target-title link :target-slug (slug link)))
       (let* ((parts (str:split " " (str:substring 1 -1 link-text)))
-             (url (first parts)))
-        (hb:make-web-link page url))))
+             (url (first parts))
+             (hb-link (hb:replace-by-hyperbook-link url)))
+        (if hb-link
+            (if (second hb-link)
+                (hb:make-page-link page (first hb-link) (second hb-link))
+                (hb:make-hyperbook-link page (first hb-link)))
+            (hb:make-web-link page url)))))
 
 ;; Paragraphs
 
@@ -134,9 +148,11 @@
 
 (defun render-external-link (url link-text page)
   (declare (ignore page))
-  (views:html
-    (:a :href url :target "_blank"
-        (views:esc link-text))))
+  (if-let (hb-link (hb:replace-by-hyperbook-link url))
+    (hb:render-hyperbook-or-page-link (first hb-link) (second hb-link) link-text)
+    (views:html
+      (:a :href url :target "_blank"
+          (views:esc link-text)))))
 
 ;; Paragraphs
 

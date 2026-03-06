@@ -14,7 +14,7 @@
            #:links-of
            ;; The catalog API
            #:catalog #:*catalog*
-           #:register #:register-scheme
+           #:register #:register-scheme #:register-link-redirection
            #:find-backlink-sources #:find-link-sources
            #:hyperbooks-of
            ;; Accessing items
