@@ -299,6 +299,41 @@
                  "Stepper Debugger Surface"
                  "Playground restarts")))
 
+(defun diagramming-debugger-surface-topic ()
+  (make-topic
+   :id "diagramming-debugger-surface"
+   :title "Diagramming Debugger Surface"
+   :summary "Playground diagramming debugger that records step events and derives collaboration/message traces."
+   :references '("Diagramming Debugger Surface"
+                 "Stepper Debugger Surface")))
+
+(defun step-trace-message-events-topic ()
+  (make-topic
+   :id "step-trace-message-events"
+   :title "Step trace message events"
+   :summary "Each Playground step is captured as an event with form source, extracted call symbols, and success/error status."
+   :references '("Diagramming Debugger Surface")))
+
+(defun graphviz-sequence-export-topic ()
+  (make-topic
+   :id "graphviz-sequence-export"
+   :title "Graphviz sequence export"
+   :summary "Diagramming debugger exports Graphviz DOT text for collaboration-flow rendering."
+   :references '("Diagramming Debugger Surface")))
+
+;; Backward-compatibility alias.
+(defun mermaid-sequence-export-topic ()
+  (graphviz-sequence-export-topic))
+
+(defun playground-stepper-class-layout-topic ()
+  (make-topic
+   :id "playground-stepper-class-layout"
+   :title "Playground stepper class layout"
+   :summary "Slot layout for playground-stepper state: object/package/source/forms/index/last-value/last-error/parse-report/done?."
+   :references '("Diagramming Debugger Surface"
+                 "Stepper Debugger Surface"
+                 "hyperbook-server/playground-stepper.lisp")))
+
 ;; Topic objects for Konrad feedback thread (2026-03-05).
 (defun graph-based-discovery-and-traversal-topic ()
   (make-topic
@@ -363,6 +398,39 @@
    :summary "Hypertext where pages describe and operationalize the graph and traversal logic that produces their own context."
    :references '("Konrad Feedback on Communication Pages"
                  "Concepts, DMX Topics, and Topic Maps")))
+
+;; Topic objects for answer-surface distinction.
+(defun surface-answer-topic ()
+  (make-topic
+   :id "surface-answer"
+   :title "Surface Answer"
+   :summary "Immediate terminal/Codex response that states the current result and decisions in the active session."
+   :references '("Surface and Artifact Answers"
+                 "Communication Surfaces Policy")))
+
+(defun artifact-answer-topic ()
+  (make-topic
+   :id "artifact-answer"
+   :title "Artifact Answer"
+   :summary "Durable answer captured as HyperDoc/FedWiki/Lisp artifacts that can be replayed and inspected later."
+   :references '("Surface and Artifact Answers"
+                 "Communication Surfaces Policy")))
+
+(defun reconstruction-protocol-topic ()
+  (make-topic
+   :id "reconstruction-protocol"
+   :title "Reconstruction protocol"
+   :summary "Protocol requiring each answer to include process trace, artifact deltas, and replay checks."
+   :references '("Surface and Artifact Answers"
+                 "Communication Surfaces Policy")))
+
+(defun skillization-loop-topic ()
+  (make-topic
+   :id "skillization-loop"
+   :title "Skillization loop"
+   :summary "Recurring workflow extraction into callable Lisp/skill routines so repeated tasks move from ad-hoc execution to reusable runtime behavior."
+   :references '("Surface and Artifact Answers"
+                 "ASDF Components Workflow")))
 
 ;; Topic objects for Smalltalk browser frame/scene discussion and HyperDoc adaptation.
 (defun four-pane-browser-metaphor-topic ()
@@ -489,7 +557,7 @@
   (make-topic
    :id "ward-beck-diagram-1986"
    :title "Ward/Beck diagram for object-oriented programs (1986)"
-   :summary "Cunningham and Beck's OOPSLA 1986 diagram work frames object collaboration as first-class explanatory structure."
+   :summary "Citation anchor: Ward Cunningham and Kent Beck, OOPSLA 1986 (Portland), frame object-collaboration diagrams as executable explanation work."
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
                  "https://c2.com/doc/case87.html")))
 
@@ -497,14 +565,15 @@
   (make-topic
    :id "ward-collaborating-objects"
    :title "Collaborating objects diagrams"
-   :summary "Hand-drawn collaboration diagrams were used to explain object behavior across tool boundaries."
-   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+   :summary "Ward first drew collaboration diagrams by hand in the Computer Research Lab to explain object behavior to colleagues."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "https://c2.com/doc/case87.html")))
 
 (defun class-browser-inspector-debugger-triangulation-topic ()
   (make-topic
    :id "class-browser-inspector-debugger-triangulation"
    :title "Class browser/inspector/debugger triangulation"
-   :summary "Behavior understanding required combining three windows: class browser, object inspector, and single-step debugger."
+   :summary "Diagram extraction combined three windows: class browser, object inspector, and single-step debugger."
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
                  "Stepper Debugger Surface")))
 
@@ -512,8 +581,9 @@
   (make-topic
    :id "compiledmethod-interpretnextinstruction"
    :title "CompiledMethod interpretNextInstructionFor: aContext"
-   :summary "The stepping primitive exposed execution semantics that enabled direct diagram extraction from runtime behavior."
-   :references '("Smalltalk Browser Frame and Scene in HyperDoc")))
+   :summary "This stepping primitive exposed execution semantics; once identified, only drawing what it says remained."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "https://c2.com/doc/case87.html")))
 
 (defun expanding-tools-literate-environment-topic ()
   (make-topic
@@ -529,7 +599,15 @@
    :title "Ward diagramming-debugger remembrance"
    :summary "Ward's later recollection ties diagram generation directly to debugger stepping and executable explanation."
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
-                 "http://code.fed.wiki.org/view/diagramming-debugger")))
+                 "Diagramming Debugger")))
+
+(defun mech-op-args-emit-dispatch-topic ()
+  (make-topic
+   :id "mech-op-args-emit-dispatch"
+   :title "Mech op/args and emit dispatch"
+   :summary "Mech mirrors the same seam: split command into op/args, assemble execution context, then dispatch to blocks[op].emit."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Mech Credible Maintenance Story")))
 
 (defun python-json-tool-source-topic ()
   (make-topic
@@ -538,5 +616,113 @@
    :summary "The json.tool CLI lives in the Python standard library module json/tool.py and can be inspected locally via json.tool.__file__."
    :references '("Python json.tool Source and Usage"
                  "https://github.com/python/cpython/blob/main/Lib/json/tool.py")))
+
+;; Civilian resilience topics for autonomous-weapons threat environments.
+(defun surviving-autonomous-weapons-environment-topic ()
+  (make-topic
+   :id "surviving-in-an-autonomous-weapons-environment"
+   :title "Surviving in an Autonomous Weapons Environment"
+   :summary "Civilian resilience baseline for preserving life, service continuity, and accountability under autonomous-threat conditions."
+   :references '("Surviving in an Autonomous Weapons Environment"
+                 "Autonomous Weapons Resilience Playbook"
+                 "Post-Incident Recovery Under Autonomous Threat")))
+
+(defun autonomous-weapons-resilience-playbook-topic ()
+  (make-topic
+   :id "autonomous-weapons-resilience-playbook"
+   :title "Autonomous Weapons Resilience Playbook"
+   :summary "Layered preparedness, protection, continuity, and recovery framework for civilian communities exposed to autonomous weapons risks."
+   :references '("Autonomous Weapons Resilience Playbook"
+                 "Surviving in an Autonomous Weapons Environment")))
+
+(defun post-incident-recovery-under-autonomous-threat-topic ()
+  (make-topic
+   :id "post-incident-recovery-under-autonomous-threat"
+   :title "Post-Incident Recovery Under Autonomous Threat"
+   :summary "Post-incident stabilization and recovery model centered on evidence preservation, service restoration, and institutional learning."
+   :references '("Post-Incident Recovery Under Autonomous Threat"
+                 "Autonomous Weapons Resilience Playbook")))
+
+(defun autonomous-weapons-civilian-resilience-topic ()
+  (make-topic
+   :id "autonomous-weapons-civilian-resilience"
+   :title "Autonomous-weapons civilian resilience"
+   :summary "Operational view of civilian resilience capabilities required when autonomous systems compress warning and response windows."
+   :references '("Autonomous Weapons Resilience Playbook"
+                 "Surviving in an Autonomous Weapons Environment")))
+
+(defun autonomous-threat-risk-model-topic ()
+  (make-topic
+   :id "autonomous-threat-risk-model"
+   :title "Autonomous-threat risk model"
+   :summary "Risk model combining infrastructure dependency, warning reliability, and disruption impact under autonomous-threat scenarios."
+   :references '("Autonomous Weapons Resilience Playbook")))
+
+(defun protective-infrastructure-hardening-topic ()
+  (make-topic
+   :id "protective-infrastructure-hardening"
+   :title "Protective infrastructure hardening"
+   :summary "Practical hardening focus on shelters, power, communications, and medical services to reduce civilian harm."
+   :references '("Autonomous Weapons Resilience Playbook")))
+
+(defun civilian-alerting-fallback-channels-topic ()
+  (make-topic
+   :id "civilian-alerting-fallback-channels"
+   :title "Civilian alerting fallback channels"
+   :summary "Redundant alert and coordination channels used when primary communications are degraded or unavailable."
+   :references '("Autonomous Weapons Resilience Playbook"
+                 "Surviving in an Autonomous Weapons Environment")))
+
+(defun disinformation-verification-loop-topic ()
+  (make-topic
+   :id "disinformation-verification-loop"
+   :title "Disinformation verification loop"
+   :summary "Structured verification cycle for filtering false reports and preserving trusted situational awareness."
+   :references '("Autonomous Weapons Resilience Playbook")))
+
+(defun continuity-of-care-under-disruption-topic ()
+  (make-topic
+   :id "continuity-of-care-under-disruption"
+   :title "Continuity of care under disruption"
+   :summary "Medical and social-care continuity planning for prolonged disruption and contested logistics."
+   :references '("Autonomous Weapons Resilience Playbook"
+                 "Post-Incident Recovery Under Autonomous Threat")))
+
+(defun autonomous-weapons-governance-accountability-topic ()
+  (make-topic
+   :id "autonomous-weapons-governance-accountability"
+   :title "Autonomous-weapons governance accountability"
+   :summary "Governance requirement to preserve human accountability, evidence trails, and legal oversight during and after incidents."
+   :references '("Autonomous Weapons Resilience Playbook"
+                 "Post-Incident Recovery Under Autonomous Threat")))
+
+(defun incident-ledger-and-evidence-topic ()
+  (make-topic
+   :id "incident-ledger-and-evidence"
+   :title "Incident ledger and evidence"
+   :summary "Structured incident ledger and chain-of-custody practices that support reliable recovery and review."
+   :references '("Post-Incident Recovery Under Autonomous Threat")))
+
+(defun service-restoration-prioritization-topic ()
+  (make-topic
+   :id "service-restoration-prioritization"
+   :title "Service restoration prioritization"
+   :summary "Prioritization model for restoring essential services under constrained resources after disruptive incidents."
+   :references '("Post-Incident Recovery Under Autonomous Threat")))
+
+(defun community-psychological-recovery-topic ()
+  (make-topic
+   :id "community-psychological-recovery"
+   :title "Community psychological recovery"
+   :summary "Community mental-health support and social-cohesion recovery operations after persistent high-stress incidents."
+   :references '("Post-Incident Recovery Under Autonomous Threat")))
+
+(defun after-action-learning-loop-topic ()
+  (make-topic
+   :id "after-action-learning-loop"
+   :title "After-action learning loop"
+   :summary "Closed-loop process for turning incident findings into revised procedures, training, and resilience improvements."
+   :references '("Post-Incident Recovery Under Autonomous Threat"
+                 "Autonomous Weapons Resilience Playbook")))
 
 ;;

@@ -1,0 +1,125 @@
+<h1>Diagramming Debugger Surface</h1>
+
+<in-package>hyperbook/server</in-package>
+
+<p>
+  The Diagramming Debugger is a new Playground runtime surface that derives
+  collaboration/message traces from stepped evaluation.
+</p>
+
+<p>
+  It is implemented as an inspectable object that wraps the existing
+  Playground stepper and records one event per attempted top-level form.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::diagramming-debugger-surface-topic)"><tt>Diagramming Debugger Surface</tt></a></li>
+  <li><a expr="(hyperdoc::step-trace-message-events-topic)"><tt>Step trace message events</tt></a></li>
+  <li><a expr="(hyperdoc::graphviz-sequence-export-topic)"><tt>Graphviz sequence export</tt></a></li>
+  <li><a expr="(hyperdoc::playground-stepper-class-layout-topic)"><tt>Playground stepper class layout</tt></a></li>
+</ul>
+
+<h2>Runtime model</h2>
+
+<ul>
+  <li><tt>make-playground-diagramming-debugger</tt> builds a diagram object from selected Playground source.</li>
+  <li><tt>playground-diagramming-debugger-step</tt> advances one step and appends a trace event.</li>
+  <li><tt>playground-diagramming-debugger-run</tt> runs until completion/error while appending events.</li>
+  <li><tt>graphviz-dot-text</tt> exports Graphviz DOT text.</li>
+</ul>
+
+<h2>Example DOT export</h2>
+
+<p>
+  Example collaboration-flow graph exported from a short Playground run:
+</p>
+
+<pre><code class="language-dot">digraph PlaygroundTrace {
+  rankdir=LR;
+  node [shape=box, fontname="Helvetica"];
+
+  start [label="start"];
+  step1 [label="step 1\\n(parse form)\\nstatus=ok"];
+  step2 [label="step 2\\n(extract calls)\\nstatus=ok"];
+  step3 [label="step 3\\n(apply call)\\nstatus=error"];
+  done  [label="done"];
+
+  start -> step1;
+  step1 -> step2;
+  step2 -> step3 [label="calls: blocks[op].emit"];
+  step3 -> done  [label="last-error"];
+}</code></pre>
+
+<p>
+  You can render this text with Graphviz:
+  <tt>dot -Tsvg trace.dot -o trace.svg</tt>.
+</p>
+
+<h2>Playground integration</h2>
+
+<p>
+  The Playground toolbar now includes a <b>Diagram</b> action next to
+  <b>Step</b> and <b>Debug</b>. It opens the diagramming debugger object in the
+  inspector.
+</p>
+
+<p>
+  The diagram view provides:
+</p>
+
+<ul>
+  <li><b>Reset/Next/Run</b> controls</li>
+  <li>step progress and parse-error handling</li>
+  <li>a timeline of captured events (form, extracted call symbols, status)</li>
+  <li>Graphviz DOT output for downstream rendering</li>
+</ul>
+
+<h2>Integrated Notes (2026-03-06)</h2>
+
+<p>
+  The integration pass added a concrete stepper model snippet and screenshot reference
+  so the surface description stays anchored to the current runtime object shape.
+</p>
+
+<pre><code class="language-lisp">(defclass playground-stepper ()
+  ((object       :initarg :object   :reader playground-stepper-object)
+   (package      :initarg :package  :reader playground-stepper-package)
+   (source       :initarg :source   :reader playground-stepper-source)
+   (forms        :initarg :forms    :accessor playground-stepper-forms)
+   (index        :initform 0        :accessor playground-stepper-index)
+   (last-value   :initform nil      :accessor playground-stepper-last-value)
+   (last-error   :initform nil      :accessor playground-stepper-last-error)
+   (parse-report :initform nil      :accessor playground-stepper-parse-report)
+   (done?        :initform nil      :accessor playground-stepper-done?)))</code></pre>
+
+<h2>Design boundary</h2>
+
+<p>
+  This remains intentionally bounded: the diagram is derived from stepped
+  top-level forms and inferred call symbols, not from a full VM-level
+  instruction tracer.
+</p>
+
+<p>
+  The goal is to make collaboration diagrams inspectable and reproducible in the
+  existing HyperDoc runtime loop without introducing a second debugger stack.
+</p>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="diagramming-debugger-surface">
+    diagramming-debugger-surface
+  </a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Stepper Debugger Surface">Stepper Debugger Surface</a></li>
+  <li><a hyperbook="moldable-inspector" page="Playground restarts">Playground restarts</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
+</ul>

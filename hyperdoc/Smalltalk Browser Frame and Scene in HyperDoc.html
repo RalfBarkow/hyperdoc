@@ -39,6 +39,7 @@
   <li><a expr="(hyperdoc::compiledmethod-interpretnextinstruction-topic)"><tt>CompiledMethod interpretNextInstructionFor: aContext</tt></a></li>
   <li><a expr="(hyperdoc::expanding-tools-literate-environment-topic)"><tt>Expanding the Role of Tools in a Literate Programming Environment</tt></a></li>
   <li><a expr="(hyperdoc::ward-diagramming-debugger-remembrance-topic)"><tt>Ward diagramming-debugger remembrance</tt></a></li>
+  <li><a expr="(hyperdoc::mech-op-args-emit-dispatch-topic)"><tt>Mech op/args and emit dispatch</tt></a></li>
 </ul>
 
 <h2>Evaluation for HyperDoc</h2>
@@ -73,10 +74,26 @@
 <h2>Ward input and implications</h2>
 
 <p>
+  Ward's citation detail:
+  Cunningham, Ward and Kent Beck, "A Diagram for Object-Oriented Programs,"
+  Proceedings of the ACM Conference on Object-Oriented Programming Systems,
+  Languages and Applications (OOPSLA), Portland, Oregon, 1986.
+</p>
+
+<p>
   Ward's input adds a concrete historical mechanism:
   collaboration diagrams emerged by combining three existing tool surfaces
   (class browser, object inspector, single-step debugger) and reading the stepping primitive
   <tt>CompiledMethod&gt;&gt;interpretNextInstructionFor: aContext</tt>.
+</p>
+
+<p>
+  Ward describes drawing those diagrams by hand first to explain collaborating
+  objects in the Computer Research Lab. The key shift was realizing that
+  Smalltalk could draw them by combining three already-available windows:
+  Class Browser, Object Inspector, and Single Step Debugger.
+  Once <tt>CompiledMethod&gt;&gt;interpretNextInstructionFor: aContext</tt> was found,
+  the remaining task was to draw what that method says.
 </p>
 
 <p>
@@ -91,8 +108,24 @@
 
 <p>
   Ward's later recollection:
-  <a href="http://code.fed.wiki.org/view/diagramming-debugger">diagramming-debugger</a>.
+  <a hyperbook="fedwiki:code.fed.wiki.org" page="diagramming-debugger">diagramming-debugger</a>.
   This reinforces the same point: explainability emerged from executable stepping semantics, not from static diagrams alone.
+</p>
+
+<h3>Mech equivalent sketch</h3>
+
+<p>
+  Ward points out a current analogue in Mech: parse a command into operation and
+  arguments, assemble execution context, then dispatch into the block's emit behavior.
+</p>
+
+<pre><code>const [op, ...args] = code.command.split(/ +/)
+const stuff = { command, op, args, body, elem, state }
+await blocks[op].emit.apply(null, [stuff])</code></pre>
+
+<p>
+  This is structurally similar to the Smalltalk stepping hook: behavior explanation
+  becomes a consequence of a compact runtime dispatch seam.
 </p>
 
 <h2>Localhost FedWiki twin</h2>
@@ -107,6 +140,7 @@
 <h2>Related</h2>
 
 <ul>
+  <li><a hyperbook="hyperdoc" page="Diagramming Debugger Surface">Diagramming Debugger Surface</a></li>
   <li><a hyperbook="hyperdoc" page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a></li>
   <li><a hyperbook="hyperdoc" page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
   <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>

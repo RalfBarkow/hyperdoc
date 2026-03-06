@@ -1,0 +1,61 @@
+<h1>Surface and Artifact Answers</h1>
+
+<p>
+  This page defines the operational distinction between immediate terminal responses
+  and durable documentation/code updates.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::surface-answer-topic)"><tt>Surface Answer</tt></a></li>
+  <li><a expr="(hyperdoc::artifact-answer-topic)"><tt>Artifact Answer</tt></a></li>
+  <li><a expr="(hyperdoc::reconstruction-protocol-topic)"><tt>Reconstruction protocol</tt></a></li>
+  <li><a expr="(hyperdoc::skillization-loop-topic)"><tt>Skillization loop</tt></a></li>
+</ul>
+
+<h2>Distinction</h2>
+
+<ul>
+  <li><b>Surface Answer</b>: immediate answer in the terminal/Codex session.</li>
+  <li><b>Artifact Answer</b>: durable answer in HyperDoc/FedWiki/Lisp source artifacts.</li>
+</ul>
+
+<h2>Required behavior</h2>
+
+<ol>
+  <li>Every response provides a Surface Answer.</li>
+  <li>If the request changes behavior, documentation, or workflows, also provide an Artifact Answer.</li>
+  <li>For conceptual-only turns, include artifact deltas as a plan unless explicitly skipped.</li>
+</ol>
+
+<h2>Reconstruction protocol</h2>
+
+<ul>
+  <li>Process trace: what was checked and decided.</li>
+  <li>HyperDoc delta: page/section updates.</li>
+  <li>Lisp delta: topic/object/view/function updates.</li>
+  <li>FedWiki delta: slug/title/summary/references and daily anchors.</li>
+  <li>Replay checks: JSON parse, journal integrity, and link resolution checks.</li>
+</ul>
+
+<h2>Skillization loop</h2>
+
+<p>
+  Repeated patterns are extracted into reusable routines so the runtime can execute
+  them directly, instead of requiring one-off assistant steps each time.
+</p>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="surface-and-artifact-answers">surface-and-artifact-answers</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+</ul>

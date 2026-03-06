@@ -132,3 +132,65 @@ What it does not guarantee:
 - FedWiki semantic correctness of `journal` action ordering/consistency
 - page-link correctness (slug/title mapping)
 - chronology/replay validity (those require journalmatic checks)
+
+## Mandatory: Every Answer Reconstruction Protocol
+
+This is not optional and does not apply only to code-change turns.
+Each assistant answer must be reconstructable as HyperDoc + Lisp + FedWiki artifacts.
+
+### Two Answer Surfaces (must be distinguished)
+
+Every response must explicitly distinguish:
+
+1. **Surface Answer** (Terminal/Codex session)
+   - Immediate answer to the user in this chat.
+   - Can be concise, but must still include minimal reconstruction metadata.
+
+2. **Artifact Answer** (HyperDoc/FedWiki/Lisp changes)
+   - Durable representation in repository/wiki artifacts.
+   - Includes page/topic/code edits and validation outputs.
+
+Rule:
+- If the user asks for implementation/documentation/update, deliver both Surface + Artifact.
+- If the user asks only a conceptual question, deliver Surface now and include an Artifact plan delta (what would be changed, where), unless user explicitly says no artifact updates.
+
+For every answer, include enough structure to derive:
+
+1. **Process Trace**
+   - What was inspected, inferred, and decided.
+   - Which commands/checks were used (or would be used).
+
+2. **HyperDoc Reconstruction**
+   - Which HyperDoc page(s) to create/update.
+   - The section-level content delta (headings, inspectable objects, related links).
+
+3. **Lisp Source Reconstruction**
+   - Which topic/object/view/function definitions to add/update.
+   - Concrete function names and expected references.
+
+4. **FedWiki Twin Reconstruction**
+   - Slug/title/summary/references updates for localhost twin pages.
+   - Daily anchor updates when relevant.
+
+5. **Replayability Checks**
+   - Validation steps sufficient to replay the result:
+     - JSON parse checks (`python3 -m json.tool`)
+     - journal integrity expectations (creation first, chronology monotonic, revision replay)
+     - link resolution checks (slug over title for FedWiki hyperbooks).
+
+6. **Skillization Requirement**
+   - Extract recurring patterns from the answer into explicit skill candidates.
+   - Update skill instructions/specs when patterns recur, so Lisp/runtime code can execute the routine directly instead of requiring repeated assistant intervention.
+   - Link skill updates back into HyperDoc/FedWiki topic graph.
+
+### Minimum response contract
+
+Even for short/non-edit answers, provide at least a minimal reconstruction block that covers:
+- process trace,
+- HyperDoc page delta,
+- Lisp/topic delta,
+- FedWiki delta,
+- replay check.
+
+For non-edit turns, these can be marked as:
+- `No file changes; proposed artifact deltas: ...`
