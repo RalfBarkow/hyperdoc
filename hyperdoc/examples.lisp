@@ -503,6 +503,23 @@ Raw list structure is preserved as a secondary view."
           :step-types (mapcar #'type-of steps)
           :step-titles (mapcar #'title-of steps))))
 
+(defexample official-rpi-tutorial-expr-quoting-regression-example
+  "Regression check: HTML expr string arguments must use &quot; and evaluate to step objects."
+  ;; expr-attr models the value seen by Lisp after HTML entity decoding.
+  (let* ((expr-attr "(hyperdoc::official-rpi-tutorial-step \"official-download-prebuilt-image\")")
+         (good (handler-case
+                   (eval (read-from-string expr-attr))
+                 (error (c) c)))
+         (bad-expr "(hyperdoc::official-rpi-tutorial-step \\\"official-download-prebuilt-image\\\")")
+    (bad (handler-case
+                  (eval (read-from-string bad-expr))
+                (error (c) c))))
+    (assert-eql 'sd-card-procedure-step (type-of good))
+    (assert (typep bad 'condition))
+    (list :expr-attr expr-attr
+          :good-type (type-of good)
+          :bad-condition-type (type-of bad))))
+
 ;;
 ;; hauptsache / kioskberrli reference objects
 ;;

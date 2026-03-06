@@ -92,8 +92,13 @@ on the object's text representation.
    `hyperdoc`, or `expr`.
 
 The `expr` attribute has Lisp code as its value. Since HTML attributes
-may not contain quotes, you have to write `&quot` instead if you have
-string literals in your expression.
+may not contain raw double quotes, encode Lisp string quotes as
+`&quot;` inside the attribute value.
+
+Do not use backslash-escaped quotes (`\"`) inside HTML `expr`
+attributes. Use:
+
+`expr="(hyperdoc::fn &quot;string-arg&quot;)"`
 
 ## Computed text
 
