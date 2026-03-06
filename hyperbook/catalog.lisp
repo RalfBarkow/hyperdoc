@@ -14,14 +14,17 @@
                :type list)
    (factories :accessor factories-of
               :initform (make-hash-table :test #'equal)
-              :type hash-table)))
+              :type hash-table)
+   (link-redirections :accessor link-redirections-of
+                      :initform nil
+                      :type list)))
 
 (defvar *catalog*
   (make-instance 'catalog))
 
 
 ;;
-;; Registration of HyperBooks and HyperBook schemes
+;; Registration of HyperBooks, HyperBook schemes, and link redirections
 ;;
 ;; HyperBook ids are URIs. A non-empty scheme means that the id
 ;; is passed to the factory registered for that scheme.
@@ -35,6 +38,13 @@
 (defun register-scheme (scheme factory)
   "Register FACTORY for SCHEME."
   (setf (gethash scheme (factories-of *catalog*)) factory))
+
+(defun register-link-redirection (fn)
+  "Register FN as a link redirection. FN will be called with a
+   single string argument (a URL). Its return value must be
+   NIL (no redirection), or a list of one or two strings, a
+   HyperBook id and optionally a page id."
+  (pushnew fn (link-redirections-of *catalog*)))
 
 ;;
 ;; Catalog lookup

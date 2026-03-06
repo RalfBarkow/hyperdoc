@@ -130,7 +130,7 @@
       (map #'(lambda (el)
                (let* ((html-id (str:substring 1 nil (plump:get-attribute el "href")))
                       (target (plump:get-element-by-id dom html-id))
-                      (target-text (plump:text target))
+                      (target-text (or (and target (plump:text target)) ""))
                       (text (plump:text el))
                       (span (plump:make-element root "span")))
                  (plump:set-attribute span "title" target-text)
@@ -200,9 +200,11 @@
         (when-let (wp-spec (assoc ed-code *editions* :test #'equal))
           (make-wikipedia edition (second wp-spec) (third wp-spec))))))
 
-;; Register a HyperBook factory
+;; Register a HyperBook factory and a link redirection for Wikipedia links
 
 (hb:register-scheme :wikipedia #'get-wikipedia)
+
+(hb:register-link-redirection 'wikipedia-link-redirection)
 
 ;;
 ;; URLs
@@ -226,6 +228,24 @@
 (defun api-url (wikipedia)
   (format nil "https://~A.wikipedia.org/w/api.php"
           (-> wikipedia edition-of)))
+
+(defun wikipedia-link-redirection (url)
+  (let* ((uri (puri:parse-uri url))
+         (host (puri:uri-host uri))
+         (host-parts (str:split "." host))
+         (path (puri:uri-path uri))
+         (path-parts (str:split "/" path)))
+    (when (and (= 3 (length host-parts))
+               (equal "wikipedia" (second host-parts))
+               (equal "org" (third host-parts))
+               (= 3 (length path-parts))
+               (equal "" (first path-parts))
+               (equal "wiki" (second path-parts)))
+      (let* ((ed-code (first host-parts))
+             (hyperbook-id (str:concat "wikipedia:" ed-code))
+             (page-name (third path-parts))
+             (page-id (str:replace-all "_" " " page-name)))
+        (list hyperbook-id page-id)))))
 
 ;;
 ;; Views

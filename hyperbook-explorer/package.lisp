@@ -8,12 +8,17 @@
 
 (export '(link source-page-of target-hyperbook-of target-page-of key-of
           object-link thunk-of view-of
+          page-link
+          hyperbook-link
           web-link url-of
           make-page-link
           make-hyperbook-link
           make-web-link
-          links
+          links web-links-of page-links-of hyperbook-links-of
+          no-links?
           extract-links
+          replace-by-hyperbook-link
+          render-hyperbook-or-page-link
           👀links
           👀backlinks
           dom-of

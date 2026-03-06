@@ -96,6 +96,7 @@ that occurred when reading the site map.")))
                (unless https-supplied-p
                  (handler-case
                      (-> domain-name
+                       copy-seq ;; ensure simple-string
                        (usocket:socket-connect 443)
                        (usocket:socket-close))
                    (usocket:connection-refused-error (c)

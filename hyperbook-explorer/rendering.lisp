@@ -54,48 +54,27 @@
 (plump:define-tag-printer a (element)
   (let ((hyperbook-attr (plump:attribute element "hyperbook"))
         (page-attr (plump:attribute element "page"))
-        (view-attr (plump:attribute element "view"))
         (href-attr (plump:attribute element "href"))
-        (text (plump:text element))
         (render-children (let ((children (plump:children element)))
                            (unless (zerop (length children))
                              (make-instance 'html-nodes
                                             :nodes children)))))
+    (when-let (hb-link (and href-attr
+                            (replace-by-hyperbook-link href-attr)))
+      ;; Replace Web link by HyperBook link
+      (setf href-attr nil)
+      (when (consp hb-link)
+        (setf hyperbook-attr (first hb-link))
+        (setf page-attr (second hb-link))))
     (cond
       (page-attr
-       (handler-case
-           (let* ((hyperbook (or (and hyperbook-attr
-                                      (find-hyperbook hyperbook-attr))
-                                 (-> *current-page*
-                                     hyperbook-of)))
-                  (page (find-page hyperbook page-attr :signal-error? t)))
-             (views:html
-               (:span :class "hyperbook-reference"
-                      :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                                     (cl-who:escape-string page-attr)
-                                     (cl-who:escape-string (title-of hyperbook)))
-                      (views:object-ref page
-                                        :display render-children
-                                        :select view-attr))))
-         (lookup-failure (c)
-           (views:html
-             (:span :class "hyperbook-reference hyperbook-error"
-                    (views:object-ref c :display render-children)))))
+       (let ((hyperbook-id (or hyperbook-attr
+                               (-> *current-page* hyperbook-of id-of))))
+         (render-hyperbook-page-link hyperbook-id page-attr render-children))
        t)
       (hyperbook-attr
-       (handler-case
-           (let ((hyperbook (find-hyperbook hyperbook-attr :signal-error? t)))
-             (views:html
-               (:span :class "hyperbook-reference"
-                      :title (format nil "HyperBook \"~A\""
-                                     (cl-who:escape-string hyperbook-attr))
-                      (views:object-ref hyperbook
-                                        :display render-children
-                                        :select view-attr))))
-         (lookup-failure (c)
-           (views:html
-             (:span :class "hyperbook-reference hyperbook-error"
-                    (views:object-ref c :display text))))))
+       (render-hyperbook-link hyperbook-attr render-children)
+       t)
       (href-attr
        ;; Force target="_blank" for href links
        (views:html
@@ -112,6 +91,41 @@
                    (str:upcase (str:join "." attrs)))))
          (serialize-a-element kw element)))))
   t)
+
+(defun render-hyperbook-link (hyperbook-id link-text)
+  (handler-case
+      (let ((hyperbook (find-hyperbook hyperbook-id :signal-error? t)))
+        (views:html
+          (:span :class "hyperbook-reference"
+                 :title (format nil "HyperBook \"~A\""
+                                (cl-who:escape-string hyperbook-id))
+                 (views:object-ref hyperbook
+                                   :display link-text))))
+    (lookup-failure (c)
+      (views:html
+        (:span :class "hyperbook-reference hyperbook-error"
+               (views:object-ref c :display link-text)))))  )
+
+(defun render-hyperbook-page-link (hyperbook-id page-id link-text)
+  (handler-case
+      (let* ((hyperbook (find-hyperbook hyperbook-id :signal-error? t))
+             (page (find-page hyperbook page-id :signal-error? t)))
+        (views:html
+          (:span :class "hyperbook-reference"
+                 :title (format nil "Page \"~A\"~%HyperBook \"~A\""
+                                (cl-who:escape-string page-id)
+                                (cl-who:escape-string (title-of hyperbook)))
+                 (views:object-ref page
+                                   :display link-text))))
+    (lookup-failure (c)
+      (views:html
+        (:span :class "hyperbook-reference hyperbook-error"
+               (views:object-ref c :display link-text))))))
+
+(defun render-hyperbook-or-page-link (hyperbook-id page-id link-text)
+  (if page-id
+      (render-hyperbook-page-link hyperbook-id page-id link-text)
+      (render-hyperbook-link hyperbook-id link-text)))
 
 (defgeneric serialize-a-element (attrs element)
   (:method ((attrs t) element)

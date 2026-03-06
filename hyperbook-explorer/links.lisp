@@ -132,6 +132,23 @@
    (hyperbook-links :reader hyperbook-links-of :initarg :hyperbook-links :initform nil)
    (web-links :reader web-links-of :initarg :web-links :initform nil)))
 
+(defmethod page-links-of ((links null))
+  nil)
+
+(defmethod hyperbook-links-of ((links null))
+  nil)
+
+(defmethod web-links-of ((links null))
+  nil)
+
+(defgeneric no-links? (links)
+  (:method ((links null))
+    t)
+  (:method ((links links))
+    (and (null (page-links-of links))
+         (null (hyperbook-links-of links))
+         (null (web-links-of links)))))
+
 (defun extract-links (page)
   (let ((dom (dom-of page)))
     (make-instance 'links
