@@ -487,11 +487,11 @@ Raw list structure is preserved as a secondary view."
            (make-instance 'sd-card-procedure-step
                           :id "official-download-prebuilt-image"
                           :title "Download prebuilt aarch64 SD image"
-                          :summary "Download latest Hydra artifact and preserve the redirected .img.zst filename."
+                          :summary "Download latest Hydra artifact and preserve filename by trusting the redirected server URL name."
                           :commands (list "nix-shell -p wget zstd"
                                           "LATEST_URL=\"https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1\""
                                           "wget --trust-server-names \"$LATEST_URL\"")
-                          :verification "Result must be a named .img.zst artifact (not a file named '1')."))
+                          :verification "Result must be a newly downloaded nixos-image-sd-card-*.img.zst artifact (not a file named '1' and no manual rename)."))
          (decompress-step
            (make-instance 'sd-card-procedure-step
                           :id "official-decompress-zstd-to-img"
@@ -522,7 +522,7 @@ Raw list structure is preserved as a secondary view."
            (make-instance 'sd-card-step-handoff-patch-target
                           :id "official-hydra-latest-filename-handoff-patch-target"
                           :title "Preserve redirected Hydra artifact filename in download step"
-                          :summary "Patch target is the relation between latest/download/1 and decompression: use wget --trust-server-names so step output satisfies decompression precondition."
+                          :summary "Patch target is the relation between latest/download/1 and decompression: use wget --trust-server-names so wget adopts the redirected URL filename and step output satisfies decompression precondition."
                           :defect filename-handoff-defect
                           :inserted-step download-step
                           :verification-note "Download output is a named .img.zst artifact carried into decompression."))         
@@ -545,7 +545,7 @@ Raw list structure is preserved as a secondary view."
                           :inserted-step decompress-step
                           :verification-note "The inserted step must produce a .img artifact consumed by the flash step.")))
     (setf (slot-value download-step 'diagnosis)
-          "Plain wget on latest/download/1 can save as file '1'; preserve redirected artifact filename for decompression.")
+          "Plain wget on latest/download/1 can save as file '1'; use --trust-server-names so wget keeps the redirected URL filename for decompression.")
     (setf (slot-value download-step 'source-target) filename-handoff-defect)
     (setf (slot-value download-step 'patch-target) filename-handoff-patch-target)
     (setf (slot-value download-step 'verification) filename-handoff-patch-target)

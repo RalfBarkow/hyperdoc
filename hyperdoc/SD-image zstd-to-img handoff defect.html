@@ -1,0 +1,74 @@
+<h1>SD-image zstd-to-img handoff defect</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This correction models a violated handoff between procedure steps, not a
+  single-step typo.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::sd-image-zstd-to-img-handoff-defect-topic)"><tt>SD-image zstd-to-img handoff defect</tt></a></li>
+  <li><a expr="(hyperdoc::hydra-latest-filename-handoff-defect-topic)"><tt>Hydra latest filename handoff defect</tt></a></li>
+  <li><a expr="(hyperdoc::official-hydra-latest-filename-handoff-defect)"><tt>Filename handoff defect object</tt></a></li>
+  <li><a expr="(hyperdoc::official-hydra-latest-filename-handoff-patch-target)"><tt>Filename handoff patch target object</tt></a></li>
+  <li><a expr="(hyperdoc::official-zstd-to-img-handoff-defect)"><tt>Handoff defect object</tt></a></li>
+  <li><a expr="(hyperdoc::official-zstd-to-img-handoff-patch-target)"><tt>Handoff patch target object</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-download-prebuilt-image&quot;)"><tt>Step 1 (download .zstd)</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-decompress-zstd-to-img&quot;)"><tt>Inserted step (.zstd -> .img)</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-flash-sd-card&quot;)"><tt>Step 2 (flash .img)</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-zstd-to-img-handoff-regression-example)"><tt>Handoff correction regression check</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-hydra-filename-preservation-regression-example)"><tt>Filename-preservation regression check</tt></a></li>
+</ul>
+
+<h2>Diagnosis</h2>
+
+<p>
+  Step 1 outputs <tt>.zstd</tt>. Step 2 requires <tt>.img</tt>. The transition
+  <tt>.zstd -> .img</tt> was implicit and therefore a defect in procedure
+  relation modeling.
+</p>
+
+<h2>Patch target</h2>
+
+<p>
+  Patch the relation between step 1 and step 2 by inserting an explicit
+  decompression step with verification that <tt>.img</tt> exists and is carried
+  into the flash step.
+</p>
+
+<h2>Follow-up handoff: filename preservation</h2>
+
+<p>
+  A second relation defect exists one step earlier: plain
+  <tt>wget "$LATEST_URL"</tt> for Hydra <tt>latest/download/1</tt> can save as
+  file <tt>1</tt>. Decompression expects a named <tt>.img.zst</tt> artifact.
+</p>
+
+<p>
+  The patch is in the download step itself:
+  <tt>wget --trust-server-names "$LATEST_URL"</tt>, which preserves the final
+  redirected artifact filename and satisfies the decompression precondition.
+</p>
+
+<p>
+  Mechanism in this command path: the redirect target URL already contains the
+  concrete filename, and <tt>wget</tt> keeps that redirected server name when
+  <tt>--trust-server-names</tt> is used.
+</p>
+
+<p>
+  Postcondition: the local directory has a new
+  <tt>nixos-image-sd-card-*.img.zst</tt> file and no rename from <tt>1</tt> is
+  needed before decompression.
+</p>
+
+<h2>References</h2>
+
+<ul>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="Create NixOS SD Card from HyperDoc Playground">Create NixOS SD Card from HyperDoc Playground</a></li>
+  <li><a page="Violated handoff">Violated handoff</a></li>
+</ul>

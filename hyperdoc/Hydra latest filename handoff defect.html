@@ -1,0 +1,44 @@
+<h1>Hydra latest filename handoff defect</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This defect captures the relation between indirect Hydra latest-download URLs
+  and decompression preconditions. Plain <tt>wget "$LATEST_URL"</tt> can produce
+  file <tt>1</tt> instead of a named <tt>.img.zst</tt> artifact.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::hydra-latest-filename-handoff-defect-topic)"><tt>Hydra latest filename handoff defect</tt></a></li>
+  <li><a expr="(hyperdoc::official-hydra-latest-filename-handoff-defect)"><tt>Filename handoff defect object</tt></a></li>
+  <li><a expr="(hyperdoc::official-hydra-latest-filename-handoff-patch-target)"><tt>Filename handoff patch target object</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-hydra-filename-preservation-regression-example)"><tt>Filename-preservation regression check</tt></a></li>
+</ul>
+
+<h2>Patch</h2>
+
+<p>
+  Preserve the redirected artifact filename in the download step:
+  <tt>wget --trust-server-names "$LATEST_URL"</tt>.
+</p>
+
+<p>
+  Mechanism: Hydra <tt>latest/download/1</tt> redirects to a concrete artifact
+  URL ending in <tt>nixos-image-sd-card-*.img.zst</tt>, and
+  <tt>--trust-server-names</tt> makes <tt>wget</tt> use that redirected name.
+</p>
+
+<p>
+  Postcondition: local directory contains the new
+  <tt>nixos-image-sd-card-*.img.zst</tt> file directly, without renaming
+  file <tt>1</tt>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400">Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</a></li>
+  <li><a page="SD-image zstd-to-img handoff defect">SD-image zstd-to-img handoff defect</a></li>
+</ul>

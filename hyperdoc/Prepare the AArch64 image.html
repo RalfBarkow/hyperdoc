@@ -153,6 +153,13 @@
 
 <h3>Command Sequence</h3>
 
+<p>
+  Mechanism note for this path: the Hydra latest endpoint redirects to a URL
+  whose path ends with the concrete artifact filename, and
+  <tt>--trust-server-names</tt> tells <tt>wget</tt> to adopt that
+  redirected server-provided name.
+</p>
+
 <pre>
 # 0) Tooling
 nix-shell -p wget zstd
@@ -188,6 +195,18 @@ unzstd -d "$ARTIFACT"
   date -u +"download_utc=%Y-%m-%dT%H:%M:%SZ"
 } > aarch64-image-provenance.txt
 </pre>
+
+<p>
+  Postcondition (primary path): local directory contains a newly downloaded
+  file named <tt>nixos-image-sd-card-*.img.zst</tt>, and no manual rename from
+  <tt>1</tt> is required.
+</p>
+
+<p>
+  Comparison note: naive <tt>wget "$LATEST_URL"</tt> may save as
+  <tt>1</tt>; corrected <tt>wget --trust-server-names "$LATEST_URL"</tt>
+  saves as the concrete artifact filename.
+</p>
 
 <h3>Observed successful outcome</h3>
 

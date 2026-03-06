@@ -238,7 +238,7 @@
   (make-topic
    :id "hydra-download-artifact-procedure"
    :title "Download artifact from Hydra"
-   :summary "Normative successful path: download latest Hydra SD-image artifact with preserved .img.zst filename provenance, then verify and decompress."
+   :summary "Normative successful path: use wget --trust-server-names so the redirected Hydra URL filename is kept as nixos-image-sd-card-*.img.zst, then verify and decompress."
    :references '("Prepare the AArch64 image"
                  "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
                  "Hydra latest SD-image job"

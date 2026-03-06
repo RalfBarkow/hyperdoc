@@ -51,6 +51,24 @@ shasum -a 256 "$ARTIFACT"
 unzstd -d "$ARTIFACT"
 </pre>
 
+<p>
+  Why this works: the Hydra latest endpoint redirects to a URL path that ends
+  with the concrete artifact filename, and <tt>--trust-server-names</tt> makes
+  <tt>wget</tt> keep that redirected server-provided name locally.
+</p>
+
+<p>
+  Postcondition (primary path): local directory contains a newly downloaded
+  file named <tt>nixos-image-sd-card-*.img.zst</tt>, and no manual rename from
+  <tt>1</tt> is required.
+</p>
+
+<p>
+  Comparison: naive <tt>wget "$LATEST_URL"</tt> may save as <tt>1</tt>;
+  corrected <tt>wget --trust-server-names "$LATEST_URL"</tt> saves as the
+  concrete artifact filename.
+</p>
+
 <h3>Observed successful outcome (primary path)</h3>
 
 <p>
