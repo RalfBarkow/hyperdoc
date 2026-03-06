@@ -150,6 +150,31 @@ checks before commit, not after:
    - keep HyperDoc repo commit(s) separate from localhost FedWiki repo commit(s),
    - do not push unless explicitly requested.
 
+### Story-item ID normalization mapping
+
+When a bulk story/journal ID normalization migration is done, write a durable
+old->new lookup mapping in localhost FedWiki pages storage so old IDs remain
+searchable.
+
+Current mapping artifacts (2026-03-06 migration commit `a3db41d5`):
+
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv`
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.json`
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json`
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/fedwiki-story-id-normalization-map-2026-03-06`
+
+Lookup commands:
+
+- TSV grep:
+  - `rg -n '^<OLD_ID>\t' /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv`
+- JSON index:
+  - `jq -r '.old_id_index["<OLD_ID>"][] | [.new_id,.page,.path] | @tsv' /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json`
+
+Notes:
+
+- The same old ID string can map to different new IDs in different pages.
+- Use `(page, path)` to disambiguate.
+
 ## Mandatory: Every Answer Reconstruction Protocol
 
 This is not optional and does not apply only to code-change turns.

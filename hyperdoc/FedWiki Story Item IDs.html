@@ -1,0 +1,124 @@
+<h1>FedWiki Story Item IDs</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  FedWiki story item ids identify journaled items for add/edit/move/remove replay.
+  In this workflow, ids should be opaque and stable, using the canonical
+  16-hex format.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::fedwiki-story-item-id-policy-topic)"><tt>FedWiki story item id policy</tt></a></li>
+  <li><a expr="(hyperdoc::fedwiki-id-runtime-contract-topic)"><tt>FedWiki id runtime contract</tt></a></li>
+  <li><a expr="(hyperdoc::semantic-item-id-effects-topic)"><tt>Semantic item id effects</tt></a></li>
+  <li><a expr="(hyperdoc::journal-checker-commit-gate-topic)"><tt>Journal checker commit gate</tt></a></li>
+  <li><a expr="(hyperdoc::chronology-violation-topic)"><tt>Chronology violation</tt></a></li>
+  <li><a expr="(hyperdoc::replay-precondition-violation-topic)"><tt>Replay precondition violation</tt></a></li>
+</ul>
+
+<h2>How wiki-client and wiki-server use item IDs</h2>
+
+<ol>
+  <li>The client stores page content as ordered <tt>story</tt> items, each with an <tt>id</tt>.</li>
+  <li>User edits are expressed as journal actions (<tt>add</tt>, <tt>edit</tt>, <tt>move</tt>, <tt>remove</tt>) keyed by item <tt>id</tt>.</li>
+  <li>The server persists journal actions and reconstructs current story state by replaying those id-addressed actions.</li>
+  <li>Checks like revision replay and chronology validation therefore depend on stable ids and consistent <tt>after</tt>/<tt>id</tt> references.</li>
+</ol>
+
+<h2>Canonical 16-hex IDs vs semantic IDs</h2>
+
+<table class="inspector-table">
+  <thead>
+    <tr><th>Dimension</th><th>Canonical 16-hex ID</th><th>Semantic ID (for example <tt>summary-20260306</tt>)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Primary role</td><td>Opaque identity key</td><td>Identity key mixed with human meaning</td></tr>
+    <tr><td>Refactor safety</td><td>High; text/title can change freely</td><td>Lower; wording changes tempt id rewrites</td></tr>
+    <tr><td>Replay stability</td><td>Predictable with consistent journal refs</td><td>Higher risk when ids are renamed or partially migrated</td></tr>
+    <tr><td>Human readability</td><td>Low in raw JSON</td><td>High in diffs/logs</td></tr>
+  </tbody>
+</table>
+
+<h2>Why semantic ids cause trouble</h2>
+
+<ul>
+  <li>Semantic ids are tempting for readability but couple identity to editorial wording.</li>
+  <li>Renaming or restructuring content can silently invalidate journal references.</li>
+  <li>Mixed id styles in one page increase replay and chronology repair friction.</li>
+</ul>
+
+<h2>Effect of using semantic item IDs instead</h2>
+
+<p>
+  FedWiki will generally accept semantic ids as plain strings. The short-term effect is
+  easier manual reading of page JSON and journal actions. The operational cost appears
+  later: ids become part of content semantics, so content rewrites can trigger accidental
+  id rewrites, partial migrations, and replay-precondition failures.
+</p>
+
+<p>
+  Practical rule: keep semantics in page text, topic ids/slugs, and links; keep story item
+  ids opaque and stable. If semantic ids already exist, normalize once across both
+  <tt>story</tt> and <tt>journal</tt>, then stop encoding meaning in item ids.
+</p>
+
+<h2>Recommended policy</h2>
+
+<ol>
+  <li>Use canonical 16-hex ids for all story items in localhost FedWiki pages.</li>
+  <li>Keep meaning in <tt>title</tt>, paragraph text, topic ids/slugs, and links.</li>
+  <li>When semantic ids already exist, normalize them consistently in <tt>story</tt> and <tt>journal</tt>.</li>
+  <li>Run <tt>python3 -m json.tool</tt> plus journalmatic checks before commit.</li>
+</ol>
+
+<h2>Expanded operating policy</h2>
+
+<ol>
+  <li>Treat story-item <tt>id</tt> as an internal replay pointer, not a human label.</li>
+  <li>Do not rename item ids when wording changes; edit text/title/slug instead.</li>
+  <li>Preserve id consistency across <tt>story</tt> and all journal references (<tt>id</tt>, <tt>after</tt>, <tt>item.id</tt>).</li>
+  <li>If semantic ids already exist, run one full normalization migration and stop encoding meaning in item ids afterward.</li>
+  <li>Use slug-keyed links for lookup (<tt>page=&quot;&lt;slug&gt;&quot;</tt>) and keep titles for display.</li>
+  <li>Require both syntax and replay validation before commit: <tt>json.tool</tt> plus journalmatic checks.</li>
+</ol>
+
+<p>
+  Net effect: content can evolve freely while identity pointers remain stable, so replay and revision checks keep working.
+</p>
+
+<h2>Operational note</h2>
+
+<p>
+  Syntax validation (<tt>json.tool</tt>) confirms JSON structure, but only journalmatic
+  replay checks confirm that current story state is reconstructible from journal actions.
+</p>
+
+<h2>Normalization Mapping</h2>
+
+<p>
+  After a bulk id normalization migration, keep an explicit old-to-new mapping
+  artifact so legacy ids remain searchable.
+</p>
+
+<ul>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv</tt></li>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.json</tt></li>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json</tt></li>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/fedwiki-story-id-normalization-map-2026-03-06</tt></li>
+</ul>
+
+<p>
+  Migration reference commit: <tt>a3db41d5</tt> in localhost FedWiki pages.
+</p>
+
+<pre>
+rg -n '^&lt;OLD_ID&gt;\t' /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv
+</pre>
+
+<pre>
+jq -r '.old_id_index["&lt;OLD_ID&gt;"][] | [.new_id,.page,.path] | @tsv' \
+  /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json
+</pre>
