@@ -35,7 +35,7 @@
 (defmethod views:title-bar-action-buttons ((wiki fedwiki))
   (views:action-button html-inspector-views/standard:*icon-open-external*
     (views:thunk
-      (clog:open-browser :url (wiki-url (domain-name-of wiki) "/")))
+      (clog:open-browser :url (wiki-url (domain-name-of wiki) (protocol-of wiki) "/")))
     nil))
 
 ;;

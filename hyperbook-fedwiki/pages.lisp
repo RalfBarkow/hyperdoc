@@ -94,7 +94,9 @@ images, etc.")
 (defun reload-page (page)
   (let* ((origin (origin-of page))
          (id (origin-id-of page))
-         (page-data (fetch-page-json (domain-name-of origin) id)))
+         (page-data (fetch-page-json (domain-name-of origin)
+                                     (protocol-of origin)
+                                     id)))
     (set-page-data page page-data)
     ;; For remote pages, add the origin to the page context
     (unless (eq origin (hb:hyperbook-of page))
@@ -229,6 +231,7 @@ images, etc.")
     (views:html
       (:div :class "hyperbook-page"
             (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
+                                      (-> page origin-of protocol-of)
                                       "/favicon.png"))
                  (views:esc " ")
                  (views:esc (hb:title-of page)))
@@ -255,6 +258,7 @@ images, etc.")
                              t))
       (views:thunk
        (clog:open-browser :url (wiki-url (domain-name-of wiki)
+                                         (protocol-of wiki)
                                          (str:concat "/" slug ".html")))))
     nil))
 
@@ -268,14 +272,16 @@ images, etc.")
 
 (defmethod make-wiki-view-url ((page fedwiki-page))
   (let ((wiki (hb:hyperbook-of page)))
-    (format nil "http://~A/~A.html"
+    (format nil "~A://~A/~A.html"
+            (protocol-of wiki)
             (domain-name-of wiki)
             (origin-id-of page))))
 
 (defmethod make-wiki-view-url ((page remote-fedwiki-page))
   (let ((wiki (hb:hyperbook-of page))
         (origin (origin-of page)))
-    (format nil "http://~A/~A/~A"
+    (format nil "~A://~A/~A/~A"
+            (protocol-of wiki)
             (domain-name-of wiki)
             (domain-name-of origin)
             (origin-id-of page))))

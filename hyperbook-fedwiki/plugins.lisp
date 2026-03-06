@@ -27,6 +27,7 @@
 
 (defun fetch-plugin-data (wiki)
   (let* ((plugin-url (wiki-url (domain-name-of wiki)
+                               (protocol-of wiki)
                                "/system/plugins.json"))
          (plugin-names (fetch-json plugin-url))
          (sorted-plugin-names (sort plugin-names #'string<)))
@@ -38,7 +39,7 @@
 
 (defun fetch-plugmatic-info (wiki)
   (let ((plugin-data (->> "/plugin/plugmatic/plugins"
-                       (wiki-url (domain-name-of wiki))
+                       (wiki-url (domain-name-of wiki) (protocol-of wiki))
                        fetch-json
                        (gethash "install"))))
     (loop for p across plugin-data
@@ -72,7 +73,9 @@
 (defun get-plugin-page (wiki slug)
   (or (gethash slug (pages-of wiki))
       (handler-case
-          (let* ((json (fetch-page-json (domain-name-of wiki) slug))
+          (let* ((json (fetch-page-json (domain-name-of wiki)
+                                        (protocol-of wiki)
+                                        slug))
                  (title (gethash "title" json))
                  (page (make-instance 'fedwiki-plugin-page
                                       :hyperbook wiki

@@ -120,9 +120,10 @@
                #:cl-ppcre
                #:cl-who
                #:drakma #:usocket
+               #:local-time
                #:shasht
                #:str
-               #:local-time
+               #:usocket
                #:trivial-package-local-nicknames)
   :components ((:module "hyperbook-fedwiki"
                 :serial t
