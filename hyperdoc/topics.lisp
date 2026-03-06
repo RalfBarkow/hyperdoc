@@ -52,6 +52,24 @@
                  "Pre-flight Checklist for Raspberry Pi NixOS SD Images"
                  "Two Installation Models: SD Image vs Classic Installer")))
 
+(defun create-sd-card-from-playground-task-topic ()
+  (make-topic
+   :id "create-sd-card-from-playground-task"
+   :title "Create NixOS SD card from HyperDoc Playground task"
+   :summary "DITA-style task for producing and flashing a Raspberry Pi NixOS SD card using runbook-aligned command plans from Playground."
+   :references '("Create NixOS SD Card from HyperDoc Playground"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Prepare the AArch64 image")))
+
+(defun sd-card-command-plan-playground-topic ()
+  (make-topic
+   :id "sd-card-command-plan-playground"
+   :title "SD card command plan in Playground"
+   :summary "Inspectable command-plan and dry-run functions that mirror the official runbook sequence."
+   :references '("Create NixOS SD Card from HyperDoc Playground"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "SBCL Process")))
+
 (defun runbook-build-and-flash-sd-image-topic ()
   (make-topic
    :id "runbook-build-and-flash-sd-image"
@@ -136,6 +154,25 @@
    :title "Hydra build 323111513"
    :summary "Concrete chosen build artifact for the current preparation pass."
    :references '("https://hydra.nixos.org/build/323111513")))
+
+(defun nixos-image-sd-card-26-05pre958232-80bdc1e5ce51-aarch64-linux-img-zst-topic ()
+  (make-topic
+   :id "nixos-image-sd-card-26-05pre958232-80bdc1e5ce51-aarch64-linux-img-zst"
+   :title "nixos-image-sd-card-26.05pre958232.80bdc1e5ce51-aarch64-linux.img.zst"
+   :summary "Concrete Hydra SD-image artifact filename selected for the current aarch64 preparation flow."
+   :references '("Prepare the AArch64 image"
+                 "Hydra build 323111513"
+                 "https://hydra.nixos.org/build/323111513/download/1/nixos-image-sd-card-26.05pre958232.80bdc1e5ce51-aarch64-linux.img.zst")))
+
+(defun hydra-click-path-hop-topic ()
+  (make-topic
+   :id "hydra-click-path-hop"
+   :title "Hydra click-path hop"
+   :summary "A single navigational step in the tutorial Hydra path: job page -> build page -> concrete artifact download."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Hydra latest SD-image job"
+                 "Hydra build 323111513"
+                 "nixos-image-sd-card-26.05pre958232.80bdc1e5ce51-aarch64-linux.img.zst")))
 
 (defun hydra-latest-download-link-topic ()
   (make-topic
@@ -223,6 +260,33 @@
                  "HyperBook Journal Tools"
                  "Python json.tool Source and Usage")))
 
+(defun fedwiki-story-item-id-policy-topic ()
+  (make-topic
+   :id "fedwiki-story-item-id-policy"
+   :title "FedWiki story item id policy"
+   :summary "Use stable, opaque story item ids (canonical 16-hex form) in journaled pages; semantic labels belong in text, slugs, and topic ids."
+   :references '("FedWiki Story Item IDs"
+                 "Journalmatic Journal Checker"
+                 "Python json.tool Source and Usage")))
+
+(defun fedwiki-id-runtime-contract-topic ()
+  (make-topic
+   :id "fedwiki-id-runtime-contract"
+   :title "FedWiki id runtime contract"
+   :summary "Wiki client and server treat item ids as replay keys for add/edit/remove/move journal actions; id stability is a runtime contract."
+   :references '("FedWiki Story Item IDs"
+                 "Journalmatic Revision Replay"
+                 "Journalmatic Journal Checker")))
+
+(defun semantic-item-id-effects-topic ()
+  (make-topic
+   :id "semantic-item-id-effects"
+   :title "Semantic item id effects"
+   :summary "Semantic item ids can improve readability but increase coupling to wording and can raise replay breakage risk during refactors."
+   :references '("FedWiki Story Item IDs"
+                 "Journalmatic Repair Tools"
+                 "Journalmatic Journal Checker")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-system-topic ()
   (make-topic
@@ -271,6 +335,43 @@
    :summary "Diagnostic path: verify symbol binding, verify component inclusion in .asd, then reload/restart."
    :references '("ASDF Components Workflow"
                  "Reloading HyperDoc After Adding Lisp Objects")))
+
+(defun sbcl-process-topic ()
+  (make-topic
+   :id "sbcl-process"
+   :title "SBCL process"
+   :summary "A running SBCL image with its own package state, loaded systems, source registry, and thread-local debugger context."
+   :references '("SBCL Process"
+                 "ASDF Components Workflow"
+                 "HyperDoc Server")))
+
+(defun sbcl-topic ()
+  (make-topic
+   :id "sbcl"
+   :title "SBCL"
+   :summary "Steel Bank Common Lisp implementation used to run HyperDoc systems, compile components, and host server/inspector runtime behavior."
+   :references '("SBCL"
+                 "SBCL Process"
+                 "ASDF Components Workflow"
+                 "HyperDoc Server")))
+
+(defun isolated-evaluation-workers-topic ()
+  (make-topic
+   :id "isolated-evaluation-workers"
+   :title "Isolated evaluation workers"
+   :summary "Run risky evaluation in dedicated worker processes or sandboxes only where needed, while keeping main server state stable."
+   :references '("SBCL Process"
+                 "Stepper Debugger Surface"
+                 "HyperDoc Server")))
+
+(defun fedwiki-content-runtime-policy-split-topic ()
+  (make-topic
+   :id "fedwiki-content-runtime-policy-split"
+   :title "FedWiki content and runtime policy split"
+   :summary "Keep page identity and content in FedWiki; keep runtime execution policy in HyperDoc/inspector tooling."
+   :references '("SBCL Process"
+                 "FedWiki Story Item IDs"
+                 "HyperDoc Server")))
 
 ;; Topic objects for Playground/debugger runtime surfaces.
 (defun playground-eval-surface-topic ()
@@ -440,6 +541,14 @@
    :summary "Recurring workflow extraction into callable Lisp/skill routines so repeated tasks move from ad-hoc execution to reusable runtime behavior."
    :references '("Surface and Artifact Answers"
                  "ASDF Components Workflow")))
+
+(defun codex-resume-branch-context-topic ()
+  (make-topic
+   :id "codex-resume-branch-context"
+   :title "Codex resume branch context"
+   :summary "Codex resume exposes the related git branch per session; interpret and replay session outputs in that branch context."
+   :references '("Surface and Artifact Answers"
+                 "Communication Surfaces Policy")))
 
 ;; Kioskberrli hardware context topics.
 (defun satechi-usbc-pro-hub-4k-hdmi-topic ()

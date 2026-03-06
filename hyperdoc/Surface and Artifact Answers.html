@@ -12,6 +12,7 @@
   <li><a expr="(hyperdoc::artifact-answer-topic)"><tt>Artifact Answer</tt></a></li>
   <li><a expr="(hyperdoc::reconstruction-protocol-topic)"><tt>Reconstruction protocol</tt></a></li>
   <li><a expr="(hyperdoc::skillization-loop-topic)"><tt>Skillization loop</tt></a></li>
+  <li><a expr="(hyperdoc::codex-resume-branch-context-topic)"><tt>Codex resume branch context</tt></a></li>
 </ul>
 
 <h2>Distinction</h2>
@@ -44,6 +45,14 @@
 <p>
   Repeated patterns are extracted into reusable routines so the runtime can execute
   them directly, instead of requiring one-off assistant steps each time.
+</p>
+
+<h2>Codex Resume Branch Context</h2>
+
+<p>
+  Codex resume exposes the related git branch for each Codex session. This is
+  an operational context signal for replay: a session answer should be read in
+  its branch context, not as branch-agnostic output.
 </p>
 
 <h2>Localhost FedWiki twin</h2>
