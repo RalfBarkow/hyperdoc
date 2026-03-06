@@ -568,6 +568,15 @@
    :references '("Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
 
+(defun prose-to-object-bridge-topic ()
+  (make-topic
+   :id "prose-to-object-bridge"
+   :title "Prose to object bridge"
+   :summary "Operational claims in prose should expose clickable inspectable objects so execution and replay can start from semantic objects, not raw structure."
+   :references '("Surface and Artifact Answers"
+                 "Create NixOS SD Card from HyperDoc Playground"
+                 "Communication Surfaces Policy")))
+
 ;; Kioskberrli hardware context topics.
 (defun satechi-usbc-pro-hub-4k-hdmi-topic ()
   (make-topic
