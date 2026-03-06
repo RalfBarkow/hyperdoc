@@ -352,6 +352,70 @@ Raw list structure is preserved as a secondary view."
   (or (find-sd-card-runbook-step (sd-card-creation-command-plan) step-id)
       (error "Unknown SD-card runbook step id: ~A" step-id)))
 
+(defun make-official-rpi-tutorial-steps ()
+  (list
+   (make-instance 'sd-card-procedure-step
+                  :id "official-download-prebuilt-image"
+                  :title "Download prebuilt aarch64 SD image"
+                  :summary "Download a prebuilt nixos-sd-image-*-aarch64-linux.img.zst artifact from Hydra."
+                  :commands (list "nix-shell -p wget zstd"
+                                  "LATEST_URL=\"https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1\""
+                                  "wget \"$LATEST_URL\""))
+   (make-instance 'sd-card-procedure-step
+                  :id "official-flash-sd-card"
+                  :title "Flash image to SD card"
+                  :summary "Write the prepared image to the selected SD card device."
+                  :commands (list "diskutil list"
+                                  "diskutil unmountDisk /dev/diskN"
+                                  "sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync"
+                                  "sync"))
+   (make-instance 'sd-card-procedure-step
+                  :id "official-boot-pi"
+                  :title "Boot Raspberry Pi from flashed card"
+                  :summary "Boot Pi 4/400 from the flashed SD image and reach a usable shell/session.")
+   (make-instance 'sd-card-procedure-step
+                  :id "official-edit-configuration"
+                  :title "Edit /etc/nixos/configuration.nix"
+                  :summary "Adjust host-specific configuration and secrets locally on the running machine."
+                  :commands (list "sudoedit /etc/nixos/configuration.nix"))
+   (make-instance 'sd-card-procedure-step
+                  :id "official-first-rebuild-boot"
+                  :title "Run first rebuild with nixos-rebuild boot"
+                  :summary "Use boot mode first to prepare a reboot-safe generation."
+                  :commands (list "sudo nixos-rebuild boot"))
+   (make-instance 'sd-card-procedure-step
+                  :id "official-reboot-new-generation"
+                  :title "Reboot into the new generation"
+                  :summary "Reboot and confirm the system starts with the freshly built generation."
+                  :commands (list "sudo reboot"))
+   (make-instance 'sd-card-procedure-step
+                  :id "official-switch-later"
+                  :title "Use nixos-rebuild switch only later"
+                  :summary "Use switch only after reboot reliability is established."
+                  :commands (list "sudo nixos-rebuild switch")
+                  :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot.")))
+
+(defun official-rpi-tutorial-workflow ()
+  (let* ((steps (make-official-rpi-tutorial-steps))
+         (section (make-instance 'sd-card-runbook-section
+                                 :id "official-workflow"
+                                 :title "Official workflow"
+                                 :summary "Canonical preinstalled SD-image sequence from nix.dev."
+                                 :steps steps
+                                 :raw-structure (list :section "Official workflow")))
+         (runbook (make-instance 'sd-card-runbook
+                                 :id "official-rpi-sd-image-workflow"
+                                 :title "Official Tutorial Workflow: NixOS SD Image on Raspberry Pi 4/400"
+                                 :summary "Step-by-step semantic workflow object for the official SD-image tutorial."
+                                 :sections (list section))))
+    (setf (slot-value runbook 'raw-structure)
+          (sd-card-runbook->raw-structure runbook))
+    runbook))
+
+(defun official-rpi-tutorial-step (step-id)
+  (or (find-sd-card-runbook-step (official-rpi-tutorial-workflow) step-id)
+      (error "Unknown official tutorial step id: ~A" step-id)))
+
 (defun sd-card-creation-dry-run
     (&key (stream *standard-output*)
           (download-url
@@ -420,6 +484,24 @@ Raw list structure is preserved as a secondary view."
     (list :runbook-type (type-of runbook)
           :section-types (mapcar #'type-of sections)
           :section-titles (mapcar #'title-of sections))))
+
+(defexample official-rpi-tutorial-step-navigation-example
+  "Regression check: official tutorial steps resolve to semantic procedure-step objects."
+  (let* ((workflow (official-rpi-tutorial-workflow))
+         (ids '("official-download-prebuilt-image"
+                "official-flash-sd-card"
+                "official-boot-pi"
+                "official-edit-configuration"
+                "official-first-rebuild-boot"
+                "official-reboot-new-generation"
+                "official-switch-later"))
+         (steps (loop for id in ids
+                      collect (official-rpi-tutorial-step id))))
+    (dolist (step steps)
+      (assert-eql 'sd-card-procedure-step (type-of step)))
+    (list :workflow-type (type-of workflow)
+          :step-types (mapcar #'type-of steps)
+          :step-titles (mapcar #'title-of steps))))
 
 ;;
 ;; hauptsache / kioskberrli reference objects
@@ -833,6 +915,28 @@ context."))
 (defun journalmatic-commit-gate-pass-p (page)
   (null (journalmatic-commit-gate-findings page)))
 
+(defun journalmatic-current-epoch-millis ()
+  (* 1000 (- (get-universal-time) 2208988800)))
+
+(defun journalmatic-next-date-like-wiki-client (journal &key (now (journalmatic-current-epoch-millis)))
+  (let ((last-date (loop for action in journal
+                         for date = (getf action :date)
+                         when date maximize date)))
+    (if last-date
+        (max now (1+ last-date))
+        now)))
+
+(defun journalmatic-normalize-dates-monotonic (journal &key (start-now (journalmatic-current-epoch-millis)))
+  "Normalize action dates in existing order, forcing monotonic progression."
+  (let ((date (1- start-now))
+        (normalized '()))
+    (dolist (action journal (nreverse normalized))
+      (let ((copy (copy-tree action))
+            (existing (getf action :date)))
+        (setf date (max (1+ date) (or existing 0)))
+        (setf (getf copy :date) date)
+        (push copy normalized)))))
+
 (defexample journalmatic-commit-gate-script-example
   "Gate FedWiki page commits on creation/chronology/revision/malformed findings."
   (let* ((bad-page *journalmatic-example-page-with-chronology-error*)
@@ -848,3 +952,116 @@ context."))
           :good-page (list :title (getf good-page :title)
                            :findings good-findings
                            :pass? (journalmatic-commit-gate-pass-p good-page)))))
+
+(defexample journalmatic-date-origin-example
+  "Show Date.now-style millis and monotonic next-date behavior."
+  (let* ((journal '((:type :create :date 1000)
+                    (:type :add :id "a1" :date 1001)))
+         (now 950)
+         (next-date (journalmatic-next-date-like-wiki-client journal :now now)))
+    (assert-equal 1002 next-date)
+    (list :date-origin "epoch-millis"
+          :now now
+          :last-date 1001
+          :next-date next-date)))
+
+(defexample journalmatic-monotonic-normalization-example
+  "Normalize out-of-order dates while preserving action order."
+  (let* ((journal '((:type :create :date 1000)
+                    (:type :add :id "a1" :date 1100)
+                    (:type :fork :site "localhost:3000" :date 1050)))
+         (normalized (journalmatic-normalize-dates-monotonic journal :start-now 1000))
+         (dates (mapcar #'(lambda (action) (getf action :date)) normalized)))
+    (assert-equal '(1000 1100 1101) dates)
+    (list :before '(1000 1100 1050)
+          :after dates)))
+
+(defun journalmatic-make-page-with-journal (title story-items &key start-date fork-site)
+  "Reproducible page generator: deterministic ids/date ordering from inputs."
+  (let* ((date (or start-date 1000))
+         (story (copy-tree story-items))
+         (journal (list (list :type :create
+                              :item (list :title title :story '())
+                              :date date)))
+         (after nil))
+    (dolist (item story-items)
+      (incf date)
+      (let ((action (list :type :add
+                          :id (getf item :id)
+                          :item (copy-tree item)
+                          :date date)))
+        (when after
+          (setf action (append action (list :after after))))
+        (push action journal)
+        (setf after (getf item :id))))
+    (when fork-site
+      (incf date)
+      (push (list :type :fork :site fork-site :date date) journal))
+    (list :title title
+          :story story
+          :journal (nreverse journal))))
+
+(defun journalmatic-append-add-like-wiki-client (page item &key after (now (journalmatic-current-epoch-millis)))
+  "Append an add action using wiki-client style date generation."
+  (let* ((page (copy-tree page))
+         (journal (or (getf page :journal) '()))
+         (story (or (getf page :story) '()))
+         (date (journalmatic-next-date-like-wiki-client journal :now now))
+         (action (list :type :add
+                       :id (getf item :id)
+                       :item (copy-tree item)
+                       :date date)))
+    (when after
+      (setf action (append action (list :after after))))
+    (setf (getf page :story)
+          (journalmatic-example-add story after (copy-tree item)))
+    (setf (getf page :journal)
+          (append journal (list action)))
+    page))
+
+(defexample journalmatic-page-generation-workflow-example
+  "Generate a reproducible page JSON shape and verify chronology/fork ordering."
+  (let* ((story (list (list :type :paragraph :id "a1" :text "Alpha")
+                      (list :type :markdown :id "b1" :text "### Beta")))
+         (page (journalmatic-make-page-with-journal "Workflow Example"
+                                                    story
+                                                    :start-date 1000
+                                                    :fork-site "localhost:3000"))
+         (dates (mapcar #'(lambda (action) (getf action :date))
+                        (getf page :journal)))
+         (checked (journalmatic-example-check page)))
+    (assert-equal '(1000 1001 1002 1003) dates)
+    (assert-equal '() checked)
+    (list :title (getf page :title)
+          :journal-dates dates
+          :results checked)))
+
+(defexample journalmatic-page-generation-wiki-client-style-example
+  "Append a story item using max(now, last-date+1) date semantics."
+  (let* ((seed (journalmatic-make-page-with-journal
+                "Workflow Example"
+                (list (list :type :paragraph :id "a1" :text "Alpha"))
+                :start-date 1000))
+         (now 995)
+         (updated (journalmatic-append-add-like-wiki-client
+                   seed
+                   (list :type :paragraph :id "b1" :text "Beta")
+                   :after "a1"
+                   :now now))
+         (dates (mapcar #'(lambda (action) (getf action :date))
+                        (getf updated :journal))))
+    (assert-equal '(1000 1001 1002) dates)
+    (list :now now
+          :journal-dates dates
+          :last-date (car (last dates)))))
+
+(defexample wiki-client-blame-operation-example
+  "Show reproducible git-blame operations for wiki-client timestamp lines."
+  (let ((repo "/Users/rgb/workspace/wiki-client"))
+    (list :repo repo
+          :commands
+          (list (format nil "git -C ~A blame -L 235,235 -- lib/pageHandler.js" repo)
+                (format nil "git -C ~A blame -L 283,283 -- lib/page.js" repo)
+                (format nil "git -C ~A blame -L 197,197 -- lib/search.js" repo)
+                (format nil "git -C ~A blame -L 64,64 -- lib/revision.js" repo))
+          :provenance-commit "d4420c72a49305ca52d18ce8203bc95bdd3f59d2")))
