@@ -181,23 +181,11 @@
     (hb:register wp)
     wp))
 
-;; It should be possible to retrieve a complete list from
-;; https://en.wikipedia.org/wiki/List_of_Wikipedias, but
-;; there doesn't seem to be a uniform way to obtain the
-;; name of the main page.
-
-(defparameter *editions*
-  '(("de" "Wikipedia" "Wikipedia:Hauptseite")
-    ("en" "Wikipedia" "Main Page")
-    ("es" "Wikipedia" "Wikipedia:Portada")
-    ("fr" "Wikipédia" "Wikipédia:Accueil principal")
-    ("it" "Wikipedia" "Pagina principale")))
-
 (defun get-wikipedia (edition &optional signal-error?)
   (declare (ignore signal-error?))
   (let ((ed-code (str:downcase edition)))
     (or (gethash ed-code *wikipedias*)
-        (when-let (wp-spec (assoc ed-code *editions* :test #'equal))
+        (when-let (wp-spec (find ed-code *editions* :key #'first :test #'equal))
           (make-wikipedia edition (second wp-spec) (third wp-spec))))))
 
 ;; Register a HyperBook factory and a link redirection for Wikipedia links
