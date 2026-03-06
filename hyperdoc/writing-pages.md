@@ -81,6 +81,10 @@ attributes for HyperDoc-specific links:
    has no children (e.g. `<a expr="nil"/>`), the link text is the
    text representation of the object being linked to.
 
+For consistency, prefer this default text-representation behavior over
+custom display overrides. Policy: remove the `:display` argument and rely
+on the object's text representation.
+
  - A `view` attribute names a specific view to be selected in the
    panel for the link destination. See <a expr="(asdf:find-system
    &quot;hyperdoc&quot;)" view="Dependency graph">here</a> for an

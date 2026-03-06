@@ -577,6 +577,15 @@
                  "Create NixOS SD Card from HyperDoc Playground"
                  "Communication Surfaces Policy")))
 
+(defun display-argument-removal-topic ()
+  (make-topic
+   :id "display-argument-removal"
+   :title "Remove :display argument"
+   :summary "Remove explicit :display overrides and rely on each object's text representation for consistent semantic navigation labels."
+   :references '("Surface and Artifact Answers"
+                 "Writing text pages"
+                 "Defining custom views")))
+
 ;; Kioskberrli hardware context topics.
 (defun satechi-usbc-pro-hub-4k-hdmi-topic ()
   (make-topic
