@@ -70,6 +70,15 @@
                  "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
                  "SBCL Process")))
 
+(defun semantic-navigation-visible-clickable-topic ()
+  (make-topic
+   :id "semantic-navigation-visible-clickable"
+   :title "Semantic navigation visible and clickable"
+   :summary "Primary navigation must stay semantic, visible, and clickable; raw structure is diagnostics-only and must not become the primary path."
+   :references '("Create NixOS SD Card from HyperDoc Playground"
+                 "Surface and Artifact Answers"
+                 "Communication Surfaces Policy")))
+
 (defun runbook-build-and-flash-sd-image-topic ()
   (make-topic
    :id "runbook-build-and-flash-sd-image"
