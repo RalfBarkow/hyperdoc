@@ -42,6 +42,86 @@ arguments."
                    (<= (abs (- x y)) tolerance))
                x y :key key))
 
+(defun assert-step-handoff (ids &key step-id required-predecessor forbidden-predecessor)
+  "Assert immediate-predecessor invariants for STEP-ID inside ordered IDS.
+Returns a small inspectable plist on success."
+  (let* ((position (position step-id ids :test #'equal))
+         (predecessor (and position
+                           (> position 0)
+                           (nth (1- position) ids))))
+    (assert position)
+    (assert (> position 0))
+    (assert-equal required-predecessor predecessor)
+    (when forbidden-predecessor
+      (assert (not (equal forbidden-predecessor predecessor))))
+    (list :step-id step-id
+          :position position
+          :predecessor predecessor)))
+
+(defun assert-immediate-predecessor (ids step-id predecessor-id)
+  "Convenience wrapper for required adjacency."
+  (assert-step-handoff ids
+                       :step-id step-id
+                       :required-predecessor predecessor-id))
+
+(defun assert-not-immediate-predecessor (ids step-id forbidden-predecessor-id)
+  "Convenience wrapper for forbidden adjacency.
+Requires STEP-ID to be present and not first."
+  (let* ((position (position step-id ids :test #'equal))
+         (predecessor (and position
+                           (> position 0)
+                           (nth (1- position) ids))))
+    (assert position)
+    (assert (> position 0))
+    (assert (not (equal forbidden-predecessor-id predecessor)))
+    (list :step-id step-id
+          :position position
+          :predecessor predecessor)))
+
+(defun assert-immediate-successor (ids step-id successor-id)
+  "Assert that SUCCESSOR-ID immediately follows STEP-ID in ordered IDS."
+  (let* ((position (position step-id ids :test #'equal))
+         (successor-pos (and position
+                             (< position (1- (length ids)))
+                             (1+ position)))
+         (successor (and successor-pos
+                         (nth successor-pos ids))))
+    (assert position)
+    (assert successor-pos)
+    (assert-equal successor-id successor)
+    (list :step-id step-id
+          :position position
+          :successor successor)))
+
+(defun assert-not-immediate-successor (ids step-id forbidden-successor-id)
+  "Assert that FORBIDDEN-SUCCESSOR-ID does not immediately follow STEP-ID."
+  (let* ((position (position step-id ids :test #'equal))
+         (successor-pos (and position
+                             (< position (1- (length ids)))
+                             (1+ position)))
+         (successor (and successor-pos
+                         (nth successor-pos ids))))
+    (assert position)
+    (assert successor-pos)
+    (assert (not (equal forbidden-successor-id successor)))
+    (list :step-id step-id
+          :position position
+          :successor successor)))
+
+(defun assert-step-chain (ids &rest chain)
+  "Assert that CHAIN forms an immediate-successor chain in ordered IDS.
+Every step id in CHAIN must exist, and each element must be immediately
+followed by the next. Returns an inspectable plist on success."
+  (assert (>= (length chain) 2))
+  (dolist (step-id chain)
+    (assert (position step-id ids :test #'equal)))
+  (let ((pairs (loop for (a b) on chain while b collect (list a b))))
+    (dolist (pair pairs)
+      (destructuring-bind (a b) pair
+        (assert-immediate-successor ids a b)))
+    (list :chain chain
+          :pairs pairs)))
+
 ;;
 ;; An example example function
 ;;
@@ -159,6 +239,24 @@ arguments."
    (transcript :initarg :transcript :reader transcript-of)
    (runbook :initarg :runbook :reader runbook-of)))
 
+(defclass sd-card-step-handoff-defect ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (from-step :initarg :from-step :reader from-step-of)
+   (to-step :initarg :to-step :reader to-step-of)
+   (produced-artifact :initarg :produced-artifact :reader produced-artifact-of)
+   (required-artifact :initarg :required-artifact :reader required-artifact-of)
+   (missing-transition :initarg :missing-transition :reader missing-transition-of)))
+
+(defclass sd-card-step-handoff-patch-target ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (defect :initarg :defect :reader defect-of)
+   (inserted-step :initarg :inserted-step :reader inserted-step-of)
+   (verification-note :initarg :verification-note :reader verification-note-of)))
+
 (defgeneric raw-structure (object)
   (:documentation "Return a structural representation of OBJECT suitable for inspector raw-structure views."))
 
@@ -196,6 +294,14 @@ arguments."
     (format stream "~A" (title-of object))))
 
 (defmethod print-object ((object sd-card-dry-run-transcript) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object sd-card-step-handoff-defect) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object sd-card-step-handoff-patch-target) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -377,47 +483,106 @@ Raw list structure is preserved as a secondary view."
       (error "Unknown SD-card runbook step id: ~A" step-id)))
 
 (defun make-official-rpi-tutorial-steps ()
-  (list
-   (make-instance 'sd-card-procedure-step
-                  :id "official-download-prebuilt-image"
-                  :title "Download prebuilt aarch64 SD image"
-                  :summary "Download a prebuilt nixos-sd-image-*-aarch64-linux.img.zst artifact from Hydra."
-                  :commands (list "nix-shell -p wget zstd"
-                                  "LATEST_URL=\"https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1\""
-                                  "wget \"$LATEST_URL\""))
-   (make-instance 'sd-card-procedure-step
-                  :id "official-flash-sd-card"
-                  :title "Flash image to SD card"
-                  :summary "Write the prepared image to the selected SD card device."
-                  :commands (list "diskutil list"
-                                  "diskutil unmountDisk /dev/diskN"
-                                  "sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync"
-                                  "sync"))
-   (make-instance 'sd-card-procedure-step
-                  :id "official-boot-pi"
-                  :title "Boot Raspberry Pi from flashed card"
-                  :summary "Boot Pi 4/400 from the flashed SD image and reach a usable shell/session.")
-   (make-instance 'sd-card-procedure-step
-                  :id "official-edit-configuration"
-                  :title "Edit /etc/nixos/configuration.nix"
-                  :summary "Adjust host-specific configuration and secrets locally on the running machine."
-                  :commands (list "sudoedit /etc/nixos/configuration.nix"))
-   (make-instance 'sd-card-procedure-step
-                  :id "official-first-rebuild-boot"
-                  :title "Run first rebuild with nixos-rebuild boot"
-                  :summary "Use boot mode first to prepare a reboot-safe generation."
-                  :commands (list "sudo nixos-rebuild boot"))
-   (make-instance 'sd-card-procedure-step
-                  :id "official-reboot-new-generation"
-                  :title "Reboot into the new generation"
-                  :summary "Reboot and confirm the system starts with the freshly built generation."
-                  :commands (list "sudo reboot"))
-   (make-instance 'sd-card-procedure-step
-                  :id "official-switch-later"
-                  :title "Use nixos-rebuild switch only later"
-                  :summary "Use switch only after reboot reliability is established."
-                  :commands (list "sudo nixos-rebuild switch")
-                  :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot.")))
+  (let* ((download-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-download-prebuilt-image"
+                          :title "Download prebuilt aarch64 SD image"
+                          :summary "Download latest Hydra artifact and preserve the redirected .img.zst filename."
+                          :commands (list "nix-shell -p wget zstd"
+                                          "LATEST_URL=\"https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1\""
+                                          "wget --trust-server-names \"$LATEST_URL\"")
+                          :verification "Result must be a named .img.zst artifact (not a file named '1')."))
+         (decompress-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-decompress-zstd-to-img"
+                          :title "Decompress .zstd image to .img"
+                          :summary "Convert the downloaded compressed image artifact into the raw .img artifact required by the flashing step."
+                          :commands (list "unzstd -d nixos-image-sd-card-*.img.zst")
+                          :verification "Confirm a .img artifact exists and is the input used by the flashing step."))
+         (flash-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-flash-sd-card"
+                          :title "Flash image to SD card"
+                          :summary "Write the prepared .img image to the selected SD card device."
+                          :commands (list "diskutil list"
+                                          "diskutil unmountDisk /dev/diskN"
+                                          "sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync"
+                                          "sync")))
+         (filename-handoff-defect
+           (make-instance 'sd-card-step-handoff-defect
+                          :id "official-hydra-latest-filename-handoff-defect"
+                          :title "Missing filename-preservation handoff for Hydra latest/download/1"
+                          :summary "Plain wget can save latest/download/1 as file '1'; decompression expects a named .img.zst artifact."
+                          :from-step download-step
+                          :to-step decompress-step
+                          :produced-artifact "file named 1"
+                          :required-artifact "named .img.zst artifact filename"
+                          :missing-transition "preserve redirected artifact filename"))
+         (filename-handoff-patch-target
+           (make-instance 'sd-card-step-handoff-patch-target
+                          :id "official-hydra-latest-filename-handoff-patch-target"
+                          :title "Preserve redirected Hydra artifact filename in download step"
+                          :summary "Patch target is the relation between latest/download/1 and decompression: use wget --trust-server-names so step output satisfies decompression precondition."
+                          :defect filename-handoff-defect
+                          :inserted-step download-step
+                          :verification-note "Download output is a named .img.zst artifact carried into decompression."))         
+         (handoff-defect
+           (make-instance 'sd-card-step-handoff-defect
+                          :id "official-zstd-to-img-handoff-defect"
+                          :title "Missing decompression handoff between steps 1 and 2"
+                          :summary "Step 1 outputs .zstd while step 2 requires .img; the .zstd -> .img transition must be explicit."
+                          :from-step download-step
+                          :to-step flash-step
+                          :produced-artifact ".img.zst"
+                          :required-artifact ".img"
+                          :missing-transition ".zstd -> .img decompression step"))
+         (handoff-patch-target
+           (make-instance 'sd-card-step-handoff-patch-target
+                          :id "official-zstd-to-img-handoff-patch-target"
+                          :title "Insert explicit .zstd -> .img handoff step"
+                          :summary "Patch target is the relation between download and flash: add a decompression step so the flashing input precondition is explicit."
+                          :defect handoff-defect
+                          :inserted-step decompress-step
+                          :verification-note "The inserted step must produce a .img artifact consumed by the flash step.")))
+    (setf (slot-value download-step 'diagnosis)
+          "Plain wget on latest/download/1 can save as file '1'; preserve redirected artifact filename for decompression.")
+    (setf (slot-value download-step 'source-target) filename-handoff-defect)
+    (setf (slot-value download-step 'patch-target) filename-handoff-patch-target)
+    (setf (slot-value download-step 'verification) filename-handoff-patch-target)
+    (setf (slot-value decompress-step 'diagnosis)
+          "A decompression step is missing between the download step and the flashing step.")
+    (setf (slot-value decompress-step 'source-target) handoff-defect)
+    (setf (slot-value decompress-step 'patch-target) handoff-patch-target)
+    (setf (slot-value decompress-step 'verification) handoff-patch-target)
+    (list
+     download-step
+     decompress-step
+     flash-step
+     (make-instance 'sd-card-procedure-step
+                    :id "official-boot-pi"
+                    :title "Boot Raspberry Pi from flashed card"
+                    :summary "Boot Pi 4/400 from the flashed SD image and reach a usable shell/session.")
+     (make-instance 'sd-card-procedure-step
+                    :id "official-edit-configuration"
+                    :title "Edit /etc/nixos/configuration.nix"
+                    :summary "Adjust host-specific configuration and secrets locally on the running machine."
+                    :commands (list "sudoedit /etc/nixos/configuration.nix"))
+     (make-instance 'sd-card-procedure-step
+                    :id "official-first-rebuild-boot"
+                    :title "Run first rebuild with nixos-rebuild boot"
+                    :summary "Use boot mode first to prepare a reboot-safe generation."
+                    :commands (list "sudo nixos-rebuild boot"))
+     (make-instance 'sd-card-procedure-step
+                    :id "official-reboot-new-generation"
+                    :title "Reboot into the new generation"
+                    :summary "Reboot and confirm the system starts with the freshly built generation."
+                    :commands (list "sudo reboot"))
+     (make-instance 'sd-card-procedure-step
+                    :id "official-switch-later"
+                    :title "Use nixos-rebuild switch only later"
+                    :summary "Use switch only after reboot reliability is established."
+                    :commands (list "sudo nixos-rebuild switch")
+                    :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot."))))
 
 (defun official-rpi-tutorial-workflow ()
   (let* ((steps (make-official-rpi-tutorial-steps))
@@ -439,6 +604,26 @@ Raw list structure is preserved as a secondary view."
 (defun official-rpi-tutorial-step (step-id)
   (or (find-sd-card-runbook-step (official-rpi-tutorial-workflow) step-id)
       (error "Unknown official tutorial step id: ~A" step-id)))
+
+(defun official-zstd-to-img-handoff-defect ()
+  "Return the relation-level defect object for the missing transition between official steps 1 and 2."
+  (or (source-target-of (official-rpi-tutorial-step "official-decompress-zstd-to-img"))
+      (error "Missing source-target defect for official decompression step.")))
+
+(defun official-zstd-to-img-handoff-patch-target ()
+  "Return the patch-target object describing insertion of the decompression handoff."
+  (or (patch-target-of (official-rpi-tutorial-step "official-decompress-zstd-to-img"))
+      (error "Missing patch-target object for official decompression step.")))
+
+(defun official-hydra-latest-filename-handoff-defect ()
+  "Return the relation-level defect object for filename preservation between download and decompression."
+  (or (source-target-of (official-rpi-tutorial-step "official-download-prebuilt-image"))
+      (error "Missing source-target defect for official download step.")))
+
+(defun official-hydra-latest-filename-handoff-patch-target ()
+  "Return the patch-target object for preserving redirected Hydra artifact filenames."
+  (or (patch-target-of (official-rpi-tutorial-step "official-download-prebuilt-image"))
+      (error "Missing patch-target object for official download step.")))
 
 (defun sd-card-creation-dry-run
     (&key (stream *standard-output*)
@@ -513,6 +698,7 @@ Raw list structure is preserved as a secondary view."
   "Regression check: official tutorial steps resolve to semantic procedure-step objects."
   (let* ((workflow (official-rpi-tutorial-workflow))
          (ids '("official-download-prebuilt-image"
+                "official-decompress-zstd-to-img"
                 "official-flash-sd-card"
                 "official-boot-pi"
                 "official-edit-configuration"
@@ -526,6 +712,116 @@ Raw list structure is preserved as a secondary view."
     (list :workflow-type (type-of workflow)
           :step-types (mapcar #'type-of steps)
           :step-titles (mapcar #'title-of steps))))
+
+(defexample official-rpi-zstd-to-img-handoff-regression-example
+  "Regression check: missing handoff is modeled as relation defect with explicit inserted step."
+  (let* ((inserted-step (official-rpi-tutorial-step "official-decompress-zstd-to-img"))
+         (defect (official-zstd-to-img-handoff-defect))
+         (patch (official-zstd-to-img-handoff-patch-target)))
+    (assert defect)
+    (assert patch)
+    (assert-eql 'sd-card-step-handoff-defect (type-of defect))
+    (assert-eql 'sd-card-step-handoff-patch-target (type-of patch))
+    (assert-equal (id-of inserted-step) (id-of (inserted-step-of patch)))
+    (assert-equal (id-of defect) (id-of (defect-of patch)))
+    (assert-equal ".img.zst" (produced-artifact-of defect))
+    (assert-equal ".img" (required-artifact-of defect))
+    (assert (commands-of inserted-step))
+    (list :inserted-step (id-of inserted-step)
+          :source-target (id-of defect)
+          :patch-target (id-of patch))))
+
+(defexample official-rpi-hydra-filename-preservation-regression-example
+  "Regression check: official download command preserves redirected Hydra artifact filename."
+  (let* ((download-step (official-rpi-tutorial-step "official-download-prebuilt-image"))
+         (commands (commands-of download-step))
+         (defect (official-hydra-latest-filename-handoff-defect))
+         (patch (official-hydra-latest-filename-handoff-patch-target)))
+    (assert (member "wget --trust-server-names \"$LATEST_URL\"" commands :test #'equal))
+    (assert (not (member "wget \"$LATEST_URL\"" commands :test #'equal)))
+    (assert-eql 'sd-card-step-handoff-defect (type-of defect))
+    (assert-eql 'sd-card-step-handoff-patch-target (type-of patch))
+    (assert-equal (id-of defect) (id-of (defect-of patch)))
+    (list :step (id-of download-step)
+          :command "wget --trust-server-names \"$LATEST_URL\""
+          :source-target (id-of defect)
+          :patch-target (id-of patch))))
+
+(defexample hydra-filename-outcome-states-example
+  "Contrast historical filename-loss outcome with current expected preserved-filename outcome."
+  (let* ((bad-outcome (list :mode :historical-failure
+                            :saved-as "1"
+                            :provenance :lost-at-download-time))
+         (good-filename "nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst")
+         (good-outcome (list :mode :current-expected
+                             :saved-as good-filename
+                             :timestamp "2026-03-06 14:54:30"
+                             :size-bytes 1377718373
+                             :provenance :preserved-at-download-time)))
+    (assert-equal "1" (getf bad-outcome :saved-as))
+    (assert (let ((name (getf good-outcome :saved-as)))
+              (and (>= (length name) (length ".img.zst"))
+                   (string= ".img.zst"
+                            name
+                            :start1 0
+                            :end1 (length ".img.zst")
+                            :start2 (- (length name) (length ".img.zst"))
+                            :end2 (length name)))))
+    (assert (search "aarch64-linux" (getf good-outcome :saved-as)))
+    (list :historical bad-outcome
+          :current-expected good-outcome)))
+
+(defexample official-rpi-zstd-to-img-handoff-adjacency-regression-example
+  "Regression check: flash step must be immediately preceded by the decompression handoff step."
+  (let* ((workflow (official-rpi-tutorial-workflow))
+         (section (first (sections-of workflow)))
+         (ids (mapcar #'id-of (steps-of section)))
+         (required (assert-immediate-predecessor
+                    ids
+                    "official-flash-sd-card"
+                    "official-decompress-zstd-to-img"))
+         (forbidden (assert-not-immediate-predecessor
+                     ids
+                     "official-flash-sd-card"
+                     "official-download-prebuilt-image")))
+    (list :ids ids
+          :required required
+          :forbidden forbidden)))
+
+(defexample official-rpi-zstd-to-img-handoff-successor-regression-example
+  "Regression check: handoff successor constraints hold from both transition endpoints."
+  (let* ((workflow (official-rpi-tutorial-workflow))
+         (section (first (sections-of workflow)))
+         (ids (mapcar #'id-of (steps-of section)))
+         (download->decompress (assert-immediate-successor
+                                ids
+                                "official-download-prebuilt-image"
+                                "official-decompress-zstd-to-img"))
+         (decompress->flash (assert-immediate-successor
+                             ids
+                             "official-decompress-zstd-to-img"
+                             "official-flash-sd-card"))
+         (download-not-flash (assert-not-immediate-successor
+                              ids
+                              "official-download-prebuilt-image"
+                              "official-flash-sd-card")))
+    (list :ids ids
+          :download-to-decompress download->decompress
+          :decompress-to-flash decompress->flash
+          :download-not-flash download-not-flash)))
+
+(defexample official-rpi-zstd-to-img-step-chain-regression-example
+  "Regression check: local SD-image handoff chain is enforced as one declarative invariant."
+  (let* ((workflow (official-rpi-tutorial-workflow))
+         (section (first (sections-of workflow)))
+         (ids (mapcar #'id-of (steps-of section)))
+         (chain-result (assert-step-chain
+                        ids
+                        "official-download-prebuilt-image"
+                        "official-decompress-zstd-to-img"
+                        "official-flash-sd-card")))
+    (list :ids ids
+          :chain-result chain-result)))
 
 (defexample official-rpi-tutorial-step-raw-structure-regression-example
   "Regression check: procedure-step raw structure is computed and includes core keys."

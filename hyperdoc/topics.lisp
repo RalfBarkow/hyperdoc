@@ -70,6 +70,16 @@
                  "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
                  "SBCL Process")))
 
+(defun sd-card-procedure-step-raw-structure-fix-topic ()
+  (make-topic
+   :id "sd-card-procedure-step-raw-structure-fix"
+   :title "SD-card procedure-step raw-structure fix"
+   :summary "Raw Structure now derives from semantic step slots via computed raw-structure, preventing NIL views when id/title/summary/commands are present."
+   :references '("Create NixOS SD Card from HyperDoc Playground"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "official-rpi-tutorial-step-raw-structure-regression-example"
+                 "a735927")))
+
 (defun semantic-navigation-visible-clickable-topic ()
   (make-topic
    :id "semantic-navigation-visible-clickable"
@@ -92,6 +102,29 @@
    :title "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
    :summary "Upstream nix.dev SD-image workflow: preinstalled image, first rebuild with nixos-rebuild boot, then reboot."
    :references '("Prepare the AArch64 image")))
+
+(defun sd-image-zstd-to-img-handoff-defect-topic ()
+  (make-topic
+   :id "sd-image-zstd-to-img-handoff-defect"
+   :title "SD-image zstd-to-img handoff defect"
+   :summary "Relation bug between official steps 1 and 2: download produces .zstd while flash requires .img; fixed by explicit decompression step."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Create NixOS SD Card from HyperDoc Playground"
+                 "Violated handoff"
+                 "official-rpi-zstd-to-img-handoff-regression-example")))
+
+(defun hydra-latest-filename-handoff-defect-topic ()
+  (hydra-filename-loss-topic))
+
+(defun hydra-filename-loss-topic ()
+  (make-topic
+   :id "hydra-filename-loss"
+   :title "Hydra filename loss"
+   :summary "Failure classification: naive latest/download/1 retrieval can save as file '1', losing artifact filename provenance and requiring recovery."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "SD-image zstd-to-img handoff defect"
+                 "Create NixOS SD Card from HyperDoc Playground"
+                 "official-rpi-hydra-filename-preservation-regression-example")))
 
 (defun expr-string-quoting-regression-topic ()
   (make-topic
@@ -205,11 +238,12 @@
   (make-topic
    :id "hydra-download-artifact-procedure"
    :title "Download artifact from Hydra"
-   :summary "Operational command sequence for selecting, downloading, verifying, and decompressing the latest aarch64 SD-image artifact."
+   :summary "Normative successful path: download latest Hydra SD-image artifact with preserved .img.zst filename provenance, then verify and decompress."
    :references '("Prepare the AArch64 image"
                  "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
                  "Hydra latest SD-image job"
-                 "Hydra latest download link")))
+                 "Hydra latest download link"
+                 "Hydra filename loss")))
 
 (defun hydra-sha256-topic ()
   (make-topic
@@ -636,6 +670,24 @@
    :summary "Codex resume exposes the related git branch per session; interpret and replay session outputs in that branch context."
    :references '("Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
+
+(defun violated-handoff-topic ()
+  (make-topic
+   :id "violated-handoff"
+   :title "Violated handoff"
+   :summary "A handoff is violated when a claimed completed transfer lacks the artifacts, links, or replay checks needed for the receiver to continue without re-deriving context."
+   :references '("Surface and Artifact Answers"
+                 "Communication Surfaces Policy"
+                 "Reconstruction protocol")))
+
+(defun express-both-sides-of-handoff-without-manually-reversing-perspective-topic ()
+  (make-topic
+   :id "express-both-sides-handoff-without-manually-reversing-perspective"
+   :title "Express both sides of a handoff without manually reversing perspective"
+   :summary "Model a handoff as one inspectable relation object that exposes producer output and consumer precondition simultaneously, avoiding perspective-flip narration."
+   :references '("Violated handoff"
+                 "SD-image zstd-to-img handoff defect"
+                 "Reconstruction protocol")))
 
 (defun prose-to-object-bridge-topic ()
   (make-topic
