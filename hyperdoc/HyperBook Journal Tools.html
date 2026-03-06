@@ -48,9 +48,16 @@
   and can be inspected via HyperDoc source-of-function views.
 </p>
 
+<p>
+  Date generation policy now follows wiki-client style epoch-millis with
+  monotonic increment from the last journal action date, avoiding hardcoded
+  timestamps that can break chronology after remote forks.
+</p>
+
 <h4>Related</h4>
 
 <ul>
+  <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
   <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
   <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
 </ul>

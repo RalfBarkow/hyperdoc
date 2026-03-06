@@ -12,6 +12,8 @@
 <ul>
   <li><a expr="(hyperdoc::journal-checker-commit-gate-topic)"><tt>Journal checker commit gate</tt></a></li>
   <li><a expr="(hyperdoc::journal-gate-script-lisp-topic)"><tt>Journal gate script and Lisp implementation</tt></a></li>
+  <li><a expr="(hyperdoc::journal-date-origin-and-fork-chronology-topic)"><tt>Journal date origin and fork chronology</tt></a></li>
+  <li><a expr="(hyperdoc::journal-monotonic-normalization-topic)"><tt>Journal monotonic normalization</tt></a></li>
 </ul>
 
 <h2>Gate rule</h2>
@@ -32,6 +34,42 @@
 <source-of-function>journalmatic-commit-gate-findings</source-of-function>
 <source-of-function>journalmatic-commit-gate-pass-p</source-of-function>
 <source-of-function>journalmatic-commit-gate-script-example</source-of-function>
+<source-of-function>journalmatic-current-epoch-millis</source-of-function>
+<source-of-function>journalmatic-next-date-like-wiki-client</source-of-function>
+<source-of-function>journalmatic-date-origin-example</source-of-function>
+<source-of-function>journalmatic-normalize-dates-monotonic</source-of-function>
+<source-of-function>journalmatic-monotonic-normalization-example</source-of-function>
+
+<h2>Timestamp policy</h2>
+
+<p>
+  Earlier manual page generation used hardcoded date values. Some values were
+  ahead of real fork time, so a later <tt>fork</tt> action got a smaller
+  timestamp and created chronology/revision errors.
+</p>
+
+<p>
+  Use wiki-client style date generation instead:
+</p>
+
+<ul>
+  <li>base date source: runtime epoch milliseconds (<tt>Date.now()</tt> equivalent)</li>
+  <li>per-action write rule: <tt>max(now, last-date + 1)</tt></li>
+  <li>never hardcode fixed date constants in generated journals</li>
+</ul>
+
+<p>
+  Rule (canonical wording): action dates use runtime epoch millis with
+  monotonic rule: <tt>max(now, last-date + 1)</tt>.
+</p>
+
+<h2>Monotonic normalization</h2>
+
+<p>
+  For imported/forked journals with out-of-order dates, normalize dates in the
+  current action order so chronology is monotonic while story replay semantics
+  stay aligned with action sequence.
+</p>
 
 <h2>Operational sequence</h2>
 
@@ -45,6 +83,7 @@
 <h2>Related</h2>
 
 <ul>
+  <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
   <li><a page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
   <li><a page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
   <li><a page="FedWiki Story Item IDs">FedWiki Story Item IDs</a></li>

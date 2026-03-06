@@ -66,6 +66,18 @@
   separate repositories and avoid push unless explicitly requested.
 </p>
 
+<p>
+  Timestamp note: a previous manual page-generation pass used hardcoded dates.
+  When such dates are ahead of real fork time, the later <tt>fork</tt> action
+  can receive a smaller date and trigger chronology/revision findings. Use
+  runtime epoch-millis with monotonic bump from the last action date.
+</p>
+
+<p>
+  If chronology is already broken, apply monotonic normalization to action
+  dates in existing action order before replay verification.
+</p>
+
 <h4>Lisp gate script source</h4>
 
 <p>
@@ -80,6 +92,7 @@
 <h4>Related</h4>
 
 <ul>
+  <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
   <li><a page="Journal Gate Script and Lisp Implementation">Journal Gate Script and Lisp Implementation</a></li>
   <li><a hyperbook="hyperdoc" page="FedWiki Story Item IDs">FedWiki Story Item IDs</a></li>
   <li><a hyperbook="hyperdoc" page="Journal Object Extensions">Journal Object Extensions</a></li>

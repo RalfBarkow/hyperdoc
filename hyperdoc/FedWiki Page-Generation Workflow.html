@@ -1,0 +1,86 @@
+<h1>FedWiki Page-Generation Workflow</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This documents the page-generation workflow used in this project, including
+  reproducible Lisp source code and wiki-client-style date assignment rules.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::fedwiki-page-generation-workflow-topic)"><tt>FedWiki page-generation workflow</tt></a></li>
+  <li><a expr="(hyperdoc::journal-date-origin-and-fork-chronology-topic)"><tt>Journal date origin and fork chronology</tt></a></li>
+  <li><a expr="(hyperdoc::journal-gate-script-lisp-topic)"><tt>Journal gate script and Lisp implementation</tt></a></li>
+  <li><a expr="(hyperdoc::git-blame-operation-topic)"><tt>Git blame operation</tt></a></li>
+</ul>
+
+<h2>Bug statement</h2>
+
+<p>
+  Earlier manual page generation used hardcoded future timestamps. After a
+  later remote fork, wiki-client appended a real-time <tt>fork</tt> action with
+  a smaller date, causing chronology errors.
+</p>
+
+<h2>Workflow rules</h2>
+
+<ol>
+  <li>Build story and journal from reproducible inputs (title + ordered story items).</li>
+  <li>Use deterministic ordering for <tt>create</tt> then <tt>add</tt> actions.</li>
+  <li>Date source must be runtime epoch milliseconds.</li>
+  <li>For every appended action, assign date as <tt>max(now, last-date + 1)</tt>.</li>
+  <li>Never use hardcoded fixed date constants in generated journals.</li>
+</ol>
+
+<p>
+  Rule (canonical wording): action dates use runtime epoch millis with
+  monotonic rule: <tt>max(now, last-date + 1)</tt>.
+</p>
+
+<p>
+  Monotonic normalization rule: when chronology is already broken (for example
+  after cross-instance fork/import), rewrite action dates in existing action
+  order until dates are monotonic again.
+</p>
+
+<h2>Reproducible Lisp source</h2>
+
+<source-of-function>journalmatic-make-page-with-journal</source-of-function>
+<source-of-function>journalmatic-append-add-like-wiki-client</source-of-function>
+<source-of-function>journalmatic-next-date-like-wiki-client</source-of-function>
+<source-of-function>journalmatic-normalize-dates-monotonic</source-of-function>
+<source-of-function>journalmatic-page-generation-workflow-example</source-of-function>
+<source-of-function>journalmatic-page-generation-wiki-client-style-example</source-of-function>
+<source-of-function>journalmatic-monotonic-normalization-example</source-of-function>
+
+<h2>wiki-client source proof</h2>
+
+<p>
+  Supporting upstream commit:
+  <a href="https://github.com/fedwiki/wiki-client/commit/d4420c72a49305ca52d18ce8203bc95bdd3f59d2"><tt>d4420c72a49305ca52d18ce8203bc95bdd3f59d2</tt></a>.
+</p>
+
+<ul>
+  <li><a href="https://github.com/fedwiki/wiki-client/blob/d4420c72a49305ca52d18ce8203bc95bdd3f59d2/lib/pageHandler.js#L235">lib/pageHandler.js#L235</a>: <tt>action.date = new Date().getTime()</tt></li>
+  <li><a href="https://github.com/fedwiki/wiki-client/blob/d4420c72a49305ca52d18ce8203bc95bdd3f59d2/lib/page.js#L283">lib/page.js#L283</a>: fork date uses <tt>new Date().getTime()</tt></li>
+  <li><a href="https://github.com/fedwiki/wiki-client/blob/d4420c72a49305ca52d18ce8203bc95bdd3f59d2/lib/search.js#L197">lib/search.js#L197</a>: create action date uses <tt>Date.now()</tt></li>
+  <li><a href="https://github.com/fedwiki/wiki-client/blob/d4420c72a49305ca52d18ce8203bc95bdd3f59d2/lib/revision.js#L64">lib/revision.js#L64</a>: implicit fork uses <tt>action.date - 1</tt></li>
+</ul>
+
+<h2>Blame operation</h2>
+
+<p>
+  Reproducible line-level provenance operation:
+</p>
+
+<source-of-function>wiki-client-blame-operation-example</source-of-function>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Journal Gate Script and Lisp Implementation">Journal Gate Script and Lisp Implementation</a></li>
+  <li><a page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
+</ul>

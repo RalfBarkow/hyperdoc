@@ -27,6 +27,8 @@
 <ol>
   <li>Open Hydra job <tt>nixos.sd_image.aarch64-linux</tt> and select latest successful build.</li>
   <li>Download artifact URL ending in <tt>aarch64-linux.img.zst</tt>.</li>
+  <li>Use corrected download command to preserve redirected artifact filename.</li>
+  <li>Post-download verification: exactly one new <tt>*.img.zst</tt> file is present and filename contains <tt>nixos-image-sd-card-</tt>, pre-release id, <tt>aarch64-linux</tt>, and <tt>.img.zst</tt>.</li>
   <li>Record build URL, artifact URL, and SHA-256 from Hydra build page.</li>
   <li>Verify checksum, then decompress to <tt>.img</tt>.</li>
   <li>Flash the resulting <tt>.img</tt> to the SD card.</li>
@@ -36,16 +38,36 @@
 nix-shell -p wget zstd
 
 LATEST_URL="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
-wget "$LATEST_URL"
+wget --trust-server-names "$LATEST_URL"
 ARTIFACT="$(ls -t *.img.zst | head -n1)"
+test -n "$ARTIFACT"
 
 echo "$ARTIFACT" | grep 'aarch64-linux\\.img\\.zst$'
+echo "$ARTIFACT" | grep 'nixos-image-sd-card-'
 
 EXPECTED_SHA256="REPLACE_WITH_HYDRA_SHA256"
 shasum -a 256 "$ARTIFACT"
 
 unzstd -d "$ARTIFACT"
 </pre>
+
+<h3>Observed successful outcome (primary path)</h3>
+
+<p>
+  2026-03-06 14:54:30 download was saved directly as
+  <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt>
+  (1377718373 bytes). This is the expected post-download state for the
+  corrected procedure.
+</p>
+
+<h3>Fallback path - filename-loss recovery only</h3>
+
+<p>
+  If local output was saved as file <tt>1</tt>, classify it as
+  filename-loss failure mode and recover the true artifact filename from the
+  Hydra build page/redirect chain before decompression. Do not treat this as
+  normal flow.
+</p>
 
 <h2>Path B - Build Project Image</h2>
 

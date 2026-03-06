@@ -28,7 +28,9 @@
   <li><a expr="(hyperdoc::nixos-image-sd-card-26-05pre958232-80bdc1e5ce51-aarch64-linux-img-zst-topic)"><tt>nixos-image-sd-card-26.05pre958232.80bdc1e5ce51-aarch64-linux.img.zst</tt></a></li>
   <li><a expr="(hyperdoc::hydra-latest-download-link-topic)"><tt>Hydra latest download link</tt></a></li>
   <li><a expr="(hyperdoc::hydra-download-artifact-procedure-topic)"><tt>Download artifact from Hydra</tt></a></li>
+  <li><a expr="(hyperdoc::hydra-filename-loss-topic)"><tt>Hydra filename loss</tt></a></li>
   <li><a expr="(hyperdoc::hydra-sha256-topic)"><tt>Hydra artifact SHA-256</tt></a></li>
+  <li><a expr="(hyperdoc::hydra-filename-outcome-states-example)"><tt>Hydra filename outcome states</tt></a></li>
   <li><a expr="(hyperdoc::transcend-16gb-micro-sd-card-topic)"><tt>Transcend 16GB Micro SD Card</tt></a></li>
   <li><a expr="(hyperdoc::dita-task-topic-topic)"><tt>DITA task topic</tt></a></li>
 </ul>
@@ -119,6 +121,13 @@
   project-local build.
 </p>
 
+<p>
+  Normative result of the corrected command path: download is saved directly as
+  a Hydra artifact filename ending in <tt>.img.zst</tt>, preserving provenance
+  in the filesystem name. Recovery is only needed for the older failure mode
+  where download was saved as file <tt>1</tt>.
+</p>
+
 <h3>Decision boundary: Hydra download vs local build</h3>
 
 <ul>
@@ -151,10 +160,10 @@ nix-shell -p wget zstd
 # 1) Optional: resolve current "latest" endpoint
 LATEST_URL="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
 
-# 2) Download artifact
-wget "$LATEST_URL"
+# 2) Download artifact (preserve redirected Hydra filename)
+wget --trust-server-names "$LATEST_URL"
 
-# 3) Determine artifact filename (works when redirected filename is used)
+# 3) Determine artifact filename
 ARTIFACT="$(ls -t *.img.zst | head -n1)"
 echo "artifact=$ARTIFACT"
 
@@ -180,6 +189,25 @@ unzstd -d "$ARTIFACT"
 } > aarch64-image-provenance.txt
 </pre>
 
+<h3>Observed successful outcome</h3>
+
+<p>
+  Observed successful download on 2026-03-06 saved the artifact directly as
+  <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt>
+  (1377718373 bytes), confirming that the corrected Hydra download procedure
+  preserves artifact filename provenance at download time.
+</p>
+
+<pre>
+2026-03-06 14:54:30 (52,8 MB/s) - »nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst« gespeichert [1377718373]
+</pre>
+
+<p>
+  Expected result: <tt>nixos-image-sd-card-26.05pre958961.aca4d95fce49-aarch64-linux.img.zst</tt>.
+  This preserves artifact identity directly in the filesystem name.
+  Recovery steps are only for the older/broken path.
+</p>
+
 <p>
   <tt>aarch64-image-provenance.txt</tt> is the replay anchor: it records which
   exact artifact was chosen, from which Hydra path, and when. Keep it next to
@@ -198,6 +226,15 @@ unzstd -d "$ARTIFACT"
 <p>
   If checksum verification fails, stop immediately and retry from the Hydra
   build page. Do not flash an unverified image.
+</p>
+
+<h3>Fallback: historical filename-loss recovery</h3>
+
+<p>
+  Filename loss is a known failure mode of the naive download path. If the
+  local file was saved as <tt>1</tt>, recover the true artifact filename from
+  the Hydra build page and rename before decompression. This is fallback only,
+  not the normal expected flow.
 </p>
 
 <h2>Acceptance</h2>
