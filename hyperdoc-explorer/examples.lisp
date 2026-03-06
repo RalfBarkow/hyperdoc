@@ -34,6 +34,89 @@
     (error ()
       (ignore-errors (raw-structure-of object)))))
 
+(defun section-step-ids (section)
+  (mapcar #'id-of (steps-of section)))
+
+(defun required-zstd-handoff-ids-present-p (ids)
+  (every #'(lambda (id) (member id ids :test #'equal))
+         '("official-download-prebuilt-image"
+           "official-decompress-zstd-to-img"
+           "official-flash-sd-card")))
+
+(defun evaluate-invariant (name thunk)
+  (handler-case
+      (list :name name
+            :status :pass
+            :result (funcall thunk))
+    (error (c)
+      (list :name name
+            :status :fail
+            :result c))))
+
+(defun section-invariant-rows (section)
+  (let ((ids (section-step-ids section)))
+    (if (required-zstd-handoff-ids-present-p ids)
+        (list
+         (evaluate-invariant
+          "zstd-to-img handoff (download -> decompress)"
+          #'(lambda ()
+              (assert-step-handoff ids
+                                   :step-id "official-decompress-zstd-to-img"
+                                   :required-predecessor "official-download-prebuilt-image"
+                                   :forbidden-predecessor "official-flash-sd-card")))
+         (evaluate-invariant
+          "flash predecessor (decompress -> flash; not download -> flash)"
+          #'(lambda ()
+              (list :required (assert-immediate-predecessor
+                               ids
+                               "official-flash-sd-card"
+                               "official-decompress-zstd-to-img")
+                    :forbidden (assert-not-immediate-predecessor
+                                ids
+                                "official-flash-sd-card"
+                                "official-download-prebuilt-image"))))
+         (evaluate-invariant
+          "download -> decompress -> flash chain"
+          #'(lambda ()
+              (assert-step-chain
+               ids
+               "official-download-prebuilt-image"
+               "official-decompress-zstd-to-img"
+               "official-flash-sd-card")))
+         (evaluate-invariant
+          "successor checks (download->decompress, decompress->flash, download !-> flash)"
+          #'(lambda ()
+              (list :download-to-decompress (assert-immediate-successor
+                                             ids
+                                             "official-download-prebuilt-image"
+                                             "official-decompress-zstd-to-img")
+                    :decompress-to-flash (assert-immediate-successor
+                                          ids
+                                          "official-decompress-zstd-to-img"
+                                          "official-flash-sd-card")
+                    :download-not-flash (assert-not-immediate-successor
+                                         ids
+                                         "official-download-prebuilt-image"
+                                         "official-flash-sd-card")))))
+        (list (list :name "zstd-to-img handoff invariants"
+                    :status :skip
+                    :result (list :reason "section does not contain the official zstd->img->flash chain"
+                                  :ids ids))))))
+
+(defun runbook-invariant-rows (runbook)
+  (loop for section in (sections-of runbook)
+        append (loop for row in (section-invariant-rows section)
+                     collect (list :section (id-of section)
+                                   :name (getf row :name)
+                                   :status (getf row :status)
+                                   :result (getf row :result)))))
+
+(defun invariant-status-label (status)
+  (ecase status
+    (:pass "pass")
+    (:fail "fail")
+    (:skip "skip")))
+
 (defmethod views:text-representation ((runbook sd-card-runbook))
   (format nil "Runbook: ~A" (title-of runbook)))
 
@@ -45,6 +128,12 @@
 
 (defmethod views:text-representation ((transcript sd-card-dry-run-transcript))
   (title-of transcript))
+
+(defmethod views:text-representation ((defect sd-card-step-handoff-defect))
+  (title-of defect))
+
+(defmethod views:text-representation ((patch sd-card-step-handoff-patch-target))
+  (title-of patch))
 
 (views:defview 👀summary (runbook sd-card-runbook)
   (views:html-view :title "Summary" :priority 1
@@ -74,6 +163,21 @@
   (views:html-view :title "Raw Structure" :priority 90
     (views:html (:pre (views:esc (format nil "~S" (raw-structure-value runbook)))))))
 
+(views:defview 👀invariants (runbook sd-card-runbook)
+  (views:html-view :title "Invariants" :priority 20
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:th (views:esc "section"))
+                   (:th (views:esc "check"))
+                   (:th (views:esc "status"))
+                   (:th (views:esc "result")))
+              (loop for row in (runbook-invariant-rows runbook)
+                    do (views:html
+                         (:tr (:td (:tt (views:esc (getf row :section))))
+                              (:td (views:esc (getf row :name)))
+                              (:td (:tt (views:esc (invariant-status-label (getf row :status)))))
+                              (:td (views:object-ref (getf row :result))))))))))
+
 (views:defview 👀summary (section sd-card-runbook-section)
   (views:html-view :title "Summary" :priority 1
     (views:html
@@ -97,6 +201,19 @@
 (views:defview 👀raw-structure (section sd-card-runbook-section)
   (views:html-view :title "Raw Structure" :priority 90
     (views:html (:pre (views:esc (format nil "~S" (raw-structure-value section)))))))
+
+(views:defview 👀invariants (section sd-card-runbook-section)
+  (views:html-view :title "Invariants" :priority 20
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:th (views:esc "check"))
+                   (:th (views:esc "status"))
+                   (:th (views:esc "result")))
+              (loop for row in (section-invariant-rows section)
+                    do (views:html
+                         (:tr (:td (views:esc (getf row :name)))
+                              (:td (:tt (views:esc (invariant-status-label (getf row :status)))))
+                              (:td (views:object-ref (getf row :result))))))))))
 
 (views:defview 👀summary (step sd-card-procedure-step)
   (views:html-view :title "Summary" :priority 1
@@ -200,3 +317,35 @@
     (views:html
       (:pre :style "white-space: pre-wrap"
             (views:esc (format nil "~S" (transcript-of transcript)))))))
+
+(views:defview 👀summary (defect sd-card-step-handoff-defect)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of defect)))
+      (:p (views:esc (summary-of defect)))
+      (:p (:b "Produced artifact: ") (:tt (views:esc (produced-artifact-of defect))))
+      (:p (:b "Required artifact: ") (:tt (views:esc (required-artifact-of defect))))
+      (:p (:b "Missing transition: ") (:tt (views:esc (missing-transition-of defect)))))))
+
+(views:defview 👀items (defect sd-card-step-handoff-defect)
+  (views:html-view :title "Items" :priority 10
+    (views:html
+      (:h4 "From step")
+      (views:object-ref (from-step-of defect))
+      (:h4 "To step")
+      (views:object-ref (to-step-of defect)))))
+
+(views:defview 👀summary (patch sd-card-step-handoff-patch-target)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of patch)))
+      (:p (views:esc (summary-of patch)))
+      (:p (:b "Verification: ") (views:esc (verification-note-of patch))))))
+
+(views:defview 👀items (patch sd-card-step-handoff-patch-target)
+  (views:html-view :title "Items" :priority 10
+    (views:html
+      (:h4 "Defect")
+      (views:object-ref (defect-of patch))
+      (:h4 "Inserted step")
+      (views:object-ref (inserted-step-of patch)))))
