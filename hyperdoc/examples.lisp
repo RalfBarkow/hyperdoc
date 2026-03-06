@@ -122,6 +122,265 @@ arguments."
           :resolution-order order)))
 
 ;;
+;; SD card creation runbook helpers for Playground usage
+;;
+
+(defclass sd-card-procedure-step ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (diagnosis :initarg :diagnosis :initform nil :reader diagnosis-of)
+   (source-target :initarg :source-target :initform nil :reader source-target-of)
+   (patch-target :initarg :patch-target :initform nil :reader patch-target-of)
+   (verification :initarg :verification :initform nil :reader verification-of)
+   (merge-notes :initarg :merge-notes :initform nil :reader merge-notes-of)
+   (commands :initarg :commands :initform nil :reader commands-of)
+   (failure-capsule :initarg :failure-capsule :initform nil :reader failure-capsule-of)
+   (raw-structure :initarg :raw-structure :initform nil :reader raw-structure-of)))
+
+(defclass sd-card-correction-step (sd-card-procedure-step) ())
+
+(defclass sd-card-runbook-section ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :initform nil :reader summary-of)
+   (steps :initarg :steps :reader steps-of)
+   (raw-structure :initarg :raw-structure :initform nil :reader raw-structure-of)))
+
+(defclass sd-card-runbook ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (sections :initarg :sections :reader sections-of)
+   (raw-structure :initarg :raw-structure :initform nil :reader raw-structure-of)))
+
+(defmethod print-object ((object sd-card-procedure-step) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object sd-card-runbook-section) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object sd-card-runbook) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defun sd-card-imagesize-correction-step ()
+  (let* ((context (kioskberrli-sd-image-failure-context))
+         (patch (suggested-patch context))
+         (verify (repro-build-command context)))
+    (make-instance 'sd-card-correction-step
+                   :id "sdimage-imagesize-correction"
+                   :title "Correct removed sdImage.imageSize option"
+                   :summary "Follow correction path from failing option to patch, verification build, and merge note."
+                   :diagnosis
+                   "Build fails because current pinned SD-image modules no longer provide sdImage.imageSize."
+                   :source-target context
+                   :patch-target patch
+                   :verification verify
+                   :merge-notes
+                   "Commit the kiosk.nix correction after successful verification build and integrate through normal branch/merge workflow."
+                   :failure-capsule context
+                   :commands (list (command-of verify))
+                   :raw-structure
+                   (list :step :sdimage-imagesize-correction
+                         :context context
+                         :patch patch
+                         :verify verify))))
+
+(defun make-sd-card-runbook-sections
+    (&key
+       (download-url
+        "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")
+       (compressed-image "nixos-aarch64.img.zst")
+       (raw-image "nixos-aarch64.img")
+       (disk "diskN")
+       (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+  (list
+   (make-instance 'sd-card-runbook-section
+                  :id "path-a-official-prebuilt-image"
+                  :title "Path A - Official prebuilt image"
+                  :summary "Fetch and verify the official Hydra artifact."
+                  :steps
+                  (list
+                   (make-instance 'sd-card-procedure-step
+                                  :id "download-hydra-artifact"
+                                  :title "Download artifact from Hydra"
+                                  :summary "Download latest aarch64 SD image artifact."
+                                  :commands (list (format nil "wget -O ~A \"~A\"" compressed-image download-url))
+                                  :raw-structure (list :command (format nil "wget -O ~A \"~A\"" compressed-image download-url)))
+                   (make-instance 'sd-card-procedure-step
+                                  :id "decompress-image"
+                                  :title "Decompress image"
+                                  :summary "Decompress the zstd artifact to a raw .img file."
+                                  :commands (list (format nil "unzstd -d ~A" compressed-image))
+                                  :raw-structure (list :command (format nil "unzstd -d ~A" compressed-image)))
+                   (make-instance 'sd-card-procedure-step
+                                  :id "verify-checksum"
+                                  :title "Verify checksum"
+                                  :summary "Verify compressed artifact integrity before flashing."
+                                  :commands (list (format nil "shasum -a 256 ~A" compressed-image))
+                                  :verification "Checksum must match the published Hydra value."
+                                  :raw-structure (list :command (format nil "shasum -a 256 ~A" compressed-image))))
+                  :raw-structure
+                  (list :section "Path A - Official prebuilt image"))
+   (make-instance 'sd-card-runbook-section
+                  :id "path-b-build-project-image"
+                  :title "Path B - Build project image"
+                  :summary "Build kioskberrli SD image from project source."
+                  :steps
+                  (list
+                   (make-instance 'sd-card-procedure-step
+                                  :id "build-kioskberrli-sd-image"
+                                  :title "Build kioskberrli SD image"
+                                  :summary "Run project build for sdImage target."
+                                  :commands (list (format nil "cd ~A" kioskberrli-root)
+                                                  "nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage"
+                                                  "ls -lah result/sd-image/")
+                                  :verification
+                                  "result/sd-image must contain the expected artifact."
+                                  :raw-structure
+                                  (list :command "nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage"))
+                   (sd-card-imagesize-correction-step))
+                  :raw-structure
+                  (list :section "Path B - Build project image"))
+   (make-instance 'sd-card-runbook-section
+                  :id "flash-procedure-macos-host"
+                  :title "Flash Procedure (macOS host)"
+                  :summary "Flash verified raw image to the selected SD-card device."
+                  :steps
+                  (list
+                   (make-instance 'sd-card-procedure-step
+                                  :id "flash-image-to-device"
+                                  :title "Flash image to SD card device"
+                                  :summary "Unmount, dd-write, sync, and eject."
+                                  :commands (list "diskutil list"
+                                                  (format nil "diskutil unmountDisk /dev/~A" disk)
+                                                  (format nil "sudo dd if=~A of=/dev/r~A bs=4m status=progress conv=sync"
+                                                          raw-image disk)
+                                                  "sync"
+                                                  (format nil "diskutil eject /dev/~A" disk))
+                                  :diagnosis
+                                  "Wrong disk id is destructive. Verify target twice before dd."
+                                  :verification "Device ejects cleanly and boots on target hardware."
+                                  :raw-structure
+                                  (list :command (format nil "sudo dd if=~A of=/dev/r~A bs=4m status=progress conv=sync"
+                                                         raw-image disk))))
+                  :raw-structure
+                  (list :section "Flash Procedure (macOS host)"))
+   (make-instance 'sd-card-runbook-section
+                  :id "safety-checks"
+                  :title "Safety"
+                  :summary "Final safeguards before destructive write operations."
+                  :steps
+                  (list
+                   (make-instance 'sd-card-procedure-step
+                                  :id "verify-disk-twice"
+                                  :title "Verify target disk twice"
+                                  :summary "Double-check selected disk identifier before flashing."
+                                  :commands (list (format nil "Verify ~A twice before running dd." disk))
+                                  :verification "Human confirmation completed before flash."
+                                  :raw-structure
+                                  (list :command (format nil "Verify ~A twice before running dd." disk))))
+                  :raw-structure
+                  (list :section "Safety"))))
+
+(defun sd-card-runbook->raw-structure (runbook)
+  (loop for section in (sections-of runbook)
+        collect
+        (list :section (title-of section)
+              :commands
+              (loop for step in (steps-of section)
+                    append (or (commands-of step) '())))))
+
+(defun find-sd-card-runbook-section (runbook section-id)
+  (find section-id (sections-of runbook)
+        :key #'id-of
+        :test #'string=))
+
+(defun find-sd-card-runbook-step (runbook step-id)
+  (loop for section in (sections-of runbook)
+        thereis (find step-id (steps-of section)
+                      :key #'id-of
+                      :test #'string=)))
+
+(defun sd-card-creation-command-plan
+    (&key
+       (download-url
+        "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")
+       (compressed-image "nixos-aarch64.img.zst")
+       (raw-image "nixos-aarch64.img")
+       (disk "diskN")
+       (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+  "Return a semantic runbook object for preparing and flashing an aarch64 SD image.
+Raw list structure is preserved as a secondary view."
+  (let* ((sections (make-sd-card-runbook-sections
+                    :download-url download-url
+                    :compressed-image compressed-image
+                    :raw-image raw-image
+                    :disk disk
+                    :kioskberrli-root kioskberrli-root))
+         (runbook (make-instance 'sd-card-runbook
+                                 :id "create-nixos-sd-card-playground-runbook"
+                                 :title "Create NixOS SD Card from HyperDoc Playground"
+                                 :summary "Correction-path aware runbook object for SD-image preparation, flashing, and integration."
+                                 :sections sections)))
+    (setf (slot-value runbook 'raw-structure)
+          (sd-card-runbook->raw-structure runbook))
+    runbook))
+
+(defun sd-card-creation-command-plan-raw (&rest keys &key &allow-other-keys)
+  "Backward-compatible raw command-plan list."
+  (declare (dynamic-extent keys))
+  (sd-card-runbook->raw-structure (apply #'sd-card-creation-command-plan keys)))
+
+(defun sd-card-creation-command-plan-section (section-id)
+  (or (find-sd-card-runbook-section (sd-card-creation-command-plan) section-id)
+      (error "Unknown SD-card runbook section id: ~A" section-id)))
+
+(defun sd-card-creation-command-plan-step (step-id)
+  (or (find-sd-card-runbook-step (sd-card-creation-command-plan) step-id)
+      (error "Unknown SD-card runbook step id: ~A" step-id)))
+
+(defun sd-card-creation-dry-run
+    (&key (stream *standard-output*)
+          (download-url
+           "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")
+          (compressed-image "nixos-aarch64.img.zst")
+          (raw-image "nixos-aarch64.img")
+          (disk "diskN")
+          (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+  "Print the SD-card runbook commands without executing shell actions."
+  (let ((runbook (sd-card-creation-command-plan
+                  :download-url download-url
+                  :compressed-image compressed-image
+                  :raw-image raw-image
+                  :disk disk
+                  :kioskberrli-root kioskberrli-root)))
+    (format stream "~&SD card creation command plan (dry-run):~%")
+    (loop for section in (sections-of runbook)
+          do (progn
+               (format stream "~&~A~%" (title-of section))
+               (loop for step in (steps-of section)
+                     for n from 1
+                     do (progn
+                          (format stream "  ~2D. ~A~%" n (title-of step))
+                          (loop for command in (commands-of step)
+                                do (format stream "      - ~A~%" command))))))
+    (format stream "~&Note: this is a dry-run printout; no shell command was executed.~%")
+    runbook))
+
+(defexample sd-card-creation-command-plan-example
+  "Return the default command plan used by the SD-card creation runbook page."
+  (sd-card-creation-command-plan))
+
+(defexample sd-card-creation-dry-run-example
+  "Return a printable dry-run transcript for the default SD-card command plan."
+  (with-output-to-string (stream)
+    (sd-card-creation-dry-run :stream stream)))
+
+;;
 ;; hauptsache / kioskberrli reference objects
 ;;
 
