@@ -154,6 +154,11 @@ arguments."
    (sections :initarg :sections :reader sections-of)
    (raw-structure :initarg :raw-structure :initform nil :reader raw-structure-of)))
 
+(defclass sd-card-dry-run-transcript ()
+  ((title :initarg :title :reader title-of)
+   (transcript :initarg :transcript :reader transcript-of)
+   (runbook :initarg :runbook :reader runbook-of)))
+
 (defmethod print-object ((object sd-card-procedure-step) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -163,6 +168,10 @@ arguments."
     (format stream "~A" (title-of object))))
 
 (defmethod print-object ((object sd-card-runbook) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object sd-card-dry-run-transcript) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -376,9 +385,14 @@ Raw list structure is preserved as a secondary view."
   (sd-card-creation-command-plan))
 
 (defexample sd-card-creation-dry-run-example
-  "Return a printable dry-run transcript for the default SD-card command plan."
-  (with-output-to-string (stream)
-    (sd-card-creation-dry-run :stream stream)))
+  "Return a semantic transcript object for the default SD-card command plan."
+  (let (runbook)
+    (let ((text (with-output-to-string (stream)
+                  (setf runbook (sd-card-creation-dry-run :stream stream)))))
+      (make-instance 'sd-card-dry-run-transcript
+                     :title "SD card creation command plan (dry-run)"
+                     :transcript text
+                     :runbook runbook))))
 
 (defexample sd-card-primary-semantic-entrypoints-example
   "Regression check: primary page entrypoints resolve to semantic objects, not raw cons lists."

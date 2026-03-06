@@ -37,6 +37,9 @@
 (defmethod views:text-representation ((step sd-card-procedure-step))
   (format nil "Step: ~A" (title-of step)))
 
+(defmethod views:text-representation ((transcript sd-card-dry-run-transcript))
+  (title-of transcript))
+
 ;; Keep link labels clean inside Summary lists while preserving explicit
 ;; pane titles from text-representation.
 (defmethod views:html-representation ((section sd-card-runbook-section) &optional id)
@@ -182,3 +185,22 @@
 (views:defview 👀raw-structure (step sd-card-procedure-step)
   (views:html-view :title "Raw Structure" :priority 90
     (views:html (:pre (views:esc (format nil "~S" (raw-structure-of step)))))))
+
+(views:defview 👀summary (transcript sd-card-dry-run-transcript)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of transcript)))
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (transcript-of transcript))))))
+
+(views:defview 👀items (transcript sd-card-dry-run-transcript)
+  (views:html-view :title "Items" :priority 10
+    (views:html
+      (:h4 "Runbook object")
+      (views:object-ref (runbook-of transcript)))))
+
+(views:defview 👀raw-structure (transcript sd-card-dry-run-transcript)
+  (views:html-view :title "Raw Structure" :priority 90
+    (views:html
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (format nil "~S" (transcript-of transcript)))))))
