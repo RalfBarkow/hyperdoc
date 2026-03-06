@@ -15,6 +15,7 @@
   <li><a expr="(hyperdoc::official-rpi-tutorial-workflow)"><tt>Official Tutorial Workflow</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-download-prebuilt-image&quot;)"><tt>Step 1 object</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step-navigation-example)"><tt>Step navigation regression check</tt></a></li>
+  <li><a expr="(hyperdoc::expr-string-quoting-regression-topic)"><tt>Expr string quoting regression</tt></a></li>
 </ul>
 
 <h2>Official Workflow</h2>
@@ -34,6 +35,24 @@
   SD image. The first task after flashing is configuration and rebuild, not
   installation.
 </p>
+
+<h2>Resolved Regression: Expr String Quoting</h2>
+
+<ul>
+  <li><b>Bug class:</b> HTML <tt>expr</tt> attributes with Lisp string literals must encode quotes as <tt>&amp;quot;...&amp;quot;</tt>.</li>
+  <li><b>Observed failure:</b> step labels rendered, but links were inert (no clickable inspector reference).</li>
+  <li><b>Root cause:</b> <tt>\"...\"</tt> inside HTML attribute text produced malformed reader input for the intended Lisp form.</li>
+  <li><b>Minimal repair set:</b> <tt>da8c815</tt> (quote fix) + <tt>3cf4ff4</tt> (regression coverage and authoring rule).</li>
+</ul>
+
+<h3>Validation checkpoint</h3>
+
+<ol>
+  <li>Force-load HyperDoc in the running image: <tt>(asdf:load-system :hyperdoc :force t)</tt>.</li>
+  <li>Open this page and click <tt>Step 1 object</tt>.</li>
+  <li>Click at least one step inside the <b>Official Workflow</b> list.</li>
+  <li>Confirm both clicks open inspectable <tt>sd-card-procedure-step</tt> targets.</li>
+</ol>
 
 <h2>Representative Configuration</h2>
 

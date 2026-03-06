@@ -93,6 +93,16 @@
    :summary "Upstream nix.dev SD-image workflow: preinstalled image, first rebuild with nixos-rebuild boot, then reboot."
    :references '("Prepare the AArch64 image")))
 
+(defun expr-string-quoting-regression-topic ()
+  (make-topic
+   :id "expr-string-quoting-regression"
+   :title "Expr string quoting regression"
+   :summary "Resolved regression where expr links with Lisp string args rendered visible labels but produced no clickable inspector refs."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "writing-pages.md"
+                 "da8c815"
+                 "3cf4ff4")))
+
 (defun preflight-rpi-sd-image-checklist-topic ()
   (make-topic
    :id "preflight-rpi-sd-image-checklist"
@@ -289,6 +299,44 @@
                  "Journal Gate Script and Lisp Implementation"
                  "HyperBook Journal Tools"
                  "journalmatic-commit-gate-script-example")))
+
+(defun journal-date-origin-and-fork-chronology-topic ()
+  (make-topic
+   :id "journal-date-origin-and-fork-chronology"
+   :title "Journal date origin and fork chronology"
+   :summary "Action dates use runtime epoch millis with monotonic rule max(now, last-date + 1); avoid hardcoded timestamps to prevent fork-induced chronology errors."
+   :references '("Journal Gate Script and Lisp Implementation"
+                 "Journalmatic Journal Checker"
+                 "journalmatic-date-origin-example")))
+
+(defun journal-monotonic-normalization-topic ()
+  (make-topic
+   :id "journal-monotonic-normalization"
+   :title "Journal monotonic normalization"
+   :summary "Normalize journal action dates in existing action order so dates become monotonic and replay remains reconstructable."
+   :references '("Journal Gate Script and Lisp Implementation"
+                 "Journalmatic Repair Tools"
+                 "journalmatic-monotonic-normalization-example")))
+
+(defun fedwiki-page-generation-workflow-topic ()
+  (make-topic
+   :id "fedwiki-page-generation-workflow"
+   :title "FedWiki page-generation workflow"
+   :summary "Reproducible Lisp page generation uses deterministic story/journal construction plus wiki-client-style date assignment (max(now, last+1))."
+   :references '("FedWiki Page-Generation Workflow"
+                 "Journal Gate Script and Lisp Implementation"
+                 "journalmatic-page-generation-workflow-example"
+                 "journalmatic-page-generation-wiki-client-style-example"
+                 "https://github.com/fedwiki/wiki-client/commit/d4420c72a49305ca52d18ce8203bc95bdd3f59d2")))
+
+(defun git-blame-operation-topic ()
+  (make-topic
+   :id "git-blame-operation"
+   :title "Git blame operation"
+   :summary "Use git blame on exact file lines to prove which commit introduced timestamp behavior in wiki-client."
+   :references '("FedWiki Page-Generation Workflow"
+                 "wiki-client-blame-operation-example"
+                 "https://github.com/fedwiki/wiki-client/commit/d4420c72a49305ca52d18ce8203bc95bdd3f59d2")))
 
 (defun fedwiki-story-item-id-policy-topic ()
   (make-topic
