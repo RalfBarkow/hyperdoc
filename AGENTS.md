@@ -158,17 +158,17 @@ searchable.
 
 Current mapping artifacts (2026-03-06 migration commit `a3db41d5`):
 
-- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv`
-- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.json`
-- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json`
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-map-2026-03-06.tsv`
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-map-2026-03-06.json`
+- `/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-index-2026-03-06.json`
 - `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/fedwiki-story-id-normalization-map-2026-03-06`
 
 Lookup commands:
 
 - TSV grep:
-  - `rg -n '^<OLD_ID>\t' /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv`
+  - `rg -n '^<OLD_ID>\t' /Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-map-2026-03-06.tsv`
 - JSON index:
-  - `jq -r '.old_id_index["<OLD_ID>"][] | [.new_id,.page,.path] | @tsv' /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json`
+  - `jq -r '.old_id_index["<OLD_ID>"][] | [.new_id,.page,.path] | @tsv' /Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-index-2026-03-06.json`
 
 Notes:
 

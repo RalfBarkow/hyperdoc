@@ -104,9 +104,9 @@
 </p>
 
 <ul>
-  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv</tt></li>
-  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.json</tt></li>
-  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json</tt></li>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-map-2026-03-06.tsv</tt></li>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-map-2026-03-06.json</tt></li>
+  <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-index-2026-03-06.json</tt></li>
   <li><tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/fedwiki-story-id-normalization-map-2026-03-06</tt></li>
 </ul>
 
@@ -115,10 +115,10 @@
 </p>
 
 <pre>
-rg -n '^&lt;OLD_ID&gt;\t' /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-map-2026-03-06.tsv
+rg -n '^&lt;OLD_ID&gt;\t' /Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-map-2026-03-06.tsv
 </pre>
 
 <pre>
 jq -r '.old_id_index["&lt;OLD_ID&gt;"][] | [.new_id,.page,.path] | @tsv' \
-  /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/id-normalization-index-2026-03-06.json
+  /Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/fedwiki-story-id-normalization-map-2026-03-06/id-normalization-index-2026-03-06.json
 </pre>
