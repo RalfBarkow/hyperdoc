@@ -1,0 +1,54 @@
+<h1>Deploy dreyeck.ch from the local flake</h1>
+
+<p>
+  Activate the <tt>dreyeck-ch</tt> NixOS host configuration over SSH from your local working tree.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Promote the locally verified flake state to the target host without server-side branch assembly.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a> has passed.</li>
+  <li>SSH access to <tt>dreyeck.ch</tt> (or its admin SSH target).</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  <tt>hauptsache</tt> should be verified locally and deployed from the local flake; the server should not be repaired by checking out that branch directly.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Deploy from a Linux controller host:
+<pre>
+nixos-rebuild --flake .#dreyeck-ch --target-host &lt;ssh-target&gt; switch
+</pre>
+  </li>
+  <li>If the controller is macOS or non-Linux, use a Linux build host:
+<pre>
+nixos-rebuild --flake .#dreyeck-ch \
+  --build-host &lt;linux-builder&gt; \
+  --target-host &lt;ssh-target&gt; \
+  switch
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  The target host switches to the deployed <tt>dreyeck-ch</tt> generation built from local flake state.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a>.
+</p>

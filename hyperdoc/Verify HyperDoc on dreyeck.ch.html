@@ -1,0 +1,56 @@
+<h1>Verify HyperDoc on dreyeck.ch</h1>
+
+<p>
+  Run minimal post-deploy checks against the deployed service.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Confirm that the service is reachable, key page routing works, and URL helper assets are served.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a> has completed.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  These checks are remote validation, not local build validation.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Check boot page:
+<pre>
+curl -I https://dreyeck.ch/boot.html
+</pre>
+  </li>
+  <li>Check one key HyperDoc page (official tutorial):
+<pre>
+curl -I "https://dreyeck.ch/584FD-hyperdoc/Official%20Tutorial%3A%20NixOS%20SD%20Image%20on%20Raspberry%20Pi%204%2F400"
+</pre>
+  </li>
+  <li>Check URL helper asset:
+<pre>
+curl -I https://dreyeck.ch/hyperbook-server/js/url.js
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<ul>
+  <li>All three checks return HTTP <tt>200</tt>.</li>
+  <li>No broken relative-slug URL behavior is observed in the deployed page flow.</li>
+</ul>
+
+<h2>Rollback/next step</h2>
+
+<p>
+  If checks fail, run <a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a>.
+</p>

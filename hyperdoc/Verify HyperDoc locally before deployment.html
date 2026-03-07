@@ -1,0 +1,56 @@
+<h1>Verify HyperDoc locally before deployment</h1>
+
+<p>
+  Run the minimum local checks before any remote activation.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Fail fast locally if flake checks, runtime checks, or smoke checks are broken.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Prepare hauptsache working tree for deployment">Prepare hauptsache working tree for deployment</a> has passed.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  Local verification gates deployment. Do not skip this and debug first on the server.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Check local working tree:
+<pre>
+git status --short
+</pre>
+  </li>
+  <li>Run flake checks:
+<pre>
+nix flake check
+</pre>
+  </li>
+  <li>Run release smoke verification:
+<pre>
+nix run .#release-smoke
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<ul>
+  <li><tt>nix flake check</tt> exits <tt>0</tt>.</li>
+  <li><tt>nix run .#release-smoke</tt> exits <tt>0</tt> and prints the release verification success marker.</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a>.
+</p>

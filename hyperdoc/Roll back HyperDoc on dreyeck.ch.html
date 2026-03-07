@@ -1,0 +1,51 @@
+<h1>Roll back HyperDoc on dreyeck.ch</h1>
+
+<p>
+  Revert to a previous NixOS generation if deployment validation fails.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Restore a known-good service state quickly using standard NixOS rollback.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>Root or sudo access on <tt>dreyeck.ch</tt>.</li>
+  <li>A previous working system generation exists.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  Rollback uses NixOS generation switching, not custom release symlink switching.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Rollback to the previous generation:
+<pre>
+sudo nixos-rebuild --rollback switch
+</pre>
+  </li>
+  <li>If you need a specific generation, activate it directly:
+<pre>
+sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bin/switch-to-configuration switch
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  The host runs the selected older generation and HyperDoc should return to its previous behavior.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Re-run <a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a> after rollback.
+</p>

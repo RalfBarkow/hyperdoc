@@ -1,0 +1,49 @@
+<h1>Get hauptsache working on dreyeck.ch</h1>
+
+<p>
+  Minimal operator procedure to deploy HyperDoc from a local <tt>hauptsache</tt>
+  working tree to the NixOS host <tt>dreyeck.ch</tt>.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Provide the shortest credible deployment path with clear checkpoints and rollback.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>SSH access to the target host.</li>
+  <li>Nix CLI and flake support on the controller machine.</li>
+  <li>Local repository checkout at branch <tt>hauptsache</tt>.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  <tt>hauptsache</tt> should be verified locally and deployed from the local flake; the server should not be repaired by checking out that branch directly.
+</p>
+
+<h2>Task sequence</h2>
+
+<ol>
+  <li><a page="Prepare hauptsache working tree for deployment">Prepare hauptsache working tree for deployment</a></li>
+  <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a></li>
+  <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a></li>
+  <li><a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a></li>
+  <li><a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a></li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  You have a local-first deployment path with explicit prechecks, deployment command, remote checks, and rollback.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Start with
+  <a page="Prepare hauptsache working tree for deployment">Prepare hauptsache working tree for deployment</a>.
+</p>
