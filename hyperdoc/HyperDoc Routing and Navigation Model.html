@@ -1,0 +1,95 @@
+<h1>HyperDoc Routing and Navigation Model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page defines routing and navigation semantics for HyperDoc across local
+  and remote page contexts.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::hyperdoc-routing-and-navigation-model-topic)"><tt>HyperDoc routing and navigation model</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-navigation-targets-topic)"><tt>HyperDoc navigation targets</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-routing-boundaries-topic)"><tt>HyperDoc routing boundaries</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-runtime-model-topic)"><tt>HyperDoc runtime model</tt></a></li>
+</ul>
+
+<h2>Why a routing model matters</h2>
+
+<p>
+  HyperDoc navigation spans local pages, linked hyperbooks, and remote page
+  stores. Explicit routing rules reduce ambiguity and prevent category mistakes
+  when the same visible title can map to different storage keys or contexts.
+</p>
+
+<h2>Slugs, pages, and navigation targets</h2>
+
+<p>
+  A navigation target is resolved from an explicit page key in a specific
+  context. In FedWiki-linked contexts, slug/file keys are the stable routing
+  target. Titles are display labels and may not be unique routing identifiers.
+</p>
+
+<h2>Local navigation vs remote navigation</h2>
+
+<ul>
+  <li><b>Local navigation:</b> opens pages in the local HyperDoc catalog using local page keys.</li>
+  <li><b>Remote navigation:</b> opens pages through a named hyperbook context where key resolution belongs to that source.</li>
+  <li><b>Cross-context rule:</b> keep source context explicit so local and remote lookup semantics do not collapse.</li>
+</ul>
+
+<h2>Pane and context behavior</h2>
+
+<p>
+  Navigation occurs in pane/context structures where each pane keeps object
+  state and view context. Opening a target in the same pane or a new pane is an
+  interaction decision, but target resolution still depends on explicit source
+  context and page key.
+</p>
+
+<h2>Opening local HyperDoc pages</h2>
+
+<ul>
+  <li>Use local page keys for deterministic lookup in the HyperDoc catalog.</li>
+  <li>Prefer explicit links between architecture pages to keep routes stable.</li>
+  <li>Use inspectable objects when navigation should also expose runtime handles.</li>
+</ul>
+
+<h2>Opening remote FedWiki pages</h2>
+
+<ul>
+  <li>Use explicit hyperbook context plus slug-based page key for lookup.</li>
+  <li>Do not rely on visible title text as a routing key when a slug exists.</li>
+  <li>Treat remote page access as linked context traversal, not local page substitution.</li>
+</ul>
+
+<h2>Routing boundaries and responsibilities</h2>
+
+<ul>
+  <li><b>Page authoring layer:</b> chooses explicit navigation targets and context.</li>
+  <li><b>Routing layer:</b> resolves target keys in the correct local/remote source.</li>
+  <li><b>Inspector/UI layer:</b> controls pane behavior after resolution.</li>
+  <li><b>Boundary rule:</b> routing semantics and display labels remain distinct concerns.</li>
+</ul>
+
+<h2>Known confusion points and historical failure modes</h2>
+
+<ul>
+  <li>Title/slug ambiguity: title links can fail where slug keys are required.</li>
+  <li>Context collapse: local and remote targets treated as if they shared one lookup namespace.</li>
+  <li>Pane confusion: interaction behavior mistaken for routing failure when resolution context is wrong.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
+  <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
+</ul>

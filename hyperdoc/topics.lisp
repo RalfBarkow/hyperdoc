@@ -1496,4 +1496,34 @@
                  "Documentation Surfaces in HyperDoc"
                  "FedWiki Page-Generation Workflow")))
 
+(defun hyperdoc-routing-and-navigation-model-topic ()
+  (make-topic
+   :id "hyperdoc-routing-and-navigation-model"
+   :title "HyperDoc routing and navigation model"
+   :summary "Architectural model describing how HyperDoc resolves and opens local and remote page targets across contexts."
+   :references '("HyperDoc Routing and Navigation Model"
+                 "HyperDoc Runtime Model"
+                 "Documentation Surfaces in HyperDoc"
+                 "Design")))
+
+(defun hyperdoc-navigation-targets-topic ()
+  (make-topic
+   :id "hyperdoc-navigation-targets"
+   :title "HyperDoc navigation targets"
+   :summary "Navigation target model distinguishing stable page keys/slugs from display titles across local and remote contexts."
+   :references '("HyperDoc Routing and Navigation Model"
+                 "HyperDoc Runtime Model"
+                 "FedWiki Page-Generation Workflow"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun hyperdoc-routing-boundaries-topic ()
+  (make-topic
+   :id "hyperdoc-routing-boundaries"
+   :title "HyperDoc routing boundaries"
+   :summary "Boundary rules separating routing resolution, pane interaction behavior, and source-specific lookup responsibility."
+   :references '("HyperDoc Routing and Navigation Model"
+                 "HyperDoc Runtime Model"
+                 "Documentation Surfaces in HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
 ;;
