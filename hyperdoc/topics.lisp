@@ -1267,4 +1267,140 @@
    :references '("Post-Incident Recovery Under Autonomous Threat"
                  "Autonomous Weapons Resilience Playbook")))
 
+;; Glamorous Toolkit acquisition/install topics.
+(defun gtoolkit-acquisition-modes-topic ()
+  (make-topic
+   :id "gtoolkit-acquisition-modes"
+   :title "Glamorous Toolkit acquisition modes"
+   :summary "GT can be used either from a ready-made distribution or by cloning/building from source."
+   :references '("Installing Glamorous Toolkit"
+                 "Acknowledgements"
+                 "https://gtoolkit.com/download/"
+                 "https://github.com/feenkcom/gtoolkit")))
+
+(defun gtoolkit-ready-made-distribution-topic ()
+  (make-topic
+   :id "gtoolkit-ready-made-distribution"
+   :title "Glamorous Toolkit ready-made distribution"
+   :summary "The packaged download is the default path for using GT without building it from source."
+   :references '("Installing Glamorous Toolkit"
+                 "Acknowledgements"
+                 "https://gtoolkit.com/download/")))
+
+(defun gtoolkit-source-install-topic ()
+  (make-topic
+   :id "gtoolkit-source-install"
+   :title "Glamorous Toolkit source install"
+   :summary "The source-install path installs the VM, clones the GitHub repository, and builds an image; upstream says this is useful for developing GT itself."
+   :references '("Installing Glamorous Toolkit"
+                 "https://gtoolkit.com/download/"
+                 "https://github.com/feenkcom/gtoolkit")))
+
+(defun gtoolkit-moldable-development-topic ()
+  (make-topic
+   :id "gtoolkit-moldable-development"
+   :title "Glamorous Toolkit as moldable development environment"
+   :summary "GT is presented upstream as the Moldable Development Environment and is already acknowledged in HyperDoc as a reference platform."
+   :references '("Installing Glamorous Toolkit"
+                 "Acknowledgements"
+                 "Design"
+                 "Goals and values"
+                 "https://github.com/feenkcom/gtoolkit"
+                 "https://moldabledevelopment.com/")))
+
+(defun gtoolkit-nix-installation-note-topic ()
+  (make-topic
+   :id "gtoolkit-nix-installation-note"
+   :title "Glamorous Toolkit Nix installation note"
+   :summary "The official download page defers Nix-specific usage instructions to the GT book."
+   :references '("Installing Glamorous Toolkit"
+                 "https://gtoolkit.com/download/"
+                 "https://book.gtoolkit.com")))
+
+(defun gtoolkit-and-hyperdoc-topic ()
+  (make-topic
+   :id "gtoolkit-and-hyperdoc"
+   :title "Glamorous Toolkit and HyperDoc"
+   :summary "Conceptual bridge page describing correspondences and distinctions between GT as a moldable environment and HyperDoc as a hypertext documentation system."
+   :references '("Glamorous Toolkit and HyperDoc"
+                 "Acknowledgements"
+                 "Design"
+                 "Goals and values"
+                 "Installing Glamorous Toolkit"
+                 "https://github.com/feenkcom/gtoolkit")))
+
+(defun reference-platforms-topic ()
+  (make-topic
+   :id "reference-platforms"
+   :title "Reference platforms"
+   :summary "Reference platforms are used as conceptual anchors to compare adopted ideas, reinterpretations, and intentional omissions."
+   :references '("Glamorous Toolkit and HyperDoc"
+                 "Acknowledgements"
+                 "Design")))
+
+(defun moldable-development-reference-systems-topic ()
+  (make-topic
+   :id "moldable-development-reference-systems"
+   :title "Moldable development reference systems"
+   :summary "Systems used as reference points for moldable-development practices while preserving local goals, constraints, and media choices."
+   :references '("Glamorous Toolkit and HyperDoc"
+                 "Goals and values"
+                 "https://moldabledevelopment.com/"
+                 "https://github.com/feenkcom/gtoolkit")))
+
+(defun hyperdoc-reference-systems-topic ()
+  (make-topic
+   :id "hyperdoc-reference-systems"
+   :title "HyperDoc reference systems"
+   :summary "Reference systems in HyperDoc documentation are explicit conceptual anchors used to compare, adapt, and bound design choices."
+   :references '("Reference Systems in HyperDoc"
+                 "Design"
+                 "Goals and values"
+                 "Glamorous Toolkit and HyperDoc")))
+
+(defun reference-system-boundaries-topic ()
+  (make-topic
+   :id "reference-system-boundaries"
+   :title "Reference system boundaries"
+   :summary "Boundary statements preserve differences between systems with shared concerns, preventing accidental equivalence in architecture or workflow."
+   :references '("Reference Systems in HyperDoc"
+                 "Glamorous Toolkit and HyperDoc"
+                 "Communication Surfaces Policy")))
+
+(defun adopting-without-equating-topic ()
+  (make-topic
+   :id "adopting-without-equating"
+   :title "Adopting without equating"
+   :summary "HyperDoc can adopt methods from reference systems while keeping scope, medium, and ownership distinctions explicit."
+   :references '("Reference Systems in HyperDoc"
+                 "Glamorous Toolkit and HyperDoc"
+                 "Acknowledgements")))
+
+(defun documentation-surfaces-in-hyperdoc-topic ()
+  (make-topic
+   :id "documentation-surfaces-in-hyperdoc"
+   :title "Documentation Surfaces in HyperDoc"
+   :summary "Defines durable pages, topic objects, inspectable object handles, and FedWiki twins as distinct documentation surfaces with explicit correspondence rules."
+   :references '("Documentation Surfaces in HyperDoc"
+                 "Reference Systems in HyperDoc"
+                 "Communication Surfaces Policy")))
+
+(defun hyperdoc-surface-boundaries-topic ()
+  (make-topic
+   :id "hyperdoc-surface-boundaries"
+   :title "HyperDoc surface boundaries"
+   :summary "Boundary rules separating narrative pages, inspectable topic objects, embedded object handles, and parallel FedWiki artifacts."
+   :references '("Documentation Surfaces in HyperDoc"
+                 "Communication Surfaces Policy"
+                 "Reference Systems in HyperDoc")))
+
+(defun page-topic-twin-correspondence-topic ()
+  (make-topic
+   :id "page-topic-twin-correspondence"
+   :title "Page/topic/twin correspondence"
+   :summary "Correspondence model linking pages, topic objects, and FedWiki twins by intent and references rather than literal structural identity."
+   :references '("Documentation Surfaces in HyperDoc"
+                 "Communication Surfaces Policy"
+                 "Glamorous Toolkit and HyperDoc")))
+
 ;;

@@ -1,0 +1,107 @@
+<h1>Documentation Surfaces in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page defines the documentation surfaces used in this repository and how
+  they relate without collapsing into false symmetry.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::documentation-surfaces-in-hyperdoc-topic)"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-surface-boundaries-topic)"><tt>HyperDoc surface boundaries</tt></a></li>
+  <li><a expr="(hyperdoc::page-topic-twin-correspondence-topic)"><tt>Page/topic/twin correspondence</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-reference-systems-topic)"><tt>HyperDoc reference systems</tt></a></li>
+</ul>
+
+<h2>Why documentation surfaces matter</h2>
+
+<p>
+  HyperDoc work spans multiple media. Explicit surface definitions keep
+  structure stable: they prevent category mistakes such as treating all
+  artifacts as interchangeable or assuming one representation can substitute for
+  all others.
+</p>
+
+<h2>Durable HyperDoc pages</h2>
+
+<p>
+  Durable pages in <tt>hyperdoc/*.html</tt> and <tt>hyperdoc/*.md</tt> capture
+  architectural distinctions, stable operational guidance, and reference links.
+  They are intended to remain readable and reusable across iterations.
+</p>
+
+<h2>Topic objects in topics.lisp</h2>
+
+<p>
+  Topic objects in <tt>hyperdoc/topics.lisp</tt> are explicit inspectable
+  semantic handles with <tt>:id</tt>, <tt>:title</tt>, <tt>:summary</tt>, and
+  <tt>:references</tt>. A HyperDoc page is not the same thing as a topic object:
+  pages carry narrative structure; topics carry inspectable concept identity.
+</p>
+
+<h2>Inspectable objects embedded in pages</h2>
+
+<p>
+  Inspectable objects in pages are embedded explanatory handles, typically via
+  <tt>expr</tt> links. They are not only navigation links; they expose runtime
+  objects that can be inspected with views and used as semantic anchors in
+  explanation.
+</p>
+
+<h2>FedWiki twins as parallel knowledge artifacts</h2>
+
+<p>
+  FedWiki twins are parallel artifacts for journaling, iteration, and
+  collaborative editing. They are not literal serialization targets for every
+  HTML detail in HyperDoc pages. Correspondence should preserve topic-level
+  intent, not enforce markup identity.
+</p>
+
+<h2>Cross-linking and correspondence rules</h2>
+
+<ul>
+  <li>Cross-link surfaces by stable topic/page intent, not by requiring identical structure.</li>
+  <li>Use explicit links between HyperDoc pages, topic objects, and FedWiki twins where useful.</li>
+  <li>Prefer additive updates to twins; avoid destructive overwrite workflows.</li>
+</ul>
+
+<h2>What belongs on which surface</h2>
+
+<ul>
+  <li><b>Durable HyperDoc pages:</b> stable distinctions, architecture, and guidance.</li>
+  <li><b>Topic objects:</b> inspectable concept handles and curated reference lists.</li>
+  <li><b>Inspectable objects in pages:</b> runtime explanatory entry points for concepts/workflows/examples.</li>
+  <li><b>FedWiki twins:</b> parallel working/journaling artifacts with topic correspondence.</li>
+</ul>
+
+<h2>Failure modes and drift risks</h2>
+
+<ul>
+  <li>False symmetry: assuming page, topic object, and twin are equivalent artifacts.</li>
+  <li>Structure drift: moving concept ownership into whatever surface is easiest to edit.</li>
+  <li>Link drift: missing correspondence links between durable and working surfaces.</li>
+</ul>
+
+<h2>Practical authoring guidance</h2>
+
+<ol>
+  <li>Write or update a durable page when a distinction should guide future work.</li>
+  <li>Add or update topic objects when a concept needs explicit inspectable identity.</li>
+  <li>Add <tt>Inspectable objects</tt> entries when page claims should be tied to inspectable runtime handles.</li>
+  <li>Create or update FedWiki twins when collaborative iteration/journaling is needed.</li>
+  <li>Check correspondence links, but do not force identical shape across surfaces.</li>
+</ol>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a page="Goals and values">Goals and values</a></li>
+  <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
+</ul>
