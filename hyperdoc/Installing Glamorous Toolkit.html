@@ -1,0 +1,93 @@
+<h1>Installing Glamorous Toolkit</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents durable installation distinctions for Glamorous Toolkit
+  (GT): packaged use versus source installation for development of GT itself.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::gtoolkit-acquisition-modes-topic)"><tt>Glamorous Toolkit acquisition modes</tt></a></li>
+  <li><a expr="(hyperdoc::gtoolkit-ready-made-distribution-topic)"><tt>Glamorous Toolkit ready-made distribution</tt></a></li>
+  <li><a expr="(hyperdoc::gtoolkit-source-install-topic)"><tt>Glamorous Toolkit source install</tt></a></li>
+  <li><a expr="(hyperdoc::gtoolkit-moldable-development-topic)"><tt>Glamorous Toolkit as moldable development environment</tt></a></li>
+  <li><a expr="(hyperdoc::gtoolkit-nix-installation-note-topic)"><tt>Glamorous Toolkit Nix installation note</tt></a></li>
+</ul>
+
+<h2>Why this matters for HyperDoc</h2>
+
+<p>
+  HyperDoc is aligned with moldable development and explainable tooling.
+  GT is already acknowledged in HyperDoc as a reference platform in that space.
+  Installation guidance here keeps the durable distinction clear:
+  use GT from packaged binaries, or install from source when developing GT itself.
+</p>
+
+<h2>Two acquisition modes</h2>
+
+<ol>
+  <li>Ready-made distribution (default for using GT).</li>
+  <li>Clone and install latest code (for developing GT itself).</li>
+</ol>
+
+<h2>Ready-made distribution</h2>
+
+<p>
+  The packaged distribution is the normal way to start using GT. Use the official
+  download page as the entry point:
+  <a href="https://gtoolkit.com/download/">https://gtoolkit.com/download/</a>.
+</p>
+
+<h2>Clone and install latest code</h2>
+
+<p>
+  Upstream describes this as the path that installs the VM, clones GT from GitHub,
+  and builds an image. It is useful when developing Glamorous Toolkit itself.
+</p>
+
+<p>
+  Current upstream source-install commands:
+</p>
+
+<pre>
+Mac:
+curl https://dl.feenk.com/scripts/mac.sh | bash
+
+Linux:
+curl https://dl.feenk.com/scripts/linux.sh | bash
+
+Windows:
+wget https://dl.feenk.com/scripts/windows.ps1 -OutFile windows.ps1; ./windows.ps1
+</pre>
+
+<h2>When to choose which path</h2>
+
+<ul>
+  <li>Choose ready-made distribution when you want to use GT now with minimal setup.</li>
+  <li>Choose source install when you need latest code and contributor/developer workflow for GT itself.</li>
+</ul>
+
+<h2>Relation to Moldable Development</h2>
+
+<p>
+  The GT GitHub repository describes GT as the Moldable Development Environment
+  and states that it is built in Pharo and Rust. This fits HyperDoc's own focus
+  on explainable, contextual tools.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Acknowledgements">Acknowledgements</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a page="Goals and values">Goals and values</a></li>
+  <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
+  <li><a href="https://gtoolkit.com/download/">https://gtoolkit.com/download/</a></li>
+  <li><a href="https://github.com/feenkcom/gtoolkit">https://github.com/feenkcom/gtoolkit</a></li>
+  <li><a href="https://book.gtoolkit.com">https://book.gtoolkit.com</a></li>
+</ul>
