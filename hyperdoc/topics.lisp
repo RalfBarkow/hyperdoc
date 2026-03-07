@@ -150,6 +150,86 @@
    :summary "Distinguishes prebuilt SD-image workflow from classic installer workflow to avoid command-model drift."
    :references '("Prepare the AArch64 image")))
 
+(defun nixos-rebuild-topic ()
+  (make-topic
+   :id "nixos-rebuild"
+   :title "nixos-rebuild"
+   :summary "Umbrella topic for rebuild operations in this SD-image workflow."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Two Installation Models: SD Image vs Classic Installer")))
+
+(defun nixos-rebuild-boot-topic ()
+  (make-topic
+   :id "nixos-rebuild-boot"
+   :title "nixos-rebuild boot"
+   :summary "Write next boot generation to /boot; preferred first rebuild in the flashed SD-image workflow."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Invariant: Boot Partition Must Be Big Enough"
+                 "Two Installation Models: SD Image vs Classic Installer")))
+
+(defun nixos-rebuild-switch-topic ()
+  (make-topic
+   :id "nixos-rebuild-switch"
+   :title "nixos-rebuild switch"
+   :summary "Activate immediately; only use later, after reboot safety is established."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Pre-flight Checklist for Raspberry Pi NixOS SD Images")))
+
+(defun nixos-rebuild-test-topic ()
+  (make-topic
+   :id "nixos-rebuild-test"
+   :title "nixos-rebuild test"
+   :summary "Runtime-only activation; does not prove boot-path safety."
+   :references '("Invariant: Boot Partition Must Be Big Enough"
+                 "Pre-flight Checklist for Raspberry Pi NixOS SD Images")))
+
+(defun first-rebuild-before-first-reboot-topic ()
+  (make-topic
+   :id "first-rebuild-before-first-reboot"
+   :title "First rebuild before first reboot"
+   :summary "The first configuration change after flashing should be followed by nixos-rebuild boot, then reboot."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Two Installation Models: SD Image vs Classic Installer")))
+
+(defun reboot-safety-gate-topic ()
+  (make-topic
+   :id "reboot-safety-gate"
+   :title "Reboot safety gate"
+   :summary "Pre-flight checks required before trusting the next reboot after rebuild."
+   :references '("Pre-flight Checklist for Raspberry Pi NixOS SD Images"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Invariant: Boot Partition Must Be Big Enough")))
+
+(defun boot-partition-capacity-for-nixos-rebuild-boot-topic ()
+  (make-topic
+   :id "boot-partition-capacity-for-nixos-rebuild-boot"
+   :title "Boot partition capacity for nixos-rebuild boot"
+   :summary "nixos-rebuild boot depends on adequate /boot capacity and intact extlinux state."
+   :references '("Invariant: Boot Partition Must Be Big Enough"
+                 "Pre-flight Checklist for Raspberry Pi NixOS SD Images"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun sd-image-first-rebuild-model-topic ()
+  (make-topic
+   :id "sd-image-first-rebuild-model"
+   :title "SD-image first rebuild model"
+   :summary "The preinstalled-image workflow uses nixos-rebuild boot; contrast with installer workflow."
+   :references '("Two Installation Models: SD Image vs Classic Installer"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun classic-installer-model-topic ()
+  (make-topic
+   :id "classic-installer-model"
+   :title "Classic installer model"
+   :summary "The /mnt installer path uses nixos-install, not nixos-rebuild boot."
+   :references '("Two Installation Models: SD Image vs Classic Installer"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400")))
+
 (defun dmx-topic-912138 ()
   (make-topic
    :id "dmx-topic-912138"
