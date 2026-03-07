@@ -1,0 +1,69 @@
+<h1>Locate and replace the legacy workspace hyperdoc.service definition</h1>
+
+<p>
+  Find where the old workspace-checkout unit is defined and replace it with the supported flake/NixOS deployment path.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Remove dependence on <tt>/home/rgb/workspace/hyperdoc</tt> as the runtime source under systemd.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Diagnose sbcl command-not-found in the legacy hyperdoc.service">Diagnose sbcl command-not-found in the legacy hyperdoc.service</a> completed.</li>
+  <li>Access to the NixOS configuration source used for <tt>dreyeck.ch</tt>.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  Installing <tt>sbcl</tt> into the legacy unit PATH is only an emergency workaround. The supported fix is to replace the legacy unit model.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Find where the old unit definition is declared:
+<pre>
+grep -R "HyperDoc (workspace checkout)" /etc/nixos /home/rgb/workspace 2>/dev/null
+grep -R "/home/rgb/workspace/hyperdoc" /etc/nixos /home/rgb/workspace 2>/dev/null
+grep -R "exec ./start.sh" /etc/nixos /home/rgb/workspace 2>/dev/null
+</pre>
+  </li>
+  <li>Remove or replace that legacy definition in the host configuration.</li>
+  <li>Ensure the target model is flake-driven deployment from local source state, not a server-local checkout launcher.</li>
+  <li>Confirm the required deployment outputs exist locally:
+<pre>
+nix eval --raw .#nixosConfigurations.dreyeck-ch.config.networking.hostName
+nix eval --raw .#apps.$(nix eval --raw --impure --expr builtins.currentSystem).release-smoke.program
+</pre>
+  </li>
+</ol>
+
+<h2>Emergency note</h2>
+
+<p>
+  While migrating, you may stop restart-loop noise temporarily:
+</p>
+
+<pre>
+sudo systemctl disable --now hyperdoc
+</pre>
+
+<h2>Result</h2>
+
+<ul>
+  <li>The old workspace-checkout unit definition is identified for removal/replacement.</li>
+  <li>The migration path is aligned to supported deployment.</li>
+  <li>If the <tt>nixosConfigurations.dreyeck-ch</tt> or <tt>release-smoke</tt> checks fail here, stop and port the missing deployment profile before continuing.</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with
+  <a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a>.
+</p>

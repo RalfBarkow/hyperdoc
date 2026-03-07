@@ -1,0 +1,54 @@
+<h1>Diagnose sbcl command-not-found in the legacy hyperdoc.service</h1>
+
+<p>
+  Reproduce and explain why the legacy workspace unit exits with status <tt>127</tt>.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Verify the failure mode before replacing the old unit definition.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch">Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch</a> confirms the legacy unit is active.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  Observed logs show: <tt>/home/rgb/workspace/hyperdoc/start.sh: line 24: sbcl: command not found</tt>.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Inspect the launcher script used by the unit:
+<pre>
+sudo -u rgb bash -lc 'cd /home/rgb/workspace/hyperdoc && sed -n "1,60p" start.sh'
+</pre>
+  </li>
+  <li>Run the same launcher manually as the service user:
+<pre>
+sudo -u rgb bash -lc 'cd /home/rgb/workspace/hyperdoc && ./start.sh'
+</pre>
+  </li>
+  <li>Confirm that the script directly invokes <tt>sbcl</tt> and fails with command-not-found.</li>
+</ol>
+
+<h2>Result</h2>
+
+<ul>
+  <li><tt>status=127</tt> means command not found.</li>
+  <li>In this case, the missing command is <tt>sbcl</tt>.</li>
+  <li>The legacy workspace unit PATH does not provide <tt>sbcl</tt>, so this unit cannot start as currently configured.</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with
+  <a page="Locate and replace the legacy workspace hyperdoc.service definition">Locate and replace the legacy workspace hyperdoc.service definition</a>.
+</p>

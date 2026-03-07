@@ -28,22 +28,40 @@
 <h2>Task sequence</h2>
 
 <ol>
-  <li><a page="Prepare hauptsache working tree for deployment">Prepare hauptsache working tree for deployment</a></li>
+  <li><a page="Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch">Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch</a></li>
+  <li><a page="Diagnose sbcl command-not-found in the legacy hyperdoc.service">Diagnose sbcl command-not-found in the legacy hyperdoc.service</a></li>
+  <li><a page="Locate and replace the legacy workspace hyperdoc.service definition">Locate and replace the legacy workspace hyperdoc.service definition</a></li>
   <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a></li>
   <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a></li>
   <li><a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a></li>
   <li><a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a></li>
 </ol>
 
+<h2>Observed blocker</h2>
+
+<p>
+  If <tt>hyperdoc.service</tt> still says “HyperDoc (workspace checkout)”, dreyeck.ch is still on the old deployment model, and that must be replaced before <tt>hauptsache</tt> can be deployed in the supported way.
+</p>
+
+<h2>Emergency note</h2>
+
+<p>
+  To stop restart-loop noise during migration, you may temporarily disable the old unit:
+</p>
+
+<pre>
+sudo systemctl disable --now hyperdoc
+</pre>
+
 <h2>Result</h2>
 
 <p>
-  You have a local-first deployment path with explicit prechecks, deployment command, remote checks, and rollback.
+  You have a blocker-first deployment path: identify and replace the legacy unit, then verify locally, deploy from local flake state, verify remotely, and rollback if needed.
 </p>
 
 <h2>Next step</h2>
 
 <p>
   Start with
-  <a page="Prepare hauptsache working tree for deployment">Prepare hauptsache working tree for deployment</a>.
+  <a page="Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch">Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch</a>.
 </p>

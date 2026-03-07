@@ -13,7 +13,7 @@
 <h2>Prerequisites</h2>
 
 <ul>
-  <li><a page="Prepare hauptsache working tree for deployment">Prepare hauptsache working tree for deployment</a> has passed.</li>
+  <li><a page="Locate and replace the legacy workspace hyperdoc.service definition">Locate and replace the legacy workspace hyperdoc.service definition</a> completed.</li>
 </ul>
 
 <h2>Context</h2>
@@ -47,6 +47,7 @@ nix run .#release-smoke
 <ul>
   <li><tt>nix flake check</tt> exits <tt>0</tt>.</li>
   <li><tt>nix run .#release-smoke</tt> exits <tt>0</tt> and prints the release verification success marker.</li>
+  <li>This step validates local branch state only; it does not yet prove remote server success.</li>
 </ul>
 
 <h2>Next step</h2>

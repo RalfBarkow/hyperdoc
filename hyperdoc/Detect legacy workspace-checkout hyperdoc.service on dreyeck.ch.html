@@ -1,0 +1,59 @@
+<h1>Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch</h1>
+
+<p>
+  Determine whether <tt>dreyeck.ch</tt> is still running the old server-local workspace service model.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  Confirm whether the host is blocked on the legacy unit before attempting deployment.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>SSH access to <tt>dreyeck.ch</tt>.</li>
+  <li>Permissions to inspect systemd units and logs.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  The observed blocker is a legacy unit that launches HyperDoc from
+  <tt>/home/rgb/workspace/hyperdoc/start.sh</tt>.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Inspect the unit definition:
+<pre>
+systemctl cat hyperdoc.service
+</pre>
+  </li>
+  <li>Inspect recent boot logs for the unit:
+<pre>
+journalctl -u hyperdoc -b -n 100 --no-pager
+</pre>
+  </li>
+  <li>Check for legacy markers:
+    <ul>
+      <li><tt>Description=HyperDoc (workspace checkout)</tt></li>
+      <li><tt>cd /home/rgb/workspace/hyperdoc && exec ./start.sh</tt></li>
+    </ul>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  If <tt>hyperdoc.service</tt> still says “HyperDoc (workspace checkout)”, dreyeck.ch is still on the old deployment model, and that must be replaced before <tt>hauptsache</tt> can be deployed in the supported way.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with
+  <a page="Diagnose sbcl command-not-found in the legacy hyperdoc.service">Diagnose sbcl command-not-found in the legacy hyperdoc.service</a>.
+</p>
