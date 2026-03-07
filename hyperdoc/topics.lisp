@@ -1526,4 +1526,34 @@
                  "Documentation Surfaces in HyperDoc"
                  "Authoring Documentation in HyperDoc")))
 
+(defun hyperdoc-evaluation-and-inspection-model-topic ()
+  (make-topic
+   :id "hyperdoc-evaluation-and-inspection-model"
+   :title "HyperDoc evaluation and inspection model"
+   :summary "Architectural model for expr evaluation, object inspection, and view rendering in HyperDoc."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model"
+                 "HyperDoc Routing and Navigation Model"
+                 "What is a moldable inspector?")))
+
+(defun hyperdoc-evaluation-boundaries-topic ()
+  (make-topic
+   :id "hyperdoc-evaluation-boundaries"
+   :title "HyperDoc evaluation boundaries"
+   :summary "Boundary rules separating value production, inspection behavior, page navigation, and debugging responsibility."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model"
+                 "Documentation Surfaces in HyperDoc"
+                 "Design")))
+
+(defun hyperdoc-view-selection-topic ()
+  (make-topic
+   :id "hyperdoc-view-selection"
+   :title "HyperDoc view selection"
+   :summary "View-selection model mapping evaluated objects to inspectable views through moldable inspector extension points."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "What is a moldable inspector?"
+                 "HyperDoc Runtime Model"
+                 "Authoring Documentation in HyperDoc")))
+
 ;;

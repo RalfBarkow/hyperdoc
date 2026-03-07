@@ -1,0 +1,101 @@
+<h1>HyperDoc Evaluation and Inspection Model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page defines how HyperDoc evaluates embedded expressions and turns
+  resulting objects into inspectable views.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::hyperdoc-evaluation-and-inspection-model-topic)"><tt>HyperDoc evaluation and inspection model</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-evaluation-boundaries-topic)"><tt>HyperDoc evaluation boundaries</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-view-selection-topic)"><tt>HyperDoc view selection</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-runtime-model-topic)"><tt>HyperDoc runtime model</tt></a></li>
+</ul>
+
+<h2>Why an evaluation and inspection model matters</h2>
+
+<p>
+  HyperDoc pages can embed runtime object handles. A clear model is required to
+  distinguish expression evaluation, object inspection, and page navigation so
+  failures are interpreted in the correct layer.
+</p>
+
+<h2>What expr= does</h2>
+
+<p>
+  <tt>expr</tt> links embed an expression reference that is evaluated in the
+  HyperDoc runtime context to produce a value. That value is then available for
+  inspection and view rendering.
+</p>
+<p>
+  The expression mechanism is about value production from explicit references;
+  it is not by itself page routing.
+</p>
+
+<h2>Evaluation vs inspection</h2>
+
+<ul>
+  <li><b>Evaluation:</b> executes/reads an expression and produces a value object.</li>
+  <li><b>Inspection:</b> renders available views for that value object.</li>
+  <li><b>Navigation:</b> opens another page target; may accompany inspection but is a separate action.</li>
+</ul>
+
+<h2>From object to view</h2>
+
+<p>
+  After evaluation produces an object, the inspector layer selects from
+  available views based on object/class support. Mapping is extensible and
+  context-sensitive; not every object has the same view set.
+</p>
+
+<h2>Inspectable objects and explanatory affordances</h2>
+
+<p>
+  Inspectable object links are explanatory affordances: they let readers move
+  from narrative claims to runtime objects and inspect views in place.
+</p>
+<p>
+  They are not decorative links and not equivalent to normal page navigation
+  links.
+</p>
+
+<h2>View selection and extension points</h2>
+
+<ul>
+  <li>View selection occurs in moldable inspector behavior over runtime objects.</li>
+  <li>Extension points come from defining/adapting object views for relevant classes.</li>
+  <li>HyperDoc pages reference these objects and views; they do not require one uniform view schema.</li>
+</ul>
+
+<h2>Evaluation boundaries and responsibilities</h2>
+
+<ul>
+  <li><b>Expression layer:</b> resolves and evaluates embedded expressions.</li>
+  <li><b>Inspector layer:</b> chooses and renders views for resulting objects.</li>
+  <li><b>Routing layer:</b> resolves page targets when navigation is requested.</li>
+  <li><b>Boundary rule:</b> keep value production, view rendering, and page routing conceptually separate.</li>
+</ul>
+
+<h2>Common failure modes and debugging paths</h2>
+
+<ul>
+  <li>Expression resolves to missing/undefined symbol: check topic/function availability and load context.</li>
+  <li>Evaluation succeeds but expected view missing: check inspector view definitions and object class support.</li>
+  <li>Link opens unexpected page/context: check whether link is routing-based or expr-based and verify target context.</li>
+  <li>Remote/local confusion during exploration: verify source context before diagnosing evaluation or view behavior.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
+  <li><a page="Defining custom views">Defining custom views</a></li>
+</ul>
