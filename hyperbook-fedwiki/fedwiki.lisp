@@ -56,6 +56,30 @@ that occurred when reading the site map.")))
 
 (defparameter *uri-scheme* "fedwiki:")
 
+(defun network-init-failure-p (condition)
+  (flet ((sb-bsd-sockets-condition-p (name)
+           (let ((pkg (find-package :sb-bsd-sockets)))
+             (when pkg
+               (when-let (sym (find-symbol name pkg))
+                 (typep condition sym))))))
+    (or (typep condition 'stream-error)
+        (typep condition 'usocket:socket-error)
+        (typep condition 'usocket:timeout-error)
+        (typep condition 'usocket:ns-host-not-found-error)
+        (typep condition 'shasht:shasht-invalid-char)
+        ;; EINTR can surface as SB-BSD-SOCKETS:INTERRUPTED-ERROR
+        ;; while probing HTTPS support.
+        (sb-bsd-sockets-condition-p "INTERRUPTED-ERROR")
+        (sb-bsd-sockets-condition-p "SOCKET-ERROR"))))
+
+(defun note-network-init-failure (domain-name context condition)
+  (format *error-output*
+          "~&[HYPERBOOK/FEDWIKI] warning: ~A for ~A: ~A (~A)~%"
+          context
+          domain-name
+          (type-of condition)
+          condition))
+
 (defun make-fedwiki (domain-name)
   (let* ((wiki (make-instance 'fedwiki
                               :id (str:concat *uri-scheme* domain-name))))
@@ -72,16 +96,27 @@ that occurred when reading the site map.")))
                      (usocket:socket-close))
                  (usocket:connection-refused-error (c)
                    (declare (ignore c))
-                   (setf (slot-value wiki 'protocol) "http")))
+                   (setf (slot-value wiki 'protocol) "http"))
+                 (error (c)
+                   (if (network-init-failure-p c)
+                       (note-network-init-failure
+                        domain-name
+                        "HTTPS probe failed; continuing with default protocol"
+                        c)
+                       (error c))))
                (handler-case
                    (progn (fetch-sitemap wiki)
                           (fetch-plugin-data wiki)
                           (setf (status-of wiki) t))
-                 ((or stream-error
-                   usocket:timeout-error
-                   usocket:ns-host-not-found-error
-                   shasht:shasht-invalid-char) (c)
-                   (setf (status-of wiki) c))))))
+                 (error (c)
+                   (if (network-init-failure-p c)
+                       (progn
+                         (note-network-init-failure
+                          domain-name
+                          "failed to load sitemap/plugin data"
+                          c)
+                         (setf (status-of wiki) c))
+                       (error c)))))))
     wiki))
 
 (defun fetch-sitemap (wiki)
