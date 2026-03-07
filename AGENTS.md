@@ -113,6 +113,27 @@ When adding/updating a concept cluster (e.g. new external input, architecture no
 - HyperDoc page links to FedWiki use slug-based `page=...`.
 - Commit HyperDoc repo and FedWiki pages repo separately.
 
+### Documentation-slice quick procedure
+
+For the full rationale and examples, see
+`hyperdoc/Authoring Documentation in HyperDoc.html`.
+
+1. Create/update a durable HyperDoc page when the distinction should remain stable.
+2. Add topic objects in `hyperdoc/topics.lisp` when concepts must be reusable inspectable handles.
+3. Add FedWiki twins when collaborative journaling/parallel working trace is useful; do not force literal page symmetry.
+4. Split commits by surface:
+   - `docs(hyperdoc)`: durable page/topic/cross-link changes
+   - `docs(fedwiki)`: twin page changes
+5. Run helper:
+   - `tools/validate-documentation-slice.sh --page "hyperdoc/<Page>.html" --topic <topic-fn> [--topic ...] [--fedwiki /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/<slug> ...]`
+6. Mandatory checks:
+   - `asdf:load-system :hyperdoc`
+   - `fboundp` for new topic functions
+   - `tools/check-topic-coverage.lisp` on the page
+   - `python3 -m json.tool` for changed FedWiki files (if any)
+7. Optional check (recommended when FedWiki pages are edited):
+   - journal semantic checker clear of `CREATION`, `CHRONOLOGY`, `REVISION`, `MALFORMED`.
+
 ### JSON validation with `python3 -m json.tool`
 
 Use `json.tool` as a syntax/structure guard before committing FedWiki page files.
