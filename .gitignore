@@ -23,3 +23,7 @@
 node_modules/
 test-results/
 repomix-output-hyperdoc.md
+
+# ---> Local release/deploy artifacts
+.release-verifications/
+result
