@@ -14,6 +14,24 @@ sbcl --no-userinit \
 
 This will serve a catalog containing a single HyperDoc, the one for HyperDoc itself, with explorer methods loaded for navigation.
 
+## Docs Topic Coverage Gate
+
+To validate `expr="(hyperdoc::...)"` references for the SD-image docs cluster:
+
+```
+nix develop --command sbcl --no-userinit --non-interactive \
+  --load tools/check-topic-coverage.lisp
+```
+
+To check an explicit set of pages instead of the default cluster:
+
+```
+nix develop --command sbcl --no-userinit --non-interactive \
+  --load tools/check-topic-coverage.lisp -- hyperdoc/page-a.html hyperdoc/page-b.html
+```
+
+When explicit page paths are provided, only those pages are checked.
+
 ## License
 
 [BSD](./LICENSE)
