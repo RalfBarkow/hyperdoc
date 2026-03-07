@@ -1,0 +1,83 @@
+<h1>Canonical docs-topic split and coverage gate workflow</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This maintenance page records the canonical way to split a mixed documentation patch into atomic commits and replay verification at explicit boundaries.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::docs-topic-slice-and-coverage-gate-workflow-topic)"><tt>Docs/topic slice and coverage-gate workflow</tt></a></li>
+  <li><a expr="(hyperdoc::reconstruction-protocol-topic)"><tt>Reconstruction protocol</tt></a></li>
+  <li><a expr="(hyperdoc::skillization-loop-topic)"><tt>Skillization loop</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Keep docs/topic history replayable and cherry-pickable by separating infrastructure, executable behavior, content/topic wiring, checks, and local hygiene.
+</p>
+
+<h2>Canonical commit stack</h2>
+
+<ol>
+  <li><tt>feat(nixos): add dreyeck host hardware configuration baseline</tt></li>
+  <li><tt>feat(deploy): add dreyeck cautious deployment runner</tt></li>
+  <li><tt>docs(topics): add nixos-rebuild topic coverage to SD-image workflow pages</tt></li>
+  <li><tt>test(docs): add topic coverage gate for hyperdoc expr references</tt></li>
+  <li><tt>docs(topics): add inspectable topic coverage for dreyeck deployment workflow</tt></li>
+  <li><tt>chore(gitignore): ignore local release and deploy artifacts</tt></li>
+</ol>
+
+<h2>Boundary replay checks</h2>
+
+<ol>
+  <li>After deploy runner commit:
+<pre>
+nix develop --command sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc :force t)' \
+  --eval '(format t "HYPERDOC_LOAD_OK~%")' \
+  --eval '(uiop:quit 0)'
+</pre>
+  </li>
+  <li>After topic coverage gate commit (default cluster):
+<pre>
+nix develop --command sbcl --no-userinit --non-interactive \
+  --load tools/check-topic-coverage.lisp
+</pre>
+  </li>
+  <li>After dreyeck docs/topic commit (explicit cluster):
+<pre>
+nix develop --command sbcl --no-userinit --non-interactive \
+  --load tools/check-topic-coverage.lisp -- \
+  "hyperdoc/Get hauptsache working on dreyeck.ch.html" \
+  "hyperdoc/Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch.html" \
+  "hyperdoc/Diagnose sbcl command-not-found in the legacy hyperdoc.service.html" \
+  "hyperdoc/Locate and replace the legacy workspace hyperdoc.service definition.html" \
+  "hyperdoc/Back up dreyeck.ch before deployment.html" \
+  "hyperdoc/Record dreyeck.ch generation before rebuild.html" \
+  "hyperdoc/Verify HyperDoc locally before deployment.html" \
+  "hyperdoc/Rehearse dreyeck.ch deployment with runner.html" \
+  "hyperdoc/Deploy dreyeck.ch from the local flake.html" \
+  "hyperdoc/Verify HyperDoc on dreyeck.ch.html" \
+  "hyperdoc/Roll back HyperDoc on dreyeck.ch.html"
+</pre>
+  </li>
+</ol>
+
+<h2>Operational rule</h2>
+
+<p>
+  Do not commit one catch-all patch for mixed docs/topic/deploy work. Split by ownership boundary and verify at each boundary.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Get hauptsache working on dreyeck.ch">Get hauptsache working on dreyeck.ch</a></li>
+  <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a></li>
+</ul>

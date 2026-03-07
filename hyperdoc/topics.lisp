@@ -863,6 +863,15 @@
    :references '("Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
 
+(defun docs-topic-slice-and-coverage-gate-workflow-topic ()
+  (make-topic
+   :id "docs-topic-slice-and-coverage-gate-workflow"
+   :title "Docs/topic slice and coverage-gate workflow"
+   :summary "Canonical maintenance workflow: split docs/topic work into atomic commits and replay topic-coverage checks at commit boundaries."
+   :references '("Canonical docs-topic split and coverage gate workflow"
+                 "Surface and Artifact Answers"
+                 "Reconstruction protocol")))
+
 (defun hyperdoc-operating-environment-assessment-2026-03-06-topic ()
   (make-topic
    :id "hyperdoc-operating-environment-assessment-2026-03-06"
