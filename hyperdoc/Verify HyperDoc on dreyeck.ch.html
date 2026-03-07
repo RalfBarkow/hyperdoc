@@ -1,25 +1,33 @@
 <h1>Verify HyperDoc on dreyeck.ch</h1>
 
 <p>
-  Run minimal post-deploy checks against the deployed service.
+  Run the minimal HTTP checks after <tt>test</tt> activation and again after <tt>switch</tt>.
 </p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dreyeck-http-smoke-probes-topic)"><tt>dreyeck HTTP smoke probes</tt></a></li>
+  <li><a expr="(hyperdoc::deployment-command-locality-topic)"><tt>Deployment command locality</tt></a></li>
+  <li><a expr="(hyperdoc::cautious-nixos-rebuild-activation-sequence-topic)"><tt>Cautious nixos-rebuild activation sequence</tt></a></li>
+</ul>
 
 <h2>Purpose</h2>
 
 <p>
-  Confirm that the service is reachable, key page routing works, and URL helper assets are served.
+  Confirm route reachability and URL-helper asset availability before and after persistent activation.
 </p>
 
 <h2>Prerequisites</h2>
 
 <ul>
-  <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a> has completed.</li>
+  <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a> reached the verification checkpoint.</li>
 </ul>
 
 <h2>Context</h2>
 
 <p>
-  These checks are remote validation, not local build validation.
+  Run these commands on the local controller against the public URLs; they complement local flake/release verification.
 </p>
 
 <h2>Steps</h2>
@@ -30,7 +38,7 @@
 curl -I https://dreyeck.ch/boot.html
 </pre>
   </li>
-  <li>Check one key HyperDoc page (official tutorial):
+  <li>Check official tutorial page:
 <pre>
 curl -I "https://dreyeck.ch/584FD-hyperdoc/Official%20Tutorial%3A%20NixOS%20SD%20Image%20on%20Raspberry%20Pi%204%2F400"
 </pre>
@@ -44,13 +52,12 @@ curl -I https://dreyeck.ch/hyperbook-server/js/url.js
 
 <h2>Result</h2>
 
-<ul>
-  <li>All three checks return HTTP <tt>200</tt>.</li>
-  <li>No broken relative-slug URL behavior is observed in the deployed page flow.</li>
-</ul>
+<p>
+  All three probes return HTTP <tt>200</tt>.
+</p>
 
 <h2>Rollback/next step</h2>
 
 <p>
-  If checks fail, run <a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a>.
+  If checks fail, stop and run <a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a>.
 </p>

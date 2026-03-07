@@ -1,34 +1,41 @@
 <h1>Roll back HyperDoc on dreyeck.ch</h1>
 
 <p>
-  Revert to a previous NixOS generation if deployment validation fails.
+  Revert to a previous NixOS generation if dry/test/switch verification fails.
 </p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::nixos-generation-rollback-topic)"><tt>NixOS generation rollback</tt></a></li>
+  <li><a expr="(hyperdoc::cautious-nixos-rebuild-activation-sequence-topic)"><tt>Cautious nixos-rebuild activation sequence</tt></a></li>
+</ul>
 
 <h2>Purpose</h2>
 
 <p>
-  Restore a known-good service state quickly using standard NixOS rollback.
+  Restore the last known-good host state quickly using standard NixOS rollback paths.
 </p>
 
 <h2>Prerequisites</h2>
 
 <ul>
   <li>Root or sudo access on <tt>dreyeck.ch</tt>.</li>
-  <li>A previous working system generation exists.</li>
+  <li>A previous working generation exists.</li>
 </ul>
 
 <h2>Context</h2>
 
 <p>
-  Rollback uses NixOS generation switching, not custom release symlink switching.
+  Rollback remains in the same NixOS deployment model; no custom symlink release switching is used.
 </p>
 
 <h2>Steps</h2>
 
 <ol>
-  <li>Rollback to the previous generation:
+  <li>Rollback to previous generation:
 <pre>
-sudo nixos-rebuild --rollback switch
+sudo nixos-rebuild switch --rollback
 </pre>
   </li>
   <li>If you need a specific generation, activate it directly:
@@ -41,11 +48,11 @@ sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bin/switch-to-configur
 <h2>Result</h2>
 
 <p>
-  The host runs the selected older generation and HyperDoc should return to its previous behavior.
+  The host runs the selected previous generation.
 </p>
 
 <h2>Next step</h2>
 
 <p>
-  Re-run <a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a> after rollback.
+  Re-run <a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a>.
 </p>

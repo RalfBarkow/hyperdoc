@@ -1,31 +1,39 @@
 <h1>Verify HyperDoc locally before deployment</h1>
 
 <p>
-  Run the minimum local checks before any remote activation.
+  Run local flake and release checks before any remote rebuild activation.
 </p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dreyeck-local-verification-gate-topic)"><tt>dreyeck local verification gate</tt></a></li>
+  <li><a expr="(hyperdoc::dreyeck-supported-deployment-model-topic)"><tt>dreyeck supported deployment model</tt></a></li>
+</ul>
 
 <h2>Purpose</h2>
 
 <p>
-  Fail fast locally if flake checks, runtime checks, or smoke checks are broken.
+  Catch build/runtime/doc consistency failures locally instead of discovering them after remote activation.
 </p>
 
 <h2>Prerequisites</h2>
 
 <ul>
-  <li><a page="Locate and replace the legacy workspace hyperdoc.service definition">Locate and replace the legacy workspace hyperdoc.service definition</a> completed.</li>
+  <li><a page="Record dreyeck.ch generation before rebuild">Record dreyeck.ch generation before rebuild</a> completed.</li>
 </ul>
 
 <h2>Context</h2>
 
 <p>
-  Local verification gates deployment. Do not skip this and debug first on the server.
+  Run all commands in this page on the local controller. Local verification gates deployment.
+  Do not skip this and debug first on the server.
 </p>
 
 <h2>Steps</h2>
 
 <ol>
-  <li>Check local working tree:
+  <li>Check local tree:
 <pre>
 git status --short
 </pre>
@@ -35,7 +43,7 @@ git status --short
 nix flake check
 </pre>
   </li>
-  <li>Run release smoke verification:
+  <li>Run release smoke:
 <pre>
 nix run .#release-smoke
 </pre>
@@ -46,8 +54,7 @@ nix run .#release-smoke
 
 <ul>
   <li><tt>nix flake check</tt> exits <tt>0</tt>.</li>
-  <li><tt>nix run .#release-smoke</tt> exits <tt>0</tt> and prints the release verification success marker.</li>
-  <li>This step validates local branch state only; it does not yet prove remote server success.</li>
+  <li><tt>nix run .#release-smoke</tt> exits <tt>0</tt> with release verification success marker.</li>
 </ul>
 
 <h2>Next step</h2>

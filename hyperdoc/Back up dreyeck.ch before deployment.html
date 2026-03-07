@@ -1,0 +1,64 @@
+<h1>Back up dreyeck.ch before deployment</h1>
+
+<p>
+  Create a rollback backup set on the target host before any <tt>nixos-rebuild</tt> activation.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dreyeck-backup-before-rebuild-topic)"><tt>dreyeck backup before rebuild</tt></a></li>
+  <li><a expr="(hyperdoc::deployment-command-locality-topic)"><tt>Deployment command locality</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Preserve configuration and HyperDoc data so rollback and manual recovery remain possible.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>SSH access to <tt>dreyeck.ch</tt>.</li>
+  <li>Root or sudo privileges on the target host.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  This is the first deployment step. Do this before <tt>dry-activate</tt>, <tt>test</tt>, or <tt>switch</tt>.
+  Run these commands on the local controller, targeting <tt>dreyeck.ch</tt> via SSH.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Run on local controller (executes on <tt>dreyeck.ch</tt>): create backup directory:
+<pre>
+ssh &lt;ssh-target&gt; 'sudo mkdir -p /root/pre-hyperdoc-backup'
+</pre>
+  </li>
+  <li>Run on local controller (executes on <tt>dreyeck.ch</tt>): back up <tt>/etc/nixos</tt>:
+<pre>
+ssh &lt;ssh-target&gt; 'sudo tar czf /root/pre-hyperdoc-backup/etc-nixos-$(date +%F-%H%M%S).tar.gz /etc/nixos'
+</pre>
+  </li>
+  <li>Run on local controller (executes on <tt>dreyeck.ch</tt>): back up HyperDoc data/workspace snapshots (best effort for missing paths):
+<pre>
+ssh &lt;ssh-target&gt; 'sudo tar czf /root/pre-hyperdoc-backup/hyperdoc-data-$(date +%F-%H%M%S).tar.gz /var/lib/hyperdoc /home/rgb/workspace/hyperdoc 2&gt;/dev/null || true'
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  Timestamped backup archives exist under <tt>/root/pre-hyperdoc-backup</tt>.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Record dreyeck.ch generation before rebuild">Record dreyeck.ch generation before rebuild</a>.
+</p>

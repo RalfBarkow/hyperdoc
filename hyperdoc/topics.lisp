@@ -230,6 +230,106 @@
    :references '("Two Installation Models: SD Image vs Classic Installer"
                  "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400")))
 
+(defun dreyeck-supported-deployment-model-topic ()
+  (make-topic
+   :id "dreyeck-supported-deployment-model"
+   :title "dreyeck supported deployment model"
+   :summary "Verify locally, then deploy dreyeck.ch from local flake state; do not repair the server by branch checkout."
+   :references '("Get hauptsache working on dreyeck.ch"
+                 "Deploy dreyeck.ch from the local flake"
+                 "Verify HyperDoc locally before deployment")))
+
+(defun legacy-workspace-checkout-unit-topic ()
+  (make-topic
+   :id "legacy-workspace-checkout-unit"
+   :title "Legacy workspace-checkout hyperdoc.service"
+   :summary "Old unit model that starts HyperDoc from /home/rgb/workspace/hyperdoc/start.sh instead of packaged host deployment."
+   :references '("Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch"
+                 "Locate and replace the legacy workspace hyperdoc.service definition")))
+
+(defun legacy-sbcl-path-failure-topic ()
+  (make-topic
+   :id "legacy-sbcl-path-failure"
+   :title "Legacy sbcl PATH failure"
+   :summary "Legacy workspace service can fail with status 127 when start.sh calls sbcl but service PATH does not provide it."
+   :references '("Diagnose sbcl command-not-found in the legacy hyperdoc.service"
+                 "Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch")))
+
+(defun replace-legacy-unit-with-flake-host-profile-topic ()
+  (make-topic
+   :id "replace-legacy-unit-with-flake-host-profile"
+   :title "Replace legacy unit with flake host profile"
+   :summary "Remove workspace-checkout unit wiring and use flake-driven host deployment outputs for dreyeck.ch."
+   :references '("Locate and replace the legacy workspace hyperdoc.service definition"
+                 "Deploy dreyeck.ch from the local flake")))
+
+(defun deployment-command-locality-topic ()
+  (make-topic
+   :id "deployment-command-locality"
+   :title "Deployment command locality"
+   :summary "Distinguish controller-local commands, commands executed remotely on dreyeck.ch via SSH, and public URL probes."
+   :references '("Back up dreyeck.ch before deployment"
+                 "Record dreyeck.ch generation before rebuild"
+                 "Verify HyperDoc on dreyeck.ch"
+                 "Rehearse dreyeck.ch deployment with runner")))
+
+(defun dreyeck-backup-before-rebuild-topic ()
+  (make-topic
+   :id "dreyeck-backup-before-rebuild"
+   :title "dreyeck backup before rebuild"
+   :summary "Create timestamped backups on dreyeck.ch before any dry-activate, test, or switch activation."
+   :references '("Back up dreyeck.ch before deployment"
+                 "Record dreyeck.ch generation before rebuild")))
+
+(defun dreyeck-generation-record-topic ()
+  (make-topic
+   :id "dreyeck-generation-record"
+   :title "dreyeck generation record"
+   :summary "Capture list-generations and current/booted system links before activation changes."
+   :references '("Record dreyeck.ch generation before rebuild"
+                 "Roll back HyperDoc on dreyeck.ch")))
+
+(defun dreyeck-local-verification-gate-topic ()
+  (make-topic
+   :id "dreyeck-local-verification-gate"
+   :title "dreyeck local verification gate"
+   :summary "Local deployment gate using git status, nix flake check, and release-smoke before remote activation."
+   :references '("Verify HyperDoc locally before deployment"
+                 "Deploy dreyeck.ch from the local flake")))
+
+(defun cautious-nixos-rebuild-activation-sequence-topic ()
+  (make-topic
+   :id "cautious-nixos-rebuild-activation-sequence"
+   :title "Cautious nixos-rebuild activation sequence"
+   :summary "Use dry-activate, then test, verify HTTP checks, and only then run switch."
+   :references '("Deploy dreyeck.ch from the local flake"
+                 "Verify HyperDoc on dreyeck.ch"
+                 "Roll back HyperDoc on dreyeck.ch")))
+
+(defun dreyeck-http-smoke-probes-topic ()
+  (make-topic
+   :id "dreyeck-http-smoke-probes"
+   :title "dreyeck HTTP smoke probes"
+   :summary "Post-activation checks for boot page, official tutorial page, and URL helper asset."
+   :references '("Verify HyperDoc on dreyeck.ch"
+                 "Deploy dreyeck.ch from the local flake")))
+
+(defun nixos-generation-rollback-topic ()
+  (make-topic
+   :id "nixos-generation-rollback"
+   :title "NixOS generation rollback"
+   :summary "Rollback via nixos-rebuild --rollback or activate a specific system generation link."
+   :references '("Roll back HyperDoc on dreyeck.ch"
+                 "Deploy dreyeck.ch from the local flake")))
+
+(defun dreyeck-runner-rehearsal-topic ()
+  (make-topic
+   :id "dreyeck-runner-rehearsal"
+   :title "dreyeck runner rehearsal"
+   :summary "Runner-driven non-destructive rehearsal path that performs backup, generation record, verify, dry-activate, test, and HTTP checks without implicit switch."
+   :references '("Rehearse dreyeck.ch deployment with runner"
+                 "Deploy dreyeck.ch from the local flake")))
+
 (defun dmx-topic-912138 ()
   (make-topic
    :id "dmx-topic-912138"

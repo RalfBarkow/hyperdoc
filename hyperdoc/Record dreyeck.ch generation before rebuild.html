@@ -1,0 +1,55 @@
+<h1>Record dreyeck.ch generation before rebuild</h1>
+
+<p>
+  Capture generation and active-system references before any activation change.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dreyeck-generation-record-topic)"><tt>dreyeck generation record</tt></a></li>
+  <li><a expr="(hyperdoc::deployment-command-locality-topic)"><tt>Deployment command locality</tt></a></li>
+  <li><a expr="(hyperdoc::nixos-generation-rollback-topic)"><tt>NixOS generation rollback</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Keep exact rollback references for the system that was active before deployment.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Back up dreyeck.ch before deployment">Back up dreyeck.ch before deployment</a> completed.</li>
+  <li>Root or sudo privileges on <tt>dreyeck.ch</tt>.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  Store this snapshot before any <tt>dry-activate</tt>, <tt>test</tt>, or <tt>switch</tt> run.
+  Run this command on the local controller, targeting <tt>dreyeck.ch</tt> via SSH.
+</p>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Run on local controller (executes on <tt>dreyeck.ch</tt>): write rollback reference file:
+<pre>
+ssh &lt;ssh-target&gt; 'sudo sh -c '"'"'{ echo "# $(date -Is)"; echo; echo "## generations"; nixos-rebuild list-generations; echo; echo "## current-system"; readlink -f /run/current-system; echo; echo "## booted-system"; readlink -f /run/booted-system; } &gt; /root/pre-hyperdoc-backup/rollback-reference.txt'"'"''
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  <tt>/root/pre-hyperdoc-backup/rollback-reference.txt</tt> contains pre-deploy generation and system links.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a>.
+</p>

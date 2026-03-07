@@ -1,21 +1,29 @@
 <h1>Get hauptsache working on dreyeck.ch</h1>
 
 <p>
-  Minimal operator procedure to deploy HyperDoc from a local <tt>hauptsache</tt>
-  working tree to the NixOS host <tt>dreyeck.ch</tt>.
+  Minimal cautious procedure to deploy HyperDoc from local <tt>hauptsache</tt> state to <tt>dreyeck.ch</tt>.
 </p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dreyeck-supported-deployment-model-topic)"><tt>dreyeck supported deployment model</tt></a></li>
+  <li><a expr="(hyperdoc::cautious-nixos-rebuild-activation-sequence-topic)"><tt>Cautious nixos-rebuild activation sequence</tt></a></li>
+  <li><a expr="(hyperdoc::deployment-command-locality-topic)"><tt>Deployment command locality</tt></a></li>
+  <li><a expr="(hyperdoc::nixos-generation-rollback-topic)"><tt>NixOS generation rollback</tt></a></li>
+</ul>
 
 <h2>Purpose</h2>
 
 <p>
-  Provide the shortest credible deployment path with clear checkpoints and rollback.
+  Provide a deployment path that is short but safety-first: backup, record rollback references, verify, dry/test activation, verify, switch, rollback if needed.
 </p>
 
 <h2>Prerequisites</h2>
 
 <ul>
   <li>SSH access to the target host.</li>
-  <li>Nix CLI and flake support on the controller machine.</li>
+  <li>Nix CLI with flake support on the controller machine.</li>
   <li>Local repository checkout at branch <tt>hauptsache</tt>.</li>
 </ul>
 
@@ -31,7 +39,10 @@
   <li><a page="Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch">Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch</a></li>
   <li><a page="Diagnose sbcl command-not-found in the legacy hyperdoc.service">Diagnose sbcl command-not-found in the legacy hyperdoc.service</a></li>
   <li><a page="Locate and replace the legacy workspace hyperdoc.service definition">Locate and replace the legacy workspace hyperdoc.service definition</a></li>
+  <li><a page="Back up dreyeck.ch before deployment">Back up dreyeck.ch before deployment</a></li>
+  <li><a page="Record dreyeck.ch generation before rebuild">Record dreyeck.ch generation before rebuild</a></li>
   <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a></li>
+  <li><a page="Rehearse dreyeck.ch deployment with runner">Rehearse dreyeck.ch deployment with runner</a></li>
   <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a></li>
   <li><a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a></li>
   <li><a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a></li>
@@ -56,7 +67,7 @@ sudo systemctl disable --now hyperdoc
 <h2>Result</h2>
 
 <p>
-  You have a blocker-first deployment path: identify and replace the legacy unit, then verify locally, deploy from local flake state, verify remotely, and rollback if needed.
+  You have a cautious deployment flow: backup and rollback references first, then local verify, dry-activate, test, verify, switch, and rollback if required.
 </p>
 
 <h2>Next step</h2>

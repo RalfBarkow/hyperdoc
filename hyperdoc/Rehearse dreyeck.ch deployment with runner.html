@@ -1,0 +1,89 @@
+<h1>Rehearse dreyeck.ch deployment with runner</h1>
+
+<p>
+  Use the HyperDoc Lisp runner to print and rehearse the cautious deployment path before a real switch.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dreyeck-runner-rehearsal-topic)"><tt>dreyeck runner rehearsal</tt></a></li>
+  <li><a expr="(hyperdoc::deployment-command-locality-topic)"><tt>Deployment command locality</tt></a></li>
+  <li><a expr="(hyperdoc::cautious-nixos-rebuild-activation-sequence-topic)"><tt>Cautious nixos-rebuild activation sequence</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Make the first live deployment rehearsal explicit and reproducible from one operator-facing runner.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a> completed.</li>
+  <li>SBCL with <tt>:hyperdoc</tt> loaded (for example from <tt>nix develop</tt>).</li>
+  <li>Build/target host values available.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  Start in print-only mode, then run the non-destructive rehearsal path. Keep <tt>switch</tt> and <tt>rollback</tt> as explicit actions.
+</p>
+
+<ul>
+  <li><b>Run on local controller:</b> <tt>:verify-dreyeck-local-flake</tt>, <tt>:dry-activate-dreyeck</tt>, <tt>:test-dreyeck</tt>, <tt>:verify-dreyeck-http</tt>, <tt>:switch-dreyeck</tt>, <tt>:rollback-dreyeck</tt>.</li>
+  <li><b>Run on dreyeck.ch via SSH from controller:</b> <tt>:backup-dreyeck</tt>, <tt>:record-dreyeck-generation</tt>.</li>
+  <li><b>Public URL probes:</b> <tt>:verify-dreyeck-http</tt>.</li>
+</ul>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Print the full cautious sequence first:
+<pre>
+(hyperdoc::run-dreyeck-deploy-sequence
+ :build-host "&lt;linux-builder&gt;"
+ :target-host "&lt;ssh-target&gt;"
+ :print-only t)
+</pre>
+  </li>
+  <li>Run the non-destructive rehearsal wrapper action (no switch):
+<pre>
+(hyperdoc::run-dreyeck-deploy-action
+ :rehearse-dreyeck
+ :build-host "&lt;linux-builder&gt;"
+ :target-host "&lt;ssh-target&gt;"
+ :print-only nil)
+</pre>
+  </li>
+  <li>If rehearsal checks are good, run persistent activation explicitly:
+<pre>
+(hyperdoc::run-dreyeck-deploy-action
+ :switch-dreyeck
+ :build-host "&lt;linux-builder&gt;"
+ :target-host "&lt;ssh-target&gt;"
+ :print-only nil)
+</pre>
+  </li>
+  <li>Rollback stays explicit:
+<pre>
+(hyperdoc::run-dreyeck-deploy-action
+ :rollback-dreyeck
+ :print-only nil)
+</pre>
+  </li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  You have a runner-driven rehearsal path that covers backup, generation recording, local verification, dry-activate, test, and HTTP checks without an implicit switch.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a>.
+</p>

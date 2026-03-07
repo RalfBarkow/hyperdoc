@@ -1,54 +1,87 @@
 <h1>Deploy dreyeck.ch from the local flake</h1>
 
 <p>
-  Activate the <tt>dreyeck-ch</tt> NixOS host configuration over SSH from your local working tree.
+  Use a cautious activation path: dry-activate, test, verify, then switch.
 </p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::cautious-nixos-rebuild-activation-sequence-topic)"><tt>Cautious nixos-rebuild activation sequence</tt></a></li>
+  <li><a expr="(hyperdoc::dreyeck-supported-deployment-model-topic)"><tt>dreyeck supported deployment model</tt></a></li>
+  <li><a expr="(hyperdoc::dreyeck-local-verification-gate-topic)"><tt>dreyeck local verification gate</tt></a></li>
+  <li><a expr="(hyperdoc::dreyeck-http-smoke-probes-topic)"><tt>dreyeck HTTP smoke probes</tt></a></li>
+</ul>
 
 <h2>Purpose</h2>
 
 <p>
-  Promote the locally verified flake state to the target host without server-side branch assembly.
+  Reduce deployment risk by validating activation behavior before making the target generation permanent.
 </p>
 
 <h2>Prerequisites</h2>
 
 <ul>
   <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a> has passed.</li>
-  <li>SSH access to <tt>dreyeck.ch</tt> (or its admin SSH target).</li>
+  <li>SSH access to the target host.</li>
+  <li>Linux build host available when controlling from macOS/non-Linux.</li>
 </ul>
 
 <h2>Context</h2>
 
 <p>
   <tt>hauptsache</tt> should be verified locally and deployed from the local flake; the server should not be repaired by checking out that branch directly.
+  Run these commands on the local controller; they activate configuration on <tt>dreyeck.ch</tt>.
 </p>
 
 <h2>Steps</h2>
 
 <ol>
-  <li>Deploy from a Linux controller host:
+  <li>Run cautious rebuild sequence:
 <pre>
-nixos-rebuild --flake .#dreyeck-ch --target-host &lt;ssh-target&gt; switch
+nixos-rebuild dry-activate --flake .#dreyeck-ch --build-host &lt;linux-builder&gt; --target-host &lt;ssh-target&gt;
+nixos-rebuild test --flake .#dreyeck-ch --build-host &lt;linux-builder&gt; --target-host &lt;ssh-target&gt;
 </pre>
   </li>
-  <li>If the controller is macOS or non-Linux, use a Linux build host:
+  <li>Verify service and key routes after <tt>test</tt> activation:
 <pre>
-nixos-rebuild --flake .#dreyeck-ch \
-  --build-host &lt;linux-builder&gt; \
-  --target-host &lt;ssh-target&gt; \
-  switch
+curl -I https://dreyeck.ch/boot.html
+curl -I "https://dreyeck.ch/584FD-hyperdoc/Official%20Tutorial%3A%20NixOS%20SD%20Image%20on%20Raspberry%20Pi%204%2F400"
+curl -I https://dreyeck.ch/hyperbook-server/js/url.js
+</pre>
+  </li>
+  <li>If checks are good, make activation persistent:
+<pre>
+nixos-rebuild switch --flake .#dreyeck-ch --build-host &lt;linux-builder&gt; --target-host &lt;ssh-target&gt;
 </pre>
   </li>
 </ol>
 
+<h2>Operator command bundle</h2>
+
+<pre>
+git status --short
+nix flake check
+nix run .#release-smoke
+
+nixos-rebuild dry-activate --flake .#dreyeck-ch --build-host &lt;linux-builder&gt; --target-host &lt;ssh-target&gt;
+nixos-rebuild test --flake .#dreyeck-ch --build-host &lt;linux-builder&gt; --target-host &lt;ssh-target&gt;
+
+curl -I https://dreyeck.ch/boot.html
+curl -I "https://dreyeck.ch/584FD-hyperdoc/Official%20Tutorial%3A%20NixOS%20SD%20Image%20on%20Raspberry%20Pi%204%2F400"
+curl -I https://dreyeck.ch/hyperbook-server/js/url.js
+
+nixos-rebuild switch --flake .#dreyeck-ch --build-host &lt;linux-builder&gt; --target-host &lt;ssh-target&gt;
+</pre>
+
 <h2>Result</h2>
 
 <p>
-  The target host switches to the deployed <tt>dreyeck-ch</tt> generation built from local flake state.
+  The host is only switched after successful dry/test activation and HTTP verification.
 </p>
 
-<h2>Next step</h2>
+<h2>Rollback/next step</h2>
 
 <p>
-  Continue with <a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a>.
+  If any step fails, follow <a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a>.
 </p>
