@@ -1,0 +1,79 @@
+<h1>Documentation Architecture in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the entry point for the current documentation architecture
+  cluster and shows how its core pages fit together.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::documentation-architecture-in-hyperdoc-topic)"><tt>Documentation Architecture in HyperDoc</tt></a></li>
+  <li><a expr="(hyperdoc::documentation-cluster-reading-order-topic)"><tt>Documentation cluster reading order</tt></a></li>
+  <li><a expr="(hyperdoc::documentation-governance-topic)"><tt>Documentation governance</tt></a></li>
+  <li><a expr="(hyperdoc::authoring-documentation-in-hyperdoc-topic)"><tt>Authoring Documentation in HyperDoc</tt></a></li>
+</ul>
+
+<h2>Why this cluster exists</h2>
+
+<p>
+  The recent documentation pages establish one coherent model for reference
+  platforms, documentation surfaces, and authoring practice. This index page
+  makes that model discoverable from one place.
+</p>
+
+<h2>Scope map of the five pages</h2>
+
+<ul>
+  <li><a page="Installing Glamorous Toolkit">Installing Glamorous Toolkit</a>: acquisition paths and durable install distinctions for GT.</li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a>: conceptual bridge between GT and HyperDoc without claiming equivalence.</li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a>: architectural framing for using reference systems with explicit boundaries.</li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a>: page/topic/inspectable/twin surface model and correspondence rules.</li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a>: operational decisions, validation gates, and commit slicing guidance.</li>
+</ul>
+
+<h2>Recommended reading order</h2>
+
+<ol>
+  <li><a page="Installing Glamorous Toolkit">Installing Glamorous Toolkit</a>: start with concrete acquisition context and durable distinctions.</li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a>: add conceptual correspondences and differences.</li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a>: formalize comparison boundaries across systems.</li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a>: map documentation media and correspondence limits.</li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a>: apply the model as repeatable authoring workflow.</li>
+</ol>
+
+<h2>Relation model summary</h2>
+
+<ul>
+  <li><b>Durable page:</b> stable architectural or operational narrative in <tt>hyperdoc/*.html</tt>/<tt>hyperdoc/*.md</tt>.</li>
+  <li><b>Topic object:</b> reusable semantic handle in <tt>hyperdoc/topics.lisp</tt> with explicit <tt>:id</tt>, <tt>:title</tt>, <tt>:summary</tt>, and <tt>:references</tt>.</li>
+  <li><b>Inspectable object:</b> in-page explanatory affordance through <tt>expr</tt> links to inspectable runtime objects.</li>
+  <li><b>FedWiki twin:</b> parallel collaboration artifact for journaling and iteration, aligned by intent rather than literal structure.</li>
+</ul>
+
+<p>
+  Symmetry stops at correspondence. The surfaces should stay linked and
+  mutually interpretable, but they should not be forced into identical shape.
+</p>
+
+<h2>How to use this cluster when extending HyperDoc</h2>
+
+<ul>
+  <li>Use the first four pages for conceptual background and boundary decisions.</li>
+  <li>Use <a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a> when turning those concepts into concrete slice edits.</li>
+  <li>When adding a new slice, decide explicitly whether FedWiki twins are needed for collaborative traceability.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
+  <li><a page="Installing Glamorous Toolkit">Installing Glamorous Toolkit</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a page="Goals and values">Goals and values</a></li>
+</ul>

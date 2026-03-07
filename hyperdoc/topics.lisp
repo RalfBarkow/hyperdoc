@@ -1432,4 +1432,38 @@
                  "Documentation Surfaces in HyperDoc"
                  "Communication Surfaces Policy")))
 
+(defun documentation-architecture-in-hyperdoc-topic ()
+  (make-topic
+   :id "documentation-architecture-in-hyperdoc"
+   :title "Documentation Architecture in HyperDoc"
+   :summary "Entry-point map for the documentation architecture cluster, including scope, reading order, and relation model."
+   :references '("Documentation Architecture in HyperDoc"
+                 "Installing Glamorous Toolkit"
+                 "Glamorous Toolkit and HyperDoc"
+                 "Reference Systems in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun documentation-cluster-reading-order-topic ()
+  (make-topic
+   :id "documentation-cluster-reading-order"
+   :title "Documentation cluster reading order"
+   :summary "Recommended reading sequence from installation context to conceptual framing, surface model, and operational authoring guidance."
+   :references '("Documentation Architecture in HyperDoc"
+                 "Installing Glamorous Toolkit"
+                 "Glamorous Toolkit and HyperDoc"
+                 "Reference Systems in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun documentation-governance-topic ()
+  (make-topic
+   :id "documentation-governance"
+   :title "Documentation governance"
+   :summary "Governance model defining how durable pages, topic objects, inspectable handles, and optional FedWiki twins stay aligned without forced symmetry."
+   :references '("Documentation Architecture in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Authoring Documentation in HyperDoc"
+                 "Reference Systems in HyperDoc")))
+
 ;;
