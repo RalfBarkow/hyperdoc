@@ -27,7 +27,13 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, arrows-src, clog-moldable-inspector-src, html-inspector-views-src, plump-inspector-views-src, lwcells-src }:
-    flake-utils.lib.eachDefaultSystem (system:
+    let
+      dreyeckHardwarePath = "${toString ./nix/hosts}/dreyeck-ch/hardware-configuration.nix";
+      dreyeckHardwareModule =
+        if builtins.pathExists dreyeckHardwarePath
+        then builtins.toPath dreyeckHardwarePath
+        else ./nix/hosts/dreyeck-ch-fallback-hardware.nix;
+      perSystem = flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
@@ -43,24 +49,27 @@
         htmlInspectorViewsSrc = html-inspector-views-src;
         plumpInspectorViewsSrc = plump-inspector-views-src;
         lwcellsSrc = lwcells-src;
-        alexandriaSrc = pkgs.sbclPackages.alexandria.src;
-        arrowMacrosSrc = pkgs.sbclPackages.arrow-macros.src;
-        puriSrc = pkgs.sbclPackages.puri.src;
-        clWhoSrc = pkgs.sbclPackages.cl-who.src;
-        hunchentootSrc = pkgs.sbclPackages.hunchentoot.src;
-        drakmaSrc = pkgs.sbclPackages.drakma.src;
-        clPpcreSrc = pkgs.sbclPackages."cl-ppcre".src;
-        bordeauxThreadsSrc = pkgs.sbclPackages.bordeaux-threads.src;
-        localTimeSrc = pkgs.sbclPackages."local-time".src;
-        shashtSrc = pkgs.sbclPackages.shasht.src;
-        strSrc = pkgs.sbclPackages.str.src;
-        usocketSrc = pkgs.sbclPackages.usocket.src;
-        tpnSrc = pkgs.sbclPackages.trivial-package-local-nicknames.src;
-        clSlugSrc = pkgs.sbclPackages."cl-slug".src;
-        sha1Src = pkgs.sbclPackages.sha1.src;
-        lquerySrc = pkgs.sbclPackages.lquery.src;
-        plumpSrc = pkgs.sbclPackages.plump.src;
-        babelSrc = pkgs.sbclPackages.babel.src;
+        clMarkupSrc = pkgs.sbclPackages."cl-markup".src;
+        asdfSourceRegistryDefault = builtins.concatStringsSep ":" [
+          "${clogSrcPatched}//"
+          "${clogMoldableInspectorSrc}//"
+          "${htmlInspectorViewsSrc}//"
+          "${plumpInspectorViewsSrc}//"
+          "${lwcellsSrc}//"
+          "${arrowsSrc}//"
+          "${clMarkupSrc}//"
+          "$PWD//"
+          "${namedClosurePkg}//"
+        ];
+        asdfSourceExports = ''
+          export ARROWS_SRC="${arrowsSrc}"
+          export CLOG_SRC="${clogSrcPatched}"
+          export CLOG_MOLDABLE_INSPECTOR_SRC="${clogMoldableInspectorSrc}"
+          export HTML_INSPECTOR_VIEWS_SRC="${htmlInspectorViewsSrc}"
+          export PLUMP_INSPECTOR_VIEWS_SRC="${plumpInspectorViewsSrc}"
+          export LWCELLS_SRC="${lwcellsSrc}"
+          export CL_MARKUP_SRC="${clMarkupSrc}"
+        '';
 
         sbclEnv = pkgs.sbcl.withPackages (ps: with ps; [
           alexandria
@@ -102,6 +111,30 @@
           ps."clog-ace"
           ps."eclector-concrete-syntax-tree"
         ]);
+        releaseRevision =
+          if self ? dirtyShortRev then self.dirtyShortRev
+          else if self ? shortRev then self.shortRev
+          else if self ? dirtyRev then builtins.substring 0 12 self.dirtyRev
+          else if self ? rev then builtins.substring 0 7 self.rev
+          else "unknown";
+        flakeLockSha256 = builtins.hashFile "sha256" ./flake.lock;
+        releaseId = "${releaseRevision}-${builtins.substring 0 12 flakeLockSha256}";
+        releasePackage = pkgs.callPackage ./nix/release/package.nix {
+          releaseSource = self;
+          inherit
+            sbclEnv
+            namedClosurePkg
+            arrowsSrc
+            clogSrcPatched
+            clogMoldableInspectorSrc
+            htmlInspectorViewsSrc
+            plumpInspectorViewsSrc
+            lwcellsSrc
+            clMarkupSrc
+            releaseId
+            releaseRevision
+            flakeLockSha256;
+        };
       in {
         devShells.default = pkgs.mkShell {
           packages = [
@@ -123,15 +156,8 @@
             project_tree="$PWD//"
             deps_tree="$PWD/.flake-deps//"
             named_closure_tree="${namedClosurePkg}//"
-            export ARROWS_SRC="${arrowsSrc}"
-            export CLOG_SRC="${clogSrcPatched}"
+            ${asdfSourceExports}
             clog_tree="$CLOG_SRC//"
-            export CLOG_MOLDABLE_INSPECTOR_SRC="${clogMoldableInspectorSrc}"
-            export HTML_INSPECTOR_VIEWS_SRC="${htmlInspectorViewsSrc}"
-            export PLUMP_INSPECTOR_VIEWS_SRC="${plumpInspectorViewsSrc}"
-            export LWCELLS_SRC="${lwcellsSrc}"
-
-            CL_MARKUP_SRC=""
             if [ -n "$current_registry" ]; then
               IFS=':' read -r -a _registry_parts <<< "$current_registry"
               for _part in "''${_registry_parts[@]}"; do
@@ -145,17 +171,9 @@
                 else
                   filtered_registry="$_part"
                 fi
-                case "$_part" in
-                  *-sbcl-cl-markup-*//|*-sbcl-cl-markup-*/)
-                    CL_MARKUP_SRC="''${_part%/}"
-                    CL_MARKUP_SRC="''${CL_MARKUP_SRC%/}"
-                    break
-                    ;;
-                esac
               done
               unset _registry_parts _part
             fi
-            export CL_MARKUP_SRC
 
             mkdir -p .flake-deps
             ln -snf "$HTML_INSPECTOR_VIEWS_SRC" .flake-deps/html-inspector-views
@@ -164,27 +182,7 @@
             ln -snf "$CLOG_MOLDABLE_INSPECTOR_SRC" .flake-deps/clog-moldable-inspector
             ln -snf "$LWCELLS_SRC" .flake-deps/lwcells
             ln -snf "$ARROWS_SRC" .flake-deps/arrows
-            ln -snf "${alexandriaSrc}" .flake-deps/alexandria
-            ln -snf "${arrowMacrosSrc}" .flake-deps/arrow-macros
-            ln -snf "${puriSrc}" .flake-deps/puri
-            ln -snf "${clWhoSrc}" .flake-deps/cl-who
-            ln -snf "${hunchentootSrc}" .flake-deps/hunchentoot
-            ln -snf "${drakmaSrc}" .flake-deps/drakma
-            ln -snf "${clPpcreSrc}" .flake-deps/cl-ppcre
-            ln -snf "${bordeauxThreadsSrc}" .flake-deps/bordeaux-threads
-            ln -snf "${localTimeSrc}" .flake-deps/local-time
-            ln -snf "${shashtSrc}" .flake-deps/shasht
-            ln -snf "${strSrc}" .flake-deps/str
-            ln -snf "${usocketSrc}" .flake-deps/usocket
-            ln -snf "${tpnSrc}" .flake-deps/trivial-package-local-nicknames
-            ln -snf "${clSlugSrc}" .flake-deps/cl-slug
-            ln -snf "${sha1Src}" .flake-deps/sha1
-            ln -snf "${lquerySrc}" .flake-deps/lquery
-            ln -snf "${plumpSrc}" .flake-deps/plump
-            ln -snf "${babelSrc}" .flake-deps/babel
-            if [ -n "$CL_MARKUP_SRC" ]; then
-              ln -snf "$CL_MARKUP_SRC" .flake-deps/cl-markup
-            fi
+            ln -snf "$CL_MARKUP_SRC" .flake-deps/cl-markup
 
             if [ -n "$filtered_registry" ]; then
               export CL_SOURCE_REGISTRY="$clog_tree:$deps_tree:$project_tree:$filtered_registry:$named_closure_tree"
@@ -225,28 +223,60 @@ EOF
           '';
         };
 
+        packages = {
+          hyperdoc-release = releasePackage;
+          default = releasePackage;
+        };
+
         apps.default = {
           type = "app";
-          program = toString (pkgs.writeShellScript "hyperdoc-start" ''
-            set -euo pipefail
-            export HTML_INSPECTOR_VIEWS_ASD="${htmlInspectorViewsSrc}/html-inspector-views.asd"
-            exec ${sbclEnv}/bin/sbcl --no-userinit \
-              --eval '(require :asdf)' \
-              --eval '(ignore-errors (require :sb-introspect))' \
-              --eval '(when (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD")
-                        (ignore-errors (asdf:clear-system "html-inspector-views"))
-                        (ignore-errors (asdf:clear-system "html-inspector-views/standard"))
-                        (ignore-errors (asdf:clear-system "html-inspector-views/reactive"))
-                        (load (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD")))' \
-              --eval '(asdf:load-system :html-inspector-views)' \
-              --eval '(when (uiop:getenv "HTML_INSPECTOR_VIEWS_THUNKS") (load (uiop:getenv "HTML_INSPECTOR_VIEWS_THUNKS")))' \
-              --eval '(when (find-package :html-inspector-views)
-                        (export (list (intern "THUNK" :html-inspector-views)
-                                      (intern "EVAL-THUNK" :html-inspector-views))
-                                :html-inspector-views))' \
-              --eval '(asdf:load-system :hyperbook/server)' \
-              --eval '(hyperbook/server:serve-catalog)'
-          '');
+          program = "${releasePackage}/bin/hyperdoc-release-start";
+        };
+
+        apps.release-verify = {
+          type = "app";
+          program = "${releasePackage}/bin/hyperdoc-release-verify";
+        };
+
+        apps.release-info = {
+          type = "app";
+          program = "${releasePackage}/bin/hyperdoc-release-info";
+        };
+
+        apps.release-smoke = {
+          type = "app";
+          program = "${releasePackage}/bin/hyperdoc-release-verify";
+        };
+
+        checks = {
+          hyperdoc-release = releasePackage;
+
+          hyperdoc-runtime-consistency = pkgs.runCommand "hyperdoc-runtime-consistency" { } ''
+            export HYPERDOC_VERIFY_PORT=19080
+            ${releasePackage}/bin/hyperdoc-release-verify
+            touch "$out"
+          '';
         };
       });
+    in
+    perSystem // {
+      nixosModules = {
+        hyperdoc-release = import ./nix/modules/hyperdoc-release.nix;
+        dreyeck-ch = import ./nix/hosts/dreyeck-ch.nix;
+      };
+
+      nixosConfigurations.dreyeck-ch = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit self; };
+        modules = [
+          dreyeckHardwareModule
+          ./nix/hosts/dreyeck-ch.nix
+          ({ lib, pkgs, ... }: {
+            system.stateVersion = lib.mkDefault "24.11";
+            networking.hostName = lib.mkDefault "dreyeck-ch";
+            services.hyperdoc.package = self.packages.${pkgs.system}.hyperdoc-release;
+          })
+        ];
+      };
+    };
 }
