@@ -1436,3 +1436,173 @@ context."))
                 (format nil "git -C ~A blame -L 197,197 -- lib/search.js" repo)
                 (format nil "git -C ~A blame -L 64,64 -- lib/revision.js" repo))
           :provenance-commit "d4420c72a49305ca52d18ce8203bc95bdd3f59d2")))
+
+;;
+;; dreyeck.ch cautious deployment runner
+;;
+
+(defparameter *dreyeck-deploy-sequence*
+  '(:backup-dreyeck
+    :record-dreyeck-generation
+    :verify-dreyeck-local-flake
+    :dry-activate-dreyeck
+    :test-dreyeck
+    :verify-dreyeck-http
+    :switch-dreyeck))
+
+(defparameter *dreyeck-rehearsal-sequence*
+  '(:backup-dreyeck
+    :record-dreyeck-generation
+    :verify-dreyeck-local-flake
+    :dry-activate-dreyeck
+    :test-dreyeck
+    :verify-dreyeck-http))
+
+(defun normalize-dreyeck-deploy-action (action)
+  (let ((keyword (etypecase action
+                   (keyword action)
+                   (symbol (alexandria:make-keyword (symbol-name action)))
+                   (string (alexandria:make-keyword action)))))
+    (unless (member keyword
+                    '(:backup-dreyeck
+                      :record-dreyeck-generation
+                      :verify-dreyeck-local-flake
+                      :dry-activate-dreyeck
+                      :test-dreyeck
+                      :verify-dreyeck-http
+                      :rehearse-dreyeck
+                      :switch-dreyeck
+                      :rollback-dreyeck)
+                    :test #'eq)
+      (error "Unknown dreyeck deployment action: ~A" action))
+    keyword))
+
+(defun dreyeck-nixos-rebuild-command (mode &key build-host target-host print-only)
+  (when (and (not print-only) (null target-host))
+    (error "Action ~A requires :target-host when executing. Use :print-only t to emit placeholders."
+           mode))
+  (let ((target (or target-host "<ssh-target>")))
+    (format nil
+            "nixos-rebuild ~A --flake .#dreyeck-ch~@[ --build-host ~A~] --target-host ~A"
+            mode
+            build-host
+            target)))
+
+(defun dreyeck-remote-shell-command (remote-command &key target-host print-only)
+  (when (and (not print-only) (null target-host))
+    (error "Remote action requires :target-host when executing. Use :print-only t to emit placeholders."))
+  (let ((target (or target-host "<ssh-target>")))
+    (list :display (format nil "ssh ~A ~S" target remote-command)
+          :argv (list "ssh" target remote-command))))
+
+(defun dreyeck-deploy-action-commands
+    (action &key build-host target-host print-only)
+  (let ((action* (normalize-dreyeck-deploy-action action)))
+    (case action*
+      (:backup-dreyeck
+       (list
+        (dreyeck-remote-shell-command
+         "sudo mkdir -p /root/pre-hyperdoc-backup"
+         :target-host target-host
+         :print-only print-only)
+        (dreyeck-remote-shell-command
+         "sudo tar czf /root/pre-hyperdoc-backup/etc-nixos-$(date +%F-%H%M%S).tar.gz /etc/nixos"
+         :target-host target-host
+         :print-only print-only)
+        (dreyeck-remote-shell-command
+         "sudo tar czf /root/pre-hyperdoc-backup/hyperdoc-data-$(date +%F-%H%M%S).tar.gz /var/lib/hyperdoc /home/rgb/workspace/hyperdoc 2>/dev/null || true"
+         :target-host target-host
+         :print-only print-only)))
+      (:record-dreyeck-generation
+       (list
+        (dreyeck-remote-shell-command
+         "sudo sh -c '{ echo \"# $(date -Is)\"; echo; echo \"## generations\"; nixos-rebuild list-generations; echo; echo \"## current-system\"; readlink -f /run/current-system; echo; echo \"## booted-system\"; readlink -f /run/booted-system; } > /root/pre-hyperdoc-backup/rollback-reference.txt'"
+         :target-host target-host
+         :print-only print-only)))
+      (:verify-dreyeck-local-flake
+       (list
+        "git status --short"
+        "nix flake check"
+        "nix run .#release-smoke"))
+      (:dry-activate-dreyeck
+       (list (dreyeck-nixos-rebuild-command
+              "dry-activate"
+              :build-host build-host
+              :target-host target-host
+              :print-only print-only)))
+      (:test-dreyeck
+       (list (dreyeck-nixos-rebuild-command
+              "test"
+              :build-host build-host
+              :target-host target-host
+              :print-only print-only)))
+      (:verify-dreyeck-http
+       (list
+        "curl -I https://dreyeck.ch/boot.html"
+        "curl -I \"https://dreyeck.ch/584FD-hyperdoc/Official%20Tutorial%3A%20NixOS%20SD%20Image%20on%20Raspberry%20Pi%204%2F400\""
+        "curl -I https://dreyeck.ch/hyperbook-server/js/url.js"))
+      (:switch-dreyeck
+       (list (dreyeck-nixos-rebuild-command
+              "switch"
+              :build-host build-host
+              :target-host target-host
+              :print-only print-only)))
+      (:rollback-dreyeck
+       (list
+        "sudo nixos-rebuild switch --rollback"
+        "sudo /nix/var/nix/profiles/system-<generation>-link/bin/switch-to-configuration switch")))))
+
+(defun run-dreyeck-shell-command (command &key (print-only t) (stream *standard-output*))
+  (let* ((display (if (stringp command)
+                      command
+                      (getf command :display)))
+         (argv (if (stringp command)
+                   (list "/bin/sh" "-lc" command)
+                   (getf command :argv))))
+    (unless (and display argv)
+      (error "Malformed command descriptor: ~S" command))
+    (format stream "~&$ ~A~%" display)
+  (finish-output stream)
+  (unless print-only
+    (let* ((process (uiop:launch-program
+                     argv
+                     :output *standard-output*
+                     :error-output *error-output*
+                     :ignore-error-status t))
+           (exit-code (uiop:wait-process process)))
+      (unless (zerop exit-code)
+        (error "Command failed with exit code ~D: ~A" exit-code display))))))
+
+(defun run-dreyeck-deploy-action
+    (action &key build-host target-host (print-only t) (stream *standard-output*))
+  "Run one cautious deployment action for dreyeck.ch.
+When PRINT-ONLY is true, only print commands without executing shell actions."
+  (let ((action* (normalize-dreyeck-deploy-action action)))
+    (if (eq action* :rehearse-dreyeck)
+        (dolist (inner-action *dreyeck-rehearsal-sequence*)
+          (run-dreyeck-deploy-action
+           inner-action
+           :build-host build-host
+           :target-host target-host
+           :print-only print-only
+           :stream stream))
+        (dolist (command (dreyeck-deploy-action-commands
+                          action*
+                          :build-host build-host
+                          :target-host target-host
+                          :print-only print-only))
+          (run-dreyeck-shell-command command :print-only print-only :stream stream)))
+    action*))
+
+(defun run-dreyeck-deploy-sequence
+    (&key build-host target-host (print-only t) (stream *standard-output*))
+  "Run or print the canonical cautious sequence:
+backup -> record -> verify-local -> dry-activate -> test -> verify-http -> switch."
+  (dolist (action *dreyeck-deploy-sequence*)
+    (run-dreyeck-deploy-action
+     action
+     :build-host build-host
+     :target-host target-host
+     :print-only print-only
+     :stream stream))
+  *dreyeck-deploy-sequence*)
