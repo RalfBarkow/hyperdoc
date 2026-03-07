@@ -1466,4 +1466,34 @@
                  "Authoring Documentation in HyperDoc"
                  "Reference Systems in HyperDoc")))
 
+(defun hyperdoc-runtime-model-topic ()
+  (make-topic
+   :id "hyperdoc-runtime-model"
+   :title "HyperDoc runtime model"
+   :summary "Shared runtime vocabulary for pages, topics, inspectable objects, and linked collaboration surfaces in HyperDoc."
+   :references '("HyperDoc Runtime Model"
+                 "Documentation Architecture in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Design")))
+
+(defun hyperdoc-runtime-entities-topic ()
+  (make-topic
+   :id "hyperdoc-runtime-entities"
+   :title "HyperDoc runtime entities"
+   :summary "Core runtime entities include page objects, topic objects, inspectable links, inspector views, and linked page records."
+   :references '("HyperDoc Runtime Model"
+                 "Documentation Surfaces in HyperDoc"
+                 "Authoring Documentation in HyperDoc"
+                 "What is a moldable inspector?")))
+
+(defun hyperdoc-runtime-boundaries-topic ()
+  (make-topic
+   :id "hyperdoc-runtime-boundaries"
+   :title "HyperDoc runtime boundaries"
+   :summary "Boundary model separating page narrative, topic semantics, inspector behavior, and FedWiki story/journal collaboration layers."
+   :references '("HyperDoc Runtime Model"
+                 "Reference Systems in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "FedWiki Page-Generation Workflow")))
+
 ;;

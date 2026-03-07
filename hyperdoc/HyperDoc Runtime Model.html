@@ -1,0 +1,99 @@
+<h1>HyperDoc Runtime Model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page defines runtime vocabulary for HyperDoc so later routing,
+  inspection, and interaction pages can build on shared concepts.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::hyperdoc-runtime-model-topic)"><tt>HyperDoc runtime model</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-runtime-entities-topic)"><tt>HyperDoc runtime entities</tt></a></li>
+  <li><a expr="(hyperdoc::hyperdoc-runtime-boundaries-topic)"><tt>HyperDoc runtime boundaries</tt></a></li>
+  <li><a expr="(hyperdoc::documentation-surfaces-in-hyperdoc-topic)"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+</ul>
+
+<h2>Why a runtime model matters</h2>
+
+<p>
+  HyperDoc combines pages, links, inspectable objects, and neighboring systems.
+  A runtime model helps contributors distinguish what is represented as data,
+  what is represented as object behavior, and which layer is responsible for
+  navigation, inspection, or collaboration traces.
+</p>
+
+<h2>Core runtime entities</h2>
+
+<ul>
+  <li><b>Page objects:</b> runtime representations of HyperDoc pages and their links.</li>
+  <li><b>Topic objects:</b> inspectable concept handles created in <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li><b>Inspectable object references:</b> <tt>expr</tt>-backed links to runtime symbols and objects.</li>
+  <li><b>HyperBook/FedWiki page records:</b> externally stored page artifacts linked into workflows.</li>
+  <li><b>Inspector views:</b> object-specific representations for runtime exploration.</li>
+</ul>
+
+<h2>Page, topic, and inspectable object</h2>
+
+<p>
+  A page is narrative structure. A topic is reusable semantic identity. An
+  inspectable object link is a runtime handle inside page narrative.
+</p>
+<p>
+  These are related but not interchangeable: pages organize explanation, topics
+  stabilize concept references, and inspectable links make runtime structures
+  explorable in context.
+</p>
+
+<h2>Story and journal as runtime-facing structures</h2>
+
+<p>
+  In FedWiki-related surfaces, <tt>story</tt> holds current visible content and
+  <tt>journal</tt> holds replayable edit history. HyperDoc consumes these as
+  linked artifacts rather than replacing their runtime semantics.
+</p>
+<p>
+  The journal layer is collaboration trace infrastructure, not a substitute for
+  HyperDoc topic modeling.
+</p>
+
+<h2>Local and remote page relationships</h2>
+
+<ul>
+  <li>Local HyperDoc pages provide durable architecture and inspectable references.</li>
+  <li>Localhost FedWiki pages provide parallel journaling and iterative trail.</li>
+  <li>Remote hyperbooks/external pages are linked as references with explicit boundaries.</li>
+</ul>
+
+<h2>Runtime boundaries and responsibilities</h2>
+
+<ul>
+  <li><b>HyperDoc page layer:</b> durable narrative + object links.</li>
+  <li><b>Topic layer:</b> curated semantic handles and references.</li>
+  <li><b>Inspector layer:</b> runtime object exploration through views.</li>
+  <li><b>FedWiki layer:</b> journaled page evolution and neighborhood context.</li>
+  <li><b>Boundary rule:</b> link layers explicitly; do not collapse them into one implied model.</li>
+</ul>
+
+<h2>Common confusions and false equivalences</h2>
+
+<ul>
+  <li>Treating page text as equivalent to topic-object identity.</li>
+  <li>Treating inspectable links as decorative navigation instead of explanatory runtime handles.</li>
+  <li>Treating FedWiki story/journal structures as direct replacements for HyperDoc page/topic structures.</li>
+  <li>Assuming local and remote references share identical lifecycle and ownership constraints.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
+  <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
+</ul>
