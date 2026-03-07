@@ -1,0 +1,114 @@
+<h1>Authoring Documentation in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page defines operational authoring guidance for documentation slices in
+  this repository.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::authoring-documentation-in-hyperdoc-topic)"><tt>Authoring Documentation in HyperDoc</tt></a></li>
+  <li><a expr="(hyperdoc::documentation-authoring-decisions-topic)"><tt>Documentation authoring decisions</tt></a></li>
+  <li><a expr="(hyperdoc::documentation-validation-and-commit-gates-topic)"><tt>Documentation validation and commit gates</tt></a></li>
+  <li><a expr="(hyperdoc::documentation-surfaces-in-hyperdoc-topic)"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+</ul>
+
+<h2>Why authoring guidance matters</h2>
+
+<p>
+  HyperDoc documentation uses multiple surfaces with different strengths.
+  Explicit guidance keeps new slices structurally consistent and reduces drift
+  between durable architecture notes and fast-moving collaborative artifacts.
+</p>
+
+<h2>When to create a durable HyperDoc page</h2>
+
+<ul>
+  <li>Create or update a durable page when a distinction should guide future work.</li>
+  <li>Prefer durable pages for architecture, boundary rules, and stable workflow guidance.</li>
+  <li>A durable page should avoid transient branch status, release churn, or commit narration.</li>
+</ul>
+
+<h2>When to add a topic object in topics.lisp</h2>
+
+<ul>
+  <li>Add a topic object when a concept needs reusable inspectable identity.</li>
+  <li>Use topics for concept reuse across multiple pages, not only one local narrative.</li>
+  <li>Topic objects are reusable semantic handles, not mere page metadata.</li>
+</ul>
+
+<h2>When to embed inspectable objects in a page</h2>
+
+<ul>
+  <li>Embed inspectable objects when page claims should be tied to runtime-inspectable handles.</li>
+  <li>Use <tt>expr</tt> references for topics and relevant workflow/runtime objects.</li>
+  <li>Inspectable objects are explanatory affordances, not decorative links.</li>
+</ul>
+
+<h2>When to create a FedWiki twin</h2>
+
+<ul>
+  <li>Create a FedWiki twin when collaborative journaling or rapid iteration is expected.</li>
+  <li>Use topic-level correspondence between HyperDoc and FedWiki artifacts.</li>
+  <li>Not every HTML page detail needs a FedWiki twin equivalent.</li>
+  <li>A FedWiki twin is a parallel artifact, not a literal serialization target.</li>
+</ul>
+
+<h2>How to keep surfaces aligned without forcing symmetry</h2>
+
+<ul>
+  <li>Align by concept intent, references, and navigable links.</li>
+  <li>Avoid requiring identical structure across page, topic, and twin surfaces.</li>
+  <li>Prefer additive changes to existing twins; avoid overwriting unrelated content.</li>
+</ul>
+
+<h2>Cross-linking guidance</h2>
+
+<ul>
+  <li>Cross-link durable pages to related durable pages and external references where needed.</li>
+  <li>Expose corresponding topic objects in an <tt>Inspectable objects</tt> section.</li>
+  <li>For FedWiki links in HyperBook contexts, prefer stable slug-based <tt>page=</tt> values.</li>
+</ul>
+
+<h2>Validation gates before commit</h2>
+
+<ol>
+  <li>Load gate: run <tt>asdf:load-system :hyperdoc</tt>.</li>
+  <li>Topic gate: verify <tt>fboundp</tt> for new topic constructors.</li>
+  <li>Coverage gate: run <tt>tools/check-topic-coverage.lisp</tt> on the new page.</li>
+  <li>FedWiki syntax gate: run <tt>python3 -m json.tool</tt> on changed FedWiki page files.</li>
+  <li>FedWiki semantic gate (where applicable): ensure journal checks are clear of creation, chronology, revision, and malformed findings.</li>
+</ol>
+
+<h2>Commit slicing guidance</h2>
+
+<ul>
+  <li>Split durable HyperDoc edits and FedWiki twin edits into separate commits.</li>
+  <li>Use a docs(hyperdoc) commit for page/topic/cross-link changes.</li>
+  <li>Use a docs(fedwiki) commit for twin-page changes.</li>
+  <li>If no twins are changed, keep the slice as a single HyperDoc docs commit.</li>
+</ul>
+
+<h2>Failure modes and drift risks</h2>
+
+<ul>
+  <li>False symmetry: treating page, topic object, and twin as equivalent artifacts.</li>
+  <li>Metadata drift: adding topics that duplicate page titles but provide no reusable concept handle.</li>
+  <li>Traceability gaps: adding narrative claims without inspectable object anchors.</li>
+  <li>Commit blur: mixing durable and twin updates in one commit, making history harder to review.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a page="Goals and values">Goals and values</a></li>
+  <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+</ul>

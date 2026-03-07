@@ -1403,4 +1403,33 @@
                  "Communication Surfaces Policy"
                  "Glamorous Toolkit and HyperDoc")))
 
+(defun authoring-documentation-in-hyperdoc-topic ()
+  (make-topic
+   :id "authoring-documentation-in-hyperdoc"
+   :title "Authoring Documentation in HyperDoc"
+   :summary "Operational guidance for writing documentation slices across durable pages, topic objects, inspectable handles, and optional FedWiki twins."
+   :references '("Authoring Documentation in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Reference Systems in HyperDoc"
+                 "Communication Surfaces Policy")))
+
+(defun documentation-authoring-decisions-topic ()
+  (make-topic
+   :id "documentation-authoring-decisions"
+   :title "Documentation authoring decisions"
+   :summary "Decision rules for when to create pages, topics, inspectable objects, and FedWiki twins without forcing structural symmetry."
+   :references '("Authoring Documentation in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Design"
+                 "Goals and values")))
+
+(defun documentation-validation-and-commit-gates-topic ()
+  (make-topic
+   :id "documentation-validation-and-commit-gates"
+   :title "Documentation validation and commit gates"
+   :summary "Validation and commit-slicing gates for documentation work, including load, topic, coverage, and FedWiki syntax/semantic checks."
+   :references '("Authoring Documentation in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Communication Surfaces Policy")))
+
 ;;
