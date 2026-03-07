@@ -3,6 +3,13 @@
   imports = [ ../modules/hyperdoc-release.nix ];
 
   # Host-specific deployment profile for dreyeck.ch.
+  boot.loader.grub.enable = true;
+  boot.loader.grub.devices = [ "/dev/sda" ];
+  networking.useDHCP = false;
+  networking.interfaces.ens3.useDHCP = true;
+  time.timeZone = "Europe/Zurich";
+  system.stateVersion = "20.09";
+
   services.hyperdoc = {
     enable = true;
     serviceName = "hyperdoc";
