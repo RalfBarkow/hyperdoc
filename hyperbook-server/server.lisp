@@ -41,32 +41,45 @@ Enable web debugger only when that extension is loaded."
   (let ((path (known-wikis-pathname)))
     (multiple-value-bind (entries exists?)
         (load-known-wikis)
+      (format t "~&[HYPERBOOK] known-wikis path: ~A~%" path)
       (unless exists?
         (format t "~&[HYPERBOOK] no known-wikis config found at ~A~%" path)
         (return-from register-known-hyperbooks nil))
+      (format t "~&[HYPERBOOK] loaded known-wikis entries: ~S~%" entries)
 
       (labels
-          ((ensure-scheme-loaded (id)
-             (let* ((uri (handler-case (puri:parse-uri id) (error () nil)))
-                    (scheme (and uri (puri:uri-scheme uri))))
-               (when scheme
-                 (case (intern (string-upcase scheme) :keyword)
-                   (:FEDWIKI (asdf:load-system :hyperbook/fedwiki))
-                   (otherwise nil)))))
+          ((ensure-fedwiki-system-loaded ()
+             (asdf:load-system :hyperbook/fedwiki))
 
-           (entry->id (entry)
+           (fedwiki-constructor ()
+             (or (find-symbol "GET-FEDWIKI" :hyperbook/fedwiki)
+                 (error "GET-FEDWIKI not found after loading :hyperbook/fedwiki")))
+
+           (entry->registration (entry)
              (cond
                ((stringp entry)
-                entry)
+                (if (str:starts-with? "fedwiki:" entry)
+                    (list :kind :fedwiki
+                          :id entry
+                          :domain (str:substring (length "fedwiki:") nil entry))
+                    (list :kind :raw-id
+                          :id entry)))
                ((and (consp entry) (stringp (first entry)))
-                (first entry))
+                (destructuring-bind (host &key https &allow-other-keys) entry
+                  (list :kind :fedwiki
+                        :id (format nil "fedwiki:~A" host)
+                        :domain host
+                        :https https)))
                ((and (consp entry) (keywordp (first entry)))
-                (destructuring-bind (kind host &key plugmatic &allow-other-keys) entry
+                (destructuring-bind (kind host &key plugmatic https &allow-other-keys) entry
                   (when plugmatic
                     (format t "~&[HYPERBOOK] note: ignoring :plugmatic in ~S (use id-only entry)~%"
                             entry))
                   (case kind
-                    (:fedwiki (format nil "fedwiki:~A" host))
+                    (:fedwiki (list :kind :fedwiki
+                                    :id (format nil "fedwiki:~A" host)
+                                    :domain host
+                                    :https https))
                     (otherwise
                      (format t "~&[HYPERBOOK] ignoring unsupported known wiki entry ~S~%"
                              entry)
@@ -75,21 +88,34 @@ Enable web debugger only when that extension is loaded."
                 (format t "~&[HYPERBOOK] ignoring malformed known wiki entry ~S~%" entry)
                 nil)))
 
-           (register-id (id)
-             (ensure-scheme-loaded id)
-             (let ((hb (hyperbook:find-hyperbook id)))
-               (unless hb
-                 (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
-                         id))
-               hb)))
+           (register-entry (registration)
+             (destructuring-bind (&key kind id domain https &allow-other-keys) registration
+               (case kind
+                 (:fedwiki
+                  (ensure-fedwiki-system-loaded)
+                  (let ((hb (funcall (fedwiki-constructor)
+                                     domain
+                                     nil
+                                     nil
+                                     :https https)))
+                    (hyperbook:register hb)
+                    (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%" (hyperbook:id-of hb))
+                    hb))
+                 (:raw-id
+                  (let ((hb (hyperbook:find-hyperbook id)))
+                    (unless hb
+                      (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
+                              id))
+                    (when hb
+                      (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%" (hyperbook:id-of hb)))
+                    hb))
+                 (otherwise nil)))))
 
         (dolist (entry entries)
           (handler-case
-              (let ((id (entry->id entry)))
-                (when id
-                  (unless (hyperbook:find-hyperbook id)
-                    (format t "~&[HYPERBOOK] ensuring ~A~%" id))
-                  (register-id id)))
+              (when-let (registration (entry->registration entry))
+                (format t "~&[HYPERBOOK] processing known wiki entry ~S~%" entry)
+                (register-entry registration))
             (error (c)
               (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c))))))))
 

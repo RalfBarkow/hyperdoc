@@ -80,9 +80,12 @@ that occurred when reading the site map.")))
           (type-of condition)
           condition))
 
-(defun make-fedwiki (domain-name)
+(defun make-fedwiki (domain-name &key (https nil https-supplied-p))
   (let* ((wiki (make-instance 'fedwiki
                               :id (str:concat *uri-scheme* domain-name))))
+    (when https-supplied-p
+      (setf (slot-value wiki 'protocol)
+            (if https "https" "http")))
     (setf (status-of wiki)
           (bt:make-thread
            #'(lambda ()
@@ -90,20 +93,21 @@ that occurred when reading the site map.")))
                ;; for this because high-level access via drakma waits for
                ;; a connection timeout rather than detecting the immediate
                ;; connection-refused error.
-               (handler-case
-                   (-> domain-name
-                     (usocket:socket-connect 443)
-                     (usocket:socket-close))
-                 (usocket:connection-refused-error (c)
-                   (declare (ignore c))
-                   (setf (slot-value wiki 'protocol) "http"))
-                 (error (c)
-                   (if (network-init-failure-p c)
-                       (note-network-init-failure
-                        domain-name
-                        "HTTPS probe failed; continuing with default protocol"
-                        c)
-                       (error c))))
+               (unless https-supplied-p
+                 (handler-case
+                     (-> domain-name
+                       (usocket:socket-connect 443)
+                       (usocket:socket-close))
+                   (usocket:connection-refused-error (c)
+                     (declare (ignore c))
+                     (setf (slot-value wiki 'protocol) "http"))
+                   (error (c)
+                     (if (network-init-failure-p c)
+                         (note-network-init-failure
+                          domain-name
+                          "HTTPS probe failed; continuing with default protocol"
+                          c)
+                         (error c)))))
                (handler-case
                    (progn (fetch-sitemap wiki)
                           (fetch-plugin-data wiki)
@@ -181,12 +185,14 @@ that occurred when reading the site map.")))
 
 (defvar *neighborhood* (make-hash-table :test #'equal))
 
-(defun get-fedwiki (domain-name &optional signal-error? wait-for-sitemap?)
+(defun get-fedwiki (domain-name &optional signal-error? wait-for-sitemap?
+                                 &rest initargs)
   (declare (ignore signal-error?))
-  (let ((wiki (if-let (wiki (gethash domain-name *neighborhood*))
+  (let* ((https (getf initargs :https))
+         (wiki (if-let (wiki (gethash domain-name *neighborhood*))
                 wiki
                 (setf (gethash domain-name *neighborhood*)
-                      (make-fedwiki domain-name)))))
+                      (make-fedwiki domain-name :https https)))))
     (when wait-for-sitemap?
       (wait-for-sitemap wiki))
     wiki))
