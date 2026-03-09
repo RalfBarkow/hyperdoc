@@ -22,16 +22,52 @@
 
 <h2>Inspectable objects</h2>
 
+<p>
+  Use this page in two passes. If the next click should open a live DMX-backed
+  runtime object, use the runtime handles below. If the next click should open
+  a stable authored topic page, use the HyperBook <tt>topics</tt> links.
+</p>
+
+<h3>Topic-page surface in HyperBook <tt>topics</tt></h3>
+
 <ul>
   <li><a hyperbook="topics" page="Concept"><tt>Concept</tt></a></li>
   <li><a hyperbook="topics" page="Topic Map"><tt>Topic Map</tt></a></li>
   <li><a hyperbook="topics" page="DMX Topic"><tt>DMX Topic</tt></a></li>
 </ul>
 
+<h3>Live DMX-backed runtime objects</h3>
+
 <p>
-  Runtime note: these inspectable objects are now DMX-backed proxies
-  (<tt>hyperdoc::dmx-topic-proxy</tt>) resolved by stable DMX IDs. HyperDoc no
-  longer duplicates local hand-written topic summaries as the source of truth.
+  These runtime handles resolve to live DMX-backed
+  <tt>hyperdoc::dmx-topic-proxy</tt> objects resolved by stable DMX IDs.
+</p>
+
+<ul>
+  <li><a expr="(concept-operational-definition)"><tt>(concept-operational-definition)</tt></a></li>
+  <li><a expr="(topic-map-operational-definition)"><tt>(topic-map-operational-definition)</tt></a></li>
+  <li><a expr="(dmx-topic-operational-definition)"><tt>(dmx-topic-operational-definition)</tt></a></li>
+</ul>
+
+<h2>Clickable demonstration</h2>
+
+<p>
+  Open this page, click one of the runtime handles above, and in the inspector
+  show <tt>Overview</tt>, <tt>Raw fetched data</tt>, and <tt>Relations</tt>.
+  This is the explicit click path for demonstrating that the documentation now
+  opens a live DMX-backed runtime object instead of only a local summary.
+</p>
+
+<ul>
+  <li><b>Overview:</b> HyperBook, base URL, topicmap id, topic id, and the DMX webclient URL.</li>
+  <li><b>Raw fetched data:</b> Topic JSON, Topicmap JSON, and Related topics JSON fetched for the proxy.</li>
+  <li><b>Relations:</b> related topics rendered as an inspector table.</li>
+</ul>
+
+<p>
+  To compare that runtime-object surface with the separate topic-page surface,
+  click the HyperBook <tt>topics</tt> links above or open
+  <a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a>.
 </p>
 
 <h2>Operational definition of concept</h2>
@@ -228,4 +264,5 @@
   <li><a page="Where This Functionality Belongs">Where This Functionality Belongs</a></li>
   <li><a page="Candidate Control Surface for Narrowly Defined Workflows">Candidate Control Surface for Narrowly Defined Workflows</a></li>
   <li><a page="Public Block Execution Contract">Public Block Execution Contract</a></li>
+  <li><a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a></li>
 </ul>

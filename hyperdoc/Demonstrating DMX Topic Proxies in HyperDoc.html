@@ -1,0 +1,109 @@
+<h1>Demonstrating DMX Topic Proxies in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the main walkthrough for demonstrating the new DMX topic proxy
+  behavior directly inside HyperDoc. Use it to show both surfaces without
+  collapsing them: authored topic pages in HyperBook <tt>topics</tt> and live
+  DMX-backed runtime objects opened through <tt>expr</tt> links.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<h3>Topic-page surface in HyperBook <tt>topics</tt></h3>
+
+<ul>
+  <li><a hyperbook="topics" page="Concepts, DMX Topics, and Topic Maps"><tt>Concepts, DMX Topics, and Topic Maps</tt></a></li>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Prepare the AArch64 image"><tt>Prepare the AArch64 image</tt></a></li>
+  <li><a hyperbook="topics" page="Concept"><tt>Concept</tt></a></li>
+  <li><a hyperbook="topics" page="Topic Map"><tt>Topic Map</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Topic"><tt>DMX Topic</tt></a></li>
+</ul>
+
+<h3>Runtime-object surface</h3>
+
+<ul>
+  <li><a expr="(concept-operational-definition)"><tt>(concept-operational-definition)</tt></a></li>
+  <li><a expr="(topic-map-operational-definition)"><tt>(topic-map-operational-definition)</tt></a></li>
+  <li><a expr="(dmx-topic-operational-definition)"><tt>(dmx-topic-operational-definition)</tt></a></li>
+  <li><a expr="(prepare-aarch64-image-topic)"><tt>(prepare-aarch64-image-topic)</tt></a></li>
+</ul>
+
+<h2>Demo 1: Live DMX runtime object</h2>
+
+<p>
+  Open
+  <a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a>,
+  then click the runtime handle
+  <a expr="(dmx-topic-operational-definition)"><tt>(dmx-topic-operational-definition)</tt></a>.
+  The same handle is also present on that page in its live DMX-backed runtime
+  section.
+</p>
+
+<p>
+  In the inspector, explicitly show these tabs:
+</p>
+
+<ul>
+  <li><b>Overview:</b> HyperBook, base URL, topicmap id, topic id, and the DMX webclient URL.</li>
+  <li><b>Raw fetched data:</b> Topic JSON, Topicmap JSON, and Related topics JSON fetched for the proxy.</li>
+  <li><b>Relations:</b> the related-topics table rendered from the fetched DMX data.</li>
+</ul>
+
+<p>
+  This click path is supposed to open a live DMX-backed
+  <tt>hyperdoc::dmx-topic-proxy</tt> runtime object.
+</p>
+
+<h2>Demo 2: Topic page surface</h2>
+
+<p>
+  Click the HyperBook <tt>topics</tt> link
+  <a hyperbook="topics" page="Prepare the AArch64 image"><tt>Prepare the AArch64 image</tt></a>.
+  That opens a stable authored topic page in the separate Topics HyperBook
+  surface, not the DMX runtime proxy inspector.
+</p>
+
+<p>
+  The topic page is still useful in the demo because it shows the documentary
+  surface: the page title, summary, references, and backlinks remain stable
+  authored material.
+</p>
+
+<h2>Demo 3: Compare both surfaces</h2>
+
+<p>
+  Compare the topic-page link
+  <a hyperbook="topics" page="Prepare the AArch64 image"><tt>Prepare the AArch64 image</tt></a>
+  with the runtime-object link
+  <a expr="(prepare-aarch64-image-topic)"><tt>(prepare-aarch64-image-topic)</tt></a>.
+</p>
+
+<ul>
+  <li><b>Topic page:</b> stable authored/documentary concept page in HyperBook <tt>topics</tt>.</li>
+  <li><b>Runtime object:</b> live DMX proxy returned by the wrapper function and inspected through dedicated runtime views.</li>
+</ul>
+
+<p>
+  HyperDoc keeps both surfaces on purpose. The topic-page surface remains
+  curated and rebuildable from authored topic factories; the runtime-object
+  surface exposes live DMX-backed state and relations through the inspector.
+</p>
+
+<h2>Optional terminal verification</h2>
+
+<p>
+  The browser demo is primary. If you also want a narrow terminal check, run
+  the DMX topic proxy smoke test:
+</p>
+
+<pre>
+nix develop --command sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc :force t)' \
+  --eval '(load "tests/dmx-topic-proxy-smoke.lisp")' \
+  --eval '(hyperdoc/tests:run-dmx-topic-proxy-smoke-tests)' \
+  --eval '(uiop:quit 0)'
+</pre>

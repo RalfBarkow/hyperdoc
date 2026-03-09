@@ -585,6 +585,16 @@
    :summary "A DMX topic is an addressable runtime topic object with type/value/association structure."
    :references '("Concepts, DMX Topics, and Topic Maps")))
 
+(defun concepts-dmx-topics-and-topic-maps-topic ()
+  (make-topic
+   :id "concepts-dmx-topics-and-topic-maps"
+   :title "Concepts, DMX Topics, and Topic Maps"
+   :summary "Explains the relation between concepts, topic maps, and DMX topics and now provides an explicit click path into DMX-backed runtime proxy objects."
+   :references '("Concept"
+                 "Topic Map"
+                 "DMX Topic"
+                 "Demonstrating DMX Topic Proxies in HyperDoc")))
+
 ;; Topic objects for AArch64 SD-image preparation flow.
 (defun prepare-aarch64-image-topic ()
   (make-topic
@@ -2313,6 +2323,15 @@
                  "Documentation Surfaces in HyperDoc"
                  "Authoring Documentation in HyperDoc"
                  "Documentation Architecture in HyperDoc")))
+
+(defun demonstrating-dmx-topic-proxies-in-hyperdoc-topic ()
+  (make-topic
+   :id "demonstrating-dmx-topic-proxies-in-hyperdoc"
+   :title "Demonstrating DMX Topic Proxies in HyperDoc"
+   :summary "Clickable walkthrough showing how authored topic pages in HyperBook topics differ from live DMX-backed runtime proxy objects in the inspector."
+   :references '("Concepts, DMX Topics, and Topic Maps"
+                 "Topics HyperBook in HyperDoc"
+                 "Documentation Surfaces in HyperDoc")))
 
 (defun topic-backlinks-model-topic ()
   (make-topic

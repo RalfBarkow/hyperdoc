@@ -25,6 +25,33 @@
   model: each topic object has its own page in HyperBook <tt>topics</tt>.
 </p>
 
+<h2>How this relates to DMX topic proxies</h2>
+
+<p>
+  For a browser-first walkthrough, see
+  <a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a>.
+</p>
+
+<p>
+  Topic-page navigation still uses authored links such as
+  <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt>
+  and opens stable pages in HyperBook <tt>topics</tt>.
+</p>
+
+<p>
+  That is distinct from runtime wrapper functions such as
+  <tt>(concept-operational-definition)</tt>,
+  <tt>(dmx-topic-operational-definition)</tt>, and
+  <tt>(prepare-aarch64-image-topic)</tt>, which may return live
+  DMX-backed <tt>hyperdoc::dmx-topic-proxy</tt> objects in the inspector.
+</p>
+
+<p>
+  The authored topic factories are still preserved internally so HyperDoc can
+  rebuild the topic index and the topic-page surface even though the wrapper
+  layer now resolves DMX proxies for selected runtime functions.
+</p>
+
 <h2>Curated page to topic links</h2>
 
 <p>
@@ -83,6 +110,7 @@
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
   <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
   <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
+  <li><a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a></li>
   <li><a page="Topic Title Changes and Canonical Link Maintenance">Topic Title Changes and Canonical Link Maintenance</a></li>
   <li><a page="Editorial References in Topic Pages">Editorial References in Topic Pages</a></li>
 </ul>
