@@ -10,10 +10,10 @@
 <h2>Inspectable objects</h2>
 
 <ul>
-  <li><a expr="(hyperdoc::authoring-documentation-in-hyperdoc-topic)"><tt>Authoring Documentation in HyperDoc</tt></a></li>
-  <li><a expr="(hyperdoc::documentation-authoring-decisions-topic)"><tt>Documentation authoring decisions</tt></a></li>
-  <li><a expr="(hyperdoc::documentation-validation-and-commit-gates-topic)"><tt>Documentation validation and commit gates</tt></a></li>
-  <li><a expr="(hyperdoc::documentation-surfaces-in-hyperdoc-topic)"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Authoring Documentation in HyperDoc"><tt>Authoring Documentation in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation authoring decisions"><tt>Documentation authoring decisions</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation validation and commit gates"><tt>Documentation validation and commit gates</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
 </ul>
 
 <h2>Why authoring guidance matters</h2>
@@ -38,13 +38,15 @@
   <li>Add a topic object when a concept needs reusable inspectable identity.</li>
   <li>Use topics for concept reuse across multiple pages, not only one local narrative.</li>
   <li>Topic objects are reusable semantic handles, not mere page metadata.</li>
+  <li>Keep stable topic key and topic title separate: the key preserves Lisp identity, while the title is the canonical page id in HyperBook <tt>topics</tt>.</li>
 </ul>
 
 <h2>When to embed inspectable objects in a page</h2>
 
 <ul>
   <li>Embed inspectable objects when page claims should be tied to runtime-inspectable handles.</li>
-  <li>Use <tt>expr</tt> references for topics and relevant workflow/runtime objects.</li>
+  <li>Use <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt> for topic pages.</li>
+  <li>Use <tt>expr</tt> references for non-topic workflow/runtime objects.</li>
   <li>Inspectable objects are explanatory affordances, not decorative links.</li>
 </ul>
 
@@ -70,6 +72,7 @@
 <ul>
   <li>Cross-link durable pages to related durable pages and external references where needed.</li>
   <li>Expose corresponding topic objects in an <tt>Inspectable objects</tt> section.</li>
+  <li>For topic-page links, keep <tt>page=</tt> equal to the exact canonical topic title string.</li>
   <li>For FedWiki links in HyperBook contexts, prefer stable slug-based <tt>page=</tt> values.</li>
 </ul>
 
@@ -118,6 +121,7 @@
   <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
   <li><a page="Documentation Page Template">Documentation Page Template</a></li>
   <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
   <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
   <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
   <li><a page="Design">Design</a></li>

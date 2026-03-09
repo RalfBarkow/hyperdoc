@@ -10,10 +10,10 @@
 <h2>Inspectable objects</h2>
 
 <ul>
-  <li><a expr="(hyperdoc::documentation-surfaces-in-hyperdoc-topic)"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
-  <li><a expr="(hyperdoc::hyperdoc-surface-boundaries-topic)"><tt>HyperDoc surface boundaries</tt></a></li>
-  <li><a expr="(hyperdoc::page-topic-twin-correspondence-topic)"><tt>Page/topic/twin correspondence</tt></a></li>
-  <li><a expr="(hyperdoc::hyperdoc-reference-systems-topic)"><tt>HyperDoc reference systems</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc surface boundaries"><tt>HyperDoc surface boundaries</tt></a></li>
+  <li><a hyperbook="topics" page="Page/topic/twin correspondence"><tt>Page/topic/twin correspondence</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc reference systems"><tt>HyperDoc reference systems</tt></a></li>
 </ul>
 
 <h2>Why documentation surfaces matter</h2>
@@ -37,18 +37,20 @@
 
 <p>
   Topic objects in <tt>hyperdoc/topics.lisp</tt> are explicit inspectable
-  semantic handles with <tt>:id</tt>, <tt>:title</tt>, <tt>:summary</tt>, and
-  <tt>:references</tt>. A HyperDoc page is not the same thing as a topic object:
+  semantic handles with a stable key, title, summary, and optional editorial
+  references. They are exposed as first-class pages in HyperBook
+  <tt>topics</tt>. A HyperDoc page is not the same thing as a topic object:
   pages carry narrative structure; topics carry inspectable concept identity.
 </p>
 
 <h2>Inspectable objects embedded in pages</h2>
 
 <p>
-  Inspectable objects in pages are embedded explanatory handles, typically via
-  <tt>expr</tt> links. They are not only navigation links; they expose runtime
-  objects that can be inspected with views and used as semantic anchors in
-  explanation.
+  Inspectable objects in pages are embedded explanatory handles. For topic
+  pages, use explicit authored links into HyperBook <tt>topics</tt>. For other
+  runtime objects, <tt>expr</tt> links remain appropriate. These handles are
+  not only navigation links; they expose runtime objects and stable concept
+  pages that can be inspected in context.
 </p>
 
 <h2>FedWiki twins as parallel knowledge artifacts</h2>
@@ -72,8 +74,8 @@
 
 <ul>
   <li><b>Durable HyperDoc pages:</b> stable distinctions, architecture, and guidance.</li>
-  <li><b>Topic objects:</b> inspectable concept handles and curated reference lists.</li>
-  <li><b>Inspectable objects in pages:</b> runtime explanatory entry points for concepts/workflows/examples.</li>
+  <li><b>Topic objects:</b> inspectable concept handles with stable keys and topic pages in HyperBook <tt>topics</tt>.</li>
+  <li><b>Inspectable objects in pages:</b> authored explanatory entry points for topic pages and runtime objects.</li>
   <li><b>FedWiki twins:</b> parallel working/journaling artifacts with topic correspondence.</li>
 </ul>
 
@@ -83,6 +85,7 @@
   <li>False symmetry: assuming page, topic object, and twin are equivalent artifacts.</li>
   <li>Structure drift: moving concept ownership into whatever surface is easiest to edit.</li>
   <li>Link drift: missing correspondence links between durable and working surfaces.</li>
+  <li>Title drift: using visible text or abbreviations instead of the exact canonical topic title in <tt>page=</tt> links to HyperBook <tt>topics</tt>.</li>
 </ul>
 
 <h2>Practical authoring guidance</h2>
@@ -91,6 +94,7 @@
   <li>Write or update a durable page when a distinction should guide future work.</li>
   <li>Add or update topic objects when a concept needs explicit inspectable identity.</li>
   <li>Add <tt>Inspectable objects</tt> entries when page claims should be tied to inspectable runtime handles.</li>
+  <li>When linking to a topic page, use <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt> rather than a topic <tt>expr</tt> link.</li>
   <li>Create or update FedWiki twins when collaborative iteration/journaling is needed.</li>
   <li>Check correspondence links, but do not force identical shape across surfaces.</li>
 </ol>
@@ -102,6 +106,7 @@
   <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
   <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
   <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
   <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
   <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>

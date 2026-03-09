@@ -85,8 +85,9 @@ When adding/updating a concept cluster (e.g. new external input, architecture no
   - `:id` (stable slug/key),
   - `:title` (human label),
   - `:summary` (one-sentence synopsis),
-  - `:references` (HyperDoc pages and/or URLs).
-- HyperDoc pages should expose these via `expr="(hyperdoc::...-topic)"` in an `Inspectable objects` section.
+  - `:references` (optional editorial references, HyperDoc pages and/or URLs).
+- Topic title is the canonical page id in HyperBook `topics`; keep stable key separate for Lisp identity/migration.
+- HyperDoc pages should expose topics via `hyperbook="topics" page="Exact Topic Title"` in an `Inspectable objects` section.
 
 ### FedWiki twin requirements
 
@@ -120,18 +121,19 @@ For the full rationale and examples, see
 
 1. Create/update a durable HyperDoc page when the distinction should remain stable.
 2. Add topic objects in `hyperdoc/topics.lisp` when concepts must be reusable inspectable handles.
-3. Add FedWiki twins when collaborative journaling/parallel working trace is useful; do not force literal page symmetry.
-4. Split commits by surface:
+3. Link page-to-topic relations explicitly with `hyperbook="topics" page="Exact Topic Title"`.
+4. Add FedWiki twins when collaborative journaling/parallel working trace is useful; do not force literal page symmetry.
+5. Split commits by surface:
    - `docs(hyperdoc)`: durable page/topic/cross-link changes
    - `docs(fedwiki)`: twin page changes
-5. Run helper:
+6. Run helper:
    - `tools/validate-documentation-slice.sh --page "hyperdoc/<Page>.html" --topic <topic-fn> [--topic ...] [--fedwiki /Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/<slug> ...]`
-6. Mandatory checks:
+7. Mandatory checks:
    - `asdf:load-system :hyperdoc`
    - `fboundp` for new topic functions
    - `tools/check-topic-coverage.lisp` on the page
    - `python3 -m json.tool` for changed FedWiki files (if any)
-7. Optional check (recommended when FedWiki pages are edited):
+8. Optional check (recommended when FedWiki pages are edited):
    - journal semantic checker clear of `CREATION`, `CHRONOLOGY`, `REVISION`, `MALFORMED`.
 
 ### JSON validation with `python3 -m json.tool`

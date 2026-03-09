@@ -10,10 +10,10 @@
 <h2>Inspectable objects</h2>
 
 <ul>
-  <li><a expr="(hyperdoc::documentation-architecture-in-hyperdoc-topic)"><tt>Documentation Architecture in HyperDoc</tt></a></li>
-  <li><a expr="(hyperdoc::documentation-cluster-reading-order-topic)"><tt>Documentation cluster reading order</tt></a></li>
-  <li><a expr="(hyperdoc::documentation-governance-topic)"><tt>Documentation governance</tt></a></li>
-  <li><a expr="(hyperdoc::authoring-documentation-in-hyperdoc-topic)"><tt>Authoring Documentation in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Architecture in HyperDoc"><tt>Documentation Architecture in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation cluster reading order"><tt>Documentation cluster reading order</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation governance"><tt>Documentation governance</tt></a></li>
+  <li><a hyperbook="topics" page="Authoring Documentation in HyperDoc"><tt>Authoring Documentation in HyperDoc</tt></a></li>
 </ul>
 
 <h2>Why this cluster exists</h2>
@@ -48,8 +48,8 @@
 
 <ul>
   <li><b>Durable page:</b> stable architectural or operational narrative in <tt>hyperdoc/*.html</tt>/<tt>hyperdoc/*.md</tt>.</li>
-  <li><b>Topic object:</b> reusable semantic handle in <tt>hyperdoc/topics.lisp</tt> with explicit <tt>:id</tt>, <tt>:title</tt>, <tt>:summary</tt>, and <tt>:references</tt>.</li>
-  <li><b>Inspectable object:</b> in-page explanatory affordance through <tt>expr</tt> links to inspectable runtime objects.</li>
+  <li><b>Topic object:</b> reusable semantic handle in <tt>hyperdoc/topics.lisp</tt> with a stable key, canonical title, summary, and optional editorial references.</li>
+  <li><b>Inspectable object:</b> in-page explanatory affordance through explicit links to HyperBook <tt>topics</tt> for topics, and <tt>expr</tt> links for other runtime objects.</li>
   <li><b>FedWiki twin:</b> parallel collaboration artifact for journaling and iteration, aligned by intent rather than literal structure.</li>
 </ul>
 
@@ -72,6 +72,7 @@
   <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
   <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
   <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
   <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
   <li><a page="Installing Glamorous Toolkit">Installing Glamorous Toolkit</a></li>

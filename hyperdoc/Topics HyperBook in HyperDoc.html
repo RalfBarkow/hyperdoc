@@ -1,0 +1,80 @@
+<h1>Topics HyperBook in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page explains why HyperDoc topics are now represented as pages in a
+  first-class HyperBook named <tt>topics</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Topic backlinks model"><tt>Topic backlinks model</tt></a></li>
+  <li><a hyperbook="topics" page="Topic editorial references"><tt>Topic editorial references</tt></a></li>
+</ul>
+
+<h2>Why topics are now a HyperBook</h2>
+
+<p>
+  HyperDoc already has object-backed HyperBooks for runtime objects such as
+  ASDF systems, Lisp functions, and Lisp classes. Topics now follow the same
+  model: each topic object has its own page in HyperBook <tt>topics</tt>.
+</p>
+
+<h2>Curated page to topic links</h2>
+
+<p>
+  Page to topic relations remain authored and explicit. HyperDoc pages link to
+  topic pages using markup such as
+  <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt>.
+</p>
+<p>
+  The <tt>page=</tt> value must equal the exact canonical topic title string.
+  Visible text may vary, but the page target string must match the topic title
+  exactly so that routing and backlink lookup stay aligned.
+</p>
+
+<h2>Automatic topic to page backlinks</h2>
+
+<p>
+  Topic to page relations are no longer primarily curated in
+  <tt>hyperdoc/topics.lisp</tt>. Instead, they are derived automatically via
+  the existing HyperBook backlink machinery from authored page links that point
+  into HyperBook <tt>topics</tt>.
+</p>
+
+<h2>Backlinks are not editorial references</h2>
+
+<p>
+  Topic objects can still carry optional editorial references. These remain
+  useful for external URLs, historical notes, or supplementary navigation, but
+  they are distinct from automatic backlinks.
+</p>
+<p>
+  Backlinks answer “which pages point here?” Editorial references answer “which
+  extra references should stay attached to this topic object?”
+</p>
+
+<h2>Canonical page id and stable topic key</h2>
+
+<ul>
+  <li><b>Canonical topic page id:</b> the topic title string.</li>
+  <li><b>Stable topic key:</b> a separate identifier retained on the topic object for Lisp identity and migration safety.</li>
+</ul>
+
+<p>
+  This separation keeps authored title-style links compatible with current path
+  and backlink behavior while preserving a stable Lisp-level identity if a
+  title ever changes later.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
+</ul>
