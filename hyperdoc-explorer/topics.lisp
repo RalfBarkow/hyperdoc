@@ -19,6 +19,14 @@
             (:p (views:esc "Page to topic relations are authored explicitly in HyperDoc page markup through links to this hyperbook. Topic to page relations are derived automatically through backlinks."))
             (:p (views:esc "Optional editorial references remain available on topic objects, but they are not the primary mechanism for internal topic-to-page association."))))))
 
+(views:defview views:👀items (hb topics-hyperbook)
+  (declare (ignore hb))
+  (ensure-topic-indexes)
+  (-> (loop for title in (sort (alexandria:hash-table-keys *topics-by-title*) #'string<)
+            collect (find-page *topics* title :signal-error? t))
+      views:👀items
+      (views:rename :title "Topic pages" :priority 3)))
+
 (views:defview views:👀content (page topic-page)
   (let* ((topic (topic-of page))
          (backlinks (find-backlink-sources "topics" (id-of page)))
