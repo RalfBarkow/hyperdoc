@@ -72,24 +72,42 @@
                         (or (get-site-owner wiki)
                             ""))))))
 
+(defun remote-fedwiki-context-url (wiki slug)
+  (handler-case
+      (let* ((protocol (and wiki (protocol-of wiki)))
+             (domain (and wiki (domain-name-of wiki)))
+             (main-page (or (and wiki (hb:main-page-id-of wiki))
+                            "welcome-visitors")))
+        (when (and protocol domain slug)
+          (wiki-url domain
+                    protocol
+                    (format nil "/view/~A/view/~A"
+                            main-page
+                            slug))))
+    (error ()
+      nil)))
+
 (views:defview 👀context (page remote-fedwiki-page)
-  (load-page page)
+  (ignore-errors (load-page page))
   (when-let (context (context-of page))
-    (let ((slug (origin-id-of page))
-          (local-wiki (hb:hyperbook-of page)))
+    (let ((slug (ignore-errors (origin-id-of page))))
       (views:html-view :title "Context" :priority 4
         (views:html
           (:table :class "inspector-table"
                   (dolist (wiki context)
-                    (let* ((target-page (ignore-errors (hb:find-page wiki slug)))
-                           (target (and target-page
-                                        (ignore-errors (make-remote local-wiki target-page))))
-                           (owner (or (get-site-owner wiki)
-                                      "")))
+                    (let* ((owner (or (get-site-owner wiki)
+                                      ""))
+                           (domain (ignore-errors (domain-name-of wiki)))
+                           (url (and domain slug
+                                     (remote-fedwiki-context-url wiki slug))))
                       (views:html
-                        (:tr (:td (if target
-                                      (views:object-ref target :display (domain-name-of wiki))
-                                      (views:object-ref wiki :display (domain-name-of wiki))))
+                        (:tr (:td (if url
+                                      (views:html
+                                        (:a :href url
+                                            :target "_blank"
+                                            :rel "noopener noreferrer"
+                                            (views:esc domain)))
+                                      (views:esc (or domain ""))))
                              (:td (views:esc owner))))))))))))
 
 ;;

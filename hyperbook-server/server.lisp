@@ -21,14 +21,29 @@ Enable web debugger only when that extension is loaded."
   (merge-pathnames #P"hyperbook/known-wikis.sexp"
                    (uiop:xdg-config-home)))
 
+(defun known-wikis-pathnames ()
+  (list (known-wikis-pathname)))
+
+(defun resolve-known-wikis-pathname ()
+  (or (find-if #'probe-file (known-wikis-pathnames))
+      (known-wikis-pathname)))
+
 (defun load-known-wikis ()
-  (let ((pathname (known-wikis-pathname)))
-    (if (probe-file pathname)
-        (values
-         (with-open-file (stream pathname :direction :input)
-           (read stream nil nil))
-         t)
-        (values nil nil))))
+  (let* ((candidates (known-wikis-pathnames))
+         (pathname (resolve-known-wikis-pathname))
+         (exists? (and pathname (probe-file pathname))))
+    (if exists?
+        (handler-case
+            (values
+             (with-open-file (stream pathname :direction :input)
+               (read stream nil nil))
+             t
+             pathname
+             candidates
+             nil)
+          (error (c)
+            (values nil t pathname candidates c)))
+        (values nil nil pathname candidates nil))))
 
 (defun static-root-pathname ()
   (let ((root (uiop:ensure-directory-pathname
@@ -38,18 +53,34 @@ Enable web debugger only when that extension is loaded."
     root))
 
 (defun register-known-hyperbooks ()
-  (let ((path (known-wikis-pathname)))
-    (multiple-value-bind (entries exists?)
+  (multiple-value-bind (entries exists? path candidates load-error)
         (load-known-wikis)
+      (format t "~&[HYPERBOOK] known-wikis candidate paths: ~S~%" candidates)
       (format t "~&[HYPERBOOK] known-wikis path: ~A~%" path)
+      (format t "~&[HYPERBOOK] known-wikis exists: ~S~%" exists?)
+      (when load-error
+        (format t "~&[HYPERBOOK] failed to read known-wikis from ~A: ~A~%"
+                path
+                load-error)
+        (return-from register-known-hyperbooks nil))
       (unless exists?
         (format t "~&[HYPERBOOK] no known-wikis config found at ~A~%" path)
         (return-from register-known-hyperbooks nil))
+      (unless (listp entries)
+        (format t "~&[HYPERBOOK] malformed known-wikis root form in ~A: expected a list, got ~S~%"
+                path
+                entries)
+        (return-from register-known-hyperbooks nil))
+      (format t "~&[HYPERBOOK] known-wikis entry count: ~D~%" (length entries))
       (format t "~&[HYPERBOOK] loaded known-wikis entries: ~S~%" entries)
 
       (labels
           ((ensure-fedwiki-system-loaded ()
              (asdf:load-system :hyperbook/fedwiki))
+
+           (id-like-string-p (string)
+             (and (stringp string)
+                  (find #\: string)))
 
            (fedwiki-constructor ()
              (or (find-symbol "GET-FEDWIKI" :hyperbook/fedwiki)
@@ -63,7 +94,12 @@ Enable web debugger only when that extension is loaded."
                           :id entry
                           :domain (str:substring (length "fedwiki:") nil entry))
                     (list :kind :raw-id
-                          :id entry)))
+                         :id entry)))
+               ((and (consp entry)
+                     (null (rest entry))
+                     (stringp (first entry))
+                     (id-like-string-p (first entry)))
+                (entry->registration (first entry)))
                ((and (consp entry) (stringp (first entry)))
                 (destructuring-bind (host &key https &allow-other-keys) entry
                   (list :kind :fedwiki
@@ -90,9 +126,10 @@ Enable web debugger only when that extension is loaded."
 
            (register-entry (registration)
              (destructuring-bind (&key kind id domain https &allow-other-keys) registration
-               (case kind
+              (case kind
                  (:fedwiki
                   (ensure-fedwiki-system-loaded)
+                  (format t "~&[HYPERBOOK] registering normalized id ~A~%" id)
                   (let ((hb (funcall (fedwiki-constructor)
                                      domain
                                      nil
@@ -102,6 +139,7 @@ Enable web debugger only when that extension is loaded."
                     (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%" (hyperbook:id-of hb))
                     hb))
                  (:raw-id
+                  (format t "~&[HYPERBOOK] registering normalized id ~A~%" id)
                   (let ((hb (hyperbook:find-hyperbook id)))
                     (unless hb
                       (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
@@ -115,9 +153,10 @@ Enable web debugger only when that extension is loaded."
           (handler-case
               (when-let (registration (entry->registration entry))
                 (format t "~&[HYPERBOOK] processing known wiki entry ~S~%" entry)
+                (format t "~&[HYPERBOOK] normalized registration: ~S~%" registration)
                 (register-entry registration))
             (error (c)
-              (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c))))))))
+              (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c)))))))
 
 (defun ensure-startup-hyperbooks ()
   (let ((ids '("hyperdoc/explorer"
