@@ -10,14 +10,46 @@
 <h2>Inspectable objects</h2>
 
 <ul>
+  <li><a hyperbook="topics" page="ASDF"><tt>ASDF</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF quick-start summary"><tt>ASDF quick-start summary</tt></a></li>
   <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="ASDF component"><tt>ASDF component</tt></a></li>
   <li><a hyperbook="topics" page="ASDF module serial order"><tt>ASDF module serial order</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF source registry"><tt>ASDF source registry</tt></a></li>
   <li><a hyperbook="topics" page="asdf:load-system :force t"><tt>asdf:load-system :force t</tt></a></li>
   <li><a hyperbook="topics" page="asdf:find-system"><tt>asdf:find-system</tt></a></li>
   <li><a hyperbook="topics" page="Undefined-function triage"><tt>Undefined-function triage</tt></a></li>
   <li><a hyperbook="topics" page="SBCL process"><tt>SBCL process</tt></a></li>
 </ul>
+
+<h2>ASDF introduction frame</h2>
+
+<p>
+  <a hyperbook="topics" page="ASDF"><tt>ASDF</tt></a> is the Common Lisp
+  build/load facility used to locate, define, compile, and operate on systems.
+  It should be understood together with
+  <a hyperbook="topics" page="Build system versus package manager"><tt>Build system versus package manager</tt></a>:
+  ASDF is not itself the installer or package-distribution layer.
+</p>
+
+<p>
+  The quick-start framing of the manual can be summarized through
+  <a hyperbook="topics" page="ASDF quick-start summary"><tt>ASDF quick-start summary</tt></a>:
+  there is a user-facing path around
+  <a hyperbook="topics" page="ASDF user workflow"><tt>ASDF user workflow</tt></a>,
+  an author-facing path around
+  <a hyperbook="topics" page="ASDF system definition"><tt>ASDF system definition</tt></a>,
+  and an implementer-facing path around
+  <a hyperbook="topics" page="ASDF extension protocol"><tt>ASDF extension protocol</tt></a>.
+</p>
+
+<p>
+  In practice, ASDF is commonly used alongside
+  <a hyperbook="topics" page="Quicklisp"><tt>Quicklisp</tt></a>, while
+  <a hyperbook="topics" page="ASDF-Install"><tt>ASDF-Install</tt></a> and
+  <a hyperbook="topics" page="clbuild"><tt>clbuild</tt></a> are historical tools
+  that should not be confused with ASDF itself.
+</p>
 
 <h2>Working model</h2>
 
@@ -56,8 +88,9 @@
 
 <p>
   For this repository, run checks through the Nix development shell
-  (<tt>nix develop</tt> or <tt>./dev.sh</tt>) so ASDF source registry and
-  dependency resolution are consistent.
+  (<tt>nix develop</tt> or <tt>./dev.sh</tt>) so
+  <a hyperbook="topics" page="ASDF source registry"><tt>ASDF source registry</tt></a>
+  and dependency resolution are consistent.
 </p>
 
 <h2>Related</h2>

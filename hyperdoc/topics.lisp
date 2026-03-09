@@ -689,6 +689,81 @@
                  "Journalmatic Journal Checker")))
 
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
+(defun asdf-topic ()
+  (make-topic
+   :id "asdf"
+   :title "ASDF"
+   :summary "ASDF is the Common Lisp system definition and build facility for loading, compiling, testing, and operating on software systems."
+   :references '("ASDF Components Workflow"
+                 "Creating a HyperDoc")))
+
+(defun asdf-quick-start-summary-topic ()
+  (make-topic
+   :id "asdf-quick-start-summary"
+   :title "ASDF quick-start summary"
+   :summary "The quick-start view of ASDF organizes the manual around using systems, defining systems, and extending ASDF."
+   :references '("ASDF Components Workflow")))
+
+(defun asdf-user-workflow-topic ()
+  (make-topic
+   :id "asdf-user-workflow"
+   :title "ASDF user workflow"
+   :summary "The user-facing ASDF workflow is about locating and loading existing Common Lisp systems."
+   :references '("ASDF Components Workflow"
+                 "HyperDoc Server")))
+
+(defun asdf-system-definition-topic ()
+  (make-topic
+   :id "asdf-system-definition"
+   :title "ASDF system definition"
+   :summary "The author-facing ASDF workflow is about defining systems and their components with defsystem."
+   :references '("ASDF Components Workflow"
+                 "Creating a HyperDoc")))
+
+(defun asdf-extension-protocol-topic ()
+  (make-topic
+   :id "asdf-extension-protocol"
+   :title "ASDF extension protocol"
+   :summary "The implementer-facing ASDF workflow is about extending ASDF's object model and operations."
+   :references '("ASDF Components Workflow")))
+
+(defun build-system-versus-package-manager-topic ()
+  (make-topic
+   :id "build-system-versus-package-manager"
+   :title "Build system versus package manager"
+   :summary "ASDF is a build/load system, not a package manager or installer."
+   :references '("ASDF Components Workflow")))
+
+(defun quicklisp-topic ()
+  (make-topic
+   :id "quicklisp"
+   :title "Quicklisp"
+   :summary "Quicklisp is the recommended package distribution and installation tool commonly used alongside ASDF."
+   :references '("ASDF Components Workflow"
+                 "Goals and values")))
+
+(defun asdf-install-topic ()
+  (make-topic
+   :id "asdf-install"
+   :title "ASDF-Install"
+   :summary "ASDF-Install is an obsolete, unmaintained installer that is separate from ASDF."
+   :references '("ASDF Components Workflow")))
+
+(defun clbuild-topic ()
+  (make-topic
+   :id "clbuild"
+   :title "clbuild"
+   :summary "clbuild is a source-based Common Lisp project management tool historically used alongside ASDF."
+   :references '("ASDF Components Workflow")))
+
+(defun asdf-source-registry-topic ()
+  (make-topic
+   :id "asdf-source-registry"
+   :title "ASDF source registry"
+   :summary "The ASDF source registry determines where ASDF looks for systems on the filesystem."
+   :references '("ASDF Components Workflow"
+                 "HyperDoc Server")))
+
 (defun asdf-system-topic ()
   (make-topic
    :id "asdf-system"
