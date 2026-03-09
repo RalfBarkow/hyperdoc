@@ -1,0 +1,111 @@
+<h1>Topic Title Changes and Canonical Link Maintenance</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This note documents the maintenance procedure for changing a HyperDoc topic
+  title after the Topics HyperBook refactor.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topic title changes and canonical link maintenance"><tt>Topic title changes and canonical link maintenance</tt></a></li>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Topic backlinks model"><tt>Topic backlinks model</tt></a></li>
+</ul>
+
+<h2>Why title changes are special now</h2>
+
+<p>
+  In the current Topics model, the canonical topic page id is the topic title.
+  Authored topic links therefore use
+  <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt>.
+</p>
+
+<p>
+  Backlinks are derived from those authored link targets. A title change is
+  therefore also a link migration problem: changing the topic title without
+  updating authored <tt>page=</tt> targets leaves old links pointing at a page
+  id that no longer exists.
+</p>
+
+<h2>Current identity split</h2>
+
+<ul>
+  <li><b>Canonical topic page id:</b> topic title.</li>
+  <li><b>Identity anchor:</b> topic <tt>:id</tt> / stable key.</li>
+</ul>
+
+<p>
+  The stable key remains useful for Lisp identity, audits, repair scripts, and
+  migration tooling, but it is not the canonical page id that authored topic
+  links resolve through. In this maintenance procedure, the stable key is the
+  identity anchor for the same topic object while the title is being migrated.
+</p>
+
+<h2>Failure modes when a title changes without link migration</h2>
+
+<ul>
+  <li>Authored <tt>hyperbook="topics"</tt> links that still point to the old title stop resolving.</li>
+  <li>Backlinks move to the new title only after authored links are updated; until then, the new topic page appears under-linked.</li>
+  <li>Readers may still see the old visible link text if markup migration is only partial.</li>
+  <li>Repair becomes harder if the stable key is not used to identify the intended topic object during migration.</li>
+</ul>
+
+<h2>Controlled rename scenario</h2>
+
+<p>
+  Representative topic used for audit: <tt>HyperDoc runtime model</tt>, stable
+  key <tt>hyperdoc-runtime-model</tt>.
+</p>
+
+<p>
+  If that title were renamed to <tt>HyperDoc runtime vocabulary model</tt>, the
+  topic object could still be found by the same stable key, but every authored
+  link whose <tt>page=</tt> value is <tt>HyperDoc runtime model</tt> would need
+  to change to <tt>HyperDoc runtime vocabulary model</tt>. Until those link
+  targets are migrated, the derived relation for the new title would remain
+  incomplete and old links would fail page lookup.
+</p>
+
+<h2>Safe maintenance procedure</h2>
+
+<ol>
+  <li>Identify the topic by stable key in <tt>hyperdoc/topics.lisp</tt>, not by display text alone.</li>
+  <li>Change the topic constructor’s <tt>:title</tt> to the new canonical title.</li>
+  <li>Find all authored <tt>hyperbook="topics"</tt> links whose <tt>page=</tt> still uses the old title.</li>
+  <li>Update those link targets to the exact new canonical title string.</li>
+  <li>Keep visible link text aligned unless there is a deliberate reason for it to differ.</li>
+  <li>Reload HyperDoc and verify the topic page resolves under the new title.</li>
+  <li>Verify backlinks now appear on the new topic page and no authored links still target the old title.</li>
+</ol>
+
+<h2>What to verify before and after a title change</h2>
+
+<ul>
+  <li>Before: count authored links that use the old canonical title.</li>
+  <li>Before: confirm the stable key still identifies the intended topic object.</li>
+  <li>After: confirm the topic page resolves by the new title.</li>
+  <li>After: confirm authored topic links now resolve with the new title string.</li>
+  <li>After: confirm backlink sources appear on the new topic page.</li>
+  <li>After: confirm no lingering authored links still use the old title.</li>
+</ul>
+
+<h2>Stable keys in repair and migration tooling</h2>
+
+<p>
+  Stable keys are the safest handle for repair and migration because they do
+  not depend on the reader-facing page title. They should be used to identify
+  the intended topic object while title strings and authored topic links are
+  being updated.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
+  <li><a page="Editorial References in Topic Pages">Editorial References in Topic Pages</a></li>
+  <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+</ul>

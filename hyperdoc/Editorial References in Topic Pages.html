@@ -1,0 +1,88 @@
+<h1>Editorial References in Topic Pages</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This note records the current decision about optional editorial
+  <tt>:references</tt> on HyperDoc topic objects.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Editorial references in topic pages"><tt>Editorial references in topic pages</tt></a></li>
+  <li><a hyperbook="topics" page="Topic editorial references"><tt>Topic editorial references</tt></a></li>
+  <li><a hyperbook="topics" page="Topic backlinks model"><tt>Topic backlinks model</tt></a></li>
+</ul>
+
+<h2>Why this note exists</h2>
+
+<p>
+  After the Topics HyperBook refactor, internal topic-to-page associations are
+  no longer primarily curated through <tt>:references</tt>. This note clarifies
+  what editorial references still mean and whether they remain part of the
+  reader-facing topic page contract.
+</p>
+
+<h2>Backlinks and editorial references are different</h2>
+
+<ul>
+  <li><b>Derived relation:</b> backlinks derived from authored incoming links that point to a topic page.</li>
+  <li><b>Curated context:</b> editorial references stored on the topic object.</li>
+</ul>
+
+<p>
+  Backlinks answer “which pages point here?” Editorial references answer
+  “which extra references should stay attached to this topic as curated
+  context?”
+</p>
+
+<h2>Decision</h2>
+
+<p>
+  Editorial <tt>:references</tt> remain optional reader-visible curated
+  context, but they are no longer the primary mechanism for internal
+  topic-to-page association.
+</p>
+
+<h2>Current UI status</h2>
+
+<p>
+  Topic pages in the current Topics HyperBook render an <tt>Editorial
+  references</tt> section. That means editorial references are currently part
+  of the reader-facing topic page contract, not hidden internal metadata.
+</p>
+
+<h2>What editorial references are for</h2>
+
+<ul>
+  <li>external URLs that should stay attached to the topic</li>
+  <li>supplementary curated HyperDoc pages that add context but are not merely discovered incoming links</li>
+  <li>historical or editorial wayfinding that should remain visible even if backlink structure changes</li>
+</ul>
+
+<h2>What editorial references are not for</h2>
+
+<ul>
+  <li>they are not the authoritative source of internal topic-to-page association</li>
+  <li>they are not a replacement for authored page-to-topic links</li>
+  <li>they are not a separate inference layer or topic graph</li>
+</ul>
+
+<h2>Maintenance guidance</h2>
+
+<ul>
+  <li>Add editorial references only when curated context adds value beyond backlinks.</li>
+  <li>Do not duplicate every backlink manually in <tt>:references</tt>.</li>
+  <li>Prefer backlinks for internal association, editorial references for optional curation.</li>
+  <li>If a topic page’s editorial references stop adding reader value, they can be reduced without changing the backlink model.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
+  <li><a page="Topic Title Changes and Canonical Link Maintenance">Topic Title Changes and Canonical Link Maintenance</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+</ul>

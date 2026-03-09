@@ -13,6 +13,8 @@
   <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
   <li><a hyperbook="topics" page="Topic backlinks model"><tt>Topic backlinks model</tt></a></li>
   <li><a hyperbook="topics" page="Topic editorial references"><tt>Topic editorial references</tt></a></li>
+  <li><a hyperbook="topics" page="Topic title changes and canonical link maintenance"><tt>Topic title changes and canonical link maintenance</tt></a></li>
+  <li><a hyperbook="topics" page="Editorial references in topic pages"><tt>Editorial references in topic pages</tt></a></li>
 </ul>
 
 <h2>Why topics are now a HyperBook</h2>
@@ -44,6 +46,10 @@
   the existing HyperBook backlink machinery from authored page links that point
   into HyperBook <tt>topics</tt>.
 </p>
+<p>
+  In this model, the derived relation is the backlink set computed from
+  authored incoming links.
+</p>
 
 <h2>Backlinks are not editorial references</h2>
 
@@ -61,7 +67,7 @@
 
 <ul>
   <li><b>Canonical topic page id:</b> the topic title string.</li>
-  <li><b>Stable topic key:</b> a separate identifier retained on the topic object for Lisp identity and migration safety.</li>
+  <li><b>Identity anchor:</b> the stable topic key retained on the topic object for Lisp identity and migration safety.</li>
 </ul>
 
 <p>
@@ -77,4 +83,6 @@
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
   <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
   <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
+  <li><a page="Topic Title Changes and Canonical Link Maintenance">Topic Title Changes and Canonical Link Maintenance</a></li>
+  <li><a page="Editorial References in Topic Pages">Editorial References in Topic Pages</a></li>
 </ul>

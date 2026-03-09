@@ -1795,8 +1795,28 @@
   (make-topic
    :id "topic-editorial-references"
    :title "Topic editorial references"
-   :summary "Optional editorial references on topic objects remain as supplementary metadata and are distinct from automatically derived backlinks."
+   :summary "Optional editorial references on topic objects remain reader-visible curated context and are distinct from automatically derived backlinks."
    :references '("Topics HyperBook in HyperDoc"
+                 "Editorial References in Topic Pages"
+                 "Authoring Documentation in HyperDoc"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun topic-title-changes-and-canonical-link-maintenance-topic ()
+  (make-topic
+   :id "topic-title-changes-and-canonical-link-maintenance"
+   :title "Topic title changes and canonical link maintenance"
+   :summary "Changing a topic title is also a link migration problem because canonical topic page ids are titles and authored topic links plus backlinks depend on exact title matches."
+   :references '("Topic Title Changes and Canonical Link Maintenance"
+                 "Topics HyperBook in HyperDoc"
+                 "HyperDoc Routing and Navigation Model")))
+
+(defun editorial-references-in-topic-pages-topic ()
+  (make-topic
+   :id "editorial-references-in-topic-pages"
+   :title "Editorial references in topic pages"
+   :summary "Editorial references remain optional reader-visible curated context, but they are no longer the primary mechanism for internal topic-to-page association."
+   :references '("Editorial References in Topic Pages"
+                 "Topics HyperBook in HyperDoc"
                  "Authoring Documentation in HyperDoc"
                  "Documentation Surfaces in HyperDoc")))
 
