@@ -64,14 +64,9 @@
                  :target-hyperbook target-hyperbook-id
                  :target-page target-page-id
                  :thunk (views:thunk
-                          (let ((hyperbook (result-or-condition
-                                             (find-hyperbook target-hyperbook-id
-                                                             :signal-error? t))))
-                            (if (typep hyperbook 'lookup-failure)
-                                hyperbook
-                                (result-or-condition
-                                  (find-page hyperbook target-page-id
-                                             :signal-error? t)))))
+                          (result-or-condition
+                            (find-page target-hyperbook-id target-page-id
+                                       :signal-error? t)))
                  :view view))
 
 ;;

@@ -80,7 +80,10 @@
 (defgeneric find-page (hyperbook page-id &key signal-error?)
   (:documentation "Look up PAGE-ID in HYPERBOOK and return the page if found.
 If no page with PAGE-ID exists, return NIL if SIGNAL-ERROR is NIL,
-otherwise signal PAGE-LOOKUP-FAILURE."))
+otherwise signal PAGE-LOOKUP-FAILURE.")
+  (:method ((hyperbook-id string) page-id &key signal-error?)
+    (find-page (find-hyperbook hyperbook-id :signal-error? signal-error?)
+               page-id :signal-error? signal-error?)))
 
 ;;
 ;; Looking up a relative path in a HyperBook
