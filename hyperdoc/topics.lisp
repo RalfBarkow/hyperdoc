@@ -1,6 +1,7 @@
 ;;;; HyperDoc inspectable topic objects
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Part of HyperDoc
+;;;; See LICENSE for licensing information.
 
 (in-package :hyperdoc)
 
