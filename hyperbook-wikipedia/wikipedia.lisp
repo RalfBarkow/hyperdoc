@@ -162,6 +162,29 @@
          (stream (first response)))
     (shasht:read-json stream)))
 
+(views:defview 👀languages (page wikipedia-page)
+  (load-page page)
+  (views:html-view :title "Languages" :priority 12
+    (views:html
+      (:table :class "inspector-table"
+               (loop for item across (->> page page-data-of
+                                          (gethash "parse")
+                                          (gethash "langlinks"))
+                     for langname = (gethash "langname" item)
+                     for autonym = (gethash "autonym" item)
+                     for hb-link = (hb:replace-by-hyperbook-link
+                                    (tbnl:url-decode (gethash "url" item)))
+                     do (let* ((hyperbook-id (first hb-link))
+                               (page-id (second hb-link))
+                               (thunk (views:thunk
+                                        (hb:find-page hyperbook-id page-id))))
+                          (views:html
+                            (:tr :id (views:eval-id thunk)
+                                 :class "inspector-inspect"
+                                 (:td (views:esc langname))
+                                 (:td (views:esc autonym))
+                                 (:td (views:esc page-id))))))))))
+
 ;;
 ;; Make and manage wikipedia objects
 ;;

@@ -93,6 +93,7 @@
                #:alexandria
                #:arrow-macros
                #:drakma
+               #:hunchentoot ;; for url-decode
                #:shasht
                #:str
                #:trivial-package-local-nicknames)
