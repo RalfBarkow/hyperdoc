@@ -92,7 +92,8 @@ PAGE-LOOKUP-FAILURE."
 (views:defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
   (when-let (text-pages (-> (text-pages-of hd)
-                            alexandria:hash-table-values))
+                            alexandria:hash-table-values
+                            (sort #'string< :key #'id-of)))
     (views:list-view text-pages :title "Text pages" :priority 3)))
 
 (views:defview 👀tools (hd hyperdoc)
@@ -156,5 +157,4 @@ PAGE-LOOKUP-FAILURE."
       file-of
       views:👀content
       (views:rename :title "Source" :priority 10)))
-
 
