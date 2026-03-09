@@ -13,6 +13,17 @@
     (and (hash-table-p assoc)
          (gethash "id" assoc))))
 
+(defun raw-object-field (object key)
+  (and (hash-table-p object)
+       (gethash key object)))
+
+(defun raw-object-keys (object)
+  (when (hash-table-p object)
+    (sort (alexandria:hash-table-keys object) #'string<)))
+
+(defun raw-object-children-keys (object)
+  (raw-object-keys (raw-object-field object "children")))
+
 (defmethod views:text-representation ((page hyperdoc::dmx-topic-proxy))
   (format nil "DMX topic ~D (topicmap ~D)"
           (hyperdoc::dmx-topic-id-of page)
@@ -82,24 +93,65 @@
                          (or (hyperdoc::dmx-topic-data-of page)
                              (hyperdoc::dmx-load-error-of page)
                              "not loaded"))))
-              (:tr (:td (views:esc "Topicmap JSON"))
+              (:tr (:td (views:esc "Topicmap core-topic JSON"))
                    (:td (views:object-ref
                          (or (hyperdoc::dmx-topicmap-data-of page)
                              (hyperdoc::dmx-load-error-of page)
                              "not loaded"))))
-              (:tr (:td (views:esc "Topicmap source"))
-                   (:td (:code (views:esc
-                                (hyperdoc::dmx-core-topic-endpoint
-                                 (hyperdoc::dmx-topicmap-id-of page))))))
+              (:tr (:td (views:esc "Topicmap core-topic source"))
+                   (:td (:a :href (hyperdoc::dmx-topicmap-core-topic-url page)
+                            :target "_blank"
+                            (:code
+                             (views:esc
+                              (hyperdoc::dmx-topicmap-core-topic-url page))))))
               (:tr (:td (views:esc "Related topics JSON"))
                    (:td (views:object-ref
                          (or (hyperdoc::dmx-related-topics-of page)
                              (hyperdoc::dmx-load-error-of page)
                              "not loaded"))))))))
 
+(views:defview 👀topicmap-core-topic (page hyperdoc::dmx-topic-proxy)
+  (hyperdoc::ensure-dmx-topicmap-data page)
+  (views:html-view :title "Topicmap core topic" :priority 3
+    (let ((topicmap-data (hyperdoc::dmx-topicmap-data-of page))
+          (source-url (hyperdoc::dmx-topicmap-core-topic-url page))
+          (condition (hyperdoc::dmx-load-error-of page)))
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source URL"))
+                     (:td (:a :href source-url
+                              :target "_blank"
+                              (:code (views:esc source-url)))))
+                (:tr (:td (views:esc "Raw object"))
+                     (:td (views:object-ref
+                           (or topicmap-data
+                               condition
+                               "not loaded"))))
+                (when topicmap-data
+                  (views:html
+                    (:tr (:td (views:esc "ID"))
+                         (:td (views:object-ref
+                               (raw-object-field topicmap-data "id"))))
+                    (:tr (:td (views:esc "Type URI"))
+                         (:td (views:object-ref
+                               (raw-object-field topicmap-data "typeUri"))))
+                    (:tr (:td (views:esc "Value"))
+                         (:td (views:object-ref
+                               (raw-object-field topicmap-data "value"))))
+                    (:tr (:td (views:esc "Top-level keys"))
+                         (:td (views:object-ref
+                               (raw-object-keys topicmap-data))))
+                    (:tr (:td (views:esc "Children keys"))
+                         (:td (views:object-ref
+                               (raw-object-children-keys topicmap-data))))))
+                (when condition
+                  (views:html
+                    (:tr (:td (views:esc "Load error"))
+                         (:td (views:object-ref condition))))))))))
+
 (views:defview 👀relations (page hyperdoc::dmx-topic-proxy)
   (hyperdoc::ensure-dmx-related-topics page)
-  (views:html-view :title "Relations" :priority 3
+  (views:html-view :title "Relations" :priority 4
     (let ((relations (hyperdoc::dmx-related-topics-of page)))
       (if (and relations (> (length relations) 0))
           (views:html
@@ -123,7 +175,7 @@
             (views:html (views:esc "No related topics returned by DMX")))))))
 
 (views:defview 👀external (page hyperdoc::dmx-topic-proxy)
-  (views:html-view :title "External" :priority 4
+  (views:html-view :title "External" :priority 5
     (views:html
       (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
           :target "_blank"

@@ -17,6 +17,10 @@
           topicmap-id
           topicmap-id))
 
+(defun expected-dmx-core-topic-url (id)
+  (format nil "https://dmx.ralfbarkow.ch/core/topic/~D?children=true&assocChildren=true"
+          id))
+
 (defun assert-equal (expected actual message)
   (unless (equal expected actual)
     (error "~A -- expected: ~S actual: ~S" message expected actual)))
@@ -90,6 +94,9 @@
         (assert-equal topicmap-json
                       (hyperdoc::dmx-topicmap-data-of proxy)
                       "Topicmap data should come from /core/topic/<topicmap-id>")
+        (assert-equal (expected-dmx-core-topic-url 912102)
+                      (hyperdoc::dmx-topicmap-core-topic-url proxy)
+                      "Topicmap helper must expose the exact core-topic URL")
         (assert-true
          (member (list "/core/topic/912102"
                        (hyperdoc::dmx-children+assoc-parameters))

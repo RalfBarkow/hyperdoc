@@ -82,6 +82,31 @@
   '(("children" . "false")
     ("assocChildren" . "false")))
 
+(defun dmx-query-string (parameters)
+  (with-output-to-string (stream)
+    (loop for (key . value) in parameters
+          for first? = t then nil
+          do (unless first?
+               (write-char #\& stream))
+             (format stream "~A=~A" key value))))
+
+(defun dmx-endpoint-url (book endpoint &key parameters)
+  (format nil "~A~A~@[?~A~]"
+          (dmx-base-url-of book)
+          endpoint
+          (and parameters
+               (dmx-query-string parameters))))
+
+(defun dmx-core-topic-url (book id &key (parameters (dmx-children+assoc-parameters)))
+  (dmx-endpoint-url book
+                    (dmx-core-topic-endpoint id)
+                    :parameters parameters))
+
+(defun dmx-topicmap-core-topic-url (page)
+  (dmx-core-topic-url (hb:hyperbook-of page)
+                      (dmx-topicmap-id-of page)
+                      :parameters (dmx-children+assoc-parameters)))
+
 (defun fetch-dmx-core-topic-data (book id)
   (dmx-fetch-json book
                   (dmx-core-topic-endpoint id)
@@ -210,8 +235,9 @@
       (dmx-cache-put book key (funcall thunk))))
 
 (defun dmx-fetch-json (book endpoint &key parameters)
-  (let* ((url (format nil "~A~A" (dmx-base-url-of book) endpoint))
-         (request-args (append (list url
+  (let* ((request-url (format nil "~A~A" (dmx-base-url-of book) endpoint))
+         (display-url (dmx-endpoint-url book endpoint :parameters parameters))
+         (request-args (append (list request-url
                                      :method :get
                                      :want-stream t)
                                (when parameters
@@ -223,7 +249,7 @@
             (ignore-errors (close stream))))
       (error (cause)
         (error 'dmx-proxy-error
-               :url url
+               :url display-url
                :message "Failed to fetch DMX JSON"
                :cause cause)))))
 
