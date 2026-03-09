@@ -81,6 +81,7 @@
                              (:file "html-pages")
                              (:file "markdown-pages")
                              (:file "code-pages")
+                             (:file "topics")
                              (:file "links-in-code")
                              (:file "tools")
                              (:file "codemeta")

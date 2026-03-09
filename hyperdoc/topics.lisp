@@ -4,19 +4,106 @@
 
 (in-package :hyperdoc)
 
-;; Inspectable topic objects used by expr links in HyperDoc pages.
+;; Inspectable topic objects used by expr links and the Topics hyperbook.
 (defclass topic ()
-  ((id :reader id-of :initarg :id)
-   (title :reader title-of :initarg :title)
-   (summary :reader summary-of :initarg :summary)
-   (references :reader references-of :initarg :references :initform nil)))
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   ;; Optional editorial metadata. Internal page associations are derived from
+   ;; authored page links plus backlink lookup, not primarily from this slot.
+   (references :accessor references-of :initarg :references :initform nil)))
+
+(defclass topics-hyperbook (hb:hyperbook) ())
+
+(defclass topic-page (hb:page)
+  ((topic :reader topic-of :initarg :topic :type topic)))
+
+(defvar *topics* (make-instance 'topics-hyperbook :id "topics"))
+(defvar *topics-by-id* (make-hash-table :test #'equal))
+(defvar *topics-by-title* (make-hash-table :test #'equal))
+(defvar *topic-index-state* :stale)
+(defparameter *legacy-topic-constructor-symbols*
+  '(concept-operational-definition
+    topic-map-operational-definition
+    dmx-topic-operational-definition
+    dmx-topic-912138))
+
+(defmethod title-of ((hb topics-hyperbook))
+  "Topics")
+
+(eval-when (:load-toplevel)
+  (register *topics*))
+
+(defun %register-topic (topic)
+  (setf (gethash (id-of topic) *topics-by-id*) topic)
+  (setf (gethash (title-of topic) *topics-by-title*) topic)
+  topic)
 
 (defun make-topic (&key id title summary references)
-  (make-instance 'topic
-                 :id id
-                 :title title
-                 :summary summary
-                 :references references))
+  (let ((topic (or (gethash id *topics-by-id*)
+                   (gethash title *topics-by-title*)
+                   (make-instance 'topic
+                                  :id id
+                                  :title title
+                                  :summary summary
+                                  :references references))))
+    (setf (id-of topic) id
+          (title-of topic) title
+          (summary-of topic) summary
+          (references-of topic) references)
+    (%register-topic topic)))
+
+(defun string-suffix-p (suffix string)
+  (let ((suffix-length (length suffix))
+        (string-length (length string)))
+    (and (<= suffix-length string-length)
+         (string= suffix
+                  string
+                  :start1 0
+                  :start2 (- string-length suffix-length)))))
+
+(defun topic-constructor-symbol-p (symbol)
+  (and (symbolp symbol)
+       (fboundp symbol)
+       (not (macro-function symbol))
+       (or (member symbol *legacy-topic-constructor-symbols*)
+           (and (not (eq symbol 'make-topic))
+                (string-suffix-p "-TOPIC" (symbol-name symbol))))))
+
+(defun rebuild-topic-indexes ()
+  (clrhash *topics-by-id*)
+  (clrhash *topics-by-title*)
+  (do-symbols (symbol (find-package :hyperdoc))
+    (when (topic-constructor-symbol-p symbol)
+      (handler-case
+          (let ((topic (funcall symbol)))
+            (when (typep topic 'topic)
+              (%register-topic topic)))
+        (error () nil))))
+  (setf *topic-index-state* :ready))
+
+(defun ensure-topic-indexes ()
+  (unless (eq *topic-index-state* :ready)
+    (rebuild-topic-indexes)))
+
+(defun find-topic-by-title (title &key signal-error?)
+  (ensure-topic-indexes)
+  (or (gethash title *topics-by-title*)
+      (and signal-error?
+           (error 'page-lookup-failure :hyperbook *topics* :page-id title))))
+
+(defun find-topic-by-id (id &key signal-error?)
+  (ensure-topic-indexes)
+  (or (gethash id *topics-by-id*)
+      (and signal-error?
+           (error "No topic with stable key ~S" id))))
+
+(defmethod hb:find-page ((hb topics-hyperbook) page-id &key signal-error?)
+  (when-let (topic (find-topic-by-title page-id :signal-error? signal-error?))
+    (make-instance 'topic-page
+                   :hyperbook hb
+                   :id (title-of topic)
+                   :topic topic)))
 
 ;; Core topic objects for Concepts/DMX/Topic Maps page.
 (defun concept-operational-definition ()
@@ -1555,5 +1642,162 @@
                  "What is a moldable inspector?"
                  "HyperDoc Runtime Model"
                  "Authoring Documentation in HyperDoc")))
+
+(defun vom-antisemitismus-der-keiner-sein-will-topic ()
+  (make-topic
+   :id "vom-antisemitismus-der-keiner-sein-will"
+   :title "Vom Antisemitismus, der keiner sein will"
+   :summary "Source argument page reconstructing Richard Schuberth's claim that anti-Israel discourse often presents itself as something other than antisemitism."
+   :references '("Vom Antisemitismus, der keiner sein will"
+                 "Ein paar Widersprüche des postkolonialen Denkens"
+                 "Israel als Projektionsfläche"
+                 "Wer will glückliche Palästinenser?"
+                 "Palästinensische Stimmen gegen Projektion und Hamas")))
+
+(defun antisemitism-debate-topic ()
+  (make-topic
+   :id "antisemitism-debate"
+   :title "Antisemitism debate"
+   :summary "Topic for the contested argument that contemporary anti-Israel discourse can function as disavowed antisemitism."
+   :references '("Vom Antisemitismus, der keiner sein will"
+                 "Israel als Projektionsfläche"
+                 "Temporalismus")))
+
+(defun postcolonial-critique-topic ()
+  (make-topic
+   :id "postcolonial-critique"
+   :title "Postcolonial critique"
+   :summary "Topic for Schuberth's critique of postcolonial discourse as identity-political, antiuniversalist, and prone to projection."
+   :references '("Vom Antisemitismus, der keiner sein will"
+                 "Ein paar Widersprüche des postkolonialen Denkens"
+                 "Temporalismus")))
+
+(defun universalism-topic ()
+  (make-topic
+   :id "universalism"
+   :title "Universalism"
+   :summary "Topic for the conflict between universalist standards and cultural-essentializing or identity-political frameworks in Schuberth's argument."
+   :references '("Vom Antisemitismus, der keiner sein will"
+                 "Ein paar Widersprüche des postkolonialen Denkens")))
+
+(defun progress-and-modernity-topic ()
+  (make-topic
+   :id "progress-and-modernity"
+   :title "Progress and modernity"
+   :summary "Topic covering Schuberth's disputed use of developmental difference, modernity, and progress against postcolonial tabooing of such distinctions."
+   :references '("Temporalismus"
+                 "Ein paar Widersprüche des postkolonialen Denkens"
+                 "Vom Antisemitismus, der keiner sein will")))
+
+(defun double-standard-topic ()
+  (make-topic
+   :id "double-standard"
+   :title "Double standard"
+   :summary "Topic for Schuberth's claim that Israel is judged under a different moral and political standard than other actors or regimes."
+   :references '("Temporalismus"
+                 "Israel als Projektionsfläche"
+                 "Vom Antisemitismus, der keiner sein will")))
+
+(defun projection-topic ()
+  (make-topic
+   :id "projection"
+   :title "Projection"
+   :summary "Topic for the claim that Israel and Palestinians are turned into symbolic surfaces for external ideological needs."
+   :references '("Ein paar Widersprüche des postkolonialen Denkens"
+                 "Israel als Projektionsfläche"
+                 "Wer will glückliche Palästinenser?"
+                 "Vom Antisemitismus, der keiner sein will")))
+
+(defun dehumanization-topic ()
+  (make-topic
+   :id "dehumanization"
+   :title "Dehumanization"
+   :summary "Topic for the argument that symbolic victimization can erase concrete Palestinian life and subjectivity."
+   :references '("Wer will glückliche Palästinenser?"
+                 "Palästinensische Stimmen gegen Projektion und Hamas"
+                 "Vom Antisemitismus, der keiner sein will")))
+
+(defun palestinian-subjectivity-topic ()
+  (make-topic
+   :id "palestinian-subjectivity"
+   :title "Palestinian subjectivity"
+   :summary "Topic for the contrast between symbolic Palestinian victim-figures and concrete Palestinian persons with divergent lives and views."
+   :references '("Wer will glückliche Palästinenser?"
+                 "Palästinensische Stimmen gegen Projektion und Hamas")))
+
+(defun palestinian-dissent-topic ()
+  (make-topic
+   :id "palestinian-dissent"
+   :title "Palestinian dissent"
+   :summary "Topic for examples of Palestinian voices resisting Hamas or western projection frameworks in Schuberth's reconstruction."
+   :references '("Palästinensische Stimmen gegen Projektion und Hamas"
+                 "Wer will glückliche Palästinenser?"
+                 "Vom Antisemitismus, der keiner sein will")))
+
+(defun time-machine-backup-setup-topic ()
+  (make-topic
+   :id "time-machine-backup-setup"
+   :title "Time Machine backup setup"
+   :summary "Operational setup path for getting a working macOS Time Machine backup to a direct disk or SMB-capable NAS target."
+   :references '("Time Machine Backup Setup"
+                 "Time Machine Backup Troubleshooting"
+                 "Time Machine Backup Verification"
+                 "Time Machine Backup on Synology NAS")))
+
+(defun time-machine-backup-troubleshooting-topic ()
+  (make-topic
+   :id "time-machine-backup-troubleshooting"
+   :title "Time Machine backup troubleshooting"
+   :summary "Diagnostic sequence for cases where a Time Machine destination is visible but backups do not start, stall, or fail."
+   :references '("Time Machine Backup Troubleshooting"
+                 "Time Machine Backup Setup"
+                 "Time Machine Backup Verification"
+                 "Time Machine Backup on Synology NAS")))
+
+(defun time-machine-backup-verification-topic ()
+  (make-topic
+   :id "time-machine-backup-verification"
+   :title "Time Machine backup verification"
+   :summary "Checks for confirming that a configured Time Machine destination is producing usable backups rather than only appearing configured."
+   :references '("Time Machine Backup Verification"
+                 "Time Machine Backup Troubleshooting"
+                 "Time Machine Backup Setup")))
+
+(defun time-machine-backup-on-synology-nas-topic ()
+  (make-topic
+   :id "time-machine-backup-on-synology-nas"
+   :title "Time Machine backup on Synology NAS"
+   :summary "Synology-specific SMB and Bonjour setup path for exposing a shared folder as a Time Machine destination for macOS."
+   :references '("Time Machine Backup on Synology NAS"
+                 "Time Machine Backup Setup"
+                 "Time Machine Backup Troubleshooting")))
+
+(defun topics-hyperbook-in-hyperdoc-topic ()
+  (make-topic
+   :id "topics-hyperbook-in-hyperdoc"
+   :title "Topics HyperBook in HyperDoc"
+   :summary "HyperDoc topic objects are exposed as first-class pages in the Topics hyperbook, with internal topic-to-page relations derived from backlinks."
+   :references '("Topics HyperBook in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Authoring Documentation in HyperDoc"
+                 "Documentation Architecture in HyperDoc")))
+
+(defun topic-backlinks-model-topic ()
+  (make-topic
+   :id "topic-backlinks-model"
+   :title "Topic backlinks model"
+   :summary "Authored page-to-topic links in HyperDoc generate automatic topic-to-page backlinks through the existing HyperBook link extraction and backlink machinery."
+   :references '("Topics HyperBook in HyperDoc"
+                 "HyperDoc Routing and Navigation Model"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun topic-editorial-references-topic ()
+  (make-topic
+   :id "topic-editorial-references"
+   :title "Topic editorial references"
+   :summary "Optional editorial references on topic objects remain as supplementary metadata and are distinct from automatically derived backlinks."
+   :references '("Topics HyperBook in HyperDoc"
+                 "Authoring Documentation in HyperDoc"
+                 "Documentation Surfaces in HyperDoc")))
 
 ;;
