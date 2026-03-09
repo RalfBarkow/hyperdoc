@@ -1,6 +1,7 @@
 ;;;; Views for Topics hyperbook pages
 ;;
-;;;; Copyright (c) 2026
+;;;; Part of HyperDoc
+;;;; See LICENSE for licensing information.
 
 (in-package :hyperdoc)
 
@@ -53,9 +54,7 @@
               (:h2 (views:esc "Editorial references"))
               (if references
                   (views:html-table
-                   (mapcar (lambda (reference)
-                             (list reference))
-                           references))
+                   (mapcar #'list references))
                   (views:html (views:esc "None"))))))))
 
 (views:defview 👀topic-object (page topic-page)
@@ -91,7 +90,5 @@
             (:h2 (views:esc "Editorial references"))
             (if (references-of topic)
                 (views:html-table
-                 (mapcar (lambda (reference)
-                           (list reference))
-                         (references-of topic)))
+                 (mapcar #'list (references-of topic)))
                 (views:html (views:esc "None")))))))
