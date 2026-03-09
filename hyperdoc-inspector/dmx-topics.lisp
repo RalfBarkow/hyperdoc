@@ -30,7 +30,7 @@
     (views:action-button html-inspector-views/standard:*icon-open-external*
                          (views:thunk
                            (clog:open-browser
-                            :url (hyperdoc::dmx-webclient-url page)))
+                            :url (hyperdoc::dmx-topicmap-webclient-url page)))
                          nil)))
 
 (views:defview 👀overview (page hyperdoc::dmx-topic-proxy)
@@ -49,9 +49,9 @@
               (:tr (:td (views:esc "Topic ID"))
                    (:td (views:object-ref (hyperdoc::dmx-topic-id-of page))))
               (:tr (:td (views:esc "DMX webclient"))
-                   (:td (:a :href (hyperdoc::dmx-webclient-url page)
+                   (:td (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
                             :target "_blank"
-                            (views:esc (hyperdoc::dmx-webclient-url page)))))
+                            (views:esc (hyperdoc::dmx-topicmap-webclient-url page)))))
               (when-let (topic-data (hyperdoc::dmx-topic-data-of page))
                 (views:html
                   (:tr (:td (views:esc "Type URI"))
@@ -87,6 +87,10 @@
                          (or (hyperdoc::dmx-topicmap-data-of page)
                              (hyperdoc::dmx-load-error-of page)
                              "not loaded"))))
+              (:tr (:td (views:esc "Topicmap source"))
+                   (:td (:code (views:esc
+                                (hyperdoc::dmx-core-topic-endpoint
+                                 (hyperdoc::dmx-topicmap-id-of page))))))
               (:tr (:td (views:esc "Related topics JSON"))
                    (:td (views:object-ref
                          (or (hyperdoc::dmx-related-topics-of page)
@@ -121,6 +125,6 @@
 (views:defview 👀external (page hyperdoc::dmx-topic-proxy)
   (views:html-view :title "External" :priority 4
     (views:html
-      (:a :href (hyperdoc::dmx-webclient-url page)
+      (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
           :target "_blank"
-          (views:esc "Open topic in DMX webclient")))))
+          (views:esc "Open topicmap entry in DMX webclient")))))

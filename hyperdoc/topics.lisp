@@ -61,12 +61,36 @@
 
 (defvar *dmx-hyperbooks* (make-hash-table :test #'equal))
 
-(defun dmx-webclient-url (page)
+(defun dmx-topicmap-webclient-url (page)
   (let ((book (hb:hyperbook-of page)))
     (format nil "~A/systems.dmx.webclient/#/topicmap/~D/topic/~D"
             (dmx-base-url-of book)
             (dmx-topicmap-id-of page)
-            (dmx-topic-id-of page))))
+            (dmx-topicmap-id-of page))))
+
+(defun dmx-webclient-url (page)
+  (dmx-topicmap-webclient-url page))
+
+(defun dmx-core-topic-endpoint (id)
+  (format nil "/core/topic/~D" id))
+
+(defun dmx-children+assoc-parameters ()
+  '(("children" . "true")
+    ("assocChildren" . "true")))
+
+(defun dmx-related-topics-parameters ()
+  '(("children" . "false")
+    ("assocChildren" . "false")))
+
+(defun fetch-dmx-core-topic-data (book id)
+  (dmx-fetch-json book
+                  (dmx-core-topic-endpoint id)
+                  :parameters (dmx-children+assoc-parameters)))
+
+(defun fetch-dmx-related-topics-data (book topic-id)
+  (dmx-fetch-json book
+                  (format nil "/core/topic/~D/related-topics" topic-id)
+                  :parameters (dmx-related-topics-parameters)))
 
 (defun parse-positive-integer (designator)
   (labels ((parse-from-string (string)
@@ -210,10 +234,7 @@
     (dmx-cache-fetch
      book key
      (lambda ()
-       (dmx-fetch-json book
-                       (format nil "/core/topic/~D" topic-id)
-                       :parameters '(("children" . "true")
-                                     ("assocChildren" . "true")))))))
+       (fetch-dmx-core-topic-data book topic-id)))))
 
 (defun fetch-dmx-related-topics (page)
   (let* ((book (hb:hyperbook-of page))
@@ -222,10 +243,7 @@
     (dmx-cache-fetch
      book key
      (lambda ()
-       (dmx-fetch-json book
-                       (format nil "/core/topic/~D/related-topics" topic-id)
-                       :parameters '(("children" . "false")
-                                     ("assocChildren" . "false")))))))
+       (fetch-dmx-related-topics-data book topic-id)))))
 
 (defun fetch-dmx-topicmap-data (page)
   (let* ((book (hb:hyperbook-of page))
@@ -234,9 +252,7 @@
     (dmx-cache-fetch
      book key
      (lambda ()
-       (dmx-fetch-json book
-                       (format nil "/topicmaps/~D" topicmap-id)
-                       :parameters '(("children" . "false")))))))
+       (fetch-dmx-core-topic-data book topicmap-id)))))
 
 (defun ensure-dmx-topic-data (page &key force?)
   (when (or force?
