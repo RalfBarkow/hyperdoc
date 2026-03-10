@@ -1246,6 +1246,17 @@
    :summary "Curated reading map for Common Lisp books, separating first books, advanced technique, object-system references, and historical references."
    :references '("Definitive Common Lisp Books")))
 
+(defun definitive-common-lisp-books-arrangement-topic ()
+  (make-topic
+   :id "definitive-common-lisp-books-arrangement"
+   :title "Definitive Common Lisp Books arrangement"
+   :summary "Authored arrangement view for the Definitive Common Lisp Books cluster, capturing nearby HyperDoc topics and supporting external anchors without asserting semantic associations."
+   :references '("Definitive Common Lisp Books arrangement"
+                 "Definitive Common Lisp Books"
+                 "Topic factory"
+                 "Authored topic factories"
+                 "Topic arrangement in HyperDoc")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic
@@ -2169,6 +2180,18 @@
    :references '("Documentation Surfaces in HyperDoc"
                  "Reference Systems in HyperDoc"
                  "Communication Surfaces Policy")))
+
+(defun topic-arrangement-in-hyperdoc-topic ()
+  (make-topic
+   :id "topic-arrangement-in-hyperdoc"
+   :title "Topic arrangement in HyperDoc"
+   :summary "An authored documentation surface for representing topic proximity, grouping, and editorial neighborhood without asserting semantic associations."
+   :references '("Topic arrangement in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
+                 "Topics HyperBook in HyperDoc"
+                 "Topic factory"
+                 "Authored topic factories"
+                 "Definitive Common Lisp Books")))
 
 (defun hyperdoc-surface-boundaries-topic ()
   (make-topic

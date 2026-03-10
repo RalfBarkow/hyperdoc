@@ -1,0 +1,69 @@
+<h1>Topic arrangement in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc sometimes needs to preserve arrangement, grouping, or neighborhood
+  among topics even when no semantic association should be claimed. An
+  arrangement page is an authored documentation surface for capturing that
+  editorial neighborhood explicitly.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topic arrangement in HyperDoc"><tt>Topic arrangement in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Topic factory"><tt>Topic factory</tt></a></li>
+  <li><a hyperbook="topics" page="Authored topic factories"><tt>Authored topic factories</tt></a></li>
+  <li><a hyperbook="topics" page="Definitive Common Lisp Books"><tt>Definitive Common Lisp Books</tt></a></li>
+</ul>
+
+<h2>What arrangement captures</h2>
+
+<ul>
+  <li>centrality around one topic</li>
+  <li>adjacency among nearby topics</li>
+  <li>grouping into editorial clusters</li>
+  <li>ordered neighborhood</li>
+  <li>supporting external anchors that belong near the cluster</li>
+</ul>
+
+<h2>What arrangement does not claim</h2>
+
+<ul>
+  <li>It is not a semantic association.</li>
+  <li>It is not a DMX runtime edge.</li>
+  <li>It is not a synchronization contract.</li>
+  <li>It is not automatic graph geometry.</li>
+</ul>
+
+<h2>How to represent arrangement in HyperDoc</h2>
+
+<p>
+  The preferred authored forms are simple and explicit: ordered sections,
+  grouped lists, central topic / nearby topics / external anchors blocks, and
+  short editorial notes that explain why items are near each other.
+</p>
+
+<p>
+  This keeps the arrangement readable without pretending that every nearby item
+  needs a typed relation.
+</p>
+
+<h2>When to use this</h2>
+
+<ul>
+  <li>when screenshot or map geometry carries meaning</li>
+  <li>when topics belong together editorially</li>
+  <li>when proximity matters more than relation type</li>
+</ul>
+
+<h2>When not to use this</h2>
+
+<ul>
+  <li>when a real semantic association should be modeled instead</li>
+  <li>when adjacency is accidental</li>
+  <li>when the page would become a noisy link dump</li>
+</ul>
