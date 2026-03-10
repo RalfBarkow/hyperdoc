@@ -1,0 +1,160 @@
+<h1>HyperDoc Checks Runner</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The <a hyperbook="topics" page="HyperDoc checks runner">HyperDoc checks runner</a>
+  is the first in-image runner for HyperDoc examples and smoke tests. It keeps
+  the existing clickable <tt>defexample</tt> execution path, but adds one common
+  runtime model for batch discovery, batch execution, inspectable failures, and
+  rerun-failed workflows.
+</p>
+
+<h4>Why this runner exists</h4>
+
+<p>
+  HyperDoc already had a good one-example interaction: open a source page,
+  click the <tt>►</tt> button before a top-level <tt>defexample</tt>, and inspect
+  the resulting object in a new pane. What it did not have was a first-class
+  way to treat examples and repo-local smoke tests as one inspectable set of
+  checks that can be discovered, run together, and inspected after failures.
+</p>
+
+<p>
+  This runner adds that missing surface without changing the existing example
+  affordance. Single-example execution still matters; the new runner adds a
+  higher-level batch surface on top of it.
+</p>
+
+<h4>One common check model</h4>
+
+<p>
+  HyperDoc now treats both examples and tests as checks.
+</p>
+
+<ul>
+  <li><a hyperbook="topics" page="Check spec">Check spec</a>: a runtime descriptor for one runnable check.</li>
+  <li><a hyperbook="topics" page="Check result">Check result</a>: the inspectable outcome of one check execution.</li>
+  <li><a hyperbook="topics" page="Check run">Check run</a>: a batch object containing discovered specs, collected results, and summary counts.</li>
+</ul>
+
+<p>
+  This keeps discovery separate from execution. A check can be discovered
+  before it is run, and a check run remains inspectable after execution rather
+  than collapsing into terminal-only text.
+</p>
+
+<h4>How discovery currently works</h4>
+
+<p>
+  Discovery is explicit and repo-local in this first slice.
+</p>
+
+<ol>
+  <li>Examples register themselves when <tt>defexample</tt> forms are loaded.</li>
+  <li>That registration stores a stable check identifier, function locator, and source-page context.</li>
+  <li>Tests come from an explicit list of existing repo-local smoke entrypoints.</li>
+  <li>The runner combines both sets into one discovered check run.</li>
+</ol>
+
+<p>
+  This is deliberate. HyperDoc does not yet attempt broad automatic discovery
+  across arbitrary third-party test frameworks or packages. The current design
+  keeps the runner understandable and inspectable.
+</p>
+
+<h4>Pane surface</h4>
+
+<p>
+  The main user-facing entrypoint is the new <tt>Checks</tt> view on the HyperDoc
+  object.
+</p>
+
+<ol>
+  <li>Open the HyperDoc object in the explorer.</li>
+  <li>Open the <tt>Checks</tt> view.</li>
+  <li>Click <tt>Inspect discovered checks</tt> to open the discovered <tt>check-run</tt> object.</li>
+  <li>Click <tt>Run all checks</tt> to populate result objects.</li>
+  <li>Inspect one failed or errored result to see its condition and captured backtrace.</li>
+  <li>Use <tt>Rerun</tt> on one result or <tt>Rerun failed</tt> on the run object.</li>
+</ol>
+
+<p>
+  This keeps failures inside the same pane model as other HyperDoc runtime
+  objects. The runner is inspectable first and HTML-visible second.
+</p>
+
+<h4>CLI surface</h4>
+
+<p>
+  The terminal entrypoint is <tt>hyperdoc:run-ci-checks</tt>. It is a thin wrapper
+  over the same runtime model, not a separate test-only subsystem.
+</p>
+
+<lisp-code>
+(hyperdoc:run-ci-checks :system "hyperdoc" :quit? nil)
+</lisp-code>
+
+<p>
+  It discovers checks, runs them, prints a compact textual summary, and can
+  exit non-zero when used in non-interactive mode.
+</p>
+
+<h4>How to demonstrate it</h4>
+
+<p>
+  There are two good demonstrations.
+</p>
+
+<ol>
+  <li>
+    Pane demo:
+    open the HyperDoc object, then open <tt>Checks</tt>, inspect discovered
+    checks, run all checks, and inspect one failure result.
+  </li>
+  <li>
+    Terminal demo:
+    run the smoke suite or <tt>hyperdoc:run-ci-checks</tt> from a non-interactive
+    SBCL session.
+  </li>
+</ol>
+
+<p>
+  The pane demo shows the architectural point more clearly: discovery objects,
+  run objects, result objects, and rerun actions are all first-class runtime
+  surfaces.
+</p>
+
+<h4>Current scope and intentional limits</h4>
+
+<ul>
+  <li>No remote or distributed execution.</li>
+  <li>No persistent history or scheduler.</li>
+  <li>No broad automatic test discovery beyond the explicit repo-local registry.</li>
+  <li>No page-markup mutation.</li>
+</ul>
+
+<p>
+  One current follow-up is already visible: a batch run exposes that some
+  existing examples are not yet classified as batch-safe versus interactive or
+  environment-sensitive. The runner is doing useful work there, but the
+  classification policy belongs to a separate slice.
+</p>
+
+<h4>Related pages / references</h4>
+
+<ul>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>
+
+<h4>Inspectable objects</h4>
+
+<ul>
+  <li><a hyperbook="topics" page="HyperDoc checks runner">HyperDoc checks runner</a></li>
+  <li><a hyperbook="topics" page="Check spec">Check spec</a></li>
+  <li><a hyperbook="topics" page="Check result">Check result</a></li>
+  <li><a hyperbook="topics" page="Check run">Check run</a></li>
+</ul>

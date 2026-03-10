@@ -2578,5 +2578,86 @@
                  "Authoring Documentation in HyperDoc"
                  "Documentation Surfaces in HyperDoc")))
 
+(defun tectonopedia-topic ()
+  (make-topic
+   :id "tectonopedia"
+   :title "Tectonopedia"
+   :summary "Reference encyclopedia in the Tectonic ecosystem whose content is technical documentation written in TeX and compiled into a web application."
+   :references '("Tectonopedia"
+                 "Tectonopedia and HyperDoc"
+                 "Reference Systems in HyperDoc")))
+
+(defun tectonopedia-and-hyperdoc-topic ()
+  (make-topic
+   :id "tectonopedia-and-hyperdoc"
+   :title "Tectonopedia and HyperDoc"
+   :summary "Comparison page positioning Tectonopedia as a reference system for documentation and publication architecture without equating it to HyperDoc."
+   :references '("Tectonopedia and HyperDoc"
+                 "Tectonopedia"
+                 "Reference Systems in HyperDoc"
+                 "Design")))
+
+(defun tectonic-html-documentation-pipeline-topic ()
+  (make-topic
+   :id "tectonic-html-documentation-pipeline"
+   :title "Tectonic HTML documentation pipeline"
+   :summary "Pipeline in which TeX-authored documentation is compiled through Tectonic and Tectonopedia tooling into raw HTML and then bundled into a web application."
+   :references '("Tectonopedia"
+                 "Design"
+                 "Reference Systems in HyperDoc")))
+
+(defun tex-authored-web-documentation-topic ()
+  (make-topic
+   :id "tex-authored-web-documentation"
+   :title "TeX-authored web documentation"
+   :summary "Documentation model in which TeX source acts as the authoring substrate for navigable web-published technical documentation."
+   :references '("Tectonopedia"
+                 "Design"
+                 "Tectonopedia and HyperDoc")))
+
+(defun reference-encyclopedia-topic ()
+  (make-topic
+   :id "reference-encyclopedia"
+   :title "Reference encyclopedia"
+   :summary "Documentation system aimed at serving as an encyclopedic reference surface rather than only a linear narrative or static manual."
+   :references '("Tectonopedia"
+                 "Reference Systems in HyperDoc"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun hyperdoc-checks-runner-topic ()
+  (make-topic
+   :id "hyperdoc-checks-runner"
+   :title "HyperDoc checks runner"
+   :summary "An in-image runner that discovers examples and repo-local smoke tests as inspectable checks, executes them in batch, and exposes rerunnable results in the pane UI and CLI."
+   :references '("HyperDoc Checks Runner"
+                 "Running HyperDoc Examples"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model")))
+
+(defun check-spec-topic ()
+  (make-topic
+   :id "check-spec"
+   :title "Check spec"
+   :summary "A reusable runtime descriptor for one check, including its kind, stable identifier, human label, rerun locator, and optional grouping tags."
+   :references '("HyperDoc Checks Runner"
+                 "Running HyperDoc Examples")))
+
+(defun check-result-topic ()
+  (make-topic
+   :id "check-result"
+   :title "Check result"
+   :summary "An inspectable execution outcome for one check, including status, returned value or failure condition, captured backtrace, and duration."
+   :references '("HyperDoc Checks Runner"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun check-run-topic ()
+  (make-topic
+   :id "check-run"
+   :title "Check run"
+   :summary "A batch execution object that groups discovered checks, accumulates results, summarizes status counts, and supports rerun-failed workflows."
+   :references '("HyperDoc Checks Runner"
+                 "HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
