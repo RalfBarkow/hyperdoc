@@ -209,6 +209,7 @@
 (defun run-hyperdoc-tests ()
   (run-dmx-topic-proxy-smoke-tests)
   (run-fedwiki-site-dmx-import-tests)
+  (run-check-runner-smoke-tests)
   t)
 
 (export '(run-fedwiki-site-dmx-import-tests run-hyperdoc-tests))

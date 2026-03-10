@@ -2,7 +2,8 @@
 
 (defpackage :hyperdoc/tests
   (:use :cl)
-  (:export :run-dmx-topic-proxy-smoke-tests))
+  (:export :run-dmx-topic-proxy-smoke-tests
+           :run-check-runner-smoke-tests))
 
 (in-package :hyperdoc/tests)
 

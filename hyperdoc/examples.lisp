@@ -16,7 +16,12 @@
   "Define an example function NAME with BODY. The syntax is the same as for
 DEFUN, except that there is no lambda list because example functions take no
 arguments."
-  `(defun ,name () ,@body))
+  (let ((source-file (or *compile-file-truename* *load-truename*)))
+    `(progn
+       (defun ,name () ,@body)
+       (eval-when (:load-toplevel :execute)
+         (register-example-check ',name :source-file ,source-file))
+       ',name)))
 
 ;;
 ;; Convenience functions for inserting assertions into examples

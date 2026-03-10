@@ -29,6 +29,7 @@
            #:defexample
            #:assert-test #:assert-equalp #:assert-equal
            #:assert-eql #:assert-within-tolerance
+           #:run-ci-checks
            ;; Defining tools
            #:deftool #:html #:markdown #:html-generator
            #:defplayground

@@ -18,13 +18,14 @@
                #:asdf #:uiop
                #:trivial-package-local-nicknames)
   :in-order-to ((test-op (test-op "hyperdoc/tests")))
-  :components ((:module "hyperdoc"
+                :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "package")
                              (:file "core")
                              (:file "topics")
                              (:file "links-in-code")
                              (:file "defining")
+                             (:file "check-runner")
                              (:file "examples")
                              (:file "tools")
                              (:file "hyperdoc")))))
@@ -93,7 +94,7 @@
                #:3bmd
                #:trivial-package-local-nicknames
                #:asdf #:uiop)
-  :components ((:module "hyperdoc-explorer"
+                :components ((:module "hyperdoc-explorer"
                 :serial t
                 :components ((:file "package")
                              (:file "links")
@@ -108,6 +109,7 @@
                              (:file "tools")
                              (:file "codemeta")
                              (:file "examples")
+                             (:file "check-runner")
                              (:file "hyperdoc")))))
 
 ;; Compatibility alias: runtime server implementation lives in hyperbook/server.
@@ -127,7 +129,8 @@
   :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
-                             (:file "fedwiki-site-dmx-import"))))
+                             (:file "fedwiki-site-dmx-import")
+                             (:file "check-runner-smoke"))))
   :perform (test-op (op c)
              (declare (ignore op c))
              (uiop:symbol-call :hyperdoc/tests
