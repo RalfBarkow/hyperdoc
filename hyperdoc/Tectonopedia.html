@@ -1,0 +1,72 @@
+<h1>Tectonopedia</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page introduces Tectonopedia as a reference encyclopedia in the
+  Tectonic ecosystem and explains why it matters as a reference system for
+  HyperDoc.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Tectonopedia"><tt>Tectonopedia</tt></a></li>
+  <li><a hyperbook="topics" page="Tectonopedia and HyperDoc"><tt>Tectonopedia and HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Tectonic HTML documentation pipeline"><tt>Tectonic HTML documentation pipeline</tt></a></li>
+  <li><a hyperbook="topics" page="TeX-authored web documentation"><tt>TeX-authored web documentation</tt></a></li>
+  <li><a hyperbook="topics" page="Reference encyclopedia"><tt>Reference encyclopedia</tt></a></li>
+</ul>
+
+<h2>What it is</h2>
+
+<p>
+  The Tectonopedia repository describes itself as the Tectonic reference
+  encyclopedia. Its content is primarily technical documentation authored in
+  TeX and published as a web application rather than a print-oriented manual.
+</p>
+
+<h2>Build / publication pipeline</h2>
+
+<p>
+  The documented structure separates authoring, compilation, and frontend
+  publication. Rust code in <tt>src</tt> builds the <tt>tectonopedia</tt>
+  program. That program compiles TeX source in <tt>txt</tt> into raw
+  HTML, CSS, and related outputs in <tt>build</tt>. Parcel then combines those
+  outputs with frontend code in <tt>web</tt> into the published web
+  application. The repository also documents a local development command:
+  <tt>cargo run --release -- serve --open</tt>.
+</p>
+
+<h2>Why it is relevant to HyperDoc</h2>
+
+<ul>
+  <li>It treats documentation as authored source material rather than plain prose.</li>
+  <li>It turns that source into a navigable published artifact instead of a static PDF.</li>
+  <li>It shows one way to build a documentation system with encyclopedic ambitions.</li>
+  <li>It keeps computation-adjacent structure in the authoring and build pipeline, even though the result is a web publication surface.</li>
+</ul>
+
+<h2>Boundaries: where it overlaps and where it differs</h2>
+
+<ul>
+  <li>Overlap: both HyperDoc and Tectonopedia treat documentation as structured source that can be transformed into a navigable web surface.</li>
+  <li>Overlap: both care about reference-style knowledge systems rather than only linear manuals.</li>
+  <li>Boundary: Tectonopedia is centered on a TeX-to-HTML publication pipeline, not on live in-image object inspection.</li>
+  <li>Boundary: Tectonic maintainers describe the HTML machinery as still in development and requiring TeX authored for HTML processing.</li>
+  <li>Boundary: Tectonopedia is not a moldable inspector environment or a live object browser in the GT/HyperDoc sense.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Tectonopedia and HyperDoc">Tectonopedia and HyperDoc</a></li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Acknowledgements">Acknowledgements</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a href="https://github.com/tectonic-typesetting/tectonopedia">https://github.com/tectonic-typesetting/tectonopedia</a></li>
+  <li><a href="https://github.com/tectonic-typesetting/tectonic/discussions/1140">https://github.com/tectonic-typesetting/tectonic/discussions/1140</a></li>
+  <li><a href="https://github.com/tectonic-typesetting">https://github.com/tectonic-typesetting</a></li>
+</ul>

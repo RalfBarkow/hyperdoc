@@ -1,0 +1,78 @@
+<h1>Tectonopedia and HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page compares Tectonopedia and HyperDoc as neighboring reference systems
+  for documentation and publication architecture, without treating them as the
+  same kind of system.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Tectonopedia and HyperDoc"><tt>Tectonopedia and HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Tectonopedia"><tt>Tectonopedia</tt></a></li>
+  <li><a hyperbook="topics" page="Tectonic HTML documentation pipeline"><tt>Tectonic HTML documentation pipeline</tt></a></li>
+  <li><a hyperbook="topics" page="TeX-authored web documentation"><tt>TeX-authored web documentation</tt></a></li>
+  <li><a hyperbook="topics" page="Reference encyclopedia"><tt>Reference encyclopedia</tt></a></li>
+  <li><a hyperbook="topics" page="Reference system boundaries"><tt>Reference system boundaries</tt></a></li>
+  <li><a hyperbook="topics" page="Adopting without equating"><tt>Adopting without equating</tt></a></li>
+</ul>
+
+<h2>Shared concerns</h2>
+
+<ul>
+  <li>Documentation is authored in a structured source form, not just written as flat prose.</li>
+  <li>Publication matters: source documents are transformed into a navigable web surface.</li>
+  <li>The target artifact is reference-oriented and exploratory, not only a linear manual.</li>
+</ul>
+
+<h2>Key differences</h2>
+
+<ul>
+  <li>Tectonopedia is a TeX-authored documentation publishing pipeline and web application.</li>
+  <li>HyperDoc is a page/object/runtime-linked documentation system inside a live Lisp environment.</li>
+  <li>Tectonopedia emphasizes source transformation and publication assembly; HyperDoc emphasizes inspectable runtime objects, object links, and page navigation.</li>
+</ul>
+
+<h2>Source medium and publication model</h2>
+
+<p>
+  Tectonopedia starts from TeX source, compiles it through Tectonic-specific
+  tooling into raw HTML outputs, and then bundles those outputs with frontend
+  assets into a web application. HyperDoc starts from HTML/Markdown/Lisp pages
+  and runtime objects that are already part of the live documentation system.
+</p>
+
+<h2>Runtime/interactivity boundary</h2>
+
+<p>
+  Tectonopedia is relevant to HyperDoc as an example of executable or
+  computation-adjacent publishing, but it is not a live object browser or
+  moldable inspector environment. HyperDoc's interactivity is runtime-linked:
+  page links, inspectable objects, and views stay connected to Lisp objects in
+  the running image.
+</p>
+
+<h2>What HyperDoc can adopt, reinterpret, or leave out</h2>
+
+<ul>
+  <li><b>Adopts:</b> treating documentation as authored source that is transformed into a navigable web publication surface.</li>
+  <li><b>Reinterprets:</b> publication pipeline thinking as page/object/runtime-linked documentation rather than TeX compilation.</li>
+  <li><b>Leaves out:</b> the idea that source-to-HTML compilation alone replaces live inspection, object browsing, or moldable runtime views.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Tectonopedia">Tectonopedia</a></li>
+  <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
+  <li><a page="Design">Design</a></li>
+  <li><a page="Acknowledgements">Acknowledgements</a></li>
+  <li><a href="https://github.com/tectonic-typesetting/tectonopedia">https://github.com/tectonic-typesetting/tectonopedia</a></li>
+  <li><a href="https://github.com/tectonic-typesetting/tectonic/discussions/1140">https://github.com/tectonic-typesetting/tectonic/discussions/1140</a></li>
+</ul>
