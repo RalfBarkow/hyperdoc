@@ -1271,7 +1271,8 @@
    :id "asdf"
    :title "ASDF"
    :summary "ASDF is the Common Lisp system definition and build facility for loading, compiling, testing, and operating on software systems."
-   :references '("ASDF Components Workflow"
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
                  "Creating a HyperDoc")))
 
 (defun asdf-quick-start-summary-topic ()
@@ -1279,7 +1280,8 @@
    :id "asdf-quick-start-summary"
    :title "ASDF quick-start summary"
    :summary "The quick-start view of ASDF organizes the manual around using systems, defining systems, and extending ASDF."
-   :references '("ASDF Components Workflow")))
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow")))
 
 (defun asdf-user-workflow-topic ()
   (make-topic
@@ -1337,24 +1339,30 @@
   (make-topic
    :id "asdf-source-registry"
    :title "ASDF source registry"
-   :summary "The ASDF source registry determines where ASDF looks for systems on the filesystem."
-   :references '("ASDF Components Workflow"
+   :summary "The ASDF source registry determines where ASDF looks for system definitions before asdf:find-system can resolve them."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "HyperDoc Server")))
 
 (defun asdf-system-topic ()
   (make-topic
    :id "asdf-system"
    :title "ASDF system"
-   :summary "Top-level ASDF unit loaded via asdf:load-system; controls transitive dependencies and component graph."
-   :references '("ASDF Components Workflow"
+   :summary "Named top-level ASDF component defined by defsystem and used as the main boundary for operations such as load-op and test-op."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "Creating a HyperDoc")))
 
 (defun asdf-component-topic ()
   (make-topic
    :id "asdf-component"
    :title "ASDF component"
-   :summary "An ASDF component is a file/module/system entry in the .asd graph that must include the code you expect at runtime."
-   :references '("ASDF Components Workflow"
+   :summary "An ASDF component is any node in the .asd graph; systems, modules, and source files are all components under one system boundary."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "Reloading HyperDoc After Adding Lisp Objects")))
 
 (defun asdf-module-serial-order-topic ()
@@ -1362,8 +1370,39 @@
    :id "asdf-module-serial-order"
    :title "ASDF module serial order"
    :summary "When :serial t is used, component order defines load order and therefore definition availability."
-   :references '("ASDF Components Workflow"
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
                  "Creating a HyperDoc")))
+
+(defun asdf-operations-topic ()
+  (make-topic
+   :id "asdf-operations"
+   :title "ASDF operations"
+   :summary "Operations such as load and test act on systems/components and matter for how HyperDoc examples and tests are organized."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "HyperDoc Test Runner"
+                 "ASDF Systems, Examples, and Tests in HyperDoc")))
+
+(defun asdf-system-boundaries-topic ()
+  (make-topic
+   :id "asdf-system-boundaries"
+   :title "ASDF system boundaries"
+   :summary "System boundaries define ownership, loading, examples, and test scope in HyperDoc."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "HyperDoc Runtime Model"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun slash-named-asdf-systems-topic ()
+  (make-topic
+   :id "slash-named-asdf-systems"
+   :title "Slash-named ASDF systems"
+   :summary "Repository convention using systems such as hyperdoc/explorer to separate runtime roles and surfaces."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "Dependencies"
+                 "Creating a HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc")))
 
 (defun asdf-load-system-force-topic ()
   (make-topic
@@ -1378,8 +1417,21 @@
    :id "asdf-find-system"
    :title "asdf:find-system"
    :summary "Resolves whether a named system is visible in the current source registry before load/operation."
-   :references '("ASDF Components Workflow"
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "HyperDoc Server")))
+
+(defun understanding-asdf-systems-in-hyperdoc-topic ()
+  (make-topic
+   :id "understanding-asdf-systems-in-hyperdoc"
+   :title "Understanding ASDF systems in HyperDoc"
+   :summary "Conceptual page explaining ASDF systems, components, operations, and why system boundaries define documentation scope in this repository."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Creating a HyperDoc"
+                 "Dependencies")))
 
 (defun undefined-function-triage-topic ()
   (make-topic
@@ -2624,12 +2676,58 @@
                  "Reference Systems in HyperDoc"
                  "Documentation Surfaces in HyperDoc")))
 
+(defun asdf-systems-as-scope-topic ()
+  (make-topic
+   :id "asdf-systems-as-scope"
+   :title "ASDF systems as scope"
+   :summary "ASDF systems act as HyperDoc's primary scope objects because they are the named top-level build/load/test boundaries that group examples, code ownership, and test surfaces."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "ASDF Components Workflow"
+                 "Documentation Architecture in HyperDoc"
+                 "HyperDoc Runtime Model")))
+
+(defun scoped-examples-topic ()
+  (make-topic
+   :id "scoped-examples"
+   :title "Scoped examples"
+   :summary "HyperDoc examples belong to a specific scope object and should be presented as exploratory runnable slices of that scope rather than as root-level global affordances."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Running HyperDoc Examples"
+                 "Documentation Surfaces in HyperDoc"
+                 "HyperDoc Runtime Model")))
+
+(defun run-action-for-examples-topic ()
+  (make-topic
+   :id "run-action-for-examples"
+   :title "Run action for examples"
+   :summary "Example execution is a direct action on a scoped example surface, analogous to GT's per-example Run interaction, while preserving inspectable results."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Running HyperDoc Examples"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "Glamorous Toolkit and HyperDoc")))
+
+(defun validation-surfaces-topic ()
+  (make-topic
+   :id "validation-surfaces"
+   :title "Tests"
+   :summary "User-facing test surfaces verify a system and should remain distinct from both exploratory examples and the root identity views of HyperDoc."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "HyperDoc Test Runner"
+                 "Documentation Surfaces in HyperDoc"
+                 "HyperDoc Runtime Model")))
+
 (defun hyperdoc-checks-runner-topic ()
   (make-topic
    :id "hyperdoc-checks-runner"
-   :title "HyperDoc checks runner"
-   :summary "An in-image runner that discovers examples and repo-local smoke tests as inspectable checks, executes them in batch, and exposes rerunnable results in the pane UI and CLI."
-   :references '("HyperDoc Checks Runner"
+   :title "HyperDoc test runner"
+   :summary "An in-image runner that discovers examples and repo-local smoke tests through an inspectable check runtime, executes them in batch, and exposes rerunnable results through system-scoped test surfaces and the CLI."
+   :references '("Understanding ASDF Systems in HyperDoc"
+                 "HyperDoc Test Runner"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "Running HyperDoc Examples"
                  "HyperDoc Evaluation and Inspection Model"
                  "HyperDoc Runtime Model")))
@@ -2639,7 +2737,8 @@
    :id "check-spec"
    :title "Check spec"
    :summary "A reusable runtime descriptor for one check, including its kind, stable identifier, human label, rerun locator, and optional grouping tags."
-   :references '("HyperDoc Checks Runner"
+   :references '("HyperDoc Test Runner"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "Running HyperDoc Examples")))
 
 (defun check-result-topic ()
@@ -2647,7 +2746,8 @@
    :id "check-result"
    :title "Check result"
    :summary "An inspectable execution outcome for one check, including status, returned value or failure condition, captured backtrace, and duration."
-   :references '("HyperDoc Checks Runner"
+   :references '("HyperDoc Test Runner"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "HyperDoc Evaluation and Inspection Model")))
 
 (defun check-run-topic ()
@@ -2655,7 +2755,8 @@
    :id "check-run"
    :title "Check run"
    :summary "A batch execution object that groups discovered checks, accumulates results, summarizes status counts, and supports rerun-failed workflows."
-   :references '("HyperDoc Checks Runner"
+   :references '("HyperDoc Test Runner"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
                  "HyperDoc Runtime Model"
                  "HyperDoc Evaluation and Inspection Model")))
 
@@ -2665,7 +2766,7 @@
    :title "Running DMX topic proxy smoke tests"
    :summary "Step-by-step procedure for running the focused DMX topic proxy smoke test from the HyperDoc dev shell."
    :references '("Running DMX Topic Proxy Smoke Tests"
-                 "HyperDoc Checks Runner"
+                 "HyperDoc Test Runner"
                  "Running HyperDoc Examples"
                  "Demonstrating DMX Topic Proxies in HyperDoc")))
 
@@ -2676,7 +2777,7 @@
    :summary "Focused smoke tests covering DMX topic proxy wrappers, topicmap helper handling, endpoint regression behavior, and the unknown-wrapper condition."
    :references '("Running DMX Topic Proxy Smoke Tests"
                  "Demonstrating DMX Topic Proxies in HyperDoc"
-                 "HyperDoc Checks Runner")))
+                 "HyperDoc Test Runner")))
 
 (defun focused-test-runners-topic ()
   (make-topic
@@ -2684,7 +2785,7 @@
    :title "Focused test runners"
    :summary "Direct test-entry commands used to run one narrow test slice without invoking the entire HyperDoc test suite."
    :references '("Running DMX Topic Proxy Smoke Tests"
-                 "HyperDoc Checks Runner"
+                 "HyperDoc Test Runner"
                  "Running HyperDoc Examples"
                  "Documentation Architecture in HyperDoc")))
 

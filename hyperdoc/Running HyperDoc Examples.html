@@ -9,10 +9,39 @@
 </p>
 
 <p>
-  The relevant mechanism is the method in
-  <tt>hyperdoc-explorer/examples.lisp</tt> that extends
+  Examples should be understood as belonging to a scope object. In HyperDoc,
+  that scope should be the ASDF system that owns the code and pages being
+  explained. The current <tt>►</tt> mechanism is therefore best read as the run
+  action for one scoped example, not as a root-level global console.
+</p>
+
+<p>
+  In ASDF terms, this is not only editorial placement. The example is present
+  because the source-file component that defines its <tt>defexample</tt> form
+  was loaded as part of a system's <tt>load-op</tt> plan. That makes the system,
+  not the HyperDoc root object, the natural owning scope for the example.
+</p>
+
+<p>
+  For the ASDF model behind that placement, see
+  <a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>.
+  For the resulting examples/tests architecture, see
+  <a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a>.
+  Together, those pages explain why examples belong on system surfaces and why
+  batch tests remain separate from single-example running.
+</p>
+
+<p>
+  The low-level rendering mechanism still lives in
+  <tt>hyperdoc-explorer/examples.lisp</tt>, which extends
   <tt>html-inspector-views/standard:render-toplevel-cst</tt> for
   <tt>defexample</tt>.
+</p>
+
+<p>
+  In other words, the <tt>►</tt> button is attached to a top-level form in the
+  rendered source, but architecturally it belongs to the ASDF system whose load
+  plan brought that form into the image.
 </p>
 
 <h4>What happens</h4>
@@ -30,10 +59,11 @@
 </p>
 
 <p>
-  For batch discovery and execution, see <a page="HyperDoc Checks Runner">HyperDoc Checks Runner</a>.
-  That page documents the <a hyperbook="topics" page="HyperDoc checks runner">HyperDoc checks runner</a>
-  surface, which adds a batch-oriented layer without replacing the per-example
-  play button.
+  For batch-oriented test running, see
+  <a page="HyperDoc Test Runner">HyperDoc Test Runner</a>. That page
+  documents the <a hyperbook="topics" page="HyperDoc test runner">HyperDoc test runner</a>
+  surface, which adds scoped test workflows without replacing the
+  per-example run action.
 </p>
 
 <p>
@@ -73,7 +103,10 @@
 <h4>Related</h4>
 
 <ul>
-  <li><a page="HyperDoc Checks Runner">HyperDoc Checks Runner</a></li>
+  <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="HyperDoc Test Runner">HyperDoc Test Runner</a></li>
   <li><a page="Running DMX Topic Proxy Smoke Tests">Running DMX Topic Proxy Smoke Tests</a></li>
   <li><a hyperbook="hyperdoc" page="Writing source code pages">Writing source code pages</a></li>
   <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>

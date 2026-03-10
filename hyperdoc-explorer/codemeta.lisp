@@ -24,7 +24,7 @@
 
 (views:defview 👀authors (hd hyperdoc)
   (when-let (authors (codemeta-authors hd))
-    (views:html-view :title "Authors" :priority 2
+    (views:html-view :title "Authors" :priority 7
       (loop for author across authors
             do (views:html
                  (:div

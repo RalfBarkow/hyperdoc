@@ -27,8 +27,34 @@
       (setf (slot-value hd 'packages)
             (find-packages-used hd))))
 
+(defun cl-source-files-in-component (component)
+  (cond
+    ((typep component 'asdf:cl-source-file)
+     (list component))
+    ((typep component 'asdf:parent-component)
+     (loop for child in (asdf:component-children component)
+           append (cl-source-files-in-component child)))
+    (t
+     nil)))
+
+(defun packages-defined-by-system (system)
+  (sort
+   (remove-duplicates
+    (loop for file in (cl-source-files-in-component system)
+          append (find-packages-used-in-file file))
+    :test #'eq)
+   #'string<
+   :key #'package-name))
+
 (views:defview 👀packages (hd hyperdoc)
   (-> hd
     packages-used
     views:👀items
-    (views:rename :title "Packages" :priority 12)))
+    (views:rename :title "Packages" :priority 13)))
+
+(views:defview 👀packages (system asdf:system)
+  (let ((packages (packages-defined-by-system system)))
+    (when packages
+      (-> packages
+          views:👀items
+          (views:rename :title "Packages" :priority 8)))))

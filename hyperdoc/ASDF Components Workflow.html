@@ -7,6 +7,13 @@
   repository and how to diagnose undefined-function failures in a running image.
 </p>
 
+<p>
+  Use this page as the practical workflow and triage guide. For the conceptual
+  model of what systems, components, modules, source files, and operations mean
+  in this repository, start with
+  <a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
@@ -51,6 +58,16 @@
   that should not be confused with ASDF itself.
 </p>
 
+<p>
+  This matters for HyperDoc architecture as well. Because a system is the named
+  boundary that <tt>asdf:find-system</tt>, <tt>asdf:load-system</tt>, and
+  <tt>asdf:test-system</tt> operate on, it is also the right primary scope
+  object for examples and test surfaces in HyperDoc. For that translation,
+  see <a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>
+  and
+  <a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a>.
+</p>
+
 <h2>Working model</h2>
 
 <ol>
@@ -61,7 +78,7 @@
   <li>Reload the system with force and re-check function availability.</li>
 </ol>
 
-<h2>Minimal checks</h2>
+<h2>Minimal steps</h2>
 
 <pre>
 (require :asdf)
@@ -87,7 +104,7 @@
 <h2>Operational note</h2>
 
 <p>
-  For this repository, run checks through the Nix development shell
+  For this repository, run these steps through the Nix development shell
   (<tt>nix develop</tt> or <tt>./dev.sh</tt>) so
   <a hyperbook="topics" page="ASDF source registry"><tt>ASDF source registry</tt></a>
   and dependency resolution are consistent.
@@ -96,6 +113,8 @@
 <h2>Related</h2>
 
 <ul>
+  <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a></li>
   <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
   <li><a page="SBCL Process">SBCL Process</a></li>
   <li><a page="Creating a HyperDoc">Creating a HyperDoc</a></li>

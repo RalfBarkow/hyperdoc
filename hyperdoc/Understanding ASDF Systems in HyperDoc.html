@@ -1,0 +1,210 @@
+<h1>Understanding ASDF Systems in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the conceptual entry point for ASDF in this repository. It
+  explains what a system is, how systems differ from their internal
+  components, how this repository uses slash-named systems, and why HyperDoc
+  should use real ASDF system boundaries as the main scope for examples and
+  tests.
+</p>
+
+<h2>What an ASDF system is</h2>
+
+<p>
+  An ASDF system is the named top-level build/load/test unit defined by
+  <tt>defsystem</tt> in a <tt>.asd</tt> file. It is what
+  <tt>asdf:find-system</tt> resolves, what <tt>asdf:load-system</tt> loads, and
+  what <tt>test-op</tt> or <tt>asdf:test-system</tt> conceptually target.
+</p>
+
+<p>
+  In this repository, <tt>hyperdoc</tt>, <tt>hyperdoc/explorer</tt>, and
+  <tt>hyperbook/server</tt> are not labels for directories. They are named ASDF
+  systems with their own dependency lists, component graphs, and operational
+  roles.
+</p>
+
+<h2>System vs component vs module vs source file</h2>
+
+<p>
+  A system is also a component, but it is the top-level one. Beneath it, ASDF
+  organizes an internal component graph. In practical repository terms:
+</p>
+
+<ul>
+  <li><b>System:</b> the named boundary declared with <tt>defsystem</tt>, such as <tt>hyperdoc</tt>.</li>
+  <li><b>Component:</b> any node in that boundary's graph.</li>
+  <li><b>Module:</b> a grouping component, usually corresponding to a directory such as <tt>hyperdoc</tt>, <tt>hyperdoc-explorer</tt>, or <tt>hyperbook-server</tt>.</li>
+  <li><b>Source file:</b> a leaf component such as <tt>package.lisp</tt>, <tt>core.lisp</tt>, <tt>topics.lisp</tt>, or <tt>check-runner.lisp</tt>.</li>
+</ul>
+
+<p>
+  The <tt>hyperdoc</tt> system in <tt>hyperdoc.asd</tt> contains a module named
+  <tt>hyperdoc</tt> whose files are loaded serially:
+  <tt>package</tt>, <tt>core</tt>, <tt>topics</tt>, <tt>links-in-code</tt>,
+  <tt>defining</tt>, <tt>check-runner</tt>, <tt>examples</tt>, <tt>tools</tt>,
+  and <tt>hyperdoc</tt>. That ordering matters because definitions in later
+  files may depend on packages, classes, or variables introduced earlier.
+</p>
+
+<h2>Operations on systems</h2>
+
+<p>
+  ASDF operations act on systems and their components. For this repository, the
+  most important ones are <tt>load-op</tt> and <tt>test-op</tt>.
+</p>
+
+<ul>
+  <li><b>load-op:</b> loads the system and the component graph it depends on into the running image.</li>
+  <li><b>test-op:</b> runs the system's test entry point, often by delegating to a separate test system.</li>
+</ul>
+
+<p>
+  The repository makes that delegation explicit. In <tt>hyperdoc.asd</tt>,
+  <tt>hyperdoc</tt> declares <tt>:in-order-to ((test-op (test-op "hyperdoc/tests")))</tt>.
+  That means the main system and the test-oriented system are related, but
+  not identical. The boundary between them is a real ASDF fact, not just a UI
+  preference.
+</p>
+
+<p>
+  <tt>asdf:find-system</tt> matters because it tells you whether a named system
+  is visible in the current source registry and therefore available for these
+  operations. If <tt>(asdf:find-system :hyperdoc/explorer)</tt> fails, that is
+  a source-registry or system-definition problem before it is a HyperDoc UI
+  problem.
+</p>
+
+<p>
+  In this repository, <tt>nix develop</tt>, <tt>dev.sh</tt>, and the server
+  startup paths matter because they establish the source-registry context in
+  which the local systems are visible. If the image was started in the wrong
+  environment, system lookup can fail even when the source tree is present on
+  disk.
+</p>
+
+<h2>How HyperDoc uses ASDF</h2>
+
+<p>
+  HyperDoc is embedded in ASDF systems rather than floating above them. A
+  HyperDoc lives in a system directory next to the system definition file, and
+  its pages and Lisp source are loaded through the system's component graph.
+</p>
+
+<p>
+  This repository shows that clearly:
+</p>
+
+<ul>
+  <li><tt>hyperdoc</tt> contains the core HyperDoc runtime and the <tt>hyperdoc</tt> module.</li>
+  <li><tt>hyperdoc/explorer</tt> contains explorer-specific views in the <tt>hyperdoc-explorer</tt> module.</li>
+  <li><tt>hyperdoc/server</tt> is a compatibility alias that depends on the explorer/server stack.</li>
+  <li><tt>hyperdoc/tests</tt> contains smoke-test code in the <tt>tests</tt> module.</li>
+  <li><tt>hyperbook/explorer</tt> contains the <tt>asdf-systems</tt> hyperbook that exposes real <tt>asdf:system</tt> objects for inspection.</li>
+</ul>
+
+<p>
+  This is why HyperDoc documentation should talk about systems directly. The
+  documentation system is already embedded in ASDF's object model.
+</p>
+
+<h2>Slash-named systems in this repository</h2>
+
+<p>
+  Slash-named systems such as <tt>hyperdoc/explorer</tt>,
+  <tt>hyperdoc/server</tt>, <tt>hyperdoc/tests</tt>, and
+  <tt>hyperbook/server</tt> are ordinary ASDF systems with names that signal a
+  narrower role relative to a main system. They are not a package convention
+  and not a fake subsystem layer invented by HyperDoc.
+</p>
+
+<p>
+  ASDF also supports package-inferred systems, where system structure follows
+  package and file naming conventions. That is not the model used here. This
+  repository uses explicit <tt>defsystem</tt> forms, explicit modules, and
+  explicit file lists, so those declared system boundaries are the ones
+  HyperDoc should surface.
+</p>
+
+<p>
+  In this repository they separate concerns cleanly:
+</p>
+
+<ul>
+  <li><tt>hyperdoc</tt> owns the core documentation/runtime model.</li>
+  <li><tt>hyperdoc/explorer</tt> owns explorer views and interaction surfaces.</li>
+  <li><tt>hyperdoc/tests</tt> owns repo-local smoke tests.</li>
+  <li><tt>hyperbook/server</tt> owns web-server/runtime hosting behavior.</li>
+</ul>
+
+<p>
+  That separation is exactly the kind of ownership boundary HyperDoc should
+  reuse when deciding where examples and tests belong.
+</p>
+
+<h2>Why ASDF systems are the right scope objects</h2>
+
+<p>
+  ASDF systems are better scope objects than packages because systems encode
+  ownership, dependencies, loading, and testing. Packages are still useful, but
+  they are primarily namespace boundaries. They do not by themselves say which
+  files belong together, which operation boundary owns an example, or which
+  test system is responsible for regression tests.
+</p>
+
+<p>
+  HyperBook Explorer already acknowledges this by exposing real systems through
+  the <tt>asdf-systems</tt> hyperbook in
+  <tt>hyperbook-explorer/asdf-systems.lisp</tt>. HyperDoc should build on that
+  existing inspection surface instead of creating a second, HyperDoc-only notion
+  of scope.
+</p>
+
+<h2>Examples and tests by system boundary</h2>
+
+<p>
+  Once ASDF is understood this way, the architecture follows directly:
+</p>
+
+<ul>
+  <li>HyperDoc root views should express what HyperDoc is.</li>
+  <li>ASDF systems should be the main scope objects.</li>
+  <li>Examples should belong to the system whose source files define them.</li>
+  <li>Tests should belong to a test-oriented system such as <tt>hyperdoc/tests</tt> or to a root <tt>Tests</tt> surface that points to that system boundary.</li>
+  <li>Packages may remain visible as secondary code-archeology surfaces, but not as the primary organizing principle.</li>
+</ul>
+
+<p>
+  This is the ASDF-grounded translation of the GT-inspired design: choose a
+  meaningful scope object, attach examples to it, make run an action on those
+  examples, and keep verification tooling separate from root identity.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a></li>
+  <li><a page="Creating a HyperDoc">Creating a HyperDoc</a></li>
+  <li><a page="Dependencies">Dependencies</a></li>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="HyperDoc Test Runner">HyperDoc Test Runner</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Understanding ASDF systems in HyperDoc"><tt>Understanding ASDF systems in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF system boundaries"><tt>ASDF system boundaries</tt></a></li>
+  <li><a hyperbook="topics" page="Slash-named ASDF systems"><tt>Slash-named ASDF systems</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF operations"><tt>ASDF operations</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF component"><tt>ASDF component</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF systems as scope"><tt>ASDF systems as scope</tt></a></li>
+  <li><a hyperbook="topics" page="asdf:find-system"><tt>asdf:find-system</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF source registry"><tt>ASDF source registry</tt></a></li>
+</ul>

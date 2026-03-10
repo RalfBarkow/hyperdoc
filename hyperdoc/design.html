@@ -127,11 +127,13 @@
 </p>
 <p>
   Examples are another key ingredient of HyperDoc, although their
-  implementation remains basic for now. Examples produce inspectable
-  results, which permit explorers to better understand the software
-  system. But examples can also contain assertions, taking the role of
-  traditional unit tests. A testing framework that automatically runs
-  all examples in a HyperDoc remains to be implemented. See
+  implementation remains intentionally lightweight. Examples produce
+  inspectable results, which permit explorers to better understand the
+  software system. Examples can also contain assertions, taking the role
+  of traditional unit tests, and HyperDoc now has a checks runner for
+  batch discovery and execution. The current architectural question is
+  not whether runnable support exists, but how examples and validation
+  should be scoped and placed in the object model. See
   <a href="http://arxiv.org/abs/2409.00514">this paper on example-driven development</a>
   to learn more about this approach.
 </p>

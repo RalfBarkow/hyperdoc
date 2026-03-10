@@ -81,6 +81,115 @@ PAGE-LOOKUP-FAILURE."
                          (views:thunk (reload-text-pages hdoc)
                            t))))
 
+(defun asdf-system-source-file-truename (system)
+  (ignore-errors
+    (some-> system
+            asdf:system-source-file
+            truename)))
+
+(defun validation-subsystem-p (system)
+  (let ((name (asdf:component-name system)))
+    (or (uiop:string-suffix-p name "/tests")
+        (uiop:string-suffix-p name "/checks"))))
+
+(defun asdf-system-role-label (system)
+  (let ((name (asdf:component-name system)))
+    (cond
+      ((validation-subsystem-p system)
+       "Test system")
+      ((uiop:string-suffix-p name "/explorer")
+       "Explorer subsystem")
+      ((uiop:string-suffix-p name "/inspector")
+       "Inspector subsystem")
+      ((uiop:string-suffix-p name "/server")
+       "Server subsystem")
+      ((search "/" name)
+       "Supporting subsystem")
+      (t
+       "Primary system"))))
+
+(defun systems-defined-with (system)
+  (let ((source-file (asdf-system-source-file-truename system)))
+    (sort
+     (remove-duplicates
+      (cons system
+            (loop for name in (asdf:registered-systems)
+                  for candidate = (ignore-errors (asdf:find-system name))
+                  when (and candidate
+                            source-file
+                            (equal source-file
+                                   (asdf-system-source-file-truename candidate)))
+                    collect candidate))
+      :test #'string=
+      :key #'asdf:component-name)
+     #'string<
+     :key #'asdf:component-name)))
+
+(defun related-asdf-systems-for-hyperdoc (hd)
+  (systems-defined-with (asdf-system-of hd)))
+
+(defun supporting-systems-for-hyperdoc (hd)
+  (let ((primary-name (asdf:component-name (asdf-system-of hd))))
+    (sort
+     (loop for system in (related-asdf-systems-for-hyperdoc hd)
+           for name = (asdf:component-name system)
+           unless (or (string= name primary-name)
+                      (validation-subsystem-p system))
+             collect system)
+     #'string<
+     :key #'asdf:component-name)))
+
+(defun validation-subsystems-for-system (system)
+  (let ((prefix (format nil "~A/" (asdf:component-name system))))
+    (sort
+     (loop for candidate in (systems-defined-with system)
+           for candidate-name = (asdf:component-name candidate)
+           when (and (not (string= candidate-name (asdf:component-name system)))
+                     (validation-subsystem-p candidate)
+                     (uiop:string-prefix-p prefix candidate-name))
+             collect candidate)
+     #'string<
+     :key #'asdf:component-name)))
+
+(defun render-object-ref-list (objects &key (empty "None"))
+  (if objects
+      (views:html
+        (:ul
+         (loop for object in objects
+               do (views:html
+                    (:li (views:object-ref object))))))
+      (views:html (:span (views:esc empty)))))
+
+(defun render-system-scope-table (systems)
+  (views:html
+    (:table :class "inspector-table"
+            (:tr (:th (views:esc "System"))
+                 (:th (views:esc "Role"))
+                 (:th (views:esc "Source"))
+                 (:th (views:esc "Examples")))
+            (loop for system in systems
+                  for example-count = (length
+                                       (discover-example-checks
+                                        :system (asdf:component-name system)))
+                  for source-file = (ignore-errors (asdf:system-source-file system))
+                  do (views:html
+                       (:tr
+                        (:td (views:object-ref system))
+                        (:td (:tt (views:esc (asdf-system-role-label system))))
+                        (:td (if source-file
+                                 (views:object-ref source-file)
+                                 (views:html (:tt (views:esc "n/a")))))
+                        (:td (:tt (views:esc (format nil "~D" example-count))))))))))
+
+(defun hyperdoc-pages (hd)
+  (ensure-pages-loaded hd)
+  (sort (alexandria:hash-table-values (pages-of hd))
+        #'string<
+        :key #'id-of))
+
+(defmethod views:text-representation ((system asdf:system))
+  (asdf:component-name system))
+
 (views:defview hb::👀main-page (hd hyperdoc)
   (ensure-pages-loaded hd)
   (call-next-method))
@@ -89,29 +198,88 @@ PAGE-LOOKUP-FAILURE."
 ;; Views listing the text and code pages and the tools
 ;;
 
+(views:defview 👀systems (hd hyperdoc)
+  (let* ((primary-system (asdf-system-of hd))
+         (supporting-systems (supporting-systems-for-hyperdoc hd))
+         (validation-systems (validation-subsystems-for-system primary-system)))
+    (views:html-view :title "Systems" :priority 2
+      (views:html
+        (:h3 "Systems relevant to this HyperDoc")
+        (:p
+         "This is the local system-scope surface for this HyperDoc. "
+         "For the catalog-wide list of loaded and registered ASDF systems, open "
+         (views:object-ref hyperbook::*asdf-systems*)
+         ".")
+        (:p "Click a system name below to inspect the corresponding ASDF system object.")
+        (:h4 "Primary system")
+        (render-system-scope-table (list primary-system))
+        (:h4 "Related systems")
+        (if supporting-systems
+            (render-system-scope-table supporting-systems)
+            (views:html
+              (:p "No related supporting systems are defined with this HyperDoc's primary system.")))
+        (:h4 "Test systems")
+        (if validation-systems
+            (render-system-scope-table validation-systems)
+            (views:html
+              (:p "No dedicated test systems are defined for this HyperDoc.")))))))
+
+(views:defview 👀pages (hd hyperdoc)
+  (when-let (pages (hyperdoc-pages hd))
+    (views:list-view pages :title "Pages" :priority 3)))
+
+(views:defview 👀topics (hd hyperdoc)
+  (declare (ignore hd))
+  (-> *topics*
+      views:👀items
+      (views:rename :title "Topics" :priority 4)))
+
+(views:defview 👀overview (system asdf:system)
+  (let* ((system-name (asdf:component-name system))
+         (source-file (ignore-errors (asdf:system-source-file system)))
+         (example-count (length (discover-example-checks :system system-name)))
+         (validation-systems (validation-subsystems-for-system system)))
+    (views:html-view :title "Overview" :priority 1
+      (views:html
+        (:h3 (views:esc system-name))
+        (:p (views:esc "ASDF systems are the primary exploration scope in HyperDoc. Examples, tests, and lower-level package archaeology hang off the system object."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Role"))
+                     (:td (:tt (views:esc (asdf-system-role-label system)))))
+                (:tr (:td (views:esc "Source file"))
+                     (:td (if source-file
+                              (views:object-ref source-file)
+                              (views:html (:tt (views:esc "n/a"))))))
+                (:tr (:td (views:esc "Examples"))
+                     (:td (:tt (views:esc (format nil "~D" example-count)))))
+                (:tr (:td (views:esc "Test systems"))
+                     (:td (render-object-ref-list
+                           validation-systems
+                           :empty "No dedicated test system registered."))))))))
+
 (views:defview 👀text-pages (hd hyperdoc)
   (ensure-pages-loaded hd)
   (when-let (text-pages (-> (text-pages-of hd)
                             alexandria:hash-table-values
                             (sort #'string< :key #'id-of)))
-    (views:list-view text-pages :title "Text pages" :priority 3)))
+    (views:list-view text-pages :title "Text pages" :priority 9)))
 
 (views:defview 👀tools (hd hyperdoc)
   (ensure-pages-loaded hd)
   (when-let (tools (tools-of hd))
     (-<> tools
       (mapcar #'get-tool <>)
-      (views:list-view :title "Tool pages" :priority 4))))
+      (views:list-view :title "Tool pages" :priority 10))))
 
 (views:defview 👀code-pages (hd hyperdoc)
   (when-let (pages (code-pages-of hd))
     (views:enumerated-list-view pages
                                 :title "Code pages"
-                                :priority 5)))
+                                :priority 11)))
 
 (views:defview 👀data (hd hyperdoc)
   (when-let (data (data-of hd))
-    (views:html-view :title "Data" :priority 6
+    (views:html-view :title "Data" :priority 12
       (views:html-table data
                   :columns '("Title" "Value")
                   :display (list #'cdr
@@ -125,7 +293,7 @@ PAGE-LOOKUP-FAILURE."
 (views:defview 👀files (hd hyperdoc)
   (-> (directory-of hd)
     views:👀items
-    (views:rename :title "Files" :priority 10)))
+    (views:rename :title "Files" :priority 14)))
 
 ;;
 ;; The source code repositories for the HyperDoc
@@ -135,7 +303,7 @@ PAGE-LOOKUP-FAILURE."
   (-> (asdf-system-name-of hd)
     asdf:find-system
     👀repository
-    (views:rename :title "Repository" :priority 7)))
+    (views:rename :title "Repository" :priority 8)))
 
 ;;
 ;; The title bar for HyperDoc text pages
@@ -157,4 +325,3 @@ PAGE-LOOKUP-FAILURE."
       file-of
       views:👀content
       (views:rename :title "Source" :priority 10)))
-

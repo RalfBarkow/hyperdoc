@@ -13,7 +13,10 @@ A HyperDoc is defined by
 A HyperDoc is part of system defined via ASDF, its directory resides
 next to the .asd file in the file system. The directory contains both
 the text pages (in HTML or Markdown format) and the source code files,
-which must be loaded as a module in the system component list.
+which must be loaded as a module in the system component list. In other
+words, a HyperDoc is not outside the ASDF model: it lives inside a real
+ASDF system, under a real module, with real file ordering and loading
+rules.
 
 See for example the <a expr="(asdf:system-relative-pathname
 &quot;hyperdoc&quot; &quot;hyperdoc/&quot;)">directory for the
@@ -21,6 +24,9 @@ HyperDoc you are looking at</a>, and the <a
 expr="(asdf:system-source-file &quot;hyperdoc&quot;)">system
 definition file</a> that lists the module "hyperdoc" among its
 components.
+
+For the conceptual model behind that arrangement, see
+<a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>.
 
 The source code files in the ASDF module should be loaded serially, in
 order to ensure that the order in which the source code files are

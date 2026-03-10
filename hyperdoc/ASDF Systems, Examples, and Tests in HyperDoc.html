@@ -1,0 +1,186 @@
+<h1>ASDF Systems, Examples, and Tests in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc should organize runnable exploration around ASDF systems. In real
+  ASDF terms, a system is a named top-level component defined in a
+  <tt>.asd</tt> file and used as the boundary for operations such as loading
+  and testing. The root HyperDoc object should express what HyperDoc is; one
+  hop away, an ASDF system expresses what belongs together, which examples
+  explain it, and which test surfaces verify it.
+</p>
+
+<p>
+  For the detailed ASDF grounding behind this page, see
+  <a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>.
+  This page focuses on the architectural consequence for examples and
+  tests after that ASDF model is understood.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="ASDF systems as scope"><tt>ASDF systems as scope</tt></a></li>
+  <li><a hyperbook="topics" page="Scoped examples"><tt>Scoped examples</tt></a></li>
+  <li><a hyperbook="topics" page="Run action for examples"><tt>Run action for examples</tt></a></li>
+  <li><a hyperbook="topics" page="Tests"><tt>Tests</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF component"><tt>ASDF component</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF source registry"><tt>ASDF source registry</tt></a></li>
+  <li><a hyperbook="topics" page="asdf:find-system"><tt>asdf:find-system</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc test runner"><tt>HyperDoc test runner</tt></a></li>
+</ul>
+
+<h2>ASDF terms that matter here</h2>
+
+<ul>
+  <li><b>System:</b> the named top-level ASDF component that <tt>asdf:find-system</tt> resolves and that operations such as <tt>load-op</tt> and <tt>test-op</tt> target.</li>
+  <li><b>Component:</b> any node in the ASDF graph. Systems, modules, and source files are all components.</li>
+  <li><b>Module:</b> a parent component that groups child components, often mirroring a directory or an ordered cluster of files.</li>
+  <li><b>Source file:</b> a leaf component that names a concrete source file to compile or load.</li>
+  <li><b>Operation:</b> an action planned over the component graph. <tt>load-op</tt> loads a system into the image; <tt>test-op</tt> runs the system's test entry point, often through a separate test system.</li>
+  <li><b>Source registry:</b> the configuration that tells ASDF where to look for system definitions. A system is only discoverable when it is visible there.</li>
+</ul>
+
+<h2>Why ASDF systems are the right scope</h2>
+
+<p>
+  ASDF systems already define the boundary HyperDoc needs. A system names a
+  loadable and testable unit, gathers related components, and exposes the
+  dependency structure that makes that unit meaningful. That makes it a better
+  scope object than the HyperDoc root object or a loose package list.
+</p>
+
+<p>
+  GT often uses the package as an example scope. HyperDoc should translate that
+  idea explicitly rather than copy it literally: Common Lisp packages are name
+  spaces, but ASDF systems are the top-level build/load/test boundaries.
+  HyperDoc should therefore use the ASDF system as the scope object and keep
+  packages as a secondary low-level surface for code archaeology.
+</p>
+
+<p>
+  This repository already uses that style of boundary in
+  <tt>hyperdoc.asd</tt> and <tt>hyperbook.asd</tt>: explicit
+  <tt>defsystem</tt> forms define systems such as <tt>hyperdoc</tt>,
+  <tt>hyperdoc/explorer</tt>, <tt>hyperdoc/server</tt>,
+  <tt>hyperbook</tt>, and <tt>hyperbook/explorer</tt>. These slash-named
+  systems are real ASDF systems, not pseudo-folders. They matter because they
+  let HyperDoc distinguish main systems from narrower explorer or test
+  subsystems without inventing a parallel scope model.
+</p>
+
+<p>
+  Package-inferred systems matter in ASDF because they can derive component
+  structure from package and file naming conventions. HyperDoc should know that
+  model exists, but this repository is not organized that way. The current repo
+  uses explicit system definitions, so the explorer should present the explicit
+  system boundaries that ASDF already knows.
+</p>
+
+<p>
+  The source registry matters for this scope model as well. HyperDoc can only
+  present meaningful system objects if <tt>asdf:find-system</tt> can resolve
+  them in the running image. In practice that means the Nix development shell
+  and <tt>dev.sh</tt> are part of the documentation story: they establish the
+  source-registry context in which the local systems are visible.
+</p>
+
+<h2>Existing inspection seam</h2>
+
+<p>
+  HyperDoc already has the right seam for this architecture. The system
+  <tt>html-inspector-views/standard</tt> ships views for ASDF systems and
+  components, including source, children, dependencies, and plans. The
+  <tt>systems</tt> component of that system is the source file that defines
+  those views.
+</p>
+
+<p>
+  HyperBook Explorer already exposes real <tt>asdf:system</tt> objects through
+  its <tt>ASDF Systems</tt> hyperbook. HyperDoc should extend those existing
+  ASDF object views with <tt>Examples</tt>, <tt>Tests</tt>, and secondary
+  <tt>Packages</tt> surfaces rather than wrapping systems in a HyperDoc-local
+  pseudo-scope.
+</p>
+
+<h2>Examples belong to a system</h2>
+
+<p>
+  Examples explain a system. In ASDF terms, an example becomes available
+  because the source-file component that defines its <tt>defexample</tt> form is
+  part of that system's load plan. A system-scoped examples surface therefore
+  answers which runnable slices belong to this unit, what they are trying to
+  show, and which inspectable results they produce.
+</p>
+
+<p>
+  That placement keeps the HyperDoc root honest. Root views should express what
+  HyperDoc is: pages, topics, and system scopes. They should not pretend that
+  all examples in the image belong to one undifferentiated root console.
+</p>
+
+<h2>Run as an example action</h2>
+
+<p>
+  Run should be an action on each scoped example. HyperDoc already has the
+  per-example <tt>►</tt> affordance on top-level <tt>defexample</tt> forms; the
+  architectural move is to present that action under the owning ASDF system
+  rather than as a free-floating mechanism.
+</p>
+
+<p>
+  This keeps the GT lesson intact in HyperDoc terms: pick a scope object, list
+  its examples, and let each example run into an inspectable result object.
+</p>
+
+<h2>Tests are separate from identity</h2>
+
+<p>
+  Tests verify a system; they do not define the stable identity of the
+  HyperDoc root object. Test surfaces should sit one hop away from root
+  identity, attached to the relevant system or test subsystem.
+</p>
+
+<p>
+  This follows ASDF practice as well. Testing is often attached to a
+  separate slash-named test system, and <tt>test-op</tt> is an operation over a
+  system boundary rather than a property of the documentation root object.
+</p>
+
+<p>
+  Examples and tests are related because both are runnable. They are distinct
+  because examples are exploratory and pedagogical, while tests are operational
+  and verification-oriented. Internally they currently share the
+  <tt>check-*</tt> runtime model.
+</p>
+
+<h2>Relation to HyperDoc Test Runner</h2>
+
+<p>
+  The <a page="HyperDoc Test Runner">HyperDoc Test Runner</a> remains the
+  runtime model for <tt>check-spec</tt>, <tt>check-result</tt>, and
+  <tt>check-run</tt>. What changes is placement: the runner should be entered
+  through system-scoped test surfaces, not taught as a primary facet of
+  the HyperDoc root object.
+</p>
+
+<p>
+  This keeps the runner useful without confusing test tooling with the
+  root identity surface.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="HyperDoc Test Runner">HyperDoc Test Runner</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a></li>
+  <li><a page="Design">Design</a></li>
+</ul>
