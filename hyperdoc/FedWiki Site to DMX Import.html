@@ -58,6 +58,30 @@
   <a hyperbook="hyperdoc" page="DMX FedWiki Write Model">DMX FedWiki Write Model</a>.
 </p>
 
+<h2>Concrete payload example</h2>
+
+<p>
+  A live create or update sends a DMX <tt>TopicModel</tt>-shaped payload like
+  this:
+</p>
+
+<pre><code>{
+  "uri": "fedwiki:sfw.c2.com/about-imagination",
+  "typeUri": "fedwiki.page",
+  "value": "About Imagination",
+  "children": {
+    "fedwiki.slug": "about-imagination",
+    "fedwiki.title": "About Imagination",
+    "fedwiki.page.json": "{\"externalKey\":\"fedwiki:sfw.c2.com/about-imagination\",\"siteDomain\":\"sfw.c2.com\",\"canonicalHtmlUrl\":\"http://sfw.c2.com/about-imagination.html\",\"sourceKind\":\"fedwiki-page\",...}"
+  }
+}</code></pre>
+
+<p>
+  The DMX topic <tt>uri</tt> carries the stable import identity, while
+  <tt>fedwiki.page.json</tt> stores the fuller provenance envelope together
+  with the fetched page JSON.
+</p>
+
 <h2>Why this is not the Topics HyperBook</h2>
 
 <p>
@@ -72,8 +96,11 @@
 
 <p>
   Dry-run is the default. It prints candidate rows and a create/update summary
-  without writing to DMX. Live mode uses the same planning path but performs
-  creates or updates through a separately configured DMX client.
+  without writing to DMX. The dry-run summary also reports the resolved import
+  protocol, whether importer-local HTTP fallback was used, whether DMX lookup
+  was enabled, and how many candidates were skipped by a <tt>--limit</tt>.
+  Live mode uses the same planning path but performs creates or updates through
+  a separately configured DMX client.
 </p>
 
 <pre><code>nix develop --command sbcl --no-userinit --non-interactive \
@@ -87,6 +114,23 @@ nix develop --command sbcl --no-userinit --non-interactive \
   --eval '(asdf:load-system :hyperdoc :force t)' \
   --load tools/import-fedwiki-site-to-dmx.lisp -- \
   --domain sfw.c2.com --dry-run --limit 10 --verbose</code></pre>
+
+<h2>HTTP fallback policy</h2>
+
+<p>
+  The importer starts from the existing FedWiki integration and therefore
+  respects its initial protocol choice. If the initial HTTPS-based site load
+  does not yield usable local sitemap pages, and an explicit HTTP retry does,
+  the importer switches to HTTP for that import run and reports
+  <tt>http-fallback=T</tt> in the dry-run/live summary.
+</p>
+
+<p>
+  This fallback is importer-local. It does not globally rewrite the cached
+  FedWiki runtime model, and it is meant only to keep site import practical for
+  hosts such as <tt>sfw.c2.com</tt> whose FedWiki JSON is currently reachable
+  over HTTP but not via a matching HTTPS certificate.
+</p>
 
 <h2>Failure modes</h2>
 

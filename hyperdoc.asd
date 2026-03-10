@@ -29,6 +29,24 @@
                              (:file "tools")
                              (:file "hyperdoc")))))
 
+(defsystem #:hyperdoc/dmx-import
+  :description "FedWiki to DMX import support for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc
+               #:hyperbook/fedwiki
+               #:cl-ppcre
+               #:drakma
+               #:shasht
+               #:uiop)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "dmx-import")))))
+
 (defsystem #:hyperdoc/inspector
   :description "HyperDoc for the moldable inspector"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -105,11 +123,12 @@
   :license  "BSD"
   :version "0.0.1"
   :serial t
-  :depends-on (#:hyperdoc)
+  :depends-on (#:hyperdoc/dmx-import)
   :components ((:module "tests"
                 :serial t
-                :components ((:file "dmx-topic-proxy-smoke"))))
+                :components ((:file "dmx-topic-proxy-smoke")
+                             (:file "fedwiki-site-dmx-import"))))
   :perform (test-op (op c)
              (declare (ignore op c))
              (uiop:symbol-call :hyperdoc/tests
-                               :run-dmx-topic-proxy-smoke-tests)))
+                               :run-hyperdoc-tests)))

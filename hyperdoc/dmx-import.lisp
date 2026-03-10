@@ -1,0 +1,696 @@
+;;;; FedWiki-to-DMX importer
+;;
+;;;; Part of HyperDoc
+;;;; See LICENSE for licensing information.
+
+(in-package :hyperdoc)
+
+(defparameter *fedwiki-import-source-kind* "fedwiki-page")
+(defparameter *fedwiki-summary-paragraph-types*
+  '("paragraph" "markdown" "reference"))
+(defparameter *dmx-fedwiki-page-type-uri* "fedwiki.page")
+(defparameter *dmx-fedwiki-slug-type-uri* "fedwiki.slug")
+(defparameter *dmx-fedwiki-title-type-uri* "fedwiki.title")
+(defparameter *dmx-fedwiki-page-json-type-uri* "fedwiki.page.json")
+(defparameter *dmx-topic-fetch-query-string* "children=true&assocChildren=true")
+(defparameter *base64-alphabet*
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+
+(define-condition fedwiki-dmx-import-error (error)
+  ((message :reader fedwiki-dmx-import-message-of :initarg :message))
+  (:report (lambda (condition stream)
+             (format stream "~A"
+                     (fedwiki-dmx-import-message-of condition)))))
+
+(define-condition duplicate-fedwiki-import-key (fedwiki-dmx-import-error)
+  ((external-key :reader duplicate-fedwiki-import-key-of :initarg :external-key))
+  (:report (lambda (condition stream)
+             (format stream "Duplicate FedWiki import key in one run: ~A"
+                     (duplicate-fedwiki-import-key-of condition)))))
+
+(define-condition dmx-import-config-error (fedwiki-dmx-import-error)
+  ((missing-keys :reader dmx-import-missing-keys-of :initarg :missing-keys))
+  (:report (lambda (condition stream)
+             (format stream "Missing DMX import configuration: ~{~A~^, ~}"
+                     (dmx-import-missing-keys-of condition)))))
+
+(define-condition dmx-import-http-error (fedwiki-dmx-import-error)
+  ((url :reader dmx-import-http-url-of :initarg :url)
+   (status-code :reader dmx-import-http-status-code-of :initarg :status-code)
+   (response-body :reader dmx-import-http-response-body-of :initarg :response-body))
+  (:report (lambda (condition stream)
+             (format stream "DMX import HTTP failure ~A for ~A"
+                     (dmx-import-http-status-code-of condition)
+                     (dmx-import-http-url-of condition)))))
+
+(defstruct fedwiki-import-candidate
+  external-key
+  domain
+  slug
+  title
+  canonical-html-url
+  canonical-json-url
+  summary
+  source-kind
+  page-json
+  raw-journal-timestamp
+  last-sync-timestamp)
+
+(defstruct dmx-import-plan-entry
+  action
+  external-key
+  candidate
+  payload
+  existing-topic)
+
+(defclass dmx-import-client () ())
+
+(defclass null-dmx-import-client (dmx-import-client) ())
+
+(defclass memory-dmx-import-client (dmx-import-client)
+  ((topics-by-external-key
+    :reader topics-by-external-key-of
+    :initarg :topics-by-external-key
+    :initform (make-hash-table :test #'equal))))
+
+(defclass http-dmx-import-client (dmx-import-client)
+  ((base-url :reader dmx-import-base-url-of :initarg :base-url :initform nil)
+   (authorization-header
+    :reader dmx-import-authorization-header-of
+    :initarg :authorization-header
+    :initform nil)
+   (topic-type-uri :reader dmx-import-topic-type-uri-of
+                   :initarg :topic-type-uri
+                   :initform *dmx-fedwiki-page-type-uri*)
+   (verbose :reader dmx-import-verbose-of :initarg :verbose :initform nil)))
+
+(defgeneric dmx-import-find-existing-topic (client external-key))
+(defgeneric dmx-import-create-topic (client payload))
+(defgeneric dmx-import-update-topic (client existing-topic payload))
+
+(defmethod dmx-import-find-existing-topic ((client null-dmx-import-client) external-key)
+  (declare (ignore external-key))
+  nil)
+
+(defmethod dmx-import-create-topic ((client null-dmx-import-client) payload)
+  (declare (ignore payload))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live writes"))
+
+(defmethod dmx-import-update-topic ((client null-dmx-import-client) existing-topic payload)
+  (declare (ignore existing-topic payload))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live writes"))
+
+(defmethod dmx-import-find-existing-topic ((client memory-dmx-import-client) external-key)
+  (gethash external-key (topics-by-external-key-of client)))
+
+(defmethod dmx-import-create-topic ((client memory-dmx-import-client) payload)
+  (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
+        payload))
+
+(defmethod dmx-import-update-topic ((client memory-dmx-import-client) existing-topic payload)
+  (declare (ignore existing-topic))
+  (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
+        payload))
+
+(defun encode-base64-octets (octets)
+  (with-output-to-string (stream)
+    (loop with length = (length octets)
+          for index from 0 below length by 3
+          for byte1 = (aref octets index)
+          for index2 = (1+ index)
+          for byte2 = (if (< index2 length) (aref octets index2) 0)
+          for index3 = (+ index 2)
+          for byte3 = (if (< index3 length) (aref octets index3) 0)
+          for triple = (logior (ash byte1 16)
+                               (ash byte2 8)
+                               byte3)
+          do (write-char (char *base64-alphabet* (ldb (byte 6 18) triple))
+                         stream)
+             (write-char (char *base64-alphabet* (ldb (byte 6 12) triple))
+                         stream)
+             (write-char (if (< index2 length)
+                             (char *base64-alphabet* (ldb (byte 6 6) triple))
+                             #\=)
+                         stream)
+             (write-char (if (< index3 length)
+                             (char *base64-alphabet* (ldb (byte 6 0) triple))
+                             #\=)
+                         stream))))
+
+(defun basic-authorization-header (username password)
+  (let* ((credentials (format nil "~A:~A" username password))
+         (octets (map 'vector
+                      (lambda (char)
+                        (let ((code (char-code char)))
+                          (unless (<= code 255)
+                            (error 'dmx-import-config-error
+                                   :message "Basic auth credentials must be Latin-1 or use HYPERDOC_DMX_IMPORT_AUTH_HEADER"
+                                   :missing-keys '("HYPERDOC_DMX_IMPORT_AUTH_HEADER")))
+                          code))
+                      credentials)))
+    (format nil "Basic ~A" (encode-base64-octets octets))))
+
+(defun normalize-fedwiki-import-text (text)
+  (let ((string (or text "")))
+    (string-trim
+     '(#\Space #\Tab #\Newline #\Return)
+     (cl-ppcre:regex-replace-all "\\s+" string " "))))
+
+(defun meaningful-fedwiki-import-text-p (text)
+  (plusp (length (normalize-fedwiki-import-text text))))
+
+(defun fedwiki-summary-paragraph-item-p (item)
+  (member (gethash "type" item)
+          *fedwiki-summary-paragraph-types*
+          :test #'string-equal))
+
+(defun derive-fedwiki-summary-from-story (story title)
+  (labels ((item-text (item)
+             (normalize-fedwiki-import-text
+              (and item
+                   (gethash "text" item))))
+           (first-matching-text (items predicate)
+             (loop for item across (or items #())
+                   for text = (item-text item)
+                   when (and (funcall predicate item)
+                             (meaningful-fedwiki-import-text-p text))
+                     return text)))
+    (or (first-matching-text story #'fedwiki-summary-paragraph-item-p)
+        (first-matching-text story (lambda (item)
+                                     (declare (ignore item))
+                                     t))
+        (normalize-fedwiki-import-text title))))
+
+(defun fedwiki-import-external-key (domain slug)
+  (format nil "fedwiki:~A/~A"
+          (string-downcase domain)
+          slug))
+
+(defun last-fedwiki-journal-timestamp (journal)
+  (loop for entry across (or journal #())
+        for date = (and entry (gethash "date" entry))
+        when (numberp date)
+          maximize date))
+
+(defun local-fedwiki-page-p (page)
+  (and (typep page 'hyperbook/fedwiki::fedwiki-page)
+       (not (typep page 'hyperbook/fedwiki::remote-fedwiki-page))
+       (not (typep page 'hyperbook/fedwiki::fedwiki-plugin-page))))
+
+(defun collect-local-fedwiki-pages (wiki)
+  (hyperbook/fedwiki::wait-for-sitemap wiki)
+  (sort (remove-if-not #'local-fedwiki-page-p
+                       (alexandria:hash-table-values
+                        (hyperbook/fedwiki::pages-of wiki)))
+        #'string<
+        :key #'hb:id-of))
+
+(defun fetch-fedwiki-import-page-json (wiki page)
+  (hyperbook/fedwiki::fetch-page-json (hyperbook/fedwiki::domain-name-of wiki)
+                                      (hyperbook/fedwiki::protocol-of wiki)
+                                      (hb:id-of page)))
+
+(defun build-fedwiki-import-candidate (wiki page page-json
+                                        &key (now (get-universal-time)))
+  (let* ((domain (hyperbook/fedwiki::domain-name-of wiki))
+         (slug (hb:id-of page))
+         (title (or (gethash "title" page-json)
+                    (hb:title-of page)
+                    slug))
+         (protocol (hyperbook/fedwiki::protocol-of wiki))
+         (story (gethash "story" page-json))
+         (journal (gethash "journal" page-json)))
+    (make-fedwiki-import-candidate
+     :external-key (fedwiki-import-external-key domain slug)
+     :domain domain
+     :slug slug
+     :title title
+     :canonical-html-url (hyperbook/fedwiki::wiki-url domain
+                                                     protocol
+                                                     (format nil "/~A.html" slug))
+     :canonical-json-url (hyperbook/fedwiki::wiki-url domain
+                                                     protocol
+                                                     (format nil "/~A.json" slug))
+     :summary (derive-fedwiki-summary-from-story story title)
+     :source-kind *fedwiki-import-source-kind*
+     :page-json page-json
+     :raw-journal-timestamp (last-fedwiki-journal-timestamp journal)
+     :last-sync-timestamp now)))
+
+(defun enumerate-fedwiki-import-candidates (wiki
+                                            &key
+                                              limit
+                                              (page-json-loader
+                                               #'fetch-fedwiki-import-page-json)
+                                              (now (get-universal-time)))
+  (let ((pages (collect-local-fedwiki-pages wiki))
+        (candidates '()))
+    (loop for page in pages
+          for index from 0
+          when (and limit (>= index limit))
+            do (loop-finish)
+          do (push (build-fedwiki-import-candidate wiki
+                                                   page
+                                                   (funcall page-json-loader wiki page)
+                                                   :now now)
+                   candidates))
+    (nreverse candidates)))
+
+(defun fedwiki-import-ready-wiki-p (wiki)
+  (and (eq (hyperbook/fedwiki::status-of wiki) t)
+       (plusp (hash-table-count (hyperbook/fedwiki::pages-of wiki)))))
+
+(defun resolve-fedwiki-import-wiki (domain &key wiki verbose (stream *standard-output*))
+  (labels ((page-count (candidate-wiki)
+             (hash-table-count (hyperbook/fedwiki::pages-of candidate-wiki)))
+           (report-http-fallback (initial-wiki retry-wiki)
+             (when verbose
+               (format stream
+                       "~&FEDWIKI_DMX_IMPORT fallback=http original-protocol=~A original-pages=~D retry-pages=~D~%"
+                       (hyperbook/fedwiki::protocol-of initial-wiki)
+                       (page-count initial-wiki)
+                       (page-count retry-wiki)))))
+    (let ((resolved-wiki (or wiki
+                             (hyperbook/fedwiki::get-fedwiki domain nil t))))
+      (if (or wiki
+              (fedwiki-import-ready-wiki-p resolved-wiki)
+              (not (string= (hyperbook/fedwiki::protocol-of resolved-wiki)
+                            "https")))
+          (values resolved-wiki nil)
+          (let ((retry-wiki (hyperbook/fedwiki::make-fedwiki domain :https nil)))
+            (hyperbook/fedwiki::wait-for-sitemap retry-wiki)
+            (if (> (page-count retry-wiki)
+                   (page-count resolved-wiki))
+                (progn
+                  (report-http-fallback resolved-wiki retry-wiki)
+                  (values retry-wiki t))
+                (values resolved-wiki nil)))))))
+
+(defun fedwiki-import-source-envelope (candidate)
+  (let ((json (make-hash-table :test #'equal)))
+    (setf (gethash "externalKey" json)
+          (fedwiki-import-candidate-external-key candidate)
+          (gethash "siteDomain" json)
+          (fedwiki-import-candidate-domain candidate)
+          (gethash "slug" json)
+          (fedwiki-import-candidate-slug candidate)
+          (gethash "title" json)
+          (fedwiki-import-candidate-title candidate)
+          (gethash "canonicalHtmlUrl" json)
+          (fedwiki-import-candidate-canonical-html-url candidate)
+          (gethash "canonicalJsonUrl" json)
+          (fedwiki-import-candidate-canonical-json-url candidate)
+          (gethash "summary" json)
+          (fedwiki-import-candidate-summary candidate)
+          (gethash "sourceKind" json)
+          (fedwiki-import-candidate-source-kind candidate)
+          (gethash "lastSyncTimestamp" json)
+          (fedwiki-import-candidate-last-sync-timestamp candidate)
+          (gethash "pageJson" json)
+          (fedwiki-import-candidate-page-json candidate))
+    (when (fedwiki-import-candidate-raw-journal-timestamp candidate)
+      (setf (gethash "rawJournalTimestamp" json)
+            (fedwiki-import-candidate-raw-journal-timestamp candidate)))
+    json))
+
+(defun fedwiki-import-dmx-children (candidate)
+  (let ((children (make-hash-table :test #'equal)))
+    (setf (gethash *dmx-fedwiki-slug-type-uri* children)
+          (fedwiki-import-candidate-slug candidate)
+          (gethash *dmx-fedwiki-title-type-uri* children)
+          (fedwiki-import-candidate-title candidate)
+          (gethash *dmx-fedwiki-page-json-type-uri* children)
+          (encode-json-string (fedwiki-import-source-envelope candidate)))
+    children))
+
+(defun fedwiki-import-payload (candidate &key topic-type-uri)
+  (list :type-uri (or topic-type-uri
+                      *dmx-fedwiki-page-type-uri*)
+        :uri (fedwiki-import-candidate-external-key candidate)
+        :value (fedwiki-import-candidate-title candidate)
+        :external-key (fedwiki-import-candidate-external-key candidate)
+        :slug (fedwiki-import-candidate-slug candidate)
+        :site-domain (fedwiki-import-candidate-domain candidate)
+        :canonical-html-url (fedwiki-import-candidate-canonical-html-url candidate)
+        :canonical-json-url (fedwiki-import-candidate-canonical-json-url candidate)
+        :summary (fedwiki-import-candidate-summary candidate)
+        :last-sync-timestamp (fedwiki-import-candidate-last-sync-timestamp candidate)
+        :raw-journal-timestamp (fedwiki-import-candidate-raw-journal-timestamp candidate)
+        :source-kind (fedwiki-import-candidate-source-kind candidate)
+        :children (fedwiki-import-dmx-children candidate)))
+
+(defun validate-unique-fedwiki-import-keys (candidates)
+  (let ((seen (make-hash-table :test #'equal)))
+    (dolist (candidate candidates)
+      (let ((key (fedwiki-import-candidate-external-key candidate)))
+        (when (gethash key seen)
+          (error 'duplicate-fedwiki-import-key
+                 :message "Duplicate FedWiki import key"
+                 :external-key key))
+        (setf (gethash key seen) t))))
+  candidates)
+
+(defun plan-fedwiki-site-dmx-import (candidates client &key topic-type-uri)
+  (validate-unique-fedwiki-import-keys candidates)
+  (loop for candidate in candidates
+        for payload = (fedwiki-import-payload candidate
+                                              :topic-type-uri
+                                              (or topic-type-uri
+                                                  (and (typep client 'http-dmx-import-client)
+                                                       (dmx-import-topic-type-uri-of client))))
+        for existing = (dmx-import-find-existing-topic
+                        client
+                        (fedwiki-import-candidate-external-key candidate))
+        collect (make-dmx-import-plan-entry
+                 :action (if existing :update :create)
+                 :external-key (fedwiki-import-candidate-external-key candidate)
+                 :candidate candidate
+                 :payload payload
+                 :existing-topic existing)))
+
+(defun summarize-dmx-import-plan (plan)
+  (let ((creates 0)
+        (updates 0))
+    (dolist (entry plan)
+      (ecase (dmx-import-plan-entry-action entry)
+        (:create (incf creates))
+        (:update (incf updates))))
+    (list :creates creates
+          :updates updates
+          :entries (length plan))))
+
+(defun lookup-enabled-for-dmx-import-client-p (client)
+  (not (typep client 'null-dmx-import-client)))
+
+(defun render-dmx-import-plan-entry (entry &key (stream *standard-output*) verbose)
+  (let ((candidate (dmx-import-plan-entry-candidate entry)))
+    (format stream "~&~A ~A ~S~%"
+            (string-upcase (symbol-name (dmx-import-plan-entry-action entry)))
+            (dmx-import-plan-entry-external-key entry)
+            (fedwiki-import-candidate-title candidate))
+    (when verbose
+      (format stream "  slug=~A site=~A~%"
+              (fedwiki-import-candidate-slug candidate)
+              (fedwiki-import-candidate-domain candidate))
+      (format stream "  html=~A~%"
+              (fedwiki-import-candidate-canonical-html-url candidate))
+      (format stream "  json=~A~%"
+              (fedwiki-import-candidate-canonical-json-url candidate))
+      (format stream "  summary=~S~%"
+              (fedwiki-import-candidate-summary candidate)))))
+
+(defun execute-dmx-import-plan (plan client &key dry-run (stream *standard-output*) verbose)
+  (dolist (entry plan)
+    (render-dmx-import-plan-entry entry :stream stream :verbose verbose)
+    (unless dry-run
+      (ecase (dmx-import-plan-entry-action entry)
+        (:create
+         (dmx-import-create-topic client
+                                  (dmx-import-plan-entry-payload entry)))
+        (:update
+         (dmx-import-update-topic client
+                                  (dmx-import-plan-entry-existing-topic entry)
+                                  (dmx-import-plan-entry-payload entry))))))
+  plan)
+
+(defun unreserved-url-char-p (char)
+  (or (and (char>= char #\a) (char<= char #\z))
+      (and (char>= char #\A) (char<= char #\Z))
+      (and (char>= char #\0) (char<= char #\9))
+      (find char "-._~" :test #'char=)))
+
+(defun url-encode-component (text)
+  (with-output-to-string (stream)
+    (loop for char across (or text "")
+          do (if (unreserved-url-char-p char)
+                 (write-char char stream)
+                 (format stream "%~2,'0X" (char-code char))))))
+
+(defun absolute-http-url-p (url)
+  (or (and url
+           (<= 7 (length url))
+           (string= "http://" url :end2 7))
+      (and url
+           (<= 8 (length url))
+           (string= "https://" url :end2 8))))
+
+(defun http-success-status-p (status)
+  (and status (<= 200 status 299)))
+
+(defun json-encoder-function ()
+  (or (let* ((pkg (find-package "SHASHT"))
+             (sym (and pkg (find-symbol "WRITE-JSON" pkg))))
+        (and sym (fboundp sym) (symbol-function sym)))
+      (let* ((pkg (or (find-package "COM.INUOE.JZON")
+                      (find-package "JZON")))
+             (sym (and pkg (find-symbol "STRINGIFY" pkg))))
+        (and sym (fboundp sym)
+             (lambda (object stream)
+               (write-string (funcall (symbol-function sym) object) stream))))))
+
+(defun encode-json-string (object)
+  (let ((encoder (json-encoder-function)))
+    (unless encoder
+      (error 'fedwiki-dmx-import-error
+             :message "No JSON encoder available for live DMX writes"))
+    (with-output-to-string (stream)
+      (funcall encoder object stream))))
+
+(defun dmx-import-json-object (payload)
+  (let ((json (make-hash-table :test #'equal)))
+    (labels ((put (key value)
+               (when value
+                 (setf (gethash key json) value))))
+      (put "id" (getf payload :id))
+      (put "uri" (getf payload :uri))
+      (put "typeUri" (getf payload :type-uri))
+      (put "value" (getf payload :value))
+      (put "children" (getf payload :children)))
+    json))
+
+(defun normalize-http-client-url (client url)
+  (cond
+    ((null url) nil)
+    ((absolute-http-url-p url)
+     url)
+    ((dmx-import-base-url-of client)
+     (let ((base-url (string-right-trim "/" (dmx-import-base-url-of client))))
+       (if (and (> (length url) 0)
+                (char= (char url 0) #\/))
+           (concatenate 'string base-url url)
+           (format nil "~A/~A" base-url url))))
+    (t
+     url)))
+
+(defun dmx-topic-uri-lookup-path (topic-uri)
+  (format nil "/core/topic/uri/~A?~A"
+          (url-encode-component topic-uri)
+          *dmx-topic-fetch-query-string*))
+
+(defun dmx-topic-create-path ()
+  "/core/topic")
+
+(defun dmx-topic-update-path (topic-id)
+  (format nil "/core/topic/~A" topic-id))
+
+(defun dmx-topic-id (topic)
+  (and (hash-table-p topic)
+       (gethash "id" topic)))
+
+(defun http-request-json (client method url &key payload allow-404?)
+  (let* ((normalized-url (normalize-http-client-url client url))
+         (headers (append (when (dmx-import-authorization-header-of client)
+                            (list (cons "Authorization"
+                                        (dmx-import-authorization-header-of client))))
+                          (when payload
+                            '(("Content-Type" . "application/json")))))
+         (request-args (append (list normalized-url
+                                     :method method
+                                     :want-stream t
+                                     :additional-headers headers)
+                               (when payload
+                                 (list :content (encode-json-string
+                                                 (dmx-import-json-object payload))
+                                       :content-type "application/json")))))
+    (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
+        (apply #'drakma:http-request request-args)
+      (declare (ignore response-headers response-uri must-close))
+      (unwind-protect
+           (cond
+             ((and allow-404? (= status-code 404))
+              nil)
+             ((http-success-status-p status-code)
+              (handler-case
+                  (shasht:read-json stream)
+                (error ()
+                  (when stream
+                    (uiop:slurp-input-stream stream)))))
+             (t
+              (error 'dmx-import-http-error
+                     :message (or reason-phrase
+                                  "DMX import request failed")
+                     :url normalized-url
+                     :status-code status-code
+                     :response-body (when stream
+                                      (ignore-errors
+                                        (uiop:slurp-input-stream stream))))))
+        (when stream
+          (ignore-errors (close stream)))))))
+
+(defun validate-http-dmx-import-client (client &key live?)
+  (let ((missing '()))
+    (unless (dmx-import-base-url-of client)
+      (push "HYPERDOC_DMX_IMPORT_BASE_URL" missing))
+    (when (and live? missing)
+      (error 'dmx-import-config-error
+             :message "Incomplete live DMX import configuration"
+             :missing-keys (nreverse missing)))
+    (nreverse missing)))
+
+(defmethod dmx-import-find-existing-topic ((client http-dmx-import-client) external-key)
+  (validate-http-dmx-import-client client)
+  (http-request-json client
+                     :get
+                     (dmx-topic-uri-lookup-path external-key)
+                     :allow-404? t))
+
+(defmethod dmx-import-create-topic ((client http-dmx-import-client) payload)
+  (validate-http-dmx-import-client client :live? t)
+  (http-request-json client
+                     :post
+                     (dmx-topic-create-path)
+                     :payload payload))
+
+(defmethod dmx-import-update-topic ((client http-dmx-import-client) existing-topic payload)
+  (validate-http-dmx-import-client client :live? t)
+  (let ((topic-id (dmx-topic-id existing-topic)))
+    (unless topic-id
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "Cannot update DMX topic without id for external key ~A"
+                              (getf payload :external-key))))
+    (http-request-json client
+                       :put
+                       (dmx-topic-update-path topic-id)
+                       :payload (list* :id topic-id payload))))
+
+(defun getenv-non-empty (name)
+  (let ((value (uiop:getenv name)))
+    (and value
+         (> (length value) 0)
+         value)))
+
+(defun make-http-dmx-import-client-from-environment (&key verbose)
+  (let* ((base-url (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL"))
+         (topic-type-uri
+           (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI"))
+         (auth-header
+           (or (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_HEADER")
+               (let ((username (getenv-non-empty "HYPERDOC_DMX_IMPORT_USERNAME"))
+                     (password (getenv-non-empty "HYPERDOC_DMX_IMPORT_PASSWORD")))
+                 (when (and username password)
+                   (basic-authorization-header username password)))))
+         (legacy-auth-token
+           (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
+    (when (or base-url topic-type-uri auth-header legacy-auth-token)
+      (make-instance 'http-dmx-import-client
+                     :base-url base-url
+                     :authorization-header (or auth-header
+                                               (and legacy-auth-token
+                                                    (format nil "Bearer ~A"
+                                                            legacy-auth-token)))
+                     :topic-type-uri (or topic-type-uri
+                                         *dmx-fedwiki-page-type-uri*)
+                     :verbose verbose))))
+
+(defun make-default-dmx-import-client (&key dry-run verbose)
+  (declare (ignore dry-run))
+  (let ((client (make-http-dmx-import-client-from-environment :verbose verbose)))
+    (cond
+      ((and client
+            (dmx-import-base-url-of client))
+       client)
+      (t
+       (make-instance 'null-dmx-import-client)))))
+
+(defun import-fedwiki-site-to-dmx (&key
+                                     domain
+                                     (dry-run t)
+                                     limit
+                                     verbose
+                                     wiki
+                                     client
+                                     topic-type-uri
+                                     (stream *standard-output*)
+                                     (page-json-loader #'fetch-fedwiki-import-page-json)
+                                     (now (get-universal-time)))
+  (unless domain
+    (error 'fedwiki-dmx-import-error
+           :message "A FedWiki domain is required"))
+  (multiple-value-bind (resolved-wiki fallback-used)
+      (resolve-fedwiki-import-wiki domain
+                                   :wiki wiki
+                                   :verbose verbose
+                                   :stream stream)
+    (let* ((all-pages (collect-local-fedwiki-pages resolved-wiki))
+           (resolved-client (or client
+                                (make-default-dmx-import-client :dry-run dry-run
+                                                                :verbose verbose)))
+           (candidates (enumerate-fedwiki-import-candidates resolved-wiki
+                                                            :limit limit
+                                                            :page-json-loader page-json-loader
+                                                            :now now))
+           (plan (plan-fedwiki-site-dmx-import candidates
+                                               resolved-client
+                                               :topic-type-uri topic-type-uri))
+           (summary (summarize-dmx-import-plan plan))
+           (lookup-enabled (lookup-enabled-for-dmx-import-client-p resolved-client))
+           (resolved-protocol (hyperbook/fedwiki::protocol-of resolved-wiki))
+           (available-count (length all-pages))
+           (selected-count (length candidates))
+           (skipped-count (- available-count selected-count)))
+      (when (and (not dry-run)
+                 (typep resolved-client 'null-dmx-import-client))
+        (error 'dmx-import-config-error
+               :message "Live DMX import requested without a configured HTTP client"
+               :missing-keys '("HYPERDOC_DMX_IMPORT_BASE_URL")))
+      (format stream "~&FEDWIKI_DMX_IMPORT domain=~A dry-run=~:[NIL~;T~] available=~D selected=~D skipped=~D limit=~A protocol=~A lookup=~:[NIL~;T~] http-fallback=~:[NIL~;T~]~%"
+              domain
+              dry-run
+              available-count
+              selected-count
+              skipped-count
+              (or limit "ALL")
+              resolved-protocol
+              lookup-enabled
+              fallback-used)
+      (when (and dry-run
+                 (typep resolved-client 'null-dmx-import-client))
+        (format stream "FEDWIKI_DMX_IMPORT note=no DMX base URL configured; dry-run assumes CREATE for unmatched external keys.~%"))
+      (execute-dmx-import-plan plan
+                               resolved-client
+                               :dry-run dry-run
+                               :stream stream
+                               :verbose verbose)
+      (format stream "~&FEDWIKI_DMX_IMPORT_SUMMARY candidates=~D creates=~D updates=~D duplicates=0 skipped=~D lookup=~:[NIL~;T~] protocol=~A http-fallback=~:[NIL~;T~]~%"
+              (getf summary :entries)
+              (getf summary :creates)
+              (getf summary :updates)
+              skipped-count
+              lookup-enabled
+              resolved-protocol
+              fallback-used)
+      (list :domain domain
+            :dry-run dry-run
+            :resolved-protocol resolved-protocol
+            :http-fallback-used fallback-used
+            :lookup-enabled lookup-enabled
+            :available-candidates available-count
+            :selected-candidates selected-count
+            :skipped-candidates skipped-count
+            :creates (getf summary :creates)
+            :updates (getf summary :updates)
+            :duplicates 0
+            :plan plan))))
