@@ -1,0 +1,64 @@
+<h1>Authored topic factories</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Authored topic factories are the preserved topic-constructor functions in
+  <tt>hyperdoc/topics.lisp</tt> that keep HyperDoc's topic-page surface
+  rebuildable. They are the authoring layer that remains available even when
+  selected similarly named wrapper entry points are redirected to live
+  DMX-backed runtime proxies.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Authored topic factories"><tt>Authored topic factories</tt></a></li>
+  <li><a hyperbook="topics" page="Topic factory"><tt>Topic factory</tt></a></li>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Demonstrating DMX Topic Proxies in HyperDoc"><tt>Demonstrating DMX Topic Proxies in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+</ul>
+
+<h2>What they are</h2>
+
+<p>
+  An authored topic factory is a durable function such as
+  <tt>(defun topic-factory-topic () ...)</tt> that returns a topic object with
+  a stable key, canonical title, summary, and editorial references. Together,
+  these functions form the authored reconstruction layer for HyperBook
+  <tt>topics</tt>.
+</p>
+
+<h2>Why they are preserved</h2>
+
+<p>
+  HyperDoc still needs a stable authored source for rebuilding topic pages by
+  canonical title. That need remains even when some runtime-facing entry points
+  are later redirected to DMX-backed proxies for inspector use.
+</p>
+
+<h2>How they differ from runtime wrappers</h2>
+
+<p>
+  A runtime wrapper may return a live DMX-backed object for inspection. An
+  authored topic factory remains the durable authoring function that preserves
+  the topic-page surface. The two layers can share conceptual names without
+  being the same runtime object.
+</p>
+
+<h2>Where they matter</h2>
+
+<p>
+  They matter whenever HyperDoc needs to keep canonical topic titles stable and
+  rebuild the Topics HyperBook surface from authored concept definitions rather
+  than from transient runtime state.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topic factory"><tt>Topic factory</tt></a></li>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Demonstrating DMX Topic Proxies in HyperDoc"><tt>Demonstrating DMX Topic Proxies in HyperDoc</tt></a></li>
+</ul>

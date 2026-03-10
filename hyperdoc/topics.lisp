@@ -2499,6 +2499,16 @@
                  "Demonstrating DMX Topic Proxies in HyperDoc"
                  "Documentation Surfaces in HyperDoc")))
 
+(defun authored-topic-factories-topic ()
+  (make-topic
+   :id "authored-topic-factories"
+   :title "Authored topic factories"
+   :summary "Authored topic-constructor functions preserved in hyperdoc/topics.lisp as the durable reconstruction layer for HyperDoc’s topic-page surface."
+   :references '("Authored topic factories"
+                 "Topic factory"
+                 "Topics HyperBook in HyperDoc"
+                 "Demonstrating DMX Topic Proxies in HyperDoc")))
+
 (defun topic-backlinks-model-topic ()
   (make-topic
    :id "topic-backlinks-model"
