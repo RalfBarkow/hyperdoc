@@ -1,0 +1,104 @@
+<h1>DMX twins</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A DMX twin is a DMX-side artifact, or small artifact set, that corresponds to
+  a HyperDoc page/topic by stable intent and navigable identity. This is a
+  correspondence model, not a claim that the DMX artifact and the HyperDoc
+  artifact are literally the same structure.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX twins"><tt>DMX twins</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Page/topic/twin correspondence"><tt>Page/topic/twin correspondence</tt></a></li>
+  <li><a hyperbook="topics" page="Concepts, DMX Topics, and Topic Maps"><tt>Concepts, DMX Topics, and Topic Maps</tt></a></li>
+  <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Definitive Common Lisp Books"><tt>Definitive Common Lisp Books</tt></a></li>
+</ul>
+
+<h2>What a DMX twin is</h2>
+
+<p>
+  A DMX twin is a parallel DMX representation of a HyperDoc subject. It may be
+  a topicmap, a bookmark, an association pattern, or another DMX-side handle
+  that preserves stable intent and explicit navigability back to the HyperDoc
+  side.
+</p>
+
+<p>
+  The important point is not literal structural matching. The important point
+  is that the DMX artifact and the HyperDoc artifact can be recognized as
+  corresponding anchors for the same documented subject.
+</p>
+
+<h2>What a DMX twin is not</h2>
+
+<ul>
+  <li>It is not the HyperDoc HTML page itself.</li>
+  <li>It is not the HyperDoc topic object in <tt>topics.lisp</tt>.</li>
+  <li>It is not the same thing as a live DMX runtime proxy object.</li>
+  <li>It is not a FedWiki twin.</li>
+  <li>It is not a claim of automatic bidirectional synchronization.</li>
+</ul>
+
+<h2>Minimal correspondence pattern</h2>
+
+<p>
+  The minimal correspondence pattern is conservative:
+</p>
+
+<ul>
+  <li>a HyperDoc page/topic on one side</li>
+  <li>a DMX topicmap/bookmark relation on the other side</li>
+  <li>an explicit way to navigate between them</li>
+</ul>
+
+<p>
+  That is enough to preserve cross-system identity by intent without claiming
+  that every field, relation, or representation must match in detail.
+</p>
+
+<h2>Current worked example</h2>
+
+<p>
+  <a hyperbook="topics" page="Definitive Common Lisp Books"><tt>Definitive Common Lisp Books</tt></a>
+  is the current concrete example. On the DMX side, there is a topicmap whose
+  value is <tt>definitive-common-lisp-books</tt>, a bookmark whose URL points to
+  the HyperDoc page, and an association linking the bookmark and topicmap.
+</p>
+
+<p>
+  On the local HyperDoc side, the corresponding anchor is the page/topic title
+  <tt>Definitive Common Lisp Books</tt>. This is enough to speak about a DMX
+  twin for that subject without claiming a full import, sync framework, or
+  permanent serialization contract.
+</p>
+
+<h2>When to add a DMX twin</h2>
+
+<ul>
+  <li>when a HyperDoc topic should be discoverable from DMX</li>
+  <li>when a DMX-side anchor usefully preserves external navigability</li>
+  <li>when correspondence is useful even without live runtime proxy inspection</li>
+</ul>
+
+<h2>Boundary rules</h2>
+
+<ul>
+  <li>A DMX twin is correspondence, not proof of full structural equivalence.</li>
+  <li>A DMX twin is not the same thing as a live write path.</li>
+  <li>Plugin-level modeling details should not be described as permanent too early.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="Definitive Common Lisp Books">Definitive Common Lisp Books</a></li>
+</ul>

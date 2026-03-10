@@ -1217,6 +1217,18 @@
                  "FedWiki Site to DMX Import"
                  "Concepts, DMX Topics, and Topic Maps")))
 
+(defun dmx-twins-topic ()
+  (make-topic
+   :id "dmx-twins"
+   :title "DMX twins"
+   :summary "Correspondence model for DMX-side artifacts that mirror HyperDoc page/topic intent without implying literal structural identity, runtime-proxy equivalence, or live synchronization."
+   :references '("DMX twins"
+                 "Documentation Surfaces in HyperDoc"
+                 "Page/topic/twin correspondence"
+                 "Concepts, DMX Topics, and Topic Maps"
+                 "DMX FedWiki Write Model"
+                 "Definitive Common Lisp Books")))
+
 (defun runtime-write-live-proof-gate-topic ()
   (make-topic
    :id "runtime-write-live-proof-gate"
