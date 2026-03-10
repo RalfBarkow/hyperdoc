@@ -2659,5 +2659,34 @@
                  "HyperDoc Runtime Model"
                  "HyperDoc Evaluation and Inspection Model")))
 
+(defun running-dmx-topic-proxy-smoke-tests-topic ()
+  (make-topic
+   :id "running-dmx-topic-proxy-smoke-tests"
+   :title "Running DMX topic proxy smoke tests"
+   :summary "Step-by-step procedure for running the focused DMX topic proxy smoke test from the HyperDoc dev shell."
+   :references '("Running DMX Topic Proxy Smoke Tests"
+                 "HyperDoc Checks Runner"
+                 "Running HyperDoc Examples"
+                 "Demonstrating DMX Topic Proxies in HyperDoc")))
+
+(defun dmx-topic-proxy-smoke-tests-topic ()
+  (make-topic
+   :id "dmx-topic-proxy-smoke-tests"
+   :title "DMX topic proxy smoke tests"
+   :summary "Focused smoke tests covering DMX topic proxy wrappers, topicmap helper handling, endpoint regression behavior, and the unknown-wrapper condition."
+   :references '("Running DMX Topic Proxy Smoke Tests"
+                 "Demonstrating DMX Topic Proxies in HyperDoc"
+                 "HyperDoc Checks Runner")))
+
+(defun focused-test-runners-topic ()
+  (make-topic
+   :id "focused-test-runners"
+   :title "Focused test runners"
+   :summary "Direct test-entry commands used to run one narrow test slice without invoking the entire HyperDoc test suite."
+   :references '("Running DMX Topic Proxy Smoke Tests"
+                 "HyperDoc Checks Runner"
+                 "Running HyperDoc Examples"
+                 "Documentation Architecture in HyperDoc")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))

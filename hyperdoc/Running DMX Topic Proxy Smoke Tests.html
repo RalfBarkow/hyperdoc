@@ -1,0 +1,98 @@
+<h1>Running DMX Topic Proxy Smoke Tests</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the direct terminal procedure for running the focused DMX
+  topic proxy smoke test entry point in the current HyperDoc system.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Running DMX topic proxy smoke tests"><tt>Running DMX topic proxy smoke tests</tt></a></li>
+  <li><a hyperbook="topics" page="DMX topic proxy smoke tests"><tt>DMX topic proxy smoke tests</tt></a></li>
+  <li><a hyperbook="topics" page="Focused test runners"><tt>Focused test runners</tt></a></li>
+  <li><a hyperbook="topics" page="Demonstrating DMX Topic Proxies in HyperDoc"><tt>Demonstrating DMX Topic Proxies in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc checks runner"><tt>HyperDoc checks runner</tt></a></li>
+</ul>
+
+<h2>Why run this test</h2>
+
+<p>
+  This focused smoke test checks the DMX topic proxy path directly. It covers
+  the mapped DMX wrapper functions, the topicmap designator helper, the current
+  <tt>/core/topic/&lt;id&gt;</tt> endpoint regression boundary, and the
+  unknown-wrapper condition. It is useful when you want a narrow terminal check
+  for the DMX proxy slice without invoking the whole HyperDoc test suite.
+</p>
+
+<h2>Exact command</h2>
+
+<pre><code>nix develop --command sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/tests :force t)' \
+  --eval '(hyperdoc/tests:run-dmx-topic-proxy-smoke-tests)' \
+  --eval '(uiop:quit 0)'</code></pre>
+
+<h2>Step-by-step explanation</h2>
+
+<ol>
+  <li><tt>nix develop --command sbcl</tt> enters the project development environment and runs SBCL in one shot.</li>
+  <li><tt>--no-userinit --non-interactive</tt> avoids user-local init noise and keeps the run non-interactive.</li>
+  <li><tt>(require :asdf)</tt> ensures ASDF is available.</li>
+  <li><tt>(asdf:load-system :hyperdoc/tests :force t)</tt> loads the HyperDoc test system and recompiles or reloads as needed.</li>
+  <li><tt>(hyperdoc/tests:run-dmx-topic-proxy-smoke-tests)</tt> runs only the DMX topic proxy smoke tests.</li>
+  <li><tt>(uiop:quit 0)</tt> exits cleanly on success.</li>
+</ol>
+
+<h2>Reading the output</h2>
+
+<p>
+  The decisive success signal is the final smoke-test pass line:
+</p>
+
+<pre><code>DMX topic proxy smoke tests passed (4 wrappers + topicmap helper + endpoint regression + unknown-wrapper condition).</code></pre>
+
+<p>
+  The load phase can print warnings from ASDF, SBCL, dependency compilation,
+  FTYPE proclamations, or redefinitions. Those messages are not by themselves
+  the smoke-test verdict. For this focused procedure, failure means that the
+  run signals an error or that the final DMX smoke-test pass line does not
+  appear.
+</p>
+
+<h2>Focused runner versus full suite</h2>
+
+<p>
+  This page documents a direct focused runner:
+</p>
+
+<lisp-code>
+(hyperdoc/tests:run-dmx-topic-proxy-smoke-tests)
+</lisp-code>
+
+<p>
+  The broader umbrella suite uses:
+</p>
+
+<lisp-code>
+(asdf:test-system :hyperdoc/tests)
+</lisp-code>
+
+<p>
+  The difference is simple: <tt>asdf:test-system</tt> delegates to the test
+  system and runs the full configured suite, while
+  <tt>hyperdoc/tests:run-dmx-topic-proxy-smoke-tests</tt> directly runs only the
+  DMX topic proxy smoke-test function.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a></li>
+  <li><a page="HyperDoc Checks Runner">HyperDoc Checks Runner</a></li>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a href="/Users/rgb/workspace/hyperdoc/tests/dmx-topic-proxy-smoke.lisp">tests/dmx-topic-proxy-smoke.lisp</a></li>
+</ul>
