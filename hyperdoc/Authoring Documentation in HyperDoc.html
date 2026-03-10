@@ -14,6 +14,7 @@
   <li><a hyperbook="topics" page="Documentation authoring decisions"><tt>Documentation authoring decisions</tt></a></li>
   <li><a hyperbook="topics" page="Documentation validation and commit gates"><tt>Documentation validation and commit gates</tt></a></li>
   <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
 </ul>
 
 <h2>Why authoring guidance matters</h2>
@@ -85,6 +86,13 @@
   <li>FedWiki syntax gate: run <tt>python3 -m json.tool</tt> on changed FedWiki page files.</li>
   <li>FedWiki semantic gate (where applicable): ensure journal checks are clear of creation, chronology, revision, and malformed findings.</li>
 </ol>
+
+<p>
+  When a page documents a runtime importer, deployment action, or other
+  external write path, it should distinguish design and implementation status,
+  dry-run evidence, and live-proof status. Reserve <i>live-proven</i> for a
+  real create-then-update replay against a configured target.
+</p>
 
 <h2>Commit slicing guidance</h2>
 

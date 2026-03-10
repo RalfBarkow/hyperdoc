@@ -1217,6 +1217,16 @@
                  "FedWiki Site to DMX Import"
                  "Concepts, DMX Topics, and Topic Maps")))
 
+(defun runtime-write-live-proof-gate-topic ()
+  (make-topic
+   :id "runtime-write-live-proof-gate"
+   :title "Runtime write live-proof gate"
+   :summary "Operational rule that a runtime write path is not live-proven until a real create-then-update replay succeeds on a configured target."
+   :references '("FedWiki Site to DMX Import"
+                 "DMX FedWiki Write Model"
+                 "Authoring Documentation in HyperDoc"
+                 "Documentation validation and commit gates")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic

@@ -115,6 +115,32 @@ nix develop --command sbcl --no-userinit --non-interactive \
   --load tools/import-fedwiki-site-to-dmx.lisp -- \
   --domain sfw.c2.com --dry-run --limit 10 --verbose</code></pre>
 
+<h2>Operational proof gate</h2>
+
+<p>
+  Dry-run evidence is valuable, but it is not enough to call a live write path
+  proven. An importer can be implemented, config-guarded, and dry-run verified
+  while still remaining not yet live-proven.
+</p>
+
+<p>
+  This importer should only be called live-proven after a replay on a
+  configured DMX target confirms the full write cycle:
+</p>
+
+<ol>
+  <li>Configure a real DMX target with working authentication.</li>
+  <li>Run one real create.</li>
+  <li>Rerun the same import against the same page.</li>
+  <li>Verify the second run updates instead of creating a duplicate topic.</li>
+  <li>Inspect the resulting DMX topic fields against the documented payload shape.</li>
+</ol>
+
+<p>
+  Until that replay exists, the correct wording is that the path is
+  implemented, config-guarded, and dry-run verified, but not yet live-proven.
+</p>
+
 <h2>HTTP fallback policy</h2>
 
 <p>
@@ -166,4 +192,5 @@ nix develop --command sbcl --no-userinit --non-interactive \
 
 <ul>
   <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
 </ul>

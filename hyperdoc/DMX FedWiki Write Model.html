@@ -51,9 +51,25 @@
   this model is permanent.
 </p>
 
+<h2>Proof boundary</h2>
+
+<p>
+  A plugin-level write model can be correctly implemented and still remain not
+  yet live-proven. For this slice, the importer path is implemented and
+  config-guarded, and its dry-run behavior has been verified, but operational
+  proof still requires replay against a configured target.
+</p>
+
+<p>
+  Until a real create-then-update cycle has succeeded against such a target,
+  the correct evidence language stays conservative: implemented,
+  config-guarded, dry-run verified, and not yet live-proven.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
   <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
   <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
 </ul>
