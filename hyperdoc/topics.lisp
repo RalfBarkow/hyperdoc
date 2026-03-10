@@ -331,6 +331,14 @@
                   resolved-topic-id
                   :signal-error? t)))
 
+(defun make-dmx-topicmap-proxy (designator &key (base-url *dmx-base-url*))
+  (let ((id (or (parse-positive-integer designator)
+                (error 'unknown-dmx-topic-identifier
+                       :identifier designator))))
+    (make-dmx-topic-proxy :topic-id id
+                          :topicmap-id id
+                          :base-url base-url)))
+
 ;; Inspectable topic objects used by expr links and the Topics hyperbook.
 (defclass topic ()
   ((id :accessor id-of :initarg :id)

@@ -110,6 +110,32 @@
          "No /topicmaps/<id> fetch should remain in the exercised topicmap path"))
       (setf (symbol-function 'hyperdoc::dmx-fetch-json) original))))
 
+(defun run-topicmap-designator-helper-test ()
+  (let* ((id 913836)
+         (url "https://dmx.ralfbarkow.ch/core/topic/913836?children=true&assocChildren=true")
+         (proxy-from-integer (hyperdoc::make-dmx-topicmap-proxy id))
+         (proxy-from-url (hyperdoc::make-dmx-topicmap-proxy url)))
+    (dolist (proxy (list proxy-from-integer proxy-from-url))
+      (assert-type 'hyperdoc::dmx-topic-proxy
+                   proxy
+                   "Topicmap helper must return DMX proxy")
+      (assert-equal id
+                    (hyperdoc::dmx-topic-id-of proxy)
+                    "Topicmap helper topic-id")
+      (assert-equal id
+                    (hyperdoc::dmx-topicmap-id-of proxy)
+                    "Topicmap helper topicmap-id")
+      (assert-equal (expected-dmx-core-topic-url id)
+                    (hyperdoc::dmx-topicmap-core-topic-url proxy)
+                    "Topicmap helper must expose the exact core-topic URL")))
+  (let ((raised nil))
+    (handler-case
+        (hyperdoc::make-dmx-topicmap-proxy 'hyperdoc::not-a-topicmap)
+      (hyperdoc::unknown-dmx-topic-identifier ()
+        (setf raised t)))
+    (unless raised
+      (error "Bad topicmap helper input must signal HYPERDOC::UNKNOWN-DMX-TOPIC-IDENTIFIER"))))
+
 (defun run-unknown-wrapper-smoke-test ()
   (let ((raised nil))
     (handler-case
@@ -122,8 +148,9 @@
 (defun run-dmx-topic-proxy-smoke-tests ()
   (dolist (spec *dmx-wrapper-smoke-specs*)
     (run-one-wrapper-smoke-test spec))
+  (run-topicmap-designator-helper-test)
   (run-topicmap-endpoint-regression-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + endpoint regression + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + endpoint regression + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)
