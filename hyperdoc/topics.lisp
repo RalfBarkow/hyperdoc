@@ -160,15 +160,14 @@
                                (main-topic-id *dmx-default-topic-id*))
   (let ((key (list base-url topicmap-id)))
     (or (gethash key *dmx-hyperbooks*)
-        (let ((book (make-instance 'dmx-hyperbook
-                                   :id (make-dmx-hyperbook-id topicmap-id)
-                                   :base-url base-url
-                                   :topicmap-id topicmap-id
-                                   :title (format nil "DMX Topicmap ~D" topicmap-id)
-                                   :main-page-id (format nil "~D" main-topic-id))))
-          (setf (gethash key *dmx-hyperbooks*) book)
-          (hb:register book)
-          book))))
+          (let ((book (make-instance 'dmx-hyperbook
+                                     :id (make-dmx-hyperbook-id topicmap-id)
+                                     :base-url base-url
+                                     :topicmap-id topicmap-id
+                                     :title (format nil "DMX Topicmap ~D" topicmap-id)
+                                     :main-page-id (format nil "~D" main-topic-id))))
+            (setf (gethash key *dmx-hyperbooks*) book)
+            book))))
 
 (defun get-dmx-hyperbook (path &optional signal-error?)
   (declare (ignore signal-error?))
