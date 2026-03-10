@@ -1,0 +1,59 @@
+<h1>DMX FedWiki Write Model</h1>
+
+<p>
+  This page documents the current write model exposed by <tt>dmx-fedwiki</tt>,
+  an early-stage DMX plugin under development. It extends DMX with
+  FedWiki-oriented functionality, but it should be read as an emerging plugin
+  model rather than a finalized DMX platform contract.
+</p>
+
+<h2>WIP plugin boundary</h2>
+
+<p>
+  <tt>dmx-fedwiki</tt> is a DMX plugin, not settled DMX core. The current
+  <tt>fedwiki.page</tt> topic type, child-topic conventions, and materialization
+  behavior are useful for integration work, but they remain plugin-level
+  extensions of DMX while the plugin is still very early-stage.
+</p>
+
+<p>
+  That means documentary and topic-level integration can move ahead now, while
+  runtime assumptions, importer bindings, and API-contract claims should remain
+  conservative until the plugin behavior is stabilized or absorbed into a
+  broader platform contract.
+</p>
+
+<h2>Current plugin-level write model</h2>
+
+<p>
+  The current HyperDoc importer reuses the plugin's <tt>fedwiki.page</tt> topic
+  type together with typed children such as <tt>fedwiki.slug</tt>,
+  <tt>fedwiki.title</tt>, and <tt>fedwiki.page.json</tt>. For idempotent
+  synchronization, HyperDoc stores the stable external key
+  <tt>fedwiki:&lt;domain&gt;/&lt;slug&gt;</tt> as the DMX topic <tt>uri</tt> and
+  keeps the fuller FedWiki provenance envelope inside
+  <tt>fedwiki.page.json</tt>.
+</p>
+
+<p>
+  The HTTP endpoints used for lookup and write are DMX core REST endpoints, but
+  the choice to model imported FedWiki pages this way comes from the
+  plugin-level extension, not from a finalized FedWiki write contract in DMX
+  core itself.
+</p>
+
+<h2>Runtime caution</h2>
+
+<p>
+  It is reasonable to document this boundary now and to add authored topic
+  handles for it. It is not yet reasonable to claim that all future DMX
+  FedWiki-related importers, proxies, or synchronization tools should assume
+  this model is permanent.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
+  <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
+</ul>

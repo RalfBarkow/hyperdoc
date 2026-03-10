@@ -1197,6 +1197,26 @@
                  "fedwiki-story-id-normalization-map-2026-03-06"
                  "Journalmatic Journal Checker")))
 
+(defun fedwiki-site-to-dmx-import-topic ()
+  (make-topic
+   :id "fedwiki-site-to-dmx-import"
+   :title "FedWiki site to DMX import"
+   :summary "Runtime importer that enumerates local FedWiki pages and upserts them into DMX through an emerging plugin write model keyed by stable domain-plus-slug identities."
+   :references '("FedWiki Site to DMX Import"
+                 "DMX FedWiki Write Model"
+                 "DMX plugin extension boundary"
+                 "Topics HyperBook in HyperDoc"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
+(defun dmx-plugin-extension-boundary-topic ()
+  (make-topic
+   :id "dmx-plugin-extension-boundary"
+   :title "DMX plugin extension boundary"
+   :summary "An early-stage plugin can extend DMX with new capabilities before those capabilities are stabilized as platform contract."
+   :references '("DMX FedWiki Write Model"
+                 "FedWiki Site to DMX Import"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic

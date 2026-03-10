@@ -1,0 +1,125 @@
+<h1>FedWiki Site to DMX Import</h1>
+
+<p>
+  This feature imports a whole local FedWiki site into DMX as runtime data. It
+  is an importer/synchronizer, not a generator for hundreds of authored topic
+  constructors in the Topics HyperBook.
+</p>
+
+<h2>Goal</h2>
+
+<p>
+  The importer enumerates local pages from an existing FedWiki hyperbook,
+  derives a deterministic summary from each page story, builds a DMX payload,
+  and upserts by a stable external key so repeated runs do not create
+  duplicates.
+</p>
+
+<h2>Identity model</h2>
+
+<p>
+  Imported identity is based on site domain plus local page slug, not on page
+  title. The stable external key has the shape
+  <tt>fedwiki:&lt;domain&gt;/&lt;slug&gt;</tt>.
+</p>
+
+<p>
+  Titles can change later. Slug plus domain remains the durable import key, and
+  the importer stores that external key as the DMX topic <tt>uri</tt>. Slug
+  remains a typed child topic, and the provenance envelope preserves the source
+  HTML URL, JSON URL, source kind, and journal timestamp when available.
+</p>
+
+<h2>DMX write model</h2>
+
+<p>
+  The importer currently reuses the <tt>fedwiki.page</tt> topic type and related
+  children from the early-stage <tt>dmx-fedwiki</tt> plugin in the local
+  <tt>dmx-platform</tt> source rather than inventing a new write protocol.
+  That is an emerging plugin write model, not a finalized DMX platform
+  contract. It currently writes typed children for <tt>fedwiki.slug</tt>,
+  <tt>fedwiki.title</tt>, and <tt>fedwiki.page.json</tt>.
+</p>
+
+<p>
+  Because the existing <tt>fedwiki.page</tt> schema does not carry a dedicated
+  site-domain child topic, the importer keeps the stable site-plus-slug identity
+  in the DMX topic <tt>uri</tt> and serializes the full provenance envelope into
+  <tt>fedwiki.page.json</tt> alongside the raw fetched page JSON.
+</p>
+
+<p>
+  Live lookup and writes follow the DMX core REST API:
+  <tt>GET /core/topic/uri/&lt;uri&gt;</tt> for idempotent lookup,
+  <tt>POST /core/topic</tt> for create,
+  and <tt>PUT /core/topic/&lt;id&gt;</tt> for update. The endpoints are part of
+  DMX core, but the FedWiki-oriented write model is supplied by a plugin-level
+  extension. See
+  <a hyperbook="hyperdoc" page="DMX FedWiki Write Model">DMX FedWiki Write Model</a>.
+</p>
+
+<h2>Why this is not the Topics HyperBook</h2>
+
+<p>
+  The Topics HyperBook is for authored and curated topic pages with title-based
+  page ids. A bulk site import would pollute that authored surface and would
+  collapse slug identity into titles. The importer instead treats FedWiki pages
+  as runtime import candidates and writes them into DMX under stable external
+  keys.
+</p>
+
+<h2>Dry-run and live mode</h2>
+
+<p>
+  Dry-run is the default. It prints candidate rows and a create/update summary
+  without writing to DMX. Live mode uses the same planning path but performs
+  creates or updates through a separately configured DMX client.
+</p>
+
+<pre><code>nix develop --command sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc :force t)' \
+  --load tools/import-fedwiki-site-to-dmx.lisp -- \
+  --domain sfw.c2.com --dry-run
+
+nix develop --command sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc :force t)' \
+  --load tools/import-fedwiki-site-to-dmx.lisp -- \
+  --domain sfw.c2.com --dry-run --limit 10 --verbose</code></pre>
+
+<h2>Failure modes</h2>
+
+<ul>
+  <li>FedWiki sitemap or page fetch fails: the run stops on the network/read error.</li>
+  <li>Duplicate external keys appear in one run: the importer signals a duplicate-key condition instead of guessing.</li>
+  <li>Live mode is requested without <tt>HYPERDOC_DMX_IMPORT_BASE_URL</tt>: the importer signals a configuration error immediately.</li>
+  <li>DMX base URL configuration is absent in dry-run: the importer still works, but it assumes unmatched keys would be creates.</li>
+  <li>Write credentials are absent or rejected: the DMX server returns an authorization failure on the live REST call.</li>
+</ul>
+
+<h2>Authentication</h2>
+
+<p>
+  The importer accepts either a full
+  <tt>HYPERDOC_DMX_IMPORT_AUTH_HEADER</tt> value or
+  <tt>HYPERDOC_DMX_IMPORT_USERNAME</tt> plus
+  <tt>HYPERDOC_DMX_IMPORT_PASSWORD</tt> for HTTP Basic authentication. This
+  mirrors the local <tt>dmx-platform</tt> access-control layer, which parses the
+  HTTP <tt>Authorization</tt> header.
+</p>
+
+<h2>Relationship to DMX runtime proxies</h2>
+
+<p>
+  This importer writes or plans DMX topic data. That is a different concern
+  from the existing DMX runtime proxy surface in the inspector. Proxy objects
+  are for reading known DMX topic ids at runtime; the importer is for
+  synchronizing FedWiki page data into DMX first.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
+</ul>
