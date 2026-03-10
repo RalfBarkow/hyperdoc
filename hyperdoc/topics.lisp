@@ -1227,6 +1227,13 @@
                  "Authoring Documentation in HyperDoc"
                  "Documentation validation and commit gates")))
 
+(defun definitive-common-lisp-books-topic ()
+  (make-topic
+   :id "definitive-common-lisp-books"
+   :title "Definitive Common Lisp Books"
+   :summary "Curated reading map for Common Lisp books, separating first books, advanced technique, object-system references, and historical references."
+   :references '("Definitive Common Lisp Books")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic
