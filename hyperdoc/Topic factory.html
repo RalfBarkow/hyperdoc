@@ -1,0 +1,144 @@
+<h1>Topic factory</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A topic factory is an authored Lisp function in <tt>hyperdoc/topics.lisp</tt>
+  that returns a topic object, typically through <tt>make-topic</tt>. Its role
+  is not only construction in one moment, but durable reconstruction of the
+  topic-page surface used by HyperBook <tt>topics</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topic factory"><tt>Topic factory</tt></a></li>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Page/topic/twin correspondence"><tt>Page/topic/twin correspondence</tt></a></li>
+  <li><a hyperbook="topics" page="Demonstrating DMX Topic Proxies in HyperDoc"><tt>Demonstrating DMX Topic Proxies in HyperDoc</tt></a></li>
+</ul>
+
+<h2>Minimal shape</h2>
+
+<p>
+  The normal authored pattern is short and explicit:
+</p>
+
+<pre>
+(defun some-topic ()
+  (make-topic
+   :id "stable-key"
+   :title "Canonical Topic Title"
+   :summary "..."
+   :references '("Some Page")))
+</pre>
+
+<p>
+  The important part is not only that the function returns a topic object. The
+  function itself is the durable authored reconstruction point for that concept
+  in this repository.
+</p>
+
+<h2>What a topic factory produces</h2>
+
+<p>
+  A topic factory normally produces a topic object with four authored fields:
+</p>
+
+<ul>
+  <li><b>stable id:</b> a durable Lisp-side key for concept identity</li>
+  <li><b>canonical title:</b> the exact topic-page title used by HyperBook <tt>topics</tt></li>
+  <li><b>summary:</b> the short explanatory synopsis for the topic page</li>
+  <li><b>editorial references:</b> durable references kept with the topic object</li>
+</ul>
+
+<p>
+  The title is what the Topics HyperBook resolves as a page id. The stable key
+  preserves concept identity separately so title maintenance and Lisp identity
+  are not collapsed into one string.
+</p>
+
+<h2>How topic factories become topic pages</h2>
+
+<p>
+  HyperDoc discovers authored topic constructor symbols in package
+  <tt>:hyperdoc</tt>, rebuilds the topic index from those authored factories,
+  and then resolves topic pages in HyperBook <tt>topics</tt> by the canonical
+  topic title.
+</p>
+
+<p>
+  This is why the factory matters even when the page content is shown later as
+  a topic page: the topic-page surface is rebuilt from authored factories, not
+  from accidental page text alone.
+</p>
+
+<h2>Why this is not just make-topic</h2>
+
+<p>
+  <tt>make-topic</tt> is the helper that constructs or refreshes a topic
+  object. A topic factory is the authored function that names a reusable
+  concept entry point and decides which stable key, canonical title, summary,
+  and references belong to that concept.
+</p>
+
+<p>
+  In this repository, the factory is the durable authoring unit. The helper is
+  the constructor used inside it.
+</p>
+
+<h2>Topic factory vs topic-page link</h2>
+
+<p>
+  A topic factory is the Lisp-side authored concept constructor. A link such as
+  <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt>
+  is the page-side authored navigation to the corresponding topic page.
+</p>
+
+<p>
+  The factory defines inspectable concept identity. The page link points to it
+  from narrative pages.
+</p>
+
+<h2>Topic factory vs DMX runtime wrapper</h2>
+
+<p>
+  Some functions with topic-shaped names may later resolve live DMX-backed
+  runtime proxies in the inspector. HyperDoc still preserves the original
+  authored topic factory internally so the topic-page surface can be rebuilt
+  from authored topic definitions.
+</p>
+
+<p>
+  This is why the authored topic-page surface and the live runtime-object
+  surface remain intentionally separate. The topic factory belongs to the
+  authored topic-page surface even when selected wrapper functions are
+  redirected to DMX-backed runtime objects.
+</p>
+
+<h2>When to add a topic factory</h2>
+
+<ul>
+  <li>add one when a concept needs reusable inspectable identity</li>
+  <li>add one when multiple pages should point to the same canonical topic title</li>
+  <li>do not add one for every transient workflow step or every page-local phrase</li>
+</ul>
+
+<h2>Failure modes</h2>
+
+<ul>
+  <li>confusing authored topic factories with runtime wrappers</li>
+  <li>changing canonical title strings carelessly and breaking topic-page links</li>
+  <li>treating editorial references as if they were automatic backlinks</li>
+  <li>creating topic factories for concepts that do not need reusable identity</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
+  <li><a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

@@ -2489,6 +2489,16 @@
                  "Topics HyperBook in HyperDoc"
                  "Documentation Surfaces in HyperDoc")))
 
+(defun topic-factory-topic ()
+  (make-topic
+   :id "topic-factory"
+   :title "Topic factory"
+   :summary "An authored Lisp function that returns a topic object and serves as the durable reconstruction point for HyperDoc’s topic-page surface."
+   :references '("Topic factory"
+                 "Topics HyperBook in HyperDoc"
+                 "Demonstrating DMX Topic Proxies in HyperDoc"
+                 "Documentation Surfaces in HyperDoc")))
+
 (defun topic-backlinks-model-topic ()
   (make-topic
    :id "topic-backlinks-model"
