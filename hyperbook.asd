@@ -49,6 +49,7 @@
                              (:file "html-books")
                              (:file "hyperbook-the-book")
                              (:file "asdf-systems")
+                             (:file "asdf-plan-view")
                              (:file "lisp-functions")
                              (:file "lisp-classes")))))
 
