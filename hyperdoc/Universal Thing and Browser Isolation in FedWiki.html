@@ -1,0 +1,88 @@
+<h1>Universal Thing and Browser Isolation in FedWiki</h1>
+
+<p>
+  Ward's current Matrix note adds a compact legend for a browser-centered
+  execution diagram and, more importantly, highlights a test seam: a custom
+  isolation layer can be exercised with Universal Thing standing in for the
+  browser.
+</p>
+
+<h2>Diagram legend</h2>
+
+<ul>
+  <li><b>Gold</b> = blocks</li>
+  <li><b>Pink</b> = arguments provided with commands</li>
+  <li><b>Tan</b> = user action to proceed</li>
+  <li><b>Blue</b> = data passed as interpreter state</li>
+  <li><b>White</b> = styled features, input, and output</li>
+</ul>
+
+<p>
+  These colors are diagram notation for reading the execution story. They are
+  not separate HyperDoc topic pages and should not be promoted into their own
+  durable topic cluster.
+</p>
+
+<h2>What is new here</h2>
+
+<p>
+  The new material is not just the legend. The operational addition is the
+  custom browser-isolation layer: browser-facing behavior is pulled behind a
+  test seam and exercised with Universal Thing as the collaborator that stands
+  in for the browser.
+</p>
+
+<p>
+  That makes the browser protocol testable. Command arguments, the user action
+  that advances execution, interpreter state, and the styled input/output
+  surface can all be described without requiring the live browser itself to be
+  the only runtime host.
+</p>
+
+<h2>Why Universal Thing matters</h2>
+
+<p>
+  Universal Thing matters because it acts as a browser stand-in: a test double,
+  surrogate runtime collaborator, and harness component for browser-facing
+  behavior. It makes it possible to isolate the protocol that the interpreter
+  expects from the browser and to test that protocol outside the browser.
+</p>
+
+<p>
+  In HyperDoc terms, this fits the existing split between documentary pages and
+  runtime objects. The page can explain the seam durably, while any live DMX
+  proxy layer remains a separate runtime surface that should only be bound once
+  stable DMX identifiers are known.
+</p>
+
+<h2>Relation to existing HyperDoc pages</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a>: the larger Ward/Beck and browser/inspector/debugger lineage that this note extends.</li>
+  <li><a hyperbook="hyperdoc" page="Diagramming Debugger Surface">Diagramming Debugger Surface</a>: the executable diagram surface that turns runtime stepping into inspectable traces.</li>
+  <li><a hyperbook="hyperdoc" page="Stepper Debugger Surface">Stepper Debugger Surface</a>: the user-visible proceed/step boundary for advancing interpreter work.</li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a>: Ward's broader workflow framing for bounded graph expansion and repair around FedWiki stories.</li>
+  <li><a hyperbook="hyperdoc" page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a>: the page that already separates authored topic pages from live DMX-backed runtime proxies.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Universal Thing"><tt>Universal Thing</tt></a></li>
+  <li><a hyperbook="topics" page="Browser stand-in"><tt>Browser stand-in</tt></a></li>
+  <li><a hyperbook="topics" page="Browser isolation layer"><tt>Browser isolation layer</tt></a></li>
+  <li><a hyperbook="topics" page="Command arguments"><tt>Command arguments</tt></a></li>
+  <li><a hyperbook="topics" page="Proceed action"><tt>Proceed action</tt></a></li>
+  <li><a hyperbook="topics" page="Interpreter state packet"><tt>Interpreter state packet</tt></a></li>
+  <li><a hyperbook="topics" page="Styled input/output surface"><tt>Styled input/output surface</tt></a></li>
+  <li><a hyperbook="topics" page="Browser stand-in test harness"><tt>Browser stand-in test harness</tt></a></li>
+</ul>
+
+<h2>DMX note</h2>
+
+<p>
+  The authored topic pages above can be added immediately. Live DMX wrapper
+  mappings should only be added after the corresponding DMX topic identifiers
+  are confirmed in the current topicmap. Until those IDs are known, HyperDoc
+  should keep this slice on the authored topic-page surface.
+</p>

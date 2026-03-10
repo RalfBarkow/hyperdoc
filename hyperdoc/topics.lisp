@@ -490,6 +490,8 @@
     (scene-graph-edit-cycle-topic :topic-id 912384 :topicmap-id 912102)
     (hyperdoc-scene-graph-adaptation-topic :topic-id 912384 :topicmap-id 912102)
     (human-written-robot-process-graphs-topic :topic-id 912384 :topicmap-id 912102)
+    ;; Universal Thing/browser-isolation topics stay authored-only until stable
+    ;; DMX topic ids are confirmed in the current topicmap.
     (ward-beck-diagram-1986-topic :topic-id 912384 :topicmap-id 912102)
     (ward-collaborating-objects-topic :topic-id 912384 :topicmap-id 912102)
     (class-browser-inspector-debugger-triangulation-topic :topic-id 912384 :topicmap-id 912102)
@@ -1765,6 +1767,70 @@
                  "Konrad Feedback on Communication Pages")))
 
 ;; Topic objects for Ward Cunningham input on Smalltalk tooling lineage.
+(defparameter *universal-thing-doc-references*
+  '("Universal Thing and Browser Isolation in FedWiki"
+    "Smalltalk Browser Frame and Scene in HyperDoc"
+    "Diagramming Debugger Surface"
+    "Stepper Debugger Surface"
+    "Story Neighborhood Workflow"
+    "Concepts, DMX Topics, and Topic Maps"))
+
+(defun universal-thing-topic ()
+  (make-topic
+   :id "universal-thing"
+   :title "Universal Thing"
+   :summary "Reusable browser stand-in used to exercise browser-facing behavior outside the browser."
+   :references *universal-thing-doc-references*))
+
+(defun browser-stand-in-topic ()
+  (make-topic
+   :id "browser-stand-in"
+   :title "Browser stand-in"
+   :summary "Surrogate collaborator that occupies the browser role so runtime behavior can be tested without a live browser."
+   :references *universal-thing-doc-references*))
+
+(defun browser-isolation-layer-topic ()
+  (make-topic
+   :id "browser-isolation-layer"
+   :title "Browser isolation layer"
+   :summary "Custom seam that separates browser-specific behavior from testable interpreter logic and command dispatch."
+   :references *universal-thing-doc-references*))
+
+(defun command-arguments-topic ()
+  (make-topic
+   :id "command-arguments"
+   :title "Command arguments"
+   :summary "Explicit arguments supplied with commands before dispatch or interpretation."
+   :references *universal-thing-doc-references*))
+
+(defun proceed-action-topic ()
+  (make-topic
+   :id "proceed-action"
+   :title "Proceed action"
+   :summary "User action that advances the interpreter or process to its next step."
+   :references *universal-thing-doc-references*))
+
+(defun interpreter-state-packet-topic ()
+  (make-topic
+   :id "interpreter-state-packet"
+   :title "Interpreter state packet"
+   :summary "Data bundle handed from one execution step to the next to preserve interpreter state."
+   :references *universal-thing-doc-references*))
+
+(defun styled-input-output-surface-topic ()
+  (make-topic
+   :id "styled-input-output-surface"
+   :title "Styled input/output surface"
+   :summary "Visible feature layer through which styled input, features, and output are rendered."
+   :references *universal-thing-doc-references*))
+
+(defun browser-stand-in-test-harness-topic ()
+  (make-topic
+   :id "browser-stand-in-test-harness"
+   :title "Browser stand-in test harness"
+   :summary "Unit-test arrangement that exercises the isolation layer with Universal Thing standing in for the browser."
+   :references *universal-thing-doc-references*))
+
 (defun ward-beck-diagram-1986-topic ()
   (make-topic
    :id "ward-beck-diagram-1986"
