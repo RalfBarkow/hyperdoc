@@ -54,7 +54,13 @@
      :id "test:hyperdoc/tests:run-fedwiki-site-dmx-import-tests"
      :title "FedWiki site DMX import tests"
      :system "hyperdoc"
-     :tags (:kind :smoke :suite "fedwiki-dmx-import"))))
+     :tags (:kind :smoke :suite "fedwiki-dmx-import"))
+    (:package "HYPERDOC/TESTS"
+     :name "RUN-CHECK-RUNNER-SMOKE-TESTS"
+     :id "test:hyperdoc/tests:run-check-runner-smoke-tests"
+     :title "Check runner smoke tests"
+     :system "hyperdoc"
+     :tags (:kind :smoke :suite "check-runner"))))
 
 (defun current-check-timestamp ()
   (get-universal-time))
