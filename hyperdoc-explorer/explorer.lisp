@@ -207,9 +207,9 @@ PAGE-LOOKUP-FAILURE."
         (:h3 "Systems relevant to this HyperDoc")
         (:p
          "This is the local system-scope surface for this HyperDoc. "
-         "For the catalog-wide list of loaded and registered ASDF systems, open "
-         (views:object-ref hyperbook::*asdf-systems*)
-         ".")
+         "For the catalog-wide list of loaded and registered ASDF systems, see the "
+         (views:object-ref hyperbook::*asdf-systems* :display "ASDF Systems")
+         " HyperBook in the catalog.")
         (:p "Click a system name below to inspect the corresponding ASDF system object.")
         (:h4 "Primary system")
         (render-system-scope-table (list primary-system))
