@@ -3327,5 +3327,30 @@
                  "Similarity, Context, and Recurrence in HyperDoc"
                  "Authoring Documentation in HyperDoc")))
 
+(defun editorial-layer-topic ()
+  (make-topic
+   :id "editorial-layer"
+   :title "Editorial layer"
+   :summary "A human-authored annotation layer attached to recurrence clusters that interprets survey findings and may conclude with caution, refactoring, or explicit retention."
+   :references '("From Idiomatic Survey to Idiomatic Lisp Survey"
+                 "Idiomatic Feedback as Survey Instead of Nitpicking"
+                 "Similarity, Context, and Recurrence in HyperDoc")))
+
+(defun editorial-note-topic ()
+  (make-topic
+   :id "editorial-note"
+   :title "Editorial note"
+   :summary "A human-authored note that records observation, interpretation, context boundaries, and optional refactoring guidance for a recurrence cluster."
+   :references '("Idiomatic Feedback as Survey Instead of Nitpicking"
+                 "Similarity, Context, and Recurrence in HyperDoc")))
+
+(defun editorial-status-topic ()
+  (make-topic
+   :id "editorial-status"
+   :title "Editorial status"
+   :summary "A human-owned status such as undocumented, observed, under review, context-dependent, worth reviewing, worth refactoring, or keep as-is that marks how a recurrence cluster has been interpreted."
+   :references '("From Idiomatic Survey to Idiomatic Lisp Survey"
+                 "Similarity, Context, and Recurrence in HyperDoc")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
