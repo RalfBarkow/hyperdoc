@@ -3331,7 +3331,7 @@
   (make-topic
    :id "editorial-layer"
    :title "Editorial layer"
-   :summary "A human-authored annotation layer attached to recurrence clusters that interprets survey findings and may conclude with caution, refactoring, or explicit retention."
+   :summary "A human-authored annotation layer, attached primarily to recurrence clusters rather than isolated occurrences, that records stable cluster identity, examples, contexts, provenance, status, exceptions, and optional recommendations without treating recurrence as an automatic verdict."
    :references '("From Idiomatic Survey to Idiomatic Lisp Survey"
                  "Idiomatic Feedback as Survey Instead of Nitpicking"
                  "Similarity, Context, and Recurrence in HyperDoc")))
