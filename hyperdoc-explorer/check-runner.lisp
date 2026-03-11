@@ -59,6 +59,42 @@
 (defun check-locator-package (spec)
   (getf (check-locator-of spec) :package))
 
+(defun resolve-check-source-target (check)
+  (typecase check
+    (check-result
+     (resolve-check-source-target (check-result-spec-of check)))
+    (check-spec
+     (or (ignore-errors
+           (resolve-check-function check))
+         (getf (check-locator-of check) :source-file)))
+    (t nil)))
+
+(defun check-source-target-label (target)
+  (typecase target
+    (function "Function")
+    (pathname "Source file")
+    (t "Source")))
+
+(defun check-source-view (check)
+  (let ((target (resolve-check-source-target check)))
+    (typecase target
+      (function
+       (-> target
+           views:👀source
+           (views:rename :title "Source" :priority 2)))
+      (pathname
+       (let ((view (views:👀content target)))
+         (if view
+             (views:rename view :title "Source" :priority 2)
+             (views:html-view :title "Source" :priority 2
+               (views:html
+                 (:p "Source file is available but has no content view.")
+                 (:p (views:object-ref target)))))))
+      (t
+       (views:html-view :title "Source" :priority 2
+         (views:html
+           (:p "No source target could be resolved for this check.")))))))
+
 (defun render-example-spec-table (specs)
   (views:html
     (:table :class "inspector-table"
@@ -132,25 +168,34 @@
                        "Rerun this item"))
 
 (views:defview 👀summary (spec check-spec)
-  (views:html-view :title "Summary" :priority 1
-    (views:html
-      (:h3 (views:esc (check-title-of spec)))
-      (:p
-       (views:eval-button (check-action-label spec)
-                          (views:thunk (run-check spec))
-                          "Run this item and inspect the result"))
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Kind"))
-                   (:td (:tt (views:esc (check-kind-label (check-kind-of spec))))))
-              (:tr (:td (views:esc "Identifier"))
-                   (:td (:code (views:esc (check-id-of spec)))))
-              (:tr (:td (views:esc "Locator"))
-                   (:td (views:object-ref (check-locator-of spec))))
-              (:tr (:td (views:esc "Tags"))
-                   (:td (views:object-ref (check-tags-of spec))))))))
+  (let ((source-target (resolve-check-source-target spec)))
+    (views:html-view :title "Summary" :priority 1
+      (views:html
+        (:h3 (views:esc (check-title-of spec)))
+        (:p
+         (views:eval-button (check-action-label spec)
+                            (views:thunk (run-check spec))
+                            "Run this item and inspect the result"))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Kind"))
+                     (:td (:tt (views:esc (check-kind-label (check-kind-of spec))))))
+                (:tr (:td (views:esc "Identifier"))
+                     (:td (:code (views:esc (check-id-of spec)))))
+                (when source-target
+                  (views:html
+                    (:tr (:td (views:esc (check-source-target-label source-target)))
+                         (:td (views:object-ref source-target)))))
+                (:tr (:td (views:esc "Locator"))
+                     (:td (views:object-ref (check-locator-of spec))))
+                (:tr (:td (views:esc "Tags"))
+                     (:td (views:object-ref (check-tags-of spec)))))))))
+
+(views:defview 👀source (spec check-spec)
+  (check-source-view spec))
 
 (views:defview 👀summary (result check-result)
-  (let ((spec (check-result-spec-of result)))
+  (let* ((spec (check-result-spec-of result))
+         (source-target (resolve-check-source-target result)))
     (views:html-view :title "Summary" :priority 1
       (views:html
         (:h3 (views:esc (check-title-of spec)))
@@ -167,6 +212,10 @@
                      (:td (:code (views:esc (check-id-of spec)))))
                 (:tr (:td (views:esc "Kind"))
                      (:td (:tt (views:esc (check-kind-label (check-kind-of spec))))))
+                (when source-target
+                  (views:html
+                    (:tr (:td (views:esc (check-source-target-label source-target)))
+                         (:td (views:object-ref source-target)))))
                 (:tr (:td (views:esc "Duration"))
                      (:td (:tt (views:esc (format nil "~D ms"
                                                   (check-result-duration-ms-of result))))))
@@ -181,6 +230,9 @@
             (:h4 "Backtrace")
             (:pre :style "white-space: pre-wrap"
                   (views:esc (check-result-backtrace-of result)))))))))
+
+(views:defview 👀source (result check-result)
+  (check-source-view result))
 
 (views:defview 👀checks (run check-run)
   (views:html-view :title "Tests & examples" :priority 3

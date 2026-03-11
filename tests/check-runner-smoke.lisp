@@ -81,6 +81,33 @@
                             test-ids :test #'equal)
                     "Test discovery must include the FedWiki import smoke suite")))
 
+(defun known-test-check-spec (id)
+  (find id
+        (hyperdoc::discover-test-checks :system "hyperdoc")
+        :key #'hyperdoc::check-id-of
+        :test #'equal))
+
+(defun run-check-source-target-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((spec (known-test-check-spec
+                "test:hyperdoc/tests:run-dmx-topic-proxy-smoke-tests"))
+         (spec-source-target (and spec
+                                  (hyperdoc::resolve-check-source-target spec)))
+         (result (and spec
+                      (hyperdoc::run-check spec)))
+         (result-source-target (and result
+                                    (hyperdoc::resolve-check-source-target result))))
+    (cr-assert-true spec
+                    "Known DMX smoke test must be discoverable")
+    (cr-assert-true spec-source-target
+                    "Discovered test spec must resolve a source target")
+    (cr-assert-typep 'function spec-source-target
+                     "Discovered test spec source target must be function-backed")
+    (cr-assert-true result-source-target
+                    "Check result must resolve a source target through its spec")
+    (cr-assert-typep 'function result-source-target
+                     "Check result source target must be function-backed")))
+
 (defun run-passing-check-smoke-test ()
   (let* ((spec (make-smoke-check-spec "test:smoke:passing"
                                       "Passing smoke check"
@@ -192,6 +219,7 @@
 
 (defun run-check-runner-smoke-tests ()
   (run-check-discovery-smoke-test)
+  (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)
   (run-failure-and-error-smoke-test)
   (run-batch-summary-smoke-test)
