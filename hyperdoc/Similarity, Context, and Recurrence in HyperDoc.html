@@ -15,6 +15,8 @@
   <li><a hyperbook="topics" page="Usage view"><tt>Usage view</tt></a></li>
   <li><a hyperbook="topics" page="Nesting view"><tt>Nesting view</tt></a></li>
   <li><a hyperbook="topics" page="Similar idioms"><tt>Similar idioms</tt></a></li>
+  <li><a hyperbook="topics" page="Editorial layer"><tt>Editorial layer</tt></a></li>
+  <li><a hyperbook="topics" page="Editorial status"><tt>Editorial status</tt></a></li>
   <li><a hyperbook="topics" page="Survey-driven refactoring"><tt>Survey-driven refactoring</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc code survey"><tt>HyperDoc code survey</tt></a></li>
 </ul>
@@ -63,6 +65,43 @@
 <p>
   That means idiomaticity is editorial, not automatic. A survey without notes
   is only an inventory.
+</p>
+
+<h2>Editorial status should be human-owned</h2>
+
+<p>
+  A useful survey should let editors mark a cluster as <tt>undocumented</tt>,
+  <tt>observed</tt>, <tt>under review</tt>, <tt>context-dependent</tt>,
+  <tt>worth reviewing</tt>, <tt>worth refactoring</tt>, or <tt>keep as-is</tt>.
+  None of those statuses
+  should be inferred mechanically from counts alone.
+</p>
+
+<p>
+  <tt>keep as-is</tt> must be a first-class outcome. A recurrence is not a
+  defect merely because it is repeated.
+</p>
+
+<p>
+  It is also not a neutral absence of judgment. <tt>Keep as-is</tt> is a
+  positive editorial conclusion: the recurrence has been inspected, the pattern
+  is understood, and change is not currently recommended.
+</p>
+
+<h2>Cluster judgment and occurrence judgment differ</h2>
+
+<p>
+  A cluster may be marked <tt>context-dependent</tt>, <tt>worth reviewing</tt>,
+  or <tt>keep as-is</tt> while some specific occurrences remain exceptions.
+  That separation matters because local context can justify keeping one
+  occurrence even when the broader cluster is still worth review.
+</p>
+
+<h2>Provenance of editorial judgment</h2>
+
+<p>
+  Editorial judgments are authored, dated interpretations, not automatic
+  properties of the corpus.
 </p>
 
 <h2>What this would mean in HyperDoc</h2>

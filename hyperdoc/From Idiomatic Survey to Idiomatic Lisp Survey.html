@@ -19,6 +19,9 @@
   <li><a hyperbook="topics" page="Nesting view"><tt>Nesting view</tt></a></li>
   <li><a hyperbook="topics" page="Similar idioms"><tt>Similar idioms</tt></a></li>
   <li><a hyperbook="topics" page="Structural recurrence"><tt>Structural recurrence</tt></a></li>
+  <li><a hyperbook="topics" page="Editorial layer"><tt>Editorial layer</tt></a></li>
+  <li><a hyperbook="topics" page="Editorial note"><tt>Editorial note</tt></a></li>
+  <li><a hyperbook="topics" page="Editorial status"><tt>Editorial status</tt></a></li>
   <li><a hyperbook="topics" page="Survey-driven refactoring"><tt>Survey-driven refactoring</tt></a></li>
 </ul>
 
@@ -67,6 +70,7 @@
   <li><b>Usage view:</b> list each occurrence with file, enclosing <tt>defun</tt>/<tt>defmethod</tt>/<tt>defview</tt>, snippet, and owning ASDF system where available.</li>
   <li><b>Nesting/context view:</b> show enclosing top-level definition, local binding layer, branch or loop form, and nearby helper calls.</li>
   <li><b>Similar forms view:</b> normalize forms structurally and cluster repeated shapes so minor local remarks can become codebase-level observations.</li>
+  <li><b>Editorial layer:</b> let a human attach notes explaining why a cluster is more or less idiomatic, rather than auto-labeling every recurrence as bad.</li>
 </ol>
 
 <h2>Separate recurrence from interpretation</h2>
@@ -82,9 +86,9 @@
 </ul>
 
 <p>
-  The survey result is the recurring shape. The human interpretation explains
-  what the recurrence may mean. Any refactoring recommendation remains optional
-  and downstream.
+  The editorial layer should be able to describe a cluster with a stable label,
+  normalized code shape, example occurrences, enclosing contexts, editorial
+  status, editorial notes, and any optional follow-up recommendation.
 </p>
 
 <h2>Proposed editorial layer for HyperDoc</h2>
@@ -104,13 +108,92 @@
   because it recurs.
 </p>
 
+<h2>Canonical editorial record shape</h2>
+
+<p>
+  A survey cluster should be documented with a stable identity,
+  representative occurrences, contextual boundaries, and a human-authored
+  editorial interpretation. The interpretation must record provenance and may
+  conclude with refactoring, caution, or explicit retention.
+</p>
+
+<p>
+  The canonical documentation vocabulary for that record shape is:
+</p>
+
+<ul>
+  <li><b>cluster label / stable identity</b></li>
+  <li><b>recurring code shape / normalized form</b></li>
+  <li><b>example occurrences</b></li>
+  <li><b>enclosing contexts</b></li>
+  <li><b>editorial status</b></li>
+  <li><b>editorial note text</b></li>
+  <li><b>author/editor</b></li>
+  <li><b>date</b></li>
+  <li><b>rationale / basis</b></li>
+  <li><b>scope of applicability</b></li>
+  <li><b>occurrence-level exceptions</b></li>
+  <li><b>optional recommendation</b></li>
+</ul>
+
+<p>
+  The model rule is:
+  the cluster is the primary object,
+  examples support the cluster,
+  exceptions apply to occurrences,
+  status is human-owned,
+  and recommendation is optional.
+</p>
+
+<h2>Four hard rules for the editorial layer</h2>
+
+<ol>
+  <li><b>Notes attach primarily to clusters, not individual occurrences.</b> A recurring shape is the main editorial object. Example occurrences support the note, but they are not the note itself.</li>
+  <li><b>Editorial provenance must be explicit.</b> Each note should answer who is making the judgment, when it was made, why it was made, and how broad the claim is meant to be.</li>
+  <li><b>Cluster judgment and occurrence judgment are different.</b> A cluster may be <tt>context-dependent</tt>, <tt>worth reviewing</tt>, or <tt>keep as-is</tt> while some individual occurrences remain exceptions.</li>
+  <li><b>Keep as-is is a positive conclusion.</b> It means the recurrence has been inspected, the pattern is understood, and change is not currently recommended.</li>
+</ol>
+
+<h2>Provenance of editorial judgment</h2>
+
+<p>
+  Editorial judgments are authored, dated interpretations, not automatic
+  properties of the corpus.
+</p>
+
+<p>
+  Recommended note types for that layer are:
+</p>
+
+<ol>
+  <li><b>Observation:</b> describe the recurring form without judging it.</li>
+  <li><b>Interpretation:</b> explain why it may be more or less idiomatic.</li>
+  <li><b>Context boundary:</b> explain where the judgment applies and where it does not.</li>
+  <li><b>Refactoring note:</b> suggest a rewrite only if clarity or regularity improves.</li>
+  <li><b>Counterexample / exception:</b> explain why some occurrences should remain unchanged.</li>
+</ol>
+
+<p>
+  Recommended statuses are human-owned rather than inferred:
+  <tt>undocumented</tt>, <tt>observed</tt>, <tt>under review</tt>,
+  <tt>context-dependent</tt>, <tt>worth reviewing</tt>,
+  <tt>worth refactoring</tt>, and
+  <tt>keep as-is</tt>.
+</p>
+
 <h2>What remains hypothetical in HyperDoc</h2>
 
 <p>
   HyperDoc does not yet expose a real code-shape survey with inventory,
-  clustering, or similarity computation. These pages document the survey idea
-  and method boundary first so later tooling can adopt the same terms instead
-  of inventing a second language for the idea.
+  clustering, or similarity computation. These pages document the vocabulary and
+  method boundary first so later tooling can adopt the same terms instead of
+  inventing a second language for the idea.
+</p>
+
+<p>
+  That future tooling should show cluster summary, examples, contexts,
+  editorial notes, editorial status, and optional related clusters. The note
+  must remain visibly human-authored.
 </p>
 
 <h2>Related pages / references</h2>
