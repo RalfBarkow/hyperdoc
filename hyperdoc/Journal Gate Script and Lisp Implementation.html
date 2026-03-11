@@ -7,6 +7,12 @@
   edits and exposes the Lisp implementation source as inspectable functions.
 </p>
 
+<p>
+  The gate is not a general linter. It is a semantic gate for localhost
+  FedWiki page journal integrity: replayability, creation ordering, action
+  chronology, and revision reconstruction.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
@@ -24,11 +30,32 @@
   <tt>MALFORMED</tt>.
 </p>
 
+<p>
+  The blocking findings set is held in
+  <tt>+journalmatic-commit-gate-findings+</tt>. A page passes only when
+  <tt>journalmatic-commit-gate-findings</tt> returns <tt>NIL</tt>.
+</p>
+
+<h2>Syntax and semantics</h2>
+
+<p>
+  <tt>python3 -m json.tool</tt> is necessary but not sufficient. It validates
+  JSON syntax and basic structure. It does not prove that a FedWiki page
+  journal replays cleanly, that action dates are monotonic, or that revision
+  reconstruction matches the current story.
+</p>
+
+<p>
+  The journal gate is the semantic check that follows syntax validation. Use
+  both steps in that order.
+</p>
+
 <h2>Lisp source</h2>
 
 <p>
-  These functions define the gate findings set, derive page-level gate findings,
-  and return a pass/fail gate decision.
+  The reusable helpers live in <tt>hyperdoc/journal-gate.lisp</tt>. These
+  functions define the gate findings set, derive page-level gate findings, and
+  return a pass/fail gate decision.
 </p>
 
 <source-of-function>journalmatic-commit-gate-findings</source-of-function>
@@ -39,6 +66,58 @@
 <source-of-function>journalmatic-date-origin-example</source-of-function>
 <source-of-function>journalmatic-normalize-dates-monotonic</source-of-function>
 <source-of-function>journalmatic-monotonic-normalization-example</source-of-function>
+
+<h2>Runnable script</h2>
+
+<p>
+  The runnable gate script lives at <tt>tools/journal-gate.lisp</tt>. It is a
+  thin wrapper around the Lisp helpers:
+</p>
+
+<ul>
+  <li>load <tt>:hyperdoc</tt></li>
+  <li>read one or more localhost FedWiki page JSON files</li>
+  <li>normalize the raw page JSON into the plist shape expected by the gate helpers</li>
+  <li>print one result per page</li>
+  <li>exit nonzero if any page is commit-blocked</li>
+</ul>
+
+<p>
+  Adapter rule: if raw page JSON contains string values in journal action
+  <tt>type</tt> fields, the script normalizes those strings to keywords before
+  calling the Lisp gate helpers.
+</p>
+
+<pre><code>nix develop --command sbcl --no-userinit --script tools/journal-gate.lisp \
+  tools/testdata/journal-gate/good-page.json \
+  tools/testdata/journal-gate/bad-chronology-page.json</code></pre>
+
+<h2>Worked example</h2>
+
+<p>
+  The fixture pair under <tt>tools/testdata/journal-gate/</tt> shows one page
+  that passes and one page that is commit-blocked on chronology. The exact
+  pass/fail shape is:
+</p>
+
+<pre><code>JOURNAL_GATE tools/testdata/journal-gate/good-page.json
+(:FINDINGS NIL :PASS? T)
+
+JOURNAL_GATE tools/testdata/journal-gate/bad-chronology-page.json
+(:FINDINGS (:CHRONOLOGY) :PASS? NIL)</code></pre>
+
+<p>
+  The inspectable Lisp example <tt>journalmatic-commit-gate-script-example</tt>
+  returns the same model in a richer form:
+</p>
+
+<pre><code>(:GATE-FINDINGS (:CREATION :CHRONOLOGY :REVISION :MALFORMED)
+ :BAD-PAGE (:TITLE "Chronology Example"
+            :FINDINGS (:CHRONOLOGY)
+            :PASS? NIL)
+ :GOOD-PAGE (:TITLE "Example Journal Page"
+             :FINDINGS NIL
+             :PASS? T))</code></pre>
 
 <h2>Timestamp policy</h2>
 
@@ -69,6 +148,12 @@
   For imported/forked journals with out-of-order dates, normalize dates in the
   current action order so chronology is monotonic while story replay semantics
   stay aligned with action sequence.
+</p>
+
+<p>
+  Monotonic normalization is a repair tool, not a license to ignore the gate.
+  After repair, run the semantic gate again and commit only when the blocking
+  findings are gone.
 </p>
 
 <h2>Operational sequence</h2>
