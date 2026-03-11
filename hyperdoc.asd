@@ -26,9 +26,35 @@
                              (:file "links-in-code")
                              (:file "defining")
                              (:file "check-runner")
-                             (:file "examples")
+                             (:file "example-core")
                              (:file "tools")
                              (:file "hyperdoc")))))
+
+(defsystem #:hyperdoc/examples
+  :description "Portable example content for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "examples-portable")))))
+
+(defsystem #:hyperdoc/examples/ops
+  :description "Ops and local example content for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "examples")))))
 
 (defsystem #:hyperdoc/dmx-import
   :description "FedWiki to DMX import support for HyperDoc"
@@ -108,15 +134,31 @@
                              (:file "links-in-code")
                              (:file "tools")
                              (:file "codemeta")
-                             (:file "examples")
+                             (:file "example-core")
                              (:file "check-runner")
                              (:file "hyperdoc")))))
+
+(defsystem #:hyperdoc/explorer/examples/ops
+  :description "Explorer views for HyperDoc ops/local examples"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc/explorer
+               #:hyperdoc/examples/ops)
+  :components ((:module "hyperdoc-explorer"
+                :serial t
+                :components ((:file "examples")))))
 
 ;; Compatibility alias: runtime server implementation lives in hyperbook/server.
 (defsystem #:hyperdoc/server
   :depends-on (#:hyperbook/server
                #:hyperbook/explorer
+               #:hyperdoc/examples
                #:hyperdoc/explorer
+               #:hyperdoc/explorer/examples/ops
                #:html-inspector-views/standard))
 
 (defsystem #:hyperdoc/tests
