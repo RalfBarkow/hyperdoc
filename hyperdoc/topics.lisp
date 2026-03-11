@@ -1115,7 +1115,7 @@
   (make-topic
    :id "journal-checker-commit-gate"
    :title "Journal checker commit gate"
-   :summary "FedWiki page commits must pass creation/chronology/revision/malformed checks; syntax-only json.tool is not sufficient."
+   :summary "Semantic gate for localhost FedWiki page commits; pages are blocked on CREATION/CHRONOLOGY/REVISION/MALFORMED findings, so syntax-only json.tool is not sufficient."
    :references '("Journalmatic Journal Checker"
                  "Journal Gate Script and Lisp Implementation"
                  "HyperBook Journal Tools"
@@ -1125,7 +1125,7 @@
   (make-topic
    :id "journal-gate-script-lisp"
    :title "Journal gate script and Lisp implementation"
-   :summary "Lisp gate functions expose commit blocking for CREATION/CHRONOLOGY/REVISION/MALFORMED and provide inspectable pass/fail results."
+   :summary "Repo-owned journal gate script and Lisp helpers print per-page findings, expose inspectable pass/fail results, and exit nonzero on blocking journal errors."
    :references '("Journalmatic Journal Checker"
                  "Journal Gate Script and Lisp Implementation"
                  "HyperBook Journal Tools"
@@ -1135,7 +1135,7 @@
   (make-topic
    :id "journal-date-origin-and-fork-chronology"
    :title "Journal date origin and fork chronology"
-   :summary "Action dates use runtime epoch millis with monotonic rule max(now, last-date + 1); avoid hardcoded timestamps to prevent fork-induced chronology errors."
+   :summary "Journal action dates should come from runtime epoch millis with max(now, last-date + 1); hardcoded timestamps can trigger fork-related chronology or revision failures."
    :references '("Journal Gate Script and Lisp Implementation"
                  "Journalmatic Journal Checker"
                  "journalmatic-date-origin-example")))
@@ -1144,7 +1144,7 @@
   (make-topic
    :id "journal-monotonic-normalization"
    :title "Journal monotonic normalization"
-   :summary "Normalize journal action dates in existing action order so dates become monotonic and replay remains reconstructable."
+   :summary "Normalize journal action dates in existing action order as a replayability repair step, but still run the commit gate afterward rather than treating normalization as a bypass."
    :references '("Journal Gate Script and Lisp Implementation"
                  "Journalmatic Repair Tools"
                  "journalmatic-monotonic-normalization-example")))
