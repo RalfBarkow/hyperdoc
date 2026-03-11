@@ -43,7 +43,87 @@
         clogSrcPatched = pkgs.applyPatches {
           name = "clog-src-patched";
           src = pkgs.sbclPackages.clog.src;
-          patches = [ ./nix/patches/clog-boot-ignore-empty-ids.patch ];
+          nativeBuildInputs = [ pkgs.python3 ];
+          postPatch = ''
+            python3 - <<'PY'
+from pathlib import Path
+
+p = Path("static-files/js/boot.js")
+s = p.read_text()
+
+original_debug = """if (typeof clog_debug == 'undefined') {
+    clog_debug = false;
+}
+"""
+
+replaced_debug = """if (typeof clog_debug == 'undefined') {
+    clog_debug = false;
+}
+
+function Guard_empty_selector() {
+    if (typeof jQuery == 'undefined' || !jQuery.find || !jQuery.find.error) {
+        return;
+    }
+
+    var original = jQuery.find.error;
+    jQuery.find.error = function (msg) {
+        if (msg === "#") {
+            console.warn("Ignoring empty jQuery selector \\"#\\"");
+            return;
+        }
+        return original.call(this, msg);
+    }
+}
+"""
+
+original_error = """        } catch (e) {
+            console.error (e.message);
+        }
+"""
+
+replaced_error = """        } catch (e) {
+            const payload = (event && typeof event.data === 'string')
+                ? event.data
+                : String(event && event.data);
+            if (!window.__clog_eval_seq) window.__clog_eval_seq = 0;
+            window.__clog_eval_seq += 1;
+            const seq = window.__clog_eval_seq;
+            window.__clog_last_eval_seq = seq;
+            window.__clog_last_eval_payload = payload;
+            console.error("[CLOG] eval error seq=", seq, e);
+            console.error("[CLOG] eval error payload(first 800 chars)=", payload.slice(0, 800));
+        }
+"""
+
+original_ready = """$( document ).ready(function() {
+    if (ws == null) { Open_ws(); }
+});
+"""
+
+replaced_ready = """$( document ).ready(function() {
+    Guard_empty_selector();
+    if (ws == null) { Open_ws(); }
+});
+"""
+
+if "function Guard_empty_selector()" not in s:
+    if s.count(original_debug) != 1:
+        raise SystemExit("Expected debug block exactly once")
+    s = s.replace(original_debug, replaced_debug, 1)
+
+if 'console.error("[CLOG] eval error seq=", seq, e);' not in s:
+    if s.count(original_error) != 1:
+        raise SystemExit("Expected eval error block exactly once")
+    s = s.replace(original_error, replaced_error, 1)
+
+if "Guard_empty_selector();" not in s:
+    if s.count(original_ready) != 1:
+        raise SystemExit("Expected document ready block exactly once")
+    s = s.replace(original_ready, replaced_ready, 1)
+
+p.write_text(s)
+PY
+          '';
         };
         clogMoldableInspectorSrc = clog-moldable-inspector-src;
         htmlInspectorViewsSrc = html-inspector-views-src;
