@@ -1,0 +1,104 @@
+<h1>Ward's Idiomatic Survey</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Ward Cunningham's <i>Idiomatic Survey</i> is best read as a small exploratory
+  corpus survey over source code, not as a style guide, linter, or finished
+  doctrine. It parses JavaScript from <tt>../wiki-client/lib</tt>, inventories
+  recurring abstract-syntax-tree shapes, and lets a human drill from counts to
+  occurrences, context, nesting, and structural similarity through a localhost
+  web UI.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Idiomatic survey"><tt>Idiomatic survey</tt></a></li>
+  <li><a hyperbook="topics" page="Ward Cunningham"><tt>Ward Cunningham</tt></a></li>
+  <li><a hyperbook="topics" page="Usage view"><tt>Usage view</tt></a></li>
+  <li><a hyperbook="topics" page="Nesting view"><tt>Nesting view</tt></a></li>
+  <li><a hyperbook="topics" page="Similar idioms"><tt>Similar idioms</tt></a></li>
+  <li><a hyperbook="topics" page="Structural recurrence"><tt>Structural recurrence</tt></a></li>
+</ul>
+
+<h2>Purpose and corpus</h2>
+
+<p>
+  The local repo at <tt>~/workspace/idiomatic</tt> surveys the JavaScript in
+  <tt>../wiki-client/lib</tt>. The README frames the job as interactively
+  browsing abstract syntax trees for idioms from an earlier interface style
+  that might be better expressed with more modern interfaces.
+</p>
+
+<p>
+  That wording matters. The survey is not trying to prove a style doctrine from
+  one isolated line. It gathers a corpus, counts recurring structures, and then
+  lets a reader inspect examples before deciding whether a repeated form is
+  merely common, historically contingent, or a plausible refactoring target.
+</p>
+
+<h2>Architecture</h2>
+
+<p>
+  The program is a Node/Express localhost app that listens on port
+  <tt>1954</tt>. It reads every file in <tt>../wiki-client/lib</tt>, parses the
+  source with Acorn, and stores each file's source text together with the
+  parsed tree.
+</p>
+
+<p>
+  Its companion <tt>visitor.js</tt> is a handwritten walker over many ESTree
+  node kinds. The walker keeps an explicit stack while it descends, which is
+  why the UI can talk about an occurrence and also about the enclosing path that
+  led to that occurrence.
+</p>
+
+<h2>Navigation surfaces</h2>
+
+<ol>
+  <li><tt>/index</tt>: counts non-terminal AST node kinds across the corpus.</li>
+  <li><tt>/terminal</tt>: lists distinct terminal values for a chosen node type/field combination.</li>
+  <li><tt>/usage</tt>: shows every occurrence of a selected value with adjustable structural context.</li>
+  <li><tt>/nesting</tt>: shows the enclosing AST path and JSON for one selected hit.</li>
+  <li><tt>/similar</tt>: finds other structurally normalized occurrences of the same nested pattern.</li>
+</ol>
+
+<h2>Why &quot;survey&quot; is the important word</h2>
+
+<p>
+  The point is not to turn one micro-observation into a codebase-wide verdict.
+  The point is to move from corpus inventory, to drill-down, to enclosing
+  context, to similar cases. That progression turns idiomatic feedback into
+  inspectable evidence.
+</p>
+
+<p>
+  Survey before doctrine, examples before verdicts, recurrence before
+  refactoring, and context before prescription are the useful lessons to carry
+  into HyperDoc.
+</p>
+
+<h2>Limits and unfinished status</h2>
+
+<p>
+  The README explicitly says the project has evolved through several iterations
+  and has not yet fully realized the vague ambition from which it began. That
+  is the right way to present it in HyperDoc as well: an exploratory
+  instrument, not a finished methodology.
+</p>
+
+<p>
+  The README also notes that ongoing history is sometimes recorded on a FedWiki
+  page named <tt>Static Aspects</tt>. This page does not rely on that page's
+  current contents.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="How Ward's Survey Works">How Ward's Survey Works</a></li>
+  <li><a page="From Idiomatic Survey to Idiomatic Lisp Survey">From Idiomatic Survey to Idiomatic Lisp Survey</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

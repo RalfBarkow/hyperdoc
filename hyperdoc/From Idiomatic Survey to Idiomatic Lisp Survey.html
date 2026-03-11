@@ -1,0 +1,88 @@
+<h1>From Idiomatic Survey to Idiomatic Lisp Survey</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page treats Ward Cunningham's JavaScript survey as a model for a future
+  HyperDoc-native <i>source-form survey</i>, <i>structural survey</i>, or
+  <i>code-shape survey</i> for Lisp. It does not claim that HyperDoc already
+  computes such a survey.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Idiomatic Lisp survey"><tt>Idiomatic Lisp survey</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc code survey"><tt>HyperDoc code survey</tt></a></li>
+  <li><a hyperbook="topics" page="Idiomatic survey"><tt>Idiomatic survey</tt></a></li>
+  <li><a hyperbook="topics" page="Usage view"><tt>Usage view</tt></a></li>
+  <li><a hyperbook="topics" page="Nesting view"><tt>Nesting view</tt></a></li>
+  <li><a hyperbook="topics" page="Similar idioms"><tt>Similar idioms</tt></a></li>
+  <li><a hyperbook="topics" page="Structural recurrence"><tt>Structural recurrence</tt></a></li>
+  <li><a hyperbook="topics" page="Survey-driven refactoring"><tt>Survey-driven refactoring</tt></a></li>
+</ul>
+
+<h2>What transfers cleanly from Ward's model</h2>
+
+<p>
+  Ward's survey suggests a reusable sequence: inventory recurring structures,
+  drill into usages, inspect enclosing context, compare similar shapes, and
+  only then decide whether a repeated form deserves explanation or refactoring.
+  That transfer is conceptual rather than tool-specific.
+</p>
+
+<ul>
+  <li><b>Inventory:</b> count recurring operator heads, special forms, macros, and function-designator patterns.</li>
+  <li><b>Usage:</b> show every occurrence with file, top-level owner, and local snippet.</li>
+  <li><b>Context:</b> show enclosing definitions and nearby control, binding, or mapping forms.</li>
+  <li><b>Similarity:</b> normalize forms structurally and cluster repeated shapes.</li>
+</ul>
+
+<h2>Why Lisp changes the implementation surface</h2>
+
+<p>
+  JavaScript needed an explicit Acorn-based AST inventory and a custom walker.
+  Lisp source often makes the structural layer more direct because forms,
+  operator heads, and macro-bearing top-level definitions are already visible as
+  data. That makes a Lisp <i>source-form survey</i> plausible without claiming
+  that HyperDoc already has a finished AST-survey runtime.
+</p>
+
+<p>
+  The important distinction is between surveying source forms and inspecting
+  runtime objects. HyperDoc already has strong runtime inspection, but that is
+  not the same thing as a corpus survey over recurring source shapes.
+</p>
+
+<h2>Proposed first survey surfaces for HyperDoc</h2>
+
+<p>
+  A first Lisp adaptation could keep Ward's survey shape while using Lisp's
+  source-form strengths more directly. This is a proposal, not a statement of
+  current HyperDoc implementation.
+</p>
+
+<ol>
+  <li><b>Inventory view:</b> count recurring operator heads, special operators, macros, and common designator patterns such as lambda wrappers or repeated mapping skeletons.</li>
+  <li><b>Usage view:</b> list each occurrence with file, enclosing <tt>defun</tt>/<tt>defmethod</tt>/<tt>defview</tt>, snippet, and owning ASDF system where available.</li>
+  <li><b>Nesting/context view:</b> show enclosing top-level definition, local binding layer, branch or loop form, and nearby helper calls.</li>
+  <li><b>Similar forms view:</b> normalize forms structurally and cluster repeated shapes so minor local remarks can become codebase-level observations.</li>
+</ol>
+
+<h2>What remains hypothetical in HyperDoc</h2>
+
+<p>
+  HyperDoc does not yet expose a real code-shape survey with inventory,
+  clustering, or similarity computation. These pages document the survey idea
+  and method boundary first so later tooling can adopt the same terms instead
+  of inventing a second language for the idea.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Ward's Idiomatic Survey">Ward's Idiomatic Survey</a></li>
+  <li><a page="How Ward's Survey Works">How Ward's Survey Works</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

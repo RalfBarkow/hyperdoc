@@ -1,0 +1,78 @@
+<h1>How Ward's Survey Works</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Ward Cunningham's survey is easiest to understand as a fixed investigative
+  progression: parse, inventory, drill down, inspect context, then compare
+  similar occurrences.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Idiomatic survey"><tt>Idiomatic survey</tt></a></li>
+  <li><a hyperbook="topics" page="Usage view"><tt>Usage view</tt></a></li>
+  <li><a hyperbook="topics" page="Nesting view"><tt>Nesting view</tt></a></li>
+  <li><a hyperbook="topics" page="Similar idioms"><tt>Similar idioms</tt></a></li>
+  <li><a hyperbook="topics" page="Structural recurrence"><tt>Structural recurrence</tt></a></li>
+</ul>
+
+<h2>1. Parse the corpus</h2>
+
+<p>
+  <tt>index.js</tt> reads every file in <tt>../wiki-client/lib</tt> and parses
+  them with Acorn. Each loaded module keeps the filename, source text, and
+  parsed tree together.
+</p>
+
+<h2>2. Inventory node kinds and terminal values</h2>
+
+<p>
+  The <tt>/index</tt> surface counts non-terminal node types across the whole
+  corpus. From there, selected node kinds link to <tt>/terminal</tt>, which
+  tallies distinct terminal values such as identifier names, operators, or
+  literal values for one chosen field.
+</p>
+
+<h2>3. Drill into usage</h2>
+
+<p>
+  The <tt>/usage</tt> surface lists every occurrence of the selected value and
+  exposes adjustable structural context. Its width/depth controls let the
+  reader expand or contract how much neighboring structure is shown around each
+  hit.
+</p>
+
+<h2>4. Inspect nesting and local context</h2>
+
+<p>
+  The <tt>/nesting</tt> surface takes one selected occurrence and shows the
+  enclosing path through the walker stack together with a JSON rendering of the
+  chosen hit. This is where local context stops being anecdotal and becomes
+  inspectable.
+</p>
+
+<h2>5. Compare similar occurrences</h2>
+
+<p>
+  The <tt>/similar</tt> surface normalizes a selected nested form and finds
+  other occurrences with the same structural shape. That is the step that turns
+  one interesting hit into evidence about recurrence.
+</p>
+
+<h2>Why the stack matters</h2>
+
+<p>
+  <tt>visitor.js</tt> is a handwritten walker with explicit rules for many
+  ESTree node kinds. It pushes each branch onto a stack before descending, so
+  the UI can talk about both an occurrence and the enclosing structure that
+  contains it.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Ward's Idiomatic Survey">Ward's Idiomatic Survey</a></li>
+  <li><a page="From Idiomatic Survey to Idiomatic Lisp Survey">From Idiomatic Survey to Idiomatic Lisp Survey</a></li>
+</ul>
