@@ -40,9 +40,22 @@
 
 (defun render-examples-concept-ref (&key (display "Examples"))
   (let ((target (examples-concept-target)))
-    (if target
-        (views:object-ref target :display display)
-        (views:html (views:esc display)))))
+    (cond
+      ((typep target 'hb:page)
+       (hb:render-hyperbook-or-page-link (id-of (hyperbook-of target))
+                                         (id-of target)
+                                         display))
+      (target
+       (views:object-ref target :display display))
+      (t
+       (views:html (views:esc display))))))
+
+(defun include-hyperbook-link-assets ()
+  (views:add-asset-path "/hyperbook/"
+                        (asdf:system-relative-pathname
+                         :hyperbook
+                         "assets/hyperbook/"))
+  (views:include-css "/hyperbook/css/hyperbook.css"))
 
 (defun asdf-system-name-string (system-designator)
   (etypecase system-designator
@@ -340,6 +353,7 @@
   (let* ((specs (discovered-example-checks-for-system system))
          (run (examples-runner-for-system system)))
     (views:html-view :title "Examples" :priority 2
+      (include-hyperbook-link-assets)
       (views:html
         (:h3 "Scoped examples")
         (:p
@@ -369,6 +383,7 @@
       (let* ((specs (discovered-validation-checks-for-system system))
              (run (validation-runner-for-system system)))
         (views:html-view :title "Tests" :priority 3
+          (include-hyperbook-link-assets)
           (views:html
             (:h3 "Tests for this system")
             (:p
@@ -400,6 +415,7 @@
   (let* ((system (asdf-system-of hd))
          (validation-systems (validation-subsystems-for-system system)))
     (views:html-view :title "Tests" :priority 5
+      (include-hyperbook-link-assets)
       (views:html
         (:h3 "Tests")
         (:p
