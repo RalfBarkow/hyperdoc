@@ -1,0 +1,66 @@
+{
+  "title": "Example Journal Page",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "a1",
+      "text": "Alpha revised"
+    },
+    {
+      "type": "paragraph",
+      "id": "b1",
+      "text": "Beta"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Example Journal Page",
+        "story": []
+      },
+      "date": 1000
+    },
+    {
+      "type": "add",
+      "id": "a1",
+      "item": {
+        "type": "paragraph",
+        "id": "a1",
+        "text": "Alpha"
+      },
+      "date": 1010
+    },
+    {
+      "type": "edit",
+      "id": "a1",
+      "item": {
+        "type": "paragraph",
+        "id": "a1",
+        "text": "Alpha draft"
+      },
+      "date": 1040
+    },
+    {
+      "type": "edit",
+      "id": "a1",
+      "item": {
+        "type": "paragraph",
+        "id": "a1",
+        "text": "Alpha revised"
+      },
+      "date": 1050
+    },
+    {
+      "type": "add",
+      "after": "a1",
+      "id": "b1",
+      "item": {
+        "type": "paragraph",
+        "id": "b1",
+        "text": "Beta"
+      },
+      "date": 1060
+    }
+  ]
+}

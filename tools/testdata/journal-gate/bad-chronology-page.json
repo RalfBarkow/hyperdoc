@@ -1,0 +1,46 @@
+{
+  "title": "Chronology Example",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "a1",
+      "text": "Alpha"
+    },
+    {
+      "type": "paragraph",
+      "id": "b1",
+      "text": "Beta"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Chronology Example",
+        "story": []
+      },
+      "date": 1000
+    },
+    {
+      "type": "add",
+      "id": "a1",
+      "item": {
+        "type": "paragraph",
+        "id": "a1",
+        "text": "Alpha"
+      },
+      "date": 1100
+    },
+    {
+      "type": "add",
+      "after": "a1",
+      "id": "b1",
+      "item": {
+        "type": "paragraph",
+        "id": "b1",
+        "text": "Beta"
+      },
+      "date": 1050
+    }
+  ]
+}

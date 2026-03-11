@@ -27,6 +27,7 @@
                              (:file "defining")
                              (:file "check-runner")
                              (:file "example-core")
+                             (:file "journal-gate")
                              (:file "tools")
                              (:file "hyperdoc")))))
 
