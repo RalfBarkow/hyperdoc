@@ -3244,5 +3244,88 @@
                  "Running HyperDoc Examples"
                  "Documentation Architecture in HyperDoc")))
 
+;; Topic objects for idiomatic survey cluster.
+(defun idiomatic-survey-topic ()
+  (make-topic
+   :id "idiomatic-survey"
+   :title "Idiomatic survey"
+   :summary "An exploratory corpus survey that inventories recurring code structures and lets a reader drill into usage, context, nesting, and similarity before drawing idiomatic conclusions."
+   :references '("Ward's Idiomatic Survey"
+                 "How Ward's Survey Works"
+                 "Idiomatic Feedback as Survey Instead of Nitpicking")))
+
+(defun ward-cunningham-topic ()
+  (make-topic
+   :id "ward-cunningham"
+   :title "Ward Cunningham"
+   :summary "Software developer and wiki inventor whose Idiomatic Survey prototype treats recurring code forms as a browsable exploratory corpus rather than a finished rule system."
+   :references '("Ward's Idiomatic Survey")))
+
+(defun usage-view-topic ()
+  (make-topic
+   :id "usage-view"
+   :title "Usage view"
+   :summary "A survey surface that lists every occurrence of a selected form or value with enough surrounding structure to compare local usage."
+   :references '("How Ward's Survey Works"
+                 "Similarity, Context, and Recurrence in HyperDoc")))
+
+(defun nesting-view-topic ()
+  (make-topic
+   :id "nesting-view"
+   :title "Nesting view"
+   :summary "A survey surface that shows the enclosing structural path around one occurrence so local context can be inspected before judging the form."
+   :references '("How Ward's Survey Works"
+                 "Similarity, Context, and Recurrence in HyperDoc")))
+
+(defun similar-idioms-topic ()
+  (make-topic
+   :id "similar-idioms"
+   :title "Similar idioms"
+   :summary "Survey clusters of structurally normalized occurrences that help distinguish one-off code from repeated code-shape patterns."
+   :references '("How Ward's Survey Works"
+                 "Similarity, Context, and Recurrence in HyperDoc")))
+
+(defun structural-recurrence-topic ()
+  (make-topic
+   :id "structural-recurrence"
+   :title "Structural recurrence"
+   :summary "Repeated code shapes across a corpus that justify editorial review and contextual comparison more than isolated micro-improvements do, without making recurrence itself a defect verdict."
+   :references '("Similarity, Context, and Recurrence in HyperDoc"
+                 "Idiomatic Feedback as Survey Instead of Nitpicking")))
+
+(defun idiomatic-lisp-survey-topic ()
+  (make-topic
+   :id "idiomatic-lisp-survey"
+   :title "Idiomatic Lisp survey"
+   :summary "A proposed HyperDoc-style source-form survey for Common Lisp that inventories recurring forms, shows usages in context, groups similar shapes, and leaves idiomatic interpretation to explicit human editorial notes."
+   :references '("From Idiomatic Survey to Idiomatic Lisp Survey"
+                 "Ward's Idiomatic Survey"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun survey-driven-refactoring-topic ()
+  (make-topic
+   :id "survey-driven-refactoring"
+   :title "Survey-driven refactoring"
+   :summary "Refactoring guided by recurring surveyed patterns, inspected examples, and explicit human editorial interpretation rather than isolated stylistic verdicts."
+   :references '("Idiomatic Feedback as Survey Instead of Nitpicking"
+                 "From Idiomatic Survey to Idiomatic Lisp Survey")))
+
+(defun micro-idiom-vs-recurring-idiom-topic ()
+  (make-topic
+   :id "micro-idiom-vs-recurring-idiom"
+   :title "Micro-idiom vs recurring idiom"
+   :summary "The distinction between a tiny local idiomatic cleanup and a codebase-level recurring pattern that deserves broader editorial review before any refactoring is proposed."
+   :references '("Idiomatic Feedback as Survey Instead of Nitpicking"
+                 "Konrad Feedback on Communication Pages")))
+
+(defun hyperdoc-code-survey-topic ()
+  (make-topic
+   :id "hyperdoc-code-survey"
+   :title "HyperDoc code survey"
+   :summary "A proposed HyperDoc survey surface over repository Lisp source that would count recurring forms, show occurrences, and compare similar code shapes across systems and definitions."
+   :references '("From Idiomatic Survey to Idiomatic Lisp Survey"
+                 "Similarity, Context, and Recurrence in HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
