@@ -1,0 +1,135 @@
+<h1>Teaching sequences and teaching arcs</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc uses <a hyperbook="topics" page="Teaching sequence"><tt>Teaching sequence</tt></a>
+  and <a hyperbook="topics" page="Teaching arc"><tt>Teaching arc</tt></a> as
+  derived pedagogical terms. DITA 1.3 does not use these exact names. The
+  closest official structures in the learning-and-training specialization are
+  <tt>learningObject</tt> and <tt>learningGroup</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Teaching sequence"><tt>Teaching sequence</tt></a></li>
+  <li><a hyperbook="topics" page="Teaching arc"><tt>Teaching arc</tt></a></li>
+  <li><a hyperbook="topics" page="Winston and Horn Lisp (1989)"><tt>Winston and Horn Lisp (1989)</tt></a></li>
+  <li><a hyperbook="topics" page="Winston and Horn Lisp topic arrangement"><tt>Winston and Horn Lisp topic arrangement</tt></a></li>
+</ul>
+
+<h2>DITA-derived mapping</h2>
+
+<p>
+  The DITA learning-and-training specialization separates specialized learning
+  topic types from map structures that order and group them. The most relevant
+  topic types here are <tt>learningPlan</tt>, <tt>learningOverview</tt>,
+  <tt>learningContent</tt>, <tt>learningSummary</tt>, and
+  <tt>learningAssessment</tt>. The most relevant map structures are
+  <tt>learningObject</tt> and <tt>learningGroup</tt>.
+</p>
+
+<p>
+  HyperDoc maps <a hyperbook="topics" page="Teaching sequence"><tt>Teaching sequence</tt></a>
+  to the reusable ordered instructional unit represented most closely by
+  <tt>learningObject</tt>. HyperDoc maps
+  <a hyperbook="topics" page="Teaching arc"><tt>Teaching arc</tt></a> to the
+  higher-level grouping structure represented most closely by
+  <tt>learningGroup</tt>.
+</p>
+
+<h2>Teaching sequence</h2>
+
+<p>
+  A <a hyperbook="topics" page="Teaching sequence"><tt>Teaching sequence</tt></a>
+  is a reusable ordered instructional unit organized around one learning
+  objective. DITA's closest analogue is <tt>learningObject</tt>, whose canonical
+  pattern is plan, then overview or pre-assessment, then one or more content
+  items, then summary, then one or more post-assessments. DITA also allows the
+  content portion to reuse ordinary non-learning topics through
+  <tt>learningContentRef</tt>.
+</p>
+
+<p>
+  The relevant sequencing model is ordered next/previous navigation through
+  map structure, especially <tt>collection-type="sequence"</tt>. This is not
+  the same thing as learner-interaction sequencing inside assessment elements
+  such as <tt>lcSequencing2</tt> or <tt>lcSequence2</tt>.
+</p>
+
+<h3>Operations for teaching sequences</h3>
+
+<ul>
+  <li><tt>has-learning-objective</tt>: sequence states the learning objective that the ordered unit is meant to achieve.</li>
+  <li><tt>has-plan</tt>: sequence includes planning or design intent for the unit.</li>
+  <li><tt>introduces-with-overview</tt>: sequence frames objectives, prerequisites, duration, and audience.</li>
+  <li><tt>pre-assesses-with</tt>: sequence may start with an optional entry checkpoint.</li>
+  <li><tt>teaches-through-content</tt>: one or more content-bearing topics deliver the instruction.</li>
+  <li><tt>contains-content-component</tt>: subordinate content components refine a content unit within the sequence.</li>
+  <li><tt>summarizes-with</tt>: sequence includes recap and reinforcement.</li>
+  <li><tt>post-assesses-with</tt>: sequence may end with an optional exit checkpoint or test.</li>
+  <li><tt>precedes</tt>: sequence explicitly orders itself before another sequence in a pedagogical path.</li>
+  <li><tt>follows</tt>: sequence explicitly orders itself after another sequence in a pedagogical path.</li>
+  <li><tt>validates-sequence-order</tt>: sequence checks whether its internal order still follows the DITA-like instructional pattern.</li>
+</ul>
+
+<h2>Teaching arc</h2>
+
+<p>
+  A <a hyperbook="topics" page="Teaching arc"><tt>Teaching arc</tt></a> is a
+  higher-level pedagogical grouping of teaching sequences, or of nested arcs,
+  used to shape lesson-, module-, or course-level progression. DITA's closest
+  analogue is <tt>learningGroup</tt>, which groups learning objects into
+  higher-level organizations and can itself nest.
+</p>
+
+<h3>Operations for teaching arcs</h3>
+
+<ul>
+  <li><tt>groups-sequence</tt>: arc contains one or more teaching sequences.</li>
+  <li><tt>groups-arc</tt>: arc can nest subordinate arcs.</li>
+  <li><tt>orders-children</tt>: arc preserves intended pedagogical progression among its children.</li>
+  <li><tt>declares-level</tt>: arc identifies itself as lesson, module, course, or equivalent.</li>
+  <li><tt>declares-entry-point</tt>: arc states where a learner should begin.</li>
+  <li><tt>declares-exit-point</tt>: arc states where the grouped progression resolves or hands off.</li>
+  <li><tt>aggregates-objectives</tt>: arc computes or states higher-level purpose from the contained sequences.</li>
+  <li><tt>aggregates-prerequisites</tt>: arc summarizes learner prerequisites across its children.</li>
+  <li><tt>aggregates-duration</tt>: arc summarizes expected duration across its children.</li>
+  <li><tt>aggregates-audience</tt>: arc summarizes intended audience across its children.</li>
+  <li><tt>validates-arc-coherence</tt>: arc checks that the grouped progression remains pedagogically intelligible.</li>
+</ul>
+
+<h2>Why this DITA distinction is useful in HyperDoc</h2>
+
+<p>
+  The official DITA vocabulary is useful here because it separates reusable
+  instructional objects, reusable information or content objects, higher-level
+  grouping structures, assessment interactions, and learner-facing metadata
+  such as audience, difficulty, and typical learning time. HyperDoc can adopt
+  that separation as inspectable vocabulary without pretending that DITA itself
+  uses the exact terms <tt>Teaching sequence</tt> or <tt>Teaching arc</tt>.
+</p>
+
+<h2>Bridge to Winston and Horn</h2>
+
+<p>
+  <a hyperbook="topics" page="Winston and Horn Lisp (1989)"><tt>Winston and Horn Lisp (1989)</tt></a>
+  is a good local bridge because it preserves a classic symbolic-programming
+  teaching sequence and then lifts that sequence into a broader teaching arc
+  that runs from list processing and procedure abstraction through CLOS and
+  larger AI-oriented examples. The editorial neighborhood for that progression
+  is preserved on
+  <a hyperbook="topics" page="Winston and Horn Lisp topic arrangement"><tt>Winston and Horn Lisp topic arrangement</tt></a>.
+</p>
+
+<h2>Related references</h2>
+
+<ul>
+  <li><a href="https://dita-lang.org/1.3/dita/archspec/learningtraining/lc-spec-overview-objectives">Objectives of the DITA learning and training specializations</a></li>
+  <li><a href="https://dita-lang.org/1.3/dita/langref/learningtraining/learningobject">DITA <tt>learningObject</tt></a></li>
+  <li><a href="https://dita-lang.org/1.3/dita/archspec/learningtraining/lc-spec-summary-of-landt-designs">Summary of DITA learning topic, map, and domain designs</a></li>
+  <li><a href="https://dita-lang.org/1.3/dita/archspec/learningtraining/lc-spec-overview-assumptions">A learning objects approach to learning and training content</a></li>
+  <li><a hyperbook="hyperdoc" page="Winston and Horn Lisp 1989">Winston and Horn Lisp 1989</a></li>
+  <li><a hyperbook="hyperdoc" page="Winston and Horn Lisp topic arrangement">Winston and Horn Lisp topic arrangement</a></li>
+</ul>

@@ -1285,6 +1285,22 @@
                  "Topic arrangement in HyperDoc"
                  "Topics HyperBook in HyperDoc")))
 
+(defun teaching-sequence-topic ()
+  (make-topic
+   :id "teaching-sequence"
+   :title "Teaching sequence"
+   :summary "An ordered instructional unit that organizes overview, content, reinforcement, and assessment around a single learning objective."
+   :references '("Winston and Horn Lisp (1989)"
+                 "Winston and Horn Lisp topic arrangement")))
+
+(defun teaching-arc-topic ()
+  (make-topic
+   :id "teaching-arc"
+   :title "Teaching arc"
+   :summary "A higher-level pedagogical grouping that orders and relates teaching sequences into a larger progression such as a lesson, module, or course."
+   :references '("Winston and Horn Lisp (1989)"
+                 "Winston and Horn Lisp topic arrangement")))
+
 (defun make-winston-and-horn-topic (id title summary)
   (make-topic
    :id id
