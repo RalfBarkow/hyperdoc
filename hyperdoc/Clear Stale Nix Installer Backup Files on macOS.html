@@ -1,0 +1,107 @@
+<h1>Clear Stale Nix Installer Backup Files on macOS</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the stale <tt>*.backup-before-nix</tt> blocker that can
+  stop an upstream Nix reinstall on macOS even after the architecture problem
+  has already been resolved.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Clear Stale Nix Installer Backup Files on macOS"><tt>Clear Stale Nix Installer Backup Files on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Reinstall Upstream Nix on macOS"><tt>Reinstall Upstream Nix on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Inspect Nix Install State on macOS"><tt>Inspect Nix Install State on macOS</tt></a></li>
+</ul>
+
+<h2>What this blocker means</h2>
+
+<p>
+  If the upstream installer correctly targets <tt>x86_64-darwin</tt> and then
+  stops because <tt>/etc/bashrc.backup-before-nix</tt> already exists, the
+  platform-selection problem is over. The remaining problem is stale installer
+  backup state left by an earlier Nix install or uninstall attempt.
+</p>
+
+<p>
+  This is a safety stop, not a failed architecture match. The installer refuses
+  to overwrite an earlier backup file blindly.
+</p>
+
+<h2>Inspect the backup file first</h2>
+
+<pre><code>sudo ls -l /etc/bashrc /etc/bashrc.backup-before-nix 2&gt;/dev/null || true
+sudo sh -c 'printf "\n--- /etc/bashrc.backup-before-nix ---\n"; sed -n "1,200p" /etc/bashrc.backup-before-nix 2&gt;/dev/null'
+sudo sh -c 'printf "\n--- /etc/bashrc ---\n"; sed -n "1,200p" /etc/bashrc 2&gt;/dev/null'</code></pre>
+
+<h2>How to interpret the result</h2>
+
+<ul>
+  <li>If <tt>/etc/bashrc</tt> does not exist, but <tt>/etc/bashrc.backup-before-nix</tt> exists and looks like a normal non-Nix shell file, move it back into place.</li>
+  <li>If <tt>/etc/bashrc</tt> already exists, for example as a live symlink to <tt>/etc/static/bashrc</tt>, do not restore the backup onto it. In that case the blocker is a stale backup file, not a missing original file.</li>
+  <li>If <tt>/etc/bashrc.backup-before-nix</tt> already contains Nix-added lines, do not restore it blindly.</li>
+  <li>If the backup content is ambiguous, keep it aside and inspect the other stale backup files before rerunning the installer.</li>
+</ul>
+
+<h2>Case 1: <tt>/etc/bashrc</tt> is missing</h2>
+
+<pre><code>sudo mv /etc/bashrc.backup-before-nix /etc/bashrc</code></pre>
+
+<h2>Case 2: <tt>/etc/bashrc</tt> is present</h2>
+
+<p>
+  On the newer observed blocker, <tt>/etc/bashrc</tt> is already present as a
+  live symlink to <tt>/etc/static/bashrc</tt>. In that case, do not restore the
+  backup onto <tt>/etc/bashrc</tt>. Inspect the stale backup and the current
+  live file first:
+</p>
+
+<pre><code># inspect first
+sudo sh -c 'sed -n "1,200p" /etc/bashrc.backup-before-nix 2&gt;/dev/null'
+sudo sh -c 'sed -n "1,200p" /etc/bashrc 2&gt;/dev/null'</code></pre>
+
+<p>
+  If the backup looks like an ordinary old shell file and not something you
+  need to preserve, move it aside so the installer can create a fresh backup of
+  the current <tt>/etc/bashrc</tt>:
+</p>
+
+<pre><code>sudo mv /etc/bashrc.backup-before-nix /etc/bashrc.backup-before-nix.stale</code></pre>
+
+<h2>Broader stale-backup checklist</h2>
+
+<p>
+  The same pattern can recur for other shell integration files:
+</p>
+
+<ul>
+  <li><tt>/etc/profile.d/nix.sh.backup-before-nix</tt></li>
+  <li><tt>/etc/zshrc.backup-before-nix</tt></li>
+  <li><tt>/etc/bash.bashrc.backup-before-nix</tt></li>
+  <li><tt>/etc/zsh/zshrc.backup-before-nix</tt></li>
+</ul>
+
+<p>
+  The upstream installer may stop on stale <tt>*.backup-before-nix</tt> files
+  left by an earlier install. This is a safety stop, not a failed platform
+  match. The correct response is to inspect the backup file, verify it does not
+  already contain Nix-injected content, and then either restore it to the
+  original path when the original file is missing or move it aside when the
+  current live file is already present.
+</p>
+
+<h2>Rerun the installer</h2>
+
+<pre><code>curl -L https://nixos.org/nix/install | sh</code></pre>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Inspect Nix Install State on macOS">Inspect Nix Install State on macOS</a></li>
+  <li><a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a></li>
+  <li><a page="Determinate Nix on macOS Intel">Determinate Nix on macOS Intel</a></li>
+  <li><a href="https://nix.dev/manual/nix/2.32/installation/installing-binary.html">https://nix.dev/manual/nix/2.32/installation/installing-binary.html</a></li>
+  <li><a href="https://nix.dev/manual/nix/2.32/installation/uninstall">https://nix.dev/manual/nix/2.32/installation/uninstall</a></li>
+</ul>

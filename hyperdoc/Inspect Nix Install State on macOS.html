@@ -1,0 +1,221 @@
+<h1>Inspect Nix Install State on macOS</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Use this page to inspect the current Nix state on macOS before choosing a
+  recovery path.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Inspect Nix Install State on macOS"><tt>Inspect Nix Install State on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Determinate Nix on macOS Intel"><tt>Determinate Nix on macOS Intel</tt></a></li>
+  <li><a hyperbook="topics" page="Reinstall Upstream Nix on macOS"><tt>Reinstall Upstream Nix on macOS</tt></a></li>
+</ul>
+
+<h2>Run these commands first</h2>
+
+<pre><code>uname -m
+ls -ld /nix /nix/store 2&gt;/dev/null || true
+ls /nix 2&gt;/dev/null || true
+file /usr/local/bin/determinate-nixd 2&gt;/dev/null || true
+nix --version 2&gt;/dev/null || true</code></pre>
+
+<h2>How to read the results</h2>
+
+<ol>
+  <li>If <tt>uname -m</tt> prints <tt>x86_64</tt>, the host is an Intel Mac. Do not fetch <tt>aarch64-darwin</tt> binaries for it.</li>
+  <li>If <tt>file /usr/local/bin/determinate-nixd</tt> reports <tt>arm64</tt> while the host is <tt>x86_64</tt>, you have a concrete architecture mismatch on disk.</li>
+  <li>If <tt>/nix/store</tt> is missing and <tt>ls /nix</tt> prints nothing, the live store contents are gone even if <tt>/nix</tt> itself still exists.</li>
+  <li>If <tt>nix --version</tt> prints nothing or fails, the CLI may be absent, broken, or no longer on the shell path.</li>
+</ol>
+
+<h2>Interpret the observed Intel-host state</h2>
+
+<p>
+  On this machine, the inspection results show an Intel (<tt>x86_64</tt>) Mac
+  with no active Nix store. <tt>/nix</tt> still exists, but <tt>/nix/store</tt>
+  is missing and <tt>/nix</tt> is empty, which indicates that the store
+  contents are gone and only the mountpoint or top-level directory remains. At
+  the same time, <tt>/usr/local/bin/determinate-nixd</tt> is still present, but
+  it is an <tt>arm64</tt> Mach-O binary, which is the wrong architecture for
+  this host. <tt>nix --version</tt> fails because no working <tt>nix</tt>
+  command is installed. The combined reading is: the Determinate install is no
+  longer functional, most of it has already been removed, and at least one
+  stale wrong-architecture binary remains on disk.
+</p>
+
+<p>
+  An empty <tt>/nix</tt> after uninstall can still be a successful uninstall on
+  macOS. The official Nix uninstall guidance notes that the empty mountpoint
+  can remain until reboot.
+</p>
+
+<p>
+  An empty <tt>/nix</tt> by itself is not proof of a healthy installation. When
+  <tt>/nix/store</tt> is missing, <tt>nix</tt> is not found, and only a stray
+  helper binary remains, the correct reading is not “partially working” but
+  “broken or mostly uninstalled.”
+</p>
+
+<h2>How to read the <tt>/nix</tt> markers</h2>
+
+<p>
+  The Determinate installer uses <tt>/nix/nix-installer</tt> and
+  <tt>/nix/receipt.json</tt> as install and uninstall markers. They can still
+  help when the state is ambiguous, but in the concrete state above they are
+  not decisive: the missing store, absent <tt>nix</tt>, and wrong-architecture
+  residue already establish that the installation is no longer usable.
+</p>
+
+<h2>Wrong-architecture downloads to avoid</h2>
+
+<ul>
+  <li>Do not download <tt>nix-installer-aarch64-darwin</tt> on an Intel Mac.</li>
+  <li>Do not download <tt>nix-installer-x86_64-linux</tt> on an Intel Mac.</li>
+  <li>Do not treat a random architecture-specific binary name as interchangeable with the host platform.</li>
+</ul>
+
+<p>
+  The correct first move is always: confirm the host architecture, inspect the
+  on-disk state, and only then choose either the upstream reinstall path or the
+  legacy fallback path.
+</p>
+
+<h2>Interpret the next blocker after cleanup</h2>
+
+<p>
+  After removing the stale <tt>arm64</tt> Determinate helper, the upstream Nix
+  installer correctly targeted <tt>x86_64-darwin</tt> and advanced into normal
+  multi-user installation. If the next stop is
+  <tt>/etc/bashrc.backup-before-nix</tt> already existing, the platform
+  mismatch is resolved. The reinstall is now blocked by leftover installer
+  backup state from an earlier Nix attempt.
+</p>
+
+<p>
+  In the observed follow-on case, <tt>/etc/bashrc</tt> is not missing; it is a
+  live symlink to <tt>/etc/static/bashrc</tt>. The blocker is therefore not
+  absence of the original file but the presence of a stale
+  <tt>/etc/bashrc.backup-before-nix</tt> left by an earlier installer run. In
+  that state, do not restore the backup onto <tt>/etc/bashrc</tt>. Instead,
+  inspect the stale backup, confirm whether it is merely an old pre-Nix copy,
+  and then move it aside or remove it so the installer can create a fresh
+  backup of the current <tt>/etc/bashrc</tt>.
+</p>
+
+<p>
+  At that point, go to
+  <a page="Clear Stale Nix Installer Backup Files on macOS">Clear Stale Nix Installer Backup Files on macOS</a>.
+</p>
+
+<h2>Interpret the first healthy install phase</h2>
+
+<p>
+  After matching the installer to the pre-existing <tt>nixbld</tt> group ID
+  (<tt>30000</tt>), the macOS multi-user installer proceeded normally. It
+  verified the existing build users, created the <tt>/nix</tt> directory
+  hierarchy, created <tt>/nix/store</tt>, copied the initial Nix closure into
+  the store, and began loading the Nix database. This is the transition point
+  from residue cleanup to successful installation.
+</p>
+
+<p>
+  Once the installer reaches <tt>nix-store --load-db</tt>, the earlier macOS
+  recovery blockers have been resolved. Remaining failures, if any, are no
+  longer about stale shell backups or mixed architectures, but about the final
+  daemon/profile setup steps.
+</p>
+
+<h2>Interpret the later shell-setup failure</h2>
+
+<p>
+  After the installer successfully created <tt>/nix/store</tt> and loaded the
+  Nix database, shell profile setup can still fail at
+  <tt>sudo touch /etc/bashrc</tt>. On the observed machine,
+  <tt>/etc/bashrc</tt> was a symlink to <tt>/etc/static/bashrc</tt>, and
+  <tt>/etc/static</tt> itself was a dangling symlink into
+  <tt>/nix/store/...</tt>. That is leftover <tt>nix-darwin</tt> residue, not a
+  normal directory tree. In this case, do not try to repair
+  <tt>/etc/static</tt> with <tt>mkdir -p</tt> or <tt>touch</tt>. The correct
+  recovery is to replace the specific broken shell-profile symlink such as
+  <tt>/etc/bashrc</tt> with a plain file, then rerun the installer.
+</p>
+
+<pre><code>[ -L /etc/bashrc ] &amp;&amp; sudo mv /etc/bashrc /etc/bashrc.dangling-static-link
+sudo touch /etc/bashrc
+sudo chmod 644 /etc/bashrc
+
+sudo test -d /etc/zsh || sudo mkdir -p /etc/zsh
+sudo touch /etc/bash.bashrc /etc/zsh/zshrc
+sudo chmod 644 /etc/bash.bashrc /etc/zsh/zshrc
+
+export NIX_BUILD_GROUP_ID=30000
+sh ./install-nix</code></pre>
+
+<h2>Interpret the later SSL error</h2>
+
+<p>
+  A later failure can show up only after installation and daemon restart, when
+  <tt>nix profile add nixpkgs#direnv</tt> fails with SSL error <tt>77</tt> and
+  specifically references <tt>/etc/ssl/certs/ca-certificates.crt</tt>. On the
+  observed machine, the Nix-managed CA bundle already existed at
+  <tt>/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt</tt>. The
+  winning fix was to write that path persistently into
+  <tt>/etc/nix/nix.conf</tt>, restart the daemon, and retry the profile
+  install.
+</p>
+
+<p>
+  Shell-only overrides such as <tt>NIX_SSL_CERT_FILE</tt> and
+  <tt>SSL_CERT_FILE</tt> were not sufficient on their own. The successful fix
+  was a daemon-visible Nix configuration change, not a temporary shell export.
+  Go next to
+  <a page="Fix Nix SSL Certificate Path on macOS">Fix Nix SSL Certificate Path on macOS</a>.
+</p>
+
+<h2>What to do next</h2>
+
+<pre><code>sudo rm -f /usr/local/bin/determinate-nixd
+curl -L https://nixos.org/nix/install | sh</code></pre>
+
+<p>
+  A tighter operational reading for this machine is:
+</p>
+
+<ol>
+  <li>Host architecture is Intel: <tt>x86_64</tt>.</li>
+  <li>No active Nix store is present.</li>
+  <li><tt>nix</tt> command is absent.</li>
+  <li>A stale <tt>arm64</tt> Determinate helper binary remains.</li>
+  <li>Recommended recovery: remove the stale helper and reinstall upstream Nix.</li>
+</ol>
+
+<p>
+  Do not try to recover this Intel Mac by manually downloading
+  <tt>nix-installer-aarch64-darwin</tt> or <tt>nix-installer-x86_64-linux</tt>.
+  Those binaries target different platforms and can recreate the same
+  mixed-architecture failure pattern.
+</p>
+
+<h2>Next page</h2>
+
+<p>
+  If this is an Intel Mac host recovery, go next to
+  <a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a>.
+  Use <a page="Restore Last Working Determinate Nix on macOS Intel">Restore Last Working Determinate Nix on macOS Intel</a>
+  only as a clearly bounded fallback.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Determinate Nix on macOS Intel">Determinate Nix on macOS Intel</a></li>
+  <li><a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a></li>
+  <li><a page="Clear Stale Nix Installer Backup Files on macOS">Clear Stale Nix Installer Backup Files on macOS</a></li>
+  <li><a page="Restore Last Working Determinate Nix on macOS Intel">Restore Last Working Determinate Nix on macOS Intel</a></li>
+  <li><a href="https://github.com/DeterminateSystems/nix-installer">https://github.com/DeterminateSystems/nix-installer</a></li>
+  <li><a href="https://nix.dev/manual/nix/2.32/installation/uninstall">https://nix.dev/manual/nix/2.32/installation/uninstall</a></li>
+</ul>

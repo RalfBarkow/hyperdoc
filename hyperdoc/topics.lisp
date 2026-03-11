@@ -2542,6 +2542,92 @@
                  "https://gtoolkit.com/download/"
                  "https://book.gtoolkit.com")))
 
+(defun determinate-nix-on-macos-intel-topic ()
+  (make-topic
+   :id "determinate-nix-on-macos-intel"
+   :title "Determinate Nix on macOS Intel"
+   :summary "Entry-point page for the current macOS Intel recovery boundary: Determinate support dropped for Intel hosts, so upstream Nix is the primary reinstall path."
+   :references '("Determinate Nix on macOS Intel"
+                 "Inspect Nix Install State on macOS"
+                 "Reinstall Upstream Nix on macOS"
+                 "Restore Last Working Determinate Nix on macOS Intel"
+                 "Fix Fish direnv Hook Error"
+                 "https://github.com/DeterminateSystems/nix-installer/releases/tag/v3.13.0"
+                 "https://nix.dev/manual/nix/2.32/installation/installing-binary.html")))
+
+(defun inspect-nix-install-state-on-macos-topic ()
+  (make-topic
+   :id "inspect-nix-install-state-on-macos"
+   :title "Inspect Nix Install State on macOS"
+   :summary "Operational inspection page for confirming host architecture, reading /nix install markers, and interpreting the transition from broken residue to a live upstream Nix install on macOS."
+   :references '("Inspect Nix Install State on macOS"
+                 "Determinate Nix on macOS Intel"
+                 "Reinstall Upstream Nix on macOS"
+                 "Restore Last Working Determinate Nix on macOS Intel"
+                 "https://github.com/DeterminateSystems/nix-installer"
+                 "https://nix.dev/manual/nix/2.32/installation/uninstall"
+                 "https://github.com/NixOS/nix/issues/7894")))
+
+(defun reinstall-upstream-nix-on-macos-topic ()
+  (make-topic
+   :id "reinstall-upstream-nix-on-macos"
+   :title "Reinstall Upstream Nix on macOS"
+   :summary "Primary recovery procedure for Intel macOS hosts: remove any Determinate-managed install, reinstall upstream Nix with the official macOS daemon path, and handle final macOS shell-setup edge cases."
+   :references '("Reinstall Upstream Nix on macOS"
+                 "Determinate Nix on macOS Intel"
+                 "Inspect Nix Install State on macOS"
+                 "Clear Stale Nix Installer Backup Files on macOS"
+                 "Fix Nix SSL Certificate Path on macOS"
+                 "Fix Fish direnv Hook Error"
+                 "https://nix.dev/manual/nix/2.32/installation/installing-binary.html"
+                 "https://nix.dev/manual/nix/2.32/installation/uninstall"
+                 "https://github.com/NixOS/nix/issues/7894")))
+
+(defun fix-nix-ssl-certificate-path-on-macos-topic ()
+  (make-topic
+   :id "fix-nix-ssl-certificate-path-on-macos"
+   :title "Fix Nix SSL Certificate Path on macOS"
+   :summary "Focused recovery page for the post-install SSL error in which Nix keeps using /etc/ssl/certs/ca-certificates.crt until ssl-cert-file is written persistently into /etc/nix/nix.conf."
+   :references '("Fix Nix SSL Certificate Path on macOS"
+                 "Reinstall Upstream Nix on macOS"
+                 "Inspect Nix Install State on macOS"
+                 "Fix Fish direnv Hook Error")))
+
+(defun clear-stale-nix-installer-backup-files-on-macos-topic ()
+  (make-topic
+   :id "clear-stale-nix-installer-backup-files-on-macos"
+   :title "Clear Stale Nix Installer Backup Files on macOS"
+   :summary "Focused recovery page for stale backup-before-nix shell files that block an upstream macOS reinstall after architecture selection has already succeeded, including the distinction between a missing bashrc and a live bashrc plus stale backup."
+   :references '("Clear Stale Nix Installer Backup Files on macOS"
+                 "Reinstall Upstream Nix on macOS"
+                 "Inspect Nix Install State on macOS"
+                 "Determinate Nix on macOS Intel"
+                 "https://nix.dev/manual/nix/2.32/installation/installing-binary.html"
+                 "https://nix.dev/manual/nix/2.32/installation/uninstall")))
+
+(defun restore-last-working-determinate-nix-on-macos-intel-topic ()
+  (make-topic
+   :id "restore-last-working-determinate-nix-on-macos-intel"
+   :title "Restore Last Working Determinate Nix on macOS Intel"
+   :summary "Legacy fallback page for trying the last plausible pre-drop Determinate installer line on Intel macOS, explicitly framed as unsupported best effort."
+   :references '("Restore Last Working Determinate Nix on macOS Intel"
+                 "Determinate Nix on macOS Intel"
+                 "Inspect Nix Install State on macOS"
+                 "Reinstall Upstream Nix on macOS"
+                 "https://github.com/DeterminateSystems/nix-installer/releases/tag/v3.13.0"
+                 "https://github.com/DeterminateSystems/nix-installer")))
+
+(defun fix-fish-direnv-hook-error-topic ()
+  (make-topic
+   :id "fix-fish-direnv-hook-error"
+   :title "Fix Fish direnv Hook Error"
+   :summary "Shell-startup cleanup for fish plus the distinction that once direnv and nix-direnv checks pass, any failing direnv reload belongs to the project flake, potentially at a patchPhase or patch-tool boundary, rather than to missing direnv integration."
+   :references '("Fix Fish direnv Hook Error"
+                 "Inspect Nix Install State on macOS"
+                 "Reinstall Upstream Nix on macOS"
+                 "Fix Nix SSL Certificate Path on macOS"
+                 "Determinate Nix on macOS Intel")))
+
 (defun gtoolkit-and-hyperdoc-topic ()
   (make-topic
    :id "gtoolkit-and-hyperdoc"

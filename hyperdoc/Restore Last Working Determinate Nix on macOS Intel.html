@@ -1,0 +1,76 @@
+<h1>Restore Last Working Determinate Nix on macOS Intel</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the bounded legacy fallback for Intel macOS hosts that
+  still need to try the last plausible pre-drop Determinate installer line.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Restore Last Working Determinate Nix on macOS Intel"><tt>Restore Last Working Determinate Nix on macOS Intel</tt></a></li>
+  <li><a hyperbook="topics" page="Determinate Nix on macOS Intel"><tt>Determinate Nix on macOS Intel</tt></a></li>
+  <li><a hyperbook="topics" page="Inspect Nix Install State on macOS"><tt>Inspect Nix Install State on macOS</tt></a></li>
+</ul>
+
+<h2>Boundary statement</h2>
+
+<p>
+  This is not a supported current vendor path. It is a best-effort fallback
+  derived from the release boundary: <tt>v3.13.0</tt> drops
+  <tt>x86_64-darwin</tt>, so <tt>v3.12.2</tt> is only the last plausible
+  pre-drop line to try on Intel macOS.
+</p>
+
+<h2>Use this only if all of these are true</h2>
+
+<ul>
+  <li>The host is an Intel Mac and <tt>uname -m</tt> prints <tt>x86_64</tt>.</li>
+  <li>You understand that upstream Nix is still the primary recommendation.</li>
+  <li>You want a bounded recovery attempt, not a claim of restored vendor support.</li>
+</ul>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Confirm the host architecture:
+<pre><code>uname -m</code></pre>
+  </li>
+  <li>Remove an existing Determinate-managed install first if present:
+<pre><code>if [ -x /nix/nix-installer ]; then
+  sudo /nix/nix-installer uninstall
+fi</code></pre>
+  </li>
+  <li>Try the pinned legacy installer line:
+<pre><code>curl -fsSL https://install.determinate.systems/nix/tag/v3.12.2 | sh -s -- install --determinate</code></pre>
+  </li>
+  <li>Verify what landed:
+<pre><code>file /usr/local/bin/determinate-nixd 2&gt;/dev/null || true
+nix --version 2&gt;/dev/null || true</code></pre>
+  </li>
+</ol>
+
+<h2>Wrong moves to avoid</h2>
+
+<ul>
+  <li>Do not download <tt>nix-installer-aarch64-darwin</tt> on an Intel Mac.</li>
+  <li>Do not download <tt>nix-installer-x86_64-linux</tt> on an Intel Mac.</li>
+  <li>Do not present <tt>v3.12.2</tt> as currently supported by Determinate.</li>
+</ul>
+
+<p>
+  If the pinned legacy line does not work cleanly, stop and use
+  <a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a>.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Determinate Nix on macOS Intel">Determinate Nix on macOS Intel</a></li>
+  <li><a page="Inspect Nix Install State on macOS">Inspect Nix Install State on macOS</a></li>
+  <li><a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a></li>
+  <li><a href="https://github.com/DeterminateSystems/nix-installer/releases/tag/v3.13.0">https://github.com/DeterminateSystems/nix-installer/releases/tag/v3.13.0</a></li>
+  <li><a href="https://github.com/DeterminateSystems/nix-installer">https://github.com/DeterminateSystems/nix-installer</a></li>
+</ul>

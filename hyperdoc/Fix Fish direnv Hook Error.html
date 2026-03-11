@@ -1,0 +1,90 @@
+<h1>Fix Fish direnv Hook Error</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the small fish-shell cleanup for machines where
+  <tt>direnv</tt> is not installed but the shell startup file still tries to
+  source its hook.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Fix Fish direnv Hook Error"><tt>Fix Fish direnv Hook Error</tt></a></li>
+  <li><a hyperbook="topics" page="Inspect Nix Install State on macOS"><tt>Inspect Nix Install State on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Reinstall Upstream Nix on macOS"><tt>Reinstall Upstream Nix on macOS</tt></a></li>
+</ul>
+
+<h2>Fish-shell fix</h2>
+
+<pre><code>if command -sq direnv
+    direnv hook fish | source
+end</code></pre>
+
+<h2>Where to put it</h2>
+
+<p>
+  Put that guard around the existing <tt>direnv hook fish | source</tt> line in
+  your fish startup file, typically <tt>~/.config/fish/config.fish</tt>.
+</p>
+
+<h2>What this does and does not do</h2>
+
+<ul>
+  <li>It removes shell-startup noise when <tt>direnv</tt> is absent.</li>
+  <li>It does not repair a broken Nix install.</li>
+  <li>It does not change the Intel macOS Determinate support boundary.</li>
+</ul>
+
+<p>
+  Treat this as shell hygiene after the install state is understood.
+</p>
+
+<h2>When direnv is no longer the blocker</h2>
+
+<p>
+  Once <tt>type -a direnv</tt>, <tt>direnv --version</tt>, and the
+  <tt>nix-direnv</tt> <tt>direnvrc</tt> check all pass, a failing
+  <tt>direnv reload</tt> should no longer be documented as a direnv
+  installation problem. In the observed recovery, direnv was functioning
+  correctly and merely surfaced a failing flake dependency build.
+</p>
+
+<p>
+  The user-level <tt>direnv</tt> integration issue was resolved by installing
+  <tt>nix-direnv</tt>, writing <tt>~/.config/direnv/direnvrc</tt> to source
+  <tt>~/.nix-profile/share/nix-direnv/direnvrc</tt>, and restarting Fish.
+  After that point, any remaining failure belonged to the project flake, not to
+  missing direnv integration.
+</p>
+
+<h2>Inspect the flake failure directly</h2>
+
+<pre><code>nix-store -l /nix/store/fwgh4qwhilxnx00vn8qsbzz7sdg9rhh6-clog-src-patched.drv
+rg -n "clog-src-patched|clog-boot-ignore-empty-ids.patch|patches =" .</code></pre>
+
+<p>
+  The environment manager is healthy. The broken unit is the project
+  derivation <tt>clog-src-patched</tt>, specifically its
+  <tt>patchPhase</tt>. The next debugging step is to inspect the derivation log
+  and the flake expression that defines the patch input.
+</p>
+
+<p>
+  A <tt>patchPhase</tt> failure that stops immediately after “applying patch
+  ...” with <tt>patch: **** out of memory</tt> is narrower than a generic build
+  failure. In the observed case, unpacking completed and the derivation died
+  before any <tt>patching file ...</tt> output appeared. That points first to a
+  patch parser or patch-tool edge case at the handoff boundary, not yet to
+  downstream compilation and not to an ordinary hunk-mismatch report.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Inspect Nix Install State on macOS">Inspect Nix Install State on macOS</a></li>
+  <li><a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a></li>
+  <li><a page="Fix Nix SSL Certificate Path on macOS">Fix Nix SSL Certificate Path on macOS</a></li>
+  <li><a page="Determinate Nix on macOS Intel">Determinate Nix on macOS Intel</a></li>
+</ul>

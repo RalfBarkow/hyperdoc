@@ -1,0 +1,90 @@
+<h1>Determinate Nix on macOS Intel</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the entry point for the current HyperDoc guidance on recovering
+  Nix on an Intel Mac after the Determinate installer support boundary moved.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Determinate Nix on macOS Intel"><tt>Determinate Nix on macOS Intel</tt></a></li>
+  <li><a hyperbook="topics" page="Inspect Nix Install State on macOS"><tt>Inspect Nix Install State on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Reinstall Upstream Nix on macOS"><tt>Reinstall Upstream Nix on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Restore Last Working Determinate Nix on macOS Intel"><tt>Restore Last Working Determinate Nix on macOS Intel</tt></a></li>
+  <li><a hyperbook="topics" page="Fix Fish direnv Hook Error"><tt>Fix Fish direnv Hook Error</tt></a></li>
+</ul>
+
+<h2>Support boundary on Intel Mac</h2>
+
+<p>
+  The boundary for this documentation slice is explicit: current Determinate
+  host support no longer includes Intel macOS, and the <tt>v3.13.0</tt> release
+  line explicitly drops <tt>x86_64-darwin</tt>. That means a fresh current
+  Determinate reinstall is no longer the recommended recovery path on an Intel
+  Mac host.
+</p>
+
+<p>
+  This is a host-support statement, not a claim about every possible build
+  target. A supported machine elsewhere may still build or evaluate
+  <tt>x86_64-darwin</tt> outputs, but that does not restore current vendor
+  support for installing Determinate Nix on an Intel Mac host itself.
+</p>
+
+<h2>What usually goes wrong</h2>
+
+<ol>
+  <li>The host is really <tt>x86_64</tt>, but one installed binary on disk is <tt>arm64</tt>.</li>
+  <li>A manual download mixes platform names such as <tt>x86_64-linux</tt>, <tt>aarch64-darwin</tt>, and Intel macOS expectations.</li>
+  <li>The presence of an empty <tt>/nix</tt> directory after uninstall is misread as failure, even though macOS can leave an empty mountpoint until reboot.</li>
+</ol>
+
+<p>
+  The first troubleshooting step is therefore architecture inspection, not
+  downloading another installer at random.
+</p>
+
+<h2>Recommended path now</h2>
+
+<ol>
+  <li>Inspect the current state with <a page="Inspect Nix Install State on macOS">Inspect Nix Install State on macOS</a>.</li>
+  <li>If Determinate-managed Nix is present, uninstall it first.</li>
+  <li>Reinstall upstream Nix using the official macOS installer path described in <a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a>.</li>
+</ol>
+
+<p>
+  For Intel macOS hosts, upstream Nix is now the stable recommendation.
+</p>
+
+<h2>Legacy fallback</h2>
+
+<p>
+  A bounded best-effort fallback still exists if you need to recover the last
+  plausible pre-drop Determinate line on Intel. That path is documented in
+  <a page="Restore Last Working Determinate Nix on macOS Intel">Restore Last Working Determinate Nix on macOS Intel</a>.
+  It is legacy, unsupported, and explicitly not the primary recommendation.
+</p>
+
+<h2>Shell noise is separate</h2>
+
+<p>
+  Fish-shell startup errors from <tt>direnv</tt> are not the root Nix problem.
+  Treat them as cleanup after the install state is understood. See
+  <a page="Fix Fish direnv Hook Error">Fix Fish direnv Hook Error</a>.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Inspect Nix Install State on macOS">Inspect Nix Install State on macOS</a></li>
+  <li><a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a></li>
+  <li><a page="Restore Last Working Determinate Nix on macOS Intel">Restore Last Working Determinate Nix on macOS Intel</a></li>
+  <li><a page="Fix Fish direnv Hook Error">Fix Fish direnv Hook Error</a></li>
+  <li><a href="https://github.com/DeterminateSystems/nix-installer/releases/tag/v3.13.0">https://github.com/DeterminateSystems/nix-installer/releases/tag/v3.13.0</a></li>
+  <li><a href="https://github.com/DeterminateSystems/nix-installer">https://github.com/DeterminateSystems/nix-installer</a></li>
+  <li><a href="https://nix.dev/manual/nix/2.32/installation/installing-binary.html">https://nix.dev/manual/nix/2.32/installation/installing-binary.html</a></li>
+  <li><a href="https://nix.dev/manual/nix/2.32/installation/uninstall">https://nix.dev/manual/nix/2.32/installation/uninstall</a></li>
+</ul>

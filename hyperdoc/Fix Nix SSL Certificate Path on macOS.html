@@ -1,0 +1,69 @@
+<h1>Fix Nix SSL Certificate Path on macOS</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the post-install SSL error in which Nix still tries to
+  use <tt>/etc/ssl/certs/ca-certificates.crt</tt> even though the working CA
+  bundle is already present under <tt>/nix/var/nix/profiles/default</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Fix Nix SSL Certificate Path on macOS"><tt>Fix Nix SSL Certificate Path on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Reinstall Upstream Nix on macOS"><tt>Reinstall Upstream Nix on macOS</tt></a></li>
+  <li><a hyperbook="topics" page="Inspect Nix Install State on macOS"><tt>Inspect Nix Install State on macOS</tt></a></li>
+</ul>
+
+<h2>Observed failure pattern</h2>
+
+<ul>
+  <li><tt>nix profile add nixpkgs#direnv</tt> failed with SSL error <tt>77</tt> and referenced <tt>/etc/ssl/certs/ca-certificates.crt</tt>.</li>
+  <li>The Nix-managed CA bundle already existed at <tt>/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt</tt>.</li>
+  <li>Shell-only overrides such as <tt>NIX_SSL_CERT_FILE</tt> and <tt>SSL_CERT_FILE</tt> were not sufficient on their own.</li>
+  <li><tt>nix config show | grep '^ssl-cert-file'</tt> reported the correct path only after the setting was written into <tt>/etc/nix/nix.conf</tt>.</li>
+</ul>
+
+<h2>Persistent fix</h2>
+
+<pre><code>sudo sh -c 'printf "build-users-group = nixbld\nssl-cert-file = /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt\n" &gt; /etc/nix/nix.conf'
+sudo launchctl kickstart -k system/org.nixos.nix-daemon
+nix config show | grep '^ssl-cert-file'
+nix profile add nixpkgs#direnv</code></pre>
+
+<p>
+  The successful fix was not a shell-only environment override. It was a
+  persistent daemon-visible Nix configuration change. Once
+  <tt>ssl-cert-file</tt> was written into <tt>/etc/nix/nix.conf</tt> and the
+  daemon was restarted, Nix stopped trying to use the broken
+  <tt>/etc/ssl/certs/ca-certificates.crt</tt> path and profile installation
+  succeeded.
+</p>
+
+<h2>Caution about <tt>launchctl setenv</tt></h2>
+
+<ul>
+  <li><tt>sudo launchctl setenv NIX_SSL_CERT_FILE ...</tt> may fail under System Integrity Protection.</li>
+  <li><tt>sudo launchctl setenv SSL_CERT_FILE ...</tt> may fail under System Integrity Protection.</li>
+  <li>On the observed machine, those failures were not fatal.</li>
+  <li>Prefer the persistent <tt>/etc/nix/nix.conf</tt> fix over relying on <tt>launchctl setenv</tt>.</li>
+</ul>
+
+<h2>Verification</h2>
+
+<p>
+  After the profile install succeeds, verify that the tool is actually present
+  in the active shell:
+</p>
+
+<pre><code>type -a direnv
+direnv --version</code></pre>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Reinstall Upstream Nix on macOS">Reinstall Upstream Nix on macOS</a></li>
+  <li><a page="Inspect Nix Install State on macOS">Inspect Nix Install State on macOS</a></li>
+  <li><a page="Fix Fish direnv Hook Error">Fix Fish direnv Hook Error</a></li>
+</ul>
