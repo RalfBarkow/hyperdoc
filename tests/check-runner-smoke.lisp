@@ -65,6 +65,11 @@
   (mapcar #'hyperdoc::check-id-of
           (hyperdoc::discover-test-checks :system "hyperdoc")))
 
+(defun discovered-example-symbols (system)
+  (mapcar (lambda (spec)
+            (getf (hyperdoc::check-locator-of spec) :function))
+          (hyperdoc::discover-example-checks :system system)))
+
 (defun run-check-discovery-smoke-test ()
   (let* ((examples (hyperdoc::discover-example-checks :system "hyperdoc" :page "Examples"))
          (example-symbols
@@ -80,6 +85,40 @@
     (cr-assert-true (member "test:hyperdoc/tests:run-fedwiki-site-dmx-import-tests"
                             test-ids :test #'equal)
                     "Test discovery must include the FedWiki import smoke suite")))
+
+(defun run-example-system-attribution-smoke-test ()
+  (let ((base-symbols (discovered-example-symbols "hyperdoc")))
+    (cr-assert-equal 1 (length base-symbols)
+                     "Base hyperdoc must expose only the core example")
+    (cr-assert-true (member 'hyperdoc::the-answer base-symbols)
+                    "Base hyperdoc examples must include the-answer")
+    (cr-assert-equal 0 (length (discovered-example-symbols "hyperdoc/examples"))
+                     "Portable examples must stay unloaded until their system is loaded")
+    (cr-assert-equal 0 (length (discovered-example-symbols "hyperdoc/examples/ops"))
+                     "Ops examples must stay unloaded until their system is loaded"))
+  (asdf:load-system :hyperdoc/examples)
+  (let ((base-symbols (discovered-example-symbols "hyperdoc"))
+        (portable-symbols (discovered-example-symbols "hyperdoc/examples")))
+    (cr-assert-equal 1 (length base-symbols)
+                     "Loading portable examples must not change the base example count")
+    (cr-assert-true (member 'hyperdoc::fedwiki-java-slug-example portable-symbols)
+                    "Portable example scope must include fedwiki-java examples")
+    (cr-assert-true (plusp (length portable-symbols))
+                    "Portable example scope must expose registered examples")
+    (cr-assert-equal 0 (length (discovered-example-symbols "hyperdoc/examples/ops"))
+                     "Ops examples must stay unloaded while only portable examples are loaded"))
+  (asdf:load-system :hyperdoc/examples/ops)
+  (let ((base-symbols (discovered-example-symbols "hyperdoc"))
+        (portable-symbols (discovered-example-symbols "hyperdoc/examples"))
+        (ops-symbols (discovered-example-symbols "hyperdoc/examples/ops")))
+    (cr-assert-equal 1 (length base-symbols)
+                     "Loading ops examples must not change the base example count")
+    (cr-assert-true (plusp (length portable-symbols))
+                    "Portable examples must remain registered after loading ops examples")
+    (cr-assert-true (member 'hyperdoc::wiki-client-blame-operation-example ops-symbols)
+                    "Ops example scope must include the ops-specific examples")
+    (cr-assert-true (plusp (length ops-symbols))
+                    "Ops example scope must expose registered examples")))
 
 (defun known-test-check-spec (id)
   (find id
@@ -219,6 +258,7 @@
 
 (defun run-check-runner-smoke-tests ()
   (run-check-discovery-smoke-test)
+  (run-example-system-attribution-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)
   (run-failure-and-error-smoke-test)

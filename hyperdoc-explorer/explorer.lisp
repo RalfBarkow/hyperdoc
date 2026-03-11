@@ -160,6 +160,21 @@ PAGE-LOOKUP-FAILURE."
                     (:li (views:object-ref object))))))
       (views:html (:span (views:esc empty)))))
 
+(defun system-examples-target (system-designator)
+  (etypecase system-designator
+    (asdf:system
+     system-designator)
+    ((or string symbol)
+     (asdf:find-system system-designator))))
+
+(defun render-system-example-count (system example-count)
+  (let ((display (format nil "~D" example-count)))
+    (if (plusp example-count)
+        (views:object-ref (system-examples-target system)
+                          :display display
+                          :select "examples")
+        (views:html (:tt (views:esc display))))))
+
 (defun render-system-scope-table (systems)
   (views:html
     (:table :class "inspector-table"
@@ -179,7 +194,7 @@ PAGE-LOOKUP-FAILURE."
                         (:td (if source-file
                                  (views:object-ref source-file)
                                  (views:html (:tt (views:esc "n/a")))))
-                        (:td (:tt (views:esc (format nil "~D" example-count))))))))))
+                        (:td (render-system-example-count system example-count))))))))
 
 (defun hyperdoc-pages (hd)
   (ensure-pages-loaded hd)

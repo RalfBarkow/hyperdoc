@@ -106,18 +106,43 @@
           (string-capitalize (string-downcase (symbol-name kind)))
           (string-downcase (symbol-name function-symbol))))
 
-(defun register-example-check (function-symbol &key (system "hyperdoc")
+(defun normalized-source-file (pathname)
+  (when pathname
+    (or (ignore-errors (truename pathname))
+        pathname)))
+
+(defun component-defines-source-file-p (component source-file)
+  (let ((component-path (normalized-source-file
+                         (ignore-errors (asdf:component-pathname component)))))
+    (or (and component-path
+             (equal component-path source-file))
+        (loop for child in (ignore-errors (asdf:component-children component))
+              thereis (component-defines-source-file-p child source-file)))))
+
+(defun source-file-system-name (source-file)
+  (let ((source-file (normalized-source-file source-file)))
+    (when source-file
+      (loop for name in (sort (copy-list (asdf:registered-systems)) #'string<)
+            for system = (ignore-errors (asdf:find-system name))
+            when (and system
+                      (component-defines-source-file-p system source-file))
+              return (asdf:component-name system)))))
+
+(defun register-example-check (function-symbol &key system
                                               (package (symbol-package function-symbol))
                                               (source-file (or *load-truename*
                                                                *compile-file-truename*))
                                               page
                                               title
                                               tags)
-  (let* ((package-name (normalize-package-designator package))
+  (let* ((resolved-system (or system
+                              (source-file-system-name source-file)
+                              "hyperdoc"))
+         (package-name (normalize-package-designator package))
          (page-title (or page (source-file-page-title source-file)))
          (registration
            (list :function function-symbol
-                 :system (normalize-string-designator system)
+                 :system (normalize-string-designator resolved-system)
                  :package package-name
                  :source-file source-file
                  :page page-title
