@@ -1,0 +1,125 @@
+<h1>Idiomatic Feedback as Survey Instead of Nitpicking</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page turns one thread of <a hyperbook="hyperdoc" page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a>
+  into an operational rule for idiomatic Lisp review: treat local idiomatic
+  cleanups as real but small, and reserve stronger claims for patterns that
+  recur across the codebase with inspectable context.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Micro-idiom vs recurring idiom"><tt>Micro-idiom vs recurring idiom</tt></a></li>
+  <li><a hyperbook="topics" page="Structural recurrence"><tt>Structural recurrence</tt></a></li>
+  <li><a hyperbook="topics" page="Survey-driven refactoring"><tt>Survey-driven refactoring</tt></a></li>
+  <li><a hyperbook="topics" page="Idiomatic Lisp survey"><tt>Idiomatic Lisp survey</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc code survey"><tt>HyperDoc code survey</tt></a></li>
+</ul>
+
+<h2>A micro-improvement can be real without being strategically important</h2>
+
+<p>
+  Replacing a trivial wrapper such as
+  <tt>(lambda (reference) (list reference))</tt> with <tt>#'list</tt> is a real
+  idiomatic improvement. It shortens the code and uses a standard function
+  designator directly.
+</p>
+
+<p>
+  But that single rewrite is still only a micro-improvement. By itself, it does
+  not tell us much about the codebase.
+</p>
+
+<h2>What makes an idiomatic issue survey-worthy</h2>
+
+<p>
+  A survey-worthy idiomatic issue is one that recurs across files, views, or
+  helper patterns. Examples include multiple ad hoc lambda wrappers, repeated
+  function-designator inconsistencies, repeated one-armed <tt>if</tt> forms
+  where <tt>when</tt> or <tt>unless</tt> would read more clearly, or duplicated
+  local helper skeletons that suggest a missing abstraction.
+</p>
+
+<p>
+  That is why the useful unit is a survey rather than a nit. The stronger claim
+  needs recurrence, context, and similarity, not only one isolated example.
+</p>
+
+<h2>The editorial layer sits above recurrence</h2>
+
+<p>
+  Even when recurrence is real, the survey result is still only the inventory
+  or cluster. A human editorial note explains what that recurrence may mean,
+  where the interpretation applies, and whether a rewrite is optional,
+  recommended, or explicitly not recommended.
+</p>
+
+<p>
+  A cluster records a recurring code shape. An editorial note records a human
+  interpretation of that shape. The note may recommend refactoring, contextual
+  caution, or explicit retention. A repeated form is not a defect merely
+  because it recurs.
+</p>
+
+<p>
+  That note layer should support at least observation, interpretation, context
+  boundary, refactoring note, and counterexample or exception. It is the layer
+  that turns inventory into HyperDoc rather than leaving the survey as a raw
+  tally.
+</p>
+
+<p>
+  Notes should attach primarily to clusters rather than to isolated
+  occurrences. Individual examples help the reader see the pattern, but the
+  editorial object is the recurring shape plus its bounded interpretation.
+</p>
+
+<h2>Konrad example as editorial note</h2>
+
+<p>
+  Pattern: trivial lambda wrappers around existing function designators.
+</p>
+
+<p>
+  Survey finding: several occurrences of <tt>(lambda (x) (list x))</tt>-like
+  wrappers or other single-call lambdas.
+</p>
+
+<p>
+  Editorial note example: &quot;This cluster shows recurring trivial lambda
+  wrappers around directly callable functions. In isolated cases this is only a
+  micro-idiom issue and does not obstruct reading. Where such wrappers recur
+  across nearby views, replacing them with direct function designators can
+  improve regularity and reduce noise. Not every occurrence should be changed
+  automatically; preserve local clarity.&quot;
+</p>
+
+<h2>Operational meaning of &quot;improve Lisp idioms&quot;</h2>
+
+<ol>
+  <li>Find recurring patterns across the corpus.</li>
+  <li>Inspect concrete examples in context.</li>
+  <li>Distinguish minor cleanups from structural repetition.</li>
+  <li>Refactor only where readability or regularity actually improves.</li>
+</ol>
+
+<h2>Review stance</h2>
+
+<ul>
+  <li><b>Survey before doctrine:</b> start with the corpus, not a checklist.</li>
+  <li><b>Examples before verdicts:</b> inspect real cases before naming a weakness.</li>
+  <li><b>Recurrence before refactoring:</b> repeated shapes justify stronger action than one-off nits.</li>
+  <li><b>Context before prescription:</b> enclosing definitions and nearby helpers matter.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Ward's Idiomatic Survey">Ward's Idiomatic Survey</a></li>
+  <li><a page="From Idiomatic Survey to Idiomatic Lisp Survey">From Idiomatic Survey to Idiomatic Lisp Survey</a></li>
+  <li><a page="Similarity, Context, and Recurrence in HyperDoc">Similarity, Context, and Recurrence in HyperDoc</a></li>
+  <li><a hyperbook="hyperdoc" page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a></li>
+</ul>

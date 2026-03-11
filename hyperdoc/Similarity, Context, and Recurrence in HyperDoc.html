@@ -1,0 +1,90 @@
+<h1>Similarity, Context, and Recurrence in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A useful code-shape survey needs more than counts. It needs recurrence,
+  enclosing context, and enough structural similarity to distinguish a one-off
+  expression from a recurring codebase pattern.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Structural recurrence"><tt>Structural recurrence</tt></a></li>
+  <li><a hyperbook="topics" page="Usage view"><tt>Usage view</tt></a></li>
+  <li><a hyperbook="topics" page="Nesting view"><tt>Nesting view</tt></a></li>
+  <li><a hyperbook="topics" page="Similar idioms"><tt>Similar idioms</tt></a></li>
+  <li><a hyperbook="topics" page="Survey-driven refactoring"><tt>Survey-driven refactoring</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc code survey"><tt>HyperDoc code survey</tt></a></li>
+</ul>
+
+<h2>Counts alone are too weak</h2>
+
+<p>
+  A frequent operator or helper name is only a starting signal. Counts can tell
+  us where to look, but not whether a recurring form is idiomatic, accidental,
+  historically layered, or already the clearest available shape.
+</p>
+
+<h2>Context changes the reading</h2>
+
+<p>
+  The same local form can mean different things inside a top-level
+  <tt>defview</tt>, a mapping helper, a restart branch, or a test harness.
+  That is why a useful survey needs a nesting/context view rather than only a
+  list of hits.
+</p>
+
+<h2>Similarity makes recurrence actionable</h2>
+
+<p>
+  A similar-forms view is the point where idiomatic feedback becomes stronger
+  than a nitpick. If several occurrences normalize to the same structural
+  pattern, then the reviewer can talk about a recurring shape instead of a lone
+  local line.
+</p>
+
+<h2>Clusters are evidence, not verdicts</h2>
+
+<p>
+  A cluster summary should never be mistaken for an automatic judgment. The
+  cluster shows recurrence. A human editorial note explains what that recurrence
+  seems to mean in the contexts where it appears.
+</p>
+
+<p>
+  A cluster records a recurring code shape. An editorial note records a human
+  interpretation of that shape. The note may recommend refactoring, contextual
+  caution, or explicit retention. A repeated form is not a defect merely
+  because it recurs.
+</p>
+
+<p>
+  That means idiomaticity is editorial, not automatic. A survey without notes
+  is only an inventory.
+</p>
+
+<h2>What this would mean in HyperDoc</h2>
+
+<p>
+  HyperDoc does not yet compute these clusters automatically. As a proposal,
+  though, a HyperDoc code survey should treat similarity as the main bridge from
+  micro-cleanup to survey-driven refactoring.
+</p>
+
+<ul>
+  <li><b>Usage evidence:</b> where does the pattern occur and in which file/system?</li>
+  <li><b>Context evidence:</b> what enclosing definition or helper layer shapes the meaning?</li>
+  <li><b>Similarity evidence:</b> which other occurrences share the same normalized code shape?</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="How Ward's Survey Works">How Ward's Survey Works</a></li>
+  <li><a page="From Idiomatic Survey to Idiomatic Lisp Survey">From Idiomatic Survey to Idiomatic Lisp Survey</a></li>
+  <li><a page="Idiomatic Feedback as Survey Instead of Nitpicking">Idiomatic Feedback as Survey Instead of Nitpicking</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>
