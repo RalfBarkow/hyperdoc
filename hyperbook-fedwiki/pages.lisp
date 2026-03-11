@@ -202,19 +202,26 @@ images, etc.")
                    :data entry)))
 
 (defun site-of (entry)
-  (->> entry
-    data-of
-    (gethash "site")))
+  (or (->> entry
+        data-of
+        (gethash "site"))
+      (some->> entry
+        data-of
+        (gethash "attribution")
+        (gethash "site"))))
 
 (defun extract-context (journal)
-  (let (fork-sites)
+  (let (remote-sites)
     (loop for entry across journal
           for site = (site-of entry)
           when site
-            do (setf fork-sites
+            ;; This looks like pushnew, but it ensures that the order
+            ;; of each site in the list corresponds to its most recent
+            ;; occurence in the journal.
+            do (setf remote-sites
                      (cons site
-                           (remove site fork-sites :test #'equal))))
-    (mapcar #'get-fedwiki fork-sites)))
+                           (remove site remote-sites :test #'equal))))
+    (mapcar #'get-fedwiki remote-sites)))
 
 ;;
 ;; Views
