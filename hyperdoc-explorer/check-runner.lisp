@@ -28,6 +28,22 @@
 (defun count-string (value)
   (format nil "~D" value))
 
+(defun examples-concept-target ()
+  (or (ignore-errors
+        (when (fboundp 'scoped-examples-topic)
+          (let ((topic (scoped-examples-topic)))
+            (or (ignore-errors
+                  (find-page *topics* (title-of topic) :signal-error? t))
+                topic))))
+      (ignore-errors
+        (find-page *hyperdoc* "Running HyperDoc Examples" :signal-error? t))))
+
+(defun render-examples-concept-ref (&key (display "Examples"))
+  (let ((target (examples-concept-target)))
+    (if target
+        (views:object-ref target :display display)
+        (views:html (views:esc display)))))
+
 (defun asdf-system-name-string (system-designator)
   (etypecase system-designator
     (asdf:system
@@ -326,7 +342,9 @@
     (views:html-view :title "Examples" :priority 2
       (views:html
         (:h3 "Scoped examples")
-        (:p "Examples belong to this ASDF system and act as runnable explanatory slices of its behavior.")
+        (:p
+         (render-examples-concept-ref)
+         " belong to this ASDF system and act as runnable explanatory slices of its behavior.")
         (:p
          (views:eval-button "Inspect example set"
                             (views:thunk run)
@@ -353,7 +371,10 @@
         (views:html-view :title "Tests" :priority 3
           (views:html
             (:h3 "Tests for this system")
-            (:p "Tests are an operational surface for this system. They are related to examples, but separate from the HyperDoc root identity.")
+            (:p
+             "Tests are an operational surface for this system. They are related to "
+             (render-examples-concept-ref)
+             ", but separate from the HyperDoc root identity.")
             (:p
              (:b (views:esc "Test systems: "))
              (render-object-ref-list validation-systems))
@@ -381,7 +402,9 @@
     (views:html-view :title "Tests" :priority 5
       (views:html
         (:h3 "Tests")
-        (:p "Examples help you understand a system. Tests help you verify it. This root surface is a local pointer to test entry points for this HyperDoc.")
+        (:p
+         (render-examples-concept-ref)
+         " help you understand a system. Tests help you verify it. This root surface is a local pointer to test entry points for this HyperDoc.")
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Primary system"))
                      (:td (views:object-ref system)))
