@@ -3847,6 +3847,54 @@
                  "HyperDoc Evaluation and Inspection Model"
                  "Glamorous Toolkit and HyperDoc")))
 
+(defun portable-examples-topic ()
+  (make-topic
+   :id "portable-examples"
+   :title "Portable examples"
+   :summary "Examples that live in the separate system :hyperdoc/examples so they can remain reusable and unloaded until that portable example layer is explicitly requested."
+   :references '("Portable examples in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Running HyperDoc Examples"
+                 "Understanding ASDF Systems in HyperDoc")))
+
+(defun portable-example-scope-topic ()
+  (make-topic
+   :id "portable-example-scope"
+   :title "Portable example scope"
+   :summary "The system-scoped discovery boundary for examples that belong to :hyperdoc/examples rather than to base :hyperdoc or the ops-specific :hyperdoc/examples/ops layer."
+   :references '("Portable examples in HyperDoc"
+                 "Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc")))
+
+(defun example-system-boundary-topic ()
+  (make-topic
+   :id "example-system-boundary"
+   :title "Example system boundary"
+   :summary "The ASDF boundary that determines which example functions become discoverable for a given system and which example layers stay unloaded."
+   :references '("Portable examples in HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "Running HyperDoc Examples")))
+
+(defun lazy-example-discovery-topic ()
+  (make-topic
+   :id "lazy-example-discovery"
+   :title "Lazy example discovery"
+   :summary "Example discovery should reflect the systems already loaded in the image, so portable and ops-specific examples remain absent until their owning systems are explicitly loaded."
+   :references '("Portable examples in HyperDoc"
+                 "Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc")))
+
+(defun examples-system-layering-topic ()
+  (make-topic
+   :id "examples-system-layering"
+   :title "Example system layering"
+   :summary "The repo's example architecture is layered across base :hyperdoc examples, portable :hyperdoc/examples examples, and ops-specific :hyperdoc/examples/ops examples."
+   :references '("Portable examples in HyperDoc"
+                 "Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Understanding ASDF Systems in HyperDoc")))
+
 (defun validation-surfaces-topic ()
   (make-topic
    :id "validation-surfaces"
