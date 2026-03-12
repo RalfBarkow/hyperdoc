@@ -1,0 +1,124 @@
+<h1>Portable examples in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Portable examples">Portable examples</a> are
+  example functions that belong to the separate ASDF system
+  <tt>:hyperdoc/examples</tt> rather than to the minimal base
+  <tt>:hyperdoc</tt> system. In this repository, that means they are part of
+  the existing system-scoped examples model, not a root-global pool of example
+  functions that should always be present in every running image.
+</p>
+
+<p>
+  The architectural point is not merely organizational convenience. A
+  <a hyperbook="topics" page="Example system boundary">example system
+  boundary</a> lets HyperDoc keep its base image small and predictable while
+  still exposing richer example material when the corresponding ASDF subsystem
+  is explicitly loaded. Portable examples are therefore an ASDF design choice
+  about scope and load boundaries, not an ad hoc implementation quirk.
+</p>
+
+<h2>Base, portable, and ops-specific example layers</h2>
+
+<p>
+  HyperDoc currently uses three distinct example layers. Base examples belong
+  to <tt>:hyperdoc</tt> and are expected to be available whenever the minimal
+  core system is loaded. Portable examples belong to
+  <tt>:hyperdoc/examples</tt> and stay outside the base layer until that system
+  is requested. Ops-specific examples belong to
+  <tt>:hyperdoc/examples/ops</tt> and remain a still narrower layer for local
+  or operational workflows.
+</p>
+
+<p>
+  This is best understood as
+  <a hyperbook="topics" page="Example system layering">example system
+  layering</a>. The layers are cumulative, but not identical. Loading
+  <tt>:hyperdoc/examples</tt> should expose the
+  <a hyperbook="topics" page="Portable example scope">portable example
+  scope</a> without silently changing which examples count as part of base
+  <tt>:hyperdoc</tt>. Loading <tt>:hyperdoc/examples/ops</tt> should expose its
+  own ops-specific layer without retroactively redefining the earlier
+  boundaries.
+</p>
+
+<h2>Why the load boundary matters</h2>
+
+<p>
+  HyperDoc's examples surfaces are scoped by ASDF system. That means example
+  presence in the image should track the systems actually loaded into that
+  image. If portable examples were loaded eagerly with base <tt>:hyperdoc</tt>,
+  the system boundary would become misleading: the image would look as if the
+  portable layer were part of the base system even though it is defined and
+  maintained separately.
+</p>
+
+<p>
+  The separation also keeps repo-local workflows honest. Base HyperDoc can stay
+  focused on the small set of examples that belong to the core system, while
+  the portable layer can depend on additional translation or FedWiki-facing
+  logic without forcing those dependencies into every core-only session.
+</p>
+
+<h2>Why the discovery boundary matters</h2>
+
+<p>
+  <a hyperbook="topics" page="Lazy example discovery">Lazy example
+  discovery</a> is the discoverability consequence of that same ASDF design.
+  Example discovery should report only what the current image has actually
+  loaded for the requested system. Before <tt>:hyperdoc/examples</tt> is
+  loaded, discovery for that system should remain empty. After it is loaded,
+  the portable examples should become visible as discoverable runnable checks.
+</p>
+
+<p>
+  This keeps the <a hyperbook="topics" page="Scoped examples">Examples</a>
+  surface meaningful. A system-scoped examples view should show the examples
+  that belong to that system and are currently available to run. It should not
+  guess across unloaded layers or flatten all example registrations into one
+  root-wide registry.
+</p>
+
+<h2>Relation to the existing Examples surface</h2>
+
+<p>
+  Portable examples still use the same
+  <a hyperbook="topics" page="Run action for examples">run action for
+  examples</a> as the base layer. They are not a second execution mechanism.
+  What changes is which examples become discoverable under which ASDF system
+  and when they enter the image. In other words, the run affordance stays the
+  same, but the owning ASDF system and its discovery/load boundary remain
+  explicit.
+</p>
+
+<p>
+  That is why the best place to understand portable examples is inside the
+  existing <a hyperbook="topics" page="ASDF systems as scope">ASDF systems as
+  scope</a> model. HyperDoc does not need a new global examples browser for
+  this distinction. It needs the system-scoped Examples surface to remain
+  faithful to the repo's layered ASDF structure.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a></li>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a page="HyperDoc Test Runner">HyperDoc Test Runner</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Portable examples"><tt>Portable examples</tt></a></li>
+  <li><a hyperbook="topics" page="Portable example scope"><tt>Portable example scope</tt></a></li>
+  <li><a hyperbook="topics" page="Example system boundary"><tt>Example system boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Lazy example discovery"><tt>Lazy example discovery</tt></a></li>
+  <li><a hyperbook="topics" page="Example system layering"><tt>Example system layering</tt></a></li>
+  <li><a hyperbook="topics" page="Scoped examples"><tt>Scoped examples</tt></a></li>
+  <li><a hyperbook="topics" page="Run action for examples"><tt>Run action for examples</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF systems as scope"><tt>ASDF systems as scope</tt></a></li>
+</ul>

@@ -23,6 +23,18 @@
 </p>
 
 <p>
+  This repo also uses a layered example structure. Base examples belong to
+  <tt>:hyperdoc</tt>, <a hyperbook="topics" page="Portable examples">portable
+  examples</a> belong to <tt>:hyperdoc/examples</tt>, and ops-specific examples
+  belong to <tt>:hyperdoc/examples/ops</tt>. That
+  <a hyperbook="topics" page="Lazy example discovery">lazy example
+  discovery</a> boundary matters: a system-scoped Examples surface should only
+  show the examples for layers that have actually been loaded into the current
+  image. See <a page="Portable examples in HyperDoc">Portable examples in
+  HyperDoc</a> for the boundary in repo-local terms.
+</p>
+
+<p>
   For the ASDF model behind that placement, see
   <a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>.
   For the resulting examples/tests architecture, see

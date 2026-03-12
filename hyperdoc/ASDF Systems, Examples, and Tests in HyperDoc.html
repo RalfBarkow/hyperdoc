@@ -135,6 +135,20 @@
 </p>
 
 <p>
+  That system-scoped picture also applies to
+  <a hyperbook="topics" page="Portable examples">portable examples</a>. In
+  this repository, base examples belong to <tt>:hyperdoc</tt>, portable
+  examples belong to <tt>:hyperdoc/examples</tt>, and narrower operational
+  examples belong to <tt>:hyperdoc/examples/ops</tt>. The resulting
+  <a hyperbook="topics" page="Example system boundary">example system
+  boundary</a> keeps the Examples surface aligned with the ASDF system that
+  actually loaded the defining files instead of flattening all example layers
+  into one root-global list. See
+  <a page="Portable examples in HyperDoc">Portable examples in HyperDoc</a>
+  for the repo-local boundary in more detail.
+</p>
+
+<p>
   That placement keeps the HyperDoc root honest. Root views should express what
   HyperDoc is: pages, topics, and system scopes. They should not pretend that
   all examples in the image belong to one undifferentiated root console.
