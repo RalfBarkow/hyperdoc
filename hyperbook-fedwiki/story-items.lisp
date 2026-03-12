@@ -12,6 +12,8 @@
 
 (defparameter *any-except-closing-bracket-regex* "(?:[^\\]]*)")
 
+(defparameter *git-commit-hash-length* 40)
+
 (defparameter *link-regex*
   (str:concat "\\["
               "(?:"
@@ -22,6 +24,54 @@
               "(?:" *url-regex* "\\s*" *any-except-closing-bracket-regex* ")"
               ")"
               "\\]"))
+
+(defun hex-char-p (char)
+  (and char (not (null (digit-char-p char 16)))))
+
+(defun commit-hash-start-p (text start)
+  (let* ((length (length text))
+         (end (+ start *git-commit-hash-length*)))
+    (and (<= end length)
+         (or (zerop start)
+             (not (hex-char-p (char text (1- start)))))
+         (loop for i from start below end
+               always (hex-char-p (char text i)))
+         (or (= end length)
+             (not (hex-char-p (char text end)))))))
+
+(defun next-commit-hash-range (text &optional (start 0))
+  (loop with limit = (- (length text) *git-commit-hash-length*)
+        for pos from start to limit
+        when (commit-hash-start-p text pos)
+          do (return (values pos (+ pos *git-commit-hash-length*)))
+        finally (return (values nil nil))))
+
+(defun software-heritage-revision-swhid (hash)
+  (str:concat "swh:1:rev:" (str:downcase hash)))
+
+(defun software-heritage-revision-url (hash)
+  (str:concat "https://archive.softwareheritage.org/"
+              (software-heritage-revision-swhid hash)
+              "/"))
+
+(defun process-commit-hashes (text page text-fn commit-fn)
+  (loop with cursor = 0
+        with results = '()
+        do (multiple-value-bind (start end)
+               (next-commit-hash-range text cursor)
+             (if start
+                 (progn
+                   (when (< cursor start)
+                     (push (funcall text-fn (str:substring cursor start text) page)
+                           results))
+                   (push (funcall commit-fn (str:substring start end text) page)
+                         results)
+                   (setf cursor end))
+                 (progn
+                   (when (< cursor (length text))
+                     (push (funcall text-fn (str:substring cursor (length text) text) page)
+                           results))
+                   (return (nreverse results)))))))
 
 (defun process-text-and-links (text page text-fn link-fn)
   (let ((link-positions (cl-ppcre:all-matches *link-regex* text)))
@@ -68,11 +118,22 @@
                    :web-links (sort web-links #'string< :key #'hb:url-of))))
 
 (defmethod extract-links-from-wiki-text (text page)
-  (process-text-and-links text page
-                          #'(lambda (chunk page)
-                              (declare (ignore chunk page))
-                              nil)
-                          #'collect-link))
+  (loop for item in (process-text-and-links text page
+                                            #'(lambda (chunk page)
+                                                (process-commit-hashes
+                                                 chunk page
+                                                 #'(lambda (plain page)
+                                                     (declare (ignore plain page))
+                                                     nil)
+                                                 #'(lambda (hash page)
+                                                     (hb:make-web-link
+                                                      page
+                                                      (software-heritage-revision-url hash)))))
+                                            #'collect-link)
+        if (listp item)
+          append item
+        else if item
+          collect item))
 
 (defun collect-link (link-text page)
   (if (str:starts-with? "[[" link-text)
@@ -124,8 +185,17 @@
 (defmethod render-wiki-text (text page)
   (process-text-and-links text page
                           #'(lambda (chunk page)
-                              (declare (ignore page))
-                              (views:html (views:esc chunk)))
+                              (process-commit-hashes
+                               chunk page
+                               #'(lambda (plain page)
+                                   (declare (ignore page))
+                                   (views:html (views:esc plain)))
+                               #'(lambda (hash page)
+                                   (declare (ignore page))
+                                   (render-external-link
+                                    (software-heritage-revision-url hash)
+                                    hash
+                                    nil))))
                           #'render-link))
 
 (defun render-link (link-text page)
@@ -164,6 +234,14 @@
 (defmethod render-story-item ((type (eql :paragraph)) item page)
   (views:html
     (:p (render-wiki-text (text-of item) page))))
+
+;; Markdown
+
+(defmethod render-story-item ((type (eql :markdown)) item page)
+  (views:html
+    (:div (:i (:small (views:object-ref item :display "markdown"))))
+    (:pre :style "background-color: #eee;"
+          (render-wiki-text (text-of item) page))))
 
 ;; References
 
