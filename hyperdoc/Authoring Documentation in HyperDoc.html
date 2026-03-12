@@ -46,6 +46,9 @@
 
 <ul>
   <li>Embed inspectable objects when page claims should be tied to runtime-inspectable handles.</li>
+  <li>Substantial topic pages should expose a dedicated <tt>Inspectable objects</tt> section rather than hiding object entry points inside prose.</li>
+  <li>Listed items must be useful next inspection steps: the main conceptual object, the main system boundary object, important helper/runtime objects, or relevant operations/functions.</li>
+  <li>Inspectable-object placement is flexible by page shape: on short pages it can appear near the top; on longer pages it can follow the main explanatory section.</li>
   <li>Use <tt>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;</tt> for topic pages.</li>
   <li>Use <tt>expr</tt> references for non-topic workflow/runtime objects.</li>
   <li>Inspectable objects are explanatory affordances, not decorative links.</li>
@@ -73,6 +76,8 @@
 <ul>
   <li>Cross-link durable pages to related durable pages and external references where needed.</li>
   <li>Expose corresponding topic objects in an <tt>Inspectable objects</tt> section.</li>
+  <li>Use first-mention topic linking only where the glossary is explicitly scoped and the term is unambiguous in that page cluster.</li>
+  <li>Avoid automatic global linking for ambiguous terms such as generic uses of <tt>system</tt>, <tt>component</tt>, or <tt>operation</tt> unless the glossary is explicitly scoped.</li>
   <li>For topic-page links, keep <tt>page=</tt> equal to the exact canonical topic title string.</li>
   <li>For FedWiki links in HyperBook contexts, prefer stable slug-based <tt>page=</tt> values.</li>
 </ul>
