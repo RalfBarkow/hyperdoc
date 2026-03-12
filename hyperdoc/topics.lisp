@@ -2378,9 +2378,146 @@
   (make-topic
    :id "mech-op-args-emit-dispatch"
    :title "Mech op/args and emit dispatch"
-   :summary "Mech mirrors the same seam: split command into op/args, assemble execution context, then dispatch to blocks[op].emit."
+   :summary "Mech exposes a block-level executable seam: split command into op and args, assemble execution context, then dispatch to blocks[op].emit."
    :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Mech Credible Maintenance Story"
+                 "Mech Execution Context and Emit Protocol"
+                 "Runtime Dispatch Seams in HyperDoc")))
+
+(defun runtime-dispatch-seam-topic ()
+  (make-topic
+   :id "runtime-dispatch-seam"
+   :title "Runtime dispatch seam"
+   :summary "A compact execution boundary where authored syntax has been normalized enough for action and explanation to attach to the same event."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun execution-context-bundle-topic ()
+  (make-topic
+   :id "execution-context-bundle"
+   :title "Execution context bundle"
+   :summary "The assembled runtime package of command, op, args, body, element, and state used to execute and inspect a Mech block."
+   :references '("Mech Execution Context and Emit Protocol"
+                 "Runtime Dispatch Seams in HyperDoc")))
+
+(defun block-level-interpreter-seam-topic ()
+  (make-topic
+   :id "block-level-interpreter-seam"
+   :title "Block-level interpreter seam"
+   :summary "A domain-specific execution seam above the VM level but below page-level narrative."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Stepper Debugger Surface"
+                 "Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun explanation-from-execution-topic ()
+  (make-topic
+   :id "explanation-from-execution"
+   :title "Explanation from execution"
+   :summary "Explanation generated from the same runtime event that performs the work, instead of reconstructed later."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Smalltalk Browser Frame and Scene in HyperDoc"
+                 "Inspectable Mech Runs")))
+
+(defun executable-explanation-topic ()
+  (make-topic
+   :id "executable-explanation"
+   :title "Executable explanation"
+   :summary "Explanatory artifacts derived directly from operational semantics."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun runtime-provenance-topic ()
+  (make-topic
+   :id "runtime-provenance"
+   :title "Runtime provenance"
+   :summary "Traceable links from generated output or findings back to the execution step and source that produced them."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Mech Execution Context and Emit Protocol"
+                 "Inspectable Mech Runs")))
+
+(defun block-registry-protocol-topic ()
+  (make-topic
+   :id "block-registry-protocol"
+   :title "Block registry protocol"
+   :summary "The implicit interface formed by blocks[op] and emit methods, defining Mech's executable vocabulary."
+   :references '("Mech Execution Context and Emit Protocol"
+                 "Mech Plugin Progress March 2026")))
+
+(defun operation-argument-normalization-topic ()
+  (make-topic
+   :id "operation-argument-normalization"
+   :title "Operation/argument normalization"
+   :summary "The parse step that turns command text into a stable operation name plus argument list."
+   :references '("Mech Execution Context and Emit Protocol"
+                 "Runtime Dispatch Seams in HyperDoc")))
+
+(defun structured-findings-tally-topic ()
+  (make-topic
+   :id "structured-findings-tally"
+   :title "Structured findings tally"
+   :summary "A categorized account of boundaries and losses encountered during execution or generation."
+   :references '("Mech Credible Maintenance Story"
+                 "Mech Plugin Progress March 2026"
+                 "Inspectable Mech Runs")))
+
+(defun first-class-run-record-topic ()
+  (make-topic
+   :id "first-class-run-record"
+   :title "First-class run record"
+   :summary "An inspectable object representing one Mech execution with steps, state, artifacts, and findings."
+   :references '("Inspectable Mech Runs"
+                 "Runtime Dispatch Seams in HyperDoc"
                  "Mech Credible Maintenance Story")))
+
+(defun diagnostic-publication-topic ()
+  (make-topic
+   :id "diagnostic-publication"
+   :title "Diagnostic publication"
+   :summary "Publishing execution findings as visible story items or inspectable objects rather than hiding them in console output."
+   :references '("Mech Plugin Progress March 2026"
+                 "Mech Credible Maintenance Story"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun execution-step-object-topic ()
+  (make-topic
+   :id "execution-step-object"
+   :title "Execution step object"
+   :summary "A proposed inspectable object for one executed Mech block step, including source command, normalized form, state effects, and findings."
+   :references '("Inspectable Mech Runs"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun state-delta-topic ()
+  (make-topic
+   :id "state-delta"
+   :title "State delta"
+   :summary "A record of how one execution step changes the working state carried through a run."
+   :references '("Inspectable Mech Runs"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun artifact-provenance-topic ()
+  (make-topic
+   :id "artifact-provenance"
+   :title "Artifact provenance"
+   :summary "The link between an emitted artifact and the execution step or source command that produced it."
+   :references '("Inspectable Mech Runs"
+                 "Runtime Dispatch Seams in HyperDoc")))
+
+(defun findings-ledger-topic ()
+  (make-topic
+   :id "findings-ledger"
+   :title "Findings ledger"
+   :summary "A durable inspectable record of warnings, errors, and boundary findings accumulated across one run."
+   :references '("Inspectable Mech Runs"
+                 "Structured findings tally")))
+
+(defun replay-trail-topic ()
+  (make-topic
+   :id "replay-trail"
+   :title "Replay trail"
+   :summary "A stepwise trace that lets one review how a run advanced from authored commands to emitted artifacts and findings."
+   :references '("Inspectable Mech Runs"
+                 "First-class run record")))
 
 (defun python-json-tool-source-topic ()
   (make-topic
