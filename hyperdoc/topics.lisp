@@ -2655,6 +2655,307 @@
                  "Acknowledgements"
                  "Design")))
 
+(defun make-hypercard-topic (&key id title summary references)
+  (make-topic
+   :id id
+   :title title
+   :summary summary
+   :references references))
+
+(defun hypercard-topic ()
+  (make-hypercard-topic
+   :id "hypercard"
+   :title "HyperCard"
+   :summary "HyperCard is Apple's card-and-stack hypermedia authoring system whose significance for HyperDoc lies in its integrated authoring surface, approachable scripting, and unusually strong sense of software malleability."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood"
+                 "Reference Systems in HyperDoc")))
+
+(defun hypertalk-topic ()
+  (make-hypercard-topic
+   :id "hypertalk"
+   :title "HyperTalk"
+   :summary "HyperTalk is the object-centered scripting language of HyperCard, notable for attaching handlers to visible objects through an English-like but still formal programming surface."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc")))
+
+(defun hypercard-stack-topic ()
+  (make-hypercard-topic
+   :id "hypercard-stack"
+   :title "HyperCard stack"
+   :summary "A HyperCard stack is the main container that holds cards, scripts, structure, and user data in one authorable artifact."
+   :references '("HyperCard on the Macintosh"
+                 "HyperTalk and English-ish Programming")))
+
+(defun hypercard-card-topic ()
+  (make-hypercard-topic
+   :id "hypercard-card"
+   :title "HyperCard card"
+   :summary "A HyperCard card is the primary visible surface within a stack, combining displayed content with object-level behavior."
+   :references '("HyperCard on the Macintosh"
+                 "HyperTalk and English-ish Programming")))
+
+(defun hypercard-background-layer-topic ()
+  (make-hypercard-topic
+   :id "hypercard-background-layer"
+   :title "HyperCard background layer"
+   :summary "The background layer in HyperCard carries shared fields, buttons, and scripts across multiple cards in the same stack."
+   :references '("HyperCard on the Macintosh"
+                 "HyperTalk and English-ish Programming")))
+
+(defun hypercard-foreground-layer-topic ()
+  (make-hypercard-topic
+   :id "hypercard-foreground-layer"
+   :title "HyperCard foreground layer"
+   :summary "The foreground layer in HyperCard is the card-specific visible surface where local content and interactions differ from the shared background."
+   :references '("HyperCard on the Macintosh"
+                 "HyperTalk and English-ish Programming")))
+
+(defun hypercard-field-topic ()
+  (make-hypercard-topic
+   :id "hypercard-field"
+   :title "HyperCard field"
+   :summary "A HyperCard field is a text-bearing object that can display, collect, and script textual content inside a stack."
+   :references '("HyperCard on the Macintosh"
+                 "HyperTalk and English-ish Programming")))
+
+(defun hypercard-button-topic ()
+  (make-hypercard-topic
+   :id "hypercard-button"
+   :title "HyperCard button"
+   :summary "A HyperCard button is a visible or invisible interactive object that can trigger navigation, actions, or custom handlers."
+   :references '("HyperCard on the Macintosh"
+                 "HyperTalk and English-ish Programming")))
+
+(defun transparent-button-hotspot-topic ()
+  (make-hypercard-topic
+   :id "transparent-button-hotspot"
+   :title "Transparent button hotspot"
+   :summary "A transparent button hotspot turns an arbitrary area of a card into an interactive region without adding visible chrome."
+   :references '("HyperCard on the Macintosh"
+                 "Hypermedia authoring")))
+
+(defun stack-contained-data-topic ()
+  (make-hypercard-topic
+   :id "stack-contained-data"
+   :title "Stack-contained data"
+   :summary "HyperCard kept scripts, structure, and user data inside the same stack artifact, reducing the gap between content editing and persistence."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc")))
+
+(defun automatic-persistence-topic ()
+  (make-hypercard-topic
+   :id "automatic-persistence"
+   :title "Automatic persistence"
+   :summary "Automatic persistence names the HyperCard feeling that edits and data changes become real without a separate deployment or database-management step."
+   :references '("HyperCard on the Macintosh"
+                 "Integrated authoring environment")))
+
+(defun end-user-programming-topic ()
+  (make-hypercard-topic
+   :id "end-user-programming"
+   :title "End-user programming"
+   :summary "End-user programming treats programming as something reachable by ordinary users through direct tools, visible objects, and low-friction feedback."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood")))
+
+(defun integrated-authoring-environment-topic ()
+  (make-hypercard-topic
+   :id "integrated-authoring-environment"
+   :title "Integrated authoring environment"
+   :summary "An integrated authoring environment keeps editing, behavior, testing, and persistence close enough that the user edits the same surface that is being used."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun direct-manipulation-authoring-topic ()
+  (make-hypercard-topic
+   :id "direct-manipulation-authoring"
+   :title "Direct manipulation authoring"
+   :summary "Direct manipulation authoring means shaping interactive artifacts by acting on visible objects directly rather than only through distant configuration."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood")))
+
+(defun built-in-paint-tools-topic ()
+  (make-hypercard-topic
+   :id "built-in-paint-tools"
+   :title "Built-in paint tools"
+   :summary "Built-in paint tools matter in HyperCard because drawing, layout, and interaction design happen inside the same authoring surface as scripting."
+   :references '("HyperCard on the Macintosh")))
+
+(defun immediate-feedback-loop-topic ()
+  (make-hypercard-topic
+   :id "immediate-feedback-loop"
+   :title "Immediate feedback loop"
+   :summary "An immediate feedback loop lets authors modify content or behavior and test the result without a disruptive phase change into a different tool or deployment surface."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc")))
+
+(defun content-behavior-co-location-topic ()
+  (make-hypercard-topic
+   :id "content-behavior-co-location"
+   :title "Content/behavior co-location"
+   :summary "Content/behavior co-location means the visible artifact and its behavior definitions remain close enough that explanation and modification are cheap."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc")))
+
+(defun editable-application-surface-topic ()
+  (make-hypercard-topic
+   :id "editable-application-surface"
+   :title "Editable application surface"
+   :summary "An editable application surface is one where using the software and altering the software happen on visibly related surfaces rather than in sealed layers."
+   :references '("HyperCard and HyperDoc"
+                 "HyperCard on the Macintosh")))
+
+(defun object-message-scripting-topic ()
+  (make-hypercard-topic
+   :id "object-message-scripting"
+   :title "Object/message scripting"
+   :summary "Object/message scripting attaches behavior to objects and routes messages through a visible hierarchy rather than treating code as detached from the artifact."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard on the Macintosh")))
+
+(defun english-ish-programming-topic ()
+  (make-hypercard-topic
+   :id "english-ish-programming"
+   :title "English-ish programming"
+   :summary "English-ish programming uses approachable, sentence-like notation to lower entry cost while still depending on real structural rules and exactness."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard reference platform neighborhood")))
+
+(defun script-editor-limitations-topic ()
+  (make-hypercard-topic
+   :id "script-editor-limitations"
+   :title "Script editor limitations"
+   :summary "HyperCard's script editor limitations matter because the language was approachable while the surrounding programming ergonomics remained comparatively sparse."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard on the Macintosh")))
+
+(defun applescript-interoperability-topic ()
+  (make-hypercard-topic
+   :id "applescript-interoperability"
+   :title "AppleScript interoperability"
+   :summary "AppleScript interoperability marks the boundary where HyperCard's approachable built-in scripting could cooperate with broader Macintosh automation rather than trying to absorb every capability itself."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard on the Macintosh"
+                 "HyperCard reference platform neighborhood")))
+
+(defun xcmd-extension-boundary-topic ()
+  (make-hypercard-topic
+   :id "xcmd-extension-boundary"
+   :title "XCMD extension boundary"
+   :summary "The XCMD boundary names the point where HyperCard relied on external compiled extensions for capabilities beyond core HyperTalk and built-in objects."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard Successors, Preservation, and Revival Attempts")))
+
+(defun xfcn-extension-boundary-topic ()
+  (make-hypercard-topic
+   :id "xfcn-extension-boundary"
+   :title "XFCN extension boundary"
+   :summary "The XFCN boundary names the external-function extension mechanism that let HyperCard reach beyond its built-in language and object model."
+   :references '("HyperTalk and English-ish Programming"
+                 "HyperCard Successors, Preservation, and Revival Attempts")))
+
+(defun hypermedia-authoring-topic ()
+  (make-hypercard-topic
+   :id "hypermedia-authoring"
+   :title "Hypermedia authoring"
+   :summary "Hypermedia authoring combines linked navigation, media placement, interaction, and structural editing into one authoring workflow."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard reference platform neighborhood"
+                 "Reference Systems in HyperDoc")))
+
+(defun hypercard-and-the-web-topic ()
+  (make-hypercard-topic
+   :id "hypercard-and-the-web"
+   :title "HyperCard and the web"
+   :summary "HyperCard and the web is a comparative topic about linked cards versus linked documents, and about how much authorability remained visible to ordinary users."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood")))
+
+(defun hypercard-as-reference-platform-topic ()
+  (make-hypercard-topic
+   :id "hypercard-as-reference-platform"
+   :title "HyperCard as reference platform"
+   :summary "HyperCard is a reference platform for HyperDoc because it proves that integrated authoring, scripting, storage, and user-owned malleability can coexist in one approachable surface."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "Reference Systems in HyperDoc"
+                 "HyperCard reference platform neighborhood")))
+
+(defun natural-language-programming-limits-topic ()
+  (make-hypercard-topic
+   :id "natural-language-programming-limits"
+   :title "Natural language programming limits"
+   :summary "Natural-language-style programming can improve approachability without removing the need for explicit structure, exact syntax, and constrained semantics."
+   :references '("HyperTalk and English-ish Programming"
+                 "English-ish programming")))
+
+(defun no-code-comparison-topic ()
+  (make-hypercard-topic
+   :id "no-code-comparison"
+   :title "No-code comparison"
+   :summary "No-code comparison asks whether a platform exposes making to the user or mainly hides it behind managed builders and generated results."
+   :references '("HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood")))
+
+(defun vibe-coding-comparison-topic ()
+  (make-hypercard-topic
+   :id "vibe-coding-comparison"
+   :title "Vibe coding comparison"
+   :summary "Vibe coding comparison highlights the difference between generated software results and tools that expose the making process directly to users."
+   :references '("HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood")))
+
+(defun software-malleability-topic ()
+  (make-hypercard-topic
+   :id "software-malleability"
+   :title "Software malleability"
+   :summary "Software malleability is the degree to which a system lets users move from using software to altering or extending it without a severe surface break."
+   :references '("HyperCard on the Macintosh"
+                 "HyperCard and HyperDoc"
+                 "HyperCard reference platform neighborhood"
+                 "Reference Systems in HyperDoc")))
+
+(defun user-owned-software-surfaces-topic ()
+  (make-hypercard-topic
+   :id "user-owned-software-surfaces"
+   :title "User-owned software surfaces"
+   :summary "User-owned software surfaces are interfaces that let users inspect, alter, and keep control over the artifacts they rely on instead of treating them as sealed products."
+   :references '("HyperCard and HyperDoc"
+                 "HyperCard on the Macintosh"
+                 "Software malleability")))
+
+(defun hypercard-preservation-topic ()
+  (make-hypercard-topic
+   :id "hypercard-preservation"
+   :title "HyperCard preservation"
+   :summary "HyperCard preservation concerns how stacks, scripts, media, and workflows can be retained or translated when the original platform is no longer a standard contemporary environment."
+   :references '("HyperCard Successors, Preservation, and Revival Attempts"
+                 "HyperCard on the Macintosh")))
+
+(defun hypercard-emulation-topic ()
+  (make-hypercard-topic
+   :id "hypercard-emulation"
+   :title "HyperCard emulation"
+   :summary "HyperCard emulation keeps the original environment accessible enough to inspect and run stacks, while still falling short of full historical continuity."
+   :references '("HyperCard Successors, Preservation, and Revival Attempts"
+                 "HyperCard preservation")))
+
+(defun hypercard-reference-platform-neighborhood-topic ()
+  (make-hypercard-topic
+   :id "hypercard-reference-platform-neighborhood"
+   :title "HyperCard reference platform neighborhood"
+   :summary "Arrangement page preserving the editorial neighborhood among HyperCard, HyperTalk, GT, no-code, vibe coding, and adjacent malleability references without claiming semantic identity."
+   :references '("HyperCard reference platform neighborhood"
+                 "Reference Systems in HyperDoc"
+                 "Topic arrangement in HyperDoc")))
+
 (defun moldable-development-reference-systems-topic ()
   (make-topic
    :id "moldable-development-reference-systems"
