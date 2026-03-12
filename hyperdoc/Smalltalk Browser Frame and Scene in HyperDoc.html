@@ -40,6 +40,14 @@
   <li><a hyperbook="topics" page="Expanding the Role of Tools in a Literate Programming Environment"><tt>Expanding the Role of Tools in a Literate Programming Environment</tt></a></li>
   <li><a hyperbook="topics" page="Ward diagramming-debugger remembrance"><tt>Ward diagramming-debugger remembrance</tt></a></li>
   <li><a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
+  <li><a hyperbook="topics" page="Execution context bundle"><tt>Execution context bundle</tt></a></li>
+  <li><a hyperbook="topics" page="Block-level interpreter seam"><tt>Block-level interpreter seam</tt></a></li>
+  <li><a hyperbook="topics" page="Explanation from execution"><tt>Explanation from execution</tt></a></li>
+  <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnostic publication"><tt>Diagnostic publication</tt></a></li>
+  <li><a hyperbook="topics" page="Structured findings tally"><tt>Structured findings tally</tt></a></li>
 </ul>
 
 <h2>Evaluation for HyperDoc</h2>
@@ -128,6 +136,47 @@ await blocks[op].emit.apply(null, [stuff])</code></pre>
   becomes a consequence of a compact runtime dispatch seam.
 </p>
 
+<h3>Why the Mech dispatch seam matters</h3>
+
+<p>
+  The important point is not that Mech happens to have a dispatch line. The
+  important point is that <a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a>
+  creates a compact <a hyperbook="topics" page="Runtime dispatch seam"><tt>runtime dispatch seam</tt></a>
+  where authored command text has already been normalized enough for work to be
+  done, but execution is still close enough to the source command that
+  explanation can attach without later reconstruction.
+</p>
+
+<p>
+  Smalltalk's seam was deeper and more universal. The crucial triangulation of
+  class browser, object inspector, and single-step debugger made execution
+  readable because <a hyperbook="topics" page="CompiledMethod interpretNextInstructionFor: aContext"><tt>CompiledMethod interpretNextInstructionFor: aContext</tt></a>
+  exposed the next actionable semantic step. That is why explanation emerged
+  from execution-aware tool composition rather than static diagrams alone.
+</p>
+
+<p>
+  Mech is narrower. It is not a VM-level stepper and not a full debugger. It is
+  a <a hyperbook="topics" page="Block-level interpreter seam"><tt>block-level interpreter seam</tt></a>:
+  split a command into operation and arguments, assemble
+  <a hyperbook="topics" page="Execution context bundle"><tt>execution context bundle</tt></a>,
+  then dispatch through <tt>blocks[op].emit</tt>. That narrower seam is still
+  architecturally important because source form and runtime state meet at one
+  point.
+</p>
+
+<p>
+  For HyperDoc that means explanation should be generated from the same seam
+  that performs the work. A Mech run can publish
+  <a hyperbook="topics" page="First-class run record"><tt>first-class run records</tt></a>,
+  <a hyperbook="topics" page="Runtime provenance"><tt>runtime provenance</tt></a>,
+  <a hyperbook="topics" page="Diagnostic publication"><tt>diagnostic publication</tt></a>,
+  and <a hyperbook="topics" page="Structured findings tally"><tt>structured findings tallies</tt></a>
+  as direct byproducts of execution rather than as an after-the-fact reporting
+  layer. That makes Mech a practical executable-explanation hook at the block
+  DSL level.
+</p>
+
 <h2>Localhost FedWiki twin</h2>
 
 <p>
@@ -141,6 +190,8 @@ await blocks[op].emit.apply(null, [stuff])</code></pre>
 
 <ul>
   <li><a hyperbook="hyperdoc" page="Diagramming Debugger Surface">Diagramming Debugger Surface</a></li>
+  <li><a hyperbook="hyperdoc" page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  <li><a hyperbook="hyperdoc" page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
   <li><a hyperbook="hyperdoc" page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a></li>
   <li><a hyperbook="hyperdoc" page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
   <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>

@@ -162,6 +162,29 @@ pull request
   merely productive.
 </p>
 
+<h4>Why the dispatch seam makes this possible</h4>
+
+<p>
+  The credible maintenance story is not only about one block becoming more
+  diagnostic. Its architectural basis is the normalized
+  <a hyperbook="topics" page="Block registry protocol"><tt>block registry protocol</tt></a>
+  and shared <a hyperbook="topics" page="Execution context bundle"><tt>execution context bundle</tt></a>
+  behind Mech dispatch. The authored command text is normalized into
+  <a hyperbook="topics" page="Operation/argument normalization"><tt>operation/argument normalization</tt></a>,
+  carried together with body, element, and state, and then handed to
+  <tt>blocks[op].emit</tt>.
+</p>
+
+<p>
+  That seam is why <tt>PRINT</tt> can move from raw emission toward
+  <a hyperbook="topics" page="Diagnostic publication"><tt>diagnostic publication</tt></a>.
+  The same place that performs the work can also tally losses, report
+  boundaries, and eventually support more explicit
+  <a hyperbook="topics" page="Runtime provenance"><tt>runtime provenance</tt></a>.
+  Credible maintenance depends on preserving that seam between authored command
+  text and inspectable runtime behavior.
+</p>
+
 <h4>What makes the story credible</h4>
 
 <p>
@@ -192,6 +215,9 @@ pull request
   <li>Mech <tt>PRINT</tt> does not yet carry source-location links back to the exact relation or annotation that generated each output fragment.</li>
   <li>non-paragraph item types are tallied as wishes rather than rendered with their own first-class adapters.</li>
   <li>the report is still assembled inside the browser block implementation rather than surfaced as an inspectable object model.</li>
+  <li>there is no first-class source-location provenance per generated fragment yet.</li>
+  <li>there is no persistent <a hyperbook="topics" page="First-class run record"><tt>first-class run record</tt></a> or fully inspectable execution ledger yet.</li>
+  <li>the tally is real, but it is not yet a durable <a hyperbook="topics" page="Structured findings tally"><tt>structured findings tally</tt></a> object published across runs.</li>
 </ul>
 
 <p>
@@ -217,6 +243,8 @@ pull request
 
 <ul>
   <li><a hyperbook="hyperdoc" page="Mech Plugin Progress March 2026">Mech Plugin Progress March 2026</a></li>
+  <li><a hyperbook="hyperdoc" page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a hyperbook="hyperdoc" page="Inspectable Mech Runs">Inspectable Mech Runs</a></li>
   <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
   <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
 </ul>

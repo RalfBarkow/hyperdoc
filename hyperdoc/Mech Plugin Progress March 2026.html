@@ -53,6 +53,27 @@
   generative-plus-diagnostic step.
 </p>
 
+<h4>Dispatch protocol as an inspectable architecture</h4>
+
+<p>
+  The deeper significance is architectural. Current Mech is a plugin with a
+  small exported <tt>api</tt> and an emit-based block protocol. Command text is
+  normalized into operation and arguments, bundled with body, element, and
+  state, and then dispatched through <tt>blocks[op].emit</tt>. That makes the
+  dispatch protocol itself an inspectable seam rather than a hidden
+  implementation detail.
+</p>
+
+<p>
+  This is also why moving <tt>download</tt> into the shared <tt>api</tt> matters.
+  Capability moves from block-local implementation toward a shared
+  <a hyperbook="topics" page="Block registry protocol"><tt>block registry protocol</tt></a>
+  that can carry validation, instrumentation, run recording, and
+  <a hyperbook="topics" page="Diagnostic publication"><tt>diagnostic publication</tt></a>
+  in one place. The plugin is still small, but the seam is now visible enough
+  to support inspectable workflow architecture.
+</p>
+
 <h4>Before and after</h4>
 
 <p>
@@ -156,6 +177,8 @@
 
 <ul>
   <li><a hyperbook="hyperdoc" page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a hyperbook="hyperdoc" page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a hyperbook="hyperdoc" page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
   <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
   <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
   <li><a hyperbook="hyperdoc" page="HyperBook Journal Tools">HyperBook Journal Tools</a></li>
