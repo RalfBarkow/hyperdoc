@@ -86,6 +86,33 @@
                             test-ids :test #'equal)
                     "Test discovery must include the FedWiki import smoke suite")))
 
+(defun run-merged-doc-slices-discovery-smoke-test ()
+  (let* ((spec (known-test-check-spec
+                "test:hyperdoc/tests:run-merged-doc-slices-smoke-tests"))
+         (locator (and spec (hyperdoc::check-locator-of spec)))
+         (function-symbol (and spec (hyperdoc::resolve-function-symbol locator)))
+         (test-ids (known-test-check-ids)))
+    (cr-assert-true spec
+                    "Merged documentation slice smoke suite must be discoverable")
+    (cr-assert-equal "Merged documentation slice smoke tests"
+                     (hyperdoc::check-title-of spec)
+                     "Merged documentation slice smoke suite title")
+    (cr-assert-equal "HYPERDOC/TESTS"
+                     (getf locator :function-package)
+                     "Merged documentation slice smoke suite package locator")
+    (cr-assert-equal "RUN-MERGED-DOC-SLICES-SMOKE-TESTS"
+                     (getf locator :function-name)
+                     "Merged documentation slice smoke suite function locator")
+    (cr-assert-equal "hyperdoc"
+                     (getf locator :system)
+                     "Merged documentation slice smoke suite system locator")
+    (cr-assert-equal (intern "RUN-MERGED-DOC-SLICES-SMOKE-TESTS" :hyperdoc/tests)
+                     function-symbol
+                     "Merged documentation slice smoke suite symbol resolution")
+    (cr-assert-true (member "test:hyperdoc/tests:run-merged-doc-slices-smoke-tests"
+                            test-ids :test #'equal)
+                    "Merged documentation slice smoke suite must be present in the system-scoped test set")))
+
 (defun run-example-system-attribution-smoke-test ()
   (let ((base-symbols (discovered-example-symbols "hyperdoc")))
     (cr-assert-equal 4 (length base-symbols)
@@ -267,6 +294,7 @@
 
 (defun run-check-runner-smoke-tests ()
   (run-check-discovery-smoke-test)
+  (run-merged-doc-slices-discovery-smoke-test)
   (run-example-system-attribution-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)

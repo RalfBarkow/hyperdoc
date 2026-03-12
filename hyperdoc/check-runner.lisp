@@ -60,7 +60,13 @@
      :id "test:hyperdoc/tests:run-check-runner-smoke-tests"
      :title "Check runner smoke tests"
      :system "hyperdoc"
-     :tags (:kind :smoke :suite "check-runner"))))
+     :tags (:kind :smoke :suite "check-runner"))
+    (:package "HYPERDOC/TESTS"
+     :name "RUN-MERGED-DOC-SLICES-SMOKE-TESTS"
+     :id "test:hyperdoc/tests:run-merged-doc-slices-smoke-tests"
+     :title "Merged documentation slice smoke tests"
+     :system "hyperdoc"
+     :tags (:kind :smoke :suite "merged-doc-slices"))))
 
 (defun current-check-timestamp ()
   (get-universal-time))

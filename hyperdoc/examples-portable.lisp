@@ -83,8 +83,8 @@
          (page (hyperbook/fedwiki::make-fedwiki-page wiki "example-page" "Example Page"))
          (links (hyperbook/fedwiki::extract-links-from-wiki-text text page))
          (urls (mapcar #'hyperbook:url-of
-                       (remove-if-not (lambda (web-link)
-                                        (typep web-link 'hyperbook:web-link))
+                       (remove-if-not (lambda (link-object)
+                                        (typep link-object 'hyperbook:web-link))
                                       links)))
          (swhid (hyperbook/fedwiki::software-heritage-revision-swhid hash))
          (swh-url (hyperbook/fedwiki::software-heritage-revision-url hash)))
