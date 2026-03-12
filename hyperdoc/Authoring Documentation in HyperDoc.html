@@ -78,6 +78,7 @@
   <li>Expose corresponding topic objects in an <tt>Inspectable objects</tt> section.</li>
   <li>Use first-mention topic linking only where the glossary is explicitly scoped and the term is unambiguous in that page cluster.</li>
   <li>Avoid automatic global linking for ambiguous terms such as generic uses of <tt>system</tt>, <tt>component</tt>, or <tt>operation</tt> unless the glossary is explicitly scoped.</li>
+  <li><tt>&lt;source-of-function&gt;</tt> only works for functions already present in the running image, so example-only functions require their owning ASDF subsystem to be loaded.</li>
   <li>For topic-page links, keep <tt>page=</tt> equal to the exact canonical topic title string.</li>
   <li>For FedWiki links in HyperBook contexts, prefer stable slug-based <tt>page=</tt> values.</li>
 </ul>
