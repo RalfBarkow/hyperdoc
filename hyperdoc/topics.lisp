@@ -2622,6 +2622,15 @@
                  "HyperDoc Runtime Model"
                  "Inspectable Mech Runs")))
 
+(defun literate-tracing-topic ()
+  (make-topic
+   :id "literate-tracing"
+   :title "Literate Tracing"
+   :summary "A documentation approach that explains systems through annotated concrete execution traces instead of source exposition alone."
+   :references '("https://arxiv.org/abs/2510.09073"
+                 "https://2025.splashcon.org/details/splash-2025-Onward-papers/11/Literate-Tracing"
+                 "https://brown.columbia.edu/portfolio/literate-tracing-unusually-interactive-visual-and-informative-software-documentation/")))
+
 (defun python-json-tool-source-topic ()
   (make-topic
    :id "python-json-tool-source"
