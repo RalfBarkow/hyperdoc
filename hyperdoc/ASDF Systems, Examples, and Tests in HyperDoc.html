@@ -53,6 +53,15 @@
 </p>
 
 <p>
+  Edmund Weitz's <i>Common Lisp Recipes</i> provides a practical external
+  justification for the same choice. His ASDF recipes treat the system
+  definition as the place where project layout, components, dependencies, and
+  publication metadata come together. That is exactly why HyperDoc should
+  attach examples and tests to ASDF systems rather than to a root-level
+  package list or a free-floating checks console.
+</p>
+
+<p>
   GT often uses the package as an example scope. HyperDoc should translate that
   idea explicitly rather than copy it literally: Common Lisp packages are name
   spaces, but ASDF systems are the top-level build/load/test boundaries.
@@ -77,6 +86,16 @@
   model exists, but this repository is not organized that way. The current repo
   uses explicit system definitions, so the explorer should present the explicit
   system boundaries that ASDF already knows.
+</p>
+
+<p>
+  Quicklisp and Quickproject fit around that architecture rather than replacing
+  it. Quicklisp is the practical library distribution layer that helps obtain
+  systems ASDF can then find and load, and Quickproject can generate a project
+  skeleton with system definitions and dependency declarations already in the
+  right place. In this repository, that remains ecosystem context rather than a
+  local prerequisite: the flake sets up SBCL and ASDF registry visibility
+  directly.
 </p>
 
 <p>

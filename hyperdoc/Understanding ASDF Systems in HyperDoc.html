@@ -26,6 +26,15 @@
   roles.
 </p>
 
+<p>
+  Edmund Weitz's <i>Common Lisp Recipes</i> is useful here as practical outside
+  confirmation of the same model. His ASDF chapter treats ASDF as the de facto
+  build automation tool for Common Lisp work, explains that a system
+  definition should describe files/components and dependencies, and treats that
+  description as part of ordinary project organization rather than as a niche
+  packaging concern.
+</p>
+
 <h2>System vs component vs module vs source file</h2>
 
 <p>
@@ -47,6 +56,14 @@
   <tt>defining</tt>, <tt>check-runner</tt>, <tt>examples</tt>, <tt>tools</tt>,
   and <tt>hyperdoc</tt>. That ordering matters because definitions in later
   files may depend on packages, classes, or variables introduced earlier.
+</p>
+
+<p>
+  Weitz's practical framing reinforces that structure. In his terms, components
+  are the files and modules that belong to one system definition, dependencies
+  belong in the <tt>.asd</tt> file rather than as ad-hoc source-level load
+  calls, and published systems should carry descriptive metadata in the system
+  definition once the code is meant to be shared beyond one local checkout.
 </p>
 
 <h2>Operations on systems</h2>
@@ -78,11 +95,29 @@
 </p>
 
 <p>
+  That is also the right place to connect ASDF to Quicklisp without confusing
+  their roles. Weitz presents Quicklisp as the practical way to obtain
+  open-source libraries and make their systems available for interactive use,
+  while ASDF remains the build/load system that locates and operates on those
+  systems once the source-registry or distribution layer has made them
+  visible.
+</p>
+
+<p>
   In this repository, <tt>nix develop</tt>, <tt>dev.sh</tt>, and the server
   startup paths matter because they establish the source-registry context in
   which the local systems are visible. If the image was started in the wrong
   environment, system lookup can fail even when the source tree is present on
   disk.
+</p>
+
+<p>
+  The same distinction explains a local rule in this repository: interactive
+  <tt>asdf:load-system</tt> and related commands belong at the REPL or in the
+  development environment, not hard-coded into ordinary source files. This
+  checkout's flake sets up SBCL and the ASDF registry directly, without relying
+  on Quicklisp as a local prerequisite, but the underlying ASDF discipline is
+  the same one Weitz describes for general Common Lisp practice.
 </p>
 
 <h2>How HyperDoc uses ASDF</h2>

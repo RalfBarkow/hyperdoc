@@ -1664,8 +1664,9 @@
   (make-topic
    :id "asdf-system-definition"
    :title "ASDF system definition"
-   :summary "The author-facing ASDF workflow is about defining systems and their components with defsystem."
+   :summary "The author-facing ASDF workflow is about defining systems with defsystem, including their components, dependencies, and publication metadata."
    :references '("ASDF Components Workflow"
+                 "Definitive Common Lisp Books"
                  "Creating a HyperDoc")))
 
 (defun asdf-extension-protocol-topic ()
@@ -1679,15 +1680,17 @@
   (make-topic
    :id "build-system-versus-package-manager"
    :title "Build system versus package manager"
-   :summary "ASDF is a build/load system, not a package manager or installer."
-   :references '("ASDF Components Workflow")))
+   :summary "ASDF is the build/load system, while tools such as Quicklisp provide the distribution and installation layer around reusable Common Lisp libraries."
+   :references '("ASDF Components Workflow"
+                 "Definitive Common Lisp Books")))
 
 (defun quicklisp-topic ()
   (make-topic
    :id "quicklisp"
    :title "Quicklisp"
-   :summary "Quicklisp is the recommended package distribution and installation tool commonly used alongside ASDF."
+   :summary "Quicklisp is the practical library distribution layer commonly used alongside ASDF, helping users obtain systems that ASDF can then find and load."
    :references '("ASDF Components Workflow"
+                 "Definitive Common Lisp Books"
                  "Goals and values")))
 
 (defun asdf-install-topic ()
@@ -1708,30 +1711,33 @@
   (make-topic
    :id "asdf-source-registry"
    :title "ASDF source registry"
-   :summary "The ASDF source registry determines where ASDF looks for system definitions before asdf:find-system can resolve them."
+   :summary "The ASDF source registry determines where ASDF looks for system definitions before asdf:find-system can resolve them, whether those systems come from a local checkout or a library distribution layer."
    :references '("Understanding ASDF Systems in HyperDoc"
                  "ASDF Components Workflow"
                  "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Definitive Common Lisp Books"
                  "HyperDoc Server")))
 
 (defun asdf-system-topic ()
   (make-topic
    :id "asdf-system"
    :title "ASDF system"
-   :summary "Named top-level ASDF component defined by defsystem and used as the main boundary for operations such as load-op and test-op."
+   :summary "Named top-level ASDF component defined by defsystem and used as the main practical boundary for project organization and for operations such as load-op and test-op."
    :references '("Understanding ASDF Systems in HyperDoc"
                  "ASDF Components Workflow"
                  "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Definitive Common Lisp Books"
                  "Creating a HyperDoc")))
 
 (defun asdf-component-topic ()
   (make-topic
    :id "asdf-component"
    :title "ASDF component"
-   :summary "An ASDF component is any node in the .asd graph; systems, modules, and source files are all components under one system boundary."
+   :summary "An ASDF component is any node in the .asd graph; systems, modules, and source files are all components under one system boundary described by the system definition."
    :references '("Understanding ASDF Systems in HyperDoc"
                  "ASDF Components Workflow"
                  "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Definitive Common Lisp Books"
                  "Reloading HyperDoc After Adding Lisp Objects")))
 
 (defun asdf-module-serial-order-topic ()
