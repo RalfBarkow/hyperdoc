@@ -3358,5 +3358,94 @@
    :references '("From Idiomatic Survey to Idiomatic Lisp Survey"
                  "Similarity, Context, and Recurrence in HyperDoc")))
 
+;; Topic objects for digital identity risk cluster.
+(defun infosperber-on-swiss-e-id-risk-2025-topic ()
+  (make-topic
+   :id "infosperber-on-swiss-e-id-risk-2025"
+   :title "Infosperber on Swiss E-ID risk (2025-09-27)"
+   :summary "Provenance page for Pascal Sigg's Infosperber reporting on Swiss E-ID and digital identity risk, keeping attribution to Infosperber, Cade Diehm, and the New Design Congress explicit."
+   :references '("Infosperber on Swiss E-ID risk (2025-09-27)"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "Cade Diehm and the New Design Congress")))
+
+(defun digital-identity-as-abstraction-topic ()
+  (make-topic
+   :id "digital-identity-as-abstraction"
+   :title "Digital Identity as Abstraction"
+   :summary "A critical framing, attributed in this cluster to Pascal Sigg's Infosperber reporting and to Cade Diehm's research, that digital identity reduces persons to machine-readable parameters and narrow system criteria."
+   :references '("Digital Identity as Abstraction"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)"
+                 "Cade Diehm and the New Design Congress")))
+
+(defun over-identification-and-identity-creep-topic ()
+  (make-topic
+   :id "over-identification-and-identity-creep"
+   :title "Over-Identification and Identity Creep"
+   :summary "The risk that digital identity systems demand, infer, or reuse more identity data than a task strictly needs, extending identity control into wider contexts and downstream effects."
+   :references '("Over-Identification and Identity Creep"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "Design Constraints for Public Digital Identity"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)")))
+
+(defun digital-identity-and-social-engineering-topic ()
+  (make-topic
+   :id "digital-identity-and-social-engineering"
+   :title "Digital Identity and Social Engineering"
+   :summary "A critical concept for identity systems in which major harms arise by exploiting trust, urgency, and representation rituals rather than by defeating cryptography directly."
+   :references '("Digital Identity and Social Engineering"
+                 "Trust Erosion from Identity Fraud"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)")))
+
+(defun trust-erosion-from-identity-fraud-topic ()
+  (make-topic
+   :id "trust-erosion-from-identity-fraud"
+   :title "Trust Erosion from Identity Fraud"
+   :summary "The claim that identity manipulation can weaken interpersonal trust and institutional trust, especially when fraudulent or coercive identity events are treated as if they were authorised and final."
+   :references '("Trust Erosion from Identity Fraud"
+                 "Digital Identity and Social Engineering"
+                 "The False Security of Biometrics"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)")))
+
+(defun the-false-security-of-biometrics-topic ()
+  (make-topic
+   :id "the-false-security-of-biometrics"
+   :title "The False Security of Biometrics"
+   :summary "A critical claim that biometric authentication is often presented as decisive proof of identity or authorisation even though it remains vulnerable to theft, imitation, misclassification, and coercion."
+   :references '("The False Security of Biometrics"
+                 "Design Constraints for Public Digital Identity"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)")))
+
+(defun design-constraints-for-public-digital-identity-topic ()
+  (make-topic
+   :id "design-constraints-for-public-digital-identity"
+   :title "Design Constraints for Public Digital Identity"
+   :summary "Attributed design constraints for public digital identity systems, including non-biometric alternatives with equivalent protection and reachable human correction paths where identity controls access."
+   :references '("Design Constraints for Public Digital Identity"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "The False Security of Biometrics"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)")))
+
+(defun swiss-e-id-through-the-lens-of-digital-identity-risk-topic ()
+  (make-topic
+   :id "swiss-e-id-through-the-lens-of-digital-identity-risk"
+   :title "Swiss E-ID Through the Lens of Digital Identity Risk"
+   :summary "A concept-map page that uses the Infosperber article and New Design Congress reporting to frame Swiss E-ID debate through broader questions of abstraction, social engineering, biometrics, trust, and public-system design."
+   :references '("Swiss E-ID Through the Lens of Digital Identity Risk"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)"
+                 "Digital Identity as Abstraction"
+                 "Design Constraints for Public Digital Identity")))
+
+(defun cade-diehm-and-the-new-design-congress-topic ()
+  (make-topic
+   :id "cade-diehm-and-the-new-design-congress"
+   :title "Cade Diehm and the New Design Congress"
+   :summary "Provenance topic for the actor and organisation whose digital-identity risk arguments are reported in this cluster, keeping attribution explicit rather than turning those arguments into anonymous HyperDoc fact."
+   :references '("Cade Diehm and the New Design Congress"
+                 "Infosperber on Swiss E-ID risk (2025-09-27)"
+                 "Swiss E-ID Through the Lens of Digital Identity Risk")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
