@@ -74,6 +74,33 @@
   to support inspectable workflow architecture.
 </p>
 
+<h4>Generation and explanation as twin outputs</h4>
+
+<p>
+  The stronger architectural claim is that the system should not need a second
+  retrospective pass to explain itself. A later reconstruction layer would only
+  inspect generated output and infer what probably happened. That is weaker than
+  recording explanation at the same seam that already has the command,
+  normalized operation, nested body, live state, and emitted result in hand.
+</p>
+
+<p>
+  In Mech, that means the same dispatch event can produce not only the visible
+  artifact but also an <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a>,
+  a <a hyperbook="topics" page="Structured findings tally"><tt>structured findings tally</tt></a>,
+  a <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a>,
+  and a <a hyperbook="topics" page="Replay trail"><tt>replay trail</tt></a>.
+  The workflow becomes more inspectable because explanation is emitted from the
+  same protocol that performs the work.
+</p>
+
+<p>
+  That is why the tally/report shift in <tt>4ed345e</tt> matters more than one
+  improved block implementation. It shows the beginning of
+  <a hyperbook="topics" page="Generation/explanation twin output"><tt>generation/explanation twin output</tt></a>
+  at the dispatch seam itself.
+</p>
+
 <h4>Before and after</h4>
 
 <p>

@@ -15,7 +15,11 @@
   <li><a hyperbook="topics" page="Block registry protocol"><tt>Block registry protocol</tt></a></li>
   <li><a hyperbook="topics" page="Operation/argument normalization"><tt>Operation/argument normalization</tt></a></li>
   <li><a hyperbook="topics" page="Structured findings tally"><tt>Structured findings tally</tt></a></li>
+  <li><a hyperbook="topics" page="Retrospective explanation pass"><tt>Retrospective explanation pass</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
   <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
+  <li><a hyperbook="topics" page="Generation/explanation twin output"><tt>Generation/explanation twin output</tt></a></li>
   <li><a hyperbook="topics" page="Diagnostic publication"><tt>Diagnostic publication</tt></a></li>
   <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
 </ul>
@@ -68,12 +72,23 @@
   <li>publish warnings and errors as explicit findings</li>
   <li>record state changes and emitted artifacts</li>
   <li>attach provenance to the same execution event that produced the result</li>
+  <li>emit an execution evidence object, boundary report, or replay trail where the workflow needs them</li>
 </ul>
 
 <p>
   That is why the seam matters architecturally. The system does not need a
   second retrospective pass to explain itself. Explanation can be generated from
   the same protocol that performs the work.
+</p>
+
+<p>
+  A <a hyperbook="topics" page="Retrospective explanation pass"><tt>retrospective explanation pass</tt></a>
+  would reconstruct behavior after output already exists. The stronger model is
+  <a hyperbook="topics" page="Generation/explanation twin output"><tt>generation/explanation twin output</tt></a>:
+  the dispatch event can produce the visible artifact and an
+  <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a>,
+  runtime provenance, and a <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a>
+  from the same authoritative seam.
 </p>
 
 <h2>Why moving capabilities into api matters</h2>

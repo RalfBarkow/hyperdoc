@@ -14,6 +14,13 @@
   <li><a hyperbook="topics" page="HyperDoc evaluation boundaries"><tt>HyperDoc evaluation boundaries</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc view selection"><tt>HyperDoc view selection</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc runtime model"><tt>HyperDoc runtime model</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
+  <li><a hyperbook="topics" page="Raw console trace"><tt>Raw console trace</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector session"><tt>Inspector session</tt></a></li>
+  <li><a hyperbook="topics" page="Pane run"><tt>Pane run</tt></a></li>
+  <li><a hyperbook="topics" page="View render event"><tt>View render event</tt></a></li>
+  <li><a hyperbook="topics" page="Same-protocol evidence"><tt>Same-protocol evidence</tt></a></li>
+  <li><a hyperbook="topics" page="Objectified execution evidence"><tt>Objectified execution evidence</tt></a></li>
 </ul>
 
 <h2>Why an evaluation and inspection model matters</h2>
@@ -71,6 +78,34 @@
   <a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a>.
 </p>
 
+<h2>Raw console traces as pre-object execution evidence</h2>
+
+<p>
+  The recent <tt>INSPECTOR-PERF</tt> lines are already an instance of
+  <a hyperbook="topics" page="Same-protocol evidence"><tt>same-protocol evidence</tt></a>.
+  They are emitted at the execution seam itself while pane creation, view
+  selection, rendering, and inspect-click navigation are happening. In that
+  sense they are not retrospective explanation and not merely debugging noise.
+</p>
+
+<p>
+  Their current weakness is form. A <a hyperbook="topics" page="Raw console trace"><tt>raw console trace</tt></a>
+  is truthful and sequence-preserving, but it is also transient, linear,
+  console-bound, and hard to query as an object. The architectural problem is
+  not that the inspector lacks evidence. It is that the evidence has not yet
+  been promoted into an <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a>.
+</p>
+
+<p>
+  HyperDoc should therefore treat those lines as the first draft of
+  <a hyperbook="topics" page="Objectified execution evidence"><tt>objectified execution evidence</tt></a>.
+  A durable <a hyperbook="topics" page="Inspector session"><tt>inspector session</tt></a>,
+  <a hyperbook="topics" page="Pane run"><tt>pane run</tt></a>, or
+  <a hyperbook="topics" page="View render event"><tt>view render event</tt></a>
+  would preserve the same information in a form that can be inspected, linked,
+  and reused from narrative pages.
+</p>
+
 <h2>View selection and extension points</h2>
 
 <ul>
@@ -106,6 +141,9 @@
   <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
   <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
   <li><a page="Design">Design</a></li>
+  <li><a page="HyperDoc Test Runner">HyperDoc Test Runner</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
   <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
   <li><a page="Defining custom views">Defining custom views</a></li>
 </ul>
