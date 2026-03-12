@@ -48,8 +48,22 @@
            "0")
        :junk-allowed t))))
 
-;; Replace upstream create-pane to add timing logs while preserving the
-;; original default selection behavior.
+(defun default-pane-selection (pane select)
+  (cond
+    (select
+     select)
+    ((typep (pane-object pane) 'class)
+     (or (and (find "Overview"
+                    (pane-views pane)
+                    :key #'hv:view-title
+                    :test #'string=)
+              "Overview")
+         0))
+    (t
+     0)))
+
+;; Replace upstream create-pane to add timing logs and default class panes
+;; to a cheap overview tab instead of the first source-heavy view.
 (defun create-pane (inspector object &key (select nil))
   (let ((pane-start (current-time-millis)))
     (log-inspector-performance :create-pane/start
@@ -81,7 +95,7 @@
                                  :object (summarize-object-for-log object)
                                  :ms (elapsed-millis dom-start))
       (add-pane inspector pane)
-      (let* ((resolved-select (or select 0))
+      (let* ((resolved-select (default-pane-selection pane select))
              (view-title (typecase resolved-select
                            (integer (hv:view-title (nth resolved-select
                                                        (pane-views pane))))
@@ -241,6 +255,39 @@
 
 (defun source-html-node-count (html)
   (count #\< html))
+
+(defun class-overview-rows (class)
+  (list (cons "Class"
+              (let ((name (class-name class)))
+                (if name
+                    (with-standard-io-syntax
+                      (let ((*package* (find-package 'common-lisp)))
+                        (prin1-to-string name)))
+                    "<anonymous-class>")))
+        (cons "Metaclass"
+              (let ((meta (class-of class)))
+                (or (and (class-name meta) (string-downcase (symbol-name (class-name meta))))
+                    (princ-to-string (type-of meta)))))
+        (cons "Direct superclasses"
+              (length (c2mop:class-direct-superclasses class)))
+        (cons "Direct subclasses"
+              (length (c2mop:class-direct-subclasses class)))
+        (cons "Finalized?"
+              (if (c2mop:class-finalized-p class) "yes" "no"))))
+
+(defview 👀overview (class class)
+  (html-view :title "Overview" :priority 1
+    (html
+      (:table :class "inspector-table"
+              (loop for (label . value) in (class-overview-rows class)
+                    do (html
+                         (:tr (:th (esc label))
+                              (:td (esc (princ-to-string value))))))))))
+
+(defview 👀source (class class)
+  (-> (source-code-view class :in-file? t)
+      (rename :title "Source code"
+              :priority 9)))
 
 (defun source-code-view (object &key in-file?)
   (let ((start (clog-moldable-inspector::current-time-millis)))
