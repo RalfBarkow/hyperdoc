@@ -1160,6 +1160,23 @@
                  "journalmatic-page-generation-wiki-client-style-example"
                  "https://github.com/fedwiki/wiki-client/commit/d4420c72a49305ca52d18ce8203bc95bdd3f59d2")))
 
+(defun clickable-commit-ids-in-fedwiki-stories-topic ()
+  (make-topic
+   :id "clickable-commit-ids-in-fedwiki-stories"
+   :title "Clickable commit IDs in FedWiki stories"
+   :summary "FedWiki story rendering can turn full Git commit hashes into ordinary external links to archived Software Heritage revision pages without changing page authoring."
+   :references '("Clickable commit IDs in FedWiki stories"
+                 "Everything in Git? Identity Across Systems"
+                 "Opening external FedWiki sites")))
+
+(defun software-heritage-revision-link-topic ()
+  (make-topic
+   :id "software-heritage-revision-link"
+   :title "Software Heritage revision link"
+   :summary "A Software Heritage revision link uses an SWHID of the form swh:1:rev:<hash> to point at an archived commit-level object."
+   :references '("Clickable commit IDs in FedWiki stories"
+                 "https://docs.softwareheritage.org/devel/swh-model/persistent-identifiers.html")))
+
 (defun git-blame-operation-topic ()
   (make-topic
    :id "git-blame-operation"

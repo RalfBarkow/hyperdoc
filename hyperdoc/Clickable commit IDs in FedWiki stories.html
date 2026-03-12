@@ -1,0 +1,89 @@
+<h1>Clickable commit IDs in FedWiki stories</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Full Git commit hashes in FedWiki story text can now be rendered as clickable
+  archived-reference links instead of inert text. The implementation is
+  intentionally narrow: it is a renderer-local enhancement in the FedWiki story
+  rendering path, not a new HyperBook and not a navigation-history framework.
+</p>
+
+<h2>What changed</h2>
+
+<p>
+  In paragraph, markdown, and reference text rendered through the FedWiki story
+  renderer, a full 40-character Git commit hash is now treated as an archived
+  reference token. It is converted into an external link targeting a
+  <a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a>
+  of the form <tt>swh:1:rev:&lt;hash&gt;</tt>.
+</p>
+
+<p>
+  This gives the immediate UX win Konrad asked for without changing page
+  authoring, without requiring a new syntax in stories, and without turning
+  commit references into live runtime objects.
+</p>
+
+<h2>Why Software Heritage is used</h2>
+
+<p>
+  Software Heritage provides stable archival identifiers and resolver URLs for
+  revision objects. For commit links, the relevant first target is the revision
+  SWHID form <tt>swh:1:rev:&lt;hash&gt;</tt>. That makes a full commit hash useful
+  as a direct archived reference rather than only as a repository-local token.
+</p>
+
+<h2>Why this stays renderer-local</h2>
+
+<p>
+  The right insertion point is the FedWiki story-item rendering path itself,
+  where story text is already turned into wiki links, HyperBook links, and
+  ordinary external links. Commit-hash linkification belongs there because it is
+  purely presentational and reversible. It does not need page-authoring changes,
+  ad hoc HTML rewriting, or a second reference system layered outside the
+  renderer.
+</p>
+
+<h2>What this is not</h2>
+
+<p>
+  This slice does <b>not</b> add a full <tt>software-heritage</tt> HyperBook.
+  It also does not add global navigation history, object replay, or retention of
+  previously displayed computed objects. Those are larger architectural moves
+  with the memory and recomputation costs Konrad pointed out, and they belong in
+  a separate design discussion.
+</p>
+
+<p>
+  The current design point is narrower: treat commit hashes first as archived
+  reference tokens, not as live runtime objects.
+</p>
+
+<h2>Why that boundary matters</h2>
+
+<p>
+  HyperDoc's pane/object model already keeps object state and view context in
+  live panes. Making commit hashes clickable in story text is nearly free.
+  Retaining full navigation history of computed objects is not. Keeping those
+  concerns separate preserves a small UX gain without silently committing the
+  system to a bigger retention model.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Everything in Git? Identity Across Systems">Everything in Git? Identity Across Systems</a></li>
+  <li><a page="Opening external FedWiki sites">Opening external FedWiki sites</a></li>
+  <li><a page="HyperDoc Routing and Navigation Model">HyperDoc Routing and Navigation Model</a></li>
+  <li><a page="Linking HyperDoc Pages to FedWiki Pages">Linking HyperDoc Pages to FedWiki Pages</a></li>
+  <li><a href="https://docs.softwareheritage.org/devel/swh-model/persistent-identifiers.html">Software Heritage persistent identifiers (SWHIDs)</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a></li>
+  <li><a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a></li>
+  <li><a hyperbook="topics" page="FedWiki content and runtime policy split"><tt>FedWiki content and runtime policy split</tt></a></li>
+</ul>
