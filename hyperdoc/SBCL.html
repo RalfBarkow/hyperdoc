@@ -12,6 +12,10 @@
 <ul>
   <li><a hyperbook="topics" page="SBCL"><tt>SBCL</tt></a></li>
   <li><a hyperbook="topics" page="SBCL process"><tt>SBCL process</tt></a></li>
+  <li><a hyperbook="topics" page="SBCL bootstrapping"><tt>SBCL bootstrapping</tt></a></li>
+  <li><a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a></li>
+  <li><a hyperbook="topics" page="Host/target separation"><tt>Host/target separation</tt></a></li>
+  <li><a hyperbook="topics" page="Bootstrap determinism"><tt>Bootstrap determinism</tt></a></li>
   <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="asdf:find-system"><tt>asdf:find-system</tt></a></li>
 </ul>
@@ -24,10 +28,38 @@
   <li>Hosts Playground evaluation and debug surfaces.</li>
 </ul>
 
+<h2>Why SBCL matters beyond runtime use</h2>
+
+<p>
+  SBCL is also interesting as a build architecture case. Christophe Rhodes's
+  2008 paper on sanely bootstrappable Common Lisp describes SBCL as a system
+  that uses a host Common Lisp image during bootstrap while deliberately
+  containing that image dependence so the final target build does not depend on
+  accidental host-image state.
+</p>
+
+<p>
+  That makes SBCL useful to HyperDoc for more than server/runtime reasons. It
+  clarifies the boundary between <a hyperbook="topics" page="Image-oriented development"><tt>image-oriented development</tt></a>
+  during live exploration or implementation work and
+  <a hyperbook="topics" page="Source-oriented development"><tt>source-oriented development</tt></a>
+  as the durable rebuild path that contributors can verify from scratch.
+</p>
+
+<p>
+  The same paper also frames <a hyperbook="topics" page="Bootstrappability as social architecture"><tt>bootstrappability as social architecture</tt></a>:
+  reducing special bootstrap knowledge lowers contributor friction and makes it
+  easier for newcomers to work on the implementation.
+</p>
+
 <h2>Related</h2>
 
 <ul>
   <li><a page="SBCL Process">SBCL Process</a></li>
+  <li><a page="SBCL bootstrapping model">SBCL bootstrapping model</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a page="Host and target separation in SBCL">Host and target separation in SBCL</a></li>
+  <li><a page="SBCL build stages: cross-compiler, genesis, cold core, cold init">SBCL build stages: cross-compiler, genesis, cold core, cold init</a></li>
   <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
   <li><a page="HyperDoc Server">HyperDoc Server</a></li>
 </ul>
