@@ -2519,6 +2519,109 @@
    :references '("Inspectable Mech Runs"
                  "First-class run record")))
 
+(defun retrospective-explanation-pass-topic ()
+  (make-topic
+   :id "retrospective-explanation-pass"
+   :title "Retrospective explanation pass"
+   :summary "A later reconstruction layer that tries to infer source, context, branches, outputs, and failures after execution has already collapsed into output."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Smalltalk Browser Frame and Scene in HyperDoc"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun execution-evidence-object-topic ()
+  (make-topic
+   :id "execution-evidence-object"
+   :title "Execution evidence object"
+   :summary "An inspectable record emitted at execution time that preserves what operation ran, in what context, with what outputs, limits, or failures."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "Inspectable Mech Runs"
+                 "Mech Credible Maintenance Story")))
+
+(defun boundary-report-topic ()
+  (make-topic
+   :id "boundary-report"
+   :title "Boundary report"
+   :summary "A report of what an execution could not resolve, represent, or complete cleanly at its authoritative seam."
+   :references '("Mech Credible Maintenance Story"
+                 "Mech Plugin Progress March 2026"
+                 "Inspectable Mech Runs")))
+
+(defun generation-explanation-twin-output-topic ()
+  (make-topic
+   :id "generation-explanation-twin-output"
+   :title "Generation/explanation twin output"
+   :summary "The design principle that execution should emit both the produced artifact and its explanatory evidence as coequal outputs."
+   :references '("Mech Plugin Progress March 2026"
+                 "Runtime Dispatch Seams in HyperDoc"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun raw-console-trace-topic ()
+  (make-topic
+   :id "raw-console-trace"
+   :title "Raw console trace"
+   :summary "A transient linear diagnostic stream emitted during execution before it has been promoted into structured inspectable objects."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model")))
+
+(defun pane-run-topic ()
+  (make-topic
+   :id "pane-run"
+   :title "Pane run"
+   :summary "An inspectable record of one pane's creation, view selection, rendering, and navigation activity."
+   :references '("HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun view-render-event-topic ()
+  (make-topic
+   :id "view-render-event"
+   :title "View render event"
+   :summary "One render-time event capturing a selected view, target object, timings, cache state, and related metrics."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model")))
+
+(defun inspector-session-topic ()
+  (make-topic
+   :id "inspector-session"
+   :title "Inspector session"
+   :summary "An inspectable record of one inspector interaction session across panes, selections, and renders."
+   :references '("HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun same-protocol-evidence-topic ()
+  (make-topic
+   :id "same-protocol-evidence"
+   :title "Same-protocol evidence"
+   :summary "Execution evidence emitted by the same protocol that performs the work, rather than reconstructed in a later pass."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun transient-diagnostic-stream-topic ()
+  (make-topic
+   :id "transient-diagnostic-stream"
+   :title "Transient diagnostic stream"
+   :summary "A sequence-preserving but weak form of execution evidence that remains console-bound, linear, and non-queryable as objects."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "Mech Credible Maintenance Story")))
+
+(defun objectified-execution-evidence-topic ()
+  (make-topic
+   :id "objectified-execution-evidence"
+   :title "Objectified execution evidence"
+   :summary "Execution evidence promoted from transient trace lines into first-class inspectable runtime objects."
+   :references '("HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Test Runner")))
+
+(defun persistence-of-investigation-context-topic ()
+  (make-topic
+   :id "persistence-of-investigation-context"
+   :title "Persistence of investigation context"
+   :summary "The requirement that investigation state, explanatory evidence, and execution context survive a run as first-class inspectable objects instead of disappearing into transient traces."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "HyperDoc Runtime Model"
+                 "Inspectable Mech Runs")))
+
 (defun python-json-tool-source-topic ()
   (make-topic
    :id "python-json-tool-source"
