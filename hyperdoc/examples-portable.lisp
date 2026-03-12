@@ -74,6 +74,27 @@
           :journal journal
           :resolution-order order)))
 
+(defexample fedwiki-commit-link-example
+  "Translate a full Git commit hash in story text into a Software Heritage revision link."
+  (let* ((hash "0123456789abcdef0123456789abcdef01234567")
+         (text (format nil "See ~A and https://example.org" hash))
+         (wiki (make-instance 'hyperbook/fedwiki::fedwiki
+                              :id "fedwiki:examples.example"))
+         (page (hyperbook/fedwiki::make-fedwiki-page wiki "example-page" "Example Page"))
+         (links (hyperbook/fedwiki::extract-links-from-wiki-text text page))
+         (urls (mapcar #'hyperbook:url-of
+                       (remove-if-not (lambda (web-link)
+                                        (typep web-link 'hyperbook:web-link))
+                                      links)))
+         (swhid (hyperbook/fedwiki::software-heritage-revision-swhid hash))
+         (swh-url (hyperbook/fedwiki::software-heritage-revision-url hash)))
+    (assert (member swh-url urls :test #'string=))
+    (assert (member "https://example.org" urls :test #'string=))
+    (list :source-text text
+          :swhid swhid
+          :software-heritage-url swh-url
+          :urls urls)))
+
 ;;
 ;; journalmatic translation helpers
 ;;

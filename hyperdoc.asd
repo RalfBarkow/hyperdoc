@@ -39,7 +39,8 @@
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
-  :depends-on (#:hyperdoc)
+  :depends-on (#:hyperdoc
+               #:hyperbook/fedwiki)
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "examples-portable")))))
@@ -173,7 +174,9 @@
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "fedwiki-site-dmx-import")
-                             (:file "check-runner-smoke"))))
+                             (:file "check-runner-smoke")
+                             (:file "fedwiki-story-items-smoke")
+                             (:file "merged-doc-slices-smoke"))))
   :perform (test-op (op c)
              (declare (ignore op c))
              (uiop:symbol-call :hyperdoc/tests
