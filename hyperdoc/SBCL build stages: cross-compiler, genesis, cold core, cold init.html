@@ -1,0 +1,79 @@
+<h1>SBCL build stages: cross-compiler, genesis, cold core, cold init</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page makes the SBCL bootstrap pipeline inspectable as a sequence of
+  stages. The important nouns are not vague “build magic,” but a host Lisp, a
+  target-directed <a hyperbook="topics" page="Cross-compiler"><tt>cross-compiler</tt></a>,
+  target FASLs, <a hyperbook="topics" page="Genesis build stage"><tt>genesis</tt></a>,
+  the <a hyperbook="topics" page="Cold core"><tt>cold core</tt></a>, and
+  <a hyperbook="topics" page="Cold init"><tt>cold init</tt></a>.
+</p>
+
+<h2>Stage 1: host Lisp and bootstrap compiler loading</h2>
+
+<p>
+  The process begins in a host Common Lisp implementation. That host image
+  loads the bootstrap machinery needed to compile target-side code. This is the
+  live-image side of the build, but it is still only the first stage, not the
+  final product.
+</p>
+
+<h2>Stage 2: cross-compiler emits target artifacts</h2>
+
+<p>
+  The <a hyperbook="topics" page="Cross-compiler"><tt>cross-compiler</tt></a>
+  runs in the host but emits target SBCL FASLs. This stage matters because it
+  starts to convert host-assisted bootstrap work into explicit target artifacts
+  that can be handed to the next phase.
+</p>
+
+<h2>Stage 3: genesis writes the cold core</h2>
+
+<p>
+  In the <a hyperbook="topics" page="Genesis build stage"><tt>genesis build stage</tt></a>,
+  SBCL simulates loading the target artifacts and writes the
+  <a hyperbook="topics" page="Cold core"><tt>cold core</tt></a>. This is where
+  the build stops being “just load more things into the host image” and starts
+  becoming a distinct target image with its own startup boundary.
+</p>
+
+<h2>Stage 4: runtime performs cold init</h2>
+
+<p>
+  The SBCL runtime starts from the cold core and performs
+  <a hyperbook="topics" page="Cold init"><tt>cold init</tt></a>. This completes
+  target-side initialization and yields the running SBCL system.
+</p>
+
+<h2>Why the stages matter</h2>
+
+<p>
+  The pipeline is useful because it enforces
+  <a hyperbook="topics" page="Host/target separation"><tt>host/target separation</tt></a>
+  and supports <a hyperbook="topics" page="Bootstrap determinism"><tt>bootstrap determinism</tt></a>.
+  Each stage narrows the room for accidental dependence on host-image state and
+  makes the final result more reconstructable from explicit inputs.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="SBCL bootstrapping model">SBCL bootstrapping model</a></li>
+  <li><a page="Host and target separation in SBCL">Host and target separation in SBCL</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a href="https://link.springer.com/chapter/10.1007/978-3-540-89275-5_5">Rhodes 2008: SBCL: A Sanely-Bootstrappable Common Lisp</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Cross-compiler"><tt>Cross-compiler</tt></a></li>
+  <li><a hyperbook="topics" page="Genesis build stage"><tt>Genesis build stage</tt></a></li>
+  <li><a hyperbook="topics" page="Cold core"><tt>Cold core</tt></a></li>
+  <li><a hyperbook="topics" page="Cold init"><tt>Cold init</tt></a></li>
+  <li><a hyperbook="topics" page="Host/target separation"><tt>Host/target separation</tt></a></li>
+  <li><a hyperbook="topics" page="Bootstrap determinism"><tt>Bootstrap determinism</tt></a></li>
+  <li><a hyperbook="topics" page="SBCL bootstrapping"><tt>SBCL bootstrapping</tt></a></li>
+</ul>
