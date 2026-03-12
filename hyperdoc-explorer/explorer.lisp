@@ -218,12 +218,19 @@ PAGE-LOOKUP-FAILURE."
          (supporting-systems (supporting-systems-for-hyperdoc hd))
          (validation-systems (validation-subsystems-for-system primary-system)))
     (views:html-view :title "Systems" :priority 2
+      (views:add-asset-path "/hyperbook/"
+                            (asdf:system-relative-pathname
+                             :hyperbook
+                             "assets/hyperbook/"))
+      (views:include-css "/hyperbook/css/hyperbook.css")
       (views:html
         (:h3 "Systems relevant to this HyperDoc")
         (:p
          "This is the local system-scope surface for this HyperDoc. "
          "For the catalog-wide list of loaded and registered ASDF systems, see the "
-         (views:object-ref hyperbook::*asdf-systems* :display "ASDF Systems")
+         (hb:render-hyperbook-or-page-link (id-of hyperbook::*asdf-systems*)
+                                           nil
+                                           "ASDF Systems")
          " HyperBook in the catalog.")
         (:p "Click a system name below to inspect the corresponding ASDF system object.")
         (:h4 "Primary system")
