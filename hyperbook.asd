@@ -76,6 +76,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "inspector-wiring")
+                             (:file "inspector-performance")
                              (:file "playground-stepper")
                              (:file "playground-package")
                              (:file "playground-bindings")
