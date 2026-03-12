@@ -53,10 +53,31 @@
   inspectable, and bounded.
 </p>
 
+<h2>From stepping hooks to block dispatch seams</h2>
+
+<p>
+  A useful historical comparison is the move from
+  <a hyperbook="topics" page="CompiledMethod interpretNextInstructionFor: aContext"><tt>CompiledMethod interpretNextInstructionFor: aContext</tt></a>
+  to Mech's <tt>blocks[op].emit</tt> protocol. They are not the same mechanism
+  and they do not operate at the same scale. The Smalltalk stepping hook is a
+  VM-near execution seam, while Mech is a
+  <a hyperbook="topics" page="Block-level interpreter seam"><tt>block-level interpreter seam</tt></a>.
+</p>
+
+<p>
+  The analogy still matters because both expose a compact execution boundary
+  where authored syntax has been normalized enough that
+  <a hyperbook="topics" page="Explanation from execution"><tt>explanation from execution</tt></a>
+  can attach to the same event that performs the work. HyperDoc can therefore
+  learn from both surfaces without claiming that Mech is a full diagramming
+  debugger.
+</p>
+
 <h2>Related</h2>
 
 <ul>
   <li><a page="Diagramming Debugger Surface">Diagramming Debugger Surface</a></li>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
   <li><a page="HyperDoc Server">HyperDoc Server</a></li>
   <li><a hyperbook="moldable-inspector" page="Playground restarts">Playground restarts</a></li>
   <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>

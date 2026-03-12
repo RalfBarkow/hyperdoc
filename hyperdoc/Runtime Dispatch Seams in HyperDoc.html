@@ -1,0 +1,100 @@
+<h1>Runtime Dispatch Seams in HyperDoc</h1>
+
+<p>
+  A <a hyperbook="topics" page="Runtime dispatch seam"><tt>runtime dispatch seam</tt></a>
+  is a compact execution boundary where authored syntax has already been
+  normalized enough for work to be done, but is still close enough to the
+  authored source that explanation, provenance, and diagnostics can attach to
+  the same event.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
+  <li><a hyperbook="topics" page="Block-level interpreter seam"><tt>Block-level interpreter seam</tt></a></li>
+  <li><a hyperbook="topics" page="Explanation from execution"><tt>Explanation from execution</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Executable explanation"><tt>Executable explanation</tt></a></li>
+  <li><a hyperbook="topics" page="Class browser/inspector/debugger triangulation"><tt>Class browser/inspector/debugger triangulation</tt></a></li>
+  <li><a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a></li>
+</ul>
+
+<h2>What makes a dispatch seam architecturally important</h2>
+
+<p>
+  A seam matters when it joins three things in one place:
+</p>
+
+<ul>
+  <li>the authored source form that a human can still recognize</li>
+  <li>the normalized operational form that a machine can execute</li>
+  <li>the live runtime situation where effects and failures become visible</li>
+</ul>
+
+<p>
+  When those three are co-present, inspectable explanation stops being an
+  after-the-fact reconstruction problem. It becomes a normal byproduct of
+  execution.
+</p>
+
+<h2>Smalltalk stepping seam</h2>
+
+<p>
+  In the Smalltalk line of work around
+  <a hyperbook="topics" page="Expanding the Role of Tools in a Literate Programming Environment"><tt>Expanding the Role of Tools in a Literate Programming Environment</tt></a>,
+  executable explanation emerged from the triangulation of class browser,
+  object inspector, and single-step debugger. The key primitive was
+  <a hyperbook="topics" page="CompiledMethod interpretNextInstructionFor: aContext"><tt>CompiledMethod interpretNextInstructionFor: aContext</tt></a>.
+  That seam sits near the language/runtime semantics and supports reading
+  behavior off execution rather than inferring it from static source alone.
+</p>
+
+<h2>Mech emit seam</h2>
+
+<p>
+  Mech is narrower and more domain-specific. It is not a VM-level stepper. It
+  normalizes a block command into operation and arguments, assembles execution
+  context, then dispatches through <tt>blocks[op].emit</tt>. That makes Mech a
+  current analogue at the block-DSL level: not the same as the Smalltalk
+  mechanism, but a practical <a hyperbook="topics" page="Block-level interpreter seam"><tt>block-level interpreter seam</tt></a>
+  that is easier to operationalize in HyperDoc-style inspectable workflows.
+</p>
+
+<h2>Why seams matter for HyperDoc</h2>
+
+<p>
+  HyperDoc already values inspectable runtime objects, graph-rooted publishing,
+  and explanatory navigation across heterogeneous systems. A runtime dispatch
+  seam is where those values can attach to execution itself.
+</p>
+
+<ul>
+  <li><a hyperbook="topics" page="Diagnostic publication"><tt>Diagnostic publication</tt></a> can emit visible findings instead of burying them in logs.</li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a> can tie generated artifacts back to source command and execution step.</li>
+  <li><a hyperbook="topics" page="First-class run record"><tt>First-class run records</tt></a> can preserve chronology, boundaries, and state changes as inspectable objects.</li>
+  <li>Published explanation can stay close to the same seam that performed the work.</li>
+</ul>
+
+<h2>Boundary of the analogy</h2>
+
+<p>
+  The analogy should stay bounded. Smalltalk's stepping seam is deeper and more
+  universal. Mech's seam is narrower and block-specific. HyperDoc should use
+  that difference productively: Mech does not replace a debugger, but it does
+  offer a concrete execution seam where explanation can become first-class.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
+  <li><a page="Diagramming Debugger Surface">Diagramming Debugger Surface</a></li>
+  <li><a page="Stepper Debugger Surface">Stepper Debugger Surface</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a page="Mech Plugin Progress March 2026">Mech Plugin Progress March 2026</a></li>
+  <li><a page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+</ul>
