@@ -1,0 +1,92 @@
+<h1>Inspectable Mech Runs</h1>
+
+<p>
+  This page is a forward-looking HyperDoc design note. Current Mech can already
+  publish output and structured findings, but it does not yet expose a
+  persistent, inspectable run object model. The proposal here is that one Mech
+  execution should become a <a hyperbook="topics" page="First-class run record"><tt>first-class run record</tt></a>
+  rather than only a transient browser action.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
+  <li><a hyperbook="topics" page="Execution step object"><tt>Execution step object</tt></a></li>
+  <li><a hyperbook="topics" page="State delta"><tt>State delta</tt></a></li>
+  <li><a hyperbook="topics" page="Artifact provenance"><tt>Artifact provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Findings ledger"><tt>Findings ledger</tt></a></li>
+  <li><a hyperbook="topics" page="Replay trail"><tt>Replay trail</tt></a></li>
+</ul>
+
+<h2>Why a run should become an inspectable object</h2>
+
+<p>
+  The current seam already has the right ingredients: source command,
+  normalized operation and arguments, body, element, state, emitted artifacts,
+  and findings. If those are preserved as objects instead of disappearing after
+  execution, HyperDoc can inspect one run as a structured chronology rather
+  than only as console traces or generated text.
+</p>
+
+<h2>Proposed execution step object</h2>
+
+<p>
+  Each executed block step should be representable as an
+  <a hyperbook="topics" page="Execution step object"><tt>execution step object</tt></a>
+  carrying:
+</p>
+
+<ul>
+  <li>the original source command</li>
+  <li>normalized operation and arguments</li>
+  <li>parent/child body relation</li>
+  <li><a hyperbook="topics" page="State delta"><tt>state deltas</tt></a></li>
+  <li>emitted artifacts</li>
+  <li>warnings, errors, and findings</li>
+  <li>source references where available</li>
+</ul>
+
+<h2>Proposed run-level views</h2>
+
+<p>
+  A <a hyperbook="topics" page="First-class run record"><tt>first-class run record</tt></a>
+  could then support several inspectable views:
+</p>
+
+<ul>
+  <li><b>chronology view</b> for step order and timing</li>
+  <li><b>tree or scene view</b> for parent/child body nesting</li>
+  <li><b>findings view</b> for warnings, losses, and runtime errors</li>
+  <li><b>provenance view</b> for emitted artifacts and their producing steps</li>
+</ul>
+
+<h2>Why this matters for publication</h2>
+
+<p>
+  HyperDoc already prefers inspectable runtime objects and graph-rooted
+  publication. Mech runs fit that model well. A run object could publish a
+  <a hyperbook="topics" page="Findings ledger"><tt>findings ledger</tt></a>,
+  boundary report, and artifact trail as live inspection surfaces instead of
+  hiding them in one output artifact.
+</p>
+
+<h2>Current limit</h2>
+
+<p>
+  This page proposes an object model; it does not claim that Mech already has
+  one. The point is to make the missing execution ledger explicit and to connect
+  it to the already existing emit seam.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a page="Mech Plugin Progress March 2026">Mech Plugin Progress March 2026</a></li>
+  <li><a page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+</ul>

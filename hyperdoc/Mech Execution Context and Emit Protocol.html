@@ -1,0 +1,110 @@
+<h1>Mech Execution Context and Emit Protocol</h1>
+
+<p>
+  This page records the concrete Mech architecture around
+  <a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a>.
+  The key move is compact but consequential: command text is normalized into an
+  operation plus argument list, assembled with body, element, and state, and
+  dispatched through the block registry's emit protocol.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Execution context bundle"><tt>Execution context bundle</tt></a></li>
+  <li><a hyperbook="topics" page="Block registry protocol"><tt>Block registry protocol</tt></a></li>
+  <li><a hyperbook="topics" page="Operation/argument normalization"><tt>Operation/argument normalization</tt></a></li>
+  <li><a hyperbook="topics" page="Structured findings tally"><tt>Structured findings tally</tt></a></li>
+  <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnostic publication"><tt>Diagnostic publication</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+</ul>
+
+<h2>Operation and argument normalization</h2>
+
+<p>
+  Mech begins from a user-facing command line. The command is split into an
+  operation name and an argument list. That
+  <a hyperbook="topics" page="Operation/argument normalization"><tt>operation/argument normalization</tt></a>
+  step matters because it turns raw authored text into a stable executable
+  vocabulary before block-specific behavior begins.
+</p>
+
+<pre><code>const [op, ...args] = code.command.split(/ +/)</code></pre>
+
+<h2>Execution context bundle</h2>
+
+<p>
+  Mech then assembles command text, normalized operation, arguments, optional
+  body, resolved element, and current state into one
+  <a hyperbook="topics" page="Execution context bundle"><tt>execution context bundle</tt></a>.
+  This is the point where source form and runtime state become available
+  together.
+</p>
+
+<pre><code>const stuff = { command, op, args, body, elem, state }</code></pre>
+
+<h2>Block registry and emit protocol</h2>
+
+<p>
+  The bundle is handed to the block registry via <tt>blocks[op].emit</tt>. That
+  implicit interface is the
+  <a hyperbook="topics" page="Block registry protocol"><tt>block registry protocol</tt></a>.
+  It is where execution happens, but it is also the correct place for
+  validation, instrumentation, run recording, and explanation.
+</p>
+
+<pre><code>await blocks[op].emit.apply(null, [stuff])</code></pre>
+
+<h2>Why this seam is the right place for diagnostics</h2>
+
+<p>
+  Once the command and runtime state have been bundled, each emit call can do
+  more than produce output:
+</p>
+
+<ul>
+  <li>validate whether the block has the body or state it requires</li>
+  <li>publish warnings and errors as explicit findings</li>
+  <li>record state changes and emitted artifacts</li>
+  <li>attach provenance to the same execution event that produced the result</li>
+</ul>
+
+<p>
+  That is why the seam matters architecturally. The system does not need a
+  second retrospective pass to explain itself. Explanation can be generated from
+  the same protocol that performs the work.
+</p>
+
+<h2>Why moving capabilities into api matters</h2>
+
+<p>
+  The recent Mech shift of <tt>download</tt> into a shared <tt>api</tt> is not
+  only refactoring tidiness. It shows capability moving from one block's local
+  implementation toward a shared protocol surface. That makes it easier to
+  standardize instrumentation and to treat findings and artifacts as
+  publishable, inspectable results rather than incidental side effects.
+</p>
+
+<h2>Current boundary</h2>
+
+<p>
+  This is still a block-level seam, not a full debugger or a complete run
+  object model. It is therefore narrower than the Smalltalk stepping primitive.
+  But it is already rich enough to support structured findings, graph-rooted
+  publication, and future first-class execution objects.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a page="Mech Plugin Progress March 2026">Mech Plugin Progress March 2026</a></li>
+  <li><a page="Inspectable Mech Runs">Inspectable Mech Runs</a></li>
+  <li><a page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+</ul>
