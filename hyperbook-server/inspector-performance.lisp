@@ -62,8 +62,8 @@
     (t
      0)))
 
-;; Replace upstream create-pane to add timing logs and default class panes
-;; to a cheap overview tab instead of the first source-heavy view.
+;; Replace upstream create-pane to log timings and to default class panes
+;; to a cheap tab instead of the first source-heavy view.
 (defun create-pane (inspector object &key (select nil))
   (let ((pane-start (current-time-millis)))
     (log-inspector-performance :create-pane/start
@@ -242,23 +242,62 @@
 
 (in-package #:html-inspector-views/standard)
 
-(defun source-log (phase &rest kvs)
-  (apply #'clog-moldable-inspector::log-inspector-performance phase kvs))
-
-(defmethod parse-lisp-code :around ((input pathname) &optional package)
-  (let ((start (clog-moldable-inspector::current-time-millis)))
-    (prog1 (call-next-method)
-      (source-log :class-source/parse
-                  :pathname (namestring input)
-                  :cache-hit? nil
-                  :ms (clog-moldable-inspector::elapsed-millis start)))))
-
-(defun source-html-node-count (html)
-  (count #\< html))
-
 (defparameter *class-source-context-max-forms* 4)
 (defparameter *class-source-context-max-lines* 160)
 (defparameter *class-source-context-max-characters* 10000)
+
+(defvar *class-source-location-cache* (make-hash-table :test #'eq))
+(defvar *class-source-parse-cache* (make-hash-table :test #'equal))
+(defvar *class-source-render-cache* (make-hash-table :test #'equal))
+
+(defun source-log (phase &rest kvs)
+  (apply #'clog-moldable-inspector::log-inspector-performance phase kvs))
+
+(defun cached-class-source-location (class)
+  (multiple-value-bind (cached foundp)
+      (gethash class *class-source-location-cache*)
+    (if foundp
+        (progn
+          (source-log :class-source/location
+                      :class (or (class-name class) "<anonymous-class>")
+                      :cache-hit? t
+                      :pathname (and (consp cached)
+                                     (first cached)
+                                     (namestring (first cached)))
+                      :offset (and (consp cached) (second cached))
+                      :ms 0)
+          (if (eq cached :missing)
+              (values nil nil t)
+              (values (first cached) (second cached) t)))
+        (let* ((start (clog-moldable-inspector::current-time-millis))
+               (location (multiple-value-list (source-code-location class)))
+               (pathname (first location))
+               (offset (second location)))
+          (setf (gethash class *class-source-location-cache*)
+                (if pathname
+                    (list pathname offset)
+                    :missing))
+          (source-log :class-source/location
+                      :class (or (class-name class) "<anonymous-class>")
+                      :cache-hit? nil
+                      :pathname (and pathname (namestring pathname))
+                      :offset offset
+                      :ms (clog-moldable-inspector::elapsed-millis start))
+          (values pathname offset nil)))))
+
+(defun cached-parse-lisp-code (pathname)
+  (let* ((key (namestring pathname))
+         (start (clog-moldable-inspector::current-time-millis)))
+    (multiple-value-bind (code foundp)
+        (gethash key *class-source-parse-cache*)
+      (unless foundp
+        (setf code (parse-lisp-code pathname)
+              (gethash key *class-source-parse-cache*) code))
+      (source-log :class-source/parse
+                  :pathname key
+                  :cache-hit? foundp
+                  :ms (clog-moldable-inspector::elapsed-millis start))
+      code)))
 
 (defun top-level-form-range (form)
   (let ((source (cst:source (cst-of form))))
@@ -271,6 +310,10 @@
 (defun top-level-form-head (form)
   (let ((sexp (top-level-form-sexp form)))
     (and (consp sexp) (car sexp))))
+
+(defun top-level-form-second (form)
+  (let ((sexp (top-level-form-sexp form)))
+    (and (consp sexp) (second sexp))))
 
 (defun cst-sexp (cst)
   (ignore-errors (s-exp cst)))
@@ -460,107 +503,118 @@
                         (cst-line-count code cst)
                         (cst-character-count code cst)))))))
 
-(defun class-source-render (class mode)
-  (let* ((location-start (clog-moldable-inspector::current-time-millis))
-         (class-name (class-name class)))
-    (multiple-value-bind (pathname offset)
-        (source-code-location class)
-      (source-log :class-source/location
-                  :class (or class-name "<anonymous-class>")
-                  :cache-hit? nil
-                  :pathname (and pathname (namestring pathname))
-                  :offset offset
-                  :ms (clog-moldable-inspector::elapsed-millis location-start))
-      (let ((render-start (clog-moldable-inspector::current-time-millis)))
-        (multiple-value-bind (html references assets)
-            (cond
-              ((null pathname)
-               (html-and-references
-                 (compact-source-fallback class pathname :no-pathname)))
-              (t
-               (let* ((code (parse-lisp-code pathname))
-                      (forms (slot-value code 'top-level-forms))
-                      (target-index nil)
-                      (definition-cst nil)
-                      (locator-kind nil))
-                 (multiple-value-setq (target-index definition-cst locator-kind)
-                   (exact-or-nearby-class-definition forms class-name offset))
-                 (if (null target-index)
+(defun cached-class-source-render (class mode)
+  (multiple-value-bind (pathname offset location-cache-hit?)
+      (cached-class-source-location class)
+    (declare (ignore location-cache-hit?))
+    (let* ((class-name (class-name class))
+           (cache-key (list mode
+                            (and pathname (namestring pathname))
+                            offset
+                            class-name)))
+      (multiple-value-bind (cached foundp)
+          (gethash cache-key *class-source-render-cache*)
+        (if foundp
+            (progn
+              (source-log :class-source/render-cache
+                          :class class-name
+                          :mode mode
+                          :cache-hit? t
+                          :pathname (and pathname (namestring pathname))
+                          :offset offset)
+              (values-list cached))
+            (let ((render-start (clog-moldable-inspector::current-time-millis)))
+              (multiple-value-bind (html references assets)
+                  (cond
+                    ((null pathname)
                      (html-and-references
-                       (compact-source-fallback class pathname locator-kind))
-                     (ecase mode
-                       (:definition
-                        (if definition-cst
-                            (progn
-                              (source-log :class-source/excerpt
-                                          :class class-name
-                                          :mode mode
-                                          :pathname (namestring pathname)
-                                          :offset offset
-                                          :locator-kind locator-kind
-                                          :target-index target-index
-                                          :indices (list target-index)
-                                          :line-count (cst-line-count code definition-cst)
-                                          :character-count (cst-character-count code definition-cst)
-                                          :truncated? nil)
-                              (html-and-references
-                                (single-cst-metadata-bar pathname locator-kind code definition-cst)
-                                (render-cst-as-html code definition-cst)))
-                            (progn
-                              (source-log :class-source/excerpt
-                                          :class class-name
-                                          :mode mode
-                                          :pathname (namestring pathname)
-                                          :offset offset
-                                          :locator-kind locator-kind
-                                          :target-index target-index
-                                          :indices (list target-index)
-                                          :line-count (form-line-count code target-index)
-                                          :character-count (form-character-count code target-index)
-                                          :truncated? nil)
-                              (html-and-references
-                                (source-metadata-bar pathname locator-kind (list target-index) nil)
-                                (render-form-indices-as-html code (list target-index))))))
-                       (:context
-                        (let* ((raw-indices (context-form-indices code forms
-                                                                  target-index
-                                                                  class-name))
-                               (indices (capped-context-indices code raw-indices))
-                               (truncated? (< (length indices) (length raw-indices))))
-                          (source-log :class-source/excerpt
-                                      :class class-name
-                                      :mode mode
-                                      :pathname (namestring pathname)
-                                      :offset offset
-                                      :locator-kind locator-kind
-                                      :target-index target-index
-                                      :indices indices
-                                      :line-count (reduce #'+ indices
-                                                          :key (lambda (index)
-                                                                 (form-line-count code index))
-                                                          :initial-value 0)
-                                      :character-count (reduce #'+ indices
-                                                               :key (lambda (index)
-                                                                      (form-character-count code index))
-                                                               :initial-value 0)
-                                      :truncated? truncated?)
-                          (html-and-references
-                            (source-metadata-bar pathname locator-kind indices truncated?)
-                            (render-form-indices-as-html code indices)))))))))
-          (source-log :class-source/render
-                      :class class-name
-                      :mode mode
-                      :pathname (and pathname (namestring pathname))
-                      :offset offset
-                      :html-length (length html)
-                      :html-node-count (count #\< html)
-                      :reference-count (length references)
-                      :asset-count (length assets)
-                      :ms (clog-moldable-inspector::elapsed-millis render-start))
-          (values html references assets))))))
+                       (compact-source-fallback class pathname :no-pathname)))
+                    (t
+                    (let* ((code (cached-parse-lisp-code pathname))
+                            (forms (slot-value code 'top-level-forms))
+                            (target-index nil)
+                            (definition-cst nil)
+                            (locator-kind nil))
+                       (multiple-value-setq (target-index definition-cst locator-kind)
+                         (exact-or-nearby-class-definition forms class-name offset))
+                       (if (null target-index)
+                           (html-and-references
+                             (compact-source-fallback class pathname locator-kind))
+                           (ecase mode
+                             (:definition
+                              (if definition-cst
+                                  (progn
+                                    (source-log :class-source/excerpt
+                                                :class class-name
+                                                :mode mode
+                                                :pathname (namestring pathname)
+                                                :offset offset
+                                                :locator-kind locator-kind
+                                                :target-index target-index
+                                                :indices (list target-index)
+                                                :line-count (cst-line-count code definition-cst)
+                                                :character-count (cst-character-count code definition-cst)
+                                                :truncated? nil)
+                                    (html-and-references
+                                      (single-cst-metadata-bar pathname locator-kind code definition-cst)
+                                      (render-cst-as-html code definition-cst)))
+                                  (progn
+                                    (source-log :class-source/excerpt
+                                                :class class-name
+                                                :mode mode
+                                                :pathname (namestring pathname)
+                                                :offset offset
+                                                :locator-kind locator-kind
+                                                :target-index target-index
+                                                :indices (list target-index)
+                                                :line-count (form-line-count code target-index)
+                                                :character-count (form-character-count code target-index)
+                                                :truncated? nil)
+                                    (html-and-references
+                                      (source-metadata-bar pathname locator-kind (list target-index) nil)
+                                      (render-form-indices-as-html code (list target-index))))))
+                             (:context
+                              (let* ((raw-indices (context-form-indices code forms
+                                                                        target-index
+                                                                        class-name))
+                                     (indices (capped-context-indices code raw-indices))
+                                     (truncated? (< (length indices) (length raw-indices))))
+                                (source-log :class-source/excerpt
+                                            :class class-name
+                                            :mode mode
+                                            :pathname (namestring pathname)
+                                            :offset offset
+                                            :locator-kind locator-kind
+                                            :target-index target-index
+                                            :indices indices
+                                            :line-count (reduce #'+ indices
+                                                                :key (lambda (index)
+                                                                       (form-line-count code index))
+                                                                :initial-value 0)
+                                            :character-count (reduce #'+ indices
+                                                                     :key (lambda (index)
+                                                                            (form-character-count code index))
+                                                                     :initial-value 0)
+                                            :truncated? truncated?)
+                                (html-and-references
+                                  (source-metadata-bar pathname locator-kind indices truncated?)
+                                  (render-form-indices-as-html code indices)))))))))
+                (source-log :class-source/render
+                            :class class-name
+                            :mode mode
+                            :pathname (and pathname (namestring pathname))
+                            :offset offset
+                            :html-length (length html)
+                            :html-node-count (count #\< html)
+                            :reference-count (length references)
+                            :asset-count (length assets)
+                            :ms (clog-moldable-inspector::elapsed-millis render-start))
+                (setf (gethash cache-key *class-source-render-cache*)
+                      (list html references assets))
+                (values html references assets))))))))
 
 (defun class-source-html-view (class &key (mode :definition) (title "Source code") (priority 9))
-  (let ((view (make-html-view (thunk (class-source-render class mode))
+  (let ((view (make-html-view (thunk (cached-class-source-render class mode))
                               :title title
                               :priority priority)))
     (setf (view-object view) class)
@@ -600,73 +654,37 @@
 (defview 👀source-context (class class)
   (class-source-html-view class :mode :context :title "Source context" :priority 10))
 
-(defun source-code-view (object &key in-file?)
-  (let ((start (clog-moldable-inspector::current-time-millis)))
-    (multiple-value-bind (pathname offset)
-        (source-code-location object)
-      (source-log :class-source/location
-                  :object (or (ignore-errors (class-name object))
-                              (type-of object))
-                  :cache-hit? nil
-                  :pathname (and pathname (namestring pathname))
-                  :offset offset
-                  :ms (clog-moldable-inspector::elapsed-millis start))
-      (if in-file?
-          (source-view pathname offset)
-          (single-form-source-view pathname offset)))))
+(defview 👀slots (class class)
+  (when (c2mop:class-finalized-p class)
+    (list-view (thunk (c2mop:class-slots class))
+               :title "Slots"
+               :priority 2)))
 
-(defun render-as-html (code &key highlight-at-offset debug)
-  (let ((start (clog-moldable-inspector::current-time-millis)))
-    (let ((html
-            (with-slots (source top-level-forms) code
-              (when debug
-                (html
-                  (object-ref top-level-forms
-                              :display #'(lambda (_) (declare (ignore _)) "Concrete syntax tree"))
-                  (:hr)))
-              (html
-                (:pre :class "code-snippet"
-                      (:code
-                       (let ((position 0))
-                         (dolist (toplevel top-level-forms)
-                           (destructuring-bind (start . end) (cst:source (cst-of toplevel))
-                             (esc (str:substring position start source))
-                             (let ((highlight? (and highlight-at-offset
-                                                    (>= highlight-at-offset start)
-                                                    (< highlight-at-offset end)
-                                                    t)))
-                               (html
-                                 (:lisp-toplevel :highlight highlight?
-                                                 (setf position
-                                                       (render-toplevel-cst nil (cst-of toplevel)
-                                                                            source start)))))
-                             (assert (eql position end))))
-                         (esc (str:substring position nil source)))))))))
-    (source-log :class-source/render
-                :mode :file
-                :html-length (length html)
-                :html-node-count (source-html-node-count html)
-                :ms (clog-moldable-inspector::elapsed-millis start))
-      html)))
+(defview 👀superclasses (class class)
+  (when (c2mop:class-direct-superclasses class)
+    (-> (thunk (cons nil (cdr (superclass-tree class))))
+        tree-view
+        (rename :title "Superclasses"
+                :priority 5))))
 
-(defun render-one-form-as-html (code offset)
-  (let ((start (clog-moldable-inspector::current-time-millis)))
-    (let ((html
-            (with-slots (source top-level-forms) code
-              (html
-                (:pre :class "code-snippet"
-                      (:code
-                       (dolist (toplevel top-level-forms)
-                         (destructuring-bind (start . end) (cst:source (cst-of toplevel))
-                           (when (and (>= offset start)
-                                      (< offset end))
-                             (html
-                               (:lisp-toplevel (render-toplevel-cst nil (cst-of toplevel)
-                                                                     source start))))))))))))
-    (source-log :class-source/render
-                :mode :single-form
-                :offset offset
-                :html-length (length html)
-                :html-node-count (source-html-node-count html)
-                :ms (clog-moldable-inspector::elapsed-millis start))
-      html)))
+(defview 👀subclasses (class class)
+  (when (c2mop:class-direct-subclasses class)
+    (-> (thunk (cons nil (cdr (subclass-tree class))))
+        tree-view
+        (rename :title "Subclasses"
+                :priority 6))))
+
+(defview 👀specializing-methods (class class)
+  (html-view :title "Methods" :priority 8
+    (let ((specializers (let ((methods (find-specializers class)))
+                          (and methods
+                               (sort methods #'string<
+                                     :key #'text-representation)))))
+      (if specializers
+          (html
+            (:small :class "inspector-index"
+                    (fmt "~a item(s)" (length specializers)))
+            (html-table specializers :display (list #'text-representation)))
+          (html
+            (:small :class "inspector-index"
+                    (esc "No specializing methods found.")))))))
