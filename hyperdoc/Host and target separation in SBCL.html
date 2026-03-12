@@ -1,0 +1,65 @@
+<h1>Host and target separation in SBCL</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  SBCL bootstrapping needs an explicit distinction between the host Common Lisp
+  used during bootstrap and the target SBCL being built. This separation is not
+  just bookkeeping. It is what makes it possible to use a live host image
+  during bootstrap without letting the final result depend on accidental host
+  state.
+</p>
+
+<h2>Why host and target must stay distinct</h2>
+
+<p>
+  The host Lisp is a tool. The target SBCL is the product. Without
+  <a hyperbook="topics" page="Host/target separation"><tt>host/target separation</tt></a>,
+  compile-time and load-time effects can drift across phases and make it hard to
+  tell whether a behavior belongs to the host compiler image or to the target
+  system being built.
+</p>
+
+<h2>Cross-compilation inside one language family</h2>
+
+<p>
+  SBCL's bootstrap uses a <a hyperbook="topics" page="Cross-compiler"><tt>cross-compiler</tt></a>
+  running inside the host Lisp. That compiler emits target SBCL artifacts rather
+  than merely extending the host image in place. The boundary is therefore not
+  host machine versus target machine in the paper's main sense, but host Common
+  Lisp semantics versus target SBCL semantics.
+</p>
+
+<h2>Devices that make the separation explicit</h2>
+
+<ul>
+  <li><tt>sb!xc</tt> provides a temporary shadow-CL namespace for target-side compilation concerns.</li>
+  <li>Target-specific <tt>#!+</tt> and <tt>#!-</tt> reader conditionals distinguish target build concerns from ordinary host read-time behavior.</li>
+  <li>Phase-sensitive forms such as <tt>eval-when</tt> and <tt>make-load-form</tt> matter because host-time and target-time behavior can diverge if not managed carefully.</li>
+</ul>
+
+<p>
+  These devices are valuable because they turn a fuzzy bootstrap boundary into
+  an inspectable one. They make it clearer which effects belong to the host,
+  which belong to the target, and which must survive into later build stages.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="SBCL bootstrapping model">SBCL bootstrapping model</a></li>
+  <li><a page="SBCL build stages: cross-compiler, genesis, cold core, cold init">SBCL build stages: cross-compiler, genesis, cold core, cold init</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a href="https://link.springer.com/chapter/10.1007/978-3-540-89275-5_5">Rhodes 2008: SBCL: A Sanely-Bootstrappable Common Lisp</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Host/target separation"><tt>Host/target separation</tt></a></li>
+  <li><a hyperbook="topics" page="Cross-compiler"><tt>Cross-compiler</tt></a></li>
+  <li><a hyperbook="topics" page="Bootstrap determinism"><tt>Bootstrap determinism</tt></a></li>
+  <li><a hyperbook="topics" page="Cold core"><tt>Cold core</tt></a></li>
+  <li><a hyperbook="topics" page="Cold init"><tt>Cold init</tt></a></li>
+  <li><a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a></li>
+</ul>

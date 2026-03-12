@@ -14,6 +14,12 @@
   <li><a hyperbook="topics" page="HyperDoc runtime entities"><tt>HyperDoc runtime entities</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc runtime boundaries"><tt>HyperDoc runtime boundaries</tt></a></li>
   <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
+  <li><a hyperbook="topics" page="Persistence of investigation context"><tt>Persistence of investigation context</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector session"><tt>Inspector session</tt></a></li>
+  <li><a hyperbook="topics" page="Pane run"><tt>Pane run</tt></a></li>
+  <li><a hyperbook="topics" page="View render event"><tt>View render event</tt></a></li>
+  <li><a hyperbook="topics" page="Objectified execution evidence"><tt>Objectified execution evidence</tt></a></li>
 </ul>
 
 <h2>Why a runtime model matters</h2>
@@ -46,6 +52,35 @@
   These are related but not interchangeable: pages organize explanation, topics
   stabilize concept references, and inspectable links make runtime structures
   explorable in context.
+</p>
+
+<h2>Execution evidence should survive the run</h2>
+
+<p>
+  HyperDoc already has one precedent for this design in
+  <a page="HyperDoc Test Runner">HyperDoc Test Runner</a>: a
+  <tt>check-result</tt> remains an inspectable execution outcome, and a
+  <tt>check-run</tt> remains an inspectable batch object rather than collapsing
+  into terminal-only text. The inspector performance log points toward the same
+  requirement for interactive exploration.
+</p>
+
+<p>
+  A pane creation, view selection, or render event should not survive only as a
+  transient console stream. It should be promotable into an
+  <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a>,
+  grouped under an <a hyperbook="topics" page="Inspector session"><tt>inspector session</tt></a>
+  or <a hyperbook="topics" page="Pane run"><tt>pane run</tt></a>, so that the
+  runtime account remains inspectable after execution instead of collapsing into
+  ephemeral log lines.
+</p>
+
+<p>
+  That is the runtime consequence of same-protocol explanation. Evidence should
+  be emitted during the run, but it should also survive the run as
+  <a hyperbook="topics" page="Objectified execution evidence"><tt>objectified execution evidence</tt></a>.
+  This is one concrete form of
+  <a hyperbook="topics" page="Persistence of investigation context"><tt>persistence of investigation context</tt></a>.
 </p>
 
 <h2>Story and journal as runtime-facing structures</h2>
@@ -86,6 +121,7 @@
   <li>Treating inspectable links as decorative navigation instead of explanatory runtime handles.</li>
   <li>Treating FedWiki story/journal structures as direct replacements for HyperDoc page/topic structures.</li>
   <li>Assuming local and remote references share identical lifecycle and ownership constraints.</li>
+  <li>Treating runtime evidence as disposable console output instead of a candidate inspectable object layer.</li>
 </ul>
 
 <h2>Related pages / references</h2>
@@ -102,4 +138,7 @@
   <li><a page="Design">Design</a></li>
   <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
   <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
+  <li><a page="HyperDoc Test Runner">HyperDoc Test Runner</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
 </ul>

@@ -1,0 +1,98 @@
+<h1>SBCL bootstrapping model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page explains what Christophe Rhodes means by a sanely bootstrappable
+  Common Lisp in the case of SBCL. The paper is not mainly about replacing
+  source files with saved images. It is about using a host Lisp image during
+  bootstrap while containing that image dependence so the final build outcome
+  does not depend on accidental host-image state.
+</p>
+
+<h2>What sanely bootstrappable means here</h2>
+
+<p>
+  SBCL is built with the help of an existing host Common Lisp implementation,
+  but the build is arranged so the final target result is reconstructed through
+  explicit stages rather than inherited from whatever happened to be sitting in
+  the host image. That is why <a hyperbook="topics" page="Bootstrap determinism"><tt>bootstrap determinism</tt></a>
+  matters: the build should succeed because the source and stages are right, not
+  because the host image happened to carry the right accidental state.
+</p>
+
+<p>
+  This makes <a hyperbook="topics" page="SBCL bootstrapping"><tt>SBCL bootstrapping</tt></a>
+  a useful architecture topic for HyperDoc. It separates live image convenience
+  from durable source reconstruction without denying that images remain useful
+  during implementation work.
+</p>
+
+<h2>Images still matter, but not as the durable truth</h2>
+
+<p>
+  The paper's workflow boundary is narrower than some modern discussions imply.
+  Ordinary Common Lisp application development is usually
+  <a hyperbook="topics" page="Source-oriented development"><tt>source-oriented development</tt></a>:
+  source files stay authoritative, <tt>compile-file</tt> and reload remain
+  normal, and saved images are often retained mainly as an
+  <a hyperbook="topics" page="Image as deployment artifact"><tt>image as deployment artifact</tt></a>.
+</p>
+
+<p>
+  What is more image-oriented in the paper is the implementation-development
+  side. A host Lisp image is mutated far enough to build the target system, but
+  SBCL's contribution is to keep that dependence explicit and bounded rather
+  than letting the final build silently depend on host-image accidents.
+</p>
+
+<h2>Why this matters technically</h2>
+
+<ul>
+  <li>A host Lisp compiles and loads the bootstrap machinery.</li>
+  <li>A <a hyperbook="topics" page="Cross-compiler"><tt>cross-compiler</tt></a> running in that host emits target SBCL code.</li>
+  <li>The <a hyperbook="topics" page="Genesis build stage"><tt>genesis build stage</tt></a> simulates loading target artifacts and writes the <a hyperbook="topics" page="Cold core"><tt>cold core</tt></a>.</li>
+  <li>The SBCL runtime starts from that core and performs <a hyperbook="topics" page="Cold init"><tt>cold init</tt></a>.</li>
+</ul>
+
+<p>
+  This pipeline is valuable because it makes
+  <a hyperbook="topics" page="Host/target separation"><tt>host/target separation</tt></a>
+  explicit. The host Common Lisp is a build tool; the target SBCL is the thing
+  being built.
+</p>
+
+<h2>Why this matters socially</h2>
+
+<p>
+  The paper also makes a social claim that fits HyperDoc directly.
+  <a hyperbook="topics" page="Bootstrappability as social architecture"><tt>bootstrappability as social architecture</tt></a>
+  lowers contributor friction: fewer special bootstrap exceptions mean less time
+  spent wondering whether a change needs secret image magic and more time spent
+  doing ordinary, reviewable development work.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="SBCL">SBCL</a></li>
+  <li><a page="SBCL Process">SBCL Process</a></li>
+  <li><a page="Host and target separation in SBCL">Host and target separation in SBCL</a></li>
+  <li><a page="SBCL build stages: cross-compiler, genesis, cold core, cold init">SBCL build stages: cross-compiler, genesis, cold core, cold init</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a href="https://link.springer.com/chapter/10.1007/978-3-540-89275-5_5">Rhodes 2008: SBCL: A Sanely-Bootstrappable Common Lisp</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="SBCL bootstrapping"><tt>SBCL bootstrapping</tt></a></li>
+  <li><a hyperbook="topics" page="Bootstrap determinism"><tt>Bootstrap determinism</tt></a></li>
+  <li><a hyperbook="topics" page="Host/target separation"><tt>Host/target separation</tt></a></li>
+  <li><a hyperbook="topics" page="Cross-compiler"><tt>Cross-compiler</tt></a></li>
+  <li><a hyperbook="topics" page="Genesis build stage"><tt>Genesis build stage</tt></a></li>
+  <li><a hyperbook="topics" page="Cold core"><tt>Cold core</tt></a></li>
+  <li><a hyperbook="topics" page="Cold init"><tt>Cold init</tt></a></li>
+  <li><a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a></li>
+  <li><a hyperbook="topics" page="Bootstrappability as social architecture"><tt>Bootstrappability as social architecture</tt></a></li>
+</ul>

@@ -1839,6 +1839,7 @@
    :title "SBCL process"
    :summary "A running SBCL image with its own package state, loaded systems, source registry, and thread-local debugger context."
    :references '("SBCL Process"
+                 "Source-oriented and image-oriented development in Common Lisp"
                  "ASDF Components Workflow"
                  "HyperDoc Server")))
 
@@ -1848,9 +1849,118 @@
    :title "SBCL"
    :summary "Steel Bank Common Lisp implementation used to run HyperDoc systems, compile components, and host server/inspector runtime behavior."
    :references '("SBCL"
+                 "SBCL bootstrapping model"
                  "SBCL Process"
                  "ASDF Components Workflow"
                  "HyperDoc Server")))
+
+(defun sbcl-bootstrapping-topic ()
+  (make-topic
+   :id "sbcl-bootstrapping"
+   :title "SBCL bootstrapping"
+   :summary "The build discipline that uses a host Common Lisp to construct SBCL while keeping the final target build independent of accidental host-image state."
+   :references '("SBCL bootstrapping model"
+                 "Host and target separation in SBCL"
+                 "SBCL build stages: cross-compiler, genesis, cold core, cold init"
+                 "SBCL")))
+
+(defun source-oriented-development-topic ()
+  (make-topic
+   :id "source-oriented-development"
+   :title "Source-oriented development"
+   :summary "Common Lisp workflow in which source files remain the durable artifacts and rebuilds from scratch remain authoritative."
+   :references '("Source-oriented and image-oriented development in Common Lisp"
+                 "SBCL bootstrapping model"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "SBCL Process")))
+
+(defun image-oriented-development-topic ()
+  (make-topic
+   :id "image-oriented-development"
+   :title "Image-oriented development"
+   :summary "Workflow in which a live Lisp image is incrementally mutated during exploration or implementation work, with source reconstruction still needed for durable rebuilds."
+   :references '("Source-oriented and image-oriented development in Common Lisp"
+                 "SBCL Process"
+                 "SBCL bootstrapping model")))
+
+(defun host-target-separation-topic ()
+  (make-topic
+   :id "host-target-separation"
+   :title "Host/target separation"
+   :summary "Explicit distinction between the host Common Lisp used during bootstrap and the target SBCL being built."
+   :references '("Host and target separation in SBCL"
+                 "SBCL bootstrapping model"
+                 "SBCL build stages: cross-compiler, genesis, cold core, cold init")))
+
+(defun cross-compiler-topic ()
+  (make-topic
+   :id "cross-compiler"
+   :title "Cross-compiler"
+   :summary "Bootstrap compiler layer that runs in the host Lisp but emits target SBCL code."
+   :references '("SBCL build stages: cross-compiler, genesis, cold core, cold init"
+                 "Host and target separation in SBCL"
+                 "SBCL bootstrapping model")))
+
+(defun genesis-build-stage-topic ()
+  (make-topic
+   :id "genesis-build-stage"
+   :title "Genesis build stage"
+   :summary "SBCL bootstrap stage that simulates loading target FASLs and writes the cold core image."
+   :references '("SBCL build stages: cross-compiler, genesis, cold core, cold init"
+                 "SBCL bootstrapping model")))
+
+(defun cold-core-topic ()
+  (make-topic
+   :id "cold-core"
+   :title "Cold core"
+   :summary "Bootstrap image written before cold init, containing the target runtime state needed to start SBCL."
+   :references '("SBCL build stages: cross-compiler, genesis, cold core, cold init"
+                 "SBCL bootstrapping model")))
+
+(defun cold-init-topic ()
+  (make-topic
+   :id "cold-init"
+   :title "Cold init"
+   :summary "First target runtime initialization that completes startup from the cold core."
+   :references '("SBCL build stages: cross-compiler, genesis, cold core, cold init"
+                 "SBCL bootstrapping model")))
+
+(defun bootstrap-determinism-topic ()
+  (make-topic
+   :id "bootstrap-determinism"
+   :title "Bootstrap determinism"
+   :summary "Goal that the final SBCL build result should not depend on accidental state in the host compiler image."
+   :references '("SBCL bootstrapping model"
+                 "Host and target separation in SBCL"
+                 "SBCL build stages: cross-compiler, genesis, cold core, cold init")))
+
+(defun image-as-deployment-artifact-topic ()
+  (make-topic
+   :id "image-as-deployment-artifact"
+   :title "Image as deployment artifact"
+   :summary "Saved image used mainly as a runnable delivery artifact rather than the durable source of truth for ordinary application development."
+   :references '("Source-oriented and image-oriented development in Common Lisp"
+                 "SBCL Process"
+                 "SBCL")))
+
+(defun live-image-versus-durable-source-topic ()
+  (make-topic
+   :id "live-image-versus-durable-source"
+   :title "Live image versus durable source"
+   :summary "Boundary between mutable runtime image state used for live work and source files that remain authoritative for rebuilds."
+   :references '("Source-oriented and image-oriented development in Common Lisp"
+                 "SBCL Process"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "SBCL bootstrapping model")))
+
+(defun bootstrappability-as-social-architecture-topic ()
+  (make-topic
+   :id "bootstrappability-as-social-architecture"
+   :title "Bootstrappability as social architecture"
+   :summary "Build design choice that reduces contributor friction by making bootstrap steps more ordinary, predictable, and teachable."
+   :references '("SBCL bootstrapping model"
+                 "SBCL"
+                 "Host and target separation in SBCL")))
 
 (defun isolated-evaluation-workers-topic ()
   (make-topic
@@ -2535,6 +2645,118 @@
    :summary "A stepwise trace that lets one review how a run advanced from authored commands to emitted artifacts and findings."
    :references '("Inspectable Mech Runs"
                  "First-class run record")))
+
+(defun retrospective-explanation-pass-topic ()
+  (make-topic
+   :id "retrospective-explanation-pass"
+   :title "Retrospective explanation pass"
+   :summary "A later reconstruction layer that tries to infer source, context, branches, outputs, and failures after execution has already collapsed into output."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "Smalltalk Browser Frame and Scene in HyperDoc"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun execution-evidence-object-topic ()
+  (make-topic
+   :id "execution-evidence-object"
+   :title "Execution evidence object"
+   :summary "An inspectable record emitted at execution time that preserves what operation ran, in what context, with what outputs, limits, or failures."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "Inspectable Mech Runs"
+                 "Mech Credible Maintenance Story")))
+
+(defun boundary-report-topic ()
+  (make-topic
+   :id "boundary-report"
+   :title "Boundary report"
+   :summary "A report of what an execution could not resolve, represent, or complete cleanly at its authoritative seam."
+   :references '("Mech Credible Maintenance Story"
+                 "Mech Plugin Progress March 2026"
+                 "Inspectable Mech Runs")))
+
+(defun generation-explanation-twin-output-topic ()
+  (make-topic
+   :id "generation-explanation-twin-output"
+   :title "Generation/explanation twin output"
+   :summary "The design principle that execution should emit both the produced artifact and its explanatory evidence as coequal outputs."
+   :references '("Mech Plugin Progress March 2026"
+                 "Runtime Dispatch Seams in HyperDoc"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun raw-console-trace-topic ()
+  (make-topic
+   :id "raw-console-trace"
+   :title "Raw console trace"
+   :summary "A transient linear diagnostic stream emitted during execution before it has been promoted into structured inspectable objects."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model")))
+
+(defun pane-run-topic ()
+  (make-topic
+   :id "pane-run"
+   :title "Pane run"
+   :summary "An inspectable record of one pane's creation, view selection, rendering, and navigation activity."
+   :references '("HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun view-render-event-topic ()
+  (make-topic
+   :id "view-render-event"
+   :title "View render event"
+   :summary "One render-time event capturing a selected view, target object, timings, cache state, and related metrics."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Runtime Model")))
+
+(defun inspector-session-topic ()
+  (make-topic
+   :id "inspector-session"
+   :title "Inspector session"
+   :summary "An inspectable record of one inspector interaction session across panes, selections, and renders."
+   :references '("HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun same-protocol-evidence-topic ()
+  (make-topic
+   :id "same-protocol-evidence"
+   :title "Same-protocol evidence"
+   :summary "Execution evidence emitted by the same protocol that performs the work, rather than reconstructed in a later pass."
+   :references '("Runtime Dispatch Seams in HyperDoc"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "Smalltalk Browser Frame and Scene in HyperDoc")))
+
+(defun transient-diagnostic-stream-topic ()
+  (make-topic
+   :id "transient-diagnostic-stream"
+   :title "Transient diagnostic stream"
+   :summary "A sequence-preserving but weak form of execution evidence that remains console-bound, linear, and non-queryable as objects."
+   :references '("HyperDoc Evaluation and Inspection Model"
+                 "Mech Credible Maintenance Story")))
+
+(defun objectified-execution-evidence-topic ()
+  (make-topic
+   :id "objectified-execution-evidence"
+   :title "Objectified execution evidence"
+   :summary "Execution evidence promoted from transient trace lines into first-class inspectable runtime objects."
+   :references '("HyperDoc Runtime Model"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "HyperDoc Test Runner")))
+
+(defun persistence-of-investigation-context-topic ()
+  (make-topic
+   :id "persistence-of-investigation-context"
+   :title "Persistence of investigation context"
+   :summary "The requirement that investigation state, explanatory evidence, and execution context survive a run as first-class inspectable objects instead of disappearing into transient traces."
+   :references '("Smalltalk Browser Frame and Scene in HyperDoc"
+                 "HyperDoc Runtime Model"
+                 "Inspectable Mech Runs")))
+
+(defun literate-tracing-topic ()
+  (make-topic
+   :id "literate-tracing"
+   :title "Literate Tracing"
+   :summary "A documentation approach that explains systems through annotated concrete execution traces instead of source exposition alone."
+   :references '("https://arxiv.org/abs/2510.09073"
+                 "https://2025.splashcon.org/details/splash-2025-Onward-papers/11/Literate-Tracing"
+                 "https://brown.columbia.edu/portfolio/literate-tracing-unusually-interactive-visual-and-informative-software-documentation/")))
 
 (defun python-json-tool-source-topic ()
   (make-topic

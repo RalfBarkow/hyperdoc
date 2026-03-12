@@ -12,6 +12,10 @@
 <ul>
   <li><a hyperbook="topics" page="SBCL"><tt>SBCL</tt></a></li>
   <li><a hyperbook="topics" page="SBCL process"><tt>SBCL process</tt></a></li>
+  <li><a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a></li>
+  <li><a hyperbook="topics" page="Image as deployment artifact"><tt>Image as deployment artifact</tt></a></li>
+  <li><a hyperbook="topics" page="Source-oriented development"><tt>Source-oriented development</tt></a></li>
+  <li><a hyperbook="topics" page="Image-oriented development"><tt>Image-oriented development</tt></a></li>
   <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="asdf:find-system"><tt>asdf:find-system</tt></a></li>
   <li><a hyperbook="topics" page="Undefined-function triage"><tt>Undefined-function triage</tt></a></li>
@@ -42,6 +46,25 @@
   different SBCL process/image.
 </p>
 
+<h2>Running process image versus bootstrap image</h2>
+
+<p>
+  A running HyperDoc server process is one instance of
+  <a hyperbook="topics" page="Image-oriented development"><tt>image-oriented development</tt></a>:
+  it has current package state, loaded systems, active threads, and mutable
+  runtime data. That should not be confused with the bootstrap image state used
+  while building SBCL itself.
+</p>
+
+<p>
+  Rhodes's SBCL bootstrapping paper is useful here because it distinguishes the
+  live host image used during build from the durable source path that must still
+  rebuild cleanly. HyperDoc's own server/runtime workflow follows the same
+  boundary in miniature: the current process image is valuable for exploration,
+  debugging, and deployment, but it is not the durable source of truth for the
+  repository.
+</p>
+
 <h2>Failure signatures</h2>
 
 <ul>
@@ -67,6 +90,8 @@
 
 <ul>
   <li><a page="SBCL">SBCL</a></li>
+  <li><a page="SBCL bootstrapping model">SBCL bootstrapping model</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
   <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
   <li><a page="HyperDoc Server">HyperDoc Server</a></li>
   <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>

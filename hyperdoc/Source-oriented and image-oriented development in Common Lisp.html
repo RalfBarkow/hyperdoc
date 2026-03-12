@@ -1,0 +1,84 @@
+<h1>Source-oriented and image-oriented development in Common Lisp</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page distinguishes two real workflow modes in Common Lisp without
+  collapsing them into slogans. The important correction is that ordinary
+  application work is usually still source-oriented even when saved images exist
+  and live image state is useful.
+</p>
+
+<h2>Source-oriented development</h2>
+
+<p>
+  In <a hyperbook="topics" page="Source-oriented development"><tt>source-oriented development</tt></a>,
+  source files remain the durable artifacts that developers check in, rebuild,
+  and verify from scratch. Loading through <tt>compile-file</tt> and rebuild
+  paths remains normal, and developers periodically verify that sources still
+  reconstruct the system cleanly.
+</p>
+
+<p>
+  This is the usual frame for Common Lisp application programmers, including
+  repositories like this one where <a hyperbook="topics" page="ASDF"><tt>ASDF</tt></a>
+  system definitions, source-registry visibility, and rebuilds from source are
+  the durable workflow layer.
+</p>
+
+<h2>Image-oriented development</h2>
+
+<p>
+  In <a hyperbook="topics" page="Image-oriented development"><tt>image-oriented development</tt></a>,
+  a live Lisp image is incrementally mutated during exploration, debugging,
+  implementation work, or delivery preparation. This mode is real and useful,
+  but it does not by itself remove the need for durable source reconstruction.
+</p>
+
+<p>
+  SBCL's bootstrapping paper is important precisely because it contains image
+  dependence rather than denying it. A host image helps with bootstrap, but the
+  final target build should not depend on accidental host-image state.
+</p>
+
+<h2>Images as deployment artifacts</h2>
+
+<p>
+  A saved image can still be valuable as an
+  <a hyperbook="topics" page="Image as deployment artifact"><tt>image as deployment artifact</tt></a>.
+  That is narrower than saying the image replaces source. It means the saved
+  runtime state is convenient for shipping or starting a program, while source
+  remains the durable form that developers rebuild and audit.
+</p>
+
+<h2>Why the boundary matters</h2>
+
+<p>
+  The useful comparison is therefore not source <i>versus</i> image in an
+  absolute sense, but <a hyperbook="topics" page="Live image versus durable source"><tt>live image versus durable source</tt></a>.
+  Live image state is excellent for exploratory and implementation work.
+  Durable source is what keeps the system rebuildable, reviewable, and portable
+  across releases and implementations.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="SBCL">SBCL</a></li>
+  <li><a page="SBCL Process">SBCL Process</a></li>
+  <li><a page="SBCL bootstrapping model">SBCL bootstrapping model</a></li>
+  <li><a page="Host and target separation in SBCL">Host and target separation in SBCL</a></li>
+  <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a href="https://link.springer.com/chapter/10.1007/978-3-540-89275-5_5">Rhodes 2008: SBCL: A Sanely-Bootstrappable Common Lisp</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Source-oriented development"><tt>Source-oriented development</tt></a></li>
+  <li><a hyperbook="topics" page="Image-oriented development"><tt>Image-oriented development</tt></a></li>
+  <li><a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a></li>
+  <li><a hyperbook="topics" page="Image as deployment artifact"><tt>Image as deployment artifact</tt></a></li>
+  <li><a hyperbook="topics" page="SBCL bootstrapping"><tt>SBCL bootstrapping</tt></a></li>
+  <li><a hyperbook="topics" page="SBCL process"><tt>SBCL process</tt></a></li>
+</ul>

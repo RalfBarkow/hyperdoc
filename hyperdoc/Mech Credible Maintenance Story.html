@@ -185,6 +185,45 @@ pull request
   text and inspectable runtime behavior.
 </p>
 
+<h4>Why diagnostics should be emitted at the same seam as generation</h4>
+
+<p>
+  A <a hyperbook="topics" page="Retrospective explanation pass"><tt>retrospective explanation pass</tt></a>
+  would look at the finished artifact later and try to reconstruct what the
+  workflow must have done. That is weaker. It has to guess which command
+  mattered, which runtime context was active, which failures were swallowed,
+  and where editorial boundaries were introduced.
+</p>
+
+<p>
+  Mech's stronger option is to let
+  <a hyperbook="topics" page="Generation/explanation twin output"><tt>generation and explanation be twin outputs</tt></a>
+  of the same dispatch event. Because <tt>blocks[op].emit</tt> already receives
+  authored command text, normalized operation and arguments, body, element, and
+  state, it can emit the artifact and also record
+  <a hyperbook="topics" page="Runtime provenance"><tt>runtime provenance</tt></a>,
+  <a hyperbook="topics" page="Structured findings tally"><tt>structured findings tallies</tt></a>,
+  a <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a>,
+  and a <a hyperbook="topics" page="Replay trail"><tt>replay trail</tt></a>
+  from the same authoritative seam.
+</p>
+
+<p>
+  Credible maintenance therefore depends on diagnostics being emitted in-band,
+  not reconstructed afterward. The output is stronger when the explanatory
+  account is part of the work product instead of commentary layered on top of
+  it later.
+</p>
+
+<p>
+  The current HyperDoc inspector performance traces make the same architectural
+  point from the other side. They are already execution-time evidence, but they
+  still live as a transient diagnostic stream. Just as Mech became more
+  credible when findings stopped being buried in console output alone, those
+  inspector traces should be read as candidates for structured evidence
+  objects, not as mere debugging noise.
+</p>
+
 <h4>What makes the story credible</h4>
 
 <p>
@@ -218,6 +257,7 @@ pull request
   <li>there is no first-class source-location provenance per generated fragment yet.</li>
   <li>there is no persistent <a hyperbook="topics" page="First-class run record"><tt>first-class run record</tt></a> or fully inspectable execution ledger yet.</li>
   <li>the tally is real, but it is not yet a durable <a hyperbook="topics" page="Structured findings tally"><tt>structured findings tally</tt></a> object published across runs.</li>
+  <li>there is still no durable <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a> or standalone <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a> object emitted per run.</li>
 </ul>
 
 <p>

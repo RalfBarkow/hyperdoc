@@ -12,9 +12,11 @@
 
 <ul>
   <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
   <li><a hyperbook="topics" page="Execution step object"><tt>Execution step object</tt></a></li>
   <li><a hyperbook="topics" page="State delta"><tt>State delta</tt></a></li>
   <li><a hyperbook="topics" page="Artifact provenance"><tt>Artifact provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
   <li><a hyperbook="topics" page="Findings ledger"><tt>Findings ledger</tt></a></li>
   <li><a hyperbook="topics" page="Replay trail"><tt>Replay trail</tt></a></li>
 </ul>
@@ -27,6 +29,14 @@
   and findings. If those are preserved as objects instead of disappearing after
   execution, HyperDoc can inspect one run as a structured chronology rather
   than only as console traces or generated text.
+</p>
+
+<p>
+  This is the practical alternative to a retrospective explanation pass. The
+  run should keep the evidence generated at execution time instead of asking a
+  later layer to infer what must have happened from output alone. In HyperDoc
+  terms, that is a concrete case of
+  <a hyperbook="topics" page="Persistence of investigation context"><tt>persistence of investigation context</tt></a>.
 </p>
 
 <h2>Proposed execution step object</h2>
@@ -67,8 +77,9 @@
   HyperDoc already prefers inspectable runtime objects and graph-rooted
   publication. Mech runs fit that model well. A run object could publish a
   <a hyperbook="topics" page="Findings ledger"><tt>findings ledger</tt></a>,
-  boundary report, and artifact trail as live inspection surfaces instead of
-  hiding them in one output artifact.
+  a <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a>,
+  and artifact trail as live inspection surfaces instead of hiding them in one
+  output artifact.
 </p>
 
 <h2>Current limit</h2>

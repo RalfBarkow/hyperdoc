@@ -1,0 +1,111 @@
+<h1>Literate Tracing</h1>
+
+<p>
+  <a hyperbook="topics" page="Literate Tracing"><tt>Literate Tracing</tt></a>
+  is a recent execution-centered documentation approach. The paper and project
+  materials describe it as explaining software through annotated, concrete
+  execution traces rather than through source exposition alone.
+</p>
+
+<p>
+  For HyperDoc, this matters as adjacent reference material for
+  <a hyperbook="topics" page="Explanation from execution"><tt>explanation from execution</tt></a>,
+  <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence objects</tt></a>,
+  and
+  <a hyperbook="topics" page="Persistence of investigation context"><tt>persistence of investigation context</tt></a>.
+  It is not the same as HyperDoc's Mech or inspector seams, but it sharpens the
+  same architectural question: how much of the account of execution can be
+  produced from execution itself instead of reconstructed afterward.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Literate Tracing"><tt>Literate Tracing</tt></a></li>
+  <li><a hyperbook="topics" page="Explanation from execution"><tt>Explanation from execution</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+  <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
+  <li><a hyperbook="topics" page="Persistence of investigation context"><tt>Persistence of investigation context</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
+</ul>
+
+<h2>What the paper claims</h2>
+
+<p>
+  The <a href="https://arxiv.org/abs/2510.09073">paper</a> defines a literate
+  trace as an explanation of a software system using annotated, concrete
+  execution traces. The related project material presents
+  <tt>TReX</tt> as the tooling surface for producing interactive visual traces.
+</p>
+
+<p>
+  Those claims should stay attributed. HyperDoc can use them as a conceptual
+  comparison point without silently converting them into canonical repository
+  truth about all execution-trace systems.
+</p>
+
+<h2>Literate tracing versus retrospective explanation</h2>
+
+<p>
+  The useful contrast for HyperDoc is not primarily with static documentation.
+  It is with a <a hyperbook="topics" page="Retrospective explanation pass"><tt>retrospective explanation pass</tt></a>
+  that tries to reconstruct behavior after execution has already collapsed into
+  output. Literate Tracing argues for explanation that stays grounded in real
+  executions instead of describing systems only at a distance.
+</p>
+
+<p>
+  That makes it close to HyperDoc's own direction. The same-protocol view says
+  that execution and explanation should be twin outputs of one semantic event.
+  Literate Tracing approaches that question through annotated traces; the Mech
+  and inspector work in this repository approach it through
+  <a hyperbook="topics" page="Runtime dispatch seam"><tt>runtime dispatch seams</tt></a>
+  and inspectable runtime objects.
+</p>
+
+<h2>Why it matters here</h2>
+
+<p>
+  HyperDoc already has the raw ingredients for execution-grounded explanation:
+  dispatch seams, render events, run records, findings tallies, and a growing
+  vocabulary for preserving investigation context. What it still lacks in many
+  places is a stronger published form for that evidence.
+</p>
+
+<p>
+  Literate Tracing is useful here because it makes the missing step legible.
+  Raw traces are not enough, but neither is narrative added later. The richer
+  form is an execution-grounded account that stays close to the real run while
+  remaining inspectable and explainable as a document surface.
+</p>
+
+<h2>Boundary with HyperDoc</h2>
+
+<p>
+  HyperDoc does not currently implement a full literate-trace tool. Its recent
+  <tt>INSPECTOR-PERF</tt> lines are still a weaker form: they are already
+  execution evidence, but they remain console-bound and transient. That makes
+  them a precursor, not yet the same thing as a published annotated trace.
+</p>
+
+<p>
+  The practical consequence is modest but important. HyperDoc should not treat
+  execution evidence as exhaust. It should keep promoting that evidence toward
+  first-class objects and toward document surfaces that can explain those
+  objects without needing a second forensic pass.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a page="Inspectable Mech Runs">Inspectable Mech Runs</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
+  <li><a href="https://arxiv.org/abs/2510.09073">Literate Tracing (arXiv)</a></li>
+  <li><a href="https://2025.splashcon.org/details/splash-2025-Onward-papers/11/Literate-Tracing">Literate Tracing (SPLASH / Onward! '25)</a></li>
+  <li><a href="https://brown.columbia.edu/portfolio/literate-tracing-unusually-interactive-visual-and-informative-software-documentation/">Brown Institute project note</a></li>
+</ul>

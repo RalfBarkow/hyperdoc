@@ -32,6 +32,7 @@
   <li><a hyperbook="topics" page="Scene graph edge"><tt>Scene graph edge</tt></a></li>
   <li><a hyperbook="topics" page="Scene graph edit cycle"><tt>Scene graph edit cycle</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc scene graph adaptation"><tt>HyperDoc scene graph adaptation</tt></a></li>
+  <li><a hyperbook="topics" page="Persistence of investigation context"><tt>Persistence of investigation context</tt></a></li>
   <li><a hyperbook="topics" page="Human-written robot process graphs"><tt>Human-written robot process graphs</tt></a></li>
   <li><a hyperbook="topics" page="Ward/Beck diagram for object-oriented programs (1986)"><tt>Ward/Beck diagram for object-oriented programs (1986)</tt></a></li>
   <li><a hyperbook="topics" page="Collaborating objects diagrams"><tt>Collaborating objects diagrams</tt></a></li>
@@ -44,8 +45,13 @@
   <li><a hyperbook="topics" page="Execution context bundle"><tt>Execution context bundle</tt></a></li>
   <li><a hyperbook="topics" page="Block-level interpreter seam"><tt>Block-level interpreter seam</tt></a></li>
   <li><a hyperbook="topics" page="Explanation from execution"><tt>Explanation from execution</tt></a></li>
+  <li><a hyperbook="topics" page="Retrospective explanation pass"><tt>Retrospective explanation pass</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
   <li><a hyperbook="topics" page="First-class run record"><tt>First-class run record</tt></a></li>
   <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
+  <li><a hyperbook="topics" page="Replay trail"><tt>Replay trail</tt></a></li>
+  <li><a hyperbook="topics" page="Generation/explanation twin output"><tt>Generation/explanation twin output</tt></a></li>
   <li><a hyperbook="topics" page="Diagnostic publication"><tt>Diagnostic publication</tt></a></li>
   <li><a hyperbook="topics" page="Structured findings tally"><tt>Structured findings tally</tt></a></li>
 </ul>
@@ -56,7 +62,8 @@
   The article's diagnosis maps well to HyperDoc:
   static pages and code browsers are necessary but not sufficient for dynamic work.
   HyperDoc already has the right primitives (links, inspectable objects, debugger/stepper surfaces, and graph-rooted publishing).
-  The missing piece is to persist investigation context as first-class objects.
+  The missing piece is <a hyperbook="topics" page="Persistence of investigation context"><tt>persistence of investigation context</tt></a>
+  as first-class objects.
 </p>
 
 <p>
@@ -175,6 +182,46 @@ await blocks[op].emit.apply(null, [stuff])</code></pre>
   as direct byproducts of execution rather than as an after-the-fact reporting
   layer. That makes Mech a practical executable-explanation hook at the block
   DSL level.
+</p>
+
+<h3>Why no second explanatory pass is needed</h3>
+
+<p>
+  A <a hyperbook="topics" page="Retrospective explanation pass"><tt>retrospective explanation pass</tt></a>
+  is a later reconstruction layer. It tries to infer, after execution, which
+  source line mattered, which context was live, which branches were taken, what
+  was emitted, and which failures were normalized away. That style is always
+  weaker because it risks semantic drift and provenance loss.
+</p>
+
+<p>
+  The stronger alternative is to treat
+  <a hyperbook="topics" page="Generation/explanation twin output"><tt>generation and explanation as twin outputs</tt></a>
+  of the same semantic event. Smalltalk's stepping hook was powerful because
+  the browser, inspector, and debugger could read meaning while execution was
+  still live. Mech can do something similar at block scale because the dispatch
+  seam still has the authored <tt>command</tt>, normalized <tt>op</tt> and
+  <tt>args</tt>, nested <tt>body</tt>, live <tt>elem</tt> and <tt>state</tt>,
+  and the emitted result in one place.
+</p>
+
+<p>
+  That is enough to mint an <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a>,
+  <a hyperbook="topics" page="Runtime provenance"><tt>runtime provenance</tt></a>,
+  a <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a>,
+  and a <a hyperbook="topics" page="Replay trail"><tt>replay trail</tt></a>
+  at the same moment work is done. HyperDoc does not need a second forensic
+  layer to explain the run if the execution seam already records its own
+  evidence.
+</p>
+
+<p>
+  HyperDoc's current <tt>INSPECTOR-PERF</tt> traces show the same principle on
+  the Lisp side. Pane creation, view activation, rendering, and inspect-click
+  transitions already emit an account of themselves while those operations are
+  happening. The remaining step is therefore not retrospective narration. It is
+  to promote that transient stream into first-class inspectable evidence
+  objects.
 </p>
 
 <h2>Localhost FedWiki twin</h2>

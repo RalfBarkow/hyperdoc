@@ -120,6 +120,17 @@
   the same one Weitz describes for general Common Lisp practice.
 </p>
 
+<p>
+  That discipline is part of the durable side of the workflow. The SBCL
+  bootstrapping literature makes the same boundary explicit from another angle:
+  <a hyperbook="topics" page="Source-oriented development"><tt>source-oriented development</tt></a>
+  and source reconstruction belong to the stable rebuild path, while a running
+  image is live operational state. In HyperDoc terms, the source registry and
+  <a hyperbook="topics" page="ASDF"><tt>ASDF</tt></a> system definitions belong
+  to the durable reconstruction story; the current SBCL image belongs to
+  runtime state and process context.
+</p>
+
 <h2>How HyperDoc uses ASDF</h2>
 
 <p>

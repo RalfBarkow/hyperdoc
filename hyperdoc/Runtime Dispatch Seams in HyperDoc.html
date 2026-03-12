@@ -14,8 +14,12 @@
   <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
   <li><a hyperbook="topics" page="Block-level interpreter seam"><tt>Block-level interpreter seam</tt></a></li>
   <li><a hyperbook="topics" page="Explanation from execution"><tt>Explanation from execution</tt></a></li>
+  <li><a hyperbook="topics" page="Retrospective explanation pass"><tt>Retrospective explanation pass</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
   <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
   <li><a hyperbook="topics" page="Executable explanation"><tt>Executable explanation</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
+  <li><a hyperbook="topics" page="Generation/explanation twin output"><tt>Generation/explanation twin output</tt></a></li>
   <li><a hyperbook="topics" page="Class browser/inspector/debugger triangulation"><tt>Class browser/inspector/debugger triangulation</tt></a></li>
   <li><a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a></li>
 </ul>
@@ -36,6 +40,25 @@
   When those three are co-present, inspectable explanation stops being an
   after-the-fact reconstruction problem. It becomes a normal byproduct of
   execution.
+</p>
+
+<h2>Retrospective pass versus same-protocol explanation</h2>
+
+<p>
+  A <a hyperbook="topics" page="Retrospective explanation pass"><tt>retrospective explanation pass</tt></a>
+  tries to reconstruct what happened after execution has already collapsed into
+  output. It infers source relevance, context, branches, outputs, and failures
+  later, which makes it vulnerable to semantic drift and provenance loss.
+</p>
+
+<p>
+  A dispatch-seam explanation is stronger because it records evidence at the
+  same semantic boundary that performed the work. In that model,
+  <a hyperbook="topics" page="Generation/explanation twin output"><tt>generation and explanation become twin outputs</tt></a>:
+  the same event can produce the artifact and an
+  <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence object</tt></a>,
+  runtime provenance, a boundary report, and other inspectable traces without a
+  second explanatory layer.
 </p>
 
 <h2>Smalltalk stepping seam</h2>
@@ -85,6 +108,26 @@
   offer a concrete execution seam where explanation can become first-class.
 </p>
 
+<h2>Literate tracing as an adjacent trace-centered model</h2>
+
+<p>
+  <a hyperbook="topics" page="Literate Tracing"><tt>Literate Tracing</tt></a>
+  is a useful adjacent reference point. It frames explanation around annotated,
+  concrete execution traces rather than around a dispatch protocol directly.
+  That makes it neither the same as the Smalltalk stepping primitive nor the
+  same as Mech's emit seam, but it asks a closely related question: how can an
+  execution-grounded account stay faithful enough to the run to explain real
+  behavior rather than static intent alone?
+</p>
+
+<p>
+  For HyperDoc, the comparison is productive because it separates two layers.
+  A runtime dispatch seam explains where evidence can be minted. Literate
+  tracing suggests what a richer published form of that evidence might look
+  like once it is preserved, annotated, and linked back into an explanatory
+  surface.
+</p>
+
 <h2>Related pages / references</h2>
 
 <ul>
@@ -97,4 +140,5 @@
   <li><a page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
   <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
   <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+  <li><a page="Literate Tracing">Literate Tracing</a></li>
 </ul>
