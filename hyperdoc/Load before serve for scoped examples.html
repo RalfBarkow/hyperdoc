@@ -1,0 +1,48 @@
+<h1>Load before serve for scoped examples</h1>
+
+<p>
+  The rule in this repo is simple:
+  <a hyperbook="topics" page="Portable examples"><tt>Portable examples</tt></a>
+  and ops-specific examples are only discoverable if their ASDF systems are
+  loaded before the service begins serving HyperDoc.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Load before serve for scoped examples"><tt>Load before serve for scoped examples</tt></a></li>
+  <li><a hyperbook="topics" page="Portable examples"><tt>Portable examples</tt></a></li>
+  <li><a hyperbook="topics" page="Example system boundary"><tt>Example system boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Lazy example discovery"><tt>Lazy example discovery</tt></a></li>
+  <li><a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a></li>
+</ul>
+
+<h2>Why this rule exists</h2>
+
+<p>
+  HyperDoc models examples as system-scoped, load-dependent exploratory slices.
+  That means service parity depends on the startup load set, not only on serving
+  the same URL routes.
+</p>
+
+<h2>Operational reading</h2>
+
+<p>
+  If a deployed image should expose portable and ops examples, the startup path
+  must load the systems that own those examples before calling
+  <tt>serve-catalog</tt>.
+</p>
+
+<h2>What this avoids</h2>
+
+<ul>
+  <li>manual rescue loads after startup</li>
+  <li>misdiagnosing under-loading as a discovery bug</li>
+  <li>overbroad root-level example ownership</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Apply the rule operationally through <a page="Deploy or restart dreyeck and confirm live parity">Deploy or restart dreyeck and confirm live parity</a>.
+</p>

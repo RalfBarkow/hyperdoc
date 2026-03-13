@@ -1,0 +1,82 @@
+<h1>Probe dreyeck runtime load set</h1>
+
+<p>
+  This diagnostic task makes the running image explicit: inspect loaded systems,
+  then inspect scoped example discovery by system to confirm whether the intended
+  <a hyperbook="topics" page="Load before serve for scoped examples"><tt>load before serve for scoped examples</tt></a>
+  rule is active.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Probe dreyeck runtime load set"><tt>Probe dreyeck runtime load set</tt></a></li>
+  <li><a hyperbook="topics" page="Startup load-set mismatch"><tt>Startup load-set mismatch</tt></a></li>
+  <li><a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a></li>
+  <li><a hyperbook="topics" page="Load before serve for scoped examples"><tt>Load before serve for scoped examples</tt></a></li>
+  <li><a hyperbook="topics" page="Live parity evidence"><tt>Live parity evidence</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Distinguish an under-loaded service image from a discovery bug.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>Access to a REPL, Playground, or equivalent live evaluation surface on dreyeck.</li>
+  <li>The service is already up.</li>
+</ul>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Inspect loaded systems:
+<pre>
+(asdf:already-loaded-systems)
+</pre>
+  </li>
+  <li>Inspect base, portable, and ops example scopes:
+<pre>
+(mapcar #'hyperdoc::check-id-of
+        (hyperdoc::discover-example-checks :system "hyperdoc"))
+
+(mapcar (lambda (spec)
+          (getf (hyperdoc::check-locator-of spec) :function))
+        (hyperdoc::discover-example-checks :system "hyperdoc/examples"))
+
+(mapcar (lambda (spec)
+          (getf (hyperdoc::check-locator-of spec) :function))
+        (hyperdoc::discover-example-checks :system "hyperdoc/examples/ops"))
+</pre>
+  </li>
+  <li>If portable/ops are empty, test the load hypothesis explicitly:
+<pre>
+(asdf:load-system :hyperdoc/examples)
+(asdf:load-system :hyperdoc/examples/ops)
+</pre>
+  </li>
+  <li>Rerun the two scoped discovery calls.</li>
+</ol>
+
+<h2>Expected results</h2>
+
+<ul>
+  <li>If the service was correctly started from <tt>:hyperdoc/server</tt>, the portable and ops scopes are already nonempty.</li>
+  <li>If the scopes only appear after explicit loads, the issue is startup/load-set drift.</li>
+</ul>
+
+<h2>Failure interpretation</h2>
+
+<ul>
+  <li>Empty scopes before explicit loads do not by themselves indicate a broken discoverer.</li>
+  <li>Change after explicit load is strong evidence of a startup path problem.</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Confirm scoped example parity on dreyeck">Confirm scoped example parity on dreyeck</a>.
+</p>

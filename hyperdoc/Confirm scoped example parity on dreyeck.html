@@ -1,0 +1,84 @@
+<h1>Confirm scoped example parity on dreyeck</h1>
+
+<p>
+  This task confirms that dreyeck exposes the same intended
+  <a hyperbook="topics" page="Portable examples"><tt>Portable examples</tt></a>
+  and ops-specific example scopes as localhost after deployment or restart.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Confirm scoped example parity on dreyeck"><tt>Confirm scoped example parity on dreyeck</tt></a></li>
+  <li><a hyperbook="topics" page="Scoped example parity"><tt>Scoped example parity</tt></a></li>
+  <li><a hyperbook="topics" page="Live parity evidence"><tt>Live parity evidence</tt></a></li>
+  <li><a hyperbook="topics" page="Probe dreyeck runtime load set"><tt>Probe dreyeck runtime load set</tt></a></li>
+  <li><a hyperbook="topics" page="Portable example scope"><tt>Portable example scope</tt></a></li>
+  <li><a hyperbook="topics" page="Lazy example discovery"><tt>Lazy example discovery</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Verify that the service does not only answer HTTP requests, but also serves
+  the intended scoped example layers.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a> passed.</li>
+  <li>You can either inspect the UI or run a live runtime probe.</li>
+</ul>
+
+<h2>UI-level confirmation</h2>
+
+<ol>
+  <li>Open the relevant system object in HyperDoc.</li>
+  <li>Open its <tt>Examples</tt> surface.</li>
+  <li>Confirm that the portable example layer for <tt>hyperdoc/examples</tt> is present.</li>
+  <li>Confirm that the ops layer for <tt>hyperdoc/examples/ops</tt> is present.</li>
+</ol>
+
+<h2>Runtime-probe confirmation</h2>
+
+<p>
+  Run the canonical probes in the live image:
+</p>
+
+<pre>
+(mapcar (lambda (spec)
+          (getf (hyperdoc::check-locator-of spec) :function))
+        (hyperdoc::discover-example-checks :system "hyperdoc/examples"))
+
+(mapcar (lambda (spec)
+          (getf (hyperdoc::check-locator-of spec) :function))
+        (hyperdoc::discover-example-checks :system "hyperdoc/examples/ops"))
+</pre>
+
+<p>
+  Operationally, “nonempty” means that both calls return at least one discoverable
+  check spec. The important invariant is presence of the intended scopes, not an
+  overfitted count.
+</p>
+
+<h2>Expected results</h2>
+
+<ul>
+  <li>Both scoped discovery calls are nonempty.</li>
+  <li>UI evidence and runtime evidence agree.</li>
+</ul>
+
+<h2>Failure interpretation</h2>
+
+<ul>
+  <li>If the UI is missing the scopes and the runtime probes are empty, the service is under-loaded.</li>
+  <li>If manual `(asdf:load-system ...)` calls make the scopes appear immediately, startup/load-scope drift is confirmed.</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  If parity fails, continue with <a page="Probe dreyeck runtime load set">Probe dreyeck runtime load set</a>
+  and be prepared to <a page="Roll back HyperDoc on dreyeck.ch">roll back</a>.
+</p>

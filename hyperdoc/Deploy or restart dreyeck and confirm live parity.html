@@ -1,0 +1,92 @@
+<h1>Deploy or restart dreyeck and confirm live parity</h1>
+
+<p>
+  This operator task is the main follow-up after the
+  <a hyperbook="topics" page="Startup load-set mismatch"><tt>Startup load-set mismatch</tt></a>
+  diagnosis: either deploy the corrected build or restart the packaged service,
+  then confirm <a hyperbook="topics" page="Scoped example parity"><tt>Scoped example parity</tt></a>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Deploy or restart dreyeck and confirm live parity"><tt>Deploy or restart dreyeck and confirm live parity</tt></a></li>
+  <li><a hyperbook="topics" page="Deployment command locality"><tt>Deployment command locality</tt></a></li>
+  <li><a hyperbook="topics" page="dreyeck local verification gate"><tt>dreyeck local verification gate</tt></a></li>
+  <li><a hyperbook="topics" page="dreyeck runner rehearsal"><tt>dreyeck runner rehearsal</tt></a></li>
+  <li><a hyperbook="topics" page="Restart dreyeck release service"><tt>Restart dreyeck release service</tt></a></li>
+  <li><a hyperbook="topics" page="Confirm scoped example parity on dreyeck"><tt>Confirm scoped example parity on dreyeck</tt></a></li>
+  <li><a hyperbook="topics" page="Live parity evidence"><tt>Live parity evidence</tt></a></li>
+  <li><a hyperbook="topics" page="NixOS generation rollback"><tt>NixOS generation rollback</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Reach a running dreyeck service that exposes the same intended scoped example
+  layers as localhost, without weakening the existing load-boundary model.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li><a page="Verify HyperDoc locally before deployment">Verify HyperDoc locally before deployment</a> passed.</li>
+  <li>You know whether the task is a full deployment or only a service restart.</li>
+  <li>You have controller-local access, target-host access, and a rollback path.</li>
+</ul>
+
+<h2>Command locality breakdown</h2>
+
+<p>
+  Follow <a hyperbook="topics" page="Deployment command locality"><tt>Deployment command locality</tt></a> strictly:
+  local verification and rebuild commands stay on the controller, SSH commands
+  target <tt>dreyeck.ch</tt>, and public URL probes remain public verification.
+</p>
+
+<h2>Recommended sequence</h2>
+
+<ol>
+  <li><a page="Verify HyperDoc locally before deployment">Verify locally</a>.</li>
+  <li><a page="Back up dreyeck.ch before deployment">Back up</a> and <a page="Record dreyeck.ch generation before rebuild">record the current generation</a>.</li>
+  <li><a page="Rehearse dreyeck.ch deployment with runner">Rehearse</a> before any real switch.</li>
+  <li>Choose exactly one operational path:
+    <ul>
+      <li><a page="Deploy dreyeck.ch from the local flake">deploy from the local flake</a> if code/configuration changed.</li>
+      <li><a page="Restart dreyeck release service">restart the release service</a> if the deployed generation is already correct.</li>
+    </ul>
+  </li>
+  <li><a page="Verify HyperDoc on dreyeck.ch">Verify HTTP/UI reachability</a>.</li>
+  <li><a page="Confirm scoped example parity on dreyeck">Confirm scoped example parity</a>.</li>
+  <li>If parity or reachability fails, <a page="Roll back HyperDoc on dreyeck.ch">roll back</a>.</li>
+</ol>
+
+<h2>Expected success signals</h2>
+
+<ul>
+  <li>The service is up and serving expected URLs.</li>
+  <li>The portable and ops example scopes are present again.</li>
+  <li>No manual rescue load is needed after the service starts.</li>
+</ul>
+
+<h2>Failure interpretation</h2>
+
+<ul>
+  <li>If the service is up but portable/ops scopes are empty, suspect a load-set problem rather than a discovery bug.</li>
+  <li>If parity appears only after ad hoc REPL loads, startup wiring is still wrong.</li>
+  <li>If the service does not come back at all, treat restart/deploy as failed and use rollback.</li>
+</ul>
+
+<h2>Automation from within HyperDoc</h2>
+
+<p>
+  HyperDoc already documents runner-friendly rehearsal steps, but this task page
+  does not assume a one-click deploy. Dry/non-destructive rehearsal remains
+  separate from switch/restart, and rollback remains explicit.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Hand a newcomer first to <a page="Onboarding dreyeck deployment and restart">Onboarding dreyeck deployment and restart</a>,
+  then use this page as the operator checklist during the real run.
+</p>

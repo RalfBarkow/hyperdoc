@@ -1,0 +1,59 @@
+<h1>New team member onboarding for dreyeck operations</h1>
+
+<p>
+  This page explains what a new operator needs to know before touching
+  <tt>dreyeck.ch</tt> in the HyperDoc context.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="New team member onboarding for dreyeck operations"><tt>New team member onboarding for dreyeck operations</tt></a></li>
+  <li><a hyperbook="topics" page="Deployment command locality"><tt>Deployment command locality</tt></a></li>
+  <li><a hyperbook="topics" page="Training arc: deploy and restart dreyeck safely"><tt>Training arc: deploy and restart dreyeck safely</tt></a></li>
+  <li><a hyperbook="topics" page="Training arc: verify scoped examples after deployment"><tt>Training arc: verify scoped examples after deployment</tt></a></li>
+  <li><a hyperbook="topics" page="Live parity evidence"><tt>Live parity evidence</tt></a></li>
+</ul>
+
+<h2>What dreyeck is here</h2>
+
+<p>
+  In this repo, dreyeck is the deployed HyperDoc host. The onboarding problem is
+  not just “how to rebuild NixOS,” but how to preserve HyperDoc-specific parity
+  across deployment, restart, and verification.
+</p>
+
+<h2>What can be rehearsed locally</h2>
+
+<p>
+  Local verification, release smoke, and runner-based rehearsal should happen
+  before live activation. A newcomer should learn the controller-local path first.
+</p>
+
+<h2>What touches the remote host</h2>
+
+<p>
+  Backup, generation recording, restart, and final activation touch the remote
+  host. Public URL probes then confirm what the outside world sees.
+</p>
+
+<h2>What counts as success</h2>
+
+<ul>
+  <li>The service is up.</li>
+  <li>The intended public URLs respond.</li>
+  <li>Scoped example parity is present without rescue loads.</li>
+</ul>
+
+<h2>What to do if parity fails</h2>
+
+<p>
+  Move from public verification to runtime probing. If the service is under-loaded,
+  fix startup/load scope; if recovery is needed immediately, roll back.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Start from <a page="Onboarding dreyeck deployment and restart">Onboarding dreyeck deployment and restart</a>.
+</p>

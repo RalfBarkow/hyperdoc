@@ -1,0 +1,51 @@
+<h1>Scoped example parity</h1>
+
+<p>
+  <a hyperbook="topics" page="Scoped example parity"><tt>Scoped example parity</tt></a>
+  means that localhost and dreyeck expose the same intended example scopes for
+  the ASDF systems that are meant to be loaded in that environment.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Scoped example parity"><tt>Scoped example parity</tt></a></li>
+  <li><a hyperbook="topics" page="Portable examples"><tt>Portable examples</tt></a></li>
+  <li><a hyperbook="topics" page="Portable example scope"><tt>Portable example scope</tt></a></li>
+  <li><a hyperbook="topics" page="Example system boundary"><tt>Example system boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Live parity evidence"><tt>Live parity evidence</tt></a></li>
+</ul>
+
+<h2>What parity means here</h2>
+
+<p>
+  In this repo, parity is not a root-global count of all examples. It is a
+  match in the intended system-scoped layers:
+  base <tt>hyperdoc</tt>, portable <tt>hyperdoc/examples</tt>, and ops-specific
+  <tt>hyperdoc/examples/ops</tt>.
+</p>
+
+<h2>Why parity can fail</h2>
+
+<p>
+  The most important failure mode in this slice was a
+  <a hyperbook="topics" page="Startup load-set mismatch"><tt>Startup load-set mismatch</tt></a>:
+  the server could start, but the runtime image still under-loaded the example systems.
+</p>
+
+<h2>How to confirm it</h2>
+
+<p>
+  Use both:
+</p>
+
+<ul>
+  <li>UI evidence from the <tt>Examples</tt> surface</li>
+  <li>runtime evidence from <a page="Probe dreyeck runtime load set">Probe dreyeck runtime load set</a></li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Operationalize this concept with <a page="Confirm scoped example parity on dreyeck">Confirm scoped example parity on dreyeck</a>.
+</p>

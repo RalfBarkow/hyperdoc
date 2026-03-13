@@ -1,0 +1,46 @@
+<h1>Startup load-set mismatch</h1>
+
+<p>
+  A <a hyperbook="topics" page="Startup load-set mismatch"><tt>Startup load-set mismatch</tt></a>
+  occurs when startup reaches a working server implementation but not the full
+  HyperDoc-specific system set expected for the intended surfaces.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Startup load-set mismatch"><tt>Startup load-set mismatch</tt></a></li>
+  <li><a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a></li>
+  <li><a hyperbook="topics" page="Load before serve for scoped examples"><tt>Load before serve for scoped examples</tt></a></li>
+  <li><a hyperbook="topics" page="Probe dreyeck runtime load set"><tt>Probe dreyeck runtime load set</tt></a></li>
+</ul>
+
+<h2>Diagnosis from this slice</h2>
+
+<p>
+  The old dreyeck-style startup path reached the generic server and exposed base
+  examples, but left portable and ops scopes empty. Explicit loads of
+  <tt>:hyperdoc/examples</tt> and <tt>:hyperdoc/examples/ops</tt> restored the
+  missing scopes immediately, while <tt>:hyperdoc/server</tt> produced parity directly.
+</p>
+
+<h2>What this diagnosis is not</h2>
+
+<p>
+  This is not evidence of a separate discovery algorithm bug. It is evidence of
+  runtime load-scope drift.
+</p>
+
+<h2>Operational consequence</h2>
+
+<p>
+  Fix startup wiring first. Only if the intended systems are already loaded and
+  parity still fails should the discovery path itself become the main suspect.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Load before serve for scoped examples">Load before serve for scoped examples</a>
+  and <a page="Probe dreyeck runtime load set">Probe dreyeck runtime load set</a>.
+</p>

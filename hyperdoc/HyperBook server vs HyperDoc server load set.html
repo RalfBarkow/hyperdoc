@@ -1,0 +1,40 @@
+<h1>HyperBook server vs HyperDoc server load set</h1>
+
+<p>
+  <a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a>
+  is the distinction between reaching the generic server implementation and
+  reaching the full HyperDoc-specific set of systems expected for the deployed
+  experience.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a></li>
+  <li><a hyperbook="topics" page="Startup load-set mismatch"><tt>Startup load-set mismatch</tt></a></li>
+  <li><a hyperbook="topics" page="Load before serve for scoped examples"><tt>Load before serve for scoped examples</tt></a></li>
+  <li><a page="HyperDoc Server">HyperDoc Server</a></li>
+</ul>
+
+<h2>The distinction</h2>
+
+<p>
+  Loading <tt>:hyperbook/server</tt> reaches the generic server implementation.
+  Loading <tt>:hyperdoc/server</tt> reaches the same implementation plus the
+  HyperDoc-specific systems needed for the intended example/discovery surfaces.
+</p>
+
+<h2>Why it matters operationally</h2>
+
+<p>
+  Two startup paths can both serve pages successfully and still differ in their
+  discoverable HyperDoc surfaces. That is why “the server works” is weaker than
+  “the intended HyperDoc load set is active.”
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Use <a page="Probe dreyeck runtime load set">Probe dreyeck runtime load set</a>
+  when you need direct evidence of which side of this boundary a running image is on.
+</p>

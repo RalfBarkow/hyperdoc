@@ -1,0 +1,78 @@
+<h1>Restart dreyeck release service</h1>
+
+<p>
+  Use this narrow task when the right build is already deployed and the
+  remaining follow-up is to restart the packaged service and verify that it
+  comes back with the intended load set.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Restart dreyeck release service"><tt>Restart dreyeck release service</tt></a></li>
+  <li><a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a></li>
+  <li><a hyperbook="topics" page="Live parity evidence"><tt>Live parity evidence</tt></a></li>
+  <li><a hyperbook="topics" page="dreyeck HTTP smoke probes"><tt>dreyeck HTTP smoke probes</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  Restart the release service safely and verify that it returns with the
+  intended HyperDoc-specific load set.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>The desired generation is already deployed.</li>
+  <li>You know the service name; in this repo the default is <tt>hyperdoc</tt>.</li>
+  <li>You have root or sudo access on <tt>dreyeck.ch</tt>.</li>
+</ul>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Inspect the service if needed:
+<pre>
+systemctl status hyperdoc
+</pre>
+  </li>
+  <li>Restart the release service:
+<pre>
+sudo systemctl restart hyperdoc
+</pre>
+  </li>
+  <li>Check that it came back:
+<pre>
+systemctl status hyperdoc
+journalctl -u hyperdoc -n 100 --no-pager
+</pre>
+  </li>
+  <li>Then continue with:
+    <a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a>
+    and
+    <a page="Confirm scoped example parity on dreyeck">Confirm scoped example parity on dreyeck</a>.
+  </li>
+</ol>
+
+<h2>Expected results</h2>
+
+<ul>
+  <li>The unit is active again.</li>
+  <li>Public routes respond.</li>
+  <li>The intended example scopes are available without rescue loads.</li>
+</ul>
+
+<h2>Failure interpretation</h2>
+
+<ul>
+  <li>If the unit restarts but parity still fails, suspect stale or wrong startup wiring.</li>
+  <li>If the unit fails immediately, treat the restart as unsuccessful and continue to rollback or redeploy.</li>
+</ul>
+
+<h2>Next step</h2>
+
+<p>
+  Continue with <a page="Confirm scoped example parity on dreyeck">Confirm scoped example parity on dreyeck</a>.
+</p>

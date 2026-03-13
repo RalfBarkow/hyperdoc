@@ -1,0 +1,92 @@
+<h1>Onboarding dreyeck deployment and restart</h1>
+
+<p>
+  This is the single URL to hand to a new team member who needs to learn how to
+  deploy or restart <tt>dreyeck.ch</tt> and confirm live parity safely.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Onboarding dreyeck deployment and restart"><tt>Onboarding dreyeck deployment and restart</tt></a></li>
+  <li><a hyperbook="topics" page="New team member onboarding for dreyeck operations"><tt>New team member onboarding for dreyeck operations</tt></a></li>
+  <li><a hyperbook="topics" page="Training arc: deploy and restart dreyeck safely"><tt>Training arc: deploy and restart dreyeck safely</tt></a></li>
+  <li><a hyperbook="topics" page="Training arc: verify scoped examples after deployment"><tt>Training arc: verify scoped examples after deployment</tt></a></li>
+  <li><a hyperbook="topics" page="Deploy or restart dreyeck and confirm live parity"><tt>Deploy or restart dreyeck and confirm live parity</tt></a></li>
+  <li><a hyperbook="topics" page="Confirm scoped example parity on dreyeck"><tt>Confirm scoped example parity on dreyeck</tt></a></li>
+  <li><a hyperbook="topics" page="NixOS generation rollback"><tt>NixOS generation rollback</tt></a></li>
+</ul>
+
+<h2>What this entry page is for</h2>
+
+<p>
+  Use this page to orient a newcomer quickly: what can be rehearsed locally,
+  what touches dreyeck directly, how to deploy or restart, how to confirm parity,
+  and how to recover if something fails.
+</p>
+
+<h2>What you will learn</h2>
+
+<ul>
+  <li>How deployment locality works.</li>
+  <li>Why rehearsal comes before switch.</li>
+  <li>Why scoped example parity is part of successful deployment.</li>
+  <li>How rollback remains explicit.</li>
+</ul>
+
+<h2>What you will do</h2>
+
+<ol>
+  <li>Read <a page="New team member onboarding for dreyeck operations">New team member onboarding for dreyeck operations</a>.</li>
+  <li>Follow <a page="Training arc: deploy and restart dreyeck safely">Training arc: deploy and restart dreyeck safely</a>.</li>
+  <li>Follow <a page="Training arc: verify scoped examples after deployment">Training arc: verify scoped examples after deployment</a>.</li>
+</ol>
+
+<h2>Deployment locality model</h2>
+
+<p>
+  The backbone remains <a hyperbook="topics" page="Deployment command locality"><tt>Deployment command locality</tt></a>:
+  controller-local commands, remote-host commands, and public verification are different classes of action.
+</p>
+
+<h2>Safe path first: rehearse before switch</h2>
+
+<p>
+  The recommended path is:
+  local verification, backup, generation recording, runner rehearsal, then deploy
+  or restart, then parity verification.
+</p>
+
+<h2>Deploy or restart dreyeck</h2>
+
+<p>
+  The main operator page is
+  <a page="Deploy or restart dreyeck and confirm live parity">Deploy or restart dreyeck and confirm live parity</a>.
+</p>
+
+<h2>Confirm live parity</h2>
+
+<p>
+  Use <a page="Confirm scoped example parity on dreyeck">Confirm scoped example parity on dreyeck</a>
+  to verify that the running service exposes the same intended scoped example layers as localhost.
+</p>
+
+<h2>Recovery path / rollback</h2>
+
+<p>
+  If restart or deploy fails, or if parity does not return, use
+  <a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a>.
+</p>
+
+<h2>Automation from within HyperDoc</h2>
+
+<p>
+  Rehearsal and some verification steps are already runner-friendly. This page
+  does not assume hidden one-click deploys; destructive steps remain explicit.
+</p>
+
+<h2>Next step</h2>
+
+<p>
+  Start with <a page="New team member onboarding for dreyeck operations">New team member onboarding for dreyeck operations</a>.
+</p>
