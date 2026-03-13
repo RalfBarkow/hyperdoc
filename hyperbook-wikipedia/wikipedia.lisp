@@ -158,6 +158,8 @@
                                  :parameters `(("action" . "parse")
                                                ("page" . ,page-title)
                                                ("format" . "json"))
+                                 :external-format-in :utf8
+                                 :external-format-out :utf8
                                  :want-stream t)))
          (stream (first response)))
     (shasht:read-json stream)))
@@ -283,6 +285,8 @@
                                                  encode-page-title-for-url))
                                   ("prop" . "wikitext")
                                   ("format" . "json"))
+                    :external-format-in :utf8
+                    :external-format-out :utf8
                     :want-stream t))
            (data (shasht:read-json stream))
            (wikitext (some->> data
@@ -302,6 +306,8 @@
                                                encode-page-title-for-url))
                                 ("prop" . "parsetree")
                                 ("format" . "json"))
+                  :external-format-in :utf8
+                  :external-format-out :utf8
                   :want-stream t))
          (data (shasht:read-json stream))
          (dom (some->> data
@@ -332,6 +338,8 @@
                                   ("bltitle" . ,page-id)
                                   ("bllimit" . "500")
                                   ("format" . "json"))
+                    :external-format-in :utf8
+                    :external-format-out :utf8
                     :want-stream t))
            (data (shasht:read-json stream))
            (links (some->> data
