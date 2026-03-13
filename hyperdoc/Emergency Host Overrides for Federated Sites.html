@@ -1,0 +1,103 @@
+<h1>Emergency Host Overrides for Federated Sites</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the bounded operational logic behind using
+  <tt>/etc/hosts</tt> during a federated naming incident. It is a continuity
+  tactic for known sites, not a replacement for correct public DNS.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Emergency Host Overrides for Federated Sites"><tt>Emergency Host Overrides for Federated Sites</tt></a></li>
+  <li><a hyperbook="topics" page="DNS Cache Decay in Browser-Centric Systems"><tt>DNS Cache Decay in Browser-Centric Systems</tt></a></li>
+  <li><a hyperbook="topics" page="DNS Propagation Lag Across Resolver Layers"><tt>DNS Propagation Lag Across Resolver Layers</tt></a></li>
+</ul>
+
+<h2>What /etc/hosts solves</h2>
+
+<p>
+  When an operator already knows the correct IP for a trusted site,
+  <tt>/etc/hosts</tt> bypasses the current DNS lookup path and pins that
+  hostname to a chosen address on one machine.
+</p>
+
+<ul>
+  <li>It can preserve access to a small known-site set during unstable public DNS.</li>
+  <li>It is especially useful when the service itself is still running and only name resolution has become unreliable.</li>
+  <li>It gives the operator a simple, local, reversible continuity path.</li>
+</ul>
+
+<h2>What it does not solve</h2>
+
+<p>
+  <tt>/etc/hosts</tt> does not repair the general naming system and it does not
+  prove that the site has recovered.
+</p>
+
+<ul>
+  <li>It does not discover the correct IP for you.</li>
+  <li>It does not help if the origin service itself is down.</li>
+  <li>It does not fix wrong TLS state, stale origin mapping, or broken application behavior.</li>
+  <li>It does not scale well to a large, changing federation.</li>
+</ul>
+
+<h2>When it is appropriate</h2>
+
+<p>
+  The tactic is appropriate when
+  <a hyperbook="topics" page="DNS Cache Decay in Browser-Centric Systems">DNS Cache Decay in Browser-Centric Systems</a>
+  is the likely problem and all of these are true:
+</p>
+
+<ul>
+  <li>the site set is small and trusted</li>
+  <li>the operator has high confidence in the intended hostname-to-IP mapping</li>
+  <li>the continuity need is short-term and explicit</li>
+  <li>the operator also has a plan for removal after recovery</li>
+</ul>
+
+<h2>Risks of stale manual mappings</h2>
+
+<ul>
+  <li>Manual entries can outlive the incident and silently route around recovered public DNS.</li>
+  <li>They can mask that an origin IP has changed legitimately.</li>
+  <li>They can bypass intended failover or infrastructure updates.</li>
+  <li>They can create local-only behavior that is hard to compare with what other users see.</li>
+</ul>
+
+<h2>Use in small trusted known-site sets</h2>
+
+<p>
+  The safe operating style is to keep the mapping set deliberately small, note
+  why each entry exists, and remove it once public resolution is trustworthy
+  again.
+</p>
+
+<ul>
+  <li>prefer a short annotated block over many scattered entries</li>
+  <li>record when the override was added and what incident it belongs to</li>
+  <li>review or remove the block after the incident is stabilized</li>
+</ul>
+
+<p>
+  That is the right scale for Ward's workaround: a pragmatic continuity move
+  for known sites, not a general federation repair mechanism.
+</p>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="emergency-host-overrides-for-federated-sites">emergency-host-overrides-for-federated-sites</a>.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="FedWiki Domain Expiry and DNS Cache Decay">FedWiki Domain Expiry and DNS Cache Decay</a></li>
+  <li><a page="DNS Cache Decay in Browser-Centric Systems">DNS Cache Decay in Browser-Centric Systems</a></li>
+  <li><a page="Opening external FedWiki sites">Opening external FedWiki sites</a></li>
+</ul>

@@ -1,0 +1,158 @@
+<h1>FedWiki Domain Expiry and DNS Cache Decay</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page records the March 2026 <tt>fed.wiki</tt> outage described in Ward's
+  thread as a bounded incident-analysis slice. It is a case study in federated
+  web fragility and operational resilience, not a permanent architectural truth
+  claim or a conclusive hijack narrative.
+</p>
+
+<h2>Incident summary</h2>
+
+<ul>
+  <li>Porkbun had granted Ward a long lease on <tt>fed.wiki</tt>, but the domain appears to have expired around 18:00 Pacific on the incident day.</li>
+  <li>Roughly 500 <tt>*.fed.wiki</tt> subdomains were affected.</li>
+  <li><tt>wiki.org</tt> remained paid up, so its subdomains kept resolving.</li>
+  <li>Ward used <tt>/etc/hosts</tt> overrides as a short-term continuity technique for known sites.</li>
+  <li>Time-bound note from March 13, 2026: public discovery still surfaced <tt>fed.wiki</tt> and <tt>fed.wiki.org</tt> pages, but live fetches were inconsistent, so this slice records recovery uncertainty at that date rather than a closed postmortem.</li>
+  <li>Working conclusion: the observed behavior is most consistent with DNS expiry plus cache decay across browser, OS, resolver, and connection layers. Uneven client failure timing and lingering traffic are expected in that model and should not be overinterpreted.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="FedWiki Domain Expiry and DNS Cache Decay"><tt>FedWiki Domain Expiry and DNS Cache Decay</tt></a></li>
+  <li><a hyperbook="topics" page="DNS Cache Decay in Browser-Centric Systems"><tt>DNS Cache Decay in Browser-Centric Systems</tt></a></li>
+  <li><a hyperbook="topics" page="DNS Propagation Lag Across Resolver Layers"><tt>DNS Propagation Lag Across Resolver Layers</tt></a></li>
+  <li><a hyperbook="topics" page="Emergency Host Overrides for Federated Sites"><tt>Emergency Host Overrides for Federated Sites</tt></a></li>
+  <li><a hyperbook="topics" page="Residual Traffic Interpretation After DNS Failure"><tt>Residual Traffic Interpretation After DNS Failure</tt></a></li>
+</ul>
+
+<h2>What failed</h2>
+
+<p>
+  The directly observed failure surface is narrower than a generic
+  "the site was taken over" story. What is actually described is a
+  domain-expiry event with cascading resolution symptoms and uneven client-side
+  failure visibility.
+</p>
+
+<ul>
+  <li><b>Domain-expiry symptoms:</b> loss or degradation of name resolution for <tt>fed.wiki</tt> and its subdomains.</li>
+  <li><b>DNS/cache propagation behavior:</b> different layers stopped serving old state at different times.</li>
+  <li><b>Application/browser behavior:</b> browsers showed different failure timing and different degrees of partial reachability.</li>
+  <li><b>Operational continuity:</b> manual host overrides could still work for a bounded set of known destinations.</li>
+</ul>
+
+<h2>Why different clients failed at different times</h2>
+
+<p>
+  The best-fitting explanation is
+  <a hyperbook="topics" page="DNS Cache Decay in Browser-Centric Systems">DNS Cache Decay in Browser-Centric Systems</a>
+  plus
+  <a hyperbook="topics" page="DNS Propagation Lag Across Resolver Layers">DNS Propagation Lag Across Resolver Layers</a>.
+  That is an inference from the observed symptoms, not a packet-level
+  reconstruction of every resolver involved.
+</p>
+
+<p>
+  Here, "propagation lag" should be read narrowly: not mainly as fresh DNS
+  records slowly propagating after an intentional change, but as different
+  layers shedding stale resolver and connection state at different times.
+</p>
+
+<ul>
+  <li>Registrar/domain state can change before every downstream client has forgotten old state.</li>
+  <li>Authoritative DNS can stop answering usefully before recursive resolvers stop serving cached answers.</li>
+  <li>Recursive resolvers can disagree for a while because their cache state and refresh timing differ.</li>
+  <li>OS caches can outlive upstream freshness for a short period.</li>
+  <li>Browser caches can differ again, so Chrome, Safari, and Firefox need not fail together.</li>
+  <li>Existing live connections can keep an already-open session useful a bit longer than fresh navigation.</li>
+</ul>
+
+<p>
+  That layered decay explains the reported sequence: Chrome failed first,
+  Safari partly worked, Firefox lasted longer, and <tt>ping</tt> outlived the
+  browsers.
+</p>
+
+<h2>Why ping can outlive browser access</h2>
+
+<p>
+  <tt>ping</tt> only needs an IP address that is still cached somewhere and a
+  route that still answers ICMP. A browser needs successful name resolution for
+  a new navigation plus workable HTTP(S) behavior on top. That extra stack can
+  fail sooner than a stale CLI reachability check.
+</p>
+
+<p>
+  This is again a mechanism-level inference. The thread does not expose the
+  exact cache entry or connection state that kept <tt>ping</tt> working.
+</p>
+
+<h2>Why residual traffic does not prove takeover</h2>
+
+<p>
+  Later steady or regular-looking traffic is better read through
+  <a hyperbook="topics" page="Residual Traffic Interpretation After DNS Failure">Residual Traffic Interpretation After DNS Failure</a>
+  than through a takeover claim.
+</p>
+
+<ul>
+  <li>Nonzero traffic after the main drop is compatible with clients or bots still using cached A/AAAA or NS data.</li>
+  <li>A regular cadence is plausibly explained by uptime monitors, search or archive crawlers, feed readers, retry loops, or a scraper that had already cached the IP.</li>
+  <li>Those explanations are ordinary enough that the traffic pattern alone is weak evidence for re-pointing, takeover, or hijack.</li>
+</ul>
+
+<h2>/etc/hosts as emergency continuity</h2>
+
+<p>
+  Ward's workaround fits
+  <a hyperbook="topics" page="Emergency Host Overrides for Federated Sites">Emergency Host Overrides for Federated Sites</a>:
+  if an operator already knows the right origin IP for a trusted site, a local
+  host override can preserve continuity while public DNS is unstable.
+</p>
+
+<ul>
+  <li>It is appropriate for a small known-site set with high confidence in the IP mapping.</li>
+  <li>It is not evidence that DNS recovered; it is a local bypass around current resolver state.</li>
+  <li>It must be removed again once the public path is trustworthy, or the operator risks stale manual routing.</li>
+</ul>
+
+<h2>Lessons for federated infrastructure</h2>
+
+<ul>
+  <li>Shared namespace failure has fan-out risk: one lapsed domain can damage hundreds of distinct federated sites at once.</li>
+  <li>Operational diagnosis should separate naming failure, cache decay, application behavior, and continuity workarounds.</li>
+  <li>Residual traffic and partial reachability are not enough to prove hostile control.</li>
+  <li>Small, documented emergency continuity tactics such as host overrides are worth keeping ready for known high-value sites.</li>
+  <li>Recovery tracking should stay explicit about uncertainty until live fetches are stable again.</li>
+</ul>
+
+<h2>Inspectable / operational objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DNS Cache Decay in Browser-Centric Systems"><tt>DNS Cache Decay in Browser-Centric Systems</tt></a>: mechanism for staggered browser-visible failure.</li>
+  <li><a hyperbook="topics" page="DNS Propagation Lag Across Resolver Layers"><tt>DNS Propagation Lag Across Resolver Layers</tt></a>: distinction between registrar, authoritative, recursive, OS, browser, and live-connection timelines.</li>
+  <li><a hyperbook="topics" page="Emergency Host Overrides for Federated Sites"><tt>Emergency Host Overrides for Federated Sites</tt></a>: bounded continuity tactic for known sites.</li>
+  <li><a hyperbook="topics" page="Residual Traffic Interpretation After DNS Failure"><tt>Residual Traffic Interpretation After DNS Failure</tt></a>: caution against over-reading later traffic.</li>
+  <li><tt>resolver cache</tt>, <tt>browser DNS/cache behavior</tt>, <tt>authoritative vs recursive DNS distinction</tt>, and <tt>subdomain fan-out risk</tt>: concrete next diagnostic surfaces.</li>
+</ul>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="fedwiki-domain-expiry-and-dns-cache-decay">fedwiki-domain-expiry-and-dns-cache-decay</a>.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="DNS Cache Decay in Browser-Centric Systems">DNS Cache Decay in Browser-Centric Systems</a></li>
+  <li><a page="Emergency Host Overrides for Federated Sites">Emergency Host Overrides for Federated Sites</a></li>
+  <li><a page="Opening external FedWiki sites">Opening external FedWiki sites</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+</ul>

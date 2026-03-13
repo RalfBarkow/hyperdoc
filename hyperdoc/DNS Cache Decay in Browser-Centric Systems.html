@@ -1,0 +1,121 @@
+<h1>DNS Cache Decay in Browser-Centric Systems</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page generalizes one narrow mechanism from the March 2026 FedWiki
+  outage: a browser-facing system can look partly alive or unevenly broken
+  because naming and connection state decays at different layers instead of
+  disappearing all at once.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DNS Cache Decay in Browser-Centric Systems"><tt>DNS Cache Decay in Browser-Centric Systems</tt></a></li>
+  <li><a hyperbook="topics" page="DNS Propagation Lag Across Resolver Layers"><tt>DNS Propagation Lag Across Resolver Layers</tt></a></li>
+  <li><a hyperbook="topics" page="Residual Traffic Interpretation After DNS Failure"><tt>Residual Traffic Interpretation After DNS Failure</tt></a></li>
+  <li><a hyperbook="topics" page="Emergency Host Overrides for Federated Sites"><tt>Emergency Host Overrides for Federated Sites</tt></a></li>
+</ul>
+
+<h2>Layered caches and resolvers</h2>
+
+<p>
+  <a hyperbook="topics" page="DNS Propagation Lag Across Resolver Layers">DNS Propagation Lag Across Resolver Layers</a>
+  means that reachability can decay separately across multiple layers:
+</p>
+
+<p>
+  In this slice the emphasis is not classic propagation of newly published DNS
+  data. The more relevant mechanism is cache expiry, cache divergence, and
+  staggered loss of stale reachability across layers.
+</p>
+
+<ul>
+  <li>registrar or domain state</li>
+  <li>authoritative DNS</li>
+  <li>recursive resolvers</li>
+  <li>OS caches</li>
+  <li>browser caches</li>
+  <li>existing live connections</li>
+</ul>
+
+<p>
+  When one layer forgets or fails before another, users see a staggered outage
+  rather than a single clean edge.
+</p>
+
+<h2>Browser vs OS vs resolver behavior</h2>
+
+<p>
+  Browsers do not only depend on fresh DNS. They also depend on navigation
+  state, connection reuse, and HTTP(S) behavior. An OS cache or resolver cache
+  may still hold an IP while a browser's next navigation or HTTPS path already
+  fails.
+</p>
+
+<ul>
+  <li>Different browsers can behave differently because they do not share exactly the same cache and connection state.</li>
+  <li>A command-line tool such as <tt>ping</tt> can remain useful longer than a browser because its requirements are narrower.</li>
+  <li>Residual success in one client does not prove that the naming system is healthy again.</li>
+</ul>
+
+<h2>Stale reachability and partial failure</h2>
+
+<p>
+  A stale IP path can produce confusing intermediate states:
+</p>
+
+<ul>
+  <li>one browser works while another fails</li>
+  <li>reload fails after an already-open page still renders</li>
+  <li>CLI reachability persists after browser navigation breaks</li>
+  <li>some automated traffic continues after most human traffic has dropped</li>
+</ul>
+
+<p>
+  These are ordinary symptoms of uneven state expiry. They do not require a
+  more dramatic explanation on their own.
+</p>
+
+<h2>Interpreting uneven outage symptoms</h2>
+
+<p>
+  The correct reading is usually layered and cautious:
+</p>
+
+<ul>
+  <li>separate naming failure from application failure</li>
+  <li>separate stale cached reachability from fresh successful resolution</li>
+  <li>separate partial client success from evidence of system recovery</li>
+  <li>mark inferences explicitly when internal resolver state was not observed directly</li>
+</ul>
+
+<h2>Caution against over-reading residual traffic</h2>
+
+<p>
+  <a hyperbook="topics" page="Residual Traffic Interpretation After DNS Failure">Residual Traffic Interpretation After DNS Failure</a>
+  is the main interpretive safeguard here. Steady traffic after the main drop
+  can come from bots, monitors, retry loops, or clients that still hold cached
+  IP data.
+</p>
+
+<p>
+  Residual traffic is therefore real signal, but it is weak evidence for
+  takeover unless supported by stronger routing or authoritative-DNS evidence.
+</p>
+
+<h2>Localhost FedWiki twin</h2>
+
+<p>
+  Twin page:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dns-cache-decay-in-browser-centric-systems">dns-cache-decay-in-browser-centric-systems</a>.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="FedWiki Domain Expiry and DNS Cache Decay">FedWiki Domain Expiry and DNS Cache Decay</a></li>
+  <li><a page="Emergency Host Overrides for Federated Sites">Emergency Host Overrides for Federated Sites</a></li>
+  <li><a page="Opening external FedWiki sites">Opening external FedWiki sites</a></li>
+</ul>

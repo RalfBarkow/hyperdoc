@@ -935,6 +935,130 @@
    :references '("Rehearse dreyeck.ch deployment with runner"
                  "Deploy dreyeck.ch from the local flake")))
 
+(defun deploy-or-restart-dreyeck-and-confirm-live-parity-topic ()
+  (make-topic
+   :id "deploy-or-restart-dreyeck-and-confirm-live-parity"
+   :title "Deploy or restart dreyeck and confirm live parity"
+   :summary "Operator task that sequences local verification, cautious deploy or restart, and post-start parity checks for the dreyeck service."
+   :references '("Onboarding dreyeck deployment and restart"
+                 "Deploy or restart dreyeck and confirm live parity"
+                 "Deploy dreyeck.ch from the local flake"
+                 "Restart dreyeck release service"
+                 "Confirm scoped example parity on dreyeck")))
+
+(defun restart-dreyeck-release-service-topic ()
+  (make-topic
+   :id "restart-dreyeck-release-service"
+   :title "Restart dreyeck release service"
+   :summary "Restart the packaged dreyeck HyperDoc service, verify that it comes back, and treat restart as a scoped operational path distinct from full deployment."
+   :references '("Restart dreyeck release service"
+                 "HyperDoc Server"
+                 "Verify HyperDoc on dreyeck.ch")))
+
+(defun confirm-scoped-example-parity-on-dreyeck-topic ()
+  (make-topic
+   :id "confirm-scoped-example-parity-on-dreyeck"
+   :title "Confirm scoped example parity on dreyeck"
+   :summary "Post-start task for confirming that portable and ops example scopes are present on dreyeck through both UI evidence and runtime probes."
+   :references '("Confirm scoped example parity on dreyeck"
+                 "Probe dreyeck runtime load set"
+                 "Verify HyperDoc on dreyeck.ch"
+                 "Portable examples in HyperDoc")))
+
+(defun probe-dreyeck-runtime-load-set-topic ()
+  (make-topic
+   :id "probe-dreyeck-runtime-load-set"
+   :title "Probe dreyeck runtime load set"
+   :summary "Inspect loaded ASDF systems and discover-example-checks results on dreyeck to confirm whether the intended scoped example layers are active."
+   :references '("Probe dreyeck runtime load set"
+                 "HyperDoc Server"
+                 "Confirm scoped example parity on dreyeck")))
+
+(defun scoped-example-parity-topic ()
+  (make-topic
+   :id "scoped-example-parity"
+   :title "Scoped example parity"
+   :summary "Operational parity in which localhost and dreyeck expose the same intended example scopes for their loaded HyperDoc systems."
+   :references '("Scoped example parity"
+                 "Confirm scoped example parity on dreyeck"
+                 "Portable examples in HyperDoc")))
+
+(defun startup-load-set-mismatch-topic ()
+  (make-topic
+   :id "startup-load-set-mismatch"
+   :title "Startup load-set mismatch"
+   :summary "A deployment/runtime drift where startup reaches the server implementation but under-loads the HyperDoc systems needed for the intended discoverable surfaces."
+   :references '("Startup load-set mismatch"
+                 "HyperBook server vs HyperDoc server load set"
+                 "HyperDoc Server")))
+
+(defun load-before-serve-for-scoped-examples-topic ()
+  (make-topic
+   :id "load-before-serve-for-scoped-examples"
+   :title "Load before serve for scoped examples"
+   :summary "Portable and ops example scopes only become discoverable if their ASDF systems are loaded before the service begins serving HyperDoc."
+   :references '("Load before serve for scoped examples"
+                 "HyperDoc Server"
+                 "Portable examples in HyperDoc")))
+
+(defun hyperbook-server-vs-hyperdoc-server-load-set-topic ()
+  (make-topic
+   :id "hyperbook-server-vs-hyperdoc-server-load-set"
+   :title "HyperBook server vs HyperDoc server load set"
+   :summary "Loading :hyperbook/server reaches the generic server implementation, while :hyperdoc/server reaches the HyperDoc-specific load set expected for scoped example parity."
+   :references '("HyperBook server vs HyperDoc server load set"
+                 "HyperDoc Server"
+                 "Startup load-set mismatch")))
+
+(defun live-parity-evidence-topic ()
+  (make-topic
+   :id "live-parity-evidence"
+   :title "Live parity evidence"
+   :summary "Acceptable evidence for parity includes HTTP/UI confirmation, runtime probe confirmation, and service-status or log confirmation, with stronger weight on direct runtime evidence."
+   :references '("Live parity evidence"
+                 "Confirm scoped example parity on dreyeck"
+                 "Probe dreyeck runtime load set")))
+
+(defun training-arc-deploy-and-restart-dreyeck-safely-topic ()
+  (make-topic
+   :id "training-arc-deploy-and-restart-dreyeck-safely"
+   :title "Training arc: deploy and restart dreyeck safely"
+   :summary "Guided sequence that teaches a new operator to verify locally, back up, rehearse, deploy or restart, and roll back dreyeck safely."
+   :references '("Training arc: deploy and restart dreyeck safely"
+                 "Onboarding dreyeck deployment and restart"
+                 "Deploy dreyeck.ch from the local flake"
+                 "Roll back HyperDoc on dreyeck.ch")))
+
+(defun training-arc-verify-scoped-examples-after-deployment-topic ()
+  (make-topic
+   :id "training-arc-verify-scoped-examples-after-deployment"
+   :title "Training arc: verify scoped examples after deployment"
+   :summary "Guided sequence for understanding load-set mismatch, probing the running image, and confirming portable and ops example parity after deployment or restart."
+   :references '("Training arc: verify scoped examples after deployment"
+                 "Onboarding dreyeck deployment and restart"
+                 "Confirm scoped example parity on dreyeck"
+                 "Probe dreyeck runtime load set")))
+
+(defun new-team-member-onboarding-for-dreyeck-operations-topic ()
+  (make-topic
+   :id "new-team-member-onboarding-for-dreyeck-operations"
+   :title "New team member onboarding for dreyeck operations"
+   :summary "Learning/training topic that introduces what dreyeck is, what can be rehearsed locally, what touches the remote host, and how to judge success or failure safely."
+   :references '("New team member onboarding for dreyeck operations"
+                 "Onboarding dreyeck deployment and restart"
+                 "Training arc: deploy and restart dreyeck safely"
+                 "Training arc: verify scoped examples after deployment")))
+
+(defun onboarding-dreyeck-deployment-and-restart-topic ()
+  (make-topic
+   :id "onboarding-dreyeck-deployment-and-restart"
+   :title "Onboarding dreyeck deployment and restart"
+   :summary "Entry-point topic for learning how to deploy or restart dreyeck, verify live parity, and recover safely using the existing HyperDoc deployment runbooks."
+   :references '("Onboarding dreyeck deployment and restart"
+                 "Deploy or restart dreyeck and confirm live parity"
+                 "Training arc: deploy and restart dreyeck safely"
+                 "Training arc: verify scoped examples after deployment")))
+
 (defun dmx-topic-912138 ()
   (make-topic
    :id "dmx-topic-912138"
@@ -1159,6 +1283,50 @@
                  "journalmatic-page-generation-workflow-example"
                  "journalmatic-page-generation-wiki-client-style-example"
                  "https://github.com/fedwiki/wiki-client/commit/d4420c72a49305ca52d18ce8203bc95bdd3f59d2")))
+
+(defun fedwiki-domain-expiry-topic ()
+  (make-topic
+   :id "fedwiki-domain-expiry-and-dns-cache-decay"
+   :title "FedWiki Domain Expiry and DNS Cache Decay"
+   :summary "Case-study topic for the March 2026 fed.wiki domain-expiry incident, emphasizing staggered client failure, cache decay, and cautious interpretation of residual traffic."
+   :references '("FedWiki Domain Expiry and DNS Cache Decay"
+                 "DNS Cache Decay in Browser-Centric Systems"
+                 "Emergency Host Overrides for Federated Sites"
+                 "Opening external FedWiki sites")))
+
+(defun dns-cache-decay-topic ()
+  (make-topic
+   :id "dns-cache-decay-in-browser-centric-systems"
+   :title "DNS Cache Decay in Browser-Centric Systems"
+   :summary "Resolution state can decay unevenly across browser, OS, resolver, and connection layers, producing staggered browser-centric outages instead of a single failure cliff."
+   :references '("DNS Cache Decay in Browser-Centric Systems"
+                 "FedWiki Domain Expiry and DNS Cache Decay"
+                 "Emergency Host Overrides for Federated Sites")))
+
+(defun dns-propagation-lag-topic ()
+  (make-topic
+   :id "dns-propagation-lag-across-resolver-layers"
+   :title "DNS Propagation Lag Across Resolver Layers"
+   :summary "Registrar state, authoritative DNS, recursive resolvers, OS caches, browser caches, and live connections can shed stale reachability on different timelines during one DNS incident; the emphasis here is cache divergence more than classic fresh-record propagation."
+   :references '("DNS Cache Decay in Browser-Centric Systems"
+                 "FedWiki Domain Expiry and DNS Cache Decay")))
+
+(defun emergency-host-overrides-topic ()
+  (make-topic
+   :id "emergency-host-overrides-for-federated-sites"
+   :title "Emergency Host Overrides for Federated Sites"
+   :summary "Temporary /etc/hosts mappings can preserve access to a small trusted set of federated sites when DNS is unstable, but they are a bounded continuity tactic rather than a general fix."
+   :references '("Emergency Host Overrides for Federated Sites"
+                 "FedWiki Domain Expiry and DNS Cache Decay"
+                 "DNS Cache Decay in Browser-Centric Systems")))
+
+(defun residual-traffic-interpretation-topic ()
+  (make-topic
+   :id "residual-traffic-interpretation-after-dns-failure"
+   :title "Residual Traffic Interpretation After DNS Failure"
+   :summary "Nonzero or regular traffic after a DNS failure can still be explained by bots, monitors, retry loops, or cached IP use, so it is weak evidence for takeover by itself."
+   :references '("FedWiki Domain Expiry and DNS Cache Decay"
+                 "DNS Cache Decay in Browser-Centric Systems")))
 
 (defun clickable-commit-ids-in-fedwiki-stories-topic ()
   (make-topic
