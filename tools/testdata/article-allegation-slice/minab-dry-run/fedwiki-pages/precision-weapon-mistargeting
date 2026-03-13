@@ -1,0 +1,46 @@
+{
+  "title": "Precision weapons and wrong-target failure",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "0000000300000001",
+      "text": "Precision weapons and wrong-target failure is scaffolded here as a reusable failure mode for allegation-qualified incident documentation."
+    },
+    {
+      "type": "markdown",
+      "id": "0000000300000002",
+      "text": "### References\n- [[Precision weapons and wrong-target failure]]\n- [[Minab school strike allegations]]\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Precision weapons and wrong-target failure",
+        "story": {}
+      },
+      "date": 1773393295342
+    },
+    {
+      "type": "add",
+      "id": "0000000300000001",
+      "item": {
+        "type": "paragraph",
+        "id": "0000000300000001",
+        "text": "Precision weapons and wrong-target failure is scaffolded here as a reusable failure mode for allegation-qualified incident documentation."
+      },
+      "date": 1773393295343
+    },
+    {
+      "type": "add",
+      "id": "0000000300000002",
+      "item": {
+        "type": "markdown",
+        "id": "0000000300000002",
+        "text": "### References\n- [[Precision weapons and wrong-target failure]]\n- [[Minab school strike allegations]]\n"
+      },
+      "date": 1773393295344,
+      "after": "0000000300000001"
+    }
+  ]
+}

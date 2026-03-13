@@ -1,0 +1,46 @@
+{
+  "title": "Stale target coordinates",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "0000000200000001",
+      "text": "Stale target coordinates is scaffolded here as a reusable failure mode for allegation-qualified incident documentation."
+    },
+    {
+      "type": "markdown",
+      "id": "0000000200000002",
+      "text": "### References\n- [[Stale target coordinates]]\n- [[Minab school strike allegations]]\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Stale target coordinates",
+        "story": {}
+      },
+      "date": 1773393295341
+    },
+    {
+      "type": "add",
+      "id": "0000000200000001",
+      "item": {
+        "type": "paragraph",
+        "id": "0000000200000001",
+        "text": "Stale target coordinates is scaffolded here as a reusable failure mode for allegation-qualified incident documentation."
+      },
+      "date": 1773393295342
+    },
+    {
+      "type": "add",
+      "id": "0000000200000002",
+      "item": {
+        "type": "markdown",
+        "id": "0000000200000002",
+        "text": "### References\n- [[Stale target coordinates]]\n- [[Minab school strike allegations]]\n"
+      },
+      "date": 1773393295343,
+      "after": "0000000200000001"
+    }
+  ]
+}

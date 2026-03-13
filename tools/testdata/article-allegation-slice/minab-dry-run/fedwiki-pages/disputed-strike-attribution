@@ -1,0 +1,46 @@
+{
+  "title": "Public attribution after disputed airstrikes",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "0000000600000001",
+      "text": "Public attribution after disputed airstrikes is scaffolded here as a reusable attribution-method concept for allegation-qualified incident documentation."
+    },
+    {
+      "type": "markdown",
+      "id": "0000000600000002",
+      "text": "### References\n- [[Public attribution after disputed airstrikes]]\n- [[Minab school strike allegations]]\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Public attribution after disputed airstrikes",
+        "story": {}
+      },
+      "date": 1773393295345
+    },
+    {
+      "type": "add",
+      "id": "0000000600000001",
+      "item": {
+        "type": "paragraph",
+        "id": "0000000600000001",
+        "text": "Public attribution after disputed airstrikes is scaffolded here as a reusable attribution-method concept for allegation-qualified incident documentation."
+      },
+      "date": 1773393295346
+    },
+    {
+      "type": "add",
+      "id": "0000000600000002",
+      "item": {
+        "type": "markdown",
+        "id": "0000000600000002",
+        "text": "### References\n- [[Public attribution after disputed airstrikes]]\n- [[Minab school strike allegations]]\n"
+      },
+      "date": 1773393295347,
+      "after": "0000000600000001"
+    }
+  ]
+}

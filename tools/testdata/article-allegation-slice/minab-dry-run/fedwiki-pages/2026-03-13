@@ -1,0 +1,30 @@
+{
+  "title": "2026-03-13",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "0000006300000001",
+      "text": "### Minab school strike allegations article-allegation slice\n- [[Minab school strike allegations]]\n- [[Stale target coordinates]]\n- [[Precision weapons and wrong-target failure]]\n- [[Target validation]]\n- [[Civilian harm accountability]]\n- [[Public attribution after disputed airstrikes]]\n- [[Human responsibility in AI-assisted targeting]]\n- Dry-run sample for the reusable article-allegation-slice scaffolding routine."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2026-03-13",
+        "story": {}
+      },
+      "date": 1773393295438
+    },
+    {
+      "type": "add",
+      "id": "0000006300000001",
+      "item": {
+        "type": "markdown",
+        "id": "0000006300000001",
+        "text": "### Minab school strike allegations article-allegation slice\n- [[Minab school strike allegations]]\n- [[Stale target coordinates]]\n- [[Precision weapons and wrong-target failure]]\n- [[Target validation]]\n- [[Civilian harm accountability]]\n- [[Public attribution after disputed airstrikes]]\n- [[Human responsibility in AI-assisted targeting]]\n- Dry-run sample for the reusable article-allegation-slice scaffolding routine."
+      },
+      "date": 1773393295439
+    }
+  ]
+}

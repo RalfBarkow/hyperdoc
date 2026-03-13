@@ -1,0 +1,46 @@
+{
+  "title": "Minab school strike allegations",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "0000000100000001",
+      "text": "Reported school strike case used to document stale targeting data, disputed attribution, civilian-harm accountability, and AI-assisted targeting responsibility."
+    },
+    {
+      "type": "markdown",
+      "id": "0000000100000002",
+      "text": "### References\n- [[Minab school strike allegations]]\n- [[Stale target coordinates]]\n- [[Precision weapons and wrong-target failure]]\n- [[Target validation]]\n- [[Civilian harm accountability]]\n- [[Public attribution after disputed airstrikes]]\n- [[Human responsibility in AI-assisted targeting]]\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Minab school strike allegations",
+        "story": {}
+      },
+      "date": 1773393295339
+    },
+    {
+      "type": "add",
+      "id": "0000000100000001",
+      "item": {
+        "type": "paragraph",
+        "id": "0000000100000001",
+        "text": "Reported school strike case used to document stale targeting data, disputed attribution, civilian-harm accountability, and AI-assisted targeting responsibility."
+      },
+      "date": 1773393295340
+    },
+    {
+      "type": "add",
+      "id": "0000000100000002",
+      "item": {
+        "type": "markdown",
+        "id": "0000000100000002",
+        "text": "### References\n- [[Minab school strike allegations]]\n- [[Stale target coordinates]]\n- [[Precision weapons and wrong-target failure]]\n- [[Target validation]]\n- [[Civilian harm accountability]]\n- [[Public attribution after disputed airstrikes]]\n- [[Human responsibility in AI-assisted targeting]]\n"
+      },
+      "date": 1773393295341,
+      "after": "0000000100000001"
+    }
+  ]
+}

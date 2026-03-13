@@ -1,0 +1,46 @@
+{
+  "title": "Civilian harm accountability",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "0000000500000001",
+      "text": "Civilian harm accountability is scaffolded here as a reusable accountability concept for allegation-qualified incident documentation."
+    },
+    {
+      "type": "markdown",
+      "id": "0000000500000002",
+      "text": "### References\n- [[Civilian harm accountability]]\n- [[Minab school strike allegations]]\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Civilian harm accountability",
+        "story": {}
+      },
+      "date": 1773393295344
+    },
+    {
+      "type": "add",
+      "id": "0000000500000001",
+      "item": {
+        "type": "paragraph",
+        "id": "0000000500000001",
+        "text": "Civilian harm accountability is scaffolded here as a reusable accountability concept for allegation-qualified incident documentation."
+      },
+      "date": 1773393295345
+    },
+    {
+      "type": "add",
+      "id": "0000000500000002",
+      "item": {
+        "type": "markdown",
+        "id": "0000000500000002",
+        "text": "### References\n- [[Civilian harm accountability]]\n- [[Minab school strike allegations]]\n"
+      },
+      "date": 1773393295346,
+      "after": "0000000500000001"
+    }
+  ]
+}

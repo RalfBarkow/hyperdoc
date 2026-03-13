@@ -1,0 +1,46 @@
+{
+  "title": "Human responsibility in AI-assisted targeting",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "0000000700000001",
+      "text": "Human responsibility in AI-assisted targeting is scaffolded here as a reusable human/AI decision-boundary concept for allegation-qualified incident documentation."
+    },
+    {
+      "type": "markdown",
+      "id": "0000000700000002",
+      "text": "### References\n- [[Human responsibility in AI-assisted targeting]]\n- [[Minab school strike allegations]]\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Human responsibility in AI-assisted targeting",
+        "story": {}
+      },
+      "date": 1773393295346
+    },
+    {
+      "type": "add",
+      "id": "0000000700000001",
+      "item": {
+        "type": "paragraph",
+        "id": "0000000700000001",
+        "text": "Human responsibility in AI-assisted targeting is scaffolded here as a reusable human/AI decision-boundary concept for allegation-qualified incident documentation."
+      },
+      "date": 1773393295347
+    },
+    {
+      "type": "add",
+      "id": "0000000700000002",
+      "item": {
+        "type": "markdown",
+        "id": "0000000700000002",
+        "text": "### References\n- [[Human responsibility in AI-assisted targeting]]\n- [[Minab school strike allegations]]\n"
+      },
+      "date": 1773393295348,
+      "after": "0000000700000001"
+    }
+  ]
+}
