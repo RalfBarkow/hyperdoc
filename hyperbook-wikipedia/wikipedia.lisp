@@ -196,22 +196,21 @@
 (defun make-wikipedia (edition title main-page)
   (assert (typep edition 'string))
   (let* ((ed-code (-> edition str:downcase))
-         (id (str:concat "wikipedia:" ed-code))
-         (wp (make-instance 'wikipedia
-                            :id id
-                            :edition ed-code
-                            :title title
-                            :main-page main-page)))
-    (setf (gethash edition *wikipedias*) wp)
-    (hb:register wp)
-    wp))
+         (id (str:concat "wikipedia:" ed-code)))
+    (make-instance 'wikipedia
+                   :id id
+                   :edition ed-code
+                   :title title
+                   :main-page main-page)))
 
 (defun get-wikipedia (edition &optional signal-error?)
   (declare (ignore signal-error?))
   (let ((ed-code (str:downcase edition)))
     (or (gethash ed-code *wikipedias*)
         (when-let (wp-spec (find ed-code *editions* :key #'first :test #'equal))
-          (make-wikipedia edition (second wp-spec) (third wp-spec))))))
+          (let ((wp (make-wikipedia edition (second wp-spec) (third wp-spec))))
+            (hb:register wp)
+            (setf (gethash ed-code *wikipedias*) wp))))))
 
 ;; Register a HyperBook factory and a link redirection for Wikipedia links
 
