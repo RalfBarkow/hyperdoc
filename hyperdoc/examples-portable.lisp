@@ -55,7 +55,7 @@
                         (list :site "gamma.example")))
          (context (-> journal
                       fedwiki-java-example-context
-                      (assert-equal '("alpha.example" "beta.example" "gamma.example")))))
+                      (assert-equal '("gamma.example" "alpha.example" "beta.example")))))
     (list :journal journal
           :context context)))
 
