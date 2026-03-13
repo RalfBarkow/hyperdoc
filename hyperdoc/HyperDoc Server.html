@@ -13,8 +13,18 @@
   The runtime entry point is
   <a hyperbook="lisp-functions" page="hyperbook/server:serve-catalog"><tt>hyperbook/server:serve-catalog</tt></a>.
   The compatibility system <tt>hyperdoc/server</tt> depends on
-  <tt>hyperbook/server</tt>, so loading <tt>:hyperdoc/server</tt> or
-  <tt>:hyperbook/server</tt> reaches the same server implementation.
+  <tt>hyperbook/server</tt>, but it also pulls in the scoped example layers that
+  HyperDoc expects for system-scoped example discovery. Loading only
+  <tt>:hyperbook/server</tt> reaches the same server implementation but does
+  not guarantee the same HyperDoc load set.
+</p>
+
+<p>
+  For parity with the deployed service and with localhost sessions that should
+  expose portable and ops-specific examples, load <tt>:hyperdoc/server</tt>
+  before serving. The server/runtime path should be read as a load-before-serve
+  rule, not as a claim that any path reaching <tt>serve-catalog</tt> produces
+  the same discoverable HyperDoc surfaces.
 </p>
 
 <p>
@@ -56,7 +66,7 @@ http://127.0.0.1:8080/boot.html
 <pre>
 sbcl --no-userinit \
   --eval '(require :asdf)' \
-  --eval '(asdf:load-system :hyperbook/server)' \
+  --eval '(asdf:load-system :hyperdoc/server)' \
   --eval '(hyperbook/server:serve-catalog)'
 </pre>
 
