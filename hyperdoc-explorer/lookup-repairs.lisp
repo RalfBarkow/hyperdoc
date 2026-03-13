@@ -167,7 +167,7 @@
     (views:html
       (:p
        (views:esc
-        "Use this probe to distinguish a missing local twin from a publication/resolution boundary on the served FedWiki site."))
+        "Use this probe to distinguish a missing twin from a publication/resolution boundary on the served FedWiki site."))
       (when-let (error (fedwiki-publication-probe-fetch-error-of probe))
         (views:html
           (:table :class "inspector-table"

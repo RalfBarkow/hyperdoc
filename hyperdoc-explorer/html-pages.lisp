@@ -220,7 +220,7 @@
              (hb:lookup-issue-suggested-repair-of issue)
              :materialize-local-fedwiki-twin
              (hb:lookup-issue-repair-description-of issue)
-             "Materialize the missing local FedWiki twin into the localhost pages repo through the existing materialization helper."
+             "Materialize the missing FedWiki twin into the localhost pages repo through the existing materialization helper."
              (hb::lookup-issue-repair-thunk-of issue)
              (lambda ()
                (plan-fedwiki-page-materialization slug))))
