@@ -28,6 +28,7 @@
                              (:file "check-runner")
                              (:file "example-core")
                              (:file "journal-gate")
+                             (:file "article-allegation-slice")
                              (:file "tools")
                              (:file "hyperdoc")))))
 
@@ -173,6 +174,7 @@
   :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
+                             (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")

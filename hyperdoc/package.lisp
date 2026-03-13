@@ -33,6 +33,10 @@
            ;; Defining tools
            #:deftool #:html #:markdown #:html-generator
            #:defplayground
+           ;; Article allegation slice scaffolding
+           #:read-article-allegation-slice-input
+           #:render-article-allegation-slice-bundle
+           #:write-article-allegation-slice-bundle
            ;; Access to the global catalog of registered HyperDocs
            #:*catalog* #:hyperdocs-of
            ;; Access to HyperDoc data
