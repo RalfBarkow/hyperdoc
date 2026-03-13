@@ -70,6 +70,89 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
   - keep fast-moving collaborative trail in localhost FedWiki pages,
   - maintain navigable links/counterparts per topic instead of forcing identical content in both places.
 
+## Expectation Handling Policy
+
+When an expectation fails, preserve the expectation itself as an artifact before
+explaining it away.
+
+Use this decision pattern:
+
+1. Expectation
+2. Observed reality
+3. Why this expectation was plausible
+4. Classification
+5. Resolution
+6. Prevention
+
+### False vs. disappointed expectations
+
+- `False expectation`
+  - the expectation was not actually supported by the system, the reference
+    implementation, or the agreed contract
+  - response:
+    - do not change the system merely to satisfy the mistaken assumption
+    - state the actual behavior and the authority for it
+    - tighten the nearby promise surface so the same mistaken inference is less
+      likely
+
+- `Disappointed expectation`
+  - the expectation was reasonable because the docs, UI, previous behavior,
+    naming, examples, or workflow strongly suggested it
+  - response:
+    - treat the mismatch as a product/documentation/design defect
+    - identify which layer created the expectation
+    - either restore the expected behavior, preserve the current behavior but
+      repair the surrounding promise surface, or introduce a clearer boundary
+
+Rules:
+- always record the expectation in the user’s or operator’s original frame
+  before correcting it
+- avoid jumping straight to root cause
+- distinguish semantic mismatch from operational failure
+- never collapse “reasonable but unmet” into “simply wrong”
+- prefer fixing the layer that generated the expectation
+- document the failed expectation at the boundary where it was created, not
+  only where it became visible
+
+Compact formula:
+- preserve the expectation
+- classify it as false or disappointed
+- for false expectations, correct the model
+- for disappointed expectations, repair the system or the promise surface
+- in both cases, leave behind a clearer boundary than before
+
+### Specialized rule: stale example expectation before helper change
+
+When an example fails, but helper, surrounding docs, and reference semantics
+agree, verify the example expectation before changing the helper.
+
+Rules:
+- do not change a helper reflexively just because an assertion failed
+- for ordering semantics, derive behavior from:
+  - traversal direction
+  - dedup strategy
+  - `nil`/`null` filtering
+  - append vs. prepend
+  - reference implementation behavior
+- do not smuggle a sorted or intuitive order into the expectation when the
+  semantics are history-derived
+
+Adjust the example assertion to the actual specified behavior when:
+- implementation and reference system agree, and
+- surrounding documentation supports that behavior or does not contradict it
+
+Change the helper only for an actual contract violation, for example when:
+- the implementation contradicts the reference semantics
+- the documentation clearly promises something else
+- multiple existing tests/examples consistently encode the opposite semantics
+- the current behavior is internally inconsistent
+
+Interpretation:
+- this is usually a `false` or stale expectation case
+- it becomes a `disappointed expectation` case if the system itself created the
+  wrong expectation through docs, naming, UI, or examples
+- in that case, repair the promise surface too, not only the assertion
+
 ## Routine: Update HyperDoc + FedWiki Twins + Topics
 
 When adding/updating a concept cluster (e.g. new external input, architecture note, workflow correction), update all three surfaces together:
