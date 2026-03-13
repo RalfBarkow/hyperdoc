@@ -77,7 +77,7 @@
 (defexample fedwiki-commit-link-example
   "Translate a full Git commit hash in story text into a Software Heritage revision link."
   (let* ((hash "0123456789abcdef0123456789abcdef01234567")
-         (text (format nil "See ~A and https://example.org" hash))
+         (text (format nil "See ~A and [https://example.org Example]" hash))
          (wiki (make-instance 'hyperbook/fedwiki::fedwiki
                               :id "fedwiki:examples.example"))
          (page (hyperbook/fedwiki::make-fedwiki-page wiki "example-page" "Example Page"))
