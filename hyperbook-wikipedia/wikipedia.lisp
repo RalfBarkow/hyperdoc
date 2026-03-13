@@ -258,7 +258,9 @@
              (hyperbook-id (str:concat "wikipedia:" ed-code))
              (page-name (third path-parts))
              (page-id (str:replace-all "_" " " page-name)))
-        (list hyperbook-id page-id)))))
+        (unless (or (str:starts-with? "Special:" page-id)
+                    (str:starts-with? "File:" page-id))
+          (list hyperbook-id page-id))))))
 
 ;;
 ;; Views
