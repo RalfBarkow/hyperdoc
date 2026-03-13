@@ -1353,6 +1353,18 @@
                  "Why a Git commit hash in story text did not become a Software Heritage link"
                  "https://docs.softwareheritage.org/devel/swh-model/persistent-identifiers.html")))
 
+(defun document-capability-as-dita-like-clickthrough-cluster-topic ()
+  (make-topic
+   :id "document-capability-as-dita-like-clickthrough-cluster"
+   :title "Document capability as DITA-like click-through cluster"
+   :summary "Document one concrete capability as a tightly linked concept, task, verification, and troubleshooting neighborhood so readers can learn it step by step."
+   :references '("Document capability as DITA-like click-through cluster"
+                 "Clickable commit IDs in FedWiki stories"
+                 "Software Heritage revision links from Git commit hashes"
+                 "Translate a full Git commit hash in story text into a Software Heritage revision link"
+                 "Verify Software Heritage revision link extraction from story text"
+                 "Why a Git commit hash in story text did not become a Software Heritage link")))
+
 (defun git-blame-operation-topic ()
   (make-topic
    :id "git-blame-operation"

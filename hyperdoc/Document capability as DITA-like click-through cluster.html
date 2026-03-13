@@ -1,0 +1,97 @@
+<h1>Document capability as DITA-like click-through cluster</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Use this pattern when one concrete capability deserves step-by-step learning
+  rather than a single static explanation page. The capability is documented as
+  a small click-through neighborhood with four distinct functions:
+  concept, task, verification or training, and troubleshooting.
+</p>
+
+<h2>When to use this pattern</h2>
+
+<p>
+  Use it when a reader must move from understanding to procedure to checking to
+  diagnosis without leaving the capability boundary. This works especially well
+  when the capability already exists in the system and needs a teachable path,
+  not a new implementation.
+</p>
+
+<h2>When not to use this pattern</h2>
+
+<p>
+  Do not use it for broad methodology theory, for abstract architecture without
+  a concrete capability, or for tiny changes that do not need verification and
+  troubleshooting surfaces. If the capability does not yet exist, implement the
+  capability first and document the working behavior afterward.
+</p>
+
+<h2>Required four-part cluster</h2>
+
+<ul>
+  <li><b>Concept:</b> explain what the capability does and why it matters.</li>
+  <li><b>Task:</b> show the explicit procedure for using or checking it.</li>
+  <li><b>Verification or training:</b> show how to confirm the expected outcome.</li>
+  <li><b>Troubleshooting:</b> explain why the expected result might not appear.</li>
+</ul>
+
+<h2>Page graph and navigation pattern</h2>
+
+<p>
+  The page graph should let a reader move in this order:
+  concept, then task, then verification, then troubleshooting. Each page should
+  backlink narrowly to the others, so the cluster reads like one instructional
+  path rather than four unrelated notes.
+</p>
+
+<h2>Authoring constraints</h2>
+
+<ul>
+  <li>Keep the capability narrow and concrete.</li>
+  <li>Prefer existing topic handles over new vocabulary.</li>
+  <li>Avoid methodology sprawl for one local capability.</li>
+  <li>Do not mix the instructional docs slice with parser, helper, or runtime repairs.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<p>
+  The Software Heritage commit-link capability is the local worked example. It
+  is documented as:
+</p>
+
+<ul>
+  <li><a page="Software Heritage revision links from Git commit hashes">concept</a></li>
+  <li><a page="Translate a full Git commit hash in story text into a Software Heritage revision link">task</a></li>
+  <li><a page="Verify Software Heritage revision link extraction from story text">verification</a></li>
+  <li><a page="Why a Git commit hash in story text did not become a Software Heritage link">troubleshooting</a></li>
+</ul>
+
+<p>
+  That cluster stays focused on one capability: turning a full Git commit hash
+  in story text into a Software Heritage revision link. It teaches the reader
+  how to understand the feature, use it, verify it, and diagnose common failure
+  cases without turning into a larger parser or FedWiki theory page.
+</p>
+
+<h2>Anti-patterns</h2>
+
+<ul>
+  <li>Writing broad documentation theory before any concrete capability pages exist.</li>
+  <li>Creating a topic explosion for one small capability.</li>
+  <li>Mixing instructional documentation with implementation repair in the same slice.</li>
+  <li>Omitting verification or troubleshooting, so the path is not actually teachable.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Document capability as DITA-like click-through cluster"><tt>Document capability as DITA-like click-through cluster</tt></a></li>
+  <li><a page="Software Heritage revision links from Git commit hashes">Software Heritage revision links from Git commit hashes</a></li>
+  <li><a page="Translate a full Git commit hash in story text into a Software Heritage revision link">Translate a full Git commit hash in story text into a Software Heritage revision link</a></li>
+  <li><a page="Verify Software Heritage revision link extraction from story text">Verify Software Heritage revision link extraction from story text</a></li>
+  <li><a page="Why a Git commit hash in story text did not become a Software Heritage link">Why a Git commit hash in story text did not become a Software Heritage link</a></li>
+  <li><a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a></li>
+  <li><a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a></li>
+</ul>
