@@ -18,6 +18,7 @@
 *.wx32fsl
 
 # ---> Local dev artifacts
+.DS_Store
 .direnv/
 .flake-deps/
 node_modules/
