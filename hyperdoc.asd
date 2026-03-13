@@ -174,12 +174,14 @@
   :license  "BSD"
   :version "0.0.1"
   :serial t
-  :depends-on (#:hyperdoc/dmx-import)
+  :depends-on (#:hyperdoc/dmx-import
+               #:hyperdoc/explorer)
   :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")
+                             (:file "page-lookup-issues-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")
