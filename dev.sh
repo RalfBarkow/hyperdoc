@@ -143,7 +143,7 @@ nix develop --command sbcl --no-userinit --disable-debugger \
                 (entry nil))
            (handler-case
                (progn
-                 (asdf:load-system :hyperbook/server)
+                 (asdf:load-system :hyperdoc/server)
                  (flet ((maybe-load (sys)
                           (handler-case
                               (if (asdf:find-system sys nil)

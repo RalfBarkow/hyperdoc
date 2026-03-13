@@ -74,7 +74,7 @@ let
 
       exec ${sbclEnv}/bin/sbcl \
         "''${sbcl_base_args[@]}" \
-        --eval '(asdf:load-system :hyperbook/server)' \
+        --eval '(asdf:load-system :hyperdoc/server)' \
         --eval '(let* ((port (or (ignore-errors (parse-integer (or (uiop:getenv "HYPERDOC_PORT") "8080")))
                                  8080))
                        (development (member (string-downcase (or (uiop:getenv "HYPERDOC_DEVELOPMENT") "0"))
