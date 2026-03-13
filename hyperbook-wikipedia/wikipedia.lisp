@@ -62,6 +62,8 @@
   (purge-page-cache)
   (when-let (page (gethash id (pages-of *page-cache*)))
     (return-from get-page page))
+  (when (str:empty? id)
+    (setf id (hb:main-page-id-of wp)))
   (let ((page (make-instance 'wikipedia-page
                              :hyperbook wp
                              :id id
