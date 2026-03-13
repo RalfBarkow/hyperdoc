@@ -1,0 +1,76 @@
+<h1>Translate a full Git commit hash in story text into a Software Heritage revision link</h1>
+
+<in-package>hyperdoc</in-package>
+
+<h2>Purpose</h2>
+
+<p>
+  Use this task when you want to verify or demonstrate the existing renderer
+  behavior that turns a full Git commit hash in story text into a Software
+  Heritage revision link.
+</p>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>You have a full 40-character Git commit hash.</li>
+  <li>You are using the FedWiki story-text rendering path that already supports clickable commit IDs.</li>
+  <li>You understand that this is a renderer-local feature, not a new HyperBook.</li>
+</ul>
+
+<h2>Inputs</h2>
+
+<ul>
+  <li>one full 40-character Git commit hash</li>
+  <li>story text containing that hash</li>
+  <li>an ordinary external link in the supported syntax, if you also want to observe mixed extraction behavior</li>
+</ul>
+
+<h2>Steps</h2>
+
+<ol>
+  <li>Identify a full 40-character Git commit hash.</li>
+  <li>Place it into FedWiki story text.</li>
+  <li>If you also want a normal external link in the same example path, use supported FedWiki bracket-link syntax such as <tt>[https://example.org Example]</tt>.</li>
+  <li>Render or inspect the story text through the relevant HyperDoc/FedWiki path.</li>
+  <li>Observe that the commit hash becomes a Software Heritage revision link.</li>
+  <li>Verify that the resulting URL has the shape <tt>https://archive.softwareheritage.org/swh:1:rev:&lt;hash&gt;/</tt>.</li>
+</ol>
+
+<h2>Expected result</h2>
+
+<p>
+  The full commit hash is rendered as a clickable Software Heritage revision
+  URL. In the same supported path, an ordinary external link expressed in
+  bracket-link form remains present as its original URL.
+</p>
+
+<h2>Variations</h2>
+
+<ul>
+  <li>The same capability applies in paragraph, markdown, and reference story items.</li>
+  <li>You can verify the behavior by inspecting the example, the smoke tests, or rendered output.</li>
+</ul>
+
+<h2>Common mistakes</h2>
+
+<ul>
+  <li>Using a short hash instead of a full 40-character commit hash.</li>
+  <li>Assuming that bare external URL text is the supported ordinary-link contract in this exact example path.</li>
+  <li>Checking a text path that is not actually the FedWiki story renderer.</li>
+</ul>
+
+<h2>Next steps</h2>
+
+<ul>
+  <li><a page="Verify Software Heritage revision link extraction from story text">Verify Software Heritage revision link extraction from story text</a></li>
+  <li><a page="Why a Git commit hash in story text did not become a Software Heritage link">Why a Git commit hash in story text did not become a Software Heritage link</a></li>
+  <li><a page="Clickable commit IDs in FedWiki stories">Clickable commit IDs in FedWiki stories</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a></li>
+  <li><a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a></li>
+</ul>

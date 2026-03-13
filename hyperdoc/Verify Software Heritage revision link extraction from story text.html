@@ -1,0 +1,53 @@
+<h1>Verify Software Heritage revision link extraction from story text</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This verification page teaches how to check that the clickable-commit-id path
+  is really producing a Software Heritage revision link from story text.
+</p>
+
+<h2>Minimal example input</h2>
+
+<pre><code>See 0123456789abcdef0123456789abcdef01234567
+and [https://example.org Example]</code></pre>
+
+<h2>Expected output</h2>
+
+<p>
+  A passing outcome includes a Software Heritage revision URL with the exact
+  shape
+  <tt>https://archive.softwareheritage.org/swh:1:rev:0123456789abcdef0123456789abcdef01234567/</tt>.
+  If the same example also includes the supported external-link form, the
+  ordinary URL <tt>https://example.org</tt> remains present as well.
+</p>
+
+<h2>What to inspect</h2>
+
+<ul>
+  <li>the example in <tt>hyperdoc/examples-portable.lisp</tt></li>
+  <li>the FedWiki story-item smoke tests</li>
+  <li>the story-item renderer path that performs the translation</li>
+</ul>
+
+<h2>What a passing outcome looks like</h2>
+
+<ul>
+  <li>the commit hash is no longer inert text</li>
+  <li>the rendered/extracted URL list contains the Software Heritage revision URL</li>
+  <li>the external link remains present when expressed in the supported syntax</li>
+</ul>
+
+<h2>Next steps</h2>
+
+<ul>
+  <li><a page="Translate a full Git commit hash in story text into a Software Heritage revision link">Translate a full Git commit hash in story text into a Software Heritage revision link</a></li>
+  <li><a page="Why a Git commit hash in story text did not become a Software Heritage link">Why a Git commit hash in story text did not become a Software Heritage link</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a></li>
+  <li><a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a></li>
+</ul>

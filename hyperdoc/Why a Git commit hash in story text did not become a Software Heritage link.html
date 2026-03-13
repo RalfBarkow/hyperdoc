@@ -1,0 +1,55 @@
+<h1>Why a Git commit hash in story text did not become a Software Heritage link</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Use this troubleshooting page when a piece of story text looks commit-like but
+  did not turn into a Software Heritage revision link.
+</p>
+
+<h2>Common causes</h2>
+
+<h3>Short hash instead of full hash</h3>
+
+<p>
+  The supported contract in this path is a full 40-character Git commit hash.
+  Short hashes are useful for humans but are not the renderer trigger here.
+</p>
+
+<h3>Unsupported text shape</h3>
+
+<p>
+  The commit-linkification path and the ordinary external-link path are related
+  but not identical. If you are also expecting a normal external URL to appear,
+  verify that you are using the supported ordinary-link syntax in this path.
+</p>
+
+<h3>Wrong expectation about unrelated URL extraction behavior</h3>
+
+<p>
+  A bare URL can look link-like to a reader, but that does not automatically
+  mean this exact extraction path treats it as an ordinary external link. Check
+  the nearby smoke tests and examples for the supported text form.
+</p>
+
+<h3>Wrong rendering path</h3>
+
+<p>
+  Make sure you are actually testing the FedWiki story-item rendering path
+  rather than another text-processing path in the system.
+</p>
+
+<h2>What to check next</h2>
+
+<ul>
+  <li><a page="Translate a full Git commit hash in story text into a Software Heritage revision link">follow the task page step by step</a></li>
+  <li><a page="Verify Software Heritage revision link extraction from story text">compare against the verification page</a></li>
+  <li><a page="Clickable commit IDs in FedWiki stories">review the feature boundary</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a></li>
+  <li><a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a></li>
+</ul>

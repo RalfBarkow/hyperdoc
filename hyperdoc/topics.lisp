@@ -1334,6 +1334,10 @@
    :title "Clickable commit IDs in FedWiki stories"
    :summary "FedWiki story rendering can turn full Git commit hashes into ordinary external links to archived Software Heritage revision pages without changing page authoring."
    :references '("Clickable commit IDs in FedWiki stories"
+                 "Software Heritage revision links from Git commit hashes"
+                 "Translate a full Git commit hash in story text into a Software Heritage revision link"
+                 "Verify Software Heritage revision link extraction from story text"
+                 "Why a Git commit hash in story text did not become a Software Heritage link"
                  "Everything in Git? Identity Across Systems"
                  "Opening external FedWiki sites")))
 
@@ -1343,6 +1347,10 @@
    :title "Software Heritage revision link"
    :summary "A Software Heritage revision link uses an SWHID of the form swh:1:rev:<hash> to point at an archived commit-level object."
    :references '("Clickable commit IDs in FedWiki stories"
+                 "Software Heritage revision links from Git commit hashes"
+                 "Translate a full Git commit hash in story text into a Software Heritage revision link"
+                 "Verify Software Heritage revision link extraction from story text"
+                 "Why a Git commit hash in story text did not become a Software Heritage link"
                  "https://docs.softwareheritage.org/devel/swh-model/persistent-identifiers.html")))
 
 (defun git-blame-operation-topic ()

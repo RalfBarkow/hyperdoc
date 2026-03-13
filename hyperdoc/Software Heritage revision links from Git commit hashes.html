@@ -1,0 +1,62 @@
+<h1>Software Heritage revision links from Git commit hashes</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  In HyperDoc's FedWiki story rendering path, a full 40-character Git commit
+  hash can become a
+  <a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a>
+  instead of remaining inert text. This is the concept layer behind
+  <a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a>:
+  a commit hash is treated as an archived reference token that resolves to a
+  specific Software Heritage revision object.
+</p>
+
+<h2>What the capability does</h2>
+
+<p>
+  The capability translates a full commit hash into an external URL of the form
+  <tt>https://archive.softwareheritage.org/swh:1:rev:&lt;hash&gt;/</tt>.
+  The result is a clickable archival reference inside story text, without
+  requiring a new HyperBook or a second reference model.
+</p>
+
+<h2>Why full 40-character hashes matter</h2>
+
+<p>
+  The supported form is a full Git revision hash. A full hash is precise enough
+  to identify one revision object directly. Short hashes are convenient for
+  humans, but they are not the contract this renderer path uses for direct
+  Software Heritage revision links.
+</p>
+
+<h2>Why Software Heritage links are useful in story text</h2>
+
+<p>
+  A Software Heritage revision link turns a repository-local identifier into an
+  archived reference that can be opened directly from a story. That is useful
+  when story text discusses commits as evidence, provenance, or review anchors.
+</p>
+
+<h2>Relation to the existing clickable-commit-id slice</h2>
+
+<p>
+  <a page="Clickable commit IDs in FedWiki stories">Clickable commit IDs in
+  FedWiki stories</a> explains the renderer-local feature boundary. This page
+  explains the conceptual role of the resulting Software Heritage revision link.
+</p>
+
+<h2>Next steps</h2>
+
+<ul>
+  <li><a page="Translate a full Git commit hash in story text into a Software Heritage revision link">Translate a full Git commit hash in story text into a Software Heritage revision link</a></li>
+  <li><a page="Verify Software Heritage revision link extraction from story text">Verify Software Heritage revision link extraction from story text</a></li>
+  <li><a page="Why a Git commit hash in story text did not become a Software Heritage link">Why a Git commit hash in story text did not become a Software Heritage link</a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Clickable commit IDs in FedWiki stories"><tt>Clickable commit IDs in FedWiki stories</tt></a></li>
+  <li><a hyperbook="topics" page="Software Heritage revision link"><tt>Software Heritage revision link</tt></a></li>
+</ul>
