@@ -4477,5 +4477,53 @@
                  "Civilian harm accountability"
                  "Minab school strike allegations")))
 
+;; Denkpanzer/think-tank conflict topics.
+(defun denkpanzer-paper-2013-topic ()
+  (make-topic
+   :id "denkpanzer-paper-2013"
+   :title "Denkpanzer paper 2013"
+   :summary "Provenance topic for Ralf Barkow's 2013 work Denkpanzer stören, keeping the paper's Swiss think-tank framing and extracted conflict concepts linked without flattening them into one thesis."
+   :references '("Denkpanzer paper 2013"
+                 "Swiss think-tank model transfer"
+                 "Power-of-definition conflict"
+                 "Communication intensification as conflict early warning"
+                 "Think-tank ideological temporization")))
+
+(defun swiss-think-tank-model-transfer-topic ()
+  (make-topic
+   :id "swiss-think-tank-model-transfer"
+   :title "Swiss think-tank model transfer"
+   :summary "Analytic frame for asking how an Anglo-Saxon think-tank pattern is imported into Swiss organizational and media conditions and how local actors react to that import."
+   :references '("Swiss think-tank model transfer"
+                 "Denkpanzer paper 2013"
+                 "Think-tank ideological temporization")))
+
+(defun power-of-definition-conflict-topic ()
+  (make-topic
+   :id "power-of-definition-conflict"
+   :title "Power-of-definition conflict"
+   :summary "Conflict over who gets to define the relevant problem, values, and legitimate interpretation of a social situation, especially where hegemony and public framing are contested."
+   :references '("Power-of-definition conflict"
+                 "Denkpanzer paper 2013"
+                 "Communication intensification as conflict early warning")))
+
+(defun communication-intensification-early-warning-topic ()
+  (make-topic
+   :id "communication-intensification-early-warning"
+   :title "Communication intensification as conflict early warning"
+   :summary "The use of dense bursts of public communication as an observable signal that routine or fundamental social conflict may be intensifying."
+   :references '("Communication intensification as conflict early warning"
+                 "Power-of-definition conflict"
+                 "Denkpanzer paper 2013")))
+
+(defun think-tank-ideological-temporization-topic ()
+  (make-topic
+   :id "think-tank-ideological-temporization"
+   :title "Think-tank ideological temporization"
+   :summary "Observation of ideology through timing, attention cycles, and staged media situations rather than as a fixed left/right label alone."
+   :references '("Think-tank ideological temporization"
+                 "Swiss think-tank model transfer"
+                 "Denkpanzer paper 2013")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
