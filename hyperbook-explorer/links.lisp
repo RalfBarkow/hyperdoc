@@ -17,9 +17,19 @@
   ((source-hyperbook :reader source-hyperbook-of :initarg :source-hyperbook
                      :type string)
    (source-page :reader source-page-of :initarg :source-page
-                :type string)))
+                :type string)
+   (link-text :reader link-text-of :initarg :link-text
+              :initform nil :type (or null string))
+   (source-section :reader source-section-of :initarg :source-section
+                   :initform nil :type (or null string))))
 
 (defgeneric key-of (link))
+
+(defun link-signature (link)
+  (list (class-name (class-of link))
+        (key-of link)
+        (source-section-of link)
+        (link-text-of link)))
 
 ;;
 ;; A mix-in for links whose target is an object in memory.
@@ -57,10 +67,13 @@
   `(handler-case (progn ,@body)
      (error (c) c)))
 
-(defun make-page-link (source-page target-hyperbook-id target-page-id &optional view)
+(defun make-page-link (source-page target-hyperbook-id target-page-id
+                       &key view link-text source-section)
   (make-instance 'page-link
                  :source-hyperbook (-> source-page hyperbook-of id-of)
                  :source-page (-> source-page id-of)
+                 :link-text link-text
+                 :source-section source-section
                  :target-hyperbook target-hyperbook-id
                  :target-page target-page-id
                  :thunk (views:thunk
@@ -86,10 +99,13 @@
           (source-page-of link)
           (target-hyperbook-of link)))
 
-(defun make-hyperbook-link (source-page target-hyperbook-id &optional view)
+(defun make-hyperbook-link (source-page target-hyperbook-id
+                            &key view link-text source-section)
   (make-instance 'hyperbook-link
                  :source-hyperbook (-> source-page hyperbook-of id-of)
                  :source-page (-> source-page id-of)
+                 :link-text link-text
+                 :source-section source-section
                  :target-hyperbook target-hyperbook-id
                  :thunk (views:thunk
                           (result-or-condition
@@ -112,11 +128,57 @@
           (source-page-of link)
           (url-of link)))
 
-(defun make-web-link (source-page url)
+(defun make-web-link (source-page url &key link-text source-section)
   (make-instance 'web-link
                  :source-hyperbook (-> source-page hyperbook-of id-of)
                  :source-page (-> source-page id-of)
+                 :link-text link-text
+                 :source-section source-section
                  :url url))
+
+(defun trimmed-node-text (node)
+  (let ((text (plump:text node)))
+    (and text
+         (let ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return #\Page)
+                                     text)))
+           (unless (zerop (length trimmed))
+             trimmed)))))
+
+(defun heading-node-p (node)
+  (and (typep node 'plump:element)
+       (member (plump:tag-name node)
+               '("h1" "h2" "h3" "h4" "h5" "h6")
+               :test #'string-equal)))
+
+(defun source-section-for-link-element (dom target)
+  (let ((section nil)
+        (found nil))
+    (labels ((walk (node)
+               (when (and (not found) (typep node 'plump:nesting-node))
+                 (when (heading-node-p node)
+                   (setf section (trimmed-node-text node)))
+                 (when (eq node target)
+                   (setf found t))
+                 (loop for child across (plump:children node)
+                       while (not found)
+                       do (walk child)))))
+      (walk dom))
+    section))
+
+(defun make-link-list (page elements make-fn)
+  (let ((dom (dom-of page)))
+    (nreverse
+     (reduce #'(lambda (links element)
+                 (let* ((link-text (trimmed-node-text element))
+                        (source-section (and dom
+                                             (source-section-for-link-element dom element)))
+                        (link (funcall make-fn page element link-text source-section)))
+                   (adjoin link
+                           links
+                           :test #'equal
+                           :key #'link-signature)))
+             elements
+             :initial-value nil))))
 
 ;;
 ;; Extract the links from a page implementing dom-of
@@ -149,34 +211,32 @@
     (make-instance 'links
      :page-links
      (make-link-list page (lquery:$ dom "a[page]")
-                     #'(lambda (page element)
+                     #'(lambda (page element link-text source-section)
                          (let ((hyperbook (or (plump:get-attribute element "hyperbook")
                                               (-> page hyperbook-of id-of))))
                            (make-page-link page hyperbook
                                            (plump:get-attribute element "page")
-                                           (plump:get-attribute element "view")))))
+                                           :view (plump:get-attribute element "view")
+                                           :link-text link-text
+                                           :source-section source-section))))
      :hyperbook-links
      (make-link-list page (lquery:$ dom
                             "a[hyperbook]"
                             (filter #'(lambda (el)
                                         (not (plump:has-attribute el "page")))))
-                     #'(lambda (page element)
+                     #'(lambda (page element link-text source-section)
                          (make-hyperbook-link page
                                               (plump:get-attribute element "hyperbook")
-                                              (plump:get-attribute element "view"))))
+                                              :view (plump:get-attribute element "view")
+                                              :link-text link-text
+                                              :source-section source-section)))
      :web-links
      (make-link-list page (lquery:$ dom "a[href]")
-                     #'(lambda (page element)
-                         (make-web-link page (plump:get-attribute element "href")))))))
-
-(defun make-link-list (page elements make-fn)
-  (nreverse
-   (reduce #'(lambda (links element)
-               (adjoin (funcall make-fn page element)
-                       links
-                       :test #'equal))
-           elements
-           :initial-value nil)))
+                     #'(lambda (page element link-text source-section)
+                         (make-web-link page
+                                        (plump:get-attribute element "href")
+                                        :link-text link-text
+                                        :source-section source-section))))))
 
 ;;
 ;; Find links

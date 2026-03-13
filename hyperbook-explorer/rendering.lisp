@@ -70,10 +70,11 @@
       (page-attr
        (let ((hyperbook-id (or hyperbook-attr
                                (-> *current-page* hyperbook-of id-of))))
-         (render-hyperbook-page-link hyperbook-id page-attr render-children))
+         (render-hyperbook-page-link hyperbook-id page-attr render-children
+                                     :element element))
        t)
       (hyperbook-attr
-       (render-hyperbook-link hyperbook-attr render-children)
+       (render-hyperbook-link hyperbook-attr render-children :element element)
        t)
       (href-attr
        ;; Force target="_blank" for href links
@@ -92,7 +93,12 @@
          (serialize-a-element kw element)))))
   t)
 
-(defun render-hyperbook-link (hyperbook-id link-text)
+(defun rendered-link-text (link-text)
+  (or link-text
+      (views:html (views:esc ""))))
+
+(defun render-hyperbook-link (hyperbook-id link-text &key element)
+  (declare (ignore element))
   (handler-case
       (let ((hyperbook (find-hyperbook hyperbook-id :signal-error? t)))
         (views:html
@@ -100,13 +106,16 @@
                  :title (format nil "HyperBook \"~A\""
                                 (cl-who:escape-string hyperbook-id))
                  (views:object-ref hyperbook
-                                   :display link-text))))
+                                   :display (rendered-link-text link-text)))))
     (lookup-failure (c)
-      (views:html
-        (:span :class "hyperbook-reference hyperbook-error"
-               (views:object-ref c :display link-text)))))  )
+      (let ((issue (enrich-lookup-issue
+                    (make-basic-hyperbook-lookup-issue c *current-page*))))
+        (views:html
+          (:span :class "hyperbook-reference hyperbook-error"
+                 (views:object-ref issue
+                                   :display (rendered-link-text link-text)))))))  )
 
-(defun render-hyperbook-page-link (hyperbook-id page-id link-text)
+(defun render-hyperbook-page-link (hyperbook-id page-id link-text &key element)
   (handler-case
       (let* ((hyperbook (find-hyperbook hyperbook-id :signal-error? t))
              (page (find-page hyperbook page-id :signal-error? t)))
@@ -116,16 +125,31 @@
                                 (cl-who:escape-string page-id)
                                 (cl-who:escape-string (title-of hyperbook)))
                  (views:object-ref page
-                                   :display link-text))))
+                                   :display (rendered-link-text link-text)))))
     (lookup-failure (c)
-      (views:html
-        (:span :class "hyperbook-reference hyperbook-error"
-               (views:object-ref c :display link-text))))))
+      (let ((issue
+              (make-render-time-lookup-issue
+               c
+               :source-page *current-page*
+               :target-hyperbook-id hyperbook-id
+               :expected-page-id page-id
+               :link-text (typecase link-text
+                            (string link-text)
+                            (t (or (and element (trimmed-node-text element))
+                                   page-id)))
+               :source-section (and *current-page* element
+                                    (source-section-for-link-element
+                                     (dom-of *current-page*)
+                                     element)))))
+        (views:html
+          (:span :class "hyperbook-reference hyperbook-error"
+                 (views:object-ref issue
+                                   :display (rendered-link-text link-text))))))))
 
-(defun render-hyperbook-or-page-link (hyperbook-id page-id link-text)
+(defun render-hyperbook-or-page-link (hyperbook-id page-id link-text &key element)
   (if page-id
-      (render-hyperbook-page-link hyperbook-id page-id link-text)
-      (render-hyperbook-link hyperbook-id link-text)))
+      (render-hyperbook-page-link hyperbook-id page-id link-text :element element)
+      (render-hyperbook-link hyperbook-id link-text :element element)))
 
 (defgeneric serialize-a-element (attrs element)
   (:method ((attrs t) element)

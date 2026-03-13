@@ -10,7 +10,10 @@
 ;;
 
 (defclass html-page (text-page)
-  ((parse-tree :reader dom-of :initform nil)))
+  ((parse-tree :reader dom-of :initform nil)
+   (counterpart-section-issues
+    :reader counterpart-section-issues-of
+    :initform nil)))
 
 ;;
 ;; The page class for file type "html" is html-page.
@@ -33,6 +36,8 @@
     (let ((plump:*tag-dispatchers* plump:*html-tags*))
       (setf parse-tree (plump:parse file))
       (set-title page)
+      (setf (slot-value page 'counterpart-section-issues)
+            (normalize-fedwiki-counterpart-sections! page parse-tree))
       (setf links (hb:extract-links page))))
   page)
 
@@ -44,6 +49,260 @@
                                (when elements
                                  (return (-> elements first plump:text)))))
                     "Untitled"))))
+
+(defun copy-plump-attributes! (from to)
+  (maphash #'(lambda (key value)
+               (plump:set-attribute to key value))
+           (plump:attributes from))
+  to)
+
+(defun replace-element-text! (element new-text)
+  (let* ((root (plump:make-root))
+         (replacement (plump:make-element root (plump:tag-name element))))
+    (copy-plump-attributes! element replacement)
+    (plump:make-text-node replacement new-text)
+    (plump:replace-child element replacement)
+    replacement))
+
+(defun normalize-fedwiki-counterpart-link! (anchor domain)
+  (let* ((current-text (or (hb::trimmed-node-text anchor)
+                           (plump:get-attribute anchor "page")
+                           domain))
+         (labelled-text
+           (if (and current-text
+                    (uiop:string-prefix-p "[" current-text))
+               current-text
+               (format nil "[~A] ~A" domain current-text))))
+    (replace-element-text! anchor labelled-text)))
+
+(defun fedwiki-counterpart-heading-p (text)
+  (member text
+          '("Localhost FedWiki twin"
+            "Localhost FedWiki twins")
+          :test #'string-equal))
+
+(defun fedwiki-counterpart-section-title (domains)
+  (cond
+    ((null domains)
+     "FedWiki counterparts")
+    ((every #'localhost-like-fedwiki-domain-p domains)
+     "Local FedWiki counterparts")
+    ((= 1 (length domains))
+     "FedWiki counterparts")
+    (t
+     "FedWiki counterpart targets")))
+
+(defun fedwiki-links-in-section (nodes)
+  (loop for node in nodes
+        when (typep node 'plump:element)
+          append (loop for element across (lquery:$ node "a[hyperbook]")
+                       for hyperbook = (plump:get-attribute element "hyperbook")
+                       when (and hyperbook
+                                 (uiop:string-prefix-p "fedwiki:" hyperbook))
+                         collect element)))
+
+(defun node-vector-to-list (vector)
+  (loop for node across vector
+        collect node))
+
+(defun normalize-fedwiki-counterpart-sections! (page dom)
+  (let* ((children (node-vector-to-list (plump:children dom)))
+         (page-hyperbook-id (hb:id-of (hb:hyperbook-of page)))
+         (page-id (hb:id-of page))
+         (page-title (title-of page))
+         (issues nil))
+    (loop for index from 0 below (length children)
+          for node = (nth index children)
+          when (and (typep node 'plump:element)
+                    (member (plump:tag-name node)
+                            '("h2" "h3" "h4" "h5" "h6")
+                            :test #'string-equal))
+            do (let ((heading-text (hb::trimmed-node-text node)))
+                 (when (fedwiki-counterpart-heading-p heading-text)
+                   (let* ((section-nodes
+                            (loop for section-index from (1+ index) below (length children)
+                                  for section-node = (nth section-index children)
+                                  while (not (and (typep section-node 'plump:element)
+                                                  (member (plump:tag-name section-node)
+                                                          '("h1" "h2" "h3" "h4" "h5" "h6")
+                                                          :test #'string-equal)))
+                                  collect section-node))
+                          (anchors (fedwiki-links-in-section section-nodes))
+                          (domains
+                            (remove-duplicates
+                             (loop for anchor in anchors
+                                   for hyperbook = (plump:get-attribute anchor "hyperbook")
+                                   collect (subseq hyperbook (length "fedwiki:")))
+                             :test #'string-equal))
+                          (replacement-title
+                            (fedwiki-counterpart-section-title domains)))
+                     (when (or (not (string= heading-text replacement-title))
+                               (some #'(lambda (domain)
+                                         (not (localhost-like-fedwiki-domain-p domain)))
+                                     domains))
+                       (push
+                        (hb:make-target-grouping-issue
+                         :source-object page
+                         :source-hyperbook page-hyperbook-id
+                         :source-page-id page-id
+                         :source-page-title page-title
+                         :source-section heading-text
+                         :target-hyperbook-id (and (= 1 (length domains))
+                                                   (format nil "fedwiki:~A"
+                                                           (first domains)))
+                         :target-kind (if (> (length domains) 1)
+                                          :unknown
+                                          :remote-fedwiki-page)
+                         :classification :mislabelled-target-grouping
+                         :status :mislabelled-target
+                         :suggested-repair :normalize-fedwiki-counterpart-labels
+                         :repair-description
+                         "Render FedWiki counterpart sections with truthful scope labels rather than a flat Localhost heading."
+                         :details (list :original-heading heading-text
+                                        :replacement-heading replacement-title
+                                        :domains domains))
+                        issues))
+                     (replace-element-text! node replacement-title)
+                     (loop for anchor in anchors
+                           for hyperbook = (plump:get-attribute anchor "hyperbook")
+                           for domain = (subseq hyperbook (length "fedwiki:"))
+                           do (normalize-fedwiki-counterpart-link! anchor domain))))))
+    (nreverse issues)))
+
+(defun classify-fedwiki-page-lookup-issue! (issue)
+  (let* ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue))
+         (slug (hb:lookup-issue-expected-page-id-of issue))
+         (domain (subseq target-hyperbook-id (length "fedwiki:")))
+         (local-domain-p (string= (string-downcase domain)
+                                  (local-fedwiki-domain-name)))
+         (local-path (and local-domain-p
+                          (local-fedwiki-path-for-slug slug)))
+         (local-page-exists-p (and local-path
+                                   (uiop:file-exists-p local-path)))
+         (materialization-plan
+           (and local-domain-p
+                (ignore-errors
+                  (plan-fedwiki-page-materialization
+                   slug
+                   :expected-fedwiki-branch nil))))
+         (probe (make-fedwiki-publication-probe domain slug)))
+    (setf (hb:lookup-issue-details-of issue)
+          (append
+           (hb:lookup-issue-details-of issue)
+           (list :target-domain domain
+                 :local-domain-p local-domain-p
+                 :local-path local-path
+                 :local-page-exists-p local-page-exists-p
+                 :sitemap-has-slug-p
+                 (fedwiki-publication-probe-sitemap-has-slug-p probe)
+                 :fetch-status
+                 (fedwiki-publication-probe-fetch-status-of probe)
+                 :publication-classification
+                 (fedwiki-publication-probe-classification-of probe))))
+    (cond
+      ((and local-domain-p
+            local-page-exists-p
+            (eq (fedwiki-publication-probe-classification-of probe)
+                :publication-boundary))
+       (setf (hb:lookup-issue-target-kind-of issue) :remote-fedwiki-page
+             (hb:lookup-issue-classification-of issue) :publication-boundary
+             (hb:lookup-issue-suggested-repair-of issue) :inspect-publication-probe
+             (hb:lookup-issue-repair-description-of issue)
+             "The local FedWiki page exists, but the served site does not currently resolve it. Inspect the publication probe instead of recreating the page."
+             (hb::lookup-issue-repair-thunk-of issue)
+             (lambda ()
+               (make-fedwiki-publication-probe domain slug))))
+      ((and local-domain-p
+            (not local-page-exists-p)
+            materialization-plan)
+       (setf (hb:lookup-issue-target-kind-of issue) :local-fedwiki-twin
+             (hb:lookup-issue-classification-of issue) :missing-local-fedwiki-twin
+             (hb:lookup-issue-suggested-repair-of issue)
+             :materialize-local-fedwiki-twin
+             (hb:lookup-issue-repair-description-of issue)
+             "Materialize the missing local FedWiki twin into the localhost pages repo through the existing materialization helper."
+             (hb::lookup-issue-repair-thunk-of issue)
+             (lambda ()
+               (plan-fedwiki-page-materialization slug))))
+      ((eq (fedwiki-publication-probe-classification-of probe)
+           :remote-page-missing)
+       (setf (hb:lookup-issue-target-kind-of issue) :remote-fedwiki-page
+             (hb:lookup-issue-classification-of issue) :remote-page-missing
+             (hb:lookup-issue-suggested-repair-of issue)
+             :inspect-publication-probe
+             (hb:lookup-issue-repair-description-of issue)
+             "The remote FedWiki page does not currently resolve. Inspect the probe before deciding whether authoring or publication work is required."
+             (hb::lookup-issue-repair-thunk-of issue)
+             (lambda ()
+               (make-fedwiki-publication-probe domain slug))))
+      (t
+       (setf (hb:lookup-issue-target-kind-of issue) :remote-fedwiki-page
+             (hb:lookup-issue-classification-of issue)
+             :lookup-path-fetch-format-failure
+             (hb:lookup-issue-suggested-repair-of issue)
+             :inspect-publication-probe
+             (hb:lookup-issue-repair-description-of issue)
+             "Inspect the publication probe to determine whether the remote lookup failure is caused by sitemap lag, fetch-format drift, or another resolution-path problem."
+             (hb::lookup-issue-repair-thunk-of issue)
+             (lambda ()
+               (make-fedwiki-publication-probe domain slug)))))
+    issue))
+
+(defmethod hb:enrich-lookup-issue ((issue hb:page-lookup-issue))
+  (let ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue))
+        (page-id (hb:lookup-issue-expected-page-id-of issue)))
+    (cond
+      ((null target-hyperbook-id)
+       issue)
+      ((string= target-hyperbook-id "topics")
+       (setf (hb:lookup-issue-target-kind-of issue) :hyperdoc-topic-page
+             (hb:lookup-issue-classification-of issue) :missing-hyperdoc-topic-page
+             (hb:lookup-issue-suggested-repair-of issue)
+             :scaffold-hyperdoc-topic
+             (hb:lookup-issue-repair-description-of issue)
+             "Scaffold the missing HyperDoc topic constructor and its durable page before adding downstream twins."
+             (hb::lookup-issue-repair-thunk-of issue)
+             (lambda ()
+               (plan-hyperdoc-authoring-scaffold target-hyperbook-id page-id)))
+       issue)
+      ((uiop:string-prefix-p "fedwiki:" target-hyperbook-id)
+       (classify-fedwiki-page-lookup-issue! issue))
+      (t
+       (setf (hb:lookup-issue-target-kind-of issue) :hyperdoc-page
+             (hb:lookup-issue-classification-of issue) :missing-hyperdoc-page
+             (hb:lookup-issue-suggested-repair-of issue)
+             :scaffold-hyperdoc-page
+             (hb:lookup-issue-repair-description-of issue)
+             "Scaffold the missing HyperDoc page from the repair flow, then add durable content deliberately."
+             (hb::lookup-issue-repair-thunk-of issue)
+             (lambda ()
+               (plan-hyperdoc-authoring-scaffold target-hyperbook-id page-id)))
+       issue))))
+
+(defmethod hb:lookup-issues-of ((page html-page))
+  (let ((issues (copy-list (counterpart-section-issues-of page))))
+    (dolist (link (or (-> page hb:links-of hb:page-links-of) '()))
+      (let ((result (-> link hb:thunk-of views:eval-thunk)))
+        (when (typep result 'hb:lookup-failure)
+          (push
+           (hb:enrich-lookup-issue
+            (hb:make-page-lookup-issue
+             result
+             :source-object page
+             :source-hyperbook (hb:source-hyperbook-of link)
+             :source-page-id (hb:source-page-of link)
+             :source-page-title (title-of page)
+             :source-section (hb:source-section-of link)
+             :link-text (hb:link-text-of link)
+             :target-hyperbook-id (hb:target-hyperbook-of link)
+             :expected-page-id (hb:target-page-of link)
+             :link link
+             :classification :lookup-failure
+             :details (list :condition-type (type-of result))))
+           issues))))
+    (remove-duplicates issues
+                       :test #'equal
+                       :key #'hb:lookup-issue-signature)))
 
 ;;
 ;; Render HTML pages

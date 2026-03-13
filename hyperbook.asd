@@ -41,6 +41,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "links")
+                             (:file "lookup-failures")
                              (:file "link-views")
                              (:file "link-redirection")
                              (:file "explorer")

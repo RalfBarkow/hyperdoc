@@ -6,7 +6,9 @@
 
 (in-package :hyperbook)
 
-(export '(link source-page-of target-hyperbook-of target-page-of key-of
+(export '(link source-page-of source-hyperbook-of key-of
+          link-text-of source-section-of
+          target-hyperbook-of target-page-of
           object-link thunk-of view-of
           page-link
           hyperbook-link
@@ -17,10 +19,33 @@
           links web-links-of page-links-of hyperbook-links-of
           no-links?
           extract-links
+          lookup-issue page-lookup-issue target-grouping-issue
+          make-page-lookup-issue make-target-grouping-issue
+          lookup-issue-source-page-title-of
+          lookup-issue-source-page-id-of
+          lookup-issue-source-section-of
+          lookup-issue-link-text-of
+          lookup-issue-expected-page-id-of
+          lookup-issue-target-hyperbook-id-of
+          lookup-issue-target-site-of
+          lookup-issue-target-kind-of
+          lookup-issue-classification-of
+          lookup-issue-status-of
+          lookup-issue-suggested-repair-of
+          lookup-issue-repair-description-of
+          lookup-issue-details-of
+          lookup-issue-underlying-condition-of
+          lookup-issue-link-of
+          lookup-issue-source-object-of
+          lookup-issue-signature
+          mark-lookup-issue!
+          enrich-lookup-issue
+          lookup-issues-of
           replace-by-hyperbook-link
           render-hyperbook-or-page-link
           👀links
           👀backlinks
+          👀lookup-issues
           dom-of
           html-nodes
           render-node

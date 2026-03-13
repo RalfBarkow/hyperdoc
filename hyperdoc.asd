@@ -113,6 +113,7 @@
   :depends-on (#:hyperdoc
                #:hyperdoc/inspector
                #:hyperbook/explorer
+               #:hyperbook/fedwiki
                #:html-inspector-views
                #:html-inspector-views/standard
                #:cl-who
@@ -132,6 +133,7 @@
                              (:file "explorer")
                              (:file "packages")
                              (:file "parse-expr")
+                             (:file "lookup-repairs")
                              (:file "html-pages")
                              (:file "markdown-pages")
                              (:file "code-pages")
