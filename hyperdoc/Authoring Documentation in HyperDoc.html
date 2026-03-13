@@ -144,6 +144,21 @@
   <li>When validating the generated slice, run load/topic/coverage gates in the HyperDoc repo and <tt>json.tool</tt> plus journal checks only on the actual changed FedWiki page files.</li>
 </ul>
 
+<h2>Lookup failures and counterpart scope</h2>
+
+<p>
+  Treat a HyperBook lookup failure as a classified boundary problem, not as a
+  generic missing-page message. A failed link can mean a missing HyperDoc
+  page, a missing topic page, a missing local FedWiki twin, a remote
+  publication/resolution problem, or a misleading target label.
+</p>
+
+<ul>
+  <li>When a FedWiki page exists in the local <tt>pages</tt> repo but <tt>fedwiki:wiki.ralfbarkow.ch</tt> still cannot resolve it, classify that as a publication/resolution boundary problem and inspect a publication probe before recreating content.</li>
+  <li>When the missing target is a real HyperDoc page or topic gap, route the issue into a scaffold plan instead of flattening it into the same repair path as a FedWiki publication miss.</li>
+  <li>FedWiki counterpart sections must describe their site scope truthfully. Do not label a section <tt>Localhost FedWiki twin(s)</tt> when the rendered targets are mixed or point at a named remote site; use a neutral heading such as <tt>FedWiki counterparts</tt> and label entries with their actual site.</li>
+</ul>
+
 <h2>Failure modes and drift risks</h2>
 
 <ul>
