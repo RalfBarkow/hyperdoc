@@ -120,6 +120,29 @@
   <li><b>Helper command:</b> <tt>tools/validate-documentation-slice.sh --page ... --topic ... --fedwiki ...</tt></li>
 </ul>
 
+<h2>Article allegation slices</h2>
+
+<p>
+  Use <tt>tools/article-allegation-slice.lisp</tt> when a documentation slice
+  is driven primarily by article text, news reporting, or another source whose
+  concrete claims should remain allegation-qualified unless stronger source
+  metadata is supplied. The helper scaffolds one incident hub, a reusable set
+  of concept pages, topic constructors, FedWiki twins, and an optional daily
+  anchor without silently upgrading reported claims into settled repository
+  fact.
+</p>
+
+<ul>
+  <li>Keep repo boundaries explicit: HyperDoc pages and <tt>topics.lisp</tt> stay in the <tt>hyperdoc</tt> repo on <tt>hauptsache</tt>; FedWiki twins and daily anchors stay in the <tt>pages</tt> repo on <tt>localhost</tt>.</li>
+  <li>Prefer the compact spec shape: slice id, mode, incident title, source label, epistemic status, summary, incident section list, concept list with topic handles, anchor date, and safeguard flags.</li>
+  <li>Use <tt>--print-plan</tt> to inspect the derived page titles, topic handles, FedWiki slugs, and daily-anchor target before any dry-run or live write.</li>
+  <li>Use the helper for incident pages that need sections such as claimed sequence, reported attribution, investigative or forensic claims, accountability questions, open uncertainties, and related concepts.</li>
+  <li>Generate topic constructors only for reusable concepts, not for every transient incident phrase.</li>
+  <li>Preserve distinctions such as precise weapon versus correct target, public attribution versus forensic attribution, and AI-assisted review versus human accountability.</li>
+  <li>Keep the emitted <tt>slice-metadata.lisp</tt> file with dry-run bundles so slices remain reconstructible as units rather than only as loose output files; it records the slice id, derived page titles, topic handles, FedWiki slugs, and anchor target.</li>
+  <li>When validating the generated slice, run load/topic/coverage gates in the HyperDoc repo and <tt>json.tool</tt> plus journal checks only on the actual changed FedWiki page files.</li>
+</ul>
+
 <h2>Failure modes and drift risks</h2>
 
 <ul>

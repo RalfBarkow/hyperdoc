@@ -32,6 +32,60 @@ nix develop --command sbcl --no-userinit --non-interactive \
 
 When explicit page paths are provided, only those pages are checked.
 
+## Article Allegation Slice Helper
+
+Use `tools/article-allegation-slice.lisp` to scaffold an article-driven,
+allegation-qualified documentation slice from a structured Lisp input file.
+The committed example input lives at
+`tools/testdata/article-allegation-slice/minab-example.lisp`, and the helper
+accepts a compact spec built around `:slice-id`, `:mode`,
+`:incident-title`, `:source-label`, `:epistemic-status`, `:summary`,
+`:incident-sections`, concept `:topic-handle`s, and `:anchor-date`. You can
+audit the derived titles, topic handles, FedWiki slugs, and daily-anchor
+target before writing anything:
+
+```sh
+nix develop --command sbcl --script tools/article-allegation-slice.lisp \
+  --input tools/testdata/article-allegation-slice/minab-example.lisp \
+  --print-plan
+```
+
+Then refresh a deterministic dry-run bundle like this:
+
+```sh
+nix develop --command sbcl --script tools/article-allegation-slice.lisp \
+  --input tools/testdata/article-allegation-slice/minab-example.lisp \
+  --dry-run-dir tools/testdata/article-allegation-slice/minab-dry-run
+```
+
+Live writes stay branch- and repo-aware:
+
+- HyperDoc pages, `topics.lisp`, and helper code belong in the `hyperdoc` repo on branch `hauptsache`.
+- FedWiki twins and daily-anchor updates belong in `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages` on branch `localhost`.
+- The helper checks those branch expectations before `--write-live` touches real files.
+
+Epistemic safeguards are built into the scaffolder rather than left to ad hoc prose:
+
+- article-derived incident claims default to reported/alleged/disputed language;
+- responsibility is not flattened into settled fact unless the input explicitly marks stronger verification;
+- legal conclusions stay qualified unless verified legal attribution is explicitly supplied;
+- AI wording stays at the level of decision support, review acceleration, automation-bias risk, and human responsibility.
+
+Validation workflow after generation:
+
+1. Run `asdf:load-system :hyperdoc`.
+2. Verify `fboundp` for generated reusable topic constructors.
+3. Run `tools/check-topic-coverage.lisp` on the generated HyperDoc pages.
+4. Run `python3 -m json.tool` on each changed FedWiki page file.
+5. Run `tools/journal-gate.lisp` on the actual changed FedWiki pages only.
+
+The example dry-run output is committed under
+`tools/testdata/article-allegation-slice/minab-dry-run/` so the emitted page
+shape, topic snippet, FedWiki JSON, and `slice-metadata.lisp` are reviewable
+without touching live artifacts. The metadata file records the slice id,
+derived page titles, topic handles, FedWiki slugs, and daily-anchor target so
+the bundle remains reconstructible as one unit.
+
 ## License
 
 [BSD](./LICENSE)
