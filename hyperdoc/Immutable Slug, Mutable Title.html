@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Immutable Slug, Mutable Title</title>
+</head>
+<body>
+  <h1>Immutable Slug, Mutable Title</h1>
+
+  <p>
+    For a rename to become part of the journal, page identity must stop being the
+    title. A page needs a stable, immutable key that survives display-name
+    changes. As long as lookup is keyed by the current heading or by a slug that
+    is derived from that heading, a rename is not a state transition inside the
+    page history. It is an identity break.
+  </p>
+
+  <p>
+    The title must instead become mutable page state. In that model, the journal
+    does not merely record edits to page content. It also records changes to page
+    metadata such as the visible title. Replaying the journal should reconstruct
+    not only the current story but also the current title and other
+    lookup-relevant metadata.
+  </p>
+
+  <p>
+    That in turn requires an explicit journal action for renaming. Whether it is
+    called <tt>rename-page</tt>, <tt>set-title</tt>, or <tt>retitle</tt>, the action
+    must have clear semantics: the stable page key remains unchanged, the title is
+    updated, and any optional alias or redirect metadata is updated in a defined
+    way. The replay engine and journal checker must both understand this action.
+  </p>
+
+  <p>
+    Links must also target stable identity rather than mutable labels. If links
+    continue to resolve by title, then every rename will still behave like a
+    missing-page event. The durable target should be an immutable page key, while
+    the title remains display metadata. Older references can still work if the
+    system stores replayable aliases or redirects as part of the page state.
+  </p>
+
+  <p>
+    Finally, the authoritative writable surface must actually be journal-backed.
+    If the real source of truth is still an authored file whose first heading
+    determines page identity at load time, then a rename remains a file-level or
+    loader-level event rather than a journaled one. In that setup, a journal can
+    at best describe a downstream mirror. It cannot be the primary record of the
+    rename.
+  </p>
+
+  <h4>What must be true</h4>
+
+  <ul>
+    <li>a stable, immutable page key exists</li>
+    <li>the title is mutable metadata, not page identity</li>
+    <li>the journal has an explicit rename action</li>
+    <li>replay and checking understand that rename action</li>
+    <li>links resolve by stable identity, not by title</li>
+    <li>optional aliases or redirects are part of replayable state</li>
+    <li>the authoritative page store is actually journal-backed</li>
+  </ul>
+
+  <p>
+    For the FedWiki side, the cleanest formulation is exactly this page title:
+    immutable slug, mutable title. If the slug is durable and the title is
+    journaled metadata, then a rename stops being a path migration and becomes a
+    bounded, replayable history event.
+  </p>
+</body>
+</html>

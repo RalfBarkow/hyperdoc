@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Association Topics for Stable Identity and Mutable Titles</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+    code, tt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    h1, h2, h3 { line-height: 1.2; }
+    .note { padding: 0.8rem 1rem; background: #f6f8fa; border-left: 4px solid #999; }
+  </style>
+</head>
+<body>
+<h1>Association Topics for Stable Identity and Mutable Titles</h1>
+
+<p>
+  This specification defines how immutable slugs or stable keys and mutable titles
+  can be represented in a DMX-style topic-map model in which associations are also
+  first-class topics. The goal is to preserve subject identity while allowing
+  names, titles, and role bindings to change over time without turning every rename
+  into a deletion-and-recreation event.
+</p>
+
+<h2>1. Problem</h2>
+
+<p>
+  A title change should not imply that the underlying subject has ceased to exist.
+  In current title-keyed page systems, a rename changes the lookup target and
+  therefore breaks inbound links. The desired model is stronger: the subject keeps
+  one stable identity, while one or more mutable naming or presentation relations
+  can be revised, journaled, and undone.
+</p>
+
+<p>
+  In topic-map terms, this means the system must not reduce identity to a current
+  label string. The stable reference point must remain constant across different
+  names, pages, views, and times.
+</p>
+
+<h2>2. Core modeling rule</h2>
+
+<p>
+  Everything important in this model is a topic, including the relation between a
+  stable identity and a mutable title.
+</p>
+
+<ul>
+  <li>The durable subject is a <b>topic</b>.</li>
+  <li>A title or name is also a <b>topic</b> when it needs independent addressability, history, or reuse.</li>
+  <li>The relation between them is an <b>association topic</b>, not a hidden field.</li>
+</ul>
+
+<p>
+  This makes title-bearing relations inspectable, nameable, versionable, and
+  further relatable. It also avoids collapsing identity into whichever string
+  happens to be displayed today.
+</p>
+
+<h2>3. Association-topic pattern</h2>
+
+<p>
+  The relevant association topic type is a relation between a subject with stable
+  identity and a title-like representation that may change over time.
+</p>
+
+<h3>3.1 Mandatory participants</h3>
+
+<ul>
+  <li><b>Association topic</b>: the first-class topic representing the identity/title relation.</li>
+  <li><b>Stable subject topic</b>: the enduring subject, identified by immutable slug or stable key.</li>
+  <li><b>Title topic</b>: the current or historical title representation.</li>
+</ul>
+
+<h3>3.2 Player roles</h3>
+
+<p>
+  In DMX terms, the stable subject topic and title topic occupy player roles in the
+  association topic. The exact side assignment is a policy choice; the important
+  invariant is that the role semantics are explicit and stable.
+</p>
+
+<ul>
+  <li><tt>player1</tt> may be defined as <tt>identified-subject</tt>.</li>
+  <li><tt>player2</tt> may be defined as <tt>presented-title</tt>.</li>
+</ul>
+
+<p>
+  Or the system may invert them. What must not vary is the meaning of each role
+  within a given association type. A reader or tool should never need to infer role
+  semantics from accidental position alone.
+</p>
+
+<div class="note">
+  <p>
+    Recommended convention: use <tt>player1 = stable subject</tt> and
+    <tt>player2 = mutable title</tt>. That keeps the durable thing on the first
+    side and the revisable representation on the second side.
+  </p>
+</div>
+
+<h3>3.3 Identity invariants</h3>
+
+<ul>
+  <li>The stable subject topic keeps one immutable slug or stable key for its entire lifetime.</li>
+  <li>The association topic also has its own stable identity.</li>
+  <li>The title topic may be replaced, superseded, or historical without changing the stable subject topic.</li>
+  <li>A title change is modeled as a change in the association state, not as replacement of the subject.</li>
+</ul>
+
+<h2>4. Why the association itself must be a topic</h2>
+
+<p>
+  Treating the relation as a first-class topic makes it possible to attach its own
+  metadata and lifecycle. Examples include:
+</p>
+
+<ul>
+  <li>valid-from / valid-to</li>
+  <li>preferred / deprecated / historical status</li>
+  <li>editorial rationale</li>
+  <li>source of authority</li>
+  <li>migration notes</li>
+  <li>undo / redo lineage</li>
+</ul>
+
+<p>
+  Without a first-class association topic, these become awkward hidden fields on
+  either the subject or the title, and the system loses the ability to talk about
+  the relation itself as a subject of inspection and repair.
+</p>
+
+<h2>5. Minimum object model</h2>
+
+<pre><code>StableSubjectTopic
+  - stable_key            ; immutable slug / durable identity
+  - current_status
+  - occurrences
+  - associations
+
+TitleTopic
+  - text
+  - language
+  - status                ; candidate / current / deprecated / historical
+  - occurrences
+
+IdentityTitleAssociationTopic
+  - association_id        ; stable identity of the relation itself
+  - association_type      ; e.g. subject-has-title
+  - player1               ; stable subject topic
+  - player2               ; title topic
+  - role1_type            ; identified-subject
+  - role2_type            ; presented-title
+  - status                ; active / superseded / historical
+  - valid_from
+  - valid_to
+  - journal_ref
+  - predecessor
+  - successor</code></pre>
+
+<h2>6. Interpretation rule</h2>
+
+<p>
+  A system view that needs a current display title for a subject must resolve it by
+  following the active identity/title association, not by assuming that the stable
+  key and current title are the same string.
+</p>
+
+<ul>
+  <li>Lookup by identity uses the stable subject key.</li>
+  <li>Presentation uses the current active title association.</li>
+  <li>Historical inspection may show older title associations.</li>
+</ul>
+
+<h2>7. Rename semantics</h2>
+
+<p>
+  A rename is defined as a bounded update to the title side of the identity/title
+  association. It does not replace the stable subject topic.
+</p>
+
+<p>
+  There are two valid implementation styles:
+</p>
+
+<ol>
+  <li><b>Retitle in place</b>: keep the same association topic and update its <tt>player2</tt> binding to a new title topic.</li>
+  <li><b>Supersede by new association</b>: close the old association and create a new active association topic with the same stable subject topic and a new title topic.</li>
+</ol>
+
+<p>
+  The second style is preferred when full historical traceability matters, because
+  the old and new title relations remain separately inspectable.
+</p>
+
+<h2>8. Consequences for page systems</h2>
+
+<p>
+  A page-like system that renders a subject should not use the visible title as its
+  sole durable lookup key. Instead:
+</p>
+
+<ul>
+  <li>URLs, slugs, and durable lookups should follow the stable subject key.</li>
+  <li>Visible headings should come from the current active title association.</li>
+  <li>Old titles should remain inspectable as historical title topics or historical associations.</li>
+</ul>
+
+<p>
+  This prevents a rename from becoming a path migration by default. Path migration
+  becomes optional, not mandatory.
+</p>
+
+<h2>9. Required guarantees</h2>
+
+<ul>
+  <li>One stable key identifies the enduring subject.</li>
+  <li>Role semantics for <tt>player1</tt> and <tt>player2</tt> are explicit per association type.</li>
+  <li>The association topic is itself addressable and inspectable.</li>
+  <li>Title changes are recorded as changes to association state, not destruction of the subject.</li>
+  <li>Historical title relations remain available for audit and repair.</li>
+</ul>
+
+<h2>10. Recommended naming policy</h2>
+
+<p>
+  Use the phrase <b>immutable slug, mutable title</b> only as a surface summary.
+  The deeper model is:</p>
+
+<ul>
+  <li><b>stable subject identity</b></li>
+  <li><b>journaled presentation relations</b></li>
+  <li><b>association topics with explicit player roles</b></li>
+</ul>
+
+<p>
+  That formulation scales beyond page titles to aliases, external names,
+  multilingual labels, and later representation forms.
+</p>
+</body>
+</html>

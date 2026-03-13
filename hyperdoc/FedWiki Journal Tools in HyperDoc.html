@@ -1,0 +1,66 @@
+<h1>FedWiki Journal Tools in HyperDoc</h1>
+
+<p>
+  This page is about tools for working with Federated Wiki page journals as they
+  are documented and inspected in HyperDoc. The concrete journal model belongs
+  to FedWiki pages: page content is accompanied by a journal of actions that can
+  be replayed, checked, repaired, and compacted.
+</p>
+
+<p>
+  In this repo, the immediate reference surface is the local plugin repository
+  <tt>~/workspace/wiki-plugin-journalmatic</tt>. That plugin provides a concrete
+  set of tools for scanning, replaying, and repairing Federated Wiki journals.
+  HyperDoc provides the documentation and inspection surface for those tools. A
+  more general journal-aware HyperBook abstraction may be possible later, but
+  that is not the subject of this page.
+</p>
+
+<h4>Why this matters</h4>
+
+<p>
+  Many hard failures in localhost or forked FedWiki pages are not content
+  problems. They are journal problems: malformed actions, missing creation
+  steps, chronology drift, or journals that no longer replay to the current page
+  state.
+</p>
+
+<p>
+  For writable FedWiki pages, a journal checker is therefore not merely an
+  optional maintenance script. It is part of the operational tool surface needed
+  to inspect, validate, and repair page history.
+</p>
+
+<h4>One idea at a time</h4>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Journal Object Extensions">Journal Object Extensions</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Plugin">Journalmatic Plugin</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
+</ul>
+
+<h4>Scope</h4>
+
+<p>
+  These pages describe FedWiki journal operations and point to executable Lisp
+  implementations where relevant. The gate logic has a concrete Lisp
+  implementation surface in
+  <a page="Journal Gate Script and Lisp Implementation">Journal Gate Script and Lisp Implementation</a>,
+  and can be inspected through HyperDoc source-of-function views.
+</p>
+
+<p>
+  Date generation policy follows wiki-client style epoch-millis with monotonic
+  increment from the last journal action date. This avoids hardcoded timestamps
+  that can break chronology after local editing or remote forks.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+</ul>

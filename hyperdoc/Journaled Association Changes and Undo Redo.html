@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Journaled Association Changes and Undo Redo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+    code, tt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    h1, h2, h3 { line-height: 1.2; }
+    .note { padding: 0.8rem 1rem; background: #f6f8fa; border-left: 4px solid #999; }
+  </style>
+</head>
+<body>
+<h1>Journaled Association Changes and Undo Redo</h1>
+
+<p>
+  This specification defines the journal and history model for association topics
+  whose <tt>player1</tt> and <tt>player2</tt> bindings may change over time. It is
+  intended for the DMX-style case in which immutable subject identity coexists
+  with mutable titles, names, aliases, or other representations. It also defines a
+  bounded undo/redo mechanism in the style of an explicit change history rather
+  than implicit editor state.
+</p>
+
+<h2>1. Goal</h2>
+
+<p>
+  A change to <tt>player1</tt>, <tt>player2</tt>, or association metadata must be:
+</p>
+
+<ul>
+  <li>recorded as a durable event</li>
+  <li>replayable into current association state</li>
+  <li>inspectable as history</li>
+  <li>reversible through explicit undo/redo operations</li>
+  <li>safe with respect to stable subject identity</li>
+</ul>
+
+<h2>2. Journal ownership</h2>
+
+<p>
+  The journal belongs to the association topic, not only to the rendered page that
+  happens to show it. A page may be one occurrence or one editable surface, but the
+  history must attach to the first-class association subject itself.
+</p>
+
+<h2>3. Event model</h2>
+
+<p>
+  The journal is an ordered log of association events. Each event has a durable id,
+  timestamp, author or agent, target association id, and event payload.
+</p>
+
+<h3>3.1 Required event types</h3>
+
+<ul>
+  <li><tt>create-association</tt></li>
+  <li><tt>set-player1</tt></li>
+  <li><tt>set-player2</tt></li>
+  <li><tt>set-role1-type</tt></li>
+  <li><tt>set-role2-type</tt></li>
+  <li><tt>set-status</tt></li>
+  <li><tt>supersede-association</tt></li>
+  <li><tt>undo-event</tt></li>
+  <li><tt>redo-event</tt></li>
+</ul>
+
+<p>
+  Additional metadata events may exist, but a minimal viable system needs at least
+  the ability to create an association, change either player binding, and record
+  undo/redo.
+</p>
+
+<h3>3.2 Event payload requirements</h3>
+
+<pre><code>JournalEvent
+  - event_id
+  - association_id
+  - event_type
+  - timestamp
+  - author
+  - previous_revision
+  - payload
+  - inverse_of           ; optional, used for undo/redo linkage
+  - supersedes           ; optional
+  - note                 ; optional rationale</code></pre>
+
+<h2>4. State reconstruction</h2>
+
+<p>
+  Current association state is obtained by replaying journal events in order,
+  starting from <tt>create-association</tt>. Replay must be deterministic.
+</p>
+
+<ul>
+  <li>If an event is undone, replay must ignore its forward effect and apply the undo event semantics.</li>
+  <li>If a later redo exists for that event, replay must reapply the intended forward effect.</li>
+  <li>At any point, the active state must be derivable without consulting hidden mutable fields.</li>
+</ul>
+
+<h2>5. Versioning policy</h2>
+
+<p>
+  Changes to <tt>player1</tt> or <tt>player2</tt> are not silent field mutation.
+  They create a new association revision. The system may materialize revisions as a
+  revision number, as snapshots derived from the journal, or both.
+</p>
+
+<p>
+  The important invariant is that the historical sequence of role bindings remains
+  inspectable.
+</p>
+
+<h3>5.1 Change classes</h3>
+
+<ul>
+  <li><b>Binding change:</b> <tt>player1</tt> or <tt>player2</tt> points to a different topic.</li>
+  <li><b>Role-meaning change:</b> the role type labels attached to <tt>player1</tt> or <tt>player2</tt> change.</li>
+  <li><b>Status change:</b> active, superseded, historical, draft, deprecated.</li>
+  <li><b>Supersession:</b> a successor association replaces the current active one.</li>
+</ul>
+
+<h2>6. Undo / redo semantics</h2>
+
+<p>
+  Undo and redo are explicit journal events, not hidden UI stack tricks. That
+  means they are themselves inspectable, serializable, and replayable.
+</p>
+
+<h3>6.1 Undo</h3>
+
+<p>
+  An <tt>undo-event</tt> names the target event being undone. The system computes
+  or stores the inverse effect of that target event.
+</p>
+
+<ul>
+  <li>Undoing <tt>set-player2</tt> restores the previous <tt>player2</tt> binding.</li>
+  <li>Undoing <tt>set-player1</tt> restores the previous <tt>player1</tt> binding.</li>
+  <li>Undoing <tt>set-status</tt> restores the previous status.</li>
+  <li>Undoing <tt>supersede-association</tt> reactivates the superseded association only if no conflicting later state prevents it.</li>
+</ul>
+
+<h3>6.2 Redo</h3>
+
+<p>
+  A <tt>redo-event</tt> reapplies a previously undone event. It must point to the
+  specific <tt>undo-event</tt> or original event that it reactivates.
+</p>
+
+<h3>6.3 Branch policy</h3>
+
+<p>
+  The system should choose one of two policies and make it explicit:
+</p>
+
+<ol>
+  <li><b>Linear history policy</b>: after undo, a new forward edit invalidates the redo chain beyond the current point.</li>
+  <li><b>Branching history policy</b>: after undo, a new forward edit creates a new branch while preserving the old redo lineage for inspection.</li>
+</ol>
+
+<p>
+  Recommended policy for topic/association systems: <b>branching history</b>. It
+  is more honest about graph-shaped editorial evolution and aligns better with a
+  first-class history object model.
+</p>
+
+<h2>7. Safety constraints</h2>
+
+<ul>
+  <li>The stable subject topic key must never be altered by undo/redo of title-side relations.</li>
+  <li>An undo that would orphan the association or violate required role cardinality must be rejected or require explicit repair.</li>
+  <li>Replay must detect contradictory event order or missing predecessor state.</li>
+  <li>Role semantics must remain consistent for the association type across revisions.</li>
+</ul>
+
+<h2>8. Recommended rename workflow</h2>
+
+<p>
+  For the common rename case, where the stable subject remains the same and the
+  title changes:
+</p>
+
+<ol>
+  <li>Keep the stable subject topic unchanged.</li>
+  <li>Create a new title topic or identify an existing title topic.</li>
+  <li>Record <tt>set-player2</tt> or create a successor association revision.</li>
+  <li>Mark the old title relation historical or superseded.</li>
+  <li>Update presentation layers to resolve current display title from the active association.</li>
+  <li>Keep journal history available for inspection and possible undo.</li>
+</ol>
+
+<h2>9. Minimum inspection surfaces</h2>
+
+<p>
+  Any inspector or editor for this model should expose at least the following:
+</p>
+
+<ul>
+  <li>current association state</li>
+  <li>journal event list</li>
+  <li>revision lineage</li>
+  <li>active player1 and player2 bindings</li>
+  <li>undoable events from the current head</li>
+  <li>redoable events from the current head or branch</li>
+</ul>
+
+<h2>10. Example</h2>
+
+<pre><code>Association A42
+  type: subject-has-title
+  player1: Topic S10   ; stable subject key = hyperdoc-runtime-model
+  player2: Topic T17   ; "HyperDoc runtime model"
+
+Event 1: create-association A42
+Event 2: set-player2 A42 -> T18   ; "HyperDoc runtime vocabulary model"
+Event 3: undo-event Event 2
+Event 4: redo-event Event 2</code></pre>
+
+<p>
+  The enduring subject is still <tt>S10</tt>. Only the title-side association state
+  changes. Undo and redo do not delete the subject; they only traverse explicit
+  history of the representation relation.
+</p>
+
+<h2>11. Resulting architectural rule</h2>
+
+<p>
+  Stable identity is held by the subject topic. Mutable representation is held by
+  one or more first-class association topics. Change history belongs to those
+  associations and is captured in a replayable journal with explicit undo/redo
+  events.
+</p>
+</body>
+</html>
