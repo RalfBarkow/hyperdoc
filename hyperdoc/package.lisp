@@ -37,6 +37,11 @@
            #:read-article-allegation-slice-input
            #:render-article-allegation-slice-bundle
            #:write-article-allegation-slice-bundle
+           ;; FedWiki page materialization
+           #:plan-fedwiki-page-materialization
+           #:plan-fedwiki-slice-materialization
+           #:print-fedwiki-materialization-plan
+           #:materialize-fedwiki-materialization-plan
            ;; Access to the global catalog of registered HyperDocs
            #:*catalog* #:hyperdocs-of
            ;; Access to HyperDoc data

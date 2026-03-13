@@ -1106,7 +1106,7 @@
          (hyperdoc-branch (article-allegation-git-branch
                            (getf input :hyperdoc-repo-root)))
          (fedwiki-branch (article-allegation-git-branch
-                          (getf input :fedwiki-repo-root))))
+                          (getf input :fedwiki-pages-directory))))
     (unless (string= hyperdoc-branch (getf input :expected-hyperdoc-branch))
       (error "HyperDoc repo branch mismatch: expected ~S, got ~S"
              (getf input :expected-hyperdoc-branch)

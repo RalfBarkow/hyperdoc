@@ -29,6 +29,7 @@
                              (:file "example-core")
                              (:file "journal-gate")
                              (:file "article-allegation-slice")
+                             (:file "fedwiki-materialization")
                              (:file "tools")
                              (:file "hyperdoc")))))
 
@@ -95,6 +96,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "dmx-topics")
+                             (:file "fedwiki-materialization")
                              (:file "playground-debug")
                              (:file "web-debugger")
                              (:file "playground-eval")
@@ -175,6 +177,7 @@
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "article-allegation-slice-smoke")
+                             (:file "fedwiki-materialization-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")
