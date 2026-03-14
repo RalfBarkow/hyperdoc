@@ -1,0 +1,124 @@
+<h1>Generate repo-native HyperDoc HTML</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page describes how to generate repo-native HyperDoc HTML instead of a
+  generic standalone web page.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Topic Title Changes and Canonical Link Maintenance"><tt>Topic Title Changes and Canonical Link Maintenance</tt></a></li>
+</ul>
+
+<h2>What makes the HTML repo-native</h2>
+
+<p>
+  In this repository, a HyperDoc page is an authored HTML page inside the
+  HyperDoc corpus. The page id is derived from the page title, so the title
+  must be explicit and stable.
+</p>
+
+<p>
+  Use a first-level heading as the page title and keep that title aligned with
+  the intended page identity:
+</p>
+
+<pre>&lt;h1&gt;Generate repo-native HyperDoc HTML&lt;/h1&gt;</pre>
+
+<p>
+  Add the package declaration used by authored HyperDoc pages:
+</p>
+
+<pre>&lt;in-package&gt;hyperdoc&lt;/in-package&gt;</pre>
+
+<p>
+  Keep the document structurally plain. Do not add an embedded
+  <tt>&lt;style&gt;</tt> block unless styling is explicitly required.
+</p>
+
+<h2>How to link inside HyperDoc</h2>
+
+<p>
+  Prefer authored HyperBook links over ad hoc relative URLs. For links to other
+  HyperDoc pages, use the HyperBook/page form:
+</p>
+
+<pre>&lt;a hyperbook=&quot;hyperdoc&quot; page=&quot;Exact Page Title&quot;&gt;Visible text&lt;/a&gt;</pre>
+
+<p>
+  For topic pages, use the <tt>topics</tt> HyperBook and the exact topic page
+  title:
+</p>
+
+<pre>&lt;a hyperbook=&quot;topics&quot; page=&quot;Exact Topic Title&quot;&gt;Visible text&lt;/a&gt;</pre>
+
+<p>
+  When the page refers to runtime objects such as ASDF systems, Lisp functions,
+  or Lisp classes, use the corresponding HyperBook surface rather than faking a
+  static local page.
+</p>
+
+<h2>Recommended authored structure</h2>
+
+<p>
+  A repo-native HyperDoc page is usually easiest to navigate when it follows a
+  small authored pattern:
+</p>
+
+<ul>
+  <li>page title in <tt>&lt;h1&gt;</tt></li>
+  <li><tt>&lt;in-package&gt;hyperdoc&lt;/in-package&gt;</tt></li>
+  <li>one short opening paragraph stating the page purpose</li>
+  <li>an <tt>Inspectable objects</tt> section with direct HyperBook links</li>
+  <li>one or more explanatory sections with narrow headings</li>
+</ul>
+
+<h2>How to write the content</h2>
+
+<p>
+  Write the page as repository documentation, not as a self-contained public
+  website. That means keeping the prose tightly scoped, using exact page titles
+  in links, and leaning on existing HyperBook navigation surfaces instead of
+  standalone web-navigation conventions.
+</p>
+
+<p>
+  When describing a maintenance or authoring procedure, prefer concrete rules,
+  exact markup shapes, and explicit target titles over broad generic advice.
+</p>
+
+<h2>Minimal template</h2>
+
+<pre>
+&lt;h1&gt;Page Title&lt;/h1&gt;
+
+&lt;in-package&gt;hyperdoc&lt;/in-package&gt;
+
+&lt;p&gt;
+  One-sentence statement of the page purpose.
+&lt;/p&gt;
+
+&lt;h2&gt;Inspectable objects&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;hyperdoc&quot; page=&quot;Exact Page Title&quot;&gt;&lt;tt&gt;Exact Page Title&lt;/tt&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Main section&lt;/h2&gt;
+
+&lt;p&gt;
+  Narrow explanatory prose.
+&lt;/p&gt;
+</pre>
+
+<h2>Rule of thumb</h2>
+
+<p>
+  Generate authored HTML that fits naturally into the existing HyperDoc
+  corpus: title-driven page identity, package declaration, HyperBook links,
+  plain structure, and no ornamental standalone-page styling.
+</p>
