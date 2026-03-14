@@ -1,0 +1,147 @@
+<h1>HyperDoc and HyperBook</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page explains the difference between <a hyperbook="hyperdoc" page="HyperBooks"><tt>HyperBooks</tt></a>
+  and HyperDoc in the terms used by this repository.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="HyperBooks"><tt>HyperBooks</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="HyperDoc Runtime Model"><tt>HyperDoc Runtime Model</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Authoring Documentation in HyperDoc"><tt>Authoring Documentation in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="HyperCard and HyperDoc"><tt>HyperCard and HyperDoc</tt></a></li>
+</ul>
+
+<h2>Short answer</h2>
+
+<p>
+  A HyperBook is the general framework: a collection of interlinked pages with a
+  unique HyperBook id and page ids that are unique inside that HyperBook.
+  HyperDoc is one specific kind of HyperBook used for this repository's
+  documentation work.
+</p>
+
+<p>
+  The simplest way to say it is:
+</p>
+
+<ul>
+  <li>HyperBook is the abstraction.</li>
+  <li>HyperDoc is a concrete documentation-oriented realization of that abstraction.</li>
+</ul>
+
+<h2>What a HyperBook is</h2>
+
+<p>
+  In the core HyperBook model, each HyperBook has a unique id and each page in
+  that HyperBook also has a unique id. Links can point to pages in the same
+  HyperBook or to pages in other HyperBooks, and the catalog ties those books
+  together for cross-book navigation and backlink-style discovery.
+</p>
+
+<p>
+  That means HyperBook is not tied to one storage format, one authoring style,
+  or one subject domain. It is the common model underneath many possible page
+  collections.
+</p>
+
+<h2>What HyperDoc is</h2>
+
+<p>
+  HyperDoc is a HyperBook whose authored pages live in the HyperDoc corpus and
+  carry stronger documentation conventions. In the repository's own summary:
+  HyperDoc uses page titles as page ids. That is the key simplification that
+  makes authored documentation pages easy to write and link.
+</p>
+
+<p>
+  HyperDoc pages are durable architecture and guidance pages written in
+  <tt>hyperdoc/*.html</tt> or <tt>hyperdoc/*.md</tt>. Markdown pages are converted
+  to HTML and then processed like HTML pages. Authored pages can use HyperDoc's
+  custom tags and link forms.
+</p>
+
+<h2>What HyperDoc adds beyond the generic HyperBook model</h2>
+
+<p>
+  HyperDoc is not just "a bunch of pages". It adds several surface distinctions
+  on top of the generic HyperBook mechanism.
+</p>
+
+<ul>
+  <li>Durable authored pages carry narrative explanation and operational guidance.</li>
+  <li>Topic objects in <tt>topics.lisp</tt> provide stable inspectable concept identities.</li>
+  <li>Inspectable runtime objects can be linked from pages without pretending they are the same thing as durable pages.</li>
+  <li>Parallel FedWiki twins can correspond to HyperDoc material without being literal HTML copies.</li>
+</ul>
+
+<p>
+  So HyperDoc uses the HyperBook mechanism, but it also defines editorial and
+  runtime disciplines for how documentation, topic identity, and inspectable
+  objects relate to one another.
+</p>
+
+<h2>Page versus topic versus runtime object</h2>
+
+<p>
+  One source of confusion is that HyperDoc contains more than one kind of thing.
+</p>
+
+<p>
+  A HyperDoc page is an authored narrative surface. A topic object is a stable
+  semantic handle exposed through the separate <tt>topics</tt> HyperBook.
+  A runtime object is an inspectable live object reached through a suitable
+  runtime link surface. These are intentionally related, but they are not the
+  same layer.
+</p>
+
+<p>
+  Put differently: HyperBook gives the network shape, while HyperDoc defines a
+  documentation architecture inside that network.
+</p>
+
+<h2>Why the distinction matters</h2>
+
+<p>
+  If everything were treated as just "pages", HyperDoc would lose important
+  distinctions between explanatory writing, stable topic identity, and live
+  inspectable behavior. The repository explicitly treats those as separate
+  surfaces so that navigation stays honest and contributors can see what kind of
+  artifact they are looking at.
+</p>
+
+<p>
+  This is also why HyperDoc compares well to systems such as HyperCard: not
+  because they are identical, but because the comparison clarifies HyperDoc's
+  particular strengths. HyperDoc is especially strong at inspectability,
+  cross-linking, and relating heterogeneous systems, whereas HyperBook by itself
+  only names the general page-and-link architecture.
+</p>
+
+<h2>Rule of thumb</h2>
+
+<p>
+  When you ask "is this HyperBook or HyperDoc?", use this test:
+</p>
+
+<ul>
+  <li>If you mean the abstract collection-of-pages model with ids, links, and a catalog, you mean HyperBook.</li>
+  <li>If you mean this repository's documentation system with authored pages, topic objects, inspectable runtime links, and related surfaces, you mean HyperDoc.</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="HyperBooks"><tt>HyperBooks</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="HyperDoc Runtime Model"><tt>HyperDoc Runtime Model</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Authoring Documentation in HyperDoc"><tt>Authoring Documentation in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="HyperCard and HyperDoc"><tt>HyperCard and HyperDoc</tt></a></li>
+</ul>
