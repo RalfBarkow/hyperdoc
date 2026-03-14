@@ -1,0 +1,152 @@
+<h1>What to fix in the wiki source code</h1>
+
+<p>
+  Mostly <tt>wiki-client</tt>, not <tt>wiki-server</tt>.
+</p>
+
+<p>
+  The server proxy already does the right basic transport fallback: it builds
+  remote candidates as <tt>https://...</tt> then <tt>http://...</tt>, and
+  <tt>/proxy/*</tt> uses that fallback before returning <tt>502</tt>.
+</p>
+
+<p>
+  What is broken is the client’s handling of failure.
+</p>
+
+<h2>1) Fix stale neighbor state in <tt>wiki-client/lib/neighborhood.js</tt></h2>
+
+<p>
+  Right now, when sitemap refresh fails, the code marks the neighbor as failed
+  and logs <tt>Unable to fetch sitemap for ${site}</tt>, but it does not
+  invalidate any previously cached <tt>sitemap</tt> or <tt>siteIndex</tt>.
+</p>
+
+<p>
+  Then <tt>neighborhood.search</tt> still searches any neighbor that has a
+  <tt>siteIndex</tt>. If <tt>sitemap</tt> is missing or invalid, it logs
+  <tt>+++ sitemap not valid for ...</tt>, sets <tt>neighborInfo.sitemap = []</tt>,
+  but it still searches the stale index and then tries to resolve matches back
+  through <tt>neighborInfo.sitemap.find(...)</tt>. That is how you get misleading
+  search and UI behavior after a fetch failure.
+</p>
+
+<p>
+  What to change:
+</p>
+
+<ul>
+  <li>In the sitemap fetch error path, clear the cached search state too.</li>
+  <li>Set <tt>neighborInfo.sitemap = null</tt>.</li>
+  <li>Set <tt>neighborInfo.siteIndex = null</tt>.</li>
+  <li>Set <tt>neighborInfo.lastModified = 0</tt>.</li>
+  <li>Optionally set <tt>neighborInfo.error = err</tt>.</li>
+  <li>In <tt>neighborhood.search</tt>, only search a neighbor when there is a valid sitemap.</li>
+  <li>If a search hit cannot be mapped back to a sitemap entry, drop it.</li>
+</ul>
+
+<p>
+  Minimal logic rule: <b>sitemap is authoritative, siteIndex is derivative</b>.
+  Never trust an index after sitemap fetch has failed.
+</p>
+
+<h2>2) Fix route discovery in <tt>wiki-client/lib/siteAdapter.js</tt></h2>
+
+<p>
+  The current adapter logic determines reachability and prefix by probing
+  <tt>/favicon.png</tt> with AJAX, and on failure it stores an empty prefix,
+  which later makes the whole site look unreachable.
+</p>
+
+<p>
+  That is too tightly coupled to favicon availability and browser security
+  behavior.
+</p>
+
+<p>
+  What to change:
+</p>
+
+<ul>
+  <li>Stop using <tt>/favicon.png</tt> as the authoritative probe for remote site reachability.</li>
+  <li>Probe <tt>system/sitemap.json</tt> instead.</li>
+  <li>For remote sites viewed from an HTTPS wiki, do not start with a direct cross-origin browser AJAX probe.</li>
+  <li>Go straight to the server proxy path: <tt>/proxy/${site}/system/sitemap.json</tt>.</li>
+  <li>Treat favicon as decoration only.</li>
+</ul>
+
+<p>
+  This is the core design defect behind the observed logs: the client currently
+  answers “can I talk to this wiki?” by asking “can I AJAX-fetch its favicon?”
+</p>
+
+<h2>3) Keep <tt>neighbors.js</tt> honest about failure</h2>
+
+<p>
+  <tt>formatNeighborTitle</tt> currently catches bad sitemap state and only logs
+  <tt>+++ sitemap not valid for ...</tt>. That hides a real invalid-state
+  condition behind a title-generation path.
+</p>
+
+<p>
+  What to change:
+</p>
+
+<ul>
+  <li>If a neighbor is in failed state, show that explicitly in the title text.</li>
+  <li>Do not treat missing or invalid sitemap as a normal variant of a loaded neighbor.</li>
+  <li>Consider a distinct state flag such as <tt>neighborInfo.failed = true</tt>.</li>
+</ul>
+
+<h2>4) Add tests for the actual broken state transitions</h2>
+
+<p>
+  The current neighborhood tests cover an unpopulated neighbor, but they do not
+  cover the more dangerous case where a neighbor had a valid sitemap and site
+  index, a later refresh fails, the stale index survives, and search still runs.
+</p>
+
+<p>
+  Add tests for:
+</p>
+
+<ul>
+  <li>failed sitemap refresh clears <tt>siteIndex</tt></li>
+  <li>search skips neighbors with invalid or missing sitemap even if <tt>siteIndex</tt> exists</li>
+  <li>retry after failure repopulates cleanly</li>
+  <li><tt>siteAdapter</tt> on HTTPS uses proxy-first for remote sitemap probing</li>
+  <li>favicon failure does not by itself mark a site unreachable</li>
+</ul>
+
+<h2>5) <tt>wiki-server</tt> changes are optional, not primary</h2>
+
+<p>
+  I would not make the server the first patch target here. Its proxy behavior
+  is already aligned with the intended fallback model.
+</p>
+
+<p>
+  Useful server-side improvements, but secondary:
+</p>
+
+<ul>
+  <li>better <tt>502</tt> diagnostics in logs</li>
+  <li>include which candidate URL failed</li>
+  <li>optionally include a debug header in non-production for the attempted upstream URL</li>
+</ul>
+
+<h2>Smallest high-value patch</h2>
+
+<p>
+  If you want the narrowest fix set:
+</p>
+
+<ol>
+  <li>In <tt>wiki-client/lib/neighborhood.js</tt>, invalidate cached sitemap and index on fetch failure and require a valid sitemap before search.</li>
+  <li>In <tt>wiki-client/lib/siteAdapter.js</tt>, change remote prefix discovery from favicon probe to sitemap probe, preferably proxy-first on HTTPS pages.</li>
+</ol>
+
+<p>
+  That removes the misleading <tt>sitemap not valid</tt> secondary symptom and
+  makes the client fail for the right reason instead of poisoning its own cache.
+</p>
