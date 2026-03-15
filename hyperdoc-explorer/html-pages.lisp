@@ -42,7 +42,7 @@
                           do (let ((elements (-> (dom-of page)
                                                (plump:get-elements-by-tag-name tag))))
                                (when elements
-                                 (return (-> elements first plump:text)))))
+                                 (return (-> elements first plump:text str:trim)))))
                     "Untitled"))))
 
 ;;
