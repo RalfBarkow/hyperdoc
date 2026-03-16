@@ -5,7 +5,8 @@
 (in-package :hyperdoc)
 
 (defclass tool-page (page)
-  ((package :reader package-of :initarg :package)
+  ((symbol :reader symbol-of :initarg :symbol)
+   (package :reader package-of :initarg :package)
    (parts :accessor parts-of :initform nil)))
 
 (defvar *tools* (make-hash-table :test #'eq))
@@ -17,6 +18,7 @@
 (defun make-tool (symbol id)
   (let ((tool (make-instance 'tool-page
                              :id id
+                             :symbol symbol
                              :package *package*)))
     (setf (gethash symbol *tools*) tool)
     (push (cons :html (concatenate 'string "<h1>" id "</h1>"))
@@ -26,8 +28,11 @@
 (defvar *current-tool*)
 
 (defmacro deftool (symbol title &body body)
-  `(let ((*current-tool* (make-tool ',symbol ,title)))
-     ,@body))
+  `(progn
+     (defvar ,symbol)
+     (let ((*current-tool* (make-tool ',symbol ,title)))
+       (setf ,symbol *current-tool*)
+       ,@body)))
 
 (defun html-generator* (fn)
   (assert (typep *current-tool* 'tool-page))
