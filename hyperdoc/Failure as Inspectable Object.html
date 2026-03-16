@@ -1,0 +1,256 @@
+<h1>Failure as Inspectable Object</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A HyperDoc failure should not stop at a raw condition message when the
+  condition can be turned into an inspectable object with preserved provenance,
+  classification, and recovery context.
+</p>
+
+<p>
+  This matters especially for documentation surfaces that promise a live object
+  reference, such as <tt>expr=</tt> links and
+  <tt>&lt;source-of-function&gt;...&lt;/source-of-function&gt;</tt> references. When one
+  of those references fails, the reader should be able to inspect what failed,
+  at which layer it failed, what object or symbol was expected, and what the
+  next correction step is.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="HyperDoc evaluation and inspection model"><tt>HyperDoc evaluation and inspection model</tt></a></li>
+  <li><a hyperbook="topics" page="Objectified execution evidence"><tt>Objectified execution evidence</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
+  <li><a hyperbook="topics" page="Undefined-function triage"><tt>Undefined-function triage</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF component"><tt>ASDF component</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF module serial order"><tt>ASDF module serial order</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF source registry"><tt>ASDF source registry</tt></a></li>
+  <li><a hyperbook="topics" page="SBCL process"><tt>SBCL process</tt></a></li>
+  <li><a hyperbook="topics" page="Pane run"><tt>Pane run</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector session"><tt>Inspector session</tt></a></li>
+  <li><a hyperbook="lisp-functions" page="hyperbook:make-page-lookup-issue"><tt>hyperbook:make-page-lookup-issue</tt></a></li>
+</ul>
+
+<h2>Problem</h2>
+
+<p>
+  At the moment, some failure paths still collapse to a message-only situation.
+  A representative case is a page that tries to resolve a function reference,
+  but the running image does not contain the expected definition. The visible
+  result is often only an undefined-function message, for example:
+</p>
+
+<pre>
+The function HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE is undefined.
+</pre>
+
+<p>
+  That message is real and useful, but it is too thin as a navigational surface.
+  By itself it does not preserve the triggering page reference, the intended
+  symbol, the evaluation stage, the likely cause, or the correction path.
+</p>
+
+<h2>Existing precedent: page-lookup-issue</h2>
+
+<p>
+  HyperDoc already has a concrete precedent for this design move:
+  <tt>page-lookup-issue</tt>. In the page-lookup work, a failed reference is not
+  treated as a dead string only. It is turned into a bounded inspectable object
+  that preserves source-page context, target context, classification, status,
+  repair metadata, and the underlying condition.
+</p>
+
+<p>
+  A concrete constructor anchor for that precedent is
+  <a hyperbook="lisp-functions" page="hyperbook:make-page-lookup-issue"><tt>hyperbook:make-page-lookup-issue</tt></a>.
+</p>
+
+<p>
+  That precedent is important because it shows that HyperDoc already prefers
+  structured, inspectable failure objects over flattened error text when a
+  failure belongs to a known navigation or rendering class.
+</p>
+
+<h2>Two-level precedent: issue object and underlying condition</h2>
+
+<p>
+  The strongest current precedent is not merely that HyperDoc can objectify a
+  failure. It is that HyperDoc can present the failure at two levels.
+</p>
+
+<ul>
+  <li><b>Primary level:</b> a bounded issue object for workflow, classification, and repair</li>
+  <li><b>Secondary level:</b> the underlying condition object for low-level diagnosis</li>
+</ul>
+
+<p>
+  In the <tt>page-lookup-issue</tt> case, the issue object exposes source-page
+  context, target context, classification, status, suggested repair, and repair
+  thunk. The underlying failure condition remains inspectable behind that issue.
+</p>
+
+<p>
+  The missing-function case should follow the same pattern. The first visible
+  result should be a bounded runtime-reference issue, while the underlying
+  undefined-function condition remains inspectable as a secondary object, and
+  the rendered message <tt>The function ... is undefined</tt> remains available
+  as additional condition text.
+</p>
+
+<h2>Why the object matters</h2>
+
+<p>
+  HyperDoc already distinguishes evaluation, inspection, and navigation. A raw
+  message loses that distinction at the exact moment the distinction matters
+  most. A bounded failure object can keep the layers explicit:
+</p>
+
+<ul>
+  <li><b>reference layer:</b> what page markup asked for</li>
+  <li><b>lookup layer:</b> what symbol or object was sought</li>
+  <li><b>runtime layer:</b> what the current image actually contains</li>
+  <li><b>correction layer:</b> what to reload, inspect, or repair next</li>
+</ul>
+
+<p>
+  This turns the failure from a dead end into an explanatory affordance.
+</p>
+
+<h2>Representative case: source-of-function</h2>
+
+<p>
+  A <tt>&lt;source-of-function&gt;</tt> reference is not ordinary prose. It declares
+  that a function should be present in the running image and that its source
+  should be reachable through the Lisp-functions HyperBook. If that lookup fails,
+  the user should not be left with a bare message only.
+</p>
+
+<p>
+  In the current Mech run-record slice, this is the practical issue behind a
+  missing or miswired function reference. The page-level promise and the image
+  load set have diverged.
+</p>
+
+<h2>Wanted sibling object</h2>
+
+<p>
+  The undefined-function case during page rendering should become a sibling of
+  <tt>page-lookup-issue</tt>, not a one-off debugger escape. A suitable shape
+  would be a bounded runtime-reference issue such as:
+</p>
+
+<ul>
+  <li><tt>runtime-reference-issue</tt></li>
+  <li><tt>missing-function-reference-issue</tt></li>
+  <li><tt>render-time-definition-issue</tt></li>
+</ul>
+
+<p>
+  The exact class name can vary. The architectural point is that the missing
+  function is not merely printed; it is objectified as one inspectable issue.
+</p>
+
+<h2>Desired behavior</h2>
+
+<p>
+  The first visible result should be an inspectable failure object. Its compact
+  title-bar text can be something like:
+</p>
+
+<pre>
+Missing function reference: HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE
+</pre>
+
+<p>
+  Opening that object should reveal fields analogous to the
+  <tt>page-lookup-issue</tt> inspector:
+</p>
+
+<ul>
+  <li>the original page reference that triggered the lookup</li>
+  <li>the source page title and source section</li>
+  <li>the exact symbol that failed to resolve</li>
+  <li>the reference kind, such as <tt>:source-of-function</tt></li>
+  <li>whether the failure occurred while reading, resolving, or calling</li>
+  <li>the current package and image context</li>
+  <li>candidate ASDF systems and source files expected to provide the definition</li>
+  <li>a classification and current status</li>
+  <li>a suggested repair, repair description, and repair thunk when available</li>
+  <li>the underlying condition</li>
+  <li>the rendered condition message</li>
+</ul>
+
+<p>
+  The underlying undefined-function condition should remain inspectable as a
+  secondary object, and the human-readable message should remain preserved as
+  additional condition text rather than disappearing behind the issue wrapper.
+</p>
+
+<h2>Relation to existing inspector practice</h2>
+
+<p>
+  HyperDoc already has the right general direction in nearby surfaces. The
+  Playground preserves parse and evaluation failures as inspectable debug
+  reports, and the page-lookup work preserves failed page references as
+  structured issue objects. The missing-function case should continue that line
+  rather than falling back to a terminal message.
+</p>
+
+<p>
+  A missing function reference should therefore be handled less like an ordinary
+  exception escaping to the UI and more like a first-class runtime issue object
+  with views for diagnosis, repair, and retry.
+</p>
+
+<h2>Boundary discipline</h2>
+
+<p>
+  Not every error should become a giant universal report object. The issue must
+  stay bounded to one failure class and one triggering reference. This keeps the
+  page understandable and avoids collapsing unrelated problems into one generic
+  debugger surface.
+</p>
+
+<ul>
+  <li>One failed reference.</li>
+  <li>One failure stage.</li>
+  <li>One primary correction path.</li>
+</ul>
+
+<p>
+  If the first correction step succeeds but reveals a second failure, that
+  second failure should become its own inspectable object.
+</p>
+
+<h2>Pragmatic implication for the current Mech slice</h2>
+
+<p>
+  For the current Mech run-record work, the immediate goal is not a perfect
+  global error architecture. It is narrower: when a
+  <tt>&lt;source-of-function&gt;</tt> reference does not resolve, HyperDoc should show
+  a bounded sibling issue object in the spirit of <tt>page-lookup-issue</tt>
+  that tells the reader what was expected, why the reference likely failed, and
+  where to go next, while still preserving the underlying condition and its
+  rendered message.
+</p>
+
+<p>
+  That would already be a material improvement over the current message-only
+  situation.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Inspectable Mech Runs">Inspectable Mech Runs</a></li>
+  <li><a page="First-class Mech Run Records in HyperDoc">First-class Mech Run Records in HyperDoc</a></li>
+  <li><a page="Implement function-lookup-issue from the page-lookup-issue precedent">Implement function-lookup-issue from the page-lookup-issue precedent</a></li>
+  <li><a page="Clickable Correction Path from Error to Merge">Clickable Correction Path from Error to Merge</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="SBCL Process">SBCL Process</a></li>
+  <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
+</ul>

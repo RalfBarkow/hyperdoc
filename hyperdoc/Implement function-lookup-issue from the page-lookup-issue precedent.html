@@ -1,0 +1,411 @@
+<h1>Implement function-lookup-issue from the page-lookup-issue precedent</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This task explains how to derive a new <tt>function-lookup-issue</tt> from the
+  existing <tt>page-lookup-issue</tt> machinery so that failed
+  <tt>&lt;source-of-function&gt;</tt> references produce a primary inspectable issue
+  object, preserve the underlying Lisp condition, and preserve the rendered
+  condition message.
+</p>
+
+<h2>Goal</h2>
+
+<p>
+  After completing this task, a failed function reference no longer stops at the
+  message:
+</p>
+
+<pre>
+The function HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE is undefined.
+</pre>
+
+<p>
+  Instead, HyperDoc presents:
+</p>
+
+<ol>
+  <li>a primary <tt>function-lookup-issue</tt> object,</li>
+  <li>the underlying <tt>undefined-function</tt> condition as a secondary object,</li>
+  <li>and the rendered message as additional condition text.</li>
+</ol>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>You can run the current HyperDoc image.</li>
+  <li>You can reproduce a failing <tt>&lt;source-of-function&gt;</tt> reference.</li>
+  <li>You can inspect the current <tt>page-lookup-issue</tt> object in the inspector.</li>
+  <li>You have the current lookup and HyperBook source files available for editing.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  The current project already contains the architectural precedent needed for
+  this work. In the HTML page lookup path, failed links are converted into
+  structured issue objects by calling
+  <tt>hb:make-page-lookup-issue</tt> and then
+  <tt>hb:enrich-lookup-issue</tt>. This means HyperDoc already knows how to turn
+  a lookup failure into a bounded issue object with source context,
+  classification, repair metadata, and underlying condition. 
+</p>
+
+<p>
+  The missing-function case arises in a different seam. The Lisp Functions
+  HyperBook resolves a function page by reading the page id as a symbol and then
+  calling <tt>symbol-function</tt> on that symbol. That is the exact place where
+  an <tt>undefined-function</tt> condition appears when the requested function is
+  not present in the current image. 
+</p>
+
+<h2>Procedure</h2>
+
+<h3>Step 1. Inspect the current page-lookup-issue object</h3>
+
+<p>
+  Open a known <tt>page-lookup-issue</tt> in the inspector and look at its
+  <tt>Slots</tt> tab. Record the stable structural fields that should also exist
+  for function lookup issues.
+</p>
+
+<p>
+  Keep these fields as the compatibility baseline:
+</p>
+
+<pre>
+source-object
+source-hyperbook
+source-page-id
+source-page-title
+source-section
+link-text
+classification
+default-status
+suggested-repair
+repair-description
+repair-thunk
+details
+underlying-condition
+link
+</pre>
+
+<p>
+  Do not redesign these fields yet. The task is to preserve as much of the
+  existing issue vocabulary as possible.
+</p>
+
+<h3>Step 2. Locate the function-resolution seam</h3>
+
+<p>
+  Open the Lisp Functions HyperBook implementation and identify the method that
+  resolves a function page. Confirm that the function page is created by calling
+  <tt>symbol-function</tt> on the symbol named by the page id. 
+</p>
+
+<p>
+  This is the seam to wrap. The missing-function issue should be created here or
+  immediately above this seam, not in a distant generic error handler.
+</p>
+
+<h3>Step 3. Decide which page-lookup slots stay unchanged</h3>
+
+<p>
+  Reuse the provenance and repair slots unchanged. A
+  <tt>function-lookup-issue</tt> should still tell the reader:
+</p>
+
+<ul>
+  <li>which page triggered the lookup,</li>
+  <li>which section triggered it,</li>
+  <li>what the classification is,</li>
+  <li>what the suggested repair is,</li>
+  <li>and which underlying condition occurred.</li>
+</ul>
+
+<p>
+  That keeps the new issue object visually and structurally close to
+  <tt>page-lookup-issue</tt>.
+</p>
+
+<h3>Step 4. Replace page-target fields with function-target fields</h3>
+
+<p>
+  Do not reuse <tt>expected-page-id</tt> for function lookup. It is misleading in
+  this context. Replace the page-target fields with function-resolution fields.
+</p>
+
+<p>
+  Use this mapping:
+</p>
+
+<pre>
+page-lookup-issue                 function-lookup-issue
+-------------------------------   ----------------------------------
+target-hyperbook-id               target-hyperbook-id
+target-site                       target-site
+expected-page-id                  expected-symbol
+target-kind                       target-kind
+                                  reference-kind
+                                  lookup-stage
+</pre>
+
+<p>
+  The minimum added function-specific fields should be:
+</p>
+
+<pre>
+reference-kind
+expected-symbol
+lookup-stage
+</pre>
+
+<h3>Step 5. Define the desired Slots view first</h3>
+
+<p>
+  Before writing the constructor, write down the desired slot shape for the
+  failing Mech example. This makes the implementation target concrete.
+</p>
+
+<pre>
+source-object            First-class Mech Run Records in HyperDoc
+source-hyperbook         hyperdoc
+source-page-id           First-class Mech Run Records in HyperDoc
+source-page-title        First-class Mech Run Records in HyperDoc
+source-section           Example (Lisp)
+link-text                mech-run-record-story-neighborhood-example
+
+reference-kind           :SOURCE-OF-FUNCTION
+target-hyperbook-id      lisp-functions
+target-site              lisp-functions
+expected-symbol          HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE
+lookup-stage             :SYMBOL-FUNCTION
+target-kind              :HYPERDOC-LISP-FUNCTION-PAGE
+
+classification           :MISSING-LISP-FUNCTION-DEFINITION
+default-status           :OPEN
+suggested-repair         :RELOAD-ASDF-SYSTEM
+repair-description       Load the defining ASDF component or repair the
+                         symbol/file/system mismatch before retrying.
+repair-thunk             (lambda () ...)
+
+details                  (...)
+underlying-condition     #<UNDEFINED-FUNCTION ...>
+underlying-message       The function HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE is undefined.
+link                     COMMON-LISP:NIL
+</pre>
+
+<p>
+  This is the target view to implement, not merely an example to describe later.
+</p>
+
+<h3>Step 6. Add a narrow constructor helper</h3>
+
+<p>
+  Add a small helper that mirrors the role of
+  <tt>hb:make-page-lookup-issue</tt>, but for function lookup. Keep it narrow.
+  It should only package the current failure into a bounded issue object.
+</p>
+
+<p>
+  At this step, aim only for slot population. Do not add inspector views yet.
+</p>
+
+<p>
+  The intended result of this step is the smallest viable constructor shape:
+</p>
+
+<pre>
+(defun make-function-lookup-issue
+    (condition
+     &key source-object
+          source-hyperbook
+          source-page-id
+          source-page-title
+          source-section
+          link-text
+          reference-kind
+          target-hyperbook-id
+          target-site
+          expected-symbol
+          lookup-stage
+          target-kind
+          classification
+          suggested-repair
+          repair-description
+          repair-thunk
+          details
+          link)
+  ...)
+</pre>
+
+<h3>Step 7. Preserve the two-level failure structure</h3>
+
+<p>
+  The new issue object must not replace the underlying condition. Preserve both:
+</p>
+
+<ol>
+  <li>the issue object as the primary workflow surface,</li>
+  <li>the underlying condition as the secondary technical object.</li>
+</ol>
+
+<p>
+  Also preserve the human-readable condition text:
+</p>
+
+<pre>
+The function HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE is undefined.
+</pre>
+
+<p>
+  Store that message explicitly as additional condition text, for example in an
+  <tt>underlying-message</tt> slot.
+</p>
+
+<h3>Step 8. Route the function-resolution failure through the helper</h3>
+
+<p>
+  Wrap the <tt>symbol-function</tt> lookup seam so that a failing
+  <tt>&lt;source-of-function&gt;</tt> reference yields a
+  <tt>function-lookup-issue</tt> instead of stopping at raw message-only output.
+  The issue should be created at the point where the symbol name, page context,
+  and condition are all still available. 
+</p>
+
+<p>
+  At the end of this step, the current red error line should no longer be the
+  only visible artifact.
+</p>
+
+<h3>Step 9. Add only the smallest useful details payload</h3>
+
+<p>
+  Do not turn the issue into a giant debugger dump. Put secondary diagnostics
+  into <tt>details</tt>, for example:
+</p>
+
+<pre>
+(:current-package "HYPERDOC"
+ :symbol-name "MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE"
+ :symbol-package "HYPERDOC"
+ :fboundp nil
+ :candidate-systems (...)
+ :candidate-files (...))
+</pre>
+
+<p>
+  Keep the top-level slot list short and stable.
+</p>
+
+<h3>Step 10. Implement the 10-line skeleton</h3>
+
+<p>
+  Once the slot vocabulary and seam are clear, reduce the first implementation to
+  the smallest constructor that proves the design. The first target is this
+  compact skeleton:
+</p>
+
+<pre>
+(defun make-function-lookup-issue (condition &key expected-symbol source-page-title source-section)
+  (list :kind :function-lookup-issue
+        :reference-kind :source-of-function
+        :source-page-title source-page-title
+        :source-section source-section
+        :expected-symbol expected-symbol
+        :lookup-stage :symbol-function
+        :classification :missing-lisp-function-definition
+        :underlying-condition condition
+        :underlying-message (princ-to-string condition)))
+</pre>
+
+<p>
+  This is not the final object model. It is the first checkpoint. It proves that
+  the function-resolution seam can produce the same two-level structure that the
+  existing page-lookup path already has.
+</p>
+
+<h3>Step 11. Expand the skeleton toward parity with page-lookup-issue</h3>
+
+<p>
+  After the compact skeleton works, extend it by adding the remaining stable
+  issue fields:
+</p>
+
+<pre>
+source-object
+source-hyperbook
+source-page-id
+link-text
+target-hyperbook-id
+target-site
+target-kind
+default-status
+suggested-repair
+repair-description
+repair-thunk
+details
+link
+</pre>
+
+<p>
+  Keep each addition justified by the existing page-lookup precedent rather than
+  inventing new vocabulary casually.
+</p>
+
+<h3>Step 12. Verify the inspector behavior</h3>
+
+<p>
+  Re-open the failing page and confirm that the failure now appears in three
+  layers:
+</p>
+
+<ol>
+  <li>primary issue object: <tt>function-lookup-issue</tt></li>
+  <li>secondary condition object: <tt>undefined-function</tt></li>
+  <li>preserved condition text: <tt>The function ... is undefined.</tt></li>
+</ol>
+
+<p>
+  The result should feel parallel to the current
+  <tt>page-lookup-issue</tt> / underlying-condition pattern, not like a
+  separate ad hoc subsystem.
+</p>
+
+<h2>Result</h2>
+
+<p>
+  The task is complete when a failed <tt>&lt;source-of-function&gt;</tt> reference
+  opens first as a bounded issue object whose Slots view is recognizably parallel
+  to <tt>page-lookup-issue</tt>, while still preserving the underlying Lisp
+  condition and its rendered message.
+</p>
+
+<h2>Troubleshooting</h2>
+
+<p>
+  If you still see only the raw undefined-function message, the wrapping code is
+  too late in the pipeline or not on the actual <tt>symbol-function</tt>
+  resolution path. Recheck the Lisp Functions HyperBook seam first. 
+</p>
+
+<p>
+  If the issue object exists but lacks provenance, copy the field set from the
+  existing page-lookup constructor path before adding more diagnostics. 
+</p>
+
+<p>
+  If the function becomes available only after reload, verify the runtime load
+  state with an <tt>fboundp</tt> check before assuming the issue-object design is
+  wrong. The repo already uses that style of runtime check in nearby undefined-function
+  recovery guidance. 
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Failure as Inspectable Object">Failure as Inspectable Object</a></li>
+  <li><a page="First-class Mech Run Records in HyperDoc">First-class Mech Run Records in HyperDoc</a></li>
+  <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
+</ul>
