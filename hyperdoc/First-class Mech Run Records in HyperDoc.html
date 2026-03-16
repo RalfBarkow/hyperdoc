@@ -1,0 +1,178 @@
+<h1>First-class Mech Run Records in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<h2>Example (Lisp)</h2>
+
+<p>
+  This page follows the usual HyperDoc example pattern: the page references a
+  Lisp example function, and the browser renders its source from the loaded
+  image.
+</p>
+
+<p>
+  The example is illustrative. It shows the shape of a future run ledger for a
+  story-neighborhood script such as <tt>WALK 3 clicks</tt>,
+  <tt>PRINT draft</tt>, and <tt>PREVIEW synopsis items</tt>. It is not a claim
+  that the current implementation already persists exactly this object.
+</p>
+
+<source-of-function>mech-run-record-story-neighborhood-example</source-of-function>
+
+<h2>What a first-class run record adds</h2>
+
+<p>
+  A future Mech execution model could preserve the same information as a
+  first-class run record with chronology, provenance, findings, and artifact
+  links. That is stronger than logging. Logging says that blocks ran. A run
+  record preserves what they consumed, what they produced, what was excluded,
+  and how the final draft or preview page came to be.
+</p>
+
+<p>
+  For story-neighborhood work this means that the walk itself becomes part of
+  the durable result. A volume draft is no longer the only surviving artifact.
+  The path that selected the pages, the warnings about borderline pages, the
+  graph aspects that were handed from <tt>WALK</tt> to <tt>PRINT</tt>, and the
+  report pages emitted by <tt>PREVIEW</tt> can all remain inspectable as one run
+  ledger.
+</p>
+
+<h2>Chronology</h2>
+
+<p>
+  Chronology is the ordered account of execution. For Mech this is not just a
+  timestamp list. It is the sequence of authored blocks and the sub-results they
+  yield. In the story-neighborhood case the chronology should answer questions
+  such as: which walk happened first, what aspect set did it yield, when was the
+  draft assembled, and which preview pages were emitted from the assembly
+  report.
+</p>
+
+<p>
+  This matters editorially because Thompson-style book work is iterative. One
+  click, two clicks, and three clicks are not merely three outputs. They are a
+  sequence of increasingly broad editorial hypotheses. A chronology-preserving
+  run record lets an author or editor compare those hypotheses without relying
+  on memory or scattered notes.
+</p>
+
+<h2>Provenance</h2>
+
+<p>
+  Provenance asks where an artifact came from. In this setting the relevant
+  artifacts are not only files. They also include aspect sets, overlap views,
+  preview pages, report pages, and assembled drafts. A provenance-preserving run
+  record can answer: which walked aspect produced this draft section, which
+  report page summarized that choice, and which earlier walk was compared or
+  discarded.
+</p>
+
+<p>
+  This is the difference between "here is the draft" and "here is the warrant
+  for the draft". HyperDoc is well placed to preserve that warrant because it
+  already values inspectable runtime objects and explanation emitted at the same
+  seam as generation.
+</p>
+
+<h2>Findings</h2>
+
+<p>
+  Findings are the humanly relevant consequences of execution. They include
+  warnings, exclusions, missing pages, changed neighborhoods, unstable gateway
+  pages, and assembly decisions that deserve review. In a first-class run record
+  these findings should not be buried in console noise. They should be kept as a
+  dedicated inspectable collection that can be sorted by severity, page,
+  distance, or producing block.
+</p>
+
+<p>
+  This matters especially for <tt>PRINT</tt> and <tt>PREVIEW</tt>. Those blocks
+  do not merely transform data. They summarize editorial decisions. A saved run
+  ledger should therefore expose what was accepted, what was omitted, and what
+  should be reviewed before the next draft is considered authoritative.
+</p>
+
+<h2>Artifact links</h2>
+
+<p>
+  Artifact links bind the ledger back to durable outputs. They are what make the
+  run record navigable rather than merely descriptive. A chronology entry that
+  says "produced draft" is much stronger when it also links to the exact draft,
+  the preview page that summarized it, and the graph browser view that shows the
+  walked aspects behind it.
+</p>
+
+<p>
+  This also fits Ward's practice of saving timestamped report pages for later
+  comparison. The run record can link to those reports, and the reports can link
+  back to the exact run object and its walked aspects. Draft and explanation can
+  remain side by side.
+</p>
+
+<h2>Relation to existing scholarly work</h2>
+
+<h3>W3C PROV</h3>
+
+<p>
+  W3C PROV offers the clearest generic vocabulary for this design. A Mech run
+  naturally contains <i>activities</i> such as <tt>WALK</tt>, <tt>PRINT</tt>,
+  and <tt>PREVIEW</tt>; <i>entities</i> such as aspect sets, drafts, and report
+  pages; and <i>agents</i> such as authors, sites, or concrete block
+  implementations. What PROV contributes is a portable lineage model rather than
+  page-local prose about where things came from.
+</p>
+
+<h3>VisTrails and workflow evolution</h3>
+
+<p>
+  VisTrails is especially relevant because it treats workflow change history as
+  first-class. That matches the editorial staircase of one-click, two-click,
+  and three-click neighborhood exploration. The history of changed walks is part
+  of the knowledge product, not just a prelude to the final book draft.
+</p>
+
+<h3>noWorkflow and script-level provenance</h3>
+
+<p>
+  noWorkflow matters because it captures provenance from ordinary scripts
+  instead of requiring users to rewrite everything into a special workflow
+  language. That is a close precedent for Mech. The preservation of run
+  evidence should emerge from normal Mech execution, not from a separate
+  formalism that authors must learn before they can keep a credible history.
+</p>
+
+<h3>Moldable inspection</h3>
+
+<p>
+  Moldable Inspector and related moldable-development work supply the decisive
+  HyperDoc lesson: preserved provenance is only fully useful when it can be
+  explored through domain-specific views. A Mech run ledger should therefore be
+  inspectable by chronology, by findings, by artifact lineage, and by editorial
+  questions such as which gateway pages were admitted or excluded.
+</p>
+
+<h3>Literate programming and executable publication</h3>
+
+<p>
+  Literate programming and later executable-publication work explain why code,
+  narrative, and result should remain linked. A first-class Mech run record goes
+  one step further by preserving not only the narrative and the output, but also
+  the intermediate editorial evidence that connects them.
+</p>
+
+<h2>HyperDoc-specific opportunity</h2>
+
+<p>
+  The main opportunity for HyperDoc is not merely to adopt a generic provenance
+  vocabulary. It is to treat the run ledger as a moldable publication object.
+  An editor should be able to inspect one run by chronology, compare two runs by
+  changed findings, open the preview page emitted from a report, and jump from a
+  draft section back to the walked aspect that justified it.
+</p>
+
+<p>
+  In that form, a Mech run record becomes both an operational artifact and a
+  scholarly one. It supports rerunning, auditing, teaching, and explaining the
+  editorial process that produced a volume from a federated neighborhood.
+</p>

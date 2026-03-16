@@ -1,0 +1,205 @@
+<h1>Editorial Control Surface and the Becoming of the Book</h1>
+
+<p>
+  <b>Editorial control surface</b> is not a standard term of art in publishing or digital humanities.
+  It is a useful synthesis for a particular kind of interface: one that does not merely display
+  workflow status, nor merely archive provenance after the fact, but helps editors steer a work
+  in progress while preserving an accountable record of how that work is taking shape.
+</p>
+
+<p>
+  In the Mech / HyperDoc setting, this means a surface that lets an editor inspect and compare
+  bounded walks, generated drafts, exclusions, warnings, overlaps, and saved report pages while
+  deciding what to try next. Such a surface does not only document a run. It participates in
+  editorial judgment.
+</p>
+
+<h2>Why “control surface” is the right emphasis</h2>
+
+<p>
+  A dashboard can remain passive. It can show tasks, counts, stages, or queue positions.
+  A provenance graph can remain retrospective. It can explain how an artifact came to be.
+  A scholarly edition can remain presentational. It can expose variants, facsimiles, and
+  editorial principles without helping guide the next editorial move.
+</p>
+
+<p>
+  A control surface is stronger. It joins visibility and action. It lets one see what the system
+  has done, what it is doing, and what should be done next. In this sense it is not simply a
+  report layer on top of publication. It is part of the machinery by which publication is shaped.
+</p>
+
+<h2>Prior art: four converging traditions</h2>
+
+<h3>1. Provenance and workflow systems</h3>
+
+<p>
+  In W3C PROV, provenance is information about entities, activities, and agents involved in
+  producing a thing. That is the right baseline for a Mech run record: pages and reports are
+  entities, block executions are activities, and authors, editors, or automated procedures are
+  agents.
+</p>
+
+<p>
+  Workflow systems such as VisTrails pushed this further by treating reproducibility and
+  provenance-aware publication as first-class concerns. The interesting precedent is not merely
+  that workflows can be replayed, but that the history of transformations becomes part of the
+  published research object.
+</p>
+
+<p>
+  noWorkflow sharpened the lesson again: useful provenance should be capturable from ordinary
+  scripts and ordinary working habits, not only from heavyweight workflow formalisms. For Mech,
+  that supports a model in which script blocks remain author-facing text while still emitting a
+  structured run record.
+</p>
+
+<h3>2. Moldable inspection and debugging</h3>
+
+<p>
+  The Moldable Inspector and Moldable Debugger add a second crucial move. Preserving runtime
+  evidence is not enough; one needs domain-specific views that answer the questions that actually
+  arise in the current practice. Generic logs are too low-level. Generic debuggers leave a gap
+  between domain questions and tool support.
+</p>
+
+<p>
+  For editorial work, that means views such as chronology, findings, boundary, overlap,
+  source-to-artifact, and run-comparison are not luxuries. They are the actual working
+  surfaces through which editorial reasoning becomes inspectable.
+</p>
+
+<h3>3. Editorial dashboards and workflow interfaces</h3>
+
+<p>
+  Existing editorial systems already provide dashboard-like control surfaces. Platforms such as
+  OMP or OJS expose tasks, workflow stages, action buttons, participants, queues, and editorial
+  history. This is genuine prior art for the managerial side of editorial control.
+</p>
+
+<p>
+  But these systems usually control submissions and responsibilities rather than the internal
+  becoming of a text. They help move a manuscript from submission to publication. They generally
+  do not preserve the computational genesis of the assembled artifact in a form that can be
+  inspected and compared as part of editorial reasoning.
+</p>
+
+<h3>4. Genetic criticism, scholarly editing, and book history</h3>
+
+<p>
+  The strongest humanities-side prior art comes from genetic criticism and scholarly editing.
+  Genetic criticism is concerned less with the final text than with reconstructing and analysing
+  the writing process through drafts, notes, proofs, and related materials. In that tradition,
+  the important object is not only the finished work but the avant-texte and the sequence of
+  transformations that led toward it.
+</p>
+
+<p>
+  Digital scholarly editing extends this by building interfaces for variants, facsimiles,
+  transcriptions, and comparisons. The Beckett Digital Manuscript Project is a clear example:
+  its goal is to represent the evolutionary dynamics of composition, not just a stabilized text.
+</p>
+
+<p>
+  Book history and the sociology of texts widen the frame further. The material form of texts,
+  and the editorial decisions that reshape them, are part of meaning-making rather than neutral
+  packaging. Scholarly editing therefore does not merely reproduce a text; it mediates between
+  versions, authorities, and interpretations.
+</p>
+
+<h2>Guides the becoming of the book</h2>
+
+<p>
+  That phrase can now be made precise.
+</p>
+
+<p>
+  To say that a run ledger or editorial control surface <i>guides the becoming of the book</i>
+  is to say that it serves three roles at once:
+</p>
+
+<ul>
+  <li>it preserves <b>process evidence</b> about how the current candidate book was assembled</li>
+  <li>it presents that evidence in <b>editorially meaningful views</b></li>
+  <li>it supports <b>next-step judgment</b> about what the editor should try, accept, reject, or compare</li>
+</ul>
+
+<p>
+  In a story-neighborhood workflow, this means the surface can show, for example:
+</p>
+
+<ul>
+  <li>which gateway pages entered at one click</li>
+  <li>how two-click and three-click expansion changed the garden</li>
+  <li>where overlaps concentrate</li>
+  <li>which pages were excluded or downgraded and why</li>
+  <li>which draft and synopsis pages were emitted from which walk</li>
+  <li>how one run differs from an earlier timestamped run</li>
+</ul>
+
+<p>
+  At that point the ledger is no longer mere bookkeeping. It becomes laufende Buchführung in the
+  strongest sense: an ongoing accounting that helps conduct the editorial process itself.
+</p>
+
+<h2>Why this matters for HyperDoc and Mech</h2>
+
+<p>
+  Mech already has the architectural seam for this. A block execution already knows the authored
+  command, normalized operation and arguments, body, runtime state, and emitted results. HyperDoc
+  already values inspectable objects over opaque output.
+</p>
+
+<p>
+  What is still missing is the move from transient execution evidence to a durable, inspectable,
+  comparable editorial object. Once that exists, the natural views are not only provenance views
+  but editorial views: what changed in the candidate book, what stayed stable, what was lost,
+  which boundary was applied, and which variation seems more faithful to the intended story.
+</p>
+
+<p>
+  In that form, an editorial control surface becomes the bridge between computational provenance
+  and editorial practice. It preserves enough evidence to justify the draft, and enough structure
+  to steer the next draft.
+</p>
+
+<h2>Sharper formulation</h2>
+
+<p>
+  An editorial control surface is an inspectable interface that joins workflow state,
+  provenance, editorial findings, and action paths so that the process of assembling a book
+  can be both accounted for and steered.
+</p>
+
+<p>
+  Or, more briefly:
+</p>
+
+<blockquote>
+  The editorial control surface does not just record book production; it helps steer the book’s becoming.
+</blockquote>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="First-class Mech Run Records in HyperDoc">First-class Mech Run Records in HyperDoc</a></li>
+  <li><a page="Inspectable Mech Runs">Inspectable Mech Runs</a></li>
+  <li><a page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+  <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
+  <li><a page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
+</ul>
+
+<h2>References</h2>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/prov-overview/">W3C PROV Overview</a> and <a href="https://www.w3.org/TR/prov-dm/">PROV Data Model</a></li>
+  <li><a href="https://www.vistrails.org/download/download.php?id=ipaw2006.pdf&amp;type=PUB">VisTrails: Managing Rapidly-Evolving Scientific Workflows</a> and <a href="https://www.usenix.org/system/files/conference/tapp13/tapp13-final18.pdf">Using Provenance for Repeatability</a></li>
+  <li><a href="https://github.com/gems-uff/noworkflow">noWorkflow</a> and <a href="https://dl.acm.org/doi/10.14778/3137765.3137789">noWorkflow: A Tool for Collecting, Analyzing, and Managing Provenance from Scripts</a></li>
+  <li><a href="https://scg.unibe.ch/archive/papers/Chis15a-MoldableInspector.pdf">The Moldable Inspector</a> and <a href="https://scg.unibe.ch/archive/papers/Chis14b-MoldableDebugger.pdf">The Moldable Debugger</a></li>
+  <li><a href="https://docs.pkp.sfu.ca/learning-omp/3.1/en/editorial-interface">Public Knowledge Project editorial interface</a> and <a href="https://docs.pkp.sfu.ca/learning-omp/en/role-specific-workflows.html">PKP role-specific workflows</a></li>
+  <li><a href="https://global.oup.com/academic/product/genetic-criticism-9780192846792">Genetic Criticism</a></li>
+  <li><a href="https://www.beckettarchive.org/">Beckett Digital Manuscript Project</a></li>
+  <li><a href="https://static.uni-graz.at/fileadmin/gewi-zentren/Informationsmodellierung/PDF/dse-interfaces_BoA21092016.pdf">Digital Scholarly Editions as Interfaces</a></li>
+  <li><a href="https://www.cambridge.org/core/elements/scholarly-editing-in-perspective/7F91F4D6FC262406D460787C39AD56F5">Scholarly Editing in Perspective</a></li>
+  <li><a href="https://www.cambridge.org/core/books/bibliography-and-the-sociology-of-texts/CF5FE52FD90E0B79D8583FF675C4923D">Bibliography and the Sociology of Texts</a></li>
+</ul>
