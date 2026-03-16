@@ -1,0 +1,160 @@
+
+<h1>Mech Editorial Control Surface and Offline Continuity</h1>
+
+<p>
+Recent discussion around Mech, book assembly, and offline use suggests a broader framing for saved runs and cached material.
+What began as a response to <code>WALK</code>, <code>SOLO</code>, <code>PRINT</code>, and <code>PREVIEW</code> grew into a question about how computational traces can guide editorial work and how federated wiki material can remain usable across changing roles, shifting stages of work, and temporary disconnection.
+</p>
+
+<h2>From WALK to Editorial Control Surface</h2>
+
+<p>
+Ward described a workflow in which a story is used to walk a surrounding garden of pages.
+<code>WALK 3 clicks</code> collects pages within three link steps of the author&apos;s story.
+<code>PRINT draft</code> assembles a draft volume from the chosen material.
+<code>PREVIEW synopsis items</code> exposes the reported decisions and statistics as wiki page items.
+</p>
+
+<p>
+This suggested that a saved run is doing more than recording execution.
+It can serve as an editorial control surface: a preserved account of chronology, selections, exclusions, overlaps, findings, and derived artifacts that helps decide what to do next while assembling the book.
+A saved run is therefore not only a log or audit trail.
+It can become a kind of laufende Buchf&uuml;hrung of the editorial process.
+</p>
+
+<h2>Run Ledger</h2>
+
+<p>
+The phrase <em>run ledger</em> became useful as a name for this preserved execution object.
+The point of the ledger is not only to explain how a draft came to be, but also to support comparison between variants and continuation of the work.
+A run ledger can preserve:
+</p>
+
+<ul>
+  <li>the script or stack of blocks that was executed,</li>
+  <li>the order in which steps ran,</li>
+  <li>the aspects or neighborhoods that were collected,</li>
+  <li>the findings and exclusions discovered during assembly,</li>
+  <li>the artifacts that were produced,</li>
+  <li>and links back to the walked material that informed later editorial choices.</li>
+</ul>
+
+<p>
+In this sense the ledger does not just document book production.
+It helps steer it.
+</p>
+
+<h2>Unfolding, Meaning, Manifesting</h2>
+
+<p>
+Ward then named three large-scale stages of production:
+</p>
+
+<ul>
+  <li>Unfolding</li>
+  <li>Meaning</li>
+  <li>Manifesting</li>
+</ul>
+
+<p>
+These stages are different in rhythm, commitment, and participation.
+Individuals may enter and leave at different points.
+Tools may also change.
+Federated wiki is valuable here because modular and movable content can pass through these stages without abrupt relocation or irreversible exchange of tooling.
+Mech may become better glue between stages than ad-hoc scripts were.
+</p>
+
+<p>
+This extended the earlier idea.
+A saved run is not only an editorial control surface for manifesting a book.
+It can also become a continuity surface across unfolding, meaning, and manifesting.
+What needs to survive across those stages is not just the pages themselves, but enough context to understand where the work currently stands and how to resume it.
+</p>
+
+<h2>Offline Continuity</h2>
+
+<p>
+Ward asked how Konrad might engage in all three phases of such a wiki-based project while repeatedly going on and off a commuter train.
+Konrad replied that one possible approach is to fetch other people&apos;s wikis through the export endpoint and extend his client so that these copies can be browsed offline.
+That seems adequate for consolidated material from the past, while ongoing work remains much harder.
+</p>
+
+<p>
+This sharpened the technical problem.
+Offline support is not merely a matter of copying content.
+It also raises the question of how much context must be preserved so that a person can step off and back onto a moving editorial process without losing the thread.
+That points again toward run records, saved walks, and local continuity structures rather than plain export alone.
+</p>
+
+<h2>Page Cache and Sitemap Cache</h2>
+
+<p>
+Ward then explored a more browser-native caching strategy.
+Instead of caching whole sites, the browser could cache every fetched page.
+The cache would be updated opportunistically while reading online and consulted only while offline.
+If a page disappears online, the cache could notice that and revise itself accordingly.
+</p>
+
+<p>
+He also asked whether sitemaps should be cached.
+The discussion suggested that pages are primary, while sitemaps are derivative support.
+A browser should remain able to operate offline without sitemaps, though with weaker search and weaker twin notification.
+When a fresh sitemap becomes available online, it could be used later to refresh cached pages and reconcile what changed or disappeared.
+</p>
+
+<p>
+This leads to a useful split:
+pages preserve what was actually read and linked through;
+sitemaps help with coordination, refresh, and reconciliation.
+</p>
+
+<h2>Shared Browser Cache</h2>
+
+<p>
+Ward proposed that the cache should be shared between tabs in a given browser but not necessarily across browsers.
+That would provide automatically allocated local space without requiring an additional service.
+If local servers are present, pages fetched from those local servers should not be cached in this remote-material cache.
+A least-recently-used discipline would then manage the total cache size.
+</p>
+
+<p>
+This looks like a practical first scope for offline federation support:
+</p>
+
+<ul>
+  <li>shared across tabs,</li>
+  <li>local to one browser,</li>
+  <li>focused on remote material,</li>
+  <li>updated during ordinary reading,</li>
+  <li>usable in degraded mode while offline,</li>
+  <li>and later reconciled with fresh online information.</li>
+</ul>
+
+<p>
+One further refinement suggested by the earlier run-ledger discussion is that not all cached pages are equal.
+Pages that belong to saved walks, assembled drafts, or other remembered editorial situations may deserve some protection from eviction.
+</p>
+
+<h2>Resulting Direction</h2>
+
+<p>
+Taken together, these exchanges suggest a broader role for Mech and for local browser support in federated wiki.
+Saved runs can become editorial control surfaces.
+Those same run records can also become continuity surfaces that survive movement between stages of work and temporary offline periods.
+A cache of fetched pages, supported by derivative sitemap refresh, offers one practical substrate for this continuity.
+</p>
+
+<p>
+The emerging design question is therefore not only how to save pages for later reading, but how to preserve enough editorial and navigational context that one can later resume the same situation of work.
+That includes remembered neighborhoods, derived artifacts, findings, exclusions, and run history.
+</p>
+
+<h2>See Also</h2>
+
+<ul>
+  <li><a page="Editorial Control Surface and the Becoming of the Book">Editorial Control Surface and the Becoming of the Book</a></li>
+  <li><a page="First-class Mech Run Records in HyperDoc">First-class Mech Run Records in HyperDoc</a></li>
+  <li><a hyperbook="fedwiki:mech.fed.wiki" page="how-to-walk-a-story">How to WALK a Story</a></li>
+  <li><a hyperbook="fedwiki:ward.dojo.fed.wiki" page="how-we-wrote-that-book">How We Wrote That Book</a></li>
+</ul>
+
