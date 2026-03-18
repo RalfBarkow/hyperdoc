@@ -1,0 +1,146 @@
+<h1>Codex commit hygiene and staging boundaries</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page records a durable operational pattern for Codex work in this
+  repository: sometimes the slice itself is correct, but the current
+  <tt>HEAD</tt>, index, and worktree state is too mixed to justify an
+  automatic commit. In that case the right move is to stop automated
+  committing, preserve the slice boundary, and cut a slice-pure cached diff by
+  manual staging.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Prompt-local slice contract"><tt>Prompt-local slice contract</tt></a></li>
+  <li><a hyperbook="topics" page="Authoritative nix develop validation"><tt>Authoritative nix develop validation</tt></a></li>
+  <li><a hyperbook="topics" page="Inventory outcome"><tt>Inventory outcome</tt></a></li>
+  <li><a hyperbook="topics" page="Continuity shell by design"><tt>Continuity shell by design</tt></a></li>
+  <li><a hyperbook="topics" page="Exact outcome reporting"><tt>Exact outcome reporting</tt></a></li>
+  <li><a hyperbook="topics" page="Reconstruction protocol"><tt>Reconstruction protocol</tt></a></li>
+</ul>
+
+<h2>Core boundary</h2>
+
+<p>
+  The commit boundary is not defined only by the requested slice. It is defined
+  by whether the staged diff can still represent only that slice. When the
+  staged set is slice-pure, committing is straightforward. When the staged set
+  or index/worktree relationship is mixed, automation should stop and the
+  boundary should be repaired explicitly.
+</p>
+
+<h2>State distinctions that matter</h2>
+
+<h3>Slice-pure commit</h3>
+
+<p>
+  A slice-pure commit is the normal path: the cached diff contains only the
+  intended files and hunks for the current slice, and the commit message still
+  describes the staged content exactly.
+</p>
+
+<h3>Mixed staged set</h3>
+
+<p>
+  A mixed staged set means the index already contains unrelated files or hunks.
+  Even if the current slice content is correct, an automated commit would blur
+  history by absorbing material from outside the slice.
+</p>
+
+<h3>Mixed index/worktree state</h3>
+
+<p>
+  A mixed index/worktree state means one or more target files already differ
+  between <tt>HEAD</tt>, the index, and the worktree. In that situation,
+  patch-selection decisions depend on which layer currently carries the older
+  edits. Resetting the index to <tt>HEAD</tt> while preserving the worktree can
+  be the necessary first step before patch staging becomes meaningful.
+</p>
+
+<h3>New-file special case</h3>
+
+<p>
+  A file that is not in <tt>HEAD</tt> has no patch baseline after
+  <tt>git restore --staged</tt>; it becomes untracked. In that case, either
+  stage the whole new file directly or create an intent-to-add entry with
+  <tt>git add -N</tt> before using <tt>git add -p</tt>.
+</p>
+
+<h2>When to stop automation</h2>
+
+<ul>
+  <li>Stop when the staged diff still contains unrelated prompt history, test work, or runtime files outside the current slice.</li>
+  <li>Stop when the target files already have older staged state that makes a plain commit broader than the requested slice.</li>
+  <li>Stop when you cannot show a slice-pure cached diff that matches the intended commit message.</li>
+  <li>Stop before committing if the uncertainty is about commit boundary rather than about implementation correctness.</li>
+</ul>
+
+<p>
+  This is not a failure of the slice itself. It is a boundary-management
+  problem. The right response is to preserve the slice, report the mixed state,
+  and switch from automated commit flow to manual staging.
+</p>
+
+<h2>Manual staging boundary</h2>
+
+<ol>
+  <li>Enter <tt>nix develop</tt> once for interactive Git work.</li>
+  <li>Unstage unrelated files or hunks that do not belong to the current slice.</li>
+  <li>For mixed files, use <tt>git restore --staged ...</tt> to reset the index to <tt>HEAD</tt> while preserving worktree edits.</li>
+  <li>Stage whole files that belong entirely to the slice with <tt>git add</tt>.</li>
+  <li>Use <tt>git add -p</tt> only for the specific hunks that belong to the slice.</li>
+  <li>For new files that need partial staging, use <tt>git add -N</tt> first so patch mode has a baseline.</li>
+  <li>Inspect the cached diff until it is slice-pure by content, filenames, and commit-message fit.</li>
+  <li>Commit only after the cached diff is clean.</li>
+</ol>
+
+<h2>Repo-shell execution style</h2>
+
+<p>
+  In this repository, the practical split is deliberate: do interactive staging
+  inside <tt>nix develop</tt>, and use explicit repo-shell verification commands
+  for the final proof surface.
+</p>
+
+<pre>nix develop
+git add -p AGENTS.md
+git diff --cached --stat
+
+nix develop --command git diff --cached -- [exact files]</pre>
+
+<p>
+  This keeps staging usable while still preserving the repo rule that the
+  authoritative reported git verification should come from the same repo shell
+  used for validation.
+</p>
+
+<h2>Durable pattern, not incident report</h2>
+
+<p>
+  The underlying pattern is general: when the repository state prevents a clean
+  slice commit, the system should preserve the requested slice boundary rather
+  than pretending the boundary is cleaner than it is. Journal entries and
+  review exports can supply evidence, but this page carries the durable rule.
+</p>
+
+<h2>Evidence trail</h2>
+
+<ul>
+  <li><a page="Codex handover journal">Codex handover journal</a></li>
+  <li><a page="Codex handover journal 2026-03-18">Codex handover journal 2026-03-18</a></li>
+  <li><a page="Commit hygiene recommendation for Codex">Commit hygiene recommendation for Codex</a></li>
+  <li><a page="Manual staging plan for codex handover consolidation">Manual staging plan for codex handover consolidation</a></li>
+  <li><a page="Next step after the 22-file staged set">Next step after the 22-file staged set</a></li>
+  <li><a page="Repo-shell staging plan for Codex prompt consolidation">Repo-shell staging plan for Codex prompt consolidation</a></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Codex handover for HyperDoc">Codex handover for HyperDoc</a></li>
+  <li><a page="Best handover to Codex for HyperDoc">Best handover to Codex for HyperDoc</a></li>
+  <li><a page="Reconstruction protocol">Reconstruction protocol</a></li>
+</ul>
