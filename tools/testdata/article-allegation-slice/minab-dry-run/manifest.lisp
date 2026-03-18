@@ -1,7 +1,8 @@
 
 (:INPUT
- (:SOURCE-PATH NIL :SLICE-ID "minab-school-strike" :MODE :ARTICLE-ALLEGATION :INCIDENT-TITLE
-  "Minab school strike allegations" :INCIDENT-SUMMARY
+ (:SOURCE-PATH #P"tools/testdata/article-allegation-slice/minab-example.lisp" :SLICE-ID
+  "minab-school-strike" :MODE :ARTICLE-ALLEGATION :INCIDENT-TITLE "Minab school strike allegations"
+  :INCIDENT-SUMMARY
   "Reported school strike case used to document stale targeting data, disputed attribution, civilian-harm accountability, and AI-assisted targeting responsibility."
   :SOURCE-LABEL "user-provided article summary" :SOURCE-DESCRIPTION "user-provided article summary"
   :SOURCE-TYPE :NEWS-ARTICLE :SOURCE-PROVENANCE NIL :ARTICLE-DATE NIL :INCIDENT-DATE "2026-03-13"
@@ -15,7 +16,7 @@
   (:CLAIMED-SEQUENCE "Claimed sequence of events" :REPORTED-ATTRIBUTION "Reported attribution"
    :FORENSIC-CLAIMS "Investigative or forensic claims" :ACCOUNTABILITY "Accountability questions"
    :UNCERTAINTIES "Open uncertainties" :RELATED "Related concepts")
-  :REQUIRE-OPEN-UNCERTAINTIES-P NIL :GENERATE-FEDWIKI-TWINS-P T :GENERATE-DAILY-ANCHOR-P T
+  :REQUIRE-OPEN-UNCERTAINTIES-P T :GENERATE-FEDWIKI-TWINS-P T :GENERATE-DAILY-ANCHOR-P T
   :DAILY-ANCHOR-DATE "2026-03-13" :DAILY-ANCHOR-HEADING
   "Minab school strike allegations article-allegation slice" :DAILY-ANCHOR-NOTE
   "Dry-run sample for the reusable article-allegation-slice scaffolding routine."
@@ -57,7 +58,7 @@
     :KIND :HUMAN-AI-BOUNDARY :TOPIC-FUNCTION-NAME "human-in-the-loop-targeting-topic" :FEDWIKI-SLUG
     "human-in-the-loop-targeting" :REFERENCES NIL :RELATED-TITLES
     ("Civilian harm accountability" "Target validation"))))
- :DRY-RUN-ROOT #P"tools/testdata/article-allegation-slice/minab-dry-run/" :HYPERDOC-FILES
+ :DRY-RUN-ROOT NIL :HYPERDOC-FILES
  ((:TITLE "Minab school strike allegations" :RELATIVE-PATH
    "hyperdoc/Minab school strike allegations.html" :TARGET-PATH
    #P"/Users/rgb/workspace/hyperdoc/hyperdoc/Minab school strike allegations.html" :CONTENT

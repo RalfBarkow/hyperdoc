@@ -1096,6 +1096,26 @@
                           :external-format :utf-8)
     (write-string content stream)))
 
+(defun article-allegation-stable-manifest-path (path root)
+  (let* ((pathname (pathname path))
+         (enough (enough-namestring pathname root)))
+    (if (string= enough (namestring pathname))
+        pathname
+        (pathname enough))))
+
+(defun article-allegation-dry-run-manifest (bundle)
+  (let* ((manifest (copy-tree bundle))
+         (input (copy-tree (getf manifest :input)))
+         (source-path (getf input :source-path))
+         (repo-root (getf input :hyperdoc-repo-root)))
+    ;; The persisted dry-run manifest should stay comparable across temp roots.
+    (when source-path
+      (setf (getf input :source-path)
+            (article-allegation-stable-manifest-path source-path repo-root)))
+    (setf (getf manifest :input) input)
+    (setf (getf manifest :dry-run-root) nil)
+    manifest))
+
 (defun article-allegation-git-branch (repo-root)
   (article-allegation-trimmed-string
    (uiop:run-program (list "git" "-C" (namestring repo-root) "branch" "--show-current")
@@ -1192,7 +1212,7 @@
      (with-output-to-string (stream)
        (let ((*print-right-margin* 100)
              (*print-pretty* t))
-         (pprint bundle stream)))))
+         (pprint (article-allegation-dry-run-manifest bundle) stream)))))
   bundle)
 
 (defun article-allegation-write-live-bundle (bundle)
