@@ -175,6 +175,27 @@ PAGE-LOOKUP-FAILURE."
                           :select "examples")
         (views:html (:tt (views:esc display))))))
 
+(defmethod views:text-representation ((target git-commit-target))
+  (commit-hash-of target))
+
+(views:defview 👀commit (target git-commit-target)
+  (views:html-view :title "Commit" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (loop for (label . value) in (git-commit-metadata target)
+                    do (views:html
+                         (:tr (:td (views:esc label))
+                              (:td (:tt (views:esc value))))))))))
+
+(views:defview 👀patch (target git-commit-target)
+  (views:html-view :title "Patch" :priority 2
+    (views:html
+      (:pre (views:esc
+             (git-command-output
+              (repo-root-of target)
+              "show" "--stat" "--patch" "--no-color"
+              (commit-hash-of target)))))))
+
 (defun render-system-scope-table (systems)
   (views:html
     (:table :class "inspector-table"
