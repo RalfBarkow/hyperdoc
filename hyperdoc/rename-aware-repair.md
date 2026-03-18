@@ -132,77 +132,66 @@ Otherwise the user can view the right page, but the red link and lookup issue re
 ## Exact Codex handoff
 
 ```text
-Add a rename-aware repair operation for HyperDoc page lookup failures.
+Read AGENTS.md and repomix-output-hyperdoc.md first. Then execute only the slice below.
 
-Problem
-- HyperDoc HTML pages are keyed by their current title extracted from the first
-  heading/title tag.
-- When an authored page link still points to the old title after a page rename,
-  lookup fails as a missing hyperdoc page.
-- The current repair suggestion "scaffold hyperdoc page" is wrong for rename
-  cases and leads to duplicate-page pressure instead of link migration.
+Task
+- Add a rename-aware repair operation for HyperDoc page lookup failures.
+- Add the repair operation name "Retarget to renamed page".
+- When a HyperDoc page link fails because it still points at an old page title,
+  offer plausible renamed-page candidates and let the user retarget the authored
+  link to the selected existing page.
 
-Goal
-- Add a page-lookup-issue repair operation that finds plausible existing renamed
-  target pages and rewrites the broken authored link to the selected page.
+In scope
+- hyperdoc-explorer/lookup-repairs.lisp
+- directly coupled issue construction or repair-view files only if needed for
+  this behavior:
+  - hyperbook-explorer/lookup-failures.lisp
+  - hyperbook-explorer/link-views.lisp
+  - hyperdoc-explorer/html-pages.lisp
 
-New repair operation
-- Name: "Retarget to renamed page"
+Out of scope
+- FedWiki lookup repair behavior
+- non-HyperDoc HyperBook lookup repair behavior
+- unrelated scaffold-plan redesign or chunk-architecture refactors
+- visible link-text rewriting unless you add that as a separate explicit action
+- HyperDoc page documentation updates unless they directly document the new
+  repair behavior
 
-Applies when
-- issue target hyperbook is "hyperdoc"
-- issue target kind is hyperdoc page
-- issue is currently open because the expected page id does not resolve
-- at least one plausible existing page candidate can be found in the target
-  HyperDoc
+Done when
+- a missing HyperDoc page lookup can surface rename candidates when the current
+  page id does not resolve but plausible existing titles do
+- the Repair tab lets the user inspect and apply "Retarget to renamed page"
+- selecting a candidate rewrites the source link target from the old page id to
+  the selected page title
+- the operation preserves visible link text by default
+- true missing-page cases still leave scaffold repair available as the fallback
+- FedWiki and generic non-HyperDoc lookup behavior remain unchanged
 
-Behavior
-1. Gather current pages from target HyperDoc.
-2. Rank candidate pages against the missing expected page id.
-3. Show a candidate list in the Repair tab.
-4. When the user selects a candidate:
-   - rewrite the source markup in the source page so that
-     page="<old-id>"
-     becomes
-     page="<selected-candidate-title>"
-   - preserve visible link text unless there is an explicit separate operation to
-     align it
-   - reload the source page / target HyperDoc
-   - re-evaluate the issue so it can become fixed
+Docs coupling
+- Update HyperDoc pages only if they directly document the new repair behavior.
+- Do not broaden into unrelated lookup-issue design notes.
 
-Candidate ranking heuristics
-- token overlap between old expected id and candidate title
-- normalized slug similarity
-- optional filename/title continuity if cheaply available
-- optional backlink/context overlap if already available
-- no automatic rewrite without user selection
+Validation
+- Authoritative repo-shell validation:
+  nix develop --command sbcl --no-userinit --non-interactive \
+    --eval '(require :asdf)' \
+    --eval '(asdf:load-system :hyperdoc)' \
+    --quit
+- Validate the named scenario in code or a narrow smoke test:
+  - rename page title "HyperBook Journal Tools" -> "FedWiki Journal Tools in HyperDoc"
+  - leave one inbound authored link pointing at the old title
+  - confirm the issue offers the renamed target candidate
+  - retarget the link
+  - confirm the link resolves and the issue becomes fixed
+- Repo diff, if needed:
+  nix develop --command git diff -- hyperdoc-explorer/lookup-repairs.lisp hyperbook-explorer/lookup-failures.lisp hyperbook-explorer/link-views.lisp hyperdoc-explorer/html-pages.lisp
 
-UI
-- In page-lookup-issue Repair tab:
-  - section "Rename candidates"
-  - one action per candidate: "Retarget link"
-  - keep "Scaffold hyperdoc page" only as fallback when no candidate is correct
-
-Suggested issue classification refinement
-- current failure classification can remain "missing hyperdoc page"
-- add a derived repair hint such as:
-  "possible renamed hyperdoc page"
-  when candidates exist
-
-Validation scenario
-- rename page title:
-  "HyperBook Journal Tools"
-  ->
-  "FedWiki Journal Tools in HyperDoc"
-- leave an inbound authored link in a Related section pointing to old title
-- confirm page-lookup-issue appears
-- confirm Repair tab offers renamed target candidate
-- retarget link
-- confirm link resolves and issue becomes fixed
-
-Do not
-- auto-create a duplicate page for rename cases
-- auto-change visible link text during retarget unless explicitly chosen
+Return format
+- Surface answer
+- Artifact answer
+- Exact files changed
+- Conventional commit message
+- Remaining risks or unresolved edges
 ```
 
 The right conceptual split is:

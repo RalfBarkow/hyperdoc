@@ -1,0 +1,128 @@
+<h1>Codex handover for HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the single canonical durable guidance for handing a HyperDoc
+  slice to Codex. Keep repository-wide operating rules in <tt>AGENTS.md</tt>,
+  and use the task prompt only for the current slice contract and end-state
+  inventory target.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Single-slice Codex thread"><tt>Single-slice Codex thread</tt></a></li>
+  <li><a hyperbook="topics" page="Filled task slice"><tt>Filled task slice</tt></a></li>
+  <li><a hyperbook="topics" page="Prompt-local slice contract"><tt>Prompt-local slice contract</tt></a></li>
+  <li><a hyperbook="topics" page="Authoritative nix develop validation"><tt>Authoritative nix develop validation</tt></a></li>
+  <li><a hyperbook="topics" page="Inventory outcome"><tt>Inventory outcome</tt></a></li>
+  <li><a hyperbook="topics" page="Continuity shell by design"><tt>Continuity shell by design</tt></a></li>
+  <li><a hyperbook="topics" page="Exact outcome reporting"><tt>Exact outcome reporting</tt></a></li>
+  <li><a hyperbook="topics" page="Reconstruction protocol"><tt>Reconstruction protocol</tt></a></li>
+</ul>
+
+<h2>Canonical structure</h2>
+
+<ol>
+  <li>State one concrete task slice and keep one Codex thread on that slice only.</li>
+  <li>Name the exact files in scope and the exact paths out of scope.</li>
+  <li>Record the architectural boundary that must stay intact.</li>
+  <li>State the done-when end state, including any durable inventory target when page consolidation or replacement is part of the slice.</li>
+  <li>Name the authoritative validation command and any repo-shell git verification command that must be reported.</li>
+  <li>Require the standard return format with exact reporting of files changed, commands run, and outcomes.</li>
+</ol>
+
+<h2>Boundary between AGENTS and the task prompt</h2>
+
+<p>
+  <tt>AGENTS.md</tt> holds durable repo rules such as execution-environment
+  policy, validation triage, documentation-surface distinctions, and
+  return-shape conventions. The prompt should stay slice-local: the current
+  task, the file boundary, the done-when state, the validation command, any
+  inventory target, and the completion contract.
+</p>
+
+<h2>Stable handover rules</h2>
+
+<ul>
+  <li>Use one Codex thread for one slice only.</li>
+  <li>Do not send placeholders when the task is already concrete enough to fill in.</li>
+  <li>Prefer an explicit file boundary over a broad subsystem request.</li>
+  <li>Keep <tt>AGENTS.md</tt> authoritative for repo-wide execution, validation, and environment-triage rules; do not restate long host-vs-repo-shell guidance in slice prompts.</li>
+  <li>Prefer <tt>nix develop --command git ...</tt> when a prompt asks Codex to show repo diff or status.</li>
+  <li>Prefer fewer authored HyperDoc guidance files over preserving prompt iteration history as durable pages.</li>
+  <li>Keep adjacent documentation edits tightly coupled to the slice that justified them.</li>
+  <li>Ask for exact validation outcomes rather than generic success language.</li>
+</ul>
+
+<h2>Inventory outcome</h2>
+
+<p>
+  For this Codex-guidance cluster, the durable target is explicit: keep exactly
+  one authoritative page, <tt>Codex handover for HyperDoc</tt>, and keep
+  exactly one minimal non-authoritative continuity shell at the immediately
+  previous canonical title, <tt>Best handover to Codex for HyperDoc</tt>. That
+  shell remains by design, not as cleanup debt. Do not create or restore any
+  additional Codex-guidance pages; preserve older iteration history in git,
+  counterpart notes, or FedWiki journals instead.
+</p>
+
+<h2>Pasteable default implementation-slice prompt</h2>
+
+<pre>Read AGENTS.md and repomix-output-hyperdoc.md first. Then execute only the slice below.
+
+Task
+- [one concrete implementation or documentation change]
+
+In scope
+- [exact files]
+
+Out of scope
+- [exact files or directories]
+
+Done when
+- [exact end state]
+- [exact validation outcome]
+- [exact inventory outcome if page consolidation or replacement is part of the slice]
+
+Inventory outcome
+- End with exactly 1 authoritative Codex-guidance page in hyperdoc/: `hyperdoc/Codex handover for HyperDoc.html`
+- End with exactly 1 non-authoritative continuity shell: `hyperdoc/Best handover to Codex for HyperDoc.html`
+- Do not create or restore any additional Codex-guidance pages
+
+Docs coupling
+- Update HyperDoc pages only when they directly document this slice.
+- Keep any adjacent documentation edit directly coupled to the task that justified it.
+
+Validation
+- Authoritative repo-shell validation:
+  nix develop --command [exact command]
+- Repo diff or status, if needed:
+  nix develop --command git [diff|status] -- [exact files]
+
+Return format
+- Surface answer
+- Artifact answer
+- Exact files changed
+- Conventional commit message
+- Remaining risks or unresolved edges</pre>
+
+<h2>History handling</h2>
+
+<p>
+  Do not keep multiple authoritative HyperDoc prompt pages that differ only by
+  iteration wording such as <tt>best</tt>, <tt>updated</tt>, or <tt>v2</tt>.
+  Preserve working history in counterpart working notes, FedWiki journals, or
+  git history, while keeping this page as the single durable reference point.
+  For this cluster, the immediately previous canonical title remains as one
+  intentional minimal continuity shell and no more.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Canonical docs-topic split and coverage gate workflow">Canonical docs-topic split and coverage gate workflow</a></li>
+</ul>

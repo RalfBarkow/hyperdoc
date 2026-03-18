@@ -61,7 +61,7 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
 ## Notes for Agents
 
 - Prefer loading `hyperdoc/server` or `hyperbook/server` via ASDF, depending on scope.
-- Run all git steps through `nix shell nixpkgs#git -c ...` to ensure git is available and consistent in this environment.
+- Prefer repo git steps through `nix develop --command git ...` so git runs inside the same authoritative repo shell as validation; use `nix shell nixpkgs#git -c ...` only as a narrower fallback when the dev shell is unavailable.
 - Use `dev.sh` for local iteration and debugging; use `start.sh` for stricter startup behavior.
 - Content updates are often in `hyperdoc/`; runtime behavior typically lives in `hyperbook-server/` and `hyperdoc-explorer/`.
 - Treat HyperDoc pages and localhost FedWiki pages as connected communication surfaces. HyperDoc pages can be mirrored or linked to FedWiki counterparts in `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages` when workflows depend on wiki journaling/editing.
