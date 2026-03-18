@@ -1,0 +1,123 @@
+<h1>Drawing Automation and review materialization</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+Ward's <a hyperbook="fedwiki:search.dojo.fed.wiki" page="drawing-automation">Drawing Automation</a> note is directly relevant here. It shows a pattern where durable annotations embedded at the point of interaction are turned into automatically maintained diagrams, diffable in GitHub, and correctable through ordinary edit and pull-request workflows.
+</p>
+
+<h2>Why it matters for the current discussion</h2>
+
+<p>
+The current discussion is about turning review prose into inspectable review points and then into
+materializable issue objects. Drawing Automation adds one more important move:
+</p>
+
+<blockquote>
+<p>
+annotated source surface → extracted relations/events → generated visual maintenance surface
+</p>
+</blockquote>
+
+<p>
+That is very close to:
+</p>
+
+<blockquote>
+<p>
+review prose → extracted review points → review-materialization issues → generated trace/diagram surface
+</p>
+</blockquote>
+
+<h2>Relevant carry-over from Drawing Automation</h2>
+
+<ul>
+  <li>Annotations live close to the place where the important interaction happens.</li>
+  <li>The generated diagram is derivative, not the primary authored artifact.</li>
+  <li>The SVG diff becomes part of the maintenance story.</li>
+  <li>Errors in the model are corrected by editing the source annotation, then regenerating.</li>
+  <li>Different perspectives can be rendered from the same underlying relation stream.</li>
+</ul>
+
+<h2>What the equivalent would be here</h2>
+
+<p>
+For HyperDoc review materialization, the authored source would not be shell-script comments but
+durable review points or issue objects.
+The generated outputs would be:
+</p>
+
+<ul>
+  <li>a review-materialization issue inspector</li>
+  <li>a review-materialization trace</li>
+  <li>a generated SVG or similar diagram of source page → target page/section → proposed change → verification</li>
+</ul>
+
+<h2>Perspective is the key imported idea</h2>
+
+<p>
+Ward's examples use perspectives such as <tt>Index</tt>, <tt>Query</tt>, <tt>Status</tt>, and <tt>Debug</tt>.
+That same design move should be reused here.
+For example, one review bundle could be rendered from several perspectives:
+</p>
+
+<ul>
+  <li><tt>Authoring</tt> — what pages/sections need edits</li>
+  <li><tt>Topics</tt> — what topic merges, aliases, or new factories are proposed</li>
+  <li><tt>Lookup</tt> — what review points correspond to missing pages or topic links</li>
+  <li><tt>Verification</tt> — what smoke tests or acceptance checks are still missing</li>
+</ul>
+
+<h2>Why this is stronger than prose review alone</h2>
+
+<p>
+A prose review mixes findings, evidence, recommendations, and ordering.
+Drawing Automation suggests separating those:
+author the durable relation/event annotations once, then derive multiple maintenance surfaces from them.
+That reduces duplication and makes correction local.
+</p>
+
+<h2>Suggested HyperDoc vocabulary additions</h2>
+
+<ul>
+  <li><tt>Drawing Automation</tt> as a topic</li>
+  <li><tt>Review points</tt> as a topic</li>
+  <li><tt>Generate review materialization diagram</tt> as an operation</li>
+  <li><tt>Review materialization issue surface</tt> as the inspectable page/object</li>
+</ul>
+
+<h2>Concrete relation to the Drew slice</h2>
+
+<p>
+The Drew review could become the first worked example.
+Each accepted review point would be encoded as a small structured object with:
+source page, source section, target page, target section, classification, suggested materialization,
+and verification.
+From that bundle, HyperDoc could generate:
+</p>
+
+<ul>
+  <li>a list view of open review points</li>
+  <li>a page-lookup-issue-like inspector for each point</li>
+  <li>a diagram showing how the review changes propagate across pages, topics, and tests</li>
+</ul>
+
+<h2>Minimal first slice</h2>
+
+<ol>
+  <li>Add a durable topic/page pair for <tt>Drawing Automation</tt>.</li>
+  <li>Define one machine-readable review-point structure.</li>
+  <li>Render one issue inspector from that structure.</li>
+  <li>Render one simple SVG from the same structure.</li>
+  <li>Use Git history or generated diff surfaces to compare revisions of the review diagram.</li>
+</ol>
+
+<h2>Bottom line</h2>
+
+<p>
+Yes: Drawing Automation is not just adjacent inspiration.
+It gives the missing automation pattern for the review-materialization work:
+keep the authored semantics close to the source, generate visual maintenance surfaces automatically,
+and let corrections happen by editing the underlying review-point annotations rather than hand-redrawing
+the diagrams.
+</p>

@@ -1,0 +1,185 @@
+<h1>DITA-like task topics for the Drew McDermott patch review</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+These task topics rewrite the earlier patch review into explicit procedural pages.
+They follow the local HyperDoc pattern for documenting one concrete capability or maintenance move
+as a teachable task surface.
+</p>
+
+<h2>Task 1: Clean the mixed patch into a coherent Drew McDermott documentation slice</h2>
+
+<p><b>Context</b></p>
+<p>
+The patch currently mixes multiple concerns: the Drew McDermott import pages, topic-merge guidance,
+review-materialization design notes, and an unrelated ASDF ops-examples page. Split it before
+committing so each slice has one durable purpose.
+</p>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>The patch is available locally.</li>
+  <li>You can inspect page titles, links, and topic references in HyperDoc.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Keep the Drew import pages together as one slice:
+    <ul>
+      <li><tt>Drew McDermott Lisp, Planning, and Software</tt></li>
+      <li><tt>Drew McDermott topic arrangement</tt></li>
+      <li><tt>YTools, Nisp, Nity, Opt, and Optop</tt></li>
+      <li><tt>PDDL and Opt in Drew McDermott's work</tt></li>
+      <li><tt>Litlisp as experimental literate programming</tt></li>
+      <li><tt>A framework for maintaining the coherence of a running Lisp</tt></li>
+    </ul>
+  </li>
+  <li>Move review-materialization and Drawing Automation pages into a separate design slice.</li>
+  <li>Move the ASDF ops-examples documentation page into its own ASDF slice.</li>
+  <li>Do not commit the mixed patch as one docs change.</li>
+</ol>
+
+<p><b>Result</b></p>
+<p>
+You have one commit-sized documentation slice for the Drew import instead of one patch that mixes
+content import, review process design, and unrelated ASDF guidance.
+</p>
+
+<h2>Task 2: Materialize the Drew McDermott topic layer in <tt>hyperdoc/topics.lisp</tt></h2>
+
+<p><b>Context</b></p>
+<p>
+The patch currently adds a proposed snippet file but does not merge the resulting topic factories into
+the durable topic-factory layer. That leaves topic links unresolved.
+</p>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>You understand that topic pages in HyperBook <tt>topics</tt> are rebuilt from authored topic factories in <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li>You can search existing topic titles before adding new ones.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Open <tt>hyperdoc/drew-mcdermott-topics-snippet.lisp</tt>.</li>
+  <li>For each proposed topic title, search <tt>hyperdoc/topics.lisp</tt> for an exact existing <tt>:title</tt>.</li>
+  <li>If the title already exists, merge into the existing factory instead of adding a duplicate factory.</li>
+  <li>If there is no exact title match, check aliases, near-duplicates, or broader existing topics before adding a new factory.</li>
+  <li>Add only genuinely new topic factories to <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li>Do not leave the snippet file as the only place where the topic definitions exist.</li>
+</ol>
+
+<p><b>Result</b></p>
+<p>
+The Topics HyperBook can rebuild the Drew topic pages from durable factories instead of surfacing
+missing topic-page lookup issues.
+</p>
+
+<h2>Task 3: Normalize <tt>Nisp</tt> and <tt>YNisp</tt> before linking both as settled topics</h2>
+
+<p><b>Context</b></p>
+<p>
+The review already says that <tt>Nisp</tt> and <tt>YNisp</tt> should first be treated as an
+alias/scope decision, not automatically as two final topic pages.
+</p>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>The Drew import pages are editable.</li>
+  <li>The topic-arrangement page is part of the slice.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Add one short normalization paragraph to <tt>Drew McDermott topic arrangement</tt> under <b>Boundary</b>.</li>
+  <li>State that absent an exact title match, the import checks aliases, near-duplicates, and broader existing topics before adding a fresh factory.</li>
+  <li>Name <tt>Nisp</tt> / <tt>YNisp</tt> as the immediate example.</li>
+  <li>In the Drew content pages, avoid presenting both as settled separate topic links until that editorial decision is made.</li>
+  <li>Use one canonical topic link or prose such as <tt>Nisp / YNisp</tt> if the normalization decision is still pending.</li>
+</ol>
+
+<p><b>Result</b></p>
+<p>
+The pages no longer overstate the current editorial decision about topic identity.
+</p>
+
+<h2>Task 4: Consolidate duplicate merge-guidance pages into one durable HyperDoc page</h2>
+
+<p><b>Context</b></p>
+<p>
+The patch contains overlapping merge-guidance pages, including a full-document HTML page that does
+not match normal HyperDoc fragment style and still contains the invalid <tt>&lt;title keyed&gt;</tt> fragment.
+</p>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>You can edit or delete duplicate documentation pages.</li>
+  <li>You want one durable merge procedure page, not a review stack.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Keep one canonical page for the merge procedure, preferably <tt>How to merge proposed topic additions into hyperdoc/topics.lisp</tt>.</li>
+  <li>Fold the valid review corrections into that page.</li>
+  <li>Delete or restack the duplicate <tt>Merge proposed topic additions into hyperdoc:topics.lisp</tt> page.</li>
+  <li>Remove the invalid <tt>&lt;title keyed&gt;</tt> fragment.</li>
+  <li>Keep the page in normal HyperDoc fragment form rather than full <tt>&lt;html&gt;</tt>/<tt>&lt;head&gt;</tt>/<tt>&lt;body&gt;</tt> wrapper form.</li>
+</ol>
+
+<p><b>Result</b></p>
+<p>
+There is one durable merge-guidance page instead of overlapping review artifacts.
+</p>
+
+<h2>Task 5: Repair page-form and asset defects before treating the slice as finished</h2>
+
+<p><b>Context</b></p>
+<p>
+The patch still contains concrete defects that will weaken the slice even if the documentation direction is sound.
+</p>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>You can inspect page markup and linked local assets.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Fix the malformed paragraph in <tt>Relating the review contents to existing HyperDoc topics and pages</tt>.</li>
+  <li>Remove the stray closing <tt>&lt;/tt&gt;</tt> in <tt>Review materialization issue surface</tt>.</li>
+  <li>Either add <tt>page_lookup_issue_flow.svg</tt> to the slice or remove the reference from <tt>Repair Drew McDermott missing topic page</tt>.</li>
+  <li>Recheck all new page titles and links for exact topic-title targets.</li>
+</ol>
+
+<p><b>Result</b></p>
+<p>
+The slice no longer carries avoidable markup and missing-asset defects.
+</p>
+
+<h2>Task 6: Verify the Drew slice after topic and page cleanup</h2>
+
+<p><b>Context</b></p>
+<p>
+The slice is only credible after the topics resolve, pages open, and the most important new links stop producing lookup issues.
+</p>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>The topic factories have been merged into <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li>The documentation pages have been cleaned.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Reload the relevant HyperDoc systems.</li>
+  <li>Check that the key new topic functions are <tt>fboundp</tt>.</li>
+  <li>Check that the topic pages resolve by canonical title in HyperBook <tt>topics</tt>.</li>
+  <li>Open the Drew pages and inspect their <b>Lookup issues</b> views.</li>
+  <li>Add or extend a slice smoke test in the existing merged-doc-slices style.</li>
+</ol>
+
+<p><b>Result</b></p>
+<p>
+The Drew import is no longer just authored prose; it is a replayable and verified documentation slice.
+</p>

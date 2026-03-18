@@ -1,0 +1,3 @@
+# Parallelpoesie
+
+Der Begriff „Parallelpoesie” bezeichnet eine Form, bei der mehrere Ausdruckslinien nebeneinander bestehen bleiben, anstatt sofort zu einer einzigen maßgeblichen Formulierung zusammengefasst zu werden. Während die vollständig demokratische Mitbestimmungsprosa das übergeordnete Problem der Kollaborations-Theorie darstellt, ermöglicht die Parallelpoesie, Abweichungen so lange zu bewahren, bis eine weitere Auswahl getroffen wird. 

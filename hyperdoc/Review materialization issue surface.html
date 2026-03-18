@@ -1,0 +1,237 @@
+<h1>Review materialization issue surface</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+A review should not stay a blob of prose once it contains actionable changes against durable HyperDoc pages, topics, sections, and tests. It can be transformed into a first-class inspectable object, parallel to <tt>page-lookup-issue</tt>, but aimed at <strong>materialization of proposed edits</strong> rather than lookup failure alone.
+</p>
+
+<h2>Proposed object name</h2>
+
+<p>
+I would not call the main object <tt>review-lookup-issue</tt>, because many review items are not
+lookup failures. A better pair is:
+</p>
+
+<ul>
+  <li><tt>review-materialization-issue</tt> — one actionable review finding</li>
+  <li><tt>review-materialization-plan</tt> — the scaffold or patch plan attached to that finding</li>
+</ul>
+
+<p>
+If you want a narrower sibling specifically for missing pages discovered while reading a review,
+that can still be a subclass such as <tt>review-missing-page-issue</tt>.
+</p>
+
+<h2>Why this matches the existing surface model</h2>
+
+<ul>
+  <li><tt>page-lookup-issue</tt> already turns a failure into an inspectable object with provenance, classification, and repair context.</li>
+  <li><tt>Diagramming Debugger Surface</tt> already treats execution steps as inspectable events that can be diagrammed.</li>
+  <li>A review is similar: it contains findings, each with source provenance, a target object, a classification, and a candidate change path.</li>
+</ul>
+
+<p>
+So the natural move is:
+review prose → parsed findings → inspectable issue objects → materialization plan → optional write/apply → trace/diagram.
+</p>
+
+<h2>Minimal data model for one issue</h2>
+
+<pre>(defclass review-materialization-issue ()
+  ((source-page
+    :initarg :source-page
+    :reader source-page-of)
+   (source-section
+    :initarg :source-section
+    :reader source-section-of)
+   (review-fragment
+    :initarg :review-fragment
+    :reader review-fragment-of)
+   (target-hyperbook
+    :initarg :target-hyperbook
+    :reader target-hyperbook-of)
+   (target-kind
+    :initarg :target-kind
+    :reader target-kind-of)
+   (target-page
+    :initarg :target-page
+    :reader target-page-of)
+   (target-section
+    :initarg :target-section
+    :reader target-section-of)
+   (classification
+    :initarg :classification
+    :reader classification-of)
+   (current-status
+    :initarg :current-status
+    :reader current-status-of)
+   (suggested-materialization
+    :initarg :suggested-materialization
+    :reader suggested-materialization-of)
+   (materialization-description
+    :initarg :materialization-description
+    :reader materialization-description-of)
+   (materialization-thunk
+    :initarg :materialization-thunk
+    :reader materialization-thunk-of)
+   (evidence
+    :initarg :evidence
+    :reader evidence-of)))</pre>
+
+<h2>Useful classifications</h2>
+
+<ul>
+  <li><tt>needs-paragraph-tightening</tt></li>
+  <li><tt>needs-alias-normalization</tt></li>
+  <li><tt>needs-broader-topic-scope-check</tt></li>
+  <li><tt>needs-cross-link-to-existing-page</tt></li>
+  <li><tt>needs-topic-factory-merge</tt></li>
+  <li><tt>needs-smoke-test</tt></li>
+  <li><tt>duplicate-guidance-page</tt></li>
+  <li><tt>wrong-page-form</tt> for full-document HTML where a normal HyperDoc fragment is expected</tt></li>
+</ul>
+
+<h2>Suggested tabs on the inspector</h2>
+
+<ul>
+  <li><b>Overview</b> — same style as <tt>page-lookup-issue</tt>: source, target, classification, current status, suggested materialization</li>
+  <li><b>Evidence</b> — the exact review sentence plus the target page paragraph(s) it refers to</li>
+  <li><b>Plan</b> — the proposed edit, scaffold, or merge operation</li>
+  <li><b>Diff</b> — textual before/after for the exact paragraph or list</li>
+  <li><b>Trace</b> — event sequence for locating anchors, computing the change, and optionally applying it</li>
+  <li><b>Condition</b> — any underlying failure or ambiguity object</li>
+  <li><b>Slots</b>, <b>Print</b>, <b>Operations</b>, <b>Playground</b> — consistent with your other inspectable objects</li>
+</ul>
+
+<h2>Top-level actions</h2>
+
+<ul>
+  <li><b>Open source</b></li>
+  <li><b>Open target</b></li>
+  <li><b>Show evidence</b></li>
+  <li><b>Scaffold</b></li>
+  <li><b>Preview diff</b></li>
+  <li><b>Apply</b> or <b>Export patch</b></li>
+  <li><b>Needs materialization</b></li>
+  <li><b>Fixed</b></li>
+  <li><b>Defer</b></li>
+</ul>
+
+<h2>What one concrete issue would look like for the Drew slice</h2>
+
+<pre>Source page:
+  Review of the first merge-proposed-topic-additions HTML
+
+Source section:
+  5. The procedure should add an alias-and-scope check
+
+Target page:
+  Drew McDermott topic arrangement
+
+Target section:
+  Boundary
+
+Classification:
+  needs-alias-normalization
+
+Current status:
+  open
+
+Suggested materialization:
+  add editorial normalization paragraph
+
+Materialization description:
+  Add one paragraph saying that absent an exact title match, the import checks
+  aliases, near-duplicates, and broader existing topics before adding a fresh
+  topic factory. Mention Nisp / YNisp as the immediate case.</pre>
+
+<h2>Current Drew slice as issue bundle</h2>
+
+<p>
+The review you already have can be decomposed into a small bundle of materialization issues:
+</p>
+
+<ol>
+  <li><b>Merge-guidance normalization:</b> fold the review into one normal HyperDoc fragment page instead of keeping duplicate full-document HTML pages.</li>
+  <li><b>Alias normalization note:</b> add a paragraph to <tt>Drew McDermott topic arrangement</tt> covering exact-title first, then alias/scope normalization.</li>
+  <li><b>Nisp / YNisp decision:</b> revise the inspectable objects lists in the Drew pages so they do not pretend the two-topic decision is already settled.</li>
+  <li><b>Running-image distinction:</b> add one paragraph to <tt>A framework for maintaining the coherence of a running Lisp</tt> distinguishing it from the existing source/image boundary pages.</li>
+  <li><b>Repair-trace sharpening:</b> rewrite the “Recommended next slice” section in <tt>Repair Drew McDermott missing topic page</tt> so it explicitly mirrors <tt>Diagramming Debugger Surface</tt>.</li>
+  <li><b>Acceptance:</b> add a McDermott slice smoke test in the existing merged-doc-slices style.</li>
+</ol>
+
+<h2>Trace model</h2>
+
+<p>
+To make the surface diagrammable, wrap each issue's plan execution in a trace object:
+</p>
+
+<pre>(defclass review-materialization-trace ()
+  ((issue :initarg :issue :reader issue-of)
+   (events :initarg :events :reader events-of)
+   (result :initarg :result :reader result-of)))</pre>
+
+<p>
+Typical events:
+</p>
+
+<ol>
+  <li>Locate source review paragraph</li>
+  <li>Locate target page and section</li>
+  <li>Read current target text</li>
+  <li>Compute proposed insertion / replacement / merge</li>
+  <li>Render preview diff</li>
+  <li>Optionally apply or export patch</li>
+  <li>Run verification</li>
+</ol>
+
+<p>
+That gives you the same kind of inspectable sequence that the Diagramming Debugger surface gives
+for stepped execution.
+</p>
+
+<h2>Why the attached missing-page issue is a good clue</h2>
+
+<p>
+The screenshot you attached is actually a good motivator for this design.
+A review page already produces concrete actionable surfaces when it points at a page title that
+does not yet exist. But right now that only appears accidentally, via ordinary page lookup.
+The next step is to make <em>all</em> actionable review findings materialize deliberately, not
+only missing-page cases.
+</p>
+
+<h2>Recommended implementation path</h2>
+
+<ol>
+  <li>Create a plain domain object <tt>review-materialization-issue</tt> and one inspector view.</li>
+  <li>Start with manual construction from a small list of known review findings.</li>
+  <li>Add a <tt>review-materialization-plan</tt> object that can return scaffold text, paragraph insertion text, or a patch preview.</li>
+  <li>Add a <tt>review-materialization-trace</tt> object and a <b>Trace</b> tab.</li>
+  <li>Only after the inspectable path is good, add direct write/apply operations.</li>
+</ol>
+
+<h2>Smallest first slice</h2>
+
+<p>
+The smallest strong slice is:
+</p>
+
+<ul>
+  <li>one issue object</li>
+  <li>one inspector surface styled like <tt>page-lookup-issue</tt></li>
+  <li>one issue bundle page for the Drew review</li>
+  <li>one plan type for paragraph insertion</li>
+  <li>one trace view showing source → target → proposed paragraph → verification</li>
+</ul>
+
+<h2>Bottom line</h2>
+
+<p>
+Yes: transform the review into a step-by-step instruction surface.
+Conceptually, the right generalization is not merely <tt>review-lookup-issue</tt> but
+<tt>review-materialization-issue</tt> plus <tt>review-materialization-trace</tt>.
+That would let each proposed review change appear as a first-class inspectable object with the same
+kind of provenance, classification, repair plan, and diagrammable execution path that you already
+value in <tt>page-lookup-issue</tt> and <tt>Diagramming Debugger Surface</tt>.
+</p>

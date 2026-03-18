@@ -1,0 +1,149 @@
+<h1>Using a local Common Lisp HyperSpec as a loadable ASDF system</h1>
+
+<p>
+The clean design is not “load all HyperSpec HTML into Lisp objects”.
+It is:</p>
+
+<ol>
+  <li>keep a complete, unmodified local HyperSpec tree inside a dedicated ASDF system,</li>
+  <li>have that system expose the filesystem root of the local copy,</li>
+  <li>mount that root under your HyperDoc server on your own origin,</li>
+  <li>generate local HyperSpec URLs from symbol lookups.</li>
+</ol>
+
+<p>
+LispWorks explicitly provides a downloadable HyperSpec archive, and the official legal page allows copying, distribution, display, and transmission only if the copy is complete and unmodified and retains the required notices, links, and images. Modified copies and derivative works are expressly not permitted.
+</p>
+
+<p>
+That means: package the HyperSpec verbatim, but do not rewrite its pages, inject HyperDoc chrome into them, or patch its links. Keep your own navigation outside the HyperSpec document.
+</p>
+
+<h2>Best practical choice</h2>
+
+<p>
+There is already a thin ASDF wrapper system named <code>clhs</code>. Its reference manual says the <code>HyperSpec-7-0</code> directory in that system is a complete and unmodified copy of LispWorks’ Common Lisp HyperSpec 7.0, and that the wrapper exposes support such as <code>hyperspec-root</code> and install/setup helpers.
+</p>
+
+<p>
+Separately, the <code>hyperspec</code> library provides a <code>lookup</code> function that maps a Common Lisp symbol to the appropriate HyperSpec URL, and a <code>*hyperspec-root*</code> variable that can point at a local root.
+</p>
+
+<p>
+So the most robust split is:</p>
+
+<ul>
+  <li><code>clhs</code> (or your own vendored equivalent) for the static corpus</li>
+  <li><code>hyperspec</code> for symbol-to-page lookup</li>
+</ul>
+
+<h2>Recommended repository shape</h2>
+
+<pre><code>hyperdoc-clhs.asd
+hyperdoc-clhs/
+  package.lisp
+  main.lisp
+vendor/
+  HyperSpec-7-0/
+    HyperSpec/
+      Front/
+      Body/
+      Data/
+      Issues/
+      ...</code></pre>
+
+<h2>Minimal ASDF system</h2>
+
+<pre><code>(defsystem #:hyperdoc/clhs
+  :description "Local Common Lisp HyperSpec mount for HyperDoc"
+  :author "Ralf Barkow"
+  :license "Wrapper code only; HyperSpec remains under LispWorks terms"
+  :serial t
+  :depends-on (#:asdf #:uiop)
+  :components ((:file "hyperdoc-clhs/package")
+               (:file "hyperdoc-clhs/main")))</code></pre>
+
+<h2>Package</h2>
+
+<pre><code>(defpackage #:hyperdoc/clhs
+  (:use #:cl)
+  (:export
+   #:*mount-path*
+   #:root-directory
+   #:root-url
+   #:local-url
+   #:register-static-mount))</code></pre>
+
+<h2>Main implementation</h2>
+
+<pre><code>(in-package #:hyperdoc/clhs)
+
+(defparameter *mount-path* "/hyperspec/")
+
+(defun root-directory ()
+  (merge-pathnames #P"vendor/HyperSpec-7-0/HyperSpec/"
+                   (asdf:system-source-directory :hyperdoc/clhs)))
+
+(defun root-url (&amp;optional (mount-path *mount-path*))
+  mount-path)
+
+(defun local-url (relative-path &amp;optional (mount-path *mount-path*))
+  (format nil "~A~A"
+          mount-path
+          (string-left-trim "/" relative-path)))
+
+(defun register-static-mount ()
+  ;; Replace this body with the exact HyperDoc/HyperBook server hook you use.
+  ;; The important part is: mount ROOT-DIRECTORY at *MOUNT-PATH*.
+  (values *mount-path* (root-directory)))</code></pre>
+
+<h2>Using the existing lookup library</h2>
+
+<pre><code>(ql:quickload '("clhs" "hyperspec"))
+
+(setf hyperspec:*hyperspec-root* "http://localhost:8080/hyperspec/")
+(hyperspec:lookup 'cl:defclass)
+;; =&gt; "http://localhost:8080/hyperspec/Body/m_defcla.htm"</code></pre>
+
+<p>
+If you want the URL to stay origin-relative inside HyperDoc, either store only the relative tail or post-process the returned URL once and swap the canonical root for your local mount root.
+</p>
+
+<h2>How this fits HyperDoc</h2>
+
+<p>
+Your “HyperSpec page for defclass” pane should stop pointing at <code>https://www.lispworks.com/...</code> and instead point at something like <code>/hyperspec/Body/m_defcla.htm</code> on your own server. Then Firefox is no longer dealing with a foreign site that forbids framing.
+</p>
+
+<p>
+The page remains the official HTML payload, just locally served.
+</p>
+
+<h2>Important constraint</h2>
+
+<p>
+Do not transform the HyperSpec files in place. If you want extra controls such as backlinks, annotations, provenance, or “open source definition” affordances, wrap them around the iframe or alongside it in HyperDoc. Do not inject them into the copied HyperSpec itself.
+</p>
+
+<h2>Recommendation</h2>
+
+<p>
+For your project, I would choose one of these two paths:</p>
+
+<ol>
+  <li><b>Fastest:</b> depend on the existing <code>clhs</code> system and mount its bundled <code>HyperSpec-7-0/HyperSpec/</code> directory locally.</li>
+  <li><b>Most reproducible for HyperDoc:</b> vendor the official archive into your repository as <code>vendor/HyperSpec-7-0/</code> and add a tiny <code>hyperdoc/clhs</code> wrapper system exactly like above.</li>
+</ol>
+
+<p>
+I would prefer the second option for HyperDoc because it makes the documentation corpus an explicit part of the project state and avoids relying on an external Quicklisp artifact at runtime.
+</p>
+
+<h2>Sources</h2>
+
+<ul>
+  <li>LispWorks says a downloadable HyperSpec archive is available from its documentation downloads page.</li>
+  <li>The HyperSpec legal page allows copying/distribution/display/transmission only for complete, unmodified copies and expressly disallows modified copies and derivative works.</li>
+  <li>The <code>clhs</code> reference manual describes an existing thin ASDF wrapper around a complete unmodified HyperSpec 7.0 copy.</li>
+  <li>The <code>hyperspec</code> library documents <code>lookup</code> and <code>*hyperspec-root*</code> for symbol-to-URL mapping with a local root.</li>
+</ul>

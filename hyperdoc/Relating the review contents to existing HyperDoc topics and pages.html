@@ -1,0 +1,175 @@
+<h1>Relating the review contents to existing HyperDoc topics and pages</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+This note maps the review points onto the existing HyperDoc surface model so the
+Drew McDermott slice can be edited in the same style as the rest of the repository.
+</p>
+
+<p>
+  See also <a page="Review of the first merge-proposed-topic-additions HTML">Review of the first merge-proposed-topic-additions HTML</a>
+</p>
+
+<h2>1. Relate the merge-rule review to the existing Topic factory page</h2>
+
+<p>
+The strongest existing anchor is <a page="Topic factory">topic factory</a>. That page already says that a
+topic factory in <tt>hyperdoc/topics.lisp</tt> is the durable reconstruction point for a
+topic page, that the authored fields are <tt>:id</tt>, <tt>:title</tt>, <tt>:summary</tt>,
+and <tt>:references</tt>, and that the canonical title is the exact topic-page title.
+Use that page as the explicit justification for the first-pass exact-title check.
+</p>
+
+<p>
+Then tighten the new merge-guidance page so it does not overclaim. The rule should read:
+first check exact <tt>:title</tt>; then check aliases, near-duplicates, or broader existing
+topics; only then add a new factory.
+</p>
+
+<h2>2. Relate the function-name review to the existing stable-id paragraph</h2>
+
+<p>
+The existing <a page="Topic factory">Topic factory</a> page already separates stable id from canonical title.
+That is the right place to ground the review point that function-name stability is only a
+workflow preference, while <tt>:id</tt> and <tt>:title</tt> are the semantic continuity
+points.
+</p>
+
+<p>
+So in the <a page="Merge proposed topic additions into hyperdoc/topics.lisp">merge-guidance page</a>, replace “keep the existing function name” with a narrower formulation: keep the existing <tt>:id</tt> and canonical <tt>:title</tt>; keep the
+existing function name when that reduces churn.
+</p>
+
+<p>NB: On which page can I find instructions on how to merge? <a page="Merge proposed topic additions into hyperdoc/topics.lisp">Merge proposed …</a> or <a page="How to merge proposed topic additions into hyperdoc/topics.lisp">How to merge …</a>
+
+<h2>3. Relate the alias/scope review to the existing Documentation Surfaces page</h2>
+
+<p>
+The page <a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a> already explains that arrangement pages record editorial neighborhood without asserting full semantic equivalence, and that topic objects are inspectable semantic handles with stable identity. That is exactly the surface boundary you need for the review’s alias-and-scope point.
+</p>
+
+<p>
+So the place to record decisions like <tt>Nisp</tt> versus <tt>YNisp</tt> is not only the merge-guidance page. It should also appear in <a page="Drew McDermott topic arrangement">Drew McDermott topic arrangement</a> as an editorial normalization note.
+</p>
+
+<h2>4. Apply that alias/scope step directly to the Drew pages</h2>
+
+<p>
+Right now the patch links both <tt>Nisp</tt> and <tt>YNisp</tt> as if they are already
+settled as separate topic pages. But the review point says that this must first be treated
+as an alias-normalization decision.
+</p>
+
+<p>
+So edit the Drew pages in this order:
+</p>
+
+<ol>
+  <li>In <a page="Drew McDermott topic arrangement">Drew McDermott topic arrangement</a>, add one short paragraph under <b>Boundary</b> that says the import first checks whether later names such as <tt>YNisp</tt> should be absorbed into an existing canonical topic such as <tt>Nisp</tt>.</li>
+  <li>In <a page="Drew McDermott Lisp, Planning, and Software">Drew McDermott Lisp, Planning, and Software</a>, do not keep both links until that decision is made. Use one canonical link, or prose like <tt>Nisp / YNisp</tt> with only the canonical topic linked.</li>
+  <li>In <a page="YTools, Nisp, Nity, Opt, and Optop">YTools, Nisp, Nity, Opt, and Optop</a>, move the naming distinction into the paragraph text if you decide there should be only one topic.</li>
+</ol>
+
+<h2>5. Relate “Running image coherence” to the existing source/image boundary page</h2>
+
+<p>
+The patch introduces <tt>Running image coherence</tt>. Existing HyperDoc already has the page
+<tt>Source-oriented and image-oriented development in Common Lisp</tt> plus the topic
+<tt>Live image versus durable source</tt>. That means the new title should not float alone.
+</p>
+
+<p>
+If you keep <tt>Running image coherence</tt> as a new topic, add one explicit paragraph in <a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a> that distinguishes it from the existing source/image boundary: the older page is about workflow modes and rebuild authority, while the new topic is about internal consistency and intelligibility of an evolving live image.
+</p>
+
+<h2>6. Relate the repair/trace page to the existing Diagramming Debugger Surface</h2>
+
+<p>
+The page <a page="Diagramming Debugger Surface">Diagramming Debugger Surface</a> already says that the debugger is an inspectable object that wraps the existing Playground stepper and records one event per attempted top-level form. That is the direct model for your proposed repair trace.
+</p>
+
+<p>
+So in <a page="Repair Drew McDermott missing topic page">Repair Drew McDermott missing topic page</a>, sharpen the “Recommended next slice” paragraph to say that <tt>lookup-repair-trace</tt> should be a sibling design: an inspectable wrapper around repair-thunk execution that records phase events and then renders a diagram surface.
+</p>
+
+<h2>7. Relate the slice boundary to the existing Definitive Common Lisp Books page</h2>
+
+<p>
+The existing books page is a practical reading map, not a catch-all import sink. That supports
+the earlier editorial decision that the McDermott material belongs as a narrow software/source
+cluster rather than as another “definitive book” unit.
+</p>
+
+<p>
+So the Drew pages should keep pointing outward to <a page="Definitive Common Lisp Books">Definitive Common Lisp Books</a> only as a neighbor, not as their primary home.
+</p>
+
+<h2>8. Relate the merge-guidance pages to existing HyperDoc page form</h2>
+
+<p>
+The current patch adds two full-document HTML files:
+<tt>Merge proposed topic additions into hyperdoc:topics.lisp.html</tt> and
+<tt>Review of the first merge-proposed-topic-additions HTML.html</tt>.
+That does not match the prevailing HyperDoc page form, where pages are HTML fragments with
+<tt>&lt;h1&gt;</tt>, optional <tt>&lt;in-package&gt;</tt>, and body content, not full
+<tt>&lt;html&gt;</tt>/<tt>&lt;head&gt;</tt>/<tt>&lt;body&gt;</tt> wrappers.
+</p>
+
+<p>
+So the review should be integrated into one normal HyperDoc page, not kept as a second full
+HTML document. The better outcome is:
+merge the revised review points into one durable page such as
+<tt>How to merge proposed topic additions into hyperdoc/topics.lisp</tt>, and delete the
+duplicate full-document variants.
+</p>
+
+<h2>9. Relate the title-lookup claim to the existing code</h2>
+
+<p>
+The current topics implementation registers topics by both id and title, and <tt>make-topic</tt>
+reuses an existing topic when either id or title already matches. That supports the review’s
+claim that duplicate <tt>:title</tt> values are operationally dangerous, but it also means that
+id continuity matters alongside title continuity.
+</p>
+
+<p>
+So the merge-guidance page should mention both:
+exact title is the first practical lookup key for authored links, and stable id is the
+durable identity key for the topic object itself.
+</p>
+
+<h2>10. Relate the slice to existing smoke-test practice</h2>
+
+<p>
+Your current smoke-test file already uses the pattern:
+assert the topic function is fboundp, then assert the topic page resolves by title,
+then assert the durable HyperDoc page exists. The Drew slice should follow exactly that pattern.
+</p>
+
+<p>
+So the review content should end with a repository-local acceptance step:
+add a small McDermott slice smoke test instead of leaving verification only as prose.
+</p>
+
+<h2>Concrete edit plan</h2>
+
+<ol>
+  <li>Keep <tt>Drew McDermott Lisp, Planning, and Software</tt>, <tt>Drew McDermott topic arrangement</tt>, <tt>YTools, Nisp, Nity, Opt, and Optop</tt>, <tt>PDDL and Opt in Drew McDermott's work</tt>, <tt>Litlisp as experimental literate programming</tt>, and <tt>A framework for maintaining the coherence of a running Lisp</tt>.</li>
+  <li>Fold the review into a single normal HyperDoc fragment page for merge guidance; drop the duplicate full-document review pages.</li>
+  <li>Add one alias-normalization paragraph to <tt>Drew McDermott topic arrangement</tt>.</li>
+  <li>Normalize <tt>Nisp</tt>/<tt>YNisp</tt> before keeping both as topic links.</li>
+  <li>Explicitly distinguish <tt>Running image coherence</tt> from <tt>Live image versus durable source</tt>.</li>
+  <li>Turn the repair note into a clearer sibling of <tt>Diagramming Debugger Surface</tt>.</li>
+  <li>Add a McDermott smoke test in the existing merged-doc-slices style.</li>
+</ol>
+
+<h2>Net result</h2>
+
+<p>
+The review becomes much stronger once it is tied to the repository’s existing surface model:
+<tt>Topic factory</tt> for identity and reconstruction, <tt>Documentation Surfaces in HyperDoc</tt>
+for page/topic/arrangement boundaries, <tt>Source-oriented and image-oriented development in Common Lisp</tt>
+for the live-image boundary, <tt>Diagramming Debugger Surface</tt> for inspectable trace design,
+and the existing smoke-test file for acceptance.
+</p>

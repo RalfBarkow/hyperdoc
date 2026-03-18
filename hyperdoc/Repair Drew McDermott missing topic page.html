@@ -1,0 +1,77 @@
+<h1>Repair Drew McDermott missing topic page</h1>
+
+<p>
+This note captures the immediate repair for the missing topic page <tt>Drew McDermott</tt>
+plus the runtime path that produced the <tt>page-lookup-issue</tt> object we inspected.
+</p>
+
+<h2>Immediate repair</h2>
+
+<p>
+The missing topic page is not a separate durable HTML file. In the current Topics HyperBook model,
+that page is rebuilt from an authored <a page="Topic factory">topic factory</a> in <tt>hyperdoc/topics.lisp</tt>.
+</p>
+
+<p>
+Add this function to <tt>hyperdoc/topics.lisp</tt>:
+</p>
+
+<pre>(defun drew-mcdermott-topic ()
+  (make-topic
+   :id "drew-mcdermott"
+   :title "Drew McDermott"
+   :summary "AI researcher whose public site is a useful HyperDoc anchor for Common Lisp software distribution, planning-language design, and the running-image versus durable-source boundary."
+   :references '("Drew McDermott Lisp, Planning, and Software"
+                 "A framework for maintaining the coherence of a running Lisp"
+                 "YTools, Nisp, Nity, Opt, and Optop"
+                 "PDDL and Opt in Drew McDermott's work"
+                 "Litlisp as experimental literate programming")))</pre>
+
+<p>
+Then reload HyperDoc and verify that <tt>topics/Drew McDermott</tt> resolves.
+</p>
+
+<h2>Why the repair currently stops at inspection</h2>
+
+<p>
+Our current repair flow attaches a repair thunk that returns a <tt>hyperdoc-authoring-scaffold-plan</tt>.
+For topic repairs this plan is in <tt>:topic</tt> mode, so it provides a template and metadata,
+but no direct write action. The existing direct write operation only handles <tt>:page</tt> mode.
+</p>
+
+<h2>Code path to the page-lookup-issue view</h2>
+
+<ol>
+  <li>The inspected HTML page exposes a <b>Lookup issues</b> tab.</li>
+  <li>That tab calls <tt>lookup-issues-of</tt> on the page object.</li>
+  <li>The <tt>html-page</tt> specialization walks page links and evaluates each link thunk.</li>
+  <li>When a link evaluation returns a lookup failure, HyperBook wraps it in a <tt>page-lookup-issue</tt>.</li>
+  <li><tt>enrich-lookup-issue</tt> sees target HyperBook <tt>topics</tt> and classifies the issue as a missing HyperDoc topic page.</li>
+  <li>The issue gets a repair thunk that calls <tt>plan-hyperdoc-authoring-scaffold</tt>.</li>
+  <li>The issue inspector then shows <b>Overview</b>, <b>Details</b>, <b>Repair</b>, and <b>Condition</b>.</li>
+</ol>
+
+<h2>Flow diagram</h2>
+
+<p>
+<img src="page_lookup_issue_flow.svg" alt="Lookup issue repair flow diagram" />
+</p>
+
+<h2>Recommended next slice</h2>
+
+<p>
+If you want this to feel closer to the <a page="Diagramming Debugger Surface">Diagramming Debugger surface</a> , the next small slice is not a blind auto-write.
+It is an inspectable repair trace object.
+</p>
+
+<ul>
+  <li>Wrap repair-thunk execution in a <tt>lookup-repair-trace</tt> object.</li>
+  <li>Record phases: link evaluation, issue creation, enrichment, repair planning, optional write/apply.</li>
+  <li>Add a <b>Trace</b> or <b>Diagram</b> action on <tt>page-lookup-issue</tt>.</li>
+  <li>Render a sequence/flow diagram from those recorded phases, just as the Diagramming Debugger derives diagrams from stepped execution.</li>
+</ul>
+
+<h2>Minimal acceptance check</h2>
+
+<pre>(fboundp 'hyperdoc::drew-mcdermott-topic)
+(hyperbook:find-page hyperdoc::*topics* "Drew McDermott" :signal-error? t)</pre>

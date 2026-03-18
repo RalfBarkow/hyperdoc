@@ -1,0 +1,131 @@
+<h1>Review of the first merge-proposed-topic-additions HTML</h1>
+
+<p>
+The draft is mostly on the right track. The core rule is good: use the exact
+canonical topic title as the first merge key, and do not create a second topic
+factory with the same <tt>:title</tt>.
+</p>
+
+<p>
+I would revise five parts.
+</p>
+
+<h2>1. Exact-title dedup is the first pass, not the whole policy</h2>
+
+<p>
+The current text makes exact-title matching sound sufficient by itself. It is
+not. It should be the first check, followed by editorial normalization for
+aliases, near-duplicates, and broader existing topics.
+</p>
+
+<p>
+That matters immediately in the Drew McDermott slice. <tt>Nisp</tt> and
+<tt>YNisp</tt> are presented by McDermott as effectively the same software line,
+not obviously two separate concepts that each require their own topic page. So
+before creating both topics, decide whether one should be the canonical topic
+and the other mentioned inside the summary or references.
+</p>
+
+<h2>2. One HTML fragment is invalid</h2>
+
+<p>
+This fragment is broken HTML:
+</p>
+
+<pre><code>&lt;title keyed&gt;</code></pre>
+
+<p>
+It will be parsed like an unknown HTML element, not shown as intended prose.
+Replace it with plain text such as <tt>title-keyed</tt>, or with an actual code
+term if you want to name a variable.
+</p>
+
+<h2>3. The justification should be stated more narrowly</h2>
+
+<p>
+The argument does not need the backlinks sentence, and it should avoid
+overstating internal implementation details unless you want to verify every one
+of them. The practical reason is simpler:
+</p>
+
+<blockquote>
+<p>
+Authored topic links target the topic page by canonical title, so duplicate
+<tt>:title</tt> values are the operational collision domain.
+</p>
+</blockquote>
+
+<p>
+That is enough to justify the merge rule.
+</p>
+
+<h2>4. "Keep the existing function name" is a workflow preference, not the semantic rule</h2>
+
+<p>
+The draft says that if a title already exists, you should keep the existing
+function name. That is a good low-churn editing habit, but it is weaker than
+keeping the existing <tt>:id</tt> and canonical <tt>:title</tt>. The important
+semantic continuity is title stability and stable topic identity. Function-name
+stability is useful, but secondary.
+</p>
+
+<h2>5. The procedure should add an alias-and-scope check</h2>
+
+<p>
+The recommended merge procedure should include one more step between exact-title
+lookup and adding a new topic:
+</p>
+
+<ol>
+  <li>Check for the exact <tt>:title</tt>.</li>
+  <li>If absent, check for an existing alias, synonym, or broader canonical topic that should absorb the new material.</li>
+  <li>Only then add a new topic factory.</li>
+</ol>
+
+<p>
+Without that step, you risk creating unnecessary parallel topics.
+</p>
+
+<h2>Suggested revised operational rule</h2>
+
+<blockquote>
+<p>
+Deduplicate first by exact <tt>:title</tt>. If there is no exact match, check
+for aliases, near-duplicates, or a broader existing canonical topic. Add a new
+factory only when the concept is genuinely new at the topic layer.
+</p>
+</blockquote>
+
+<h2>Suggested revised Drew McDermott guidance</h2>
+
+<p>
+For the Drew McDermott slice, do this per candidate concept:
+</p>
+
+<ul>
+  <li><tt>Drew McDermott</tt>: probably a new topic if absent.</li>
+  <li><tt>PDDL</tt>: likely merge into an existing topic if present.</li>
+  <li><tt>Nisp</tt> / <tt>YNisp</tt>: treat as an alias-normalization decision first, not as automatically two topics.</li>
+  <li><tt>Ontology translation</tt>, <tt>Estimated-regression planning</tt>, <tt>Autonomous process</tt>: check whether they are already covered under existing broader planning topics before adding fresh factories.</li>
+</ul>
+
+<h2>Suggested tightened replacement paragraph</h2>
+
+<p>
+Use the canonical topic title as the first merge key. If an exact title already
+exists in <tt>hyperdoc/topics.lisp</tt>, edit that factory in place rather than
+adding a second factory with the same <tt>:title</tt>. If no exact title exists,
+check for aliases, near-duplicates, or a broader existing topic that should
+absorb the new references. Add a new topic factory only when the concept is
+truly new at the Topics HyperBook layer.
+</p>
+
+<h2>Net assessment</h2>
+
+<p>
+So: the draft is directionally right, but I would change it from
+<b>title-first and title-only</b> to <b>title-first, then normalize aliases and
+scope</b>. I would also remove the broken <tt>&lt;title keyed&gt;</tt> fragment and
+soften the claims about internal mechanics unless you want to verify each one in
+code.
+</p>

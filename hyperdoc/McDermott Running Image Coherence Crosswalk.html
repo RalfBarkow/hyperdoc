@@ -1,0 +1,172 @@
+<h1>McDermott Running Image Coherence Crosswalk</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page maps the concepts from Drew McDermott’s <a page="A framework for maintaining the coherence of a running Lisp">A Framework for Maintaining the Coherence of a Running Lisp</a> onto existing HyperDoc pages and topic vocabulary.
+</p>
+
+<h2>Layer 1 — Already Covered in HyperDoc</h2>
+
+<h3>Running Lisp Session Coherence</h3>
+<ul>
+  <li>Source-oriented and image-oriented development in Common Lisp</li>
+  <li>SBCL Process</li>
+  <li>Reloading HyperDoc After Adding Lisp Objects</li>
+</ul>
+
+<p>
+  The core problem—long-lived Lisp images becoming inconsistent during
+  iterative development—is already addressed operationally.
+</p>
+
+<h3>Lisp as Shell + Compiler</h3>
+<ul>
+  <li>SBCL</li>
+  <li>SBCL Process</li>
+  <li>HyperDoc Server</li>
+</ul>
+
+<h3>ASDF as Partial Solution</h3>
+<ul>
+  <li>Understanding ASDF Systems in HyperDoc</li>
+  <li>ASDF Components Workflow</li>
+  <li>ASDF Systems, Examples, and Tests in HyperDoc</li>
+</ul>
+
+<p>
+  HyperDoc already models system boundaries, load order, and reproducibility.
+</p>
+
+<h3>Reload / Stale Image Diagnosis</h3>
+<ul>
+  <li>Undefined-function triage</li>
+  <li>asdf:load-system :force t</li>
+</ul>
+
+<p>
+  This corresponds to McDermott’s observation that existing mechanisms are ad hoc.
+</p>
+
+<h2>Layer 2 — Structural Analogies (Partial Coverage)</h2>
+
+<h3>Managed vs Dormant State</h3>
+<ul>
+  <li>Portable examples in HyperDoc</li>
+  <li>Running HyperDoc Examples</li>
+</ul>
+
+<p>
+  Example systems behave like dormant chunks that become active when loaded.
+</p>
+
+<h3>Execution Evidence and Rebuild</h3>
+<ul>
+  <li>HyperDoc Test Runner</li>
+  <li>Execution evidence object</li>
+  <li>Check run / Check result</li>
+</ul>
+
+<p>
+  These resemble derived artifacts, but lack explicit dependency semantics.
+</p>
+
+<h3>Dynamic Runtime Mutation</h3>
+<ul>
+  <li>HyperDoc Evaluation and Inspection Model</li>
+  <li>Runtime Dispatch Seams in HyperDoc</li>
+</ul>
+
+<p>
+  HyperDoc acknowledges that the object graph changes during execution,
+  but does not formalize this as a dependency network.
+</p>
+
+<h2>Layer 3 — Missing McDermott Vocabulary (Gap)</h2>
+
+<p>
+  The following concepts are not yet first-class in HyperDoc.
+  They form the core of McDermott’s contribution.
+</p>
+
+<h3>Chunk Model</h3>
+<ul>
+  <li>Chunk</li>
+  <li>Given chunk</li>
+  <li>Derived chunk</li>
+  <li>File-segment chunk</li>
+</ul>
+
+<h3>Dependency Graph</h3>
+<ul>
+  <li>Chunk basis</li>
+  <li>Update basis</li>
+  <li>Immediate supporter</li>
+  <li>Supporting path</li>
+  <li>Leaf chunk</li>
+  <li>Chunk height</li>
+</ul>
+
+<h3>Disjunction and Alternatives</h3>
+<ul>
+  <li>Or-chunk</li>
+  <li>Default disjunct</li>
+</ul>
+
+<h3>Update Semantics</h3>
+<ul>
+  <li>chunks-update</li>
+  <li>Selective rederivation</li>
+  <li>Marking and reentrancy</li>
+</ul>
+
+<h3>Cycles</h3>
+<ul>
+  <li>Stable dependency cycle</li>
+  <li>Unstable dependency cycle</li>
+  <li>Lateral chains</li>
+</ul>
+
+<h3>Fine-Grained Rebuilding</h3>
+<ul>
+  <li>Declarative reload dependency</li>
+  <li>Fine-grained session rebuilding</li>
+</ul>
+
+<h2>Key Insight for HyperDoc</h2>
+
+<p>
+  HyperDoc already solves the <em>operational</em> problem:
+  how to reload, inspect, and test a running system.
+</p>
+
+<p>
+  McDermott provides the missing <em>semantic model</em>:
+  a first-class dependency graph over runtime objects,
+  enabling principled, minimal, and correct rederivation.
+</p>
+
+<p>
+  The integration path is therefore not replacing existing pages,
+  but introducing a new topic layer that explains:
+</p>
+
+<ul>
+  <li>what exactly is being kept coherent,</li>
+  <li>how dependencies are represented,</li>
+  <li>and how updates propagate through the running image.</li>
+</ul>
+
+<h2>Proposed Topic Handles</h2>
+
+<ul>
+  <li>running-image-coherence-topic</li>
+  <li>chunk-topic</li>
+  <li>derived-chunk-topic</li>
+  <li>chunk-basis-topic</li>
+  <li>update-basis-topic</li>
+  <li>or-chunk-topic</li>
+  <li>supporting-path-topic</li>
+  <li>dependency-cycle-topic</li>
+  <li>fine-grained-rebuild-topic</li>
+</ul>

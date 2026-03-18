@@ -1,0 +1,61 @@
+<h1>YTools, Nisp, Nity, Opt, and Optop</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The McDermott software page shows a small layered Lisp software stack rather than a set of
+  isolated downloads. That stack is worth preserving because it makes dependencies, intended
+  use, and conceptual escalation visible.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="YTools"><tt>YTools</tt></a></li>
+  <li><a hyperbook="topics" page="Lexiparse"><tt>Lexiparse</tt></a></li>
+  <li><a hyperbook="topics" page="Nisp"><tt>Nisp</tt></a></li>
+  <li><a hyperbook="topics" page="YNisp"><tt>YNisp</tt></a></li>
+  <li><a hyperbook="topics" page="Nity"><tt>Nity</tt></a></li>
+  <li><a hyperbook="topics" page="Opt"><tt>Opt</tt></a></li>
+  <li><a hyperbook="topics" page="Optop"><tt>Optop</tt></a></li>
+</ul>
+
+<h2>Layering visible on the site</h2>
+
+<ul>
+  <li><b>YTools:</b> a base utility layer for Lisp, including iteration aids,
+      formatted I/O, file management, and a rewritten file manager.</li>
+  <li><b>Lexiparse:</b> a precedence-grammar parser with lexer and translation
+      framework; it depends on <tt>YTools</tt>.</li>
+  <li><b>Nisp / YNisp:</b> a strongly typed Lisp dialect implemented as macros;
+      the newer form is described as <tt>YTools + ydecl</tt>.</li>
+  <li><b>Nity:</b> a polymorphic type system used by <tt>Opt</tt> and intended as a
+      future typing substrate for <tt>Nisp</tt>.</li>
+  <li><b>Opt:</b> a knowledge-representation language based on type theory and
+      positioned as a successor to PDDL.</li>
+  <li><b>Optop:</b> an estimated-regression planner on top of <tt>Opt</tt> that can
+      reason about autonomous processes.</li>
+</ul>
+
+<h2>Why this matters</h2>
+
+<p>
+  HyperDoc often needs examples of systems that are not just libraries but small conceptual
+  stacks. This one is valuable because utility support, type discipline, representation language,
+  and planning engine remain visible as distinct layers rather than collapsing into one opaque tool.
+</p>
+
+<h2>Import stance</h2>
+
+<p>
+  Preserve the stack as an explanatory page plus reusable topics. Do not treat the old installation
+  snippet as an operational recipe for current Common Lisp practice. It belongs as historical packaging
+  evidence, not as present-day advice for this repository.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="PDDL and Opt in Drew McDermott's work">PDDL and Opt in Drew McDermott's work</a></li>
+  <li><a page="Drew McDermott Lisp, Planning, and Software">Drew McDermott Lisp, Planning, and Software</a></li>
+</ul>

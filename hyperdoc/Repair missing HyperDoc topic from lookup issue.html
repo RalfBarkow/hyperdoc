@@ -1,0 +1,151 @@
+<h1>Repair missing HyperDoc topic from lookup issue</h1>
+
+<p>
+This export explains both requested artifacts:
+a DITA-like task topic and a Lisp repair function sketch for the issue-state facets
+shown in the attached screenshot.
+</p>
+
+<h2>DITA-like task topic</h2>
+
+<h3>Repair a missing HyperDoc topic from a page-lookup issue</h3>
+
+<p><b>Purpose</b></p>
+<p>
+Restore coherence when a page-lookup issue reports that a HyperDoc topic page is missing.
+This is the case shown in the screenshot for the missing topic page
+<code>Running image coherence</code>.
+</p>
+
+<p><b>When to use this task</b></p>
+<ul>
+  <li>Issue state includes <code>Open</code>.</li>
+  <li>Failure classification is a missing HyperDoc topic page.</li>
+  <li>Suggested repair is to scaffold a HyperDoc topic.</li>
+</ul>
+
+<p><b>Prerequisites</b></p>
+<ul>
+  <li>The missing link text has been inspected.</li>
+  <li>The target HyperBook is known to be <code>topics</code>.</li>
+  <li>You have write access to the HyperDoc source tree.</li>
+</ul>
+
+<p><b>Steps</b></p>
+<ol>
+  <li>Open the lookup issue and confirm the expected page id / slug.</li>
+  <li>Confirm whether the concept is absent entirely or only lacks materialization.</li>
+  <li>If the concept is absent entirely, add a new topic constructor in <code>topics.lisp</code>.</li>
+  <li>Create the corresponding HyperDoc page file with the canonical title.</li>
+  <li>Add minimal explanatory prose so the page is a durable topic anchor, not an empty stub.</li>
+  <li>If your workflow requires it, create or refresh the FedWiki twin counterpart.</li>
+  <li>Reload HyperDoc so the new topic constructor and page become available in the running image.</li>
+  <li>Re-run lookup or reload the source page containing the broken link.</li>
+  <li>Verify that the issue no longer reports as open.</li>
+  <li>Mark the issue fixed only after link resolution succeeds in the running system.</li>
+</ol>
+
+<p><b>Results</b></p>
+<ul>
+  <li>The previously missing topic page exists.</li>
+  <li>The link resolves in HyperDoc.</li>
+  <li>The issue can move from <code>Open</code> to <code>Fixed</code>.</li>
+</ul>
+
+<p><b>Troubleshooting</b></p>
+<ul>
+  <li>If the topic constructor exists but the page does not, treat this as <code>Needs materialization</code> rather than <code>Needs topic</code>.</li>
+  <li>If the page exists but lookup still fails, inspect title, page id mapping, and target HyperBook selection.</li>
+  <li>If the page resolves only after a cold restart, the running image likely had a load-set mismatch.</li>
+</ul>
+
+<h2>Lisp repair function sketch</h2>
+
+<pre>
+(defun repair-missing-topic-from-lookup-issue (issue &key create-fedwiki-twin-p)
+  "Repair a page-lookup issue whose target kind is a missing HyperDoc topic page.
+Returns a plist describing the performed work and verification result."
+
+  (labels ((issue-value (key)
+             (slot-value issue key))
+           (canonical-title ()
+             ;; prefer explicit expected page id / slug, fall back to link text
+             (or (issue-value 'expected-page-id)
+                 (issue-value 'link-text)))
+           (topic-handle-from-title (title)
+             ;; sketch only; adapt to your existing naming convention
+             (string-downcase
+              (substitute #\- #\Space title)))
+           (topic-page-path (title)
+             (merge-pathnames
+              (format nil "hyperdoc/~A.html" title)
+              (uiop:getcwd)))
+           (topic-constructor-present-p (title)
+             ;; replace with your real lookup against topics.lisp registrations
+             (declare (ignore title))
+             nil)
+           (page-present-p (title)
+             (probe-file (topic-page-path title)))
+           (write-topic-page (title)
+             (with-open-file (out (topic-page-path title)
+                                  :direction :output
+                                  :if-exists :supersede
+                                  :if-does-not-exist :create)
+               (format out "&lt;h1&gt;~A&lt;/h1&gt;~%~%&lt;in-package&gt;hyperdoc&lt;/in-package&gt;~%~%&lt;p&gt;Topic anchor.&lt;/p&gt;~%"
+                       title)))
+           (append-topic-constructor (title)
+             ;; sketch only; in the real system, edit topics.lisp structurally
+             (let ((handle (topic-handle-from-title title)))
+               (values handle t)))
+           (reload-hyperdoc ()
+             ;; replace with the exact load/reload operation you use
+             (asdf:load-system :hyperdoc))
+           (verify-repair (title)
+             ;; replace with real issue re-resolution / lookup check
+             (and (topic-constructor-present-p title)
+                  (page-present-p title))))
+
+    (let* ((title (canonical-title))
+           (had-constructor (topic-constructor-present-p title))
+           (had-page (page-present-p title))
+           (created-constructor nil)
+           (created-page nil)
+           (fedwiki-twin-created nil))
+
+      (unless had-constructor
+        (append-topic-constructor title)
+        (setf created-constructor t))
+
+      (unless had-page
+        (write-topic-page title)
+        (setf created-page t))
+
+      (when create-fedwiki-twin-p
+        ;; hook your FedWiki twin generation here
+        (setf fedwiki-twin-created t))
+
+      (reload-hyperdoc)
+
+      (let ((verified (verify-repair title)))
+        (list :title title
+              :created-constructor created-constructor
+              :created-page created-page
+              :created-fedwiki-twin fedwiki-twin-created
+              :verified verified
+              :next-status (if verified :fixed :open))))))
+</pre>
+
+<h2>How the labels fit together</h2>
+
+<ul>
+  <li><code>Open</code>: the issue is unresolved.</li>
+  <li><code>Publication</code>: the issue affects reader-facing published material.</li>
+  <li><code>Needs topic</code>: the concept node itself is missing.</li>
+  <li><code>Needs materialization</code>: the concept may exist, but its concrete page artifact is missing.</li>
+  <li><code>Fixed</code>: the link resolves again after repair and reload.</li>
+</ul>
+
+<p>
+This matches the screenshot's current diagnosis of a missing topic page for
+<code>Running image coherence</code>.
+</p>

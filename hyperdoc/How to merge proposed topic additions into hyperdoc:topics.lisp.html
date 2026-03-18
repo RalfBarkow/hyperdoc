@@ -1,0 +1,67 @@
+<h1>How to merge proposed topic additions into hyperdoc/topics.lisp</h1>
+
+<p>
+Use <strong>exact topic title</strong> as the merge key.
+</p>
+
+<p>
+That is the correct rule in the current Topics model because authored topic links resolve through a
+Topics HyperBook page title, and topic pages are rebuilt from topic-constructor functions and then
+registered by title. The real collision domain is duplicate <code>:title</code> values, not duplicate
+Lisp function names.
+</p>
+
+<h2>Merge rule</h2>
+
+<ol>
+  <li>For each proposed topic, search <code>hyperdoc/topics.lisp</code> for the exact <code>:title</code> string.</li>
+  <li>If that title already exists, edit the existing factory in place.</li>
+  <li>If that title does not exist, add a new <code>...-topic</code> factory.</li>
+  <li>Keep the existing canonical title stable unless you are intentionally doing a link migration, because title changes break authored <code>page=</code> targets until those links are updated.</li>
+</ol>
+
+<h2>What to merge when the title already exists</h2>
+
+<ul>
+  <li>Usually keep the existing <code>:id</code>.</li>
+  <li>Usually keep the existing <code>:title</code>.</li>
+  <li>Tighten or broaden <code>:summary</code> only if the concept itself really changed.</li>
+  <li>Append new page titles to <code>:references</code> only when they actually belong to that topic.</li>
+</ul>
+
+<p>
+Do not add a second topic factory with a different Lisp function name but the same <code>:title</code>.
+That creates a duplicate title collision in the topic-page layer.
+</p>
+
+<h2>Applied to the Drew McDermott slice</h2>
+
+<ul>
+  <li><code>Drew McDermott</code> is likely a new topic, so add a new factory if that exact title does not already exist.</li>
+  <li><code>PDDL</code> may already exist. If it does, merge into the existing <code>PDDL</code> topic instead of creating another one.</li>
+  <li>Apply the same rule to reusable concepts such as <code>Ontology translation</code> or <code>Autonomous process</code>.</li>
+</ul>
+
+<h2>Practical workflow</h2>
+
+<ol>
+  <li>Open the proposed snippet.</li>
+  <li>For each proposed <code>:title</code>, grep or search <code>hyperdoc/topics.lisp</code>.</li>
+  <li>Reuse the existing topic function when the title already exists.</li>
+  <li>Add only truly new titles as new topic factories.</li>
+  <li>Reload <code>:hyperdoc</code> or the relevant system.</li>
+  <li>Verify that the topic resolves by title.</li>
+</ol>
+
+<h2>Minimal verification</h2>
+
+<pre>
+(asdf:load-system :hyperdoc/explorer)
+
+(fboundp 'hyperdoc::drew-mcdermott-topic)
+(hyperbook:find-page hyperdoc::*topics* "Drew McDermott" :signal-error? t)
+</pre>
+
+<p>
+Durable rule: <strong>deduplicate by exact <code>:title</code></strong>; reuse and edit the existing factory when the title already exists; add a new factory only for titles that do not yet exist.
+</p>

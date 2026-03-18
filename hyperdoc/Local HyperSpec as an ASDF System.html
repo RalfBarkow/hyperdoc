@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Local HyperSpec as an ASDF System</title>
+</head>
+<body>
+  <h1>Local HyperSpec as an ASDF System</h1>
+  <p>
+    The official LispWorks documentation page links to a downloadable archive of the Common Lisp HyperSpec.
+    A local HyperDoc integration should keep that archive complete and unmodified, wrap it in a tiny ASDF system,
+    and serve it from the same origin as HyperDoc. <a href="https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/913836/topic/915747/related">related</a>
+  </p>
+
+  <h2>Recommended layout</h2>
+  <pre>
+my-project/
+  hyperdoc-clhs.asd
+  hyperdoc-clhs/
+    package.lisp
+    main.lisp
+  vendor/
+    HyperSpec-7-0/
+      HyperSpec/
+        Front/
+        Body/
+        Data/
+        Issues/
+        ...
+  </pre>
+
+  <h2>ASDF system</h2>
+  <pre>
+(defsystem #:hyperdoc/clhs
+  :description "Local Common Lisp HyperSpec mount for HyperDoc"
+  :depends-on (#:asdf #:uiop)
+  :serial t
+  :components ((:file "hyperdoc-clhs/package")
+               (:file "hyperdoc-clhs/main")))
+  </pre>
+
+  <h2>Package</h2>
+  <pre>
+(defpackage #:hyperdoc/clhs
+  (:use #:cl)
+  (:export
+   #:*mount-path*
+   #:root-directory
+   #:root-url
+   #:local-url))
+  </pre>
+
+  <h2>Main</h2>
+  <pre>
+(in-package #:hyperdoc/clhs)
+
+(defparameter *mount-path* "/hyperspec/")
+
+(defun root-directory ()
+  (merge-pathnames #P"vendor/HyperSpec-7-0/HyperSpec/"
+                   (asdf:system-source-directory :hyperdoc/clhs)))
+
+(defun root-url (&amp;optional (mount-path *mount-path*))
+  mount-path)
+
+(defun local-url (relative-path &amp;optional (mount-path *mount-path*))
+  (format nil "~A~A"
+          mount-path
+          (string-left-trim "/" relative-path)))
+  </pre>
+
+  <h2>Operational rule</h2>
+  <p>
+    Keep the HyperSpec tree unmodified. Add HyperDoc controls, annotations, and provenance outside the copied files.
+  </p>
+</body>
+</html>

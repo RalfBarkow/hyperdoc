@@ -1,0 +1,293 @@
+<h1>Declarative chunk wiring for page-lookup issues and first real Topics chunk</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+In this repository, a Topics HyperBook page is not backed by a separate HTML file. Topic pages are derived from authored topic factories discovered in <tt>hyperdoc/topics.lisp</tt>, indexed into <tt>*topics-by-id*</tt> and <tt>*topics-by-title*</tt>, and then resolved by canonical topic title in HyperBook <tt>topics</tt>.
+</p>
+
+<h2>Repository-grounded consequences</h2>
+
+<ul>
+  <li>A missing topic-page lookup is not primarily “missing HTML page file”.</li>
+  <li>It is primarily “missing authored topic factory and/or stale topic index”.</li>
+  <li>The running target proposition is: the Topics HyperBook resolves the expected canonical title.</li>
+</ul>
+
+<h2>Part 1: Wire chunks into page-lookup-issue objects</h2>
+
+<pre>
+(defparameter +no-info-date+ -1)
+
+(defclass hd-chunk ()
+  ((id :initarg :id :reader chunk-id)
+   (managed-p :initarg :managed-p :initform t :accessor managed-p)
+   (last-derived-at :initarg :last-derived-at :initform nil :accessor last-derived-at)))
+
+(defgeneric chunk-basis (chunk))
+(defmethod chunk-basis ((chunk hd-chunk)) nil)
+
+(defgeneric chunk-update-basis (chunk))
+(defmethod chunk-update-basis ((chunk hd-chunk)) nil)
+
+(defgeneric derive-chunk (chunk))
+(defgeneric derive-date (chunk))
+(defmethod derive-date ((chunk hd-chunk))
+  (last-derived-at chunk))
+
+(defgeneric chunk-up-to-date-p (chunk))
+(defmethod chunk-up-to-date-p ((chunk hd-chunk))
+  (let ((my-date (derive-date chunk)))
+    (cond
+      ((or (null my-date)
+           (eql my-date +no-info-date+))
+       nil)
+      (t
+       (every (lambda (basis)
+                (let ((basis-date (derive-date basis)))
+                  (and basis-date
+                       (not (eql basis-date +no-info-date+))
+                       (&lt;= basis-date my-date))))
+              (chunk-basis chunk))))))
+
+(defgeneric ensure-chunk (chunk))
+(defmethod ensure-chunk ((chunk hd-chunk))
+  (when (managed-p chunk)
+    (dolist (b (chunk-basis chunk))
+      (ensure-chunk b))
+    (dolist (b (chunk-update-basis chunk))
+      (ensure-chunk b))
+    (unless (chunk-up-to-date-p chunk)
+      (let ((changed-at (derive-chunk chunk)))
+        (when changed-at
+          (setf (last-derived-at chunk) changed-at)))))
+  chunk)
+
+(defun issue-expected-title (issue)
+  (or (hyperbook:lookup-issue-expected-page-id-of issue)
+      (hyperbook:lookup-issue-link-text-of issue)))
+
+(defun issue-target-topic-title-p (issue)
+  (string= (or (hyperbook:lookup-issue-target-hyperbook-id-of issue) "")
+           "topics"))
+
+(defgeneric issue-target-chunk (issue))
+
+(defmethod issue-target-chunk ((issue hyperbook:lookup-issue))
+  (cond
+    ((issue-target-topic-title-p issue)
+     (make-instance 'topic-page-availability-chunk
+                    :id (list :topic-page-availability
+                              (issue-expected-title issue))
+                    :title (issue-expected-title issue)))
+    (t
+     nil)))
+
+(defun repair-lookup-issue-via-chunks (issue)
+  (let ((chunk (issue-target-chunk issue)))
+    (unless chunk
+      (error "No declarative target chunk for ~S" issue))
+    (ensure-chunk chunk)))
+
+(defun chunk-tree (chunk)
+  (list :chunk chunk
+        :basis (mapcar #'chunk-tree (chunk-basis chunk))
+        :update-basis (mapcar #'chunk-tree (chunk-update-basis chunk))))
+
+(defun derive-lookup-issue-repair-hints (issue)
+  (let ((chunk (issue-target-chunk issue)))
+    (cond
+      ((null chunk)
+       '(:no-chunk-model))
+      ((chunk-up-to-date-p chunk)
+       '(:fixed))
+      ((typep chunk 'topic-page-availability-chunk)
+       (let ((title (topic-title chunk)))
+         (append
+          (when (null (find-authored-topic-factory-by-title title))
+            '(:needs-topic-creation))
+          (when (eq *topic-index-state* :stale)
+            '(:needs-local-materialization)))))
+      (t
+       '(:open)))))
+
+(defun maybe-mark-issue-from-chunk-state! (issue)
+  (let ((chunk (issue-target-chunk issue)))
+    (when chunk
+      (setf (hyperbook:lookup-issue-status-of issue)
+            (if (chunk-up-to-date-p chunk)
+                :fixed
+                :open))))
+  issue)
+</pre>
+
+<p>
+This keeps the existing manual status buttons available, but adds a derived
+coherence path. The issue now points to a target chunk instead of a handwritten
+repair script.
+</p>
+
+<h2>Part 2: First real chunk end-to-end for Topics</h2>
+
+<p>
+The first real chunk should match the actual Topics implementation:
+</p>
+
+<ul>
+  <li><b>topic-factory-definition-chunk</b>: an authored factory exists in <tt>hyperdoc/topics.lisp</tt></li>
+  <li><b>topic-index-chunk</b>: the in-image topic indexes reflect authored factories</li>
+  <li><b>topic-page-availability-chunk</b>: HyperBook <tt>topics</tt> resolves the canonical title</li>
+</ul>
+
+<pre>
+(defclass topic-factory-definition-chunk (hd-chunk)
+  ((title :initarg :title :reader topic-title)))
+
+(defclass topic-index-chunk (hd-chunk) ())
+
+(defclass topic-page-availability-chunk (hd-chunk)
+  ((title :initarg :title :reader topic-title)))
+
+(defun topics-source-path ()
+  (asdf:system-relative-pathname :hyperdoc "hyperdoc/topics.lisp"))
+
+(defun topics-file-write-date ()
+  (or (ignore-errors (file-write-date (topics-source-path)))
+      +no-info-date+))
+
+(defun title-&gt;stable-key (title)
+  (string-downcase
+   (with-output-to-string (out)
+     (loop for ch across title
+           do (write-char (if (char= ch #\Space) #\- ch) out)))))
+
+(defun title-&gt;factory-symbol (title)
+  (intern (format nil "~A-TOPIC" (string-upcase (title-&gt;stable-key title)))
+          :hyperdoc))
+
+(defun make-placeholder-topic-form (title)
+  (let ((stable-key (title-&gt;stable-key title)))
+    (format nil
+            "~%~%(defun ~A ()~%  (make-topic~%   :id ~S~%   :title ~S~%   :summary ~S~%   :references '()))~%"
+            (symbol-name (title-&gt;factory-symbol title))
+            stable-key
+            title
+            "TODO: add summary.")))
+
+(defun append-placeholder-topic-factory! (title)
+  (with-open-file (out (topics-source-path)
+                       :direction :output
+                       :if-exists :append
+                       :if-does-not-exist :error)
+    (write-string (make-placeholder-topic-form title) out)))
+
+(defun find-authored-topic-factory-by-title (title)
+  (hyperdoc::ensure-topic-indexes)
+  (or (ignore-errors (hyperdoc::find-topic-by-title title))
+      (let ((symbol (title-&gt;factory-symbol title)))
+        (when (and (fboundp symbol)
+                   (ignore-errors
+                     (typep (funcall symbol) 'hyperdoc::topic)))
+          symbol))))
+
+(defmethod derive-date ((chunk topic-factory-definition-chunk))
+  (if (find-authored-topic-factory-by-title (topic-title chunk))
+      (topics-file-write-date)
+      +no-info-date+))
+
+(defmethod derive-chunk ((chunk topic-factory-definition-chunk))
+  (if (find-authored-topic-factory-by-title (topic-title chunk))
+      nil
+      (progn
+        (append-placeholder-topic-factory! (topic-title chunk))
+        (topics-file-write-date))))
+
+(defmethod derive-date ((chunk topic-index-chunk))
+  (if (eq hyperdoc::*topic-index-state* :ready)
+      (or (last-derived-at chunk) +no-info-date+)
+      +no-info-date+))
+
+(defmethod derive-chunk ((chunk topic-index-chunk))
+  (hyperdoc::rebuild-topic-indexes)
+  (get-universal-time))
+
+(defmethod chunk-basis ((chunk topic-page-availability-chunk))
+  (list
+   (make-instance 'topic-factory-definition-chunk
+                  :id (list :topic-factory-definition (topic-title chunk))
+                  :title (topic-title chunk))
+   (make-instance 'topic-index-chunk
+                  :id '(:topic-index))))
+
+(defmethod derive-date ((chunk topic-page-availability-chunk))
+  (handler-case
+      (progn
+        (hyperbook:find-page hyperdoc::*topics* (topic-title chunk) :signal-error? t)
+        (or (derive-date (make-instance 'topic-index-chunk :id '(:topic-index)))
+            +no-info-date+))
+    (error ()
+      +no-info-date+)))
+
+(defmethod derive-chunk ((chunk topic-page-availability-chunk))
+  ;; This chunk should become true once its basis has been ensured.
+  ;; It exists to express the lookup proposition itself.
+  (handler-case
+      (progn
+        (hyperbook:find-page hyperdoc::*topics* (topic-title chunk) :signal-error? t)
+        nil)
+    (error ()
+      ;; Rebuild once more defensively in case the image is stale.
+      (hyperdoc::rebuild-topic-indexes)
+      (hyperbook:find-page hyperdoc::*topics* (topic-title chunk) :signal-error? t)
+      (get-universal-time))))
+</pre>
+
+<h2>How the first real target chunk behaves</h2>
+
+<p>
+For a lookup issue against HyperBook <tt>topics</tt> with expected page id
+<tt>Running image coherence</tt>, the target chunk is:
+</p>
+
+<pre>
+(make-instance 'topic-page-availability-chunk
+               :id '(:topic-page-availability "Running image coherence")
+               :title "Running image coherence")
+</pre>
+
+<p>
+Calling <tt>ensure-chunk</tt> on that chunk means:
+</p>
+
+<ol>
+  <li>ensure the authored topic factory exists, appending a placeholder factory to <tt>hyperdoc/topics.lisp</tt> if needed</li>
+  <li>rebuild the runtime topic indexes</li>
+  <li>verify that HyperBook <tt>topics</tt> now resolves the canonical title</li>
+</ol>
+
+<p>
+That is the chunk-based replacement for the old “repair function”.
+</p>
+
+<h2>Where this fits the current UI</h2>
+
+<ul>
+  <li>The existing title-bar buttons still work as editorial/manual status markers.</li>
+  <li>The chunk model provides a derived coherence path underneath them.</li>
+  <li>The Repair tab can show:
+    <ul>
+      <li>target chunk</li>
+      <li>basis tree</li>
+      <li>derived repair hints</li>
+      <li>action button: <tt>Derive target chunk</tt></li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Most important correction to the earlier model</h2>
+
+<p>
+Do <b>not</b> model a Topics HyperBook repair as writing a separate topic HTML
+page file. In this repository, Topics pages are generated from authored topic
+factories plus rebuilt indexes, not from standalone topic-page HTML files.
+</p>

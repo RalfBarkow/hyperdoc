@@ -1,0 +1,53 @@
+<h1>Official ASDF documentation relevant to HyperDoc ops examples</h1>
+
+<p>
+There is no official ASDF concept named <tt>ops examples</tt>. In HyperDoc,
+that is a repo-local name for the ASDF subsystem <tt>:hyperdoc/examples/ops</tt>,
+described as "Ops and local example content for HyperDoc" and as a narrower
+layer for local or operational workflows.
+</p>
+
+<h2>Most relevant official ASDF links</h2>
+
+<ul>
+  <li><a href="https://asdf.common-lisp.dev/">ASDF project home</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html">ASDF Manual</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#The-defsystem-form">ASDF Manual: The defsystem form</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#The-defsystem-grammar">ASDF Manual: The defsystem grammar</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#Operations">ASDF Manual: Operations</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#Predefined-operations-of-ASDF">ASDF Manual: Predefined operations of ASDF</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#Creating-new-operations">ASDF Manual: Creating new operations</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#Components">ASDF Manual: Components</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#Common-attributes-of-components">ASDF Manual: Common attributes of components</a></li>
+  <li><a href="https://asdf.common-lisp.dev/asdf.html#Dependencies">ASDF Manual: Dependencies</a></li>
+</ul>
+
+<h2>Why these are the right links</h2>
+
+<p>
+HyperDoc's <tt>:hyperdoc/examples/ops</tt> is just an ordinary ASDF system boundary.
+So the relevant official ASDF concepts are: how a subsystem is defined with
+<tt>defsystem</tt>, how files and modules are declared as components, how one
+system depends on another, and what ASDF means by an operation such as
+<tt>load-op</tt> or <tt>test-op</tt>.
+</p>
+
+<h2>Practical reading order</h2>
+
+<ol>
+  <li>The defsystem form</li>
+  <li>The defsystem grammar</li>
+  <li>Components</li>
+  <li>Dependencies</li>
+  <li>Operations</li>
+  <li>Predefined operations of ASDF</li>
+  <li>Creating new operations</li>
+</ol>
+
+<h2>HyperDoc-specific conclusion</h2>
+
+<p>
+If you want to understand <tt>ops examples</tt> in your repository, read them as
+"examples that live in their own ASDF subsystem for operational/local material,"
+not as an official ASDF feature category.
+</p>

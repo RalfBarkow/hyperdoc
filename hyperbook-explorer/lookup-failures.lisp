@@ -1,6 +1,7 @@
 ;;;; Structured lookup issues for failed HyperBook links
 ;;
-;;;; Copyright (c) 2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Part of HyperDoc
+;;;; See LICENSE for licensing information.
 
 (in-package :hyperbook)
 

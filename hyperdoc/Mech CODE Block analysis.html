@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mech CODE Block analysis</title>
+</head>
+<body>
+  <h1>Mech CODE Block analysis</h1>
+
+  <p>
+    I read Ward's page as a proposal for one new Mech capability layered on top of a much larger
+    client-side Mech that already exists: execute a dynamically created JavaScript module against
+    the current Mech state and then continue with the rest of the block. <a href="https://chatgpt.com/g/g-p-68b1afbede4c8191be613fef9c8571ae-fedwiki/c/69ba3fae-df54-838c-a1dd-35b18ce1cadc">chatgpt</a>
+  </p>
+
+  <h2>What already exists</h2>
+
+  <p>
+    The newer Mech already has the surrounding execution path that Ward's example wants.
+    <code>CLICK</code> runs an indented body on demand. <code>NEIGHBORS</code> populates
+    <code>state.neighborhood</code> from sitemap entries collected from the browser's neighborhood cache.
+    <code>PREVIEW</code> can open a result page, and <code>PREVIEW ... items</code> already expects
+    <code>state.items</code>. <code>SOLO</code> is also already present in the current Mech block catalog.
+  </p>
+
+  <p>
+    This means the proposed example is structurally coherent:
+  </p>
+
+  <pre><code>CLICK
+  NEIGHBORS next
+  CODE
+  PREVIEW synopsis items</code></pre>
+
+  <p>
+    The missing step is simply: after <code>NEIGHBORS</code>, run code that turns
+    <code>state.neighborhood</code> entries into reference items and stores them in
+    <code>state.items</code>.
+  </p>
+
+  <h2>Why the state shape matches</h2>
+
+  <p>
+    The current <code>NEIGHBORS</code> block stores an array of neighborhood page records in
+    <code>state.neighborhood</code>. Those records come from site sitemaps and include the fields needed
+    for this example: domain, slug, title, and synopsis. The current wiki-server tests also confirm that
+    sitemap entries include <code>synopsis</code> and <code>links</code>.
+  </p>
+
+  <p>
+    So the proposed module body is the right transformation:
+  </p>
+
+  <pre><code>export async function doit({state}) {
+  state.items = state.neighborhood.map(info =&gt; ({
+    type: "reference",
+    site: info.domain,
+    slug: info.slug,
+    title: info.title,
+    text: info.synopsis
+  }))
+}</code></pre>
+
+  <h2>What is still underspecified</h2>
+
+  <p>
+    As written, Ward's example shows <code>CODE</code> as a command, but the JavaScript source is not shown
+    as an indented Mech body beneath that command. That leaves two possible designs.
+  </p>
+
+  <h3>Option A: inline source under CODE</h3>
+
+  <p>
+    Example:
+  </p>
+
+  <pre><code>CLICK
+  NEIGHBORS next
+  CODE
+    export async function doit({state}) {
+      state.items = state.neighborhood.map(info =&gt; ({
+        type: "reference",
+        site: info.domain,
+        slug: info.slug,
+        title: info.title,
+        text: info.synopsis
+      }))
+    }
+  PREVIEW synopsis items</code></pre>
+
+  <p>
+    This is the easiest first slice. The existing Mech tree parser already preserves nested body structure,
+    and <code>CODE</code> can serialize that body back into JavaScript source instead of asking Mech to execute it
+    as more block commands.
+  </p>
+
+  <h3>Option B: source from a neighboring page item</h3>
+
+  <p>
+    This may be closer to Ward's page sketch, because the source line appears outside the command sequence.
+    In that model, <code>CODE</code> would scan nearby page items for a code-bearing source item, much like the
+    existing <code>SOURCE</code> block scans earlier items for topic-specific source providers.
+  </p>
+
+  <p>
+    This design fits the page-authoring story better, but it needs one more protocol: how a preceding item
+    exposes code text to Mech.
+  </p>
+
+  <h2>Security note</h2>
+
+  <p>
+    Dynamic module import is not, by itself, a sandbox. Browsers do support dynamic import of blob URLs,
+    but that still executes code in the page's JavaScript environment. If actual isolation is wanted,
+    this must move into a worker or a sandboxed iframe with an explicit message protocol.
+  </p>
+
+  <h2>Best first implementation</h2>
+
+  <p>
+    The shortest truthful path is:
+  </p>
+
+  <ol>
+    <li>Add a client-side <code>CODE</code> block to <code>wiki-plugin-mech/client/mech.js</code>.</li>
+    <li>Have it consume indented source as literal JavaScript text.</li>
+    <li>Create a Blob from that text and <code>import()</code> it.</li>
+    <li>Call <code>await module.doit({state, elem, wiki, context: state.context})</code>.</li>
+    <li>Resume the remaining Mech body after the module returns.</li>
+  </ol>
+
+  <p>
+    That gets Ward's example running without inventing a new page-level source protocol first.
+    After that, the block can be generalized to fetch code from neighboring items if that authoring style
+    proves more natural.
+  </p>
+
+  <h2>Bottom line</h2>
+
+  <p>
+    Ward's example is viable right now. The current Mech already has the input state and the output surface.
+    The only missing seam is a <code>CODE</code> block that turns page-authored JavaScript into a callable module.
+    For a first slice, keep it client-side, keep it inline, and treat sandboxing as a separate concern.
+  </p>
+</body>
+</html>

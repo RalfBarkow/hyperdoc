@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Merge proposed topic additions into hyperdoc/topics.lisp</title>
+</head>
+<body>
+<h1>Merge proposed topic additions into <tt>hyperdoc/topics.lisp</tt></h1>
+
+<p>
+The merge key is the <b>canonical topic title</b>, not the proposed function name.
+In the current Topics model, authored links resolve through the exact topic title,
+backlinks are derived from those title-based links, and the topic index also has a
+<title keyed> lookup path. That means “does this title already exist?” is the first
+merge question. If yes, edit the existing factory in place. Do not add a second
+factory with the same <tt>:title</tt>.
+</p>
+
+<h2>Why title-first merge is the right rule</h2>
+
+<ul>
+  <li>Topic factories are discovered as Lisp functions in the <tt>:hyperdoc</tt> package, typically by the <tt>-topic</tt> suffix.</li>
+  <li>Those factories are called to rebuild the topic indexes.</li>
+  <li>The runtime title index is <tt>*topics-by-title*</tt>.</li>
+  <li>Authored topic links use <tt>&lt;a hyperbook="topics" page="Exact Topic Title"&gt;</tt>.</li>
+</ul>
+
+<p>
+So duplicate titles are the real collision domain. A fresh function name does not make a fresh topic if it reuses an existing title.
+</p>
+
+<h2>Recommended merge procedure</h2>
+
+<ol>
+  <li>For each proposed topic, search <tt>hyperdoc/topics.lisp</tt> for the exact <tt>:title</tt> string.</li>
+  <li>If the title already exists, keep the existing function name and merge only the content fields that need updating:
+    <ul>
+      <li>keep the existing <tt>:id</tt> unless you are intentionally doing a larger migration</li>
+      <li>keep the canonical <tt>:title</tt> stable unless you are ready to migrate all authored links</li>
+      <li>tighten or extend <tt>:summary</tt> carefully</li>
+      <li>append new page titles to <tt>:references</tt> only when they are genuinely relevant</li>
+    </ul>
+  </li>
+  <li>If the title does not exist, add a new topic factory.</li>
+  <li>After editing, reload HyperDoc and verify both the function and the topic page lookup.</li>
+</ol>
+
+<h2>What not to do</h2>
+
+<ul>
+  <li>Do not append every proposed factory blindly.</li>
+  <li>Do not create two factories with different Lisp names but the same <tt>:title</tt>.</li>
+  <li>Do not casually rename a canonical topic title. In this model, title changes are also link migrations.</li>
+</ul>
+
+<h2>Concrete Drew McDermott example</h2>
+
+<p>
+For the Drew McDermott slice, treat these as candidate titles and merge each one by exact title match first:
+</p>
+
+<ul>
+  <li><tt>Drew McDermott</tt></li>
+  <li><tt>YTools</tt></li>
+  <li><tt>Lexiparse</tt></li>
+  <li><tt>Nisp</tt></li>
+  <li><tt>YNisp</tt></li>
+  <li><tt>Nity</tt></li>
+  <li><tt>Opt</tt></li>
+  <li><tt>Optop</tt></li>
+  <li><tt>PDDL</tt></li>
+  <li><tt>Ontology translation</tt></li>
+  <li><tt>Estimated-regression planning</tt></li>
+  <li><tt>Autonomous process</tt></li>
+  <li><tt>Running image coherence</tt></li>
+  <li><tt>Litlisp</tt></li>
+</ul>
+
+<p>
+If, for example, <tt>PDDL</tt> already exists, do not add a second <tt>pddl-topic</tt>-like factory with the same title. Instead, open the existing <tt>PDDL</tt> topic factory and add Drew-related references there. By contrast, if <tt>Drew McDermott</tt> does not exist yet, add a new factory for that exact title.
+</p>
+
+<h2>Practical editing pattern</h2>
+
+<p>
+Use one of these two outcomes per proposed title:
+</p>
+
+<pre><code>;; Case 1: title already exists
+(defun existing-topic-name-topic ()
+  (make-topic
+   :id "existing-stable-key"
+   :title "Existing canonical title"
+   :summary "Existing summary, sharpened only if needed."
+   :references '("Existing Page"
+                 "New Drew Slice Page")))
+
+;; Case 2: title is new
+(defun drew-mcdermott-topic ()
+  (make-topic
+   :id "drew-mcdermott"
+   :title "Drew McDermott"
+   :summary "AI researcher whose public site is a useful HyperDoc anchor for Common Lisp software distribution, planning-language design, and the running-image versus durable-source boundary."
+   :references '("Drew McDermott Lisp, Planning, and Software"
+                 "A framework for maintaining the coherence of a running Lisp"
+                 "YTools, Nisp, Nity, Opt, and Optop"
+                 "PDDL and Opt in Drew McDermott's work"
+                 "Litlisp as experimental literate programming")))</code></pre>
+
+<h2>Fast verification</h2>
+
+<pre><code>(asdf:load-system :hyperdoc/explorer)
+
+(fboundp 'hyperdoc::drew-mcdermott-topic)
+(hyperbook:find-page hyperdoc::*topics* "Drew McDermott" :signal-error? t)</code></pre>
+
+<p>
+For a stricter slice-level check, add a small assertion to <tt>tests/merged-doc-slices-smoke.lisp</tt> in the same style used by the existing merged-doc-slice smoke tests.
+</p>
+
+<h2>Minimal operational rule</h2>
+
+<p>
+Interpret “merge selectively if any of these titles already exist” as:
+</p>
+
+<blockquote>
+<p>
+Deduplicate by exact <tt>:title</tt>. Reuse and edit the existing factory when the title already exists; add a new factory only for titles that do not yet exist.
+</p>
+</blockquote>
+
+</body>
+</html>
