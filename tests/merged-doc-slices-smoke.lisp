@@ -24,6 +24,11 @@
   (assert-true (hyperbook:find-page hyperdoc::*hyperdoc* title :signal-error? t)
                (format nil "Missing HyperDoc page ~A" title)))
 
+(defun assert-hyperdoc-page-absent (title)
+  (ensure-hyperdoc-page-lookup-loaded)
+  (assert-true (null (hyperbook:find-page hyperdoc::*hyperdoc* title))
+               (format nil "Legacy HyperDoc page should be absent ~A" title)))
+
 (defun run-clickable-commit-ids-doc-slice-smoke-test ()
   (assert-topic-function-present 'hyperdoc::clickable-commit-ids-in-fedwiki-stories-topic
                                  "Clickable commit IDs in FedWiki stories")
@@ -102,6 +107,26 @@
                    "Understanding ASDF Systems in HyperDoc"))
     (assert-hyperdoc-page-present title)))
 
+(defun run-codex-handover-doc-slice-smoke-test ()
+  (dolist (entry '((hyperdoc::single-slice-codex-thread-topic "Single-slice Codex thread")
+                   (hyperdoc::filled-task-slice-topic "Filled task slice")
+                   (hyperdoc::prompt-local-slice-contract-topic "Prompt-local slice contract")
+                   (hyperdoc::authoritative-nix-develop-validation-topic
+                    "Authoritative nix develop validation")
+                   (hyperdoc::inventory-outcome-topic "Inventory outcome")
+                   (hyperdoc::continuity-shell-by-design-topic
+                    "Continuity shell by design")
+                   (hyperdoc::exact-outcome-reporting-topic "Exact outcome reporting")))
+    (destructuring-bind (symbol title) entry
+      (assert-topic-function-present symbol title)))
+  (dolist (title '("Codex handover for HyperDoc"
+                   "Best handover to Codex for HyperDoc"))
+    (assert-hyperdoc-page-present title))
+  (dolist (title '("Best Codex Handover for HyperDoc"
+                   "Codex prompts v2 for HyperDoc"
+                   "Updated Codex prompts for HyperDoc"))
+    (assert-hyperdoc-page-absent title)))
+
 (defun run-clickable-commit-example-discovery-smoke-test ()
   (asdf:load-system :hyperdoc/examples)
   (let ((symbols (mapcar (lambda (spec)
@@ -115,6 +140,7 @@
   (run-literate-tracing-doc-slice-smoke-test)
   (run-execution-evidence-vocabulary-smoke-test)
   (run-sbcl-bootstrapping-doc-slice-smoke-test)
+  (run-codex-handover-doc-slice-smoke-test)
   (run-clickable-commit-example-discovery-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)

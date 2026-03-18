@@ -2345,6 +2345,65 @@
    :references '("Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
 
+(defun single-slice-codex-thread-topic ()
+  (make-topic
+   :id "single-slice-codex-thread"
+   :title "Single-slice Codex thread"
+   :summary "A Codex thread should carry exactly one active slice so scope, file boundaries, and validation assumptions stay stable."
+   :references '("Codex handover for HyperDoc"
+                 "Surface and Artifact Answers")))
+
+(defun filled-task-slice-topic ()
+  (make-topic
+   :id "filled-task-slice"
+   :title "Filled task slice"
+   :summary "A usable Codex handover names a concrete task, exact scope, and exact validation path rather than leaving placeholders."
+   :references '("Codex handover for HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun prompt-local-slice-contract-topic ()
+  (make-topic
+   :id "prompt-local-slice-contract"
+   :title "Prompt-local slice contract"
+   :summary "Keep durable repo norms in AGENTS.md and use the prompt only for the current slice contract: task, file boundary, validation, and return shape."
+   :references '("Codex handover for HyperDoc"
+                 "Authoring Documentation in HyperDoc"
+                 "Reconstruction protocol")))
+
+(defun authoritative-nix-develop-validation-topic ()
+  (make-topic
+   :id "authoritative-nix-develop-validation"
+   :title "Authoritative nix develop validation"
+   :summary "When host-shell dependency loading fails, rerun the named validation inside nix develop and treat that result as authoritative unless host portability is the explicit goal."
+   :references '("Codex handover for HyperDoc"
+                 "Canonical docs-topic split and coverage gate workflow")))
+
+(defun inventory-outcome-topic ()
+  (make-topic
+   :id "inventory-outcome"
+   :title "Inventory outcome"
+   :summary "Prompt field that specifies the required end-state page inventory, including the authoritative page count and the explicit policy for any retained continuity shell."
+   :references '("Codex handover for HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun continuity-shell-by-design-topic ()
+  (make-topic
+   :id "continuity-shell-by-design"
+   :title "Continuity shell by design"
+   :summary "When a canonical guidance page is retitled, keep at most one minimal non-authoritative forwarding page at the immediately previous canonical title if continuity still matters."
+   :references '("Codex handover for HyperDoc"
+                 "Best handover to Codex for HyperDoc"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun exact-outcome-reporting-topic ()
+  (make-topic
+   :id "exact-outcome-reporting"
+   :title "Exact outcome reporting"
+   :summary "A completed Codex slice reports exact files changed, exact validation commands, exact outcomes, and remaining risks instead of generic completion language."
+   :references '("Codex handover for HyperDoc"
+                 "Surface and Artifact Answers"
+                 "Reconstruction protocol")))
+
 (defun docs-topic-slice-and-coverage-gate-workflow-topic ()
   (make-topic
    :id "docs-topic-slice-and-coverage-gate-workflow"
