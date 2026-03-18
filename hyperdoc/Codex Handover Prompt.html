@@ -1,0 +1,52 @@
+<h1>Codex Handover Prompt</h1>
+<p>Simplify HyperDoc Codex prompts after AGENTS tightening</p>
+
+<pre>Read AGENTS.md and repomix-output-hyperdoc.md first.
+
+Task
+- Update the repository’s Codex prompt artifacts so they rely on the new durable execution rules in AGENTS.md instead of repeating long environment-triage prose.
+- Keep the result centered on one-thread-per-slice, one-slice-per-prompt, and authoritative repo-shell validation.
+- Prefer consolidating overlapping prompt writeups instead of adding another near-duplicate prompt file.
+
+Goal
+- Produce one cleaned-up, reusable prompt set for HyperDoc Codex handovers.
+- Shorten per-slice prompts so they contain only task-local instructions.
+- Preserve the repo-specific rules that still belong in prompts: exact task slice, exact scope, done-when, directly-coupled docs rule, return format.
+
+In scope
+- AGENTS.md only if a tiny wording adjustment is strictly needed for consistency
+- prompt and handover artifacts related to Codex in hyperdoc/
+- any repo-local prompt documentation files that now duplicate AGENTS.md guidance
+
+Out of scope
+- hyperbook-server/**
+- hyperdoc-inspector/**
+- hyperdoc-explorer/**
+- runtime Lisp behavior
+- FedWiki page content
+- unrelated topic imports
+
+Required changes
+- Remove repeated environment-triage text from prompt artifacts where AGENTS.md now covers it durably.
+- Keep or add the rule that one Codex thread should carry exactly one slice.
+- Keep prompts explicit about exact in-scope files, out-of-scope files, and done-when validation.
+- Prefer `nix develop --command git ...` when verifying repo diffs or status from Codex-facing instructions.
+- If multiple prompt artifacts overlap heavily, consolidate them into the smallest sensible set and explain what was kept vs removed.
+- Do not add another parallel prompt variant unless it serves a clearly distinct use case.
+
+Done when
+- The remaining Codex prompt artifacts are internally consistent with AGENTS.md.
+- At least one default implementation-slice prompt is present and pasteable.
+- Any retained alternative prompts are clearly differentiated by use case.
+- Repo verification for the changed prompt files is shown with `nix develop --command git diff -- ...` or equivalent repo-shell git usage.
+
+Docs coupling
+- Update HyperDoc HTML prompt pages only where they directly document the changed Codex handover rules.
+- Do not broaden into unrelated HyperDoc conceptual edits.
+
+Return format
+- Surface answer
+- Artifact answer
+- Exact files changed
+- Conventional commit message
+- Remaining risks or unresolved edges</pre>

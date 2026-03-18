@@ -1,0 +1,44 @@
+<h1>Repo-shell staging plan for Codex prompt consolidation</h1>
+
+<p>
+The staging boundary is correct. For this repository, the cleanest practical version is to enter the repo shell once and run the Git steps there.
+</p>
+
+<pre>nix develop
+
+# 1) Unstage older prompt artifacts that do not belong to this slice.
+git restore --staged \
+  "hyperdoc/Best Codex Handover for HyperDoc.html" \
+  "hyperdoc/Codex prompts v2 for HyperDoc.html" \
+  "hyperdoc/Updated Codex prompts for HyperDoc.html"
+
+# 2) Reset the mixed files back to HEAD in the index only.
+#    This keeps worktree edits but clears the old staged state.
+git restore --staged AGENTS.md \
+  "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+# 3) Stage the files that belong wholly to this slice.
+git add \
+  "hyperdoc/Codex handover for HyperDoc.html" \
+  hyperdoc/page-id-migration.md \
+  hyperdoc/rename-aware-repair.md
+
+# 4) Stage only the intended hunks from the mixed files.
+git add -p AGENTS.md
+git add -p "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+# 5) Inspect exactly what will be committed.
+git diff --cached --stat
+git diff --cached -- \
+  AGENTS.md \
+  "hyperdoc/Codex handover for HyperDoc.html" \
+  "hyperdoc/Best handover to Codex for HyperDoc.html" \
+  hyperdoc/page-id-migration.md \
+  hyperdoc/rename-aware-repair.md
+
+# 6) Commit only if that staged diff is clean.
+git commit -m "docs(codex): consolidate HyperDoc handover prompts"</pre>
+
+<p>
+If you want to keep the explicit repo-shell style even for one-off checks, use <tt>nix develop --command git ...</tt> for the verification commands. For the interactive <tt>git add -p</tt> steps, entering <tt>nix develop</tt> once is the more practical equivalent.
+</p>

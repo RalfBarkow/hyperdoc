@@ -1,0 +1,67 @@
+<h1>Next step after the 22-file staged set</h1>
+
+<p>Do not commit the 22-file staged set as <code>docs(codex): consolidate HyperDoc handover prompts</code>.</p>
+
+<p>The new fact is that <code>hyperdoc/Best handover to Codex for HyperDoc.html</code> is not in <code>HEAD</code>. After <code>git restore --staged</code>, it became untracked, so <code>git add -p</code> had no baseline and returned <code>No changes</code>. That is expected.</p>
+
+<h2>Best recovery path</h2>
+
+<p>Stay with the prompt-only commit, but cut the index back again and treat the continuity-shell page as a new file.</p>
+
+<pre>nix develop
+
+# Unstage only the unrelated staged files that are blocking this commit.
+git restore --staged \
+  hyperbook-explorer/lookup-failures.lisp \
+  hyperdoc-explorer/html-pages.lisp \
+  hyperdoc-explorer/lookup-repairs.lisp \
+  "hyperdoc/Declarative chunk wiring for page-lookup issues and first real Topics chunk.html" \
+  "hyperdoc/Implement function-lookup-issue from the page-lookup-issue precedent.html" \
+  "hyperdoc/Synchronization as a Visualization Problem.html" \
+  hyperdoc/article-allegation-slice.lisp \
+  tests/article-allegation-slice-smoke.lisp \
+  tests/page-lookup-issues-smoke.lisp \
+  tools/testdata/article-allegation-slice/minab-dry-run/manifest.lisp
+
+# If the continuity-shell page should be committed in full, stage it as a normal new file.
+git add "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+# If you need partial staging for that new file instead, create an intent-to-add entry first,
+# then patch-stage from there.
+# git add -N "hyperdoc/Best handover to Codex for HyperDoc.html"
+# git add -p "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+# Verify the staged set is now exactly the prompt-consolidation slice.
+git diff --cached --name-only
+
+git diff --cached -- \
+  AGENTS.md \
+  "hyperdoc/Codex handover for HyperDoc.html" \
+  "hyperdoc/Best handover to Codex for HyperDoc.html" \
+  hyperdoc/page-id-migration.md \
+  hyperdoc/rename-aware-repair.md
+
+# Commit only if the staged diff is slice-pure.
+git commit -m "docs(codex): consolidate HyperDoc handover prompts"</pre>
+
+<h2>If you want the cleanest possible reset</h2>
+
+<pre>nix develop
+
+git restore --staged :/
+
+git add "hyperdoc/Codex handover for HyperDoc.html" \
+        hyperdoc/page-id-migration.md \
+        hyperdoc/rename-aware-repair.md
+
+git add -p AGENTS.md
+
+git add "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+git diff --cached --name-only
+
+git commit -m "docs(codex): consolidate HyperDoc handover prompts"</pre>
+
+<p>Only use this second route if you are happy to clear the entire staged set and rebuild it from scratch.</p>
+</body>
+</html>

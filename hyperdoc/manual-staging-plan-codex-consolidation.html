@@ -1,0 +1,65 @@
+<h1>Manual staging plan for codex handover consolidation</h1>
+
+<p>
+The slice is good. The next step is to cut a clean commit by resetting the index for the affected prompt files back to HEAD, then restaging only the slice hunks.
+</p>
+
+<h2>Recommended sequence</h2>
+
+<pre>
+nix develop
+
+# 1) Remove unrelated staged prompt artifacts from the index.
+git restore --staged \
+  "hyperdoc/Best Codex Handover for HyperDoc.html" \
+  "hyperdoc/Codex prompts v2 for HyperDoc.html" \
+  "hyperdoc/Updated Codex prompts for HyperDoc.html"
+
+# 2) Reset mixed files back to HEAD in the index only.
+#    This keeps your worktree edits, but clears older staged state.
+git restore --staged AGENTS.md \
+  "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+# 3) Stage the files that belong wholly to this slice.
+git add \
+  "hyperdoc/Codex handover for HyperDoc.html" \
+  hyperdoc/page-id-migration.md \
+  hyperdoc/rename-aware-repair.md
+
+# 4) Stage only the intended hunks from the mixed files.
+git add -p AGENTS.md
+
+git add -p "hyperdoc/Best handover to Codex for HyperDoc.html"
+
+# 5) Inspect exactly what will go into the commit.
+git diff --cached --stat
+
+git diff --cached -- \
+  AGENTS.md \
+  "hyperdoc/Codex handover for HyperDoc.html" \
+  "hyperdoc/Best handover to Codex for HyperDoc.html" \
+  hyperdoc/page-id-migration.md \
+  hyperdoc/rename-aware-repair.md
+
+# 6) Commit only when the staged diff is clean.
+git commit -m "docs(codex): consolidate HyperDoc handover prompts"
+</pre>
+
+<h2>What to stage in patch mode</h2>
+
+<ul>
+  <li><tt>AGENTS.md</tt>: only the repo-git preference line that prefers <tt>nix develop --command git ...</tt>.</li>
+  <li><tt>hyperdoc/Best handover to Codex for HyperDoc.html</tt>: only the continuity-shell clarification that it contains no reusable prompt body.</li>
+</ul>
+
+<h2>Why this works</h2>
+
+<p>
+<tt>git restore --staged</tt> resets the index to HEAD without discarding your worktree edits. That gives you a clean base for <tt>git add -p</tt>, which is the safest way to isolate this slice from older staged prompt work.
+</p>
+
+<h2>After the commit</h2>
+
+<p>
+Your unrelated prompt artifacts and any non-slice edits will still be present in the worktree. They just will not be part of this commit.
+</p>

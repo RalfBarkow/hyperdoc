@@ -1,0 +1,35 @@
+<h1>Commit hygiene recommendation for Codex</h1>
+
+<p>
+Stop here and leave the commit for manual staging.
+</p>
+
+<p>
+Do not proceed with the full commit against HEAD. The current index and HEAD mismatch means that doing so would fold older staged prompt-file additions and older AGENTS hunks into this slice, which would blur the history and weaken the meaning of the <code>docs(codex): consolidate HyperDoc handover prompts</code> commit.
+</p>
+
+<h2>What to tell Codex</h2>
+
+<pre>Stop here and do not create a commit.
+
+Reason
+- The current HEAD/index/worktree state does not allow a clean commit containing only this slice's intended changes.
+- I do not want older staged prompt-file additions or older AGENTS hunks folded into this docs(codex) commit.
+
+What to do instead
+- Leave the worktree as-is.
+- Do not rewrite history.
+- Do not stage or unstage anything further unless explicitly asked.
+- Provide a concise manual-staging note that identifies:
+  - which hunks belong to this slice,
+  - which files contain pre-existing staged or index-vs-HEAD differences,
+  - and the exact commit message to use once staged cleanly.
+
+Commit message to keep
+- docs(codex): consolidate HyperDoc handover prompts</pre>
+
+<h2>Why this is the right choice</h2>
+
+<p>
+The slice itself looks good, but the repository state is not clean enough to guarantee that the resulting commit would represent only this slice. In this situation, manual staging is the correct boundary because it preserves both continuity-shell intent and commit hygiene.
+</p>

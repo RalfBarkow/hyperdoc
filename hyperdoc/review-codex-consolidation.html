@@ -1,0 +1,51 @@
+<h1>Review of Codex handover consolidation</h1>
+
+<p>
+This is a good result.
+</p>
+
+<p>
+The important architectural move succeeded: there is now one canonical Codex handover page,
+AGENTS.md owns the durable execution and repo-shell rules, the old "best handover" page remains
+only as a continuity shell, and the slice-specific handoffs were shortened to task-local fields.
+That is the right shape for this repository.
+</p>
+
+<h2>What is strong</h2>
+
+<ul>
+  <li>One canonical reusable page instead of several competing prompt bodies.</li>
+  <li>Durable execution guidance moved into AGENTS.md instead of being repeated in every prompt.</li>
+  <li>The one-thread-per-slice rule was preserved.</li>
+  <li>The retained slice prompts now use a consistent local structure.</li>
+  <li>The replay checks are appropriate and repo-native.</li>
+</ul>
+
+<h2>What I would accept as-is</h2>
+
+<ul>
+  <li><tt>docs(codex): consolidate HyperDoc handover prompts</tt> is a good commit message.</li>
+  <li>The continuity-shell treatment of <tt>Best handover to Codex for HyperDoc.html</tt> matches your stated preference for continuity shells instead of deletion.</li>
+</ul>
+
+<h2>One thing to check before committing</h2>
+
+<p>
+The remaining risk section matters: AGENTS.md and the continuity-shell page already had unrelated worktree/index divergence.
+So before committing, I would make sure the commit contains only the intended hunks for:
+</p>
+
+<ul>
+  <li><tt>AGENTS.md</tt>: the repo-git preference consistency tweak</li>
+  <li><tt>hyperdoc/Best handover to Codex for HyperDoc.html</tt>: the explicit "no reusable prompt body" clarification</li>
+</ul>
+
+<p>
+In other words: the slice content looks right, but I would still use patch-level staging or an equivalent targeted commit boundary so this docs(codex) commit does not accidentally absorb older unrelated edits.
+</p>
+
+<h2>My judgment</h2>
+
+<p>
+I would accept this slice and move to commit, with only that commit-hygiene check first. <a href="https://chatgpt.com/g/g-p-6928007ad8dc8191ac5152dfb0ca199b-hyperdoc-8470/c/69bae635-7908-838c-be8b-0c489b2cf430">chatgpt</a>
+</p>
