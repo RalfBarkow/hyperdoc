@@ -1,0 +1,244 @@
+<h1>Integrate Ward's story-neighborhood update into HyperDoc</h1>
+
+<p>
+This note proposes a narrow HyperDoc slice that integrates Ward's newer
+story-neighborhood and book-assembly thread into the existing Mech/
+Story-Neighborhood cluster.
+</p>
+
+<h2>Recommended scope</h2>
+
+<p>
+Do not create a parallel cluster. Fold the new material into the existing pages
+<tt>Story Neighborhood Workflow</tt>, <tt>Story Neighborhood Workflow Entry Point</tt>,
+and <tt>Inspectable Mech Runs</tt>, and add one new page for the saved/timestamped
+report history.
+</p>
+
+<h2>Why this shape fits the current repo</h2>
+
+<ul>
+  <li><tt>Story Neighborhood Workflow</tt> already covers story as seed set, <tt>WALK</tt> by clicks, gateway/neighborhood/book scope, and <tt>PRINT draft</tt>.</li>
+  <li><tt>Story Neighborhood Workflow Entry Point</tt> still treats <tt>PRINT</tt>/<tt>REVIEW</tt> as partly missing concrete surfaces.</li>
+  <li><tt>Mech Plugin Progress March 2026</tt> and <tt>Inspectable Mech Runs</tt> already frame findings, reports, and run records as inspectable publication surfaces.</li>
+</ul>
+
+<p>
+Ward's newer thread adds four things that deserve explicit capture:
+</p>
+
+<ol>
+  <li><tt>SOLO</tt> as overlap browser across multiple <tt>WALK</tt> result sets.</li>
+  <li>The editorial staircase <tt>1 click -&gt; 2 clicks -&gt; 3 clicks</tt>.</li>
+  <li><tt>PRINT draft</tt> plus <tt>PREVIEW synopsis items</tt> as report publication, not only artifact generation.</li>
+  <li>Saving timestamped report pages and walked aspects as comparable editorial history.</li>
+</ol>
+
+<h2>Files to change</h2>
+
+<ul>
+  <li><b>Update:</b> <tt>hyperdoc/Story Neighborhood Workflow.html</tt></li>
+  <li><b>Update:</b> <tt>hyperdoc/Story Neighborhood Workflow Entry Point.html</tt></li>
+  <li><b>Update:</b> <tt>hyperdoc/Inspectable Mech Runs.html</tt></li>
+  <li><b>New:</b> <tt>hyperdoc/Timestamped Story-Neighborhood Reports.html</tt></li>
+  <li><b>Update:</b> <tt>hyperdoc/topics.lisp</tt></li>
+</ul>
+
+<h2>New topic handles</h2>
+
+<ul>
+  <li><tt>gateway-page-topic</tt> — first-hop page that must reset reader context when leaving the authored story.</li>
+  <li><tt>story-neighborhood-report-topic</tt> — saved report page describing one bounded <tt>WALK</tt>/<tt>PRINT</tt> run.</li>
+  <li><tt>walked-aspect-set-topic</tt> — the set of aspects handed from <tt>WALK</tt> to <tt>SOLO</tt> or <tt>PRINT</tt>.</li>
+</ul>
+
+<p>
+I would <b>not</b> add separate topics for every detail such as gold overlaps,
+review variations, or click count. Those can stay page-local prose.
+</p>
+
+<h2>Exact integration intent per page</h2>
+
+<h3>1. Story Neighborhood Workflow</h3>
+
+<p>
+Keep this as the durable conceptual page. Extend it with four additional
+sections:
+</p>
+
+<ul>
+  <li><b>SOLO as overlap browser</b> — explain that multiple <tt>WALK</tt> runs can be stacked and that <tt>SOLO</tt> highlights overlaps as valuable convergence rather than mere duplication.</li>
+  <li><b>Gateway-first editorial staircase</b> — explain why authors review 1 click first, then 2, then 3.</li>
+  <li><b>PRINT plus PREVIEW as report publication</b> — explain <tt>PRINT draft</tt> and <tt>PREVIEW synopsis items</tt> as publication of decisions.</li>
+  <li><b>Saved runs as editorial comparison history</b> — explain timestamped pages and saved walked aspects as a comparative record of attempted cuts.</li>
+</ul>
+
+<p>
+The pipeline on that page should become:
+</p>
+
+<pre>
+Story (seed links)
+   -&gt;
+WALK (bounded expansion)
+   -&gt;
+Aspects
+   -&gt;
+SOLO (overlap inspection)
+   or
+PRINT (draft + findings)
+   -&gt;
+PREVIEW synopsis items
+   -&gt;
+Saved timestamped report pages
+</pre>
+
+<h3>2. Story Neighborhood Workflow Entry Point</h3>
+
+<p>
+Replace the current "missing workflow pages" stance with a more precise split:
+</p>
+
+<ul>
+  <li>the <b>conceptual workflow is now documented in HyperDoc</b></li>
+  <li>some concrete localhost FedWiki pages may still be missing or unevenly linked</li>
+</ul>
+
+<p>
+Add one explicit step after neighborhood expansion:
+</p>
+
+<ul>
+  <li><b>Overlap inspection and draft reporting</b></li>
+  <li>HyperDoc links to <tt>Story Neighborhood Workflow</tt>, <tt>Timestamped Story-Neighborhood Reports</tt>, and <tt>Inspectable Mech Runs</tt></li>
+  <li>localhost links only where concrete pages are actually known</li>
+</ul>
+
+<h3>3. Inspectable Mech Runs</h3>
+
+<p>
+Add one short section connecting the proposed run-object model to Ward's saved
+report pages:
+</p>
+
+<ul>
+  <li>a timestamped synopsis page is a publication surface for one run</li>
+  <li>the saved walked aspects are the corresponding structural evidence</li>
+  <li>the missing object-model step is to make those records first-class inspectable run objects rather than only saved wiki pages</li>
+</ul>
+
+<h3>4. New page: Timestamped Story-Neighborhood Reports</h3>
+
+<p>
+This should be the durable page for Ward's 05:02–05:10 material. It should
+explain:
+</p>
+
+<ul>
+  <li><tt>PRINT</tt> emits draft plus decision statistics</li>
+  <li><tt>PREVIEW synopsis items</tt> can materialize those decisions as wiki items</li>
+  <li>authors can save timestamped report pages during iteration</li>
+  <li>each report should also link back to the walked aspects used for that draft</li>
+  <li>the result is a side-by-side comparable editorial history of variants</li>
+</ul>
+
+<h2>Draft text for the new page</h2>
+
+<pre>
+&lt;h1&gt;Timestamped Story-Neighborhood Reports&lt;/h1&gt;
+
+&lt;p&gt;
+A story-neighborhood run should not disappear after one draft download. When
+&lt;tt&gt;PRINT&lt;/tt&gt; assembles a draft, it also makes editorial decisions about scope,
+missing pages, unresolved references, item-type wishes, and other boundaries.
+Those decisions are useful review material in their own right.
+&lt;/p&gt;
+
+&lt;p&gt;
+Ward's newer workflow makes that review material publishable. A stack such as:
+&lt;/p&gt;
+
+&lt;pre&gt;
+WALK 3 clicks
+PRINT draft
+PREVIEW synopsis items
+&lt;/pre&gt;
+
+&lt;p&gt;
+can materialize a draft and also publish synopsis items describing how the
+assembly proceeded. Those synopsis items can then be saved as ordinary wiki
+pages.
+&lt;/p&gt;
+
+&lt;h2&gt;Inspectable objects&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;topics&quot; page=&quot;Story-neighborhood report&quot;&gt;&lt;tt&gt;Story-neighborhood report&lt;/tt&gt;&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;topics&quot; page=&quot;Walked aspect set&quot;&gt;&lt;tt&gt;Walked aspect set&lt;/tt&gt;&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;topics&quot; page=&quot;First-class run record&quot;&gt;&lt;tt&gt;First-class run record&lt;/tt&gt;&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;topics&quot; page=&quot;Boundary report&quot;&gt;&lt;tt&gt;Boundary report&lt;/tt&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Why save reports&lt;/h2&gt;
+
+&lt;p&gt;
+While reviewing a draft, one often wants to compare variants: one click versus
+two clicks, one neighborhood source set versus another, or one editorial repair
+before and after a reference fix. Saved report pages make those variants durable
+and comparable.
+&lt;/p&gt;
+
+&lt;p&gt;
+In this workflow, the report page is not merely commentary. It is a compact
+publication of one bounded run and its findings.
+&lt;/p&gt;
+
+&lt;h2&gt;Timestamp and walked aspects&lt;/h2&gt;
+
+&lt;p&gt;
+Ward's suggestion is to label report pages with a timestamp and the walked
+aspects used for the draft. The timestamp distinguishes successive attempts.
+The walked aspects preserve the structural neighborhood that was handed from
+&lt;tt&gt;WALK&lt;/tt&gt; to &lt;tt&gt;PRINT&lt;/tt&gt;.
+&lt;/p&gt;
+
+&lt;p&gt;
+That pairing matters because a draft alone is not enough. The saved aspects show
+what graph was actually explored, and the report page shows how that graph was
+interpreted for publication.
+&lt;/p&gt;
+
+&lt;h2&gt;Relation to inspectable runs&lt;/h2&gt;
+
+&lt;p&gt;
+A timestamped report page is already a useful publication surface, but it is not
+quite a full inspectable run object. It is better understood as one durable
+externalization of a run. A future Mech execution model could preserve the same
+information as a first-class run record with chronology, provenance, findings,
+and artifact links.
+&lt;/p&gt;
+
+&lt;h2&gt;Related&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;hyperdoc&quot; page=&quot;Story Neighborhood Workflow&quot;&gt;Story Neighborhood Workflow&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;hyperdoc&quot; page=&quot;Inspectable Mech Runs&quot;&gt;Inspectable Mech Runs&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a hyperbook=&quot;hyperdoc&quot; page=&quot;Mech Plugin Progress March 2026&quot;&gt;Mech Plugin Progress March 2026&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+
+<h2>Recommended commit split</h2>
+
+<ol>
+  <li><tt>docs(topics): add gateway/report/aspect topic handles</tt></li>
+  <li><tt>docs(hyperdoc): extend story neighborhood workflow with solo and report history</tt></li>
+</ol>
+
+<h2>Bottom line</h2>
+
+<p>
+The clean integration is not "add another Mech page." It is: keep
+<tt>Story Neighborhood Workflow</tt> as the conceptual hub, add the saved-report
+layer explicitly, and connect it to the already existing run-evidence and
+findings-ledger direction.
+</p>

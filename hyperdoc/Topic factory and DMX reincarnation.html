@@ -1,0 +1,197 @@
+<h1>Topic factory and DMX reincarnation</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page clarifies the interplay between a HyperDoc topic factory, the page it
+  reconstructs in the Topics HyperBook, and the corresponding DMX topic that may
+  exist as a graph-native counterpart.
+</p>
+
+<p>
+  The important distinction is that HyperDoc intentionally keeps two surfaces in
+  play. The topic-page surface in HyperBook <tt>topics</tt> is stable, authored,
+  and rebuildable. The DMX runtime-object surface is live, fetched, and shaped by
+  the current state of the external DMX graph.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Topic factory"><tt>Topic factory</tt></a></li>
+  <li><a hyperbook="topics" page="Authored topic factories"><tt>Authored topic factories</tt></a></li>
+  <li><a hyperbook="topics" page="Demonstrating DMX Topic Proxies in HyperDoc"><tt>Demonstrating DMX Topic Proxies in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Concepts, DMX Topics, and Topic Maps"><tt>Concepts, DMX Topics, and Topic Maps</tt></a></li>
+  <li><a hyperbook="topics" page="Topic title changes and canonical link maintenance"><tt>Topic title changes and canonical link maintenance</tt></a></li>
+</ul>
+
+<h2>Three layers, not two</h2>
+
+<p>
+  It is useful to think in three layers rather than collapsing everything into a
+  single notion of topic.
+</p>
+
+<ol>
+  <li><b>The subject matter:</b> the concept under discussion.</li>
+  <li><b>The HyperDoc authored layer:</b> the topic factory and the stable page it reconstructs in HyperBook <tt>topics</tt>.</li>
+  <li><b>The DMX graph layer:</b> the DMX topic object, with its own id, type, children, and associations.</li>
+</ol>
+
+<p>
+  The concept may be the same across all three layers, but the representations are
+  not the same object and should not be treated as if they were.
+</p>
+
+<h2>What a topic factory is</h2>
+
+<p>
+  A topic factory is not merely a title string and not merely a convenient wrapper
+  around a topic object. In HyperDoc it is the durable local reconstruction point
+  for a topic in the Topics HyperBook.
+</p>
+
+<p>
+  The factory preserves the local editorial identity of the topic by reconstructing
+  stable authored material such as the canonical title, summary, references, and
+  backlinks. This makes the topic-page surface rebuildable even when runtime proxy
+  mechanisms change.
+</p>
+
+<p>
+  In that sense, the topic factory itself is part of the durable authoring layer,
+  not just a helper for runtime access.
+</p>
+
+<h2>What the DMX reincarnation is</h2>
+
+<p>
+  A DMX reincarnation is the graph-native counterpart of the same subject in DMX.
+  It is identified by DMX-native identity such as a numeric topic id and a type
+  uri, and it participates in DMX-native structures such as children, associations,
+  and topic-map placement.
+</p>
+
+<p>
+  When HyperDoc exposes a live <tt>hyperdoc::dmx-topic-proxy</tt>, it is not
+  reconstructing the authored topic page. It is exposing a runtime view onto the
+  current DMX-backed state.
+</p>
+
+<h2>Why HyperDoc keeps both surfaces</h2>
+
+<p>
+  HyperDoc keeps both surfaces on purpose.
+</p>
+
+<ul>
+  <li><b>Topic-page surface:</b> stable authored/documentary concept page in HyperBook <tt>topics</tt>.</li>
+  <li><b>Runtime-object surface:</b> live DMX-backed proxy with fetched JSON, relations, and inspector views.</li>
+</ul>
+
+<p>
+  The first surface is suited for durable explanation, local reconstruction, and
+  editorial curation. The second surface is suited for live inspection of the
+  external graph and its current state.
+</p>
+
+<p>
+  The systems are related, but neither should erase the role of the other.
+</p>
+
+<h2>Identity should not be reduced to title equality</h2>
+
+<p>
+  The clean bridge is not title equality.
+</p>
+
+<ul>
+  <li><b>HyperDoc identity:</b> a stable local key preserved by the topic factory.</li>
+  <li><b>DMX identity:</b> the DMX topic id and related graph metadata.</li>
+  <li><b>Presentation:</b> the canonical title currently shown in HyperDoc or DMX.</li>
+</ul>
+
+<p>
+  Titles can match and often should match, but title equality is presentation
+  agreement, not identity. If the DMX title changes, HyperDoc should not lose the
+  local topic identity. If the HyperDoc canonical title changes, the DMX topic id
+  should not be forgotten.
+</p>
+
+<h2>What import from DMX should mean</h2>
+
+<p>
+  If HyperDoc can read a topic from DMX and add it to the Topics HyperBook, the
+  cleaner model is materialization rather than substitution.
+</p>
+
+<p>
+  In other words, DMX should be able to serve as a source for a local authored
+  topic factory, while the Topics HyperBook remains a stable authored surface.
+</p>
+
+<p>
+  A DMX import should therefore do two things at once:
+</p>
+
+<ul>
+  <li>materialize or refresh a local authored topic factory and its topic-page surface, and</li>
+  <li>preserve an explicit correspondence to the DMX topic id and optional live proxy entry point.</li>
+</ul>
+
+<p>
+  This preserves offline rebuildability and local editorial control while still
+  allowing live graph inspection.
+</p>
+
+<h2>Recommended correspondence model</h2>
+
+<p>
+  The correspondence should be explicit rather than implicit.
+</p>
+
+<pre><code>HyperDoc stable key &lt;-&gt; DMX topic id</code></pre>
+
+<p>
+  The mapping can then support title synchronization, reference enrichment, runtime
+  proxy access, and later reconciliation work, without collapsing the HyperDoc
+  topic into the DMX object or collapsing the DMX object into the HyperDoc page.
+</p>
+
+<h2>Applied example: Encryption boundaries on the small web</h2>
+
+<p>
+  For a topic such as <tt>Encryption boundaries on the small web</tt>, the HyperDoc
+  side and the DMX side can be treated as two incarnations of one subject.
+</p>
+
+<ul>
+  <li><b>HyperDoc side:</b> a stable local topic factory and a page in HyperBook <tt>topics</tt>.</li>
+  <li><b>DMX side:</b> a DMX topic object with DMX-native identity and graph relations.</li>
+</ul>
+
+<p>
+  The right interpretation is not that the two records are literally the same
+  object. The right interpretation is that they are explicit counterparts. The
+  HyperDoc topic factory is the durable reconstruction point for the local
+  documentary surface; the DMX topic is the live graph reincarnation of the same
+  subject in a different system.
+</p>
+
+<h2>Operational rule for implementation</h2>
+
+<p>
+  A useful implementation rule is this:
+</p>
+
+<blockquote>
+  Import from DMX into Topics HyperBook by materializing or refreshing a local
+  authored topic factory, while preserving explicit correspondence to the DMX topic
+  id and optional live DMX proxy access.
+</blockquote>
+
+<p>
+  That rule keeps the authored layer durable, the runtime layer inspectable, and
+  the correspondence auditable.
+</p>

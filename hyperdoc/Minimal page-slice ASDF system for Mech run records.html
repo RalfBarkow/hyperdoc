@@ -1,0 +1,145 @@
+<h1>Minimal page-slice ASDF system for Mech run records</h1>
+
+<p>
+A narrow page-slice system for the Mech run-record material should follow the same
+basic pattern as the existing <tt>hyperdoc</tt>, <tt>hyperdoc/examples</tt>, and
+<tt>hyperdoc/examples/ops</tt> systems: one explicit <tt>defsystem</tt>, one real
+module rooted in the <tt>hyperdoc/</tt> directory, and one Lisp source file that is
+loaded specifically so that the page's <tt>&lt;source-of-function&gt;...&lt;/source-of-function&gt;</tt>
+references resolve in the running image.
+</p>
+
+<h2>Minimal defsystem shape</h2>
+
+<pre><code>(asdf:defsystem #:hyperdoc/mech-run-records
+  :description "Mech run-record documentation slice for HyperDoc"
+  :author "Konrad Hinsen &lt;konrad.hinsen@fastmail.net&gt;"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "mech-run-record-examples"))))))</code></pre>
+
+<p>
+That is the smallest useful form. It keeps the page in the already indexed <tt>hyperdoc/</tt>
+page directory, and adds only the file that must be loaded for the page's example
+function to exist.
+</p>
+
+<h2>Companion page</h2>
+
+<p>
+The page itself remains a normal HyperDoc text page, for example
+<tt>hyperdoc/First-class Mech Run Records in HyperDoc.html</tt>, and it should use:
+</p>
+
+<pre><code>&lt;source-of-function&gt;mech-run-record-story-neighborhood-example&lt;/source-of-function&gt;</code></pre>
+
+<p>
+That keeps the page idiomatic: the page shows an example by reference, and the
+system boundary guarantees that the referenced function is present when the slice
+is loaded.
+</p>
+
+<h2>Companion Lisp file</h2>
+
+<p>
+The companion source file should live at:
+</p>
+
+<pre><code>hyperdoc/mech-run-record-examples.lisp</code></pre>
+
+<p>
+with content in the existing HyperDoc package, for example:
+</p>
+
+<pre><code>(in-package :hyperdoc)
+
+(defexample mech-run-record-story-neighborhood-example
+  "Illustrative story-neighborhood run ledger for WALK 3 clicks, PRINT draft, and PREVIEW synopsis items."
+  (-&gt; '(:run-id "2026-03-16T12:00:00Z/walk-3-clicks"
+        :script ("WALK 3 clicks"
+                 "PRINT draft"
+                 "PREVIEW synopsis items")
+        :steps ((:op :walk
+                 :argument (3 :unit :clicks)
+                 :result :aspects-collected)
+                (:op :print
+                 :argument :draft
+                 :result :draft-generated)
+                (:op :preview
+                 :argument (:synopsis :items)
+                 :result :report-page-generated))
+        :artifacts ((:kind :draft
+                     :label "Draft volume"
+                     :derived-from :print)
+                    (:kind :report-page
+                     :label "Synopsis items"
+                     :derived-from :preview))
+        :findings ((:kind :coverage
+                    :value "gateway pages present")
+                   (:kind :boundary
+                    :value "three-click expansion used"))
+        :note "Illustrative example only; this is not a claim about current persisted Mech state.")
+      (assert-true)))</code></pre>
+
+<h2>Why this is the right minimum</h2>
+
+<p>
+It matches three existing repo rules at once. The extra FedWiki dependency is unnecessary unless the example starts constructing real FedWiki objects or calling FedWiki-specific helper code.
+</p>
+
+<ul>
+  <li>A HyperDoc lives inside a real ASDF system and its source files must be loaded as components of that system.</li>
+  <li>Examples belong to the ASDF system that owns the code and pages being explained.</li>
+  <li>Examples displayed via <tt>&lt;source-of-function&gt;</tt> only work when the source file containing the <tt>defexample</tt> has already been loaded into the image.</li>
+</ul>
+
+<p>
+So the page-slice system is not a new abstraction layer. It is a small, explicit ASDF
+boundary that keeps one documentation page and its runnable example honest with respect
+to load order.
+</p>
+
+<h2>What not to include in the minimal system</h2>
+
+<ul>
+  <li>No new HyperDoc root object.</li>
+  <li>No separate page directory.</li>
+  <li>No extra topic layer unless the page introduces reusable vocabulary.</li>
+  <li>No tests in the first cut.</li>
+</ul>
+
+<p>
+Those can be added later. The minimum viable slice is just: page plus companion
+example file plus a small <tt>defsystem</tt> that loads the companion file.
+</p>
+
+<h2>Optional stricter variant</h2>
+
+<p>
+If you want the slice to verify itself, add one smoke test system next to it:
+</p>
+
+<pre><code>(asdf:defsystem #:hyperdoc/mech-run-records/tests
+  :description "Smoke tests for the Mech run-record documentation slice"
+  :author "Konrad Hinsen &lt;konrad.hinsen@fastmail.net&gt;"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc/mech-run-records
+               #:hyperdoc/tests)
+  :components ((:module "tests"
+                :serial t
+                :components ((:file "mech-run-record-slice-smoke")))))</code></pre>
+
+<p>
+But that is optional. The exact minimal shape for your concrete Mech run-record page is the single
+<tt>hyperdoc/mech-run-records</tt> system shown above.
+</p>

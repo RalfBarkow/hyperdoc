@@ -1,0 +1,342 @@
+<h1>Implement Missing Function References as Inspectable Objects</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This task explains how to move the current HyperDoc code base from a
+  message-only undefined-function failure path to a two-level inspectable
+  failure path modeled after the existing <tt>page-lookup-issue</tt>
+  precedent.
+</p>
+
+<p>
+  The desired end state is:
+</p>
+
+<ul>
+  <li>a primary bounded issue object for a failed <tt>&lt;source-of-function&gt;</tt> reference</li>
+  <li>the underlying Lisp condition preserved as an inspectable secondary object</li>
+  <li>the rendered message <tt>The function ... is undefined.</tt> preserved as additional condition text</li>
+  <li>a clickable correction path analogous to the existing page-lookup repair flow</li>
+</ul>
+
+<h2>Prerequisites</h2>
+
+<ul>
+  <li>You can load and run the current HyperDoc image.</li>
+  <li>You can reproduce the current message-only failure for a broken <tt>&lt;source-of-function&gt;</tt> reference.</li>
+  <li>You can inspect the existing page-lookup issue workflow in the running system.</li>
+  <li>You have the current files for page lookup, lisp-function resolution, and inspector views available for editing.</li>
+</ul>
+
+<h2>Context</h2>
+
+<p>
+  The current project already contains the right architectural precedent:
+  <tt>page-lookup-issue</tt> as created by
+  <a hyperbook="lisp-functions" page="hyperbook:make-page-lookup-issue"><tt>hyperbook:make-page-lookup-issue</tt></a>.
+  That precedent does two important things:
+</p>
+
+<ol>
+  <li>It exposes a bounded issue object as the primary workflow surface.</li>
+  <li>It keeps the underlying condition inspectable behind that issue.</li>
+</ol>
+
+<p>
+  The missing-function case should follow the same two-level pattern rather than
+  stopping at the raw message:
+</p>
+
+<pre>
+The function HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE is undefined.
+</pre>
+
+<h2>Goal</h2>
+
+<p>
+  After completing this task, a failed <tt>&lt;source-of-function&gt;</tt> lookup no
+  longer presents only a terminal undefined-function message. Instead, it opens
+  a bounded issue object first and preserves the undefined-function condition and
+  message as secondary inspectable artifacts.
+</p>
+
+<h2>Step 1. Reproduce the current failure path</h2>
+
+<p>
+  Open a page that contains a broken <tt>&lt;source-of-function&gt;</tt> reference and
+  confirm the current behavior.
+</p>
+
+<ol>
+  <li>Choose a page whose function reference is currently unresolved.</li>
+  <li>Open that page in the running HyperDoc image.</li>
+  <li>Trigger the rendering path that resolves the function reference.</li>
+  <li>Record the exact visible result and the exact symbol name involved.</li>
+</ol>
+
+<p>
+  At this stage you should still see the message-only behavior.
+</p>
+
+<h2>Step 2. Identify the exact resolution path for <tt>source-of-function</tt></h2>
+
+<p>
+  Find the code path that takes a page-level function reference and resolves it
+  into a callable function or source object.
+</p>
+
+<ol>
+  <li>Locate the code that handles <tt>&lt;source-of-function&gt;</tt> page markup.</li>
+  <li>Follow the handoff into the Lisp-functions HyperBook lookup path.</li>
+  <li>Identify the exact point where the system currently calls or resolves the function.</li>
+  <li>Mark the place where the undefined-function condition currently escapes.</li>
+</ol>
+
+<p>
+  The implementation work should happen at the boundary where the missing
+  definition becomes known, not later in generic UI code.
+</p>
+
+<h2>Step 3. Inspect the <tt>page-lookup-issue</tt> precedent in the code base</h2>
+
+<p>
+  Before introducing a new issue type, study the current page-lookup issue
+  object and its surrounding workflow.
+</p>
+
+<ol>
+  <li>Read the constructor path rooted at <a hyperbook="lisp-functions" page="hyperbook:make-page-lookup-issue"><tt>hyperbook:make-page-lookup-issue</tt></a>.</li>
+  <li>Inspect which fields are required for classification, repair, and provenance.</li>
+  <li>Inspect how the issue exposes its underlying condition.</li>
+  <li>Inspect how the current inspector tabs are provided.</li>
+</ol>
+
+<p>
+  Use this as the model for the new missing-function issue rather than inventing
+  a new error style from scratch.
+</p>
+
+<h2>Step 4. Define a bounded issue object for missing function references</h2>
+
+<p>
+  Add a new issue type for failed function references during page rendering.
+</p>
+
+<ol>
+  <li>Choose a concrete object or class name, for example <tt>missing-function-reference-issue</tt>.</li>
+  <li>Keep the issue bounded to one failed reference and one failure stage.</li>
+  <li>Ensure it can store both workflow metadata and the underlying condition.</li>
+</ol>
+
+<p>
+  The issue should capture at least the following fields:
+</p>
+
+<pre>
+:reference-kind
+:source-page-title
+:source-section
+:reference
+:expected-symbol
+:stage
+:package
+:classification
+:status
+:suggested-repair
+:repair-description
+:repair-thunk
+:underlying-condition
+:underlying-condition-message
+</pre>
+
+<h2>Step 5. Construct the issue object where the failure occurs</h2>
+
+<p>
+  Replace the current message-only escape path with issue construction at the
+  point where the missing function is detected.
+</p>
+
+<ol>
+  <li>Wrap the function-resolution step in a handler for the relevant missing-function condition.</li>
+  <li>When the condition is signaled, build the new issue object immediately.</li>
+  <li>Populate it with the triggering page reference and source context.</li>
+  <li>Attach the original condition object unchanged.</li>
+  <li>Also store the human-readable condition message as separate text.</li>
+</ol>
+
+<p>
+  Do not discard the condition after constructing the issue.
+</p>
+
+<h2>Step 6. Preserve the two-level structure explicitly</h2>
+
+<p>
+  The result must keep three distinct layers visible.
+</p>
+
+<ol>
+  <li>Primary issue object for navigation and repair.</li>
+  <li>Underlying condition object for low-level diagnosis.</li>
+  <li>Underlying condition message for compact human-readable display.</li>
+</ol>
+
+<p>
+  The structure should look conceptually like this:
+</p>
+
+<pre>
+missing-function-reference-issue
+   ├─ reference-kind: :source-of-function
+   ├─ expected-symbol: HYPERDOC::...
+   ├─ suggested-repair: ...
+   └─ underlying-condition
+         ├─ condition-object: #&lt;UNDEFINED-FUNCTION ...&gt;
+         └─ message: "The function ... is undefined."
+</pre>
+
+<h2>Step 7. Provide inspector views modeled after <tt>page-lookup-issue</tt></h2>
+
+<p>
+  Add a small stable inspector surface rather than a generic debugger dump.
+</p>
+
+<ol>
+  <li>Add an <b>Overview</b> view with source page, reference kind, and expected symbol.</li>
+  <li>Add a <b>Details</b> view with package, stage, likely causes, and ASDF clues.</li>
+  <li>Add a <b>Repair</b> view with suggested repair, description, and retry or reload affordance.</li>
+  <li>Add a <b>Condition</b> view that exposes the underlying undefined-function condition and message.</li>
+</ol>
+
+<p>
+  Keep the view set narrow and repeatable.
+</p>
+
+<h2>Step 8. Define the default repair path</h2>
+
+<p>
+  The issue object should not only diagnose the failure. It should also point to
+  the next correction step.
+</p>
+
+<ol>
+  <li>Decide which repair classification is appropriate for the current slice.</li>
+  <li>Add a repair description that explains what to reload, rewire, or rename.</li>
+  <li>Provide a repair thunk when the correction can be mechanized safely.</li>
+  <li>Ensure the repair path can be retried after the correction step.</li>
+</ol>
+
+<p>
+  For the current Mech slice, likely causes include:
+</p>
+
+<ul>
+  <li>defining file not loaded</li>
+  <li>ASDF component mismatch</li>
+  <li>stale server process</li>
+  <li>symbol or filename drift</li>
+</ul>
+
+<h2>Step 9. Wire the page-rendering surface to show the issue object first</h2>
+
+<p>
+  After issue construction and view definition, the page-rendering path must use
+  the issue object as the first visible result.
+</p>
+
+<ol>
+  <li>Return or render the new issue object instead of flattening the condition into bare text.</li>
+  <li>Keep the condition object reachable from the issue.</li>
+  <li>Keep the rendered message reachable from the issue.</li>
+  <li>Confirm that the user reaches diagnosis and repair from the primary object without dropping into a generic debugger first.</li>
+</ol>
+
+<h2>Step 10. Add a narrow smoke test for the new failure class</h2>
+
+<p>
+  Add a replayable test that proves the new behavior on one known broken
+  function reference.
+</p>
+
+<ol>
+  <li>Create or reuse a controlled broken <tt>&lt;source-of-function&gt;</tt> fixture.</li>
+  <li>Trigger the rendering path in a test context.</li>
+  <li>Assert that the result is a missing-function issue object.</li>
+  <li>Assert that the issue contains the expected symbol.</li>
+  <li>Assert that the issue retains the underlying condition object.</li>
+  <li>Assert that the issue retains the rendered undefined-function message.</li>
+</ol>
+
+<p>
+  This prevents regression to the current message-only behavior.
+</p>
+
+<h2>Step 11. Validate against the existing screenshot-level precedent</h2>
+
+<p>
+  Compare the new missing-function UI against the existing page-lookup UI.
+</p>
+
+<ol>
+  <li>Open an existing <tt>page-lookup-issue</tt> object and inspect its tabs and field density.</li>
+  <li>Open the new missing-function issue object and compare the same surfaces.</li>
+  <li>Confirm that the primary workflow object appears first in both cases.</li>
+  <li>Confirm that the underlying condition remains inspectable in both cases.</li>
+</ol>
+
+<p>
+  The two flows do not need identical field names, but they should feel like the
+  same family of inspectable issue objects.
+</p>
+
+<h2>Step 12. Update the documentation pages</h2>
+
+<p>
+  Once the code path works, update the documentation so the new behavior is part
+  of the documented architecture.
+</p>
+
+<ol>
+  <li>Keep <tt>Failure as Inspectable Object.html</tt> as the conceptual page.</li>
+  <li>Add the new concrete issue object name and its two-level structure.</li>
+  <li>Link it explicitly to <tt>page-lookup-issue</tt> as precedent.</li>
+  <li>Document the step-by-step repair path for <tt>&lt;source-of-function&gt;</tt> failures.</li>
+</ol>
+
+<h2>Result</h2>
+
+<p>
+  The code base has reached the desired state when all of the following are
+  true:
+</p>
+
+<ul>
+  <li>A broken <tt>&lt;source-of-function&gt;</tt> reference no longer yields only the text <tt>The function ... is undefined.</tt></li>
+  <li>The first visible object is a bounded missing-function issue.</li>
+  <li>The undefined-function condition is still inspectable as a secondary object.</li>
+  <li>The rendered condition message is still preserved.</li>
+  <li>The issue exposes a repair path analogous to the current page-lookup workflow.</li>
+</ul>
+
+<h2>Troubleshooting</h2>
+
+<p>
+  If you still see only the raw undefined-function message, check the following:
+</p>
+
+<ul>
+  <li>The handler is attached at the actual function-resolution boundary rather than after rendering has already flattened the error.</li>
+  <li>The new issue object is returned to the page surface instead of being logged and discarded.</li>
+  <li>The inspector views are defined for the correct object type.</li>
+  <li>The running image has been reloaded after changing the issue type and views.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Failure as Inspectable Object">Failure as Inspectable Object</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Clickable Correction Path from Error to Merge">Clickable Correction Path from Error to Merge</a></li>
+  <li><a page="First-class Mech Run Records in HyperDoc">First-class Mech Run Records in HyperDoc</a></li>
+  <li><a page="Minimal page-slice ASDF system for Mech run records">Minimal page-slice ASDF system for Mech run records</a></li>
+</ul>

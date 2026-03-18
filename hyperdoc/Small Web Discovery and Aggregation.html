@@ -1,0 +1,74 @@
+<h1>Small Web Discovery and Aggregation</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Kevin Boone's article gives the cluster a concrete operational question: if
+  the small web is really small, can its new material be aggregated in one
+  place the way Gemini feed aggregators often do? The answer in the supplied
+  material is structurally interesting: yes at machine scale, but not cleanly
+  at reader scale.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Small Web feed aggregation"><tt>Small Web feed aggregation</tt></a></li>
+  <li><a hyperbook="topics" page="Small Web scale"><tt>Small Web scale</tt></a></li>
+  <li><a hyperbook="topics" page="Opt-in aggregation"><tt>Opt-in aggregation</tt></a></li>
+  <li><a hyperbook="topics" page="Human reading budget"><tt>Human reading budget</tt></a></li>
+  <li><a hyperbook="topics" page="Feed-required discovery"><tt>Feed-required discovery</tt></a></li>
+</ul>
+
+<h2>Aggregation is limited by readers more than crawlers</h2>
+
+<p>
+  The article's most reusable insight is that compute is not necessarily the
+  hardest constraint. Once a sufficiently large feed list exists, crawling,
+  timestamp extraction, and chronological ordering are straightforward enough.
+  The actual bottleneck is that a daily list large enough to be representative
+  quickly exceeds what a human can realistically read.
+</p>
+
+<p>
+  That makes “small web” aggregation unlike the romantic picture of one calm
+  shared bulletin board. Distribution still matters, and selectivity remains
+  necessary even in a non-commercial ecology.
+</p>
+
+<h2>Why Gemini feels different</h2>
+
+<p>
+  Gemini aggregation appears manageable not because feeds are conceptually
+  different there, but because the participating universe is smaller and more
+  explicitly bounded. Once browser-based personal publishing is included, the
+  discovered corpus becomes much larger and more unevenly active.
+</p>
+
+<h2>Opt-in as a readability strategy</h2>
+
+<p>
+  Boone's update points toward a more practical pattern: opt-in aggregators,
+  topic-specific aggregators, or other deliberately partial lenses. These do
+  not solve the whole discovery problem, but they restore a workable relation
+  between collection size and reading attention.
+</p>
+
+<h2>Implication for HyperDoc</h2>
+
+<p>
+  HyperDoc should preserve the distinction between complete inventory and useful
+  reading surface. A cluster can acknowledge scale without promising total daily
+  legibility. That same distinction already appears elsewhere in HyperDoc when a
+  complete graph exists but only some curated paths should be exposed as a first
+  reading surface.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Small Web and HyperDoc">Small Web and HyperDoc</a></li>
+  <li><a page="Small Web Search, Directories, and Discovery">Small Web Search, Directories, and Discovery</a></li>
+  <li><a page="Gemini, HTTP, and Protocol Minimalism">Gemini, HTTP, and Protocol Minimalism</a></li>
+  <li><a href="https://kevinboone.me/small_web_is_big.html">https://kevinboone.me/small_web_is_big.html</a></li>
+</ul>
