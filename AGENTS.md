@@ -70,6 +70,25 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
   - keep fast-moving collaborative trail in localhost FedWiki pages,
   - maintain navigable links/counterparts per topic instead of forcing identical content in both places.
 
+## Codex task execution rules
+
+- Work one slice per thread. Do not switch to a different slice inside the same thread unless I explicitly retarget the task.
+- Treat `nix develop` as the authoritative environment for this repository's repo-defined validation, dependency resolution, and bundled tooling.
+- If a raw host command fails because a dependency, executable, or ASDF component is missing, do not stop there if the same command can be rerun inside `nix develop`.
+- For repo-scoped checks, prefer this order:
+  1. try the requested command as written if practical
+  2. if it fails due to host-environment or tooling resolution, rerun it inside `nix develop`
+  3. treat the `nix develop` result as authoritative unless the task is explicitly about host portability, system service behavior, or a non-Nix runtime or deployment path
+- Distinguish environment failures from slice failures in the report.
+- When relevant, report both outcomes:
+  - host-environment failure, if any
+  - authoritative `nix develop` validation result
+- Do not describe a slice as blocked merely because the host environment is missing repo-managed dependencies or tools.
+- If the task is explicitly about host portability, systemd services, launcher scripts outside the dev shell, deployment hosts, or non-Nix runtime behavior, host behavior is part of the task and must be reported as such.
+- Do not stop at planning when the slice, file scope, and validation command are already concrete.
+- Do not broaden scope. If one small adjacent documentation update is explicitly in scope, keep it tightly coupled to the code change.
+- Return exact files changed, exact validation commands run, and exact outcomes.
+
 ## Expectation Handling Policy
 
 When an expectation fails, preserve the expectation itself as an artifact before
