@@ -29,6 +29,20 @@
         :test #'string=
         :key #'hyperbook:lookup-issue-expected-page-id-of))
 
+(defun smoke-make-page-lookup-issue (target-hyperbook-id expected-page-id)
+  (hyperbook:make-page-lookup-issue
+   (make-condition 'simple-error
+                   :format-control "Synthetic lookup issue"
+                   :format-arguments nil)
+   :source-hyperbook "hyperdoc"
+   :source-page-id "Synthetic source page"
+   :source-page-title "Synthetic source page"
+   :source-section "Smoke"
+   :link-text expected-page-id
+   :target-hyperbook-id target-hyperbook-id
+   :expected-page-id expected-page-id
+   :classification :lookup-failure))
+
 (defun run-page-lookup-issues-smoke-tests ()
   (let* ((denk-page (smoke-find-hyperdoc-page "Denkpanzer paper 2013"))
          (denk-headings (smoke-heading-texts denk-page))
@@ -56,6 +70,9 @@
                                                      "Defining custom views")))
       (assert-true missing-issue
                    "Writing text pages should expose the missing Defining custom views target as a structured issue")
+      (assert-equal :hyperdoc-page
+                    (hyperbook:lookup-issue-target-kind-of missing-issue)
+                    "Missing HyperDoc page should keep the HyperDoc page target kind")
       (assert-equal :missing-hyperdoc-page
                     (hyperbook:lookup-issue-classification-of missing-issue)
                     "Missing HyperDoc page should classify separately from FedWiki publication issues")
@@ -75,6 +92,39 @@
       (assert-equal :fixed
                     (hyperbook:lookup-issue-status-of missing-issue)
                     "Lookup-issue status should be markable from the operation flow")))
+  (let* ((topic-issue
+           (hyperbook:enrich-lookup-issue
+            (smoke-make-page-lookup-issue "topics"
+                                          "Synthetic missing topic")))
+         (topic-repair (funcall (hyperbook::lookup-issue-repair-thunk-of topic-issue))))
+    (assert-equal :hyperdoc-topic-page
+                  (hyperbook:lookup-issue-target-kind-of topic-issue)
+                  "Topics targets should route to HyperDoc topic-page repair planning")
+    (assert-equal :missing-hyperdoc-topic-page
+                  (hyperbook:lookup-issue-classification-of topic-issue)
+                  "Topics targets should classify as missing HyperDoc topic pages")
+    (assert-equal :scaffold-hyperdoc-topic
+                  (hyperbook:lookup-issue-suggested-repair-of topic-issue)
+                  "Topics targets should propose topic scaffolding")
+    (assert-true (typep topic-repair 'hyperdoc::hyperdoc-authoring-scaffold-plan)
+                 "Topic repair thunk should yield a HyperDoc authoring scaffold plan")
+    (assert-equal :topic
+                  (hyperdoc::hyperdoc-authoring-scaffold-mode-of topic-repair)
+                  "Missing topic scaffold should stay in topic mode"))
+  (let ((generic-issue
+          (hyperbook:enrich-lookup-issue
+           (smoke-make-page-lookup-issue "lisp-functions"
+                                         "hyperbook:make-page-lookup-issue"))))
+    (assert-equal :hyperbook-page
+                  (hyperbook:lookup-issue-target-kind-of generic-issue)
+                  "Non-HyperDoc targets should remain generic HyperBook page issues")
+    (assert-equal :missing-hyperbook-page
+                  (hyperbook:lookup-issue-classification-of generic-issue)
+                  "Non-HyperDoc targets should not be misclassified as missing HyperDoc pages")
+    (assert-equal :inspect-target-hyperbook
+                  (hyperbook:lookup-issue-suggested-repair-of generic-issue)
+                  "Non-HyperDoc targets should suggest inspecting the target HyperBook")
+    (assert-true (null (hyperbook::lookup-issue-repair-thunk-of generic-issue))
+                 "Generic HyperBook lookup issues should not attach a HyperDoc scaffold thunk"))
   (format t "~&Page lookup issue smoke tests passed.~%")
   t)
-

@@ -217,6 +217,135 @@
                    :summary summary
                    :template template)))
 
+(defun hyperdoc-hyperbook-id ()
+  (or (ignore-errors (hb:id-of *hyperdoc*))
+      "hyperdoc"))
+
+(defun route-hyperdoc-authoring-lookup-issue!
+    (issue &key target-kind classification suggested-repair repair-description)
+  (let ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue))
+        (page-id (hb:lookup-issue-expected-page-id-of issue)))
+    (hb::configure-lookup-issue!
+     issue
+     :target-kind target-kind
+     :classification classification
+     :suggested-repair suggested-repair
+     :repair-description repair-description
+     :repair-thunk (lambda ()
+                     (plan-hyperdoc-authoring-scaffold
+                      target-hyperbook-id
+                      page-id)))))
+
+(defun route-hyperdoc-topic-lookup-issue! (issue)
+  (route-hyperdoc-authoring-lookup-issue!
+   issue
+   :target-kind :hyperdoc-topic-page
+   :classification :missing-hyperdoc-topic-page
+   :suggested-repair :scaffold-hyperdoc-topic
+   :repair-description
+   "Scaffold the missing HyperDoc topic constructor and its durable page before adding downstream twins."))
+
+(defun route-hyperdoc-page-authoring-lookup-issue! (issue)
+  (route-hyperdoc-authoring-lookup-issue!
+   issue
+   :target-kind :hyperdoc-page
+   :classification :missing-hyperdoc-page
+   :suggested-repair :scaffold-hyperdoc-page
+   :repair-description
+   "Scaffold the missing HyperDoc page from the repair flow, then add durable content deliberately."))
+
+(defun route-fedwiki-page-lookup-issue! (issue)
+  (let* ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue))
+         (slug (hb:lookup-issue-expected-page-id-of issue))
+         (domain (subseq target-hyperbook-id (length "fedwiki:")))
+         (local-domain-p (string= (string-downcase domain)
+                                  (local-fedwiki-domain-name)))
+         (local-path (and local-domain-p
+                          (local-fedwiki-path-for-slug slug)))
+         (local-page-exists-p (and local-path
+                                   (uiop:file-exists-p local-path)))
+         (materialization-plan
+           (and local-domain-p
+                (ignore-errors
+                  (plan-fedwiki-page-materialization
+                   slug
+                   :expected-fedwiki-branch nil))))
+         (probe (make-fedwiki-publication-probe domain slug)))
+    (hb::append-lookup-issue-details!
+     issue
+     (list :target-domain domain
+           :local-domain-p local-domain-p
+           :local-path local-path
+           :local-page-exists-p local-page-exists-p
+           :sitemap-has-slug-p
+           (fedwiki-publication-probe-sitemap-has-slug-p probe)
+           :fetch-status
+           (fedwiki-publication-probe-fetch-status-of probe)
+           :publication-classification
+           (fedwiki-publication-probe-classification-of probe)))
+    (cond
+      ((and local-domain-p
+            local-page-exists-p
+            (eq (fedwiki-publication-probe-classification-of probe)
+                :publication-boundary))
+       (hb::configure-lookup-issue!
+        issue
+        :target-kind :remote-fedwiki-page
+        :classification :publication-boundary
+        :suggested-repair :inspect-publication-probe
+        :repair-description
+        "The local FedWiki page exists, but the served site does not currently resolve it. Inspect the publication probe instead of recreating the page."
+        :repair-thunk (lambda ()
+                        (make-fedwiki-publication-probe domain slug))))
+      ((and local-domain-p
+            (not local-page-exists-p)
+            materialization-plan)
+       (hb::configure-lookup-issue!
+        issue
+        :target-kind :local-fedwiki-twin
+        :classification :missing-local-fedwiki-twin
+        :suggested-repair :materialize-local-fedwiki-twin
+        :repair-description
+        "Materialize the missing FedWiki twin into the localhost pages repo through the existing materialization helper."
+        :repair-thunk (lambda ()
+                        (plan-fedwiki-page-materialization slug))))
+      ((eq (fedwiki-publication-probe-classification-of probe)
+           :remote-page-missing)
+       (hb::configure-lookup-issue!
+        issue
+        :target-kind :remote-fedwiki-page
+        :classification :remote-page-missing
+        :suggested-repair :inspect-publication-probe
+        :repair-description
+        "The remote FedWiki page does not currently resolve. Inspect the probe before deciding whether authoring or publication work is required."
+        :repair-thunk (lambda ()
+                        (make-fedwiki-publication-probe domain slug))))
+      (t
+       (hb::configure-lookup-issue!
+        issue
+        :target-kind :remote-fedwiki-page
+        :classification :lookup-path-fetch-format-failure
+        :suggested-repair :inspect-publication-probe
+        :repair-description
+        "Inspect the publication probe to determine whether the remote lookup failure is caused by sitemap lag, fetch-format drift, or another resolution-path problem."
+        :repair-thunk (lambda ()
+                        (make-fedwiki-publication-probe domain slug)))))
+    issue))
+
+(defun route-hyperdoc-page-lookup-issue! (issue)
+  (let ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue)))
+    (cond
+      ((null target-hyperbook-id)
+       issue)
+      ((string= target-hyperbook-id "topics")
+       (route-hyperdoc-topic-lookup-issue! issue))
+      ((uiop:string-prefix-p "fedwiki:" target-hyperbook-id)
+       (route-fedwiki-page-lookup-issue! issue))
+      ((string= target-hyperbook-id (hyperdoc-hyperbook-id))
+       (route-hyperdoc-page-authoring-lookup-issue! issue))
+      (t
+       (hb::classify-generic-page-lookup-issue! issue)))))
+
 (defun write-hyperdoc-authoring-scaffold-plan! (plan)
   (unless (eq (hyperdoc-authoring-scaffold-mode-of plan) :page)
     (error "Only page-mode scaffold plans can write files directly."))
@@ -285,4 +414,3 @@
   (views:html-view :title "Template" :priority 2
     (views:html
       (:pre (views:esc (hyperdoc-authoring-scaffold-template-of plan))))))
-

@@ -12,6 +12,7 @@ In this repository, a Topics HyperBook page is not backed by a separate HTML fil
   <li>A missing topic-page lookup is not primarily “missing HTML page file”.</li>
   <li>It is primarily “missing authored topic factory and/or stale topic index”.</li>
   <li>The running target proposition is: the Topics HyperBook resolves the expected canonical title.</li>
+  <li>Only targets in HyperBook <tt>hyperdoc</tt> or <tt>topics</tt> should route to HyperDoc authoring scaffolds; other HyperBooks stay generic lookup issues.</li>
 </ul>
 
 <h2>Part 1: Wire chunks into page-lookup-issue objects</h2>
@@ -290,4 +291,11 @@ That is the chunk-based replacement for the old “repair function”.
 Do <b>not</b> model a Topics HyperBook repair as writing a separate topic HTML
 page file. In this repository, Topics pages are generated from authored topic
 factories plus rebuilt indexes, not from standalone topic-page HTML files.
+</p>
+
+<p>
+Likewise, do <b>not</b> route every failed page lookup through HyperDoc page
+scaffolding. A failure against another HyperBook such as
+<tt>lisp-functions</tt> should keep a generic HyperBook classification and only
+HyperDoc-owned targets should attach HyperDoc repair plans.
 </p>

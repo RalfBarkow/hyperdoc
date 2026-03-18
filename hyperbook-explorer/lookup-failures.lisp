@@ -162,6 +162,48 @@
         status)
   issue)
 
+(defun append-lookup-issue-details! (issue details)
+  (when details
+    (setf (lookup-issue-details-of issue)
+          (append (lookup-issue-details-of issue)
+                  details)))
+  issue)
+
+(defun configure-lookup-issue!
+    (issue
+     &key
+       ((:target-kind target-kind) nil target-kind-p)
+       ((:classification classification) nil classification-p)
+       ((:status status) nil status-p)
+       ((:suggested-repair suggested-repair) nil suggested-repair-p)
+       ((:repair-description repair-description) nil repair-description-p)
+       ((:repair-thunk repair-thunk) nil repair-thunk-p)
+       ((:details details) nil details-p))
+  (when target-kind-p
+    (setf (lookup-issue-target-kind-of issue) target-kind))
+  (when classification-p
+    (setf (lookup-issue-classification-of issue) classification))
+  (when status-p
+    (setf (lookup-issue-default-status-of issue) status))
+  (when suggested-repair-p
+    (setf (lookup-issue-suggested-repair-of issue) suggested-repair))
+  (when repair-description-p
+    (setf (lookup-issue-repair-description-of issue) repair-description))
+  (when repair-thunk-p
+    (setf (lookup-issue-repair-thunk-of issue) repair-thunk))
+  (when details-p
+    (append-lookup-issue-details! issue details))
+  issue)
+
+(defun classify-generic-page-lookup-issue! (issue)
+  (configure-lookup-issue!
+   issue
+   :target-kind :hyperbook-page
+   :classification :missing-hyperbook-page
+   :suggested-repair :inspect-target-hyperbook
+   :repair-description
+   "This lookup failed against a non-HyperDoc HyperBook. Inspect that HyperBook's own authoring or index path instead of routing through HyperDoc page scaffolding."))
+
 (defgeneric enrich-lookup-issue (issue)
   (:method ((issue lookup-issue))
     issue))

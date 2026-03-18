@@ -60,6 +60,14 @@ The function HYPERDOC::MECH-RUN-RECORD-STORY-NEIGHBORHOOD-EXAMPLE is undefined.
   not present in the current image. 
 </p>
 
+<p>
+  Preserve the page-lookup seam carefully here: HyperDoc-specific repair thunks
+  belong only on HyperDoc-owned targets such as <tt>hyperdoc</tt>,
+  <tt>topics</tt>, or HyperDoc-managed FedWiki twins. A failed lookup against a
+  different HyperBook should stay a generic HyperBook issue rather than being
+  misrouted into HyperDoc page scaffolding.
+</p>
+
 <h2>Procedure</h2>
 
 <h3>Step 1. Inspect the current page-lookup-issue object</h3>
