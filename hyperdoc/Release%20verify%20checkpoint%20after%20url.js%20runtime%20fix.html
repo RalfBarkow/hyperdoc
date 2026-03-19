@@ -1,0 +1,37 @@
+<h1>Release verify checkpoint after url.js runtime fix</h1>
+
+<p>
+  This checkpoint records the currently validated release state after the recent
+  release-verify warning-status work and the <tt>url.js</tt> runtime-route fix.
+</p>
+
+<h2>Validated Commits</h2>
+
+<ul>
+  <li><tt>8a5beb4e638cf46d1329807acac5b0251f0d221c</tt></li>
+  <li><tt>d219c6fe50cd7eb35d2d3824f624ed49431fa2ff</tt></li>
+</ul>
+
+<h2>Intermediate Attempt</h2>
+
+<p>
+  <tt>9be5d1ddca5cd122e0ecf0d56e90253b72079560</tt> was an incomplete intermediate
+  step. It improved startup asset registration but did not satisfy the
+  <tt>url.js</tt> runtime contract on its own.
+</p>
+
+<h2>Current Release Interpretation</h2>
+
+<ul>
+  <li><tt>release-verify</tt> passes functionally.</li>
+  <li>The readiness retry warning remains advisory.</li>
+  <li>The most likely cause is cold-start overhead in the packaged verification path.</li>
+</ul>
+
+<h2>When To Reopen</h2>
+
+<ul>
+  <li>Readiness polling reaches timeout.</li>
+  <li>Final HTTP checks stop ending at <tt>200</tt>.</li>
+  <li>Startup latency becomes an explicit release or deployment goal.</li>
+</ul>
