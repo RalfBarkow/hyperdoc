@@ -56,8 +56,16 @@ Enable web debugger only when that extension is loaded."
         (values nil nil pathname candidates nil))))
 
 (defun static-root-pathname ()
-  (let ((root (uiop:ensure-directory-pathname
-               (asdf:system-relative-pathname :clog "static-files/"))))
+  (let* ((env-root (when-let (clog-src (uiop:getenv "CLOG_SRC"))
+                     (let ((candidate (uiop:ensure-directory-pathname
+                                       (merge-pathnames #P"static-files/"
+                                                        (uiop:ensure-directory-pathname
+                                                         (pathname clog-src))))))
+                       (when (probe-file candidate)
+                         candidate))))
+         (root (or env-root
+                   (uiop:ensure-directory-pathname
+                    (asdf:system-relative-pathname :clog "static-files/")))))
     (assert (typep root 'pathname) (root)
             "Static root must be a pathname, got ~S" root)
     root))
@@ -215,6 +223,7 @@ recommended on public servers because it allows the execution of
                                                    :playground? development*))
      :port port
      :static-root static-root
+     :static-boot-js t
      :extended-routing t)
     (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
       (add-path-to-hyperbook hb pane-width development*))
