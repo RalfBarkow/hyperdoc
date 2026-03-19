@@ -75,7 +75,7 @@ Enable web debugger only when that extension is loaded."
    "^/hyperbook-server/"
    (uiop:ensure-directory-pathname
     (asdf:system-relative-pathname :hyperbook/server
-                                   "assets/hyperbook-server/"))))
+                                   "assets/"))))
 
 (defun register-known-hyperbooks ()
   (multiple-value-bind (entries exists? path candidates load-error)
@@ -366,7 +366,7 @@ removal of characters that are not allowed in URLs."
     (views:add-asset-path "/hyperbook-server/"
                           (asdf:system-relative-pathname
                            :hyperbook/server
-                           "assets/hyperbook-server/"))
+                           "assets/"))
     (views:include-js "/hyperbook-server/js/url.js")
     (views:include-script "makeUrl(window.currentInspectorView)")
     (views:html (:hyperbook-slug (views:esc slug)))))
