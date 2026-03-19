@@ -99,13 +99,92 @@
       (views:html
         (:span :style "opacity: 0.55;" "No relations."))))
 
-(defun render-path-list (paths empty-message)
+(defun maybe-path-annotation-ref (annotation &key display)
+  (if annotation
+      (views:object-ref annotation :display (or display (short-label-of annotation)))
+      (views:html (:span :style "opacity: 0.55;" "-"))))
+
+(defun include-git-path-context-menu-assets ()
+  (views:add-asset-path "/hyperdoc/"
+                        (asdf:system-relative-pathname
+                         :hyperdoc
+                         "assets/hyperdoc/"))
+  (views:include-css "/hyperdoc/css/git-path-context-menu.css")
+  (views:include-js "/hyperdoc/js/git-path-context-menu.js")
+  (views:include-script
+   "window.hyperdocGitPathContextMenu && window.hyperdocGitPathContextMenu.init()"))
+
+(defun render-path-context-action (command label &key target select disabledp)
+  (views:html
+    (:span :class "git-path-context-action"
+           :data-command command
+           :data-label label
+           :data-disabled (if disabledp "true" "false")
+           (cond
+             (disabledp
+              (views:esc label))
+             (target
+              (if select
+                  (views:object-ref target :display label :select select)
+                  (views:object-ref target :display label)))
+             (t
+              (views:esc label))))))
+
+(defun render-path-context-actions (path-item &key forecast path-set)
+  (let* ((relative-path (relative-path-of path-item))
+         (annotation (and forecast
+                          (git-path-annotation-for-path forecast relative-path)))
+         (annotation-target (and forecast
+                                 (git-openable-path-annotation-for-path
+                                  forecast relative-path :path-set path-set)))
+         (related-decisions (and forecast
+                                 (git-related-path-decisions-for-path
+                                  forecast relative-path))))
+    (views:html
+      (:span :class "git-path-context-actions" :hidden "hidden"
+             (render-path-context-action "details" "Details"
+                                         :target path-item)
+             (render-path-context-action "add-annotation" "Add annotation"
+                                         :target annotation-target)
+             (render-path-context-action "edit-annotation" "Edit annotation"
+                                         :target annotation
+                                         :disabledp (null annotation))
+             (render-path-context-action "related-decisions" "Related decisions"
+                                         :target path-item
+                                         :select "Related decisions"
+                                         :disabledp (null related-decisions))))))
+
+(defun render-path-item (path &key forecast path-set)
+  (let* ((path-item (and forecast
+                         (git-forecast-path-item-for-path
+                          forecast path :path-set path-set)))
+         (annotation (and forecast
+                          (git-path-annotation-for-path forecast path))))
+    (views:html
+      (:span :class "git-path-item"
+             :data-relative-path path
+             :data-path-set (or path-set "")
+             (:tt (if path-item
+                      (views:object-ref path-item :display path)
+                      (views:esc path)))
+             (when annotation
+               (views:html
+                 (:span :class "git-path-annotation-badge"
+                        (views:esc (short-label-of annotation)))))
+             (when path-item
+               (render-path-context-actions path-item
+                                            :forecast forecast
+                                            :path-set path-set))))))
+
+(defun render-path-list (paths empty-message &key forecast path-set)
   (if paths
       (views:html
         (:ul
          (loop for path in paths
                do (views:html
-                    (:li (:tt (views:esc path)))))))
+                    (:li (render-path-item path
+                                           :forecast forecast
+                                           :path-set path-set))))))
       (views:html
         (:p (views:esc empty-message)))))
 
@@ -137,7 +216,11 @@
                      (:th (views:esc "Note")))
                 (loop for decision in decisions
                       do (views:html
-                           (:tr (:td (:tt (views:esc (path-of decision))))
+                           (:tr (:td (render-path-item
+                                      (path-of decision)
+                                      :forecast (git-merge-forecast-from-relation
+                                                 (relation-of decision))
+                                      :path-set (path-set-of decision)))
                                 (:td (:tt (views:esc (classification-of decision))))
                                 (:td (views:esc (rationale-of decision)))
                                 (:td (maybe-linked-note-ref (linked-note-of decision))))))))
@@ -161,7 +244,8 @@
                   (:tr (:td (views:esc "Adaptation mode"))
                        (:td (:tt (views:esc (adaptation-mode-of bucket))))))
           (render-path-list (paths-of bucket)
-                            "This bucket does not currently hold any paths."))))
+                            "This bucket does not currently hold any paths."
+                            :forecast (forecast-of bucket)))))
 
 (defun render-validation-proof-list (items)
   (if items
@@ -196,7 +280,8 @@
           (render-validation-proof-list (validation-proof-of bucket))
           (:h5 "Paths")
           (render-path-list (paths-of bucket)
-                            "This transition bucket does not currently hold any paths."))))
+                            "This transition bucket does not currently hold any paths."
+                            :forecast (forecast-of bucket)))))
 
 (defun render-manual-conflict-table (conflicts empty-message)
   (if conflicts
@@ -477,6 +562,14 @@
           (path-of decision)
           (classification-of decision)))
 
+(defmethod views:text-representation ((annotation git-path-annotation))
+  (format nil "~A [~A]"
+          (relative-path-of annotation)
+          (short-label-of annotation)))
+
+(defmethod views:text-representation ((path-item git-forecast-path-item))
+  (relative-path-of path-item))
+
 (defmethod views:text-representation ((plan git-dreyeck-extraction-plan))
   (title-of plan))
 
@@ -642,6 +735,7 @@
 (views:defview 👀upstream-only-files (forecast git-merge-forecast)
   (let ((source-branch (source-branch-of (relation-of forecast))))
     (views:html-view :title "Upstream-only files" :priority 2
+      (include-git-path-context-menu-assets)
       (views:html
         (:h3 (views:esc
               (format nil "~A-only paths"
@@ -649,11 +743,14 @@
         (render-path-list
          (upstream-only-paths-of forecast)
          (format nil "No ~A-only paths at the anchored commits."
-                 (branch-name-of source-branch)))))))
+                 (branch-name-of source-branch))
+         :forecast forecast
+         :path-set "upstream-only")))))
 
 (views:defview 👀hauptsache-only-files (forecast git-merge-forecast)
   (let ((target-branch (target-branch-of (relation-of forecast))))
     (views:html-view :title "Hauptsache-only files" :priority 3
+      (include-git-path-context-menu-assets)
       (views:html
         (:h3 (views:esc
               (format nil "~A-only paths"
@@ -661,19 +758,25 @@
         (render-path-list
          (hauptsache-only-paths-of forecast)
          (format nil "No ~A-only paths at the anchored commits."
-                 (branch-name-of target-branch)))))))
+                 (branch-name-of target-branch))
+         :forecast forecast
+         :path-set "hauptsache-only")))))
 
 (views:defview 👀overlapping-paths (forecast git-merge-forecast)
   (views:html-view :title "Overlapping paths" :priority 4
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 "Overlapping paths")
       (:p (views:esc (blocker-summary-of forecast)))
       (render-path-list
        (overlapping-paths-of forecast)
-       "No overlapping paths at the anchored commits."))))
+       "No overlapping paths at the anchored commits."
+       :forecast forecast
+       :path-set "overlapping"))))
 
 (views:defview 👀overlapping-path-decisions (forecast git-merge-forecast)
   (views:html-view :title "Overlapping path decisions" :priority 5
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 "Overlapping path decisions")
       (render-path-decision-table
@@ -682,6 +785,7 @@
 
 (views:defview 👀hauptsache-path-decisions (forecast git-merge-forecast)
   (views:html-view :title "Hauptsache path decisions" :priority 6
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 "Hauptsache-only path classifications")
       (render-path-decision-table
@@ -690,6 +794,7 @@
 
 (views:defview 👀dreyeck-candidate-paths (forecast git-merge-forecast)
   (views:html-view :title "Dreyeck candidate paths" :priority 7
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 "Dreyeck candidate paths")
       (render-path-decision-table
@@ -698,6 +803,7 @@
 
 (views:defview 👀unresolved-manual-paths (forecast git-merge-forecast)
   (views:html-view :title "Unresolved manual paths" :priority 8
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 "Unresolved manual overlapping paths")
       (render-path-decision-table
@@ -715,11 +821,99 @@
                    (:td (:tt (views:esc (classification-of decision)))))
               (:tr (:td (views:esc "Relation"))
                    (:td (views:object-ref (relation-of decision))))
+              (:tr (:td (views:esc "Annotation"))
+                   (:td (maybe-path-annotation-ref
+                         (git-path-annotation-for-decision decision)
+                         :display "Path annotation")))
               (:tr (:td (views:esc "Linked note"))
                    (:td (maybe-linked-note-ref (linked-note-of decision)))))
       (:h4 "Rationale")
       (:pre :style "white-space: pre-wrap"
             (views:esc (rationale-of decision))))))
+
+(views:defview 👀summary (annotation git-path-annotation)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (:tt (views:esc (relative-path-of annotation))))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Forecast"))
+                   (:td (views:object-ref (forecast-of annotation))))
+              (:tr (:td (views:esc "Bucket"))
+                   (:td (:tt (views:esc (bucket-of annotation)))))
+              (:tr (:td (views:esc "Owner"))
+                   (:td (:tt (views:esc (owner-of annotation)))))
+              (:tr (:td (views:esc "Label"))
+                   (:td (views:esc (short-label-of annotation))))
+              (:tr (:td (views:esc "Related paths"))
+                   (:td (if (related-paths-of annotation)
+                            (views:html
+                              (:ul
+                               (loop for path in (related-paths-of annotation)
+                                     do (views:html
+                                          (:li (:tt (views:esc path)))))))
+                            (views:html
+                              (:span :style "opacity: 0.55;" "-")))))))))
+
+(views:defview 👀rationale (annotation git-path-annotation)
+  (views:html-view :title "Rationale" :priority 2
+    (views:html
+      (:h3 (views:esc (short-label-of annotation)))
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (long-rationale-of annotation))))))
+
+(views:defview 👀path-decision (annotation git-path-annotation)
+  (views:html-view :title "Path decision" :priority 3
+    (views:html
+      (:h3 (:tt (views:esc (relative-path-of annotation))))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Bucket"))
+                   (:td (:tt (views:esc (bucket-of annotation)))))
+              (:tr (:td (views:esc "Owner"))
+                   (:td (:tt (views:esc (owner-of annotation)))))
+              (:tr (:td (views:esc "Merge policy"))
+                   (:td (:pre :style "white-space: pre-wrap; margin: 0;"
+                              (views:esc (merge-policy-of annotation)))))))))
+
+(views:defview 👀summary (path-item git-forecast-path-item)
+  (views:html-view :title "Summary" :priority 1
+    (let* ((forecast (forecast-of path-item))
+           (annotation (git-path-annotation-for-path forecast
+                                                     (relative-path-of path-item)))
+           (related-decisions (git-related-path-decisions path-item)))
+      (views:html
+        (:h3 (:tt (views:esc (relative-path-of path-item))))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Forecast"))
+                     (:td (views:object-ref forecast)))
+                (:tr (:td (views:esc "Path set"))
+                     (:td (:tt (views:esc (or (path-set-of path-item)
+                                              "n/a")))))
+                (:tr (:td (views:esc "Annotation"))
+                     (:td (if annotation
+                              (views:object-ref annotation)
+                              (views:object-ref
+                               (git-openable-path-annotation-for-path
+                                forecast
+                                (relative-path-of path-item)
+                                :path-set (path-set-of path-item))
+                               :display "Draft annotation"))))
+                (:tr (:td (views:esc "Related decisions"))
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        (length related-decisions)))))))))))
+
+(views:defview 👀related-decisions (path-item git-forecast-path-item)
+  (views:html-view :title "Related decisions" :priority 2
+    (let ((related-decisions (git-related-path-decisions path-item)))
+      (include-git-path-context-menu-assets)
+      (views:html
+        (:h3 (:tt (views:esc (relative-path-of path-item))))
+        (if related-decisions
+            (render-path-decision-table
+             related-decisions
+             "No related decisions are recorded for this path.")
+            (views:html
+              (:p "No related decisions are recorded for this path.")))))))
 
 (views:defview 👀summary (plan git-dreyeck-extraction-plan)
   (views:html-view :title "Summary" :priority 1
@@ -770,10 +964,12 @@
 
 (views:defview 👀paths (bucket git-dreyeck-extraction-bucket)
   (views:html-view :title "Paths" :priority 2
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 (views:esc (title-of bucket)))
       (render-path-list (paths-of bucket)
-                        "This bucket does not currently hold any paths."))))
+                        "This bucket does not currently hold any paths."
+                        :forecast (forecast-of bucket)))))
 
 (views:defview 👀summary (plan git-dreyeck-transition-plan)
   (views:html-view :title "Summary" :priority 1
@@ -819,10 +1015,12 @@
 
 (views:defview 👀paths (bucket git-dreyeck-transition-bucket)
   (views:html-view :title "Paths" :priority 2
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 (views:esc (title-of bucket)))
       (render-path-list (paths-of bucket)
-                        "This transition bucket does not currently hold any paths."))))
+                        "This transition bucket does not currently hold any paths."
+                        :forecast (forecast-of bucket)))))
 
 (views:defview 👀summary (conflict git-manual-conflict)
   (views:html-view :title "Summary" :priority 1
@@ -1125,6 +1323,7 @@
 
 (views:defview 👀raw-conflicts (surface git-raw-conflict-surface)
   (views:html-view :title "Raw conflicts" :priority 2
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 (views:esc (title-of surface)))
       (:h4 "Typed manual-dossier results on the raw frontier")
@@ -1138,7 +1337,8 @@
       (:h4 "Still-untyped raw conflict remainder")
       (render-path-list
        (remainder-paths-of surface)
-       "No raw merge-tree conflicts remain outside the typed manual plus extra conflict frontier."))))
+       "No raw merge-tree conflicts remain outside the typed manual plus extra conflict frontier."
+       :forecast (forecast-of surface)))))
 
 (views:defview 👀summary (surface git-path-decision-surface)
   (views:html-view :title "Summary" :priority 1
@@ -1155,6 +1355,7 @@
 
 (views:defview 👀path-decisions (surface git-path-decision-surface)
   (views:html-view :title "Path decisions" :priority 2
+    (include-git-path-context-menu-assets)
     (views:html
       (:h3 (views:esc (title-of surface)))
       (render-path-decision-table

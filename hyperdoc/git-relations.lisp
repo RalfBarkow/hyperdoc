@@ -104,6 +104,27 @@ The resulting system must continue to load and serve HyperDoc.")
    (rationale :reader rationale-of :initarg :rationale :type string)
    (linked-note :reader linked-note-of :initarg :linked-note :initform nil)))
 
+(defclass git-path-annotation ()
+  ((id :reader id-of :initarg :id :type string)
+   (title :reader title-of :initarg :title :type string)
+   (summary :reader summary-of :initarg :summary :type string)
+   (forecast :reader forecast-of :initarg :forecast :type git-merge-forecast)
+   (relative-path :reader relative-path-of :initarg :relative-path :type string)
+   (bucket :reader bucket-of :initarg :bucket :type string)
+   (owner :reader owner-of :initarg :owner :type string)
+   (short-label :reader short-label-of :initarg :short-label :type string)
+   (long-rationale :reader long-rationale-of :initarg :long-rationale :type string)
+   (merge-policy :reader merge-policy-of :initarg :merge-policy :type string)
+   (related-paths :reader related-paths-of :initarg :related-paths :initform nil)))
+
+(defclass git-forecast-path-item ()
+  ((id :reader id-of :initarg :id :type string)
+   (title :reader title-of :initarg :title :type string)
+   (summary :reader summary-of :initarg :summary :type string)
+   (forecast :reader forecast-of :initarg :forecast :type git-merge-forecast)
+   (relative-path :reader relative-path-of :initarg :relative-path :type string)
+   (path-set :reader path-set-of :initarg :path-set :initform nil)))
+
 (defclass git-path-decision-surface ()
   ((id :reader id-of :initarg :id :type string)
    (title :reader title-of :initarg :title :type string)
@@ -574,6 +595,14 @@ The resulting system must continue to load and serve HyperDoc.")
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object git-path-annotation) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object git-forecast-path-item) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object git-dreyeck-extraction-plan) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -755,6 +784,105 @@ The resulting system must continue to load and serve HyperDoc.")
    :classification classification
    :rationale rationale
    :linked-note linked-note))
+
+(defun make-git-path-annotation (forecast relative-path bucket owner short-label
+                                 long-rationale merge-policy
+                                 &key related-paths)
+  (make-instance
+   'git-path-annotation
+   :id (format nil "~A/annotation/~A"
+               (id-of forecast)
+               relative-path)
+   :title (format nil "Path annotation: ~A" relative-path)
+   :summary short-label
+   :forecast forecast
+   :relative-path relative-path
+   :bucket bucket
+   :owner owner
+   :short-label short-label
+   :long-rationale long-rationale
+   :merge-policy merge-policy
+   :related-paths related-paths))
+
+(defun git-path-annotation-specs (forecast)
+  (when (string= (id-of (relation-of forecast))
+                 "merge-upstream-main-into-hauptsache-via-dreyeck-fallback")
+    (list
+     (list
+      :relative-path "hyperbook-server/assets/hyperbook-server/js/url.js"
+      :bucket "glue-code"
+      :owner "dreyeck"
+      :short-label "runtime URL-helper asset"
+      :long-rationale
+      "dreyeck-owned glue asset for the HyperBook URL view.
+Browser/runtime contract file, not just packaged static baggage.
+Included via /hyperbook-server/js/url.js from hyperbook-server/server.lisp.
+Previously failed at runtime with 404 because asset mounting/root selection was wrong.
+Startup registration alone was not sufficient; the real fix was correcting the mounted filesystem root while keeping the /hyperbook-server/ URL prefix unchanged."
+      :merge-policy
+      "keep in dreyeck glue/release-support territory until upstream has the same URL-helper runtime contract"))))
+
+(defun git-path-annotations (forecast)
+  (loop for spec in (git-path-annotation-specs forecast)
+        collect (make-git-path-annotation
+                 forecast
+                 (getf spec :relative-path)
+                 (getf spec :bucket)
+                 (getf spec :owner)
+                 (getf spec :short-label)
+                 (getf spec :long-rationale)
+                 (getf spec :merge-policy)
+                 :related-paths (copy-list (getf spec :related-paths)))))
+
+(defun git-path-annotation-for-path (forecast relative-path)
+  (find relative-path
+        (git-path-annotations forecast)
+        :key #'relative-path-of
+        :test #'string=))
+
+(defun git-path-annotation-for-decision (decision)
+  (git-path-annotation-for-path
+   (git-merge-forecast-from-relation (relation-of decision))
+   (path-of decision)))
+
+(defun default-git-path-annotation (forecast relative-path &key path-set)
+  (declare (ignore path-set))
+  (make-git-path-annotation
+   forecast
+   relative-path
+   "unclassified"
+   "unassigned"
+   "draft path annotation"
+   "No explicit path annotation is recorded yet for this merge-forecast path.
+Use this object to capture ownership, rationale, and merge policy before merge execution."
+   "set a merge policy for this path"))
+
+(defun git-openable-path-annotation-for-path (forecast relative-path &key path-set)
+  (or (git-path-annotation-for-path forecast relative-path)
+      (default-git-path-annotation forecast relative-path :path-set path-set)))
+
+(defun make-git-forecast-path-item (forecast relative-path &key path-set)
+  (make-instance
+   'git-forecast-path-item
+   :id (format nil "~A/path/~A" (id-of forecast) relative-path)
+   :title (format nil "Forecast path: ~A" relative-path)
+   :summary "Inspectable merge-forecast path item with context-menu targets for details, annotation, and related decisions."
+   :forecast forecast
+   :relative-path relative-path
+   :path-set path-set))
+
+(defun git-forecast-path-item-for-path (forecast relative-path &key path-set)
+  (make-git-forecast-path-item forecast relative-path :path-set path-set))
+
+(defun git-related-path-decisions-for-path (forecast relative-path)
+  (remove-if-not (lambda (decision)
+                   (string= (path-of decision) relative-path))
+                 (append (git-overlapping-path-decisions forecast)
+                         (git-hauptsache-only-path-decisions forecast))))
+
+(defun git-related-path-decisions (path-item)
+  (git-related-path-decisions-for-path (forecast-of path-item)
+                                       (relative-path-of path-item)))
 
 (defun overlapping-path-decision (relation path)
   (let ((note (relation-note-for-path relation path)))
@@ -2054,6 +2182,18 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
   (git-extra-raw-conflict-for-path
    (%hyperdoc-upstream-main-into-hauptsache-merge-forecast)
    "hyperbook-wikipedia/wikipedia.lisp"))
+
+(def-git-runtime-entrypoint hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-annotation ()
+  (or (git-path-annotation-for-path
+       (%hyperdoc-upstream-main-into-hauptsache-merge-forecast)
+       "hyperbook-server/assets/hyperbook-server/js/url.js")
+      (error "Missing path annotation for hyperbook-server/assets/hyperbook-server/js/url.js.")))
+
+(def-git-runtime-entrypoint hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-item ()
+  (git-forecast-path-item-for-path
+   (%hyperdoc-upstream-main-into-hauptsache-merge-forecast)
+   "hyperbook-server/assets/hyperbook-server/js/url.js"
+   :path-set "hauptsache-only"))
 
 (defun %hyperdoc-git-history-surface ()
   (let* ((local-branch (%hyperdoc-hauptsache-branch-ref))
