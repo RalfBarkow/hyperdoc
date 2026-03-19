@@ -18,5 +18,6 @@
     reverseProxyDomain = "dreyeck.ch";
     publicOrigin = "https://dreyeck.ch";
     dataDir = "/var/lib/hyperdoc/data";
+    gitRepositoryRoot = "/home/rgb/workspace/hyperdoc";
   };
 }

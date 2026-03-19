@@ -60,6 +60,13 @@ in
       default = "/var/lib/hyperdoc/data";
       description = "Persistent runtime data directory for HyperDoc service.";
     };
+
+    gitRepositoryRoot = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Optional live checkout root used for Git-backed history surfaces in deployed runtimes.";
+      example = "/home/rgb/workspace/hyperdoc";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -105,6 +112,8 @@ in
         HYPERDOC_GIT_PROGRAM = "${pkgs.git}/bin/git";
       } // optionalAttrs (cfg.publicOrigin != null) {
         HYPERDOC_PUBLIC_ORIGIN = cfg.publicOrigin;
+      } // optionalAttrs (cfg.gitRepositoryRoot != null) {
+        HYPERDOC_GIT_REPOSITORY_ROOT = cfg.gitRepositoryRoot;
       } // optionalAttrs (cfg.reverseProxyDomain != null) {
         HYPERDOC_REVERSE_PROXY_DOMAIN = cfg.reverseProxyDomain;
       };

@@ -217,11 +217,20 @@ PAGE-LOOKUP-FAILURE."
                               (or (and (working-directory-of condition)
                                        (namestring (working-directory-of condition)))
                                   "n/a")))))
-              (:tr (:td (views:esc "Repository path tested"))
+              (:tr (:td (views:esc "Effective repository root"))
                    (:td (:tt (views:esc
                               (or (and (repository-root-of condition)
                                        (namestring (repository-root-of condition)))
                                   "n/a")))))
+              (:tr (:td (views:esc "Repository root source"))
+                   (:td (:tt (views:esc
+                              (git-repository-root-source-label
+                               (repository-root-source-of condition))))))
+              (:tr (:td (views:esc "Repository root mode"))
+                   (:td (:tt (views:esc
+                              (git-repository-root-origin-label
+                               (repository-root-of condition)
+                               (repository-root-source-of condition))))))
               (:tr (:td (views:esc "Requested program"))
                    (:td (:tt (views:esc
                               (or (requested-program-of condition)
@@ -291,6 +300,24 @@ PAGE-LOOKUP-FAILURE."
               (:tr (:td (views:esc "Canonical page URL"))
                    (:td (render-canonical-url-cell
                          (canonical-page-url (page-of surface)))))
+              (:tr (:td (views:esc "Effective repository root"))
+                   (:td (render-canonical-path-cell
+                         (repository-root-of surface))))
+              (:tr (:td (views:esc "Repository root source"))
+                   (:td (:tt (views:esc
+                              (if-let (repository-root-source
+                                       (repository-root-source-of surface))
+                                (git-repository-root-source-label
+                                 repository-root-source)
+                                "n/a")))))
+              (:tr (:td (views:esc "Repository root mode"))
+                   (:td (:tt (views:esc
+                              (if-let (repository-root-source
+                                       (repository-root-source-of surface))
+                                (git-repository-root-origin-label
+                                 (repository-root-of surface)
+                                 repository-root-source)
+                                "n/a")))))
               (:tr (:td (views:esc "Object renders in-process"))
                    (:td (:tt (views:esc
                               (if (inspectable-object-of surface)
@@ -333,6 +360,17 @@ PAGE-LOOKUP-FAILURE."
               (:tr (:td (views:esc "Page path"))
                    (:td (render-canonical-path-cell
                          (canonical-page-path (page-of surface)))))
+              (:tr (:td (views:esc "Git repository root"))
+                   (:td (render-canonical-path-cell
+                         (repository-root-of surface))))
+              (:tr (:td (views:esc "Repository root mode"))
+                   (:td (:tt (views:esc
+                              (if-let (repository-root-source
+                                       (repository-root-source-of surface))
+                                (git-repository-root-origin-label
+                                 (repository-root-of surface)
+                                 repository-root-source)
+                                "n/a")))))
               (:tr (:td (views:esc "Inspector object URL"))
                    (:td
                     (render-canonical-url-cell

@@ -45,6 +45,12 @@
           (:div (:b (views:object-ref branch-ref)))
           (:div :style "font-size: 0.92em; opacity: 0.85;"
                 (:tt (views:esc (branch-role-label branch-ref))))
+          (:div :style "font-size: 0.84em; opacity: 0.75; margin-top: 0.25em;"
+                (views:esc
+                 (format nil "repo root mode: ~A"
+                         (git-repository-root-origin-label
+                          (repo-root-of branch-ref)
+                          (repository-root-source-of branch-ref)))))
           (:div :style "margin-top: 0.3em;"
                 (render-commit-summary (git-branch-target branch-ref)))
           (:div :style "font-size: 0.84em; opacity: 0.75; margin-top: 0.25em;"
@@ -549,7 +555,16 @@
                 (:tr (:td (views:esc "Aliases"))
                      (:td (:tt (views:esc (branch-aliases-display branch-ref)))))
                 (:tr (:td (views:esc "Repository root"))
-                     (:td (:tt (views:esc (namestring (repo-root-of branch-ref)))))))))))
+                     (:td (:tt (views:esc (namestring (repo-root-of branch-ref))))))
+                (:tr (:td (views:esc "Repository root source"))
+                     (:td (:tt (views:esc
+                                (git-repository-root-source-label
+                                 (repository-root-source-of branch-ref))))))
+                (:tr (:td (views:esc "Repository root mode"))
+                     (:td (:tt (views:esc
+                                (git-repository-root-origin-label
+                                 (repo-root-of branch-ref)
+                                 (repository-root-source-of branch-ref)))))))))))
 
 (views:defview 👀merge-intent (relation git-merge-intent)
   (let ((forecast (git-merge-forecast-from-relation relation))
@@ -1160,6 +1175,19 @@
         (:h3 (views:esc (title-of surface)))
         (:p (views:esc (summary-of surface)))
         (:p "This first slice is lane-based and declarative: branch anchors and merge relations are durable objects, while the row list below stays intentionally narrower than a full DAG renderer.")
+        (:h4 "Repository root")
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Effective root"))
+                     (:td (:tt (views:esc (namestring (repo-root-of surface))))))
+                (:tr (:td (views:esc "Root source"))
+                     (:td (:tt (views:esc
+                                (git-repository-root-source-label
+                                 (repository-root-source-of surface))))))
+                (:tr (:td (views:esc "Root mode"))
+                     (:td (:tt (views:esc
+                                (git-repository-root-origin-label
+                                 (repo-root-of surface)
+                                 (repository-root-source-of surface)))))))
         (:h4 "Lane anchors")
         (:table :class "inspector-table"
                 (:tr (:th (views:esc (branch-name-of local-branch)))

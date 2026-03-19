@@ -68,6 +68,9 @@
 (defclass git-commit-target ()
   ((system :reader system-of :initarg :system :type asdf:system)
    (repo-root :reader repo-root-of :initarg :repo-root :type pathname)
+   (repository-root-source :reader repository-root-source-of
+                           :initarg :repository-root-source
+                           :initform :system-source-default)
    (commit-hash :reader commit-hash-of :initarg :commit-hash :type string)))
 
 (defclass canonical-route-discovery ()
@@ -81,6 +84,12 @@
    (inspectable-object-label :reader inspectable-object-label-of
                              :initarg :inspectable-object-label
                              :initform nil)
+   (repository-root :reader repository-root-of
+                    :initarg :repository-root
+                    :initform nil)
+   (repository-root-source :reader repository-root-source-of
+                           :initarg :repository-root-source
+                           :initform nil)
    (notes :reader notes-of
           :initarg :notes
           :initform nil)))
@@ -89,13 +98,19 @@
   "Optional Git executable designator for HyperDoc Git-backed surfaces.
 If NIL, HYPERDOC_GIT_PROGRAM is consulted and then PATH lookup for \"git\".")
 
+(defparameter *git-repository-root* nil
+  "Optional explicit Git repository root designator for HyperDoc Git-backed
+surfaces. If NIL, HYPERDOC_GIT_REPOSITORY_ROOT is consulted before falling back
+to repository discovery from the loaded ASDF system.")
+
 (defparameter +git-history-runtime-policy+
   "Git-backed history surfaces are supported in the dev shell and only in
 deployed dreyeck runtimes that provide both a Git executable and usable
 repository metadata for the HyperDoc tree. Built release images may contain
 source snapshots without a live checkout or .git metadata; those runtimes
 should render an inspectable unavailability surface instead of a raw
-subprocess failure.")
+subprocess failure unless an explicit repository-root override points at a live
+checkout.")
 
 (defun git-runtime-classification-label (classification)
   (ecase classification
@@ -161,6 +176,9 @@ subprocess failure.")
    (repository-root :reader repository-root-of
                     :initarg :repository-root
                     :initform nil)
+   (repository-root-source :reader repository-root-source-of
+                           :initarg :repository-root-source
+                           :initform nil)
    (requested-program :reader requested-program-of
                       :initarg :requested-program
                       :initform nil)
@@ -237,6 +255,84 @@ subprocess failure.")
     (t
      (values "git" :default-path))))
 
+(defun configured-git-repository-root ()
+  (cond
+    (*git-repository-root*
+     (values *git-repository-root* :special-variable))
+    ((uiop:getenv "HYPERDOC_GIT_REPOSITORY_ROOT")
+     (values (uiop:getenv "HYPERDOC_GIT_REPOSITORY_ROOT")
+             :environment))
+    (t
+     (values nil nil))))
+
+(defun git-explicit-repository-root-source-p (source)
+  (member source '(:special-variable :environment) :test #'eq))
+
+(defun git-repository-root-source-label (source)
+  (case source
+    ((nil)
+     "n/a")
+    (:special-variable
+     "explicit override via hyperdoc::*git-repository-root*")
+    (:environment
+     "explicit override via HYPERDOC_GIT_REPOSITORY_ROOT")
+    (:system-source-default
+     "default root derived from the loaded ASDF system")
+    (t
+     (format nil "~A" source))))
+
+(defun nix-store-pathname-p (pathname-designator)
+  (and pathname-designator
+       (uiop:string-prefix-p "/nix/store/"
+                             (pathname-namestring-or-nil pathname-designator))))
+
+(defun git-repository-root-origin-label (repository-root source)
+  (cond
+    ((git-explicit-repository-root-source-p source)
+     "explicit override")
+    ((nix-store-pathname-p repository-root)
+     "packaged runtime default")
+    (repository-root
+     "default live checkout")
+    (t
+     "unknown")))
+
+(defun normalize-directory-pathname (pathname-designator)
+  (uiop:ensure-directory-pathname (pathname pathname-designator)))
+
+(defun resolve-git-repository-root-override ()
+  (multiple-value-bind (requested-root configuration-source)
+      (configured-git-repository-root)
+    (when requested-root
+      (let* ((requested-string (etypecase requested-root
+                                 (pathname
+                                  (namestring requested-root))
+                                 (string
+                                  requested-root)))
+             (requested-path (normalize-directory-pathname requested-string))
+             (resolved-path (ignore-errors (probe-file requested-path))))
+        (values requested-path
+                (and resolved-path
+                     (normalize-directory-pathname resolved-path))
+                configuration-source
+                requested-string)))))
+
+(defun pathname-equal-p (left right)
+  (and left
+       right
+       (equal (pathname-namestring-or-nil left)
+              (pathname-namestring-or-nil right))))
+
+(defun infer-git-repository-root-source (repository-root)
+  (multiple-value-bind (_requested-root resolved-root source _requested-string)
+      (resolve-git-repository-root-override)
+    (declare (ignore _requested-root _requested-string))
+    (if (and repository-root
+             resolved-root
+             (pathname-equal-p repository-root resolved-root))
+        source
+        :system-source-default)))
+
 (defun resolve-git-program ()
   (multiple-value-bind (requested-program configuration-source)
       (configured-git-program)
@@ -255,17 +351,27 @@ subprocess failure.")
               requested-string
               configuration-source))))
 
-(defun git-runtime-guidance (&key classification working-directory)
+(defun git-runtime-guidance (&key classification working-directory repository-root
+                               repository-root-source)
   (remove nil
           (list
            "Run HyperDoc inside `nix develop` when you want live Git-backed history surfaces."
            "Set `HYPERDOC_GIT_PROGRAM` or `hyperdoc::*git-program*` to an explicit Git executable path in runtimes that ship Git outside PATH."
+           "Set `HYPERDOC_GIT_REPOSITORY_ROOT` or `hyperdoc::*git-repository-root*` to an explicit live checkout when you intentionally want a deployed runtime to use workspace-backed Git history surfaces."
            (and (eq classification :repository-metadata-unavailable)
                 "Built release images may contain source snapshots without usable `.git` repository metadata. Git-backed history surfaces need a live checkout, worktree, or another runtime that exposes repository metadata to Git.")
            (and (eq classification :git-executable-unavailable)
                 "This runtime still needs a usable Git executable. `HYPERDOC_GIT_PROGRAM` only solves executable discovery; it does not create repository metadata.")
+           (and (git-explicit-repository-root-source-p repository-root-source)
+                "Hosts like dreyeck.ch can intentionally point the deployed runtime at a real mutable checkout. This enables Git-backed history surfaces, but it also means the service observes whatever state is currently in that checkout.")
            (and (eq classification :git-command-failed)
                 "Inspect the command, exit code, and working directory fields below to diagnose the Git invocation.")
+           (and repository-root
+                (format nil "The effective repository root for this runtime is `~A` (~A)."
+                        (pathname-namestring-or-nil repository-root)
+                        (git-repository-root-origin-label
+                         repository-root
+                         repository-root-source)))
            (and working-directory
                 (format nil "The failing Git command was run with `-C ~A`."
                         (pathname-namestring-or-nil working-directory)))
@@ -321,9 +427,13 @@ subprocess failure.")
 (defun signal-git-runtime-unavailable (&key operation repository-root reason detail
                                          requested-program resolved-program
                                          configuration-source classification
-                                         command exit-code working-directory)
+                                         command exit-code working-directory
+                                         repository-root-source)
   (let* ((classification (or classification :git-command-failed))
          (working-directory (or working-directory repository-root))
+         (repository-root-source
+           (or repository-root-source
+               (infer-git-repository-root-source repository-root)))
          (summary (git-runtime-condition-summary classification))
          (title (git-runtime-condition-title classification))
          (reason (or reason
@@ -337,6 +447,7 @@ subprocess failure.")
          :exit-code exit-code
          :working-directory working-directory
          :repository-root repository-root
+         :repository-root-source repository-root-source
          :requested-program requested-program
          :resolved-program resolved-program
          :configuration-source configuration-source
@@ -344,9 +455,12 @@ subprocess failure.")
          :detail detail
          :guidance (git-runtime-guidance
                     :classification classification
-                    :working-directory working-directory))))
+                    :working-directory working-directory
+                    :repository-root repository-root
+                    :repository-root-source repository-root-source))))
 
-(defun git-command-output* (directory args &key ignore-error-status operation)
+(defun git-command-output* (directory args &key ignore-error-status operation
+                                      repository-root-source)
   (multiple-value-bind (resolved-program requested-program configuration-source)
       (resolve-git-program)
     (let* ((resolved-program-string
@@ -369,6 +483,7 @@ subprocess failure.")
          :working-directory directory
          :reason "Git history unavailable: no usable Git executable is configured for this runtime."
          :detail "Configure HYPERDOC_GIT_PROGRAM or hyperdoc::*git-program* if Git is not on PATH."
+         :repository-root-source repository-root-source
          :requested-program requested-program
          :configuration-source configuration-source
          :command (git-command-display-string
@@ -406,6 +521,7 @@ subprocess failure.")
                     :repository-root directory
                     :working-directory directory
                     :detail output
+                    :repository-root-source repository-root-source
                     :requested-program requested-program
                     :resolved-program resolved-program-string
                     :configuration-source configuration-source
@@ -425,25 +541,49 @@ subprocess failure.")
              :repository-root directory
              :working-directory directory
              :detail detail
+             :repository-root-source repository-root-source
              :requested-program requested-program
              :resolved-program resolved-program-string
              :configuration-source configuration-source
              :command command-display)))))))
 
+(defun system-repository-root-info (system)
+  (multiple-value-bind (requested-root resolved-root source requested-string)
+      (resolve-git-repository-root-override)
+    (declare (ignore requested-string))
+    (cond
+      (requested-root
+       (unless resolved-root
+         (signal-git-runtime-unavailable
+          :operation "git repository root override"
+          :classification :repository-metadata-unavailable
+          :repository-root requested-root
+          :working-directory requested-root
+          :repository-root-source source
+          :reason "Git history unavailable: the explicit repository-root override does not resolve to an accessible checkout in this runtime."
+          :detail "The HYPERDOC_GIT_REPOSITORY_ROOT override path does not exist or is not accessible."))
+       (values resolved-root source))
+      (t
+       (let ((source-file (ignore-errors (asdf:system-source-file system))))
+         (unless source-file
+           (signal-git-runtime-unavailable
+            :operation "git rev-parse --show-toplevel"
+            :classification :repository-metadata-unavailable
+            :repository-root-source :system-source-default
+            :reason (format nil "ASDF system ~A has no source file for repository lookup."
+                            (asdf:component-name system))
+            :detail "A runtime without usable source or repository metadata cannot host Git-backed history surfaces."))
+         (values
+          (pathname
+           (git-command-output*
+            (uiop:pathname-directory-pathname source-file)
+            '("rev-parse" "--show-toplevel")
+            :operation "git rev-parse --show-toplevel"
+            :repository-root-source :system-source-default))
+          :system-source-default))))))
+
 (defun system-repository-root (system)
-  (let ((source-file (ignore-errors (asdf:system-source-file system))))
-    (unless source-file
-      (signal-git-runtime-unavailable
-       :operation "git rev-parse --show-toplevel"
-       :classification :repository-metadata-unavailable
-       :reason (format nil "ASDF system ~A has no source file for repository lookup."
-                       (asdf:component-name system))
-       :detail "A runtime without usable source or repository metadata cannot host Git-backed history surfaces."))
-    (pathname
-     (git-command-output*
-      (uiop:pathname-directory-pathname source-file)
-      '("rev-parse" "--show-toplevel")
-      :operation "git rev-parse --show-toplevel"))))
+  (nth-value 0 (system-repository-root-info system)))
 
 (defun %system-git-commit-target (system-designator full-commit-hash)
   (let ((system (etypecase system-designator
@@ -454,10 +594,13 @@ subprocess failure.")
     (unless (full-git-commit-hash-p full-commit-hash)
       (error "Expected a full 40-character Git commit hash, got ~S."
              full-commit-hash))
-    (make-instance 'git-commit-target
-                   :system system
-                   :repo-root (system-repository-root system)
-                   :commit-hash (string-downcase full-commit-hash))))
+    (multiple-value-bind (repo-root repository-root-source)
+        (system-repository-root-info system)
+      (make-instance 'git-commit-target
+                     :system system
+                     :repo-root repo-root
+                     :repository-root-source repository-root-source
+                     :commit-hash (string-downcase full-commit-hash)))))
 
 (defun call-with-git-runtime-boundary (thunk)
   (handler-case
@@ -485,6 +628,13 @@ subprocess failure.")
                   (commit-hash-of target)))
          (lines (uiop:split-string output :separator '(#\Newline))))
     (list (cons "Repository root" (namestring (repo-root-of target)))
+          (cons "Repository root source"
+                (git-repository-root-source-label
+                 (repository-root-source-of target)))
+          (cons "Repository root origin"
+                (git-repository-root-origin-label
+                 (repo-root-of target)
+                 (repository-root-source-of target)))
           (cons "System" (asdf:component-name (system-of target)))
           (cons "Commit" (or (first lines) (commit-hash-of target)))
           (cons "Author" (or (second lines) ""))

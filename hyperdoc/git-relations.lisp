@@ -45,6 +45,9 @@ The resulting system must continue to load and serve HyperDoc.")
 (defclass git-branch-ref ()
   ((system :reader system-of :initarg :system :type asdf:system)
    (repo-root :reader repo-root-of :initarg :repo-root :type pathname)
+   (repository-root-source :reader repository-root-source-of
+                           :initarg :repository-root-source
+                           :initform :system-source-default)
    (name :reader branch-name-of :initarg :name :type string)
    (commit-hash :reader commit-hash-of :initarg :commit-hash :type string)
    (role :reader branch-role-of :initarg :role :initform nil)
@@ -357,6 +360,9 @@ The resulting system must continue to load and serve HyperDoc.")
    (summary :reader summary-of :initarg :summary :type string)
    (system :reader system-of :initarg :system :type asdf:system)
    (repo-root :reader repo-root-of :initarg :repo-root :type pathname)
+   (repository-root-source :reader repository-root-source-of
+                           :initarg :repository-root-source
+                           :initform :system-source-default)
    (local-branch :reader local-branch-of :initarg :local-branch :type git-branch-ref)
    (upstream-branch :reader upstream-branch-of :initarg :upstream-branch :type git-branch-ref)
    (relations :reader relations-of :initarg :relations :initform nil)
@@ -652,13 +658,16 @@ The resulting system must continue to load and serve HyperDoc.")
       (error "Expected a full 40-character Git commit hash for ~A, got ~S."
              branch-name
              full-commit-hash))
-    (make-instance 'git-branch-ref
-                   :system system
-                   :repo-root (system-repository-root system)
-                   :name branch-name
-                   :commit-hash (string-downcase full-commit-hash)
-                   :role role
-                   :aliases aliases)))
+    (multiple-value-bind (repo-root repository-root-source)
+        (system-repository-root-info system)
+      (make-instance 'git-branch-ref
+                     :system system
+                     :repo-root repo-root
+                     :repository-root-source repository-root-source
+                     :name branch-name
+                     :commit-hash (string-downcase full-commit-hash)
+                     :role role
+                     :aliases aliases))))
 
 (def-git-runtime-entrypoint system-git-branch-ref
     (system-designator branch-name &key full-commit-hash role aliases)
@@ -2056,6 +2065,8 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
                    :summary "Lane-based history and merge-worklist surface for the HyperDoc repository, centered on explicit merge-intent relations."
                    :system system
                    :repo-root (repo-root-of local-branch)
+                   :repository-root-source
+                   (repository-root-source-of local-branch)
                    :local-branch local-branch
                    :upstream-branch upstream-branch
                    :relations (list (%hyperdoc-upstream-main-into-hauptsache-merge-intent))
@@ -2065,18 +2076,36 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
   (%hyperdoc-git-history-surface))
 
 (defun hyperdoc-git-history-route-discovery ()
-  (make-instance 'canonical-route-discovery
-                 :id "canonical-route-discovery-for-git-history-surface"
-                 :title "Canonical route discovery for Git history surface"
-                 :summary "Shows the canonical page URL for the Git history page and the direct-addressability status of the anchored merge-intent object."
-                 :page (find-page (symbol-value '*hyperdoc*)
-                                  "Git History Surface for HyperDoc"
-                                  :signal-error? t)
-                 :inspectable-object
-                 (hyperdoc-upstream-main-into-hauptsache-merge-intent)
-                 :inspectable-object-label
-                 "Anchored merge-intent relation"
-                 :notes
-                 (list
-                  "Use the canonical page URL for HTTP smoke tests instead of guessing the router slug."
-                  "Pages and hyperbooks are directly addressable inspector roots today; nested relation objects are inspectable in-process but do not yet have dedicated canonical URLs.")))
+  (let* ((history-surface (hyperdoc-git-history-surface))
+         (inspectable-object
+           (hyperdoc-upstream-main-into-hauptsache-merge-intent))
+         (repository-root
+           (typecase history-surface
+             (git-history-surface
+              (repo-root-of history-surface))
+             (git-runtime-unavailable
+              (repository-root-of history-surface))
+             (t
+              nil)))
+         (repository-root-source
+           (typecase history-surface
+             ((or git-history-surface git-runtime-unavailable)
+              (repository-root-source-of history-surface))
+             (t
+              nil))))
+    (make-instance 'canonical-route-discovery
+                   :id "canonical-route-discovery-for-git-history-surface"
+                   :title "Canonical route discovery for Git history surface"
+                   :summary "Shows the canonical page URL for the Git history page, the direct-addressability status of the anchored merge-intent object, and the current Git repository-root mode."
+                   :page (find-page (symbol-value '*hyperdoc*)
+                                    "Git History Surface for HyperDoc"
+                                    :signal-error? t)
+                   :inspectable-object inspectable-object
+                   :inspectable-object-label
+                   "Anchored merge-intent relation"
+                   :repository-root repository-root
+                   :repository-root-source repository-root-source
+                   :notes
+                   (list
+                    "Use the canonical page URL for HTTP smoke tests instead of guessing the router slug."
+                    "Pages and hyperbooks are directly addressable inspector roots today; nested relation objects are inspectable in-process but do not yet have dedicated canonical URLs."))))
