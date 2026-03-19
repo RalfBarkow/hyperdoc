@@ -351,6 +351,15 @@ removal of characters that are not allowed in URLs."
 (defun canonical-page-url (page &key (origin (canonical-route-origin)))
   (canonical-inspector-url page :origin origin))
 
+(defun versioned-hyperbook-server-asset-url (asset-url asset-relative-path)
+  (let* ((asset-file (asdf:system-relative-pathname
+                      :hyperbook/server
+                      asset-relative-path))
+         (date (ignore-errors (file-write-date asset-file))))
+    (if date
+        (format nil "~A?date=~A" asset-url date)
+        asset-url)))
+
 (views:defview 👀url (hb hyperbook:hyperbook)
   (url-view-from-slug (-> hb slug)))
 
@@ -363,11 +372,13 @@ removal of characters that are not allowed in URLs."
 
 (defun url-view-from-slug (slug)
   (views:html-view :title "URL" :priority 20
-    (views:add-asset-path "/hyperbook-server/"
-                          (asdf:system-relative-pathname
-                           :hyperbook/server
-                           "assets/"))
-    (views:include-js "/hyperbook-server/js/url.js")
+    ;; Runtime mounting and cache-busting need different filesystem roots here:
+    ;; the server route is mounted at startup, while the file lives under
+    ;; assets/hyperbook-server/js/url.js for version lookup.
+    (views:include-js
+     (versioned-hyperbook-server-asset-url
+      "/hyperbook-server/js/url.js"
+      "assets/hyperbook-server/js/url.js"))
     (views:include-script "makeUrl(window.currentInspectorView)")
     (views:html (:hyperbook-slug (views:esc slug)))))
 
