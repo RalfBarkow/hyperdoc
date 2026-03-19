@@ -1,0 +1,55 @@
+<h1>Rehearsal Results for manual conflicts</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page materializes one typed <tt>git-rehearsal-result</tt> per path in
+  the current manual-conflict dossier. Each result records whether the proposal
+  is clean in principle, how the current virtual merge classifies the path, and
+  whether the new dreyeck scaffold already supports the intended downstream
+  direction.
+</p>
+
+<p>
+  The result surface now lives beside a typed extra-conflict surface instead of
+  leaving the remaining raw merge-tree frontier as an untyped list. The manual
+  rehearsal results still preserve the earlier three-path dossier, while the
+  extra raw conflict page records the five additional raw conflicts that the
+  anchored <tt>merge-tree</tt> still reports outside that dossier.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-rehearsal)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-rehearsal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-extra-raw-conflict-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-extra-raw-conflict-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-asd-rehearsal-result)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-asd-rehearsal-result</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-package-rehearsal-result)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-package-rehearsal-result</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-rehearsal-result)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-rehearsal-result</tt></a></li>
+</ul>
+
+<h2>Views</h2>
+
+<ul>
+  <li><tt>👀rehearsal-results</tt> on the parent rehearsal now shows the typed manual-dossier results, the typed extra raw conflicts, and the still-untyped remainder, if any.</li>
+  <li><tt>👀summary</tt> on a single <tt>git-rehearsal-result</tt> shows the linked manual conflict, linked proposal, rationale, and supporting evidence.</li>
+  <li><tt>👀raw-conflicts</tt> on the extra raw conflict surface shows the same raw frontier split as typed manual results plus typed extra raw conflicts plus any still-untyped remainder.</li>
+</ul>
+
+<h2>Interpretation rule</h2>
+
+<p>
+  A result can be positive even when the original dossier called the path
+  manual. In this slice the rehearsal preserves that expectation as an artifact
+  and then records the observed reality: some former manual paths now
+  auto-merge at the anchored tips, while others still need curated edits.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Dry-run Merge Rehearsal for upstream main into hauptsache">Dry-run Merge Rehearsal for upstream main into hauptsache</a></li>
+  <li><a page="Extra Raw Merge Conflicts for upstream main into hauptsache">Extra Raw Merge Conflicts for upstream main into hauptsache</a></li>
+  <li><a page="Manual Merge Dossier for upstream main into hauptsache">Manual Merge Dossier for upstream main into hauptsache</a></li>
+  <li><a page="Manual Conflict Resolution Proposals for upstream main into hauptsache">Manual Conflict Resolution Proposals for upstream main into hauptsache</a></li>
+</ul>

@@ -9,7 +9,13 @@
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :serve-catalog
-           :serve-hyperbooks))
+           :serve-hyperbooks
+           :register-server-startup-hook
+           :canonical-route-origin
+           :canonical-page-path
+           :canonical-page-url
+           :canonical-inspector-path
+           :canonical-inspector-url))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperbook/server)

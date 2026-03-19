@@ -1,0 +1,40 @@
+<h1>Canonical Route Discovery for Runtime Smoke Tests</h1>
+
+<p>
+  HyperDoc runtime smoke tests should use discovered canonical routes instead of
+  guessed paths. The server already owns the slug and path rules, so the smoke
+  test boundary should ask the runtime for the page URL it actually serves.
+</p>
+
+<h2>What this slice distinguishes</h2>
+
+<ul>
+  <li><b>In-process render:</b> the object exists and renders in the current Lisp image.</li>
+  <li><b>Canonical HyperDoc page URL:</b> the runtime has a stable routed page URL for a HyperBook page.</li>
+  <li><b>Canonical inspector object URL:</b> some inspectable objects are directly addressable, but nested relation objects are not yet guaranteed their own stable route.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="hyperdoc-git-history-route-discovery" view="Route discovery">Canonical route discovery for Git history surface</a></li>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+  <li><a expr="hyperdoc-upstream-main-into-hauptsache-merge-intent" view="Summary">Merge upstream/main into hauptsache via dreyeck fallback</a></li>
+</ul>
+
+<h2>Smoke-test procedure</h2>
+
+<ol>
+  <li>Resolve the route-discovery object in-process.</li>
+  <li>Read the canonical page path or canonical page URL from that surface.</li>
+  <li>Use that discovered URL for the HTTP smoke check.</li>
+  <li>Treat a missing canonical inspector URL for a nested relation object as an explicit routing boundary, not as a guessed-path failure.</li>
+</ol>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+  <li><a page="Dry-run Merge Rehearsal for upstream main into hauptsache">Dry-run Merge Rehearsal for upstream main into hauptsache</a></li>
+  <li><a page="Rehearsal Results for manual conflicts">Rehearsal Results for manual conflicts</a></li>
+</ul>

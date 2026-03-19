@@ -178,23 +178,198 @@ PAGE-LOOKUP-FAILURE."
 (defmethod views:text-representation ((target git-commit-target))
   (commit-hash-of target))
 
-(views:defview 👀commit (target git-commit-target)
-  (views:html-view :title "Commit" :priority 1
+(defmethod views:text-representation ((surface canonical-route-discovery))
+  (title-of surface))
+
+(defmethod views:text-representation ((condition git-runtime-unavailable))
+  (title-of condition))
+
+(defmethod views:html-representation ((condition git-runtime-unavailable) &optional id)
+  (views:html
+    (:div :id id :class "inspector-error"
+          (:strong (views:esc (title-of condition)))
+          (:div :style "margin-top: 0.35em;"
+                (views:esc (reason-of condition))))))
+
+(views:defview 👀summary (condition git-runtime-unavailable)
+  (views:html-view :title "Summary" :priority 1
     (views:html
+      (:h3 (views:esc (title-of condition)))
+      (:p (views:esc (summary-of condition)))
       (:table :class "inspector-table"
-              (loop for (label . value) in (git-commit-metadata target)
-                    do (views:html
-                         (:tr (:td (views:esc label))
-                              (:td (:tt (views:esc value))))))))))
+              (:tr (:td (views:esc "Interpreted classification"))
+                   (:td (:tt (views:esc
+                              (git-runtime-classification-label
+                               (classification-of condition))))))
+              (:tr (:td (views:esc "Operation"))
+                   (:td (:tt (views:esc (operation-of condition)))))
+              (:tr (:td (views:esc "Command"))
+                   (:td (:tt (views:esc
+                              (or (command-of condition)
+                                  "n/a")))))
+              (:tr (:td (views:esc "Process exit code"))
+                   (:td (:tt (views:esc
+                              (if-let (exit-code (exit-code-of condition))
+                                (format nil "~A" exit-code)
+                                "n/a")))))
+              (:tr (:td (views:esc "Working directory"))
+                   (:td (:tt (views:esc
+                              (or (and (working-directory-of condition)
+                                       (namestring (working-directory-of condition)))
+                                  "n/a")))))
+              (:tr (:td (views:esc "Repository path tested"))
+                   (:td (:tt (views:esc
+                              (or (and (repository-root-of condition)
+                                       (namestring (repository-root-of condition)))
+                                  "n/a")))))
+              (:tr (:td (views:esc "Requested program"))
+                   (:td (:tt (views:esc
+                              (or (requested-program-of condition)
+                                  "n/a")))))
+              (:tr (:td (views:esc "Resolved program"))
+                   (:td (:tt (views:esc
+                              (or (resolved-program-of condition)
+                                  "n/a")))))
+              (:tr (:td (views:esc "Configuration source"))
+                   (:td (:tt (views:esc
+                              (format nil "~A"
+                                      (configuration-source-of condition))))))
+              (:tr (:td (views:esc "Reason"))
+                   (:td (views:esc (reason-of condition))))
+              (:tr (:td (views:esc "Detail"))
+                   (:td (views:esc (or (detail-of condition) "n/a")))))
+      (:h4 "Runtime policy")
+      (:p (views:esc (runtime-policy-of condition)))
+      (:h4 "Guidance")
+      (if-let (guidance (guidance-of condition))
+        (views:html
+          (:ul
+           (loop for item in guidance
+                 do (views:html
+                      (:li (views:esc item))))))
+        (views:html
+          (:p "No additional guidance recorded."))))))
+
+(defun render-canonical-url-cell (url)
+  (if url
+      (views:html
+        (:a :href url
+            :target "_blank"
+            (views:esc url)))
+      (views:html
+        (:span :style "opacity: 0.55;" "n/a"))))
+
+(defun render-canonical-path-cell (path)
+  (if path
+      (views:html
+        (:tt (views:esc path)))
+      (views:html
+        (:span :style "opacity: 0.55;" "n/a"))))
+
+(views:defview 👀summary (surface canonical-route-discovery)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of surface)))
+      (:p (views:esc (summary-of surface)))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Chosen page"))
+                   (:td (views:object-ref (page-of surface))))
+              (:tr (:td (views:esc "Chosen inspectable object"))
+                   (:td
+                    (if-let (object (inspectable-object-of surface))
+                      (views:object-ref object
+                                        :display
+                                        (or (inspectable-object-label-of surface)
+                                            (views:text-representation object)))
+                      (views:html
+                        (:span :style "opacity: 0.55;" "n/a")))))
+              (:tr (:td (views:esc "Runtime origin"))
+                   (:td (:tt (views:esc (canonical-route-origin)))))
+              (:tr (:td (views:esc "Canonical page path"))
+                   (:td (render-canonical-path-cell
+                         (canonical-page-path (page-of surface)))))
+              (:tr (:td (views:esc "Canonical page URL"))
+                   (:td (render-canonical-url-cell
+                         (canonical-page-url (page-of surface)))))
+              (:tr (:td (views:esc "Object renders in-process"))
+                   (:td (:tt (views:esc
+                              (if (inspectable-object-of surface)
+                                  "yes"
+                                  "n/a")))))
+              (:tr (:td (views:esc "Canonical inspector path"))
+                   (:td
+                    (render-canonical-path-cell
+                     (and (inspectable-object-of surface)
+                          (canonical-inspector-path
+                           (inspectable-object-of surface))))))
+              (:tr (:td (views:esc "Canonical inspector URL"))
+                   (:td
+                    (render-canonical-url-cell
+                     (and (inspectable-object-of surface)
+                          (canonical-inspector-url
+                           (inspectable-object-of surface))))))
+              (:tr (:td (views:esc "Inspector URL status"))
+                   (:td (views:esc
+                         (if-let (object (inspectable-object-of surface))
+                           (canonical-inspector-url-status object)
+                           "No inspectable object recorded.")))))
+      (when-let (notes (notes-of surface))
+        (views:html
+          (:h4 "Notes")
+          (:ul
+           (loop for note in notes
+                 do (views:html
+                      (:li (views:esc note))))))))))
+
+(views:defview 👀route-discovery (surface canonical-route-discovery)
+  (views:html-view :title "Route discovery" :priority 2
+    (views:html
+      (:h3 (views:esc (title-of surface)))
+      (:p (views:esc "Use the discovered page URL for HTTP smoke tests. Treat an absent inspector URL as an explicit routing boundary."))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Page URL"))
+                   (:td (render-canonical-url-cell
+                         (canonical-page-url (page-of surface)))))
+              (:tr (:td (views:esc "Page path"))
+                   (:td (render-canonical-path-cell
+                         (canonical-page-path (page-of surface)))))
+              (:tr (:td (views:esc "Inspector object URL"))
+                   (:td
+                    (render-canonical-url-cell
+                     (and (inspectable-object-of surface)
+                          (canonical-inspector-url
+                           (inspectable-object-of surface))))))
+              (:tr (:td (views:esc "Inspector object status"))
+                   (:td (views:esc
+                         (if-let (object (inspectable-object-of surface))
+                           (canonical-inspector-url-status object)
+                           "No inspectable object recorded."))))))))
+
+(views:defview 👀commit (target git-commit-target)
+  (handler-case
+      (views:html-view :title "Commit" :priority 1
+        (views:html
+          (:table :class "inspector-table"
+                  (loop for (label . value) in (git-commit-metadata target)
+                        do (views:html
+                             (:tr (:td (views:esc label))
+                                  (:td (:tt (views:esc value)))))))))
+    (git-runtime-unavailable (condition)
+      (views:html-view :title "Commit" :priority 1
+        (views:html-representation condition)))))
 
 (views:defview 👀patch (target git-commit-target)
-  (views:html-view :title "Patch" :priority 2
-    (views:html
-      (:pre (views:esc
-             (git-command-output
-              (repo-root-of target)
-              "show" "--stat" "--patch" "--no-color"
-              (commit-hash-of target)))))))
+  (handler-case
+      (views:html-view :title "Patch" :priority 2
+        (views:html
+          (:pre (views:esc
+                 (git-command-output
+                  (repo-root-of target)
+                  "show" "--stat" "--patch" "--no-color"
+                  (commit-hash-of target))))))
+    (git-runtime-unavailable (condition)
+      (views:html-view :title "Patch" :priority 2
+        (views:html-representation condition)))))
 
 (defun render-system-scope-table (systems)
   (views:html

@@ -9,6 +9,13 @@
   inspectable as one durable object that the history surface can render.
 </p>
 
+<p>
+  The preparation slice adds a computed forecast object for the same relation.
+  That forecast classifies path overlap from the anchored commits back to their
+  merge base, so readiness and blockers can be inspected before any merge is
+  attempted.
+</p>
+
 <h2>Concrete merge intent</h2>
 
 <ul>
@@ -34,9 +41,20 @@
 
 <ul>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-intent)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-intent</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-forecast)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-forecast</tt></a></li>
+  <li><a expr="(hyperdoc-dreyeck-runtime-seam-note)"><tt>hyperdoc-dreyeck-runtime-seam-note</tt></a></li>
+  <li><a expr="(hyperdoc-dreyeck-link-resolution-note)"><tt>hyperdoc-dreyeck-link-resolution-note</tt></a></li>
   <li><a expr="(hyperdoc-git-history-surface)"><tt>hyperdoc-git-history-surface</tt></a></li>
   <li><a expr="(system-git-commit-target :hyperdoc &quot;823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e&quot;)"><tt>823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e</tt></a></li>
   <li><a expr="(system-git-commit-target :hyperdoc &quot;e9257b4d4301b4c4f94c90061ab68659aecad4c6&quot;)"><tt>e9257b4d4301b4c4f94c90061ab68659aecad4c6</tt></a></li>
+</ul>
+
+<h2>Preparation additions</h2>
+
+<ul>
+  <li>The forecast object computes the merge base and path classifications without running <tt>git merge</tt>.</li>
+  <li>Overlapping paths are treated as blockers to inspect before execution.</li>
+  <li>Relation-linked notes identify likely dreyeck extraction seams if overlap pressure shows that local behavior should move out of upstream-touched files.</li>
 </ul>
 
 <h2>Prompt attached to the relation</h2>
@@ -76,4 +94,5 @@ The outcome must keep overall HyperDoc working:
 <ul>
   <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
   <li><a page="Merge Intent Relations Between Git Commits">Merge Intent Relations Between Git Commits</a></li>
+  <li><a page="Merge Readiness and Blockers for upstream main into hauptsache">Merge Readiness and Blockers for upstream main into hauptsache</a></li>
 </ul>

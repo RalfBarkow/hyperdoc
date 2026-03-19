@@ -32,10 +32,14 @@ let
     export HTML_INSPECTOR_VIEWS_ASD="${htmlInspectorViewsSrc}/html-inspector-views.asd"
     export CL_SOURCE_REGISTRY="${clogSrcPatched}//:${clogMoldableInspectorSrc}//:${htmlInspectorViewsSrc}//:${plumpInspectorViewsSrc}//:${lwcellsSrc}//:${arrowsSrc}//:${clMarkupSrc}//:$HYPERDOC_ROOT//:${namedClosurePkg}//"
     export HYPERDOC_ASDF_TREES="$CL_SOURCE_REGISTRY"
+    export HYPERDOC_GIT_PROGRAM="''${HYPERDOC_GIT_PROGRAM:-${pkgs.git}/bin/git}"
   '';
 
   startScript = pkgs.writeShellApplication {
     name = "hyperdoc-release-start";
+    runtimeInputs = [
+      pkgs.git
+    ];
     text = ''
       set -euo pipefail
       ${runtimeInit}
@@ -107,7 +111,7 @@ let
 
   verifyScript = pkgs.writeShellApplication {
     name = "hyperdoc-release-verify";
-    runtimeInputs = [ pkgs.coreutils pkgs.curl pkgs.gnugrep pkgs.findutils pkgs.gawk pkgs.python3 pkgs.which ];
+    runtimeInputs = [ pkgs.coreutils pkgs.curl pkgs.gnugrep pkgs.findutils pkgs.gawk pkgs.python3 pkgs.which pkgs.git ];
     text = ''
       set -euo pipefail
       ${runtimeInit}

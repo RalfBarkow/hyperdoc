@@ -42,6 +42,7 @@
           enrich-lookup-issue
           lookup-issues-of
           replace-by-hyperbook-link
+          register-link-target-rewriter
           render-hyperbook-or-page-link
           👀links
           👀backlinks

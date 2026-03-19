@@ -355,6 +355,10 @@ EOF
             system.stateVersion = lib.mkDefault "24.11";
             networking.hostName = lib.mkDefault "dreyeck-ch";
             services.hyperdoc.package = self.packages.${pkgs.system}.hyperdoc-release;
+
+            environment.systemPackages = with pkgs; [
+              git
+            ];
           })
         ];
       };

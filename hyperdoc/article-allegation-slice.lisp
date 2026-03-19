@@ -1118,8 +1118,7 @@
 
 (defun article-allegation-git-branch (repo-root)
   (article-allegation-trimmed-string
-   (uiop:run-program (list "git" "-C" (namestring repo-root) "branch" "--show-current")
-                     :output :string)))
+   (git-command-output repo-root "branch" "--show-current")))
 
 (defun article-allegation-assert-live-branches (bundle)
   (let* ((input (getf bundle :input))

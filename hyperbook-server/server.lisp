@@ -9,6 +9,16 @@
 ;;
 
 (defvar *server-parameters* nil)
+(defvar *server-startup-hooks* nil)
+
+(defun register-server-startup-hook (hook)
+  "Register HOOK to run during SERVE-CATALOG startup.
+HOOK may be a function or a symbol naming a function."
+  (pushnew hook *server-startup-hooks* :test #'equal))
+
+(defun run-server-startup-hooks ()
+  (dolist (hook (reverse *server-startup-hooks*))
+    (funcall hook)))
 
 (defun maybe-enable-web-debugger ()
   "Optional seam into CLOG-MOLDABLE-INSPECTOR.
@@ -264,6 +274,7 @@ public servers because it allows the execution of arbitrary Lisp code."
                           development)))
     (register-known-hyperbooks)
     (ensure-startup-hyperbooks)
+    (run-server-startup-hooks)
     (serve-hyperbooks hyperbook:*catalog*
                       :port port
                       :title "HyperBook Catalog"
@@ -281,6 +292,47 @@ removal of characters that are not allowed in URLs."
    "-"
    (str:substring 0 30
                   (-> hyperbook hyperbook:title-of slug:slugify))))
+
+(defun trim-trailing-slash (string)
+  (string-right-trim "/" string))
+
+(defun local-route-host ()
+  (let ((bind-address (or (uiop:getenv "HYPERDOC_BIND_ADDRESS")
+                          "127.0.0.1")))
+    (if (member bind-address '("0.0.0.0" "::" "*") :test #'string=)
+        "127.0.0.1"
+        bind-address)))
+
+(defun canonical-route-origin ()
+  (if-let (public-base-url (uiop:getenv "HYPERDOC_PUBLIC_BASE_URL"))
+    (trim-trailing-slash public-base-url)
+    (format nil "http://~A:~A"
+            (local-route-host)
+            (or (uiop:getenv "HYPERDOC_PORT")
+                "8080"))))
+
+(defun canonical-inspector-path (object)
+  (typecase object
+    (hyperbook:hyperbook
+     (str:concat "/" (slug object)))
+    (hyperbook:page
+     (str:concat "/"
+                 (slug (hyperbook:hyperbook-of object))
+                 "/"
+                 (tbnl:url-encode (hyperbook:path-item-of object))))
+    (t
+     nil)))
+
+(defun canonical-page-path (page)
+  (canonical-inspector-path page))
+
+(defun canonical-inspector-url (object &key (origin (canonical-route-origin)))
+  (when-let (path (canonical-inspector-path object))
+    (str:concat (trim-trailing-slash origin)
+                path)))
+
+(defun canonical-page-url (page &key (origin (canonical-route-origin)))
+  (canonical-inspector-url page :origin origin))
 
 (views:defview 👀url (hb hyperbook:hyperbook)
   (url-view-from-slug (-> hb slug)))

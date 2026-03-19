@@ -1,0 +1,59 @@
+<h1>First Protocol Seams for dreyeck extraction</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page turns the current manual conflict resolution proposals into the
+  first real extension seams. The durable objects are typed
+  <tt>git-protocol-seam</tt> objects, not only prose about future hooks.
+</p>
+
+<p>
+  The current seam surface is intentionally small:
+</p>
+
+<ul>
+  <li>a startup-hook seam in <tt>hyperbook/server</tt> so downstream runtime behavior installs after core startup</li>
+  <li>a link-redirection and target-rewrite seam in shared HyperBook rendering so dreyeck routing stays downstream</li>
+</ul>
+
+<p>
+  These seams materially realize the current proposal outcomes without running
+  <tt>git merge</tt> and without moving the larger dreyeck buckets yet.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-protocol-seam-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-protocol-seam-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-server-startup-hook-seam)"><tt>hyperdoc-upstream-main-into-hauptsache-server-startup-hook-seam</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-link-redirection-seam)"><tt>hyperdoc-upstream-main-into-hauptsache-link-redirection-seam</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-dreyeck-executable-scaffold)"><tt>hyperdoc-upstream-main-into-hauptsache-dreyeck-executable-scaffold</tt></a></li>
+</ul>
+
+<h2>Views</h2>
+
+<ul>
+  <li><tt>👀protocol-seams</tt> on the seam surface shows both seams with their core paths, downstream paths, exported symbols, and validation proof.</li>
+  <li><tt>👀summary</tt> on a single seam shows the core call surface, downstream behavior, related proposals, and the concrete symbol boundary.</li>
+  <li><tt>👀dreyeck-executable-scaffold</tt> on the linked scaffold object shows the minimal downstream system that consumes these seams.</li>
+</ul>
+
+<h2>Why these seams matter</h2>
+
+<p>
+  The startup hook realizes the one-way ASDF direction proposed for
+  <tt>hyperbook.asd</tt>: dreyeck loads after HyperDoc core and installs its
+  behavior through a hook. The link seams realize the package/export proposals
+  for <tt>hyperbook/package.lisp</tt> and
+  <tt>hyperbook-explorer/package.lisp</tt> by keeping shared hook exports in
+  core while letting downstream dreyeck own the branch-specific routing logic.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Dreyeck Executable Scaffold for upstream main into hauptsache">Dreyeck Executable Scaffold for upstream main into hauptsache</a></li>
+  <li><a page="Dreyeck Transition Plan for upstream main into hauptsache">Dreyeck Transition Plan for upstream main into hauptsache</a></li>
+  <li><a page="Manual Conflict Resolution Proposals for upstream main into hauptsache">Manual Conflict Resolution Proposals for upstream main into hauptsache</a></li>
+</ul>

@@ -1,0 +1,69 @@
+<h1>Dreyeck Extraction Plan for upstream main into hauptsache</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page turns the current <tt>clearly-dreyeck-candidate</tt> path set into
+  a typed extraction plan. The durable object is a
+  <tt>git-dreyeck-extraction-plan</tt>, not only a paragraph about future
+  cleanup.
+</p>
+
+<p>
+  The current plan groups the 44 candidate paths into four buckets:
+</p>
+
+<ul>
+  <li><tt>runtime-hooks</tt></li>
+  <li><tt>local-deployment</tt></li>
+  <li><tt>page-content-overlays</tt></li>
+  <li><tt>glue-code</tt></li>
+</ul>
+
+<p>
+  For each bucket, the object graph records the concrete path list, why those
+  paths do not belong in upstream core, the expected ASDF placement or
+  downstream layer, the dependency direction, and whether the local behavior
+  should move, wrap, or become a hook/protocol seam.
+</p>
+
+<p>
+  The follow-on slice is the transition plan: it keeps the same buckets but
+  adds concrete target destinations, core continuation points, and validation
+  proofs for the future split.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-dreyeck-extraction-plan)"><tt>hyperdoc-upstream-main-into-hauptsache-dreyeck-extraction-plan</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-dreyeck-transition-plan)"><tt>hyperdoc-upstream-main-into-hauptsache-dreyeck-transition-plan</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-dreyeck-candidate-path-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-dreyeck-candidate-path-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-forecast)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-forecast</tt></a></li>
+</ul>
+
+<h2>Views</h2>
+
+<ul>
+  <li><tt>👀dreyeck-extraction-plan</tt> shows the bucketed extraction plan in one place.</li>
+  <li><tt>👀summary</tt> on the plan gives bucket and path counts.</li>
+  <li><tt>👀summary</tt> and <tt>👀paths</tt> on each bucket object show the bucket rationale and its path list.</li>
+  <li><tt>👀dreyeck-transition-plan</tt> on the follow-on transition object shows the target destination and validation proof for each bucket.</li>
+</ul>
+
+<h2>Why this stays downstream preparation</h2>
+
+<p>
+  This page still does not move files or create the <tt>dreyeck</tt> subsystem.
+  It records the intended extraction shape so the later merge and extraction
+  steps can stay inspectable instead of improvising from memory.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Merge Path Decisions for upstream main into hauptsache">Merge Path Decisions for upstream main into hauptsache</a></li>
+  <li><a page="Merge Readiness and Blockers for upstream main into hauptsache">Merge Readiness and Blockers for upstream main into hauptsache</a></li>
+  <li><a page="Manual Merge Dossier for upstream main into hauptsache">Manual Merge Dossier for upstream main into hauptsache</a></li>
+  <li><a page="Dreyeck Transition Plan for upstream main into hauptsache">Dreyeck Transition Plan for upstream main into hauptsache</a></li>
+</ul>

@@ -102,6 +102,7 @@ in
         HYPERDOC_DEBUG = "0";
         HYPERDOC_USE_THREAD = "0";
         HYPERDOC_DATA_DIR = cfg.dataDir;
+        HYPERDOC_GIT_PROGRAM = "${pkgs.git}/bin/git";
       } // optionalAttrs (cfg.publicOrigin != null) {
         HYPERDOC_PUBLIC_ORIGIN = cfg.publicOrigin;
       } // optionalAttrs (cfg.reverseProxyDomain != null) {

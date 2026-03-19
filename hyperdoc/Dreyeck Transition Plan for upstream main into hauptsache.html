@@ -1,0 +1,60 @@
+<h1>Dreyeck Transition Plan for upstream main into hauptsache</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page turns the bucketed dreyeck extraction plan into an
+  implementation-ready transition surface. The durable object is a
+  <tt>git-dreyeck-transition-plan</tt> that records, for each bucket, the
+  exact path list, target destination, dependency direction, transition mode,
+  core continuation point, and validation proof.
+</p>
+
+<p>
+  The current transition plan keeps the same four buckets:
+</p>
+
+<ul>
+  <li><tt>runtime-hooks</tt></li>
+  <li><tt>local-deployment</tt></li>
+  <li><tt>page-content-overlays</tt></li>
+  <li><tt>glue-code</tt></li>
+</ul>
+
+<p>
+  What changes in this slice is not the classification itself, but the
+  downstream destination and the split protocol. That keeps the eventual
+  dreyeck extraction inspectable before any file moves happen.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-dreyeck-transition-plan)"><tt>hyperdoc-upstream-main-into-hauptsache-dreyeck-transition-plan</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-dreyeck-extraction-plan)"><tt>hyperdoc-upstream-main-into-hauptsache-dreyeck-extraction-plan</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-forecast)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-forecast</tt></a></li>
+</ul>
+
+<h2>Views</h2>
+
+<ul>
+  <li><tt>👀dreyeck-transition-plan</tt> shows all bucket transitions in one place.</li>
+  <li><tt>👀summary</tt> on the transition plan gives the extraction-plan link and transition count.</li>
+  <li><tt>👀summary</tt> and <tt>👀paths</tt> on each transition bucket show the target destination, dependency direction, core continuation point, validation proof, and exact path list.</li>
+</ul>
+
+<h2>Why this is still preparation</h2>
+
+<p>
+  This page still does not create the <tt>dreyeck</tt> subsystem or move files.
+  It records the intended destinations and proof obligations so the later split
+  can be executed as a replayable change instead of an ad hoc refactor.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Dreyeck Extraction Plan for upstream main into hauptsache">Dreyeck Extraction Plan for upstream main into hauptsache</a></li>
+  <li><a page="Manual Conflict Resolution Proposals for upstream main into hauptsache">Manual Conflict Resolution Proposals for upstream main into hauptsache</a></li>
+  <li><a page="Merge Readiness and Blockers for upstream main into hauptsache">Merge Readiness and Blockers for upstream main into hauptsache</a></li>
+</ul>

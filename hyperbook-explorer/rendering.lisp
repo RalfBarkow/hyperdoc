@@ -17,6 +17,28 @@
 ;; A special variable holding the current page
 
 (defvar *current-page* nil)
+(defvar *link-target-rewriters* nil)
+
+(defun register-link-target-rewriter (hook)
+  "Register HOOK to rewrite HyperBook link targets before rendering.
+HOOK may return three values: new hyperbook id, new page id, and a handled flag."
+  (pushnew hook *link-target-rewriters* :test #'equal))
+
+(defun rewrite-link-target (hyperbook-id page-id &key element link-text)
+  (loop with current-hyperbook = hyperbook-id
+        with current-page-id = page-id
+        for hook in *link-target-rewriters*
+        do (multiple-value-bind (new-hyperbook new-page handledp)
+               (funcall hook
+                        *current-page*
+                        current-hyperbook
+                        current-page-id
+                        :element element
+                        :link-text link-text)
+             (when handledp
+               (setf current-hyperbook new-hyperbook
+                     current-page-id new-page)))
+        finally (return (values current-hyperbook current-page-id))))
 
 ;; A container for HTML nodes to be rendered
 
@@ -67,14 +89,11 @@
         (setf hyperbook-attr (first hb-link))
         (setf page-attr (second hb-link))))
     (cond
-      (page-attr
+      ((or page-attr hyperbook-attr)
        (let ((hyperbook-id (or hyperbook-attr
                                (-> *current-page* hyperbook-of id-of))))
-         (render-hyperbook-page-link hyperbook-id page-attr render-children
-                                     :element element))
-       t)
-      (hyperbook-attr
-       (render-hyperbook-link hyperbook-attr render-children :element element)
+         (render-hyperbook-or-page-link hyperbook-id page-attr render-children
+                                        :element element))
        t)
       (href-attr
        ;; Force target="_blank" for href links
@@ -147,9 +166,13 @@
                                    :display (rendered-link-text link-text))))))))
 
 (defun render-hyperbook-or-page-link (hyperbook-id page-id link-text &key element)
-  (if page-id
-      (render-hyperbook-page-link hyperbook-id page-id link-text :element element)
-      (render-hyperbook-link hyperbook-id link-text :element element)))
+  (multiple-value-bind (hyperbook-id* page-id*)
+      (rewrite-link-target hyperbook-id page-id
+                           :element element
+                           :link-text link-text)
+    (if page-id*
+        (render-hyperbook-page-link hyperbook-id* page-id* link-text :element element)
+        (render-hyperbook-link hyperbook-id* link-text :element element))))
 
 (defgeneric serialize-a-element (attrs element)
   (:method ((attrs t) element)
