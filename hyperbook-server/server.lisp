@@ -70,6 +70,13 @@ Enable web debugger only when that extension is loaded."
             "Static root must be a pathname, got ~S" root)
     root))
 
+(defun register-runtime-asset-paths ()
+  (clog-connection:add-plugin-path
+   "^/hyperbook-server/"
+   (uiop:ensure-directory-pathname
+    (asdf:system-relative-pathname :hyperbook/server
+                                   "assets/hyperbook-server/"))))
+
 (defun register-known-hyperbooks ()
   (multiple-value-bind (entries exists? path candidates load-error)
         (load-known-wikis)
@@ -281,6 +288,7 @@ public servers because it allows the execution of arbitrary Lisp code."
   (let ((development* (if (eq development :auto)
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
                           development)))
+    (register-runtime-asset-paths)
     (register-known-hyperbooks)
     (ensure-startup-hyperbooks)
     (run-server-startup-hooks)
