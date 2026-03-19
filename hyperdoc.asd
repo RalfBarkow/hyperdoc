@@ -187,6 +187,7 @@
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")
+                             (:file "inspector-performance-smoke")
                              (:file "merged-doc-slices-smoke"))))
   :perform (test-op (op c)
              (declare (ignore op c))

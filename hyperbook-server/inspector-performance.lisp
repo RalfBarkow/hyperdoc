@@ -36,15 +36,25 @@
 (defun html-view-realized-p (view)
   (not (null (slot-value view 'html-inspector-views::html))))
 
+(defun normalize-dom-html-id (html-id)
+  (typecase html-id
+    (string html-id)
+    (symbol (symbol-name html-id))
+    (character (string html-id))
+    (t (princ-to-string html-id))))
+
+(defun dom-node-count-query-script (html-id)
+  (format nil
+          "(function(){var el=document.getElementById(~S); return el ? String(el.querySelectorAll('*').length) : '0';})()"
+          (normalize-dom-html-id html-id)))
+
 (defun dom-node-count (element)
   (when (clog:connection-body element)
     (ignore-errors
       (parse-integer
        (or (clog:js-query
             element
-            (format nil
-                    "(function(){var el=document.getElementById(~S); return el ? String(el.querySelectorAll('*').length) : '0';})()"
-                    (clog:html-id element)))
+            (dom-node-count-query-script (clog:html-id element)))
            "0")
        :junk-allowed t))))
 
