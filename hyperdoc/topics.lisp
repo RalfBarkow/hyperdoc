@@ -853,6 +853,13 @@
                  "Canonical Route Discovery for Runtime Smoke Tests"
                  "Git History Surface for HyperDoc")))
 
+(defun synchronization-as-a-visualization-problem-topic ()
+  (make-topic
+   :id "synchronization-as-a-visualization-problem"
+   :title "Synchronization as a Visualization Problem"
+   :summary "Synchronization becomes a HyperDoc exploration surface when the main question is how to make the onset of global coherence legible rather than merely computable."
+   :references '("Synchronization as a Visualization Problem")))
+
 (defun legacy-workspace-checkout-unit-topic ()
   (make-topic
    :id "legacy-workspace-checkout-unit"

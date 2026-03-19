@@ -1,0 +1,98 @@
+<h1>Synchronization as a Visualization Problem</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+Ward's off-hand comment about synchronization identifies a real HyperDoc exploration surface.
+The problem is not only how to compute synchronization.
+The problem is how to make the onset of synchronization legible when tables, logs, and ordinary summaries hide the transition.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Synchronization as a Visualization Problem"><tt>Synchronization as a Visualization Problem</tt></a></li>
+</ul>
+
+<h2>Anchor</h2>
+
+<p>
+The Kassabov-Strogatz-Townsend result provides a rigorous anchor: identical Kuramoto oscillators on an Erdős-Rényi random graph can exhibit global synchronization under sufficiently strong graph connectivity conditions.
+That framing matters because synchronization is treated as a structural property of a networked dynamical system, not as a decorative animation target.
+</p>
+
+<h2>Exploration boundary</h2>
+
+<p>
+A coupling regime such as strong same-day-of-week links and weaker same-week links is not the theorem itself.
+It is an exploratory extension.
+The theorem gives the anchor.
+The temporal coupling scheme gives a semantically meaningful graph family to inspect.
+The visualization then becomes a way to see threshold behavior, partial lock-in, lagging clusters, and resistant strays.
+</p>
+
+<h2>Why visualization is central</h2>
+
+<p>
+Synchronization can be present mathematically before it becomes obvious to a reader.
+A useful visualization therefore does more than display state.
+It helps an investigator notice when local relations begin to induce global order, when order remains partial, and when a few out-of-phase nodes still dominate human attention despite growing overall coherence.
+</p>
+
+<h2>Operational chunk shape</h2>
+
+<p>
+Each scenario should be specified in three parts:
+phenomenon, encoding, and view.
+The phenomenon states what kind of dynamic is expected.
+The encoding states which graph or coupling rule might induce it.
+The view states which rendering makes that dynamic easiest to notice.
+</p>
+
+<h2>Candidate scenarios</h2>
+
+<ul>
+  <li>
+    <b>Partial weekday lock-in.</b>
+    Phenomenon: clusters align by recurring weekday rhythm before full synchrony.
+    Encoding: strong same-day-of-week edges, weaker same-week edges.
+    View: animated phase circle plus a calendar-structured edge view.
+  </li>
+  <li>
+    <b>Metastable weekly bands.</b>
+    Phenomenon: several bands appear stable for a while before collapsing into one phase.
+    Encoding: medium within-week coupling and sparse cross-week bridges.
+    View: order-parameter trace combined with cluster coloring over time.
+  </li>
+  <li>
+    <b>Persistent strays.</b>
+    Phenomenon: most nodes lock while a few remain visibly late.
+    Encoding: mostly uniform coupling with a small low-degree or weakly connected fringe.
+    View: stray-node emphasis in both network and phase-space views.
+  </li>
+</ul>
+
+<h2>Rendering directions</h2>
+
+<p>
+Planetnine's response points toward one concrete rendering family: a stick-and-ball display for a time series of images along a geo path, using images as textures for spheres.
+That suggestion is valuable because it translates the abstract synchronization prompt into an implementable visualization surface.
+It also suggests that the same underlying relation stream may support more than one view: phase circle, geo path, textured spheres, and temporal replay.
+</p>
+
+<h2>Questions worth asking</h2>
+
+<ul>
+  <li>When does weak weekly coupling become strong enough to produce visible daily alignment?</li>
+  <li>Which threshold crossings are obvious in motion before they are obvious in summary metrics?</li>
+  <li>Which rendering best distinguishes true global coherence from visually persuasive but local clustering?</li>
+  <li>How should a view expose the few nodes that remain out of phase after the rest appear synchronized?</li>
+</ul>
+
+<h2>HyperDoc relevance</h2>
+
+<p>
+For HyperDoc, synchronization is not only a topic from nonlinear dynamics.
+It is also a general pattern for showing how local relations become global coherence.
+That makes it relevant to visual explanations, neighborhood exploration, editorial control surfaces, and any documentation system that must show emergence rather than merely report outcome.
+</p>
