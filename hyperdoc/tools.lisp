@@ -101,7 +101,8 @@ If NIL, HYPERDOC_GIT_PROGRAM is consulted and then PATH lookup for \"git\".")
 (defparameter *git-repository-root* nil
   "Optional explicit Git repository root designator for HyperDoc Git-backed
 surfaces. If NIL, HYPERDOC_GIT_REPOSITORY_ROOT is consulted before falling back
-to repository discovery from the loaded ASDF system.")
+to repository discovery from the current process working directory and then the
+loaded ASDF system.")
 
 (defparameter +git-history-runtime-policy+
   "Git-backed history surfaces are supported in the dev shell and only in
@@ -110,7 +111,8 @@ repository metadata for the HyperDoc tree. Built release images may contain
 source snapshots without a live checkout or .git metadata; those runtimes
 should render an inspectable unavailability surface instead of a raw
 subprocess failure unless an explicit repository-root override points at a live
-checkout.")
+checkout or the runtime is intentionally launched from a working directory
+inside a live checkout.")
 
 (defun git-runtime-classification-label (classification)
   (ecase classification
@@ -276,6 +278,8 @@ checkout.")
      "explicit override via hyperdoc::*git-repository-root*")
     (:environment
      "explicit override via HYPERDOC_GIT_REPOSITORY_ROOT")
+    (:process-working-directory
+     "inferred from the current process working directory")
     (:system-source-default
      "default root derived from the loaded ASDF system")
     (t
@@ -290,6 +294,8 @@ checkout.")
   (cond
     ((git-explicit-repository-root-source-p source)
      "explicit override")
+    ((eq source :process-working-directory)
+     "workspace-rooted runtime")
     ((nix-store-pathname-p repository-root)
      "packaged runtime default")
     (repository-root
@@ -299,6 +305,10 @@ checkout.")
 
 (defun normalize-directory-pathname (pathname-designator)
   (uiop:ensure-directory-pathname (pathname pathname-designator)))
+
+(defun current-process-working-directory ()
+  (ignore-errors
+    (normalize-directory-pathname (uiop:getcwd))))
 
 (defun resolve-git-repository-root-override ()
   (multiple-value-bind (requested-root configuration-source)
@@ -327,11 +337,25 @@ checkout.")
   (multiple-value-bind (_requested-root resolved-root source _requested-string)
       (resolve-git-repository-root-override)
     (declare (ignore _requested-root _requested-string))
-    (if (and repository-root
-             resolved-root
-             (pathname-equal-p repository-root resolved-root))
-        source
-        :system-source-default)))
+    (let* ((process-root-info
+             (handler-case
+                 (multiple-value-list
+                  (process-working-directory-repository-root-info))
+               (error ()
+                 nil)))
+           (process-root (first process-root-info))
+           (process-source (second process-root-info)))
+      (cond
+        ((and repository-root
+              resolved-root
+              (pathname-equal-p repository-root resolved-root))
+         source)
+        ((and repository-root
+              process-root
+              (pathname-equal-p repository-root process-root))
+         process-source)
+        (t
+         :system-source-default)))))
 
 (defun resolve-git-program ()
   (multiple-value-bind (requested-program configuration-source)
@@ -351,12 +375,38 @@ checkout.")
               requested-string
               configuration-source))))
 
+(defun git-repository-root-from-directory (directory &key repository-root-source)
+  (let ((directory (normalize-directory-pathname directory)))
+    (normalize-directory-pathname
+     (pathname
+      (git-command-output*
+       directory
+       '("rev-parse" "--show-toplevel")
+       :operation "git rev-parse --show-toplevel"
+       :repository-root-source repository-root-source)))))
+
+(defun process-working-directory-repository-root-info ()
+  (let ((working-directory (current-process-working-directory)))
+    (when working-directory
+      (handler-case
+          (values
+           (git-repository-root-from-directory
+            working-directory
+            :repository-root-source :process-working-directory)
+           :process-working-directory)
+        (git-runtime-unavailable (condition)
+          (if (eq (classification-of condition)
+                  :repository-metadata-unavailable)
+              (values nil nil)
+              (error condition)))))))
+
 (defun git-runtime-guidance (&key classification working-directory repository-root
                                repository-root-source)
   (remove nil
           (list
            "Run HyperDoc inside `nix develop` when you want live Git-backed history surfaces."
            "Set `HYPERDOC_GIT_PROGRAM` or `hyperdoc::*git-program*` to an explicit Git executable path in runtimes that ship Git outside PATH."
+           "Workspace-rooted runtimes such as `nix run .#default` can infer a live checkout from the current process working directory when that directory resolves inside a real Git repository."
            "Set `HYPERDOC_GIT_REPOSITORY_ROOT` or `hyperdoc::*git-repository-root*` to an explicit live checkout when you intentionally want a deployed runtime to use workspace-backed Git history surfaces."
            (and (eq classification :repository-metadata-unavailable)
                 "Built release images may contain source snapshots without usable `.git` repository metadata. Git-backed history surfaces need a live checkout, worktree, or another runtime that exposes repository metadata to Git.")
@@ -564,6 +614,11 @@ checkout.")
           :detail "The HYPERDOC_GIT_REPOSITORY_ROOT override path does not exist or is not accessible."))
        (values resolved-root source))
       (t
+       (multiple-value-bind (working-directory-root working-directory-source)
+           (process-working-directory-repository-root-info)
+         (when working-directory-root
+           (return-from system-repository-root-info
+             (values working-directory-root working-directory-source))))
        (let ((source-file (ignore-errors (asdf:system-source-file system))))
          (unless source-file
            (signal-git-runtime-unavailable
