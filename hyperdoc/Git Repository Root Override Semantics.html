@@ -1,0 +1,82 @@
+<h1>Git Repository Root Override Semantics</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Git-backed history surfaces need two separate runtime facts: a usable Git
+  executable and a repository root that actually carries Git metadata. The
+  repository-root override exists so a deployed runtime can intentionally ask
+  Git about a live checkout instead of only the packaged source snapshot inside
+  the release image.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Git Repository Root Override Semantics"><tt>Git Repository Root Override Semantics</tt></a></li>
+  <li><a expr="hyperdoc-git-history-route-discovery" view="Route discovery">Canonical route discovery for Git history surface</a></li>
+  <li><a expr="(hyperdoc-git-history-surface)" view="git history"><tt>hyperdoc-git-history-surface</tt></a></li>
+</ul>
+
+<h2>Repository-root precedence</h2>
+
+<ol>
+  <li><tt>hyperdoc::*git-repository-root*</tt> inside the current Lisp image.</li>
+  <li><tt>HYPERDOC_GIT_REPOSITORY_ROOT</tt> from the runtime environment.</li>
+  <li>the default root derived from the loaded ASDF system source tree.</li>
+</ol>
+
+<p>
+  The effective root, its source, and its interpreted mode are now inspectable
+  on Git-history surfaces and runtime-unavailability conditions.
+</p>
+
+<h2>Packaged runtime versus live checkout</h2>
+
+<p>
+  A packaged HyperDoc release image can contain a source snapshot under
+  <tt>/nix/store/.../share/hyperdoc/source/</tt> without shipping usable
+  <tt>.git</tt> repository metadata. In that default mode, Git-backed history
+  surfaces should remain truthful and render
+  <tt>repository-metadata-unavailable</tt> instead of pretending the runtime has
+  a live checkout.
+</p>
+
+<p>
+  A live checkout mode is different: if the runtime explicitly points
+  <tt>HYPERDOC_GIT_REPOSITORY_ROOT</tt> or
+  <tt>hyperdoc::*git-repository-root*</tt> at a real checkout, the same
+  Git-backed history surfaces can resolve real commit and history objects.
+</p>
+
+<h2>Intentional provenance split on deployed hosts</h2>
+
+<p>
+  Hosts like <tt>dreyeck.ch</tt> can intentionally split provenance:
+  executable code still comes from the immutable packaged release, while Git
+  history inspection is allowed to read from a mutable workspace checkout such
+  as <tt>/home/rgb/workspace/hyperdoc</tt>.
+</p>
+
+<p>
+  That split is deliberate. It keeps deployed code reproducible while still
+  allowing operator-facing history and merge-preparation surfaces to inspect the
+  live repository state when the host provides one explicitly.
+</p>
+
+<h2>Operator guidance</h2>
+
+<ul>
+  <li>Use <tt>nix develop</tt> when you want local live-checkout behavior by default.</li>
+  <li>Use <tt>HYPERDOC_GIT_PROGRAM</tt> when the runtime needs explicit Git executable discovery.</li>
+  <li>Use <tt>HYPERDOC_GIT_REPOSITORY_ROOT</tt> when a deployed runtime should inspect a real checkout instead of the packaged source tree.</li>
+  <li>Expect packaged releases without an override to stay inspectably unavailable for Git history rather than failing as raw subprocess errors.</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Canonical Route Discovery for Runtime Smoke Tests">Canonical Route Discovery for Runtime Smoke Tests</a></li>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+  <li><a page="Merge Readiness and Blockers for upstream main into hauptsache">Merge Readiness and Blockers for upstream main into hauptsache</a></li>
+</ul>

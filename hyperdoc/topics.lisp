@@ -844,6 +844,15 @@
                  "Deploy dreyeck.ch from the local flake"
                  "Verify HyperDoc locally before deployment")))
 
+(defun git-repository-root-override-semantics-topic ()
+  (make-topic
+   :id "git-repository-root-override-semantics"
+   :title "Git Repository Root Override Semantics"
+   :summary "Git-backed history surfaces first honor explicit repository-root overrides and otherwise fall back to the loaded system source tree, which means packaged releases and live checkouts intentionally differ."
+   :references '("Git Repository Root Override Semantics"
+                 "Canonical Route Discovery for Runtime Smoke Tests"
+                 "Git History Surface for HyperDoc")))
+
 (defun legacy-workspace-checkout-unit-topic ()
   (make-topic
    :id "legacy-workspace-checkout-unit"
