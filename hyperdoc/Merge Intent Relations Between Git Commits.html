@@ -1,0 +1,65 @@
+<h1>Merge Intent Relations Between Git Commits</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A merge-intent relation is a first-class object that says more than "these two
+  commits are related." It records an intended merge direction, the explicit
+  review anchors, the planning prompt, and the conflict policy that should guide
+  the work if the merge turns out to be non-trivial.
+</p>
+
+<p>
+  In this first slice, the relation is typed as <tt>merge-intent</tt> and links
+  two existing inspectable <tt>git-commit-target</tt> objects. The relation also
+  carries source and target branch objects so the history surface can render the
+  same fact in both a lane-oriented view and an actionable worklist view.
+</p>
+
+<h2>Why keep this as an object</h2>
+
+<p>
+  HyperDoc already has a pattern of turning bounded workflow state into small
+  inspectable objects instead of terminal-only output. A merge-intent relation
+  follows the same rule: the durable fact is the relation object, not only a
+  narrative paragraph on a page.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-intent)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-intent</tt></a></li>
+  <li><a expr="(system-git-commit-target :hyperdoc &quot;823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e&quot;)"><tt>823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e</tt></a></li>
+  <li><a expr="(system-git-commit-target :hyperdoc &quot;e9257b4d4301b4c4f94c90061ab68659aecad4c6&quot;)"><tt>e9257b4d4301b4c4f94c90061ab68659aecad4c6</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-branch-ref)"><tt>hyperdoc-upstream-main-branch-ref</tt></a></li>
+  <li><a expr="(hyperdoc-hauptsache-branch-ref)"><tt>hyperdoc-hauptsache-branch-ref</tt></a></li>
+</ul>
+
+<h2>Fields stored on the relation</h2>
+
+<ul>
+  <li>a stable id and title,</li>
+  <li>relation type <tt>merge-intent</tt>,</li>
+  <li>status <tt>planned</tt>,</li>
+  <li>source branch and source commit anchor,</li>
+  <li>target branch and target commit anchor,</li>
+  <li>the full prompt text to guide the merge,</li>
+  <li>the conflict policy that prefers a <tt>dreyeck</tt> subsystem fallback over dirty overwrite,</li>
+  <li>the success criteria that must remain true after the merge.</li>
+</ul>
+
+<h2>Views</h2>
+
+<ul>
+  <li><tt>👀merge-intent</tt> renders the prompt, conflict policy, and success criteria directly on the relation object.</li>
+  <li><tt>👀git-history</tt> on the surrounding history surface shows the same relation in lane context.</li>
+  <li><tt>👀merge-worklist</tt> on the history surface filters the relation set by target branch and expands the checklist for execution.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+  <li><a page="Merge upstream main into hauptsache via dreyeck fallback">Merge upstream main into hauptsache via dreyeck fallback</a></li>
+  <li><a page="Clickable commit IDs in FedWiki stories">Clickable commit IDs in FedWiki stories</a></li>
+</ul>

@@ -31,6 +31,7 @@
                              (:file "article-allegation-slice")
                              (:file "fedwiki-materialization")
                              (:file "tools")
+                             (:file "git-relations")
                              (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/examples
@@ -131,6 +132,7 @@
                 :components ((:file "package")
                              (:file "links")
                              (:file "explorer")
+                             (:file "git-relations")
                              (:file "packages")
                              (:file "parse-expr")
                              (:file "lookup-repairs")

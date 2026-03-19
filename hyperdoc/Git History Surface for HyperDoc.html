@@ -1,0 +1,78 @@
+<h1>Git History Surface for HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page introduces a first narrow Git history surface inside HyperDoc. The
+  surface stays deliberately small: it exposes explicit branch anchors, commit
+  targets, and typed merge-intent relations as inspectable objects instead of
+  trying to become a full interactive Git client.
+</p>
+
+<p>
+  The main object is a <tt>git-history-surface</tt>. It owns two branch lanes
+  for the HyperDoc repository, one local and one upstream, plus a list of typed
+  relations that turn merge planning into a durable object graph rather than a
+  prose-only note.
+</p>
+
+<h2>Why this first slice is lane-based</h2>
+
+<p>
+  A Sublime-Merge-like surface does not require a full DAG renderer on day one.
+  For this first slice, lane columns are enough to make three things
+  inspectable:
+</p>
+
+<ol>
+  <li>the anchored local and upstream branch positions,</li>
+  <li>the merge-intent relation between those anchors,</li>
+  <li>the branch-only backlog on either side.</li>
+</ol>
+
+<p>
+  That keeps the durable fact in the relation object while still giving the
+  repository a history/worklist surface that can be replayed from the current
+  source tree.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-git-history-surface)"><tt>hyperdoc-git-history-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-intent)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-intent</tt></a></li>
+  <li><a expr="(hyperdoc-hauptsache-branch-ref)"><tt>hyperdoc-hauptsache-branch-ref</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-branch-ref)"><tt>hyperdoc-upstream-main-branch-ref</tt></a></li>
+</ul>
+
+<h2>Current lane anchors</h2>
+
+<ul>
+  <li><tt>hauptsache</tt> is anchored at <tt>e9257b4d4301b4c4f94c90061ab68659aecad4c6</tt>.</li>
+  <li><tt>upstream/main</tt> is anchored at <tt>823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e</tt>.</li>
+  <li><tt>khinsen/main</tt> currently resolves to the same upstream commit and is stored as an alias on the upstream branch object.</li>
+</ul>
+
+<h2>What the surface shows</h2>
+
+<ul>
+  <li><tt>👀git-history</tt> shows the two lane anchors, the active merge-intent relation, and recent branch-only commits.</li>
+  <li><tt>👀merge-worklist</tt> filters the relation list by target branch and expands the validation checklist kept on each relation object.</li>
+</ul>
+
+<h2>Intentional limits</h2>
+
+<ul>
+  <li>No staging, checkout, cherry-pick, or rebase UI.</li>
+  <li>No free-form relation editing.</li>
+  <li>No attempt yet to draw the full commit DAG or collapse shared ancestors.</li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Merge Intent Relations Between Git Commits">Merge Intent Relations Between Git Commits</a></li>
+  <li><a page="Merge upstream main into hauptsache via dreyeck fallback">Merge upstream main into hauptsache via dreyeck fallback</a></li>
+  <li><a page="Clickable commit IDs in FedWiki stories">Clickable commit IDs in FedWiki stories</a></li>
+  <li><a page="Everything in Git? Identity Across Systems">Everything in Git? Identity Across Systems</a></li>
+</ul>
