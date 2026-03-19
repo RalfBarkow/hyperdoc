@@ -31,6 +31,7 @@
                              (:file "article-allegation-slice")
                              (:file "fedwiki-materialization")
                              (:file "tools")
+                             (:file "operational-targets")
                              (:file "git-relations")
                              (:file "hyperdoc")))))
 
@@ -132,6 +133,7 @@
                 :components ((:file "package")
                              (:file "links")
                              (:file "explorer")
+                             (:file "operational-targets")
                              (:file "git-relations")
                              (:file "packages")
                              (:file "parse-expr")
