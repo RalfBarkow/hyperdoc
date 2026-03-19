@@ -232,9 +232,14 @@ let
       }
       trap cleanup EXIT
 
+      warning_count=0
       ready=0
+      ready_attempts=0
       for _i in $(seq 1 60); do
-        if curl -fsS "http://$host:$port/boot.html" -o /tmp/hyperdoc-release-boot.$$; then
+        ready_attempts=$((ready_attempts + 1))
+        if curl -fsS "http://$host:$port/boot.html" \
+          -o /tmp/hyperdoc-release-boot.$$ \
+          2>/dev/null; then
           ready=1
           break
         fi
@@ -244,6 +249,10 @@ let
         echo "[verify] server did not become ready; log tail:" >&2
         tail -n 120 "$log_file" >&2 || true
         exit 1
+      fi
+      if [ "$ready_attempts" -gt 1 ]; then
+        warning_count=$((warning_count + 1))
+        echo "[verify][warn] server became ready after $ready_attempts probes"
       fi
 
       echo "[verify] HTTP boot check"
@@ -263,7 +272,8 @@ let
       if [ "$url_js_code" = "200" ]; then
         echo "HTTP/1.1 200 OK"
       else
-        echo "[verify] /hyperbook-server/js/url.js returned code=$url_js_code; falling back to shipped asset file check"
+        warning_count=$((warning_count + 1))
+        echo "[verify][warn] /hyperbook-server/js/url.js returned code=$url_js_code; verified shipped asset file instead"
         rm -f "$url_js_path"
         for candidate in \
           "$HYPERDOC_ROOT/hyperbook-server/assets/hyperbook-server/js/url.js" \
@@ -285,7 +295,11 @@ let
         exit 1
       fi
 
-      echo "RELEASE_VERIFY_OK id=$HYPERDOC_RELEASE_ID slug=$slug"
+      if [ "$warning_count" -gt 0 ]; then
+        echo "RELEASE_VERIFY_PASS_WITH_WARNINGS warnings=$warning_count id=$HYPERDOC_RELEASE_ID slug=$slug"
+      else
+        echo "RELEASE_VERIFY_OK id=$HYPERDOC_RELEASE_ID slug=$slug"
+      fi
     '';
   };
 in
