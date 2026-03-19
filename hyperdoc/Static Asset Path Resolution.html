@@ -1,0 +1,29 @@
+<h1>Static Asset Path Resolution</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page exposes first-class, inspectable path-resolution objects for the
+  core static asset routes used by local HyperDoc and CLOG startup.
+  The objects are based on static computation from the current server wiring.
+  They do not perform live HTTP probes.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-static-asset-resolution-surface)"><tt>hyperdoc-static-asset-resolution-surface</tt></a></li>
+  <li><a expr="(hyperdoc-static-asset-resolution-surface)" view="comparison"><tt>hyperdoc-static-asset-resolution-surface</tt> comparison</a></li>
+  <li><a expr="(hyperdoc-boot-html-static-asset-path-resolution)"><tt>/boot.html</tt></a></li>
+  <li><a expr="(hyperdoc-boot-js-static-asset-path-resolution)"><tt>/js/boot.js</tt></a></li>
+  <li><a expr="(hyperdoc-jquery-min-js-static-asset-path-resolution)"><tt>/js/jquery.min.js</tt></a></li>
+  <li><a expr="(hyperdoc-url-helper-static-asset-path-resolution)"><tt>/hyperbook-server/js/url.js</tt></a></li>
+</ul>
+
+<h2>Scope</h2>
+
+<ul>
+  <li>Default CLOG static-root ownership for <tt>/boot.html</tt>, <tt>/js/boot.js</tt>, and <tt>/js/jquery.min.js</tt></li>
+  <li>hyperbook-server runtime asset-mount ownership for <tt>/hyperbook-server/js/url.js</tt></li>
+  <li>Filesystem resolution against the currently computed mounted roots</li>
+</ul>
