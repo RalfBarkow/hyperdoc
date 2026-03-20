@@ -21,21 +21,22 @@
     if (!target) {
       return null;
     }
-    var direct = target.closest(
-      "[data-hyperdoc-anchor-id], [id], li, p, h1, h2, h3, h4, h5, h6, pre, blockquote, a, code, tt"
-    );
-    var candidate = direct || (target.nodeType === 1 ? target : target.parentElement);
-    if (!candidate || !root.contains(candidate)) {
-      return null;
+    var candidate = target.nodeType === 1 ? target : target.parentElement;
+    while (candidate && candidate !== root) {
+      if (!root.contains(candidate)) {
+        return null;
+      }
+      if (candidate.closest("[data-hyperdoc-connect-ignore='true']")) {
+        return null;
+      }
+      var tagName = candidate.tagName && candidate.tagName.toLowerCase();
+      if (tagName &&
+          ["script", "style", "link", "meta", "noscript"].indexOf(tagName) === -1) {
+        return candidate;
+      }
+      candidate = candidate.parentElement;
     }
-    if (candidate.closest(".hyperdoc-dom-connect-toolbar") ||
-        candidate.closest(".hyperdoc-dom-connect-controls")) {
-      return null;
-    }
-    if (candidate === root) {
-      return null;
-    }
-    return candidate;
+    return null;
   }
 
   function domPath(element, root) {
@@ -61,6 +62,9 @@
     if (strategy === "data-anchor") {
       return '[data-hyperdoc-anchor-id="' + cssEscape(value) + '"]';
     }
+    if (strategy === "data-object-id") {
+      return '[data-hyperdoc-object-id="' + cssEscape(value) + '"]';
+    }
     if (strategy === "element-id") {
       return "#" + cssEscape(value);
     }
@@ -69,12 +73,16 @@
 
   function buildAnchor(element, root) {
     var anchorId = element.dataset.hyperdocAnchorId;
+    var objectId = element.dataset.hyperdocObjectId;
     var elementId = element.id;
     var strategy = "dom-path";
     var value = domPath(element, root);
     if (anchorId) {
       strategy = "data-anchor";
       value = anchorId;
+    } else if (objectId) {
+      strategy = "data-object-id";
+      value = objectId;
     } else if (elementId) {
       strategy = "element-id";
       value = elementId;
@@ -93,7 +101,7 @@
       label: limitText(label || value, 140),
       tagName: element.tagName.toLowerCase(),
       textSnippet: limitText(collapseWhitespace(element.textContent || ""), 220),
-      objectId: element.dataset.hyperdocObjectId || null
+      objectId: objectId || null
     };
   }
 
@@ -140,30 +148,50 @@
     state.overlay.hidden = true;
   }
 
+  function setHoverElement(state, element) {
+    if (state.hoverElement && state.hoverElement !== state.sourceElement) {
+      state.hoverElement.classList.remove("hyperdoc-dom-connect-hover");
+    }
+    state.hoverElement = null;
+    if (element && element !== state.sourceElement) {
+      element.classList.add("hyperdoc-dom-connect-hover");
+      state.hoverElement = element;
+    }
+  }
+
   function deactivate(state, resetStatus) {
     state.enabled = false;
+    state.surface.classList.remove("hyperdoc-dom-connect-active");
     state.toggle.dataset.mode = "inactive";
     state.cancel.hidden = true;
+    setHoverElement(state, null);
     clearSource(state);
     if (resetStatus) {
-      setStatus(state, "Direction matters: click source first, then target.");
+      setStatus(state, state.readyMessage);
     }
   }
 
   function activate(state) {
     state.enabled = true;
+    state.surface.classList.add("hyperdoc-dom-connect-active");
     state.toggle.dataset.mode = "active";
     state.cancel.hidden = false;
-    setStatus(state, "Connect mode active. Click the source element.");
+    setStatus(state, "Connect mode: click any content element as the source.");
   }
 
   function beginConnection(state, element, anchor) {
+    setHoverElement(state, null);
     clearSource(state);
     state.source = anchor;
     state.sourceElement = element;
     state.sourceElement.classList.add("hyperdoc-dom-connect-source");
     state.overlay.hidden = false;
-    setStatus(state, 'Source selected: "' + anchor.label + '". Click the target element.');
+    setStatus(
+      state,
+      'Source selected: "' +
+        anchor.label +
+        '". Now click any content element as the target.'
+    );
   }
 
   function updateLineFromMouse(state, clientX, clientY) {
@@ -188,24 +216,35 @@
     }
   }
 
+  function invalidClick(state) {
+    setStatus(
+      state,
+      "Click inside the rendered content, not the toolbar or browser chrome, to create a relation."
+    );
+  }
+
   function onRootClick(state, event) {
     if (!state.enabled) {
       return;
     }
+    event.preventDefault();
+    event.stopPropagation();
     var element = anchorCandidate(state.root, event.target);
     if (!element) {
+      invalidClick(state);
       return;
     }
     var anchor = buildAnchor(element, state.root);
-    event.preventDefault();
-    event.stopPropagation();
     if (!state.source) {
       beginConnection(state, element, anchor);
       updateLineFromMouse(state, event.clientX, event.clientY);
       return;
     }
     if (anchorKey(anchor) === anchorKey(state.source)) {
-      setStatus(state, "Pick a different target element.");
+      setStatus(
+        state,
+        "Pick a different target element in this rendered content."
+      );
       return;
     }
     completeConnection(state, anchor);
@@ -243,11 +282,14 @@
       targetInput: targetInput,
       submit: submit,
       enabled: false,
+      hoverElement: null,
       source: null,
-      sourceElement: null
+      sourceElement: null,
+      readyMessage: "Connect is available on this rendered content pane. Click Connect, then choose a source element and a target element in this page. Esc or Cancel exits connect mode."
     };
     surface.dataset.hyperdocDomConnectInitialized = "true";
     toggle.dataset.mode = "inactive";
+    setStatus(state, state.readyMessage);
     toggle.addEventListener("click", function () {
       if (state.enabled) {
         deactivate(state, true);
@@ -262,8 +304,19 @@
       onRootClick(state, event);
     }, true);
     root.addEventListener("mousemove", function (event) {
+      if (state.enabled) {
+        setHoverElement(state, anchorCandidate(state.root, event.target));
+      }
       updateLineFromMouse(state, event.clientX, event.clientY);
     }, true);
+    root.addEventListener("mouseleave", function () {
+      setHoverElement(state, null);
+    }, true);
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && state.enabled) {
+        deactivate(state, true);
+      }
+    });
     window.addEventListener("resize", function () {
       if (state.sourceElement) {
         var center = elementCenter(state.surface, state.sourceElement);

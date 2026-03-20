@@ -46,13 +46,16 @@
             (:div :class "hyperdoc-dom-connect-toolbar"
                   (:button :type "button"
                            :class "hyperdoc-dom-connect-toggle"
+                           :title "Connect two content elements in this page to create a relation annotation."
                            "Connect")
                   (:button :type "button"
                            :class "hyperdoc-dom-connect-cancel"
                            :hidden "hidden"
                            "Cancel")
+                  (:span :class "hyperdoc-dom-connect-help"
+                         "Pane-local DOM connect: this works only within the current rendered page. Click Connect, then choose any content element as source and any content element as target. Esc or Cancel exits connect mode.")
                   (:span :class "hyperdoc-dom-connect-status"
-                         "Direction matters: click source first, then target."))
+                         "Connect is available on this rendered content pane."))
             (:div :class "hyperdoc-dom-connect-controls"
                   :style "display:none"
                   :data-source-input-id source-input-id

@@ -51,6 +51,8 @@
 
 (defun normalize-dom-annotation-json (value)
   (cond
+    ((stringp value)
+     value)
     ((hash-table-p value)
      (loop for json-key being each hash-key of value
              using (hash-value json-value)
@@ -138,7 +140,10 @@
                   "This DOM relation matches an already modeled workflow patch target."))))))
 
 (defun slugify-dom-relation-fragment (value)
-  (let* ((value (or value "anchor"))
+  (let* ((value (typecase value
+                  (null "anchor")
+                  (string value)
+                  (t (princ-to-string value))))
          (chars (loop for ch across value
                       collect (cond
                                 ((alphanumericp ch)
