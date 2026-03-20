@@ -1,0 +1,103 @@
+<h1>WebXDC-style Story Items for FedWiki and HyperDoc</h1>
+
+<p>
+  A <a hyperbook="topics" page="WebXDC-style story item"><tt>WebXDC-style story item</tt></a>
+  is a design note about a packaged app surface for HyperDoc and FedWiki story
+  items. The attractive part is not "iframe plus code." It is the possibility
+  of an <a hyperbook="topics" page="Shared-state app story item"><tt>item-local shared state</tt></a>
+  model where a story item carries an app container, serialized state, and a
+  bounded message contract together.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="WebXDC-style story item"><tt>WebXDC-style story item</tt></a></li>
+  <li><a hyperbook="topics" page="Shared-state app story item"><tt>Shared-state app story item</tt></a></li>
+  <li><a hyperbook="topics" page="Capability-scoped extension"><tt>Capability-scoped extension</tt></a></li>
+  <li><a hyperbook="topics" page="Declarative extension manifest"><tt>Declarative extension manifest</tt></a></li>
+  <li><a hyperbook="topics" page="Consent-gated execution"><tt>Consent-gated execution</tt></a></li>
+  <li><a hyperbook="topics" page="Browser isolation layer"><tt>Browser isolation layer</tt></a></li>
+</ul>
+
+<h2>Why a packaged app fits a story-item model</h2>
+
+<p>
+  A story item is already a bounded editorial unit. A WebXDC-like app package
+  or <b>app container</b> fits that unit better than a plain remote iframe
+  because it can carry its own assets, metadata, and host-facing contract with
+  the item.
+</p>
+
+<h2>Item-local shared state changes the design</h2>
+
+<p>
+  Once the state is stored with the item, the design stops looking like a
+  remote embed and starts looking like a portable collaboration artifact. The
+  item can preserve shared inputs, derived outputs, or session state as part of
+  the story itself.
+</p>
+
+<p>
+  That is interesting for HyperDoc because inspectable objects and published
+  traces can now point to a stateful story-item artifact rather than only to an
+  external app URL.
+</p>
+
+<h2>How this differs from plain remote iframe embedding</h2>
+
+<p>
+  A remote iframe embed mainly gives presentation containment and URL-based
+  indirection. A packaged app story item adds a container format, a local state
+  story, and a clearer contract about what the parent and child owe each other.
+</p>
+
+<p>
+  That difference is important, but it does not erase the boundary described in
+  <a hyperbook="hyperdoc" page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a>.
+  Packaging is not the compute sandbox. An iframe alone still does not make
+  arbitrary code safe.
+</p>
+
+<h2>Nearest current analogue: SOLO popup and message seam</h2>
+
+<p>
+  The nearest in-tree analogue is the existing <tt>SOLO</tt> popup /
+  <tt>postMessage</tt> seam: a parent-controlled surface hands a bounded view
+  problem to a child surface and keeps interaction legible through explicit
+  messages. A WebXDC-style story item would widen that pattern into a more
+  durable parent/app contract, not replace the need for one.
+</p>
+
+<h2>What a bounded parent/app contract should contain</h2>
+
+<ul>
+  <li>an app package or app container identifier</li>
+  <li>item-local shared state with explicit serialization rules</li>
+  <li>a narrow message contract between parent and app</li>
+  <li>explicit user consent before privileged actions</li>
+  <li>a published capability profile for requested powers</li>
+</ul>
+
+<h2>Why this is promising but non-trivial</h2>
+
+<p>
+  The model is promising because it offers a portable, inspectable extension
+  surface for story items. It is non-trivial because packaging, state
+  migration, replay, capability review, consent UI, and host mediation all have
+  to align before it is safe and explainable.
+</p>
+
+<p>
+  Non-goal: <b>iframe alone makes code safe.</b>
+</p>
+
+<h2>Related links</h2>
+
+<ul>
+  <li><a page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a></li>
+  <li><a page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a></li>
+  <li><a page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a></li>
+  <li><a page="Mech CODE Block analysis">Mech CODE Block analysis</a></li>
+  <li><a page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
+</ul>

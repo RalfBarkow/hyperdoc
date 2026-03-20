@@ -115,10 +115,57 @@
     this must move into a worker or a sandboxed iframe with an explicit message protocol.
   </p>
 
+  <h2>Why ad hoc CODE should not be the default extension model</h2>
+
+  <p>
+    The <code>CODE</code> proposal is still interesting because it exposes a real
+    executable seam in Mech. But the durable path should move away from
+    silently executing arbitrary page-authored JavaScript and toward
+    host-mediated capabilities.
+  </p>
+
+  <p>
+    Jan d's capability split is the right local refinement: powers to change
+    content, change user interface, access data, and transform data should be
+    requested separately rather than collapsed into one broad permission to run
+    code. That makes room for a host-defined API boundary, a published
+    capability profile, and an explicit consent gate before execution.
+  </p>
+
+  <p>
+    This also fits the existing
+    <a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a>
+    and
+    <a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a>
+    framing. The dispatch seam is where authored syntax has already been
+    normalized enough for the host to evaluate a
+    <a hyperbook="topics" page="Declarative extension manifest"><tt>declarative extension manifest</tt></a>,
+    compare it to a
+    <a hyperbook="topics" page="Capability-scoped extension"><tt>capability-scoped extension</tt></a>
+    profile, and publish the resulting
+    <a hyperbook="topics" page="Consent-gated execution"><tt>consent-gated execution</tt></a>
+    decision as inspectable evidence.
+  </p>
+
+  <p>
+    In that maturation path, a future CODE-like feature would not merely run
+    arbitrary text because it happened to appear on a page. It would surface
+    its requested powers, consent boundary, and message surface as inspectable
+    objects before the host decides whether and how to run it.
+  </p>
+
+  <p>
+    The local design notes for that direction are
+    <a hyperbook="hyperdoc" page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a>
+    and
+    <a hyperbook="hyperdoc" page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a>.
+  </p>
+
   <h2>Best first implementation</h2>
 
   <p>
-    The shortest truthful path is:
+    If the goal is only to prove that Ward's example can execute, the shortest
+    truthful path is:
   </p>
 
   <ol>
@@ -135,12 +182,30 @@
     proves more natural.
   </p>
 
+  <p>
+    Even then, it should stay framed as an experiment about the execution seam,
+    not as the default long-term extension model. The durable design target is
+    still host-mediated, manifest-declared, capability-scoped execution.
+  </p>
+
   <h2>Bottom line</h2>
 
   <p>
     Ward's example is viable right now. The current Mech already has the input state and the output surface.
     The only missing seam is a <code>CODE</code> block that turns page-authored JavaScript into a callable module.
-    For a first slice, keep it client-side, keep it inline, and treat sandboxing as a separate concern.
+    For an experiment, keeping it client-side and inline is coherent. It should not become the default
+    extension model; the durable path is capability-scoped, manifest-declared, and consent-gated.
   </p>
+
+  <h2>Related links</h2>
+
+  <ul>
+    <li><a page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a></li>
+    <li><a page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a></li>
+    <li><a page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a></li>
+    <li><a page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a></li>
+    <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+    <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  </ul>
 </body>
 </html>

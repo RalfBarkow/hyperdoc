@@ -64,6 +64,25 @@ A safer formulation is:
 
 Those are complementary layers, not substitutes. Wasmtime explicitly treats preserving the integrity of the Wasm sandbox as a security concern, while the browser’s iframe sandbox and CSP restrict what embedded documents can do. ([docs.wasmtime.dev][5])
 
+## WebXDC as packaging and state container, not compute sandbox
+
+A WebXDC-like package is interesting here because it can act as an **app container** for a FedWiki or HyperDoc story item instead of as a mere remote embed. That makes room for a bounded delivery unit, explicit metadata, and **item-local shared state** that travels with the story item rather than living only at a remote URL.
+
+That shared-state angle is architecturally promising. A story item that carries both its app package and its own serialized state is closer to a portable, inspectable collaboration artifact than a plain iframe pointing elsewhere.
+
+But the packaging move must still be separated from the actual compute boundary. A WebXDC-like app package or iframe-contained app does **not** become safe merely because it is packaged or framed. HyperDoc still needs to keep the same separation intact:
+
+1. **host/orchestrator policy**
+2. **bounded computation**
+3. **presentation containment**
+
+The nearest in-tree analogue is the existing `SOLO` popup / `postMessage` seam: a parent-controlled surface, a narrow message contract, and a child view that should not inherit broad ambient powers by accident.
+
+For the local continuation of this design, see
+<a hyperbook="hyperdoc" page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a>
+and
+<a hyperbook="hyperdoc" page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a>.
+
 ## Best fit for HyperDoc
 
 Given your architecture, I would recommend this concrete first slice:

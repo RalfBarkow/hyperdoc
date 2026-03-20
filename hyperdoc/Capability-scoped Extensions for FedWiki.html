@@ -1,0 +1,122 @@
+<h1>Capability-scoped Extensions for FedWiki</h1>
+
+<p>
+  A <a hyperbook="topics" page="Capability-scoped extension"><tt>capability-scoped extension</tt></a>
+  is the local design answer to the question, "how should HyperDoc or FedWiki
+  grow programmable behavior without defaulting to arbitrary page JavaScript?"
+  The durable pattern is an extension host: the host defines the boundary,
+  the extension declares intent up front, and execution only proceeds through a
+  bounded API surface.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Capability-scoped extension"><tt>Capability-scoped extension</tt></a></li>
+  <li><a hyperbook="topics" page="Declarative extension manifest"><tt>Declarative extension manifest</tt></a></li>
+  <li><a hyperbook="topics" page="Consent-gated execution"><tt>Consent-gated execution</tt></a></li>
+  <li><a hyperbook="topics" page="Browser isolation layer"><tt>Browser isolation layer</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
+  <li><a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a></li>
+</ul>
+
+<h2>Why extension host beats arbitrary page JavaScript</h2>
+
+<p>
+  "Run whatever script the page happens to contain" is the wrong default
+  architecture for a browser-isolation cluster. It gives the document too much
+  ambient authority and makes it difficult to inspect, mediate, or explain what
+  the code is trying to do.
+</p>
+
+<p>
+  An extension host is stronger because the host remains in charge of policy,
+  data access, and visible effects. The extension asks through a boundary the
+  host already understands. Comparative systems such as Figma plugins, browser
+  WebExtensions, and Jamovi differ in mechanics, but they share that durable
+  shape: host-defined verbs first, extension code second.
+</p>
+
+<h2>Declarative manifest and capability profile</h2>
+
+<p>
+  A <a hyperbook="topics" page="Declarative extension manifest"><tt>declarative extension manifest</tt></a>
+  states intent before execution. It can describe the extension's entry point,
+  requested powers, message surface, and expected artifacts without first
+  granting those powers.
+</p>
+
+<p>
+  That manifest becomes a capability profile the host can inspect, compare,
+  log, and present to the user before anything runs. The important move is not
+  only metadata. It is that the host can now evaluate the request at a stable
+  boundary instead of inferring it from arbitrary text after the fact.
+</p>
+
+<h2>Permission partition by effect</h2>
+
+<p>
+  Capability partitioning should stay effect-oriented:
+</p>
+
+<ul>
+  <li>content mutation</li>
+  <li>user-interface mutation</li>
+  <li>data read</li>
+  <li>data transformation</li>
+</ul>
+
+<p>
+  Those are different powers with different risk surfaces. Treating them as one
+  generic "execute code" permission erases the distinction that the host needs
+  in order to explain and govern extension behavior.
+</p>
+
+<h2>Consent before execution</h2>
+
+<p>
+  A <a hyperbook="topics" page="Consent-gated execution"><tt>consent-gated execution</tt></a>
+  boundary means the user sees the requested powers before the extension runs.
+  Execution should be an explicit grant, not an accidental consequence of
+  visiting a page or clicking an unrelated link.
+</p>
+
+<h2>Relation to browser isolation layer</h2>
+
+<p>
+  <a hyperbook="hyperdoc" page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a>
+  already shows the local direction: browser-facing behavior is more useful
+  when it is pulled behind an explicit seam. Capability-scoped extensions take
+  the same move further by making the browser- or app-facing power surface a
+  host-defined contract rather than an implicit page privilege.
+</p>
+
+<h2>Relation to Mech CODE experiments</h2>
+
+<p>
+  <a hyperbook="hyperdoc" page="Mech CODE Block analysis">Mech CODE Block analysis</a>
+  is still valuable because it identifies a real executable seam. The safe
+  maturation path is to place declarative manifests, consent checks, and
+  inspectable capability profiles at that seam rather than using the seam as a
+  reason to normalize silent arbitrary-code execution.
+</p>
+
+<h2>Why this matters for end-user-programmable systems</h2>
+
+<p>
+  This is not only an enterprise plugin story. End-user-programmable systems
+  need the same clarity because they mix authoring, execution, and explanation
+  in one place. Capability-scoped extension design keeps that power available
+  without making the page itself the default authority surface.
+</p>
+
+<h2>Related links</h2>
+
+<ul>
+  <li><a page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a></li>
+  <li><a page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a></li>
+  <li><a page="Mech CODE Block analysis">Mech CODE Block analysis</a></li>
+  <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  <li><a page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a></li>
+</ul>

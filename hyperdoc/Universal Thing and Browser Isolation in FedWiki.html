@@ -56,9 +56,62 @@
   stable DMX identifiers are known.
 </p>
 
+<h2>Host-defined extension boundary</h2>
+
+<p>
+  The browser-isolation move should not be read as a license to run arbitrary
+  page JavaScript. It points in the opposite direction: browser-facing powers
+  should be pulled behind a host-defined API boundary that HyperDoc or FedWiki
+  controls explicitly.
+</p>
+
+<p>
+  That is the durable pattern worth keeping. Comparative systems such as Figma
+  plugins, browser WebExtensions, and Jamovi differ in detail, but they share
+  the same architectural move: the host defines the verbs, mediation, and
+  policy surface instead of letting every document inherit ambient browser
+  privilege.
+</p>
+
+<p>
+  In this cluster, <a hyperbook="topics" page="Universal Thing"><tt>Universal Thing</tt></a>
+  and the <a hyperbook="topics" page="Browser isolation layer"><tt>browser isolation layer</tt></a>
+  are the in-tree evidence that this boundary already wants to exist. The
+  browser role is becoming an explicit collaborator, not an unbounded execution
+  environment.
+</p>
+
+<h3>Explicit consent and capability partitioning</h3>
+
+<p>
+  Once the host owns the extension boundary, consent can be made explicit
+  rather than accidental. A click on a link or a page load should not silently
+  authorize execution with broad powers.
+</p>
+
+<p>
+  The permission split should stay effect-oriented: an extension may ask to
+  change content, change user interface, access data, or transform data. Those
+  are meaningfully different powers and should not collapse into one generic
+  "run script" permission.
+</p>
+
+<p>
+  The local follow-on pages for that idea are
+  <a hyperbook="hyperdoc" page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a>
+  and
+  <a hyperbook="hyperdoc" page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a>.
+  They extend this browser-isolation note without promoting every comparative
+  example into its own durable topic page.
+</p>
+
 <h2>Relation to existing HyperDoc pages</h2>
 
 <ul>
+  <li><a hyperbook="hyperdoc" page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a>: follow-on design note for host-defined extension APIs, declarative manifests, and explicit consent.</li>
+  <li><a hyperbook="hyperdoc" page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a>: packaged-app and shared-state story-item note that stays inside the same boundary vocabulary.</li>
+  <li><a hyperbook="hyperdoc" page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a>: keeps packaging and presentation containment separate from the actual compute/security boundary.</li>
+  <li><a hyperbook="hyperdoc" page="Mech CODE Block analysis">Mech CODE Block analysis</a>: the nearest in-tree executable experiment and the page that now frames CODE maturation toward host-mediated capabilities.</li>
   <li><a hyperbook="hyperdoc" page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a>: the larger Ward/Beck and browser/inspector/debugger lineage that this note extends.</li>
   <li><a hyperbook="hyperdoc" page="Diagramming Debugger Surface">Diagramming Debugger Surface</a>: the executable diagram surface that turns runtime stepping into inspectable traces.</li>
   <li><a hyperbook="hyperdoc" page="Stepper Debugger Surface">Stepper Debugger Surface</a>: the user-visible proceed/step boundary for advancing interpreter work.</li>
@@ -77,6 +130,9 @@
   <li><a hyperbook="topics" page="Interpreter state packet"><tt>Interpreter state packet</tt></a></li>
   <li><a hyperbook="topics" page="Styled input/output surface"><tt>Styled input/output surface</tt></a></li>
   <li><a hyperbook="topics" page="Browser stand-in test harness"><tt>Browser stand-in test harness</tt></a></li>
+  <li><a hyperbook="topics" page="Capability-scoped extension"><tt>Capability-scoped extension</tt></a></li>
+  <li><a hyperbook="topics" page="Declarative extension manifest"><tt>Declarative extension manifest</tt></a></li>
+  <li><a hyperbook="topics" page="Consent-gated execution"><tt>Consent-gated execution</tt></a></li>
 </ul>
 
 <h2>DMX note</h2>
