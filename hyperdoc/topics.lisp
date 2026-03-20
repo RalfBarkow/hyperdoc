@@ -930,7 +930,6 @@
    :references '("Inspectable operational targets"
                  "Materialize a host-aware operation without executing it"
                  "Operational Target Objects for dreyeck.ch")))
-
 (defun synchronization-as-a-visualization-problem-topic ()
   (make-topic
    :id "synchronization-as-a-visualization-problem"
