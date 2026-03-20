@@ -877,6 +877,33 @@
    :references '("Static route observability"
                  "Diagnose static asset route ownership")))
 
+(defun annotated-merge-forecast-paths-topic ()
+  (make-topic
+   :id "annotated-merge-forecast-paths"
+   :title "Annotated merge-forecast paths"
+   :summary "Skill for treating merge-forecast path rows as inspectable objects with path annotations, related decisions, and a custom context-command surface."
+   :references '("Annotated merge-forecast paths"
+                 "Add or edit an annotation from a path context menu"
+                 "Git History Surface for HyperDoc")))
+
+(defun add-or-edit-an-annotation-from-a-path-context-menu-topic ()
+  (make-topic
+   :id "add-or-edit-an-annotation-from-a-path-context-menu"
+   :title "Add or edit an annotation from a path context menu"
+   :summary "Task skill for opening the draft or explicit path-annotation object behind a merge-forecast row without executing a merge."
+   :references '("Add or edit an annotation from a path context menu"
+                 "Annotated merge-forecast paths"
+                 "Git History Surface for HyperDoc")))
+
+(defun context-commands-for-inspectable-path-rows-topic ()
+  (make-topic
+   :id "context-commands-for-inspectable-path-rows"
+   :title "Context commands for inspectable path rows"
+   :summary "Current HyperDoc pattern where hidden object-ref actions, custom JS/CSS, and row target objects provide Details, Add annotation, Edit annotation, and Related decisions commands."
+   :references '("Annotated merge-forecast paths"
+                 "Add or edit an annotation from a path context menu"
+                 "Git History Surface for HyperDoc")))
+
 (defun synchronization-as-a-visualization-problem-topic ()
   (make-topic
    :id "synchronization-as-a-visualization-problem"
@@ -2739,6 +2766,49 @@
    :title "Browser stand-in test harness"
    :summary "Unit-test arrangement that exercises the isolation layer with Universal Thing standing in for the browser."
    :references *universal-thing-doc-references*))
+
+;; Topic objects for capability-scoped extension and packaged-app story-item notes.
+(defparameter *capability-scoped-extension-doc-references*
+  '("Universal Thing and Browser Isolation in FedWiki"
+    "The iFrame Is Not the Compute Sandbox"
+    "Mech CODE Block analysis"
+    "Capability-scoped Extensions for FedWiki"
+    "WebXDC-style Story Items for FedWiki and HyperDoc"))
+
+(defun capability-scoped-extension-topic ()
+  (make-topic
+   :id "capability-scoped-extension"
+   :title "Capability-scoped extension"
+   :summary "Host-mediated extension unit whose powers are explicitly bounded instead of inheriting arbitrary page JavaScript authority."
+   :references *capability-scoped-extension-doc-references*))
+
+(defun declarative-extension-manifest-topic ()
+  (make-topic
+   :id "declarative-extension-manifest"
+   :title "Declarative extension manifest"
+   :summary "Up-front declaration of extension intent, requested powers, and integration boundary before execution."
+   :references *capability-scoped-extension-doc-references*))
+
+(defun consent-gated-execution-topic ()
+  (make-topic
+   :id "consent-gated-execution"
+   :title "Consent-gated execution"
+   :summary "Execution boundary that requires explicit user approval before a page-authored or packaged extension can exercise declared powers."
+   :references *capability-scoped-extension-doc-references*))
+
+(defun shared-state-app-story-item-topic ()
+  (make-topic
+   :id "shared-state-app-story-item"
+   :title "Shared-state app story item"
+   :summary "Story item that carries an app container together with item-local shared state for bounded parent/app interaction."
+   :references *capability-scoped-extension-doc-references*))
+
+(defun webxdc-style-story-item-topic ()
+  (make-topic
+   :id "webxdc-style-story-item"
+   :title "WebXDC-style story item"
+   :summary "Packaged app story-item model that treats WebXDC-style delivery and shared state as distinct from the actual compute sandbox."
+   :references *capability-scoped-extension-doc-references*))
 
 (defun ward-beck-diagram-1986-topic ()
   (make-topic

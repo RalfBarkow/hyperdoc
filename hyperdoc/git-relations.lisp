@@ -125,6 +125,18 @@ The resulting system must continue to load and serve HyperDoc.")
    (relative-path :reader relative-path-of :initarg :relative-path :type string)
    (path-set :reader path-set-of :initarg :path-set :initform nil)))
 
+(defclass git-forecast-path-context-surface ()
+  ((id :reader id-of :initarg :id :type string)
+   (title :reader title-of :initarg :title :type string)
+   (summary :reader summary-of :initarg :summary :type string)
+   (forecast :reader forecast-of :initarg :forecast :type git-merge-forecast)
+   (path-item :reader path-item-of :initarg :path-item :type git-forecast-path-item)
+   (annotation-target :reader annotation-target-of :initarg :annotation-target
+                      :type git-path-annotation)
+   (worked-example-path :reader worked-example-path-of :initarg :worked-example-path
+                        :type string)
+   (path-set :reader path-set-of :initarg :path-set :initform nil)))
+
 (defclass git-path-decision-surface ()
   ((id :reader id-of :initarg :id :type string)
    (title :reader title-of :initarg :title :type string)
@@ -883,6 +895,21 @@ Use this object to capture ownership, rationale, and merge policy before merge e
 (defun git-related-path-decisions (path-item)
   (git-related-path-decisions-for-path (forecast-of path-item)
                                        (relative-path-of path-item)))
+
+(defun make-git-forecast-path-context-surface (forecast relative-path
+                                               &key path-set id title summary)
+  (make-instance
+   'git-forecast-path-context-surface
+   :id id
+   :title title
+   :summary summary
+   :forecast forecast
+   :path-item (git-forecast-path-item-for-path forecast relative-path
+                                               :path-set path-set)
+   :annotation-target (git-openable-path-annotation-for-path forecast relative-path
+                                                             :path-set path-set)
+   :worked-example-path relative-path
+   :path-set path-set))
 
 (defun overlapping-path-decision (relation path)
   (let ((note (relation-note-for-path relation path)))
@@ -2194,6 +2221,15 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
    (%hyperdoc-upstream-main-into-hauptsache-merge-forecast)
    "hyperbook-server/assets/hyperbook-server/js/url.js"
    :path-set "hauptsache-only"))
+
+(def-git-runtime-entrypoint hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-context-surface ()
+  (make-git-forecast-path-context-surface
+   (%hyperdoc-upstream-main-into-hauptsache-merge-forecast)
+   "hyperbook-server/assets/hyperbook-server/js/url.js"
+   :path-set "hauptsache-only"
+   :id "merge-forecast-path-context-surface/url-helper-asset"
+   :title "Merge-forecast path context surface for url.js"
+   :summary "Reusable skill surface showing how an inspectable merge-forecast path row, a path annotation, and hidden object-ref actions become a custom context menu."))
 
 (defun %hyperdoc-git-history-surface ()
   (let* ((local-branch (%hyperdoc-hauptsache-branch-ref))

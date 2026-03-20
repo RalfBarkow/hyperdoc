@@ -130,7 +130,7 @@
              (t
               (views:esc label))))))
 
-(defun render-path-context-actions (path-item &key forecast path-set)
+(defun git-forecast-path-context-action-specs (path-item &key forecast path-set)
   (let* ((relative-path (relative-path-of path-item))
          (annotation (and forecast
                           (git-path-annotation-for-path forecast relative-path)))
@@ -140,19 +140,61 @@
          (related-decisions (and forecast
                                  (git-related-path-decisions-for-path
                                   forecast relative-path))))
-    (views:html
-      (:span :class "git-path-context-actions" :hidden "hidden"
-             (render-path-context-action "details" "Details"
-                                         :target path-item)
-             (render-path-context-action "add-annotation" "Add annotation"
-                                         :target annotation-target)
-             (render-path-context-action "edit-annotation" "Edit annotation"
-                                         :target annotation
-                                         :disabledp (null annotation))
-             (render-path-context-action "related-decisions" "Related decisions"
-                                         :target path-item
-                                         :select "Related decisions"
-                                         :disabledp (null related-decisions))))))
+    (list
+     (list :command "details"
+           :label "Details"
+           :target path-item)
+     (list :command "add-annotation"
+           :label "Add annotation"
+           :target annotation-target)
+     (list :command "edit-annotation"
+           :label "Edit annotation"
+           :target annotation
+           :disabledp (null annotation))
+     (list :command "related-decisions"
+           :label "Related decisions"
+           :target path-item
+           :select "Related decisions"
+           :disabledp (null related-decisions)))))
+
+(defun render-path-context-actions (path-item &key forecast path-set)
+  (views:html
+    (:span :class "git-path-context-actions" :hidden "hidden"
+           (loop for spec in (git-forecast-path-context-action-specs
+                              path-item :forecast forecast :path-set path-set)
+                 do (views:html
+                      (render-path-context-action
+                       (getf spec :command)
+                       (getf spec :label)
+                       :target (getf spec :target)
+                       :select (getf spec :select)
+                       :disabledp (getf spec :disabledp)))))))
+
+(defun render-path-context-command-target (action)
+  (cond
+    ((and (getf action :target)
+          (getf action :select))
+     (views:object-ref (getf action :target)
+                       :display (or (getf action :label)
+                                    "target")
+                       :select (getf action :select)))
+    ((getf action :target)
+     (views:object-ref (getf action :target)
+                       :display (or (getf action :label)
+                                    "target")))
+    (t
+     (views:html
+       (:span :style "opacity: 0.55;" "-")))))
+
+(defun render-path-context-command-row (action)
+  (views:html
+    (:tr
+     (:td (views:esc (getf action :label)))
+     (:td (:tt (views:esc
+                (if (getf action :disabledp)
+                    "no"
+                    "yes"))))
+     (:td (render-path-context-command-target action)))))
 
 (defun render-path-item (path &key forecast path-set)
   (let* ((path-item (and forecast
@@ -570,6 +612,9 @@
 (defmethod views:text-representation ((path-item git-forecast-path-item))
   (relative-path-of path-item))
 
+(defmethod views:text-representation ((surface git-forecast-path-context-surface))
+  (worked-example-path-of surface))
+
 (defmethod views:text-representation ((plan git-dreyeck-extraction-plan))
   (title-of plan))
 
@@ -901,6 +946,60 @@
                      (:td (:tt (views:esc
                                 (format nil "~D"
                                         (length related-decisions)))))))))))
+
+(views:defview 👀summary (surface git-forecast-path-context-surface)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (:tt (views:esc (worked-example-path-of surface))))
+      (:p (views:esc (summary-of surface)))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Forecast"))
+                   (:td (views:object-ref (forecast-of surface))))
+              (:tr (:td (views:esc "Path item"))
+                   (:td (views:object-ref (path-item-of surface))))
+              (:tr (:td (views:esc "Annotation target"))
+                   (:td (views:object-ref (annotation-target-of surface))))
+              (:tr (:td (views:esc "Path set"))
+                   (:td (:tt (views:esc (or (path-set-of surface) "n/a")))))
+              (:tr (:td (views:esc "Worked example"))
+                   (:td (:tt (views:esc (worked-example-path-of surface)))))))))
+
+(views:defview 👀commands (surface git-forecast-path-context-surface)
+  (views:html-view :title "Commands" :priority 2
+    (let* ((path-item (path-item-of surface))
+           (actions (git-forecast-path-context-action-specs
+                     path-item
+                     :forecast (forecast-of surface)
+                     :path-set (path-set-of surface))))
+      (views:html
+        (:h3 "Context commands")
+        (:table :class "inspector-table"
+                (:tr (:th "Command")
+                     (:th "Enabled")
+                     (:th "Target"))
+                (loop for action in actions
+                      do (render-path-context-command-row action)))))))
+
+(views:defview 👀implementation (surface git-forecast-path-context-surface)
+  (views:html-view :title "Implementation" :priority 3
+    (views:html
+      (:h3 "Current implementation contract")
+      (:ul
+       (:li "Inspectable row targets are "
+            (:tt "git-forecast-path-item")
+            " objects rendered by the merge-forecast views.")
+       (:li "Context actions are hidden "
+            (:tt "views:object-ref")
+            " links inside "
+            (:tt ".git-path-context-actions")
+            ".")
+       (:li "The menu shell is custom client code from "
+            (:tt "assets/hyperdoc/js/git-path-context-menu.js")
+            " plus "
+            (:tt "assets/hyperdoc/css/git-path-context-menu.css")
+            ".")
+       (:li "Action transport stays object-ref based: the custom menu dispatches a click to the hidden anchor instead of inventing a second command transport.")
+       (:li "This is the current HyperDoc implementation pattern, not a generic DMX port.")))))
 
 (views:defview 👀related-decisions (path-item git-forecast-path-item)
   (views:html-view :title "Related decisions" :priority 2

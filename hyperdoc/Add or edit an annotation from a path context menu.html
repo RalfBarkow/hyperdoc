@@ -1,0 +1,57 @@
+<h1>Add or edit an annotation from a path context menu</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Add or edit an annotation from a path context menu"><tt>Add
+  or edit an annotation from a path context menu</tt></a> is the task page for
+  the current merge-forecast row interaction pattern. It documents how the
+  existing context commands open inspectable objects instead of mutating files
+  directly.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Add or edit an annotation from a path context menu"><tt>Add or edit an annotation from a path context menu</tt></a></li>
+  <li><a hyperbook="topics" page="Context commands for inspectable path rows"><tt>Context commands for inspectable path rows</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-context-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-context-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-item)"><tt>hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-item</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-annotation)"><tt>hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-annotation</tt></a></li>
+</ul>
+
+<h2>Task sequence</h2>
+
+<ol>
+  <li>Open a merge-forecast path list such as <tt>👀hauptsache-only-files</tt>, <tt>👀upstream-only-files</tt>, or <tt>👀overlapping-paths</tt>.</li>
+  <li>Right-click the row for the path you want to inspect.</li>
+  <li>Choose <b>Details</b> to open the row target object itself.</li>
+  <li>Choose <b>Add annotation</b> to open a draft annotation object if no explicit annotation exists yet.</li>
+  <li>Choose <b>Edit annotation</b> when an explicit annotation already exists for the path.</li>
+  <li>Choose <b>Related decisions</b> to inspect path decisions already attached to that path.</li>
+</ol>
+
+<h2>Worked example</h2>
+
+<p>
+  For the current repo history, the worked example path is
+  <tt>hyperbook-server/assets/hyperbook-server/js/url.js</tt>. It already has
+  an explicit annotation, so <b>Edit annotation</b> is the concrete command to
+  use there, while <b>Add annotation</b> remains the generic draft-opening path
+  for rows without a recorded annotation.
+</p>
+
+<h2>Implementation boundary</h2>
+
+<ul>
+  <li>The menu is rendered by custom HyperDoc JS/CSS, not by native browser context menus.</li>
+  <li>The commands are hidden object refs rendered into the DOM and activated by the custom menu.</li>
+  <li>The current behavior opens inspectable objects; it does not persist annotation edits to source yet.</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Annotated merge-forecast paths">Annotated merge-forecast paths</a></li>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+</ul>

@@ -1,0 +1,54 @@
+<h1>Annotated merge-forecast paths</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Annotated merge-forecast paths"><tt>Annotated
+  merge-forecast paths</tt></a> is the current HyperDoc skill for treating a
+  merge-forecast row as more than plain text. The row target is an inspectable
+  object, the annotation is another inspectable object, and a custom
+  context-menu layer exposes commands without executing the merge.
+</p>
+
+<p>
+  This implementation is honest about its current mechanics: inspectable row
+  target objects, hidden action refs, custom context-menu JS/CSS, and
+  object-ref based action transport. It is not yet a generic DMX port.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Annotated merge-forecast paths"><tt>Annotated merge-forecast paths</tt></a></li>
+  <li><a hyperbook="topics" page="Context commands for inspectable path rows"><tt>Context commands for inspectable path rows</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-context-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-context-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-item)"><tt>hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-item</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-annotation)"><tt>hyperdoc-upstream-main-into-hauptsache-url-helper-asset-path-annotation</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-forecast)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-forecast</tt></a></li>
+</ul>
+
+<h2>Current command set</h2>
+
+<ul>
+  <li><b>Details:</b> open the <tt>git-forecast-path-item</tt> target object for the row.</li>
+  <li><b>Add annotation:</b> open a draft or explicit <tt>git-path-annotation</tt> target for the path.</li>
+  <li><b>Edit annotation:</b> open the explicit annotation object when one already exists.</li>
+  <li><b>Related decisions:</b> open the path item's <tt>Related decisions</tt> view.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<p>
+  The current worked example path is
+  <tt>hyperbook-server/assets/hyperbook-server/js/url.js</tt>. In the current
+  merge-forecast it is a <tt>hauptsache-only</tt> path with an explicit path
+  annotation about runtime URL-helper ownership and merge policy.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Add or edit an annotation from a path context menu">Add or edit an annotation from a path context menu</a></li>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+  <li><a page="Merge Path Decisions for upstream main into hauptsache">Merge Path Decisions for upstream main into hauptsache</a></li>
+</ul>
