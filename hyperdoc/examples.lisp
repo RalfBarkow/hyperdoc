@@ -151,7 +151,8 @@
                                   :id "download-hydra-artifact"
                                   :title "Download artifact from Hydra"
                                   :summary "Resolve the exact Hydra build and download its published aarch64 SD image artifact."
-                                  :commands (list (format nil "LATEST_URL=\"~A\"" download-url)
+                                  :commands (list "# POSIX shell block for sh/bash/zsh. In fish, either run via: bash -lc '...'; or use the fish-native equivalent procedure."
+                                                  (format nil "LATEST_URL=\"~A\"" download-url)
                                                   "BUILD_DOWNLOAD_URL=\"$(curl -fsSI \"$LATEST_URL\" | awk 'tolower($1)==\"location:\" {gsub(/\\r/, \"\", $2); print $2; exit}')\""
                                                   "BUILD_URL=\"${BUILD_DOWNLOAD_URL%/download/*}\""
                                                   "BUILD_JSON=\"$(curl -fsS -H 'Accept: application/json' \"$BUILD_URL\")\""
@@ -173,7 +174,8 @@
                                   :id "verify-checksum"
                                   :title "Verify checksum"
                                   :summary "Verify compressed artifact integrity by comparing the local hash to Hydra's published build metadata."
-                                  :commands (list "ARTIFACT=\"${ARTIFACT:?set ARTIFACT to the downloaded Hydra filename}\""
+                                  :commands (list "# POSIX shell block for sh/bash/zsh. In fish, either run via: bash -lc '...'; or use the fish-native equivalent procedure."
+                                                  "ARTIFACT=\"${ARTIFACT:?set ARTIFACT to the downloaded Hydra filename}\""
                                                   "BUILD_URL=\"${BUILD_URL:?set BUILD_URL to the resolved Hydra build URL}\""
                                                   "BUILD_JSON=\"$(curl -fsS -H 'Accept: application/json' \"$BUILD_URL\")\""
                                                   "EXPECTED_SHA256=\"$(printf '%s' \"$BUILD_JSON\" | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"buildproducts\"][\"1\"][\"sha256hash\"])')\""

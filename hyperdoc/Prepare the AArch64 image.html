@@ -184,7 +184,15 @@
   <tt>$PUBLISHED_NAME</tt> without any redirect-name heuristic.
 </p>
 
+<p>
+  Shell note: this is the primary canonical procedure and it is written for
+  POSIX shell syntax (<tt>sh</tt>/<tt>bash</tt>/<tt>zsh</tt>). If your
+  interactive shell is fish, either run this block via
+  <tt>bash -lc '...'</tt> or use the fish-native equivalent below.
+</p>
+
 <pre>
+# POSIX shell block for sh/bash/zsh. In fish, either run via: bash -lc '...'; or use the fish-native equivalent below.
 # 0) Tooling
 nix-shell -p curl wget zstd python3
 
@@ -243,6 +251,49 @@ ls -la
 <p>
   Use <tt>ls -la</tt> for directory inspection in this runbook. Do not assume
   a local alias such as <tt>la</tt> exists.
+</p>
+
+<h3>Alternative: fish-native command sequence</h3>
+
+<p>
+  Use this only if you want to run the procedure directly in fish instead of
+  wrapping the canonical POSIX block with <tt>bash -lc '...'</tt>.
+</p>
+
+<pre>
+set -l LATEST_URL "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
+set -l BUILD_DOWNLOAD_URL (curl -fsSI "$LATEST_URL" | awk 'tolower($1)=="location:" {gsub(/\r/, "", $2); print $2; exit}')
+test -n "$BUILD_DOWNLOAD_URL"; or exit 1
+
+set -l BUILD_URL (string replace -r '/download/.*$' '' -- "$BUILD_DOWNLOAD_URL")
+set -l BUILD_JSON (curl -fsS -H 'Accept: application/json' "$BUILD_URL")
+
+set -l PUBLISHED_NAME (printf '%s' "$BUILD_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["buildproducts"]["1"]["name"])')
+set -l EXPECTED_SHA256 (printf '%s' "$BUILD_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["buildproducts"]["1"]["sha256hash"])')
+
+set -l ARTIFACT_URL "$BUILD_DOWNLOAD_URL/$PUBLISHED_NAME"
+test -n "$PUBLISHED_NAME"; or exit 1
+test -n "$EXPECTED_SHA256"; or exit 1
+test ! -e "$PUBLISHED_NAME"; or exit 1
+
+set -l ARTIFACT "$PUBLISHED_NAME"
+wget -O "$ARTIFACT" "$ARTIFACT_URL"
+test -f "$ARTIFACT"; or exit 1
+
+echo "$ARTIFACT" | grep 'aarch64-linux\.img\.zst$'; or exit 1
+
+set -l LOCAL_SHA256 (shasum -a 256 "$ARTIFACT" | awk '{print $1}')
+test "$LOCAL_SHA256" = "$EXPECTED_SHA256"; or exit 1
+
+printf "OK\nartifact=%s\nsha256=%s\n" "$ARTIFACT" "$LOCAL_SHA256"
+</pre>
+
+<p>
+  Manual verification note: on 2026-03-20, the fish-native variant completed
+  successfully against Hydra latest. Hydra advanced to a newer build during the
+  check, which was expected; the artifact downloaded successfully and the local
+  SHA-256 matched the published build JSON value
+  <tt>buildproducts["1"]["sha256hash"]</tt>.
 </p>
 
 <p>

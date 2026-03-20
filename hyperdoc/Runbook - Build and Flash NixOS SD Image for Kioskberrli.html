@@ -48,7 +48,16 @@
   <li>Flash the resulting <tt>.img</tt> to the SD card.</li>
 </ol>
 
+<p>
+  Shell note: this runbook block is the primary canonical procedure and it is
+  written for POSIX shell syntax (<tt>sh</tt>/<tt>bash</tt>/<tt>zsh</tt>). If
+  your interactive shell is fish, either run it via
+  <tt>bash -lc '...'</tt> or use the fish-native equivalent documented on
+  <a page="Prepare the AArch64 image">Prepare the AArch64 image</a>.
+</p>
+
 <pre>
+# POSIX shell block for sh/bash/zsh. In fish, either run via: bash -lc '...'; or use the fish-native equivalent documented on "Prepare the AArch64 image".
 nix-shell -p curl wget zstd python3
 
 LATEST_URL="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
@@ -106,6 +115,12 @@ ls -la
   Verification object: local SHA-256 must equal the published Hydra SHA-256
   from the exact build JSON field <tt>buildproducts["1"]["sha256hash"]</tt>.
   A mismatch is failure.
+</p>
+
+<p>
+  Manual verification note: the fish-native equivalent was exercised
+  successfully on 2026-03-20 against Hydra latest, including a matching local
+  SHA-256 versus the published build JSON value.
 </p>
 
 <h3>Step Boundary Checks</h3>
