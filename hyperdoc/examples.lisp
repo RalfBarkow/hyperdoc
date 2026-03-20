@@ -28,6 +28,8 @@
    (title :initarg :title :reader title-of)
    (summary :initarg :summary :initform nil :reader summary-of)
    (steps :initarg :steps :reader steps-of)
+   (next-steps :initarg :next-steps :initform nil :reader next-steps-of)
+   (continuation-note :initarg :continuation-note :initform nil :reader continuation-note-of)
    (raw-structure :initarg :raw-structure :initform nil :reader raw-structure-of)))
 
 (defclass sd-card-runbook ()
@@ -145,6 +147,13 @@
                   :id "path-a-official-prebuilt-image"
                   :title "Path A - Official prebuilt image"
                   :summary "Fetch and verify the official Hydra artifact."
+                  :continuation-note "Continue with the downstream official workflow after checksum verification."
+                  :next-steps (list "official-flash-sd-card"
+                                    "official-boot-pi"
+                                    "official-edit-configuration"
+                                    "official-first-rebuild-boot"
+                                    "official-reboot-new-generation"
+                                    "official-switch-later")
                   :steps
                   (list
                    (make-instance 'sd-card-procedure-step
@@ -184,7 +193,14 @@
                                   :verification "Local SHA-256 must equal the exact Hydra build JSON value at buildproducts[\"1\"][\"sha256hash\"]."
                                   :raw-structure (list :command "test \"$LOCAL_SHA256\" = \"$EXPECTED_SHA256\"")))
                   :raw-structure
-                  (list :section "Path A - Official prebuilt image"))
+                  (list :section "Path A - Official prebuilt image"
+                        :continuation-note "Continue with the downstream official workflow after checksum verification."
+                        :next-steps (list "official-flash-sd-card"
+                                          "official-boot-pi"
+                                          "official-edit-configuration"
+                                          "official-first-rebuild-boot"
+                                          "official-reboot-new-generation"
+                                          "official-switch-later")))
    (make-instance 'sd-card-runbook-section
                   :id "path-b-build-project-image"
                   :title "Path B - Build project image"

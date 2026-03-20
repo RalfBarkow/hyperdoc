@@ -25,6 +25,14 @@
 (defun section-step-ids (section)
   (mapcar #'id-of (steps-of section)))
 
+(defun section-next-step-target (value)
+  (typecase value
+    (string
+     (or (ignore-errors (official-rpi-tutorial-step value))
+         value))
+    (t
+     value)))
+
 (defun required-zstd-handoff-ids-present-p (ids)
   (every #'(lambda (id) (member id ids :test #'equal))
          '("official-download-prebuilt-image"
@@ -176,15 +184,32 @@
       (:ol
        (loop for step in (steps-of section)
              do (views:html
-                  (:li (views:object-ref step))))))))
+                  (:li (views:object-ref step)))))
+      (when (next-steps-of section)
+        (views:html
+          (:h4 "Next steps")
+          (when (continuation-note-of section)
+            (views:html (:p (views:esc (continuation-note-of section)))))
+          (:ol
+           (loop for target in (next-steps-of section)
+                 do (views:html
+                      (:li (maybe-object-ref (section-next-step-target target)))))))))))
 
 (views:defview 👀items (section sd-card-runbook-section)
   (views:html-view :title "Items" :priority 10
     (views:html
+      (:h4 "Procedure steps")
       (:ul
        (loop for step in (steps-of section)
              do (views:html
-                  (:li (views:object-ref step))))))))
+                  (:li (views:object-ref step)))))
+      (when (next-steps-of section)
+        (views:html
+          (:h4 "Next steps")
+          (:ul
+           (loop for target in (next-steps-of section)
+                 do (views:html
+                      (:li (maybe-object-ref (section-next-step-target target)))))))))))
 
 (views:defview 👀raw-structure (section sd-card-runbook-section)
   (views:html-view :title "Raw Structure" :priority 90
