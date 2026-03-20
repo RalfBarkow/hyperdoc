@@ -1,0 +1,145 @@
+# A DOM-annotation connect gesture
+
+We are in ~/workspace/hyperdoc.
+You may also inspect ~/workspace/dmx-platform for UX reference.
+
+Refinement of the previous design:
+
+Do not scope the connect gesture only to “existing inspectable objects”.
+Instead, implement a more general first slice:
+
+A DOM-annotation connect gesture between any two DOM elements within a single rendered tree/pane.
+
+Goal:
+Create a reusable HyperDoc capability where a user can connect any two rendered DOM elements in one pane, producing a relation annotation anchored to those two DOM positions.
+
+This should be the general substrate.
+The existing “missing step between Boot Raspberry Pi from flashed card and Edit /etc/nixos/configuration.nix” is then just the first concrete use case built on top of it.
+
+Why this is better:
+- more general than object-only connections
+- closer to the DMX “draw a relation between two visible things” UX
+- lets HyperDoc treat rendered prose/headings/list items/links as annotatable anchors
+- avoids prematurely locking the feature to one object family
+
+Scope constraints:
+- single rendering tree / single pane only for this first slice
+- no cross-pane or cross-window connections yet
+- no full graph editor
+- no arbitrary canvas redesign
+- keep the slice narrow and demonstrable
+
+Please do this:
+
+1. Inspect DMX for the interaction pattern
+In ~/workspace/dmx-platform, find the relevant UI code for drawing/creating an association between visible topics.
+Return a short grounded summary of:
+- how the gesture starts
+- what the user sees while connecting
+- what gets created at completion
+
+2. Inspect HyperDoc for the best DOM-level insertion point
+Find where rendered pane DOM is created and where click/mouse events can be attached for a single inspector pane.
+Identify the narrowest place to add a pane-local connect mode.
+
+3. Implement a general connect mode for one rendered pane
+MVP interaction:
+- user enables a pane-local mode such as “Connect” or “Annotate relation”
+- first click picks a source DOM element in that pane
+- moving the mouse shows a temporary visible line/overlay or equivalent live connection affordance
+- second click picks a target DOM element in the same pane
+- completion creates or opens a relation annotation object prefilled with:
+  - source DOM anchor
+  - target DOM anchor
+  - pane/page/object context
+
+If a true drag-line is too invasive for the first slice, acceptable fallback:
+- click source
+- visible “connecting…” state
+- click target
+- with a temporary overlay if possible
+
+But prefer an actual temporary line if it is cheap in the current CLOG inspector architecture.
+
+4. Define the anchor model
+For this first slice, anchor the relation to DOM elements, not just objects.
+Use the most stable anchor representation available in the current renderer, for example:
+- element ids
+- data attributes
+- stable path/index selectors within the rendered tree
+- or an existing internal reference/anchor model if one already exists
+
+Be explicit about the stability tradeoff.
+Do not pretend the anchors are stronger than they are.
+If needed, limit the first slice to connectable elements that already have stable identifiers.
+
+5. Define the created object
+Create or reuse a general relation-annotation / patch-target object with:
+- source anchor
+- target anchor
+- anchor context (page/object/view)
+- optional label / relation kind
+- optional note/annotation text
+
+Prefer reusing existing annotation/patch-target machinery if possible.
+Do not invent a parallel unrelated object model if HyperDoc already has one that can carry source/target anchors.
+
+6. Make the first concrete use case work
+Use this concrete workflow example to prove the feature:
+- in the official workflow rendering, connect:
+  - “Boot Raspberry Pi from flashed card”
+  - to “Edit /etc/nixos/configuration.nix”
+- land in a prefilled relation annotation / patch-target object
+- from there, the user can classify it as something like:
+  - missing headless connection step
+  - connect to the Pi over SSH
+  - or similar inserted-step topic
+
+Important:
+The gesture should operate on the rendered DOM items themselves, not require the user to separately inspect both objects first.
+
+7. UI expectations
+At minimum provide:
+- a visible connect-mode affordance in the pane
+- visible source selection
+- visible temporary connection state
+- created/prefilled relation annotation object after target selection
+- immediate inspectability of that resulting object
+
+If there is already an “Edit / Patch Target” surface, it is acceptable and preferred to land there prefilled after the DOM gesture.
+
+8. Keep it narrow
+Do not solve:
+- cross-pane relations
+- cross-page global graph editing
+- auto-layout
+- every renderer in the system
+
+Do solve:
+- one pane
+- rendered DOM elements
+- temporary connection gesture
+- relation annotation object creation/prefill
+- one verified workflow example
+
+9. Verification
+Return:
+- the DMX interaction pattern you found
+- the HyperDoc insertion point you chose
+- the exact gesture the user performs
+- the anchor representation used
+- the exact created/prefilled object shape
+- the exact files changed
+- compile/runtime validation performed
+- the concrete demonstration path for the Pi workflow example
+- any limits of this first slice
+
+Also provide:
+- a conventional commit message in plain text
+
+Constraints:
+- prefer existing HyperDoc annotation/patch-target machinery
+- no fake placeholder UI
+- no unrelated runbook redesign
+- single rendering tree only
+- keep the slice narrow and demonstrable

@@ -412,11 +412,15 @@
     (let ((hb::*current-page* page)
           (*current-package* (find-package "CL-USER")))
       (when-let (dom (dom-of page))
-        (views:html
-          (:div :class "hyperbook-page"
-                (let ((plump:*tag-dispatchers* *hyperdoc-tags*))
-                  (plump:serialize dom views::*html-stream*))
-                (:br)))))))
+        (render-dom-connect-surface
+         page
+         "Content"
+         #'(lambda ()
+             (views:html
+               (:div :class "hyperbook-page"
+                     (let ((plump:*tag-dispatchers* *hyperdoc-tags*))
+                       (plump:serialize dom views::*html-stream*))
+                     (:br)))))))))
 
 ;;
 ;; Parse tree view
