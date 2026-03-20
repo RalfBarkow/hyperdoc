@@ -113,6 +113,24 @@
     (:fail "fail")
     (:skip "skip")))
 
+(defun patch-anchor-context (patch)
+  (let ((defect (and patch (defect-of patch))))
+    (list :defect defect
+          :upstream (and defect (from-step-of defect))
+          :downstream (and defect (to-step-of defect))
+          :inserted (and patch (inserted-step-of patch)))))
+
+(defun step-patch-role-label (step patch)
+  (let* ((context (patch-anchor-context patch))
+         (upstream (getf context :upstream))
+         (downstream (getf context :downstream))
+         (inserted (getf context :inserted)))
+    (cond
+      ((eq step upstream) "upstream anchor")
+      ((eq step downstream) "downstream anchor")
+      ((eq step inserted) "inserted step")
+      (t "related step"))))
+
 (defmethod views:text-representation ((runbook sd-card-runbook))
   (format nil "Runbook: ~A" (title-of runbook)))
 
@@ -257,7 +275,23 @@
   (views:html-view :title "Edit / Patch Target" :priority 4
     (views:html
       (if (patch-target-of step)
-          (views:html (maybe-object-ref (patch-target-of step)))
+          (let* ((patch (patch-target-of step))
+                 (context (patch-anchor-context patch)))
+            (views:html
+              (:p "Current patch-target context for this workflow gap.")
+              (:table :class "inspector-table"
+                      (:tr (:th "Current step role")
+                           (:td (:tt (views:esc (step-patch-role-label step patch)))))
+                      (:tr (:th "Upstream anchor")
+                           (:td (maybe-object-ref (getf context :upstream))))
+                      (:tr (:th "Downstream anchor")
+                           (:td (maybe-object-ref (getf context :downstream))))
+                      (:tr (:th "Intended inserted step")
+                           (:td (maybe-object-ref (getf context :inserted))))
+                      (:tr (:th "Missing-step defect")
+                           (:td (maybe-object-ref (getf context :defect))))
+                      (:tr (:th "Resulting patch target")
+                           (:td (maybe-object-ref patch))))))
           (views:html (:p "No patch target for this step."))))))
 
 (views:defview 👀verification (step sd-card-procedure-step)
@@ -357,8 +391,14 @@
 
 (views:defview 👀items (patch sd-card-step-handoff-patch-target)
   (views:html-view :title "Items" :priority 10
-    (views:html
-      (:h4 "Defect")
-      (views:object-ref (defect-of patch))
-      (:h4 "Inserted step")
-      (views:object-ref (inserted-step-of patch)))))
+    (let* ((context (patch-anchor-context patch))
+           (defect (getf context :defect)))
+      (views:html
+        (:h4 "Upstream anchor")
+        (maybe-object-ref (getf context :upstream))
+        (:h4 "Downstream anchor")
+        (maybe-object-ref (getf context :downstream))
+        (:h4 "Defect")
+        (maybe-object-ref defect)
+        (:h4 "Inserted step")
+        (maybe-object-ref (getf context :inserted))))))

@@ -150,6 +150,7 @@
                   :continuation-note "Continue with the downstream official workflow after checksum verification."
                   :next-steps (list "official-flash-sd-card"
                                     "official-boot-pi"
+                                    "official-connect-pi-over-ssh"
                                     "official-edit-configuration"
                                     "official-first-rebuild-boot"
                                     "official-reboot-new-generation"
@@ -197,6 +198,7 @@
                         :continuation-note "Continue with the downstream official workflow after checksum verification."
                         :next-steps (list "official-flash-sd-card"
                                           "official-boot-pi"
+                                          "official-connect-pi-over-ssh"
                                           "official-edit-configuration"
                                           "official-first-rebuild-boot"
                                           "official-reboot-new-generation"
@@ -345,6 +347,45 @@ Raw list structure is preserved as a secondary view."
                                           "diskutil unmountDisk /dev/diskN"
                                           "sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync"
                                           "sync")))
+         (boot-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-boot-pi"
+                          :title "Boot Raspberry Pi from flashed card"
+                          :summary "Boot Pi 4/400 from the flashed SD image and reach a usable local shell/session."))
+         (connect-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-connect-pi-over-ssh"
+                          :title "Connect to the Pi over SSH"
+                          :summary "If the Pi joined the network and remote access is already configured, determine its hostname/IP and open an SSH session; otherwise continue from a local console."
+                          :commands (list "PI_HOST_OR_IP=\"${PI_HOST_OR_IP:?set the Pi hostname or IP after confirming it joined the network}\""
+                                          "ping -c 1 \"$PI_HOST_OR_IP\""
+                                          "SSH_TARGET=\"${SSH_TARGET:?set to user@$PI_HOST_OR_IP once SSH/login credentials are configured}\""
+                                          "ssh \"$SSH_TARGET\"")))
+         (edit-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-edit-configuration"
+                          :title "Edit /etc/nixos/configuration.nix"
+                          :summary "Adjust host-specific configuration and secrets locally on the running machine."
+                          :commands (list "sudoedit /etc/nixos/configuration.nix")))
+         (first-rebuild-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-first-rebuild-boot"
+                          :title "Run first rebuild with nixos-rebuild boot"
+                          :summary "Use boot mode first to prepare a reboot-safe generation."
+                          :commands (list "sudo nixos-rebuild boot")))
+         (reboot-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-reboot-new-generation"
+                          :title "Reboot into the new generation"
+                          :summary "Reboot and confirm the system starts with the freshly built generation."
+                          :commands (list "sudo reboot")))
+         (switch-step
+           (make-instance 'sd-card-procedure-step
+                          :id "official-switch-later"
+                          :title "Use nixos-rebuild switch only later"
+                          :summary "Use switch only after reboot reliability is established."
+                          :commands (list "sudo nixos-rebuild switch")
+                          :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot."))
          (filename-handoff-defect
            (make-instance 'sd-card-step-handoff-defect
                           :id "official-hydra-latest-filename-handoff-defect"
@@ -380,7 +421,25 @@ Raw list structure is preserved as a secondary view."
                           :summary "Patch target is the relation between download and flash: add a decompression step so the flashing input precondition is explicit."
                           :defect handoff-defect
                           :inserted-step decompress-step
-                          :verification-note "The inserted step must produce a .img artifact consumed by the flash step.")))
+                          :verification-note "The inserted step must produce a .img artifact consumed by the flash step."))
+         (headless-handoff-defect
+           (make-instance 'sd-card-step-handoff-defect
+                          :id "official-headless-ssh-connect-handoff-defect"
+                          :title "Missing headless-connect handoff between boot and configuration edit"
+                          :summary "Booting the Pi does not by itself yield a remote shell; headless continuation needs network reachability, host discovery, and a configured SSH/login path."
+                          :from-step boot-step
+                          :to-step edit-step
+                          :produced-artifact "booted Pi with no remote shell yet"
+                          :required-artifact "reachable shell session on the Pi"
+                          :missing-transition "network discovery and SSH connection step"))
+         (headless-handoff-patch-target
+           (make-instance 'sd-card-step-handoff-patch-target
+                          :id "official-headless-ssh-connect-handoff-patch-target"
+                          :title "Insert explicit headless SSH-connect handoff step"
+                          :summary "Patch target is the relation between boot and configuration edit: add an explicit step that confirms network reachability, identifies the Pi on the network, and opens an SSH session when remote access is configured."
+                          :defect headless-handoff-defect
+                          :inserted-step connect-step
+                          :verification-note "The inserted step must produce a reachable SSH shell on the Pi or stop and redirect the user to a local console when SSH/login prerequisites are absent.")))
     (setf (slot-value download-step 'diagnosis)
           "Plain wget on latest/download/1 can save as file '1'; use --trust-server-names so wget keeps the redirected URL filename for decompression.")
     (setf (slot-value download-step 'source-target) filename-handoff-defect)
@@ -391,35 +450,28 @@ Raw list structure is preserved as a secondary view."
     (setf (slot-value decompress-step 'source-target) handoff-defect)
     (setf (slot-value decompress-step 'patch-target) handoff-patch-target)
     (setf (slot-value decompress-step 'verification) handoff-patch-target)
+    (setf (slot-value boot-step 'diagnosis)
+          "Booting from the flashed card does not by itself guarantee headless continuation. The Pi still needs network reachability, an identifiable hostname/IP, and a configured SSH/login path before remote editing can continue.")
+    (setf (slot-value boot-step 'patch-target) headless-handoff-patch-target)
+    (setf (slot-value connect-step 'diagnosis)
+          "SSH only makes sense after the Pi is reachable on the network and the running image already has SSH plus a usable login path. If those prerequisites are absent, stop here and continue from a directly attached console instead.")
+    (setf (slot-value connect-step 'source-target) headless-handoff-defect)
+    (setf (slot-value connect-step 'patch-target) headless-handoff-patch-target)
+    (setf (slot-value connect-step 'verification) headless-handoff-patch-target)
+    (setf (slot-value edit-step 'diagnosis)
+          "Headless editing assumes a shell on the Pi already exists, either via an attached console or via the explicit SSH-connect handoff step.")
+    (setf (slot-value edit-step 'source-target) headless-handoff-defect)
+    (setf (slot-value edit-step 'patch-target) headless-handoff-patch-target)
     (list
      download-step
      decompress-step
      flash-step
-     (make-instance 'sd-card-procedure-step
-                    :id "official-boot-pi"
-                    :title "Boot Raspberry Pi from flashed card"
-                    :summary "Boot Pi 4/400 from the flashed SD image and reach a usable shell/session.")
-     (make-instance 'sd-card-procedure-step
-                    :id "official-edit-configuration"
-                    :title "Edit /etc/nixos/configuration.nix"
-                    :summary "Adjust host-specific configuration and secrets locally on the running machine."
-                    :commands (list "sudoedit /etc/nixos/configuration.nix"))
-     (make-instance 'sd-card-procedure-step
-                    :id "official-first-rebuild-boot"
-                    :title "Run first rebuild with nixos-rebuild boot"
-                    :summary "Use boot mode first to prepare a reboot-safe generation."
-                    :commands (list "sudo nixos-rebuild boot"))
-     (make-instance 'sd-card-procedure-step
-                    :id "official-reboot-new-generation"
-                    :title "Reboot into the new generation"
-                    :summary "Reboot and confirm the system starts with the freshly built generation."
-                    :commands (list "sudo reboot"))
-     (make-instance 'sd-card-procedure-step
-                    :id "official-switch-later"
-                    :title "Use nixos-rebuild switch only later"
-                    :summary "Use switch only after reboot reliability is established."
-                    :commands (list "sudo nixos-rebuild switch")
-                    :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot."))))
+     boot-step
+     connect-step
+     edit-step
+     first-rebuild-step
+     reboot-step
+     switch-step)))
 
 (defun official-rpi-tutorial-workflow ()
   (let* ((steps (make-official-rpi-tutorial-steps))
@@ -461,6 +513,16 @@ Raw list structure is preserved as a secondary view."
   "Return the patch-target object for preserving redirected Hydra artifact filenames."
   (or (patch-target-of (official-rpi-tutorial-step "official-download-prebuilt-image"))
       (error "Missing patch-target object for official download step.")))
+
+(defun official-headless-ssh-connect-handoff-defect ()
+  "Return the relation-level defect object for the missing headless-connect transition between boot and configuration edit."
+  (or (source-target-of (official-rpi-tutorial-step "official-edit-configuration"))
+      (error "Missing source-target defect for official edit step.")))
+
+(defun official-headless-ssh-connect-handoff-patch-target ()
+  "Return the patch-target object for the explicit boot -> SSH connect -> configuration edit handoff."
+  (or (patch-target-of (official-rpi-tutorial-step "official-boot-pi"))
+      (error "Missing patch-target object for official boot step.")))
 
 (defun sd-card-creation-dry-run
     (&key (stream *standard-output*)
@@ -538,6 +600,7 @@ Raw list structure is preserved as a secondary view."
                 "official-decompress-zstd-to-img"
                 "official-flash-sd-card"
                 "official-boot-pi"
+                "official-connect-pi-over-ssh"
                 "official-edit-configuration"
                 "official-first-rebuild-boot"
                 "official-reboot-new-generation"
@@ -581,6 +644,26 @@ Raw list structure is preserved as a secondary view."
     (assert-equal (id-of defect) (id-of (defect-of patch)))
     (list :step (id-of download-step)
           :command "wget --trust-server-names \"$LATEST_URL\""
+          :source-target (id-of defect)
+          :patch-target (id-of patch))))
+
+(defexample official-rpi-headless-ssh-connect-handoff-regression-example
+  "Regression check: headless continuation is modeled as an explicit boot -> SSH connect -> edit handoff."
+  (let* ((inserted-step (official-rpi-tutorial-step "official-connect-pi-over-ssh"))
+         (defect (official-headless-ssh-connect-handoff-defect))
+         (patch (official-headless-ssh-connect-handoff-patch-target)))
+    (assert defect)
+    (assert patch)
+    (assert-eql 'sd-card-step-handoff-defect (type-of defect))
+    (assert-eql 'sd-card-step-handoff-patch-target (type-of patch))
+    (assert-equal (id-of inserted-step) (id-of (inserted-step-of patch)))
+    (assert-equal "official-boot-pi" (id-of (from-step-of defect)))
+    (assert-equal "official-edit-configuration" (id-of (to-step-of defect)))
+    (assert-equal "reachable shell session on the Pi" (required-artifact-of defect))
+    (assert (commands-of inserted-step))
+    (list :inserted-step (id-of inserted-step)
+          :from-step (id-of (from-step-of defect))
+          :to-step (id-of (to-step-of defect))
           :source-target (id-of defect)
           :patch-target (id-of patch))))
 

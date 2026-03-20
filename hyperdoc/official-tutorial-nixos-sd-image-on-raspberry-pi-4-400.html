@@ -21,13 +21,17 @@
   <li><a expr="(hyperdoc::official-rpi-tutorial-workflow)"><tt>Official Tutorial Workflow</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-download-prebuilt-image&quot;)"><tt>Step 1 object</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-decompress-zstd-to-img&quot;)"><tt>Inserted handoff step object</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-connect-pi-over-ssh&quot;)"><tt>Headless-connect step object</tt></a></li>
   <li><a expr="(hyperdoc::official-hydra-latest-filename-handoff-defect)"><tt>Filename handoff defect object</tt></a></li>
   <li><a expr="(hyperdoc::official-hydra-latest-filename-handoff-patch-target)"><tt>Filename handoff patch target object</tt></a></li>
   <li><a expr="(hyperdoc::official-zstd-to-img-handoff-defect)"><tt>Handoff defect object</tt></a></li>
   <li><a expr="(hyperdoc::official-zstd-to-img-handoff-patch-target)"><tt>Handoff patch target object</tt></a></li>
+  <li><a expr="(hyperdoc::official-headless-ssh-connect-handoff-defect)"><tt>Headless-connect handoff defect object</tt></a></li>
+  <li><a expr="(hyperdoc::official-headless-ssh-connect-handoff-patch-target)"><tt>Headless-connect handoff patch target object</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step-navigation-example)"><tt>Step navigation regression check</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-zstd-to-img-handoff-regression-example)"><tt>Handoff correction regression check</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-hydra-filename-preservation-regression-example)"><tt>Filename-preservation regression check</tt></a></li>
+  <li><a expr="(hyperdoc::official-rpi-headless-ssh-connect-handoff-regression-example)"><tt>Headless-connect regression check</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step-raw-structure-regression-example)"><tt>Raw-structure regression check</tt></a></li>
   <li><a hyperbook="topics" page="Expr string quoting regression"><tt>Expr string quoting regression</tt></a></li>
 </ul>
@@ -39,7 +43,8 @@
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-decompress-zstd-to-img&quot;)">Decompress the downloaded <tt>.zstd</tt> artifact to a raw <tt>.img</tt> artifact.</a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-flash-sd-card&quot;)">Flash the <tt>.img</tt> artifact to an SD card.</a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-boot-pi&quot;)">Boot the Raspberry Pi 4 or Pi 400 from that card.</a></li>
-  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-edit-configuration&quot;)">Connect to the machine and edit <tt>/etc/nixos/configuration.nix</tt>.</a></li>
+  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-connect-pi-over-ssh&quot;)">If the Pi is on the network and SSH/login prerequisites are configured, determine its hostname/IP and connect over SSH; otherwise continue from a local console.</a></li>
+  <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-edit-configuration&quot;)">Edit <tt>/etc/nixos/configuration.nix</tt> on the running machine.</a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-first-rebuild-boot&quot;)">Run <tt>nixos-rebuild boot</tt>.</a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-reboot-new-generation&quot;)">Reboot into the new generation.</a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-switch-later&quot;)">Only later use <tt>nixos-rebuild switch</tt> once the system is known to reboot safely.</a></li>
@@ -58,6 +63,24 @@
   <li>Defect object: <a expr="(hyperdoc::official-zstd-to-img-handoff-defect)"><tt>official-zstd-to-img-handoff-defect</tt></a></li>
   <li>Patch target object: <a expr="(hyperdoc::official-zstd-to-img-handoff-patch-target)"><tt>official-zstd-to-img-handoff-patch-target</tt></a></li>
   <li>Inserted step: <a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-decompress-zstd-to-img&quot;)"><tt>official-decompress-zstd-to-img</tt></a></li>
+</ul>
+
+<h2>Headless-connect handoff diagnosis (modeled)</h2>
+
+<p>
+  Between booting the Pi and editing <tt>/etc/nixos/configuration.nix</tt>,
+  headless continuation needs one more explicit handoff. The boot step does not
+  by itself guarantee remote access. The Pi must be reachable on the network,
+  the operator must determine its hostname or IP address, and SSH only works if
+  the running image already has a usable login path. If those prerequisites are
+  absent, continue from a directly attached console instead of assuming stock
+  boot implies SSH.
+</p>
+
+<ul>
+  <li>Defect object: <a expr="(hyperdoc::official-headless-ssh-connect-handoff-defect)"><tt>official-headless-ssh-connect-handoff-defect</tt></a></li>
+  <li>Patch target object: <a expr="(hyperdoc::official-headless-ssh-connect-handoff-patch-target)"><tt>official-headless-ssh-connect-handoff-patch-target</tt></a></li>
+  <li>Inserted step: <a expr="(hyperdoc::official-rpi-tutorial-step &quot;official-connect-pi-over-ssh&quot;)"><tt>official-connect-pi-over-ssh</tt></a></li>
 </ul>
 
 <h2>Filename-preservation handoff diagnosis (resolved)</h2>
