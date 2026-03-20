@@ -1,0 +1,55 @@
+<h1>Static route observability</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Static route observability"><tt>Static route
+  observability</tt></a> is the reusable skill for answering one narrow
+  question first: which runtime component owns a public static asset path?
+  This first skill slice is based on <b>static computation</b> from the current
+  server wiring, not on live HTTP probing.
+</p>
+
+<p>
+  In the current runtime, <tt>/boot.html</tt>, <tt>/js/boot.js</tt>, and
+  <tt>/js/jquery.min.js</tt> belong to the active CLOG static root, while
+  <tt>/hyperbook-server/js/url.js</tt> belongs to an explicit
+  <tt>views:add-asset-path</tt> mount owned by HyperBook server views.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Static route observability"><tt>Static route observability</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnose static asset route ownership"><tt>Diagnose static asset route ownership</tt></a></li>
+  <li><a hyperbook="topics" page="Static asset path resolution"><tt>Static asset path resolution</tt></a></li>
+  <li><a expr="(hyperdoc-static-asset-resolution-surface)"><tt>hyperdoc-static-asset-resolution-surface</tt></a></li>
+  <li><a expr="(hyperdoc-boot-html-static-asset-resolution)"><tt>hyperdoc-boot-html-static-asset-resolution</tt></a></li>
+  <li><a expr="(hyperdoc-boot-js-static-asset-resolution)"><tt>hyperdoc-boot-js-static-asset-resolution</tt></a></li>
+  <li><a expr="(hyperdoc-jquery-min-js-static-asset-resolution)"><tt>hyperdoc-jquery-min-js-static-asset-resolution</tt></a></li>
+  <li><a expr="(hyperbook-server-url-js-static-asset-resolution)"><tt>hyperbook-server-url-js-static-asset-resolution</tt></a></li>
+</ul>
+
+<h2>What the skill makes explicit</h2>
+
+<ul>
+  <li>the public request path,</li>
+  <li>the owning route contract,</li>
+  <li>the root directory that should serve the file,</li>
+  <li>the concrete resolved file path on disk.</li>
+</ul>
+
+<h2>Worked examples from this repo</h2>
+
+<ul>
+  <li><b>/js/boot.js:</b> the patched-boot investigation only became clear once the route was treated as a CLOG static-root asset instead of a generic JavaScript file.</li>
+  <li><b>/hyperbook-server/js/url.js:</b> the URL-tab helper regression was a mounted-asset contract problem, not a global static-root problem.</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Diagnose static asset route ownership">Diagnose static asset route ownership</a></li>
+  <li><a page="Canonical Route Discovery for Runtime Smoke Tests">Canonical Route Discovery for Runtime Smoke Tests</a></li>
+  <li><a page="Git History Surface for HyperDoc">Git History Surface for HyperDoc</a></li>
+</ul>

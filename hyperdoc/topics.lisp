@@ -853,6 +853,30 @@
                  "Canonical Route Discovery for Runtime Smoke Tests"
                  "Git History Surface for HyperDoc")))
 
+(defun static-route-observability-topic ()
+  (make-topic
+   :id "static-route-observability"
+   :title "Static route observability"
+   :summary "Operational skill for computing which runtime component owns a static asset path before falling back to live HTTP probes."
+   :references '("Static route observability"
+                 "Diagnose static asset route ownership")))
+
+(defun diagnose-static-asset-route-ownership-topic ()
+  (make-topic
+   :id "diagnose-static-asset-route-ownership"
+   :title "Diagnose static asset route ownership"
+   :summary "Task skill for deciding whether a broken asset belongs to the CLOG static root or to an explicit mounted asset route."
+   :references '("Diagnose static asset route ownership"
+                 "Static route observability")))
+
+(defun static-asset-path-resolution-topic ()
+  (make-topic
+   :id "static-asset-path-resolution"
+   :title "Static asset path resolution"
+   :summary "Inspectable mapping from a public asset path to its owning route contract, root path, and resolved file."
+   :references '("Static route observability"
+                 "Diagnose static asset route ownership")))
+
 (defun synchronization-as-a-visualization-problem-topic ()
   (make-topic
    :id "synchronization-as-a-visualization-problem"

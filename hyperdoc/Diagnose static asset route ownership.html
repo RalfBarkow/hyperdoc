@@ -1,0 +1,52 @@
+<h1>Diagnose static asset route ownership</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Diagnose static asset route ownership"><tt>Diagnose
+  static asset route ownership</tt></a> is the task skill for deciding whether a
+  broken asset should be debugged as a CLOG static-root problem or as an
+  explicit runtime asset-mount problem.
+</p>
+
+<p>
+  This task page is also <b>static computation first</b>. It tells you which
+  route contract owns the path before you spend time on live probes or browser
+  cache hypotheses.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Diagnose static asset route ownership"><tt>Diagnose static asset route ownership</tt></a></li>
+  <li><a hyperbook="topics" page="Static route observability"><tt>Static route observability</tt></a></li>
+  <li><a hyperbook="topics" page="Static asset path resolution"><tt>Static asset path resolution</tt></a></li>
+  <li><a expr="(hyperdoc-static-asset-resolution-surface)" view="Comparison"><tt>hyperdoc-static-asset-resolution-surface</tt></a></li>
+  <li><a expr="(hyperdoc-boot-js-static-asset-resolution)" view="Contract"><tt>hyperdoc-boot-js-static-asset-resolution</tt></a></li>
+  <li><a expr="(hyperbook-server-url-js-static-asset-resolution)" view="Contract"><tt>hyperbook-server-url-js-static-asset-resolution</tt></a></li>
+</ul>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Inspect <tt>hyperdoc-static-asset-resolution-surface</tt> and read the <tt>Comparison</tt> view.</li>
+  <li>If the failing path is <tt>/boot.html</tt> or under <tt>/js/</tt>, treat it as a CLOG static-root path first.</li>
+  <li>If the failing path is under <tt>/hyperbook-server/</tt>, treat it as an explicit asset mount first.</li>
+  <li>Only after ownership is clear, move on to live probes such as <tt>curl -I</tt>, browser reload, or process inspection.</li>
+</ol>
+
+<h2>Worked example boundary</h2>
+
+<p>
+  The public <tt>/js/boot.js</tt> incident and the
+  <tt>/hyperbook-server/js/url.js</tt> incident looked similar from the browser,
+  but they belonged to different route contracts. This task exists so the next
+  operator can separate those two cases before debugging the wrong layer.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Static route observability">Static route observability</a></li>
+  <li><a page="Canonical Route Discovery for Runtime Smoke Tests">Canonical Route Discovery for Runtime Smoke Tests</a></li>
+</ul>
