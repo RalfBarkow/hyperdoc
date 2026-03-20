@@ -904,6 +904,33 @@
                  "Add or edit an annotation from a path context menu"
                  "Git History Surface for HyperDoc")))
 
+(defun inspectable-operational-targets-topic ()
+  (make-topic
+   :id "inspectable-operational-targets"
+   :title "Inspectable operational targets"
+   :summary "Skill for representing live hosts and host-aware Git operations as inspectable objects that render concrete shell materializations without executing them."
+   :references '("Inspectable operational targets"
+                 "Materialize a host-aware operation without executing it"
+                 "Operational Target Objects for dreyeck.ch")))
+
+(defun materialize-a-host-aware-operation-without-executing-it-topic ()
+  (make-topic
+   :id "materialize-a-host-aware-operation-without-executing-it"
+   :title "Materialize a host-aware operation without executing it"
+   :summary "Task skill for inspecting a host target or Git remote operation and extracting the exact shell block to run manually on the target host."
+   :references '("Materialize a host-aware operation without executing it"
+                 "Inspectable operational targets"
+                 "Operational Target Objects for dreyeck.ch")))
+
+(defun nixos-host-target-objects-topic ()
+  (make-topic
+   :id "nixos-host-target-objects"
+   :title "NixOS host target objects"
+   :summary "Object pattern that captures a host's SSH identity, checkout root, service name, and deployment mode so operational commands can be materialized consistently."
+   :references '("Inspectable operational targets"
+                 "Materialize a host-aware operation without executing it"
+                 "Operational Target Objects for dreyeck.ch")))
+
 (defun synchronization-as-a-visualization-problem-topic ()
   (make-topic
    :id "synchronization-as-a-visualization-problem"

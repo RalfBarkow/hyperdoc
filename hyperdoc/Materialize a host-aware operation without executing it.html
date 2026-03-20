@@ -1,0 +1,53 @@
+<h1>Materialize a host-aware operation without executing it</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Materialize a host-aware operation without executing it"><tt>Materialize
+  a host-aware operation without executing it</tt></a> is the task skill for
+  turning an inspectable host or Git remote operation object into the exact
+  shell block an operator should run manually.
+</p>
+
+<p>
+  This skill is intentionally bounded: HyperDoc computes and displays the
+  command block, but it does <b>not</b> SSH into the host or execute the remote
+  action itself.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Materialize a host-aware operation without executing it"><tt>Materialize a host-aware operation without executing it</tt></a></li>
+  <li><a hyperbook="topics" page="Inspectable operational targets"><tt>Inspectable operational targets</tt></a></li>
+  <li><a hyperbook="topics" page="NixOS host target objects"><tt>NixOS host target objects</tt></a></li>
+  <li><a expr="(dreyeck-ch-nixos-host-target)" view="Materialization"><tt>dreyeck-ch-nixos-host-target</tt></a></li>
+  <li><a expr="(dreyeck-ch-add-konrad-upstream-remote-operation)" view="Materialization"><tt>dreyeck-ch-add-konrad-upstream-remote-operation</tt></a></li>
+  <li><a expr="(dreyeck-ch-fetch-upstream-main-operation)" view="Materialization"><tt>dreyeck-ch-fetch-upstream-main-operation</tt></a></li>
+</ul>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Inspect the host or operation object and open its <tt>Materialization</tt> view.</li>
+  <li>Read the rendered shell block in full, including the target host, checkout root, and Git arguments.</li>
+  <li>Run the block manually in a terminal only if the target host and action are the ones you intend.</li>
+  <li>Keep the difference explicit between "HyperDoc rendered the command" and "the operator executed the command".</li>
+</ol>
+
+<h2>Worked example boundary</h2>
+
+<p>
+  For <tt>dreyeck.ch</tt>, the two first operational materializations are:
+  add <tt>upstream</tt> if missing, and fetch <tt>upstream main</tt> from the
+  live checkout at <tt>/home/rgb/workspace/hyperdoc/</tt>. The same modeling
+  pattern should be reusable for other NixOS hosts without implying remote
+  execution inside HyperDoc.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Inspectable operational targets">Inspectable operational targets</a></li>
+  <li><a page="Operational Target Objects for dreyeck.ch">Operational Target Objects for dreyeck.ch</a></li>
+</ul>

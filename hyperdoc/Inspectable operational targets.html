@@ -1,0 +1,56 @@
+<h1>Inspectable operational targets</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Inspectable operational targets"><tt>Inspectable
+  operational targets</tt></a> is the reusable skill for treating a live host
+  and a host-aware operation as inspectable objects before any remote command is
+  executed. This skill is about <b>modeling + materialization</b>, not remote
+  execution.
+</p>
+
+<p>
+  The current implementation anchor is the <tt>dreyeck.ch</tt> HyperDoc host:
+  user <tt>rgb</tt>, checkout
+  <tt>/home/rgb/workspace/hyperdoc/</tt>, and Git operations for adding or
+  fetching Konrad's <tt>upstream</tt> remote.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Inspectable operational targets"><tt>Inspectable operational targets</tt></a></li>
+  <li><a hyperbook="topics" page="Materialize a host-aware operation without executing it"><tt>Materialize a host-aware operation without executing it</tt></a></li>
+  <li><a hyperbook="topics" page="NixOS host target objects"><tt>NixOS host target objects</tt></a></li>
+  <li><a expr="(dreyeck-ch-nixos-host-target)"><tt>dreyeck-ch-nixos-host-target</tt></a></li>
+  <li><a expr="(dreyeck-ch-add-konrad-upstream-remote-operation)"><tt>dreyeck-ch-add-konrad-upstream-remote-operation</tt></a></li>
+  <li><a expr="(dreyeck-ch-fetch-upstream-main-operation)"><tt>dreyeck-ch-fetch-upstream-main-operation</tt></a></li>
+</ul>
+
+<h2>What the skill makes explicit</h2>
+
+<ul>
+  <li>a <tt>nixos-host-target</tt> can carry hostname, SSH user, checkout root, service name, and deployment mode,</li>
+  <li>a <tt>git-remote-operation</tt> can carry remote name, remote URL, branch, and operation kind,</li>
+  <li>the <tt>Materialization</tt> view renders the exact shell block to run, while leaving execution to the operator.</li>
+</ul>
+
+<h2>Worked example from this repo</h2>
+
+<p>
+  The <tt>dreyeck.ch</tt> example exists because the live HyperDoc checkout
+  needed a durable representation of "add Konrad's remote if missing, then fetch
+  <tt>upstream/main</tt>" without hiding those commands inside prose-only notes.
+  The existing page <a page="Operational Target Objects for dreyeck.ch">Operational
+  Target Objects for dreyeck.ch</a> shows the concrete host object and the two
+  operation objects.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Materialize a host-aware operation without executing it">Materialize a host-aware operation without executing it</a></li>
+  <li><a page="Operational Target Objects for dreyeck.ch">Operational Target Objects for dreyeck.ch</a></li>
+  <li><a page="Dreyeck Extraction Plan for upstream main into hauptsache">Dreyeck Extraction Plan for upstream main into hauptsache</a></li>
+</ul>
