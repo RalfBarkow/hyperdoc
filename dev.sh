@@ -112,7 +112,7 @@ nix develop --command sbcl --no-userinit --disable-debugger \
             ;; systems (e.g. alexandria) remain discoverable at runtime.
             (asdf:initialize-source-registry
              (list :source-registry
-                   (list :tree root)
+                   (list :directory root)
                    (list :tree flake-deps)
                    :inherit-configuration)))' \
   --eval '(sb-sys:enable-interrupt
