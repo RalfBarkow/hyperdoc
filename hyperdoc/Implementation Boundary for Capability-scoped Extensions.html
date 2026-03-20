@@ -1,0 +1,91 @@
+<h1>Implementation Boundary for Capability-scoped Extensions</h1>
+
+<p>
+  This page marks the current implementation boundary between written design and
+  eventual runtime surfaces for the capability/WebXDC cluster. It explains what
+  remains in the planning phase, sketches the inspectable objects that must
+  exist later, and links back to the continuity shells that precede the runtime
+  work.
+</p>
+
+<h2>What remains documentation and planning</h2>
+
+<ul>
+  <li><b>Capability-scoped extension</b> – the HyperDoc/FedWiki host API contract
+      must still be scripted, documented, and paired with a FedWiki twin that
+      reports manifest intent.</li>
+  <li><b>Declarative extension manifest</b> – the manifest schema and review
+      surface are notes at this point; the FedWiki twin will describe how to
+      inspect requested powers before granting them.</li>
+  <li><b>Consent-gated execution</b> – the user-visible consent template is a
+      planning artifact, not yet wired to a running command.</li>
+  <li><b>Shared-state app story item</b> – the shared state object is being
+      recorded as a continuity shell rather than actual host storage.</li>
+  <li><b>WebXDC-style story item</b> – the packaged-app parent/app contract is
+      documented here, but no runtime boundary has been enforced yet.</li>
+</ul>
+
+<h2>Eventual runtime surfaces</h2>
+
+<p>
+  Once the documentation settles, the stack will need:
+</p>
+
+<ul>
+  <li>a host-managed service that enforces declared capabilities</li>
+  <li>a manifest inspector that publishes requested powers and highlights
+      UI/data effects</li>
+  <li>a consent UI that records the user’s decision before any extension runs</li>
+  <li>a host/app message contract with signature, origin, and replay rules</li>
+  <li>an item-local shared-state object that survives story-item restarts</li>
+</ul>
+
+<h2>Inspectable objects to expect later</h2>
+
+<ul>
+  <li><b>Capability profile</b> – the manifest’s ability list plus risk metadata.</li>
+  <li><b>Consent decision</b> – a logged, inspectable approval or denial record.</li>
+  <li><b>Host/app message contract</b> – the traceable `postMessage`/WebXDC channel
+      signature.</li>
+  <li><b>Item-local shared state object</b> – the persisted state container
+      attached to each story item.</li>
+</ul>
+
+<p>
+  None of these objects exist in this slice. They are called out here so future
+  runtime work knows where to attach findings, instrumentation, and FedWiki
+  twins.
+</p>
+
+<h2>Continuity shells</h2>
+
+<p>
+  The five topics above now have HyperDoc continuity shells that describe the
+  pending FedWiki twins and host surfaces. Each one will eventually branch
+  toward a FedWiki page (slug matching the topic slugs) that mirrors this page’s
+  planning notes and links back to a running implementation.
+</p>
+
+<p>
+  This is also the place to record interim FedWiki links so that collaborative
+  writers can anchor future narrative drafts without waiting for the runtime
+  plumbing.
+</p>
+
+<h2>Why nothing is implemented yet</h2>
+
+<p>
+  The documentation deliberately stops short of wiring new sandboxed execution
+  surfaces. The job is to describe the boundaries, not to invent host APIs or
+  message protocols that might later change. When the API/manifest/consent story
+  stabilizes, the inspectable objects listed above will be created, and the
+  FedWiki twins referenced here will become what we publish.
+</p>
+
+<h2>Related links</h2>
+
+<ul>
+  <li><a page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a></li>
+  <li><a page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a></li>
+  <li><a page="Mech CODE Block analysis">Mech CODE Block analysis</a></li>
+</ul>
