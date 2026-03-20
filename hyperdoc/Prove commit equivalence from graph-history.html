@@ -1,0 +1,53 @@
+<h1>Prove commit equivalence from graph/history</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove
+  commit equivalence from graph/history</tt></a> is the reusable skill for
+  separating two different questions:
+</p>
+
+<ul>
+  <li>Is the original commit hash directly reachable from the target branch ancestry?</li>
+  <li>If not, is the commit's content still present as a replay-equivalent patch under a different hash?</li>
+</ul>
+
+<p>
+  This skill is <b>read-only graph/history inspection</b>. It does not repair
+  branches, move refs, or execute merge recovery. Its proof is built from
+  ancestry, <tt>git cherry</tt>, left/right history, and <tt>git range-diff</tt>
+  anchored to an explicit shared base.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove commit equivalence from graph/history</tt></a></li>
+  <li><a hyperbook="topics" page="Check whether a preserved commit was replayed equivalently"><tt>Check whether a preserved commit was replayed equivalently</tt></a></li>
+  <li><a hyperbook="topics" page="Commit equivalence vs ancestry"><tt>Commit equivalence vs ancestry</tt></a></li>
+  <li><a expr="(hyperdoc-commit-equivalence-proof-surface)"><tt>hyperdoc-commit-equivalence-proof-surface</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+</ul>
+
+<h2>Worked example</h2>
+
+<p>
+  The worked example uses the preserved pre-merge <tt>hauptsache</tt> target
+  branch so the replay-equivalent state remains inspectable even after the
+  original lineage was later merged. It proves that the original
+  <tt>4fd5e78c0e3afd9f14a0fda4f9d379b2ecc4286c</tt> remains on
+  <tt>backup/hauptsache-before-remote-sync-4fd5e78</tt>, while
+  <tt>f7dd5540d3f7497a4d76f2b75db6f15d65485c0b</tt> on
+  <tt>backup/hauptsache-before-merging-original-4fd5e78-d969ef5</tt> is its
+  replayed equivalent. The explicit shared base for the proof is
+  <tt>d6ff2f4881533dbc26510d47bd085bb4c9a4b1bc</tt>.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Check whether a preserved commit was replayed equivalently">Check whether a preserved commit was replayed equivalently</a></li>
+  <li><a page="Why a commit hash can stay outside the target branch even when its content is integrated">Why a commit hash can stay outside the target branch even when its content is integrated</a></li>
+  <li><a page="Operational Target Objects for dreyeck.ch">Operational Target Objects for dreyeck.ch</a></li>
+</ul>

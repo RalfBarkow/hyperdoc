@@ -930,6 +930,34 @@
    :references '("Inspectable operational targets"
                  "Materialize a host-aware operation without executing it"
                  "Operational Target Objects for dreyeck.ch")))
+
+(defun prove-commit-equivalence-from-graph-history-topic ()
+  (make-topic
+   :id "prove-commit-equivalence-from-graph-history"
+   :title "Prove commit equivalence from graph/history"
+   :summary "Read-only skill for distinguishing direct ancestry from replay-equivalent content by combining merge-base, cherry, left/right history, and range-diff with an explicit shared base."
+   :references '("Prove commit equivalence from graph/history"
+                 "Check whether a preserved commit was replayed equivalently"
+                 "Why a commit hash can stay outside the target branch even when its content is integrated")))
+
+(defun check-whether-a-preserved-commit-was-replayed-equivalently-topic ()
+  (make-topic
+   :id "check-whether-a-preserved-commit-was-replayed-equivalently"
+   :title "Check whether a preserved commit was replayed equivalently"
+   :summary "Task skill for proving whether a preserved source commit is absent from target ancestry only as an original hash while an equivalent replay exists on the target branch."
+   :references '("Check whether a preserved commit was replayed equivalently"
+                 "Prove commit equivalence from graph/history"
+                 "Why a commit hash can stay outside the target branch even when its content is integrated")))
+
+(defun commit-equivalence-vs-ancestry-topic ()
+  (make-topic
+   :id "commit-equivalence-vs-ancestry"
+   :title "Commit equivalence vs ancestry"
+   :summary "Concept boundary between original commit identity and content equivalence, where a target branch can integrate a patch under a replayed hash without containing the original commit object."
+   :references '("Why a commit hash can stay outside the target branch even when its content is integrated"
+                 "Prove commit equivalence from graph/history"
+                 "Check whether a preserved commit was replayed equivalently")))
+
 (defun synchronization-as-a-visualization-problem-topic ()
   (make-topic
    :id "synchronization-as-a-visualization-problem"

@@ -1,0 +1,56 @@
+<h1>Why a commit hash can stay outside the target branch even when its content is integrated</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Commit equivalence vs ancestry"><tt>Commit
+  equivalence vs ancestry</tt></a> names a recurring merge-intent confusion:
+  an original commit hash can remain outside the target branch even though the
+  target branch already contains the same content under a replayed hash.
+</p>
+
+<p>
+  This happens after cherry-pick or replay-style integration. The graph keeps
+  the original commit on the preserved source branch, while the target branch
+  receives a new commit object with different identity but equivalent patch
+  content.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Commit equivalence vs ancestry"><tt>Commit equivalence vs ancestry</tt></a></li>
+  <li><a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove commit equivalence from graph/history</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)" view="Merge intent interpretation"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)" view="Range-diff"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+</ul>
+
+<h2>Operational rule</h2>
+
+<ul>
+  <li>Do not confuse original commit identity with content integration.</li>
+  <li>Use ancestry to answer whether the original object is reachable.</li>
+  <li>Use <tt>git cherry</tt>, left/right history, and <tt>git range-diff</tt> with an explicit shared base to answer whether the content was replayed equivalently.</li>
+  <li>Do not use a floating remote ref as the primary <tt>range-diff</tt> base once the target branch has moved.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<p>
+  The worked example is exactly this case. It stays pinned to the preserved
+  pre-merge <tt>hauptsache</tt> target branch so the replay-equivalent state
+  remains inspectable even after the later lineage merge. The original
+  <tt>4fd5e78...</tt> stayed on
+  <tt>backup/hauptsache-before-remote-sync-4fd5e78</tt>, while
+  <tt>f7dd554...</tt> on
+  <tt>backup/hauptsache-before-merging-original-4fd5e78-d969ef5</tt> carried
+  the same skill content before the preserved lineage was later merged
+  explicitly.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
+  <li><a page="Check whether a preserved commit was replayed equivalently">Check whether a preserved commit was replayed equivalently</a></li>
+</ul>

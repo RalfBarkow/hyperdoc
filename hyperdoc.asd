@@ -34,6 +34,7 @@
                              (:file "static-route-observability")
                              (:file "operational-targets")
                              (:file "git-relations")
+                             (:file "git-commit-equivalence")
                              (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/examples
@@ -137,6 +138,7 @@
                              (:file "static-route-observability")
                              (:file "operational-targets")
                              (:file "git-relations")
+                             (:file "git-commit-equivalence")
                              (:file "packages")
                              (:file "parse-expr")
                              (:file "lookup-repairs")

@@ -1,0 +1,56 @@
+<h1>Check whether a preserved commit was replayed equivalently</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Check whether a preserved commit was replayed equivalently"><tt>Check
+  whether a preserved commit was replayed equivalently</tt></a> is the task
+  skill for answering one operational question:
+</p>
+
+<p>
+  Is the preserved source commit outside the target branch only as an original
+  hash, while a replay-equivalent commit on the target branch already carries
+  the same content?
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Check whether a preserved commit was replayed equivalently"><tt>Check whether a preserved commit was replayed equivalently</tt></a></li>
+  <li><a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove commit equivalence from graph/history</tt></a></li>
+  <li><a hyperbook="topics" page="Commit equivalence vs ancestry"><tt>Commit equivalence vs ancestry</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)" view="Summary"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)" view="Proof"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)" view="Graph/History"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-equivalence-check)" view="Range-diff"><tt>hyperdoc-static-route-observability-commit-equivalence-check</tt></a></li>
+</ul>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Open the check object's <tt>Summary</tt> view and read the ancestry and patch-equivalence flags separately.</li>
+  <li>Open <tt>Proof</tt> to see the exact read-only commands and key outputs.</li>
+  <li>Open <tt>Graph/History</tt> to see what remains unique to the source branch after cherry-equivalent replay.</li>
+  <li>Open <tt>Range-diff</tt> to identify the explicit replayed commit hash on the target branch.</li>
+  <li>Use the merge-intent interpretation sentence as the final readable answer.</li>
+</ol>
+
+<h2>Worked example boundary</h2>
+
+<p>
+  In the current repo, the replay-equivalence proof is anchored to the
+  preserved pre-merge <tt>hauptsache</tt> target branch:
+  <tt>backup/hauptsache-before-merging-original-4fd5e78-d969ef5</tt>. That
+  lets the skill answer the historical merge-intent question cleanly:
+  <tt>4fd5e78...</tt> stays on the preserved source branch as the original
+  hash, while <tt>f7dd554...</tt> on the preserved target branch is the
+  replayed equivalent proven from graph/history evidence.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
+  <li><a page="Why a commit hash can stay outside the target branch even when its content is integrated">Why a commit hash can stay outside the target branch even when its content is integrated</a></li>
+</ul>
