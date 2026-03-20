@@ -139,6 +139,7 @@
        (raw-image "nixos-aarch64.img")
        (disk "diskN")
        (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+  (declare (ignore compressed-image))
   (list
    (make-instance 'sd-card-runbook-section
                   :id "path-a-official-prebuilt-image"
@@ -179,7 +180,7 @@
                                                   "LOCAL_SHA256=\"$(shasum -a 256 \"$ARTIFACT\" | awk '{print $1}')\""
                                                   "test \"$LOCAL_SHA256\" = \"$EXPECTED_SHA256\"")
                                   :verification "Local SHA-256 must equal the exact Hydra build JSON value at buildproducts[\"1\"][\"sha256hash\"]."
-                                  :raw-structure (list :command "test \"$LOCAL_SHA256\" = \"$EXPECTED_SHA256\""))))
+                                  :raw-structure (list :command "test \"$LOCAL_SHA256\" = \"$EXPECTED_SHA256\"")))
                   :raw-structure
                   (list :section "Path A - Official prebuilt image"))
    (make-instance 'sd-card-runbook-section
