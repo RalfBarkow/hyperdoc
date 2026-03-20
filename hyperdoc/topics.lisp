@@ -421,6 +421,7 @@
     (hydra-download-artifact-procedure-topic :topic-id 912384 :topicmap-id 912102)
     (hydra-artifact-to-flashable-image-handoff-topic :topic-id 912384 :topicmap-id 912102)
     (hydra-sha256-topic :topic-id 912384 :topicmap-id 912102)
+    (verify-hydra-artifact-checksum-topic :topic-id 912384 :topicmap-id 912102)
     (aarch64-procedure-select-source-topic :topic-id 912384 :topicmap-id 912102)
     (aarch64-procedure-record-provenance-topic :topic-id 912384 :topicmap-id 912102)
     (aarch64-procedure-decompress-topic :topic-id 912384 :topicmap-id 912102)
@@ -1268,12 +1269,13 @@
   (make-topic
    :id "hydra-download-artifact-procedure"
    :title "Download artifact from Hydra"
-   :summary "Normative successful path: download named .img.zst via wget --trust-server-names, verify it, decompress to .img, and use .img as flash input while .img.zst may remain as preserved download identity."
+   :summary "Normative successful path: resolve the exact Hydra build behind latest/download/1, read build product 1 metadata, download the named .img.zst explicitly as the published filename, verify it against the published SHA-256, decompress to .img, and use .img as flash input while .img.zst may remain as preserved download identity."
    :references '("Prepare the AArch64 image"
                  "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
                  "Hydra artifact to flashable image handoff"
                  "Hydra latest SD-image job"
                  "Hydra latest download link"
+                 "Verify Hydra artifact checksum"
                  "Hydra filename loss"
                  "hydra-filename-outcome-states-example")))
 
@@ -1291,8 +1293,21 @@
   (make-topic
    :id "hydra-sha256"
    :title "Hydra artifact SHA-256"
-   :summary "Integrity hash used to verify the downloaded .img.zst artifact before decompression and flashing."
-   :references '("6c0f8bffdac01aa95e66505180d51b3557b04f3ad43cf0900376528837b62d0f")))
+   :summary "Published SHA-256 for Hydra build product 1; the authoritative machine-readable source is the exact build JSON field buildproducts[\"1\"][\"sha256hash\"]."
+   :references '("Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Verify Hydra artifact checksum"
+                 "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")))
+
+(defun verify-hydra-artifact-checksum-topic ()
+  (make-topic
+   :id "verify-hydra-artifact-checksum"
+   :title "Verify Hydra artifact checksum"
+   :summary "Resolve the exact Hydra build behind latest/download/1, fetch build product 1 metadata from that build URL as JSON, and compare the local SHA-256 to buildproducts[\"1\"][\"sha256hash\"] before decompression."
+   :references '("Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Hydra latest download link"
+                 "Hydra artifact SHA-256")))
 
 ;; Procedure-step topics for "Prepare the AArch64 image".
 (defun aarch64-procedure-select-source-topic ()
@@ -1326,9 +1341,10 @@
   (make-topic
    :id "aarch64-procedure-verify-integrity"
    :title "Procedure step 4: verify integrity"
-   :summary "Verify downloaded artifact integrity using file size and/or SHA-256 checksum before flashing."
+   :summary "Verify the downloaded artifact by matching the local SHA-256 to Hydra's published build product 1 SHA-256 before decompression and flashing."
    :references '("Prepare the AArch64 image"
-                 "Hydra artifact SHA-256")))
+                 "Hydra artifact SHA-256"
+                 "Verify Hydra artifact checksum")))
 
 (defun aarch64-procedure-confirm-architecture-topic ()
   (make-topic

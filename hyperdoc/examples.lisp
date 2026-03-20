@@ -149,22 +149,37 @@
                    (make-instance 'sd-card-procedure-step
                                   :id "download-hydra-artifact"
                                   :title "Download artifact from Hydra"
-                                  :summary "Download latest aarch64 SD image artifact."
-                                  :commands (list (format nil "wget -O ~A \"~A\"" compressed-image download-url))
-                                  :raw-structure (list :command (format nil "wget -O ~A \"~A\"" compressed-image download-url)))
+                                  :summary "Resolve the exact Hydra build and download its published aarch64 SD image artifact."
+                                  :commands (list (format nil "LATEST_URL=\"~A\"" download-url)
+                                                  "BUILD_DOWNLOAD_URL=\"$(curl -fsSI \"$LATEST_URL\" | awk 'tolower($1)==\"location:\" {gsub(/\\r/, \"\", $2); print $2; exit}')\""
+                                                  "BUILD_URL=\"${BUILD_DOWNLOAD_URL%/download/*}\""
+                                                  "BUILD_JSON=\"$(curl -fsS -H 'Accept: application/json' \"$BUILD_URL\")\""
+                                                  "PUBLISHED_NAME=\"$(printf '%s' \"$BUILD_JSON\" | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"buildproducts\"][\"1\"][\"name\"])')\""
+                                                  "ARTIFACT_URL=\"${BUILD_DOWNLOAD_URL}/$PUBLISHED_NAME\""
+                                                  "test ! -e \"$PUBLISHED_NAME\""
+                                                  "ARTIFACT=\"$PUBLISHED_NAME\""
+                                                  "wget -O \"$ARTIFACT\" \"$ARTIFACT_URL\""
+                                                  "test -f \"$ARTIFACT\"")
+                                  :raw-structure (list :command "wget -O \"$ARTIFACT\" \"$ARTIFACT_URL\""))
                    (make-instance 'sd-card-procedure-step
                                   :id "decompress-image"
                                   :title "Decompress image"
                                   :summary "Decompress the zstd artifact to a raw .img file."
-                                  :commands (list (format nil "unzstd -d ~A" compressed-image))
-                                  :raw-structure (list :command (format nil "unzstd -d ~A" compressed-image)))
+                                  :commands (list "ARTIFACT=\"${ARTIFACT:?set ARTIFACT to the downloaded Hydra filename}\""
+                                                  "unzstd -d \"$ARTIFACT\"")
+                                  :raw-structure (list :command "unzstd -d \"$ARTIFACT\""))
                    (make-instance 'sd-card-procedure-step
                                   :id "verify-checksum"
                                   :title "Verify checksum"
-                                  :summary "Verify compressed artifact integrity before flashing."
-                                  :commands (list (format nil "shasum -a 256 ~A" compressed-image))
-                                  :verification "Checksum must match the published Hydra value."
-                                  :raw-structure (list :command (format nil "shasum -a 256 ~A" compressed-image))))
+                                  :summary "Verify compressed artifact integrity by comparing the local hash to Hydra's published build metadata."
+                                  :commands (list "ARTIFACT=\"${ARTIFACT:?set ARTIFACT to the downloaded Hydra filename}\""
+                                                  "BUILD_URL=\"${BUILD_URL:?set BUILD_URL to the resolved Hydra build URL}\""
+                                                  "BUILD_JSON=\"$(curl -fsS -H 'Accept: application/json' \"$BUILD_URL\")\""
+                                                  "EXPECTED_SHA256=\"$(printf '%s' \"$BUILD_JSON\" | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"buildproducts\"][\"1\"][\"sha256hash\"])')\""
+                                                  "LOCAL_SHA256=\"$(shasum -a 256 \"$ARTIFACT\" | awk '{print $1}')\""
+                                                  "test \"$LOCAL_SHA256\" = \"$EXPECTED_SHA256\"")
+                                  :verification "Local SHA-256 must equal the exact Hydra build JSON value at buildproducts[\"1\"][\"sha256hash\"]."
+                                  :raw-structure (list :command "test \"$LOCAL_SHA256\" = \"$EXPECTED_SHA256\""))))
                   :raw-structure
                   (list :section "Path A - Official prebuilt image"))
    (make-instance 'sd-card-runbook-section

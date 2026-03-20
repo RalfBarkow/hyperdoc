@@ -31,6 +31,7 @@
   <li><a hyperbook="topics" page="Hydra artifact to flashable image handoff"><tt>Hydra artifact to flashable image handoff</tt></a></li>
   <li><a hyperbook="topics" page="Hydra filename loss"><tt>Hydra filename loss</tt></a></li>
   <li><a hyperbook="topics" page="Hydra artifact SHA-256"><tt>Hydra artifact SHA-256</tt></a></li>
+  <li><a hyperbook="topics" page="Verify Hydra artifact checksum"><tt>Verify Hydra artifact checksum</tt></a></li>
   <li><a expr="(hyperdoc::hydra-filename-outcome-states-example)"><tt>Hydra filename outcome states</tt></a></li>
   <li><a hyperbook="topics" page="Transcend 16GB Micro SD Card"><tt>Transcend 16GB Micro SD Card</tt></a></li>
   <li><a hyperbook="topics" page="DITA task topic"><tt>DITA task topic</tt></a></li>
@@ -129,7 +130,7 @@
   <li><a hyperbook="topics" page="Procedure step 1: select one source of truth">Select one source of truth (official prebuilt or project build).</a></li>
   <li><a hyperbook="topics" page="Procedure step 2: record provenance">Download/build the artifact and record provenance (URL/commit/date).</a></li>
   <li><a hyperbook="topics" page="Procedure step 3: decompress image">Decompress (<tt>zstd -d</tt>) when needed.</a></li>
-  <li><a hyperbook="topics" page="Procedure step 4: verify integrity">Verify artifact integrity (size/checksum if available).</a></li>
+  <li><a hyperbook="topics" page="Procedure step 4: verify integrity">Verify artifact integrity against the Hydra-published SHA-256 before flashing.</a></li>
   <li><a hyperbook="topics" page="Procedure step 5: confirm architecture">Confirm filename and architecture include <tt>aarch64-linux</tt>.</a></li>
 </ol>
 
@@ -161,11 +162,12 @@
   </li>
   <li>Open the latest successful build (green checkmark).</li>
   <li>
-    On the build page, copy:
+    On the concrete build page, record:
     <ul>
       <li>artifact URL (<tt>...download/1/...aarch64-linux.img.zst</tt>)</li>
-      <li>published SHA-256 value</li>
       <li>build URL and timestamp for provenance notes</li>
+      <li>published SHA-256 value from the build page table or from the same build URL queried as JSON</li>
+      <li>for automation, use build JSON field <tt>buildproducts["1"]["sha256hash"]</tt></li>
     </ul>
   </li>
 </ol>
@@ -174,33 +176,50 @@
 
 <p>
   Mechanism note for this path: the Hydra latest endpoint redirects to a URL
-  whose path ends with the concrete artifact filename, and
-  <tt>--trust-server-names</tt> tells <tt>wget</tt> to adopt that
-  redirected server-provided name.
+  whose path identifies the concrete build. Use that exact build URL as the
+  checksum source of truth: the build page publishes the SHA-256 in HTML, and
+  the same build URL queried with <tt>Accept: application/json</tt> exposes
+  <tt>buildproducts["1"]["sha256hash"]</tt>. The resolved artifact URL already
+  contains the exact published filename, so download can write explicitly to
+  <tt>$PUBLISHED_NAME</tt> without any redirect-name heuristic.
 </p>
 
 <pre>
 # 0) Tooling
-nix-shell -p wget zstd
+nix-shell -p curl wget zstd python3
 
-# 1) Optional: resolve current "latest" endpoint
+# 1) Resolve the exact build behind the current "latest" endpoint
 LATEST_URL="https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1"
+BUILD_DOWNLOAD_URL="$(curl -fsSI "$LATEST_URL" | awk 'tolower($1)=="location:" {gsub(/\r/, "", $2); print $2; exit}')"
+test -n "$BUILD_DOWNLOAD_URL"
+BUILD_URL="${BUILD_DOWNLOAD_URL%/download/*}"
+echo "build_url=$BUILD_URL"
 
-# 2) Download artifact (preserve redirected Hydra filename)
-wget --trust-server-names "$LATEST_URL"
+# 2) Read the published metadata for build product 1
+BUILD_JSON="$(curl -fsS -H 'Accept: application/json' "$BUILD_URL")"
+PUBLISHED_NAME="$(printf '%s' "$BUILD_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["buildproducts"]["1"]["name"])')"
+EXPECTED_SHA256="$(printf '%s' "$BUILD_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["buildproducts"]["1"]["sha256hash"])')"
+ARTIFACT_URL="$BUILD_DOWNLOAD_URL/$PUBLISHED_NAME"
+test -n "$PUBLISHED_NAME"
+test -n "$EXPECTED_SHA256"
+echo "artifact_url=$ARTIFACT_URL"
+echo "published_sha256=$EXPECTED_SHA256"
 
-# 3) Determine artifact filename
-ARTIFACT="$(ls -t *.img.zst | head -n1)"
-echo "artifact=$ARTIFACT"
+# 3) Download artifact to the exact published filename
+test ! -e "$PUBLISHED_NAME"
+ARTIFACT="$PUBLISHED_NAME"
+wget -O "$ARTIFACT" "$ARTIFACT_URL"
+test -f "$ARTIFACT"
 
-# 4) Confirm architecture marker in filename
+# 4) Confirm architecture marker in the published/downloaded filename
 echo "$ARTIFACT" | grep 'aarch64-linux\\.img\\.zst$'
 
-# 5) Verify SHA-256 (replace EXPECTED_SHA256 from Hydra build page)
-EXPECTED_SHA256="REPLACE_WITH_HYDRA_SHA256"
-shasum -a 256 "$ARTIFACT"
+# 5) Verify SHA-256 against Hydra's published build metadata
+LOCAL_SHA256="$(shasum -a 256 "$ARTIFACT" | awk '{print $1}')"
 # Linux alternative:
-# sha256sum "$ARTIFACT"
+# LOCAL_SHA256="$(sha256sum "$ARTIFACT" | awk '{print $1}')"
+test "$LOCAL_SHA256" = "$EXPECTED_SHA256"
+echo "sha256_match=$LOCAL_SHA256"
 
 # 6) Decompress into .img
 unzstd -d "$ARTIFACT"
@@ -212,8 +231,11 @@ ls -la
 {
   echo "hydra_job=https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux"
   echo "latest_download=$LATEST_URL"
+  echo "build_url=$BUILD_URL"
+  echo "artifact_url=$ARTIFACT_URL"
   echo "artifact=$ARTIFACT"
   echo "sha256_expected=$EXPECTED_SHA256"
+  echo "sha256_local=$LOCAL_SHA256"
   date -u +"download_utc=%Y-%m-%dT%H:%M:%SZ"
 } > aarch64-image-provenance.txt
 </pre>
@@ -231,8 +253,15 @@ ls -la
 
 <p>
   Comparison note: naive <tt>wget "$LATEST_URL"</tt> may save as
-  <tt>1</tt>; corrected <tt>wget --trust-server-names "$LATEST_URL"</tt>
-  saves as the concrete artifact filename.
+  <tt>1</tt>; corrected <tt>wget -O "$PUBLISHED_NAME" "$ARTIFACT_URL"</tt>
+  binds the local filename explicitly to Hydra's published product name.
+</p>
+
+<p>
+  Verification rule: this step is complete only when the local
+  <tt>shasum -a 256</tt> value equals the published Hydra build metadata value
+  from <tt>buildproducts["1"]["sha256hash"]</tt> for the exact build selected
+  by <tt>latest/download/1</tt>. A mismatch is failure.
 </p>
 
 <p>
@@ -284,9 +313,9 @@ ls -la
 <h3>Reader flow: missing assumptions checklist</h3>
 
 <ol>
-  <li>Assume your host can run <tt>nix-shell</tt>, <tt>wget</tt>, and <tt>zstd</tt>; if not, stop and install tooling first.</li>
+  <li>Assume your host can run <tt>nix-shell</tt>, <tt>curl</tt>, <tt>wget</tt>, <tt>python3</tt>, and <tt>zstd</tt>; if not, stop and install tooling first.</li>
   <li>Assume network access to <tt>hydra.nixos.org</tt>; if not, switch to local build Path B.</li>
-  <li>Assume checksum is available from the selected build page; if missing, do not flash.</li>
+  <li>Assume the selected Hydra build exposes <tt>buildproducts["1"]["sha256hash"]</tt>; if not, stop and compare manually against the build page before flashing.</li>
   <li>Assume target media is the intended SD card; verify device identity before any destructive write step.</li>
 </ol>
 
