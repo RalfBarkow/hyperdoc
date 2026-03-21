@@ -53,13 +53,7 @@ async function openHyperDoc(page) {
 async function openTextPageFromHyperDoc(page, title) {
   const paneCountBefore = await page.locator(".inspector-pane").count();
   const hyperdocPane = pane(page, 1);
-  await hyperdocPane
-    .locator(".inspector-tabs button")
-    .filter({ hasText: exactTextPattern("Text pages") })
-    .click();
-  await expect(
-    hyperdocPane.locator(".inspector-tabs button.active")
-  ).toHaveText(exactTextPattern("Text pages"));
+  await activatePaneTab(page, 1, "Text pages");
   const pageRow = hyperdocPane
     .locator("tr")
     .filter({ hasText: exactTextPattern(title) })
@@ -81,11 +75,19 @@ async function openTextPageFromHyperDoc(page, title) {
 }
 
 async function selectSourceTab(page, paneIndex) {
+  await activatePaneTab(page, paneIndex, "Source");
+}
+
+async function activatePaneTab(page, paneIndex, title) {
   const currentPane = pane(page, paneIndex);
-  await currentPane
+  const tab = currentPane
     .locator(".inspector-tabs button")
-    .filter({ hasText: exactTextPattern("Source") })
-    .click();
+    .filter({ hasText: exactTextPattern(title) });
+  await expect(tab).toBeVisible();
+  await tab.click();
+  await expect(
+    currentPane.locator(".inspector-tabs button.active")
+  ).toHaveText(exactTextPattern(title));
 }
 
 async function readPaneTitles(page) {
@@ -111,6 +113,7 @@ async function readHelpPanelState(page, paneIndex) {
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
     return {
+      slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
       helpExpanded:
         slot?.querySelector(".hyperdoc-dom-connect-help-toggle")?.getAttribute(
@@ -287,6 +290,7 @@ async function runSourceAssociation(page, title) {
 }
 
 module.exports = {
+  activatePaneTab,
   attachJson,
   bootUrl,
   exactTextPattern,

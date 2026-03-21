@@ -130,8 +130,10 @@
 ;; control. The DOM overlay and anchor machinery remain in the rendered view.
 (defun create-tabs (pane)
   (with-slots (clog-obj inspector views tab-ids) pane
-    (let ((view-titles (mapcar #'hv:view-title views))
-          (tabs (clog:create-div clog-obj :class "inspector-tabs")))
+    (let* ((view-titles (mapcar #'hv:view-title views))
+           (chrome (clog:create-div clog-obj
+                                    :class "hyperdoc-dom-connect-pane-chrome"))
+           (tabs (clog:create-div chrome :class "inspector-tabs")))
       (loop for tab-text in view-titles
             for tab-id in tab-ids
             for view in views
@@ -151,11 +153,11 @@
                               (close-panes-after inspector pane))
                             (create-pane inspector view* :select "Source code"))
                           (select-view pane index*))))))
-      (clog:create-div tabs
+      (clog:create-div chrome
                        :class "hyperdoc-dom-connect-pane-slot"
                        :content ""
                        :html-id (gensym "dom-connect-slot"))
-      tabs)))
+      chrome)))
 
 ;; Override only the Eval path. The generic reference wiring stays in
 ;; inspector-wiring; this file owns the DOM-association-specific create/open

@@ -2,9 +2,11 @@
 
 const { test, expect } = require("@playwright/test");
 const {
+  activatePaneTab,
   attachJson,
   openHyperDoc,
   readHelpPanelState,
+  readPaneTitles,
   runContentAssociation,
   runSourceAssociation,
   toggleHelpInPane,
@@ -68,6 +70,27 @@ test("pane-chrome help opens without shifting the active view", async ({
   expect(after.activeViewTop).toBe(before.activeViewTop);
   expect(after.documentScrollHeight).toBe(before.documentScrollHeight);
   expect(after.panelTop).toBeGreaterThan(after.controlBottom);
+});
+
+test("Pages tab stays clickable while Connect help is open", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  const before = await readHelpPanelState(page, 1);
+  const withHelp = await toggleHelpInPane(page, 1);
+  await activatePaneTab(page, 1, "Pages");
+  const after = await readHelpPanelState(page, 1);
+  const paneTitles = await readPaneTitles(page);
+
+  await attachJson(testInfo, "pages-tab-before.json", before);
+  await attachJson(testInfo, "pages-tab-with-help.json", withHelp);
+  await attachJson(testInfo, "pages-tab-after.json", after);
+  await attachJson(testInfo, "pages-tab-pane-titles.json", paneTitles);
+
+  expect(before.slotHidden).toBe(false);
+  expect(withHelp.helpExpanded).toBe("true");
+  expect(withHelp.helpAriaHidden).toBe("false");
+  expect(paneTitles[1].activeTab).toBe("Pages");
 });
 
 test("source view exposes source anchors and opens an association", async (

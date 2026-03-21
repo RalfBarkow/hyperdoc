@@ -555,39 +555,61 @@
   }
 
   function syncPaneSurface(state) {
-    var surface = activeSurfaceForPane(state.pane);
-    var previousSurface = state.surface;
-    var previousAvailable = state.available;
-    var available = bindSurface(state, surface);
-    state.available = available;
-    state.slot.hidden = !available;
-    if (!available) {
-      clearFeedback(state);
-      closeHelpPanel(state);
-      setHoverElement(state, null);
-      clearSource(state);
-      state.enabled = false;
-      state.toggle.dataset.mode = "inactive";
-      setPhase(state, "dormant");
+    if (state.syncingPaneSurface) {
       return;
     }
-    if (previousSurface && previousSurface !== surface) {
-      setHoverElement(state, null);
-      clearSource(state);
-      if (state.enabled) {
+    state.syncingPaneSurface = true;
+    try {
+      var surface = activeSurfaceForPane(state.pane);
+      var previousSurface = state.surface;
+      var previousAvailable = state.available;
+      var available = bindSurface(state, surface);
+      state.available = available;
+      state.slot.hidden = !available;
+      if (!available) {
+        clearFeedback(state);
+        closeHelpPanel(state);
+        setHoverElement(state, null);
+        clearSource(state);
         state.enabled = false;
         state.toggle.dataset.mode = "inactive";
-      }
-    }
-    if (!previousAvailable || previousSurface !== surface) {
-      clearFeedback(state);
-      updateProviderCopy(state);
-      if (state.learned || state.introDismissed) {
         setPhase(state, "dormant");
-      } else {
-        setPhase(state, "coachmark");
+        return;
       }
+      if (previousSurface && previousSurface !== surface) {
+        setHoverElement(state, null);
+        clearSource(state);
+        if (state.enabled) {
+          state.enabled = false;
+          state.toggle.dataset.mode = "inactive";
+        }
+      }
+      if (!previousAvailable || previousSurface !== surface) {
+        clearFeedback(state);
+        updateProviderCopy(state);
+        if (state.learned || state.introDismissed) {
+          setPhase(state, "dormant");
+        } else {
+          setPhase(state, "coachmark");
+        }
+      }
+    } finally {
+      state.syncingPaneSurface = false;
     }
+  }
+
+  function schedulePaneSurfaceSync(state) {
+    if (!state || state.syncPaneSurfaceScheduled) {
+      return;
+    }
+    state.syncPaneSurfaceScheduled = true;
+    var schedule = window.requestAnimationFrame || function (callback) {
+      return window.setTimeout(callback, 0);
+    };
+    schedule(function () {
+      state.syncPaneSurfaceScheduled = false;
+      syncPaneSurface(state);
+    });
   }
 
   function setPhase(state, phase) {
@@ -889,6 +911,8 @@
       requestId: null,
       pendingRequest: null,
       resetTimer: null,
+      syncingPaneSurface: false,
+      syncPaneSurfaceScheduled: false,
       provider: providerApiForKind("dom-v1"),
       providerKind: "dom-v1",
       surface: null,
@@ -958,7 +982,7 @@
       }
     });
     var observer = new MutationObserver(function () {
-      syncPaneSurface(state);
+      schedulePaneSurfaceSync(state);
     });
     observer.observe(pane, {
       subtree: true,
@@ -1002,7 +1026,7 @@
         }
       }, true);
     }
-    syncPaneSurface(state);
+    schedulePaneSurfaceSync(state);
   }
 
   window.hyperdocDomConnect = {

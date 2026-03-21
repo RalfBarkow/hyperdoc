@@ -2,16 +2,21 @@
   position: relative;
 }
 
+.hyperdoc-dom-connect-pane-chrome {
+  position: relative;
+}
+
 .inspector-tabs {
-  display: flow-root;
   overflow: visible;
   position: relative;
 }
 
 .hyperdoc-dom-connect-pane-slot {
-  float: right;
+  display: flex;
+  justify-content: flex-end;
   position: relative;
-  margin: 2px 4px 2px 10px;
+  width: 100%;
+  margin: 0.22rem 0 0.38rem;
   z-index: 2;
 }
 
@@ -30,7 +35,7 @@
   background: rgba(255, 250, 243, 0.98);
   box-shadow: 0 4px 12px rgba(74, 52, 31, 0.08);
   min-height: 1.9rem;
-  max-width: min(28rem, 100%);
+  max-width: min(26rem, 100%);
 }
 
 .hyperdoc-dom-connect-coachmark,
@@ -225,10 +230,8 @@
 
 @media (max-width: 720px) {
   .hyperdoc-dom-connect-pane-slot {
-    float: none;
-    clear: both;
     display: block;
-    margin: 4px;
+    margin: 0.28rem 0 0.4rem;
   }
 
   .hyperdoc-dom-connect-control,

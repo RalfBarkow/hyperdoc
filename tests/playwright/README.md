@@ -8,6 +8,9 @@ This suite materializes the current DOM association findings as browser tests:
 - `pane-chrome help opens without shifting the active view`
   - proves the `?` help toggle opens in pane chrome
   - asserts the help panel does not move the active view or change document height
+- `Pages tab stays clickable while Connect help is open`
+  - proves normal pane navigation still works while the Connect chrome is visible
+  - asserts the non-connectable `Pages` view can still be activated even with help open
 - `source view exposes source anchors and opens an association`
   - expresses the intended `source-v1` provider behavior on the `Creating a HyperDoc` page
   - is currently marked `test.fail()` on all browsers because the remaining automation boundary is still reaching a text page and its `Source` provider reliably
@@ -40,4 +43,5 @@ The current expected Chromium state is:
 
 - content transport test passes
 - help toggle test passes
+- Pages tab regression test passes
 - source-provider test is an expected failure that documents the remaining boundary
