@@ -167,16 +167,21 @@ let
           --eval '(asdf:load-system :hyperdoc/server :force t)' \
           --eval '(let* ((hb (hyperbook:find-hyperbook "hyperdoc"))
                          (slug (hyperbook/server::slug hb))
+                         (drawing (hyperbook:find-page hb "Drawing Automation and review materialization"))
                          (official (hyperbook:find-page hb "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"))
                          (server-page (hyperbook:find-page hb "HyperDoc Server")))
                     (assert hb)
+                    (assert drawing)
                     (assert official)
                     (assert server-page)
-                    (let ((official-path (str:concat "/" slug "/" (tbnl:url-encode (hyperbook:path-item-of official))))
+                    (let ((drawing-path (str:concat "/" slug "/" (tbnl:url-encode (hyperbook:path-item-of drawing))))
+                          (official-path (str:concat "/" slug "/" (tbnl:url-encode (hyperbook:path-item-of official))))
                           (server-path (str:concat "/" slug "/" (tbnl:url-encode (hyperbook:path-item-of server-page)))))
+                      (assert (and (> (length drawing-path) 0) (char= (char drawing-path 0) #\/)))
                       (assert (and (> (length official-path) 0) (char= (char official-path 0) #\/)))
                       (assert (and (> (length server-path) 0) (char= (char server-path 0) #\/)))
                       (format t "HYPERDOC_SLUG ~A~%" slug)
+                      (format t "KEY_PAGE_PATH ~A~%" drawing-path)
                       (format t "KEY_PAGE_PATH ~A~%" official-path)
                       (format t "KEY_PAGE_PATH ~A~%" server-path)))' \
           --eval '(uiop:quit 0)'
@@ -255,15 +260,39 @@ let
         echo "[verify][warn] server became ready after $ready_attempts probes"
       fi
 
+      check_html_shell() {
+        local file="$1"
+        local label="$2"
+
+        if grep -q '<%=' "$file"; then
+          echo "[verify] raw template marker leaked in $label" >&2
+          exit 1
+        fi
+        if ! grep -Eqi '<html[^>]+lang=' "$file"; then
+          echo "[verify] missing html lang attribute in $label" >&2
+          exit 1
+        fi
+        if ! grep -Eqi '<title[^>]*>[^<]+</title>' "$file"; then
+          echo "[verify] missing document title in $label" >&2
+          exit 1
+        fi
+        if grep -Eqi '<meta[^>]+http-equiv=["'"'"'](Cache-Control|Pragma|Expires)["'"'"']' "$file"; then
+          echo "[verify] invalid cache-control meta tag present in $label" >&2
+          exit 1
+        fi
+      }
+
       echo "[verify] HTTP boot check"
       curl -fsS -D /tmp/hyperdoc-release-boot-headers.$$ "http://$host:$port/boot.html" -o /tmp/hyperdoc-release-boot-body.$$
       head -n 1 /tmp/hyperdoc-release-boot-headers.$$
+      check_html_shell /tmp/hyperdoc-release-boot-body.$$ /boot.html
 
       echo "[verify] HTTP key-page checks"
       while IFS= read -r path; do
         [ -n "$path" ] || continue
         curl -fsS -D /tmp/hyperdoc-release-page-headers.$$ "http://$host:$port$path" -o /tmp/hyperdoc-release-page-body.$$
         head -n 1 /tmp/hyperdoc-release-page-headers.$$
+        check_html_shell /tmp/hyperdoc-release-page-body.$$ "$path"
       done <<< "$key_page_paths"
 
       echo "[verify] URL helper asset checks"

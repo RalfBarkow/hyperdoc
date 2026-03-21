@@ -48,8 +48,23 @@
             python3 - <<'PY'
 from pathlib import Path
 
+boot = Path("static-files/boot.html")
 p = Path("static-files/js/boot.js")
 s = p.read_text()
+boot_html = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HyperDoc</title>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/boot.js"></script>
+</head>
+<body>
+  <noscript>Your browser must support JavaScript and HTML5 to see this site.</noscript>
+</body>
+</html>
+"""
 
 original_debug = """if (typeof clog_debug == 'undefined') {
     clog_debug = false;
@@ -121,6 +136,7 @@ if "Guard_empty_selector();" not in s:
         raise SystemExit("Expected document ready block exactly once")
     s = s.replace(original_ready, replaced_ready, 1)
 
+boot.write_text(boot_html)
 p.write_text(s)
 PY
           '';
