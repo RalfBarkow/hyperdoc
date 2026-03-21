@@ -45,11 +45,18 @@
             :data-context-view-title view-title
             (:div :class "hyperdoc-dom-connect-chrome"
                   :data-hyperdoc-connect-ignore "true"
-                  (:div :class "hyperdoc-dom-connect-launcher"
+                  (:div :class "hyperdoc-dom-connect-control"
                         (:button :type "button"
                                  :class "hyperdoc-dom-connect-toggle"
                                  :title "Connect visible elements in this page to create an association."
                                  "Connect")
+                        (:span :class "hyperdoc-dom-connect-status"
+                               :hidden "hidden"
+                               "Connect: choose source")
+                        (:button :type "button"
+                                 :class "hyperdoc-dom-connect-cancel"
+                                 :hidden "hidden"
+                                 "Cancel")
                         (:button :type "button"
                                  :class "hyperdoc-dom-connect-help-toggle"
                                  :title "How DOM connect works"
@@ -66,19 +73,6 @@
                                (:button :type "button"
                                         :class "hyperdoc-dom-connect-dismiss"
                                         "Dismiss")))
-                  (:div :class "hyperdoc-dom-connect-strip"
-                        :hidden "hidden"
-                        (:span :class "hyperdoc-dom-connect-status"
-                               "Connect mode - choose source element")
-                        (:span :class "hyperdoc-dom-connect-strip-actions"
-                               (:button :type "button"
-                                        :class "hyperdoc-dom-connect-help-toggle"
-                                        :title "How DOM connect works"
-                                        :aria-label "How DOM connect works"
-                                        "?")
-                               (:button :type "button"
-                                        :class "hyperdoc-dom-connect-cancel"
-                                        "Cancel")))
                   (:div :class "hyperdoc-dom-connect-help-panel"
                         :hidden "hidden"
                         (:p "Connect visible elements in this page to create an association.")

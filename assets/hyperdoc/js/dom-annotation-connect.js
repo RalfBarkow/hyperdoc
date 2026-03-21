@@ -182,17 +182,16 @@
   function setPhase(state, phase) {
     state.phase = phase;
     state.surface.dataset.connectState = phase;
-    state.launcher.hidden = !(phase === "dormant" || phase === "coachmark");
     state.coachmark.hidden = phase !== "coachmark";
-    state.strip.hidden = !(phase === "select-source" ||
+    state.status.hidden = !(phase === "select-source" ||
       phase === "select-target" ||
       phase === "submitting");
     state.cancel.hidden = !(phase === "select-source" || phase === "select-target");
 
     if (phase === "select-source") {
-      setStatus(state, "Connect mode - choose source element");
+      setStatus(state, "Connect: choose source");
     } else if (phase === "select-target") {
-      setStatus(state, "Source selected - choose target element");
+      setStatus(state, "Connect: choose target");
     } else if (phase === "submitting") {
       setStatus(state, "Opening association...");
     }
@@ -341,12 +340,11 @@
     }
     var controls = surface.querySelector(".hyperdoc-dom-connect-controls");
     var chrome = surface.querySelector(".hyperdoc-dom-connect-chrome");
-    var launcher = surface.querySelector(".hyperdoc-dom-connect-launcher");
+    var control = surface.querySelector(".hyperdoc-dom-connect-control");
     var coachmark = surface.querySelector(".hyperdoc-dom-connect-coachmark");
-    var strip = surface.querySelector(".hyperdoc-dom-connect-strip");
     var root = surface.querySelector(".hyperdoc-dom-connect-root");
     var toggle = surface.querySelector(".hyperdoc-dom-connect-toggle");
-    var helpToggles = surface.querySelectorAll(".hyperdoc-dom-connect-help-toggle");
+    var helpToggle = surface.querySelector(".hyperdoc-dom-connect-help-toggle");
     var tryButton = surface.querySelector(".hyperdoc-dom-connect-try");
     var dismissButton = surface.querySelector(".hyperdoc-dom-connect-dismiss");
     var cancel = surface.querySelector(".hyperdoc-dom-connect-cancel");
@@ -354,8 +352,8 @@
     var status = surface.querySelector(".hyperdoc-dom-connect-status");
     var overlay = surface.querySelector(".hyperdoc-dom-connect-overlay");
     var line = overlay && overlay.querySelector(".hyperdoc-dom-connect-line");
-    if (!controls || !chrome || !launcher || !coachmark || !strip || !root ||
-        !toggle || !tryButton || !dismissButton || !cancel || !helpPanel ||
+    if (!controls || !chrome || !control || !coachmark || !root ||
+        !toggle || !helpToggle || !tryButton || !dismissButton || !cancel || !helpPanel ||
         !status || !overlay || !line) {
       return;
     }
@@ -368,9 +366,8 @@
     var state = {
       surface: surface,
       chrome: chrome,
-      launcher: launcher,
+      control: control,
       coachmark: coachmark,
-      strip: strip,
       root: root,
       toggle: toggle,
       cancel: cancel,
@@ -401,12 +398,10 @@
         activate(state);
       }
     });
-    helpToggles.forEach(function (button) {
-      button.addEventListener("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        toggleHelpPanel(state);
-      });
+    helpToggle.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleHelpPanel(state);
     });
     tryButton.addEventListener("click", function (event) {
       event.preventDefault();
