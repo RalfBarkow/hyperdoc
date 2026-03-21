@@ -6,6 +6,7 @@ const {
   openHyperDoc,
   readPaneTitles,
   runContentAssociation,
+  runHyperDocToFedWikiAssociation,
   runTwoPaneContentAssociation,
   runSourceAssociation,
 } = require("./hyperdoc-inspector");
@@ -86,6 +87,78 @@ test("content view opens a cross-pane association through pane-chrome Connect", 
       /Association: Text pages -> Creating a HyperDoc/.test(
         result.trace.latestPaneSummary.body
       )
+  ).toBe(true);
+});
+
+test("content view opens a HyperDoc to FedWiki association through pane-chrome Connect", async ({
+  page,
+}, testInfo) => {
+  const result = await runHyperDocToFedWikiAssociation(page);
+
+  await attachJson(testInfo, "hyperdoc-fedwiki-pane-state.json", result.fedwikiState);
+  await attachJson(
+    testInfo,
+    "hyperdoc-fedwiki-session-after-source.json",
+    result.sessionAfterSource
+  );
+  await attachJson(testInfo, "hyperdoc-fedwiki-browser-trace.json", result.trace);
+  await attachJson(testInfo, "hyperdoc-fedwiki-pane-titles.json", result.paneTitles);
+
+  expect(result.fedwikiState.providerKind).toBe("fedwiki-v1");
+  expect(result.fedwikiState.activeTab).toBe("Story");
+  expect(result.fedwikiState.itemCount).toBeGreaterThan(0);
+
+  expect(result.sessionAfterSource).toBeTruthy();
+  expect(result.sessionAfterSource.phase).toBe("choose-target");
+  expect(result.sessionAfterSource.source.providerKind).toBe("dom-v1");
+  expect(result.sessionAfterSource.source.strategy).toBe("heading-anchor");
+
+  expect(result.trace.requestId).toBeTruthy();
+  expect(result.trace.latestStage).toBe("pane-open-succeeded");
+  expect(
+    result.trace.events.some(
+      (event) =>
+        event.stage === "target-selected" &&
+        event.details &&
+        event.details.providerKind === "fedwiki-v1" &&
+        event.details.anchor &&
+        event.details.anchor.strategy === "fedwiki-story-item" &&
+        event.details.anchor.siteDomain === "wiki.ralfbarkow.ch" &&
+        event.details.anchor.pageSlug === "find" &&
+        !!event.details.anchor.storyItemId
+    )
+  ).toBe(true);
+  expect(
+    result.trace.events.some(
+      (event) =>
+        event.stage === "association-payload-assembled" &&
+        event.details &&
+        event.details.source &&
+        event.details.source.providerKind === "dom-v1" &&
+        event.details.target &&
+        event.details.target.providerKind === "fedwiki-v1" &&
+        event.details.target.strategy === "fedwiki-story-item" &&
+        event.details.target.siteDomain === "wiki.ralfbarkow.ch" &&
+        event.details.target.pageSlug === "find" &&
+        !!event.details.target.storyItemId
+    )
+  ).toBe(true);
+  expect(
+    result.trace.events.some(
+      (event) =>
+        event.stage === "request-payload-written" &&
+        event.details &&
+        event.details.transport === "button-payload-v2" &&
+        event.details.sourceProviderKind === "dom-v1" &&
+        event.details.targetProviderKind === "fedwiki-v1" &&
+        event.details.sourcePaneId &&
+        event.details.targetPaneId &&
+        event.details.sourcePaneId !== event.details.targetPaneId
+    )
+  ).toBe(true);
+  expect(
+    result.trace.latestPaneSummary &&
+      /Association:/.test(result.trace.latestPaneSummary.body)
   ).toBe(true);
 });
 

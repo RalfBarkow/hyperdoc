@@ -14,6 +14,13 @@
    (context-object-id :initarg :context-object-id
                       :initform nil
                       :reader context-object-id-of)
+   (page-title :initarg :page-title :initform nil :reader page-title-of)
+   (site-domain :initarg :site-domain :initform nil :reader site-domain-of)
+   (page-slug :initarg :page-slug :initform nil :reader page-slug-of)
+   (story-item-id :initarg :story-item-id :initform nil :reader story-item-id-of)
+   (story-item-type :initarg :story-item-type
+                    :initform nil
+                    :reader story-item-type-of)
    (strategy :initarg :strategy :reader anchor-strategy-of)
    (value :initarg :value :reader anchor-value-of)
    (selector :initarg :selector :initform nil :reader selector-of)
@@ -122,6 +129,9 @@
          (string= strategy "source-line-range")
          (string= strategy "source-line"))
      "Source line anchors are durable for the same file path and line range, but line numbers can drift when the source file changes.")
+    ((or (string= provider-kind "fedwiki-v1")
+         (string= strategy "fedwiki-story-item"))
+     "FedWiki story-item anchors resolve clicks to site, slug, and story-item id. They remain durable while the page slug and story-item id are preserved by journal evolution; DOM location is fallback metadata only.")
     ((string= strategy "heading-anchor")
      "Heading anchors resolve to the semantic heading path within the current HyperDoc page. They are more durable than raw DOM paths, but can drift if headings are renamed or restructured.")
     ((string= strategy "list-item-anchor")
@@ -148,6 +158,11 @@
                    :view-title (getf json :viewTitle)
                    :pane-id (getf json :paneId)
                    :context-object-id (getf json :contextObjectId)
+                   :page-title (getf json :pageTitle)
+                   :site-domain (getf json :siteDomain)
+                   :page-slug (getf json :pageSlug)
+                   :story-item-id (getf json :storyItemId)
+                   :story-item-type (getf json :storyItemType)
                    :strategy strategy
                    :value (or (getf json :value)
                               (getf json :fallbackValue)
@@ -172,7 +187,8 @@
                    :object-id (getf json :objectId))))
 
 (defun anchor-surface-label (anchor)
-  (let ((context-object-id (context-object-id-of anchor))
+  (let ((context-object-id (or (page-title-of anchor)
+                               (context-object-id-of anchor)))
         (view-title (view-title-of anchor)))
     (cond
       ((and context-object-id view-title)

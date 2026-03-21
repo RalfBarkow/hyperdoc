@@ -87,6 +87,30 @@ async function openTextPageFromHyperDoc(page, title) {
   return textPagePane;
 }
 
+async function openFedWikiPageFromTextPageLink(page, paneIndex, linkText) {
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  const sourcePane = pane(page, paneIndex);
+  const reference = sourcePane
+    .locator(".hyperdoc-connect-provider-root .hyperbook-reference")
+    .filter({ hasText: exactTextPattern(linkText) })
+    .first();
+  await expect(reference).toBeVisible({ timeout: 20_000 });
+  await settleInspectorBindings(page);
+  await reference.click();
+  await expect
+    .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+    .toBe(paneCountBefore + 1);
+  const fedwikiPane = pane(page, paneCountBefore);
+  await expect(fedwikiPane).toBeVisible({ timeout: 20_000 });
+  await expect(
+    fedwikiPane.locator(".inspector-tabs button").filter({
+      hasText: exactTextPattern("Story"),
+    }).first()
+  ).toBeVisible({ timeout: 20_000 });
+  await settleInspectorBindings(page);
+  return fedwikiPane;
+}
+
 async function selectSourceTab(page, paneIndex) {
   await activatePaneTab(page, paneIndex, "Source");
 }
@@ -95,12 +119,23 @@ async function activatePaneTab(page, paneIndex, title) {
   const currentPane = pane(page, paneIndex);
   const tab = currentPane
     .locator(".inspector-tabs button")
-    .filter({ hasText: exactTextPattern(title) });
+    .filter({ hasText: exactTextPattern(title) })
+    .first();
   await expect(tab).toBeVisible();
-  await tab.click();
-  await expect(
-    currentPane.locator(".inspector-tabs button.active")
-  ).toHaveText(exactTextPattern(title));
+  let lastError = null;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await tab.click();
+    try {
+      await expect(
+        currentPane.locator(".inspector-tabs button.active")
+      ).toHaveText(exactTextPattern(title), { timeout: 3000 });
+      return;
+    } catch (error) {
+      lastError = error;
+      await settleInspectorBindings(page, 250);
+    }
+  }
+  throw lastError;
 }
 
 async function readPaneTitles(page) {
@@ -261,6 +296,36 @@ async function readSourcePaneState(page, paneIndex) {
   }, paneIndex);
 }
 
+async function readFedWikiStoryPaneState(page, paneIndex) {
+  return page.evaluate((index) => {
+    const paneNode = document.querySelectorAll(".inspector-pane")[index];
+    const surface = paneNode?.querySelector(".hyperdoc-connect-provider-surface");
+    const items = paneNode
+      ? Array.from(paneNode.querySelectorAll(".hyperdoc-fedwiki-story-item-anchor"))
+      : [];
+    return {
+      paneCount: document.querySelectorAll(".inspector-pane").length,
+      title:
+        paneNode?.querySelector(".inspector-title-bar-class")?.textContent?.trim() || null,
+      activeTab:
+        paneNode?.querySelector(".inspector-tabs button.active")?.textContent?.trim() ||
+        null,
+      providerKind: surface?.dataset.hyperdocConnectProviderKind || null,
+      viewKind: surface?.dataset.hyperdocConnectViewKind || null,
+      itemCount: items.length,
+      firstItems: items.slice(0, 5).map((item) => ({
+        label: item.dataset.hyperdocFedwikiStoryItemLabel || null,
+        id: item.dataset.hyperdocFedwikiStoryItemId || null,
+        type: item.dataset.hyperdocFedwikiStoryItemType || null,
+        siteDomain: item.dataset.hyperdocFedwikiSiteDomain || null,
+        pageSlug: item.dataset.hyperdocFedwikiPageSlug || null,
+        pageTitle: item.dataset.hyperdocFedwikiPageTitle || null,
+        text: item.textContent?.replace(/\s+/g, " ").trim().slice(0, 140) || "",
+      })),
+    };
+  }, paneIndex);
+}
+
 async function waitForSourceProvider(page, paneIndex) {
   const currentPane = pane(page, paneIndex);
   await expect.poll(
@@ -317,6 +382,34 @@ async function runTwoPaneContentAssociation(page, title) {
   };
 }
 
+async function runHyperDocToFedWikiAssociation(
+  page,
+  hyperdocTitle = "Linking HyperDoc pages to FedWiki pages",
+  fedwikiLinkText = "FIND"
+) {
+  await openHyperDoc(page);
+  const textPagePane = await openTextPageFromHyperDoc(page, hyperdocTitle);
+  const fedwikiPane = await openFedWikiPageFromTextPageLink(page, 2, fedwikiLinkText);
+  await activatePaneTab(page, 2, "Content");
+  await activatePaneTab(page, 3, "Story");
+  const fedwikiState = await readFedWikiStoryPaneState(page, 3);
+  await clearDomConnectTrace(page);
+  await startConnectInPane(page, 2);
+  await textPagePane
+    .locator(".hyperdoc-connect-provider-root h1")
+    .filter({ hasText: exactTextPattern(hyperdocTitle) })
+    .click();
+  const sessionAfterSource = await readConnectSessionState(page);
+  await fedwikiPane.locator(".hyperdoc-fedwiki-story-item-anchor").nth(0).click();
+  const trace = await waitForAssociationResult(page);
+  return {
+    fedwikiState,
+    sessionAfterSource,
+    trace,
+    paneTitles: await readPaneTitles(page),
+  };
+}
+
 async function runSourceAssociation(page, title) {
   await openHyperDoc(page);
   await openTextPageFromHyperDoc(page, title);
@@ -342,14 +435,17 @@ module.exports = {
   exactTextPattern,
   gotoCatalog,
   openHyperDoc,
+  openFedWikiPageFromTextPageLink,
   openTextPageFromHyperDoc,
   pane,
   readConnectSessionState,
   readHelpPanelState,
   readDomConnectTrace,
+  readFedWikiStoryPaneState,
   readPaneTitles,
   readSourcePaneState,
   runContentAssociation,
+  runHyperDocToFedWikiAssociation,
   runTwoPaneContentAssociation,
   runSourceAssociation,
   selectSourceTab,

@@ -21,6 +21,9 @@ This suite materializes the current DOM association findings as browser tests:
 - `content view opens a cross-pane association through pane-chrome Connect`
   - proves an explicit two-pane Connect session survives source selection in one pane and target selection in another
   - asserts the authoritative transport carries distinct source and target pane ids
+- `content view opens a HyperDoc to FedWiki association through pane-chrome Connect`
+  - proves the first real heterogeneous two-pane path: HyperDoc content anchor -> FedWiki story-item anchor
+  - asserts the authoritative transport remains `button-payload-v2` while carrying `dom-v1` on one side and `fedwiki-v1` on the other
 - `pane-chrome help opens without shifting the active view`
   - proves the `?` help toggle opens in the subordinate pane-chrome Connect row
   - asserts the help panel does not move the active view or change document height
@@ -62,6 +65,7 @@ The current expected Chromium state is:
 
 - content transport test passes
 - two-pane content association test passes
+- HyperDoc-to-FedWiki association test passes
 - help toggle test passes
 - main-tab click-safety test passes
 - provider-sync round-trip test passes

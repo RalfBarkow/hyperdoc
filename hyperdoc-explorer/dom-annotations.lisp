@@ -49,6 +49,9 @@
    (context-object :initarg :context-object
                    :reader anchor-provider-context-object-of)))
 
+(defclass fedwiki-view-anchor-provider (view-anchor-provider)
+  ((page :initarg :page :reader anchor-provider-page-of)))
+
 (defgeneric anchor-provider-connectable-p (provider))
 
 (defgeneric render-anchor-provider-body (provider))
@@ -58,6 +61,9 @@
   t)
 
 (defmethod render-anchor-provider-body ((provider dom-view-anchor-provider))
+  (funcall (anchor-provider-body-thunk-of provider)))
+
+(defmethod render-anchor-provider-body ((provider fedwiki-view-anchor-provider))
   (funcall (anchor-provider-body-thunk-of provider)))
 
 (defun source-line-label (line-number line-text)
@@ -179,6 +185,87 @@
    context-object
    view-title))
 
+(defun fedwiki-story-item-type-label (item)
+  (-> item
+      hyperbook/fedwiki::item-type-of
+      symbol-name
+      string-downcase))
+
+(defun fedwiki-story-item-anchor-label (item)
+  (let* ((type-label (fedwiki-story-item-type-label item))
+         (text (string-trim '(#\Space #\Tab #\Newline #\Return)
+                            (or (hyperbook/fedwiki::text-of item)
+                                ""))))
+    (if (> (length text) 0)
+        (shorten-dom-association-label
+         (format nil "~A: ~A" type-label text)
+         96)
+        (format nil "~A item ~A"
+                (string-capitalize type-label)
+                (hyperbook/fedwiki::id-of item)))))
+
+(defun render-fedwiki-story-item-anchor (page item)
+  (let* ((wiki (hyperbook/fedwiki::origin-of page))
+         (site-domain (hyperbook/fedwiki::domain-name-of wiki))
+         (page-slug (hyperbook/fedwiki::origin-id-of page))
+         (page-title (hb:title-of page))
+         (item-type (fedwiki-story-item-type-label item))
+         (item-id (hyperbook/fedwiki::id-of item))
+         (label (fedwiki-story-item-anchor-label item)))
+    (views:html
+      (:div :class "hyperdoc-fedwiki-story-item-anchor"
+            :title item-type
+            :data-hyperdoc-fedwiki-story-item-anchor "true"
+            :data-hyperdoc-fedwiki-site-domain site-domain
+            :data-hyperdoc-fedwiki-page-slug page-slug
+            :data-hyperdoc-fedwiki-page-title page-title
+            :data-hyperdoc-fedwiki-story-item-id item-id
+            :data-hyperdoc-fedwiki-story-item-type item-type
+            :data-hyperdoc-fedwiki-story-item-label label
+            (hyperbook/fedwiki::render-story-item
+             (hyperbook/fedwiki::item-type-of item)
+             item
+             page)))))
+
+(defun render-fedwiki-connect-surface (page view-title)
+  (let* ((wiki (hyperbook/fedwiki::origin-of page))
+         (domain (hyperbook/fedwiki::domain-name-of wiki))
+         (protocol (hyperbook/fedwiki::protocol-of wiki)))
+    (render-anchor-provider-surface
+     (make-instance 'fedwiki-view-anchor-provider
+                    :kind "fedwiki-v1"
+                    :view-kind "story"
+                    :help-summary
+                    "Connect FedWiki story items in this page to create an association."
+                    :help-detail
+                    "Selections resolve to durable story-item identity: site + slug + story-item id. DOM location is fallback metadata only."
+                    :page page
+                    :body-thunk
+                    (lambda ()
+                      (views:add-asset-path "/hyperbook/"
+                                            (asdf:system-relative-pathname
+                                             :hyperbook
+                                             "assets/hyperbook/"))
+                      (views:include-css "/hyperbook/css/hyperbook.css")
+                      (views:html
+                        (:div :class "hyperbook-page"
+                              (:h1 (:img :src (hyperbook/fedwiki::wiki-url
+                                               domain
+                                               protocol
+                                               "/favicon.png"))
+                                   (views:esc " ")
+                                   (views:esc (hb:title-of page)))
+                              (loop for item across (hyperbook/fedwiki::story-of page)
+                                    do (render-fedwiki-story-item-anchor
+                                        page item))))))
+     page
+     view-title)))
+
+(views:defview 👀story (page hyperbook/fedwiki::fedwiki-page)
+  (hyperbook/fedwiki::load-page page)
+  (views:html-view :title "Story" :priority 2
+    (render-fedwiki-connect-surface page "Story")))
+
 (defmethod views:text-representation ((anchor dom-annotation-anchor))
   (or (label-of anchor)
       (anchor-value-of anchor)))
@@ -201,11 +288,26 @@
               (:tr (:th "Context object")
                    (:td (:tt (views:esc (or (context-object-id-of anchor)
                                             "-")))))
+              (:tr (:th "Page title")
+                   (:td (:tt (views:esc (or (page-title-of anchor)
+                                            "-")))))
               (:tr (:th "View kind")
                    (:td (:tt (views:esc (or (view-kind-of anchor)
                                             "-")))))
               (:tr (:th "View title")
                    (:td (:tt (views:esc (or (view-title-of anchor)
+                                            "-")))))
+              (:tr (:th "Site domain")
+                   (:td (:tt (views:esc (or (site-domain-of anchor)
+                                            "-")))))
+              (:tr (:th "Page slug")
+                   (:td (:tt (views:esc (or (page-slug-of anchor)
+                                            "-")))))
+              (:tr (:th "Story item id")
+                   (:td (:tt (views:esc (or (story-item-id-of anchor)
+                                            "-")))))
+              (:tr (:th "Story item type")
+                   (:td (:tt (views:esc (or (story-item-type-of anchor)
                                             "-")))))
               (:tr (:th "Resolved strategy")
                    (:td (:tt (views:esc (anchor-strategy-of anchor)))))

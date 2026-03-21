@@ -84,6 +84,24 @@
     return candidate;
   }
 
+  function fedwikiStoryItemAnchorCandidate(root, target) {
+    if (!root || !target) {
+      return null;
+    }
+    var candidate = target.nodeType === 1 ? target : target.parentElement;
+    if (!candidate) {
+      return null;
+    }
+    candidate = candidate.closest("[data-hyperdoc-fedwiki-story-item-anchor='true']");
+    if (!candidate || !root.contains(candidate)) {
+      return null;
+    }
+    if (candidate.closest("[data-hyperdoc-connect-ignore='true']")) {
+      return null;
+    }
+    return candidate;
+  }
+
   function domPath(element, root) {
     var parts = [];
     var current = element;
@@ -394,6 +412,59 @@
     };
   }
 
+  function buildFedwikiAnchor(element, surface, root, target) {
+    var clickedElement = domAnchorCandidate(root, target) || element;
+    var fallback = buildDomFallbackMetadata(clickedElement, root);
+    var siteDomain = element.dataset.hyperdocFedwikiSiteDomain ||
+      surface && surface.dataset.hyperdocFedwikiSiteDomain ||
+      null;
+    var pageSlug = element.dataset.hyperdocFedwikiPageSlug ||
+      surface && surface.dataset.hyperdocFedwikiPageSlug ||
+      null;
+    var pageTitle = element.dataset.hyperdocFedwikiPageTitle ||
+      surface && surface.dataset.hyperdocFedwikiPageTitle ||
+      null;
+    var storyItemId = element.dataset.hyperdocFedwikiStoryItemId || null;
+    var storyItemType = element.dataset.hyperdocFedwikiStoryItemType || null;
+    var label = collapseWhitespace(
+      element.dataset.hyperdocFedwikiStoryItemLabel ||
+      fallback.label ||
+      pageTitle ||
+      storyItemId ||
+      "FedWiki story item"
+    );
+    var value = "story-item:" +
+      (siteDomain || "site") + "/" +
+      (pageSlug || "page") + "#" +
+      (storyItemId || "item");
+    return {
+      providerKind: "fedwiki-v1",
+      viewKind: surface && surface.dataset.hyperdocConnectViewKind || "story",
+      viewTitle: surface && surface.dataset.contextViewTitle || null,
+      paneId: paneIdForElement(surface || element),
+      contextObjectId: pageTitle ||
+        surface && surface.dataset.contextObjectId ||
+        null,
+      pageTitle: pageTitle,
+      siteDomain: siteDomain,
+      pageSlug: pageSlug,
+      storyItemId: storyItemId,
+      storyItemType: storyItemType,
+      strategy: "fedwiki-story-item",
+      value: value,
+      label: limitText(label || value, 140),
+      selector: fallback.selector,
+      tagName: clickedElement && clickedElement.tagName &&
+        clickedElement.tagName.toLowerCase() || null,
+      textSnippet: fallback.textSnippet,
+      durabilityTier: "strong",
+      durabilityNote: "FedWiki story-item anchors resolve clicks to site, slug, and story-item id. They remain durable while the page slug and story-item id are preserved by journal evolution; DOM location is fallback metadata only.",
+      fallbackStrategy: fallback.strategy,
+      fallbackValue: fallback.value,
+      objectId: null
+    };
+  }
+
   function surfaceProviderKind(surface) {
     return surface && surface.dataset.hyperdocConnectProviderKind || "dom-v1";
   }
@@ -414,6 +485,14 @@
         anchorCandidate: sourceAnchorCandidate,
         buildAnchor: function (element, surface) {
           return buildSourceAnchor(element, surface);
+        }
+      };
+    }
+    if (kind === "fedwiki-v1") {
+      return {
+        anchorCandidate: fedwikiStoryItemAnchorCandidate,
+        buildAnchor: function (element, surface, root, target) {
+          return buildFedwikiAnchor(element, surface, root, target);
         }
       };
     }
@@ -520,7 +599,12 @@
       strategy: anchor && anchor.strategy,
       value: anchor && anchor.value,
       durabilityTier: anchor && anchor.durabilityTier,
-      objectId: anchor && anchor.objectId
+      objectId: anchor && anchor.objectId,
+      pageTitle: anchor && anchor.pageTitle,
+      siteDomain: anchor && anchor.siteDomain,
+      pageSlug: anchor && anchor.pageSlug,
+      storyItemId: anchor && anchor.storyItemId,
+      storyItemType: anchor && anchor.storyItemType
     };
   }
 
@@ -1316,7 +1400,7 @@
       invalidClick(state);
       return;
     }
-    var anchor = state.provider.buildAnchor(element, state.surface, state.root);
+    var anchor = state.provider.buildAnchor(element, state.surface, state.root, event.target);
     if (session.phase === "choose-source") {
       beginConnection(state, element, anchor);
       updateLineFromMouse(state, event.clientX, event.clientY);
