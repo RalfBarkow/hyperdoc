@@ -5,6 +5,7 @@
 (in-package :clog-moldable-inspector)
 
 (defvar *inspector-performance-logging* t)
+(defvar *inspector-operation-id* nil)
 
 (defun current-time-millis ()
   (round (* 1000 (/ (get-internal-real-time)
@@ -28,6 +29,8 @@
 (defun log-inspector-performance (phase &rest kvs)
   (when *inspector-performance-logging*
     (format *trace-output* "~&[INSPECTOR-PERF] ~A" phase)
+    (when *inspector-operation-id*
+      (format *trace-output* " request-id=~S" *inspector-operation-id*))
     (loop for (key value) on kvs by #'cddr
           do (format *trace-output* " ~A=~S" key value))
     (terpri *trace-output*)
@@ -183,72 +186,6 @@
                                :asset-count (length assets)
                                :dom-node-count dom-nodes)
     result))
-
-;; Override the local wiring once more to add timing logs for inspect clicks
-;; while preserving the invalid-id guard.
-(defun set-event-handlers (pane element references)
-  (with-slots (object inspector clog-obj) pane
-    (dolist (ref references)
-      (let* ((target (cdr ref))
-             (html-id (car ref)))
-        (if (not (valid-reference-id-p html-id))
-            (progn
-              (format *error-output*
-                      "~&[INSPECTOR] dropped empty ref id for ~S~%"
-                      object)
-              (finish-output *error-output*))
-            (let* ((html-id-parts (str:split "-" html-id))
-                   (ref-type (first html-id-parts))
-                   (ref-element (clog:attach-as-child element html-id)))
-              (cond
-                ((string= ref-type "inspect")
-                 (let ((view-ref nil))
-                   (when (eql (length html-id-parts) 3)
-                     (setf view-ref (hv:decode-base32 (third html-id-parts))))
-                   (clog:set-on-mouse-click
-                    ref-element
-                    #'(lambda (obj event)
-                        (declare (ignore obj))
-                        (let ((click-start (current-time-millis)))
-                          (log-inspector-performance :click/inspect
-                                                     :pane-object (summarize-object-for-log object)
-                                                     :target (summarize-object-for-log target)
-                                                     :select view-ref
-                                                     :alt? (getf event :alt-key)
-                                                     :shift? (getf event :shift-key))
-                          (when (getf event :alt-key)
-                            (clog:jquery-trigger (clog:parent element) "click"))
-                          (unless (getf event :alt-key)
-                            (unless (getf event :shift-key)
-                              (close-panes-after inspector pane))
-                            (create-pane inspector target :select view-ref))
-                          (log-inspector-performance :click/inspect-done
-                                                     :target (summarize-object-for-log target)
-                                                     :ms (elapsed-millis click-start))))
-                    :cancel-event t)))
-                ((string= ref-type "action")
-                 (clog:set-on-mouse-click
-                  ref-element
-                  #'(lambda (obj event)
-                      (if (getf event :alt-key)
-                          (progn
-                            (unless (getf event :shift-key)
-                              (close-panes-after inspector pane))
-                            (create-pane inspector target))
-                          (when (eval-thunk-with-active-button clog-obj obj target)
-                            (refresh pane))))
-                  :cancel-event t))
-                ((string= ref-type "eval")
-                 (clog:set-on-mouse-click
-                  ref-element
-                  #'(lambda (obj event)
-                      (unless (getf event :shift-key)
-                        (close-panes-after inspector pane))
-                      (if (getf event :alt-key)
-                          (create-pane inspector target)
-                          (create-pane inspector
-                                       (eval-thunk-with-active-button clog-obj obj target))))
-                  :cancel-event t)))))))))
 
 (in-package #:html-inspector-views/standard)
 

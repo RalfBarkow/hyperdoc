@@ -78,6 +78,7 @@
                 :components ((:file "package")
                              (:file "inspector-wiring")
                              (:file "inspector-performance")
+                             (:file "inspector-dom-association")
                              (:file "playground-stepper")
                              (:file "playground-package")
                              (:file "playground-bindings")
