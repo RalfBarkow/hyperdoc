@@ -178,7 +178,7 @@
                (label-of target-anchor)))))
 
 (defun dom-relation-annotation-title (source-anchor target-anchor)
-  (format nil "DOM relation annotation: ~A -> ~A"
+  (format nil "DOM association: ~A -> ~A"
           (or (label-of source-anchor)
               (anchor-value-of source-anchor))
           (or (label-of target-anchor)
@@ -186,12 +186,12 @@
 
 (defun dom-relation-annotation-summary (source-anchor target-anchor patch-target)
   (if patch-target
-      (format nil "Relation annotation between ~A and ~A within one rendered pane; this anchor pair matches an existing workflow patch target."
+      (format nil "Association between ~A and ~A within one rendered pane; this anchor pair matches an existing workflow patch target."
               (or (label-of source-anchor)
                   (anchor-value-of source-anchor))
               (or (label-of target-anchor)
                   (anchor-value-of target-anchor)))
-      (format nil "Relation annotation between ~A and ~A within one rendered pane."
+      (format nil "Association between ~A and ~A within one rendered pane."
               (or (label-of source-anchor)
                   (anchor-value-of source-anchor))
               (or (label-of target-anchor)

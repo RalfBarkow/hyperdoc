@@ -48,7 +48,7 @@
                   (:div :class "hyperdoc-dom-connect-launcher"
                         (:button :type "button"
                                  :class "hyperdoc-dom-connect-toggle"
-                                 :title "Connect visible elements in this page to create a relation annotation."
+                                 :title "Connect visible elements in this page to create an association."
                                  "Connect")
                         (:button :type "button"
                                  :class "hyperdoc-dom-connect-help-toggle"
@@ -58,7 +58,7 @@
                   (:div :class "hyperdoc-dom-connect-coachmark"
                         :hidden "hidden"
                         (:span :class "hyperdoc-dom-connect-coachmark-copy"
-                               "New: connect visible elements to create relation annotations.")
+                               "New: connect visible elements to create associations.")
                         (:span :class "hyperdoc-dom-connect-coachmark-actions"
                                (:button :type "button"
                                         :class "hyperdoc-dom-connect-try"
@@ -69,7 +69,7 @@
                   (:div :class "hyperdoc-dom-connect-strip"
                         :hidden "hidden"
                         (:span :class "hyperdoc-dom-connect-status"
-                               "Connect mode - click source element")
+                               "Connect mode - choose source element")
                         (:span :class "hyperdoc-dom-connect-strip-actions"
                                (:button :type "button"
                                         :class "hyperdoc-dom-connect-help-toggle"
@@ -81,8 +81,8 @@
                                         "Cancel")))
                   (:div :class "hyperdoc-dom-connect-help-panel"
                         :hidden "hidden"
-                        (:p "Connect visible elements in this page to create relation annotations.")
-                        (:p "Click source, then target. Esc cancels.")))
+                        (:p "Connect visible elements in this page to create an association.")
+                        (:p "Choose source, then target. Esc cancels.")))
             (:div :class "hyperdoc-dom-connect-controls"
                   :style "display:none"
                   :data-source-input-id source-input-id
@@ -92,7 +92,7 @@
                   (:span :class "hyperdoc-dom-connect-submit"
                          :style "display:none"
                          (views:eval-button
-                          "Open DOM relation annotation"
+                          "Open association"
                           (views:thunk
                             (make-dom-relation-annotation-from-json
                              :context-object context-object
@@ -152,7 +152,7 @@
       (:h3 (views:esc (title-of annotation)))
       (:p (views:esc (summary-of annotation)))
       (:table :class "inspector-table"
-              (:tr (:th "Relation kind")
+              (:tr (:th "Association kind")
                    (:td (:tt (views:esc (or (relation-kind-of annotation)
                                             "-")))))
               (:tr (:th "Context view")

@@ -190,11 +190,11 @@
     state.cancel.hidden = !(phase === "select-source" || phase === "select-target");
 
     if (phase === "select-source") {
-      setStatus(state, "Connect mode - click source element");
+      setStatus(state, "Connect mode - choose source element");
     } else if (phase === "select-target") {
-      setStatus(state, "Source selected - click target element");
+      setStatus(state, "Source selected - choose target element");
     } else if (phase === "submitting") {
-      setStatus(state, "Opening relation annotation...");
+      setStatus(state, "Opening association...");
     }
   }
 
@@ -304,7 +304,7 @@
   function invalidClick(state) {
     setStatus(
       state,
-      "Click inside the rendered content, not the controls, to create a relation."
+      "Click inside the rendered content, not the controls, to create an association."
     );
   }
 
@@ -328,7 +328,7 @@
     if (anchorKey(anchor) === anchorKey(state.source)) {
       setStatus(
         state,
-        "Source selected - click a different target element."
+        "Source selected - choose a different target element."
       );
       return;
     }
