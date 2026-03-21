@@ -1589,6 +1589,57 @@
                  "Authoring Documentation in HyperDoc"
                  "Documentation validation and commit gates")))
 
+(defun dmx-workspace-sharing-mode-topic ()
+  (make-topic
+   :id "dmx-workspace-sharing-mode"
+   :title "DMX workspace sharing modes for AI context windows"
+   :summary "For AI-facing DMX use, Public is the conservative world-readable choice and Common is the deliberate world read/write choice."
+   :references '("Use a DMX Common workspace as a world read/write context window"
+                 "Codex read/write boundary for a DMX topicmap"
+                 "Why a DMX webclient URL alone is not a durable Codex interface"
+                 "https://dmx.readthedocs.io/en/latest/user.html#workspace-sharing-modes")))
+
+(defun dmx-context-window-topic ()
+  (make-topic
+   :id "dmx-context-window"
+   :title "Use a DMX Common workspace as a world read/write context window"
+   :summary "Choose a DMX Common workspace as a context window only when the material is intentionally open for world read/write use."
+   :references '("DMX workspace sharing modes for AI context windows"
+                 "Common workspace"
+                 "Codex read/write boundary for a DMX topicmap"
+                 "Why a DMX webclient URL alone is not a durable Codex interface"
+                 "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/919822")))
+
+(defun common-workspace-topic ()
+  (make-topic
+   :id "common-workspace"
+   :title "Common workspace"
+   :summary "A DMX Common workspace is the deliberate choice when anonymous or world write access is intentionally part of the operating model."
+   :references '("Use a DMX Common workspace as a world read/write context window"
+                 "DMX workspace sharing modes for AI context windows"
+                 "https://dmx.readthedocs.io/en/latest/user.html#workspace-sharing-modes"
+                 "https://dmx.readthedocs.io/en/latest/admin.html#request-filters")))
+
+(defun codex-dmx-access-boundary-topic ()
+  (make-topic
+   :id "codex-dmx-access-boundary"
+   :title "Codex read/write boundary for a DMX topicmap"
+   :summary "A DMX topicmap link is an operational target reference, not proof that Codex already has live read/write access."
+   :references '("Why a DMX webclient URL alone is not a durable Codex interface"
+                 "Use a DMX Common workspace as a world read/write context window"
+                 "DMX workspace sharing modes for AI context windows"
+                 "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/919822")))
+
+(defun dmx-webclient-url-alone-is-not-a-durable-codex-interface-topic ()
+  (make-topic
+   :id "dmx-webclient-url-alone-is-not-a-durable-codex-interface"
+   :title "Why a DMX webclient URL alone is not a durable Codex interface"
+   :summary "A DMX webclient hash URL opens a browser-facing SPA state, not a durable agent interface or stable machine-writable contract."
+   :references '("Codex read/write boundary for a DMX topicmap"
+                 "Use a DMX Common workspace as a world read/write context window"
+                 "DMX workspace sharing modes for AI context windows"
+                 "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/919822")))
+
 (defun definitive-common-lisp-books-topic ()
   (make-topic
    :id "definitive-common-lisp-books"

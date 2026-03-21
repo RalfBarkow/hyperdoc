@@ -2,15 +2,19 @@
 
 const { test, expect } = require("@playwright/test");
 const {
-  activatePaneTab,
   attachJson,
   openHyperDoc,
-  readHelpPanelState,
   readPaneTitles,
   runContentAssociation,
   runSourceAssociation,
-  toggleHelpInPane,
 } = require("./hyperdoc-inspector");
+const {
+  assertHelpPanelAttachment,
+  assertProviderSurfaceSync,
+  assertTabClickSafety,
+  openPaneChromeHelp,
+  readPaneChromeState,
+} = require("./pane-chrome-harness");
 
 test.describe.configure({ mode: "serial" });
 
@@ -52,45 +56,43 @@ test("pane-chrome help opens without shifting the active view", async ({
   page,
 }, testInfo) => {
   await openHyperDoc(page);
-  const before = await readHelpPanelState(page, 1);
-  const after = await toggleHelpInPane(page, 1);
+  const before = await readPaneChromeState(page, 1);
+  const after = await openPaneChromeHelp(page, 1);
 
   await attachJson(testInfo, "help-before.json", before);
   await attachJson(testInfo, "help-after.json", after);
 
-  expect(before.slotHelpOpen).toBe("false");
-  expect(before.helpExpanded).toBe("false");
-  expect(before.panelDisplay).toBe("none");
-
-  expect(after.slotHelpOpen).toBe("true");
-  expect(after.helpExpanded).toBe("true");
-  expect(after.helpAriaHidden).toBe("false");
-  expect(after.panelDisplay).toBe("block");
-  expect(after.tabRowHeight).toBe(before.tabRowHeight);
-  expect(after.activeViewTop).toBe(before.activeViewTop);
-  expect(after.documentScrollHeight).toBe(before.documentScrollHeight);
-  expect(after.panelTop).toBeGreaterThan(after.controlBottom);
+  assertHelpPanelAttachment(before, after);
 });
 
-test("Pages tab stays clickable while Connect help is open", async ({
+test("main tabs stay clickable while Connect help is open", async ({
   page,
 }, testInfo) => {
   await openHyperDoc(page);
-  const before = await readHelpPanelState(page, 1);
-  const withHelp = await toggleHelpInPane(page, 1);
-  await activatePaneTab(page, 1, "Pages");
-  const after = await readHelpPanelState(page, 1);
-  const paneTitles = await readPaneTitles(page);
+  const states = await assertTabClickSafety(page, 1, ["Systems", "Pages", "Main page"], {
+    openHelp: true,
+  });
 
-  await attachJson(testInfo, "pages-tab-before.json", before);
-  await attachJson(testInfo, "pages-tab-with-help.json", withHelp);
-  await attachJson(testInfo, "pages-tab-after.json", after);
-  await attachJson(testInfo, "pages-tab-pane-titles.json", paneTitles);
+  await attachJson(testInfo, "tab-click-safety.json", states);
+  expect(states[states.length - 1].paneTitles[1].activeTab).toBe("Main page");
+});
 
-  expect(before.slotHidden).toBe(false);
-  expect(withHelp.helpExpanded).toBe("true");
-  expect(withHelp.helpAriaHidden).toBe("false");
-  expect(paneTitles[1].activeTab).toBe("Pages");
+test("provider-surface sync settles across a Pages round trip", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  const sync = await assertProviderSurfaceSync(page, 1, {
+    connectableTab: "Main page",
+    nonConnectableTab: "Pages",
+    returnTab: "Main page",
+  });
+
+  await attachJson(testInfo, "provider-sync.json", sync);
+
+  expect(sync.connectable.chrome.slotHidden).toBe(false);
+  expect(sync.nonConnectable.chrome.slotHidden).toBe(true);
+  expect(sync.returned.chrome.slotHidden).toBe(false);
+  expect(sync.returned.paneTitles[1].activeTab).toBe("Main page");
 });
 
 test("source view exposes source anchors and opens an association", async (
