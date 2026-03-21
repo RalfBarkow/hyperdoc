@@ -577,7 +577,7 @@ PAGE-LOOKUP-FAILURE."
 ;;
 
 (views:defview 👀source (page text-page)
-  (-> page
-      file-of
-      views:👀content
-      (views:rename :title "Source" :priority 10)))
+  (views:html-view :title "Source" :priority 10
+    (render-source-connect-surface page
+                                   "Source"
+                                   (file-of page))))

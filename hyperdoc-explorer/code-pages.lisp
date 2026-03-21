@@ -9,10 +9,10 @@
 ;;
 
 (views:defview views:👀source (page code-page)
-  (-> page
-      file-of
-      views:👀source
-      (views:rename :title "Source" :priority 1)))
+  (views:html-view :title "Source" :priority 1
+    (render-source-connect-surface page
+                                   "Source"
+                                   (source-code-pathname page))))
 
 ;;
 ;; HTML parse tree

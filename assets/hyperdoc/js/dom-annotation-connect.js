@@ -17,7 +17,7 @@
     return String(value).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
   }
 
-  function anchorCandidate(root, target) {
+  function domAnchorCandidate(root, target) {
     if (!target) {
       return null;
     }
@@ -37,6 +37,17 @@
       candidate = candidate.parentElement;
     }
     return null;
+  }
+
+  function sourceAnchorCandidate(root, target) {
+    if (!root || !target) {
+      return null;
+    }
+    var candidate = target.closest("[data-hyperdoc-connect-source-anchor='true']");
+    if (!candidate || !root.contains(candidate)) {
+      return null;
+    }
+    return candidate;
   }
 
   function domPath(element, root) {
@@ -71,7 +82,7 @@
     return value;
   }
 
-  function buildAnchor(element, root) {
+  function buildDomAnchor(element, root, surface) {
     var anchorId = element.dataset.hyperdocAnchorId;
     var objectId = element.dataset.hyperdocObjectId;
     var elementId = element.id;
@@ -95,13 +106,90 @@
       value
     );
     return {
+      providerKind: "dom-v1",
+      viewKind: surface && surface.dataset.hyperdocConnectViewKind || "content",
+      viewTitle: surface && surface.dataset.contextViewTitle || null,
       strategy: strategy,
       value: value,
       selector: anchorSelector(strategy, value),
       label: limitText(label || value, 140),
       tagName: element.tagName.toLowerCase(),
       textSnippet: limitText(collapseWhitespace(element.textContent || ""), 220),
+      durabilityNote: (function () {
+        if (strategy === "data-anchor") {
+          return "Authored anchor ids are the strongest DOM-backed anchors in this slice; durability depends on the id being preserved across page revisions.";
+        }
+        if (strategy === "data-object-id") {
+          return "Object-id anchors remain stable while the rendered element continues to represent the same related object.";
+        }
+        if (strategy === "element-id") {
+          return "Element-id anchors remain stable while the DOM id is preserved.";
+        }
+        return "Relative DOM-path anchors are fallback-level and can drift when the rendered tree shape changes.";
+      }()),
       objectId: objectId || null
+    };
+  }
+
+  function buildSourceAnchor(element, surface) {
+    var path = element.dataset.hyperdocSourcePath || "";
+    var startLine = Number(element.dataset.hyperdocSourceStartLine || 0) || null;
+    var endLine = Number(element.dataset.hyperdocSourceEndLine || 0) || startLine;
+    var startColumn = Number(element.dataset.hyperdocSourceStartColumn || 0) || 1;
+    var endColumn = Number(element.dataset.hyperdocSourceEndColumn || 0) || startColumn;
+    var value = element.dataset.hyperdocSourceValue || path;
+    var label = collapseWhitespace(
+      element.dataset.hyperdocSourceLabel ||
+      element.innerText ||
+      element.textContent ||
+      value
+    );
+    return {
+      providerKind: "source-v1",
+      viewKind: surface && surface.dataset.hyperdocConnectViewKind || "source",
+      viewTitle: surface && surface.dataset.contextViewTitle || null,
+      strategy: "source-line",
+      value: value,
+      label: limitText(label || value, 140),
+      path: path,
+      startLine: startLine,
+      endLine: endLine,
+      startColumn: startColumn,
+      endColumn: endColumn,
+      textSnippet: limitText(collapseWhitespace(element.textContent || ""), 220),
+      durabilityNote: "Source line anchors are durable for the same file path and line range, but line numbers can drift when the source file changes.",
+      objectId: element.dataset.hyperdocSourceObjectId || null
+    };
+  }
+
+  function surfaceProviderKind(surface) {
+    return surface && surface.dataset.hyperdocConnectProviderKind || "dom-v1";
+  }
+
+  function providerHelpSummary(surface) {
+    return surface && surface.dataset.hyperdocConnectHelpSummary ||
+      "Connect anchors in this view to create an association.";
+  }
+
+  function providerHelpDetail(surface) {
+    return surface && surface.dataset.hyperdocConnectHelpDetail ||
+      "Choose source, then target. Esc cancels.";
+  }
+
+  function providerApiForKind(kind) {
+    if (kind === "source-v1") {
+      return {
+        anchorCandidate: sourceAnchorCandidate,
+        buildAnchor: function (element, surface) {
+          return buildSourceAnchor(element, surface);
+        }
+      };
+    }
+    return {
+      anchorCandidate: domAnchorCandidate,
+      buildAnchor: function (element, surface, root) {
+        return buildDomAnchor(element, root, surface);
+      }
     };
   }
 
@@ -157,6 +245,7 @@
     return {
       found: !!surface,
       id: surface && surface.id || null,
+      providerKind: surfaceProviderKind(surface),
       contextObjectId: surface && surface.dataset.contextObjectId || null,
       contextViewTitle: surface && surface.dataset.contextViewTitle || null
     };
@@ -200,6 +289,15 @@
   }
 
   function logStage(requestId, stage, details) {
+    window.hyperdocDomConnectEvents = window.hyperdocDomConnectEvents || [];
+    window.hyperdocDomConnectEvents.push({
+      requestId: requestId,
+      stage: stage,
+      details: details === undefined ? null : details
+    });
+    if (window.hyperdocDomConnectEvents.length > 400) {
+      window.hyperdocDomConnectEvents.shift();
+    }
     if (details !== undefined) {
       console.log("[DOM-ASSOC]", requestId, stage, details);
     } else {
@@ -334,6 +432,20 @@
     state.helpPanel.setAttribute("aria-hidden", state.helpOpen ? "false" : "true");
   }
 
+  function updateProviderCopy(state) {
+    var helpSummary = providerHelpSummary(state.surface);
+    var helpDetail = providerHelpDetail(state.surface);
+    state.helpToggle.title = helpSummary;
+    state.helpToggle.setAttribute("aria-label", helpSummary);
+    state.toggle.title = helpSummary;
+    state.helpPanel.innerHTML =
+      "<p>" + helpSummary + "</p>" +
+      "<p>" + helpDetail + "</p>";
+    if (state.coachmarkCopy) {
+      state.coachmarkCopy.textContent = helpSummary;
+    }
+  }
+
   function activeSurfaceForPane(pane) {
     if (!pane) {
       return null;
@@ -344,7 +456,9 @@
       if (view.hidden) {
         continue;
       }
-      var surface = view.querySelector(".hyperdoc-dom-connect-surface");
+      var surface = view.querySelector(
+        ".hyperdoc-connect-provider-surface, .hyperdoc-dom-connect-surface"
+      );
       if (surface) {
         return surface;
       }
@@ -360,21 +474,21 @@
     slot.innerHTML =
       '<div class="hyperdoc-dom-connect-control" data-hyperdoc-connect-ignore="true">' +
         '<button type="button" class="hyperdoc-dom-connect-toggle" ' +
-                'title="Connect visible elements in this page to create an association.">Connect</button>' +
+                'title="Connect anchors in this view to create an association.">Connect</button>' +
         '<span class="hyperdoc-dom-connect-status" hidden>Connect: choose source</span>' +
         '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
         '<button type="button" class="hyperdoc-dom-connect-help-toggle" ' +
-                'title="How DOM connect works" aria-label="How DOM connect works" aria-expanded="false">?</button>' +
+                'title="How Connect works in this view" aria-label="How Connect works in this view" aria-expanded="false">?</button>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-coachmark" hidden>' +
-        '<span class="hyperdoc-dom-connect-coachmark-copy">New: connect visible elements to create associations.</span>' +
+        '<span class="hyperdoc-dom-connect-coachmark-copy">New: connect anchors in this view to create associations.</span>' +
         '<span class="hyperdoc-dom-connect-coachmark-actions">' +
           '<button type="button" class="hyperdoc-dom-connect-try">Try it</button>' +
           '<button type="button" class="hyperdoc-dom-connect-dismiss">Dismiss</button>' +
         '</span>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-help-panel" aria-hidden="true">' +
-        '<p>Connect visible elements in this page to create an association.</p>' +
+        '<p>Connect anchors in this view to create an association.</p>' +
         '<p>Choose source, then target. Esc cancels.</p>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-feedback" hidden></div>';
@@ -404,6 +518,7 @@
   }
 
   function bindSurface(state, surface) {
+    var provider = providerApiForKind(surfaceProviderKind(surface));
     state.surface = surface || null;
     state.root = null;
     state.overlay = null;
@@ -411,6 +526,8 @@
     state.sourceInput = null;
     state.targetInput = null;
     state.submit = null;
+    state.provider = provider;
+    state.providerKind = surfaceProviderKind(surface);
     if (!surface) {
       return false;
     }
@@ -433,6 +550,7 @@
     state.sourceInput = sourceInput;
     state.targetInput = targetInput;
     state.submit = submit;
+    updateProviderCopy(state);
     return true;
   }
 
@@ -463,6 +581,7 @@
     }
     if (!previousAvailable || previousSurface !== surface) {
       clearFeedback(state);
+      updateProviderCopy(state);
       if (state.learned || state.introDismissed) {
         setPhase(state, "dormant");
       } else {
@@ -594,6 +713,7 @@
     var targetJson = JSON.stringify(targetAnchor);
     var payload = {
       requestId: requestId,
+      providerKind: state.providerKind,
       contextObjectId: submitSurface && submitSurface.dataset.contextObjectId || null,
       contextViewTitle: submitSurface && submitSurface.dataset.contextViewTitle || null,
       source: state.source,
@@ -644,6 +764,7 @@
     writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson);
     logStage(requestId, "request-payload-written", {
       transport: "button-payload-v1",
+      providerKind: state.providerKind,
       submitButtonId: submitButton.id || null,
       sourceFieldId: state.sourceInput.id || null,
       targetFieldId: state.targetInput.id || null,
@@ -667,6 +788,7 @@
     logStage(requestId, "request-sent-to-create-open-association", {
       contextObjectId: payload.contextObjectId,
       contextViewTitle: payload.contextViewTitle,
+      providerKind: state.providerKind,
       transport: "button-payload-v1"
     });
     registerPendingRequest(state, requestId);
@@ -682,7 +804,7 @@
   function invalidClick(state) {
     setStatus(
       state,
-      "Click inside the rendered page content, not the pane chrome, to create an association."
+      "Click inside the active view representation, not the pane chrome, to create an association."
     );
   }
 
@@ -695,12 +817,14 @@
     if (!state.root || event.currentTarget !== state.root) {
       return;
     }
-    var element = anchorCandidate(state.root, event.target);
+    var element = state.provider &&
+      state.provider.anchorCandidate &&
+      state.provider.anchorCandidate(state.root, event.target);
     if (!element) {
       invalidClick(state);
       return;
     }
-    var anchor = buildAnchor(element, state.root);
+    var anchor = state.provider.buildAnchor(element, state.surface, state.root);
     if (!state.source) {
       beginConnection(state, element, anchor);
       updateLineFromMouse(state, event.clientX, event.clientY);
@@ -728,6 +852,7 @@
     ensurePaneControlMarkup(slot);
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
     var coachmark = slot.querySelector(".hyperdoc-dom-connect-coachmark");
+    var coachmarkCopy = slot.querySelector(".hyperdoc-dom-connect-coachmark-copy");
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
     var helpToggle = slot.querySelector(".hyperdoc-dom-connect-help-toggle");
     var tryButton = slot.querySelector(".hyperdoc-dom-connect-try");
@@ -736,7 +861,7 @@
     var feedback = slot.querySelector(".hyperdoc-dom-connect-feedback");
     var helpPanel = slot.querySelector(".hyperdoc-dom-connect-help-panel");
     var status = slot.querySelector(".hyperdoc-dom-connect-status");
-    if (!control || !coachmark || !toggle || !helpToggle || !tryButton ||
+    if (!control || !coachmark || !coachmarkCopy || !toggle || !helpToggle || !tryButton ||
         !dismissButton || !cancel || !feedback || !helpPanel || !status) {
       return null;
     }
@@ -745,6 +870,7 @@
       slot: slot,
       control: control,
       coachmark: coachmark,
+      coachmarkCopy: coachmarkCopy,
       toggle: toggle,
       cancel: cancel,
       feedback: feedback,
@@ -763,6 +889,8 @@
       requestId: null,
       pendingRequest: null,
       resetTimer: null,
+      provider: providerApiForKind("dom-v1"),
+      providerKind: "dom-v1",
       surface: null,
       root: null,
       overlay: null,
@@ -859,7 +987,12 @@
       }, true);
       root.addEventListener("mousemove", function (event) {
         if (state.enabled && state.root === root) {
-          setHoverElement(state, anchorCandidate(state.root, event.target));
+          setHoverElement(
+            state,
+            state.provider &&
+              state.provider.anchorCandidate &&
+              state.provider.anchorCandidate(state.root, event.target)
+          );
         }
         updateLineFromMouse(state, event.clientX, event.clientY);
       }, true);
@@ -877,7 +1010,9 @@
       if (!window.currentInspectorView) {
         return;
       }
-      var surface = window.currentInspectorView.querySelector(".hyperdoc-dom-connect-surface");
+      var surface = window.currentInspectorView.querySelector(
+        ".hyperdoc-connect-provider-surface, .hyperdoc-dom-connect-surface"
+      );
       initSurface(surface);
     },
     notifyServerResult: function (detail) {

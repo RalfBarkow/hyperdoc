@@ -86,13 +86,15 @@
      :target-field-id (getf payload :target-field-id)
      :source-present? (dom-association-json-present-p (getf payload :source-json))
      :target-present? (dom-association-json-present-p (getf payload :target-json))))
-  (error "Missing ~A DOM anchor JSON." field-label))
+  (error "Missing ~A anchor JSON." field-label))
 
 (defun call-hyperdoc-dom-association-constructor (&rest arguments)
   (let* ((package (find-package :hyperdoc))
          (symbol (and package
-                      (find-symbol "MAKE-DOM-RELATION-ANNOTATION-FROM-JSON"
-                                   package))))
+                      (or (find-symbol "MAKE-ASSOCIATION-ANNOTATION-FROM-JSON"
+                                       package)
+                          (find-symbol "MAKE-DOM-RELATION-ANNOTATION-FROM-JSON"
+                                       package)))))
     (unless (and symbol (fboundp symbol))
       (error "HyperDoc DOM association constructor is unavailable."))
     (apply (symbol-function symbol) arguments)))

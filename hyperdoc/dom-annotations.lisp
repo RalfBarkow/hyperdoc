@@ -5,12 +5,25 @@
 (in-package :hyperdoc)
 
 (defclass dom-annotation-anchor ()
-  ((strategy :initarg :strategy :reader anchor-strategy-of)
+  ((provider-kind :initarg :provider-kind
+                  :initform "dom-v1"
+                  :reader provider-kind-of)
+   (view-kind :initarg :view-kind :initform nil :reader view-kind-of)
+   (view-title :initarg :view-title :initform nil :reader view-title-of)
+   (strategy :initarg :strategy :reader anchor-strategy-of)
    (value :initarg :value :reader anchor-value-of)
    (selector :initarg :selector :initform nil :reader selector-of)
    (label :initarg :label :initform nil :reader label-of)
    (tag-name :initarg :tag-name :initform nil :reader tag-name-of)
    (text-snippet :initarg :text-snippet :initform nil :reader text-snippet-of)
+   (path :initarg :path :initform nil :reader path-of)
+   (start-line :initarg :start-line :initform nil :reader start-line-of)
+   (end-line :initarg :end-line :initform nil :reader end-line-of)
+   (start-column :initarg :start-column :initform nil :reader start-column-of)
+   (end-column :initarg :end-column :initform nil :reader end-column-of)
+   (durability-note :initarg :durability-note
+                    :initform nil
+                    :reader durability-note-of)
    (object-id :initarg :object-id :initform nil :reader anchor-object-id-of)))
 
 (defclass dom-relation-annotation ()
@@ -89,18 +102,45 @@
       (getf json :value)
       "<unnamed-anchor>"))
 
+(defun inferred-anchor-durability-note (provider-kind strategy)
+  (cond
+    ((string= provider-kind "source-v1")
+     "Source line anchors are durable for the same file path and line range, but line numbers can drift when the source file changes.")
+    ((string= strategy "data-anchor")
+     "Authored anchor ids are the strongest DOM-backed anchors in this slice; durability depends on the id being preserved across page revisions.")
+    ((string= strategy "data-object-id")
+     "Object-id anchors remain stable while the rendered element continues to represent the same related object.")
+    ((string= strategy "element-id")
+     "Element-id anchors remain stable while the DOM id is preserved.")
+    (t
+     "Relative DOM-path anchors are fallback-level and can drift when the rendered tree shape changes.")))
+
 (defun make-dom-annotation-anchor-from-json (json)
-  (make-instance 'dom-annotation-anchor
-                 :strategy (or (getf json :strategy)
-                               "dom-path")
-                 :value (or (getf json :value)
-                            (getf json :selector)
-                            "")
-                 :selector (getf json :selector)
-                 :label (anchor-label-for-json json)
-                 :tag-name (getf json :tagName)
-                 :text-snippet (getf json :textSnippet)
-                 :object-id (getf json :objectId)))
+  (let* ((provider-kind (or (getf json :providerKind)
+                            "dom-v1"))
+         (strategy (or (getf json :strategy)
+                       "dom-path")))
+    (make-instance 'dom-annotation-anchor
+                   :provider-kind provider-kind
+                   :view-kind (getf json :viewKind)
+                   :view-title (getf json :viewTitle)
+                   :strategy strategy
+                   :value (or (getf json :value)
+                              (getf json :selector)
+                              "")
+                   :selector (getf json :selector)
+                   :label (anchor-label-for-json json)
+                   :tag-name (getf json :tagName)
+                   :text-snippet (getf json :textSnippet)
+                   :path (getf json :path)
+                   :start-line (getf json :startLine)
+                   :end-line (getf json :endLine)
+                   :start-column (getf json :startColumn)
+                   :end-column (getf json :endColumn)
+                   :durability-note (or (getf json :durabilityNote)
+                                        (inferred-anchor-durability-note
+                                         provider-kind strategy))
+                   :object-id (getf json :objectId))))
 
 (defun call-hyperdoc-runtime (symbol-name &rest arguments)
   (let ((symbol (find-symbol symbol-name :hyperdoc)))
@@ -188,24 +228,38 @@
                (label-of target-anchor)))))
 
 (defun dom-relation-annotation-title (source-anchor target-anchor)
-  (format nil "DOM association: ~A -> ~A"
+  (format nil "Association: ~A -> ~A"
           (or (label-of source-anchor)
               (anchor-value-of source-anchor))
           (or (label-of target-anchor)
               (anchor-value-of target-anchor))))
 
-(defun dom-relation-annotation-summary (source-anchor target-anchor patch-target)
+(defun dom-relation-annotation-summary (source-anchor target-anchor patch-target
+                                         &optional context-view-title)
   (if patch-target
-      (format nil "Association between ~A and ~A within one rendered pane; this anchor pair matches an existing workflow patch target."
+      (format nil "Association between ~A and ~A within the ~A view; this anchor pair matches an existing workflow patch target."
               (or (label-of source-anchor)
                   (anchor-value-of source-anchor))
               (or (label-of target-anchor)
-                  (anchor-value-of target-anchor)))
-      (format nil "Association between ~A and ~A within one rendered pane."
+                  (anchor-value-of target-anchor))
+              (or context-view-title "active"))
+      (format nil "Association between ~A and ~A within the ~A view."
               (or (label-of source-anchor)
                   (anchor-value-of source-anchor))
               (or (label-of target-anchor)
-                  (anchor-value-of target-anchor)))))
+                  (anchor-value-of target-anchor))
+              (or context-view-title "active"))))
+
+(defun dom-relation-annotation-durability-note (source-anchor target-anchor)
+  (let ((source-note (or (durability-note-of source-anchor)
+                         "Source anchor durability is unspecified."))
+        (target-note (or (durability-note-of target-anchor)
+                         "Target anchor durability is unspecified.")))
+    (if (string= source-note target-note)
+        source-note
+        (format nil "Source anchor durability: ~A Target anchor durability: ~A"
+                source-note
+                target-note))))
 
 (defun make-dom-relation-annotation (&key context-object
                                           context-view-title
@@ -225,7 +279,8 @@
                    :id (dom-relation-annotation-id source-anchor target-anchor)
                    :title (dom-relation-annotation-title source-anchor target-anchor)
                    :summary (dom-relation-annotation-summary
-                             source-anchor target-anchor patch-target)
+                             source-anchor target-anchor patch-target
+                             context-view-title)
                    :context-object context-object
                    :context-view-title context-view-title
                    :source-anchor source-anchor
@@ -233,21 +288,22 @@
                    :source-object source-object
                    :target-object target-object
                    :relation-kind (or (getf match :relation-kind)
-                                      "unclassified DOM relation")
+                                      "unclassified association")
                    :note (or (getf match :note)
-                             "Anchor stability is best when elements expose data-hyperdoc-anchor-id or element ids. Relative DOM-path anchors are limited to the current rendered tree shape.")
+                             (dom-relation-annotation-durability-note
+                              source-anchor target-anchor))
                    :matching-patch-target patch-target
                    :matching-defect defect
                    :matching-inserted-step inserted-step)))
 
-(defun make-dom-relation-annotation-from-json (&key context-object
-                                                    context-view-title
-                                                    source-json
-                                                    target-json)
+(defun make-association-annotation-from-json (&key context-object
+                                                   context-view-title
+                                                   source-json
+                                                   target-json)
   (let* ((source-data (or (parse-dom-annotation-json source-json)
-                          (error "Missing source DOM anchor JSON.")))
+                          (error "Missing source anchor JSON.")))
          (target-data (or (parse-dom-annotation-json target-json)
-                          (error "Missing target DOM anchor JSON.")))
+                          (error "Missing target anchor JSON.")))
          (source-anchor (make-dom-annotation-anchor-from-json source-data))
          (target-anchor (make-dom-annotation-anchor-from-json target-data)))
     (make-dom-relation-annotation
@@ -255,3 +311,13 @@
      :context-view-title context-view-title
      :source-anchor source-anchor
      :target-anchor target-anchor)))
+
+(defun make-dom-relation-annotation-from-json (&key context-object
+                                                    context-view-title
+                                                    source-json
+                                                    target-json)
+  (make-association-annotation-from-json
+   :context-object context-object
+   :context-view-title context-view-title
+   :source-json source-json
+   :target-json target-json))

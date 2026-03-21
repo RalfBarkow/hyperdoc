@@ -135,6 +135,52 @@
   position: relative;
 }
 
+.hyperdoc-source-connect-view {
+  display: block;
+  border: 1px solid rgba(107, 79, 47, 0.18);
+  border-radius: 0.8rem;
+  background: rgba(255, 252, 247, 0.98);
+  overflow: auto;
+}
+
+.hyperdoc-source-connect-line {
+  display: grid;
+  grid-template-columns: minmax(3.5rem, auto) 1fr;
+  gap: 0.9rem;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(107, 79, 47, 0.08);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0.22rem 0.7rem;
+  text-align: left;
+  font-family: "SFMono-Regular", "Menlo", "Consolas", monospace;
+  font-size: 0.9rem;
+}
+
+.hyperdoc-source-connect-line:last-child {
+  border-bottom: 0;
+}
+
+.hyperdoc-source-connect-line-number {
+  color: rgba(84, 64, 42, 0.6);
+  user-select: none;
+}
+
+.hyperdoc-source-connect-line-text {
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.hyperdoc-source-connect-line.hyperdoc-dom-connect-hover {
+  background: rgba(243, 228, 199, 0.52);
+}
+
+.hyperdoc-source-connect-line.hyperdoc-dom-connect-source {
+  background: rgba(141, 106, 58, 0.16);
+}
+
 .hyperdoc-dom-association-title,
 .hyperdoc-dom-association-summary {
   white-space: normal;
