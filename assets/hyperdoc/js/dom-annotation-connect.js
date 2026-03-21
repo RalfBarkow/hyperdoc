@@ -862,7 +862,7 @@
                 'title="How Connect works in this view" aria-label="How Connect works in this view" aria-expanded="false">?</button>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-coachmark" hidden>' +
-        '<span class="hyperdoc-dom-connect-coachmark-copy">New: connect anchors in this view to create associations.</span>' +
+        '<span class="hyperdoc-dom-connect-coachmark-copy">Connect anchors in this view to create an association.</span>' +
         '<span class="hyperdoc-dom-connect-coachmark-actions">' +
           '<button type="button" class="hyperdoc-dom-connect-try">Try it</button>' +
           '<button type="button" class="hyperdoc-dom-connect-dismiss">Dismiss</button>' +
@@ -1413,7 +1413,7 @@
         state.paneId === session.sourcePaneId) {
       setStatus(
         state,
-        "Source selected - choose a different target element."
+        "Source selected - choose a different target anchor."
       );
       return;
     }

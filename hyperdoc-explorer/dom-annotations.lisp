@@ -164,7 +164,7 @@
                   :kind "dom-v1"
                   :view-kind "content"
                   :help-summary
-                  "Connect visible elements in this page to create an association."
+                  "Connect structural anchors in this view to create an association."
                   :help-detail
                   "Authored ids are strongest when present. Otherwise DOM-path anchoring is a fallback that can drift when page structure changes."
                   :body-thunk body-thunk)
@@ -177,7 +177,7 @@
                   :kind "source-v1"
                   :view-kind "source"
                   :help-summary
-                  "Connect durable source-line anchors in this view to create an association."
+                  "Connect source anchors in this view to create an association."
                   :help-detail
                   "Source anchors use file path plus line and column range. They remain durable for the same file revision, but line numbers can drift when the source changes."
                   :pathname pathname
@@ -236,7 +236,7 @@
                     :kind "fedwiki-v1"
                     :view-kind "story"
                     :help-summary
-                    "Connect FedWiki story items in this page to create an association."
+                    "Connect story-item anchors in this view to create an association."
                     :help-detail
                     "Selections resolve to durable story-item identity: site + slug + story-item id. DOM location is fallback metadata only."
                     :page page
