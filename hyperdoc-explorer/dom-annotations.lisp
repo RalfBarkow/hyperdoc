@@ -43,40 +43,6 @@
       (:div :class "hyperdoc-dom-connect-surface"
             :data-context-object-id (dom-connect-context-object-id context-object)
             :data-context-view-title view-title
-            (:div :class "hyperdoc-dom-connect-chrome"
-                  :data-hyperdoc-connect-ignore "true"
-                  (:div :class "hyperdoc-dom-connect-control"
-                        (:button :type "button"
-                                 :class "hyperdoc-dom-connect-toggle"
-                                 :title "Connect visible elements in this page to create an association."
-                                 "Connect")
-                        (:span :class "hyperdoc-dom-connect-status"
-                               :hidden "hidden"
-                               "Connect: choose source")
-                        (:button :type "button"
-                                 :class "hyperdoc-dom-connect-cancel"
-                                 :hidden "hidden"
-                                 "Cancel")
-                        (:button :type "button"
-                                 :class "hyperdoc-dom-connect-help-toggle"
-                                 :title "How DOM connect works"
-                                 :aria-label "How DOM connect works"
-                                 "?"))
-                  (:div :class "hyperdoc-dom-connect-coachmark"
-                        :hidden "hidden"
-                        (:span :class "hyperdoc-dom-connect-coachmark-copy"
-                               "New: connect visible elements to create associations.")
-                        (:span :class "hyperdoc-dom-connect-coachmark-actions"
-                               (:button :type "button"
-                                        :class "hyperdoc-dom-connect-try"
-                                        "Try it")
-                               (:button :type "button"
-                                        :class "hyperdoc-dom-connect-dismiss"
-                                        "Dismiss")))
-                  (:div :class "hyperdoc-dom-connect-help-panel"
-                        :hidden "hidden"
-                        (:p "Connect visible elements in this page to create an association.")
-                        (:p "Choose source, then target. Esc cancels.")))
             (:div :class "hyperdoc-dom-connect-controls"
                   :style "display:none"
                   :data-source-input-id source-input-id
@@ -110,7 +76,7 @@
       (anchor-value-of anchor)))
 
 (defmethod views:text-representation ((annotation dom-relation-annotation))
-  (title-of annotation))
+  (shorten-dom-association-label (title-of annotation)))
 
 (views:defview 👀summary (anchor dom-annotation-anchor)
   (views:html-view :title "Summary" :priority 1
@@ -143,8 +109,10 @@
 (views:defview 👀summary (annotation dom-relation-annotation)
   (views:html-view :title "Summary" :priority 1
     (views:html
-      (:h3 (views:esc (title-of annotation)))
-      (:p (views:esc (summary-of annotation)))
+      (:h3 :class "hyperdoc-dom-association-title"
+           (views:esc (title-of annotation)))
+      (:p :class "hyperdoc-dom-association-summary"
+          (views:esc (summary-of annotation)))
       (:table :class "inspector-table"
               (:tr (:th "Association kind")
                    (:td (:tt (views:esc (or (relation-kind-of annotation)

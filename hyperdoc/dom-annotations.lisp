@@ -46,6 +46,16 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defun shorten-dom-association-label (value &optional (max-length 88))
+  (if (<= (length value) max-length)
+      value
+      (let* ((room (- max-length 3))
+             (front (ceiling room 2))
+             (back (floor room 2)))
+        (format nil "~A...~A"
+                (subseq value 0 front)
+                (subseq value (- (length value) back))))))
+
 (defun dom-annotation-json-keyword (value)
   (intern (string-upcase value) :keyword))
 

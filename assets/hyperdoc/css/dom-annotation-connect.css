@@ -2,30 +2,43 @@
   position: relative;
 }
 
-.hyperdoc-dom-connect-chrome {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-  margin: 0 0 0.5rem;
-  z-index: 6;
+.inspector-tabs {
+  display: flow-root;
+  overflow: visible;
+  position: relative;
+}
+
+.hyperdoc-dom-connect-pane-slot {
+  float: right;
+  position: relative;
+  margin: 2px 4px 2px 10px;
+  z-index: 2;
+}
+
+.hyperdoc-dom-connect-pane-slot[hidden] {
+  display: none;
 }
 
 .hyperdoc-dom-connect-control {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.4rem;
-  padding: 0.3rem 0.45rem;
+  padding: 0.18rem 0.3rem;
   border: 1px solid rgba(107, 79, 47, 0.28);
   border-radius: 999px;
   background: rgba(255, 250, 243, 0.98);
   box-shadow: 0 4px 12px rgba(74, 52, 31, 0.08);
-  max-width: min(32rem, 100%);
+  min-height: 1.9rem;
+  max-width: min(28rem, 100%);
 }
 
 .hyperdoc-dom-connect-coachmark,
-.hyperdoc-dom-connect-help-panel {
+.hyperdoc-dom-connect-help-panel,
+.hyperdoc-dom-connect-feedback {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
   width: min(18rem, 100%);
   padding: 0.55rem 0.7rem;
   border: 1px solid rgba(107, 79, 47, 0.24);
@@ -33,9 +46,11 @@
   background: rgba(255, 250, 243, 0.98);
   color: #3f3428;
   box-shadow: 0 8px 18px rgba(74, 52, 31, 0.1);
+  z-index: 7;
 }
 
-.hyperdoc-dom-connect-chrome button {
+.hyperdoc-dom-connect-pane-slot button {
+  float: none;
   border: 1px solid #8d6a3a;
   background: #fff9f0;
   color: #3f3428;
@@ -46,8 +61,8 @@
   line-height: 1.2;
 }
 
-.hyperdoc-dom-connect-chrome button:hover,
-.hyperdoc-dom-connect-chrome button:focus {
+.hyperdoc-dom-connect-pane-slot button:hover,
+.hyperdoc-dom-connect-pane-slot button:focus {
   background: #f3e4c7;
 }
 
@@ -81,7 +96,21 @@
 }
 
 .hyperdoc-dom-connect-status {
-  max-width: 14rem;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hyperdoc-dom-connect-feedback {
+  font-size: 0.9em;
+  line-height: 1.35;
+}
+
+.hyperdoc-dom-connect-feedback[data-kind="error"] {
+  border-color: rgba(153, 27, 27, 0.24);
+  background: rgba(255, 245, 245, 0.98);
+  color: #7f1d1d;
 }
 
 .hyperdoc-dom-connect-help-panel p {
@@ -96,6 +125,13 @@
 
 .hyperdoc-dom-connect-root {
   position: relative;
+}
+
+.hyperdoc-dom-association-title,
+.hyperdoc-dom-association-summary {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .hyperdoc-dom-connect-surface.hyperdoc-dom-connect-active .hyperdoc-dom-connect-root {
@@ -134,18 +170,29 @@
 }
 
 @media (max-width: 720px) {
-  .hyperdoc-dom-connect-chrome {
-    align-items: stretch;
+  .hyperdoc-dom-connect-pane-slot {
+    float: none;
+    clear: both;
+    display: block;
+    margin: 4px;
   }
 
   .hyperdoc-dom-connect-control,
   .hyperdoc-dom-connect-coachmark,
-  .hyperdoc-dom-connect-help-panel {
+  .hyperdoc-dom-connect-help-panel,
+  .hyperdoc-dom-connect-feedback {
     width: 100%;
     max-width: none;
   }
 
   .hyperdoc-dom-connect-control {
     justify-content: flex-start;
+  }
+
+  .hyperdoc-dom-connect-coachmark,
+  .hyperdoc-dom-connect-help-panel,
+  .hyperdoc-dom-connect-feedback {
+    left: 0;
+    right: 0;
   }
 }
