@@ -135,8 +135,93 @@
     input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  var STORAGE_KEYS = {
+    introDismissed: "hyperdoc.domConnect.introDismissed.v1",
+    learned: "hyperdoc.domConnect.learned.v1"
+  };
+
+  function readPreference(key) {
+    try {
+      return window.localStorage && window.localStorage.getItem(key) === "1";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function writePreference(key, value) {
+    try {
+      if (window.localStorage) {
+        window.localStorage.setItem(key, value ? "1" : "0");
+      }
+    } catch (error) {
+      // Ignore localStorage failures and keep the current-page behavior.
+    }
+  }
+
   function setStatus(state, text) {
     state.status.textContent = text;
+  }
+
+  function clearResetTimer(state) {
+    if (state.resetTimer) {
+      window.clearTimeout(state.resetTimer);
+      state.resetTimer = null;
+    }
+  }
+
+  function closeHelpPanel(state) {
+    state.helpPanel.hidden = true;
+    state.helpOpen = false;
+  }
+
+  function toggleHelpPanel(state) {
+    state.helpOpen = !state.helpOpen;
+    state.helpPanel.hidden = !state.helpOpen;
+  }
+
+  function setPhase(state, phase) {
+    state.phase = phase;
+    state.surface.dataset.connectState = phase;
+    state.launcher.hidden = !(phase === "dormant" || phase === "coachmark");
+    state.coachmark.hidden = phase !== "coachmark";
+    state.strip.hidden = !(phase === "select-source" ||
+      phase === "select-target" ||
+      phase === "submitting");
+    state.cancel.hidden = !(phase === "select-source" || phase === "select-target");
+
+    if (phase === "select-source") {
+      setStatus(state, "Connect mode - click source element");
+    } else if (phase === "select-target") {
+      setStatus(state, "Source selected - click target element");
+    } else if (phase === "submitting") {
+      setStatus(state, "Opening relation annotation...");
+    }
+  }
+
+  function enterDormant(state) {
+    clearResetTimer(state);
+    state.enabled = false;
+    state.surface.classList.remove("hyperdoc-dom-connect-active");
+    state.toggle.dataset.mode = "inactive";
+    setHoverElement(state, null);
+    clearSource(state);
+    closeHelpPanel(state);
+    if (!state.learned && !state.introDismissed) {
+      setPhase(state, "coachmark");
+    } else {
+      setPhase(state, "dormant");
+    }
+  }
+
+  function markIntroDismissed(state) {
+    state.introDismissed = true;
+    writePreference(STORAGE_KEYS.introDismissed, true);
+  }
+
+  function markLearned(state) {
+    state.learned = true;
+    writePreference(STORAGE_KEYS.learned, true);
+    markIntroDismissed(state);
   }
 
   function clearSource(state) {
@@ -160,23 +245,17 @@
   }
 
   function deactivate(state, resetStatus) {
-    state.enabled = false;
-    state.surface.classList.remove("hyperdoc-dom-connect-active");
-    state.toggle.dataset.mode = "inactive";
-    state.cancel.hidden = true;
-    setHoverElement(state, null);
-    clearSource(state);
-    if (resetStatus) {
-      setStatus(state, state.readyMessage);
-    }
+    enterDormant(state);
   }
 
   function activate(state) {
+    clearResetTimer(state);
+    markIntroDismissed(state);
     state.enabled = true;
     state.surface.classList.add("hyperdoc-dom-connect-active");
     state.toggle.dataset.mode = "active";
-    state.cancel.hidden = false;
-    setStatus(state, "Connect mode: click any content element as the source.");
+    closeHelpPanel(state);
+    setPhase(state, "select-source");
   }
 
   function beginConnection(state, element, anchor) {
@@ -186,12 +265,7 @@
     state.sourceElement = element;
     state.sourceElement.classList.add("hyperdoc-dom-connect-source");
     state.overlay.hidden = false;
-    setStatus(
-      state,
-      'Source selected: "' +
-        anchor.label +
-        '". Now click any content element as the target.'
-    );
+    setPhase(state, "select-target");
   }
 
   function updateLineFromMouse(state, clientX, clientY) {
@@ -205,21 +279,32 @@
 
   function completeConnection(state, targetAnchor) {
     var sourceAnchor = state.source;
+    markLearned(state);
+    clearResetTimer(state);
     dispatchValue(state.sourceInput, JSON.stringify(state.source));
     dispatchValue(state.targetInput, JSON.stringify(targetAnchor));
-    deactivate(state, false);
-    setStatus(state, 'Opening relation annotation for "' +
-      sourceAnchor.label + '" -> "' + targetAnchor.label + '".');
+    state.enabled = false;
+    state.surface.classList.remove("hyperdoc-dom-connect-active");
+    state.toggle.dataset.mode = "inactive";
+    setHoverElement(state, null);
+    clearSource(state);
+    closeHelpPanel(state);
+    setPhase(state, "submitting");
     var submitButton = state.submit.querySelector("button");
     if (submitButton) {
       submitButton.click();
     }
+    state.resetTimer = window.setTimeout(function () {
+      if (state.phase === "submitting") {
+        enterDormant(state);
+      }
+    }, 900);
   }
 
   function invalidClick(state) {
     setStatus(
       state,
-      "Click inside the rendered content, not the toolbar or browser chrome, to create a relation."
+      "Click inside the rendered content, not the controls, to create a relation."
     );
   }
 
@@ -243,7 +328,7 @@
     if (anchorKey(anchor) === anchorKey(state.source)) {
       setStatus(
         state,
-        "Pick a different target element in this rendered content."
+        "Source selected - click a different target element."
       );
       return;
     }
@@ -255,13 +340,23 @@
       return;
     }
     var controls = surface.querySelector(".hyperdoc-dom-connect-controls");
+    var chrome = surface.querySelector(".hyperdoc-dom-connect-chrome");
+    var launcher = surface.querySelector(".hyperdoc-dom-connect-launcher");
+    var coachmark = surface.querySelector(".hyperdoc-dom-connect-coachmark");
+    var strip = surface.querySelector(".hyperdoc-dom-connect-strip");
     var root = surface.querySelector(".hyperdoc-dom-connect-root");
     var toggle = surface.querySelector(".hyperdoc-dom-connect-toggle");
+    var helpToggles = surface.querySelectorAll(".hyperdoc-dom-connect-help-toggle");
+    var tryButton = surface.querySelector(".hyperdoc-dom-connect-try");
+    var dismissButton = surface.querySelector(".hyperdoc-dom-connect-dismiss");
     var cancel = surface.querySelector(".hyperdoc-dom-connect-cancel");
+    var helpPanel = surface.querySelector(".hyperdoc-dom-connect-help-panel");
     var status = surface.querySelector(".hyperdoc-dom-connect-status");
     var overlay = surface.querySelector(".hyperdoc-dom-connect-overlay");
     var line = overlay && overlay.querySelector(".hyperdoc-dom-connect-line");
-    if (!controls || !root || !toggle || !cancel || !status || !overlay || !line) {
+    if (!controls || !chrome || !launcher || !coachmark || !strip || !root ||
+        !toggle || !tryButton || !dismissButton || !cancel || !helpPanel ||
+        !status || !overlay || !line) {
       return;
     }
     var sourceInput = document.getElementById(controls.dataset.sourceInputId);
@@ -272,9 +367,14 @@
     }
     var state = {
       surface: surface,
+      chrome: chrome,
+      launcher: launcher,
+      coachmark: coachmark,
+      strip: strip,
       root: root,
       toggle: toggle,
       cancel: cancel,
+      helpPanel: helpPanel,
       status: status,
       overlay: overlay,
       line: line,
@@ -282,20 +382,42 @@
       targetInput: targetInput,
       submit: submit,
       enabled: false,
+      phase: "dormant",
+      introDismissed: readPreference(STORAGE_KEYS.introDismissed),
+      learned: readPreference(STORAGE_KEYS.learned),
+      helpOpen: false,
       hoverElement: null,
       source: null,
       sourceElement: null,
-      readyMessage: "Connect is available on this rendered content pane. Click Connect, then choose a source element and a target element in this page. Esc or Cancel exits connect mode."
+      resetTimer: null
     };
     surface.dataset.hyperdocDomConnectInitialized = "true";
     toggle.dataset.mode = "inactive";
-    setStatus(state, state.readyMessage);
+    setPhase(state, state.learned || state.introDismissed ? "dormant" : "coachmark");
     toggle.addEventListener("click", function () {
       if (state.enabled) {
         deactivate(state, true);
       } else {
         activate(state);
       }
+    });
+    helpToggles.forEach(function (button) {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleHelpPanel(state);
+      });
+    });
+    tryButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      activate(state);
+    });
+    dismissButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      markIntroDismissed(state);
+      enterDormant(state);
     });
     cancel.addEventListener("click", function () {
       deactivate(state, true);
@@ -311,6 +433,11 @@
     }, true);
     root.addEventListener("mouseleave", function () {
       setHoverElement(state, null);
+    }, true);
+    document.addEventListener("click", function (event) {
+      if (state.helpOpen && !state.chrome.contains(event.target)) {
+        closeHelpPanel(state);
+      }
     }, true);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && state.enabled) {

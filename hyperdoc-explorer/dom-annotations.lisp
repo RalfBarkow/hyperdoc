@@ -43,19 +43,46 @@
       (:div :class "hyperdoc-dom-connect-surface"
             :data-context-object-id (dom-connect-context-object-id context-object)
             :data-context-view-title view-title
-            (:div :class "hyperdoc-dom-connect-toolbar"
-                  (:button :type "button"
-                           :class "hyperdoc-dom-connect-toggle"
-                           :title "Connect two content elements in this page to create a relation annotation."
-                           "Connect")
-                  (:button :type "button"
-                           :class "hyperdoc-dom-connect-cancel"
-                           :hidden "hidden"
-                           "Cancel")
-                  (:span :class "hyperdoc-dom-connect-help"
-                         "Pane-local DOM connect: this works only within the current rendered page. Click Connect, then choose any content element as source and any content element as target. Esc or Cancel exits connect mode.")
-                  (:span :class "hyperdoc-dom-connect-status"
-                         "Connect is available on this rendered content pane."))
+            (:div :class "hyperdoc-dom-connect-chrome"
+                  :data-hyperdoc-connect-ignore "true"
+                  (:div :class "hyperdoc-dom-connect-launcher"
+                        (:button :type "button"
+                                 :class "hyperdoc-dom-connect-toggle"
+                                 :title "Connect visible elements in this page to create a relation annotation."
+                                 "Connect")
+                        (:button :type "button"
+                                 :class "hyperdoc-dom-connect-help-toggle"
+                                 :title "How DOM connect works"
+                                 :aria-label "How DOM connect works"
+                                 "?"))
+                  (:div :class "hyperdoc-dom-connect-coachmark"
+                        :hidden "hidden"
+                        (:span :class "hyperdoc-dom-connect-coachmark-copy"
+                               "New: connect visible elements to create relation annotations.")
+                        (:span :class "hyperdoc-dom-connect-coachmark-actions"
+                               (:button :type "button"
+                                        :class "hyperdoc-dom-connect-try"
+                                        "Try it")
+                               (:button :type "button"
+                                        :class "hyperdoc-dom-connect-dismiss"
+                                        "Dismiss")))
+                  (:div :class "hyperdoc-dom-connect-strip"
+                        :hidden "hidden"
+                        (:span :class "hyperdoc-dom-connect-status"
+                               "Connect mode - click source element")
+                        (:span :class "hyperdoc-dom-connect-strip-actions"
+                               (:button :type "button"
+                                        :class "hyperdoc-dom-connect-help-toggle"
+                                        :title "How DOM connect works"
+                                        :aria-label "How DOM connect works"
+                                        "?")
+                               (:button :type "button"
+                                        :class "hyperdoc-dom-connect-cancel"
+                                        "Cancel")))
+                  (:div :class "hyperdoc-dom-connect-help-panel"
+                        :hidden "hidden"
+                        (:p "Connect visible elements in this page to create relation annotations.")
+                        (:p "Click source, then target. Esc cancels.")))
             (:div :class "hyperdoc-dom-connect-controls"
                   :style "display:none"
                   :data-source-input-id source-input-id

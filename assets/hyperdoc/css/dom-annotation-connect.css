@@ -2,46 +2,107 @@
   position: relative;
 }
 
-.hyperdoc-dom-connect-toolbar {
+.hyperdoc-dom-connect-chrome {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 9;
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 0 0 0.85rem 0;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid #d8d0c6;
-  background: #f7f1e8;
-  color: #3f3428;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  max-width: min(24rem, calc(100% - 1.5rem));
 }
 
-.hyperdoc-dom-connect-toolbar button {
+.hyperdoc-dom-connect-launcher,
+.hyperdoc-dom-connect-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(107, 79, 47, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.95);
+  box-shadow: 0 10px 24px rgba(74, 52, 31, 0.11);
+  backdrop-filter: blur(8px);
+}
+
+.hyperdoc-dom-connect-strip {
+  border-radius: 1rem;
+  align-items: flex-start;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.45rem 0.55rem;
+}
+
+.hyperdoc-dom-connect-coachmark,
+.hyperdoc-dom-connect-help-panel {
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(107, 79, 47, 0.24);
+  border-radius: 1rem;
+  background: rgba(255, 250, 243, 0.98);
+  color: #3f3428;
+  box-shadow: 0 14px 30px rgba(74, 52, 31, 0.15);
+}
+
+.hyperdoc-dom-connect-chrome button {
   border: 1px solid #8d6a3a;
   background: #fff9f0;
   color: #3f3428;
-  padding: 0.2rem 0.6rem;
+  padding: 0.24rem 0.65rem;
+  border-radius: 999px;
   cursor: pointer;
+  font: inherit;
+  line-height: 1.2;
 }
 
-.hyperdoc-dom-connect-toolbar button:hover,
-.hyperdoc-dom-connect-toolbar button:focus {
+.hyperdoc-dom-connect-chrome button:hover,
+.hyperdoc-dom-connect-chrome button:focus {
   background: #f3e4c7;
 }
 
-.hyperdoc-dom-connect-toolbar .hyperdoc-dom-connect-toggle[data-mode="active"] {
+.hyperdoc-dom-connect-toggle[data-mode="active"] {
   background: #8d6a3a;
   color: #fff9f0;
 }
 
-.hyperdoc-dom-connect-help {
-  flex: 1 1 28rem;
+.hyperdoc-dom-connect-help-toggle {
+  min-width: 1.95rem;
+  padding-inline: 0;
+  text-align: center;
+}
+
+.hyperdoc-dom-connect-coachmark-copy,
+.hyperdoc-dom-connect-status {
   font-size: 0.92em;
   line-height: 1.35;
+  color: #4a3722;
+}
+
+.hyperdoc-dom-connect-coachmark-actions,
+.hyperdoc-dom-connect-strip-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.hyperdoc-dom-connect-coachmark-actions {
+  margin-top: 0.65rem;
 }
 
 .hyperdoc-dom-connect-status {
-  flex: 1 1 100%;
-  font-size: 0.92em;
-  color: #654c29;
+  max-width: 15rem;
+}
+
+.hyperdoc-dom-connect-help-panel p {
+  margin: 0;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.hyperdoc-dom-connect-help-panel p + p {
+  margin-top: 0.45rem;
 }
 
 .hyperdoc-dom-connect-root {
@@ -81,4 +142,25 @@
   outline-offset: 2px;
   background: rgba(194, 65, 12, 0.16);
   box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.15);
+}
+
+@media (max-width: 720px) {
+  .hyperdoc-dom-connect-chrome {
+    left: 0.75rem;
+    right: 0.75rem;
+    align-items: stretch;
+  }
+
+  .hyperdoc-dom-connect-launcher,
+  .hyperdoc-dom-connect-strip,
+  .hyperdoc-dom-connect-coachmark,
+  .hyperdoc-dom-connect-help-panel {
+    width: 100%;
+    max-width: none;
+  }
+
+  .hyperdoc-dom-connect-launcher,
+  .hyperdoc-dom-connect-strip {
+    justify-content: space-between;
+  }
 }
