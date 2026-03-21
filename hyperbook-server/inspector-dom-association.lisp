@@ -11,6 +11,102 @@
          (> (length (string-trim '(#\Space #\Tab #\Newline #\Return) value)) 0)
          value)))
 
+(defun dom-association-attribute-value (element attribute-name)
+  (let ((value (ignore-errors
+                 (clog:attribute element attribute-name))))
+    (and (stringp value)
+         (> (length (string-trim '(#\Space #\Tab #\Newline #\Return) value)) 0)
+         value)))
+
+(defun dom-association-json-present-p (value)
+  (and (stringp value)
+       (> (length value) 0)))
+
+(defun dom-association-json-length (value)
+  (if (stringp value)
+      (length value)
+      0))
+
+(defun dom-association-active-view-title (pane)
+  (with-slots (views active-view) pane
+    (let ((view (nth active-view views)))
+      (and view
+           (ignore-errors
+             (hv:view-title view))))))
+
+(defun dom-association-submit-payload (pane element)
+  (list :transport
+        (or (dom-association-attribute-value
+             element "data-dom-association-transport")
+            "legacy-eval-button")
+        :context-object-id
+        (dom-association-attribute-value
+         element "data-dom-association-context-object-id")
+        :context-view-title
+        (or (dom-association-attribute-value
+             element "data-dom-association-context-view-title")
+            (dom-association-active-view-title pane))
+        :source-field-id
+        (dom-association-attribute-value
+         element "data-dom-association-source-field-id")
+        :target-field-id
+        (dom-association-attribute-value
+         element "data-dom-association-target-field-id")
+        :source-json
+        (dom-association-attribute-value
+         element "data-dom-association-source-json")
+        :target-json
+        (dom-association-attribute-value
+         element "data-dom-association-target-json")))
+
+(defun log-dom-association-submit-boundary (pane payload)
+  (with-slots (object) pane
+    (maybe-log-inspector-performance
+     :dom-association/submit-boundary
+     :pane-object (maybe-summarize-object-for-log object)
+     :view (getf payload :context-view-title)
+     :transport (getf payload :transport)
+     :context-object-id (getf payload :context-object-id)
+     :source-field-id (getf payload :source-field-id)
+     :target-field-id (getf payload :target-field-id)
+     :source-present? (dom-association-json-present-p (getf payload :source-json))
+     :source-length (dom-association-json-length (getf payload :source-json))
+     :target-present? (dom-association-json-present-p (getf payload :target-json))
+     :target-length (dom-association-json-length (getf payload :target-json)))))
+
+(defun missing-dom-association-payload (pane payload field-label)
+  (with-slots (object) pane
+    (maybe-log-inspector-performance
+     :dom-association/payload-missing
+     :pane-object (maybe-summarize-object-for-log object)
+     :view (getf payload :context-view-title)
+     :transport (getf payload :transport)
+     :missing field-label
+     :source-field-id (getf payload :source-field-id)
+     :target-field-id (getf payload :target-field-id)
+     :source-present? (dom-association-json-present-p (getf payload :source-json))
+     :target-present? (dom-association-json-present-p (getf payload :target-json))))
+  (error "Missing ~A DOM anchor JSON." field-label))
+
+(defun call-hyperdoc-dom-association-constructor (&rest arguments)
+  (let* ((package (find-package :hyperdoc))
+         (symbol (and package
+                      (find-symbol "MAKE-DOM-RELATION-ANNOTATION-FROM-JSON"
+                                   package))))
+    (unless (and symbol (fboundp symbol))
+      (error "HyperDoc DOM association constructor is unavailable."))
+    (apply (symbol-function symbol) arguments)))
+
+(defun make-dom-association-from-submit-payload (pane payload)
+  (with-slots (object) pane
+    (call-hyperdoc-dom-association-constructor
+     :context-object object
+     :context-view-title (getf payload :context-view-title)
+     :source-json (or (getf payload :source-json)
+                      (missing-dom-association-payload pane payload "source"))
+     :target-json (or (getf payload :target-json)
+                      (missing-dom-association-payload pane payload "target")))))
+
 (defun notify-dom-association-browser (element request-id status
                                        &key message detail)
   (when request-id
@@ -18,11 +114,15 @@
       (clog:js-execute
        element
        (format nil
-               "(function(){ if (window.hyperdocDomConnect && window.hyperdocDomConnect.notifyServerResult) { window.hyperdocDomConnect.notifyServerResult({requestId: ~S, status: ~S, message: ~S, detail: ~S}); } })();"
+               "(function(){ if (window.hyperdocDomConnect && window.hyperdocDomConnect.notifyServerResult) { window.hyperdocDomConnect.notifyServerResult({requestId: ~S, status: ~S, message: ~A, detail: ~A}); } })();"
                request-id
                status
-               message
-               detail)))))
+               (if message
+                   (format nil "~S" message)
+                   "null")
+               (if detail
+                   (format nil "~S" detail)
+                   "null"))))))
 
 ;; Extend the pane tab row with a dedicated slot for the pane-level Connect
 ;; control. The DOM overlay and anchor machinery remain in the rendered view.
@@ -61,12 +161,29 @@
 (defun handle-inspector-eval-click (pane obj target event)
   (with-slots (object inspector clog-obj) pane
     (let* ((request-id (dom-association-request-id-for-element obj))
+           (submit-payload (and request-id
+                                (dom-association-submit-payload pane obj)))
            (*inspector-operation-id* request-id)
            (click-start (maybe-current-time-millis)))
+      (when submit-payload
+        (log-dom-association-submit-boundary pane submit-payload))
       (maybe-log-inspector-performance
        :dom-association/server-received
        :pane-object (maybe-summarize-object-for-log object)
        :target (maybe-summarize-object-for-log target)
+       :transport (and submit-payload (getf submit-payload :transport))
+       :source-present? (and submit-payload
+                             (dom-association-json-present-p
+                              (getf submit-payload :source-json)))
+       :source-length (and submit-payload
+                           (dom-association-json-length
+                            (getf submit-payload :source-json)))
+       :target-present? (and submit-payload
+                             (dom-association-json-present-p
+                              (getf submit-payload :target-json)))
+       :target-length (and submit-payload
+                           (dom-association-json-length
+                            (getf submit-payload :target-json)))
        :alt? (getf event :alt-key)
        :shift? (getf event :shift-key))
       (handler-case
@@ -87,8 +204,11 @@
                    obj request-id "pane-open-succeeded"
                    :message "Association pane opened."))
                 (let ((association
-                        (eval-thunk-with-active-button
-                         clog-obj obj target)))
+                        (if request-id
+                            (make-dom-association-from-submit-payload
+                             pane submit-payload)
+                            (eval-thunk-with-active-button
+                             clog-obj obj target))))
                   (maybe-log-inspector-performance
                    :dom-association/object-created
                    :object (maybe-summarize-object-for-log association))

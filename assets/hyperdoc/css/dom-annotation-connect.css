@@ -49,6 +49,14 @@
   z-index: 7;
 }
 
+.hyperdoc-dom-connect-help-panel {
+  display: none;
+}
+
+.hyperdoc-dom-connect-pane-slot[data-help-open="true"] .hyperdoc-dom-connect-help-panel {
+  display: block;
+}
+
 .hyperdoc-dom-connect-pane-slot button {
   float: none;
   border: 1px solid #8d6a3a;

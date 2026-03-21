@@ -135,6 +135,33 @@
     input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  function stringValueLength(value) {
+    return typeof value === "string" ? value.length : 0;
+  }
+
+  function stringValuePresent(value) {
+    return stringValueLength(value) > 0;
+  }
+
+  function fieldDiagnostic(input) {
+    return {
+      found: !!input,
+      id: input && input.id || null,
+      name: input && input.name || null,
+      present: !!(input && stringValuePresent(input.value)),
+      length: input ? stringValueLength(input.value) : 0
+    };
+  }
+
+  function surfaceDiagnostic(surface) {
+    return {
+      found: !!surface,
+      id: surface && surface.id || null,
+      contextObjectId: surface && surface.dataset.contextObjectId || null,
+      contextViewTitle: surface && surface.dataset.contextViewTitle || null
+    };
+  }
+
   var STORAGE_KEYS = {
     introDismissed: "hyperdoc.domConnect.introDismissed.v1",
     learned: "hyperdoc.domConnect.learned.v1"
@@ -294,13 +321,17 @@
   }
 
   function closeHelpPanel(state) {
-    state.helpPanel.hidden = true;
     state.helpOpen = false;
+    state.slot.dataset.helpOpen = "false";
+    state.helpToggle.setAttribute("aria-expanded", "false");
+    state.helpPanel.setAttribute("aria-hidden", "true");
   }
 
   function toggleHelpPanel(state) {
     state.helpOpen = !state.helpOpen;
-    state.helpPanel.hidden = !state.helpOpen;
+    state.slot.dataset.helpOpen = state.helpOpen ? "true" : "false";
+    state.helpToggle.setAttribute("aria-expanded", state.helpOpen ? "true" : "false");
+    state.helpPanel.setAttribute("aria-hidden", state.helpOpen ? "false" : "true");
   }
 
   function activeSurfaceForPane(pane) {
@@ -333,7 +364,7 @@
         '<span class="hyperdoc-dom-connect-status" hidden>Connect: choose source</span>' +
         '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
         '<button type="button" class="hyperdoc-dom-connect-help-toggle" ' +
-                'title="How DOM connect works" aria-label="How DOM connect works">?</button>' +
+                'title="How DOM connect works" aria-label="How DOM connect works" aria-expanded="false">?</button>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-coachmark" hidden>' +
         '<span class="hyperdoc-dom-connect-coachmark-copy">New: connect visible elements to create associations.</span>' +
@@ -342,11 +373,34 @@
           '<button type="button" class="hyperdoc-dom-connect-dismiss">Dismiss</button>' +
         '</span>' +
       '</div>' +
-      '<div class="hyperdoc-dom-connect-help-panel" hidden>' +
+      '<div class="hyperdoc-dom-connect-help-panel" aria-hidden="true">' +
         '<p>Connect visible elements in this page to create an association.</p>' +
         '<p>Choose source, then target. Esc cancels.</p>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-feedback" hidden></div>';
+  }
+
+  function writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson) {
+    submitButton.setAttribute("data-dom-association-request-id", payload.requestId);
+    submitButton.setAttribute("data-dom-association-transport", "button-payload-v1");
+    submitButton.setAttribute(
+      "data-dom-association-context-object-id",
+      payload.contextObjectId || ""
+    );
+    submitButton.setAttribute(
+      "data-dom-association-context-view-title",
+      payload.contextViewTitle || ""
+    );
+    submitButton.setAttribute("data-dom-association-source-json", sourceJson);
+    submitButton.setAttribute("data-dom-association-target-json", targetJson);
+    submitButton.setAttribute(
+      "data-dom-association-source-field-id",
+      state.sourceInput && state.sourceInput.id || ""
+    );
+    submitButton.setAttribute(
+      "data-dom-association-target-field-id",
+      state.targetInput && state.targetInput.id || ""
+    );
   }
 
   function bindSurface(state, surface) {
@@ -532,37 +586,92 @@
 
   function completeConnection(state, targetAnchor) {
     var requestId = state.requestId || makeRequestId();
+    var previousSurface = state.surface;
+    var activeSurface = activeSurfaceForPane(state.pane);
+    var submitSurface = activeSurface || previousSurface;
+    var submitReady = bindSurface(state, submitSurface);
+    var sourceJson = JSON.stringify(state.source);
+    var targetJson = JSON.stringify(targetAnchor);
     var payload = {
       requestId: requestId,
-      contextObjectId: state.surface.dataset.contextObjectId || null,
-      contextViewTitle: state.surface.dataset.contextViewTitle || null,
+      contextObjectId: submitSurface && submitSurface.dataset.contextObjectId || null,
+      contextViewTitle: submitSurface && submitSurface.dataset.contextViewTitle || null,
       source: state.source,
       target: targetAnchor
     };
+    var submitButton = submitReady &&
+      state.submit &&
+      state.submit.querySelector("button");
     markLearned(state);
     clearResetTimer(state);
     logStage(requestId, "target-selected", anchorLogData(targetAnchor));
     logStage(requestId, "association-payload-assembled", payload);
-    dispatchValue(state.sourceInput, JSON.stringify(state.source));
-    dispatchValue(state.targetInput, JSON.stringify(targetAnchor));
+    logStage(requestId, "submit-boundary-resolved", {
+      activeSurface: surfaceDiagnostic(activeSurface),
+      previousSurface: surfaceDiagnostic(previousSurface),
+      submitSurface: surfaceDiagnostic(submitSurface),
+      activeSurfaceMatchesPrevious: activeSurface === previousSurface,
+      sourceField: fieldDiagnostic(state.sourceInput),
+      targetField: fieldDiagnostic(state.targetInput),
+      sourceJsonPresent: stringValuePresent(sourceJson),
+      sourceJsonLength: stringValueLength(sourceJson),
+      targetJsonPresent: stringValuePresent(targetJson),
+      targetJsonLength: stringValueLength(targetJson)
+    });
+    if (!submitReady || !state.sourceInput || !state.targetInput || !submitButton) {
+      logStage(requestId, "submit-bridge-missing", {
+        submitReady: submitReady,
+        sourceField: fieldDiagnostic(state.sourceInput),
+        targetField: fieldDiagnostic(state.targetInput),
+        submitButtonFound: !!submitButton
+      });
+      enterDormant(state);
+      setFeedback(
+        state,
+        "error",
+        "Association could not be opened. Submit bridge could not resolve its active surface."
+      );
+      return;
+    }
+    // Mirror into the legacy hidden inputs for diagnostics only. The clicked
+    // submit button now carries the authoritative request payload.
+    dispatchValue(state.sourceInput, sourceJson);
+    dispatchValue(state.targetInput, targetJson);
+    logStage(requestId, "hidden-field-mirror-written", {
+      sourceField: fieldDiagnostic(state.sourceInput),
+      targetField: fieldDiagnostic(state.targetInput)
+    });
+    writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson);
+    logStage(requestId, "request-payload-written", {
+      transport: "button-payload-v1",
+      submitButtonId: submitButton.id || null,
+      sourceFieldId: state.sourceInput.id || null,
+      targetFieldId: state.targetInput.id || null,
+      sourceJsonPresent: stringValuePresent(sourceJson),
+      sourceJsonLength: stringValueLength(sourceJson),
+      targetJsonPresent: stringValuePresent(targetJson),
+      targetJsonLength: stringValueLength(targetJson)
+    });
     state.enabled = false;
-    state.surface.classList.remove("hyperdoc-dom-connect-active");
+    if (previousSurface && previousSurface !== state.surface) {
+      previousSurface.classList.remove("hyperdoc-dom-connect-active");
+    }
+    if (state.surface) {
+      state.surface.classList.remove("hyperdoc-dom-connect-active");
+    }
     state.toggle.dataset.mode = "inactive";
     setHoverElement(state, null);
     clearSource(state);
     closeHelpPanel(state);
     setPhase(state, "submitting");
-    var submitButton = state.submit.querySelector("button");
-    if (submitButton) {
-      submitButton.setAttribute("data-dom-association-request-id", requestId);
-      logStage(requestId, "request-sent-to-create-open-association", {
-        contextObjectId: payload.contextObjectId,
-        contextViewTitle: payload.contextViewTitle
-      });
-      registerPendingRequest(state, requestId);
-      state.requestId = null;
-      submitButton.click();
-    }
+    logStage(requestId, "request-sent-to-create-open-association", {
+      contextObjectId: payload.contextObjectId,
+      contextViewTitle: payload.contextViewTitle,
+      transport: "button-payload-v1"
+    });
+    registerPendingRequest(state, requestId);
+    state.requestId = null;
+    submitButton.click();
     state.resetTimer = window.setTimeout(function () {
       if (state.phase === "submitting") {
         enterDormant(state);
@@ -639,6 +748,7 @@
       toggle: toggle,
       cancel: cancel,
       feedback: feedback,
+      helpToggle: helpToggle,
       helpPanel: helpPanel,
       status: status,
       enabled: false,
@@ -663,7 +773,14 @@
     };
     pane.hyperdocDomConnectState = state;
     slot.hidden = true;
+    slot.dataset.helpOpen = "false";
     toggle.dataset.mode = "inactive";
+    if (!helpPanel.id) {
+      helpPanel.id = (slot.id || "hyperdoc-dom-connect-pane-slot") + "-help-panel";
+    }
+    helpToggle.setAttribute("aria-controls", helpPanel.id);
+    helpToggle.setAttribute("aria-expanded", "false");
+    helpPanel.setAttribute("aria-hidden", "true");
     toggle.addEventListener("click", function () {
       if (!state.available) {
         return;
