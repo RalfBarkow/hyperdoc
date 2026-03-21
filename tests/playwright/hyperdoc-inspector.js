@@ -41,11 +41,24 @@ async function openHyperDoc(page) {
     .filter({ hasText: exactTextPattern("3HyperDoc") })
     .first()
     .click();
+  await expect
+    .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+    .toBeGreaterThan(1);
   const hyperdocPane = pane(page, 1);
-  await expect(hyperdocPane.locator(".hyperdoc-connect-provider-surface")).toBeVisible();
-  await expect(
-    hyperdocPane.locator(".inspector-tabs button.active")
-  ).toHaveText(exactTextPattern("Main page"));
+  await expect(hyperdocPane).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      async () => hyperdocPane.locator(".inspector-tabs button").allTextContents(),
+      { timeout: 20_000 }
+    )
+    .toContain("Main page");
+  const activeTab = hyperdocPane.locator(".inspector-tabs button.active");
+  if ((await activeTab.textContent())?.trim() !== "Main page") {
+    await activatePaneTab(page, 1, "Main page");
+  }
+  await expect(hyperdocPane.locator(".hyperdoc-connect-provider-surface")).toBeVisible({
+    timeout: 20_000,
+  });
   await settleInspectorBindings(page);
   return hyperdocPane;
 }
@@ -172,6 +185,15 @@ async function readDomConnectTrace(page) {
   });
 }
 
+async function readConnectSessionState(page) {
+  return page.evaluate(() => {
+    if (!window.hyperdocDomConnect || !window.hyperdocDomConnect.readSessionState) {
+      return null;
+    }
+    return window.hyperdocDomConnect.readSessionState();
+  });
+}
+
 async function clearDomConnectTrace(page) {
   await page.evaluate(() => {
     window.hyperdocDomConnectEvents = [];
@@ -271,6 +293,30 @@ async function runContentAssociation(page) {
   };
 }
 
+async function runTwoPaneContentAssociation(page, title) {
+  const hyperdocPane = await openHyperDoc(page);
+  const textPagePane = await openTextPageFromHyperDoc(page, title);
+  await activatePaneTab(page, 1, "Main page");
+  await activatePaneTab(page, 2, "Content");
+  await clearDomConnectTrace(page);
+  await startConnectInPane(page, 1);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  const sessionAfterSource = await readConnectSessionState(page);
+  await textPagePane
+    .locator(".hyperdoc-connect-provider-root h1")
+    .filter({ hasText: exactTextPattern(title) })
+    .click();
+  const trace = await waitForAssociationResult(page);
+  return {
+    sessionAfterSource,
+    trace,
+    paneTitles: await readPaneTitles(page),
+  };
+}
+
 async function runSourceAssociation(page, title) {
   await openHyperDoc(page);
   await openTextPageFromHyperDoc(page, title);
@@ -298,11 +344,13 @@ module.exports = {
   openHyperDoc,
   openTextPageFromHyperDoc,
   pane,
+  readConnectSessionState,
   readHelpPanelState,
   readDomConnectTrace,
   readPaneTitles,
   readSourcePaneState,
   runContentAssociation,
+  runTwoPaneContentAssociation,
   runSourceAssociation,
   selectSourceTab,
   settleInspectorBindings,

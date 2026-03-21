@@ -6,6 +6,7 @@ const {
   openHyperDoc,
   readPaneTitles,
   runContentAssociation,
+  runTwoPaneContentAssociation,
   runSourceAssociation,
 } = require("./hyperdoc-inspector");
 const {
@@ -33,7 +34,10 @@ test("content view opens an association through pane-chrome Connect", async ({
       (event) =>
         event.stage === "association-payload-assembled" &&
         event.details &&
-        event.details.providerKind === "dom-v1"
+        event.details.source &&
+        event.details.source.providerKind === "dom-v1" &&
+        event.details.target &&
+        event.details.target.providerKind === "dom-v1"
     )
   ).toBe(true);
   expect(
@@ -41,12 +45,45 @@ test("content view opens an association through pane-chrome Connect", async ({
       (event) =>
         event.stage === "request-payload-written" &&
         event.details &&
-        event.details.transport === "button-payload-v1"
+        event.details.transport === "button-payload-v2"
     )
   ).toBe(true);
   expect(
     result.trace.latestPaneSummary &&
       /Association: Text pages -> Data objects/.test(
+        result.trace.latestPaneSummary.body
+      )
+  ).toBe(true);
+});
+
+test("content view opens a cross-pane association through pane-chrome Connect", async ({
+  page,
+}, testInfo) => {
+  const result = await runTwoPaneContentAssociation(page, "Creating a HyperDoc");
+
+  await attachJson(testInfo, "two-pane-session-after-source.json", result.sessionAfterSource);
+  await attachJson(testInfo, "two-pane-browser-trace.json", result.trace);
+  await attachJson(testInfo, "two-pane-pane-titles.json", result.paneTitles);
+
+  expect(result.sessionAfterSource).toBeTruthy();
+  expect(result.sessionAfterSource.phase).toBe("choose-target");
+  expect(result.sessionAfterSource.sourcePaneId).toBeTruthy();
+  expect(result.trace.requestId).toBeTruthy();
+  expect(result.trace.latestStage).toBe("pane-open-succeeded");
+  expect(
+    result.trace.events.some(
+      (event) =>
+        event.stage === "request-payload-written" &&
+        event.details &&
+        event.details.transport === "button-payload-v2" &&
+        event.details.sourcePaneId &&
+        event.details.targetPaneId &&
+        event.details.sourcePaneId !== event.details.targetPaneId
+    )
+  ).toBe(true);
+  expect(
+    result.trace.latestPaneSummary &&
+      /Association: Text pages -> Creating a HyperDoc/.test(
         result.trace.latestPaneSummary.body
       )
   ).toBe(true);
@@ -122,7 +159,10 @@ test("source view exposes source anchors and opens an association", async (
       (event) =>
         event.stage === "association-payload-assembled" &&
         event.details &&
-        event.details.providerKind === "source-v1"
+        event.details.source &&
+        event.details.source.providerKind === "source-v1" &&
+        event.details.target &&
+        event.details.target.providerKind === "source-v1"
     )
   ).toBe(true);
   expect(
@@ -130,8 +170,9 @@ test("source view exposes source anchors and opens an association", async (
       (event) =>
         event.stage === "request-payload-written" &&
         event.details &&
-        event.details.providerKind === "source-v1" &&
-        event.details.transport === "button-payload-v1"
+        event.details.sourceProviderKind === "source-v1" &&
+        event.details.targetProviderKind === "source-v1" &&
+        event.details.transport === "button-payload-v2"
     )
   ).toBe(true);
   expect(

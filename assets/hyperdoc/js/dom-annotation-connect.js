@@ -17,6 +17,19 @@
     return String(value).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
   }
 
+  function isHeadingTagName(tagName) {
+    return ["h1", "h2", "h3", "h4", "h5", "h6"].indexOf(tagName) !== -1;
+  }
+
+  function slugifyText(value) {
+    return collapseWhitespace(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .replace(/-{2,}/g, "-")
+      .slice(0, 96) || "anchor";
+  }
+
   function domAnchorCandidate(root, target) {
     if (!target) {
       return null;
@@ -37,6 +50,27 @@
       candidate = candidate.parentElement;
     }
     return null;
+  }
+
+  function contentAnchorCandidate(root, target) {
+    if (!target) {
+      return null;
+    }
+    var candidate = target.nodeType === 1 ? target : target.parentElement;
+    while (candidate && candidate !== root) {
+      if (!root.contains(candidate)) {
+        return null;
+      }
+      if (candidate.closest("[data-hyperdoc-connect-ignore='true']")) {
+        return null;
+      }
+      var tagName = candidate.tagName && candidate.tagName.toLowerCase();
+      if (tagName && (isHeadingTagName(tagName) || tagName === "li" || tagName === "p")) {
+        return candidate;
+      }
+      candidate = candidate.parentElement;
+    }
+    return domAnchorCandidate(root, target);
   }
 
   function sourceAnchorCandidate(root, target) {
@@ -82,7 +116,12 @@
     return value;
   }
 
-  function buildDomAnchor(element, root, surface) {
+  function paneIdForElement(element) {
+    var pane = element && element.closest(".inspector-pane");
+    return pane && pane.dataset.hyperdocConnectPaneId || null;
+  }
+
+  function buildDomFallbackMetadata(element, root) {
     var anchorId = element.dataset.hyperdocAnchorId;
     var objectId = element.dataset.hyperdocObjectId;
     var elementId = element.id;
@@ -106,15 +145,21 @@
       value
     );
     return {
-      providerKind: "dom-v1",
-      viewKind: surface && surface.dataset.hyperdocConnectViewKind || "content",
-      viewTitle: surface && surface.dataset.contextViewTitle || null,
       strategy: strategy,
       value: value,
       selector: anchorSelector(strategy, value),
       label: limitText(label || value, 140),
       tagName: element.tagName.toLowerCase(),
       textSnippet: limitText(collapseWhitespace(element.textContent || ""), 220),
+      durabilityTier: (function () {
+        if (strategy === "data-anchor") {
+          return "strong";
+        }
+        if (strategy === "data-object-id" || strategy === "element-id") {
+          return "medium";
+        }
+        return "weak";
+      }()),
       durabilityNote: (function () {
         if (strategy === "data-anchor") {
           return "Authored anchor ids are the strongest DOM-backed anchors in this slice; durability depends on the id being preserved across page revisions.";
@@ -128,6 +173,188 @@
         return "Relative DOM-path anchors are fallback-level and can drift when the rendered tree shape changes.";
       }()),
       objectId: objectId || null
+    };
+  }
+
+  function sectionPathForElement(root, element) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+    var current = walker.currentNode;
+    var stack = [];
+    while (current) {
+      if (current === element) {
+        break;
+      }
+      var tagName = current.tagName && current.tagName.toLowerCase();
+      if (isHeadingTagName(tagName)) {
+        var level = Number(tagName.slice(1));
+        stack = stack.filter(function (entry) {
+          return entry.level < level;
+        });
+        stack.push({
+          level: level,
+          label: collapseWhitespace(current.textContent || ""),
+          slug: slugifyText(current.textContent || "")
+        });
+      }
+      current = walker.nextNode();
+    }
+    if (element && isHeadingTagName(element.tagName && element.tagName.toLowerCase())) {
+      var elementLevel = Number(element.tagName.toLowerCase().slice(1));
+      stack = stack.filter(function (entry) {
+        return entry.level < elementLevel;
+      });
+      stack.push({
+        level: elementLevel,
+        label: collapseWhitespace(element.textContent || ""),
+        slug: slugifyText(element.textContent || "")
+      });
+    }
+    return stack;
+  }
+
+  function scopeKeyForElement(root, element) {
+    var path = sectionPathForElement(root, element);
+    if (!path.length) {
+      return "page-root";
+    }
+    return path.map(function (entry) {
+      return "h" + entry.level + ":" + entry.slug;
+    }).join("/");
+  }
+
+  function paragraphIndexInScope(root, element) {
+    var scopeKey = scopeKeyForElement(root, element);
+    var paragraphs = root.querySelectorAll("p");
+    var index = 0;
+    for (var i = 0; i < paragraphs.length; i += 1) {
+      if (scopeKeyForElement(root, paragraphs[i]) !== scopeKey) {
+        continue;
+      }
+      index += 1;
+      if (paragraphs[i] === element) {
+        return index;
+      }
+    }
+    return 1;
+  }
+
+  function listContainerPath(list, root) {
+    var segments = [];
+    var current = list;
+    while (current && current !== root) {
+      var tagName = current.tagName && current.tagName.toLowerCase();
+      if (tagName === "ul" || tagName === "ol" || tagName === "li") {
+        var index = 1;
+        var sibling = current.previousElementSibling;
+        while (sibling) {
+          if (sibling.tagName === current.tagName) {
+            index += 1;
+          }
+          sibling = sibling.previousElementSibling;
+        }
+        segments.unshift(tagName + "[" + index + "]");
+      }
+      current = current.parentElement;
+    }
+    return segments;
+  }
+
+  function resolvedContentIdentity(element, root, fallback) {
+    var tagName = element.tagName.toLowerCase();
+    var sectionPath = sectionPathForElement(root, element);
+    var scopeKey = scopeKeyForElement(root, element);
+    var label = fallback.label;
+    if (fallback.strategy === "data-anchor" ||
+        fallback.strategy === "data-object-id" ||
+        fallback.strategy === "element-id") {
+      return {
+        strategy: fallback.strategy,
+        value: fallback.value,
+        label: label,
+        durabilityTier: fallback.durabilityTier,
+        durabilityNote: fallback.durabilityNote,
+        sectionPath: sectionPath
+      };
+    }
+    if (isHeadingTagName(tagName)) {
+      return {
+        strategy: "heading-anchor",
+        value: "heading:" + scopeKey,
+        label: label,
+        durabilityTier: "medium",
+        durabilityNote: "Heading anchors resolve clicks to the semantic heading path inside the current HyperDoc content page. They are more durable than raw DOM paths, but can drift if headings are renamed or restructured.",
+        sectionPath: sectionPath
+      };
+    }
+    if (tagName === "li") {
+      var list = element.parentElement;
+      var itemIndex = 1;
+      var sibling = element.previousElementSibling;
+      while (sibling) {
+        if (sibling.tagName === element.tagName) {
+          itemIndex += 1;
+        }
+        sibling = sibling.previousElementSibling;
+      }
+      return {
+        strategy: "list-item-anchor",
+        value: "list-item:" + scopeKey + "/" +
+          listContainerPath(list, root).join("/") +
+          "/item[" + itemIndex + "]:" + slugifyText(label),
+        label: label,
+        durabilityTier: "medium",
+        durabilityNote: "List-item anchors resolve clicks to the surrounding heading scope plus list and item position. They are more durable than raw DOM paths, but still depend on section and list structure remaining recognizable.",
+        sectionPath: sectionPath
+      };
+    }
+    if (tagName === "p") {
+      return {
+        strategy: "paragraph-anchor",
+        value: "paragraph:" + scopeKey + "/p[" +
+          paragraphIndexInScope(root, element) + "]:" + slugifyText(label),
+        label: label,
+        durabilityTier: "medium",
+        durabilityNote: "Paragraph anchors resolve clicks to the surrounding heading scope plus paragraph index. They are more durable than raw DOM paths, but can drift if paragraphs are inserted, removed, or reordered.",
+        sectionPath: sectionPath
+      };
+    }
+    return {
+      strategy: fallback.strategy,
+      value: fallback.value,
+      label: label,
+      durabilityTier: fallback.durabilityTier,
+      durabilityNote: fallback.durabilityNote,
+      sectionPath: sectionPath
+    };
+  }
+
+  function buildDomAnchor(element, root, surface) {
+    var fallback = buildDomFallbackMetadata(element, root);
+    var resolved = resolvedContentIdentity(element, root, fallback);
+    return {
+      providerKind: "dom-v1",
+      viewKind: surface && surface.dataset.hyperdocConnectViewKind || "content",
+      viewTitle: surface && surface.dataset.contextViewTitle || null,
+      paneId: paneIdForElement(surface || element),
+      contextObjectId: surface && surface.dataset.contextObjectId || null,
+      strategy: resolved.strategy,
+      value: resolved.value,
+      label: resolved.label,
+      selector: fallback.selector,
+      tagName: element.tagName.toLowerCase(),
+      textSnippet: fallback.textSnippet,
+      durabilityTier: resolved.durabilityTier,
+      durabilityNote: resolved.durabilityNote,
+      sectionPath: resolved.sectionPath && resolved.sectionPath.map(function (entry) {
+        return {
+          level: entry.level,
+          label: entry.label,
+          slug: entry.slug
+        };
+      }),
+      fallbackStrategy: fallback.strategy,
+      fallbackValue: fallback.value,
+      objectId: fallback.objectId || null
     };
   }
 
@@ -148,7 +375,9 @@
       providerKind: "source-v1",
       viewKind: surface && surface.dataset.hyperdocConnectViewKind || "source",
       viewTitle: surface && surface.dataset.contextViewTitle || null,
-      strategy: "source-line",
+      paneId: paneIdForElement(surface || element),
+      contextObjectId: surface && surface.dataset.contextObjectId || null,
+      strategy: "source-line-range",
       value: value,
       label: limitText(label || value, 140),
       path: path,
@@ -157,7 +386,10 @@
       startColumn: startColumn,
       endColumn: endColumn,
       textSnippet: limitText(collapseWhitespace(element.textContent || ""), 220),
+      durabilityTier: "medium",
       durabilityNote: "Source line anchors are durable for the same file path and line range, but line numbers can drift when the source file changes.",
+      fallbackStrategy: null,
+      fallbackValue: null,
       objectId: element.dataset.hyperdocSourceObjectId || null
     };
   }
@@ -186,7 +418,7 @@
       };
     }
     return {
-      anchorCandidate: domAnchorCandidate,
+      anchorCandidate: contentAnchorCandidate,
       buildAnchor: function (element, surface, root) {
         return buildDomAnchor(element, root, surface);
       }
@@ -245,6 +477,7 @@
     return {
       found: !!surface,
       id: surface && surface.id || null,
+      paneId: paneIdForElement(surface),
       providerKind: surfaceProviderKind(surface),
       contextObjectId: surface && surface.dataset.contextObjectId || null,
       contextViewTitle: surface && surface.dataset.contextViewTitle || null
@@ -281,9 +514,12 @@
 
   function anchorLogData(anchor) {
     return {
+      paneId: anchor && anchor.paneId,
+      providerKind: anchor && anchor.providerKind,
       label: anchor && anchor.label,
       strategy: anchor && anchor.strategy,
       value: anchor && anchor.value,
+      durabilityTier: anchor && anchor.durabilityTier,
       objectId: anchor && anchor.objectId
     };
   }
@@ -303,6 +539,64 @@
     } else {
       console.log("[DOM-ASSOC]", requestId, stage);
     }
+  }
+
+  function makeIdleSession() {
+    return {
+      id: null,
+      phase: "idle",
+      originPaneId: null,
+      sourcePaneId: null,
+      sourceProviderKind: null,
+      sourceAnchor: null,
+      sourceState: null,
+      targetPaneId: null,
+      targetProviderKind: null,
+      targetAnchor: null,
+      targetState: null
+    };
+  }
+
+  function connectManager() {
+    if (!window.hyperdocDomConnectManager) {
+      window.hyperdocDomConnectManager = {
+        states: [],
+        session: makeIdleSession()
+      };
+    }
+    return window.hyperdocDomConnectManager;
+  }
+
+  function liveStates(manager) {
+    manager.states = manager.states.filter(function (state) {
+      return !!(state && state.pane && state.pane.isConnected);
+    });
+    return manager.states;
+  }
+
+  function registerState(manager, state) {
+    if (liveStates(manager).indexOf(state) === -1) {
+      manager.states.push(state);
+    }
+  }
+
+  function sessionActive(manager) {
+    return !!(manager.session && manager.session.id &&
+      manager.session.phase !== "idle");
+  }
+
+  function sessionDiagnostic(session) {
+    return {
+      id: session && session.id || null,
+      phase: session && session.phase || "idle",
+      originPaneId: session && session.originPaneId || null,
+      sourcePaneId: session && session.sourcePaneId || null,
+      sourceProviderKind: session && session.sourceProviderKind || null,
+      source: anchorLogData(session && session.sourceAnchor),
+      targetPaneId: session && session.targetPaneId || null,
+      targetProviderKind: session && session.targetProviderKind || null,
+      target: anchorLogData(session && session.targetAnchor)
+    };
   }
 
   function setStatus(state, text) {
@@ -350,12 +644,13 @@
       return;
     }
     var requestId = state.pendingRequest.id;
+    var manager = state.manager || connectManager();
     logStage(requestId, "request-failed", {
       message: message,
       detail: detail || null
     });
     clearPendingRequest(state);
-    enterDormant(state);
+    resetConnectSession(manager);
     setFeedback(
       state,
       "error",
@@ -405,10 +700,12 @@
         state.pendingRequest.id !== detail.requestId) {
       return;
     }
+    var manager = state.manager || connectManager();
     if (detail.status === "pane-open-succeeded") {
       logStage(detail.requestId, "pane-open-succeeded", detail);
       clearPendingRequest(state);
       clearFeedback(state);
+      resetConnectSession(manager);
       return;
     }
     failPendingRequest(
@@ -496,7 +793,7 @@
 
   function writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson) {
     submitButton.setAttribute("data-dom-association-request-id", payload.requestId);
-    submitButton.setAttribute("data-dom-association-transport", "button-payload-v1");
+    submitButton.setAttribute("data-dom-association-transport", "button-payload-v2");
     submitButton.setAttribute(
       "data-dom-association-context-object-id",
       payload.contextObjectId || ""
@@ -514,6 +811,22 @@
     submitButton.setAttribute(
       "data-dom-association-target-field-id",
       state.targetInput && state.targetInput.id || ""
+    );
+    submitButton.setAttribute(
+      "data-dom-association-source-pane-id",
+      payload.sourcePaneId || ""
+    );
+    submitButton.setAttribute(
+      "data-dom-association-target-pane-id",
+      payload.targetPaneId || ""
+    );
+    submitButton.setAttribute(
+      "data-dom-association-source-provider-kind",
+      payload.sourceProviderKind || ""
+    );
+    submitButton.setAttribute(
+      "data-dom-association-target-provider-kind",
+      payload.targetProviderKind || ""
     );
   }
 
@@ -554,6 +867,132 @@
     return true;
   }
 
+  function sessionStatusText(state, session) {
+    if (!session || !session.id) {
+      return null;
+    }
+    if (session.phase === "choose-source") {
+      return "Connect: choose source";
+    }
+    if (session.phase === "choose-target") {
+      if (session.sourceAnchor && session.sourceAnchor.label) {
+        return "Connect: choose target for " + limitText(session.sourceAnchor.label, 48);
+      }
+      return "Connect: choose target";
+    }
+    if (session.phase === "submitting") {
+      return "Opening association...";
+    }
+    return null;
+  }
+
+  function refreshPaneStateFromSession(state) {
+    var manager = state.manager || connectManager();
+    var session = manager.session;
+    var available = !!state.available;
+    state.slot.hidden = !available;
+    if (!available) {
+      state.enabled = false;
+      state.toggle.dataset.mode = "inactive";
+      if (!state.pendingRequest) {
+        setPhase(state, "dormant");
+      }
+      return;
+    }
+
+    var activeForSource = session.phase === "choose-source" &&
+      session.originPaneId === state.paneId;
+    var activeForTarget = session.phase === "choose-target";
+    var activeForSubmitting = session.phase === "submitting" &&
+      session.id !== null;
+    var sessionVisible = activeForSource || activeForTarget || activeForSubmitting;
+
+    state.enabled = activeForSource || activeForTarget;
+    state.toggle.dataset.mode = sessionVisible ? "active" : "inactive";
+    if (state.surface) {
+      state.surface.classList.toggle("hyperdoc-dom-connect-active", !!state.enabled);
+    }
+    if (!sessionVisible) {
+      if (!state.pendingRequest) {
+        if (sessionActive(manager)) {
+          setPhase(state, "dormant");
+        } else if (!state.learned && !state.introDismissed) {
+          setPhase(state, "coachmark");
+        } else {
+          setPhase(state, "dormant");
+        }
+      }
+      return;
+    }
+    if (session.phase === "choose-source") {
+      setPhase(state, activeForSource ? "select-source" : "dormant");
+    } else if (session.phase === "choose-target") {
+      setPhase(state, "select-target");
+    } else if (session.phase === "submitting") {
+      setPhase(state, "submitting");
+    }
+    var statusText = sessionStatusText(state, session);
+    if (statusText && state.phase !== "dormant") {
+      setStatus(state, statusText);
+    }
+  }
+
+  function refreshAllPaneStates(manager) {
+    liveStates(manager).forEach(function (state) {
+      refreshPaneStateFromSession(state);
+    });
+  }
+
+  function resetConnectSession(manager, options) {
+    var preservePendingState = options && options.preservePendingState;
+    liveStates(manager).forEach(function (state) {
+      if (state !== preservePendingState) {
+        clearPendingRequest(state);
+      }
+      enterDormant(state);
+    });
+    manager.session = makeIdleSession();
+  }
+
+  function startConnectSession(state) {
+    var manager = state.manager;
+    if (sessionActive(manager)) {
+      resetConnectSession(manager);
+    }
+    markIntroDismissed(state);
+    liveStates(manager).forEach(function (otherState) {
+      clearFeedback(otherState);
+      closeHelpPanel(otherState);
+      setHoverElement(otherState, null);
+    });
+    manager.session = {
+      id: makeRequestId(),
+      phase: "choose-source",
+      originPaneId: state.paneId,
+      sourcePaneId: null,
+      sourceProviderKind: null,
+      sourceAnchor: null,
+      sourceState: null,
+      targetPaneId: null,
+      targetProviderKind: null,
+      targetAnchor: null,
+      targetState: null
+    };
+    logStage(manager.session.id, "session-started", sessionDiagnostic(manager.session));
+    refreshAllPaneStates(manager);
+  }
+
+  function cancelConnectSession(state) {
+    var manager = state.manager;
+    var requestId = manager.session && manager.session.id;
+    resetConnectSession(manager);
+    if (requestId) {
+      logStage(requestId, "session-cancelled", {
+        paneId: state.paneId
+      });
+    }
+  }
+
   function syncPaneSurface(state) {
     if (state.syncingPaneSurface) {
       return;
@@ -565,34 +1004,24 @@
       var previousAvailable = state.available;
       var available = bindSurface(state, surface);
       state.available = available;
-      state.slot.hidden = !available;
       if (!available) {
         clearFeedback(state);
         closeHelpPanel(state);
         setHoverElement(state, null);
         clearSource(state);
-        state.enabled = false;
-        state.toggle.dataset.mode = "inactive";
-        setPhase(state, "dormant");
+        refreshPaneStateFromSession(state);
         return;
       }
       if (previousSurface && previousSurface !== surface) {
+        previousSurface.classList.remove("hyperdoc-dom-connect-active");
         setHoverElement(state, null);
         clearSource(state);
-        if (state.enabled) {
-          state.enabled = false;
-          state.toggle.dataset.mode = "inactive";
-        }
       }
       if (!previousAvailable || previousSurface !== surface) {
         clearFeedback(state);
         updateProviderCopy(state);
-        if (state.learned || state.introDismissed) {
-          setPhase(state, "dormant");
-        } else {
-          setPhase(state, "coachmark");
-        }
       }
+      refreshPaneStateFromSession(state);
     } finally {
       state.syncingPaneSurface = false;
     }
@@ -687,7 +1116,7 @@
   }
 
   function deactivate(state, resetStatus) {
-    enterDormant(state);
+    cancelConnectSession(state);
   }
 
   function activate(state) {
@@ -695,25 +1124,31 @@
       return;
     }
     clearResetTimer(state);
-    markIntroDismissed(state);
-    state.enabled = true;
-    state.surface.classList.add("hyperdoc-dom-connect-active");
-    state.toggle.dataset.mode = "active";
-    clearFeedback(state);
-    closeHelpPanel(state);
-    setPhase(state, "select-source");
+    startConnectSession(state);
   }
 
   function beginConnection(state, element, anchor) {
+    var manager = state.manager;
+    var session = manager.session;
     setHoverElement(state, null);
     clearSource(state);
     state.source = anchor;
     state.sourceElement = element;
-    state.requestId = makeRequestId();
+    state.requestId = session.id;
     state.sourceElement.classList.add("hyperdoc-dom-connect-source");
     state.overlay.hidden = false;
-    logStage(state.requestId, "source-selected", anchorLogData(anchor));
-    setPhase(state, "select-target");
+    session.phase = "choose-target";
+    session.sourcePaneId = state.paneId;
+    session.sourceProviderKind = anchor.providerKind;
+    session.sourceAnchor = anchor;
+    session.sourceState = state;
+    logStage(session.id, "source-selected", {
+      paneId: state.paneId,
+      providerKind: anchor.providerKind,
+      anchor: anchorLogData(anchor),
+      session: sessionDiagnostic(session)
+    });
+    refreshAllPaneStates(manager);
   }
 
   function updateLineFromMouse(state, clientX, clientY) {
@@ -726,29 +1161,60 @@
   }
 
   function completeConnection(state, targetAnchor) {
-    var requestId = state.requestId || makeRequestId();
+    var manager = state.manager;
+    var session = manager.session;
+    var sourceState = session.sourceState;
+    var sourceAnchor = session.sourceAnchor;
+    var requestId = session.id || makeRequestId();
+    var pendingState = sourceState || state;
+    if (!sourceAnchor) {
+      setFeedback(
+        state,
+        "error",
+        "Association could not be opened. No source anchor is active in the current Connect session."
+      );
+      resetConnectSession(manager);
+      return;
+    }
     var previousSurface = state.surface;
     var activeSurface = activeSurfaceForPane(state.pane);
     var submitSurface = activeSurface || previousSurface;
     var submitReady = bindSurface(state, submitSurface);
-    var sourceJson = JSON.stringify(state.source);
+    var sourceJson = JSON.stringify(sourceAnchor);
     var targetJson = JSON.stringify(targetAnchor);
     var payload = {
       requestId: requestId,
-      providerKind: state.providerKind,
+      sourcePaneId: session.sourcePaneId,
+      targetPaneId: state.paneId,
+      sourceProviderKind: sourceAnchor.providerKind,
+      targetProviderKind: targetAnchor.providerKind,
       contextObjectId: submitSurface && submitSurface.dataset.contextObjectId || null,
       contextViewTitle: submitSurface && submitSurface.dataset.contextViewTitle || null,
-      source: state.source,
+      source: sourceAnchor,
       target: targetAnchor
     };
     var submitButton = submitReady &&
       state.submit &&
       state.submit.querySelector("button");
+    session.phase = "submitting";
+    session.targetPaneId = state.paneId;
+    session.targetProviderKind = targetAnchor.providerKind;
+    session.targetAnchor = targetAnchor;
+    session.targetState = state;
     markLearned(state);
+    if (sourceState && sourceState !== state) {
+      markLearned(sourceState);
+    }
     clearResetTimer(state);
-    logStage(requestId, "target-selected", anchorLogData(targetAnchor));
+    logStage(requestId, "target-selected", {
+      paneId: state.paneId,
+      providerKind: targetAnchor.providerKind,
+      anchor: anchorLogData(targetAnchor),
+      session: sessionDiagnostic(session)
+    });
     logStage(requestId, "association-payload-assembled", payload);
     logStage(requestId, "submit-boundary-resolved", {
+      sourceSurface: surfaceDiagnostic(sourceState && sourceState.surface),
       activeSurface: surfaceDiagnostic(activeSurface),
       previousSurface: surfaceDiagnostic(previousSurface),
       submitSurface: surfaceDiagnostic(submitSurface),
@@ -767,7 +1233,7 @@
         targetField: fieldDiagnostic(state.targetInput),
         submitButtonFound: !!submitButton
       });
-      enterDormant(state);
+      resetConnectSession(manager);
       setFeedback(
         state,
         "error",
@@ -785,8 +1251,11 @@
     });
     writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson);
     logStage(requestId, "request-payload-written", {
-      transport: "button-payload-v1",
-      providerKind: state.providerKind,
+      transport: "button-payload-v2",
+      sourcePaneId: payload.sourcePaneId,
+      targetPaneId: payload.targetPaneId,
+      sourceProviderKind: payload.sourceProviderKind,
+      targetProviderKind: payload.targetProviderKind,
       submitButtonId: submitButton.id || null,
       sourceFieldId: state.sourceInput.id || null,
       targetFieldId: state.targetInput.id || null,
@@ -795,30 +1264,29 @@
       targetJsonPresent: stringValuePresent(targetJson),
       targetJsonLength: stringValueLength(targetJson)
     });
-    state.enabled = false;
-    if (previousSurface && previousSurface !== state.surface) {
-      previousSurface.classList.remove("hyperdoc-dom-connect-active");
-    }
-    if (state.surface) {
-      state.surface.classList.remove("hyperdoc-dom-connect-active");
-    }
-    state.toggle.dataset.mode = "inactive";
-    setHoverElement(state, null);
-    clearSource(state);
-    closeHelpPanel(state);
-    setPhase(state, "submitting");
+    liveStates(manager).forEach(function (otherState) {
+      setHoverElement(otherState, null);
+      clearSource(otherState);
+      closeHelpPanel(otherState);
+    });
+    refreshAllPaneStates(manager);
     logStage(requestId, "request-sent-to-create-open-association", {
       contextObjectId: payload.contextObjectId,
       contextViewTitle: payload.contextViewTitle,
-      providerKind: state.providerKind,
-      transport: "button-payload-v1"
+      sourcePaneId: payload.sourcePaneId,
+      targetPaneId: payload.targetPaneId,
+      sourceProviderKind: payload.sourceProviderKind,
+      targetProviderKind: payload.targetProviderKind,
+      transport: "button-payload-v2"
     });
-    registerPendingRequest(state, requestId);
+    registerPendingRequest(pendingState, requestId);
     state.requestId = null;
     submitButton.click();
-    state.resetTimer = window.setTimeout(function () {
-      if (state.phase === "submitting") {
-        enterDormant(state);
+    pendingState.resetTimer = window.setTimeout(function () {
+      if (manager.session.phase === "submitting") {
+        resetConnectSession(manager, {
+          preservePendingState: pendingState
+        });
       }
     }, 900);
   }
@@ -831,7 +1299,9 @@
   }
 
   function onRootClick(state, event) {
-    if (!state.enabled) {
+    var manager = state.manager;
+    var session = manager.session;
+    if (!state.enabled || !sessionActive(manager)) {
       return;
     }
     event.preventDefault();
@@ -847,12 +1317,16 @@
       return;
     }
     var anchor = state.provider.buildAnchor(element, state.surface, state.root);
-    if (!state.source) {
+    if (session.phase === "choose-source") {
       beginConnection(state, element, anchor);
       updateLineFromMouse(state, event.clientX, event.clientY);
       return;
     }
-    if (anchorKey(anchor) === anchorKey(state.source)) {
+    if (session.phase !== "choose-target") {
+      return;
+    }
+    if (session.sourceAnchor && anchorKey(anchor) === anchorKey(session.sourceAnchor) &&
+        state.paneId === session.sourcePaneId) {
       setStatus(
         state,
         "Source selected - choose a different target element."
@@ -868,10 +1342,15 @@
     if (!pane || !slot) {
       return null;
     }
+    if (!pane.dataset.hyperdocConnectPaneId) {
+      pane.dataset.hyperdocConnectPaneId = "pane-" +
+        Math.random().toString(36).slice(2, 10);
+    }
     if (pane.hyperdocDomConnectState) {
       return pane.hyperdocDomConnectState;
     }
     ensurePaneControlMarkup(slot);
+    var manager = connectManager();
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
     var coachmark = slot.querySelector(".hyperdoc-dom-connect-coachmark");
     var coachmarkCopy = slot.querySelector(".hyperdoc-dom-connect-coachmark-copy");
@@ -889,6 +1368,8 @@
     }
     var state = {
       pane: pane,
+      paneId: pane.dataset.hyperdocConnectPaneId,
+      manager: manager,
       slot: slot,
       control: control,
       coachmark: coachmark,
@@ -924,6 +1405,7 @@
       submit: null
     };
     pane.hyperdocDomConnectState = state;
+    registerState(manager, state);
     slot.hidden = true;
     slot.dataset.helpOpen = "false";
     toggle.dataset.mode = "inactive";
@@ -937,7 +1419,7 @@
       if (!state.available) {
         return;
       }
-      if (state.enabled) {
+      if (sessionActive(state.manager)) {
         deactivate(state, true);
       } else {
         activate(state);
@@ -968,7 +1450,7 @@
       }
     }, true);
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && state.enabled) {
+      if (event.key === "Escape" && sessionActive(state.manager)) {
         deactivate(state, true);
       }
     });
@@ -1045,6 +1527,21 @@
           detail: detail || {}
         })
       );
+    },
+    readSessionState: function () {
+      return sessionDiagnostic(connectManager().session);
+    },
+    readPaneStates: function () {
+      return liveStates(connectManager()).map(function (state) {
+        return {
+          paneId: state.paneId,
+          available: state.available,
+          phase: state.phase,
+          providerKind: state.providerKind,
+          activeTab: state.pane.querySelector(".inspector-tabs button.active") &&
+            state.pane.querySelector(".inspector-tabs button.active").textContent.trim()
+        };
+      });
     }
   };
 }());

@@ -16,8 +16,11 @@ It protects these invariants for future Connect/provider slices:
 This suite materializes the current DOM association findings as browser tests:
 
 - `content view opens an association through pane-chrome Connect`
-  - proves the working `dom-v1` provider path
-  - asserts the authoritative transport is `button-payload-v1`
+  - proves the working `dom-v1` provider path with resolved content anchors
+  - asserts the authoritative transport is `button-payload-v2`
+- `content view opens a cross-pane association through pane-chrome Connect`
+  - proves an explicit two-pane Connect session survives source selection in one pane and target selection in another
+  - asserts the authoritative transport carries distinct source and target pane ids
 - `pane-chrome help opens without shifting the active view`
   - proves the `?` help toggle opens in the subordinate pane-chrome Connect row
   - asserts the help panel does not move the active view or change document height
@@ -58,6 +61,7 @@ Each spec attaches the browser-side event trace JSON so the request id, provider
 The current expected Chromium state is:
 
 - content transport test passes
+- two-pane content association test passes
 - help toggle test passes
 - main-tab click-safety test passes
 - provider-sync round-trip test passes

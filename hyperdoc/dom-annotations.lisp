@@ -10,6 +10,10 @@
                   :reader provider-kind-of)
    (view-kind :initarg :view-kind :initform nil :reader view-kind-of)
    (view-title :initarg :view-title :initform nil :reader view-title-of)
+   (pane-id :initarg :pane-id :initform nil :reader pane-id-of)
+   (context-object-id :initarg :context-object-id
+                      :initform nil
+                      :reader context-object-id-of)
    (strategy :initarg :strategy :reader anchor-strategy-of)
    (value :initarg :value :reader anchor-value-of)
    (selector :initarg :selector :initform nil :reader selector-of)
@@ -21,9 +25,19 @@
    (end-line :initarg :end-line :initform nil :reader end-line-of)
    (start-column :initarg :start-column :initform nil :reader start-column-of)
    (end-column :initarg :end-column :initform nil :reader end-column-of)
+   (section-path :initarg :section-path :initform nil :reader section-path-of)
+   (durability-tier :initarg :durability-tier
+                    :initform nil
+                    :reader durability-tier-of)
    (durability-note :initarg :durability-note
                     :initform nil
                     :reader durability-note-of)
+   (fallback-strategy :initarg :fallback-strategy
+                      :initform nil
+                      :reader fallback-strategy-of)
+   (fallback-value :initarg :fallback-value
+                   :initform nil
+                   :reader fallback-value-of)
    (object-id :initarg :object-id :initform nil :reader anchor-object-id-of)))
 
 (defclass dom-relation-annotation ()
@@ -104,8 +118,16 @@
 
 (defun inferred-anchor-durability-note (provider-kind strategy)
   (cond
-    ((string= provider-kind "source-v1")
+    ((or (string= provider-kind "source-v1")
+         (string= strategy "source-line-range")
+         (string= strategy "source-line"))
      "Source line anchors are durable for the same file path and line range, but line numbers can drift when the source file changes.")
+    ((string= strategy "heading-anchor")
+     "Heading anchors resolve to the semantic heading path within the current HyperDoc page. They are more durable than raw DOM paths, but can drift if headings are renamed or restructured.")
+    ((string= strategy "list-item-anchor")
+     "List-item anchors resolve to heading scope plus list and item position. They are more durable than raw DOM paths, but still depend on recognizable section and list structure.")
+    ((string= strategy "paragraph-anchor")
+     "Paragraph anchors resolve to heading scope plus paragraph index. They are more durable than raw DOM paths, but can drift when paragraphs are inserted, removed, or reordered.")
     ((string= strategy "data-anchor")
      "Authored anchor ids are the strongest DOM-backed anchors in this slice; durability depends on the id being preserved across page revisions.")
     ((string= strategy "data-object-id")
@@ -124,8 +146,11 @@
                    :provider-kind provider-kind
                    :view-kind (getf json :viewKind)
                    :view-title (getf json :viewTitle)
+                   :pane-id (getf json :paneId)
+                   :context-object-id (getf json :contextObjectId)
                    :strategy strategy
                    :value (or (getf json :value)
+                              (getf json :fallbackValue)
                               (getf json :selector)
                               "")
                    :selector (getf json :selector)
@@ -137,10 +162,27 @@
                    :end-line (getf json :endLine)
                    :start-column (getf json :startColumn)
                    :end-column (getf json :endColumn)
+                   :section-path (getf json :sectionPath)
+                   :durability-tier (getf json :durabilityTier)
                    :durability-note (or (getf json :durabilityNote)
                                         (inferred-anchor-durability-note
                                          provider-kind strategy))
+                   :fallback-strategy (getf json :fallbackStrategy)
+                   :fallback-value (getf json :fallbackValue)
                    :object-id (getf json :objectId))))
+
+(defun anchor-surface-label (anchor)
+  (let ((context-object-id (context-object-id-of anchor))
+        (view-title (view-title-of anchor)))
+    (cond
+      ((and context-object-id view-title)
+       (format nil "~A / ~A" context-object-id view-title))
+      (context-object-id
+       context-object-id)
+      (view-title
+       view-title)
+      (t
+       "current surface"))))
 
 (defun call-hyperdoc-runtime (symbol-name &rest arguments)
   (let ((symbol (find-symbol symbol-name :hyperdoc)))
@@ -236,19 +278,38 @@
 
 (defun dom-relation-annotation-summary (source-anchor target-anchor patch-target
                                          &optional context-view-title)
-  (if patch-target
-      (format nil "Association between ~A and ~A within the ~A view; this anchor pair matches an existing workflow patch target."
-              (or (label-of source-anchor)
-                  (anchor-value-of source-anchor))
-              (or (label-of target-anchor)
-                  (anchor-value-of target-anchor))
-              (or context-view-title "active"))
-      (format nil "Association between ~A and ~A within the ~A view."
-              (or (label-of source-anchor)
-                  (anchor-value-of source-anchor))
-              (or (label-of target-anchor)
-                  (anchor-value-of target-anchor))
-              (or context-view-title "active"))))
+  (let* ((source-surface (anchor-surface-label source-anchor))
+         (target-surface (anchor-surface-label target-anchor))
+         (same-surface-p (string= source-surface target-surface)))
+    (if patch-target
+        (if same-surface-p
+            (format nil "Association between ~A and ~A within ~A; this anchor pair matches an existing workflow patch target."
+                    (or (label-of source-anchor)
+                        (anchor-value-of source-anchor))
+                    (or (label-of target-anchor)
+                        (anchor-value-of target-anchor))
+                    (or context-view-title source-surface "the active surface"))
+            (format nil "Association between ~A in ~A and ~A in ~A; this anchor pair matches an existing workflow patch target."
+                    (or (label-of source-anchor)
+                        (anchor-value-of source-anchor))
+                    source-surface
+                    (or (label-of target-anchor)
+                        (anchor-value-of target-anchor))
+                    target-surface))
+        (if same-surface-p
+            (format nil "Association between ~A and ~A within ~A."
+                    (or (label-of source-anchor)
+                        (anchor-value-of source-anchor))
+                    (or (label-of target-anchor)
+                        (anchor-value-of target-anchor))
+                    (or context-view-title source-surface "the active surface"))
+            (format nil "Association between ~A in ~A and ~A in ~A."
+                    (or (label-of source-anchor)
+                        (anchor-value-of source-anchor))
+                    source-surface
+                    (or (label-of target-anchor)
+                        (anchor-value-of target-anchor))
+                    target-surface)))))
 
 (defun dom-relation-annotation-durability-note (source-anchor target-anchor)
   (let ((source-note (or (durability-note-of source-anchor)

@@ -52,6 +52,18 @@
         :target-field-id
         (dom-association-attribute-value
          element "data-dom-association-target-field-id")
+        :source-pane-id
+        (dom-association-attribute-value
+         element "data-dom-association-source-pane-id")
+        :target-pane-id
+        (dom-association-attribute-value
+         element "data-dom-association-target-pane-id")
+        :source-provider-kind
+        (dom-association-attribute-value
+         element "data-dom-association-source-provider-kind")
+        :target-provider-kind
+        (dom-association-attribute-value
+         element "data-dom-association-target-provider-kind")
         :source-json
         (dom-association-attribute-value
          element "data-dom-association-source-json")
@@ -69,6 +81,10 @@
      :context-object-id (getf payload :context-object-id)
      :source-field-id (getf payload :source-field-id)
      :target-field-id (getf payload :target-field-id)
+     :source-pane-id (getf payload :source-pane-id)
+     :target-pane-id (getf payload :target-pane-id)
+     :source-provider-kind (getf payload :source-provider-kind)
+     :target-provider-kind (getf payload :target-provider-kind)
      :source-present? (dom-association-json-present-p (getf payload :source-json))
      :source-length (dom-association-json-length (getf payload :source-json))
      :target-present? (dom-association-json-present-p (getf payload :target-json))
@@ -176,6 +192,12 @@
        :pane-object (maybe-summarize-object-for-log object)
        :target (maybe-summarize-object-for-log target)
        :transport (and submit-payload (getf submit-payload :transport))
+       :source-pane-id (and submit-payload (getf submit-payload :source-pane-id))
+       :target-pane-id (and submit-payload (getf submit-payload :target-pane-id))
+       :source-provider-kind (and submit-payload
+                                  (getf submit-payload :source-provider-kind))
+       :target-provider-kind (and submit-payload
+                                  (getf submit-payload :target-provider-kind))
        :source-present? (and submit-payload
                              (dom-association-json-present-p
                               (getf submit-payload :source-json)))
