@@ -62,6 +62,8 @@
   (purge-page-cache)
   (when-let (page (gethash id (pages-of *page-cache*)))
     (return-from get-page page))
+  (when (str:empty? id)
+    (setf id (hb:main-page-id-of wp)))
   (let ((page (make-instance 'wikipedia-page
                              :hyperbook wp
                              :id id
@@ -158,6 +160,8 @@
                                  :parameters `(("action" . "parse")
                                                ("page" . ,page-title)
                                                ("format" . "json"))
+                                 :external-format-in :utf8
+                                 :external-format-out :utf8
                                  :want-stream t)))
          (stream (first response)))
     (shasht:read-json stream)))
@@ -178,12 +182,12 @@
                                (page-id (second hb-link))
                                (thunk (views:thunk
                                         (hb:find-page hyperbook-id page-id))))
-                          (views:html
-                            (:tr :id (views:eval-id thunk)
-                                 :class "inspector-inspect"
-                                 (:td (views:esc langname))
-                                 (:td (views:esc autonym))
-                                 (:td (views:esc page-id))))))))))
+                           (views:html
+                             (:tr :id (views:eval-id thunk)
+                                  :class "inspector-inspect"
+                                  (:td (views:esc langname))
+                                  (:td (views:esc autonym))
+                                   (:td (views:esc page-id))))))))))
 
 ;;
 ;; Make and manage wikipedia objects
@@ -194,22 +198,21 @@
 (defun make-wikipedia (edition title main-page)
   (assert (typep edition 'string))
   (let* ((ed-code (-> edition str:downcase))
-         (id (str:concat "wikipedia:" ed-code))
-         (wp (make-instance 'wikipedia
-                            :id id
-                            :edition ed-code
-                            :title title
-                            :main-page main-page)))
-    (setf (gethash edition *wikipedias*) wp)
-    (hb:register wp)
-    wp))
+         (id (str:concat "wikipedia:" ed-code)))
+    (make-instance 'wikipedia
+                   :id id
+                   :edition ed-code
+                   :title title
+                   :main-page main-page)))
 
 (defun get-wikipedia (edition &optional signal-error?)
   (declare (ignore signal-error?))
   (let ((ed-code (str:downcase edition)))
     (or (gethash ed-code *wikipedias*)
         (when-let (wp-spec (find ed-code *editions* :key #'first :test #'equal))
-          (make-wikipedia edition (second wp-spec) (third wp-spec))))))
+          (let ((wp (make-wikipedia edition (second wp-spec) (third wp-spec))))
+            (hb:register wp)
+            (setf (gethash ed-code *wikipedias*) wp))))))
 
 ;; Register a HyperBook factory and a link redirection for Wikipedia links
 
@@ -256,7 +259,9 @@
              (hyperbook-id (str:concat "wikipedia:" ed-code))
              (page-name (third path-parts))
              (page-id (str:replace-all "_" " " page-name)))
-        (list hyperbook-id page-id)))))
+        (unless (or (str:starts-with? "Special:" page-id)
+                    (str:starts-with? "File:" page-id))
+          (list hyperbook-id page-id))))))
 
 ;;
 ;; Views
@@ -283,6 +288,8 @@
                                                  encode-page-title-for-url))
                                   ("prop" . "wikitext")
                                   ("format" . "json"))
+                    :external-format-in :utf8
+                    :external-format-out :utf8
                     :want-stream t))
            (data (shasht:read-json stream))
            (wikitext (some->> data
@@ -302,6 +309,8 @@
                                                encode-page-title-for-url))
                                 ("prop" . "parsetree")
                                 ("format" . "json"))
+                  :external-format-in :utf8
+                  :external-format-out :utf8
                   :want-stream t))
          (data (shasht:read-json stream))
          (dom (some->> data
@@ -332,6 +341,8 @@
                                   ("bltitle" . ,page-id)
                                   ("bllimit" . "500")
                                   ("format" . "json"))
+                    :external-format-in :utf8
+                    :external-format-out :utf8
                     :want-stream t))
            (data (shasht:read-json stream))
            (links (some->> data

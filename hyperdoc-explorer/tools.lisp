@@ -61,6 +61,13 @@
   (with-slots (links) page
     (setf links (hb:extract-links page))))
 
+(views:defview views:👀source (tool tool-page)
+  (-> tool
+    symbol-of
+    views/standard:var-definition
+    views:👀source
+    (views:rename :title "Source" :priority 7)))
+
 ;;
 ;; Playground pages
 ;;

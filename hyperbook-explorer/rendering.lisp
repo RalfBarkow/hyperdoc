@@ -125,7 +125,7 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
                  :title (format nil "HyperBook \"~A\""
                                 (cl-who:escape-string hyperbook-id))
                  (views:object-ref hyperbook
-                                   :display (rendered-link-text link-text)))))
+                                    :display (rendered-link-text link-text)))))
     (lookup-failure (c)
       (let ((issue (enrich-lookup-issue
                     (make-basic-hyperbook-lookup-issue c *current-page*))))
@@ -144,7 +144,7 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
                                 (cl-who:escape-string page-id)
                                 (cl-who:escape-string (title-of hyperbook)))
                  (views:object-ref page
-                                   :display (rendered-link-text link-text)))))
+                                    :display (rendered-link-text link-text)))))
     (lookup-failure (c)
       (let ((issue
               (make-render-time-lookup-issue
