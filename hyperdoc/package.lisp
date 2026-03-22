@@ -42,6 +42,17 @@
            #:plan-fedwiki-slice-materialization
            #:print-fedwiki-materialization-plan
            #:materialize-fedwiki-materialization-plan
+           ;; Documentation validation helpers
+           #:topic-coverage-report
+           #:documentation-slice-validation-report
+           #:documentation-topic-coverage-report
+           #:documentation-topic-coverage-pass-p
+           #:print-documentation-topic-coverage-report
+           #:validate-documentation-slice
+           #:documentation-slice-validation-pass-p
+           #:documentation-validation-checks-of
+           #:documentation-validation-coverage-report-of
+           #:print-documentation-slice-validation-report
            ;; Access to the global catalog of registered HyperDocs
            #:*catalog* #:hyperdocs-of
            ;; Access to HyperDoc data

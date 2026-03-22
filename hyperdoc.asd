@@ -28,6 +28,7 @@
                              (:file "check-runner")
                              (:file "example-core")
                              (:file "journal-gate")
+                             (:file "validation")
                              (:file "article-allegation-slice")
                              (:file "fedwiki-materialization")
                              (:file "tools")
