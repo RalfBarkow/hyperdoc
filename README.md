@@ -47,6 +47,10 @@ The audit is source-based and checks:
 - provider/help copy for stale DOM-first phrasing
 - inspector rendering for separate semantic, fallback, and durability surfaces
 
+The documentation-slice helper also runs this audit after its page/topic/FedWiki
+checks pass, so it is part of the normal repo validation flow for that
+entrypoint.
+
 ## Article Allegation Slice Helper
 
 Use `tools/article-allegation-slice.lisp` to scaffold an article-driven,
