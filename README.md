@@ -47,12 +47,13 @@ The audit is source-based and checks:
 - provider/help copy for stale DOM-first phrasing
 - inspector rendering for separate semantic, fallback, and durability surfaces
 
-The documentation-slice helper also runs this audit after its page/topic/FedWiki
-checks pass, so it is part of the normal repo validation flow for that
-entrypoint. The broader repo-level `hyperdoc:run-ci-checks` path now includes a
-first-class documentation-slice validation check, which delegates to
-`tools/validate-documentation-slice.sh` and therefore reaches this audit
-through the same established helper path.
+The source of truth for this audit now lives in HyperDoc Lisp via
+`hyperdoc:semantic-first-anchor-audit-report`. The documentation-slice helper
+includes it as a named validation sub-check, so it is part of the normal repo
+validation flow for that entrypoint. The broader repo-level
+`hyperdoc:run-ci-checks` path includes a first-class documentation-slice
+validation check, and that check now reports the semantic-first anchor audit
+explicitly through the same HyperDoc-owned validation report.
 
 ## Article Allegation Slice Helper
 

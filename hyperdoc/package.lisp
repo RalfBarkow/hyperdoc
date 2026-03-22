@@ -49,6 +49,9 @@
            #:documentation-topic-coverage-pass-p
            #:print-documentation-topic-coverage-report
            #:validate-documentation-slice
+           #:semantic-first-anchor-audit-report
+           #:semantic-first-anchor-audit-pass-p
+           #:print-semantic-first-anchor-audit-report
            #:run-repo-documentation-slice-validation-check
            #:documentation-slice-validation-pass-p
            #:documentation-validation-checks-of

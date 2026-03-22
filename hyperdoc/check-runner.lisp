@@ -70,7 +70,7 @@
     (:package "HYPERDOC"
      :name "RUN-REPO-DOCUMENTATION-SLICE-VALIDATION-CHECK"
      :id "test:hyperdoc:run-repo-documentation-slice-validation-check"
-     :title "Documentation-slice validation helper delegation"
+     :title "Documentation-slice validation"
      :system "hyperdoc"
      :tags (:kind :validation :suite "documentation-slice"))))
 

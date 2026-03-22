@@ -26,6 +26,10 @@
   (unless (typep object type)
     (error "~A -- expected type: ~S actual type: ~S" message type (type-of object))))
 
+(defun cr-assert-string-contains (needle haystack message)
+  (unless (search needle haystack :test #'char=)
+    (error "~A -- missing substring: ~S" message needle)))
+
 (defun make-smoke-check-spec (id title function-symbol &key (kind :test) tags)
   (make-instance 'hyperdoc::check-spec
                  :kind kind
@@ -124,7 +128,7 @@
          (test-ids (known-test-check-ids)))
     (cr-assert-true spec
                     "Documentation-slice validation check must be discoverable")
-    (cr-assert-equal "Documentation-slice validation helper delegation"
+    (cr-assert-equal "Documentation-slice validation"
                      (hyperdoc::check-title-of spec)
                      "Documentation-slice validation check title")
     (cr-assert-equal "HYPERDOC"
@@ -142,6 +146,43 @@
     (cr-assert-true (member "test:hyperdoc:run-repo-documentation-slice-validation-check"
                             test-ids :test #'equal)
                     "Documentation-slice validation check must be present in the system-scoped test set")))
+
+(defun documentation-validation-check-by-id (report id)
+  (find id
+        (hyperdoc:documentation-validation-checks-of report)
+        :key #'hyperdoc::documentation-validation-check-id-of
+        :test #'equal))
+
+(defun run-documentation-slice-validation-report-smoke-test ()
+  (let* ((report
+           (hyperdoc:validate-documentation-slice
+            :page "hyperdoc/Semantic-first anchor resolution.html"
+            :topics '("semantic-first-anchor-resolution-topic")
+            :fedwiki-pages '("tools/testdata/journal-gate/good-page.json")))
+         (audit-check (documentation-validation-check-by-id
+                       report
+                       "semantic-first-anchor-audit"))
+         (audit-payload (and audit-check
+                             (hyperdoc::documentation-validation-check-payload-of audit-check)))
+         (rendered
+           (with-output-to-string (stream)
+             (hyperdoc:print-documentation-slice-validation-report report stream))))
+    (cr-assert-true (hyperdoc:documentation-slice-validation-pass-p report)
+                    "Representative documentation slice must validate successfully")
+    (cr-assert-true audit-check
+                    "Documentation-slice validation must include a named semantic-first anchor audit check")
+    (cr-assert-equal :passed
+                     (hyperdoc::documentation-validation-check-status-of audit-check)
+                     "Semantic-first anchor audit check status")
+    (cr-assert-typep 'hyperdoc::semantic-first-anchor-audit-result
+                     audit-payload
+                     "Semantic-first anchor audit payload type")
+    (cr-assert-string-contains "semantic-first anchor audit"
+                               rendered
+                               "Documentation-slice report must render the named semantic-first anchor audit")
+    (cr-assert-string-contains "SEMANTIC_FIRST_ANCHOR_AUDIT_OK"
+                               rendered
+                               "Documentation-slice report must print the semantic-first anchor audit result token")))
 
 (defun run-example-system-attribution-smoke-test ()
   (let ((base-symbols (discovered-example-symbols "hyperdoc")))
@@ -332,6 +373,7 @@
   (run-check-discovery-smoke-test)
   (run-merged-doc-slices-discovery-smoke-test)
   (run-documentation-slice-validation-discovery-smoke-test)
+  (run-documentation-slice-validation-report-smoke-test)
   (run-example-system-attribution-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)

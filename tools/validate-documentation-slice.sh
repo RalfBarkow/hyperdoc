@@ -22,5 +22,4 @@ run_documentation_validation() {
   fi
 }
 
-run_documentation_validation "$@" || exit $?
-./tools/semantic-first-anchor-audit.sh
+run_documentation_validation "$@"

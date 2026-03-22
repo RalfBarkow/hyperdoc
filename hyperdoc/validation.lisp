@@ -116,29 +116,26 @@
             (length (documentation-validation-checks-of report))
             (documentation-validation-failed-count-of report))))
 
-(defclass documentation-helper-delegation-report ()
-  ((page :reader documentation-helper-delegation-page-of
-         :initarg :page)
-   (topics :reader documentation-helper-delegation-topics-of
-           :initarg :topics
+(defclass semantic-first-anchor-audit-result ()
+  ((checks :reader semantic-first-anchor-audit-checks-of
+           :initarg :checks
            :initform nil)
-   (fedwiki-pages :reader documentation-helper-delegation-fedwiki-pages-of
-                  :initarg :fedwiki-pages
-                  :initform nil)
-   (command :reader documentation-helper-delegation-command-of
-            :initarg :command)
-   (output :reader documentation-helper-delegation-output-of
-           :initarg :output
-           :initform "")
-   (pass? :reader documentation-helper-delegation-pass-p
+   (passed-count :reader semantic-first-anchor-audit-passed-count-of
+                 :initarg :passed-count
+                 :initform 0)
+   (failed-count :reader semantic-first-anchor-audit-failed-count-of
+                 :initarg :failed-count
+                 :initform 0)
+   (pass? :reader semantic-first-anchor-audit-pass-p
           :initarg :pass?
-          :initform nil)))
+          :initform t)))
 
-(defmethod print-object ((report documentation-helper-delegation-report) stream)
+(defmethod print-object ((report semantic-first-anchor-audit-result) stream)
   (print-unreadable-object (report stream :type t :identity t)
-    (format stream "~:[fail~;ok~] ~A"
-            (documentation-helper-delegation-pass-p report)
-            (documentation-helper-delegation-page-of report))))
+    (format stream "~:[fail~;ok~] passes=~D fails=~D"
+            (semantic-first-anchor-audit-pass-p report)
+            (semantic-first-anchor-audit-passed-count-of report)
+            (semantic-first-anchor-audit-failed-count-of report))))
 
 (defparameter *repo-documentation-slice-validation-page*
   "hyperdoc/Semantic-first anchor resolution.html")
@@ -159,55 +156,9 @@
                         (documentation-validation-repo-root-pathname)))
       (error "~A not found: ~A" missing-label path)))
 
-(defun documentation-helper-argument-string (value)
-  (typecase value
-    (symbol (string-downcase (symbol-name value)))
-    (string value)
-    (t (princ-to-string value))))
-
-(defun documentation-helper-delegation-command (&key page topics fedwiki-pages)
-  (append (list "/usr/bin/env"
-                "-u" "CL_SOURCE_REGISTRY"
-                "-u" "ASDF_OUTPUT_TRANSLATIONS"
-                "./tools/validate-documentation-slice.sh"
-                "--page" (documentation-helper-argument-string page))
-          (loop for topic in topics
-                append (list "--topic"
-                             (documentation-helper-argument-string topic)))
-          (loop for fedwiki-page in fedwiki-pages
-                append (list "--fedwiki"
-                             (documentation-helper-argument-string fedwiki-page)))))
-
-(defun documentation-helper-delegation-output-pass-p (output)
-  (and (search "DOC_SLICE_VALIDATION_OK" output :test #'char=)
-       (search "SEMANTIC_FIRST_ANCHOR_AUDIT_OK" output :test #'char=)))
-
-(defun run-documentation-helper-delegation-check
-    (&key (page *repo-documentation-slice-validation-page*)
-          (topics *repo-documentation-slice-validation-topics*)
-          (fedwiki-pages *repo-documentation-slice-validation-fedwiki-pages*))
-  (let* ((repo-root (documentation-validation-repo-root-pathname))
-         (command (documentation-helper-delegation-command
-                   :page page
-                   :topics topics
-                   :fedwiki-pages fedwiki-pages))
-         (output
-           (handler-case
-               (uiop:with-current-directory (repo-root)
-                 (uiop:run-program command
-                                   :output :string
-                                   :error-output :output
-                                   :ignore-error-status t))
-             (error (condition)
-               (format nil "~A" condition))))
-         (pass? (documentation-helper-delegation-output-pass-p output)))
-    (make-instance 'documentation-helper-delegation-report
-                   :page page
-                   :topics topics
-                   :fedwiki-pages fedwiki-pages
-                   :command command
-                   :output output
-                   :pass? pass?)))
+(defun validation-file-string (path &key (missing-label "Validation file"))
+  (uiop:read-file-string
+   (documentation-validation-file-path path :missing-label missing-label)))
 
 (defun documentation-whitespace-char-p (char)
   (or (char= char #\Space)
@@ -399,6 +350,195 @@
              (:skipped (incf skipped)))
         finally (return (values passed failed skipped))))
 
+(defun pattern-present-validation-check
+    (id label path content pattern)
+  (if (search pattern content :test #'char=)
+      (make-documentation-validation-check id label :passed)
+      (make-documentation-validation-check
+       id
+       label
+       :failed
+       :detail (format nil "Missing pattern in ~A: ~S" path pattern))))
+
+(defun pattern-absent-validation-check
+    (id label path content pattern)
+  (if (search pattern content :test #'char=)
+      (make-documentation-validation-check
+       id
+       label
+       :failed
+       :detail (format nil "Found stale pattern in ~A: ~S" path pattern))
+      (make-documentation-validation-check id label :passed)))
+
+(defun semantic-first-anchor-audit-report ()
+  "Return a source-based audit report for semantic-vs-presentation anchor boundaries."
+  (let* ((anchor-model-path "hyperdoc/dom-annotations.lisp")
+         (anchor-model (validation-file-string anchor-model-path
+                                              :missing-label "Anchor model file"))
+         (explorer-path "hyperdoc-explorer/dom-annotations.lisp")
+         (explorer (validation-file-string explorer-path
+                                           :missing-label "Explorer annotation file"))
+         (connect-js-path "assets/hyperdoc/js/dom-annotation-connect.js")
+         (connect-js (validation-file-string connect-js-path
+                                             :missing-label "Connect UI JS file"))
+         (checks
+           (list
+            (pattern-present-validation-check
+             "semantic-anchor-identity-fields"
+             "anchor envelope exposes semantic identity fields separately"
+             anchor-model-path
+             anchor-model
+             "(defun semantic-anchor-identity-fields")
+            (pattern-present-validation-check
+             "presentation-anchor-fallback-fields"
+             "anchor envelope exposes presentation fallback fields separately"
+             anchor-model-path
+             anchor-model
+             "(defun presentation-anchor-fallback-fields")
+            (pattern-present-validation-check
+             "semantic-identity-label"
+             "semantic identity is labeled explicitly"
+             anchor-model-path
+             anchor-model
+             "(cons \"Semantic identity\"")
+            (pattern-present-validation-check
+             "fallback-strategy-label"
+             "fallback strategy is labeled as fallback metadata"
+             anchor-model-path
+             anchor-model
+             "(cons \"Fallback strategy\"")
+            (pattern-present-validation-check
+             "fallback-value-label"
+             "fallback value is labeled as fallback metadata"
+             anchor-model-path
+             anchor-model
+             "(cons \"Fallback value\"")
+            (pattern-present-validation-check
+             "durability-tier"
+             "anchor model keeps durability tier available"
+             anchor-model-path
+             anchor-model
+             "durability-tier")
+            (pattern-present-validation-check
+             "inspector-semantic-fields"
+             "inspector rendering reads semantic identity fields"
+             explorer-path
+             explorer
+             "(semantic-anchor-identity-fields anchor)")
+            (pattern-present-validation-check
+             "inspector-fallback-fields"
+             "inspector rendering reads presentation fallback fields"
+             explorer-path
+             explorer
+             "(presentation-anchor-fallback-fields anchor)")
+            (pattern-present-validation-check
+             "inspector-semantic-section"
+             "inspector renders a dedicated Semantic anchor section"
+             explorer-path
+             explorer
+             "(:h4 \"Semantic anchor\")")
+            (pattern-present-validation-check
+             "inspector-fallback-section"
+             "inspector renders a dedicated Presentation fallback section"
+             explorer-path
+             explorer
+             "(:h4 \"Presentation fallback\")")
+            (pattern-present-validation-check
+             "inspector-durability-section"
+             "inspector renders a dedicated Durability section"
+             explorer-path
+             explorer
+             "(:h4 \"Durability\")")
+            (pattern-present-validation-check
+             "content-provider-copy"
+             "content provider help uses anchor-first wording"
+             explorer-path
+             explorer
+             "\"Connect structural anchors in this view to create an association.\"")
+            (pattern-present-validation-check
+             "source-provider-copy"
+             "source provider help uses anchor-first wording"
+             explorer-path
+             explorer
+             "\"Connect source anchors in this view to create an association.\"")
+            (pattern-present-validation-check
+             "fedwiki-provider-copy"
+             "FedWiki provider help uses anchor-first wording"
+             explorer-path
+             explorer
+             "\"Connect story-item anchors in this view to create an association.\"")
+            (pattern-present-validation-check
+             "generic-connect-copy"
+             "generic Connect chrome copy uses anchor/view wording"
+             connect-js-path
+             connect-js
+             "\"Connect anchors in this view to create an association.\"")
+            (pattern-absent-validation-check
+             "no-visible-elements-provider-copy"
+             "provider help avoids stale visible-elements wording"
+             explorer-path
+             explorer
+             "Connect visible elements")
+            (pattern-absent-validation-check
+             "no-visible-elements-chrome-copy"
+             "pane chrome copy avoids stale visible-elements wording"
+             connect-js-path
+             connect-js
+             "Connect visible elements")
+            (pattern-absent-validation-check
+             "no-page-scoped-provider-copy"
+             "provider help avoids page-scoped wording"
+             explorer-path
+             explorer
+             "in this page to create an association")
+            (pattern-absent-validation-check
+             "no-page-scoped-chrome-copy"
+             "pane chrome copy avoids page-scoped wording"
+             connect-js-path
+             connect-js
+             "in this page to create an association")
+            (pattern-absent-validation-check
+             "no-target-element-provider-copy"
+             "provider help avoids target-element wording"
+             explorer-path
+             explorer
+             "target element")
+            (pattern-absent-validation-check
+             "no-target-element-chrome-copy"
+             "pane chrome copy avoids target-element wording"
+             connect-js-path
+             connect-js
+             "target element"))))
+    (multiple-value-bind (passed failed skipped)
+        (count-documentation-validation-checks checks)
+      (declare (ignore skipped))
+      (make-instance 'semantic-first-anchor-audit-result
+                     :checks checks
+                     :passed-count passed
+                     :failed-count failed
+                     :pass? (zerop failed)))))
+
+(defun print-semantic-first-anchor-audit-report
+    (report &optional (stream *standard-output*))
+  (dolist (check (semantic-first-anchor-audit-checks-of report))
+    (format stream "~A ~A~%"
+            (documentation-validation-status-label
+             (documentation-validation-check-status-of check))
+            (documentation-validation-check-label-of check))
+    (when (documentation-validation-check-detail-of check)
+      (print-prefixed-lines stream
+                            "      "
+                            (documentation-validation-check-detail-of check))))
+  (format stream "----~%")
+  (format stream "SUMMARY passes=~D fails=~D~%"
+          (semantic-first-anchor-audit-passed-count-of report)
+          (semantic-first-anchor-audit-failed-count-of report))
+  (format stream "~A~%"
+          (if (semantic-first-anchor-audit-pass-p report)
+              "SEMANTIC_FIRST_ANCHOR_AUDIT_OK"
+              "SEMANTIC_FIRST_ANCHOR_AUDIT_FAIL"))
+  report)
+
 (defun validate-fedwiki-json-syntax (path)
   (let ((resolved-path (documentation-validation-file-path
                         path
@@ -517,6 +657,26 @@
                      :failed
                      :detail condition)
                     checks)))))
+    (handler-case
+        (let ((audit-report (semantic-first-anchor-audit-report)))
+          (push (make-documentation-validation-check
+                 "semantic-first-anchor-audit"
+                 "semantic-first anchor audit"
+                 (if (semantic-first-anchor-audit-pass-p audit-report)
+                     :passed
+                     :failed)
+                 :detail (format nil "passes=~D fails=~D"
+                                 (semantic-first-anchor-audit-passed-count-of audit-report)
+                                 (semantic-first-anchor-audit-failed-count-of audit-report))
+                 :payload audit-report)
+                checks))
+      (error (condition)
+        (push (make-documentation-validation-check
+               "semantic-first-anchor-audit"
+               "semantic-first anchor audit"
+               :failed
+               :detail condition)
+              checks)))
     (let* ((ordered-checks (nreverse checks))
            (pass? (notany #'(lambda (check)
                               (eql (documentation-validation-check-status-of check)
@@ -553,6 +713,13 @@
                       'topic-coverage-report))
       (print-documentation-topic-coverage-report
        (documentation-validation-check-payload-of check)
+       stream))
+    (when (and (string= (documentation-validation-check-id-of check)
+                        "semantic-first-anchor-audit")
+               (typep (documentation-validation-check-payload-of check)
+                      'semantic-first-anchor-audit-result))
+      (print-semantic-first-anchor-audit-report
+       (documentation-validation-check-payload-of check)
        stream)))
   (format stream "----~%")
   (format stream "SUMMARY passes=~D fails=~D skips=~D~%"
@@ -566,11 +733,15 @@
   report)
 
 (defun run-repo-documentation-slice-validation-check ()
-  "Run the representative documentation-slice helper path as a first-class repo check."
-  (let ((report (run-documentation-helper-delegation-check)))
-    (unless (documentation-helper-delegation-pass-p report)
+  "Run the representative documentation-slice validation path as a first-class repo check."
+  (let ((report (validate-documentation-slice
+                 :page *repo-documentation-slice-validation-page*
+                 :topics *repo-documentation-slice-validation-topics*
+                 :fedwiki-pages *repo-documentation-slice-validation-fedwiki-pages*)))
+    (print-documentation-slice-validation-report report)
+    (unless (documentation-slice-validation-pass-p report)
       (error 'check-failure
              :message (format nil
-                              "Documentation-slice helper delegation failed.~%Output was:~%~A"
-                              (documentation-helper-delegation-output-of report))))
+                              "Documentation-slice validation failed for ~A."
+                              *repo-documentation-slice-validation-page*)))
     report))

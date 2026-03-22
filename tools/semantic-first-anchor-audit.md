@@ -27,3 +27,9 @@ Scope note:
 
 - this is a source audit for wording and rendering boundaries
 - it is not a runtime association proof or a full cross-pane/fedwiki integration test
+
+Source of truth:
+
+- the audit logic lives in `hyperdoc/validation.lisp`
+- `tools/semantic-first-anchor-audit.lisp` is a thin CLI wrapper around
+  `hyperdoc:semantic-first-anchor-audit-report`
