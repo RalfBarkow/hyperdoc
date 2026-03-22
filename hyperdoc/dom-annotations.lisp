@@ -200,6 +200,68 @@
       (t
        "current surface"))))
 
+(defun semantic-anchor-kind-of (anchor)
+  (anchor-strategy-of anchor))
+
+(defun semantic-anchor-identity-of (anchor)
+  (anchor-value-of anchor))
+
+(defun section-path-summary (section-path)
+  (when section-path
+    (format nil "~{~A~^ / ~}"
+            (mapcar (lambda (entry)
+                      (or (getf entry :label)
+                          (getf entry :slug)
+                          "?"))
+                    section-path))))
+
+(defun source-line-range-summary (anchor)
+  (when (start-line-of anchor)
+    (format nil "~D:~D - ~D:~D"
+            (start-line-of anchor)
+            (or (start-column-of anchor) 1)
+            (or (end-line-of anchor)
+                (start-line-of anchor))
+            (or (end-column-of anchor)
+                (or (start-column-of anchor) 1)))))
+
+(defun semantic-anchor-identity-fields (anchor)
+  (remove nil
+          (list
+           (cons "Semantic kind" (semantic-anchor-kind-of anchor))
+           (cons "Semantic identity" (semantic-anchor-identity-of anchor))
+           (and (anchor-object-id-of anchor)
+                (cons "Object id" (anchor-object-id-of anchor)))
+           (and (page-title-of anchor)
+                (cons "Page title" (page-title-of anchor)))
+           (and (site-domain-of anchor)
+                (cons "Site domain" (site-domain-of anchor)))
+           (and (page-slug-of anchor)
+                (cons "Page slug" (page-slug-of anchor)))
+           (and (story-item-id-of anchor)
+                (cons "Story item id" (story-item-id-of anchor)))
+           (and (story-item-type-of anchor)
+                (cons "Story item type" (story-item-type-of anchor)))
+           (and (path-of anchor)
+                (cons "Path" (format nil "~A" (path-of anchor))))
+           (and (section-path-of anchor)
+                (cons "Section path"
+                      (section-path-summary (section-path-of anchor))))
+           (and (start-line-of anchor)
+                (cons "Line range" (source-line-range-summary anchor))))))
+
+(defun presentation-anchor-fallback-fields (anchor)
+  (remove nil
+          (list
+           (and (selector-of anchor)
+                (cons "Selector" (selector-of anchor)))
+           (and (fallback-strategy-of anchor)
+                (cons "Fallback strategy" (fallback-strategy-of anchor)))
+           (and (fallback-value-of anchor)
+                (cons "Fallback value" (fallback-value-of anchor)))
+           (and (tag-name-of anchor)
+                (cons "Tag" (tag-name-of anchor))))))
+
 (defun call-hyperdoc-runtime (symbol-name &rest arguments)
   (let ((symbol (find-symbol symbol-name :hyperdoc)))
     (when (and symbol (fboundp symbol))

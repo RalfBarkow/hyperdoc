@@ -695,6 +695,15 @@
                  "Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
 
+(defun semantic-first-anchor-resolution-topic ()
+  (make-topic
+   :id "semantic-first-anchor-resolution"
+   :title "Semantic-first anchor resolution"
+   :summary "Connect treats visible selection as a presentation gesture, resolves it to a semantic anchor, and keeps DOM or selector data as fallback metadata only."
+   :references '("Semantic-first anchor resolution"
+                 "Concepts, DMX Topics, and Topic Maps"
+                 "Documentation Architecture in HyperDoc")))
+
 (defun runbook-build-and-flash-sd-image-topic ()
   (make-topic
    :id "runbook-build-and-flash-sd-image"

@@ -1,0 +1,76 @@
+<h1>Semantic-first anchor resolution</h1>
+
+<p>
+  Connect now distinguishes between the thing the user clicks and the anchor
+  the system stores. A visible click is a presentation-layer gesture. The
+  active provider resolves that gesture to the strongest semantic anchor it can
+  produce, and persistence stores that semantic anchor. DOM path or selector
+  data remains fallback metadata only.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Semantic-first anchor resolution"><tt>Semantic-first anchor resolution</tt></a></li>
+</ul>
+
+<h2>Selection, resolution, and persistence</h2>
+
+<ul>
+  <li><b>Selection</b> is a presentation-layer gesture such as clicking visible rendered content.</li>
+  <li><b>Resolution</b> maps that gesture to a semantic anchor kind such as a heading, list item, paragraph, source range, or story item.</li>
+  <li><b>Persistence</b> stores the resolved semantic anchor envelope, not the raw presentation detail that happened to surface the click.</li>
+</ul>
+
+<h2>Semantic anchor envelope</h2>
+
+<p>
+  A resolved anchor is semantic-first when its primary fields answer
+  “what subject was selected?” rather than “what DOM node was clicked?” The
+  envelope therefore keeps semantic identity and presentation fallback
+  separate.
+</p>
+
+<ul>
+  <li><b>Provider kind</b> identifies which resolver produced the anchor.</li>
+  <li><b>Semantic kind</b> names the resolved anchor strategy, for example <tt>heading-anchor</tt>, <tt>list-item-anchor</tt>, or <tt>paragraph-anchor</tt>.</li>
+  <li><b>Durable identity fields</b> carry the semantic identity appropriate to that strategy.</li>
+  <li><b>Human label</b> helps recognition in the UI but is not the primary identity.</li>
+  <li><b>Presentation fallback metadata</b> such as selector or DOM-path value is kept separately for diagnostics and repair heuristics.</li>
+</ul>
+
+<h2>Durability tiers</h2>
+
+<ul>
+  <li><b>Strong</b>: identity depends on authored or external identifiers that are expected to survive routine presentation changes.</li>
+  <li><b>Medium</b>: identity depends on stable local structure such as heading scope, list position, paragraph order, or source line range.</li>
+  <li><b>Weak</b>: identity depends mainly on presentation structure such as a DOM path or selector and can drift when rendering changes.</li>
+</ul>
+
+<h2>Current HyperDoc content example</h2>
+
+<p>
+  The current HyperDoc content provider starts from visible clicks in rendered
+  HTML but resolves them to semantic anchors where possible:
+  <tt>heading-anchor</tt>, <tt>list-item-anchor</tt>, and
+  <tt>paragraph-anchor</tt>. DOM-path information is retained only as fallback
+  metadata.
+</p>
+
+<h2>Why DOM path is fallback only</h2>
+
+<p>
+  A DOM path is a useful presentation breadcrumb, but it is usually a poor
+  long-term identity mechanism. Rendered structure can shift without the
+  underlying subject changing. Keeping DOM data as fallback metadata preserves
+  repair and diagnostic value without pretending that presentation structure is
+  the same thing as semantic identity.
+</p>
+
+<h2>Related links</h2>
+
+<ul>
+  <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

@@ -166,7 +166,7 @@
                   :help-summary
                   "Connect structural anchors in this view to create an association."
                   :help-detail
-                  "Authored ids are strongest when present. Otherwise DOM-path anchoring is a fallback that can drift when page structure changes."
+                  "Visible clicks resolve to heading, list-item, or paragraph anchors when possible. Authored ids are strongest when present; DOM-path data is fallback metadata only."
                   :body-thunk body-thunk)
    context-object
    view-title))
@@ -273,91 +273,55 @@
 (defmethod views:text-representation ((annotation dom-relation-annotation))
   (shorten-dom-association-label (title-of annotation)))
 
+(defun render-anchor-field-rows (rows)
+  (loop for (label . value) in rows
+        do (views:html
+             (:tr (:th (views:esc label))
+                  (:td (maybe-dom-object-ref value :fallback-empty "-"))))))
+
 (views:defview 👀summary (anchor dom-annotation-anchor)
   (views:html-view :title "Summary" :priority 1
-    (views:html
-      (:h3 (views:esc (or (label-of anchor)
-                          (anchor-value-of anchor))))
-      (:table :class "inspector-table"
-              (:tr (:th "Provider")
-                   (:td (:tt (views:esc (or (provider-kind-of anchor)
-                                            "-")))))
-              (:tr (:th "Pane")
-                   (:td (:tt (views:esc (or (pane-id-of anchor)
-                                            "-")))))
-              (:tr (:th "Context object")
-                   (:td (:tt (views:esc (or (context-object-id-of anchor)
-                                            "-")))))
-              (:tr (:th "Page title")
-                   (:td (:tt (views:esc (or (page-title-of anchor)
-                                            "-")))))
-              (:tr (:th "View kind")
-                   (:td (:tt (views:esc (or (view-kind-of anchor)
-                                            "-")))))
-              (:tr (:th "View title")
-                   (:td (:tt (views:esc (or (view-title-of anchor)
-                                            "-")))))
-              (:tr (:th "Site domain")
-                   (:td (:tt (views:esc (or (site-domain-of anchor)
-                                            "-")))))
-              (:tr (:th "Page slug")
-                   (:td (:tt (views:esc (or (page-slug-of anchor)
-                                            "-")))))
-              (:tr (:th "Story item id")
-                   (:td (:tt (views:esc (or (story-item-id-of anchor)
-                                            "-")))))
-              (:tr (:th "Story item type")
-                   (:td (:tt (views:esc (or (story-item-type-of anchor)
-                                            "-")))))
-              (:tr (:th "Resolved strategy")
-                   (:td (:tt (views:esc (anchor-strategy-of anchor)))))
-              (:tr (:th "Resolved value")
-                   (:td (:tt (views:esc (anchor-value-of anchor)))))
-              (:tr (:th "Durability tier")
-                   (:td (:tt (views:esc (or (durability-tier-of anchor)
-                                            "-")))))
-              (:tr (:th "Path")
-                   (:td (:tt (views:esc (or (path-of anchor)
-                                            "-")))))
-              (:tr (:th "Section path")
-                   (:td (:tt (views:esc
-                              (if (section-path-of anchor)
-                                  (format nil "~{~A~^ / ~}"
-                                          (mapcar #'(lambda (entry)
-                                                      (or (getf entry :label)
-                                                          (getf entry :slug)
-                                                          "?"))
-                                                  (section-path-of anchor)))
-                                  "-")))))
-              (:tr (:th "Line range")
-                   (:td (:tt (views:esc
-                              (if (start-line-of anchor)
-                                  (format nil "~D:~D - ~D:~D"
-                                          (start-line-of anchor)
-                                          (or (start-column-of anchor) 1)
-                                          (or (end-line-of anchor)
-                                              (start-line-of anchor))
-                                          (or (end-column-of anchor)
-                                              (or (start-column-of anchor) 1)))
-                                  "-")))))
-              (:tr (:th "Selector")
-                   (:td (:tt (views:esc (or (selector-of anchor)
-                                            "-")))))
-              (:tr (:th "Fallback strategy")
-                   (:td (:tt (views:esc (or (fallback-strategy-of anchor)
-                                            "-")))))
-              (:tr (:th "Fallback value")
-                   (:td (:tt (views:esc (or (fallback-value-of anchor)
-                                            "-")))))
-              (:tr (:th "Tag")
-                   (:td (:tt (views:esc (or (tag-name-of anchor)
-                                            "-")))))
-              (:tr (:th "Durability")
-                   (:td (views:esc (or (durability-note-of anchor)
-                                       "-"))))
-              (:tr (:th "Object id")
-                   (:td (:tt (views:esc (or (anchor-object-id-of anchor)
-                                            "-")))))))))
+    (let ((semantic-fields (semantic-anchor-identity-fields anchor))
+          (presentation-fields (presentation-anchor-fallback-fields anchor)))
+      (views:html
+        (:h3 (views:esc (or (label-of anchor)
+                            (semantic-anchor-identity-of anchor))))
+        (:h4 "Context")
+        (:table :class "inspector-table"
+                (:tr (:th "Provider")
+                     (:td (:tt (views:esc (or (provider-kind-of anchor)
+                                              "-")))))
+                (:tr (:th "Pane")
+                     (:td (:tt (views:esc (or (pane-id-of anchor)
+                                              "-")))))
+                (:tr (:th "Context object")
+                     (:td (:tt (views:esc (or (context-object-id-of anchor)
+                                              "-")))))
+                (:tr (:th "View kind")
+                     (:td (:tt (views:esc (or (view-kind-of anchor)
+                                              "-")))))
+                (:tr (:th "View title")
+                     (:td (:tt (views:esc (or (view-title-of anchor)
+                                              "-"))))))
+        (:h4 "Semantic anchor")
+        (:table :class "inspector-table"
+                (render-anchor-field-rows semantic-fields))
+        (:h4 "Presentation fallback")
+        (:table :class "inspector-table"
+                (if presentation-fields
+                    (render-anchor-field-rows presentation-fields)
+                    (views:html
+                      (:tr (:th "Captured fallback")
+                           (:td (:span :style "opacity: 0.55;"
+                                       "none"))))))
+        (:h4 "Durability")
+        (:table :class "inspector-table"
+                (:tr (:th "Tier")
+                     (:td (:tt (views:esc (or (durability-tier-of anchor)
+                                              "-")))))
+                (:tr (:th "Note")
+                     (:td (views:esc (or (durability-note-of anchor)
+                                         "-")))))))))
 
 (views:defview 👀items (anchor dom-annotation-anchor)
   (views:html-view :title "Items" :priority 10
