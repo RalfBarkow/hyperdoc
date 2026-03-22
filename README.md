@@ -49,9 +49,10 @@ The audit is source-based and checks:
 
 The documentation-slice helper also runs this audit after its page/topic/FedWiki
 checks pass, so it is part of the normal repo validation flow for that
-entrypoint. The broader repo-level `hyperdoc:run-ci-checks` path reaches the
-same delegated flow through the merged documentation slice smoke suite, which
-invokes `tools/validate-documentation-slice.sh` and therefore this audit.
+entrypoint. The broader repo-level `hyperdoc:run-ci-checks` path now includes a
+first-class documentation-slice validation check, which delegates to
+`tools/validate-documentation-slice.sh` and therefore reaches this audit
+through the same established helper path.
 
 ## Article Allegation Slice Helper
 

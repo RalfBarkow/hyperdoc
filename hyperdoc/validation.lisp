@@ -116,6 +116,39 @@
             (length (documentation-validation-checks-of report))
             (documentation-validation-failed-count-of report))))
 
+(defclass documentation-helper-delegation-report ()
+  ((page :reader documentation-helper-delegation-page-of
+         :initarg :page)
+   (topics :reader documentation-helper-delegation-topics-of
+           :initarg :topics
+           :initform nil)
+   (fedwiki-pages :reader documentation-helper-delegation-fedwiki-pages-of
+                  :initarg :fedwiki-pages
+                  :initform nil)
+   (command :reader documentation-helper-delegation-command-of
+            :initarg :command)
+   (output :reader documentation-helper-delegation-output-of
+           :initarg :output
+           :initform "")
+   (pass? :reader documentation-helper-delegation-pass-p
+          :initarg :pass?
+          :initform nil)))
+
+(defmethod print-object ((report documentation-helper-delegation-report) stream)
+  (print-unreadable-object (report stream :type t :identity t)
+    (format stream "~:[fail~;ok~] ~A"
+            (documentation-helper-delegation-pass-p report)
+            (documentation-helper-delegation-page-of report))))
+
+(defparameter *repo-documentation-slice-validation-page*
+  "hyperdoc/Semantic-first anchor resolution.html")
+
+(defparameter *repo-documentation-slice-validation-topics*
+  '("semantic-first-anchor-resolution-topic"))
+
+(defparameter *repo-documentation-slice-validation-fedwiki-pages*
+  '("tools/testdata/journal-gate/good-page.json"))
+
 (defun documentation-validation-repo-root-pathname ()
   (asdf:system-relative-pathname :hyperdoc ""))
 
@@ -125,6 +158,56 @@
        (merge-pathnames (pathname path)
                         (documentation-validation-repo-root-pathname)))
       (error "~A not found: ~A" missing-label path)))
+
+(defun documentation-helper-argument-string (value)
+  (typecase value
+    (symbol (string-downcase (symbol-name value)))
+    (string value)
+    (t (princ-to-string value))))
+
+(defun documentation-helper-delegation-command (&key page topics fedwiki-pages)
+  (append (list "/usr/bin/env"
+                "-u" "CL_SOURCE_REGISTRY"
+                "-u" "ASDF_OUTPUT_TRANSLATIONS"
+                "./tools/validate-documentation-slice.sh"
+                "--page" (documentation-helper-argument-string page))
+          (loop for topic in topics
+                append (list "--topic"
+                             (documentation-helper-argument-string topic)))
+          (loop for fedwiki-page in fedwiki-pages
+                append (list "--fedwiki"
+                             (documentation-helper-argument-string fedwiki-page)))))
+
+(defun documentation-helper-delegation-output-pass-p (output)
+  (and (search "DOC_SLICE_VALIDATION_OK" output :test #'char=)
+       (search "SEMANTIC_FIRST_ANCHOR_AUDIT_OK" output :test #'char=)))
+
+(defun run-documentation-helper-delegation-check
+    (&key (page *repo-documentation-slice-validation-page*)
+          (topics *repo-documentation-slice-validation-topics*)
+          (fedwiki-pages *repo-documentation-slice-validation-fedwiki-pages*))
+  (let* ((repo-root (documentation-validation-repo-root-pathname))
+         (command (documentation-helper-delegation-command
+                   :page page
+                   :topics topics
+                   :fedwiki-pages fedwiki-pages))
+         (output
+           (handler-case
+               (uiop:with-current-directory (repo-root)
+                 (uiop:run-program command
+                                   :output :string
+                                   :error-output :output
+                                   :ignore-error-status t))
+             (error (condition)
+               (format nil "~A" condition))))
+         (pass? (documentation-helper-delegation-output-pass-p output)))
+    (make-instance 'documentation-helper-delegation-report
+                   :page page
+                   :topics topics
+                   :fedwiki-pages fedwiki-pages
+                   :command command
+                   :output output
+                   :pass? pass?)))
 
 (defun documentation-whitespace-char-p (char)
   (or (char= char #\Space)
@@ -481,3 +564,13 @@
               "DOC_SLICE_VALIDATION_OK"
               "DOC_SLICE_VALIDATION_FAIL"))
   report)
+
+(defun run-repo-documentation-slice-validation-check ()
+  "Run the representative documentation-slice helper path as a first-class repo check."
+  (let ((report (run-documentation-helper-delegation-check)))
+    (unless (documentation-helper-delegation-pass-p report)
+      (error 'check-failure
+             :message (format nil
+                              "Documentation-slice helper delegation failed.~%Output was:~%~A"
+                              (documentation-helper-delegation-output-of report))))
+    report))

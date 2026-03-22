@@ -84,7 +84,10 @@
                     "Test discovery must include the DMX smoke suite")
     (cr-assert-true (member "test:hyperdoc/tests:run-fedwiki-site-dmx-import-tests"
                             test-ids :test #'equal)
-                    "Test discovery must include the FedWiki import smoke suite")))
+                    "Test discovery must include the FedWiki import smoke suite")
+    (cr-assert-true (member "test:hyperdoc:run-repo-documentation-slice-validation-check"
+                            test-ids :test #'equal)
+                    "Test discovery must include the first-class documentation-slice validation check")))
 
 (defun run-merged-doc-slices-discovery-smoke-test ()
   (let* ((spec (known-test-check-spec
@@ -112,6 +115,33 @@
     (cr-assert-true (member "test:hyperdoc/tests:run-merged-doc-slices-smoke-tests"
                             test-ids :test #'equal)
                     "Merged documentation slice smoke suite must be present in the system-scoped test set")))
+
+(defun run-documentation-slice-validation-discovery-smoke-test ()
+  (let* ((spec (known-test-check-spec
+                "test:hyperdoc:run-repo-documentation-slice-validation-check"))
+         (locator (and spec (hyperdoc::check-locator-of spec)))
+         (function-symbol (and spec (hyperdoc::resolve-function-symbol locator)))
+         (test-ids (known-test-check-ids)))
+    (cr-assert-true spec
+                    "Documentation-slice validation check must be discoverable")
+    (cr-assert-equal "Documentation-slice validation helper delegation"
+                     (hyperdoc::check-title-of spec)
+                     "Documentation-slice validation check title")
+    (cr-assert-equal "HYPERDOC"
+                     (getf locator :function-package)
+                     "Documentation-slice validation check package locator")
+    (cr-assert-equal "RUN-REPO-DOCUMENTATION-SLICE-VALIDATION-CHECK"
+                     (getf locator :function-name)
+                     "Documentation-slice validation check function locator")
+    (cr-assert-equal "hyperdoc"
+                     (getf locator :system)
+                     "Documentation-slice validation check system locator")
+    (cr-assert-equal (intern "RUN-REPO-DOCUMENTATION-SLICE-VALIDATION-CHECK" :hyperdoc)
+                     function-symbol
+                     "Documentation-slice validation check symbol resolution")
+    (cr-assert-true (member "test:hyperdoc:run-repo-documentation-slice-validation-check"
+                            test-ids :test #'equal)
+                    "Documentation-slice validation check must be present in the system-scoped test set")))
 
 (defun run-example-system-attribution-smoke-test ()
   (let ((base-symbols (discovered-example-symbols "hyperdoc")))
@@ -301,6 +331,7 @@
 (defun run-check-runner-smoke-tests ()
   (run-check-discovery-smoke-test)
   (run-merged-doc-slices-discovery-smoke-test)
+  (run-documentation-slice-validation-discovery-smoke-test)
   (run-example-system-attribution-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)

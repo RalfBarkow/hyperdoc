@@ -49,6 +49,7 @@
            #:documentation-topic-coverage-pass-p
            #:print-documentation-topic-coverage-report
            #:validate-documentation-slice
+           #:run-repo-documentation-slice-validation-check
            #:documentation-slice-validation-pass-p
            #:documentation-validation-checks-of
            #:documentation-validation-coverage-report-of

@@ -66,7 +66,13 @@
      :id "test:hyperdoc/tests:run-merged-doc-slices-smoke-tests"
      :title "Merged documentation slice smoke tests"
      :system "hyperdoc"
-     :tags (:kind :smoke :suite "merged-doc-slices"))))
+     :tags (:kind :smoke :suite "merged-doc-slices"))
+    (:package "HYPERDOC"
+     :name "RUN-REPO-DOCUMENTATION-SLICE-VALIDATION-CHECK"
+     :id "test:hyperdoc:run-repo-documentation-slice-validation-check"
+     :title "Documentation-slice validation helper delegation"
+     :system "hyperdoc"
+     :tags (:kind :validation :suite "documentation-slice"))))
 
 (defun current-check-timestamp ()
   (get-universal-time))
