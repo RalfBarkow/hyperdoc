@@ -3,16 +3,26 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  This page turns the manual-conflict dossier into explicit proposed
+  This page turns the merge-driving conflict set into explicit proposed
   resolutions. The durable fact is a typed
-  <tt>git-conflict-resolution-proposal</tt> for each manual path, not only a
-  narrative about how the merge might go later.
+  <tt>git-conflict-resolution-proposal</tt> object per covered path, not only
+  a narrative about how the merge might go later.
 </p>
 
 <p>
   Each proposal records the path, current branch roles, exact conflict shape,
   preferred merged form, result placement, and a minimal pseudo-diff that can
-  drive the later hand-merge without executing it yet.
+  drive the later hand-merge without executing it yet. The new follow-on layer
+  is an execution recipe surface that turns those merged-form stances into
+  path-by-path splice instructions and validation targets.
+</p>
+
+<p>
+  The page stays current-frontier-aware without flattening history. It still
+  preserves the historical three-path dossier proposals, but it now also adds
+  proposal coverage for the five promoted extra raw conflicts so the
+  authoritative six-path frontier is fully proposal-backed and handoff-ready
+  for execution recipes.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -22,14 +32,23 @@
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-asd-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-asd-resolution-proposal</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-package-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-package-resolution-proposal</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-resolution-proposal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-rendering-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-rendering-resolution-proposal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-fedwiki-fedwiki-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-fedwiki-fedwiki-resolution-proposal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-fedwiki-pages-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-fedwiki-pages-resolution-proposal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-list-editions-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-list-editions-resolution-proposal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-wikipedia-resolution-proposal)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-wikipedia-resolution-proposal</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-manual-conflict-dossier)"><tt>hyperdoc-upstream-main-into-hauptsache-manual-conflict-dossier</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier)"><tt>hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier</tt></a></li>
 </ul>
 
 <h2>Views</h2>
 
 <ul>
-  <li><tt>👀resolution-proposals</tt> on the proposal surface lists all manual paths with their preferred merged forms.</li>
-  <li><tt>👀summary</tt> on a single proposal shows the branch roles, exact conflict shape, preferred merged form, and patch sketch.</li>
+  <li><tt>👀resolution-proposals</tt> on the proposal surface groups the current six-path frontier separately from the two historical dossier proposals that no longer remain raw.</li>
+  <li><tt>👀summary</tt> on a single proposal shows the branch roles, proposal source, merge action, what to keep from upstream, what to keep from hauptsache, the preferred merged form, and the patch sketch.</li>
+  <li><tt>👀execution-recipes</tt> on the execution-recipe surface is the next handoff: it turns the same six proposal-backed paths into explicit splice boundaries and post-splice validation targets.</li>
+  <li><tt>👀current-frontier</tt> on the current manual merge-driving frontier object links the same six blocking paths to both their proposal objects and their execution recipes and shows the zero-gap checks.</li>
 </ul>
 
 <h2>Why this is still pre-merge work</h2>
@@ -37,13 +56,16 @@
 <p>
   These are proposed merged forms, not applied patches. The point of this page
   is to make the later manual merge replayable and inspectable without running
-  <tt>git merge</tt> yet.
+  <tt>git merge</tt> yet. After this slice the remaining readiness block is
+  recipe quality and later execution, not missing proposal objects or missing
+  execution-recipe objects for the current frontier.
 </p>
 
 <h2>Related pages / references</h2>
 
 <ul>
   <li><a page="Manual Merge Dossier for upstream main into hauptsache">Manual Merge Dossier for upstream main into hauptsache</a></li>
+  <li><a page="Manual Merge Execution Recipes for upstream main into hauptsache">Manual Merge Execution Recipes for upstream main into hauptsache</a></li>
   <li><a page="Dreyeck Transition Plan for upstream main into hauptsache">Dreyeck Transition Plan for upstream main into hauptsache</a></li>
   <li><a page="Merge Path Decisions for upstream main into hauptsache">Merge Path Decisions for upstream main into hauptsache</a></li>
 </ul>

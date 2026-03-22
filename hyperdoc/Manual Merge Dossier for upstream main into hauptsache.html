@@ -3,10 +3,10 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  This page turns the remaining <tt>manual-merge-needed</tt> paths into typed
-  manual-conflict objects. The current dossier is intentionally small: one
-  object for each of the three overlapping package or ASDF files that still
-  need deliberate resolution.
+  This page turns the original pre-rehearsal <tt>manual-merge-needed</tt>
+  overlap set into typed manual-conflict objects. The dossier remains
+  intentionally small and historical: one object for each of the three package
+  or ASDF boundary files that the earlier overlap pass marked as manual.
 </p>
 
 <p>
@@ -16,9 +16,21 @@
 </p>
 
 <p>
-  The follow-on slice is the proposal surface: it keeps the same three manual
-  conflicts but adds explicit merged forms and pseudo-diffs that can drive the
-  later hand-merge work without executing the merge yet.
+  The anchored rehearsal has since refined the active gate. Two of these three
+  dossier paths no longer appear as raw merge-tree conflicts at the review
+  tips, but they remain here so the earlier expectation and the still-useful
+  boundary proposals stay inspectable.
+</p>
+
+<p>
+  The follow-on slice is still the proposal surface: it keeps the same three
+  historical dossier paths as authored history, but it now also adds explicit
+  proposal objects for the five promoted current-frontier conflicts. The newer
+  five raw conflicts still live on the current manual merge-driving frontier
+  instead of being silently rewritten into this older dossier. The current
+  execution-recipe surface keeps the same distinction: one remaining dossier
+  raw conflict still executes beside five promoted extra conflicts, not inside
+  a rewritten historical dossier.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -30,6 +42,8 @@
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-package-manual-conflict)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-package-manual-conflict</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-manual-conflict)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-manual-conflict</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-unresolved-manual-path-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-unresolved-manual-path-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier)"><tt>hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier</tt></a></li>
 </ul>
 
 <h2>Views</h2>
@@ -38,15 +52,19 @@
   <li><tt>👀manual-conflicts</tt> on the dossier object lists all remaining manual paths with their preferred strategies.</li>
   <li><tt>👀summary</tt> on a single <tt>git-manual-conflict</tt> shows the exact reason and preferred resolution for that path.</li>
   <li><tt>👀resolution-proposals</tt> on the follow-on proposal surface lists the preferred merged forms and pseudo-diffs.</li>
+  <li><tt>👀execution-recipes</tt> on the execution-recipe surface shows how the one remaining dossier raw conflict is now executed beside five promoted extra conflicts.</li>
+  <li><tt>👀current-frontier</tt> on the current manual merge-driving frontier object shows which dossier items still remain raw today and which promoted extra conflicts now sit beside them.</li>
 </ul>
 
 <h2>Why these remain manual</h2>
 
 <p>
-  The three remaining manual conflicts are not arbitrary. They are the package
-  and system-definition boundaries where export surfaces, dependency direction,
-  and future extension seams must be curated explicitly rather than inferred
-  from an automatic merge.
+  The three dossier paths are not arbitrary. They are the package and
+  system-definition boundaries where export surfaces, dependency direction, and
+  future extension seams had to be curated explicitly rather than inferred from
+  an automatic merge. The rehearsal now shows that only one of them still
+  remains on the raw frontier, but all three still matter as durable authored
+  boundary records.
 </p>
 
 <h2>Related pages / references</h2>
@@ -56,4 +74,5 @@
   <li><a page="Merge Readiness and Blockers for upstream main into hauptsache">Merge Readiness and Blockers for upstream main into hauptsache</a></li>
   <li><a page="Dreyeck Extraction Plan for upstream main into hauptsache">Dreyeck Extraction Plan for upstream main into hauptsache</a></li>
   <li><a page="Manual Conflict Resolution Proposals for upstream main into hauptsache">Manual Conflict Resolution Proposals for upstream main into hauptsache</a></li>
+  <li><a page="Manual Merge Execution Recipes for upstream main into hauptsache">Manual Merge Execution Recipes for upstream main into hauptsache</a></li>
 </ul>

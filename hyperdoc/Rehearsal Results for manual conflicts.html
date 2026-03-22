@@ -14,8 +14,10 @@
   The result surface now lives beside a typed extra-conflict surface instead of
   leaving the remaining raw merge-tree frontier as an untyped list. The manual
   rehearsal results still preserve the earlier three-path dossier, while the
-  extra raw conflict page records the five additional raw conflicts that the
-  anchored <tt>merge-tree</tt> still reports outside that dossier.
+  current manual merge-driving frontier now makes the active gate explicit: one
+  remaining dossier raw conflict plus five promoted extra raw conflicts, with
+  no untyped remainder at the anchored tips and no missing proposal or
+  execution-recipe object on that six-path frontier.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -23,6 +25,9 @@
 <ul>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-merge-rehearsal)"><tt>hyperdoc-upstream-main-into-hauptsache-merge-rehearsal</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-extra-raw-conflict-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-extra-raw-conflict-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-conflict-resolution-proposal-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-conflict-resolution-proposal-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface)"><tt>hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier)"><tt>hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-asd-rehearsal-result)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-asd-rehearsal-result</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-package-rehearsal-result)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-package-rehearsal-result</tt></a></li>
   <li><a expr="(hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-rehearsal-result)"><tt>hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-rehearsal-result</tt></a></li>
@@ -34,6 +39,9 @@
   <li><tt>👀rehearsal-results</tt> on the parent rehearsal now shows the typed manual-dossier results, the typed extra raw conflicts, and the still-untyped remainder, if any.</li>
   <li><tt>👀summary</tt> on a single <tt>git-rehearsal-result</tt> shows the linked manual conflict, linked proposal, rationale, and supporting evidence.</li>
   <li><tt>👀raw-conflicts</tt> on the extra raw conflict surface shows the same raw frontier split as typed manual results plus typed extra raw conflicts plus any still-untyped remainder.</li>
+  <li><tt>👀resolution-proposals</tt> on the proposal surface shows the proposal stance for the one remaining dossier conflict and the five promoted extra conflicts.</li>
+  <li><tt>👀execution-recipes</tt> on the execution-recipe surface shows the execution-grade splice guidance for the same one-plus-five frontier split.</li>
+  <li><tt>👀current-frontier</tt> on the current manual merge-driving frontier object shows which historical dossier item is still active, which extra raw conflicts were promoted beside it, and which proposal and recipe object covers each one.</li>
 </ul>
 
 <h2>Interpretation rule</h2>
@@ -41,8 +49,10 @@
 <p>
   A result can be positive even when the original dossier called the path
   manual. In this slice the rehearsal preserves that expectation as an artifact
-  and then records the observed reality: some former manual paths now
-  auto-merge at the anchored tips, while others still need curated edits.
+  and then records the observed reality: two former manual dossier paths now
+  auto-merge at the anchored tips, one dossier path still needs a curated raw
+  merge, and the five promoted extra conflicts now carry the rest of the
+  current gate.
 </p>
 
 <h2>Related pages / references</h2>
@@ -52,4 +62,5 @@
   <li><a page="Extra Raw Merge Conflicts for upstream main into hauptsache">Extra Raw Merge Conflicts for upstream main into hauptsache</a></li>
   <li><a page="Manual Merge Dossier for upstream main into hauptsache">Manual Merge Dossier for upstream main into hauptsache</a></li>
   <li><a page="Manual Conflict Resolution Proposals for upstream main into hauptsache">Manual Conflict Resolution Proposals for upstream main into hauptsache</a></li>
+  <li><a page="Manual Merge Execution Recipes for upstream main into hauptsache">Manual Merge Execution Recipes for upstream main into hauptsache</a></li>
 </ul>

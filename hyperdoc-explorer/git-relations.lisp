@@ -248,6 +248,11 @@
       (views:object-ref object)
       (views:html (:span :style "opacity: 0.55;" "-"))))
 
+(defun maybe-git-object-ref (object)
+  (if object
+      (views:object-ref object)
+      (views:html (:span :style "opacity: 0.55;" "-"))))
+
 (defun render-path-decision-table (decisions empty-message)
   (if decisions
       (views:html
@@ -350,8 +355,10 @@
       (views:html
         (:table :class "inspector-table"
                 (:tr (:th (views:esc "Path"))
-                     (:th (views:esc "Conflict shape"))
-                     (:th (views:esc "Preferred merged form"))
+                     (:th (views:esc "Proposal source"))
+                     (:th (views:esc "Merge action"))
+                     (:th (views:esc "Keep from upstream"))
+                     (:th (views:esc "Keep from hauptsache"))
                      (:th (views:esc "Result placement")))
                 (loop for proposal in proposals
                       do (views:html
@@ -359,9 +366,33 @@
                                                       :display
                                                       (format nil "~A"
                                                               (path-of proposal))))
-                                (:td (views:esc (conflict-shape-of proposal)))
-                                (:td (views:esc (preferred-merged-form-of proposal)))
+                                (:td (:tt (views:esc (proposal-scope-of proposal))))
+                                (:td (:tt (views:esc (merge-action-of proposal))))
+                                (:td (views:esc (keep-from-upstream-of proposal)))
+                                (:td (views:esc (keep-from-hauptsache-of proposal)))
                                 (:td (:tt (views:esc (result-placement-of proposal)))))))))
+      (views:html
+        (:p (views:esc empty-message)))))
+
+(defun render-execution-recipe-table (recipes empty-message)
+  (if recipes
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th (views:esc "Path"))
+                     (:th (views:esc "Frontier status"))
+                     (:th (views:esc "Merge action"))
+                     (:th (views:esc "Confidence"))
+                     (:th (views:esc "Result placement")))
+                (loop for recipe in recipes
+                      do (views:html
+                           (:tr (:td (views:object-ref recipe
+                                                      :display
+                                                      (format nil "~A"
+                                                              (path-of recipe))))
+                                (:td (:tt (views:esc (frontier-status-of recipe))))
+                                (:td (:tt (views:esc (merge-action-of recipe))))
+                                (:td (:tt (views:esc (confidence-of recipe))))
+                                (:td (:tt (views:esc (result-placement-of recipe)))))))))
       (views:html
         (:p (views:esc empty-message)))))
 
@@ -414,6 +445,7 @@
 (defun render-rehearsal-summary-table (rehearsal)
   (let* ((manual-raw-results (git-typed-manual-raw-conflict-results rehearsal))
          (extra-conflicts (git-extra-raw-conflicts rehearsal))
+         (promoted-extra-conflicts (git-promoted-extra-raw-conflicts rehearsal))
          (remainder (git-rehearsal-untyped-raw-conflict-paths rehearsal)))
     (views:html
       (:table :class "inspector-table"
@@ -435,10 +467,19 @@
                    (:td (:tt (views:esc
                               (format nil "~D"
                                       (length extra-conflicts))))))
+              (:tr (:td (views:esc "Promoted extra raw conflicts"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length promoted-extra-conflicts))))))
               (:tr (:td (views:esc "Typed raw frontier total"))
                    (:td (:tt (views:esc
                               (format nil "~D"
                                       (git-typed-raw-conflict-frontier-count
+                                       rehearsal))))))
+              (:tr (:td (views:esc "Current manual merge-driving frontier"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (git-current-manual-merge-frontier-count
                                        rehearsal))))))
               (:tr (:td (views:esc "Still-untyped raw conflicts"))
                    (:td (:tt (views:esc
@@ -487,7 +528,8 @@
         (:table :class "inspector-table"
                 (:tr (:th (views:esc "Path"))
                      (:th (views:esc "Conflict kind"))
-                     (:th (views:esc "Looks like"))
+                     (:th (views:esc "Original decision"))
+                     (:th (views:esc "Frontier classification"))
                      (:th (views:esc "Promote"))
                      (:th (views:esc "Preliminary handling")))
                 (loop for conflict in conflicts
@@ -500,14 +542,57 @@
                             (:td (:tt (views:esc
                                        (or (conflict-kind-of conflict)
                                            "unknown"))))
-                            (:td (:tt (views:esc (looks-like-of conflict))))
+                            (:td (maybe-git-object-ref
+                                  (original-decision-of conflict)))
+                            (:td (:tt (views:esc
+                                       (frontier-classification-of conflict))))
                             (:td (:tt (views:esc
                                        (boolean-label
-                                        (promote-to-manual-dossier-p-of conflict)))))
+                                        (promote-to-current-frontier-p-of conflict)))))
                             (:td (views:esc
                                   (preliminary-preferred-handling-of conflict))))))))
       (views:html
         (:p (views:esc empty-message)))))
+
+(defun render-current-manual-frontier-summary-table (surface)
+  (let ((historical-count (length (conflicts-of (historical-dossier-of surface))))
+        (remaining-count (length (remaining-historical-results-of surface)))
+        (promoted-count (length (promoted-extra-conflicts-of surface)))
+        (proposal-count (length (current-frontier-proposals-of surface)))
+        (proposal-gap-count (length (proposal-gap-paths-of surface)))
+        (recipe-count (length (current-frontier-recipes-of surface)))
+        (recipe-gap-count (length (recipe-gap-paths-of surface)))
+        (remainder-count (length (remainder-paths-of surface))))
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Historical dossier"))
+                   (:td (views:object-ref (historical-dossier-of surface))))
+              (:tr (:td (views:esc "Raw conflict surface"))
+                   (:td (views:object-ref (raw-conflict-surface-of surface))))
+              (:tr (:td (views:esc "Proposal surface"))
+                   (:td (views:object-ref (proposal-surface-of surface))))
+              (:tr (:td (views:esc "Execution recipe surface"))
+                   (:td (views:object-ref (recipe-surface-of surface))))
+              (:tr (:td (views:esc "Historical dossier paths"))
+                   (:td (:tt (views:esc (format nil "~D" historical-count)))))
+              (:tr (:td (views:esc "Historical dossier paths still raw"))
+                   (:td (:tt (views:esc (format nil "~D" remaining-count)))))
+              (:tr (:td (views:esc "Promoted extra raw conflicts"))
+                   (:td (:tt (views:esc (format nil "~D" promoted-count)))))
+              (:tr (:td (views:esc "Current manual merge-driving frontier"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (+ remaining-count promoted-count))))))
+              (:tr (:td (views:esc "Current frontier proposals"))
+                   (:td (:tt (views:esc (format nil "~D" proposal-count)))))
+              (:tr (:td (views:esc "Paths lacking curated proposals"))
+                   (:td (:tt (views:esc (format nil "~D" proposal-gap-count)))))
+              (:tr (:td (views:esc "Current frontier execution recipes"))
+                   (:td (:tt (views:esc (format nil "~D" recipe-count)))))
+              (:tr (:td (views:esc "Paths lacking execution recipes"))
+                   (:td (:tt (views:esc (format nil "~D" recipe-gap-count)))))
+              (:tr (:td (views:esc "Still-untyped raw conflicts"))
+                   (:td (:tt (views:esc (format nil "~D" remainder-count)))))))))
 
 (defun render-merge-forecast-summary-table (forecast)
   (let* ((relation (relation-of forecast))
@@ -635,10 +720,19 @@
   (title-of dossier))
 
 (defmethod views:text-representation ((proposal git-conflict-resolution-proposal))
-  (format nil "~A [proposal]"
-          (path-of proposal)))
+  (format nil "~A [~A]"
+          (path-of proposal)
+          (merge-action-of proposal)))
 
 (defmethod views:text-representation ((surface git-conflict-resolution-proposal-surface))
+  (title-of surface))
+
+(defmethod views:text-representation ((recipe git-manual-merge-execution-recipe))
+  (format nil "~A [~A]"
+          (path-of recipe)
+          (merge-action-of recipe)))
+
+(defmethod views:text-representation ((surface git-manual-merge-execution-recipe-surface))
   (title-of surface))
 
 (defmethod views:text-representation ((scaffold git-dreyeck-executable-scaffold))
@@ -665,6 +759,9 @@
               "unknown")))
 
 (defmethod views:text-representation ((surface git-raw-conflict-surface))
+  (title-of surface))
+
+(defmethod views:text-representation ((surface git-manual-merge-frontier-surface))
   (title-of surface))
 
 (defmethod views:text-representation ((surface git-path-decision-surface))
@@ -1173,16 +1270,34 @@
                    (:td (views:object-ref (source-branch-of proposal))))
               (:tr (:td (views:esc "Target branch"))
                    (:td (views:object-ref (target-branch-of proposal))))
-              (:tr (:td (views:esc "Manual conflict"))
-                   (:td (views:object-ref (conflict-of proposal))))
+              (:tr (:td (views:esc "Proposal source"))
+                   (:td (:tt (views:esc (proposal-scope-of proposal)))))
+              (:tr (:td (views:esc "Merge action"))
+                   (:td (:tt (views:esc (merge-action-of proposal)))))
+              (:tr (:td (views:esc "Historical manual conflict"))
+                   (:td (maybe-git-object-ref (conflict-of proposal))))
+              (:tr (:td (views:esc "Promoted extra raw conflict"))
+                   (:td (maybe-git-object-ref (extra-conflict-of proposal))))
+              (:tr (:td (views:esc "Original overlap decision"))
+                   (:td (maybe-git-object-ref
+                         (original-decision-of proposal))))
               (:tr (:td (views:esc "Result placement"))
                    (:td (:tt (views:esc (result-placement-of proposal))))))
+      (:h4 "Keep from upstream")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (keep-from-upstream-of proposal)))
+      (:h4 "Keep from hauptsache")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (keep-from-hauptsache-of proposal)))
       (:h4 "Conflict shape")
       (:pre :style "white-space: pre-wrap"
             (views:esc (conflict-shape-of proposal)))
       (:h4 "Preferred merged form")
       (:pre :style "white-space: pre-wrap"
             (views:esc (preferred-merged-form-of proposal)))
+      (:h4 "Why this action")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (proposal-rationale-of proposal)))
       (:h4 "Patch sketch")
       (:pre :style "white-space: pre-wrap"
             (views:esc (patch-sketch-of proposal))))))
@@ -1197,18 +1312,153 @@
                    (:td (views:object-ref (forecast-of surface))))
               (:tr (:td (views:esc "Manual dossier"))
                    (:td (views:object-ref (manual-dossier-of surface))))
-              (:tr (:td (views:esc "Proposal count"))
+              (:tr (:td (views:esc "Execution recipe surface"))
+                   (:td (views:object-ref
+                         (git-manual-merge-execution-recipe-surface-from-forecast
+                          (forecast-of surface)))))
+              (:tr (:td (views:esc "Historical proposal count"))
                    (:td (:tt (views:esc
                               (format nil "~D"
-                                      (length (proposals-of surface)))))))))))
+                                      (length (historical-proposals-of surface)))))))
+              (:tr (:td (views:esc "Promoted frontier proposal count"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (promoted-frontier-proposals-of surface)))))))
+              (:tr (:td (views:esc "Current frontier proposal count"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (current-frontier-proposals-of surface)))))))
+              (:tr (:td (views:esc "Total proposal count"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (proposals-of surface)))))))
+              (:tr (:td (views:esc "Current frontier proposal gaps"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (proposal-gap-paths-of surface)))))))))))
 
 (views:defview 👀resolution-proposals (surface git-conflict-resolution-proposal-surface)
   (views:html-view :title "Resolution proposals" :priority 2
+    (let ((preserved-historical-proposals
+            (loop for proposal in (historical-proposals-of surface)
+                  unless (member (path-of proposal)
+                                 (mapcar #'path-of
+                                         (frontier-historical-proposals-of surface))
+                                 :test #'string=)
+                    collect proposal)))
+      (views:html
+        (:h3 (views:esc (title-of surface)))
+        (:h4 "Current manual merge-driving frontier proposals")
+        (render-resolution-proposal-table
+         (current-frontier-proposals-of surface)
+         "No current-frontier proposals are recorded.")
+        (:h4 "Execution recipe handoff")
+        (views:object-ref
+         (git-manual-merge-execution-recipe-surface-from-forecast
+          (forecast-of surface)))
+        (:h4 "Promoted extra raw conflict proposals")
+        (render-resolution-proposal-table
+         (promoted-frontier-proposals-of surface)
+         "No promoted extra raw conflict proposals are recorded.")
+        (:h4 "Historical dossier proposals preserved outside the current raw frontier")
+        (render-resolution-proposal-table
+         preserved-historical-proposals
+         "No historical dossier proposals sit outside the current frontier.")
+        (:h4 "Current proposal coverage gaps")
+        (render-path-list
+         (proposal-gap-paths-of surface)
+         "Every current frontier path already has a curated proposal."
+         :forecast (forecast-of surface))))))
+
+(views:defview 👀summary (recipe git-manual-merge-execution-recipe)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (:tt (views:esc (path-of recipe))))
+      (:p (views:esc (summary-of recipe)))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Proposal"))
+                   (:td (views:object-ref (proposal-of recipe))))
+              (:tr (:td (views:esc "Historical rehearsal result"))
+                   (:td (maybe-git-object-ref (rehearsal-result-of recipe))))
+              (:tr (:td (views:esc "Promoted extra raw conflict"))
+                   (:td (maybe-git-object-ref (extra-conflict-of recipe))))
+              (:tr (:td (views:esc "Frontier status"))
+                   (:td (:tt (views:esc (frontier-status-of recipe)))))
+              (:tr (:td (views:esc "Merge action"))
+                   (:td (:tt (views:esc (merge-action-of recipe)))))
+              (:tr (:td (views:esc "Result placement"))
+                   (:td (:tt (views:esc (result-placement-of recipe)))))
+              (:tr (:td (views:esc "Confidence"))
+                   (:td (:tt (views:esc (confidence-of recipe))))))
+      (:h4 "Keep from upstream")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (keep-from-upstream-of recipe)))
+      (:h4 "Keep from hauptsache")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (keep-from-hauptsache-of recipe)))
+      (:h4 "Splice boundary / combination rule")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (splice-boundary-of recipe)))
+      (:h4 "Validation target")
+      (render-validation-proof-list (validation-targets-of recipe))
+      (:h4 "Rationale")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (rationale-of recipe)))
+      (:h4 "Open question")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (or (open-question-of recipe)
+                           "none"))))))
+
+(views:defview 👀summary (surface git-manual-merge-execution-recipe-surface)
+  (views:html-view :title "Summary" :priority 1
     (views:html
       (:h3 (views:esc (title-of surface)))
-      (render-resolution-proposal-table
-       (proposals-of surface)
-       "No resolution proposals are recorded."))))
+      (:p (views:esc (summary-of surface)))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Forecast"))
+                   (:td (views:object-ref (forecast-of surface))))
+              (:tr (:td (views:esc "Raw conflict surface"))
+                   (:td (views:object-ref (raw-conflict-surface-of surface))))
+              (:tr (:td (views:esc "Proposal surface"))
+                   (:td (views:object-ref (proposal-surface-of surface))))
+              (:tr (:td (views:esc "Historical-current recipe count"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (historical-current-recipes-of surface)))))))
+              (:tr (:td (views:esc "Promoted-current recipe count"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (promoted-current-recipes-of surface)))))))
+              (:tr (:td (views:esc "Current frontier recipe count"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (current-frontier-recipes-of surface)))))))
+              (:tr (:td (views:esc "Current frontier recipe gaps"))
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (length (recipe-gap-paths-of surface)))))))))))
+
+(views:defview 👀execution-recipes (surface git-manual-merge-execution-recipe-surface)
+  (views:html-view :title "Execution recipes" :priority 2
+    (views:html
+      (:h3 (views:esc (title-of surface)))
+      (:h4 "Current frontier execution recipes")
+      (render-execution-recipe-table
+       (current-frontier-recipes-of surface)
+       "No current-frontier execution recipes are recorded.")
+      (:h4 "Historical current-frontier recipes")
+      (render-execution-recipe-table
+       (historical-current-recipes-of surface)
+       "No historical-dossier path remains on the current frontier.")
+      (:h4 "Promoted current-frontier recipes")
+      (render-execution-recipe-table
+       (promoted-current-recipes-of surface)
+       "No promoted extra raw conflict recipes are recorded.")
+      (:h4 "Current execution-recipe coverage gaps")
+      (render-path-list
+       (recipe-gap-paths-of surface)
+       "Every current frontier path already has an execution recipe."
+       :forecast (forecast-of surface)))))
 
 (views:defview 👀summary (scaffold git-dreyeck-executable-scaffold)
   (views:html-view :title "Summary" :priority 1
@@ -1288,9 +1538,11 @@
 
 (views:defview 👀merge-rehearsal (rehearsal git-merge-rehearsal)
   (views:html-view :title "Merge rehearsal" :priority 2
-    (let ((raw-conflict-surface
-            (git-raw-conflict-surface-from-forecast
-             (forecast-of rehearsal))))
+    (let* ((forecast (forecast-of rehearsal))
+           (raw-conflict-surface
+             (git-raw-conflict-surface-from-forecast forecast))
+           (current-frontier
+             (git-manual-merge-frontier-surface-from-forecast forecast)))
       (views:html
         (:h3 (views:esc (title-of rehearsal)))
         (:p (views:esc (summary-of rehearsal)))
@@ -1300,7 +1552,8 @@
          (:li (views:object-ref (forecast-of rehearsal)))
          (:li (views:object-ref (scaffold-of rehearsal)))
          (:li (views:object-ref (proposal-surface-of rehearsal)))
-         (:li (views:object-ref raw-conflict-surface)))
+         (:li (views:object-ref raw-conflict-surface))
+         (:li (views:object-ref current-frontier)))
         (:h4 "Typed manual-dossier results on the raw frontier")
         (render-rehearsal-result-table
          (typed-manual-results-of raw-conflict-surface)
@@ -1315,6 +1568,8 @@
          "No raw merge-tree conflicts remain outside the typed manual plus extra conflict frontier.")
         (:h4 "Scaffold evidence")
         (render-validation-proof-list (scaffold-evidence-of rehearsal))
+        (:h4 "Current manual merge-driving frontier")
+        (views:object-ref current-frontier)
         (:h4 "Manual-conflict rehearsal results")
         (render-rehearsal-result-table
          (rehearsal-results-of rehearsal)
@@ -1385,20 +1640,32 @@
                    (:td (:tt (views:esc
                               (or (conflict-kind-of conflict)
                                   "unknown")))))
+              (:tr (:td (views:esc "Original overlap decision"))
+                   (:td (maybe-git-object-ref
+                         (original-decision-of conflict))))
               (:tr (:td (views:esc "Looks like"))
                    (:td (:tt (views:esc (looks-like-of conflict)))))
-              (:tr (:td (views:esc "Promote into manual dossier"))
+              (:tr (:td (views:esc "Frontier classification"))
+                   (:td (:tt (views:esc
+                              (frontier-classification-of conflict)))))
+              (:tr (:td (views:esc "Promote into current frontier"))
                    (:td (:tt (views:esc
                               (boolean-label
-                               (promote-to-manual-dossier-p-of conflict)))))))
+                               (promote-to-current-frontier-p-of conflict)))))))
+      (:h4 "Promotion rationale")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (promotion-rationale-of conflict)))
       (:h4 "Preliminary preferred handling")
       (:pre :style "white-space: pre-wrap"
             (views:esc (preliminary-preferred-handling-of conflict))))))
 
 (views:defview 👀summary (surface git-raw-conflict-surface)
   (views:html-view :title "Summary" :priority 1
-    (let ((typed-manual-count (length (typed-manual-results-of surface)))
-          (extra-count (length (extra-conflicts-of surface)))
+    (let* ((typed-manual-count (length (typed-manual-results-of surface)))
+           (extra-count (length (extra-conflicts-of surface)))
+           (promoted-count
+             (count-if #'promote-to-current-frontier-p-of
+                       (extra-conflicts-of surface)))
           (remainder-count (length (remainder-paths-of surface))))
       (views:html
         (:h3 (views:esc (title-of surface)))
@@ -1412,13 +1679,65 @@
                 (:tr (:td (views:esc "Typed extra raw conflicts"))
                      (:td (:tt (views:esc
                                 (format nil "~D" extra-count)))))
+                (:tr (:td (views:esc "Promoted extra raw conflicts"))
+                     (:td (:tt (views:esc
+                                (format nil "~D" promoted-count)))))
                 (:tr (:td (views:esc "Typed raw frontier total"))
                      (:td (:tt (views:esc
                                 (format nil "~D"
                                         (+ typed-manual-count extra-count))))))
+                (:tr (:td (views:esc "Current manual merge-driving frontier"))
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        (+ typed-manual-count promoted-count))))))
                 (:tr (:td (views:esc "Still-untyped raw conflicts"))
                      (:td (:tt (views:esc
                                 (format nil "~D" remainder-count))))))))))
+
+(views:defview 👀summary (surface git-manual-merge-frontier-surface)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of surface)))
+      (:p (views:esc (summary-of surface)))
+      (render-current-manual-frontier-summary-table surface))))
+
+(views:defview 👀current-frontier (surface git-manual-merge-frontier-surface)
+  (views:html-view :title "Current frontier" :priority 2
+    (views:html
+      (:h3 (views:esc (title-of surface)))
+      (:p (views:esc (summary-of surface)))
+      (render-current-manual-frontier-summary-table surface)
+      (:h4 "Historical dossier items still on the raw frontier")
+      (render-rehearsal-result-table
+       (remaining-historical-results-of surface)
+       "No historical manual-dossier items remain on the current raw frontier.")
+      (:h4 "Promoted extra raw conflicts")
+      (render-extra-raw-conflict-table
+       (promoted-extra-conflicts-of surface)
+       "No extra raw conflicts were promoted into the current manual frontier.")
+      (:h4 "Current proposal coverage")
+      (render-resolution-proposal-table
+       (current-frontier-proposals-of surface)
+       "No current-frontier proposals are recorded.")
+      (:h4 "Current proposal coverage gaps")
+      (render-path-list
+       (proposal-gap-paths-of surface)
+       "Every current frontier path already has a curated proposal surface."
+       :forecast (forecast-of surface))
+      (:h4 "Current execution recipes")
+      (render-execution-recipe-table
+       (current-frontier-recipes-of surface)
+       "No current-frontier execution recipes are recorded.")
+      (:h4 "Current execution-recipe coverage gaps")
+      (render-path-list
+       (recipe-gap-paths-of surface)
+       "Every current frontier path already has an execution recipe surface."
+       :forecast (forecast-of surface))
+      (:h4 "Still-untyped raw conflict remainder")
+      (render-path-list
+       (remainder-paths-of surface)
+       "No raw merge-tree conflicts remain outside the current manual frontier."
+       :forecast (forecast-of surface)))))
 
 (views:defview 👀raw-conflicts (surface git-raw-conflict-surface)
   (views:html-view :title "Raw conflicts" :priority 2
@@ -1437,7 +1756,7 @@
       (render-path-list
        (remainder-paths-of surface)
        "No raw merge-tree conflicts remain outside the typed manual plus extra conflict frontier."
-       :forecast (forecast-of surface)))))
+       :forecast (forecast-of (rehearsal-of surface))))))
 
 (views:defview 👀summary (surface git-path-decision-surface)
   (views:html-view :title "Summary" :priority 1
