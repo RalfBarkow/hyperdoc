@@ -32,6 +32,21 @@ nix develop --command sbcl --no-userinit --non-interactive \
 
 When explicit page paths are provided, only those pages are checked.
 
+## Semantic-first Anchor Audit
+
+To guard the current semantic-first anchor model against wording and rendering
+drift:
+
+```sh
+./tools/semantic-first-anchor-audit.sh
+```
+
+The audit is source-based and checks:
+
+- semantic identity vs presentation fallback separation in the anchor model
+- provider/help copy for stale DOM-first phrasing
+- inspector rendering for separate semantic, fallback, and durability surfaces
+
 ## Article Allegation Slice Helper
 
 Use `tools/article-allegation-slice.lisp` to scaffold an article-driven,
