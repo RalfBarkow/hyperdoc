@@ -115,7 +115,7 @@
 
 (defun run-example-system-attribution-smoke-test ()
   (let ((base-symbols (discovered-example-symbols "hyperdoc")))
-    (cr-assert-equal 4 (length base-symbols)
+    (cr-assert-equal 6 (length base-symbols)
                      "Base hyperdoc must expose the current core example set")
     (cr-assert-true (member 'hyperdoc::the-answer base-symbols)
                     "Base hyperdoc examples must include the-answer")
@@ -128,6 +128,12 @@
     (cr-assert-true (member 'hyperdoc::journalmatic-monotonic-normalization-example
                             base-symbols)
                     "Base hyperdoc examples must include the monotonic normalization example")
+    (cr-assert-true (member 'hyperdoc::fedwiki-materialization-page-preview-example
+                            base-symbols)
+                    "Base hyperdoc examples must include the FedWiki materialization page preview example")
+    (cr-assert-true (member 'hyperdoc::fedwiki-materialization-slice-preview-example
+                            base-symbols)
+                    "Base hyperdoc examples must include the FedWiki materialization slice preview example")
     (cr-assert-equal 0 (length (discovered-example-symbols "hyperdoc/examples"))
                      "Portable examples must stay unloaded until their system is loaded")
     (cr-assert-equal 0 (length (discovered-example-symbols "hyperdoc/examples/ops"))
@@ -135,7 +141,7 @@
   (asdf:load-system :hyperdoc/examples)
   (let ((base-symbols (discovered-example-symbols "hyperdoc"))
         (portable-symbols (discovered-example-symbols "hyperdoc/examples")))
-    (cr-assert-equal 4 (length base-symbols)
+    (cr-assert-equal 6 (length base-symbols)
                      "Loading portable examples must not change the base example count")
     (cr-assert-true (member 'hyperdoc::fedwiki-java-slug-example portable-symbols)
                     "Portable example scope must include fedwiki-java examples")
@@ -147,7 +153,7 @@
   (let ((base-symbols (discovered-example-symbols "hyperdoc"))
         (portable-symbols (discovered-example-symbols "hyperdoc/examples"))
         (ops-symbols (discovered-example-symbols "hyperdoc/examples/ops")))
-    (cr-assert-equal 4 (length base-symbols)
+    (cr-assert-equal 6 (length base-symbols)
                      "Loading ops examples must not change the base example count")
     (cr-assert-true (plusp (length portable-symbols))
                     "Portable examples must remain registered after loading ops examples")

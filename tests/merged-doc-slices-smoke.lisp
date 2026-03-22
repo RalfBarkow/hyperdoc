@@ -135,6 +135,29 @@
     (assert-true (member 'hyperdoc::fedwiki-commit-link-example symbols)
                  "Clickable-commit example must be discoverable through the existing Examples surface")))
 
+(defun run-documentation-slice-helper-delegation-smoke-test ()
+  (let* ((repo-root (asdf:system-relative-pathname :hyperdoc ""))
+         (output
+           (uiop:with-current-directory (repo-root)
+             (uiop:run-program
+              (list "/usr/bin/env"
+                    "-u" "CL_SOURCE_REGISTRY"
+                    "-u" "ASDF_OUTPUT_TRANSLATIONS"
+                    "./tools/validate-documentation-slice.sh"
+                    "--page" "hyperdoc/Semantic-first anchor resolution.html"
+                    "--topic" "semantic-first-anchor-resolution-topic"
+                    "--fedwiki" "tools/testdata/journal-gate/good-page.json")
+              :output :string
+              :error-output :output))))
+    (assert-true (search "DOC_SLICE_VALIDATION_OK" output :test #'char=)
+                 (format nil
+                         "Documentation-slice helper must pass from the merged-doc-slices smoke suite.~%Output was:~%~A"
+                         output))
+    (assert-true (search "SEMANTIC_FIRST_ANCHOR_AUDIT_OK" output :test #'char=)
+                 (format nil
+                         "Documentation-slice helper must delegate into the semantic-first anchor audit.~%Output was:~%~A"
+                         output))))
+
 (defun run-upstream-main-merge-preparation-chain-smoke-test ()
   (dolist (title '("Merge upstream main into hauptsache via dreyeck fallback"
                    "Merge Readiness and Blockers for upstream main into hauptsache"
@@ -320,6 +343,7 @@
   (run-sbcl-bootstrapping-doc-slice-smoke-test)
   (run-codex-handover-doc-slice-smoke-test)
   (run-clickable-commit-example-discovery-smoke-test)
+  (run-documentation-slice-helper-delegation-smoke-test)
   (run-upstream-main-merge-preparation-chain-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)
