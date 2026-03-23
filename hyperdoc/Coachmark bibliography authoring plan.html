@@ -51,6 +51,13 @@
   visible as separate supporting surfaces before any final authoring decision.
 </p>
 
+<p>
+  The <tt>bibliography-subcollection</tt> object is the extraction surface: it
+  exposes <b>Collection summary</b>, <b>Entries</b>, and <b>Candidate topics</b>.
+  The <tt>hyperdoc-authoring-plan</tt> object is the review surface: it exposes
+  existing-topic matches, page/topic decisions, and materialization preview.
+</p>
+
 <h2>Coachmark-specific first-slice outcome</h2>
 
 <p>
@@ -74,8 +81,8 @@
 <h2>How to inspect the distinction</h2>
 
 <ol>
-  <li>Open <a expr="(coachmark-bibliography-subcollection)"><tt>(coachmark-bibliography-subcollection)</tt></a> and inspect the collection summary, entries, and candidate topics.</li>
-  <li>Open <a expr="(coachmark-bibliography-authoring-plan)"><tt>(coachmark-bibliography-authoring-plan)</tt></a>.</li>
+  <li>Open <a expr="(coachmark-bibliography-subcollection)"><tt>(coachmark-bibliography-subcollection)</tt></a>. Its first-class bibliography tabs are <b>Collection summary</b>, <b>Entries</b>, and <b>Candidate topics</b>.</li>
+  <li>From that pane, use the <b>Open authoring plan</b> action button, or open <a expr="(coachmark-bibliography-authoring-plan)"><tt>(coachmark-bibliography-authoring-plan)</tt></a> directly.</li>
   <li>In the <b>Page write/update plan</b> view, read each decision as a compact record: decision kind, matched existing topic/page if any, grouped evidence, rationale, and materialization consequence.</li>
   <li>In the <b>Materialization preview</b> view, compare the bundle target path against the proposed later repo touch, such as <tt>hyperdoc/topics.lisp</tt> or a specific <tt>hyperdoc/&lt;Title&gt;.html</tt> page.</li>
 </ol>

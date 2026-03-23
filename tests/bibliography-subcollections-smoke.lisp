@@ -251,6 +251,14 @@ COMMIT;"
                 (hyperdoc::authoring-decision-candidate-topic-of decision)))
         :test #'string-equal))
 
+(defun inspector-view-titles-for-object (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (mapcar #'html-inspector-views:view-title
+            (slot-value pane 'clog-moldable-inspector::views))))
+
 (defun make-synthetic-candidate (title)
   (let* ((aliases (hyperdoc::phrase-aliases title))
          (signal (make-instance 'hyperdoc::candidate-topic-signal
@@ -427,6 +435,24 @@ COMMIT;"
                                  (hyperdoc::authoring-decision-repo-touch-preview-of mobile-onboarding)))
                  "Arrangement-only decisions should expose a no-write-yet touch preview")))
 
+(defun run-bibliography-subcollection-inspector-surface-smoke-test ()
+  (let* ((source (make-bibliography-smoke-source))
+         (subcollection (hyperdoc::coachmark-bibliography-subcollection :source source
+                                                                        :signal-error? t))
+         (plan (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
+         (subcollection-titles (inspector-view-titles-for-object subcollection))
+         (plan-titles (inspector-view-titles-for-object plan)))
+    (assert-equal "Collection summary"
+                  (first subcollection-titles)
+                  "Bibliography subcollection should land on Collection summary before generic tabs")
+    (dolist (title '("Collection summary" "Entries" "Candidate topics"))
+      (assert-true (member title subcollection-titles :test #'string=)
+                   (format nil "Bibliography subcollection should expose ~A" title)))
+    (assert-true (member "Page write/update plan" plan-titles :test #'string=)
+                 "Authoring plan should expose the decision surface directly")
+    (assert-true (member "Materialization preview" plan-titles :test #'string=)
+                 "Authoring plan should expose the materialization preview directly")))
+
 (defun run-bibliography-materialization-smoke-test ()
   (let* ((fixture (make-bibliography-smoke-fixture))
          (root (merge-pathnames "bundle/" (getf fixture :root)))
@@ -517,6 +543,7 @@ COMMIT;"
   (run-bibliography-candidate-extraction-smoke-test)
   (run-bibliography-topic-comparison-smoke-test)
   (run-bibliography-authoring-decision-smoke-test)
+  (run-bibliography-subcollection-inspector-surface-smoke-test)
   (run-bibliography-materialization-smoke-test)
   (run-bibliography-standin-report-smoke-test)
   (format t "~&Bibliography subcollections smoke tests passed.~%")

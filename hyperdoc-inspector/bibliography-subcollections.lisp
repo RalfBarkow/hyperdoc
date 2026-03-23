@@ -90,7 +90,7 @@
                    (:td (:code
                          (views:esc
                           (bibliography-path-string
-                           (hyperdoc::bibliography-source-materialization-root-of source)))))
+                           (hyperdoc::bibliography-source-materialization-root-of source))))))
               (:tr (:td (views:esc "Live coachmark plan"))
                    (:td (views:object-ref
                          (hyperdoc::coachmark-bibliography-authoring-plan :source source))))))))
@@ -136,20 +136,24 @@
   (views:html-view :title "Overview" :priority 1
     (views:html
       (:table :class "inspector-table"
-              (:tr (:td (views:esc "Query text"))
-                   (:td (:tt
-                         (views:esc
-                          (hyperdoc::zotero-collection-query-text-of query)))))
-              (:tr (:td (views:esc "Bridge"))
-                   (:td (views:object-ref
-                         (hyperdoc::zotero-collection-query-bridge-of query))))
-              (:tr (:td (views:esc "Matched collections"))
-                   (:td (views:object-ref
-                         (hyperdoc::zotero-collection-query-matched-collections-of query))))
-              (:tr (:td (views:esc "Raw SQL query"))
-                   (:td (:pre
-                         (views:esc
-                          (hyperdoc::zotero-query-sql-of query)))))))))
+              (:tr
+               (:td (views:esc "Query text"))
+               (:td (:tt
+                     (views:esc
+                      (hyperdoc::zotero-collection-query-text-of query)))))
+              (:tr
+               (:td (views:esc "Bridge"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-collection-query-bridge-of query))))
+              (:tr
+               (:td (views:esc "Matched collections"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-collection-query-matched-collections-of query))))
+              (:tr
+               (:td (views:esc "Raw SQL query"))
+               (:td (:pre
+                     (views:esc
+                      (hyperdoc::zotero-query-sql-of query)))))))))
 
 (defmethod views:text-representation ((subcollection hyperdoc::bibliography-subcollection))
   (format nil "Bibliography subcollection ~A (~D entries)"
@@ -157,90 +161,110 @@
            (hyperdoc::bibliography-subcollection-collection-hit-of subcollection))
           (length (hyperdoc::bibliography-subcollection-entries-of subcollection))))
 
+(defmethod views:title-bar-action-buttons ((subcollection hyperdoc::bibliography-subcollection))
+  (views:html
+    (views:action-button
+     "Open authoring plan"
+     (views:thunk
+       (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
+     "Open the reviewed authoring-plan object for this bibliography subcollection.")))
+
 (views:defview 👀collection-summary (subcollection hyperdoc::bibliography-subcollection)
   (views:html-view :title "Collection summary" :priority 1
     (views:html
       (:table :class "inspector-table"
-              (:tr (:td (views:esc "Source system"))
-                   (:td (:tt
-                         (views:esc
-                          (bibliography-keyword-label
-                           (hyperdoc::bibliography-subcollection-source-system-of
-                            subcollection))))))
-              (:tr (:td (views:esc "Requested collection"))
-                   (:td (:tt
-                         (views:esc
-                          (hyperdoc::bibliography-subcollection-query-text-of subcollection)))))
-              (:tr (:td (views:esc "Resolved collection"))
-                   (:td (views:object-ref
-                         (hyperdoc::bibliography-subcollection-collection-hit-of
-                          subcollection))))
-              (:tr (:td (views:esc "Collection query"))
-                   (:td (views:object-ref
-                         (hyperdoc::bibliography-subcollection-collection-query-of
-                          subcollection))))
-              (:tr (:td (views:esc "Imported entries"))
-                   (:td (views:object-ref
-                         (length
-                          (hyperdoc::bibliography-subcollection-entries-of
-                           subcollection)))))
-              (:tr (:td (views:esc "Candidate topics"))
-                   (:td (views:object-ref
-                         (length
-                          (hyperdoc::bibliography-subcollection-candidate-topics-of
-                           subcollection)))))
-              (:tr (:td (views:esc "Authoring plan"))
-                   (:td (views:object-ref
-                         (hyperdoc::bibliography-subcollection-authoring-plan-of
-                          subcollection))))))))
+              (:tr
+               (:td (views:esc "Source system"))
+               (:td (:tt
+                     (views:esc
+                      (bibliography-keyword-label
+                       (hyperdoc::bibliography-subcollection-source-system-of
+                        subcollection))))))
+              (:tr
+               (:td (views:esc "Requested collection"))
+               (:td (:tt
+                     (views:esc
+                      (hyperdoc::bibliography-subcollection-query-text-of subcollection)))))
+              (:tr
+               (:td (views:esc "Resolved collection"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-collection-hit-of
+                      subcollection))))
+              (:tr
+               (:td (views:esc "Collection query"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-collection-query-of
+                      subcollection))))
+              (:tr
+               (:td (views:esc "Imported entries"))
+               (:td (views:object-ref
+                     (length
+                      (hyperdoc::bibliography-subcollection-entries-of
+                       subcollection)))))
+              (:tr
+               (:td (views:esc "Candidate topics"))
+               (:td (views:object-ref
+                     (length
+                      (hyperdoc::bibliography-subcollection-candidate-topics-of
+                       subcollection)))))
+              (:tr
+               (:td (views:esc "Authoring plan"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-authoring-plan-of
+                      subcollection))))))))
 
 (views:defview 👀entries (subcollection hyperdoc::bibliography-subcollection)
   (views:html-view :title "Entries" :priority 2
     (views:html
       (:table :class "inspector-table"
-              (:tr (:th (views:esc "Item"))
-                   (:th (views:esc "Title"))
-                   (:th (views:esc "Authors"))
-                   (:th (views:esc "Year"))
-                   (:th (views:esc "Type"))
-                   (:th (views:esc "Tags")))
+              (:tr
+               (:th (views:esc "Item"))
+               (:th (views:esc "Title"))
+               (:th (views:esc "Authors"))
+               (:th (views:esc "Year"))
+               (:th (views:esc "Type"))
+               (:th (views:esc "Tags")))
               (dolist (entry (hyperdoc::bibliography-subcollection-entries-of subcollection))
                 (views:html
-                  (:tr (:td (views:object-ref entry))
-                       (:td (views:esc
-                             (or (hyperdoc::bibliography-entry-title-of entry) "")))
-                       (:td (views:esc
-                             (format nil "~{~A~^; ~}"
-                                     (hyperdoc::bibliography-entry-authors-of entry))))
-                       (:td (views:object-ref
-                             (hyperdoc::bibliography-entry-year-of entry)))
-                       (:td (views:esc
-                             (or (hyperdoc::bibliography-entry-work-type-of entry) "")))
-                       (:td (views:esc
-                             (format nil "~{~A~^; ~}"
-                                     (hyperdoc::bibliography-entry-tags-of entry)))))))))))
+                  (:tr
+                   (:td (views:object-ref entry))
+                   (:td (views:esc
+                         (or (hyperdoc::bibliography-entry-title-of entry) "")))
+                   (:td (views:esc
+                         (format nil "~{~A~^; ~}"
+                                 (hyperdoc::bibliography-entry-authors-of entry))))
+                   (:td (views:object-ref
+                         (hyperdoc::bibliography-entry-year-of entry)))
+                   (:td (views:esc
+                         (or (hyperdoc::bibliography-entry-work-type-of entry) "")))
+                   (:td (views:esc
+                         (format nil "~{~A~^; ~}"
+                                 (hyperdoc::bibliography-entry-tags-of entry)))))))))))
 
 (views:defview 👀candidate-topics (subcollection hyperdoc::bibliography-subcollection)
   (views:html-view :title "Candidate topics" :priority 3
     (views:html
       (:table :class "inspector-table"
-              (:tr (:th (views:esc "Candidate"))
-                   (:th (views:esc "Collection cues"))
-                   (:th (views:esc "Entry cues"))
-                   (:th (views:esc "Entries")))
+              (:tr
+               (:th (views:esc "Candidate"))
+               (:th (views:esc "Collection cues"))
+               (:th (views:esc "Entry cues"))
+               (:th (views:esc "Entries")))
               (dolist (candidate (hyperdoc::bibliography-subcollection-candidate-topics-of
                                   subcollection))
                 (views:html
-                  (:tr (:td (views:object-ref candidate))
-                       (:td (views:object-ref
-                             (length
-                              (hyperdoc::candidate-topic-collection-signals-of
-                               candidate))))
-                       (:td (views:object-ref
-                             (length
-                              (hyperdoc::candidate-topic-entry-signals-of candidate))))
-                       (:td (views:object-ref
-                             (hyperdoc::candidate-topic-support-count-of candidate)))))))))))
+                  (:tr
+                   (:td (views:object-ref candidate))
+                   (:td (views:object-ref
+                         (length
+                          (hyperdoc::candidate-topic-collection-signals-of
+                           candidate))))
+                   (:td (views:object-ref
+                         (length
+                          (hyperdoc::candidate-topic-entry-signals-of candidate))))
+                   (:td (views:object-ref
+                         (hyperdoc::candidate-topic-support-count-of
+                          candidate))))))))))
 
 (defmethod views:text-representation ((entry hyperdoc::bibliography-entry))
   (format nil "Bibliography entry ~A"

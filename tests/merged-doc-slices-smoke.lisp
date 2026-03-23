@@ -377,6 +377,10 @@
   (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
                                "entry-derived evidence")
   (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
+                               "Collection summary</b>, <b>Entries</b>, and <b>Candidate topics</b>")
+  (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
+                               "Open authoring plan")
+  (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
                                "materialization consequence")
   (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
                                "proposed later repo touch")
