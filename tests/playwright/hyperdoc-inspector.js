@@ -17,6 +17,13 @@ function activeView(currentPane) {
   return currentPane.locator(".inspector-view:not([hidden])");
 }
 
+function tableCellByExactText(container, value) {
+  return container
+    .locator("td")
+    .filter({ hasText: exactTextPattern(value) })
+    .first();
+}
+
 function exactTextPattern(value) {
   return new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
 }
@@ -40,11 +47,7 @@ async function settleInspectorBindings(page, timeout = 1500) {
 async function openHyperDoc(page) {
   await gotoCatalog(page);
   const catalogPane = pane(page, 0);
-  await catalogPane
-    .locator("tr")
-    .filter({ hasText: exactTextPattern("3HyperDoc") })
-    .first()
-    .click();
+  await tableCellByExactText(catalogPane, "HyperDoc").click();
   await expect
     .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
     .toBeGreaterThan(1);
@@ -71,13 +74,10 @@ async function openTextPageFromHyperDoc(page, title) {
   const paneCountBefore = await page.locator(".inspector-pane").count();
   const hyperdocPane = pane(page, 1);
   await activatePaneTab(page, 1, "Text pages");
-  const pageRow = hyperdocPane
-    .locator("tr")
-    .filter({ hasText: exactTextPattern(title) })
-    .first();
-  await expect(pageRow).toBeVisible();
+  const pageCell = tableCellByExactText(hyperdocPane, title);
+  await expect(pageCell).toBeVisible();
   await settleInspectorBindings(page);
-  await pageRow.click();
+  await pageCell.click();
   await expect
     .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
     .toBe(paneCountBefore + 1);
