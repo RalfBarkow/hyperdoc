@@ -103,9 +103,9 @@ function Clog_set_connection_state(state) {
 
 function Clog_disconnected_message(detail) {
     if (detail && detail.length > 0 && detail !== 'user') {
-        return 'Disconnected from HyperDoc: ' + detail + '. Reload to reconnect.';
+        return 'Disconnected from HyperDoc: ' + detail + '. Clicks will not open new panes until you reload to reconnect.';
     }
-    return 'Disconnected from HyperDoc. Reload to reconnect.';
+    return 'Disconnected from HyperDoc. Clicks will not open new panes until you reload to reconnect.';
 }
 
 function Clog_show_disconnected_state(detail) {

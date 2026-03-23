@@ -124,6 +124,9 @@ test("Coachmark page entry degrades cleanly after websocket normal close", async
   await expect(page.locator("#clog-disconnected-banner")).toContainText(
     "Disconnected from HyperDoc"
   );
+  await expect(page.locator("#clog-disconnected-banner")).toContainText(
+    "Clicks will not open new panes until you reload to reconnect."
+  );
 
   const paneCountBefore = await page.locator(".inspector-pane").count();
   await settleInspectorBindings(page);
@@ -145,6 +148,9 @@ test("Coachmark page entry degrades cleanly after websocket normal close", async
   expect(closeState.wsHasSend).toBe(true);
   expect(closeState.connectionState).toBe("disconnected");
   expect(closeState.bannerText).toContain("Disconnected from HyperDoc");
+  expect(closeState.bannerText).toContain(
+    "Clicks will not open new panes until you reload to reconnect."
+  );
   expect(closeState.htmlState).toBe("disconnected");
   expect(closeState.bodyState).toBe("disconnected");
 
@@ -154,7 +160,12 @@ test("Coachmark page entry degrades cleanly after websocket normal close", async
   expect(stateAfterClick.wsHasSend).toBe(true);
   expect(stateAfterClick.connectionState).toBe("disconnected");
   expect(stateAfterClick.bannerText).toContain("Disconnected from HyperDoc");
-  expect(stateAfterClick.disconnectedMessage).toContain("Reload to reconnect.");
+  expect(stateAfterClick.bannerText).toContain(
+    "Clicks will not open new panes until you reload to reconnect."
+  );
+  expect(stateAfterClick.disconnectedMessage).toContain(
+    "Clicks will not open new panes until you reload to reconnect."
+  );
   expect(stateAfterClick.htmlState).toBe("disconnected");
   expect(stateAfterClick.bodyState).toBe("disconnected");
 
