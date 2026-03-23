@@ -1,0 +1,98 @@
+<h1>Bibliography authoring-plan stand-in inspection</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc now exposes the bibliography authoring-plan stand-in seam as a
+  first-class inspectable object. The stand-in report does not replace the live
+  browser tests. It makes the protocol boundary before browser pane opening
+  visible: tracked entry-page selection, runtime-surface inventory, workspace
+  versus flake mismatch classification, authoring-plan readiness, artifact-bundle
+  readiness, and failure classification before real browser rendering.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Universal Thing"><tt>Universal Thing</tt></a></li>
+  <li><a hyperbook="topics" page="Browser stand-in"><tt>Browser stand-in</tt></a></li>
+  <li><a hyperbook="topics" page="Browser isolation layer"><tt>Browser isolation layer</tt></a></li>
+  <li><a hyperbook="topics" page="Browser stand-in test harness"><tt>Browser stand-in test harness</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc authoring plan"><tt>HyperDoc authoring plan</tt></a></li>
+  <li><a expr="(coachmark-bibliography-authoring-plan-standin-report)"><tt>(coachmark-bibliography-authoring-plan-standin-report)</tt></a></li>
+  <li><a expr="(plastics-packaging-bibliography-authoring-plan-standin-report)"><tt>(plastics-packaging-bibliography-authoring-plan-standin-report)</tt></a></li>
+  <li><a expr="(bibliography-authoring-plan-standin-report &quot;Topological Intelligence&quot; :link-text &quot;Topological Intelligence live plan&quot;)"><tt>(bibliography-authoring-plan-standin-report "Topological Intelligence" ...)</tt></a></li>
+</ul>
+
+<h2>What the stand-in layer covers</h2>
+
+<p>
+  The stand-in report is the pre-browser protocol surface for bibliography
+  authoring-plan inspection. It records six boundaries that can be inspected
+  without needing the final browser pane to appear:
+</p>
+
+<ol>
+  <li><b>Entry-page selection</b>: whether HyperDoc selected the tracked entry page and found the expected live-plan link text.</li>
+  <li><b>Runtime-surface inventory classification</b>: whether the runtime page and workspace source align closely enough to act as the planned entry point.</li>
+  <li><b>Workspace-vs-flake mismatch classification</b>: whether the page is tracked or at risk of existing only in the workspace and therefore not in the flake-built browser runtime.</li>
+  <li><b>Plan readiness</b>: whether the authoring plan object already exists, with counts and any plan-construction error preserved.</li>
+  <li><b>Artifact-bundle readiness</b>: whether the review bundle can be materialized before any repo write.</li>
+  <li><b>Failure classification before browser</b>: whether the seam is already ready before pane opening or still blocked earlier.</li>
+</ol>
+
+<h2>Mapping to Universal Thing and browser isolation</h2>
+
+<p>
+  This stand-in layer is a direct local application of the same
+  <a page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a>
+  pattern.
+</p>
+
+<ul>
+  <li><b>Universal Thing</b>: the stand-in report plays the same role as a controlled collaborator that proves the upstream protocol without requiring the browser itself to be the only runtime host.</li>
+  <li><b>Browser stand-in</b>: the report is the inspectable browser stand-in for bibliography authoring-plan readiness. It proves that page selection, plan construction, and artifact production have already reached a stable boundary.</li>
+  <li><b>Browser isolation layer</b>: Playwright stays on the final pane-open and rendering side of the seam, while the stand-in report stays on the pre-browser side and classifies what is ready before rendering begins.</li>
+</ul>
+
+<p>
+  In other words, the stand-in report answers whether a bibliography plan is
+  already ready before the pane-open and rendering boundary. The real browser
+  tests still answer the later question of whether pane creation, rendering,
+  and UI detection succeed.
+</p>
+
+<h2>Why keep this separate from the browser test</h2>
+
+<p>
+  The separation matters because a failing browser pane-open case can now be
+  classified more precisely:
+</p>
+
+<ul>
+  <li>if the stand-in report is not ready, the defect is earlier than browser rendering</li>
+  <li>if the stand-in report is <tt>ready-before-pane-open</tt>, the remaining defect is later, in pane-open wiring, rendering, UI polling, or browser environment</li>
+</ul>
+
+<p>
+  That preserves the browser as the final integration boundary without forcing
+  every diagnosis to begin there.
+</p>
+
+<h2>Script and test relation</h2>
+
+<p>
+  The existing stand-in script and Playwright stand-in tests remain in place.
+  They now exercise the same stand-in report object that HyperDoc can inspect
+  directly. That keeps the protocol surface unified instead of growing a second
+  hand-maintained report path.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Bibliography subcollections in HyperDoc">Bibliography subcollections in HyperDoc</a></li>
+  <li><a page="Bibliography authoring plan live evaluation">Bibliography authoring plan live evaluation</a></li>
+  <li><a page="Coachmark bibliography authoring plan">Coachmark bibliography authoring plan</a></li>
+  <li><a page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a></li>
+</ul>

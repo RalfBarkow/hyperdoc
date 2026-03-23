@@ -2116,6 +2116,59 @@
                  "Resolve a local PDF from Zotero in HyperDoc"
                  "Zotero library bridge for HyperDoc")))
 
+;; Topic objects for bibliography subcollection import and authoring plans.
+(defun bibliography-subcollection-topic ()
+  (make-topic
+   :id "bibliography-subcollection"
+   :title "Bibliography subcollection"
+   :summary "First-class collection object that preserves bibliography provenance such as source system, collection path, and imported entry set separately from editorial topic inference."
+   :references '("Bibliography subcollections in HyperDoc"
+                 "Coachmark bibliography authoring plan")))
+
+(defun bibliography-entry-topic ()
+  (make-topic
+   :id "bibliography-entry"
+   :title "Bibliography entry"
+   :summary "Normalized inspectable bibliography record with stable provenance and parsed bibliographic fields such as title, authors, year, work type, venue, DOI, URL, notes, and raw source text."
+   :references '("Bibliography subcollections in HyperDoc"
+                 "Coachmark bibliography authoring plan")))
+
+(defun candidate-topic-topic ()
+  (make-topic
+   :id "candidate-topic"
+   :title "Candidate topic"
+   :summary "Heuristic editorial topic candidate extracted from bibliography provenance and entry metadata, kept inspectable rather than treated as ground truth."
+   :references '("Bibliography subcollections in HyperDoc"
+                 "Coachmark bibliography authoring plan"
+                 "How to merge proposed topic additions into hyperdoc/topics.lisp")))
+
+(defun topic-comparison-report-topic ()
+  (make-topic
+   :id "topic-comparison-report"
+   :title "Topic comparison report"
+   :summary "Inspectable comparison object that checks a candidate topic against the current Topics HyperBook by exact title first, then alias, near-duplicate, and broader-topic review."
+   :references '("Bibliography subcollections in HyperDoc"
+                 "Coachmark bibliography authoring plan"
+                 "Review of the first merge-proposed-topic-additions HTML")))
+
+(defun authoring-decision-topic ()
+  (make-topic
+   :id "authoring-decision"
+   :title "Authoring decision"
+   :summary "Editorial decision object that records whether a candidate should merge into an existing topic, become a new topic/page scaffold, or remain only as arrangement or continuity-shell evidence."
+   :references '("Bibliography subcollections in HyperDoc"
+                 "Coachmark bibliography authoring plan"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun hyperdoc-authoring-plan-topic ()
+  (make-topic
+   :id "hyperdoc-authoring-plan"
+   :title "HyperDoc authoring plan"
+   :summary "Inspectable plan that turns bibliography candidates and topic comparison reports into explicit topic/page actions plus a separate materialization preview."
+   :references '("Bibliography subcollections in HyperDoc"
+                 "Coachmark bibliography authoring plan"
+                 "Authoring Documentation in HyperDoc")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic

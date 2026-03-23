@@ -62,6 +62,12 @@
      :system "hyperdoc"
      :tags (:kind :live :suite "zotero-bridge"))
     (:package "HYPERDOC/TESTS"
+     :name "RUN-BIBLIOGRAPHY-SUBCOLLECTIONS-SMOKE-TESTS"
+     :id "test:hyperdoc/tests:run-bibliography-subcollections-smoke-tests"
+     :title "Bibliography subcollections smoke tests"
+     :system "hyperdoc"
+     :tags (:kind :smoke :suite "bibliography-subcollections"))
+    (:package "HYPERDOC/TESTS"
      :name "RUN-FEDWIKI-SITE-DMX-IMPORT-TESTS"
      :id "test:hyperdoc/tests:run-fedwiki-site-dmx-import-tests"
      :title "FedWiki site DMX import tests"

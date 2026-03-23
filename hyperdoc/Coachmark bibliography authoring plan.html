@@ -1,0 +1,99 @@
+<h1>Coachmark bibliography authoring plan</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the narrow demonstration slice for bibliography-subcollection
+  import. It treats <tt>coachmark</tt> first as a Zotero subcollection identity
+  and only then as a possible editorial topic cue. The inspectable authoring
+  plan keeps those two roles separate.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Bibliography subcollection"><tt>Bibliography subcollection</tt></a></li>
+  <li><a hyperbook="topics" page="Candidate topic"><tt>Candidate topic</tt></a></li>
+  <li><a hyperbook="topics" page="Topic comparison report"><tt>Topic comparison report</tt></a></li>
+  <li><a hyperbook="topics" page="Authoring decision"><tt>Authoring decision</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc authoring plan"><tt>HyperDoc authoring plan</tt></a></li>
+  <li><a hyperbook="bibliography" page="coachmark"><tt>hyperbook="bibliography" page="coachmark"</tt></a></li>
+  <li><a expr="(coachmark-bibliography-subcollection)"><tt>(coachmark-bibliography-subcollection)</tt></a></li>
+  <li><a expr="(coachmark-bibliography-authoring-plan)"><tt>(coachmark-bibliography-authoring-plan)</tt></a></li>
+</ul>
+
+<h2>Current live local evidence</h2>
+
+<p>
+  On the current machine, the live Zotero collection lookup resolves
+  <tt>coachmark</tt> to the collection path
+  <tt>A – B – C – D – E / C / coachmark</tt>. That is machine-local runtime evidence
+  from the current Zotero library, not a repo-global truth. The
+  inspectable subcollection object remains the authoritative surface.
+</p>
+
+<h2>What the plan distinguishes</h2>
+
+<ul>
+  <li><b>Collection-name evidence</b>: the Zotero collection/subcollection name <tt>coachmark</tt> is preserved as provenance and can seed a candidate topic cue.</li>
+  <li><b>Entry-derived evidence</b>: titles, tags, notes, venues, and other parsed bibliography-entry fields can independently support or weaken candidate topics.</li>
+  <li><b>Editorial outcome</b>: the plan records whether each candidate should merge into an existing topic, become a new topic/page scaffold, or remain only as arrangement or continuity-shell mention.</li>
+</ul>
+
+<p>
+  That separation prevents an accidental rule such as “every Zotero collection
+  name becomes a topic.” Instead, the collection name is one inspectable cue
+  among others.
+</p>
+
+<p>
+  In inspector terms, collection-name evidence and entry-derived evidence stay
+  visible as separate supporting surfaces before any final authoring decision.
+</p>
+
+<h2>Coachmark-specific first-slice outcome</h2>
+
+<p>
+  In the fixture-backed smoke path, the plan can justify candidates such as
+  <tt>Coach marks</tt>, <tt>Onboarding</tt>, <tt>User onboarding</tt>,
+  <tt>Help overlays</tt>, <tt>Guided tours</tt>, and
+  <tt>Mobile onboarding</tt>. The resulting decisions deliberately differ:
+</p>
+
+<ul>
+  <li>some candidates become proposed new topic/page scaffolds</li>
+  <li>some merge or normalize against existing Topics HyperBook titles</li>
+  <li>some remain arrangement-only mentions because they are scoped variants of a broader candidate</li>
+</ul>
+
+<p>
+  This keeps the slice narrow and reviewable rather than turning one Zotero
+  subcollection into a giant automatic page dump.
+</p>
+
+<h2>How to inspect the distinction</h2>
+
+<ol>
+  <li>Open <a expr="(coachmark-bibliography-subcollection)"><tt>(coachmark-bibliography-subcollection)</tt></a> and inspect the collection summary, entries, and candidate topics.</li>
+  <li>Open <a expr="(coachmark-bibliography-authoring-plan)"><tt>(coachmark-bibliography-authoring-plan)</tt></a>.</li>
+  <li>In the <b>Page write/update plan</b> view, read each decision as a compact record: decision kind, matched existing topic/page if any, grouped evidence, rationale, and materialization consequence.</li>
+  <li>In the <b>Materialization preview</b> view, compare the bundle target path against the proposed later repo touch, such as <tt>hyperdoc/topics.lisp</tt> or a specific <tt>hyperdoc/&lt;Title&gt;.html</tt> page.</li>
+</ol>
+
+<h2>Relation to the Topics model</h2>
+
+<p>
+  The comparison step stays title-first. It checks the current Topics HyperBook
+  and <tt>hyperdoc/topics.lisp</tt> for exact existing titles first, then alias
+  or near-duplicate normalization, then broader-topic review. Only after those
+  checks fail does the plan treat a candidate as genuinely new.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Bibliography subcollections in HyperDoc">Bibliography subcollections in HyperDoc</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="How to merge proposed topic additions into hyperdoc/topics.lisp">How to merge proposed topic additions into hyperdoc/topics.lisp</a></li>
+  <li><a page="Topic arrangement in HyperDoc">Topic arrangement in HyperDoc</a></li>
+</ul>

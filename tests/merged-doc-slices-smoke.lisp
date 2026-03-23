@@ -344,6 +344,67 @@
   (assert-true (null (hyperbook:find-page hyperdoc::*topics* "Mind and Mechanism"))
                "Mind and Mechanism should remain a HyperDoc page-level bridge, not a topic"))
 
+(defun run-bibliography-subcollections-doc-slice-smoke-test ()
+  (dolist (entry '((hyperdoc::bibliography-subcollection-topic "Bibliography subcollection")
+                   (hyperdoc::bibliography-entry-topic "Bibliography entry")
+                   (hyperdoc::candidate-topic-topic "Candidate topic")
+                   (hyperdoc::topic-comparison-report-topic "Topic comparison report")
+                   (hyperdoc::authoring-decision-topic "Authoring decision")
+                   (hyperdoc::hyperdoc-authoring-plan-topic "HyperDoc authoring plan")))
+    (destructuring-bind (symbol title) entry
+      (assert-topic-function-present symbol title)))
+  (dolist (title '("Bibliography subcollections in HyperDoc"
+                   "Coachmark bibliography authoring plan"
+                   "Bibliography authoring plan live evaluation"
+                   "Bibliography authoring-plan stand-in inspection"))
+    (assert-hyperdoc-page-present title))
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "(coachmark-bibliography-authoring-plan)")
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "(coachmark-bibliography-authoring-plan-standin-report)")
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "collection name can influence candidate extraction")
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "2 passed, 1 failed in Chromium")
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "paneOpenMs")
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "60_000ms")
+  (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
+                               "machine-local runtime evidence")
+  (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
+                               "collection-name evidence")
+  (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
+                               "entry-derived evidence")
+  (assert-page-source-contains "hyperdoc/Coachmark bibliography authoring plan.html"
+                               "materialization consequence")
+  (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
+                               "proposed later repo touch")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "machine-local live evaluation surface")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "2 passed, 1 failed in Chromium")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "pane-open timing JSON artifact")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "HTML Rewriting live plan")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "Topological Intelligence live plan")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "Plastics Packaging live plan")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
+                               "Bibliography authoring-plan stand-in inspection")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
+                               "Universal Thing")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
+                               "Browser stand-in")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
+                               "Browser isolation layer")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
+                               "(plastics-packaging-bibliography-authoring-plan-standin-report)")
+  (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
+                               "ready before the pane-open and rendering boundary"))
+
 (defun run-merged-doc-slices-smoke-tests ()
   (run-clickable-commit-ids-doc-slice-smoke-test)
   (run-literate-tracing-doc-slice-smoke-test)
@@ -353,5 +414,6 @@
   (run-clickable-commit-example-discovery-smoke-test)
   (run-upstream-main-merge-preparation-chain-smoke-test)
   (run-drew-mind-and-mechanism-doc-slice-smoke-test)
+  (run-bibliography-subcollections-doc-slice-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)

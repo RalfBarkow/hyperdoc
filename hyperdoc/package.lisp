@@ -42,6 +42,11 @@
            #:plan-fedwiki-slice-materialization
            #:print-fedwiki-materialization-plan
            #:materialize-fedwiki-materialization-plan
+           ;; Bibliography subcollections and authoring plans
+           #:make-default-bibliography-source
+           #:ensure-bibliography-subcollections-hyperbook
+           #:plan-bibliography-authoring
+           #:materialize-bibliography-authoring-plan
            ;; Documentation validation helpers
            #:topic-coverage-report
            #:documentation-slice-validation-report

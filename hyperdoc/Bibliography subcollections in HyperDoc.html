@@ -1,0 +1,198 @@
+<h1>Bibliography subcollections in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc can now treat a named bibliography subcollection as a first-class
+  HyperBook collection surface rather than as pasted source text. The current
+  concrete source is a read-only Zotero subcollection, exposed through a
+  dedicated <tt>bibliography</tt> HyperBook and turned into inspectable
+  bibliography entries, candidate topics, topic-comparison reports, authoring
+  decisions, and a separate materialization preview.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Bibliography subcollection"><tt>Bibliography subcollection</tt></a></li>
+  <li><a hyperbook="topics" page="Bibliography entry"><tt>Bibliography entry</tt></a></li>
+  <li><a hyperbook="topics" page="Candidate topic"><tt>Candidate topic</tt></a></li>
+  <li><a hyperbook="topics" page="Topic comparison report"><tt>Topic comparison report</tt></a></li>
+  <li><a hyperbook="topics" page="Authoring decision"><tt>Authoring decision</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc authoring plan"><tt>HyperDoc authoring plan</tt></a></li>
+  <li><a expr="(make-default-bibliography-source)"><tt>(make-default-bibliography-source)</tt></a></li>
+  <li><a expr="(ensure-bibliography-subcollections-hyperbook)"><tt>(ensure-bibliography-subcollections-hyperbook)</tt></a></li>
+  <li><a hyperbook="bibliography" page="coachmark"><tt>hyperbook="bibliography" page="coachmark"</tt></a></li>
+  <li><a expr="(coachmark-bibliography-subcollection)"><tt>(coachmark-bibliography-subcollection)</tt></a></li>
+  <li><a expr="(coachmark-bibliography-authoring-plan)"><tt>(coachmark-bibliography-authoring-plan)</tt></a></li>
+  <li><a expr="(coachmark-bibliography-authoring-plan-standin-report)"><tt>(coachmark-bibliography-authoring-plan-standin-report)</tt></a></li>
+</ul>
+
+<h2>Three distinct layers</h2>
+
+<ol>
+  <li><b>Live runtime/import objects</b>: Zotero-backed subcollections, entries, candidate signals, comparison reports, and plans.</li>
+  <li><b>Stable topic objects</b>: reusable concept handles such as <tt>Candidate topic</tt> or <tt>Topic comparison report</tt> in <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li><b>Authored HyperDoc pages</b>: durable prose pages that explain the capability and later absorb approved materialized outputs.</li>
+</ol>
+
+<p>
+  The import layer does not silently mutate authored pages or
+  <tt>hyperdoc/topics.lisp</tt>. It produces an inspectable authoring plan first,
+  then a separate explicit materialization bundle only after review.
+</p>
+
+<h2>Provenance versus editorial inference</h2>
+
+<p>
+  Zotero collection identity and editorial topic inference are deliberately kept
+  separate.
+</p>
+
+<ul>
+  <li><b>Source provenance</b>: the subcollection object preserves source system, collection id, collection key, collection name, and full collection path.</li>
+  <li><b>Editorial inference</b>: candidate topics aggregate signals from the collection name and from bibliography-entry fields such as title, tags, notes, and venue.</li>
+  <li><b>Boundary rule</b>: a Zotero collection name can influence candidate extraction, but it does not automatically become a HyperDoc topic.</li>
+</ul>
+
+<p>
+  This matters for <a page="Coachmark bibliography authoring plan">Coachmark bibliography authoring plan</a>:
+  the collection cue <tt>coachmark</tt> is preserved as provenance, but the plan
+  still asks whether <tt>Coach marks</tt>, <tt>Onboarding</tt>, or adjacent UX
+  pattern concepts deserve new topics, page updates, or only arrangement-level
+  mention.
+</p>
+
+<h2>Comparison rule</h2>
+
+<p>
+  Candidate-topic comparison follows the same doctrine already documented for
+  manual topic merging:
+</p>
+
+<ol>
+  <li>check the exact topic title first</li>
+  <li>then check aliases and near-duplicate normalization</li>
+  <li>then check broader-topic absorption</li>
+  <li>only then mark a candidate as genuinely new</li>
+</ol>
+
+<p>
+  That comparison is visible as typed report objects, not hidden inside a write
+  script.
+</p>
+
+<h2>Materialization boundary</h2>
+
+<p>
+  The authoring plan exposes a materialization preview and a write action, but
+  the write action generates a separate review bundle. It does not patch
+  <tt>hyperdoc/topics.lisp</tt> or overwrite authored pages in place.
+</p>
+
+<p>
+  Each <tt>Authoring decision</tt> now keeps its own compact rationale,
+  grouped evidence surface, and materialization consequence. The plan-level
+  preview also distinguishes the bundle file that would be written now from the
+  proposed later repo touch, such as a topic-factory function in
+  <tt>hyperdoc/topics.lisp</tt> or a page fragment/update against a specific
+  <tt>hyperdoc/&lt;Title&gt;.html</tt> page.
+</p>
+
+<lisp-code>
+(let ((plan (coachmark-bibliography-authoring-plan)))
+  (materialize-bibliography-authoring-plan plan))
+</lisp-code>
+
+<p>
+  Use that step only after inspecting the plan. The generated bundle is the
+  review surface for proposed topic-factory snippets, page fragments, and page
+  update notes.
+</p>
+
+<h2>Stand-in seam before browser rendering</h2>
+
+<p>
+  HyperDoc also exposes a stand-in inspection layer for bibliography plans.
+  That seam classifies entry-page selection, runtime-surface inventory,
+  workspace-versus-flake mismatch, plan readiness, artifact-bundle readiness,
+  and failure classification before browser rendering. It is the local
+  bibliography version of the
+  <a hyperbook="topics" page="Browser stand-in"><tt>browser stand-in</tt></a>
+  pattern and keeps Playwright focused on the later pane-open and rendering
+  boundary.
+</p>
+
+<h2>Focused smoke test</h2>
+
+<lisp-code>
+(hyperdoc/tests:run-bibliography-subcollections-smoke-tests)
+</lisp-code>
+
+<h2>Live evaluation probes</h2>
+
+<p>
+  These live plan probes stay machine-local runtime evidence. They are useful
+  for stress-testing the current decision surface on real Zotero
+  subcollections without materializing any repo write.
+</p>
+
+<p>
+  The current authoritative live Playwright status for these probes is
+  <b>2 passed, 1 failed in Chromium</b>.
+  The browser suite keeps pane-open timing explicit per case and
+  records <tt>paneOpenMs</tt> plus <tt>paneOpenTimeoutMs</tt> attachments so
+  slow collections become measurable rather than anecdotal.
+</p>
+
+<ul>
+  <li><a expr="(plan-bibliography-authoring &quot;HTML Rewriting&quot;)"><tt>HTML Rewriting live plan</tt></a></li>
+  <li><a expr="(plan-bibliography-authoring &quot;Topological Intelligence&quot;)"><tt>Topological Intelligence live plan</tt></a></li>
+  <li><a expr="(plan-bibliography-authoring &quot;Plastics Packaging&quot;)"><tt>Plastics Packaging live plan</tt></a></li>
+</ul>
+
+<table>
+  <tr>
+    <th>Probe</th>
+    <th>Pane-open budget</th>
+    <th>Status</th>
+    <th>Inspectability note</th>
+  </tr>
+  <tr>
+    <td><tt>HTML Rewriting</tt></td>
+    <td><tt>60_000ms</tt></td>
+    <td>passing</td>
+    <td>Explicit cold first-plan budget, with timing attached per case.</td>
+  </tr>
+  <tr>
+    <td><tt>Topological Intelligence</tt></td>
+    <td><tt>45_000ms</tt></td>
+    <td>passing</td>
+    <td>Explicit moderate-plan budget, with timing attached per case.</td>
+  </tr>
+  <tr>
+    <td><tt>Plastics Packaging</tt></td>
+    <td><tt>60_000ms</tt></td>
+    <td>failing</td>
+    <td>Explicit heavy-plan budget; the latest authoritative failure is still a pane-open/UI polling timeout, not a silent retry.</td>
+  </tr>
+</table>
+
+<p>
+  <tt>Plastics Packaging</tt> is currently the heaviest live case because the
+  pane-open path combines a broader import, more candidate extraction from thin
+  title or note cues, more inspector rendering work in the decision surface,
+  and longer pane-open UI polling before the plan is fully visible.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Coachmark bibliography authoring plan">Coachmark bibliography authoring plan</a></li>
+  <li><a page="Bibliography authoring plan live evaluation">Bibliography authoring plan live evaluation</a></li>
+  <li><a page="Bibliography authoring-plan stand-in inspection">Bibliography authoring-plan stand-in inspection</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="How to merge proposed topic additions into hyperdoc/topics.lisp">How to merge proposed topic additions into hyperdoc/topics.lisp</a></li>
+  <li><a page="Review of the first merge-proposed-topic-additions HTML">Review of the first merge-proposed-topic-additions HTML</a></li>
+  <li><a page="Topic arrangement in HyperDoc">Topic arrangement in HyperDoc</a></li>
+</ul>

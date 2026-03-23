@@ -446,13 +446,15 @@
           immutablep))
 
 (defun parse-zotero-json-output (output)
-  (with-input-from-string (stream output)
-    (let ((data (shasht:read-json stream)))
-      (typecase data
-        (null nil)
-        (vector (coerce data 'list))
-        (list data)
-        (t (list data))))))
+  (if (zotero-blank-string-p output)
+      nil
+      (with-input-from-string (stream output)
+        (let ((data (shasht:read-json stream)))
+          (typecase data
+            (null nil)
+            (vector (coerce data 'list))
+            (list data)
+            (t (list data)))))))
 
 (defun zotero-query-attempt-status-detail (output exit-code)
   (let ((trimmed (zotero-trimmed-string output)))

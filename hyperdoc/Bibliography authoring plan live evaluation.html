@@ -1,0 +1,85 @@
+<h1>Bibliography authoring plan live evaluation</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is a machine-local live evaluation surface for additional Zotero
+  subcollections beyond <tt>coachmark</tt>. The collection names here are first
+  source provenance and only then possible editorial cues. Each linked plan is
+  runtime evidence from the current Zotero library, not a repo-global truth.
+</p>
+
+<p>
+  The current authoritative live Playwright result for this page is
+  <b>2 passed, 1 failed in Chromium</b>.
+  Each case keeps its pane-open budget explicit and
+  records pane-open timing as test artifacts instead of treating slower
+  collections as anecdotal.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Bibliography subcollection"><tt>Bibliography subcollection</tt></a></li>
+  <li><a hyperbook="topics" page="Candidate topic"><tt>Candidate topic</tt></a></li>
+  <li><a hyperbook="topics" page="Topic comparison report"><tt>Topic comparison report</tt></a></li>
+  <li><a hyperbook="topics" page="Authoring decision"><tt>Authoring decision</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc authoring plan"><tt>HyperDoc authoring plan</tt></a></li>
+</ul>
+
+<h2>Live plan probes</h2>
+
+<ul>
+  <li><a expr="(plan-bibliography-authoring &quot;HTML Rewriting&quot;)"><tt>HTML Rewriting live plan</tt></a></li>
+  <li><a expr="(plan-bibliography-authoring &quot;Topological Intelligence&quot;)"><tt>Topological Intelligence live plan</tt></a></li>
+  <li><a expr="(plan-bibliography-authoring &quot;Plastics Packaging&quot;)"><tt>Plastics Packaging live plan</tt></a></li>
+</ul>
+
+<h2>Current live budgets</h2>
+
+<ul>
+  <li><b>HTML Rewriting</b>: <tt>60_000ms</tt> pane-open budget, passing.</li>
+  <li><b>Topological Intelligence</b>: <tt>45_000ms</tt> pane-open budget, passing.</li>
+  <li><b>Plastics Packaging</b>: <tt>60_000ms</tt> pane-open budget, still failing in the latest authoritative rerun because pane-open/UI polling did not reach a visible plan pane before timeout.</li>
+</ul>
+
+<p>
+  The Playwright suite attaches one pane-open timing JSON artifact per case
+  with the measured elapsed time, the explicit timeout budget, and the case
+  note that explains why that budget exists.
+</p>
+
+<p>
+  Use <a page="Bibliography authoring-plan stand-in inspection">Bibliography authoring-plan stand-in inspection</a>
+  to inspect the pre-browser stand-in report when you need to know whether a
+  collection is already ready before the pane-open and rendering boundary.
+</p>
+
+<h2>What to inspect</h2>
+
+<ol>
+  <li>Use <b>Collection summary</b> to confirm the resolved Zotero collection path and imported-entry count.</li>
+  <li>Use <b>Page write/update plan</b> to see grouped evidence, compact rationale, and materialization consequence per decision.</li>
+  <li>Use <b>Materialization preview</b> to inspect the bundle target and the diff-like proposed repo touches before any write step.</li>
+</ol>
+
+<h2>Why these probes matter</h2>
+
+<p>
+  These three live plans stress different boundaries in the current decision
+  surface:
+</p>
+
+<ul>
+  <li><b>HTML Rewriting</b>: sparse extraction that currently stays as continuity-shell evidence.</li>
+  <li><b>Topological Intelligence</b>: mixed evidence where arrangement-only variants and a broader new-topic proposal compete.</li>
+  <li><b>Plastics Packaging</b>: thin note or keyword cues that can still produce explicit new-topic/page proposals with named repo touches. It is also the heaviest current case because the pane-open path combines import cost, candidate extraction cost, inspector rendering cost, and longer pane-open UI polling cost. The latest authoritative failure is classified at the last boundary: pane-open/UI polling cost.</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Bibliography subcollections in HyperDoc">Bibliography subcollections in HyperDoc</a></li>
+  <li><a page="Bibliography authoring-plan stand-in inspection">Bibliography authoring-plan stand-in inspection</a></li>
+  <li><a page="Coachmark bibliography authoring plan">Coachmark bibliography authoring plan</a></li>
+</ul>
