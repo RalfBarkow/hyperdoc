@@ -139,7 +139,7 @@
 
 <p>
   The current authoritative live Playwright status for these probes is
-  <b>2 passed, 1 failed in Chromium</b>.
+  <b>1 passed, 1 failed, 1 did not run in Chromium</b>.
   The browser suite keeps pane-open timing explicit per case and
   records <tt>paneOpenMs</tt> plus <tt>paneOpenTimeoutMs</tt> attachments so
   slow collections become measurable rather than anecdotal.
@@ -167,14 +167,14 @@
   <tr>
     <td><tt>Topological Intelligence</tt></td>
     <td><tt>45_000ms</tt></td>
-    <td>passing</td>
-    <td>Explicit moderate-plan budget, with timing attached per case.</td>
+    <td>failing</td>
+    <td>Explicit moderate-plan budget; the latest fresh rerun failed earlier than pane-open timing, at the initial <tt>Main page</tt> tab-detection boundary in <tt>openHyperDoc</tt>.</td>
   </tr>
   <tr>
     <td><tt>Plastics Packaging</tt></td>
     <td><tt>60_000ms</tt></td>
-    <td>failing</td>
-    <td>Explicit heavy-plan budget; the latest authoritative failure is still a pane-open/UI polling timeout, not a silent retry.</td>
+    <td>not run</td>
+    <td>Still configured with the explicit heavy-plan budget, but the latest fresh serial rerun stopped after the earlier <tt>Topological Intelligence</tt> failure and did not reach this case.</td>
   </tr>
 </table>
 

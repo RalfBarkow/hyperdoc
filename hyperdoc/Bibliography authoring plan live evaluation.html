@@ -11,7 +11,7 @@
 
 <p>
   The current authoritative live Playwright result for this page is
-  <b>2 passed, 1 failed in Chromium</b>.
+  <b>1 passed, 1 failed, 1 did not run in Chromium</b>.
   Each case keeps its pane-open budget explicit and
   records pane-open timing as test artifacts instead of treating slower
   collections as anecdotal.
@@ -39,8 +39,8 @@
 
 <ul>
   <li><b>HTML Rewriting</b>: <tt>60_000ms</tt> pane-open budget, passing.</li>
-  <li><b>Topological Intelligence</b>: <tt>45_000ms</tt> pane-open budget, passing.</li>
-  <li><b>Plastics Packaging</b>: <tt>60_000ms</tt> pane-open budget, still failing in the latest authoritative rerun because pane-open/UI polling did not reach a visible plan pane before timeout.</li>
+  <li><b>Topological Intelligence</b>: <tt>45_000ms</tt> pane-open budget, failing in the latest fresh rerun before pane-open timing was even reached, at the initial <tt>Main page</tt> tab-detection boundary inside <tt>openHyperDoc</tt>.</li>
+  <li><b>Plastics Packaging</b>: <tt>60_000ms</tt> pane-open budget, not reached in that same serial rerun because Playwright stopped after the earlier <tt>Topological Intelligence</tt> failure.</li>
 </ul>
 
 <p>
@@ -72,8 +72,8 @@
 
 <ul>
   <li><b>HTML Rewriting</b>: sparse extraction that currently stays as continuity-shell evidence.</li>
-  <li><b>Topological Intelligence</b>: mixed evidence where arrangement-only variants and a broader new-topic proposal compete.</li>
-  <li><b>Plastics Packaging</b>: thin note or keyword cues that can still produce explicit new-topic/page proposals with named repo touches. It is also the heaviest current case because the pane-open path combines import cost, candidate extraction cost, inspector rendering cost, and longer pane-open UI polling cost. The latest authoritative failure is classified at the last boundary: pane-open/UI polling cost.</li>
+  <li><b>Topological Intelligence</b>: mixed evidence where arrangement-only variants and a broader new-topic proposal compete. In the latest fresh rerun the failure happened earlier, at the browser-entry boundary in <tt>openHyperDoc</tt>, before the plan pane was even requested.</li>
+  <li><b>Plastics Packaging</b>: thin note or keyword cues that can still produce explicit new-topic/page proposals with named repo touches. It is also the heaviest current case because the pane-open path combines import cost, candidate extraction cost, inspector rendering cost, and longer pane-open UI polling cost, but the latest fresh serial rerun did not reach it.</li>
 </ul>
 
 <h2>Related pages</h2>
