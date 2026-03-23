@@ -56,14 +56,15 @@
         (when (eval-thunk-with-active-button clog-obj obj target)
           (refresh pane)))))
 
-(defun handle-inspector-eval-click (pane obj target event)
+(defun handle-inspector-reference-eval-click (pane obj target event &optional view-ref)
   (with-slots (inspector clog-obj) pane
     (unless (getf event :shift-key)
       (close-panes-after inspector pane))
     (if (getf event :alt-key)
         (create-pane inspector target)
         (create-pane inspector
-                     (eval-thunk-with-active-button clog-obj obj target)))))
+                     (eval-thunk-with-active-button clog-obj obj target)
+                     :select view-ref))))
 
 ;; Override upstream wiring to ignore invalid reference ids that would
 ;; otherwise trigger jQuery selector errors for "#".
@@ -100,11 +101,14 @@
                       (handle-inspector-action-click pane obj target event))
                   :cancel-event t))
                 ((string= ref-type "eval")
+                 (let ((view-ref nil))
+                   (when (eql (length html-id-parts) 3)
+                     (setf view-ref (hv:decode-base32 (third html-id-parts))))
                  (clog:set-on-mouse-click
                   ref-element
                   #'(lambda (obj event)
-                      (handle-inspector-eval-click pane obj target event))
+                      (handle-inspector-reference-eval-click pane obj target event view-ref))
                   :cancel-event t)
                  (setf (clog:attribute ref-element
                                        "data-hyperdoc-eval-bound")
-                       "true")))))))))
+                       "true"))))))))))
