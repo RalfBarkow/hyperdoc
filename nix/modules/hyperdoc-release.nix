@@ -43,6 +43,12 @@ in
       description = "Bind port passed to HyperDoc runtime.";
     };
 
+    enableZotero = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable optional Zotero-backed runtime surfaces. When false, HyperDoc stays loadable without Zotero/sqlite3 and Zotero surfaces degrade explicitly as unavailable by configuration.";
+    };
+
     publicOrigin = mkOption {
       type = types.nullOr types.str;
       default = null;
@@ -105,6 +111,7 @@ in
       environment = {
         HYPERDOC_BIND_ADDRESS = cfg.bindAddress;
         HYPERDOC_PORT = toString cfg.port;
+        HYPERDOC_ENABLE_ZOTERO = if cfg.enableZotero then "1" else "0";
         HYPERDOC_DEVELOPMENT = "0";
         HYPERDOC_DEBUG = "0";
         HYPERDOC_USE_THREAD = "0";

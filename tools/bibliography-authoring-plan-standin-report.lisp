@@ -17,6 +17,7 @@
 (defun make-standin-source (mode)
   (cond
     ((string-equal mode "fixture")
+     (asdf:load-system :hyperdoc/tests/zotero)
      (hyperdoc/tests::make-bibliography-smoke-source))
     ((string-equal mode "live")
      (hyperdoc::make-default-bibliography-source))

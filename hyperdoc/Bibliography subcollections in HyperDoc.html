@@ -4,11 +4,13 @@
 
 <p>
   HyperDoc can now treat a named bibliography subcollection as a first-class
-  HyperBook collection surface rather than as pasted source text. The current
-  concrete source is a read-only Zotero subcollection, exposed through a
-  dedicated <tt>bibliography</tt> HyperBook and turned into inspectable
-  bibliography entries, candidate topics, topic-comparison reports, authoring
-  decisions, and a separate materialization preview.
+  HyperBook collection surface rather than as pasted source text. The generic
+  bibliography planner lives in HyperDoc core, while the current live backend
+  is a read-only Zotero subcollection in the optional <tt>:hyperdoc/zotero</tt>
+  system. When that backend is enabled, HyperDoc exposes a dedicated
+  <tt>bibliography</tt> HyperBook and turns the imported records into
+  inspectable bibliography entries, candidate topics, topic-comparison
+  reports, authoring decisions, and a separate materialization preview.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -31,7 +33,7 @@
 <h2>Three distinct layers</h2>
 
 <ol>
-  <li><b>Live runtime/import objects</b>: Zotero-backed subcollections, entries, candidate signals, comparison reports, and plans.</li>
+  <li><b>Live runtime/import objects</b>: backend-specific imported subcollections, entries, candidate signals, comparison reports, and plans.</li>
   <li><b>Stable topic objects</b>: reusable concept handles such as <tt>Candidate topic</tt> or <tt>Topic comparison report</tt> in <tt>hyperdoc/topics.lisp</tt>.</li>
   <li><b>Authored HyperDoc pages</b>: durable prose pages that explain the capability and later absorb approved materialized outputs.</li>
 </ol>
@@ -62,6 +64,20 @@
   pattern concepts deserve new topics, page updates, or only arrangement-level
   mention.
 </p>
+
+<h2>Optional Zotero backend</h2>
+
+<p>
+  Zotero is now an optional backend, not a hard dependency of core
+  <tt>:hyperdoc</tt> or <tt>:hyperdoc/server</tt>. The authoritative runtime
+  seam is <tt>HYPERDOC_ENABLE_ZOTERO</tt>.
+</p>
+
+<ul>
+  <li><tt>HYPERDOC_ENABLE_ZOTERO=1</tt>: load <tt>:hyperdoc/zotero</tt> and <tt>:hyperdoc/inspector/zotero</tt>, register the live <tt>bibliography</tt> HyperBook, and expose real Zotero-backed collection access.</li>
+  <li><tt>HYPERDOC_ENABLE_ZOTERO=0</tt>: keep core bibliography planning loadable, but return explicit unavailable-by-configuration objects instead of fake live Zotero surfaces.</li>
+  <li>The configured value is authoritative; dreyeck uses this seam to keep Zotero disabled.</li>
+</ul>
 
 <h2>Comparison rule</h2>
 
@@ -126,6 +142,7 @@
 <h2>Focused smoke test</h2>
 
 <lisp-code>
+(asdf:load-system :hyperdoc/tests/zotero)
 (hyperdoc/tests:run-bibliography-subcollections-smoke-tests)
 </lisp-code>
 

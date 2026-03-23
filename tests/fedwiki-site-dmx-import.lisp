@@ -208,9 +208,6 @@
 
 (defun run-hyperdoc-tests ()
   (run-dmx-topic-proxy-smoke-tests)
-  (run-zotero-bridge-smoke-tests)
-  (run-zotero-bridge-live-tests)
-  (run-bibliography-subcollections-smoke-tests)
   (run-article-allegation-slice-smoke-tests)
   (run-fedwiki-materialization-smoke-tests)
   (run-page-lookup-issues-smoke-tests)

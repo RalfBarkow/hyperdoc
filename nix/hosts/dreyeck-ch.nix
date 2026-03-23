@@ -12,6 +12,7 @@
 
   services.hyperdoc = {
     enable = true;
+    enableZotero = false;
     serviceName = "hyperdoc";
     bindAddress = "127.0.0.1";
     port = 8080;

@@ -47,117 +47,47 @@
     (t
      (format nil "~A" value))))
 
-(defmethod views:text-representation ((source hyperdoc::zotero-bibliography-source))
-  (format nil "Bibliography source (~A)"
-          (or (bibliography-path-string
-               (hyperdoc::zotero-db-path-of
-                (hyperdoc::bibliography-source-bridge-of source)))
-              "no Zotero db")))
+(defmethod views:text-representation ((status hyperdoc::zotero-backend-unavailable))
+  (format nil "Zotero unavailable (~A)"
+          (bibliography-keyword-label
+           (hyperdoc::zotero-backend-unavailable-reason-of status))))
 
-(defmethod views:title-bar-action-buttons ((source hyperdoc::zotero-bibliography-source))
-  (views:html
-    (views:action-button
-     "Open coachmark"
-     (views:thunk
-       (hyperdoc::coachmark-bibliography-subcollection :source source))
-     "Load the live coachmark Zotero subcollection through the bibliography HyperBook interface.")))
-
-(views:defview 👀overview (source hyperdoc::zotero-bibliography-source)
-  (views:html-view :title "Overview" :priority 1
+(views:defview 👀overview (status hyperdoc::zotero-backend-unavailable)
+  (views:html-view :title "Unavailable" :priority 1
     (views:html
       (:table :class "inspector-table"
-              (:tr (:td (views:esc "Source system"))
+              (:tr (:td (views:esc "Backend"))
                    (:td (:tt (views:esc "Zotero"))))
-              (:tr (:td (views:esc "Zotero DB"))
-                   (:td (:code
-                         (views:esc
-                          (or (bibliography-path-string
-                               (hyperdoc::zotero-db-path-of
-                                (hyperdoc::bibliography-source-bridge-of source)))
-                              "")))))
-              (:tr (:td (views:esc "Storage root"))
-                   (:td (:code
-                         (views:esc
-                          (or (bibliography-path-string
-                               (hyperdoc::zotero-storage-root-of
-                                (hyperdoc::bibliography-source-bridge-of source)))
-                              "")))))
-              (:tr (:td (views:esc "Default collection"))
-                   (:td (:tt
-                         (views:esc
-                          (hyperdoc::bibliography-source-default-collection-of source)))))
-              (:tr (:td (views:esc "Materialization root"))
-                   (:td (:code
-                         (views:esc
-                          (bibliography-path-string
-                           (hyperdoc::bibliography-source-materialization-root-of source))))))
-              (:tr (:td (views:esc "Live coachmark plan"))
-                   (:td (views:object-ref
-                         (hyperdoc::coachmark-bibliography-authoring-plan :source source))))))))
-
-(defmethod views:text-representation ((collection hyperdoc::zotero-collection-hit))
-  (format nil "Zotero collection ~A"
-          (hyperdoc::zotero-collection-path-of collection)))
-
-(views:defview 👀overview (collection hyperdoc::zotero-collection-hit)
-  (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Collection ID"))
-                   (:td (views:object-ref
-                         (hyperdoc::zotero-collection-id-of collection))))
-              (:tr (:td (views:esc "Collection key"))
-                   (:td (:tt
-                         (views:esc
-                          (hyperdoc::zotero-collection-key-of collection)))))
-              (:tr (:td (views:esc "Collection name"))
+              (:tr (:td (views:esc "Operation"))
                    (:td (views:esc
-                         (hyperdoc::zotero-collection-name-of collection))))
-              (:tr (:td (views:esc "Collection path"))
+                         (hyperdoc::zotero-backend-unavailable-operation-of status))))
+              (:tr (:td (views:esc "Reason"))
                    (:td (:tt
                          (views:esc
-                          (hyperdoc::zotero-collection-path-of collection)))))
-              (:tr (:td (views:esc "Library ID"))
-                   (:td (views:object-ref
-                         (hyperdoc::zotero-collection-library-id-of collection))))
-              (:tr (:td (views:esc "Parent collection ID"))
-                   (:td (views:object-ref
-                         (hyperdoc::zotero-collection-parent-id-of collection))))
-              (:tr (:td (views:esc "Path components"))
-                   (:td (views:object-ref
-                         (hyperdoc::zotero-collection-path-components-of collection))))))))
-
-(defmethod views:text-representation ((query hyperdoc::zotero-collection-query))
-  (format nil "Zotero collection query ~A (~D matches)"
-          (hyperdoc::zotero-collection-query-text-of query)
-          (length (hyperdoc::zotero-collection-query-matched-collections-of query))))
-
-(views:defview 👀overview (query hyperdoc::zotero-collection-query)
-  (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr
-               (:td (views:esc "Query text"))
-               (:td (:tt
-                     (views:esc
-                      (hyperdoc::zotero-collection-query-text-of query)))))
-              (:tr
-               (:td (views:esc "Bridge"))
-               (:td (views:object-ref
-                     (hyperdoc::zotero-collection-query-bridge-of query))))
-              (:tr
-               (:td (views:esc "Matched collections"))
-               (:td (views:object-ref
-                     (hyperdoc::zotero-collection-query-matched-collections-of query))))
-              (:tr
-               (:td (views:esc "Raw SQL query"))
-               (:td (:pre
-                     (views:esc
-                      (hyperdoc::zotero-query-sql-of query)))))))))
+                          (bibliography-keyword-label
+                           (hyperdoc::zotero-backend-unavailable-reason-of status))))))
+              (:tr (:td (views:esc "Configuration variable"))
+                   (:td (:code
+                         (views:esc
+                          (hyperdoc::zotero-backend-unavailable-configuration-variable-of
+                           status)))))
+              (:tr (:td (views:esc "Configuration value"))
+                   (:td (:tt
+                         (views:esc
+                          (or (hyperdoc::zotero-backend-unavailable-configuration-value-of
+                               status)
+                              "")))))
+              (:tr (:td (views:esc "Message"))
+                   (:td (views:esc
+                         (hyperdoc::zotero-backend-unavailable-message-of status))))
+              (:tr (:td (views:esc "Optional system"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::zotero-backend-unavailable-system-name-of status)))))))))
 
 (defmethod views:text-representation ((subcollection hyperdoc::bibliography-subcollection))
   (format nil "Bibliography subcollection ~A (~D entries)"
-          (hyperdoc::zotero-collection-path-of
+          (hyperdoc::bibliography-collection-path-of
            (hyperdoc::bibliography-subcollection-collection-hit-of subcollection))
           (length (hyperdoc::bibliography-subcollection-entries-of subcollection))))
 
@@ -275,7 +205,10 @@
     (views:html
       (:table :class "inspector-table"
               (:tr (:td (views:esc "Source system"))
-                   (:td (:tt (views:esc "Zotero"))))
+                   (:td (:tt
+                         (views:esc
+                          (bibliography-keyword-label
+                           (hyperdoc::bibliography-entry-source-system-of entry))))))
               (:tr (:td (views:esc "Collection path"))
                    (:td (:tt
                          (views:esc
@@ -323,7 +256,7 @@
                    (:td (:pre
                          (views:esc
                           (hyperdoc::bibliography-entry-raw-source-text-of entry)))))
-              (:tr (:td (views:esc "Raw Zotero row"))
+              (:tr (:td (views:esc "Raw source row"))
                    (:td (views:object-ref
                          (hyperdoc::bibliography-entry-raw-row-of entry))))
               (:tr (:td (views:esc "Author rows"))
@@ -509,10 +442,10 @@
   (views:html-view :title "Evidence" :priority 2
     (views:html
       (:table :class "inspector-table"
-              (:tr (:td (views:esc "Zotero provenance evidence"))
+              (:tr (:td (views:esc "Source provenance evidence"))
                    (:td (views:object-ref
                          (bibliography-display-list
-                          (hyperdoc::authoring-decision-zotero-provenance-evidence-of
+                          (hyperdoc::authoring-decision-source-provenance-evidence-of
                            decision)))))
               (:tr (:td (views:esc "Entry-title evidence"))
                    (:td (views:object-ref
@@ -591,7 +524,7 @@
 
 (defmethod views:text-representation ((plan hyperdoc::hyperdoc-authoring-plan))
   (format nil "Bibliography authoring plan ~A"
-          (hyperdoc::zotero-collection-path-of
+          (hyperdoc::bibliography-collection-path-of
            (hyperdoc::bibliography-subcollection-collection-hit-of
             (hyperdoc::hyperdoc-authoring-plan-source-subcollection-of plan)))))
 
@@ -610,11 +543,15 @@
       (views:html
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Source system"))
-                     (:td (:tt (views:esc "Zotero"))))
+                     (:td (:tt
+                           (views:esc
+                            (bibliography-keyword-label
+                             (hyperdoc::bibliography-subcollection-source-system-of
+                              subcollection))))))
                 (:tr (:td (views:esc "Collection path"))
                      (:td (:tt
                            (views:esc
-                            (hyperdoc::zotero-collection-path-of
+                            (hyperdoc::bibliography-collection-path-of
                              (hyperdoc::bibliography-subcollection-collection-hit-of
                               subcollection))))))
                 (:tr (:td (views:esc "Imported entries"))
@@ -700,7 +637,7 @@
               (:tr (:th (views:esc "Candidate"))
                    (:th (views:esc "Decision kind"))
                    (:th (views:esc "Matched existing topic/page"))
-                   (:th (views:esc "Zotero provenance evidence"))
+                   (:th (views:esc "Source provenance evidence"))
                    (:th (views:esc "Entry-title evidence"))
                    (:th (views:esc "Notes/keywords/tag evidence"))
                    (:th (views:esc "Broader-neighborhood/editorial evidence"))
@@ -718,7 +655,7 @@
                              (bibliography-decision-match-summary decision)))
                        (:td (views:object-ref
                              (bibliography-display-list
-                              (hyperdoc::authoring-decision-zotero-provenance-evidence-of
+                              (hyperdoc::authoring-decision-source-provenance-evidence-of
                                decision))))
                        (:td (views:object-ref
                              (bibliography-display-list

@@ -1,4 +1,4 @@
-;;;; Zotero-backed bibliography subcollections and authoring plans
+;;;; Generic bibliography subcollections and authoring plans
 ;;
 ;;;; Copyright (c) 2026
 
@@ -20,20 +20,40 @@
 (defclass bibliography-source ()
   ((source-system :reader bibliography-source-system-of
                   :initarg :source-system
-                  :initform :zotero)
+                  :initform :unknown)
    (description :reader bibliography-source-description-of
                 :initarg :description
-                :initform nil)))
-
-(defclass zotero-bibliography-source (bibliography-source)
-  ((bridge :reader bibliography-source-bridge-of
-           :initarg :bridge)
+                :initform nil)
    (default-collection :reader bibliography-source-default-collection-of
                        :initarg :default-collection
                        :initform *bibliography-default-main-page-id*)
    (materialization-root :reader bibliography-source-materialization-root-of
                          :initarg :materialization-root
                          :initform *bibliography-default-materialization-root*)))
+
+(defclass bibliography-collection-hit ()
+  ((collection-id :reader bibliography-collection-id-of
+                  :initarg :collection-id
+                  :initform nil)
+   (collection-key :reader bibliography-collection-key-of
+                   :initarg :collection-key
+                   :initform nil)
+   (collection-name :reader bibliography-collection-name-of
+                    :initarg :collection-name)
+   (collection-path :reader bibliography-collection-path-of
+                    :initarg :collection-path)
+   (path-components :reader bibliography-collection-path-components-of
+                    :initarg :path-components
+                    :initform nil)
+   (parent-collection-id :reader bibliography-collection-parent-id-of
+                         :initarg :parent-collection-id
+                         :initform nil)
+   (library-id :reader bibliography-collection-library-id-of
+               :initarg :library-id
+               :initform nil)
+   (raw-row :reader bibliography-collection-raw-row-of
+            :initarg :raw-row
+            :initform nil)))
 
 (defclass bibliography-subcollections-hyperbook (hb:hyperbook)
   ((source :reader bibliography-hyperbook-source-of
@@ -47,36 +67,12 @@
    (pages :reader bibliography-hyperbook-pages-of
           :initform (make-hash-table :test #'equal))))
 
-(defclass zotero-collection-hit ()
-  ((collection-id :reader zotero-collection-id-of :initarg :collection-id)
-   (collection-key :reader zotero-collection-key-of :initarg :collection-key)
-   (collection-name :reader zotero-collection-name-of :initarg :collection-name)
-   (collection-path :reader zotero-collection-path-of :initarg :collection-path)
-   (path-components :reader zotero-collection-path-components-of
-                    :initarg :path-components
-                    :initform nil)
-   (parent-collection-id :reader zotero-collection-parent-id-of
-                         :initarg :parent-collection-id
-                         :initform nil)
-   (library-id :reader zotero-collection-library-id-of
-               :initarg :library-id
-               :initform nil)
-   (raw-row :reader zotero-collection-raw-row-of
-            :initarg :raw-row)))
-
-(defclass zotero-collection-query (zotero-query-evidence)
-  ((bridge :reader zotero-collection-query-bridge-of :initarg :bridge)
-   (query-text :reader zotero-collection-query-text-of :initarg :query-text)
-   (matched-collections :reader zotero-collection-query-matched-collections-of
-                        :initarg :matched-collections
-                        :initform nil)))
-
 (defclass bibliography-subcollection (hb:page)
   ((source :reader bibliography-subcollection-source-of
            :initarg :source)
    (source-system :reader bibliography-subcollection-source-system-of
                   :initarg :source-system
-                  :initform :zotero)
+                  :initform :unknown)
    (query-text :reader bibliography-subcollection-query-text-of
                :initarg :query-text)
    (collection-hit :reader bibliography-subcollection-collection-hit-of
@@ -106,7 +102,7 @@
 (defclass bibliography-entry ()
   ((source-system :reader bibliography-entry-source-system-of
                   :initarg :source-system
-                  :initform :zotero)
+                  :initform :unknown)
    (collection-name :reader bibliography-entry-collection-name-of
                     :initarg :collection-name)
    (collection-path :reader bibliography-entry-collection-path-of
@@ -254,8 +250,10 @@
     :reader authoring-decision-matched-existing-page-title-of
     :initarg :matched-existing-page-title
     :initform nil)
-   (zotero-provenance-evidence
+   (source-provenance-evidence
+    :reader authoring-decision-source-provenance-evidence-of
     :reader authoring-decision-zotero-provenance-evidence-of
+    :initarg :source-provenance-evidence
     :initarg :zotero-provenance-evidence
     :initform nil)
    (entry-title-evidence
@@ -415,17 +413,42 @@
 
 (defvar *bibliography-subcollections* nil)
 
-(defmethod print-object ((object zotero-bibliography-source) stream)
+(defgeneric load-bibliography-subcollection-using-source
+    (source query-text &key signal-error? output-root))
+
+(defmethod load-bibliography-subcollection-using-source
+    ((source zotero-backend-unavailable) query-text &key signal-error? output-root)
+  (declare (ignore query-text signal-error? output-root))
+  source)
+
+(defmethod load-bibliography-subcollection-using-source
+    ((source bibliography-source) query-text &key signal-error? output-root)
+  (declare (ignore output-root))
+  (if signal-error?
+      (error "No bibliography backend implementation is available for ~A (~A)."
+             query-text
+             (bibliography-source-system-of source))
+      (make-zotero-backend-unavailable
+       "bibliography subcollection lookup"
+       :detail (format nil "no load-bibliography-subcollection-using-source method for source system ~A"
+                       (bibliography-source-system-of source)))))
+
+(defmethod print-object ((object bibliography-source) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~A"
-            (or (pathname-namestring-or-nil
-                 (zotero-db-path-of (bibliography-source-bridge-of object)))
-                "<no zotero db>"))))
+            (or (bibliography-source-description-of object)
+                (string-downcase
+                 (symbol-name (bibliography-source-system-of object)))))))
+
+(defmethod print-object ((object bibliography-collection-hit) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~A"
+            (bibliography-collection-path-of object))))
 
 (defmethod print-object ((object bibliography-subcollection) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~A (~D entries)"
-            (zotero-collection-path-of
+            (bibliography-collection-path-of
              (bibliography-subcollection-collection-hit-of object))
             (length (bibliography-subcollection-entries-of object)))))
 
@@ -472,7 +495,7 @@
 (defmethod print-object ((object hyperdoc-authoring-plan) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~A (~D candidates, ~D decisions)"
-            (zotero-collection-path-of
+            (bibliography-collection-path-of
              (bibliography-subcollection-collection-hit-of
               (hyperdoc-authoring-plan-source-subcollection-of object)))
             (length (hyperdoc-authoring-plan-candidate-topics-of object))
@@ -485,22 +508,8 @@
             (bibliography-standin-failure-classification-before-browser-of object))))
 
 (defmethod hb:title-of ((page bibliography-subcollection))
-  (zotero-collection-name-of
+  (bibliography-collection-name-of
    (bibliography-subcollection-collection-hit-of page)))
-
-(defun make-zotero-bibliography-source
-    (&key (bridge (make-default-zotero-library-bridge))
-       (default-collection *bibliography-default-main-page-id*)
-       (materialization-root *bibliography-default-materialization-root*))
-  (make-instance 'zotero-bibliography-source
-                 :bridge bridge
-                 :default-collection default-collection
-                 :materialization-root
-                 (uiop:ensure-directory-pathname materialization-root)
-                 :description "Read-only Zotero bibliography source for HyperDoc collection import and authoring plans."))
-
-(defun make-default-bibliography-source ()
-  (make-zotero-bibliography-source))
 
 (defun bibliography-standin-current-millis ()
   (round (* 1000 (/ (get-internal-real-time)
@@ -511,7 +520,9 @@
 
 (defun bibliography-entry-page-object (title)
   (ignore-errors
-    (hyperbook:find-page *hyperdoc* title :signal-error? t)))
+    (hyperbook:find-page (symbol-value '*hyperdoc*)
+                         title
+                         :signal-error? t)))
 
 (defun bibliography-entry-page-source-pathname (page)
   (and page
@@ -586,8 +597,14 @@
      "missing-workspace-page")))
 
 (defun bibliography-failure-classification-before-browser
-    (selection-classification mismatch-classification plan-ready-p artifact-ready-p)
+    (selection-classification mismatch-classification plan plan-ready-p artifact-ready-p)
   (cond
+    ((zotero-backend-unavailable-p plan)
+     (case (zotero-backend-unavailable-reason-of plan)
+       (:disabled-by-configuration
+        "zotero-disabled-by-configuration")
+       (otherwise
+        "zotero-backend-load-failed")))
     ((string/= selection-classification "tracked-entry-page-selected")
      "tracked-entry-page-selection-defect")
     ((string/= mismatch-classification "tracked-page-no-mismatch-risk")
@@ -671,6 +688,8 @@
                     :output-root resolved-output-root))
       (error (condition)
         (setf plan-error (princ-to-string condition))))
+    (when (zotero-backend-unavailable-p plan)
+      (setf plan-error (zotero-backend-unavailable-message-of plan)))
     (let* ((plan-build-ms (bibliography-standin-elapsed-millis plan-build-start))
            (plan-ready-p (typep plan 'hyperdoc-authoring-plan))
            (materialization-summary
@@ -681,12 +700,15 @@
              (bibliography-failure-classification-before-browser
               selection-classification
               mismatch-classification
+              plan
               plan-ready-p
               artifact-ready-p))
            (last-protocol-boundary
              (cond
                (artifact-ready-p "artifact-bundle-written")
                (plan-ready-p "authoring-plan-ready")
+               ((zotero-backend-unavailable-p plan)
+                "zotero-backend-unavailable")
                ((string= selection-classification "tracked-entry-page-selected")
                 "tracked-entry-page-selected")
                (t
@@ -747,22 +769,28 @@
     (&key (source (make-default-bibliography-source))
        (id *bibliography-default-hyperbook-id*)
        (title "Bibliography")
-       (main-page-id (bibliography-source-default-collection-of source)))
-  (or (and *bibliography-subcollections*
-           (equal (hb:id-of *bibliography-subcollections*) id)
-           (typep *bibliography-subcollections* 'bibliography-subcollections-hyperbook)
-           (eq (bibliography-hyperbook-source-of *bibliography-subcollections*)
-               source)
-           *bibliography-subcollections*)
-      (setf *bibliography-subcollections*
-            (make-instance 'bibliography-subcollections-hyperbook
-                           :id id
-                           :source source
-                           :title title
-                           :main-page-id main-page-id))))
-
-(eval-when (:load-toplevel)
-  (register (ensure-bibliography-subcollections-hyperbook)))
+       (main-page-id (and (typep source 'bibliography-source)
+                          (bibliography-source-default-collection-of source)))
+       register?)
+  (if (zotero-backend-unavailable-p source)
+      source
+      (let ((book
+              (or (and *bibliography-subcollections*
+                       (equal (hb:id-of *bibliography-subcollections*) id)
+                       (typep *bibliography-subcollections* 'bibliography-subcollections-hyperbook)
+                       (eq (bibliography-hyperbook-source-of *bibliography-subcollections*)
+                           source)
+                       *bibliography-subcollections*)
+                  (setf *bibliography-subcollections*
+                        (make-instance 'bibliography-subcollections-hyperbook
+                                       :id id
+                                       :source source
+                                       :title title
+                                       :main-page-id (or main-page-id
+                                                         *bibliography-default-main-page-id*))))))
+        (when register?
+          (register book))
+        book)))
 
 (defun string-blank-p (value)
   (or (null value)
@@ -947,17 +975,18 @@
 
 (defun bibliography-output-root-for-subcollection (subcollection &optional source)
   (let* ((source (or source (bibliography-subcollection-source-of subcollection)))
-         (base (if (typep source 'zotero-bibliography-source)
-                   (bibliography-source-materialization-root-of source)
-                   *bibliography-default-materialization-root*)))
+         (base (uiop:ensure-directory-pathname
+                (or (and (typep source 'bibliography-source)
+                         (bibliography-source-materialization-root-of source))
+                    *bibliography-default-materialization-root*))))
     (merge-pathnames
      (format nil "~A/"
              (string-downcase
               (substitute #\- #\Space
-                          (zotero-collection-name-of
+                          (bibliography-collection-name-of
                            (bibliography-subcollection-collection-hit-of
                             subcollection)))))
-     (uiop:ensure-directory-pathname base))))
+     base)))
 
 (defun bibliography-page-filename (title)
   (merge-pathnames (format nil "~A.html" title)
@@ -1074,7 +1103,7 @@
        (hyperdoc-page-present-p target-page-title)
        target-page-title))
 
-(defun decision-zotero-provenance-evidence (candidate subcollection)
+(defun decision-source-provenance-evidence (candidate subcollection)
   (let* ((collection-hit (bibliography-subcollection-collection-hit-of subcollection))
          (item-ids (remove nil
                            (mapcar #'bibliography-entry-item-id-of
@@ -1082,11 +1111,16 @@
     (remove nil
             (append
              (list (format nil "Collection path: ~A"
-                           (zotero-collection-path-of collection-hit))
+                           (bibliography-collection-path-of collection-hit))
                    (format nil "Collection key: ~A"
-                           (zotero-collection-key-of collection-hit)))
+                           (bibliography-collection-key-of collection-hit)))
              (when item-ids
-               (list (format nil "Zotero item ids: ~{~A~^, ~}"
+               (list (format nil "~A item ids: ~{~A~^, ~}"
+                             (string-capitalize
+                              (string-downcase
+                               (symbol-name
+                                (bibliography-subcollection-source-system-of
+                                 subcollection))))
                              item-ids)))
              (candidate-evidence-lines
               candidate
@@ -1198,8 +1232,8 @@
                    :target-page-title target-page-title
                    :matched-existing-topic-title matched-existing-topic-title
                    :matched-existing-page-title matched-existing-page-title
-                   :zotero-provenance-evidence
-                   (decision-zotero-provenance-evidence candidate subcollection)
+                   :source-provenance-evidence
+                   (decision-source-provenance-evidence candidate subcollection)
                    :entry-title-evidence
                    (decision-entry-title-evidence candidate)
                    :notes-keywords-tag-evidence
@@ -1219,219 +1253,6 @@
         :entry-signals
         (mapcar #'candidate-topic-signal-display-title-of
                 (candidate-topic-entry-signals-of candidate))))
-
-(defun zotero-collection-query-sql (query-text)
-  (let ((literal (sql-string-literal (lowercase-string query-text))))
-    (format nil
-            "WITH RECURSIVE collection_paths AS (
-               SELECT c.collectionID,
-                      c.collectionName,
-                      c.parentCollectionID,
-                      c.libraryID,
-                      c.key AS collectionKey,
-                      c.collectionName AS collectionPath
-               FROM collections c
-               WHERE c.parentCollectionID IS NULL
-               UNION ALL
-               SELECT c.collectionID,
-                      c.collectionName,
-                      c.parentCollectionID,
-                      c.libraryID,
-                      c.key AS collectionKey,
-                      cp.collectionPath || ' / ' || c.collectionName AS collectionPath
-               FROM collections c
-               JOIN collection_paths cp ON cp.collectionID = c.parentCollectionID
-             )
-             SELECT collectionID,
-                    collectionName,
-                    parentCollectionID,
-                    libraryID,
-                    collectionKey,
-                    collectionPath
-             FROM collection_paths
-             WHERE lower(collectionPath) = ~A
-                OR lower(collectionName) = ~A
-             ORDER BY CASE WHEN lower(collectionPath) = ~A THEN 0 ELSE 1 END,
-                      length(collectionPath),
-                      collectionID;"
-            literal literal literal)))
-
-(defun zotero-collection-items-query-sql (collection-id)
-  (format nil
-          "WITH item_fields AS (
-             SELECT id.itemID,
-                    max(CASE WHEN f.fieldName = 'title' THEN v.value END) AS title,
-                    max(CASE WHEN f.fieldName = 'date' THEN v.value END) AS dateValue,
-                    max(CASE WHEN f.fieldName = 'DOI' THEN v.value END) AS doi,
-                    max(CASE WHEN f.fieldName = 'url' THEN v.value END) AS url,
-                    max(CASE WHEN f.fieldName = 'abstractNote' THEN v.value END) AS notes,
-                    max(CASE WHEN f.fieldName = 'publicationTitle' THEN v.value END) AS publicationTitle,
-                    max(CASE WHEN f.fieldName = 'bookTitle' THEN v.value END) AS bookTitle,
-                    max(CASE WHEN f.fieldName = 'proceedingsTitle' THEN v.value END) AS proceedingsTitle,
-                    max(CASE WHEN f.fieldName = 'websiteTitle' THEN v.value END) AS websiteTitle,
-                    max(CASE WHEN f.fieldName = 'blogTitle' THEN v.value END) AS blogTitle,
-                    max(CASE WHEN f.fieldName = 'publisher' THEN v.value END) AS publisher
-             FROM itemData id
-             JOIN itemDataValues v ON v.valueID = id.valueID
-             JOIN fields f ON f.fieldID = id.fieldID
-             GROUP BY id.itemID
-           )
-           SELECT i.itemID,
-                  i.key AS itemKey,
-                  t.typeName,
-                  f.title,
-                  f.dateValue,
-                  f.doi,
-                  f.url,
-                  f.notes,
-                  coalesce(f.publicationTitle,
-                           f.bookTitle,
-                           f.proceedingsTitle,
-                           f.websiteTitle,
-                           f.blogTitle,
-                           f.publisher) AS venue
-           FROM collectionItems ci
-           JOIN items i ON i.itemID = ci.itemID
-           JOIN itemTypes t ON t.itemTypeID = i.itemTypeID
-           LEFT JOIN item_fields f ON f.itemID = i.itemID
-           WHERE ci.collectionID = ~D
-             AND t.typeName NOT IN ('attachment', 'note')
-           ORDER BY lower(coalesce(f.title, '')), i.itemID;"
-          collection-id))
-
-(defun zotero-collection-authors-query-sql (collection-id)
-  (format nil
-          "SELECT ic.itemID,
-                  ic.orderIndex,
-                  ct.creatorType,
-                  c.firstName,
-                  c.lastName,
-                  c.fieldMode
-           FROM collectionItems ci
-           JOIN itemCreators ic ON ic.itemID = ci.itemID
-           JOIN creators c ON c.creatorID = ic.creatorID
-           JOIN creatorTypes ct ON ct.creatorTypeID = ic.creatorTypeID
-           WHERE ci.collectionID = ~D
-           ORDER BY ic.itemID, ic.orderIndex;"
-          collection-id))
-
-(defun zotero-collection-tags-query-sql (collection-id)
-  (format nil
-          "SELECT it.itemID,
-                  tg.name AS tagName
-           FROM collectionItems ci
-           JOIN itemTags it ON it.itemID = ci.itemID
-           JOIN tags tg ON tg.tagID = it.tagID
-           WHERE ci.collectionID = ~D
-           ORDER BY it.itemID, lower(tg.name);"
-          collection-id))
-
-(defun make-zotero-collection-hit (row)
-  (let ((path (gethash "collectionPath" row)))
-    (make-instance 'zotero-collection-hit
-                   :collection-id (gethash "collectionID" row)
-                   :collection-key (gethash "collectionKey" row)
-                   :collection-name (gethash "collectionName" row)
-                   :collection-path path
-                   :path-components (uiop:split-string path :separator " / ")
-                   :parent-collection-id (gethash "parentCollectionID" row)
-                   :library-id (gethash "libraryID" row)
-                   :raw-row row)))
-
-(defun lookup-zotero-collection (query-text &key (source (make-default-bibliography-source))
-                                            signal-error?)
-  (let* ((bridge (bibliography-source-bridge-of source))
-         (query (run-zotero-sqlite-query
-                 bridge
-                 "zotero-collection-lookup"
-                 (zotero-collection-query-sql query-text)))
-         (collections
-           (mapcar #'make-zotero-collection-hit
-                   (zotero-query-attempt-rows-of
-                    (zotero-query-selected-attempt-of query))))
-         (wrapped-query
-           (make-instance 'zotero-collection-query
-                          :bridge bridge
-                          :name "zotero-collection-lookup"
-                          :query-text query-text
-                          :sql (zotero-query-sql-of query)
-                          :attempts (zotero-query-attempts-of query)
-                          :selected-attempt (zotero-query-selected-attempt-of query)
-                          :matched-collections collections)))
-    (cond
-      ((null collections)
-       (when signal-error?
-         (error "No Zotero bibliography subcollection matched ~S." query-text))
-       (values nil wrapped-query))
-      ((and (> (length collections) 1)
-            (null (find query-text collections
-                        :key #'zotero-collection-path-of
-                        :test #'string-equal)))
-       (when signal-error?
-         (error "Ambiguous Zotero bibliography subcollection ~S (~D matches)."
-                query-text
-                (length collections)))
-       (values nil wrapped-query))
-      (t
-       (values (or (find query-text collections
-                         :key #'zotero-collection-path-of
-                         :test #'string-equal)
-                   (first collections))
-               wrapped-query)))))
-
-(defun author-name-from-row (row)
-  (let ((field-mode (gethash "fieldMode" row))
-        (first-name (gethash "firstName" row))
-        (last-name (gethash "lastName" row)))
-    (if (and field-mode (= field-mode 1))
-        (or last-name first-name "")
-        (collapse-whitespace
-         (format nil "~@[~A ~]~A"
-                 first-name
-                 (or last-name ""))))))
-
-(defun bibliography-entry-raw-text (item-row author-rows tag-rows collection-hit)
-  (with-output-to-string (stream)
-    (format stream "source-system: Zotero~%")
-    (format stream "collection-path: ~A~%" (zotero-collection-path-of collection-hit))
-    (format stream "item-id: ~A~%" (gethash "itemID" item-row))
-    (format stream "item-key: ~A~%" (gethash "itemKey" item-row))
-    (format stream "title: ~A~%" (or (gethash "title" item-row) ""))
-    (format stream "type: ~A~%" (or (gethash "typeName" item-row) ""))
-    (format stream "authors: ~{~A~^; ~}~%"
-            (mapcar #'author-name-from-row author-rows))
-    (format stream "date: ~A~%" (or (gethash "dateValue" item-row) ""))
-    (format stream "venue: ~A~%" (or (gethash "venue" item-row) ""))
-    (format stream "doi: ~A~%" (or (gethash "doi" item-row) ""))
-    (format stream "url: ~A~%" (or (gethash "url" item-row) ""))
-    (format stream "notes: ~A~%" (or (gethash "notes" item-row) ""))
-    (format stream "tags: ~{~A~^; ~}" (mapcar (lambda (row) (gethash "tagName" row)) tag-rows))))
-
-(defun make-bibliography-entry (item-row author-rows tag-rows collection-hit)
-  (make-instance 'bibliography-entry
-                 :source-system :zotero
-                 :collection-name (zotero-collection-name-of collection-hit)
-                 :collection-path (zotero-collection-path-of collection-hit)
-                 :collection-key (zotero-collection-key-of collection-hit)
-                 :item-id (gethash "itemID" item-row)
-                 :item-key (gethash "itemKey" item-row)
-                 :title (gethash "title" item-row)
-                 :authors (remove-if #'string-blank-p
-                                     (mapcar #'author-name-from-row author-rows))
-                 :year (parse-year-from-date-string (gethash "dateValue" item-row))
-                 :work-type (gethash "typeName" item-row)
-                 :venue (maybe-string (gethash "venue" item-row))
-                 :doi (maybe-string (gethash "doi" item-row))
-                 :url (maybe-string (gethash "url" item-row))
-                 :notes (maybe-string (gethash "notes" item-row))
-                 :tags (remove-if #'string-blank-p
-                                  (mapcar (lambda (row) (gethash "tagName" row))
-                                          tag-rows))
-                 :raw-source-text (bibliography-entry-raw-text
-                                   item-row author-rows tag-rows collection-hit)
-                 :raw-row item-row
-                 :author-rows author-rows
-                 :tag-rows tag-rows))
 
 (defun extract-ngram-signals-from-text (text &key entry field source-kind)
   (let* ((tokens (remove-if (lambda (token)
@@ -1455,12 +1276,12 @@
                                                          aliases)
                                         :aliases aliases
                                         :entry entry
-                                        :detail "Derived by simple n-gram extraction from Zotero metadata text.")
+                                        :detail "Derived by simple n-gram extraction from bibliography metadata text.")
                          signals))))
     (nreverse signals)))
 
 (defun collection-name-signals (collection-hit)
-  (let* ((name (zotero-collection-name-of collection-hit))
+  (let* ((name (bibliography-collection-name-of collection-hit))
          (display-title (sentence-case-term name))
          (aliases (phrase-aliases display-title)))
     (list (make-instance 'candidate-topic-signal
@@ -1470,7 +1291,7 @@
                          :display-title display-title
                          :normalized-key (candidate-topic-key display-title aliases)
                          :aliases aliases
-                         :detail "Collection/subcollection provenance cue from Zotero."))))
+                         :detail "Collection/subcollection provenance cue from the bibliography source."))))
 
 (defun entry-tag-signals (entry)
   (loop for tag in (bibliography-entry-tags-of entry)
@@ -1484,7 +1305,7 @@
                                :normalized-key (candidate-topic-key display-title aliases)
                                :aliases aliases
                                :entry entry
-                               :detail "Explicit Zotero tag on the bibliography item.")))
+                               :detail "Explicit source tag on the bibliography item.")))
 
 (defun entry-title-signals (entry)
   (extract-ngram-signals-from-text (bibliography-entry-title-of entry)
@@ -1692,7 +1513,7 @@
            :target-topic-title nil
            :target-page-title default-plan-page
            :decision-notes
-           (list "Only the Zotero collection/subcollection name supports this candidate so far; keep it as editorial continuity-shell evidence instead of forcing a topic.")))
+           (list "Only the source collection/subcollection name supports this candidate so far; keep it as editorial continuity-shell evidence instead of forcing a topic.")))
          ((arrangement-only-candidate-p candidate all-candidates)
           (let ((broader (or (find (first (candidate-topic-broader-hints-of candidate))
                                    all-candidates
@@ -1715,9 +1536,12 @@
            :target-topic-title (candidate-topic-title-of candidate)
            :target-page-title (candidate-topic-title-of candidate)
            :decision-notes
-           (list (format nil "New topic/page candidate supported by ~D bibliography entries from Zotero collection ~A."
+           (list (format nil "New topic/page candidate supported by ~D bibliography entries from ~A collection ~A."
                          (candidate-topic-support-count-of candidate)
-                         (zotero-collection-path-of
+                         (string-downcase
+                          (symbol-name
+                           (bibliography-subcollection-source-system-of subcollection)))
+                         (bibliography-collection-path-of
                           (bibliography-subcollection-collection-hit-of subcollection)))))))))))
 
 (defun bibliography-topic-id-from-title (title)
@@ -1737,7 +1561,7 @@
          (references '("Coachmark bibliography authoring plan"
                        "Bibliography subcollections in HyperDoc"))
          (summary
-           (format nil "Proposed topic scaffold derived from Zotero bibliography evidence for ~A; tighten after editorial review."
+           (format nil "Proposed topic scaffold derived from bibliography evidence for ~A; tighten after editorial review."
                    title)))
     (format nil "(defun ~A ()~%  (make-topic~%   :id ~S~%   :title ~S~%   :summary ~S~%   :references '~S))~%"
             (bibliography-topic-function-name-from-title title)
@@ -1750,9 +1574,9 @@
   (let* ((title (authoring-decision-target-page-title-of decision))
          (subcollection (hyperdoc-authoring-plan-source-subcollection-of plan))
          (collection-path
-           (zotero-collection-path-of
+           (bibliography-collection-path-of
             (bibliography-subcollection-collection-hit-of subcollection))))
-    (format nil "<h1>~A</h1>~%~%<in-package>hyperdoc</in-package>~%~%<p>~%  This page was scaffolded from the inspectable authoring plan for the Zotero bibliography subcollection <tt>~A</tt>. Replace this scaffold with durable HyperDoc prose after reviewing the supporting bibliography entries and candidate-topic comparison report.~%</p>~%~%<h2>Inspectable objects</h2>~%~%<ul>~%  <li><a hyperbook=\"topics\" page=\"~A\"><tt>~A</tt></a></li>~%  <li><a expr=\"(coachmark-bibliography-authoring-plan)\"><tt>(coachmark-bibliography-authoring-plan)</tt></a></li>~%</ul>~%"
+    (format nil "<h1>~A</h1>~%~%<in-package>hyperdoc</in-package>~%~%<p>~%  This page was scaffolded from the inspectable authoring plan for the bibliography subcollection <tt>~A</tt>. Replace this scaffold with durable HyperDoc prose after reviewing the supporting bibliography entries and candidate-topic comparison report.~%</p>~%~%<h2>Inspectable objects</h2>~%~%<ul>~%  <li><a hyperbook=\"topics\" page=\"~A\"><tt>~A</tt></a></li>~%  <li><a expr=\"(coachmark-bibliography-authoring-plan)\"><tt>(coachmark-bibliography-authoring-plan)</tt></a></li>~%</ul>~%"
             title
             collection-path
             title
@@ -1773,8 +1597,11 @@
       (format stream "Entry-derived evidence: ~{~A~^, ~}~%"
               (mapcar #'candidate-topic-signal-display-title-of
                       (candidate-topic-entry-signals-of candidate)))
-      (format stream "Supporting entries from Zotero collection ~A:~%  ~{~A~^~%  ~}~%"
-              (zotero-collection-path-of
+      (format stream "Supporting entries from ~A collection ~A:~%  ~{~A~^~%  ~}~%"
+              (string-downcase
+               (symbol-name
+                (bibliography-subcollection-source-system-of subcollection)))
+              (bibliography-collection-path-of
                (bibliography-subcollection-collection-hit-of subcollection))
               (mapcar #'bibliography-entry-title-of
                       (candidate-topic-source-entries-of candidate)))
@@ -1811,8 +1638,12 @@
 
 (defun bibliography-plan-summary-preview (plan)
   (with-output-to-string (stream)
-    (format stream "Bibliography authoring plan for Zotero collection ~A~%~%"
-            (zotero-collection-path-of
+    (format stream "Bibliography authoring plan for ~A collection ~A~%~%"
+            (string-downcase
+             (symbol-name
+              (bibliography-subcollection-source-system-of
+               (hyperdoc-authoring-plan-source-subcollection-of plan))))
+            (bibliography-collection-path-of
              (bibliography-subcollection-collection-hit-of
               (hyperdoc-authoring-plan-source-subcollection-of plan))))
     (dolist (decision (hyperdoc-authoring-plan-authoring-decisions-of plan))
@@ -1916,84 +1747,33 @@
           (bibliography-materialization-entries plan))
     plan))
 
-(defun load-zotero-bibliography-subcollection
-    (query-text &key (source (make-default-bibliography-source)) signal-error? output-root)
-  (multiple-value-bind (collection-hit collection-query)
-      (lookup-zotero-collection query-text :source source :signal-error? signal-error?)
-    (when collection-hit
-      (let* ((bridge (bibliography-source-bridge-of source))
-             (item-query
-               (run-zotero-sqlite-query
-                bridge
-                "zotero-bibliography-items"
-                (zotero-collection-items-query-sql
-                 (zotero-collection-id-of collection-hit))))
-             (author-query
-               (run-zotero-sqlite-query
-                bridge
-                "zotero-bibliography-authors"
-                (zotero-collection-authors-query-sql
-                 (zotero-collection-id-of collection-hit))))
-             (tag-query
-               (run-zotero-sqlite-query
-                bridge
-                "zotero-bibliography-tags"
-                (zotero-collection-tags-query-sql
-                 (zotero-collection-id-of collection-hit))))
-             (author-rows (zotero-query-attempt-rows-of
-                           (zotero-query-selected-attempt-of author-query)))
-             (tag-rows (zotero-query-attempt-rows-of
-                        (zotero-query-selected-attempt-of tag-query)))
-             (authors-by-item (group-rows-by-key author-rows "itemID"))
-             (tags-by-item (group-rows-by-key tag-rows "itemID"))
-             (entries
-               (loop for row in (zotero-query-attempt-rows-of
-                                 (zotero-query-selected-attempt-of item-query))
-                     collect (make-bibliography-entry
-                              row
-                              (gethash (gethash "itemID" row) authors-by-item)
-                              (gethash (gethash "itemID" row) tags-by-item)
-                              collection-hit)))
-             (subcollection
-               (make-instance 'bibliography-subcollection
-                              :hyperbook (ensure-bibliography-subcollections-hyperbook
-                                          :source source)
-                              :id query-text
-                              :source source
-                              :source-system :zotero
-                              :query-text query-text
-                              :collection-hit collection-hit
-                              :collection-query collection-query
-                              :entry-query item-query
-                              :author-query author-query
-                              :tag-query tag-query
-                              :entries entries)))
-        (let ((plan (build-hyperdoc-authoring-plan subcollection
-                                                   :output-root output-root)))
-          (setf (bibliography-subcollection-candidate-topics-of subcollection)
-                (hyperdoc-authoring-plan-candidate-topics-of plan)
-                (bibliography-subcollection-authoring-plan-of subcollection)
-                plan)
-          subcollection)))))
-
 (defun plan-bibliography-authoring
     (subcollection-or-name &key (source (make-default-bibliography-source))
        signal-error? output-root)
   (let ((subcollection
-          (etypecase subcollection-or-name
+          (typecase subcollection-or-name
+            (zotero-backend-unavailable subcollection-or-name)
             (string
-             (load-zotero-bibliography-subcollection
-              subcollection-or-name
-              :source source
-              :signal-error? signal-error?
-              :output-root output-root))
+             (cond
+               ((zotero-backend-unavailable-p source)
+                source)
+               (t
+                (load-bibliography-subcollection-using-source
+                 source
+                 subcollection-or-name
+                 :signal-error? signal-error?
+                 :output-root output-root))))
             (bibliography-subcollection
-             subcollection-or-name))))
-    (and subcollection
-         (or (bibliography-subcollection-authoring-plan-of subcollection)
-             (setf (bibliography-subcollection-authoring-plan-of subcollection)
-                   (build-hyperdoc-authoring-plan subcollection
-                                                 :output-root output-root))))))
+             subcollection-or-name)
+            (otherwise
+             (error "Unsupported bibliography authoring target ~S." subcollection-or-name)))))
+    (if (zotero-backend-unavailable-p subcollection)
+        subcollection
+        (and subcollection
+             (or (bibliography-subcollection-authoring-plan-of subcollection)
+                 (setf (bibliography-subcollection-authoring-plan-of subcollection)
+                       (build-hyperdoc-authoring-plan subcollection
+                                                     :output-root output-root)))))))
 
 (defun plan-materialization-write! (entry)
   (let ((path (bibliography-materialization-entry-target-path-of entry)))
@@ -2026,31 +1806,37 @@
         (lookup (or page-id (hb:main-page-id-of book))))
     (or (gethash lookup cache)
         (let ((subcollection
-                (load-zotero-bibliography-subcollection
+                (load-bibliography-subcollection-using-source
+                 source
                  lookup
-                 :source source
                  :signal-error? signal-error?)))
-          (when subcollection
+          (cond
+            ((zotero-backend-unavailable-p subcollection)
+             subcollection)
+            (subcollection
             (setf (gethash lookup cache) subcollection)
-            (let ((path (zotero-collection-path-of
+            (let ((path (bibliography-collection-path-of
                          (bibliography-subcollection-collection-hit-of
                           subcollection))))
               (setf (gethash path cache) subcollection
-                    (gethash (zotero-collection-name-of
+                    (gethash (bibliography-collection-name-of
                               (bibliography-subcollection-collection-hit-of
                                subcollection))
                              cache)
                     subcollection))
-            subcollection)))))
+             subcollection)
+            (t nil))))))
 
 (defun coachmark-bibliography-subcollection (&key (source (make-default-bibliography-source))
                                                signal-error?
                                                output-root)
-  (load-zotero-bibliography-subcollection
-   "coachmark"
-   :source source
-   :signal-error? signal-error?
-   :output-root output-root))
+  (if (zotero-backend-unavailable-p source)
+      source
+      (load-bibliography-subcollection-using-source
+       source
+       "coachmark"
+       :signal-error? signal-error?
+       :output-root output-root)))
 
 (defun coachmark-bibliography-authoring-plan (&key (source (make-default-bibliography-source))
                                                 signal-error?

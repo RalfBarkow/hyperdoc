@@ -32,7 +32,7 @@
                              (:file "article-allegation-slice")
                              (:file "fedwiki-materialization")
                              (:file "tools")
-                             (:file "zotero-bridge")
+                             (:file "zotero-support")
                              (:file "bibliography-subcollections")
                              (:file "static-route-observability")
                              (:file "operational-targets")
@@ -40,6 +40,20 @@
                              (:file "git-relations")
                              (:file "git-commit-equivalence")
                              (:file "hyperdoc")))))
+
+(defsystem #:hyperdoc/zotero
+  :description "Optional Zotero backend for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "zotero-bridge")
+                             (:file "bibliography-zotero")))))
 
 (defsystem #:hyperdoc/examples
   :description "Portable example content for HyperDoc"
@@ -104,13 +118,27 @@
                 :serial t
                 :components ((:file "package")
                              (:file "dmx-topics")
-                             (:file "zotero-bridge")
                              (:file "bibliography-subcollections")
                              (:file "fedwiki-materialization")
                              (:file "playground-debug")
                              (:file "web-debugger")
                              (:file "playground-eval")
                              (:file "inspector")))))
+
+(defsystem #:hyperdoc/inspector/zotero
+  :description "Zotero-backed inspector views for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc/inspector
+               #:hyperdoc/zotero)
+  :components ((:module "hyperdoc-inspector"
+                :serial t
+                :components ((:file "zotero-bridge")
+                             (:file "bibliography-zotero")))))
 
 (defsystem #:hyperdoc/explorer
   :description "Explorer for HyperDocs"
@@ -181,7 +209,10 @@
                #:hyperdoc/examples
                #:hyperdoc/explorer
                #:hyperdoc/explorer/examples/ops
-               #:html-inspector-views/standard))
+               #:html-inspector-views/standard)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "server-runtime")))))
 
 (defsystem #:hyperdoc/tests
   :description "Smoke tests for HyperDoc"
@@ -194,8 +225,7 @@
   :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
-                             (:file "zotero-bridge-smoke")
-                             (:file "bibliography-subcollections-smoke")
+                             (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")
                              (:file "page-lookup-issues-smoke")
@@ -208,3 +238,21 @@
              (declare (ignore op c))
              (uiop:symbol-call :hyperdoc/tests
                                :run-hyperdoc-tests)))
+
+(defsystem #:hyperdoc/tests/zotero
+  :description "Zotero-backed smoke tests for HyperDoc"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:hyperdoc/tests
+               #:hyperdoc/inspector/zotero)
+  :components ((:module "tests"
+                :serial t
+                :components ((:file "zotero-bridge-smoke")
+                             (:file "bibliography-subcollections-smoke")
+                             (:file "zotero-suite"))))
+  :perform (test-op (op c)
+             (declare (ignore op c))
+             (uiop:symbol-call :hyperdoc/tests
+                               :run-hyperdoc-zotero-tests)))

@@ -53,19 +53,19 @@
      :name "RUN-ZOTERO-BRIDGE-SMOKE-TESTS"
      :id "test:hyperdoc/tests:run-zotero-bridge-smoke-tests"
      :title "Zotero bridge smoke tests"
-     :system "hyperdoc"
+     :system "hyperdoc/tests/zotero"
      :tags (:kind :smoke :suite "zotero-bridge"))
     (:package "HYPERDOC/TESTS"
      :name "RUN-ZOTERO-BRIDGE-LIVE-TESTS"
      :id "test:hyperdoc/tests:run-zotero-bridge-live-tests"
      :title "Zotero bridge live tests"
-     :system "hyperdoc"
+     :system "hyperdoc/tests/zotero"
      :tags (:kind :live :suite "zotero-bridge"))
     (:package "HYPERDOC/TESTS"
      :name "RUN-BIBLIOGRAPHY-SUBCOLLECTIONS-SMOKE-TESTS"
      :id "test:hyperdoc/tests:run-bibliography-subcollections-smoke-tests"
      :title "Bibliography subcollections smoke tests"
-     :system "hyperdoc"
+     :system "hyperdoc/tests/zotero"
      :tags (:kind :smoke :suite "bibliography-subcollections"))
     (:package "HYPERDOC/TESTS"
      :name "RUN-FEDWIKI-SITE-DMX-IMPORT-TESTS"

@@ -7,7 +7,9 @@
   <i>Mind and Mechanism</i>, look it up in a local read-only Zotero library,
   inspect the matched bibliographic item and attachment, then cross-check the
   same result through direct item-id lookup before resolving the local PDF path
-  as an explicit report object.
+  as an explicit report object. The underlying bridge is now optional; if
+  <tt>HYPERDOC_ENABLE_ZOTERO=0</tt>, these entry points open an explicit
+  unavailable-by-configuration object instead of a fake live Zotero surface.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -34,6 +36,12 @@
   <li>Open <a expr="(mind-and-mechanism-zotero-attachment-hit)"><tt>(mind-and-mechanism-zotero-attachment-hit)</tt></a> and <a expr="(mind-and-mechanism-zotero-path-resolution-report)"><tt>(mind-and-mechanism-zotero-path-resolution-report)</tt></a>.</li>
   <li>Open <a expr="(mind-and-mechanism-zotero-resolution-report)"><tt>(mind-and-mechanism-zotero-resolution-report)</tt></a> for the user-facing title-to-PDF report.</li>
 </ol>
+
+<p>
+  Local/dev environments can keep Zotero enabled. On dreyeck, the same page is
+  expected to degrade explicitly when the optional Zotero backend is disabled
+  by configuration.
+</p>
 
 <h2>Worked local example</h2>
 
@@ -78,6 +86,7 @@
 </p>
 
 <lisp-code>
+(asdf:load-system :hyperdoc/tests/zotero)
 (hyperdoc/tests:run-zotero-bridge-smoke-tests)
 </lisp-code>
 

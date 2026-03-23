@@ -7,7 +7,9 @@
   Zotero library. The bridge takes a Zotero database path, a Zotero storage
   root, and optional note roots, queries bibliographic items through
   <tt>sqlite3</tt>, discovers child attachments, and returns typed inspectable
-  objects rather than opaque path strings.
+  objects rather than opaque path strings. The implementation now lives in the
+  optional <tt>:hyperdoc/zotero</tt> system so core HyperDoc can load without
+  Zotero or <tt>sqlite3</tt>.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -25,11 +27,15 @@
 <h2>Configuration boundary</h2>
 
 <p>
-  The default constructor first respects environment overrides, then falls back
-  to the conventional local Zotero locations under <tt>~/Zotero/</tt>.
+  The default constructor first respects the explicit runtime toggle
+  <tt>HYPERDOC_ENABLE_ZOTERO</tt>, then reads the usual Zotero path overrides.
+  If Zotero support is disabled, the inspectable entry points on this page open
+  an explicit unavailable-by-configuration object instead of pretending the
+  bridge is live.
 </p>
 
 <ul>
+  <li><tt>HYPERDOC_ENABLE_ZOTERO</tt> with <tt>1</tt>/<tt>0</tt> to enable or disable the optional Zotero backend</li>
   <li><tt>HYPERDOC_ZOTERO_DB_PATH</tt></li>
   <li><tt>HYPERDOC_ZOTERO_STORAGE_ROOT</tt></li>
   <li><tt>HYPERDOC_ZETTELKASTEN_ROOTS</tt> as a colon-separated list</li>
@@ -40,6 +46,12 @@
 <p>
   The bridge is intentionally read-only. It does not sync Zotero, edit items,
   or import a whole note system into HyperDoc.
+</p>
+
+<p>
+  On dreyeck, Zotero support can be disabled by configuration while the rest of
+  HyperDoc stays loadable. Local/dev runtimes can still enable the bridge and
+  use the same inspectable objects.
 </p>
 
 <h2>Supported entry points</h2>
