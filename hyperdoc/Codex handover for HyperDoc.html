@@ -5,8 +5,9 @@
 <p>
   This page is the single canonical durable guidance for handing a HyperDoc
   slice to Codex. Keep repository-wide operating rules in <tt>AGENTS.md</tt>,
-  and use the task prompt only for the current slice contract and end-state
-  inventory target.
+  treat <tt>repomix-output-hyperdoc.md</tt> as the authoritative packed
+  snapshot when it is provided, and use the task prompt only for the current
+  slice contract and end-state inventory target.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -38,10 +39,22 @@
 <p>
   <tt>AGENTS.md</tt> holds durable repo rules such as execution-environment
   policy, validation triage, documentation-surface distinctions, and
-  return-shape conventions. The prompt should stay slice-local: the current
-  task, the file boundary, the done-when state, the validation command, any
-  inventory target, and the completion contract.
+  return-shape conventions. <tt>repomix-output-hyperdoc.md</tt> is the
+  authoritative read-only packed repo snapshot when present. The prompt should
+  stay slice-local: the current task, the file boundary, the done-when state,
+  the validation command, any inventory target, and the completion contract.
 </p>
+
+<h2>Repo truths to preserve</h2>
+
+<ul>
+  <li>HyperBook is the abstract page-and-link substrate; HyperDoc is the documentation-oriented realization layered on top of it.</li>
+  <li>Keep authored pages, stable topic objects, and live runtime objects distinct unless the slice explicitly bridges them.</li>
+  <li>Keep core <tt>:hyperdoc</tt> loadable without Zotero; optional Zotero behavior belongs in <tt>:hyperdoc/zotero</tt> and <tt>:hyperdoc/inspector/zotero</tt>.</li>
+  <li><tt>HYPERDOC_ENABLE_ZOTERO</tt> is the authoritative runtime seam for Zotero; disabled mode should surface explicit unavailable objects rather than crashing or pretending live behavior exists.</li>
+  <li>Bibliography authoring is review-first: live/import objects and generated plans may propose materialization, but they must not silently rewrite authored pages or <tt>topics.lisp</tt>.</li>
+  <li>Keep deployment-aware seams explicit around public origin, reverse-proxy domain, data directory, git repository root, and optional Zotero enablement.</li>
+</ul>
 
 <h2>Stable handover rules</h2>
 
@@ -50,6 +63,8 @@
   <li>Do not send placeholders when the task is already concrete enough to fill in.</li>
   <li>Prefer an explicit file boundary over a broad subsystem request.</li>
   <li>Keep <tt>AGENTS.md</tt> authoritative for repo-wide execution, validation, and environment-triage rules; do not restate long host-vs-repo-shell guidance in slice prompts.</li>
+  <li>When present, read <tt>repomix-output-hyperdoc.md</tt> first and treat it as the authoritative packed snapshot of the repo.</li>
+  <li>Prefer named validation surfaces and smoke checks over ad hoc success claims.</li>
   <li>Prefer <tt>nix develop --command git ...</tt> when a prompt asks Codex to show repo diff or status.</li>
   <li>Prefer fewer authored HyperDoc guidance files over preserving prompt iteration history as durable pages.</li>
   <li>Keep adjacent documentation edits tightly coupled to the slice that justified them.</li>
@@ -70,10 +85,32 @@
 
 <h2>Pasteable default implementation-slice prompt</h2>
 
-<pre>Read AGENTS.md and repomix-output-hyperdoc.md first. Then execute only the slice below.
+<pre>Read AGENTS.md and repomix-output-hyperdoc.md first. Treat repomix-output-hyperdoc.md as the authoritative packed snapshot of the repo.
+
+Then work from these repo truths:
+- HyperBook is the abstract page-and-link substrate; HyperDoc is the documentation-oriented realization layered on top of it.
+- Keep authored pages, stable topic objects, and live runtime objects distinct unless the slice explicitly bridges them.
+- Zotero is optional. Preserve the boundary where core :hyperdoc stays loadable without Zotero, and the optional backend lives in :hyperdoc/zotero and :hyperdoc/inspector/zotero.
+- HYPERDOC_ENABLE_ZOTERO is the authoritative runtime seam for Zotero. Disabled mode must degrade explicitly to unavailable objects instead of crashing or faking live behavior.
+- Bibliography authoring is review-first: live/import objects and generated authoring plans may propose materialization, but they must not silently rewrite authored pages or topics.lisp.
+- Prefer explicit validation surfaces over ad hoc claims.
+- Keep deployment-aware seams intact, especially Nix/runtime wiring around public origin, reverse proxy domain, data dir, git repository root, and optional Zotero enablement.
+
+Then execute only the slice below.
 
 Task
 - [one concrete implementation or documentation change]
+
+Goal
+- Make the smallest coherent change that fits the current architecture.
+- Preserve existing boundary decisions unless the task explicitly asks to change one.
+
+Architecture constraints
+- Do not collapse HyperBook and HyperDoc into one concept in code or docs.
+- Do not treat a topic object, an authored page, and a runtime object as interchangeable.
+- Do not reintroduce a hard Zotero dependency into core systems.
+- Do not make generated outputs authoritative by accident.
+- Do not create extra Codex-guidance pages beyond the canonical durable page and its minimal continuity shell.
 
 In scope
 - [exact files]
@@ -95,6 +132,13 @@ Docs coupling
 - Update HyperDoc pages only when they directly document this slice.
 - Keep any adjacent documentation edit directly coupled to the task that justified it.
 
+Implementation rules
+- Prefer a narrow file boundary over a broad subsystem rewrite.
+- Keep adjacent documentation edits tightly coupled to the slice that justified them.
+- If the change touches generated authoring artifacts, keep provenance, editorial inference, and final materialization separate.
+- If the change touches runtime/deployment seams, preserve explicit environment-variable or Nix-option wiring.
+- If the change touches validation, wire it into existing named checks where appropriate instead of inventing a parallel surface.
+
 Validation
 - Authoritative repo-shell validation:
   nix develop --command [exact command]
@@ -105,8 +149,14 @@ Return format
 - Surface answer
 - Artifact answer
 - Exact files changed
+- Exact validation run and outcome
 - Conventional commit message
-- Remaining risks or unresolved edges</pre>
+- Remaining risks or unresolved edges
+
+Before finishing, verify that the result still matches the current project
+center of gravity: HyperDoc is a validated, deployment-aware, inspectable
+documentation runtime with optional backends, generated authoring workflows,
+and explicit distinctions between pages, topics, and runtime objects.</pre>
 
 <h2>History handling</h2>
 
