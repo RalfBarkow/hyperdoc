@@ -24,6 +24,14 @@
   (assert-true (hyperbook:find-page hyperdoc::*hyperdoc* title :signal-error? t)
                (format nil "Missing HyperDoc page ~A" title)))
 
+(defun assert-page-source-contains (relative-path substring)
+  (let* ((pathname (asdf:system-relative-pathname :hyperdoc relative-path))
+         (contents (uiop:read-file-string pathname)))
+    (assert-true (search substring contents :test #'char=)
+                 (format nil "Expected ~A to contain ~S"
+                         relative-path
+                         substring))))
+
 (defun assert-hyperdoc-page-absent (title)
   (ensure-hyperdoc-page-lookup-loaded)
   (assert-true (null (hyperbook:find-page hyperdoc::*hyperdoc* title))
@@ -325,6 +333,14 @@
                    "Symbols and semantics in Mind and Mechanism"
                    "Computationalism in Mind and Mechanism"))
     (assert-hyperdoc-page-present title))
+  (dolist (relative-path '("hyperdoc/Mind and Mechanism.html"
+                           "hyperdoc/Mind and Mechanism compatibility with HyperDoc.html"
+                           "hyperdoc/Symbols and semantics in Mind and Mechanism.html"
+                           "hyperdoc/Computationalism in Mind and Mechanism.html"))
+    (assert-page-source-contains relative-path
+                                 "(mind-and-mechanism-zotero-resolution-report)"))
+  (assert-page-source-contains "hyperdoc/Resolve a local PDF from Zotero in HyperDoc.html"
+                               "machine-local evidence")
   (assert-true (null (hyperbook:find-page hyperdoc::*topics* "Mind and Mechanism"))
                "Mind and Mechanism should remain a HyperDoc page-level bridge, not a topic"))
 
