@@ -51,6 +51,7 @@ from pathlib import Path
 boot = Path("static-files/boot.html")
 p = Path("static-files/js/boot.js")
 s = p.read_text()
+empty_js = "'" + "'"
 boot_html = """<!doctype html>
 <html lang="en">
 <head>
@@ -89,6 +90,81 @@ function Guard_empty_selector() {
         return original.call(this, msg);
     }
 }
+
+function Clog_set_connection_state(state) {
+    clog['connection_state'] = state;
+    if (document.documentElement) {
+        document.documentElement.setAttribute('data-clog-connection-state', state);
+    }
+    if (document.body) {
+        document.body.setAttribute('data-clog-connection-state', state);
+    }
+}
+
+function Clog_disconnected_message(detail) {
+    if (detail && detail.length > 0 && detail !== 'user') {
+        return 'Disconnected from HyperDoc: ' + detail + '. Reload to reconnect.';
+    }
+    return 'Disconnected from HyperDoc. Reload to reconnect.';
+}
+
+function Clog_show_disconnected_state(detail) {
+    var message = Clog_disconnected_message(detail);
+    clog['disconnected_message'] = message;
+    Clog_set_connection_state('disconnected');
+    if (typeof clog['html_on_close'] === 'string' && clog['html_on_close'] !== "") {
+        return message;
+    }
+    if (!document.body) {
+        return message;
+    }
+    var banner = document.getElementById('clog-disconnected-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'clog-disconnected-banner';
+        banner.setAttribute('role', 'status');
+        banner.setAttribute('aria-live', 'polite');
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:8px 12px;background:#7a0018;color:#fff;font:14px/1.4 sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25)';
+        document.body.appendChild(banner);
+    }
+    banner.textContent = message;
+    return message;
+}
+
+function Clog_clear_disconnected_state() {
+    clog['disconnected_message'] = "";
+    Clog_set_connection_state('connected');
+    var banner = document.getElementById('clog-disconnected-banner');
+    if (banner) {
+        banner.remove();
+    }
+}
+
+function Clog_send(payload, options) {
+    if (ws != null && ws.readyState == 1) {
+        ws.send(payload);
+        return true;
+    }
+    var context = options && options.context ? ' (' + options.context + ')' : "";
+    var message = Clog_show_disconnected_state(options && options.reason ? options.reason : null);
+    console.warn(message + context);
+    return false;
+}
+
+function Clog_make_disconnected_socket(detail) {
+    return {
+        readyState: 3,
+        send: function (payload) {
+            return Clog_send(payload, {
+                reason: detail,
+                context: 'disconnected-session'
+            });
+        },
+        close: function () {
+            return false;
+        }
+    };
+}
 """
 
 original_error = """        } catch (e) {
@@ -121,6 +197,89 @@ replaced_ready = """$( document ).ready(function() {
 });
 """
 
+original_ping = """function Ping_ws() {
+    if (ws.readyState == 1) {
+        ws.send ('0');
+    }
+}
+"""
+
+replaced_ping = """function Ping_ws() {
+    if (ws != null && ws.readyState == 1) {
+        ws.send ('0');
+    }
+}
+"""
+
+original_shutdown = """function Shutdown_ws(event) {
+    if (ws != null) {
+\tws.onerror = null;
+\tws.onclose = null;
+\tws.close ();
+\tws = null;
+    }
+    clearInterval (pingerid);
+    if (clog['html_on_close'] != __EMPTY_JS__) {
+        $(document.body).html(clog['html_on_close']);
+    }
+}
+""".replace("__EMPTY_JS__", empty_js)
+
+replaced_shutdown = """function Shutdown_ws(event) {
+    if (ws != null) {
+\tws.onerror = null;
+\tws.onclose = null;
+\tws.close ();
+    }
+    ws = Clog_make_disconnected_socket(event && event.reason ? event.reason : null);
+    clearInterval (pingerid);
+    Clog_show_disconnected_state(event && event.reason ? event.reason : null);
+    if (typeof clog['html_on_close'] === 'string' && clog['html_on_close'] !== "") {
+        $(document.body).html(clog['html_on_close']);
+    }
+}
+"""
+
+original_open = """    if (ws != null) {
+\tws.onopen = function (event) {
+            console.log ('connection successful');
+            Setup_ws();
+\t}
+\tpingerid = setInterval (function () {Ping_ws ();}, 10000);
+    } else {
+\tdocument.writeln ('If you are seeing this your browser or your connection to the internet is blocking websockets.');
+    }
+}
+"""
+
+replaced_open = """    Clog_set_connection_state('connecting');
+    if (ws != null) {
+\tws.onopen = function (event) {
+            console.log ('connection successful');
+            Clog_clear_disconnected_state();
+            Setup_ws();
+\t}
+\tpingerid = setInterval (function () {Ping_ws ();}, 10000);
+    } else {
+\tdocument.writeln ('If you are seeing this your browser or your connection to the internet is blocking websockets.');
+    }
+}
+"""
+
+original_reconnect_open = """        ws.onopen = function (event) {
+            console.log ('reconnect successful');
+            Setup_ws();
+        }
+"""
+
+replaced_reconnect_open = """        ws.onopen = function (event) {
+            console.log ('reconnect successful');
+            Clog_clear_disconnected_state();
+            Setup_ws();
+        }
+"""
+
+
 if "function Guard_empty_selector()" not in s:
     if s.count(original_debug) != 1:
         raise SystemExit("Expected debug block exactly once")
@@ -135,6 +294,26 @@ if "Guard_empty_selector();" not in s:
     if s.count(original_ready) != 1:
         raise SystemExit("Expected document ready block exactly once")
     s = s.replace(original_ready, replaced_ready, 1)
+
+if "function Ping_ws() {\n    if (ws != null && ws.readyState == 1)" not in s:
+    if s.count(original_ping) != 1:
+        raise SystemExit("Expected ping block exactly once")
+    s = s.replace(original_ping, replaced_ping, 1)
+
+if "Clog_show_disconnected_state(event && event.reason ? event.reason : null);" not in s:
+    if s.count(original_shutdown) != 1:
+        raise SystemExit("Expected shutdown block exactly once")
+    s = s.replace(original_shutdown, replaced_shutdown, 1)
+
+if "Clog_set_connection_state('connecting');" not in s:
+    if s.count(original_open) != 1:
+        raise SystemExit("Expected open block exactly once")
+    s = s.replace(original_open, replaced_open, 1)
+
+if "console.log ('reconnect successful');\n            Clog_clear_disconnected_state();" not in s:
+    if s.count(original_reconnect_open) != 1:
+        raise SystemExit("Expected reconnect-open block exactly once")
+    s = s.replace(original_reconnect_open, replaced_reconnect_open, 1)
 
 boot.write_text(boot_html)
 p.write_text(s)
