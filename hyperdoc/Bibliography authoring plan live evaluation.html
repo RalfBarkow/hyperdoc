@@ -11,7 +11,7 @@
 
 <p>
   The current authoritative live Playwright result for this page is
-  <b>1 passed, 1 failed, 1 did not run in Chromium</b>.
+  <b>1 failed, 2 did not run in Chromium</b>.
   Each case keeps its pane-open budget explicit and
   records pane-open timing as test artifacts instead of treating slower
   collections as anecdotal.
@@ -38,9 +38,9 @@
 <h2>Current live budgets</h2>
 
 <ul>
-  <li><b>HTML Rewriting</b>: <tt>60_000ms</tt> pane-open budget, passing.</li>
-  <li><b>Topological Intelligence</b>: <tt>45_000ms</tt> pane-open budget, failing in the latest fresh rerun before pane-open timing was even reached, at the initial <tt>Main page</tt> tab-detection boundary inside <tt>openHyperDoc</tt>.</li>
-  <li><b>Plastics Packaging</b>: <tt>60_000ms</tt> pane-open budget, not reached in that same serial rerun because Playwright stopped after the earlier <tt>Topological Intelligence</tt> failure.</li>
+  <li><b>HTML Rewriting</b>: configured <tt>60_000ms</tt> pane-open budget, but the latest authoritative rerun failed earlier at the browser-entry boundary in <tt>gotoCatalog</tt> while waiting for the first <tt>.inspector-pane</tt>, so pane-open timing was not reached.</li>
+  <li><b>Topological Intelligence</b>: configured <tt>45_000ms</tt> pane-open budget, not run in that same serial rerun because Playwright stopped after the earlier <tt>HTML Rewriting</tt> failure.</li>
+  <li><b>Plastics Packaging</b>: configured <tt>60_000ms</tt> pane-open budget, not run in that same serial rerun because Playwright stopped after the earlier <tt>HTML Rewriting</tt> failure.</li>
 </ul>
 
 <p>
@@ -71,9 +71,9 @@
 </p>
 
 <ul>
-  <li><b>HTML Rewriting</b>: sparse extraction that currently stays as continuity-shell evidence.</li>
-  <li><b>Topological Intelligence</b>: mixed evidence where arrangement-only variants and a broader new-topic proposal compete. In the latest fresh rerun the failure happened earlier, at the browser-entry boundary in <tt>openHyperDoc</tt>, before the plan pane was even requested.</li>
-  <li><b>Plastics Packaging</b>: thin note or keyword cues that can still produce explicit new-topic/page proposals with named repo touches. It is also the heaviest current case because the pane-open path combines import cost, candidate extraction cost, inspector rendering cost, and longer pane-open UI polling cost, but the latest fresh serial rerun did not reach it.</li>
+  <li><b>HTML Rewriting</b>: sparse extraction that currently stays as continuity-shell evidence, but the latest authoritative rerun failed before the plan pane was even requested, at the browser-entry boundary in <tt>gotoCatalog</tt>.</li>
+  <li><b>Topological Intelligence</b>: mixed evidence where arrangement-only variants and a broader new-topic proposal compete. The latest authoritative rerun did not reach this case.</li>
+  <li><b>Plastics Packaging</b>: thin note or keyword cues that can still produce explicit new-topic/page proposals with named repo touches. It remains the heaviest configured case because the pane-open path combines import cost, candidate extraction cost, inspector rendering cost, and longer pane-open UI polling cost, but the latest authoritative rerun did not reach it.</li>
 </ul>
 
 <h2>Related pages</h2>

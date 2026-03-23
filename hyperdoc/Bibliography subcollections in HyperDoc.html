@@ -139,7 +139,7 @@
 
 <p>
   The current authoritative live Playwright status for these probes is
-  <b>1 passed, 1 failed, 1 did not run in Chromium</b>.
+  <b>1 failed, 2 did not run in Chromium</b>.
   The browser suite keeps pane-open timing explicit per case and
   records <tt>paneOpenMs</tt> plus <tt>paneOpenTimeoutMs</tt> attachments so
   slow collections become measurable rather than anecdotal.
@@ -161,20 +161,20 @@
   <tr>
     <td><tt>HTML Rewriting</tt></td>
     <td><tt>60_000ms</tt></td>
-    <td>passing</td>
-    <td>Explicit cold first-plan budget, with timing attached per case.</td>
+    <td>failing before pane-open timing</td>
+    <td>Configured cold first-plan budget, but the latest authoritative rerun failed earlier at the browser-entry boundary in <tt>gotoCatalog</tt> while waiting for the first <tt>.inspector-pane</tt>.</td>
   </tr>
   <tr>
     <td><tt>Topological Intelligence</tt></td>
     <td><tt>45_000ms</tt></td>
-    <td>failing</td>
-    <td>Explicit moderate-plan budget; the latest fresh rerun failed earlier than pane-open timing, at the initial <tt>Main page</tt> tab-detection boundary in <tt>openHyperDoc</tt>.</td>
+    <td>not run</td>
+    <td>Still configured with the explicit moderate-plan budget, but the latest authoritative serial rerun stopped after the earlier <tt>HTML Rewriting</tt> failure.</td>
   </tr>
   <tr>
     <td><tt>Plastics Packaging</tt></td>
     <td><tt>60_000ms</tt></td>
     <td>not run</td>
-    <td>Still configured with the explicit heavy-plan budget, but the latest fresh serial rerun stopped after the earlier <tt>Topological Intelligence</tt> failure and did not reach this case.</td>
+    <td>Still configured with the explicit heavy-plan budget, but the latest authoritative serial rerun stopped after the earlier <tt>HTML Rewriting</tt> failure and did not reach this case.</td>
   </tr>
 </table>
 
@@ -182,7 +182,10 @@
   <tt>Plastics Packaging</tt> is currently the heaviest live case because the
   pane-open path combines a broader import, more candidate extraction from thin
   title or note cues, more inspector rendering work in the decision surface,
-  and longer pane-open UI polling before the plan is fully visible.
+  and longer pane-open UI polling before the plan is fully visible. The latest
+  authoritative rerun did not reach that heavy-case boundary because it failed
+  earlier, at the browser-entry boundary before the first live case opened
+  HyperDoc.
 </p>
 
 <h2>Related pages</h2>
