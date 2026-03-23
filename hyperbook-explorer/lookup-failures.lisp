@@ -266,6 +266,23 @@
     :classification :lookup-failure
     :details (list :condition-type (type-of condition)))))
 
+(defun make-render-time-hyperbook-lookup-issue
+    (condition &key source-page target-hyperbook-id link-text source-section)
+  (let ((issue (make-basic-hyperbook-lookup-issue condition source-page)))
+    (when target-hyperbook-id
+      (setf (slot-value issue 'target-hyperbook-id) target-hyperbook-id
+            (slot-value issue 'target-site)
+            (lookup-issue-target-site target-hyperbook-id)))
+    (when link-text
+      (setf (slot-value issue 'link-text) link-text))
+    (when source-section
+      (setf (slot-value issue 'source-section) source-section))
+    (append-lookup-issue-details!
+     issue
+     (list :render-phase :content
+           :condition-type (type-of condition)))
+    (enrich-lookup-issue issue)))
+
 (defun issue-label (symbol)
   (string-downcase
    (substitute #\Space #\- (symbol-name symbol))))

@@ -228,6 +228,7 @@
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")
+                             (:file "authored-html-render-safety-smoke")
                              (:file "page-lookup-issues-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")

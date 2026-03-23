@@ -4,8 +4,10 @@ const { test, expect } = require("@playwright/test");
 const {
   activatePaneTab,
   attachJson,
+  exactTextPattern,
   openHyperDoc,
   openTextPageFromHyperDoc,
+  pane,
   readInspectorPaneState,
 } = require("./hyperdoc-inspector");
 const {
@@ -57,6 +59,12 @@ function liveZoteroEnabled() {
   return process.env.HYPERDOC_RUN_ZOTERO_LIVE_TESTS === "1";
 }
 
+const RELATED_PAGE_LINKS = [
+  "Bibliography subcollections in HyperDoc",
+  "Bibliography authoring-plan stand-in inspection",
+  "Coachmark bibliography authoring plan",
+];
+
 function tableRowsToMap(rows) {
   return Object.fromEntries(
     (rows || [])
@@ -71,9 +79,43 @@ async function openLiveEvaluationPage(page) {
   await activatePaneTab(page, 2, "Content");
 }
 
+async function openBibliographyAuthoringPlanLiveEvaluationPage(page) {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, "Bibliography authoring plan live evaluation");
+  await activatePaneTab(page, 2, "Content");
+}
+
 async function openLivePlan(page, liveCase) {
   await openLiveEvaluationPage(page);
   return openObjectFromTextPageLink(page, 2, liveCase.linkText, liveCase.paneOpenTimeoutMs);
+}
+
+async function readPaneUrl(page, paneIndex) {
+  await activatePaneTab(page, paneIndex, "URL");
+  const urlPane = pane(page, paneIndex);
+  const link = urlPane.locator("a[href]").first();
+  await expect(link).toBeVisible({ timeout: 20_000 });
+  return link.getAttribute("href");
+}
+
+async function assertDirectRouteLoads(page, url, targetTitle) {
+  const routePage = await page.context().newPage();
+  try {
+    await routePage.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await expect(routePage.locator("body")).not.toContainText("502 Bad Gateway", {
+      timeout: 20_000,
+    });
+    await expect(routePage.locator(".inspector-pane")).toBeVisible({ timeout: 20_000 });
+    await expect(
+      routePage
+        .locator(".inspector-title-bar-object, .inspector-title-bar-class")
+        .filter({ hasText: exactTextPattern(targetTitle) })
+        .first()
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(routePage.locator("#clog-disconnected-banner")).toHaveCount(0);
+  } finally {
+    await routePage.close();
+  }
 }
 
 function asInteger(value) {
@@ -116,6 +158,56 @@ async function openLivePlanWithDiagnostics(page, liveCase, testInfo) {
     throw error;
   }
 }
+
+test.describe("bibliography related page navigation", () => {
+  for (const targetTitle of RELATED_PAGE_LINKS) {
+    test(`opens ${targetTitle} without disconnecting`, async ({
+      page,
+    }, testInfo) => {
+      await openBibliographyAuthoringPlanLiveEvaluationPage(page);
+
+      let paneOpen;
+      try {
+        paneOpen = await openObjectFromTextPageLink(page, 2, targetTitle, 20_000);
+      } catch (error) {
+        if (error.paneOpenDiagnostic) {
+          await attachJson(
+            testInfo,
+            `${targetTitle.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-related-page-diagnostic.json`,
+            error.paneOpenDiagnostic
+          );
+        }
+        throw error;
+      }
+
+      await attachJson(
+        testInfo,
+        `${targetTitle.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-related-page-diagnostic.json`,
+        paneOpen.paneOpenDiagnostic
+      );
+
+      const targetTitleButton = pane(page, paneOpen.paneIndex)
+        .locator(".inspector-title-bar-object, .inspector-title-bar-class")
+        .filter({ hasText: exactTextPattern(targetTitle) })
+        .first();
+
+      await expect(page.locator("#clog-disconnected-banner")).toHaveCount(0);
+      await expect(targetTitleButton).toBeVisible({ timeout: 15_000 });
+
+      const directUrl = await readPaneUrl(page, paneOpen.paneIndex);
+      await attachJson(
+        testInfo,
+        `${targetTitle.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-related-page-url.json`,
+        {
+          targetTitle,
+          directUrl,
+        }
+      );
+
+      await assertDirectRouteLoads(page, directUrl, targetTitle);
+    });
+  }
+});
 
 test.describe("live bibliography authoring-plan evaluation", () => {
   test.skip(

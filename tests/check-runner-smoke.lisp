@@ -89,6 +89,9 @@
     (cr-assert-true (member "test:hyperdoc/tests:run-fedwiki-site-dmx-import-tests"
                             test-ids :test #'equal)
                     "Test discovery must include the FedWiki import smoke suite")
+    (cr-assert-true (member "test:hyperdoc/tests:run-authored-html-render-safety-smoke-tests"
+                            test-ids :test #'equal)
+                    "Test discovery must include the authored HTML render safety smoke suite")
     (cr-assert-true (member "test:hyperdoc:run-repo-documentation-slice-validation-check"
                             test-ids :test #'equal)
                     "Test discovery must include the first-class documentation-slice validation check")))

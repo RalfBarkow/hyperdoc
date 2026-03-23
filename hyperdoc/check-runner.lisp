@@ -74,6 +74,12 @@
      :system "hyperdoc"
      :tags (:kind :smoke :suite "fedwiki-dmx-import"))
     (:package "HYPERDOC/TESTS"
+     :name "RUN-AUTHORED-HTML-RENDER-SAFETY-SMOKE-TESTS"
+     :id "test:hyperdoc/tests:run-authored-html-render-safety-smoke-tests"
+     :title "Authored HTML render safety smoke tests"
+     :system "hyperdoc"
+     :tags (:kind :smoke :suite "authored-html-render-safety"))
+    (:package "HYPERDOC/TESTS"
      :name "RUN-CHECK-RUNNER-SMOKE-TESTS"
      :id "test:hyperdoc/tests:run-check-runner-smoke-tests"
      :title "Check runner smoke tests"

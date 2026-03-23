@@ -365,7 +365,7 @@
   (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
                                "collection name can influence candidate extraction")
   (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
-                               "1 passed, 1 failed, 1 did not run in Chromium")
+                               "1 failed, 2 did not run in Chromium")
   (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
                                "paneOpenMs")
   (assert-page-source-contains "hyperdoc/Bibliography subcollections in HyperDoc.html"
@@ -387,7 +387,7 @@
   (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
                                "machine-local live evaluation surface")
   (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
-                               "1 passed, 1 failed, 1 did not run in Chromium")
+                               "1 failed, 2 did not run in Chromium")
   (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
                                "pane-open timing JSON artifact")
   (assert-page-source-contains "hyperdoc/Bibliography authoring plan live evaluation.html"
