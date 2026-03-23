@@ -1,0 +1,71 @@
+<h1>Zotero library bridge for HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This slice adds one narrow read-only bridge from HyperDoc into a local
+  Zotero library. The bridge takes a Zotero database path, a Zotero storage
+  root, and optional note roots, queries bibliographic items through
+  <tt>sqlite3</tt>, discovers child attachments, and returns typed inspectable
+  objects rather than opaque path strings.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Zotero library"><tt>Zotero library</tt></a></li>
+  <li><a hyperbook="topics" page="Zotero attachment"><tt>Zotero attachment</tt></a></li>
+  <li><a hyperbook="topics" page="Attachment path resolution"><tt>Attachment path resolution</tt></a></li>
+  <li><a expr="(make-default-zotero-library-bridge)"><tt>(make-default-zotero-library-bridge)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-title-query)"><tt>(mind-and-mechanism-zotero-title-query)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-item-id-query)"><tt>(mind-and-mechanism-zotero-item-id-query)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-resolution-report)"><tt>(mind-and-mechanism-zotero-resolution-report)</tt></a></li>
+</ul>
+
+<h2>Configuration boundary</h2>
+
+<p>
+  The default constructor first respects environment overrides, then falls back
+  to the conventional local Zotero locations under <tt>~/Zotero/</tt>.
+</p>
+
+<ul>
+  <li><tt>HYPERDOC_ZOTERO_DB_PATH</tt></li>
+  <li><tt>HYPERDOC_ZOTERO_STORAGE_ROOT</tt></li>
+  <li><tt>HYPERDOC_ZETTELKASTEN_ROOTS</tt> as a colon-separated list</li>
+  <li><tt>HYPERDOC_SQLITE_PROGRAM</tt> if <tt>sqlite3</tt> is not on <tt>PATH</tt></li>
+  <li><tt>HYPERDOC_ZOTERO_DEMO_DB_PATH</tt>, <tt>HYPERDOC_ZOTERO_DEMO_STORAGE_ROOT</tt>, <tt>HYPERDOC_ZOTERO_DEMO_TITLE</tt>, <tt>HYPERDOC_ZOTERO_DEMO_ITEM_ID</tt>, and <tt>HYPERDOC_ZOTERO_DEMO_ATTACHMENT_KEY</tt> for the concrete live demonstrator</li>
+</ul>
+
+<p>
+  The bridge is intentionally read-only. It does not sync Zotero, edit items,
+  or import a whole note system into HyperDoc.
+</p>
+
+<h2>Supported entry points</h2>
+
+<p>
+  The named lookup operations are:
+</p>
+
+<ul>
+  <li><tt>lookup-zotero-items-by-title</tt> for exact or loose title lookup, returning bibliographic hits plus a <tt>zotero-title-query</tt> object</li>
+  <li><tt>lookup-zotero-item-by-id</tt> for deterministic item-id lookup, returning a bibliographic hit plus a <tt>zotero-item-id-query</tt> object</li>
+  <li><tt>list-zotero-attachments-for-item</tt> for child attachment discovery</li>
+  <li><tt>resolve-zotero-stored-attachment-path</tt> for stored-file resolution</li>
+  <li><tt>resolve-zotero-title-to-candidate-pdf-reports</tt> and <tt>resolve-zotero-title-to-local-pdf-report</tt> for report-oriented title resolution</li>
+</ul>
+
+<p>
+  The main object for user-facing title resolution remains
+  <tt>hyperdoc::zotero-title-resolution-report</tt>. Deterministic
+  verification can use the item-id path directly.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Resolve a local PDF from Zotero in HyperDoc">Resolve a local PDF from Zotero in HyperDoc</a></li>
+  <li><a page="Zotero attachment path resolution">Zotero attachment path resolution</a></li>
+  <li><a page="Zettelkasten note lookup for Zotero resolution">Zettelkasten note lookup for Zotero resolution</a></li>
+</ul>

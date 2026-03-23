@@ -32,6 +32,7 @@
                              (:file "article-allegation-slice")
                              (:file "fedwiki-materialization")
                              (:file "tools")
+                             (:file "zotero-bridge")
                              (:file "static-route-observability")
                              (:file "operational-targets")
                              (:file "dom-annotations")
@@ -102,6 +103,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "dmx-topics")
+                             (:file "zotero-bridge")
                              (:file "fedwiki-materialization")
                              (:file "playground-debug")
                              (:file "web-debugger")
@@ -190,6 +192,7 @@
   :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
+                             (:file "zotero-bridge-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")
                              (:file "page-lookup-issues-smoke")

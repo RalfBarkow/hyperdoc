@@ -1,0 +1,66 @@
+<h1>Zotero attachment path resolution</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Attachment path resolution is the boundary where HyperDoc turns Zotero
+  attachment metadata into a concrete local path or a typed failure. This slice
+  supports only two path kinds: stored attachments under the Zotero storage
+  root and linked file attachments that already point at a local path.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Zotero attachment"><tt>Zotero attachment</tt></a></li>
+  <li><a hyperbook="topics" page="Attachment path resolution"><tt>Attachment path resolution</tt></a></li>
+  <li><a hyperbook="topics" page="Stored attachment"><tt>Stored attachment</tt></a></li>
+  <li><a hyperbook="topics" page="Linked file attachment"><tt>Linked file attachment</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-attachment-hit)"><tt>(mind-and-mechanism-zotero-attachment-hit)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-path-resolution-report)"><tt>(mind-and-mechanism-zotero-path-resolution-report)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-resolution-report)"><tt>(mind-and-mechanism-zotero-resolution-report)</tt></a></li>
+</ul>
+
+<h2>Stored attachments</h2>
+
+<p>
+  Stored attachments use Zotero's own storage tree. HyperDoc resolves them by
+  combining:
+</p>
+
+<ul>
+  <li>the configured Zotero storage root</li>
+  <li>the bibliographic item and child attachment row</li>
+  <li>the attachment key</li>
+  <li>the path suffix carried after the <tt>storage:</tt> prefix</li>
+  <li>the normalized local pathname and existence check</li>
+</ul>
+
+<p>
+  If any part of that chain is missing, the result is a typed failure such as
+  <tt>:missing-storage-root</tt>, <tt>:missing-attachment-key</tt>, or
+  <tt>:stored-file-missing</tt>.
+</p>
+
+<h2>Linked file attachments</h2>
+
+<p>
+  Linked file attachments are normalized directly from their recorded local
+  paths. HyperDoc checks existence, but it does not invent replacements when
+  the file is gone.
+</p>
+
+<h2>No fabricated paths</h2>
+
+<p>
+  The bridge never guesses a location from title alone. A resolved path exists
+  only when the Zotero attachment metadata plus the configured local roots are
+  sufficient to derive one concretely.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Zotero library bridge for HyperDoc">Zotero library bridge for HyperDoc</a></li>
+  <li><a page="Resolve a local PDF from Zotero in HyperDoc">Resolve a local PDF from Zotero in HyperDoc</a></li>
+</ul>

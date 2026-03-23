@@ -86,6 +86,12 @@
     (cr-assert-true (member "test:hyperdoc/tests:run-dmx-topic-proxy-smoke-tests"
                             test-ids :test #'equal)
                     "Test discovery must include the DMX smoke suite")
+    (cr-assert-true (member "test:hyperdoc/tests:run-zotero-bridge-smoke-tests"
+                            test-ids :test #'equal)
+                    "Test discovery must include the Zotero bridge smoke suite")
+    (cr-assert-true (member "test:hyperdoc/tests:run-zotero-bridge-live-tests"
+                            test-ids :test #'equal)
+                    "Test discovery must include the gated Zotero bridge live suite")
     (cr-assert-true (member "test:hyperdoc/tests:run-fedwiki-site-dmx-import-tests"
                             test-ids :test #'equal)
                     "Test discovery must include the FedWiki import smoke suite")

@@ -1,0 +1,57 @@
+<h1>Zettelkasten note lookup for Zotero resolution</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Note lookup is optional supporting evidence for Zotero resolution, not a full
+  note-system importer. When note roots are configured, HyperDoc scans text
+  notes for a narrow clue set and records the matches as inspectable note
+  evidence objects.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Zotero library"><tt>Zotero library</tt></a></li>
+  <li><a hyperbook="topics" page="Zotero attachment"><tt>Zotero attachment</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-title-query)"><tt>(mind-and-mechanism-zotero-title-query)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-item-id-query)"><tt>(mind-and-mechanism-zotero-item-id-query)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-resolution-report)"><tt>(mind-and-mechanism-zotero-resolution-report)</tt></a></li>
+</ul>
+
+<h2>Supported clues</h2>
+
+<ul>
+  <li>exact title</li>
+  <li>DOI</li>
+  <li>Zotero item key</li>
+  <li>Better BibTeX citekey</li>
+  <li>attachment filename</li>
+</ul>
+
+<p>
+  The report records which note file matched which clue on which line. This
+  keeps the evidence chain inspectable without turning the slice into a generic
+  importer for arbitrary note formats.
+</p>
+
+<p>
+  In this slice, note evidence can narrow or explain both title lookup and the
+  deterministic item-id verification path, but it never overrides Zotero's own
+  item and attachment identities.
+</p>
+
+<h2>Current limit</h2>
+
+<p>
+  Note evidence can support interpretation and later disambiguation work, but
+  this first slice does not yet promote note hits into an automatic winner when
+  the Zotero title or attachment space is ambiguous.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Zotero library bridge for HyperDoc">Zotero library bridge for HyperDoc</a></li>
+  <li><a page="Resolve a local PDF from Zotero in HyperDoc">Resolve a local PDF from Zotero in HyperDoc</a></li>
+</ul>

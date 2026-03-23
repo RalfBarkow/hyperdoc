@@ -2072,6 +2072,50 @@
                  "Mind and Mechanism compatibility with HyperDoc"
                  "PDDL and Opt in Drew McDermott's work")))
 
+;; Topic objects for the narrow Zotero title-to-local-PDF bridge slice.
+(defun zotero-library-topic ()
+  (make-topic
+   :id "zotero-library"
+   :title "Zotero library"
+   :summary "Read-only bibliographic source that HyperDoc can query by exact title and then inspect through typed item, attachment, and path-resolution report objects."
+   :references '("Zotero library bridge for HyperDoc"
+                 "Resolve a local PDF from Zotero in HyperDoc"
+                 "Zettelkasten note lookup for Zotero resolution")))
+
+(defun zotero-attachment-topic ()
+  (make-topic
+   :id "zotero-attachment"
+   :title "Zotero attachment"
+   :summary "Child Zotero item that carries attachment metadata such as parent item id, item key, link mode, content type, and stored or linked path data."
+   :references '("Zotero attachment path resolution"
+                 "Zotero library bridge for HyperDoc"
+                 "Resolve a local PDF from Zotero in HyperDoc")))
+
+(defun attachment-path-resolution-topic ()
+  (make-topic
+   :id "attachment-path-resolution"
+   :title "Attachment path resolution"
+   :summary "Explicit report that turns Zotero attachment metadata into a concrete local filesystem path or a typed failure mode without fabricating a path."
+   :references '("Zotero attachment path resolution"
+                 "Resolve a local PDF from Zotero in HyperDoc")))
+
+(defun linked-file-attachment-topic ()
+  (make-topic
+   :id "linked-file-attachment"
+   :title "Linked file attachment"
+   :summary "Attachment whose path already points to an external local file location and must be normalized and existence-checked directly."
+   :references '("Zotero attachment path resolution"
+                 "Resolve a local PDF from Zotero in HyperDoc")))
+
+(defun stored-attachment-topic ()
+  (make-topic
+   :id "stored-attachment"
+   :title "Stored attachment"
+   :summary "Attachment stored under the Zotero storage root and resolved by combining the configured storage directory, the attachment key, and the stored path metadata."
+   :references '("Zotero attachment path resolution"
+                 "Resolve a local PDF from Zotero in HyperDoc"
+                 "Zotero library bridge for HyperDoc")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic

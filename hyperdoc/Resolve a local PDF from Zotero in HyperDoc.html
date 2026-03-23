@@ -1,0 +1,77 @@
+<h1>Resolve a local PDF from Zotero in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This task page demonstrates the narrow end-to-end slice: start from the title
+  <i>Mind and Mechanism</i>, look it up in a local read-only Zotero library,
+  inspect the matched bibliographic item and attachment, then cross-check the
+  same result through direct item-id lookup before resolving the local PDF path
+  as an explicit report object.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Zotero library"><tt>Zotero library</tt></a></li>
+  <li><a hyperbook="topics" page="Attachment path resolution"><tt>Attachment path resolution</tt></a></li>
+  <li><a hyperbook="topics" page="Stored attachment"><tt>Stored attachment</tt></a></li>
+  <li><a expr="(make-zotero-live-demo-library)"><tt>(make-zotero-live-demo-library)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-title-query)"><tt>(mind-and-mechanism-zotero-title-query)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-item-id-query)"><tt>(mind-and-mechanism-zotero-item-id-query)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-item-hit)"><tt>(mind-and-mechanism-zotero-item-hit)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-attachment-hit)"><tt>(mind-and-mechanism-zotero-attachment-hit)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-path-resolution-report)"><tt>(mind-and-mechanism-zotero-path-resolution-report)</tt></a></li>
+  <li><a expr="(mind-and-mechanism-zotero-resolution-report)"><tt>(mind-and-mechanism-zotero-resolution-report)</tt></a></li>
+</ul>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Open <a expr="(make-zotero-live-demo-library)"><tt>(make-zotero-live-demo-library)</tt></a> and confirm the DB path and storage root are the intended local ones.</li>
+  <li>Open <a expr="(mind-and-mechanism-zotero-title-query)"><tt>(mind-and-mechanism-zotero-title-query)</tt></a> to inspect the general title-lookup path.</li>
+  <li>Open <a expr="(mind-and-mechanism-zotero-item-id-query)"><tt>(mind-and-mechanism-zotero-item-id-query)</tt></a> and <a expr="(mind-and-mechanism-zotero-item-hit)"><tt>(mind-and-mechanism-zotero-item-hit)</tt></a> to inspect the deterministic item-id verification path through its dedicated query object.</li>
+  <li>Open <a expr="(mind-and-mechanism-zotero-attachment-hit)"><tt>(mind-and-mechanism-zotero-attachment-hit)</tt></a> and <a expr="(mind-and-mechanism-zotero-path-resolution-report)"><tt>(mind-and-mechanism-zotero-path-resolution-report)</tt></a>.</li>
+  <li>Open <a expr="(mind-and-mechanism-zotero-resolution-report)"><tt>(mind-and-mechanism-zotero-resolution-report)</tt></a> for the user-facing title-to-PDF report.</li>
+</ol>
+
+<h2>Worked local example</h2>
+
+<p>
+  The concrete live demonstrator defaults to the current known local facts:
+  Zotero DB <tt>~/Zotero/zotero.sqlite</tt>, title <i>Mind and Mechanism</i>,
+  bibliographic item <tt>75704</tt>, and stored PDF attachment key
+  <tt>UULEU9Z7</tt>. In the current local Zotero library on this machine, the
+  report resolves that chain to the stored attachment path
+  <tt>~/Zotero/storage/UULEU9Z7/McDermott - 2001 - Mind and Mechanism.pdf</tt>.
+  Those values live at the demo boundary, not in the generic core lookup code,
+  so the report object stays the authoritative surface.
+</p>
+
+<h2>Why this page exists</h2>
+
+<p>
+  HyperDoc already has a page-level bridge for <a page="Mind and Mechanism">Mind and Mechanism</a>.
+  This page adds the operational literature bridge: from authored topic/page
+  material to a local bibliographic attachment path that can be inspected
+  rather than guessed.
+</p>
+
+<h2>Focused smoke test</h2>
+
+<p>
+  The fixture-backed entry point for this slice is:
+</p>
+
+<lisp-code>
+(hyperdoc/tests:run-zotero-bridge-smoke-tests)
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Mind and Mechanism">Mind and Mechanism</a></li>
+  <li><a page="Zotero library bridge for HyperDoc">Zotero library bridge for HyperDoc</a></li>
+  <li><a page="Zotero attachment path resolution">Zotero attachment path resolution</a></li>
+  <li><a page="Zettelkasten note lookup for Zotero resolution">Zettelkasten note lookup for Zotero resolution</a></li>
+</ul>
