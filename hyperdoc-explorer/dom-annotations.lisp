@@ -24,7 +24,19 @@
   (views:include-css "/hyperdoc/css/dom-annotation-connect.css")
   (views:include-js "/hyperdoc/js/dom-annotation-connect.js")
   (views:include-script
-   "window.hyperdocDomConnect && window.hyperdocDomConnect.initCurrentView()"))
+   "(function initHyperdocDomConnect(attempt) {
+      if (window.hyperdocDomConnect &&
+          typeof window.hyperdocDomConnect.initCurrentView === 'function') {
+        window.hyperdocDomConnect.initCurrentView();
+        return;
+      }
+      if ((attempt || 0) >= 40) {
+        return;
+      }
+      window.setTimeout(function () {
+        initHyperdocDomConnect((attempt || 0) + 1);
+      }, 50);
+    }(0));"))
 
 (defun dom-connect-context-object-id (object)
   (or (ignore-errors (id-of object))
@@ -110,10 +122,13 @@
 (defun render-anchor-provider-surface (provider context-object view-title)
   (let* ((source-cell (lwcells:cell ""))
          (target-cell (lwcells:cell ""))
+         (snapshot-cell (lwcells:cell ""))
          (source-input-id (html-inspector-views/reactive:input-id
                            source-cell :event :change))
          (target-input-id (html-inspector-views/reactive:input-id
-                           target-cell :event :change)))
+                           target-cell :event :change))
+         (snapshot-input-id (html-inspector-views/reactive:input-id
+                             snapshot-cell :event :change)))
     (include-dom-annotation-connect-assets)
     (when (anchor-provider-connectable-p provider)
       (views:html
@@ -134,8 +149,10 @@
                   :style "display:none"
                   :data-source-input-id source-input-id
                   :data-target-input-id target-input-id
+                  :data-snapshot-input-id snapshot-input-id
                   (:input :type "hidden" :id source-input-id :value "")
                   (:input :type "hidden" :id target-input-id :value "")
+                  (:input :type "hidden" :id snapshot-input-id :value "")
                   (:span :class "hyperdoc-dom-connect-submit"
                          :style "display:none"
                          (views:eval-button
@@ -145,7 +162,16 @@
                              :context-object context-object
                              :context-view-title view-title
                              :source-json (lwcells:cell-ref source-cell)
-                             :target-json (lwcells:cell-ref target-cell))))))
+                             :target-json (lwcells:cell-ref target-cell)))))
+                  (:span :class "hyperdoc-dom-connect-inspect-submit"
+                         :style "display:none"
+                         (views:eval-button
+                          "Inspect Connect state"
+                          (views:thunk
+                            (make-dom-connect-session-snapshot-from-json
+                             :context-object context-object
+                             :context-view-title view-title
+                             :snapshot-json (lwcells:cell-ref snapshot-cell))))))
             (:svg :class "hyperdoc-dom-connect-overlay"
                   :hidden "hidden"
                   :xmlns "http://www.w3.org/2000/svg"
@@ -164,9 +190,9 @@
                   :kind "dom-v1"
                   :view-kind "content"
                   :help-summary
-                  "Connect structural anchors in this view to create an association."
+                  "Click the part of the page you want to connect."
                   :help-detail
-                  "Visible clicks resolve to heading, list-item, or paragraph anchors when possible. Authored ids are strongest when present; DOM-path data is fallback metadata only."
+                  "Connect resolves visible clicks to headings, list items, or paragraphs when it can. Authored ids stay strongest when present; DOM-path data is fallback metadata only."
                   :body-thunk body-thunk)
    context-object
    view-title))
@@ -177,9 +203,9 @@
                   :kind "source-v1"
                   :view-kind "source"
                   :help-summary
-                  "Connect source anchors in this view to create an association."
+                  "Click the source lines you want to connect."
                   :help-detail
-                  "Source anchors use file path plus line and column range. They remain durable for the same file revision, but line numbers can drift when the source changes."
+                  "Connect stores file path plus line and column range. These anchors stay useful for the same file revision, but line numbers can drift when the source changes."
                   :pathname pathname
                   :context-object context-object)
    context-object
@@ -236,9 +262,9 @@
                     :kind "fedwiki-v1"
                     :view-kind "story"
                     :help-summary
-                    "Connect story-item anchors in this view to create an association."
+                    "Click the story item you want to connect."
                     :help-detail
-                    "Selections resolve to durable story-item identity: site + slug + story-item id. DOM location is fallback metadata only."
+                    "Connect stores durable story-item identity when it can: site, page slug, and story-item id. DOM location is fallback metadata only."
                     :page page
                     :body-thunk
                     (lambda ()
@@ -273,11 +299,64 @@
 (defmethod views:text-representation ((annotation dom-relation-annotation))
   (shorten-dom-association-label (title-of annotation)))
 
+(defmethod views:text-representation ((snapshot dom-connect-pane-state-snapshot))
+  (format nil "~A (~A)"
+          (or (pane-id-of snapshot) "pane")
+          (or (local-phase-of snapshot) "dormant")))
+
+(defmethod views:text-representation ((entry dom-connect-transition-entry))
+  (or (stage-of entry)
+      (title-of entry)))
+
+(defmethod views:text-representation ((snapshot dom-connect-session-snapshot))
+  (shorten-dom-association-label (title-of snapshot)))
+
 (defun render-anchor-field-rows (rows)
   (loop for (label . value) in rows
         do (views:html
              (:tr (:th (views:esc label))
                   (:td (maybe-dom-object-ref value :fallback-empty "-"))))))
+
+(defun render-connect-field-row (label value &key (fallback "-"))
+  (views:html
+    (:tr (:th (views:esc label))
+         (:td (maybe-dom-object-ref value :fallback-empty fallback)))))
+
+(defun connect-provider-label (value)
+  (or value "-"))
+
+(defun render-connect-anchor-section (heading anchor)
+  (views:html
+    (:h4 (views:esc heading))
+    (if anchor
+        (let* ((semantic-fields
+                 (append
+                  (list (cons "Provider kind"
+                              (connect-provider-label (provider-kind-of anchor))))
+                  (semantic-anchor-identity-fields anchor)
+                  (list (cons "Human label"
+                              (or (label-of anchor) "-")))))
+               (presentation-fields (presentation-anchor-fallback-fields anchor)))
+          (views:html
+            (:p (maybe-dom-object-ref anchor))
+            (:table :class "inspector-table hyperdoc-dom-connect-anchor-table"
+                    (render-anchor-field-rows semantic-fields))
+            (:h5 "Fallback diagnostics")
+            (:table :class "inspector-table hyperdoc-dom-connect-anchor-diagnostics-table"
+                    (if presentation-fields
+                        (render-anchor-field-rows presentation-fields)
+                        (views:html
+                          (:tr (:th "Captured fallback")
+                               (:td (:span :style "opacity: 0.55;"
+                                           "none"))))))))
+        (views:html
+          (:p (:span :style "opacity: 0.55;"
+                     "No active anchor in the current session."))))))
+
+(defun render-connect-transition-anchor-ref (entry)
+  (or (anchor-of entry)
+      (source-anchor-of entry)
+      (target-anchor-of entry)))
 
 (views:defview 👀summary (anchor dom-annotation-anchor)
   (views:html-view :title "Summary" :priority 1
@@ -382,3 +461,209 @@
         (views:html
           (:h4 "Suggested inserted step")
           (maybe-dom-object-ref (matching-inserted-step-of annotation)))))))
+
+(views:defview 👀summary (snapshot dom-connect-pane-state-snapshot)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of snapshot)))
+      (:p (views:esc (summary-of snapshot)))
+      (:table :class "inspector-table hyperdoc-dom-connect-pane-summary-table"
+              (render-connect-field-row "Pane id" (pane-id-of snapshot))
+              (render-connect-field-row "Visible tab" (active-tab-of snapshot))
+              (render-connect-field-row "View title"
+                                        (context-view-title-of snapshot))
+              (render-connect-field-row "Provider kind"
+                                        (provider-kind-of snapshot))
+              (render-connect-field-row "Available"
+                                        (dom-connect-bool-label
+                                         (available-p-of snapshot)))
+              (render-connect-field-row "Enabled"
+                                        (dom-connect-bool-label
+                                         (enabled-p-of snapshot)))
+              (render-connect-field-row "Local phase" (local-phase-of snapshot))
+              (render-connect-field-row "Help open"
+                                        (dom-connect-bool-label
+                                         (help-open-p-of snapshot)))
+              (render-connect-field-row "Selected source label"
+                                        (selected-source-label-of snapshot))
+              (render-connect-field-row "Selected source pane"
+                                        (dom-connect-bool-label
+                                         (selected-source-pane-p-of snapshot)))
+              (render-connect-field-row "Pending request id"
+                                        (pending-request-id-of snapshot))))))
+
+(views:defview 👀summary (entry dom-connect-transition-entry)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of entry)))
+      (:p (views:esc (summary-of entry)))
+      (:table :class "inspector-table hyperdoc-dom-connect-transition-summary-table"
+              (render-connect-field-row "Stage" (stage-of entry))
+              (render-connect-field-row "Request id" (request-id-of entry))
+              (render-connect-field-row "Time" (timestamp-label-of entry))
+              (render-connect-field-row "Pane id" (pane-id-of entry))
+              (render-connect-field-row "Provider kind"
+                                        (provider-kind-of entry))
+              (render-connect-field-row "Anchor"
+                                        (render-connect-transition-anchor-ref
+                                         entry))))))
+
+(views:defview 👀summary (snapshot dom-connect-session-snapshot)
+  (views:html-view :title "Summary" :priority 1
+    (let* ((source-anchor (source-anchor-of snapshot))
+           (target-anchor (target-anchor-of snapshot))
+           (last-transition (last-transition-of snapshot)))
+      (views:html
+        (:h3 (views:esc (title-of snapshot)))
+        (:p (views:esc (summary-of snapshot)))
+        (:table :class "inspector-table hyperdoc-dom-connect-session-summary-table"
+                (render-connect-field-row "Session id"
+                                          (or (session-id-of snapshot)
+                                              "idle"))
+                (render-connect-field-row "Global phase" (phase-of snapshot))
+                (render-connect-field-row "Origin pane"
+                                          (origin-pane-id-of snapshot))
+                (render-connect-field-row "Source pane"
+                                          (source-pane-id-of snapshot))
+                (render-connect-field-row "Source provider kind"
+                                          (or (source-provider-kind-of snapshot)
+                                              (and source-anchor
+                                                   (provider-kind-of
+                                                    source-anchor))))
+                (render-connect-field-row "Source semantic label"
+                                          (dom-connect-anchor-label
+                                           source-anchor))
+                (render-connect-field-row "Target pane"
+                                          (target-pane-id-of snapshot))
+                (render-connect-field-row "Target provider kind"
+                                          (or (target-provider-kind-of snapshot)
+                                              (and target-anchor
+                                                   (provider-kind-of
+                                                    target-anchor))))
+                (render-connect-field-row "Target semantic label"
+                                          (dom-connect-anchor-label
+                                           target-anchor))
+                (render-connect-field-row "Pending request id"
+                                          (or (pending-request-id-of snapshot)
+                                              "none"))
+                (render-connect-field-row "Pending request state"
+                                          (or (pending-request-state-of snapshot)
+                                              "none"))
+                (render-connect-field-row "Last transition"
+                                          (and last-transition
+                                               (stage-of last-transition)))
+                (render-connect-field-row "Last transition time"
+                                          (and last-transition
+                                               (timestamp-label-of
+                                                last-transition)))
+                (render-connect-field-row "Captured at"
+                                          (captured-at-label-of snapshot))
+                (render-connect-field-row "Context view"
+                                          (context-view-title-of snapshot))
+                (render-connect-field-row "Context object"
+                                          (context-object-of snapshot)))))))
+
+(views:defview 👀panes (snapshot dom-connect-session-snapshot)
+  (views:html-view :title "Panes" :priority 2
+    (views:html
+      (:table :class "inspector-table hyperdoc-dom-connect-panes-table"
+              (:tr (:th "Pane id")
+                   (:th "Snapshot")
+                   (:th "Visible tab")
+                   (:th "View title")
+                   (:th "Provider")
+                   (:th "Available")
+                   (:th "Enabled")
+                   (:th "Local phase")
+                   (:th "Help open")
+                   (:th "Selected source label")
+                   (:th "Pending request"))
+              (if (panes-of snapshot)
+                  (loop for pane-state in (panes-of snapshot)
+                        do (views:html
+                             (:tr (:td (:tt (views:esc
+                                             (or (pane-id-of pane-state)
+                                                 "-"))))
+                                  (:td (maybe-dom-object-ref pane-state))
+                                  (:td (views:esc
+                                        (or (active-tab-of pane-state)
+                                            "-")))
+                                  (:td (views:esc
+                                        (or (context-view-title-of pane-state)
+                                            "-")))
+                                  (:td (:tt (views:esc
+                                             (or (provider-kind-of pane-state)
+                                                 "-"))))
+                                  (:td (views:esc
+                                        (dom-connect-bool-label
+                                         (available-p-of pane-state))))
+                                  (:td (views:esc
+                                        (dom-connect-bool-label
+                                         (enabled-p-of pane-state))))
+                                  (:td (:tt (views:esc
+                                             (or (local-phase-of pane-state)
+                                                 "-"))))
+                                  (:td (views:esc
+                                        (dom-connect-bool-label
+                                         (help-open-p-of pane-state))))
+                                  (:td (views:esc
+                                        (or (selected-source-label-of
+                                             pane-state)
+                                            "-")))
+                                  (:td (:tt (views:esc
+                                             (or (pending-request-id-of
+                                                  pane-state)
+                                                 "-")))))))
+                  (views:html
+                    (:tr (:td :colspan "11"
+                              (:span :style "opacity: 0.55;"
+                                     "No live panes are registered.")))))))))
+
+(views:defview 👀transitions (snapshot dom-connect-session-snapshot)
+  (views:html-view :title "Transitions" :priority 3
+    (views:html
+      (:table :class "inspector-table hyperdoc-dom-connect-transitions-table"
+              (:tr (:th "Time")
+                   (:th "Stage")
+                   (:th "Request id")
+                   (:th "Pane id")
+                   (:th "Provider")
+                   (:th "Anchor")
+                   (:th "Transition")
+                   (:th "Summary"))
+              (if (transitions-of snapshot)
+                  (loop for entry in (transitions-of snapshot)
+                        do (views:html
+                             (:tr (:td (:tt (views:esc
+                                             (or (timestamp-label-of entry)
+                                                 "-"))))
+                                  (:td (:tt (views:esc
+                                             (or (stage-of entry)
+                                                 "-"))))
+                                  (:td (:tt (views:esc
+                                             (or (request-id-of entry)
+                                                 "-"))))
+                                  (:td (:tt (views:esc
+                                             (or (pane-id-of entry)
+                                                 "-"))))
+                                  (:td (:tt (views:esc
+                                             (or (provider-kind-of entry)
+                                                 "-"))))
+                                  (:td (maybe-dom-object-ref
+                                        (render-connect-transition-anchor-ref
+                                         entry)
+                                        :fallback-empty "-"))
+                                  (:td (maybe-dom-object-ref entry))
+                                  (:td (views:esc (summary-of entry))))))
+                  (views:html
+                    (:tr (:td :colspan "8"
+                              (:span :style "opacity: 0.55;"
+                                     "No Connect transitions have been recorded.")))))))))
+
+(views:defview 👀payload (snapshot dom-connect-session-snapshot)
+  (views:html-view :title "Payload / Anchors" :priority 4
+    (views:html
+      (render-connect-anchor-section "Source anchor"
+                                     (source-anchor-of snapshot))
+      (render-connect-anchor-section "Target anchor"
+                                     (target-anchor-of snapshot)))))

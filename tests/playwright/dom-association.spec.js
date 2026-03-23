@@ -2,36 +2,229 @@
 
 const { test, expect } = require("@playwright/test");
 const {
+  activatePaneTab,
   attachJson,
+  exactTextPattern,
+  openFedWikiPageFromTextPageLink,
+  openConnectInspection,
   openHyperDoc,
+  openTextPageFromHyperDoc,
+  readConnectSessionState,
+  readFedWikiStoryPaneState,
+  readInspectorPaneState,
   readPaneTitles,
-  runContentAssociation,
-  runHyperDocToFedWikiAssociation,
-  runTwoPaneContentAssociation,
   runSourceAssociation,
+  startConnectInPane,
+  waitForAssociationResult,
 } = require("./hyperdoc-inspector");
 const {
   assertHelpPanelAttachment,
   assertProviderSurfaceSync,
   assertTabClickSafety,
+  clearConnectEventTrace,
   openPaneChromeHelp,
+  paneChrome,
   readPaneChromeState,
 } = require("./pane-chrome-harness");
 
 test.describe.configure({ mode: "serial" });
 
+function tableRowsToMap(rows) {
+  return Object.fromEntries(
+    (rows || [])
+      .filter((row) => row.length >= 2 && row[0])
+      .map((row) => [row[0], row.slice(1).join(" ").trim()])
+  );
+}
+
+test("Connect inspection is reachable from the pane chrome", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  const inspection = await openConnectInspection(page, 1);
+  const snapshotPane = await readInspectorPaneState(page, inspection.index);
+  const summaryRows = tableRowsToMap(snapshotPane.tables[0]);
+
+  await attachJson(testInfo, "connect-inspection-idle-pane.json", snapshotPane);
+
+  expect(snapshotPane.title).toContain("Connect session");
+  expect(snapshotPane.activeTab).toBe("Summary");
+  expect(snapshotPane.tabNames).toEqual(
+    expect.arrayContaining([
+      "Summary",
+      "Panes",
+      "Transitions",
+      "Payload / Anchors",
+    ])
+  );
+  expect(summaryRows["Global phase"]).toBe("idle");
+  expect(summaryRows["Pending request state"]).toBe("none");
+});
+
+test("Connect inspection reflects choose-source, choose-target, and cancel reset", async ({
+  page,
+}, testInfo) => {
+  const hyperdocPane = await openHyperDoc(page);
+
+  await startConnectInPane(page, 1);
+  const chooseSourceInspection = await openConnectInspection(page, 1);
+  const paneCountAfterChooseSource = await page.locator(".inspector-pane").count();
+  const chooseSourcePane = await readInspectorPaneState(page, chooseSourceInspection.index);
+  const chooseSourceSummary = tableRowsToMap(chooseSourcePane.tables[0]);
+
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+
+  const chooseTargetInspection = await openConnectInspection(page, 1);
+  const paneCountAfterChooseTarget = await page.locator(".inspector-pane").count();
+  const chooseTargetSummaryPane = await readInspectorPaneState(
+    page,
+    chooseTargetInspection.index
+  );
+  const chooseTargetSummary = tableRowsToMap(chooseTargetSummaryPane.tables[0]);
+
+  await activatePaneTab(page, chooseTargetInspection.index, "Panes");
+  const panesView = await readInspectorPaneState(page, chooseTargetInspection.index);
+
+  await activatePaneTab(page, chooseTargetInspection.index, "Transitions");
+  const transitionsView = await readInspectorPaneState(page, chooseTargetInspection.index);
+
+  await activatePaneTab(page, chooseTargetInspection.index, "Payload / Anchors");
+  const payloadView = await readInspectorPaneState(page, chooseTargetInspection.index);
+
+  await paneChrome(page, 1).cancelButton.click();
+
+  const resetInspection = await openConnectInspection(page, 1);
+  const paneCountAfterReset = await page.locator(".inspector-pane").count();
+  const resetPane = await readInspectorPaneState(page, resetInspection.index);
+  const resetSummary = tableRowsToMap(resetPane.tables[0]);
+
+  await activatePaneTab(page, resetInspection.index, "Transitions");
+  const resetTransitions = await readInspectorPaneState(page, resetInspection.index);
+
+  await attachJson(testInfo, "connect-inspection-choose-source.json", chooseSourcePane);
+  await attachJson(testInfo, "connect-inspection-choose-target-summary.json", chooseTargetSummaryPane);
+  await attachJson(testInfo, "connect-inspection-panes.json", panesView);
+  await attachJson(testInfo, "connect-inspection-transitions.json", transitionsView);
+  await attachJson(testInfo, "connect-inspection-payload.json", payloadView);
+  await attachJson(testInfo, "connect-inspection-reset-summary.json", resetPane);
+  await attachJson(testInfo, "connect-inspection-reset-transitions.json", resetTransitions);
+
+  expect(chooseSourceSummary["Global phase"]).toBe("choose-source");
+  expect(chooseSourceInspection.reused).toBe(false);
+
+  expect(chooseTargetSummary["Global phase"]).toBe("choose-target");
+  expect(chooseTargetSummary["Source provider kind"]).toBe("dom-v1");
+  expect(chooseTargetSummary["Source semantic label"]).toBe("Text pages");
+  expect(chooseTargetInspection.reused).toBe(true);
+  expect(chooseTargetInspection.index).toBe(chooseSourceInspection.index);
+  expect(paneCountAfterChooseTarget).toBe(paneCountAfterChooseSource);
+
+  expect(panesView.bodyText).toContain("select-target");
+  expect(panesView.bodyText).toContain("Text pages");
+
+  expect(transitionsView.bodyText).toContain("session-started");
+  expect(transitionsView.bodyText).toContain("source-selected");
+
+  expect(payloadView.bodyText).toContain("Source anchor");
+  expect(payloadView.bodyText).toContain("Provider kind");
+  expect(payloadView.bodyText).toContain("Text pages");
+
+  expect(resetSummary["Global phase"]).toBe("idle");
+  expect(resetSummary["Source semantic label"]).toBe("-");
+  expect(resetSummary["Pending request state"]).toBe("none");
+  expect(resetInspection.reused).toBe(true);
+  expect(resetInspection.index).toBe(chooseSourceInspection.index);
+  expect(paneCountAfterReset).toBe(paneCountAfterChooseSource);
+  expect(resetTransitions.bodyText).toContain("session-cancelled");
+});
+
+test("Connect inspection resets cleanly after a successful association", async ({
+  page,
+}, testInfo) => {
+  const hyperdocPane = await openHyperDoc(page);
+
+  await clearConnectEventTrace(page);
+  await startConnectInPane(page, 1);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Data objects") })
+    .click();
+  const trace = await waitForAssociationResult(page);
+
+  const inspection = await openConnectInspection(page, 1);
+  const summaryPane = await readInspectorPaneState(page, inspection.index);
+  const summaryRows = tableRowsToMap(summaryPane.tables[0]);
+
+  await activatePaneTab(page, inspection.index, "Transitions");
+  const transitionsPane = await readInspectorPaneState(page, inspection.index);
+
+  await attachJson(testInfo, "connect-inspection-success-trace.json", trace);
+  await attachJson(testInfo, "connect-inspection-success-summary.json", summaryPane);
+  await attachJson(testInfo, "connect-inspection-success-transitions.json", transitionsPane);
+
+  expect(summaryRows["Global phase"]).toBe("idle");
+  expect(summaryRows["Source semantic label"]).toBe("-");
+  expect(summaryRows["Pending request state"]).toBe("none");
+  expect(transitionsPane.bodyText).toContain("request-payload-written");
+  expect(transitionsPane.bodyText).toContain("pane-open-succeeded");
+});
+
 test("content view opens an association through pane-chrome Connect", async ({
   page,
 }, testInfo) => {
-  const result = await runContentAssociation(page);
+  const hyperdocPane = await openHyperDoc(page);
+  await clearConnectEventTrace(page);
+  await startConnectInPane(page, 1);
+  const chromeAfterStart = await readPaneChromeState(page, 1);
 
-  await attachJson(testInfo, "content-browser-trace.json", result.trace);
-  await attachJson(testInfo, "content-pane-titles.json", result.paneTitles);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  const chromeAfterSource = await readPaneChromeState(page, 1);
 
-  expect(result.trace.requestId).toBeTruthy();
-  expect(result.trace.latestStage).toBe("pane-open-succeeded");
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Data objects") })
+    .click();
+
+  const trace = await waitForAssociationResult(page);
+  const chromeAfterResult = await readPaneChromeState(page, 1);
+  const paneTitles = await readPaneTitles(page);
+
+  await attachJson(testInfo, "content-chrome-after-start.json", chromeAfterStart);
+  await attachJson(testInfo, "content-chrome-after-source.json", chromeAfterSource);
+  await attachJson(testInfo, "content-chrome-after-result.json", chromeAfterResult);
+  await attachJson(testInfo, "content-browser-trace.json", trace);
+  await attachJson(testInfo, "content-pane-titles.json", paneTitles);
+
+  expect(chromeAfterStart.connectState).toBe("select-source");
+  expect(chromeAfterStart.statusText).toBe("Pick source");
+  expect(chromeAfterStart.cueText).toBe("Click a source anchor.");
+  expect(chromeAfterStart.sourceSummaryHidden).toBe(true);
+
+  expect(chromeAfterSource.connectState).toBe("select-target");
+  expect(chromeAfterSource.statusText).toBe("Pick target");
+  expect(chromeAfterSource.sourceChipText).toBe("Text pages");
+  expect(chromeAfterSource.clearHidden).toBe(false);
+  expect(chromeAfterSource.cueText).toBe("Click a target anchor.");
+
+  expect(chromeAfterResult.toggleMode).toBe("inactive");
+  expect(chromeAfterResult.feedbackKind).toBe("success");
+  expect(chromeAfterResult.feedbackText).toContain("Text pages");
+  expect(chromeAfterResult.feedbackText).toContain("Data objects");
+
+  expect(trace.requestId).toBeTruthy();
+  expect(trace.latestStage).toBe("pane-open-succeeded");
   expect(
-    result.trace.events.some(
+    trace.events.some(
       (event) =>
         event.stage === "association-payload-assembled" &&
         event.details &&
@@ -42,7 +235,7 @@ test("content view opens an association through pane-chrome Connect", async ({
     )
   ).toBe(true);
   expect(
-    result.trace.events.some(
+    trace.events.some(
       (event) =>
         event.stage === "request-payload-written" &&
         event.details &&
@@ -50,9 +243,9 @@ test("content view opens an association through pane-chrome Connect", async ({
     )
   ).toBe(true);
   expect(
-    result.trace.latestPaneSummary &&
+    trace.latestPaneSummary &&
       /Association: Text pages -> Data objects/.test(
-        result.trace.latestPaneSummary.body
+        trace.latestPaneSummary.body
       )
   ).toBe(true);
 });
@@ -60,19 +253,51 @@ test("content view opens an association through pane-chrome Connect", async ({
 test("content view opens a cross-pane association through pane-chrome Connect", async ({
   page,
 }, testInfo) => {
-  const result = await runTwoPaneContentAssociation(page, "Creating a HyperDoc");
+  const title = "Creating a HyperDoc";
+  const hyperdocPane = await openHyperDoc(page);
+  const textPagePane = await openTextPageFromHyperDoc(page, title);
 
-  await attachJson(testInfo, "two-pane-session-after-source.json", result.sessionAfterSource);
-  await attachJson(testInfo, "two-pane-browser-trace.json", result.trace);
-  await attachJson(testInfo, "two-pane-pane-titles.json", result.paneTitles);
+  await activatePaneTab(page, 1, "Main page");
+  await activatePaneTab(page, 2, "Content");
+  await clearConnectEventTrace(page);
+  await startConnectInPane(page, 1);
 
-  expect(result.sessionAfterSource).toBeTruthy();
-  expect(result.sessionAfterSource.phase).toBe("choose-target");
-  expect(result.sessionAfterSource.sourcePaneId).toBeTruthy();
-  expect(result.trace.requestId).toBeTruthy();
-  expect(result.trace.latestStage).toBe("pane-open-succeeded");
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+
+  const sourceChromeAfterSource = await readPaneChromeState(page, 1);
+  const targetChromeAfterSource = await readPaneChromeState(page, 2);
+  const sessionAfterSource = await readConnectSessionState(page);
+
+  await textPagePane
+    .locator(".hyperdoc-connect-provider-root h1")
+    .filter({ hasText: exactTextPattern(title) })
+    .click();
+
+  const trace = await waitForAssociationResult(page);
+  const paneTitles = await readPaneTitles(page);
+
+  await attachJson(testInfo, "two-pane-source-chrome-after-source.json", sourceChromeAfterSource);
+  await attachJson(testInfo, "two-pane-target-chrome-after-source.json", targetChromeAfterSource);
+  await attachJson(testInfo, "two-pane-session-after-source.json", sessionAfterSource);
+  await attachJson(testInfo, "two-pane-browser-trace.json", trace);
+  await attachJson(testInfo, "two-pane-pane-titles.json", paneTitles);
+
+  expect(sourceChromeAfterSource.statusText).toBe("Pick target");
+  expect(sourceChromeAfterSource.sourceChipText).toBe("Text pages");
+  expect(targetChromeAfterSource.statusText).toBe("Pick target");
+  expect(targetChromeAfterSource.sourceChipText).toBe("Text pages");
+  expect(targetChromeAfterSource.clearHidden).toBe(false);
+
+  expect(sessionAfterSource).toBeTruthy();
+  expect(sessionAfterSource.phase).toBe("choose-target");
+  expect(sessionAfterSource.sourcePaneId).toBeTruthy();
+  expect(trace.requestId).toBeTruthy();
+  expect(trace.latestStage).toBe("pane-open-succeeded");
   expect(
-    result.trace.events.some(
+    trace.events.some(
       (event) =>
         event.stage === "request-payload-written" &&
         event.details &&
@@ -83,9 +308,9 @@ test("content view opens a cross-pane association through pane-chrome Connect", 
     )
   ).toBe(true);
   expect(
-    result.trace.latestPaneSummary &&
+    trace.latestPaneSummary &&
       /Association: Text pages -> Creating a HyperDoc/.test(
-        result.trace.latestPaneSummary.body
+        trace.latestPaneSummary.body
       )
   ).toBe(true);
 });
@@ -93,30 +318,58 @@ test("content view opens a cross-pane association through pane-chrome Connect", 
 test("content view opens a HyperDoc to FedWiki association through pane-chrome Connect", async ({
   page,
 }, testInfo) => {
-  const result = await runHyperDocToFedWikiAssociation(page);
+  const hyperdocTitle = "Linking HyperDoc pages to FedWiki pages";
+  const fedwikiLinkText = "FIND";
 
-  await attachJson(testInfo, "hyperdoc-fedwiki-pane-state.json", result.fedwikiState);
-  await attachJson(
-    testInfo,
-    "hyperdoc-fedwiki-session-after-source.json",
-    result.sessionAfterSource
-  );
-  await attachJson(testInfo, "hyperdoc-fedwiki-browser-trace.json", result.trace);
-  await attachJson(testInfo, "hyperdoc-fedwiki-pane-titles.json", result.paneTitles);
+  await openHyperDoc(page);
+  const textPagePane = await openTextPageFromHyperDoc(page, hyperdocTitle);
+  const fedwikiPane = await openFedWikiPageFromTextPageLink(page, 2, fedwikiLinkText);
 
-  expect(result.fedwikiState.providerKind).toBe("fedwiki-v1");
-  expect(result.fedwikiState.activeTab).toBe("Story");
-  expect(result.fedwikiState.itemCount).toBeGreaterThan(0);
+  await activatePaneTab(page, 2, "Content");
+  await activatePaneTab(page, 3, "Story");
+  const fedwikiState = await readFedWikiStoryPaneState(page, 3);
 
-  expect(result.sessionAfterSource).toBeTruthy();
-  expect(result.sessionAfterSource.phase).toBe("choose-target");
-  expect(result.sessionAfterSource.source.providerKind).toBe("dom-v1");
-  expect(result.sessionAfterSource.source.strategy).toBe("heading-anchor");
+  await clearConnectEventTrace(page);
+  await startConnectInPane(page, 2);
+  await textPagePane
+    .locator(".hyperdoc-connect-provider-root h1")
+    .filter({ hasText: exactTextPattern(hyperdocTitle) })
+    .click();
 
-  expect(result.trace.requestId).toBeTruthy();
-  expect(result.trace.latestStage).toBe("pane-open-succeeded");
+  const sourceChromeAfterSource = await readPaneChromeState(page, 2);
+  const fedwikiChromeAfterSource = await readPaneChromeState(page, 3);
+  const sessionAfterSource = await readConnectSessionState(page);
+
+  await fedwikiPane.locator(".hyperdoc-fedwiki-story-item-anchor").nth(0).click();
+
+  const trace = await waitForAssociationResult(page);
+  const paneTitles = await readPaneTitles(page);
+
+  await attachJson(testInfo, "hyperdoc-fedwiki-pane-state.json", fedwikiState);
+  await attachJson(testInfo, "hyperdoc-fedwiki-source-chrome-after-source.json", sourceChromeAfterSource);
+  await attachJson(testInfo, "hyperdoc-fedwiki-target-chrome-after-source.json", fedwikiChromeAfterSource);
+  await attachJson(testInfo, "hyperdoc-fedwiki-session-after-source.json", sessionAfterSource);
+  await attachJson(testInfo, "hyperdoc-fedwiki-browser-trace.json", trace);
+  await attachJson(testInfo, "hyperdoc-fedwiki-pane-titles.json", paneTitles);
+
+  expect(fedwikiState.providerKind).toBe("fedwiki-v1");
+  expect(fedwikiState.activeTab).toBe("Story");
+  expect(fedwikiState.itemCount).toBeGreaterThan(0);
+
+  expect(sourceChromeAfterSource.statusText).toBe("Pick target");
+  expect(sourceChromeAfterSource.sourceChipText).toBe(hyperdocTitle);
+  expect(fedwikiChromeAfterSource.statusText).toBe("Pick target");
+  expect(fedwikiChromeAfterSource.sourceChipText).toBe(hyperdocTitle);
+
+  expect(sessionAfterSource).toBeTruthy();
+  expect(sessionAfterSource.phase).toBe("choose-target");
+  expect(sessionAfterSource.source.providerKind).toBe("dom-v1");
+  expect(sessionAfterSource.source.strategy).toBe("heading-anchor");
+
+  expect(trace.requestId).toBeTruthy();
+  expect(trace.latestStage).toBe("pane-open-succeeded");
   expect(
-    result.trace.events.some(
+    trace.events.some(
       (event) =>
         event.stage === "target-selected" &&
         event.details &&
@@ -129,7 +382,7 @@ test("content view opens a HyperDoc to FedWiki association through pane-chrome C
     )
   ).toBe(true);
   expect(
-    result.trace.events.some(
+    trace.events.some(
       (event) =>
         event.stage === "association-payload-assembled" &&
         event.details &&
@@ -144,7 +397,7 @@ test("content view opens a HyperDoc to FedWiki association through pane-chrome C
     )
   ).toBe(true);
   expect(
-    result.trace.events.some(
+    trace.events.some(
       (event) =>
         event.stage === "request-payload-written" &&
         event.details &&
@@ -157,8 +410,8 @@ test("content view opens a HyperDoc to FedWiki association through pane-chrome C
     )
   ).toBe(true);
   expect(
-    result.trace.latestPaneSummary &&
-      /Association:/.test(result.trace.latestPaneSummary.body)
+    trace.latestPaneSummary &&
+      /Association:/.test(trace.latestPaneSummary.body)
   ).toBe(true);
 });
 
@@ -187,6 +440,51 @@ test("main tabs stay clickable while Connect help is open", async ({
   expect(states[states.length - 1].paneTitles[1].activeTab).toBe("Main page");
 });
 
+test("Connect clear and cancel restore a clean pre-selection state", async ({
+  page,
+}, testInfo) => {
+  const hyperdocPane = await openHyperDoc(page);
+  const chrome = paneChrome(page, 1);
+
+  await startConnectInPane(page, 1);
+  const chromeAfterStart = await readPaneChromeState(page, 1);
+
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  const chromeAfterSource = await readPaneChromeState(page, 1);
+
+  await expect(chrome.clearButton).toBeVisible();
+  await chrome.clearButton.click();
+  const chromeAfterClear = await readPaneChromeState(page, 1);
+
+  await expect(chrome.cancelButton).toBeVisible();
+  await chrome.cancelButton.click();
+  const chromeAfterCancel = await readPaneChromeState(page, 1);
+
+  await attachJson(testInfo, "connect-clear-cancel-start.json", chromeAfterStart);
+  await attachJson(testInfo, "connect-clear-cancel-source.json", chromeAfterSource);
+  await attachJson(testInfo, "connect-clear-cancel-clear.json", chromeAfterClear);
+  await attachJson(testInfo, "connect-clear-cancel-cancel.json", chromeAfterCancel);
+
+  expect(chromeAfterStart.statusText).toBe("Pick source");
+  expect(chromeAfterSource.statusText).toBe("Pick target");
+  expect(chromeAfterSource.sourceChipText).toBe("Text pages");
+
+  expect(chromeAfterClear.connectState).toBe("select-source");
+  expect(chromeAfterClear.statusText).toBe("Pick source");
+  expect(chromeAfterClear.sourceSummaryHidden).toBe(true);
+  expect(chromeAfterClear.clearHidden).toBe(true);
+  expect(chromeAfterClear.cueText).toBe("Click a source anchor.");
+
+  expect(chromeAfterCancel.toggleMode).toBe("inactive");
+  expect(chromeAfterCancel.connectState).toBe("dormant");
+  expect(chromeAfterCancel.statusHidden).toBe(true);
+  expect(chromeAfterCancel.sourceSummaryHidden).toBe(true);
+  expect(chromeAfterCancel.cueText).toBe("Click Connect to start.");
+});
+
 test("provider-surface sync settles across a Pages round trip", async ({
   page,
 }, testInfo) => {
@@ -210,10 +508,6 @@ test("source view exposes source anchors and opens an association", async (
   testInfo
 ) => {
   test.setTimeout(35_000);
-  test.fail(
-    true,
-    "Known current boundary: automated navigation into a text page and its Source provider is not yet reliable under Playwright in this release build."
-  );
 
   const result = await runSourceAssociation(page, "Creating a HyperDoc");
 

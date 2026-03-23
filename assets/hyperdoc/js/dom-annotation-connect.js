@@ -471,12 +471,12 @@
 
   function providerHelpSummary(surface) {
     return surface && surface.dataset.hyperdocConnectHelpSummary ||
-      "Connect anchors in this view to create an association.";
+      "Click a source anchor, then a target anchor.";
   }
 
   function providerHelpDetail(surface) {
     return surface && surface.dataset.hyperdocConnectHelpDetail ||
-      "Choose source, then target. Esc cancels.";
+      "Connect keeps the resolved anchor and its presentation fallback separate. Esc cancels.";
   }
 
   function providerApiForKind(kind) {
@@ -534,6 +534,19 @@
     input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  function cloneData(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (error) {
+      return {
+        summary: String(value)
+      };
+    }
+  }
+
   function stringValueLength(value) {
     return typeof value === "string" ? value.length : 0;
   }
@@ -563,56 +576,23 @@
     };
   }
 
-  var STORAGE_KEYS = {
-    introDismissed: "hyperdoc.domConnect.introDismissed.v1",
-    learned: "hyperdoc.domConnect.learned.v1"
-  };
-
-  function readPreference(key) {
-    try {
-      return window.localStorage && window.localStorage.getItem(key) === "1";
-    } catch (error) {
-      return false;
-    }
-  }
-
-  function writePreference(key, value) {
-    try {
-      if (window.localStorage) {
-        window.localStorage.setItem(key, value ? "1" : "0");
-      }
-    } catch (error) {
-      // Ignore localStorage failures and keep the current-page behavior.
-    }
-  }
-
   function makeRequestId() {
     return "assoc-" + Date.now().toString(36) + "-" +
       Math.random().toString(36).slice(2, 8);
   }
 
   function anchorLogData(anchor) {
-    return {
-      paneId: anchor && anchor.paneId,
-      providerKind: anchor && anchor.providerKind,
-      label: anchor && anchor.label,
-      strategy: anchor && anchor.strategy,
-      value: anchor && anchor.value,
-      durabilityTier: anchor && anchor.durabilityTier,
-      objectId: anchor && anchor.objectId,
-      pageTitle: anchor && anchor.pageTitle,
-      siteDomain: anchor && anchor.siteDomain,
-      pageSlug: anchor && anchor.pageSlug,
-      storyItemId: anchor && anchor.storyItemId,
-      storyItemType: anchor && anchor.storyItemType
-    };
+    return cloneData(anchor);
   }
 
   function logStage(requestId, stage, details) {
+    var now = Date.now();
     window.hyperdocDomConnectEvents = window.hyperdocDomConnectEvents || [];
     window.hyperdocDomConnectEvents.push({
       requestId: requestId,
       stage: stage,
+      timestamp: now,
+      timestampLabel: new Date(now).toISOString(),
       details: details === undefined ? null : details
     });
     if (window.hyperdocDomConnectEvents.length > 400) {
@@ -676,15 +656,162 @@
       originPaneId: session && session.originPaneId || null,
       sourcePaneId: session && session.sourcePaneId || null,
       sourceProviderKind: session && session.sourceProviderKind || null,
-      source: anchorLogData(session && session.sourceAnchor),
+      source: cloneData(session && session.sourceAnchor),
       targetPaneId: session && session.targetPaneId || null,
       targetProviderKind: session && session.targetProviderKind || null,
-      target: anchorLogData(session && session.targetAnchor)
+      target: cloneData(session && session.targetAnchor)
     };
+  }
+
+  function paneSnapshot(state) {
+    var session = connectManager().session;
+    return {
+      paneId: state.paneId,
+      activeTab: state.pane.querySelector(".inspector-tabs button.active") &&
+        state.pane.querySelector(".inspector-tabs button.active").textContent.trim() || null,
+      contextViewTitle: state.surface && state.surface.dataset.contextViewTitle || null,
+      providerKind: state.providerKind,
+      available: !!state.available,
+      enabled: !!state.enabled,
+      phase: state.phase,
+      helpOpen: !!state.helpOpen,
+      selectedSourceLabel: anchorLabel(session && session.sourceAnchor, null),
+      selectedSourcePane: !!(session && session.sourcePaneId &&
+        session.sourcePaneId === state.paneId),
+      pendingRequestId: state.pendingRequest && state.pendingRequest.id || null
+    };
+  }
+
+  function transitionSnapshots() {
+    return cloneData(window.hyperdocDomConnectEvents || []) || [];
+  }
+
+  function debugSnapshot() {
+    var manager = connectManager();
+    var now = Date.now();
+    return {
+      capturedAt: now,
+      capturedAtLabel: new Date(now).toISOString(),
+      session: sessionDiagnostic(manager.session),
+      panes: liveStates(manager).map(function (state) {
+        return paneSnapshot(state);
+      }),
+      transitions: transitionSnapshots()
+    };
+  }
+
+  function anchorLabel(anchor, fallback) {
+    var label = collapseWhitespace(anchor && (anchor.label || anchor.value || "") || "");
+    if (!label && fallback) {
+      label = fallback;
+    }
+    return label ? limitText(label, 64) : null;
+  }
+
+  function sessionCueText(session) {
+    if (!session || !session.id) {
+      return "Click Connect to start.";
+    }
+    if (session.phase === "choose-source") {
+      return "Click a source anchor.";
+    }
+    if (session.phase === "choose-target") {
+      return "Click a target anchor.";
+    }
+    return "";
+  }
+
+  function connectionSuccessText(session) {
+    var sourceLabel = anchorLabel(session && session.sourceAnchor, "source");
+    var targetLabel = anchorLabel(session && session.targetAnchor, "target");
+    if (sourceLabel && targetLabel) {
+      return 'Connected "' + sourceLabel + '" to "' + targetLabel + '".';
+    }
+    return "Connected.";
+  }
+
+  function uniqueStates(states) {
+    var result = [];
+    states.forEach(function (state) {
+      if (state && result.indexOf(state) === -1) {
+        result.push(state);
+      }
+    });
+    return result;
   }
 
   function setStatus(state, text) {
     state.status.textContent = text;
+  }
+
+  function setCue(state, text) {
+    state.cue.textContent = text || "";
+    state.cue.hidden = !text;
+  }
+
+  function setSourceSummary(state, anchor, visible) {
+    var label = anchorLabel(anchor, "Selected source");
+    state.sourceSummary.hidden = !(visible && label);
+    state.sourceChip.textContent = label || "";
+  }
+
+  function inspectConnectState(state) {
+    if (!state.available || !state.inspectSubmit) {
+      return;
+    }
+    var snapshotJson = JSON.stringify(debugSnapshot());
+    var button = state.inspectSubmit.querySelector("button");
+    if (button) {
+      [
+        "data-dom-association-request-id",
+        "data-dom-association-transport",
+        "data-dom-association-context-object-id",
+        "data-dom-association-context-view-title",
+        "data-dom-association-source-json",
+        "data-dom-association-target-json",
+        "data-dom-association-source-field-id",
+        "data-dom-association-target-field-id",
+        "data-dom-association-source-pane-id",
+        "data-dom-association-target-pane-id",
+        "data-dom-association-source-provider-kind",
+        "data-dom-association-target-provider-kind",
+        "data-dom-connect-inspection-pane-id",
+        "data-dom-connect-snapshot-json"
+      ].forEach(function (attribute) {
+        button.removeAttribute(attribute);
+      });
+      button.setAttribute(
+        "data-dom-association-request-id",
+        "connect-inspect-" + Date.now().toString(36) + "-" +
+          Math.random().toString(36).slice(2, 8)
+      );
+      button.setAttribute("data-dom-association-transport", "connect-snapshot-v1");
+      button.setAttribute(
+        "data-dom-association-context-object-id",
+        state.surface && state.surface.dataset.contextObjectId || ""
+      );
+      button.setAttribute(
+        "data-dom-association-context-view-title",
+        state.surface && state.surface.dataset.contextViewTitle || ""
+      );
+      button.setAttribute(
+        "data-dom-connect-inspection-pane-id",
+        state.paneId || ""
+      );
+      button.setAttribute("data-dom-connect-snapshot-json", snapshotJson);
+      if (state.inspectInput) {
+        dispatchValue(state.inspectInput, snapshotJson);
+      }
+      dispatchEvalButtonWhenReady(button, {
+        click: function () {
+          button.dispatchEvent(new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          }));
+        }
+      });
+    }
   }
 
   function clearFeedback(state) {
@@ -785,11 +912,20 @@
       return;
     }
     var manager = state.manager || connectManager();
+    var session = manager.session;
+    var feedbackText = connectionSuccessText(session);
+    var feedbackStates = uniqueStates([
+      session && session.sourceState,
+      session && session.targetState,
+      state
+    ]);
     if (detail.status === "pane-open-succeeded") {
       logStage(detail.requestId, "pane-open-succeeded", detail);
       clearPendingRequest(state);
-      clearFeedback(state);
       resetConnectSession(manager);
+      feedbackStates.forEach(function (feedbackState) {
+        setFeedback(feedbackState, "success", feedbackText);
+      });
       return;
     }
     failPendingRequest(
@@ -822,9 +958,6 @@
     state.helpPanel.innerHTML =
       "<p>" + helpSummary + "</p>" +
       "<p>" + helpDetail + "</p>";
-    if (state.coachmarkCopy) {
-      state.coachmarkCopy.textContent = helpSummary;
-    }
   }
 
   function activeSurfaceForPane(pane) {
@@ -855,22 +988,23 @@
     slot.innerHTML =
       '<div class="hyperdoc-dom-connect-control" data-hyperdoc-connect-ignore="true">' +
         '<button type="button" class="hyperdoc-dom-connect-toggle" ' +
-                'title="Connect anchors in this view to create an association.">Connect</button>' +
-        '<span class="hyperdoc-dom-connect-status" hidden>Connect: choose source</span>' +
-        '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
+                'title="Click a source anchor, then a target anchor.">Connect</button>' +
+        '<span class="hyperdoc-dom-connect-status" hidden>Pick source</span>' +
+        '<span class="hyperdoc-dom-connect-source-summary" hidden>' +
+          '<span class="hyperdoc-dom-connect-source-summary-label">Source:</span>' +
+          '<span class="hyperdoc-dom-connect-source-chip"></span>' +
+        '</span>' +
+        '<span class="hyperdoc-dom-connect-cue">Click Connect to start.</span>' +
+        '<button type="button" class="hyperdoc-dom-connect-clear" hidden>Clear</button>' +
+        '<button type="button" class="hyperdoc-dom-connect-inspect" ' +
+                'title="Inspect the current Connect session and pane states.">Inspect</button>' +
         '<button type="button" class="hyperdoc-dom-connect-help-toggle" ' +
                 'title="How Connect works in this view" aria-label="How Connect works in this view" aria-expanded="false">?</button>' +
-      '</div>' +
-      '<div class="hyperdoc-dom-connect-coachmark" hidden>' +
-        '<span class="hyperdoc-dom-connect-coachmark-copy">Connect anchors in this view to create an association.</span>' +
-        '<span class="hyperdoc-dom-connect-coachmark-actions">' +
-          '<button type="button" class="hyperdoc-dom-connect-try">Try it</button>' +
-          '<button type="button" class="hyperdoc-dom-connect-dismiss">Dismiss</button>' +
-        '</span>' +
+        '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-help-panel" aria-hidden="true">' +
-        '<p>Connect anchors in this view to create an association.</p>' +
-        '<p>Choose source, then target. Esc cancels.</p>' +
+        '<p>Click a source anchor, then a target anchor.</p>' +
+        '<p>Connect keeps the resolved anchor and its presentation fallback separate. Esc cancels.</p>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-feedback" hidden></div>';
   }
@@ -914,6 +1048,40 @@
     );
   }
 
+  function evalButtonBound(button) {
+    return !!(button &&
+      button.getAttribute("data-hyperdoc-eval-bound") === "true");
+  }
+
+  function dispatchEvalButtonWhenReady(button, options) {
+    var click = options && options.click;
+    var onTimeout = options && options.onTimeout;
+    var attemptsRemaining = options && options.maxAttempts || 60;
+
+    function tryDispatch() {
+      if (!button || !button.isConnected) {
+        if (onTimeout) {
+          onTimeout("Submit bridge disappeared before the request could be dispatched.");
+        }
+        return;
+      }
+      if (evalButtonBound(button)) {
+        click();
+        return;
+      }
+      attemptsRemaining -= 1;
+      if (attemptsRemaining <= 0) {
+        if (onTimeout) {
+          onTimeout("Submit bridge did not become ready before dispatch.");
+        }
+        return;
+      }
+      window.setTimeout(tryDispatch, 50);
+    }
+
+    window.setTimeout(tryDispatch, 0);
+  }
+
   function bindSurface(state, surface) {
     var provider = providerApiForKind(surfaceProviderKind(surface));
     state.surface = surface || null;
@@ -922,7 +1090,9 @@
     state.line = null;
     state.sourceInput = null;
     state.targetInput = null;
+    state.inspectInput = null;
     state.submit = null;
+    state.inspectSubmit = null;
     state.provider = provider;
     state.providerKind = surfaceProviderKind(surface);
     if (!surface) {
@@ -937,8 +1107,10 @@
     }
     var sourceInput = document.getElementById(controls.dataset.sourceInputId);
     var targetInput = document.getElementById(controls.dataset.targetInputId);
+    var inspectInput = document.getElementById(controls.dataset.snapshotInputId);
     var submit = controls.querySelector(".hyperdoc-dom-connect-submit");
-    if (!sourceInput || !targetInput || !submit) {
+    var inspectSubmit = controls.querySelector(".hyperdoc-dom-connect-inspect-submit");
+    if (!sourceInput || !targetInput || !inspectInput || !submit || !inspectSubmit) {
       return false;
     }
     state.root = root;
@@ -946,28 +1118,11 @@
     state.line = line;
     state.sourceInput = sourceInput;
     state.targetInput = targetInput;
+    state.inspectInput = inspectInput;
     state.submit = submit;
+    state.inspectSubmit = inspectSubmit;
     updateProviderCopy(state);
     return true;
-  }
-
-  function sessionStatusText(state, session) {
-    if (!session || !session.id) {
-      return null;
-    }
-    if (session.phase === "choose-source") {
-      return "Connect: choose source";
-    }
-    if (session.phase === "choose-target") {
-      if (session.sourceAnchor && session.sourceAnchor.label) {
-        return "Connect: choose target for " + limitText(session.sourceAnchor.label, 48);
-      }
-      return "Connect: choose target";
-    }
-    if (session.phase === "submitting") {
-      return "Opening association...";
-    }
-    return null;
   }
 
   function refreshPaneStateFromSession(state) {
@@ -998,13 +1153,7 @@
     }
     if (!sessionVisible) {
       if (!state.pendingRequest) {
-        if (sessionActive(manager)) {
-          setPhase(state, "dormant");
-        } else if (!state.learned && !state.introDismissed) {
-          setPhase(state, "coachmark");
-        } else {
-          setPhase(state, "dormant");
-        }
+        setPhase(state, "dormant");
       }
       return;
     }
@@ -1014,10 +1163,6 @@
       setPhase(state, "select-target");
     } else if (session.phase === "submitting") {
       setPhase(state, "submitting");
-    }
-    var statusText = sessionStatusText(state, session);
-    if (statusText && state.phase !== "dormant") {
-      setStatus(state, statusText);
     }
   }
 
@@ -1043,7 +1188,6 @@
     if (sessionActive(manager)) {
       resetConnectSession(manager);
     }
-    markIntroDismissed(state);
     liveStates(manager).forEach(function (otherState) {
       clearFeedback(otherState);
       closeHelpPanel(otherState);
@@ -1126,23 +1270,32 @@
   }
 
   function setPhase(state, phase) {
+    var session = state.manager && state.manager.session;
+    var showSourceSummary = !!(session && session.sourceAnchor &&
+      (phase === "select-target" || phase === "submitting"));
+    var cueText = sessionCueText(phase === "dormant" ? null : session);
     state.phase = phase;
     state.slot.dataset.connectState = phase;
+    state.control.dataset.connectState = phase;
     if (state.surface) {
       state.surface.dataset.connectState = phase;
     }
-    state.coachmark.hidden = phase !== "coachmark";
     state.status.hidden = !(phase === "select-source" ||
       phase === "select-target" ||
       phase === "submitting");
+    setSourceSummary(state, session && session.sourceAnchor, showSourceSummary);
+    setCue(state, phase === "submitting" ? "" : cueText);
+    state.clear.hidden = !(phase === "select-target" && showSourceSummary);
     state.cancel.hidden = !(phase === "select-source" || phase === "select-target");
 
     if (phase === "select-source") {
-      setStatus(state, "Connect: choose source");
+      setStatus(state, "Pick source");
     } else if (phase === "select-target") {
-      setStatus(state, "Connect: choose target");
+      setStatus(state, "Pick target");
     } else if (phase === "submitting") {
       setStatus(state, "Opening association...");
+    } else {
+      setStatus(state, "");
     }
   }
 
@@ -1159,22 +1312,7 @@
     if (!state.pendingRequest) {
       state.requestId = null;
     }
-    if (!state.learned && !state.introDismissed) {
-      setPhase(state, "coachmark");
-    } else {
-      setPhase(state, "dormant");
-    }
-  }
-
-  function markIntroDismissed(state) {
-    state.introDismissed = true;
-    writePreference(STORAGE_KEYS.introDismissed, true);
-  }
-
-  function markLearned(state) {
-    state.learned = true;
-    writePreference(STORAGE_KEYS.learned, true);
-    markIntroDismissed(state);
+    setPhase(state, "dormant");
   }
 
   function clearSource(state) {
@@ -1209,6 +1347,35 @@
     }
     clearResetTimer(state);
     startConnectSession(state);
+  }
+
+  function clearSelectedSource(state) {
+    var manager = state.manager;
+    var session = manager.session;
+    if (!sessionActive(manager) || session.phase !== "choose-target") {
+      return;
+    }
+    liveStates(manager).forEach(function (otherState) {
+      clearFeedback(otherState);
+      closeHelpPanel(otherState);
+      setHoverElement(otherState, null);
+    });
+    if (session.sourceState) {
+      clearSource(session.sourceState);
+    }
+    session.phase = "choose-source";
+    session.sourcePaneId = null;
+    session.sourceProviderKind = null;
+    session.sourceAnchor = null;
+    session.sourceState = null;
+    session.targetPaneId = null;
+    session.targetProviderKind = null;
+    session.targetAnchor = null;
+    session.targetState = null;
+    logStage(session.id, "source-cleared", {
+      paneId: state.paneId
+    });
+    refreshAllPaneStates(manager);
   }
 
   function beginConnection(state, element, anchor) {
@@ -1285,10 +1452,6 @@
     session.targetProviderKind = targetAnchor.providerKind;
     session.targetAnchor = targetAnchor;
     session.targetState = state;
-    markLearned(state);
-    if (sourceState && sourceState !== state) {
-      markLearned(sourceState);
-    }
     clearResetTimer(state);
     logStage(requestId, "target-selected", {
       paneId: state.paneId,
@@ -1365,7 +1528,18 @@
     });
     registerPendingRequest(pendingState, requestId);
     state.requestId = null;
-    submitButton.click();
+    dispatchEvalButtonWhenReady(submitButton, {
+      click: function () {
+        submitButton.click();
+      },
+      onTimeout: function (detail) {
+        failPendingRequest(
+          pendingState,
+          "Association could not be opened.",
+          detail
+        );
+      }
+    });
     pendingState.resetTimer = window.setTimeout(function () {
       if (manager.session.phase === "submitting") {
         resetConnectSession(manager, {
@@ -1378,7 +1552,7 @@
   function invalidClick(state) {
     setStatus(
       state,
-      "Click inside the active view representation, not the pane chrome, to create an association."
+      "Click a source or target in the active view, not in the Connect controls."
     );
   }
 
@@ -1436,18 +1610,20 @@
     ensurePaneControlMarkup(slot);
     var manager = connectManager();
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
-    var coachmark = slot.querySelector(".hyperdoc-dom-connect-coachmark");
-    var coachmarkCopy = slot.querySelector(".hyperdoc-dom-connect-coachmark-copy");
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
+    var cue = slot.querySelector(".hyperdoc-dom-connect-cue");
+    var sourceSummary = slot.querySelector(".hyperdoc-dom-connect-source-summary");
+    var sourceChip = slot.querySelector(".hyperdoc-dom-connect-source-chip");
+    var clear = slot.querySelector(".hyperdoc-dom-connect-clear");
+    var inspect = slot.querySelector(".hyperdoc-dom-connect-inspect");
     var helpToggle = slot.querySelector(".hyperdoc-dom-connect-help-toggle");
-    var tryButton = slot.querySelector(".hyperdoc-dom-connect-try");
-    var dismissButton = slot.querySelector(".hyperdoc-dom-connect-dismiss");
     var cancel = slot.querySelector(".hyperdoc-dom-connect-cancel");
     var feedback = slot.querySelector(".hyperdoc-dom-connect-feedback");
     var helpPanel = slot.querySelector(".hyperdoc-dom-connect-help-panel");
     var status = slot.querySelector(".hyperdoc-dom-connect-status");
-    if (!control || !coachmark || !coachmarkCopy || !toggle || !helpToggle || !tryButton ||
-        !dismissButton || !cancel || !feedback || !helpPanel || !status) {
+    if (!control || !toggle || !cue || !sourceSummary || !sourceChip || !clear ||
+        !inspect ||
+        !helpToggle || !cancel || !feedback || !helpPanel || !status) {
       return null;
     }
     var state = {
@@ -1456,9 +1632,12 @@
       manager: manager,
       slot: slot,
       control: control,
-      coachmark: coachmark,
-      coachmarkCopy: coachmarkCopy,
       toggle: toggle,
+      cue: cue,
+      sourceSummary: sourceSummary,
+      sourceChip: sourceChip,
+      clear: clear,
+      inspect: inspect,
       cancel: cancel,
       feedback: feedback,
       helpToggle: helpToggle,
@@ -1467,8 +1646,6 @@
       enabled: false,
       available: false,
       phase: "dormant",
-      introDismissed: readPreference(STORAGE_KEYS.introDismissed),
-      learned: readPreference(STORAGE_KEYS.learned),
       helpOpen: false,
       hoverElement: null,
       source: null,
@@ -1486,13 +1663,16 @@
       line: null,
       sourceInput: null,
       targetInput: null,
-      submit: null
+      inspectInput: null,
+      submit: null,
+      inspectSubmit: null
     };
     pane.hyperdocDomConnectState = state;
     registerState(manager, state);
     slot.hidden = true;
     slot.dataset.helpOpen = "false";
     toggle.dataset.mode = "inactive";
+    control.dataset.connectState = "dormant";
     if (!helpPanel.id) {
       helpPanel.id = (slot.id || "hyperdoc-dom-connect-pane-slot") + "-help-panel";
     }
@@ -1514,16 +1694,15 @@
       event.stopPropagation();
       toggleHelpPanel(state);
     });
-    tryButton.addEventListener("click", function (event) {
+    clear.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
-      activate(state);
+      clearSelectedSource(state);
     });
-    dismissButton.addEventListener("click", function (event) {
+    inspect.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
-      markIntroDismissed(state);
-      enterDormant(state);
+      inspectConnectState(state);
     });
     cancel.addEventListener("click", function () {
       deactivate(state, true);
@@ -1617,15 +1796,11 @@
     },
     readPaneStates: function () {
       return liveStates(connectManager()).map(function (state) {
-        return {
-          paneId: state.paneId,
-          available: state.available,
-          phase: state.phase,
-          providerKind: state.providerKind,
-          activeTab: state.pane.querySelector(".inspector-tabs button.active") &&
-            state.pane.querySelector(".inspector-tabs button.active").textContent.trim()
-        };
+        return paneSnapshot(state);
       });
+    },
+    readDebugSnapshot: function () {
+      return debugSnapshot();
     }
   };
 }());

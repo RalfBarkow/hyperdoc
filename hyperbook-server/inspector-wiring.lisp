@@ -104,4 +104,7 @@
                   ref-element
                   #'(lambda (obj event)
                       (handle-inspector-eval-click pane obj target event))
-                  :cancel-event t)))))))))
+                  :cancel-event t)
+                 (setf (clog:attribute ref-element
+                                       "data-hyperdoc-eval-bound")
+                       "true")))))))))

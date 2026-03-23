@@ -71,12 +71,112 @@
    (matching-inserted-step :initarg :matching-inserted-step :initform nil
                            :reader matching-inserted-step-of)))
 
+(defclass dom-connect-pane-state-snapshot ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (pane-id :initarg :pane-id :reader pane-id-of)
+   (active-tab :initarg :active-tab :initform nil :reader active-tab-of)
+   (context-view-title :initarg :context-view-title
+                       :initform nil
+                       :reader context-view-title-of)
+   (provider-kind :initarg :provider-kind
+                  :initform nil
+                  :reader provider-kind-of)
+   (available :initarg :available :initform nil :reader available-p-of)
+   (enabled :initarg :enabled :initform nil :reader enabled-p-of)
+   (local-phase :initarg :local-phase :initform "dormant" :reader local-phase-of)
+   (help-open :initarg :help-open :initform nil :reader help-open-p-of)
+   (selected-source-label :initarg :selected-source-label
+                          :initform nil
+                          :reader selected-source-label-of)
+   (selected-source-pane :initarg :selected-source-pane
+                         :initform nil
+                         :reader selected-source-pane-p-of)
+   (pending-request-id :initarg :pending-request-id
+                       :initform nil
+                       :reader pending-request-id-of)))
+
+(defclass dom-connect-transition-entry ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (request-id :initarg :request-id :initform nil :reader request-id-of)
+   (stage :initarg :stage :initform nil :reader stage-of)
+   (timestamp :initarg :timestamp :initform nil :reader timestamp-of)
+   (timestamp-label :initarg :timestamp-label
+                    :initform nil
+                    :reader timestamp-label-of)
+   (pane-id :initarg :pane-id :initform nil :reader pane-id-of)
+   (provider-kind :initarg :provider-kind
+                  :initform nil
+                  :reader provider-kind-of)
+   (anchor :initarg :anchor :initform nil :reader anchor-of)
+   (source-anchor :initarg :source-anchor :initform nil :reader source-anchor-of)
+   (target-anchor :initarg :target-anchor :initform nil :reader target-anchor-of)
+   (details :initarg :details :initform nil :reader details-of)))
+
+(defclass dom-connect-session-snapshot ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (context-object :initarg :context-object :initform nil
+                   :reader context-object-of)
+   (context-view-title :initarg :context-view-title :initform nil
+                       :reader context-view-title-of)
+   (captured-at :initarg :captured-at :initform nil :reader captured-at-of)
+   (captured-at-label :initarg :captured-at-label
+                      :initform nil
+                      :reader captured-at-label-of)
+   (session-id :initarg :session-id :initform nil :reader session-id-of)
+   (phase :initarg :phase :initform "idle" :reader phase-of)
+   (origin-pane-id :initarg :origin-pane-id
+                   :initform nil
+                   :reader origin-pane-id-of)
+   (source-pane-id :initarg :source-pane-id
+                   :initform nil
+                   :reader source-pane-id-of)
+   (source-provider-kind :initarg :source-provider-kind
+                         :initform nil
+                         :reader source-provider-kind-of)
+   (source-anchor :initarg :source-anchor :initform nil :reader source-anchor-of)
+   (target-pane-id :initarg :target-pane-id
+                   :initform nil
+                   :reader target-pane-id-of)
+   (target-provider-kind :initarg :target-provider-kind
+                         :initform nil
+                         :reader target-provider-kind-of)
+   (target-anchor :initarg :target-anchor :initform nil :reader target-anchor-of)
+   (panes :initarg :panes :initform nil :reader panes-of)
+   (transitions :initarg :transitions :initform nil :reader transitions-of)
+   (pending-request-id :initarg :pending-request-id
+                       :initform nil
+                       :reader pending-request-id-of)
+   (pending-request-state :initarg :pending-request-state
+                          :initform nil
+                          :reader pending-request-state-of)
+   (last-transition :initarg :last-transition
+                    :initform nil
+                    :reader last-transition-of)))
+
 (defmethod print-object ((object dom-annotation-anchor) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (or (label-of object)
                             (anchor-value-of object)))))
 
 (defmethod print-object ((object dom-relation-annotation) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-pane-state-snapshot) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-transition-entry) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-session-snapshot) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -97,6 +197,12 @@
   (cond
     ((stringp value)
      value)
+    ((eq value :null)
+     nil)
+    ((eq value :true)
+     t)
+    ((eq value :false)
+     nil)
     ((hash-table-p value)
      (loop for json-key being each hash-key of value
              using (hash-value json-value)
@@ -261,6 +367,238 @@
                 (cons "Fallback value" (fallback-value-of anchor)))
            (and (tag-name-of anchor)
                 (cons "Tag" (tag-name-of anchor))))))
+
+(defun dom-connect-anchor-label (anchor)
+  (when anchor
+    (or (label-of anchor)
+        (anchor-value-of anchor)
+        (text-snippet-of anchor))))
+
+(defun dom-connect-present-p (value)
+  (and value
+       (not (and (stringp value)
+                 (zerop (length (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                             value)))))))
+
+(defun dom-connect-bool-label (value)
+  (if value "yes" "no"))
+
+(defun dom-connect-transition-stage-summary (stage details source-anchor
+                                              target-anchor anchor)
+  (let ((stage (or stage "")))
+    (labels ((anchor-label (anchor-object)
+             (or (dom-connect-anchor-label anchor-object) "anchor")))
+      (cond
+        ((string= stage "session-started")
+         (format nil "Session started in ~A."
+                 (or (getf details :originPaneId)
+                     (getf details :paneId)
+                     "the current pane")))
+        ((string= stage "source-selected")
+         (format nil "Source selected: ~A."
+                 (anchor-label (or anchor source-anchor))))
+        ((string= stage "target-selected")
+         (format nil "Target selected: ~A."
+                 (anchor-label (or anchor target-anchor))))
+        ((string= stage "request-payload-written")
+         (format nil "Request payload written for ~A -> ~A."
+                 (or (getf details :sourceProviderKind) "source")
+                 (or (getf details :targetProviderKind) "target")))
+        ((string= stage "association-payload-assembled")
+         (format nil "Association payload assembled for ~A -> ~A."
+                 (anchor-label source-anchor)
+                 (anchor-label target-anchor)))
+        ((string= stage "pane-open-succeeded")
+         "Association pane opened.")
+        ((string= stage "session-cancelled")
+         "Connect session cancelled.")
+        ((string= stage "source-cleared")
+         "Selected source cleared.")
+        ((string= stage "request-failed")
+         (or (getf details :message)
+             "Association request failed."))
+        (t
+         (format nil "~A" stage))))))
+
+(defun dom-connect-pane-state-summary (pane-id local-phase provider-kind
+                                       active-tab)
+  (format nil "Pane ~A is ~A in ~A (~A)."
+          (or pane-id "?")
+          (or local-phase "dormant")
+          (or active-tab "its current view")
+          (or provider-kind "unknown provider")))
+
+(defun dom-connect-transition-title (stage timestamp-label)
+  (if (dom-connect-present-p timestamp-label)
+      (format nil "Connect transition: ~A @ ~A" stage timestamp-label)
+      (format nil "Connect transition: ~A" stage)))
+
+(defun dom-connect-transition-id (request-id stage timestamp)
+  (format nil "connect-transition/~A/~A/~A"
+          (or request-id "no-request")
+          (slugify-dom-relation-fragment (or stage "transition"))
+          (or timestamp "now")))
+
+(defun make-dom-connect-pane-state-snapshot-from-json (json)
+  (let* ((pane-id (getf json :paneId))
+         (active-tab (getf json :activeTab))
+         (context-view-title (getf json :contextViewTitle))
+         (provider-kind (getf json :providerKind))
+         (local-phase (getf json :phase))
+         (selected-source-label (getf json :selectedSourceLabel)))
+    (make-instance 'dom-connect-pane-state-snapshot
+                   :id (format nil "connect-pane/~A" (or pane-id "unknown"))
+                   :title (format nil "Connect pane: ~A"
+                                  (or pane-id "unknown"))
+                   :summary (dom-connect-pane-state-summary
+                             pane-id
+                             local-phase
+                             provider-kind
+                             active-tab)
+                   :pane-id pane-id
+                   :active-tab active-tab
+                   :context-view-title context-view-title
+                   :provider-kind provider-kind
+                   :available (getf json :available)
+                   :enabled (getf json :enabled)
+                   :local-phase local-phase
+                   :help-open (getf json :helpOpen)
+                   :selected-source-label selected-source-label
+                   :selected-source-pane (getf json :selectedSourcePane)
+                   :pending-request-id (getf json :pendingRequestId))))
+
+(defun maybe-dom-connect-anchor-from-json (json)
+  (when (and json (listp json))
+    (make-dom-annotation-anchor-from-json json)))
+
+(defun make-dom-connect-transition-entry-from-json (json)
+  (let* ((details (getf json :details))
+         (stage (getf json :stage))
+         (request-id (getf json :requestId))
+         (timestamp (getf json :timestamp))
+         (timestamp-label (getf json :timestampLabel))
+         (anchor (maybe-dom-connect-anchor-from-json (getf details :anchor)))
+         (source-anchor (maybe-dom-connect-anchor-from-json (getf details :source)))
+         (target-anchor (maybe-dom-connect-anchor-from-json (getf details :target)))
+         (provider-kind (or (getf details :providerKind)
+                            (and anchor (provider-kind-of anchor))
+                            (and source-anchor (provider-kind-of source-anchor))
+                            (getf details :sourceProviderKind)
+                            (getf details :targetProviderKind)))
+         (pane-id (or (getf details :paneId)
+                      (getf details :sourcePaneId)
+                      (getf details :targetPaneId)))
+         (summary (dom-connect-transition-stage-summary
+                   stage details source-anchor target-anchor anchor)))
+    (make-instance 'dom-connect-transition-entry
+                   :id (dom-connect-transition-id request-id stage timestamp)
+                   :title (dom-connect-transition-title stage timestamp-label)
+                   :summary summary
+                   :request-id request-id
+                   :stage stage
+                   :timestamp timestamp
+                   :timestamp-label timestamp-label
+                   :pane-id pane-id
+                   :provider-kind provider-kind
+                   :anchor anchor
+                   :source-anchor source-anchor
+                   :target-anchor target-anchor
+                   :details details)))
+
+(defun dom-connect-pending-request-state (phase pending-request-id
+                                           last-transition)
+  (cond
+    (pending-request-id
+     (or (and last-transition (stage-of last-transition))
+         (and (dom-connect-present-p phase) phase)
+         "pending"))
+    ((string= (or phase "") "submitting")
+     "submitting")
+    (t
+     nil)))
+
+(defun make-dom-connect-session-snapshot (&key context-object
+                                               context-view-title
+                                               captured-at
+                                               captured-at-label
+                                               session-id
+                                               phase
+                                               origin-pane-id
+                                               source-pane-id
+                                               source-provider-kind
+                                               source-anchor
+                                               target-pane-id
+                                               target-provider-kind
+                                               target-anchor
+                                               panes
+                                               transitions)
+  (let* ((last-transition (car (last transitions)))
+         (pending-pane (find-if (lambda (pane)
+                                  (dom-connect-present-p
+                                   (pending-request-id-of pane)))
+                                panes))
+         (pending-request-id (and pending-pane
+                                  (pending-request-id-of pending-pane)))
+         (title (if (dom-connect-present-p session-id)
+                    (format nil "Connect session: ~A" session-id)
+                    "Connect session"))
+         (summary
+           (format nil "Snapshot of Connect phase ~A with ~D live pane~:P."
+                   (or phase "idle")
+                   (length panes))))
+    (make-instance 'dom-connect-session-snapshot
+                   :id (format nil "connect-session/~A/~A"
+                               (or session-id "idle")
+                               (or captured-at "now"))
+                   :title title
+                   :summary summary
+                   :context-object context-object
+                   :context-view-title context-view-title
+                   :captured-at captured-at
+                   :captured-at-label captured-at-label
+                   :session-id session-id
+                   :phase (or phase "idle")
+                   :origin-pane-id origin-pane-id
+                   :source-pane-id source-pane-id
+                   :source-provider-kind source-provider-kind
+                   :source-anchor source-anchor
+                   :target-pane-id target-pane-id
+                   :target-provider-kind target-provider-kind
+                   :target-anchor target-anchor
+                   :panes panes
+                   :transitions transitions
+                   :pending-request-id pending-request-id
+                   :pending-request-state
+                   (dom-connect-pending-request-state
+                    phase pending-request-id last-transition)
+                   :last-transition last-transition)))
+
+(defun make-dom-connect-session-snapshot-from-json (&key context-object
+                                                         context-view-title
+                                                         snapshot-json)
+  (let* ((data (or (parse-dom-annotation-json snapshot-json)
+                   (error "Missing Connect snapshot JSON.")))
+         (session (or (getf data :session) '()))
+         (panes (mapcar #'make-dom-connect-pane-state-snapshot-from-json
+                        (or (getf data :panes) '())))
+         (transitions (mapcar #'make-dom-connect-transition-entry-from-json
+                              (or (getf data :transitions) '()))))
+    (make-dom-connect-session-snapshot
+     :context-object context-object
+     :context-view-title context-view-title
+     :captured-at (getf data :capturedAt)
+     :captured-at-label (getf data :capturedAtLabel)
+     :session-id (getf session :id)
+     :phase (getf session :phase)
+     :origin-pane-id (getf session :originPaneId)
+     :source-pane-id (getf session :sourcePaneId)
+     :source-provider-kind (getf session :sourceProviderKind)
+     :source-anchor (maybe-dom-connect-anchor-from-json (getf session :source))
+     :target-pane-id (getf session :targetPaneId)
+     :target-provider-kind (getf session :targetProviderKind)
+     :target-anchor (maybe-dom-connect-anchor-from-json (getf session :target))
+     :panes panes
+     :transitions transitions)))
 
 (defun call-hyperdoc-runtime (symbol-name &rest arguments)
   (let ((symbol (find-symbol symbol-name :hyperdoc)))

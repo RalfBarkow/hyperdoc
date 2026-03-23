@@ -8,6 +8,50 @@
   data remains fallback metadata only.
 </p>
 
+<h2>Current Connect chrome</h2>
+
+<p>
+  The current pane chrome is step-oriented rather than explanation-heavy:
+  inactive shows <tt>Connect</tt>, the first active step shows
+  <tt>Pick source</tt>, and after the first click the chrome switches to
+  <tt>Pick target</tt> while showing a compact <tt>Source:</tt> chip with the
+  selected label. <tt>Clear</tt> returns to source-picking without leaving the
+  flow; <tt>Cancel</tt> exits it.
+</p>
+
+<p>
+  The default visible cue stays compact and human-facing, for example
+  “Click a source anchor” and “Click a target anchor.” Provider-specific
+  explanation remains behind the <tt>?</tt> affordance instead of occupying the
+  row by default.
+</p>
+
+<h2>Current Connect inspection</h2>
+
+<p>
+  The running pane now exposes a visible <tt>Inspect</tt> action next to
+  <tt>Connect</tt>. It opens a real inspectable snapshot object for the current
+  Connect state instead of requiring console inspection. Repeated clicks from
+  the same live pane reuse that inspection pane when it is still open.
+</p>
+
+<p>
+  The snapshot surface is modeled explicitly:
+</p>
+
+<ul>
+  <li><tt>dom-connect-session-snapshot</tt> captures the current global phase, source/target anchors, live panes, and recent transitions.</li>
+  <li><tt>dom-connect-pane-state-snapshot</tt> captures one pane's local Connect state such as provider kind, local phase, selected source label, and pending request id.</li>
+  <li><tt>dom-connect-transition-entry</tt> preserves recent stage-log events such as <tt>session-started</tt>, <tt>source-selected</tt>, <tt>request-payload-written</tt>, <tt>pane-open-succeeded</tt>, and <tt>session-cancelled</tt>.</li>
+</ul>
+
+<p>
+  The default session object provides <tt>Summary</tt>, <tt>Panes</tt>,
+  <tt>Transitions</tt>, and <tt>Payload / Anchors</tt> views. The payload view
+  leads with semantic-first anchor data and keeps selector or DOM-path fields
+  as secondary diagnostics.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>

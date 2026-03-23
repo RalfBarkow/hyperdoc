@@ -451,28 +451,40 @@
              "(:h4 \"Durability\")")
             (pattern-present-validation-check
              "content-provider-copy"
-             "content provider help uses anchor-first wording"
+             "content provider help uses human-facing click wording"
              explorer-path
              explorer
-             "\"Connect structural anchors in this view to create an association.\"")
+             "\"Click the part of the page you want to connect.\"")
             (pattern-present-validation-check
              "source-provider-copy"
-             "source provider help uses anchor-first wording"
+             "source provider help uses human-facing click wording"
              explorer-path
              explorer
-             "\"Connect source anchors in this view to create an association.\"")
+             "\"Click the source lines you want to connect.\"")
             (pattern-present-validation-check
              "fedwiki-provider-copy"
-             "FedWiki provider help uses anchor-first wording"
+             "FedWiki provider help uses human-facing click wording"
              explorer-path
              explorer
-             "\"Connect story-item anchors in this view to create an association.\"")
+             "\"Click the story item you want to connect.\"")
             (pattern-present-validation-check
              "generic-connect-copy"
-             "generic Connect chrome copy uses anchor/view wording"
+             "generic Connect chrome copy uses step wording"
              connect-js-path
              connect-js
-             "\"Connect anchors in this view to create an association.\"")
+             "\"Click a source anchor, then a target anchor.\"")
+            (pattern-present-validation-check
+             "connect-inspect-affordance"
+             "pane chrome exposes an Inspect affordance for Connect state"
+             connect-js-path
+             connect-js
+             "\"hyperdoc-dom-connect-inspect\"")
+            (pattern-present-validation-check
+             "connect-snapshot-constructor"
+             "explorer wires Connect inspection through a session snapshot object"
+             explorer-path
+             explorer
+             "make-dom-connect-session-snapshot-from-json")
             (pattern-absent-validation-check
              "no-visible-elements-provider-copy"
              "provider help avoids stale visible-elements wording"

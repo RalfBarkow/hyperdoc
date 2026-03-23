@@ -13,6 +13,10 @@ function pane(page, index) {
   return page.locator(".inspector-pane").nth(index);
 }
 
+function activeView(currentPane) {
+  return currentPane.locator(".inspector-view:not([hidden])");
+}
+
 function exactTextPattern(value) {
   return new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
 }
@@ -52,11 +56,11 @@ async function openHyperDoc(page) {
       { timeout: 20_000 }
     )
     .toContain("Main page");
-  const activeTab = hyperdocPane.locator(".inspector-tabs button.active");
-  if ((await activeTab.textContent())?.trim() !== "Main page") {
-    await activatePaneTab(page, 1, "Main page");
-  }
+  await activatePaneTab(page, 1, "Main page");
   await expect(hyperdocPane.locator(".hyperdoc-connect-provider-surface")).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(hyperdocPane.locator(".hyperdoc-dom-connect-inspect")).toBeVisible({
     timeout: 20_000,
   });
   await settleInspectorBindings(page);
@@ -129,6 +133,22 @@ async function activatePaneTab(page, paneIndex, title) {
       await expect(
         currentPane.locator(".inspector-tabs button.active")
       ).toHaveText(exactTextPattern(title), { timeout: 3000 });
+      await expect
+        .poll(
+          () =>
+            currentPane.evaluate((paneNode) => {
+              const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
+              if (!activeView) {
+                return 0;
+              }
+              const textLength =
+                activeView.innerText?.replace(/\s+/g, " ").trim().length || 0;
+              const childCount = activeView.children?.length || 0;
+              return Math.max(textLength, childCount);
+            }),
+          { timeout: 5000 }
+        )
+        .toBeGreaterThan(0);
       return;
     } catch (error) {
       lastError = error;
@@ -142,11 +162,12 @@ async function readPaneTitles(page) {
   return page.evaluate(() =>
     Array.from(document.querySelectorAll(".inspector-pane")).map((paneNode, index) => {
       const activeTab = paneNode.querySelector(".inspector-tabs button.active");
+      const titleNode =
+        paneNode.querySelector(".inspector-title-bar-object") ||
+        paneNode.querySelector(".inspector-title-bar-class");
       return {
         index,
-        title:
-          paneNode.querySelector(".inspector-title-bar-class")?.textContent?.trim() ||
-          null,
+        title: titleNode?.textContent?.trim() || null,
         activeTab: activeTab?.textContent?.trim() || null,
       };
     })
@@ -196,19 +217,21 @@ async function readDomConnectTrace(page) {
       paneCount: panes.length,
       paneTitles: panes.map((paneNode, index) => {
         const activeTab = paneNode.querySelector(".inspector-tabs button.active");
+        const titleNode =
+          paneNode.querySelector(".inspector-title-bar-object") ||
+          paneNode.querySelector(".inspector-title-bar-class");
         return {
           index,
-          title:
-            paneNode.querySelector(".inspector-title-bar-class")?.textContent?.trim() ||
-            null,
+          title: titleNode?.textContent?.trim() || null,
           activeTab: activeTab?.textContent?.trim() || null,
         };
       }),
       latestPaneSummary: lastPane
         ? {
             title:
-              lastPane.querySelector(".inspector-title-bar-class")?.textContent?.trim() ||
-              null,
+              (lastPane.querySelector(".inspector-title-bar-object") ||
+                lastPane.querySelector(".inspector-title-bar-class"))
+                ?.textContent?.trim() || null,
             body:
               lastPane.querySelector(".inspector-view")?.innerText
                 ?.replace(/\s+/g, " ")
@@ -257,7 +280,145 @@ async function startConnectInPane(page, paneIndex) {
   const button = currentPane.locator(".hyperdoc-dom-connect-toggle");
   await expect(button).toBeVisible();
   await button.click();
+  await page.waitForFunction((index) => {
+    const paneNode = document.querySelectorAll(".inspector-pane")[index];
+    const slot = paneNode?.querySelector(".hyperdoc-dom-connect-pane-slot");
+    return slot?.dataset.connectState === "select-source";
+  }, paneIndex, { timeout: 10_000 });
   return currentPane;
+}
+
+async function waitForConnectChromeState(page, paneIndex, expectedState, options = {}) {
+  const requireSourceChip = options.requireSourceChip || false;
+  await page.waitForFunction(
+    ({ index, state, requireSourceChip: sourceChipRequired }) => {
+      const paneNode = document.querySelectorAll(".inspector-pane")[index];
+      const slot = paneNode?.querySelector(".hyperdoc-dom-connect-pane-slot");
+      const sourceChip = slot?.querySelector(".hyperdoc-dom-connect-source-chip");
+      const matchesState = slot?.dataset.connectState === state;
+      if (!matchesState) {
+        return false;
+      }
+      if (!sourceChipRequired) {
+        return true;
+      }
+      return !!sourceChip?.textContent?.trim();
+    },
+    {
+      index: paneIndex,
+      state: expectedState,
+      requireSourceChip,
+    },
+    { timeout: 10_000 }
+  );
+}
+
+async function openConnectInspection(page, paneIndex) {
+  const currentPane = pane(page, paneIndex);
+  const inspectButton = currentPane.locator(".hyperdoc-dom-connect-inspect");
+  const inspectionPaneId = await currentPane.evaluate(
+    (paneNode) => paneNode.dataset.hyperdocConnectPaneId || null
+  );
+  const matchingInspectionPanes = page.locator(
+    `.inspector-pane[data-hyperdoc-connect-inspection="true"][data-hyperdoc-connect-inspection-pane-id="${inspectionPaneId}"]`
+  );
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  const matchingCountBefore = await matchingInspectionPanes.count();
+  const capturedAtBefore =
+    matchingCountBefore > 0
+      ? await matchingInspectionPanes
+          .nth(matchingCountBefore - 1)
+          .getAttribute("data-hyperdoc-connect-captured-at")
+      : null;
+  const latestCapturedAt = async () =>
+    page.evaluate((paneId) => {
+      const panes = Array.from(document.querySelectorAll(".inspector-pane")).filter(
+        (paneNode) =>
+          paneNode.dataset.hyperdocConnectInspection === "true" &&
+          paneNode.dataset.hyperdocConnectInspectionPaneId === paneId
+      );
+      if (panes.length === 0) {
+        return null;
+      }
+      return panes[panes.length - 1].dataset.hyperdocConnectCapturedAt || null;
+    }, inspectionPaneId);
+  await expect(inspectButton).toBeVisible();
+  await inspectButton.click();
+  if (matchingCountBefore === 0) {
+    await expect
+      .poll(() => matchingInspectionPanes.count(), { timeout: 20_000 })
+      .toBeGreaterThan(0);
+  } else {
+    await expect
+      .poll(async () => (await latestCapturedAt()) !== capturedAtBefore, {
+        timeout: 20_000,
+      })
+      .toBe(true);
+  }
+  const snapshotIndex = await page.evaluate((paneId) => {
+    return Array.from(document.querySelectorAll(".inspector-pane")).findIndex(
+      (paneNode) =>
+        paneNode.dataset.hyperdocConnectInspection === "true" &&
+        paneNode.dataset.hyperdocConnectInspectionPaneId === paneId
+    );
+  }, inspectionPaneId);
+  expect(snapshotIndex).toBeGreaterThanOrEqual(0);
+  if (matchingCountBefore === 0) {
+    await expect
+      .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+      .toBe(paneCountBefore + 1);
+  } else {
+    await expect
+      .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+      .toBe(paneCountBefore);
+  }
+  const snapshotPane = pane(page, snapshotIndex);
+  await expect(snapshotPane).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      async () => snapshotPane.locator(".inspector-tabs button").allTextContents(),
+      { timeout: 20_000 }
+    )
+    .toContain("Summary");
+  await settleInspectorBindings(page);
+  return {
+    index: snapshotIndex,
+    pane: snapshotPane,
+    reused: matchingCountBefore > 0,
+  };
+}
+
+async function readInspectorPaneState(page, paneIndex) {
+  return page.evaluate((index) => {
+    const paneNode = document.querySelectorAll(".inspector-pane")[index];
+    const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
+    const titleNode =
+      paneNode?.querySelector(".inspector-title-bar-object") ||
+      paneNode?.querySelector(".inspector-title-bar-class");
+    const tables = activeView
+      ? Array.from(activeView.querySelectorAll("table.inspector-table")).map((table) =>
+          Array.from(table.querySelectorAll("tr")).map((row) =>
+            Array.from(row.children).map((cell) =>
+              cell.textContent?.replace(/\s+/g, " ").trim() || ""
+            )
+          )
+        )
+      : [];
+    return {
+      title: titleNode?.textContent?.trim() || null,
+      activeTab:
+        paneNode?.querySelector(".inspector-tabs button.active")?.textContent?.trim() ||
+        null,
+      tabNames: paneNode
+        ? Array.from(paneNode.querySelectorAll(".inspector-tabs button")).map((button) =>
+            button.textContent?.trim() || ""
+          )
+        : [],
+      bodyText:
+        activeView?.innerText?.replace(/\s+/g, " ").trim() || "",
+      tables,
+    };
+  }, paneIndex);
 }
 
 async function toggleHelpInPane(page, paneIndex) {
@@ -272,14 +433,17 @@ async function toggleHelpInPane(page, paneIndex) {
 async function readSourcePaneState(page, paneIndex) {
   return page.evaluate((index) => {
     const paneNode = document.querySelectorAll(".inspector-pane")[index];
-    const surface = paneNode?.querySelector(".hyperdoc-connect-provider-surface");
-    const lines = paneNode
-      ? Array.from(paneNode.querySelectorAll(".hyperdoc-source-connect-line"))
+    const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
+    const surface = activeView?.querySelector(".hyperdoc-connect-provider-surface");
+    const titleNode =
+      paneNode?.querySelector(".inspector-title-bar-object") ||
+      paneNode?.querySelector(".inspector-title-bar-class");
+    const lines = activeView
+      ? Array.from(activeView.querySelectorAll(".hyperdoc-source-connect-line"))
       : [];
     return {
       paneCount: document.querySelectorAll(".inspector-pane").length,
-      title:
-        paneNode?.querySelector(".inspector-title-bar-class")?.textContent?.trim() || null,
+      title: titleNode?.textContent?.trim() || null,
       activeTab:
         paneNode?.querySelector(".inspector-tabs button.active")?.textContent?.trim() ||
         null,
@@ -299,14 +463,17 @@ async function readSourcePaneState(page, paneIndex) {
 async function readFedWikiStoryPaneState(page, paneIndex) {
   return page.evaluate((index) => {
     const paneNode = document.querySelectorAll(".inspector-pane")[index];
-    const surface = paneNode?.querySelector(".hyperdoc-connect-provider-surface");
-    const items = paneNode
-      ? Array.from(paneNode.querySelectorAll(".hyperdoc-fedwiki-story-item-anchor"))
+    const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
+    const surface = activeView?.querySelector(".hyperdoc-connect-provider-surface");
+    const titleNode =
+      paneNode?.querySelector(".inspector-title-bar-object") ||
+      paneNode?.querySelector(".inspector-title-bar-class");
+    const items = activeView
+      ? Array.from(activeView.querySelectorAll(".hyperdoc-fedwiki-story-item-anchor"))
       : [];
     return {
       paneCount: document.querySelectorAll(".inspector-pane").length,
-      title:
-        paneNode?.querySelector(".inspector-title-bar-class")?.textContent?.trim() || null,
+      title: titleNode?.textContent?.trim() || null,
       activeTab:
         paneNode?.querySelector(".inspector-tabs button.active")?.textContent?.trim() ||
         null,
@@ -329,13 +496,12 @@ async function readFedWikiStoryPaneState(page, paneIndex) {
 async function waitForSourceProvider(page, paneIndex) {
   const currentPane = pane(page, paneIndex);
   await expect.poll(
-    () => currentPane.locator(".hyperdoc-source-connect-line").count(),
+    () => activeView(currentPane).locator(".hyperdoc-source-connect-line").count(),
     { timeout: 20_000 }
   ).toBeGreaterThan(5);
-  await expect(currentPane.locator(".hyperdoc-connect-provider-surface")).toHaveAttribute(
-    "data-hyperdoc-connect-provider-kind",
-    "source-v1"
-  );
+  await expect(
+    activeView(currentPane).locator(".hyperdoc-connect-provider-surface")
+  ).toHaveAttribute("data-hyperdoc-connect-provider-kind", "source-v1");
   return readSourcePaneState(page, paneIndex);
 }
 
@@ -417,8 +583,11 @@ async function runSourceAssociation(page, title) {
   const sourceState = await waitForSourceProvider(page, 2);
   await clearDomConnectTrace(page);
   await startConnectInPane(page, 2);
-  const lineButtons = pane(page, 2).locator(".hyperdoc-source-connect-line");
+  const lineButtons = activeView(pane(page, 2)).locator(".hyperdoc-source-connect-line");
   await lineButtons.nth(0).click();
+  await waitForConnectChromeState(page, 2, "select-target", {
+    requireSourceChip: true,
+  });
   await lineButtons.nth(2).click();
   const trace = await waitForAssociationResult(page);
   return {
@@ -436,8 +605,10 @@ module.exports = {
   gotoCatalog,
   openHyperDoc,
   openFedWikiPageFromTextPageLink,
+  openConnectInspection,
   openTextPageFromHyperDoc,
   pane,
+  readInspectorPaneState,
   readConnectSessionState,
   readHelpPanelState,
   readDomConnectTrace,

@@ -19,6 +19,13 @@ function paneChrome(page, paneIndex) {
     connectRow: currentPane.locator(".hyperdoc-dom-connect-pane-slot"),
     connectControl: currentPane.locator(".hyperdoc-dom-connect-control"),
     connectToggle: currentPane.locator(".hyperdoc-dom-connect-toggle"),
+    status: currentPane.locator(".hyperdoc-dom-connect-status"),
+    cue: currentPane.locator(".hyperdoc-dom-connect-cue"),
+    sourceChip: currentPane.locator(".hyperdoc-dom-connect-source-chip"),
+    clearButton: currentPane.locator(".hyperdoc-dom-connect-clear"),
+    inspectButton: currentPane.locator(".hyperdoc-dom-connect-inspect"),
+    cancelButton: currentPane.locator(".hyperdoc-dom-connect-cancel"),
+    feedback: currentPane.locator(".hyperdoc-dom-connect-feedback"),
     helpToggle: currentPane.locator(".hyperdoc-dom-connect-help-toggle"),
     helpPanel: currentPane.locator(".hyperdoc-dom-connect-help-panel"),
   };
@@ -30,6 +37,15 @@ async function readPaneChromeState(page, paneIndex) {
     const tabRow = paneNode?.querySelector(".inspector-tabs");
     const slot = paneNode?.querySelector(".hyperdoc-dom-connect-pane-slot");
     const control = slot?.querySelector(".hyperdoc-dom-connect-control");
+    const toggle = slot?.querySelector(".hyperdoc-dom-connect-toggle");
+    const status = slot?.querySelector(".hyperdoc-dom-connect-status");
+    const cue = slot?.querySelector(".hyperdoc-dom-connect-cue");
+    const sourceSummary = slot?.querySelector(".hyperdoc-dom-connect-source-summary");
+    const sourceChip = slot?.querySelector(".hyperdoc-dom-connect-source-chip");
+    const clearButton = slot?.querySelector(".hyperdoc-dom-connect-clear");
+    const inspectButton = slot?.querySelector(".hyperdoc-dom-connect-inspect");
+    const cancelButton = slot?.querySelector(".hyperdoc-dom-connect-cancel");
+    const feedback = slot?.querySelector(".hyperdoc-dom-connect-feedback");
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
     const providerSurface = activeView?.querySelector(
@@ -46,6 +62,24 @@ async function readPaneChromeState(page, paneIndex) {
         null,
       slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
+      connectState: slot?.dataset.connectState || null,
+      toggleMode: toggle?.dataset.mode || null,
+      toggleText: toggle?.textContent?.trim() || null,
+      statusHidden: !!status?.hidden,
+      statusText: status?.textContent?.trim() || null,
+      cueHidden: !!cue?.hidden,
+      cueText: cue?.textContent?.trim() || null,
+      sourceSummaryHidden: !!sourceSummary?.hidden,
+      sourceSummaryText:
+        sourceSummary?.textContent?.replace(/\s+/g, " ").trim() || null,
+      sourceChipText: sourceChip?.textContent?.trim() || null,
+      clearHidden: !!clearButton?.hidden,
+      inspectHidden: !!inspectButton?.hidden,
+      inspectText: inspectButton?.textContent?.trim() || null,
+      cancelHidden: !!cancelButton?.hidden,
+      feedbackHidden: !!feedback?.hidden,
+      feedbackKind: feedback?.dataset.kind || null,
+      feedbackText: feedback?.textContent?.replace(/\s+/g, " ").trim() || null,
       providerKind: providerSurface?.dataset.hyperdocConnectProviderKind || null,
       providerViewKind: providerSurface?.dataset.hyperdocConnectViewKind || null,
       helpExpanded:

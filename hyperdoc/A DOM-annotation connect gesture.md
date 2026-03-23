@@ -13,6 +13,12 @@ A DOM-annotation connect gesture between any two DOM elements within a single re
 Goal:
 Create a reusable HyperDoc capability where a user can connect any two rendered DOM elements in one pane, producing a relation annotation anchored to those two DOM positions.
 
+Current follow-up note:
+- the running pane now also exposes a visible `Inspect` action beside `Connect`
+- that action opens a real Connect state snapshot object with `Summary`, `Panes`, `Transitions`, and `Payload / Anchors` views
+- repeated `Inspect` clicks from the same live pane reuse that Connect inspection pane instead of opening an unbounded stack of duplicates
+- the inspection surface reports current phase/session state and recent stage-log entries without changing the semantic-first persistence contract
+
 This should be the general substrate.
 The existing “missing step between Boot Raspberry Pi from flashed card and Edit /etc/nixos/configuration.nix” is then just the first concrete use case built on top of it.
 
@@ -44,7 +50,7 @@ Identify the narrowest place to add a pane-local connect mode.
 
 3. Implement a general connect mode for one rendered pane
 MVP interaction:
-- user enables a pane-local mode such as “Connect” or “Annotate relation”
+- user activates a pane-local Connect affordance such as “Connect” or “Annotate relation”
 - first click picks a source DOM element in that pane
 - moving the mouse shows a temporary visible line/overlay or equivalent live connection affordance
 - second click picks a target DOM element in the same pane

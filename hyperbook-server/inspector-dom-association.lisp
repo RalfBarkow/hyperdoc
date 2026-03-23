@@ -5,18 +5,16 @@
 (in-package :clog-moldable-inspector)
 
 (defun dom-association-request-id-for-element (element)
-  (let ((value (ignore-errors
-                 (clog:attribute element "data-dom-association-request-id"))))
-    (and (stringp value)
-         (> (length (string-trim '(#\Space #\Tab #\Newline #\Return) value)) 0)
-         value)))
+  (dom-association-attribute-value element "data-dom-association-request-id"))
 
 (defun dom-association-attribute-value (element attribute-name)
   (let ((value (ignore-errors
                  (clog:attribute element attribute-name))))
     (and (stringp value)
-         (> (length (string-trim '(#\Space #\Tab #\Newline #\Return) value)) 0)
-         value)))
+         (let ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return) value)))
+           (and (> (length trimmed) 0)
+                (not (member trimmed '("undefined" "null") :test #'string=))
+                trimmed)))))
 
 (defun dom-association-json-present-p (value)
   (and (stringp value)
@@ -64,6 +62,12 @@
         :target-provider-kind
         (dom-association-attribute-value
          element "data-dom-association-target-provider-kind")
+        :inspection-pane-id
+        (dom-association-attribute-value
+         element "data-dom-connect-inspection-pane-id")
+        :snapshot-json
+        (dom-association-attribute-value
+         element "data-dom-connect-snapshot-json")
         :source-json
         (dom-association-attribute-value
          element "data-dom-association-source-json")
@@ -85,6 +89,11 @@
      :target-pane-id (getf payload :target-pane-id)
      :source-provider-kind (getf payload :source-provider-kind)
      :target-provider-kind (getf payload :target-provider-kind)
+     :inspection-pane-id (getf payload :inspection-pane-id)
+     :snapshot-present? (dom-association-json-present-p
+                         (getf payload :snapshot-json))
+     :snapshot-length (dom-association-json-length
+                       (getf payload :snapshot-json))
      :source-present? (dom-association-json-present-p (getf payload :source-json))
      :source-length (dom-association-json-length (getf payload :source-json))
      :target-present? (dom-association-json-present-p (getf payload :target-json))
@@ -100,9 +109,10 @@
      :missing field-label
      :source-field-id (getf payload :source-field-id)
      :target-field-id (getf payload :target-field-id)
+     :snapshot-present? (dom-association-json-present-p (getf payload :snapshot-json))
      :source-present? (dom-association-json-present-p (getf payload :source-json))
      :target-present? (dom-association-json-present-p (getf payload :target-json))))
-  (error "Missing ~A anchor JSON." field-label))
+  (error "Missing ~A JSON." field-label))
 
 (defun call-hyperdoc-dom-association-constructor (&rest arguments)
   (let* ((package (find-package :hyperdoc))
@@ -124,6 +134,99 @@
                       (missing-dom-association-payload pane payload "source"))
      :target-json (or (getf payload :target-json)
                       (missing-dom-association-payload pane payload "target")))))
+
+(defun call-hyperdoc-dom-connect-snapshot-constructor (&rest arguments)
+  (let* ((package (find-package :hyperdoc))
+         (symbol (and package
+                      (find-symbol "MAKE-DOM-CONNECT-SESSION-SNAPSHOT-FROM-JSON"
+                                   package))))
+    (unless (and symbol (fboundp symbol))
+      (error "HyperDoc Connect snapshot constructor is unavailable."))
+    (apply (symbol-function symbol) arguments)))
+
+(defun make-dom-connect-snapshot-from-submit-payload (pane payload)
+  (with-slots (object) pane
+    (call-hyperdoc-dom-connect-snapshot-constructor
+     :context-object object
+     :context-view-title (getf payload :context-view-title)
+     :snapshot-json
+     (or (getf payload :snapshot-json)
+         (missing-dom-association-payload pane payload "Connect snapshot")))))
+
+(defun dom-connect-snapshot-submit-payload-p (payload)
+  (let ((transport (getf payload :transport)))
+    (and (stringp transport)
+         (string= transport "connect-snapshot-v1"))))
+
+(defun call-hyperdoc-connect-snapshot-accessor (symbol-name snapshot)
+  (let ((symbol (find-symbol symbol-name :hyperdoc)))
+    (when (and symbol (fboundp symbol))
+      (ignore-errors
+        (funcall (symbol-function symbol) snapshot)))))
+
+(defun set-connect-snapshot-pane-attribute (pane attribute-name value)
+  (setf (clog:attribute (clog-obj pane) attribute-name)
+        (or value "")))
+
+(defun mark-dom-connect-snapshot-pane (pane payload snapshot)
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-inspection" "true")
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-inspection-pane-id"
+   (getf payload :inspection-pane-id))
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-session-id"
+   (call-hyperdoc-connect-snapshot-accessor "SESSION-ID-OF" snapshot))
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-phase"
+   (call-hyperdoc-connect-snapshot-accessor "PHASE-OF" snapshot))
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-origin-pane-id"
+   (call-hyperdoc-connect-snapshot-accessor "ORIGIN-PANE-ID-OF" snapshot))
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-captured-at"
+   (let ((captured-at
+           (call-hyperdoc-connect-snapshot-accessor "CAPTURED-AT-OF" snapshot)))
+     (and captured-at (format nil "~A" captured-at)))))
+
+(defun dom-connect-snapshot-pane-match-p (pane inspection-pane-id)
+  (let ((marked (dom-association-attribute-value
+                 (clog-obj pane)
+                 "data-hyperdoc-connect-inspection"))
+        (pane-id (dom-association-attribute-value
+                  (clog-obj pane)
+                  "data-hyperdoc-connect-inspection-pane-id")))
+    (and (stringp inspection-pane-id)
+         (stringp marked)
+         (stringp pane-id)
+         (string= marked "true")
+         (string= pane-id inspection-pane-id))))
+
+(defun find-reusable-dom-connect-snapshot-pane (inspector payload)
+  (let ((inspection-pane-id (getf payload :inspection-pane-id)))
+    (when inspection-pane-id
+      (loop for candidate in (fset:convert 'list (inspector-panes inspector))
+            when (dom-connect-snapshot-pane-match-p candidate inspection-pane-id)
+              return candidate))))
+
+(defun open-dom-connect-snapshot-pane (inspector payload snapshot)
+  (let ((existing-pane (find-reusable-dom-connect-snapshot-pane inspector payload)))
+    (if existing-pane
+        (progn
+          (setf (pane-object existing-pane) snapshot)
+          (refresh existing-pane)
+          (mark-dom-connect-snapshot-pane existing-pane payload snapshot)
+          (select-view existing-pane "Summary")
+          (clog:focus (clog-obj existing-pane))
+          existing-pane)
+        (let ((pane (create-pane inspector snapshot)))
+          (mark-dom-connect-snapshot-pane pane payload snapshot)
+          pane))))
+
+(defun dom-association-success-message (payload)
+  (if (dom-connect-snapshot-submit-payload-p payload)
+      "Connect state opened."
+      "Association pane opened."))
 
 (defun notify-dom-association-browser (element request-id status
                                        &key message detail)
@@ -228,20 +331,30 @@
                    :ms (maybe-elapsed-millis click-start))
                   (notify-dom-association-browser
                    obj request-id "pane-open-succeeded"
-                   :message "Association pane opened."))
+                   :message (dom-association-success-message submit-payload)))
                 (let ((association
-                        (if request-id
-                            (make-dom-association-from-submit-payload
-                             pane submit-payload)
-                            (eval-thunk-with-active-button
-                             clog-obj obj target))))
+                        (cond
+                          ((and request-id
+                                (dom-connect-snapshot-submit-payload-p
+                                 submit-payload))
+                           (make-dom-connect-snapshot-from-submit-payload
+                            pane submit-payload))
+                          (request-id
+                           (make-dom-association-from-submit-payload
+                            pane submit-payload))
+                          (t
+                           (eval-thunk-with-active-button
+                            clog-obj obj target)))))
                   (maybe-log-inspector-performance
                    :dom-association/object-created
                    :object (maybe-summarize-object-for-log association))
                   (maybe-log-inspector-performance
                    :dom-association/pane-open-requested
                    :mode :evaluated-object)
-                  (create-pane inspector association)
+                  (if (dom-connect-snapshot-submit-payload-p submit-payload)
+                      (open-dom-connect-snapshot-pane
+                       inspector submit-payload association)
+                      (create-pane inspector association))
                   (maybe-log-inspector-performance
                    :dom-association/pane-open-succeeded
                    :mode :evaluated-object
@@ -249,7 +362,8 @@
                    :ms (maybe-elapsed-millis click-start))
                   (notify-dom-association-browser
                    obj request-id "pane-open-succeeded"
-                   :message "Association pane opened."))))
+                   :message (dom-association-success-message
+                             submit-payload)))))
         (error (c)
           (let ((detail (princ-to-string c)))
             (maybe-log-inspector-performance
