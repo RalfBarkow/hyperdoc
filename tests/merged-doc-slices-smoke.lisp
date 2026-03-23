@@ -313,6 +313,21 @@
                   (hyperdoc::merge-action-of list-editions-recipe)
                   "The list-editions execution recipe should preserve the adopt-upstream action")))
 
+(defun run-drew-mind-and-mechanism-doc-slice-smoke-test ()
+  (dolist (entry '((hyperdoc::computationalism-topic "Computationalism")
+                   (hyperdoc::symbols-and-semantics-topic "Symbols and semantics")
+                   (hyperdoc::informational-meaning-topic "Informational meaning")
+                   (hyperdoc::intentionality-topic "Intentionality")))
+    (destructuring-bind (symbol title) entry
+      (assert-topic-function-present symbol title)))
+  (dolist (title '("Mind and Mechanism"
+                   "Mind and Mechanism compatibility with HyperDoc"
+                   "Symbols and semantics in Mind and Mechanism"
+                   "Computationalism in Mind and Mechanism"))
+    (assert-hyperdoc-page-present title))
+  (assert-true (null (hyperbook:find-page hyperdoc::*topics* "Mind and Mechanism"))
+               "Mind and Mechanism should remain a HyperDoc page-level bridge, not a topic"))
+
 (defun run-merged-doc-slices-smoke-tests ()
   (run-clickable-commit-ids-doc-slice-smoke-test)
   (run-literate-tracing-doc-slice-smoke-test)
@@ -321,5 +336,6 @@
   (run-codex-handover-doc-slice-smoke-test)
   (run-clickable-commit-example-discovery-smoke-test)
   (run-upstream-main-merge-preparation-chain-smoke-test)
+  (run-drew-mind-and-mechanism-doc-slice-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)

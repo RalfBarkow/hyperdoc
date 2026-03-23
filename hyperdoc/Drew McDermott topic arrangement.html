@@ -55,6 +55,16 @@
   <li><a hyperbook="topics" page="Image-oriented development"><tt>Image-oriented development</tt></a></li>
 </ul>
 
+<h2>Existing preserved cluster</h2>
+
+<p>
+  The repository already preserves the Drew import as a coherent cluster: the
+  <tt>YTools</tt>/<tt>Lexiparse</tt>/<tt>Nisp</tt>/<tt>Nity</tt>/<tt>Opt</tt>/
+  <tt>Optop</tt> software line, the <tt>PDDL</tt> and <tt>Opt</tt> planning
+  line, ontology translation, estimated-regression planning, autonomous process,
+  and a bridge from Drew's work into running image coherence.
+</p>
+
 <h2>Boundary</h2>
 
 <p>
@@ -62,4 +72,21 @@
   topics only when they introduce a reusable concept for HyperDoc. The clearest candidate
   is <i>A framework for maintaining the coherence of a running Lisp</i>. Most of the other
   papers belong as references inside pages rather than as one-topic-per-paper objects.
+</p>
+
+<p>
+  Apply the same rule to <i>Mind and Mechanism</i>. Keep the book title as a
+  page-level bridge/source unless that exact title already exists as a topic.
+  For this slice, check exact titles in <tt>hyperdoc/topics.lisp</tt> first, then
+  aliases, near-duplicates, and broader existing topics, and only then add new
+  factories. The only new exact-title topic additions justified here are
+  <tt>Computationalism</tt>, <tt>Symbols and semantics</tt>,
+  <tt>Informational meaning</tt>, and <tt>Intentionality</tt>.
+</p>
+
+<p>
+  Running image coherence must also stay distinct from
+  <tt>Live image versus durable source</tt>: the former is about internal
+  coherence of an evolving live system, while the latter is about which artifact
+  remains authoritative for rebuilds.
 </p>

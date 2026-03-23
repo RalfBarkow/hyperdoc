@@ -2036,6 +2036,42 @@
    "Class precedence list"
    "Ordered CLOS class linearization used to resolve inheritance and method lookup."))
 
+;; Topic objects for the Drew McDermott Mind and Mechanism compatibility slice.
+(defun computationalism-topic ()
+  (make-topic
+   :id "computationalism"
+   :title "Computationalism"
+   :summary "View that minds can be explained in terms of computation, with the relevant mechanisms realized in concrete information-processing systems."
+   :references '("Computationalism in Mind and Mechanism"
+                 "Mind and Mechanism compatibility with HyperDoc"
+                 "Drew McDermott Lisp, Planning, and Software")))
+
+(defun symbols-and-semantics-topic ()
+  (make-topic
+   :id "symbols-and-semantics"
+   :title "Symbols and semantics"
+   :summary "Question of how symbol structures in computational systems acquire meanings that matter to explanation and behavior."
+   :references '("Symbols and semantics in Mind and Mechanism"
+                 "Mind and Mechanism compatibility with HyperDoc"
+                 "PDDL and Opt in Drew McDermott's work")))
+
+(defun informational-meaning-topic ()
+  (make-topic
+   :id "informational-meaning"
+   :title "Informational meaning"
+   :summary "Meaning relation in which an event provides evidence about a situation because its occurrence changes the probability of that situation."
+   :references '("Symbols and semantics in Mind and Mechanism"
+                 "Mind and Mechanism compatibility with HyperDoc")))
+
+(defun intentionality-topic ()
+  (make-topic
+   :id "intentionality"
+   :title "Intentionality"
+   :summary "Capacity of mental or symbolic states to be about something, approached here through their causal roles and environmental relations."
+   :references '("Symbols and semantics in Mind and Mechanism"
+                 "Mind and Mechanism compatibility with HyperDoc"
+                 "PDDL and Opt in Drew McDermott's work")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic
