@@ -23,6 +23,14 @@
   against the locked upstream module set.
 </p>
 
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Raspberry Pi first-boot access paths"><tt>Raspberry Pi first-boot access paths</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli preconfigured headless image"><tt>Kioskberrli preconfigured headless image</tt></a></li>
+  <li><a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>First-boot access dry-run examples</tt></a></li>
+</ul>
+
 <h4>1. Build evidence</h4>
 
 <ul>
@@ -41,7 +49,7 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
 <ul>
   <li>Flash the image to an SD card.</li>
-  <li>Boot it on the actual Raspberry Pi 4 Model B with HDMI attached.</li>
+  <li>Boot it on the actual Raspberry Pi 4 Model B with a local console available unless the image is already preconfigured for fully headless access.</li>
   <li>Confirm that the system reaches a usable graphical kiosk session.</li>
 </ul>
 
@@ -65,13 +73,47 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 <h4>4. Remote maintenance</h4>
 
 <ul>
-  <li>Add SSH key-based maintenance access.</li>
+  <li>For the stock official SD image, assume one local-console bootstrap unless network plus SSH/login access was preseeded.</li>
+  <li>Prefer a custom image that already contains SSH key-based maintenance access for the declared admin user.</li>
   <li>Disable password login once key access is confirmed.</li>
+  <li>Disable root SSH once the normal admin path works.</li>
   <li>Verify that the device can be recovered without on-site keyboard use.</li>
 </ul>
 
 <p>
   This is the minimum operational standard for a wall-mounted device.
+</p>
+
+<p>
+  The module fragment below belongs to the custom-image / fully-headless path.
+  It is not a claim that the stock official SD image is SSH-ready on first
+  boot.
+</p>
+
+<pre>
+{ ... }:
+{
+  networking.hostName = "kioskberrli";
+
+  services.openssh.enable = true;
+  services.openssh.settings.PasswordAuthentication = false;
+  services.openssh.settings.PermitRootLogin = "no";
+
+  users.users.rgb = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... replace-with-real-rgb-key"
+    ];
+  };
+
+  security.sudo.wheelNeedsPassword = false;
+}
+</pre>
+
+<p>
+  If a temporary password-based bootstrap was needed earlier, remove it after
+  the key-based path is proven.
 </p>
 
 <h4>5. Browser and session recovery</h4>

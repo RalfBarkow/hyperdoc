@@ -524,6 +524,169 @@ Raw list structure is preserved as a secondary view."
   (or (patch-target-of (official-rpi-tutorial-step "official-boot-pi"))
       (error "Missing patch-target object for official boot step.")))
 
+(defun rpi-first-boot-access-command-plan
+    (&key
+       (model :official)
+       (network-reachable-p t)
+       (ssh-login-ready-p nil)
+       (host-or-ip "kioskberrli.local")
+       (admin-user "rgb"))
+  "Return a semantic runbook for first-boot access decisions without executing network actions.
+
+MODEL accepts :OFFICIAL for the stock official SD-image path and :CUSTOM-IMAGE
+for the fully headless preconfigured-image path."
+  (labels ((make-step (id title summary &key diagnosis commands)
+             (make-instance 'sd-card-procedure-step
+                            :id id
+                            :title title
+                            :summary summary
+                            :diagnosis diagnosis
+                            :commands commands))
+           (make-runbook (id title summary section)
+             (let ((runbook (make-instance 'sd-card-runbook
+                                           :id id
+                                           :title title
+                                           :summary summary
+                                           :sections (list section))))
+               (setf (slot-value runbook 'raw-structure)
+                     (sd-card-runbook->raw-structure runbook))
+               runbook)))
+    (ecase model
+      (:official
+       (let* ((boot-step (official-rpi-tutorial-step "official-boot-pi"))
+              (connect-step (official-rpi-tutorial-step "official-connect-pi-over-ssh"))
+              (edit-step (official-rpi-tutorial-step "official-edit-configuration"))
+              (bootstrap-step
+                (make-step "official-local-console-bootstrap"
+                           "Continue from local console to establish remote access"
+                           "Use a directly attached console once to set a password or authorized key, confirm sshd, and discover hostname/IP before returning to the SSH continuation step."
+                           :diagnosis
+                           "This is the semi-headless bootstrap path: stock official boot is not assumed to be SSH-ready."
+                           :commands
+                           (list "sudo systemctl status sshd"
+                                 "hostname"
+                                 "ip -brief address"
+                                 "# set password or install an authorized key through the local console path")))
+              (remote-ready-p (and network-reachable-p ssh-login-ready-p))
+              (continuation-note
+                (cond (remote-ready-p
+                       "Remote continuation is valid: the booted official image is reachable and a usable SSH/login path already exists.")
+                      (network-reachable-p
+                       "Network is reachable, but SSH/login prerequisites are still missing. Use a local console once, then resume remote maintenance over SSH.")
+                      (t
+                       "No confirmed network path exists yet. Stop remote continuation and continue from a local console.")))
+              (steps (if remote-ready-p
+                         (list boot-step connect-step edit-step)
+                         (list boot-step bootstrap-step connect-step edit-step)))
+              (section (make-instance 'sd-card-runbook-section
+                                      :id "official-sd-image-first-boot-access"
+                                      :title "Official SD image first-boot access"
+                                      :summary "Decision path for the stock official Raspberry Pi SD-image workflow."
+                                      :steps steps
+                                      :continuation-note continuation-note
+                                      :raw-structure
+                                      (list :section "Official SD image first-boot access"
+                                            :model :official
+                                            :network-reachable-p network-reachable-p
+                                            :ssh-login-ready-p ssh-login-ready-p))))
+         (make-runbook "rpi-first-boot-access-official"
+                       "Raspberry Pi first-boot access paths"
+                       "Stock official SD-image first boot with either remote continuation or one-time local-console bootstrap."
+                       section)))
+      (:custom-image
+       (let* ((preseed-step
+                (make-step "custom-image-preseeded-access"
+                           "Build a custom image with preseeded access"
+                           "Fully headless first boot requires OpenSSH, a normal admin user, and an authorized key already present in the image."
+                           :diagnosis
+                           "This is a different access path from stock official SD-image boot, but it still converges on the same post-boot maintenance flow."))
+              (boot-step
+                (make-step "custom-image-boot-pi"
+                           "Boot the preconfigured custom image"
+                           "Boot the flashed custom image on the Pi and wait for it to join the network with its predeclared access path."))
+              (discover-step
+                (make-step "custom-image-discover-host"
+                           "Discover hostname or IP on the network"
+                           "Determine the host or IP that the preconfigured image obtained after boot."
+                           :commands
+                           (list (format nil "PI_HOST_OR_IP=\"${PI_HOST_OR_IP:-~A}\"" host-or-ip)
+                                 "ping -c 1 \"$PI_HOST_OR_IP\"")))
+              (connect-step
+                (make-step "custom-image-ssh-admin-login"
+                           "SSH in as the declared admin user"
+                           "Open an SSH session as the normal admin user declared in the custom image."
+                           :commands
+                           (list (format nil "SSH_TARGET=\"${SSH_TARGET:-~A@$PI_HOST_OR_IP}\"" admin-user)
+                                 "ssh \"$SSH_TARGET\"")))
+              (edit-step (official-rpi-tutorial-step "official-edit-configuration"))
+              (section (make-instance 'sd-card-runbook-section
+                                      :id "custom-image-first-boot-access"
+                                      :title "Fully headless custom-image first boot"
+                                      :summary "Preferred Kioskberrli maintenance path once access is declaratively preseeded into the image."
+                                      :steps (list preseed-step
+                                                   boot-step
+                                                   discover-step
+                                                   connect-step
+                                                   edit-step)
+                                      :continuation-note
+                                      "First boot stays headless because the image already includes OpenSSH, a normal admin user, and an authorized key."
+                                      :raw-structure
+                                      (list :section "Fully headless custom-image first boot"
+                                            :model :custom-image
+                                            :host-or-ip host-or-ip
+                                            :admin-user admin-user))))
+         (make-runbook "rpi-first-boot-access-custom-image"
+                       "Raspberry Pi first-boot access paths"
+                       "Fully headless first boot for a preconfigured custom image with declared SSH access."
+                       section))))))
+
+(defun rpi-first-boot-access-dry-run
+    (&key
+       (stream *standard-output*)
+       (model :official)
+       (network-reachable-p t)
+       (ssh-login-ready-p nil)
+       (host-or-ip "kioskberrli.local")
+       (admin-user "rgb"))
+  "Print the first-boot access logic without executing network or SSH actions."
+  (let* ((runbook (rpi-first-boot-access-command-plan
+                   :model model
+                   :network-reachable-p network-reachable-p
+                   :ssh-login-ready-p ssh-login-ready-p
+                   :host-or-ip host-or-ip
+                   :admin-user admin-user))
+         (section (first (sections-of runbook))))
+    (format stream "~&Raspberry Pi first-boot access dry-run:~%")
+    (ecase model
+      (:official
+       (format stream "  Access model: stock official SD image~%")
+       (format stream "  Booted official image: yes~%")
+       (format stream "  Network reachable? ~:[no~;yes~]~%" network-reachable-p)
+       (format stream "  SSH/login path already configured? ~:[no~;yes~]~%" ssh-login-ready-p)
+       (if (and network-reachable-p ssh-login-ready-p)
+           (format stream "  Decision: open SSH session path and continue remotely.~%")
+           (progn
+             (format stream "  Decision: stop and continue from local console.~%")
+             (format stream "  Path: semi-headless bootstrap, then resume SSH continuation.~%"))))
+      (:custom-image
+       (format stream "  Access model: fully headless custom image~%")
+       (format stream "  Custom image includes OpenSSH + authorized key: yes~%")
+       (format stream "  Host/IP hint: ~A~%" host-or-ip)
+       (format stream "  Admin user: ~A~%" admin-user)
+       (format stream "  Decision: boot, discover host/IP, and SSH in as the normal admin user.~%")))
+    (format stream "~&~A~%" (title-of section))
+    (loop for step in (steps-of section)
+          for n from 1
+          do (progn
+               (format stream "  ~2D. ~A~%" n (title-of step))
+               (when (commands-of step)
+                 (loop for command in (commands-of step)
+                       do (format stream "      - ~A~%" command)))))
+    (when (continuation-note-of section)
+      (format stream "~&Continuation: ~A~%" (continuation-note-of section)))
+    (format stream "~&Note: this is a dry-run printout; no network, SSH, or shell command was executed.~%")
+    runbook))
+
 (defun sd-card-creation-dry-run
     (&key (stream *standard-output*)
           (download-url
@@ -565,6 +728,37 @@ Raw list structure is preserved as a secondary view."
                      :title "SD card creation command plan (dry-run)"
                      :transcript text
                      :runbook runbook))))
+
+(defexample rpi-first-boot-access-dry-run-example
+  "Return inspectable dry-run transcripts for the first-boot access paths in this slice."
+  (flet ((transcript (title &rest args)
+           (let (runbook)
+             (let ((text (with-output-to-string (stream)
+                           (setf runbook
+                                 (apply #'rpi-first-boot-access-dry-run
+                                        :stream stream
+                                        args)))))
+               (make-instance 'sd-card-dry-run-transcript
+                              :title title
+                              :transcript text
+                              :runbook runbook)))))
+    (list :official-remote-ready
+          (transcript "Stock official SD image with remote continuation (dry-run)"
+                      :model :official
+                      :network-reachable-p t
+                      :ssh-login-ready-p t
+                      :host-or-ip "pi.local")
+          :official-needs-local-console
+          (transcript "Stock official SD image with semi-headless bootstrap (dry-run)"
+                      :model :official
+                      :network-reachable-p t
+                      :ssh-login-ready-p nil
+                      :host-or-ip "pi.local")
+          :fully-headless-custom-image
+          (transcript "Fully headless custom image first boot (dry-run)"
+                      :model :custom-image
+                      :host-or-ip "kioskberrli.local"
+                      :admin-user "rgb"))))
 
 (defexample sd-card-primary-semantic-entrypoints-example
   "Regression check: primary page entrypoints resolve to semantic objects, not raw cons lists."
@@ -666,6 +860,53 @@ Raw list structure is preserved as a secondary view."
           :to-step (id-of (to-step-of defect))
           :source-target (id-of defect)
           :patch-target (id-of patch))))
+
+(defexample rpi-first-boot-access-dry-run-regression-example
+  "Regression check: first-boot access dry-runs cover stock-remote, semi-headless bootstrap, and fully headless custom-image paths."
+  (let (official-remote-runbook official-local-runbook custom-runbook)
+    (let* ((official-remote-text
+             (with-output-to-string (stream)
+               (setf official-remote-runbook
+                     (rpi-first-boot-access-dry-run
+                      :stream stream
+                      :model :official
+                      :network-reachable-p t
+                      :ssh-login-ready-p t
+                      :host-or-ip "pi.local"))))
+           (official-local-text
+             (with-output-to-string (stream)
+               (setf official-local-runbook
+                     (rpi-first-boot-access-dry-run
+                      :stream stream
+                      :model :official
+                      :network-reachable-p t
+                      :ssh-login-ready-p nil
+                      :host-or-ip "pi.local"))))
+           (custom-text
+             (with-output-to-string (stream)
+               (setf custom-runbook
+                     (rpi-first-boot-access-dry-run
+                      :stream stream
+                      :model :custom-image
+                      :host-or-ip "kioskberrli.local"
+                      :admin-user "rgb")))))
+      (assert-eql 'sd-card-runbook (type-of official-remote-runbook))
+      (assert-eql 'sd-card-runbook (type-of official-local-runbook))
+      (assert-eql 'sd-card-runbook (type-of custom-runbook))
+      (assert (search "Access model: stock official SD image" official-remote-text))
+      (assert (search "Decision: open SSH session path and continue remotely." official-remote-text))
+      (assert (search "SSH/login path already configured? yes" official-remote-text))
+      (assert (search "Access model: stock official SD image" official-local-text))
+      (assert (search "Decision: stop and continue from local console." official-local-text))
+      (assert (search "Path: semi-headless bootstrap, then resume SSH continuation." official-local-text))
+      (assert (search "Continue from local console to establish remote access" official-local-text))
+      (assert (search "Access model: fully headless custom image" custom-text))
+      (assert (search "Custom image includes OpenSSH + authorized key: yes" custom-text))
+      (assert (search "Decision: boot, discover host/IP, and SSH in as the normal admin user." custom-text))
+      (assert (search "SSH_TARGET=\"${SSH_TARGET:-rgb@$PI_HOST_OR_IP}\"" custom-text))
+      (list :official-remote-summary (summary-of official-remote-runbook)
+            :official-local-summary (summary-of official-local-runbook)
+            :custom-summary (summary-of custom-runbook)))))
 
 (defexample hydra-filename-outcome-states-example
   "Contrast historical filename-loss with corrected download and post-decompression state progression."
@@ -793,6 +1034,39 @@ Raw list structure is preserved as a secondary view."
     (list :expr-attr expr-attr
           :good-type (type-of good)
           :bad-condition-type (type-of bad))))
+
+(defexample rpi-first-boot-access-page-wiring-regression-example
+  "Regression check: the Pi first-boot access slice is linked from the edited HyperDoc pages."
+  (flet ((page-string (path)
+           (uiop:read-file-string (asdf:system-relative-pathname :hyperdoc path))))
+    (let* ((specs '(("hyperdoc/official-tutorial-nixos-sd-image-on-raspberry-pi-4-400.html"
+                     "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
+                     "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")
+                    ("hyperdoc/Prepare the AArch64 image.html"
+                     "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
+                     "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")
+                    ("hyperdoc/Runbook - Build and Flash NixOS SD Image for Kioskberrli.html"
+                     "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
+                     "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")
+                    ("hyperdoc/Salon Pi 4 Kiosk Hardening Checklist.html"
+                     "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
+                     "hyperbook=\"topics\" page=\"Kioskberrli preconfigured headless image\"")
+                    ("hyperdoc/two-installation-models-sd-image-vs-classic-installer.html"
+                     "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
+                     "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")))
+           (results
+             (loop for (path required-a required-b) in specs
+                   for html = (page-string path)
+                   do (progn
+                        (assert (search required-a html))
+                        (assert (search required-b html)))
+                   collect (list :page path
+                                 :required-a required-a
+                                 :required-b required-b))))
+      (assert (search "openssh.authorizedKeys.keys"
+                      (page-string "hyperdoc/Salon Pi 4 Kiosk Hardening Checklist.html")))
+      (list :pages results
+            :snippet-page "hyperdoc/Salon Pi 4 Kiosk Hardening Checklist.html"))))
 
 ;;
 ;; hauptsache / kioskberrli reference objects

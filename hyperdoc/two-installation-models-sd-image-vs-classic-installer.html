@@ -14,6 +14,9 @@
   <li><a hyperbook="topics" page="Classic installer model"><tt>Classic installer model</tt></a></li>
   <li><a hyperbook="topics" page="nixos-rebuild"><tt>nixos-rebuild</tt></a></li>
   <li><a hyperbook="topics" page="nixos-rebuild boot"><tt>nixos-rebuild boot</tt></a></li>
+  <li><a hyperbook="topics" page="Raspberry Pi first-boot access paths"><tt>Raspberry Pi first-boot access paths</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli preconfigured headless image"><tt>Kioskberrli preconfigured headless image</tt></a></li>
+  <li><a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>First-boot access dry-run examples</tt></a></li>
 </ul>
 
 <h2>Decision Table</h2>
@@ -51,6 +54,48 @@ edit /etc/nixos/configuration.nix
 nixos-rebuild boot
 reboot
 </pre>
+
+<h2>First-boot access paths inside the SD-image model</h2>
+
+<p>
+  The SD-image model still contains three distinct first-boot access paths.
+  These are access variants inside the same installation model, not a third
+  installer.
+</p>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <th>What must already be true</th>
+    <th>Continuation</th>
+  </tr>
+  <tr>
+    <td>stock official SD image</td>
+    <td>only the upstream SD image was flashed</td>
+    <td>SSH is optional; if reachability or login prerequisites are missing, continue from a local console</td>
+  </tr>
+  <tr>
+    <td>semi-headless bootstrap</td>
+    <td>the Pi booted, but remote login is not ready yet</td>
+    <td>use HDMI/keyboard once to establish the login path, then continue remotely</td>
+  </tr>
+  <tr>
+    <td>fully headless custom image</td>
+    <td>the image already contains OpenSSH, a normal admin user, and an authorized key</td>
+    <td>boot, discover host/IP, SSH in as the declared admin user</td>
+  </tr>
+</table>
+
+<p>
+  Remote SSH provisioning to a machine that is already running and reachable is
+  real, but it should not be confused with what the stock official Raspberry Pi
+  SD-image tutorial guarantees on first boot.
+</p>
+
+<p>
+  Inspect the branch logic here:
+  <a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>rpi-first-boot-access-dry-run-example</tt></a>.
+</p>
 
 <h2>Classic Installer Model</h2>
 

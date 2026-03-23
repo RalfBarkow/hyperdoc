@@ -407,6 +407,8 @@
     (expr-string-quoting-regression-topic :topic-id 912384 :topicmap-id 912102)
     (preflight-rpi-sd-image-checklist-topic :topic-id 912384 :topicmap-id 912102)
     (two-installation-models-topic :topic-id 912384 :topicmap-id 912102)
+    (rpi-first-boot-access-paths-topic :topic-id 912384 :topicmap-id 912102)
+    (kioskberrli-preconfigured-headless-image-topic :topic-id 912384 :topicmap-id 912102)
     (dmx-topic-912138 :topic-id 912138 :topicmap-id 912102 :label "Explicit DMX topic mapping")
     (nix-shell-topic :topic-id 912384 :topicmap-id 912102)
     (wget-topic :topic-id 912384 :topicmap-id 912102)
@@ -764,6 +766,27 @@
    :title "Two Installation Models: SD Image vs Classic Installer"
    :summary "Distinguishes prebuilt SD-image workflow from classic installer workflow to avoid command-model drift."
    :references '("Prepare the AArch64 image")))
+
+(defun rpi-first-boot-access-paths-topic ()
+  (make-topic
+   :id "rpi-first-boot-access-paths"
+   :title "Raspberry Pi first-boot access paths"
+   :summary "Distinguishes stock official SD-image boot, one-time local-console bootstrap, and fully headless preconfigured-image access."
+   :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Prepare the AArch64 image"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Salon Pi 4 Kiosk Hardening Checklist"
+                 "Two Installation Models: SD Image vs Classic Installer")))
+
+(defun kioskberrli-preconfigured-headless-image-topic ()
+  (make-topic
+   :id "kioskberrli-preconfigured-headless-image"
+   :title "Kioskberrli preconfigured headless image"
+   :summary "Preferred maintenance target: a custom image enables OpenSSH, declares a normal admin user, seeds authorized keys, and avoids password/root SSH on first boot."
+   :references '("Salon Pi 4 Kiosk Hardening Checklist"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Two Installation Models: SD Image vs Classic Installer")))
 
 (defun nixos-rebuild-topic ()
   (make-topic

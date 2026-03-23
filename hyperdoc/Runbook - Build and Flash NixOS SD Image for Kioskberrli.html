@@ -17,6 +17,9 @@
   <li><a hyperbook="topics" page="nixos-rebuild switch"><tt>nixos-rebuild switch</tt></a></li>
   <li><a hyperbook="topics" page="First rebuild before first reboot"><tt>First rebuild before first reboot</tt></a></li>
   <li><a hyperbook="topics" page="Reboot safety gate"><tt>Reboot safety gate</tt></a></li>
+  <li><a hyperbook="topics" page="Raspberry Pi first-boot access paths"><tt>Raspberry Pi first-boot access paths</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli preconfigured headless image"><tt>Kioskberrli preconfigured headless image</tt></a></li>
+  <li><a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>First-boot access dry-run examples</tt></a></li>
 </ul>
 
 <h2>Scope</h2>
@@ -213,12 +216,51 @@ diskutil eject /dev/diskN
 
 <h2>First Boot on Pi</h2>
 
+<p>
+  After flashing, choose the first-boot access path that matches the image you
+  actually booted. Do not silently upgrade the stock official image into a
+  fully unattended SSH story.
+</p>
+
+<h3>Stock official SD image</h3>
+
 <ol>
   <li>Boot from flashed SD card.</li>
-  <li>Edit <tt>/etc/nixos/configuration.nix</tt> for local network/SSH settings.</li>
+  <li>If network reachability plus SSH/login prerequisites already exist, continue with the explicit SSH-connect step; otherwise continue from a local console.</li>
+  <li>Edit <tt>/etc/nixos/configuration.nix</tt> on the running machine.</li>
   <li>Run first rebuild with <tt>nixos-rebuild boot</tt> (not <tt>switch</tt>).</li>
   <li>Reboot into the new generation.</li>
 </ol>
+
+<h3>Semi-headless bootstrap</h3>
+
+<ol>
+  <li>Use HDMI/keyboard once to set a password or authorized key, confirm <tt>sshd</tt>, and discover hostname/IP.</li>
+  <li>Resume remote maintenance over SSH after the login path exists.</li>
+  <li>Treat this as a one-time bootstrap bridge, not as proof that stock first boot was zero-touch.</li>
+</ol>
+
+<h3>Fully headless custom image</h3>
+
+<p>
+  This is the preferred long-term maintenance story for <tt>Kioskberrli</tt>.
+</p>
+
+<ol>
+  <li>Build and flash a custom image that already includes OpenSSH, a normal admin user, and an authorized key.</li>
+  <li>Boot the Pi and discover its hostname/IP on the network.</li>
+  <li>SSH in as the declared admin user and continue the same maintenance flow from there.</li>
+</ol>
+
+<p>
+  Inspect the dry-run object for all three branches:
+  <a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>rpi-first-boot-access-dry-run-example</tt></a>.
+</p>
+
+<p>
+  Concrete custom-image module fragment:
+  <a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a>.
+</p>
 
 <h2>Pre-flight Gate Before Reboot</h2>
 
@@ -239,7 +281,7 @@ ls -la /dev/disk/by-label | grep -E 'FIRMWARE|NIXOS_SD' || true
 <ul>
   <li>image build/download is reproducible and recorded</li>
   <li>SD card boots on physical Pi 4</li>
-  <li>network and SSH come up</li>
+  <li>network comes up and the chosen first-boot access path is demonstrated</li>
   <li>kiosk session shows landing page after reboot</li>
 </ul>
 

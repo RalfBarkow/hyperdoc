@@ -17,6 +17,9 @@
   <li><a hyperbook="topics" page="Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"><tt>Official Tutorial: NixOS SD Image on Raspberry Pi 4/400</tt></a></li>
   <li><a hyperbook="topics" page="Pre-flight Checklist for Raspberry Pi NixOS SD Images"><tt>Pre-flight Checklist for Raspberry Pi NixOS SD Images</tt></a></li>
   <li><a hyperbook="topics" page="Two Installation Models: SD Image vs Classic Installer"><tt>Two Installation Models: SD Image vs Classic Installer</tt></a></li>
+  <li><a hyperbook="topics" page="Raspberry Pi first-boot access paths"><tt>Raspberry Pi first-boot access paths</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli preconfigured headless image"><tt>Kioskberrli preconfigured headless image</tt></a></li>
+  <li><a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>First-boot access dry-run examples</tt></a></li>
   <li><a hyperbook="topics" page="DMX Topic 912138"><tt>DMX Topic 912138</tt></a></li>
   <li><a hyperbook="topics" page="nix-shell"><tt>nix-shell</tt></a></li>
   <li><a hyperbook="topics" page="wget"><tt>wget</tt></a></li>
@@ -133,6 +136,25 @@
   <li><a hyperbook="topics" page="Procedure step 4: verify integrity">Verify artifact integrity against the Hydra-published SHA-256 before flashing.</a></li>
   <li><a hyperbook="topics" page="Procedure step 5: confirm architecture">Confirm filename and architecture include <tt>aarch64-linux</tt>.</a></li>
 </ol>
+
+<h2>First-boot access boundary</h2>
+
+<p>
+  Image preparation determines what kind of first boot is possible, but it does
+  not erase the distinction between stock SD-image boot and preconfigured
+  headless boot.
+</p>
+
+<ul>
+  <li><b>Stock official image:</b> preparing the upstream artifact gives you the official SD-image workflow. First boot is not assumed to be SSH-ready.</li>
+  <li><b>Semi-headless bootstrap:</b> if the flashed image boots but lacks a usable remote login path, plan one local-console pass to establish it.</li>
+  <li><b>Fully headless custom image:</b> if first boot must be remote from the start, this preparation phase has to produce a custom image with preseeded SSH access rather than only flashing the stock official artifact.</li>
+</ul>
+
+<p>
+  Dry-run object for this decision logic:
+  <a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>rpi-first-boot-access-dry-run-example</tt></a>.
+</p>
 
 <h2>Download Artifact from Hydra (Path A)</h2>
 
