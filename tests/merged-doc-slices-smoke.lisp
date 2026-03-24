@@ -466,6 +466,28 @@
    "hyperdoc/Association Topics for Stable Identity and Mutable Titles.html"
    "exact canonical title"))
 
+(defun run-reviewed-relation-topic-promotion-and-application-doc-slice-smoke-test ()
+  (assert-topic-function-present
+   'hyperdoc::reviewed-relation-topic-promotion-and-application-topic
+   "Reviewed relation-topic promotion and application")
+  (assert-hyperdoc-page-present
+   "Reviewed relation-topic promotion and application")
+  (assert-page-source-contains
+   "hyperdoc/Reviewed relation-topic promotion and application.html"
+   "page=\"Reviewed relation-topic promotion and application\"")
+  (assert-page-source-contains
+   "hyperdoc/Reviewed relation-topic promotion and application.html"
+   "find-class 'relation-topic-proposal")
+  (assert-page-source-contains
+   "hyperdoc/Reviewed relation-topic promotion and application.html"
+   "approval-gated seam")
+  (assert-page-source-contains
+   "hyperdoc/Reviewed relation-topic promotion and application.html"
+   "Stale append plans must therefore refuse exact-title duplication")
+  (assert-page-source-contains
+   "hyperdoc/Reviewed relation-topic promotion and application.html"
+   "without exposing the raw approval token"))
+
 (defun run-merged-doc-slices-smoke-tests ()
   (run-clickable-commit-ids-doc-slice-smoke-test)
   (run-literate-tracing-doc-slice-smoke-test)
@@ -479,5 +501,6 @@
   (run-dom-connect-submit-path-comparison-doc-slice-smoke-test)
   (run-snapshot-transport-doc-slice-smoke-test)
   (run-association-topics-doc-slice-smoke-test)
+  (run-reviewed-relation-topic-promotion-and-application-doc-slice-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)

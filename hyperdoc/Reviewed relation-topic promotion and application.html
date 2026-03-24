@@ -1,0 +1,73 @@
+<h1>Reviewed relation-topic promotion and application</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Runtime relation objects remain first-class inspectable objects in HyperDoc.
+  When one of those relations deserves durable topic identity, the relation is
+  promoted through a reviewed proposal and an advisory patch plan before any
+  authored file is edited. That keeps runtime inspection fast while preserving
+  authored sources as durable reconstruction points.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Reviewed relation-topic promotion and application"><tt>Reviewed relation-topic promotion and application</tt></a></li>
+  <li><a expr="(find-class 'relation-topic-proposal)"><tt>(find-class 'relation-topic-proposal)</tt></a></li>
+  <li><a expr="(find-class 'relation-topic-patch-plan)"><tt>(find-class 'relation-topic-patch-plan)</tt></a></li>
+  <li><a expr="(find-class 'approved-relation-topic-patch-application)"><tt>(find-class 'approved-relation-topic-patch-application)</tt></a></li>
+  <li><a expr="(promote-relation-to-topic-proposal (example-association-topics-relation))"><tt>(promote-relation-to-topic-proposal (example-association-topics-relation))</tt></a></li>
+  <li><a expr="(make-relation-topic-patch-plan (promote-relation-to-topic-proposal (example-association-topics-relation)))"><tt>(make-relation-topic-patch-plan (promote-relation-to-topic-proposal (example-association-topics-relation)))</tt></a></li>
+  <li><a page="Association Topics for Stable Identity and Mutable Titles"><tt>Association Topics for Stable Identity and Mutable Titles</tt></a></li>
+</ul>
+
+<h2>Reviewed promotion, not automatic topic creation</h2>
+
+<p>
+  Promotion to topic identity is reviewed, not automatic. Relation objects can
+  emit a proposal, an authoring bundle, and a collision-aware patch plan, but
+  those outputs remain advisory by default. They are meant to help a reviewer
+  decide whether the relation deserves durable topic treatment at all.
+</p>
+
+<h2>Exact-title collision is the merge key</h2>
+
+<p>
+  The practical merge key for <tt>hyperdoc/topics.lisp</tt> is the exact
+  canonical <tt>:title</tt>. If that exact title already exists, the reviewed
+  path is to edit the existing factory in place. It is operationally dangerous
+  to append a second factory with the same exact title.
+</p>
+
+<p>
+  Stale append plans must therefore refuse exact-title duplication instead of
+  silently appending another factory. The reviewed plan can stay inspectable,
+  but the apply seam must stop before mutating authored files when the exact
+  title already exists in the authored target.
+</p>
+
+<h2>Approval-gated application seam</h2>
+
+<p>
+  Application is separate from proposal and patch-plan generation. Bundles and
+  patch plans are advisory by default; mutation happens only through an explicit
+  approval-gated seam. That seam is restricted to local authored repo targets
+  only: <tt>hyperdoc/topics.lisp</tt> and a candidate HyperDoc page file.
+</p>
+
+<p>
+  Approved application yields an inspectable application result object. The
+  result records patch-plan identity, repo-root evidence, applied paths,
+  performed actions, and safe approval evidence. Approval evidence remains
+  inspectable without exposing the raw approval token in inspector views.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Association topics">Association topics</a></li>
+  <li><a page="Association Topics for Stable Identity and Mutable Titles">Association Topics for Stable Identity and Mutable Titles</a></li>
+  <li><a page="How to merge proposed topic additions into hyperdoc/topics.lisp">How to merge proposed topic additions into hyperdoc/topics.lisp</a></li>
+</ul>
+

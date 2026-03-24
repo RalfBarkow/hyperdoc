@@ -2533,6 +2533,15 @@
                  "How to merge proposed topic additions into hyperdoc/topics.lisp"
                  "Relating the review contents to existing HyperDoc topics and pages")))
 
+(defun reviewed-relation-topic-promotion-and-application-topic ()
+  (make-topic
+   :id "reviewed-relation-topic-promotion-and-application"
+   :title "Reviewed relation-topic promotion and application"
+   :summary "Operational pattern in which runtime relation objects stay first-class inspectables, promotion and patch planning remain advisory by default, and authored repo mutation happens only through an explicit approval-gated application seam."
+   :references '("Reviewed relation-topic promotion and application"
+                 "Association Topics for Stable Identity and Mutable Titles"
+                 "How to merge proposed topic additions into hyperdoc/topics.lisp")))
+
 (defun bootstrappability-as-social-architecture-topic ()
   (make-topic
    :id "bootstrappability-as-social-architecture"
