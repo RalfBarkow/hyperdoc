@@ -1,0 +1,101 @@
+<h1>Normal association submit path vs evidence path</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page makes the submit-boundary asymmetry explicit between the standard
+  Connect association submit path and the request-evidence path. The key
+  distinction is not a generic difference between two buttons. It is that the
+  normal association path makes <tt>source-json</tt> and <tt>target-json</tt>
+  authoritative on the payload-bearing element, whereas the evidence path
+  makes <tt>snapshot-json</tt> authoritative on the payload-bearing element.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Normal association submit path vs evidence path"><tt>Normal association submit path vs evidence path</tt></a></li>
+  <li><a expr="(dom-connect-submit-path-comparison)"><tt>(dom-connect-submit-path-comparison)</tt></a></li>
+  <li><a expr="(normal-dom-association-submit-path)"><tt>(normal-dom-association-submit-path)</tt></a></li>
+  <li><a expr="(connect-request-evidence-submit-path)"><tt>(connect-request-evidence-submit-path)</tt></a></li>
+  <li><a page="Snapshot transport"><tt>Snapshot transport</tt></a></li>
+  <li><a expr="(dom-connect-snapshot-transport)"><tt>(dom-connect-snapshot-transport)</tt></a></li>
+  <li><a page="Submit-boundary Connect session snapshot"><tt>Submit-boundary Connect session snapshot</tt></a></li>
+  <li><a hyperbook="topics" page="Running image coherence"><tt>Running image coherence</tt></a></li>
+</ul>
+
+<h2>Operational asymmetry</h2>
+
+<p>
+  In the normal association path, <tt>writeSubmitPayload()</tt> writes request
+  id, context, source/target JSON, field ids, pane ids, and provider kinds
+  onto the clicked submit button and tags that button with
+  <tt>button-payload-v2</tt>. It does <b>not</b> attach
+  <tt>data-dom-connect-snapshot-json</tt> to that authoritative payload
+  element. Snapshot transport is therefore only a fallback path through the
+  hidden inspect field if that field exists and is still readable at submit
+  time.
+</p>
+
+<p>
+  In the evidence path, <tt>prepareEvidenceButton()</tt> tags the evidence
+  button with <tt>connect-request-evidence-v1</tt> and writes
+  <tt>data-dom-connect-snapshot-json</tt> directly onto that payload-bearing
+  button. It also mirrors the same JSON into the hidden inspect field, but
+  that mirror is secondary. The inline snapshot JSON on the button is the
+  authoritative transport carrier for later request-evidence reconstruction.
+</p>
+
+<h2>Server seam</h2>
+
+<p>
+  The server-side seam is shared but the two paths meet it differently.
+  <tt>dom-association-submit-payload</tt> reads snapshot JSON from
+  <tt>data-dom-connect-snapshot-json</tt> on the payload-bearing element first
+  and only then falls back to the hidden control referenced by
+  <tt>data-dom-connect-snapshot-field-id</tt>. That means
+  <tt>ensure-dom-connect-request-evidence</tt> and
+  <tt>maybe-dom-connect-session-snapshot-from-json-string</tt> can only
+  reconstruct a submit-boundary session snapshot when snapshot JSON was
+  actually transported and parseable.
+</p>
+
+<h2>How to read "No submit-boundary session snapshot was captured."</h2>
+
+<p>
+  That message does not necessarily mean the request failed. It can mean that
+  the normal association path successfully transported <tt>source-json</tt>
+  and <tt>target-json</tt> authoritatively enough to create or open the
+  association object, but did not transport <tt>snapshot-json</tt>
+  authoritatively on the payload-bearing element. In that case the later
+  request-evidence object may still have request metadata and source/target
+  anchors while lacking a reconstructed session snapshot.
+</p>
+
+<h2>Implementation lineage</h2>
+
+<p>
+  Browser lineage:
+  <tt>writeSubmitPayload()</tt> and <tt>prepareEvidenceButton()</tt> in
+  <tt>assets/hyperdoc/js/dom-annotation-connect.js</tt>.
+</p>
+
+<source-of-function>clog-moldable-inspector::dom-association-submit-payload</source-of-function>
+<source-of-function>ensure-dom-connect-request-evidence</source-of-function>
+<source-of-function>maybe-dom-connect-session-snapshot-from-json-string</source-of-function>
+
+<h2>FedWiki counterpart</h2>
+
+<p>
+  Localhost twin:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="normal-association-submit-path-vs-evidence-path">normal-association-submit-path-vs-evidence-path</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Snapshot transport">Snapshot transport</a></li>
+  <li><a page="Submit-boundary Connect session snapshot">Submit-boundary Connect session snapshot</a></li>
+  <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
+  <li><a hyperbook="topics" page="Running image coherence">Running image coherence</a></li>
+</ul>

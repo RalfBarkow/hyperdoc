@@ -2504,6 +2504,26 @@
                  "Drew McDermott Lisp, Planning, and Software"
                  "Source-oriented and image-oriented development in Common Lisp")))
 
+(defun normal-association-submit-path-vs-evidence-path-topic ()
+  (make-topic
+   :id "normal-association-submit-path-vs-evidence-path"
+   :title "Normal association submit path vs evidence path"
+   :summary "Operational distinction between the standard button-payload-v2 association submit path, where source and target transport is authoritative, and the connect-request-evidence-v1 evidence path, where snapshot transport is authoritative."
+   :references '("Snapshot transport"
+                 "Submit-boundary Connect session snapshot"
+                 "A DOM-annotation connect gesture"
+                 "Running image coherence")))
+
+(defun snapshot-transport-topic ()
+  (make-topic
+   :id "snapshot-transport"
+   :title "Snapshot transport"
+   :summary "Submit-boundary carrier seam by which browser-captured Connect snapshot JSON crosses from pane UI state into the server-side payload for later request evidence or snapshot inspection."
+   :references '("Normal association submit path vs evidence path"
+                 "Submit-boundary Connect session snapshot"
+                 "A DOM-annotation connect gesture"
+                 "Running image coherence")))
+
 (defun bootstrappability-as-social-architecture-topic ()
   (make-topic
    :id "bootstrappability-as-social-architecture"

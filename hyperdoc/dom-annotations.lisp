@@ -225,6 +225,97 @@
                    :initform nil
                    :accessor browser-detail-of)))
 
+(defclass dom-connect-submit-path ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (trigger :initarg :trigger :initform nil :reader trigger-of)
+   (purpose :initarg :purpose :initform nil :reader purpose-of)
+   (transport-tag :initarg :transport-tag
+                  :initform nil
+                  :reader transport-tag-of)
+   (payload-bearing-element :initarg :payload-bearing-element
+                            :initform nil
+                            :reader payload-bearing-element-of)
+   (authoritative-payload-fields :initarg :authoritative-payload-fields
+                                 :initform nil
+                                 :reader authoritative-payload-fields-of)
+   (snapshot-carrier :initarg :snapshot-carrier
+                     :initform nil
+                     :reader snapshot-carrier-of)
+   (snapshot-handling :initarg :snapshot-handling
+                      :initform nil
+                      :reader snapshot-handling-of)
+   (snapshot-transport-status :initarg :snapshot-transport-status
+                              :initform nil
+                              :reader snapshot-transport-status-of)
+   (hidden-field-dependency :initarg :hidden-field-dependency
+                            :initform nil
+                            :reader hidden-field-dependency-of)
+   (server-parse-order :initarg :server-parse-order
+                       :initform nil
+                       :reader server-parse-order-of)
+   (object-opened :initarg :object-opened
+                  :initform nil
+                  :reader object-opened-of)
+   (typical-interpretation :initarg :typical-interpretation
+                           :initform nil
+                           :reader typical-interpretation-of)
+   (lineage :initarg :lineage :initform nil :reader lineage-of)))
+
+(defclass dom-connect-submit-path-comparison ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (normal-path :initarg :normal-path :reader normal-path-of)
+   (evidence-path :initarg :evidence-path :reader evidence-path-of)
+   (server-seam :initarg :server-seam :initform nil :reader server-seam-of)
+   (no-snapshot-message-meaning :initarg :no-snapshot-message-meaning
+                                :initform nil
+                                :reader no-snapshot-message-meaning-of)
+   (lineage :initarg :lineage :initform nil :reader lineage-of)))
+
+(defclass dom-connect-snapshot-transport-path ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (producer :initarg :producer :initform nil :reader producer-of)
+   (carrier :initarg :carrier :initform nil :reader carrier-of)
+   (payload-bearing-element :initarg :payload-bearing-element
+                            :initform nil
+                            :reader payload-bearing-element-of)
+   (authority-status :initarg :authority-status
+                     :initform nil
+                     :reader authority-status-of)
+   (hidden-field-dependency :initarg :hidden-field-dependency
+                            :initform nil
+                            :reader hidden-field-dependency-of)
+   (server-parse-order :initarg :server-parse-order
+                       :initform nil
+                       :reader server-parse-order-of)
+   (absence-interpretation :initarg :absence-interpretation
+                           :initform nil
+                           :reader absence-interpretation-of)
+   (downstream-object :initarg :downstream-object
+                      :initform nil
+                      :reader downstream-object-of)
+   (lineage :initarg :lineage :initform nil :reader lineage-of)))
+
+(defclass dom-connect-snapshot-transport ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (summary :initarg :summary :reader summary-of)
+   (normal-path :initarg :normal-path :reader normal-path-of)
+   (evidence-path :initarg :evidence-path :reader evidence-path-of)
+   (operational-definition :initarg :operational-definition
+                           :initform nil
+                           :reader operational-definition-of)
+   (server-seam :initarg :server-seam :initform nil :reader server-seam-of)
+   (absence-interpretation :initarg :absence-interpretation
+                           :initform nil
+                           :reader absence-interpretation-of)
+   (lineage :initarg :lineage :initform nil :reader lineage-of)))
+
 (defmethod print-object ((object dom-annotation-anchor) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (or (label-of object)
@@ -249,6 +340,215 @@
 (defmethod print-object ((object dom-connect-request-evidence) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-submit-path) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-submit-path-comparison) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-snapshot-transport-path) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-snapshot-transport) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defun normal-dom-association-submit-path ()
+  (make-instance
+   'dom-connect-submit-path
+   :id "dom-connect-submit-path/normal-association"
+   :title "Normal association submit path"
+   :summary
+   "The standard Connect submit path authoritatively transports source and target association data, but not the submit-boundary session snapshot."
+   :trigger
+   "Open association after the browser has resolved source and target anchors."
+   :purpose
+   "Create or open the association object."
+   :transport-tag
+   "button-payload-v2"
+   :payload-bearing-element
+   "The clicked submit button in the normal Connect submit affordance."
+   :authoritative-payload-fields
+   '("request id"
+     "context object id"
+     "context view title"
+     "source-json"
+     "target-json"
+     "source field id"
+     "target field id"
+     "source pane id"
+     "target pane id"
+     "source provider kind"
+     "target provider kind")
+   :snapshot-carrier
+   "Not the authoritative payload element; snapshot JSON stays only in the hidden inspect field if that field exists."
+   :snapshot-handling
+   "writeSubmitPayload() writes source/target/context/provider data onto the button but does not attach data-dom-connect-snapshot-json."
+   :snapshot-transport-status
+   "Fallback or best-effort only."
+   :hidden-field-dependency
+   "Yes. Snapshot recovery depends on the hidden inspect field referenced by data-dom-connect-snapshot-field-id if that field is present and readable."
+   :server-parse-order
+   "dom-association-submit-payload reads data-dom-connect-snapshot-json from the payload-bearing element first, then falls back to the hidden snapshot field. In the normal path, snapshot recovery usually depends on that fallback."
+   :object-opened
+   "Association object or association pane."
+   :typical-interpretation
+   "Association creation can succeed even when no submit-boundary session snapshot is reconstructed later. The later message about a missing snapshot does not by itself mean the request failed."
+   :lineage
+   '("writeSubmitPayload()"
+     "dom-association-submit-payload"
+     "ensure-dom-connect-request-evidence"
+     "maybe-dom-connect-session-snapshot-from-json-string")))
+
+(defun connect-request-evidence-submit-path ()
+  (make-instance
+   'dom-connect-submit-path
+   :id "dom-connect-submit-path/request-evidence"
+   :title "Evidence path"
+   :summary
+   "The request-evidence submit path authoritatively transports snapshot JSON on the evidence button, so request evidence can usually reconstruct the session snapshot directly from the submitted payload."
+   :trigger
+   "Inspect request evidence or open browser failure evidence at the submit boundary."
+   :purpose
+   "Open Connect request evidence or browser failure evidence."
+   :transport-tag
+   "connect-request-evidence-v1"
+   :payload-bearing-element
+   "The evidence button prepared for the request-evidence submit."
+   :authoritative-payload-fields
+   '("request id"
+     "context object id"
+     "context view title"
+     "snapshot field id"
+     "request evidence request id"
+     "browser failure kind"
+     "browser message"
+     "browser detail"
+     "snapshot JSON")
+   :snapshot-carrier
+   "The evidence button itself via data-dom-connect-snapshot-json, mirrored secondarily into the hidden inspect field."
+   :snapshot-handling
+   "prepareEvidenceButton() writes data-dom-connect-snapshot-json directly onto the evidence button and also mirrors the same JSON into the hidden inspect field."
+   :snapshot-transport-status
+   "Authoritative on the payload-bearing element."
+   :hidden-field-dependency
+   "No for the primary payload contract. The hidden inspect field is only a secondary mirror."
+   :server-parse-order
+   "dom-association-submit-payload reads data-dom-connect-snapshot-json from the payload-bearing element first. In the evidence path, that first branch usually already contains the snapshot JSON."
+   :object-opened
+   "Connect request evidence or browser failure evidence."
+   :typical-interpretation
+   "If the request-evidence submit succeeds and the inline snapshot JSON is parseable, the evidence object can usually reconstruct the submit-boundary session snapshot directly from the submitted payload."
+   :lineage
+   '("prepareEvidenceButton()"
+     "dom-association-submit-payload"
+     "ensure-dom-connect-request-evidence"
+     "maybe-dom-connect-session-snapshot-from-json-string")))
+
+(defun dom-connect-submit-path-comparison ()
+  (make-instance
+   'dom-connect-submit-path-comparison
+   :id "dom-connect-submit-path-comparison"
+   :title "Normal association submit path vs evidence path"
+   :summary
+   "Operational comparison of the standard association submit path and the request-evidence path at the submit boundary, with emphasis on where source/target data is authoritative and where snapshot JSON is authoritative."
+   :normal-path (normal-dom-association-submit-path)
+   :evidence-path (connect-request-evidence-submit-path)
+   :server-seam
+   "At the server seam, dom-association-submit-payload always tries snapshot JSON on the payload-bearing element first and only then falls back to the hidden control referenced by data-dom-connect-snapshot-field-id. Snapshot reconstruction in ensure-dom-connect-request-evidence therefore depends on whether snapshot JSON was actually transported and parseable."
+   :no-snapshot-message-meaning
+   "The message \"No submit-boundary session snapshot was captured.\" does not necessarily mean the request failed. In the normal association path, source-json and target-json can be authoritative and sufficient for association creation even when snapshot JSON never travelled authoritatively on the payload-bearing element."
+   :lineage
+   '("writeSubmitPayload()"
+     "prepareEvidenceButton()"
+     "dom-association-submit-payload"
+     "ensure-dom-connect-request-evidence"
+     "maybe-dom-connect-session-snapshot-from-json-string")))
+
+(defun normal-dom-connect-snapshot-transport-path ()
+  (make-instance
+   'dom-connect-snapshot-transport-path
+   :id "dom-connect-snapshot-transport/normal-association"
+   :title "Normal association snapshot transport"
+   :summary
+   "The normal association path can build a browser snapshot, but snapshot JSON crosses the submit boundary only through the hidden inspect field fallback."
+   :producer "writeSubmitPayload()"
+   :carrier
+   "The hidden inspect field named by data-dom-connect-snapshot-field-id if that field remains present and readable."
+   :payload-bearing-element
+   "The clicked normal association submit button carries button-payload-v2, but it does not carry data-dom-connect-snapshot-json itself."
+   :authority-status
+   "Fallback only. Snapshot transport is not authoritative on the payload-bearing button."
+   :hidden-field-dependency
+   "Yes. Later reconstruction depends on the hidden inspect field mirror."
+   :server-parse-order
+   "dom-association-submit-payload reads data-dom-connect-snapshot-json from the payload-bearing element first, then falls back to the hidden field named by data-dom-connect-snapshot-field-id. The normal path usually reaches only that second branch."
+   :absence-interpretation
+   "The browser may have built a snapshot successfully, while later evidence still lacks a reconstructed submit-boundary session snapshot because snapshot JSON never crossed the boundary authoritatively."
+   :downstream-object
+   "Association object first; request evidence may later exist without a reconstructed dom-connect-session-snapshot."
+   :lineage
+   '("debugSnapshot()"
+     "writeSubmitPayload()"
+     "dom-association-submit-payload"
+     "ensure-dom-connect-request-evidence"
+     "maybe-dom-connect-session-snapshot-from-json-string")))
+
+(defun evidence-dom-connect-snapshot-transport-path ()
+  (make-instance
+   'dom-connect-snapshot-transport-path
+   :id "dom-connect-snapshot-transport/request-evidence"
+   :title "Evidence-path snapshot transport"
+   :summary
+   "The evidence path carries snapshot JSON directly on the payload-bearing evidence button, so submit-boundary reconstruction can usually use the inline carrier without needing the hidden-field fallback."
+   :producer "prepareEvidenceButton()"
+   :carrier
+   "The evidence button itself via data-dom-connect-snapshot-json, mirrored secondarily into the hidden inspect field."
+   :payload-bearing-element
+   "The evidence button tagged with connect-request-evidence-v1."
+   :authority-status
+   "Authoritative inline carrier on the payload-bearing element."
+   :hidden-field-dependency
+   "No for the primary transport contract. The hidden inspect field is only a secondary mirror."
+   :server-parse-order
+   "dom-association-submit-payload reads data-dom-connect-snapshot-json from the payload-bearing element first. On the evidence path, that first branch already carries the submit-boundary snapshot JSON."
+   :absence-interpretation
+   "If snapshot JSON is absent or unparsable here, request evidence can still exist, but it will lack the reconstructed dom-connect-session-snapshot despite carrying request metadata and browser failure classification."
+   :downstream-object
+   "Connect request evidence or direct Connect snapshot inspection with reconstructed submit-boundary state."
+   :lineage
+   '("debugSnapshot()"
+     "prepareEvidenceButton()"
+     "dom-association-submit-payload"
+     "ensure-dom-connect-request-evidence"
+     "maybe-dom-connect-session-snapshot-from-json-string")))
+
+(defun dom-connect-snapshot-transport ()
+  (make-instance
+   'dom-connect-snapshot-transport
+   :id "dom-connect-snapshot-transport"
+   :title "Snapshot transport"
+   :summary
+   "Snapshot transport is the submit-boundary carrier seam by which browser-captured Connect snapshot JSON crosses from pane UI state into the server-side payload, enabling later request evidence or direct snapshot inspection to reconstruct the exact browser-side session state."
+   :normal-path (normal-dom-connect-snapshot-transport-path)
+   :evidence-path (evidence-dom-connect-snapshot-transport-path)
+   :operational-definition
+   "Snapshot construction is not snapshot transport. debugSnapshot() may succeed in the browser, yet later evidence still lacks a dom-connect-session-snapshot unless snapshot JSON actually crosses the submit boundary."
+   :server-seam
+   "Transport authority is path-dependent because dom-association-submit-payload reads data-dom-connect-snapshot-json from the payload-bearing element first and only then falls back to the hidden field named by data-dom-connect-snapshot-field-id."
+   :absence-interpretation
+   "\"No submit-boundary session snapshot was captured.\" means the reconstruction seam lacked transported snapshot JSON, not necessarily that the original Connect request failed."
+   :lineage
+   '("debugSnapshot()"
+     "writeSubmitPayload()"
+     "prepareEvidenceButton()"
+     "dom-association-submit-payload"
+     "ensure-dom-connect-request-evidence"
+     "maybe-dom-connect-session-snapshot-from-json-string")))
 
 (defun shorten-dom-association-label (value &optional (max-length 88))
   (if (<= (length value) max-length)

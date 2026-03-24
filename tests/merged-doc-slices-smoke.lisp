@@ -412,6 +412,44 @@
   (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
                                "ready before the pane-open and rendering boundary"))
 
+(defun run-dom-connect-submit-path-comparison-doc-slice-smoke-test ()
+  (assert-topic-function-present
+   'hyperdoc::normal-association-submit-path-vs-evidence-path-topic
+   "Normal association submit path vs evidence path")
+  (assert-hyperdoc-page-present "Normal association submit path vs evidence path")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "(dom-connect-submit-path-comparison)")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "button-payload-v2")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "connect-request-evidence-v1")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "No submit-boundary session snapshot was captured.")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "writeSubmitPayload()")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "prepareEvidenceButton()")
+  (assert-page-source-contains "hyperdoc/Normal association submit path vs evidence path.html"
+                               "Snapshot transport"))
+
+(defun run-snapshot-transport-doc-slice-smoke-test ()
+  (assert-topic-function-present
+   'hyperdoc::snapshot-transport-topic
+   "Snapshot transport")
+  (assert-hyperdoc-page-present "Snapshot transport")
+  (assert-page-source-contains "hyperdoc/Snapshot transport.html"
+                               "(dom-connect-snapshot-transport)")
+  (assert-page-source-contains "hyperdoc/Snapshot transport.html"
+                               "debugSnapshot()")
+  (assert-page-source-contains "hyperdoc/Snapshot transport.html"
+                               "data-dom-connect-snapshot-json")
+  (assert-page-source-contains "hyperdoc/Snapshot transport.html"
+                               "data-dom-connect-snapshot-field-id")
+  (assert-page-source-contains "hyperdoc/Snapshot transport.html"
+                               "Normal association submit path vs evidence path")
+  (assert-page-source-contains "hyperdoc/Snapshot transport.html"
+                               "Submit-boundary Connect session snapshot"))
+
 (defun run-merged-doc-slices-smoke-tests ()
   (run-clickable-commit-ids-doc-slice-smoke-test)
   (run-literate-tracing-doc-slice-smoke-test)
@@ -422,5 +460,7 @@
   (run-upstream-main-merge-preparation-chain-smoke-test)
   (run-drew-mind-and-mechanism-doc-slice-smoke-test)
   (run-bibliography-subcollections-doc-slice-smoke-test)
+  (run-dom-connect-submit-path-comparison-doc-slice-smoke-test)
+  (run-snapshot-transport-doc-slice-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)

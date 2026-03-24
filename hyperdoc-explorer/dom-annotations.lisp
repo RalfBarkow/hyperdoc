@@ -362,6 +362,18 @@
 (defmethod views:text-representation ((evidence dom-connect-request-evidence))
   (shorten-dom-association-label (title-of evidence)))
 
+(defmethod views:text-representation ((path dom-connect-submit-path))
+  (shorten-dom-association-label (title-of path)))
+
+(defmethod views:text-representation ((comparison dom-connect-submit-path-comparison))
+  (shorten-dom-association-label (title-of comparison)))
+
+(defmethod views:text-representation ((path dom-connect-snapshot-transport-path))
+  (shorten-dom-association-label (title-of path)))
+
+(defmethod views:text-representation ((transport dom-connect-snapshot-transport))
+  (shorten-dom-association-label (title-of transport)))
+
 (defun render-anchor-field-rows (rows)
   (loop for (label . value) in rows
         do (views:html
@@ -372,6 +384,35 @@
   (views:html
     (:tr (:th (views:esc label))
          (:td (maybe-dom-object-ref value :fallback-empty fallback)))))
+
+(defun render-connect-data-cell (value &key (fallback "-"))
+  (cond
+    ((null value)
+     (views:html
+       (:span :style "opacity: 0.55;" (views:esc fallback))))
+    ((listp value)
+     (views:html
+       (:ul
+        (loop for item in value
+              do (views:html
+                   (:li (maybe-dom-object-ref item :fallback-empty fallback)))))))
+    (t
+     (maybe-dom-object-ref value :fallback-empty fallback))))
+
+(defun render-connect-rich-field-row (label value &key (fallback "-"))
+  (views:html
+    (:tr (:th (views:esc label))
+         (:td (render-connect-data-cell value :fallback fallback)))))
+
+(defun render-connect-comparison-row (label normal-value evidence-value
+                                      &key (normal-fallback "-")
+                                        (evidence-fallback "-"))
+  (views:html
+    (:tr (:th (views:esc label))
+         (:td (render-connect-data-cell normal-value
+                                        :fallback normal-fallback))
+         (:td (render-connect-data-cell evidence-value
+                                        :fallback evidence-fallback)))))
 
 (defun connect-provider-label (value)
   (or value "-"))
@@ -797,3 +838,193 @@
           (views:html
             (:p (:span :style "opacity: 0.55;"
                        "No submit-boundary session snapshot was captured.")))))))
+
+(views:defview 👀summary (path dom-connect-submit-path)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of path)))
+      (:p (views:esc (summary-of path)))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Trigger" (trigger-of path))
+              (render-connect-field-row "Purpose" (purpose-of path))
+              (render-connect-field-row "Transport tag"
+                                        (transport-tag-of path))
+              (render-connect-field-row "Payload-bearing element"
+                                        (payload-bearing-element-of path))
+              (render-connect-rich-field-row "Authoritative payload fields"
+                                             (authoritative-payload-fields-of
+                                              path))
+              (render-connect-field-row "Snapshot carrier"
+                                        (snapshot-carrier-of path))
+              (render-connect-field-row "Snapshot handling"
+                                        (snapshot-handling-of path))
+              (render-connect-field-row "Snapshot transport status"
+                                        (snapshot-transport-status-of path))
+              (render-connect-field-row "Hidden-field dependency"
+                                        (hidden-field-dependency-of path))
+              (render-connect-field-row "Server parse order"
+                                        (server-parse-order-of path))
+              (render-connect-field-row "Object opened"
+                                        (object-opened-of path))
+              (render-connect-field-row "Typical interpretation"
+                                        (typical-interpretation-of path))
+              (render-connect-rich-field-row "Implementation lineage"
+                                             (lineage-of path))))))
+
+(views:defview 👀comparison (comparison dom-connect-submit-path-comparison)
+  (views:html-view :title "Comparison" :priority 1
+    (let ((normal-path (normal-path-of comparison))
+          (evidence-path (evidence-path-of comparison)))
+      (views:html
+        (:h3 (views:esc (title-of comparison)))
+        (:p (views:esc (summary-of comparison)))
+        (:table :class "inspector-table"
+                (:tr (:th "Operational field")
+                     (:th (views:esc (title-of normal-path)))
+                     (:th (views:esc (title-of evidence-path))))
+                (render-connect-comparison-row "Trigger"
+                                               (trigger-of normal-path)
+                                               (trigger-of evidence-path))
+                (render-connect-comparison-row "Purpose"
+                                               (purpose-of normal-path)
+                                               (purpose-of evidence-path))
+                (render-connect-comparison-row "Transport tag"
+                                               (transport-tag-of normal-path)
+                                               (transport-tag-of evidence-path))
+                (render-connect-comparison-row
+                 "Payload-bearing element"
+                 (payload-bearing-element-of normal-path)
+                 (payload-bearing-element-of evidence-path))
+                (render-connect-comparison-row
+                 "Authoritative payload fields"
+                 (authoritative-payload-fields-of normal-path)
+                 (authoritative-payload-fields-of evidence-path))
+                (render-connect-comparison-row "Snapshot carrier"
+                                               (snapshot-carrier-of normal-path)
+                                               (snapshot-carrier-of evidence-path))
+                (render-connect-comparison-row
+                 "Snapshot handling"
+                 (snapshot-handling-of normal-path)
+                 (snapshot-handling-of evidence-path))
+                (render-connect-comparison-row
+                 "Snapshot transport status"
+                 (snapshot-transport-status-of normal-path)
+                 (snapshot-transport-status-of evidence-path))
+                (render-connect-comparison-row
+                 "Hidden-field dependency"
+                 (hidden-field-dependency-of normal-path)
+                 (hidden-field-dependency-of evidence-path))
+                (render-connect-comparison-row "Server parse order"
+                                               (server-parse-order-of normal-path)
+                                               (server-parse-order-of evidence-path))
+                (render-connect-comparison-row "Object opened"
+                                               (object-opened-of normal-path)
+                                               (object-opened-of evidence-path))
+                (render-connect-comparison-row
+                 "Typical success/failure interpretation"
+                 (typical-interpretation-of normal-path)
+                 (typical-interpretation-of evidence-path)))))))
+
+(views:defview 👀server-seam (comparison dom-connect-submit-path-comparison)
+  (views:html-view :title "Server seam" :priority 2
+    (views:html
+      (:h4 "Submit-boundary parse seam")
+      (:table :class "inspector-table"
+              (render-connect-field-row "Server seam"
+                                        (server-seam-of comparison))
+              (render-connect-field-row
+               "Interpretation of missing snapshot message"
+               (no-snapshot-message-meaning-of comparison))
+              (render-connect-rich-field-row "Implementation lineage"
+                                             (lineage-of comparison))))))
+
+(views:defview 👀paths (comparison dom-connect-submit-path-comparison)
+  (views:html-view :title "Paths" :priority 3
+    (views:html
+      (:h4 (views:esc (title-of (normal-path-of comparison))))
+      (:p (maybe-dom-object-ref (normal-path-of comparison)))
+      (:h4 (views:esc (title-of (evidence-path-of comparison))))
+      (:p (maybe-dom-object-ref (evidence-path-of comparison))))))
+
+(views:defview 👀summary (path dom-connect-snapshot-transport-path)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of path)))
+      (:p (views:esc (summary-of path)))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Producer" (producer-of path))
+              (render-connect-field-row "Carrier" (carrier-of path))
+              (render-connect-field-row "Payload-bearing element"
+                                        (payload-bearing-element-of path))
+              (render-connect-field-row "Authority / fallback status"
+                                        (authority-status-of path))
+              (render-connect-field-row "Hidden-field dependency"
+                                        (hidden-field-dependency-of path))
+              (render-connect-field-row "Server parse order"
+                                        (server-parse-order-of path))
+              (render-connect-field-row "Parse absence interpretation"
+                                        (absence-interpretation-of path))
+              (render-connect-field-row "Downstream object enabled"
+                                        (downstream-object-of path))
+              (render-connect-rich-field-row "Implementation lineage"
+                                             (lineage-of path))))))
+
+(views:defview 👀summary (transport dom-connect-snapshot-transport)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of transport)))
+      (:p (views:esc (summary-of transport)))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Operational definition"
+                                        (operational-definition-of transport))
+              (render-connect-field-row "Server parse order / authority"
+                                        (server-seam-of transport))
+              (render-connect-field-row "Absence interpretation"
+                                        (absence-interpretation-of transport))
+              (render-connect-rich-field-row "Implementation lineage"
+                                             (lineage-of transport)))
+      (:h4 "Paths")
+      (:p (maybe-dom-object-ref (normal-path-of transport)))
+      (:p (maybe-dom-object-ref (evidence-path-of transport)))))
+
+(views:defview 👀paths (transport dom-connect-snapshot-transport)
+  (views:html-view :title "Paths" :priority 2
+    (let ((normal-path (normal-path-of transport))
+          (evidence-path (evidence-path-of transport)))
+      (views:html
+        (:h3 (views:esc (title-of transport)))
+        (:p (views:esc (summary-of transport)))
+        (:table :class "inspector-table"
+                (:tr (:th "Transport field")
+                     (:th (views:esc (title-of normal-path)))
+                     (:th (views:esc (title-of evidence-path))))
+                (render-connect-comparison-row "Producer"
+                                               (producer-of normal-path)
+                                               (producer-of evidence-path))
+                (render-connect-comparison-row "Carrier"
+                                               (carrier-of normal-path)
+                                               (carrier-of evidence-path))
+                (render-connect-comparison-row
+                 "Payload-bearing element"
+                 (payload-bearing-element-of normal-path)
+                 (payload-bearing-element-of evidence-path))
+                (render-connect-comparison-row
+                 "Authority / fallback status"
+                 (authority-status-of normal-path)
+                 (authority-status-of evidence-path))
+                (render-connect-comparison-row
+                 "Hidden-field dependency"
+                 (hidden-field-dependency-of normal-path)
+                 (hidden-field-dependency-of evidence-path))
+                (render-connect-comparison-row
+                 "Server parse order"
+                 (server-parse-order-of normal-path)
+                 (server-parse-order-of evidence-path))
+                (render-connect-comparison-row
+                 "Parse absence interpretation"
+                 (absence-interpretation-of normal-path)
+                 (absence-interpretation-of evidence-path))
+                (render-connect-comparison-row
+                 "Downstream object enabled"
+                 (downstream-object-of normal-path)
+                 (downstream-object-of evidence-path))))))))

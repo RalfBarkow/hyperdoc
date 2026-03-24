@@ -1,0 +1,87 @@
+<h1>Snapshot transport</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Snapshot transport is the submit-boundary carrier seam by which
+  browser-captured Connect snapshot JSON crosses from pane UI state into the
+  server-side payload, so later request evidence or direct snapshot inspection
+  can reconstruct the exact browser-side Connect state at handoff time.
+</p>
+
+<p>
+  Snapshot construction is not snapshot transport. The browser may successfully
+  build a snapshot with <tt>debugSnapshot()</tt>, yet later evidence still
+  lacks a reconstructed <tt>dom-connect-session-snapshot</tt> unless snapshot
+  JSON was actually carried across the submit boundary.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Snapshot transport"><tt>Snapshot transport</tt></a></li>
+  <li><a expr="(dom-connect-snapshot-transport)"><tt>(dom-connect-snapshot-transport)</tt></a></li>
+  <li><a expr="(normal-dom-connect-snapshot-transport-path)"><tt>(normal-dom-connect-snapshot-transport-path)</tt></a></li>
+  <li><a expr="(evidence-dom-connect-snapshot-transport-path)"><tt>(evidence-dom-connect-snapshot-transport-path)</tt></a></li>
+  <li><a page="Normal association submit path vs evidence path"><tt>Normal association submit path vs evidence path</tt></a></li>
+  <li><a page="Submit-boundary Connect session snapshot"><tt>Submit-boundary Connect session snapshot</tt></a></li>
+  <li><a hyperbook="topics" page="Running image coherence"><tt>Running image coherence</tt></a></li>
+</ul>
+
+<h2>Carrier seam</h2>
+
+<p>
+  The browser-side producers differ. <tt>writeSubmitPayload()</tt> prepares the
+  normal association submit path, while <tt>prepareEvidenceButton()</tt>
+  prepares the request-evidence path. Those paths do not merely differ in
+  intent; they differ in which submit-boundary carrier is authoritative for
+  snapshot JSON.
+</p>
+
+<p>
+  On the normal association path, the payload-bearing button carries
+  <tt>button-payload-v2</tt> and authoritatively transports source and target
+  JSON. Snapshot JSON is only a fallback mirror through the hidden control
+  named by <tt>data-dom-connect-snapshot-field-id</tt>.
+</p>
+
+<p>
+  On the evidence path, the payload-bearing button carries
+  <tt>connect-request-evidence-v1</tt> and also carries
+  <tt>data-dom-connect-snapshot-json</tt> directly. The hidden inspect field is
+  only a secondary mirror there.
+</p>
+
+<h2>Server parse order</h2>
+
+<p>
+  The server parse seam is shared. <tt>dom-association-submit-payload</tt>
+  reads <tt>data-dom-connect-snapshot-json</tt> from the payload-bearing element
+  first and only then falls back to the hidden control referenced by
+  <tt>data-dom-connect-snapshot-field-id</tt>. Transport authority is therefore
+  path-dependent:
+</p>
+
+<ul>
+  <li>authoritative inline carrier on the evidence path</li>
+  <li>fallback hidden-field dependency on the normal association path</li>
+</ul>
+
+<h2>Absence interpretation</h2>
+
+<p>
+  When later evidence says <tt>No submit-boundary session snapshot was
+  captured.</tt>, that message means the reconstruction seam lacked
+  transported, parseable snapshot JSON. It does not necessarily mean that the
+  original Connect request failed or that snapshot construction in the browser
+  never happened.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Normal association submit path vs evidence path">Normal association submit path vs evidence path</a></li>
+  <li><a page="Submit-boundary Connect session snapshot">Submit-boundary Connect session snapshot</a></li>
+  <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
+  <li><a hyperbook="topics" page="Running image coherence">Running image coherence</a></li>
+</ul>
