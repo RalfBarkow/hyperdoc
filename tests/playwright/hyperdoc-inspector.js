@@ -60,9 +60,35 @@ async function openHyperDoc(page) {
     )
     .toContain("Main page");
   await activatePaneTab(page, 1, "Main page");
-  await expect(hyperdocPane.locator(".hyperdoc-connect-provider-surface")).toBeVisible({
-    timeout: 20_000,
-  });
+  await expect
+    .poll(
+      () =>
+        hyperdocPane.evaluate((paneNode) => {
+          const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
+          const surface =
+            activeView &&
+            activeView.querySelector(".hyperdoc-connect-provider-surface");
+          const root =
+            surface &&
+            surface.querySelector(".hyperdoc-connect-provider-root");
+          return !!(activeView && surface && root);
+        }),
+      { timeout: 20_000 }
+    )
+    .toBe(true);
+  await expect
+    .poll(
+      () =>
+        hyperdocPane.evaluate((paneNode) => {
+          const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
+          const root =
+            activeView &&
+            activeView.querySelector(".hyperdoc-connect-provider-root");
+          return root?.textContent?.replace(/\s+/g, " ").trim().length || 0;
+        }),
+      { timeout: 20_000 }
+    )
+    .toBeGreaterThan(0);
   await expect(hyperdocPane.locator(".hyperdoc-dom-connect-inspect")).toBeVisible({
     timeout: 20_000,
   });
@@ -275,6 +301,23 @@ async function waitForAssociationResult(page) {
   return readDomConnectTrace(page);
 }
 
+async function forceNextConnectFailureMode(page, kind) {
+  await page.evaluate((failureKind) => {
+    if (!window.hyperdocDomConnect || !window.hyperdocDomConnect.__test) {
+      throw new Error("hyperdocDomConnect test hooks are unavailable");
+    }
+    window.hyperdocDomConnect.__test.forceNextFailureMode(failureKind);
+  }, kind);
+}
+
+async function clearConnectFailureModes(page) {
+  await page.evaluate(() => {
+    if (window.hyperdocDomConnect && window.hyperdocDomConnect.__test) {
+      window.hyperdocDomConnect.__test.clearFailureModes();
+    }
+  });
+}
+
 async function startConnectInPane(page, paneIndex) {
   const currentPane = pane(page, paneIndex);
   const button = currentPane.locator(".hyperdoc-dom-connect-toggle");
@@ -385,6 +428,42 @@ async function openConnectInspection(page, paneIndex) {
     index: snapshotIndex,
     pane: snapshotPane,
     reused: matchingCountBefore > 0,
+  };
+}
+
+async function openConnectRequestEvidence(page, paneIndex) {
+  const currentPane = pane(page, paneIndex);
+  const evidenceButton = currentPane.locator(".hyperdoc-dom-connect-feedback-open-evidence");
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  const existingCountBefore = await page
+    .locator(".inspector-title-bar-object")
+    .filter({ hasText: /Connect request evidence/ })
+    .count();
+  await expect(evidenceButton).toBeVisible({ timeout: 20_000 });
+  await evidenceButton.click();
+  await expect
+    .poll(
+      () =>
+        page.locator(".inspector-title-bar-object").filter({
+          hasText: /Connect request evidence/
+        }).count(),
+      { timeout: 20_000 }
+    )
+    .toBeGreaterThan(existingCountBefore);
+  const evidenceIndex = await page.evaluate(() => {
+    return Array.from(document.querySelectorAll(".inspector-pane")).findIndex((paneNode) => {
+      const titleNode = paneNode.querySelector(".inspector-title-bar-object");
+      return !!(titleNode && /Connect request evidence/.test(titleNode.textContent || ""));
+    });
+  });
+  expect(evidenceIndex).toBeGreaterThanOrEqual(0);
+  await expect
+    .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+    .toBeGreaterThan(paneCountBefore - 1);
+  await settleInspectorBindings(page);
+  return {
+    index: evidenceIndex,
+    pane: pane(page, evidenceIndex),
   };
 }
 
@@ -601,11 +680,14 @@ module.exports = {
   activatePaneTab,
   attachJson,
   bootUrl,
+  clearConnectFailureModes,
   exactTextPattern,
+  forceNextConnectFailureMode,
   gotoCatalog,
   openHyperDoc,
   openFedWikiPageFromTextPageLink,
   openConnectInspection,
+  openConnectRequestEvidence,
   openTextPageFromHyperDoc,
   pane,
   readInspectorPaneState,

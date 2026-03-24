@@ -25,6 +25,33 @@
   (when (fboundp 'log-inspector-performance)
     (apply #'log-inspector-performance phase kvs)))
 
+(defun maybe-attribute-value (element attribute-name)
+  (let ((value (ignore-errors
+                 (clog:attribute element attribute-name))))
+    (and (stringp value)
+         (> (length value) 0)
+         value)))
+
+(defun class-present-p (element class-name)
+  (let ((classes (maybe-attribute-value element "class")))
+    (and (stringp classes)
+         (search class-name classes :test #'char-equal))))
+
+(defun dom-association-submit-click-p (element)
+  (loop for current = element then (ignore-errors (clog:parent current))
+        while current
+        thereis (or (maybe-attribute-value
+                     current "data-dom-association-request-id")
+                    (maybe-attribute-value
+                     current "data-dom-association-transport")
+                    (maybe-attribute-value
+                     current "data-dom-connect-inspection-pane-id")
+                    (maybe-attribute-value
+                     current "data-dom-connect-request-evidence-request-id")
+                    (class-present-p current "hyperdoc-dom-connect-submit")
+                    (class-present-p current "hyperdoc-dom-connect-inspect-submit")
+                    (class-present-p current "hyperdoc-dom-connect-evidence-submit"))))
+
 (defun handle-inspector-inspect-click (pane element target view-ref event)
   (with-slots (object inspector) pane
     (let ((click-start (maybe-current-time-millis)))
@@ -57,14 +84,17 @@
           (refresh pane)))))
 
 (defun handle-inspector-reference-eval-click (pane obj target event &optional view-ref)
-  (with-slots (inspector clog-obj) pane
-    (unless (getf event :shift-key)
-      (close-panes-after inspector pane))
-    (if (getf event :alt-key)
-        (create-pane inspector target)
-        (create-pane inspector
-                     (eval-thunk-with-active-button clog-obj obj target)
-                     :select view-ref))))
+  (if (and (fboundp 'handle-inspector-eval-click)
+           (dom-association-submit-click-p obj))
+      (handle-inspector-eval-click pane obj target event)
+      (with-slots (inspector clog-obj) pane
+        (unless (getf event :shift-key)
+          (close-panes-after inspector pane))
+        (if (getf event :alt-key)
+            (create-pane inspector target)
+            (create-pane inspector
+                         (eval-thunk-with-active-button clog-obj obj target)
+                         :select view-ref)))))
 
 ;; Override upstream wiring to ignore invalid reference ids that would
 ;; otherwise trigger jQuery selector errors for "#".

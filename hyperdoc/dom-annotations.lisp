@@ -159,6 +159,72 @@
                     :initform nil
                     :reader last-transition-of)))
 
+(defclass dom-connect-request-evidence ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :accessor title-of)
+   (summary :initarg :summary :accessor summary-of)
+   (context-object :initarg :context-object :initform nil
+                   :reader context-object-of)
+   (context-view-title :initarg :context-view-title :initform nil
+                       :reader context-view-title-of)
+   (request-id :initarg :request-id :reader request-id-of)
+   (transport :initarg :transport :initform nil :accessor transport-of)
+   (inspection-pane-id :initarg :inspection-pane-id
+                       :initform nil
+                       :accessor inspection-pane-id-of)
+   (source-pane-id :initarg :source-pane-id
+                   :initform nil
+                   :accessor source-pane-id-of)
+   (target-pane-id :initarg :target-pane-id
+                   :initform nil
+                   :accessor target-pane-id-of)
+   (source-provider-kind :initarg :source-provider-kind
+                         :initform nil
+                         :accessor source-provider-kind-of)
+   (target-provider-kind :initarg :target-provider-kind
+                         :initform nil
+                         :accessor target-provider-kind-of)
+   (source-anchor :initarg :source-anchor
+                  :initform nil
+                  :accessor source-anchor-of)
+   (target-anchor :initarg :target-anchor
+                  :initform nil
+                  :accessor target-anchor-of)
+   (session-snapshot :initarg :session-snapshot
+                     :initform nil
+                     :accessor session-snapshot-of)
+   (submitted-at :initarg :submitted-at
+                 :initform nil
+                 :accessor submitted-at-of)
+   (submitted-at-label :initarg :submitted-at-label
+                       :initform nil
+                       :accessor submitted-at-label-of)
+   (updated-at :initarg :updated-at :initform nil :accessor updated-at-of)
+   (updated-at-label :initarg :updated-at-label
+                     :initform nil
+                     :accessor updated-at-label-of)
+   (server-status :initarg :server-status
+                  :initform "submitted"
+                  :accessor server-status-of)
+   (server-message :initarg :server-message
+                   :initform nil
+                   :accessor server-message-of)
+   (server-detail :initarg :server-detail
+                  :initform nil
+                  :accessor server-detail-of)
+   (server-acknowledged :initarg :server-acknowledged
+                        :initform nil
+                        :accessor server-acknowledged-p-of)
+   (browser-failure-kind :initarg :browser-failure-kind
+                         :initform nil
+                         :accessor browser-failure-kind-of)
+   (browser-message :initarg :browser-message
+                    :initform nil
+                    :accessor browser-message-of)
+   (browser-detail :initarg :browser-detail
+                   :initform nil
+                   :accessor browser-detail-of)))
+
 (defmethod print-object ((object dom-annotation-anchor) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (or (label-of object)
@@ -177,6 +243,10 @@
     (format stream "~A" (title-of object))))
 
 (defmethod print-object ((object dom-connect-session-snapshot) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dom-connect-request-evidence) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -471,6 +541,22 @@
   (when (and json (listp json))
     (make-dom-annotation-anchor-from-json json)))
 
+(defun maybe-dom-connect-anchor-from-json-string (json-string)
+  (let ((json (ignore-errors (parse-dom-annotation-json json-string))))
+    (when (and json (listp json))
+      (make-dom-annotation-anchor-from-json json))))
+
+(defun dom-connect-evidence-failure-kind-label (failure-kind)
+  (cond
+    ((string= (or failure-kind "") "websocket-disconnect-before-acknowledgement")
+     "websocket disconnect before acknowledgement")
+    ((string= (or failure-kind "") "pane-open-timeout")
+     "pane-open timeout")
+    ((string= (or failure-kind "") "server-failed")
+     "server failure")
+    (t
+     failure-kind)))
+
 (defun make-dom-connect-transition-entry-from-json (json)
   (let* ((details (getf json :details))
          (stage (getf json :stage))
@@ -599,6 +685,252 @@
      :target-anchor (maybe-dom-connect-anchor-from-json (getf session :target))
      :panes panes
      :transitions transitions)))
+
+(defparameter *dom-connect-request-evidence-max-entries* 160)
+(defvar *dom-connect-request-evidence-table* (make-hash-table :test #'equal))
+(defvar *dom-connect-request-evidence-order* nil)
+
+(defun dom-connect-request-evidence-title (request-id)
+  (format nil "Connect request evidence: ~A"
+          (or request-id "unknown")))
+
+(defun dom-connect-request-evidence-summary (request-id server-status
+                                             browser-failure-kind)
+  (cond
+    ((string= (or browser-failure-kind "")
+                 "websocket-disconnect-before-acknowledgement")
+     (format nil "Request ~A reached the Connect boundary, but the browser lost the websocket before it saw any acknowledgement."
+             (or request-id "unknown")))
+    ((string= (or browser-failure-kind "") "pane-open-timeout")
+     (format nil "Request ~A reached the Connect boundary, but the browser timed out waiting for an acknowledgement."
+             (or request-id "unknown")))
+    ((string= (or browser-failure-kind "") "server-failed")
+     (format nil "Request ~A failed on the server side before the association pane could open."
+             (or request-id "unknown")))
+    ((string= (or server-status "") "pane-open-succeeded")
+     (format nil "Request ~A opened its association pane successfully."
+             (or request-id "unknown")))
+    ((string= (or server-status "") "failed")
+     (format nil "Request ~A failed on the server side before the association pane could open."
+             (or request-id "unknown")))
+    ((string= (or server-status "") "object-created")
+     (format nil "Request ~A created its association object and is waiting for pane-open confirmation."
+             (or request-id "unknown")))
+    ((string= (or server-status "") "server-received")
+     (format nil "Request ~A was received by the server and is waiting for object creation."
+             (or request-id "unknown")))
+    (t
+     (format nil "Request ~A is recorded at the Connect submit boundary."
+             (or request-id "unknown")))))
+
+(defun touch-dom-connect-request-evidence-key (request-id)
+  (when request-id
+    (setf *dom-connect-request-evidence-order*
+          (cons request-id
+                (remove request-id
+                        *dom-connect-request-evidence-order*
+                        :test #'equal)))))
+
+(defun trim-dom-connect-request-evidence-registry ()
+  (loop while (> (length *dom-connect-request-evidence-order*)
+                 *dom-connect-request-evidence-max-entries*)
+        do (let ((oldest (car (last *dom-connect-request-evidence-order*))))
+             (setf *dom-connect-request-evidence-order*
+                   (butlast *dom-connect-request-evidence-order*))
+             (when oldest
+               (remhash oldest *dom-connect-request-evidence-table*)))))
+
+(defun register-dom-connect-request-evidence (evidence)
+  (let ((request-id (request-id-of evidence)))
+    (when request-id
+      (setf (gethash request-id *dom-connect-request-evidence-table*) evidence)
+      (touch-dom-connect-request-evidence-key request-id)
+      (trim-dom-connect-request-evidence-registry)))
+  evidence)
+
+(defun find-dom-connect-request-evidence (request-id)
+  (when request-id
+    (let ((evidence (gethash request-id *dom-connect-request-evidence-table*)))
+      (when evidence
+        (touch-dom-connect-request-evidence-key request-id))
+      evidence)))
+
+(defun maybe-dom-connect-session-snapshot-from-json-string (context-object
+                                                            context-view-title
+                                                            snapshot-json)
+  (when snapshot-json
+    (ignore-errors
+      (make-dom-connect-session-snapshot-from-json
+       :context-object context-object
+       :context-view-title context-view-title
+       :snapshot-json snapshot-json))))
+
+(defun refresh-dom-connect-request-evidence (evidence)
+  (setf (title-of evidence)
+        (dom-connect-request-evidence-title (request-id-of evidence))
+        (summary-of evidence)
+        (dom-connect-request-evidence-summary
+         (request-id-of evidence)
+         (server-status-of evidence)
+         (browser-failure-kind-of evidence)))
+  evidence)
+
+(defun update-dom-connect-request-evidence-payload (evidence
+                                                    &key transport
+                                                      inspection-pane-id
+                                                      source-pane-id
+                                                      target-pane-id
+                                                      source-provider-kind
+                                                      target-provider-kind
+                                                      source-anchor
+                                                      target-anchor
+                                                      session-snapshot)
+  (when transport
+    (setf (transport-of evidence) transport))
+  (when inspection-pane-id
+    (setf (inspection-pane-id-of evidence) inspection-pane-id))
+  (when source-pane-id
+    (setf (source-pane-id-of evidence) source-pane-id))
+  (when target-pane-id
+    (setf (target-pane-id-of evidence) target-pane-id))
+  (when source-provider-kind
+    (setf (source-provider-kind-of evidence) source-provider-kind))
+  (when target-provider-kind
+    (setf (target-provider-kind-of evidence) target-provider-kind))
+  (when source-anchor
+    (setf (source-anchor-of evidence) source-anchor))
+  (when target-anchor
+    (setf (target-anchor-of evidence) target-anchor))
+  (when session-snapshot
+    (setf (session-snapshot-of evidence) session-snapshot))
+  evidence)
+
+(defun ensure-dom-connect-request-evidence (&key context-object
+                                                 context-view-title
+                                                 request-id
+                                                 transport
+                                                 inspection-pane-id
+                                                 snapshot-json
+                                                 source-json
+                                                 target-json
+                                                 source-pane-id
+                                                 target-pane-id
+                                                 source-provider-kind
+                                                 target-provider-kind)
+  (let* ((existing (find-dom-connect-request-evidence request-id))
+         (session-snapshot
+           (or (and existing (session-snapshot-of existing))
+               (maybe-dom-connect-session-snapshot-from-json-string
+                context-object context-view-title snapshot-json)))
+         (source-anchor (or (and existing (source-anchor-of existing))
+                            (maybe-dom-connect-anchor-from-json-string
+                             source-json)
+                            (and session-snapshot
+                                 (source-anchor-of session-snapshot))))
+         (target-anchor (or (and existing (target-anchor-of existing))
+                            (maybe-dom-connect-anchor-from-json-string
+                             target-json)
+                            (and session-snapshot
+                                 (target-anchor-of session-snapshot)))))
+    (if existing
+        (progn
+          (update-dom-connect-request-evidence-payload
+           existing
+           :transport transport
+           :inspection-pane-id inspection-pane-id
+           :source-pane-id source-pane-id
+           :target-pane-id target-pane-id
+           :source-provider-kind source-provider-kind
+           :target-provider-kind target-provider-kind
+           :source-anchor source-anchor
+           :target-anchor target-anchor
+           :session-snapshot session-snapshot)
+          (refresh-dom-connect-request-evidence existing)
+          existing)
+        (register-dom-connect-request-evidence
+         (make-instance 'dom-connect-request-evidence
+                        :id (format nil "connect-request/~A"
+                                    (or request-id "unknown"))
+                        :title (dom-connect-request-evidence-title request-id)
+                        :summary
+                        (dom-connect-request-evidence-summary
+                         request-id "submitted" nil)
+                        :context-object context-object
+                        :context-view-title context-view-title
+                        :request-id request-id
+                        :transport transport
+                        :inspection-pane-id inspection-pane-id
+                        :source-pane-id source-pane-id
+                        :target-pane-id target-pane-id
+                        :source-provider-kind source-provider-kind
+                        :target-provider-kind target-provider-kind
+                        :source-anchor source-anchor
+                        :target-anchor target-anchor
+                        :session-snapshot session-snapshot
+                        :submitted-at (get-universal-time)
+                        :submitted-at-label
+                        (or (and session-snapshot
+                                 (captured-at-label-of session-snapshot))
+                            "submit-boundary")
+                        :updated-at (get-universal-time)
+                        :updated-at-label
+                        (or (and session-snapshot
+                                 (captured-at-label-of session-snapshot))
+                            "submit-boundary")
+                        :server-status "submitted")))))
+
+(defun record-dom-connect-request-evidence-server-status (request-id status
+                                                          &key message detail
+                                                            acknowledged-p)
+  (let ((evidence (ensure-dom-connect-request-evidence :request-id request-id)))
+    (setf (server-status-of evidence) (or status "submitted")
+          (server-message-of evidence) message
+          (server-detail-of evidence) detail
+          (server-acknowledged-p-of evidence) acknowledged-p
+          (updated-at-of evidence) (get-universal-time)
+          (updated-at-label-of evidence)
+          (format nil "server ~A" (or status "submitted")))
+    (refresh-dom-connect-request-evidence evidence)
+    (register-dom-connect-request-evidence evidence)))
+
+(defun record-dom-connect-request-evidence-browser-failure (request-id
+                                                            browser-failure-kind
+                                                            &key message detail)
+  (let ((evidence (ensure-dom-connect-request-evidence :request-id request-id)))
+    (setf (browser-failure-kind-of evidence) browser-failure-kind
+          (browser-message-of evidence) message
+          (browser-detail-of evidence) detail
+          (updated-at-of evidence) (get-universal-time)
+          (updated-at-label-of evidence)
+          (format nil "browser ~A"
+                  (or (dom-connect-evidence-failure-kind-label
+                       browser-failure-kind)
+                      "failure")))
+    (refresh-dom-connect-request-evidence evidence)
+    (register-dom-connect-request-evidence evidence)))
+
+(defun make-dom-connect-request-evidence-from-values (&key context-object
+                                                           context-view-title
+                                                           request-id
+                                                           snapshot-json
+                                                           browser-failure-kind
+                                                           browser-message
+                                                           browser-detail)
+  (let ((evidence
+          (ensure-dom-connect-request-evidence
+           :context-object context-object
+           :context-view-title context-view-title
+           :request-id (or request-id
+                           (error "Missing Connect request id."))
+           :transport "connect-request-evidence-v1"
+           :snapshot-json snapshot-json)))
+    (when (or browser-failure-kind browser-message browser-detail)
+      (record-dom-connect-request-evidence-browser-failure
+       request-id
+       browser-failure-kind
+       :message browser-message
+       :detail browser-detail))
+    evidence))
 
 (defun call-hyperdoc-runtime (symbol-name &rest arguments)
   (let ((symbol (find-symbol symbol-name :hyperdoc)))

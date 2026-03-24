@@ -123,66 +123,114 @@
   (let* ((source-cell (lwcells:cell ""))
          (target-cell (lwcells:cell ""))
          (snapshot-cell (lwcells:cell ""))
+         (request-id-cell (lwcells:cell ""))
+         (browser-failure-kind-cell (lwcells:cell ""))
+         (browser-message-cell (lwcells:cell ""))
+         (browser-detail-cell (lwcells:cell ""))
          (source-input-id (html-inspector-views/reactive:input-id
                            source-cell :event :change))
          (target-input-id (html-inspector-views/reactive:input-id
                            target-cell :event :change))
          (snapshot-input-id (html-inspector-views/reactive:input-id
-                             snapshot-cell :event :change)))
+                             snapshot-cell :event :change))
+         (request-id-input-id (html-inspector-views/reactive:input-id
+                               request-id-cell :event :change))
+         (browser-failure-kind-input-id
+           (html-inspector-views/reactive:input-id
+            browser-failure-kind-cell :event :change))
+         (browser-message-input-id
+           (html-inspector-views/reactive:input-id
+            browser-message-cell :event :change))
+         (browser-detail-input-id
+           (html-inspector-views/reactive:input-id
+            browser-detail-cell :event :change)))
     (include-dom-annotation-connect-assets)
     (when (anchor-provider-connectable-p provider)
       (views:html
         (:div :class "hyperdoc-dom-connect-surface hyperdoc-connect-provider-surface"
-            :data-hyperdoc-connect-provider-kind
-            (anchor-provider-kind-of provider)
-            :data-hyperdoc-connect-view-kind
-            (anchor-provider-view-kind-of provider)
-            :data-hyperdoc-connect-selection-mode
-            (anchor-provider-selection-mode-of provider)
-            :data-hyperdoc-connect-help-summary
-            (anchor-provider-help-summary-of provider)
-            :data-hyperdoc-connect-help-detail
-            (anchor-provider-help-detail-of provider)
-            :data-context-object-id (dom-connect-context-object-id context-object)
-            :data-context-view-title view-title
-            (:div :class "hyperdoc-dom-connect-controls"
-                  :style "display:none"
-                  :data-source-input-id source-input-id
-                  :data-target-input-id target-input-id
-                  :data-snapshot-input-id snapshot-input-id
-                  (:input :type "hidden" :id source-input-id :value "")
-                  (:input :type "hidden" :id target-input-id :value "")
-                  (:input :type "hidden" :id snapshot-input-id :value "")
-                  (:span :class "hyperdoc-dom-connect-submit"
-                         :style "display:none"
-                         (views:eval-button
-                          "Open association"
-                          (views:thunk
-                            (make-dom-relation-annotation-from-json
-                             :context-object context-object
-                             :context-view-title view-title
-                             :source-json (lwcells:cell-ref source-cell)
-                             :target-json (lwcells:cell-ref target-cell)))))
-                  (:span :class "hyperdoc-dom-connect-inspect-submit"
-                         :style "display:none"
-                         (views:eval-button
-                          "Inspect Connect state"
-                          (views:thunk
-                            (make-dom-connect-session-snapshot-from-json
-                             :context-object context-object
-                             :context-view-title view-title
-                             :snapshot-json (lwcells:cell-ref snapshot-cell))))))
-            (:svg :class "hyperdoc-dom-connect-overlay"
-                  :hidden "hidden"
-                  :xmlns "http://www.w3.org/2000/svg"
-                  :aria-hidden "true"
-                  (:line :class "hyperdoc-dom-connect-line"
-                         :x1 "0"
-                         :y1 "0"
-                         :x2 "0"
-                         :y2 "0"))
-            (:div :class "hyperdoc-dom-connect-root hyperdoc-connect-provider-root"
-                  (render-anchor-provider-body provider)))))))
+              :data-hyperdoc-connect-provider-kind
+              (anchor-provider-kind-of provider)
+              :data-hyperdoc-connect-view-kind
+              (anchor-provider-view-kind-of provider)
+              :data-hyperdoc-connect-selection-mode
+              (anchor-provider-selection-mode-of provider)
+              :data-hyperdoc-connect-help-summary
+              (anchor-provider-help-summary-of provider)
+              :data-hyperdoc-connect-help-detail
+              (anchor-provider-help-detail-of provider)
+              :data-context-object-id (dom-connect-context-object-id context-object)
+              :data-context-view-title view-title
+              (:div :class "hyperdoc-dom-connect-controls"
+                    :style "display:none"
+                    :data-source-input-id source-input-id
+                    :data-target-input-id target-input-id
+                    :data-snapshot-input-id snapshot-input-id
+                    :data-request-id-input-id request-id-input-id
+                    :data-browser-failure-kind-input-id
+                    browser-failure-kind-input-id
+                    :data-browser-message-input-id
+                    browser-message-input-id
+                    :data-browser-detail-input-id
+                    browser-detail-input-id
+                    (:input :type "hidden" :id source-input-id :value "")
+                    (:input :type "hidden" :id target-input-id :value "")
+                    (:input :type "hidden" :id snapshot-input-id :value "")
+                    (:input :type "hidden" :id request-id-input-id :value "")
+                    (:input :type "hidden"
+                            :id browser-failure-kind-input-id
+                            :value "")
+                    (:input :type "hidden"
+                            :id browser-message-input-id
+                            :value "")
+                    (:input :type "hidden"
+                            :id browser-detail-input-id
+                            :value "")
+                    (:span :class "hyperdoc-dom-connect-submit"
+                           :style "display:none"
+                           (views:eval-button
+                            "Open association"
+                            (views:thunk
+                              (make-dom-relation-annotation-from-json
+                               :context-object context-object
+                               :context-view-title view-title
+                               :source-json (lwcells:cell-ref source-cell)
+                               :target-json (lwcells:cell-ref target-cell)))))
+                    (:span :class "hyperdoc-dom-connect-inspect-submit"
+                           :style "display:none"
+                           (views:eval-button
+                            "Inspect Connect state"
+                            (views:thunk
+                              (make-dom-connect-session-snapshot-from-json
+                               :context-object context-object
+                               :context-view-title view-title
+                               :snapshot-json (lwcells:cell-ref snapshot-cell)))))
+                    (:span :class "hyperdoc-dom-connect-evidence-submit"
+                           :style "display:none"
+                           (views:eval-button
+                            "Inspect request evidence"
+                            (views:thunk
+                              (make-dom-connect-request-evidence-from-values
+                               :context-object context-object
+                               :context-view-title view-title
+                               :request-id (lwcells:cell-ref request-id-cell)
+                               :snapshot-json (lwcells:cell-ref snapshot-cell)
+                               :browser-failure-kind
+                               (lwcells:cell-ref browser-failure-kind-cell)
+                               :browser-message
+                               (lwcells:cell-ref browser-message-cell)
+                               :browser-detail
+                               (lwcells:cell-ref browser-detail-cell))))))
+              (:svg :class "hyperdoc-dom-connect-overlay"
+                    :hidden "hidden"
+                    :xmlns "http://www.w3.org/2000/svg"
+                    :aria-hidden "true"
+                    (:line :class "hyperdoc-dom-connect-line"
+                           :x1 "0"
+                           :y1 "0"
+                           :x2 "0"
+                           :y2 "0"))
+              (:div :class "hyperdoc-dom-connect-root hyperdoc-connect-provider-root"
+                    (render-anchor-provider-body provider)))))))
 
 (defun render-dom-connect-surface (context-object view-title body-thunk)
   (render-anchor-provider-surface
@@ -310,6 +358,9 @@
 
 (defmethod views:text-representation ((snapshot dom-connect-session-snapshot))
   (shorten-dom-association-label (title-of snapshot)))
+
+(defmethod views:text-representation ((evidence dom-connect-request-evidence))
+  (shorten-dom-association-label (title-of evidence)))
 
 (defun render-anchor-field-rows (rows)
   (loop for (label . value) in rows
@@ -667,3 +718,82 @@
                                      (source-anchor-of snapshot))
       (render-connect-anchor-section "Target anchor"
                                      (target-anchor-of snapshot)))))
+
+(views:defview 👀summary (evidence dom-connect-request-evidence)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of evidence)))
+      (:p (views:esc (summary-of evidence)))
+      (:table :class "inspector-table hyperdoc-dom-connect-request-evidence-table"
+              (render-connect-field-row "Request id" (request-id-of evidence))
+              (render-connect-field-row "Transport" (transport-of evidence))
+              (render-connect-field-row "Context view"
+                                        (context-view-title-of evidence))
+              (render-connect-field-row "Context object"
+                                        (context-object-of evidence))
+              (render-connect-field-row "Inspection pane id"
+                                        (inspection-pane-id-of evidence))
+              (render-connect-field-row "Source pane"
+                                        (source-pane-id-of evidence))
+              (render-connect-field-row "Target pane"
+                                        (target-pane-id-of evidence))
+              (render-connect-field-row "Source provider kind"
+                                        (source-provider-kind-of evidence))
+              (render-connect-field-row "Target provider kind"
+                                        (target-provider-kind-of evidence))
+              (render-connect-field-row "Server status"
+                                        (server-status-of evidence))
+              (render-connect-field-row "Server acknowledged"
+                                        (dom-connect-bool-label
+                                         (server-acknowledged-p-of evidence)))
+              (render-connect-field-row "Browser failure kind"
+                                        (or (dom-connect-evidence-failure-kind-label
+                                             (browser-failure-kind-of evidence))
+                                            "none"))
+              (render-connect-field-row "Submitted at"
+                                        (or (submitted-at-label-of evidence)
+                                            "submit-boundary"))
+              (render-connect-field-row "Last updated"
+                                        (or (updated-at-label-of evidence)
+                                            "submit-boundary"))))))
+
+(views:defview 👀failure (evidence dom-connect-request-evidence)
+  (views:html-view :title "Failure / Boundary" :priority 2
+    (views:html
+      (:h4 "Browser-side classification")
+      (:table :class "inspector-table"
+              (render-connect-field-row "Failure kind"
+                                        (or (dom-connect-evidence-failure-kind-label
+                                             (browser-failure-kind-of evidence))
+                                            "none"))
+              (render-connect-field-row "Browser message"
+                                        (or (browser-message-of evidence)
+                                            "none"))
+              (render-connect-field-row "Browser detail"
+                                        (or (browser-detail-of evidence)
+                                            "none")))
+      (:h4 "Server-side boundary")
+      (:table :class "inspector-table"
+              (render-connect-field-row "Server status"
+                                        (or (server-status-of evidence)
+                                            "submitted"))
+              (render-connect-field-row "Server message"
+                                        (or (server-message-of evidence)
+                                            "none"))
+              (render-connect-field-row "Server detail"
+                                        (or (server-detail-of evidence)
+                                            "none"))))))
+
+(views:defview 👀payload (evidence dom-connect-request-evidence)
+  (views:html-view :title "Payload / Snapshot" :priority 3
+    (views:html
+      (render-connect-anchor-section "Source anchor"
+                                     (source-anchor-of evidence))
+      (render-connect-anchor-section "Target anchor"
+                                     (target-anchor-of evidence))
+      (:h4 "Captured session snapshot")
+      (if (session-snapshot-of evidence)
+          (maybe-dom-object-ref (session-snapshot-of evidence))
+          (views:html
+            (:p (:span :style "opacity: 0.55;"
+                       "No submit-boundary session snapshot was captured.")))))))

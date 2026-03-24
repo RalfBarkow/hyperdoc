@@ -2494,6 +2494,16 @@
                  "Understanding ASDF Systems in HyperDoc"
                  "SBCL bootstrapping model")))
 
+(defun running-image-coherence-topic ()
+  (make-topic
+   :id "running-image-coherence"
+   :title "Running image coherence"
+   :summary "The problem of keeping a live Lisp image internally consistent and intelligible as definitions, dependencies, and loaded state evolve over time."
+   :references '("A framework for maintaining the coherence of a running Lisp"
+                 "McDermott Running Image Coherence Crosswalk"
+                 "Drew McDermott Lisp, Planning, and Software"
+                 "Source-oriented and image-oriented development in Common Lisp")))
+
 (defun bootstrappability-as-social-architecture-topic ()
   (make-topic
    :id "bootstrappability-as-social-architecture"

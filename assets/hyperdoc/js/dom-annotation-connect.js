@@ -605,6 +605,53 @@
     }
   }
 
+  function connectTestState() {
+    if (!window.hyperdocDomConnectTestState) {
+      window.hyperdocDomConnectTestState = {
+        nextFailureMode: null,
+        suppressedServerResults: {}
+      };
+    }
+    return window.hyperdocDomConnectTestState;
+  }
+
+  function consumeNextFailureMode() {
+    var state = connectTestState();
+    var mode = state.nextFailureMode || null;
+    state.nextFailureMode = null;
+    return mode;
+  }
+
+  function suppressServerResult(requestId, reason) {
+    if (!requestId) {
+      return;
+    }
+    connectTestState().suppressedServerResults[requestId] = reason || true;
+  }
+
+  function suppressedServerResultReason(requestId) {
+    if (!requestId) {
+      return null;
+    }
+    return connectTestState().suppressedServerResults[requestId] || null;
+  }
+
+  function clearSuppressedServerResult(requestId) {
+    if (!requestId) {
+      return;
+    }
+    delete connectTestState().suppressedServerResults[requestId];
+  }
+
+  function escapeHtml(value) {
+    return String(value === undefined || value === null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function makeIdleSession() {
     return {
       id: null,
@@ -759,6 +806,8 @@
     if (!state.available || !state.inspectSubmit) {
       return;
     }
+    var requestId = "connect-inspect-" + Date.now().toString(36) + "-" +
+      Math.random().toString(36).slice(2, 8);
     var snapshotJson = JSON.stringify(debugSnapshot());
     var button = state.inspectSubmit.querySelector("button");
     if (button) {
@@ -776,15 +825,12 @@
         "data-dom-association-source-provider-kind",
         "data-dom-association-target-provider-kind",
         "data-dom-connect-inspection-pane-id",
+        "data-dom-connect-snapshot-field-id",
         "data-dom-connect-snapshot-json"
       ].forEach(function (attribute) {
         button.removeAttribute(attribute);
       });
-      button.setAttribute(
-        "data-dom-association-request-id",
-        "connect-inspect-" + Date.now().toString(36) + "-" +
-          Math.random().toString(36).slice(2, 8)
-      );
+      button.setAttribute("data-dom-association-request-id", requestId);
       button.setAttribute("data-dom-association-transport", "connect-snapshot-v1");
       button.setAttribute(
         "data-dom-association-context-object-id",
@@ -798,9 +844,18 @@
         "data-dom-connect-inspection-pane-id",
         state.paneId || ""
       );
+      if (state.inspectInput) {
+        button.setAttribute(
+          "data-dom-connect-snapshot-field-id",
+          state.inspectInput.id || ""
+        );
+      }
       button.setAttribute("data-dom-connect-snapshot-json", snapshotJson);
       if (state.inspectInput) {
         dispatchValue(state.inspectInput, snapshotJson);
+      }
+      if (state.requestIdInput) {
+        dispatchValue(state.requestIdInput, requestId);
       }
       dispatchEvalButtonWhenReady(button, {
         click: function () {
@@ -809,7 +864,8 @@
             cancelable: true,
             shiftKey: true
           }));
-        }
+        },
+        dispatchDelayMs: 250
       });
     }
   }
@@ -817,6 +873,7 @@
   function clearFeedback(state) {
     state.feedback.hidden = true;
     state.feedback.textContent = "";
+    state.feedback.innerHTML = "";
     delete state.feedback.dataset.kind;
   }
 
@@ -824,6 +881,134 @@
     state.feedback.dataset.kind = kind;
     state.feedback.textContent = text;
     state.feedback.hidden = false;
+  }
+
+  function evidenceButtonAttributes(button) {
+    [
+      "data-dom-association-request-id",
+      "data-dom-association-transport",
+      "data-dom-association-context-object-id",
+      "data-dom-association-context-view-title",
+      "data-dom-connect-snapshot-field-id",
+      "data-dom-connect-request-evidence-request-id",
+      "data-dom-connect-browser-failure-kind",
+      "data-dom-connect-browser-message",
+      "data-dom-connect-browser-detail",
+      "data-dom-connect-snapshot-json"
+    ].forEach(function (attribute) {
+      button.removeAttribute(attribute);
+    });
+  }
+
+  function prepareEvidenceButton(state, requestId, failureKind, message, detail) {
+    if (!state.evidenceSubmit) {
+      return null;
+    }
+    var button = state.evidenceSubmit.querySelector("button");
+    if (!button) {
+      return null;
+    }
+    evidenceButtonAttributes(button);
+    button.setAttribute(
+      "data-dom-association-request-id",
+      requestId || ("connect-evidence-" + Date.now().toString(36) + "-" +
+        Math.random().toString(36).slice(2, 8))
+    );
+    button.setAttribute("data-dom-association-transport", "connect-request-evidence-v1");
+    button.setAttribute(
+      "data-dom-association-context-object-id",
+      state.surface && state.surface.dataset.contextObjectId || ""
+    );
+    button.setAttribute(
+      "data-dom-association-context-view-title",
+      state.surface && state.surface.dataset.contextViewTitle || ""
+    );
+    if (state.inspectInput) {
+      button.setAttribute(
+        "data-dom-connect-snapshot-field-id",
+        state.inspectInput.id || ""
+      );
+    }
+    button.setAttribute(
+      "data-dom-connect-request-evidence-request-id",
+      requestId || ""
+    );
+    button.setAttribute(
+      "data-dom-connect-browser-failure-kind",
+      failureKind || ""
+    );
+    button.setAttribute(
+      "data-dom-connect-browser-message",
+      message || ""
+    );
+    button.setAttribute(
+      "data-dom-connect-browser-detail",
+      detail || ""
+    );
+    button.setAttribute(
+      "data-dom-connect-snapshot-json",
+      JSON.stringify(debugSnapshot())
+    );
+    if (state.inspectInput) {
+      dispatchValue(state.inspectInput, JSON.stringify(debugSnapshot()));
+    }
+    if (state.requestIdInput) {
+      dispatchValue(state.requestIdInput, requestId || "");
+    }
+    if (state.browserFailureKindInput) {
+      dispatchValue(state.browserFailureKindInput, failureKind || "");
+    }
+    if (state.browserMessageInput) {
+      dispatchValue(state.browserMessageInput, message || "");
+    }
+    if (state.browserDetailInput) {
+      dispatchValue(state.browserDetailInput, detail || "");
+    }
+    return button;
+  }
+
+  function setFailureFeedback(state, message, requestId, failureKind, detail) {
+    var button = prepareEvidenceButton(state, requestId, failureKind, message, detail);
+    var html =
+      '<span class="hyperdoc-dom-connect-feedback-message">' +
+      escapeHtml(message) +
+      "</span>";
+    if (button && requestId) {
+      html +=
+        ' <button type="button" class="hyperdoc-dom-connect-feedback-open-evidence"' +
+        ' data-request-id="' + escapeHtml(requestId) + '"' +
+        ' data-failure-kind="' + escapeHtml(failureKind || "") + '"' +
+        ' data-message="' + escapeHtml(message || "") + '"' +
+        ' data-detail="' + escapeHtml(detail || "") + '">' +
+        "Inspect request evidence" +
+        "</button>";
+    }
+    if (requestId) {
+      html +=
+        ' <span class="hyperdoc-dom-connect-feedback-request-id">' +
+        "Request id " + escapeHtml(requestId) + "." +
+        "</span>";
+    }
+    state.feedback.dataset.kind = "error";
+    state.feedback.innerHTML = html;
+    state.feedback.hidden = false;
+  }
+
+  function openRequestEvidence(state, requestId, failureKind, message, detail) {
+    var button = prepareEvidenceButton(state, requestId, failureKind, message, detail);
+    if (!button) {
+      return;
+    }
+    dispatchEvalButtonWhenReady(button, {
+      click: function () {
+        button.dispatchEvent(new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+          shiftKey: true
+        }));
+      },
+      dispatchDelayMs: 250
+    });
   }
 
   function clearResetTimer(state) {
@@ -837,6 +1022,7 @@
     if (!state.pendingRequest) {
       return;
     }
+    clearSuppressedServerResult(state.pendingRequest.id);
     window.clearTimeout(state.pendingRequest.timeoutId);
     window.clearInterval(state.pendingRequest.connectionWatchId);
     state.pendingRequest = null;
@@ -850,54 +1036,69 @@
       window.ws.readyState > 1);
   }
 
-  function failPendingRequest(state, message, detail) {
+  function failPendingRequest(state, failureKind, message, detail) {
     if (!state.pendingRequest) {
       return;
     }
     var requestId = state.pendingRequest.id;
     var manager = state.manager || connectManager();
     logStage(requestId, "request-failed", {
+      failureKind: failureKind || null,
       message: message,
       detail: detail || null
     });
     clearPendingRequest(state);
     resetConnectSession(manager);
-    setFeedback(
-      state,
-      "error",
-      message + " See console/server log for request id " + requestId + "."
-    );
+    setFailureFeedback(state, message, requestId, failureKind, detail);
   }
 
   function registerPendingRequest(state, requestId) {
     clearPendingRequest(state);
+    var forcedFailureMode = consumeNextFailureMode();
+    if (forcedFailureMode) {
+      suppressServerResult(requestId, forcedFailureMode);
+    }
     state.pendingRequest = {
       id: requestId,
+      forcedFailureMode: forcedFailureMode,
       timeoutId: window.setTimeout(function () {
         if (!state.pendingRequest || state.pendingRequest.id !== requestId) {
           return;
         }
-        if (connectionClosed()) {
+        if (state.pendingRequest.forcedFailureMode ===
+            "websocket-disconnect-before-acknowledgement") {
           failPendingRequest(
             state,
+            "websocket-disconnect-before-acknowledgement",
+            "Connection closed before the association pane opened.",
+            "WebSocket closed before any server acknowledgement for this request."
+          );
+        } else if (connectionClosed()) {
+          failPendingRequest(
+            state,
+            "websocket-disconnect-before-acknowledgement",
             "Connection closed before the association pane opened.",
             "WebSocket closed before any server acknowledgement for this request."
           );
         } else {
           failPendingRequest(
             state,
+            "pane-open-timeout",
             "Association could not be opened.",
             "No server acknowledgement arrived before the request timed out."
           );
         }
-      }, 5000),
+      }, forcedFailureMode ? 250 : 5000),
       connectionWatchId: window.setInterval(function () {
         if (!state.pendingRequest || state.pendingRequest.id !== requestId) {
           return;
         }
-        if (connectionClosed()) {
+        if (state.pendingRequest.forcedFailureMode ===
+            "websocket-disconnect-before-acknowledgement" ||
+            connectionClosed()) {
           failPendingRequest(
             state,
+            "websocket-disconnect-before-acknowledgement",
             "Connection closed before the association pane opened.",
             "WebSocket closed before any server acknowledgement for this request."
           );
@@ -909,6 +1110,9 @@
   function handleServerResult(state, detail) {
     if (!detail || !detail.requestId || !state.pendingRequest ||
         state.pendingRequest.id !== detail.requestId) {
+      return;
+    }
+    if (suppressedServerResultReason(detail.requestId)) {
       return;
     }
     var manager = state.manager || connectManager();
@@ -930,6 +1134,7 @@
     }
     failPendingRequest(
       state,
+      "server-failed",
       detail.message || "Association could not be opened.",
       detail.detail || null
     );
@@ -1056,6 +1261,7 @@
   function dispatchEvalButtonWhenReady(button, options) {
     var click = options && options.click;
     var onTimeout = options && options.onTimeout;
+    var dispatchDelayMs = options && options.dispatchDelayMs || 0;
     var attemptsRemaining = options && options.maxAttempts || 60;
 
     function tryDispatch() {
@@ -1066,7 +1272,7 @@
         return;
       }
       if (evalButtonBound(button)) {
-        click();
+        window.setTimeout(click, dispatchDelayMs);
         return;
       }
       attemptsRemaining -= 1;
@@ -1091,8 +1297,13 @@
     state.sourceInput = null;
     state.targetInput = null;
     state.inspectInput = null;
+    state.requestIdInput = null;
+    state.browserFailureKindInput = null;
+    state.browserMessageInput = null;
+    state.browserDetailInput = null;
     state.submit = null;
     state.inspectSubmit = null;
+    state.evidenceSubmit = null;
     state.provider = provider;
     state.providerKind = surfaceProviderKind(surface);
     if (!surface) {
@@ -1108,9 +1319,23 @@
     var sourceInput = document.getElementById(controls.dataset.sourceInputId);
     var targetInput = document.getElementById(controls.dataset.targetInputId);
     var inspectInput = document.getElementById(controls.dataset.snapshotInputId);
+    var requestIdInput = document.getElementById(controls.dataset.requestIdInputId);
+    var browserFailureKindInput = document.getElementById(
+      controls.dataset.browserFailureKindInputId
+    );
+    var browserMessageInput = document.getElementById(
+      controls.dataset.browserMessageInputId
+    );
+    var browserDetailInput = document.getElementById(
+      controls.dataset.browserDetailInputId
+    );
     var submit = controls.querySelector(".hyperdoc-dom-connect-submit");
     var inspectSubmit = controls.querySelector(".hyperdoc-dom-connect-inspect-submit");
-    if (!sourceInput || !targetInput || !inspectInput || !submit || !inspectSubmit) {
+    var evidenceSubmit = controls.querySelector(".hyperdoc-dom-connect-evidence-submit");
+    if (!sourceInput || !targetInput || !inspectInput ||
+        !requestIdInput || !browserFailureKindInput ||
+        !browserMessageInput || !browserDetailInput ||
+        !submit || !inspectSubmit || !evidenceSubmit) {
       return false;
     }
     state.root = root;
@@ -1119,8 +1344,13 @@
     state.sourceInput = sourceInput;
     state.targetInput = targetInput;
     state.inspectInput = inspectInput;
+    state.requestIdInput = requestIdInput;
+    state.browserFailureKindInput = browserFailureKindInput;
+    state.browserMessageInput = browserMessageInput;
+    state.browserDetailInput = browserDetailInput;
     state.submit = submit;
     state.inspectSubmit = inspectSubmit;
+    state.evidenceSubmit = evidenceSubmit;
     updateProviderCopy(state);
     return true;
   }
@@ -1492,9 +1722,26 @@
     // submit button now carries the authoritative request payload.
     dispatchValue(state.sourceInput, sourceJson);
     dispatchValue(state.targetInput, targetJson);
+    if (state.inspectInput) {
+      dispatchValue(state.inspectInput, JSON.stringify(debugSnapshot()));
+    }
+    if (state.requestIdInput) {
+      dispatchValue(state.requestIdInput, requestId);
+    }
+    if (state.browserFailureKindInput) {
+      dispatchValue(state.browserFailureKindInput, "");
+    }
+    if (state.browserMessageInput) {
+      dispatchValue(state.browserMessageInput, "");
+    }
+    if (state.browserDetailInput) {
+      dispatchValue(state.browserDetailInput, "");
+    }
     logStage(requestId, "hidden-field-mirror-written", {
       sourceField: fieldDiagnostic(state.sourceInput),
-      targetField: fieldDiagnostic(state.targetInput)
+      targetField: fieldDiagnostic(state.targetInput),
+      snapshotField: fieldDiagnostic(state.inspectInput),
+      requestIdField: fieldDiagnostic(state.requestIdInput)
     });
     writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson);
     logStage(requestId, "request-payload-written", {
@@ -1538,7 +1785,8 @@
           "Association could not be opened.",
           detail
         );
-      }
+      },
+      dispatchDelayMs: 250
     });
     pendingState.resetTimer = window.setTimeout(function () {
       if (manager.session.phase === "submitting") {
@@ -1664,8 +1912,13 @@
       sourceInput: null,
       targetInput: null,
       inspectInput: null,
+      requestIdInput: null,
+      browserFailureKindInput: null,
+      browserMessageInput: null,
+      browserDetailInput: null,
       submit: null,
-      inspectSubmit: null
+      inspectSubmit: null,
+      evidenceSubmit: null
     };
     pane.hyperdocDomConnectState = state;
     registerState(manager, state);
@@ -1703,6 +1956,21 @@
       event.preventDefault();
       event.stopPropagation();
       inspectConnectState(state);
+    });
+    feedback.addEventListener("click", function (event) {
+      var button = event.target.closest(".hyperdoc-dom-connect-feedback-open-evidence");
+      if (!button) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      openRequestEvidence(
+        state,
+        button.dataset.requestId || null,
+        button.dataset.failureKind || null,
+        button.dataset.message || null,
+        button.dataset.detail || null
+      );
     });
     cancel.addEventListener("click", function () {
       deactivate(state, true);
@@ -1801,6 +2069,15 @@
     },
     readDebugSnapshot: function () {
       return debugSnapshot();
+    },
+    __test: {
+      forceNextFailureMode: function (kind) {
+        connectTestState().nextFailureMode = kind || null;
+      },
+      clearFailureModes: function () {
+        connectTestState().nextFailureMode = null;
+        connectTestState().suppressedServerResults = {};
+      }
     }
   };
 }());

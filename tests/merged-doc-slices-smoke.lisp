@@ -94,6 +94,7 @@
   (dolist (entry '((hyperdoc::sbcl-bootstrapping-topic "SBCL bootstrapping")
                    (hyperdoc::source-oriented-development-topic "Source-oriented development")
                    (hyperdoc::image-oriented-development-topic "Image-oriented development")
+                   (hyperdoc::running-image-coherence-topic "Running image coherence")
                    (hyperdoc::host-target-separation-topic "Host/target separation")
                    (hyperdoc::cross-compiler-topic "Cross-compiler")
                    (hyperdoc::genesis-build-stage-topic "Genesis build stage")
@@ -107,6 +108,8 @@
     (destructuring-bind (symbol title) entry
       (assert-topic-function-present symbol title)))
   (dolist (title '("SBCL bootstrapping model"
+                   "A framework for maintaining the coherence of a running Lisp"
+                   "McDermott Running Image Coherence Crosswalk"
                    "Source-oriented and image-oriented development in Common Lisp"
                    "Host and target separation in SBCL"
                    "SBCL build stages: cross-compiler, genesis, cold core, cold init"

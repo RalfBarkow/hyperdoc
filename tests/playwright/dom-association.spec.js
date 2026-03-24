@@ -4,9 +4,12 @@ const { test, expect } = require("@playwright/test");
 const {
   activatePaneTab,
   attachJson,
+  clearConnectFailureModes,
   exactTextPattern,
+  forceNextConnectFailureMode,
   openFedWikiPageFromTextPageLink,
   openConnectInspection,
+  openConnectRequestEvidence,
   openHyperDoc,
   openTextPageFromHyperDoc,
   readConnectSessionState,
@@ -174,6 +177,109 @@ test("Connect inspection resets cleanly after a successful association", async (
   expect(summaryRows["Pending request state"]).toBe("none");
   expect(transitionsPane.bodyText).toContain("request-payload-written");
   expect(transitionsPane.bodyText).toContain("pane-open-succeeded");
+});
+
+test("Connect request evidence opens for a pane-open timeout classification", async ({
+  page,
+}, testInfo) => {
+  const hyperdocPane = await openHyperDoc(page);
+
+  await clearConnectEventTrace(page);
+  await clearConnectFailureModes(page);
+  await startConnectInPane(page, 1);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  await forceNextConnectFailureMode(page, "pane-open-timeout");
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Data objects") })
+    .click();
+
+  const trace = await waitForAssociationResult(page);
+  const chromeAfterFailure = await readPaneChromeState(page, 1);
+  const evidence = await openConnectRequestEvidence(page, 1);
+  const summaryPane = await readInspectorPaneState(page, evidence.index);
+  const summaryRows = tableRowsToMap(summaryPane.tables[0]);
+
+  await activatePaneTab(page, evidence.index, "Failure / Boundary");
+  const failurePane = await readInspectorPaneState(page, evidence.index);
+
+  await attachJson(testInfo, "connect-timeout-trace.json", trace);
+  await attachJson(testInfo, "connect-timeout-pane-chrome.json", chromeAfterFailure);
+  await attachJson(testInfo, "connect-timeout-evidence-summary.json", summaryPane);
+  await attachJson(testInfo, "connect-timeout-evidence-failure.json", failurePane);
+
+  expect(trace.latestStage).toBe("request-failed");
+  expect(
+    trace.events.some(
+      (event) =>
+        event.stage === "request-failed" &&
+        event.details &&
+        event.details.failureKind === "pane-open-timeout"
+    )
+  ).toBe(true);
+  expect(chromeAfterFailure.feedbackKind).toBe("error");
+  expect(chromeAfterFailure.feedbackText).toContain("Inspect request evidence");
+  expect(summaryRows["Request id"]).toBe(trace.requestId);
+  expect(summaryRows["Browser failure kind"]).toBe("pane-open timeout");
+  expect(failurePane.bodyText).toContain(
+    "No server acknowledgement arrived before the request timed out."
+  );
+});
+
+test("Connect request evidence classifies websocket disconnect before acknowledgement separately", async ({
+  page,
+}, testInfo) => {
+  const hyperdocPane = await openHyperDoc(page);
+
+  await clearConnectEventTrace(page);
+  await clearConnectFailureModes(page);
+  await startConnectInPane(page, 1);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  await forceNextConnectFailureMode(page, "websocket-disconnect-before-acknowledgement");
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Data objects") })
+    .click();
+
+  const trace = await waitForAssociationResult(page);
+  const chromeAfterFailure = await readPaneChromeState(page, 1);
+  const evidence = await openConnectRequestEvidence(page, 1);
+  const summaryPane = await readInspectorPaneState(page, evidence.index);
+  const summaryRows = tableRowsToMap(summaryPane.tables[0]);
+
+  await activatePaneTab(page, evidence.index, "Failure / Boundary");
+  const failurePane = await readInspectorPaneState(page, evidence.index);
+
+  await attachJson(testInfo, "connect-disconnect-trace.json", trace);
+  await attachJson(testInfo, "connect-disconnect-pane-chrome.json", chromeAfterFailure);
+  await attachJson(testInfo, "connect-disconnect-evidence-summary.json", summaryPane);
+  await attachJson(testInfo, "connect-disconnect-evidence-failure.json", failurePane);
+
+  expect(trace.latestStage).toBe("request-failed");
+  expect(
+    trace.events.some(
+      (event) =>
+        event.stage === "request-failed" &&
+        event.details &&
+        event.details.failureKind ===
+          "websocket-disconnect-before-acknowledgement"
+    )
+  ).toBe(true);
+  expect(chromeAfterFailure.feedbackKind).toBe("error");
+  expect(chromeAfterFailure.feedbackText).toContain("Inspect request evidence");
+  expect(summaryRows["Request id"]).toBe(trace.requestId);
+  expect(summaryRows["Browser failure kind"]).toBe(
+    "websocket disconnect before acknowledgement"
+  );
+  expect(failurePane.bodyText).toContain(
+    "WebSocket closed before any server acknowledgement for this request."
+  );
 });
 
 test("content view opens an association through pane-chrome Connect", async ({
