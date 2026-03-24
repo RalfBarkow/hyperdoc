@@ -85,6 +85,24 @@
                  :initarg :matched-item
                  :initform nil)))
 
+(defclass zotero-recent-changes-query (zotero-query-evidence)
+  ((bridge :reader zotero-recent-changes-query-bridge-of :initarg :bridge)
+   (limit :reader zotero-recent-changes-query-limit-of :initarg :limit)
+   (since :reader zotero-recent-changes-query-since-of
+          :initarg :since
+          :initform nil)
+   (include-attachments-p
+    :reader zotero-recent-changes-query-include-attachments-p
+    :initarg :include-attachments-p
+    :initform nil)
+   (change-timestamp-field
+    :reader zotero-recent-changes-query-change-timestamp-field-of
+    :initarg :change-timestamp-field
+    :initform "items.dateModified")
+   (recent-items :reader zotero-recent-changes-query-recent-items-of
+                 :initarg :recent-items
+                 :initform nil)))
+
 (defclass zotero-item-hit ()
   ((item-id :reader zotero-item-id-of :initarg :item-id)
    (item-key :reader zotero-item-key-of :initarg :item-key)
@@ -99,6 +117,43 @@
    (attachments :accessor zotero-item-attachments-of
                 :initarg :attachments
                 :initform nil)))
+
+(defclass zotero-recent-change-hit (zotero-item-hit)
+  ((change-timestamp-field
+    :reader zotero-recent-change-hit-change-timestamp-field-of
+    :initarg :change-timestamp-field
+    :initform "items.dateModified")
+   (change-timestamp :reader zotero-recent-change-hit-change-timestamp-of
+                     :initarg :change-timestamp
+                     :initform nil)
+   (evidence-path :reader zotero-recent-change-hit-evidence-path-of
+                  :initarg :evidence-path
+                  :initform nil)
+   (date-added :reader zotero-recent-change-hit-date-added-of
+               :initarg :date-added
+               :initform nil)
+   (item-date-modified
+    :reader zotero-recent-change-hit-item-date-modified-of
+    :initarg :item-date-modified
+    :initform nil)
+   (client-date-modified
+    :reader zotero-recent-change-hit-client-date-modified-of
+    :initarg :client-date-modified
+    :initform nil)
+   (parent-item-id :reader zotero-recent-change-hit-parent-item-id-of
+                   :initarg :parent-item-id
+                   :initform nil)
+   (attachment-path :reader zotero-recent-change-hit-attachment-path-of
+                    :initarg :attachment-path
+                    :initform nil)
+   (attachment-storage-mod-time
+    :reader zotero-recent-change-hit-attachment-storage-mod-time-of
+    :initarg :attachment-storage-mod-time
+    :initform nil)
+   (attachment-last-processed-modification-time
+    :reader zotero-recent-change-hit-attachment-last-processed-modification-time-of
+    :initarg :attachment-last-processed-modification-time
+    :initform nil)))
 
 (defclass zotero-bibliographic-item (zotero-item-hit) ())
 
@@ -312,11 +367,24 @@
             (zotero-title-query-text-of object)
             (length (zotero-title-query-matched-items-of object)))))
 
+(defmethod print-object ((object zotero-recent-changes-query) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~A (~D hits)"
+            (zotero-recent-changes-query-change-timestamp-field-of object)
+            (length (zotero-recent-changes-query-recent-items-of object)))))
+
 (defmethod print-object ((object zotero-item-hit) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~A ~A"
             (zotero-item-id-of object)
             (zotero-item-title-of object))))
+
+(defmethod print-object ((object zotero-recent-change-hit) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~A ~A"
+            (zotero-item-id-of object)
+            (or (zotero-recent-change-hit-change-timestamp-of object)
+                "<no timestamp>"))))
 
 (defmethod print-object ((object zotero-attachment-hit) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -381,6 +449,16 @@
      (ignore-errors (parse-integer value)))
     (t
      nil)))
+
+(defun zotero-positive-integer-or-default (value default)
+  (let ((integer (zotero-integer-value value)))
+    (if (and integer (plusp integer))
+        integer
+        default)))
+
+(defun zotero-normalize-since-value (value)
+  (when-let (string (zotero-trimmed-string value))
+    string))
 
 (defun expand-home-path-string (string)
   (cond
@@ -622,6 +700,55 @@
                              -1))
    :order-by "itemID"))
 
+(defun recent-zotero-changes-query-sql (limit since include-attachments-p)
+  (let ((type-filter
+          (if include-attachments-p
+              "it.typeName NOT IN ('note', 'annotation')"
+              "it.typeName NOT IN ('attachment', 'note', 'annotation')"))
+        (since-clause
+          (and since
+               (format nil "AND i.dateModified >= ~A"
+                       (sql-string-literal since)))))
+    (format nil
+            "WITH item_fields AS (
+               SELECT d.itemID,
+                      MAX(CASE WHEN f.fieldName='title' THEN v.value END) AS title
+               FROM itemData d
+               JOIN fields f ON f.fieldID = d.fieldID
+               JOIN itemDataValues v ON v.valueID = d.valueID
+               GROUP BY d.itemID
+             )
+             SELECT i.itemID AS itemID,
+                    i.key AS itemKey,
+                    it.typeName AS itemType,
+                    COALESCE(item_fields.title,
+                             CASE
+                               WHEN it.typeName = 'attachment'
+                               THEN COALESCE(ia.path, '')
+                               ELSE ''
+                             END) AS title,
+                    i.dateAdded AS dateAdded,
+                    i.dateModified AS itemDateModified,
+                    i.clientDateModified AS clientDateModified,
+                    'items.dateModified' AS chosenChangeTimestampField,
+                    i.dateModified AS chosenChangeTimestamp,
+                    ia.parentItemID AS parentItemID,
+                    ia.path AS attachmentPath,
+                    ia.storageModTime AS attachmentStorageModTime,
+                    ia.lastProcessedModificationTime
+                      AS attachmentLastProcessedModificationTime
+             FROM items i
+             JOIN itemTypes it ON it.itemTypeID = i.itemTypeID
+             LEFT JOIN item_fields ON item_fields.itemID = i.itemID
+             LEFT JOIN itemAttachments ia ON ia.itemID = i.itemID
+             WHERE ~A
+             ~@[  ~A~%~]\
+             ORDER BY i.dateModified DESC, i.itemID DESC
+             LIMIT ~D;"
+            type-filter
+            since-clause
+            limit)))
+
 (defun attachment-query-sql (item-ids)
   (format nil
           "SELECT ia.parentItemID AS parentItemID,~%
@@ -773,6 +900,56 @@
                  :item-id item-id
                  :matched-item item))
 
+(defun make-zotero-recent-change-hit-from-row (row row-index)
+  (make-instance 'zotero-recent-change-hit
+                 :item-id (zotero-integer-value (raw-row-value row "itemID"))
+                 :item-key (zotero-string-value (raw-row-value row "itemKey"))
+                 :item-type (zotero-string-value (raw-row-value row "itemType"))
+                 :title (or (zotero-string-value (raw-row-value row "title"))
+                            "")
+                 :raw-row row
+                 :change-timestamp-field
+                 (or (zotero-string-value
+                      (raw-row-value row "chosenChangeTimestampField"))
+                     "items.dateModified")
+                 :change-timestamp
+                 (zotero-string-value
+                  (raw-row-value row "chosenChangeTimestamp"))
+                 :evidence-path
+                 (format nil "selected-attempt.rows[~D]" row-index)
+                 :date-added
+                 (zotero-string-value (raw-row-value row "dateAdded"))
+                 :item-date-modified
+                 (zotero-string-value (raw-row-value row "itemDateModified"))
+                 :client-date-modified
+                 (zotero-string-value
+                  (raw-row-value row "clientDateModified"))
+                 :parent-item-id
+                 (zotero-integer-value (raw-row-value row "parentItemID"))
+                 :attachment-path
+                 (zotero-string-value (raw-row-value row "attachmentPath"))
+                 :attachment-storage-mod-time
+                 (zotero-integer-value
+                  (raw-row-value row "attachmentStorageModTime"))
+                 :attachment-last-processed-modification-time
+                 (zotero-integer-value
+                  (raw-row-value row
+                                 "attachmentLastProcessedModificationTime"))))
+
+(defun make-zotero-recent-changes-query-from-evidence
+    (bridge limit since include-attachments-p hits query)
+  (make-instance 'zotero-recent-changes-query
+                 :bridge bridge
+                 :name (zotero-query-name-of query)
+                 :sql (zotero-query-sql-of query)
+                 :attempts (zotero-query-attempts-of query)
+                 :selected-attempt (zotero-query-selected-attempt-of query)
+                 :limit limit
+                 :since since
+                 :include-attachments-p include-attachments-p
+                 :change-timestamp-field "items.dateModified"
+                 :recent-items hits))
+
 (defun lookup-zotero-items-by-title (title &key bridge (match-mode :exact))
   (let* ((bridge (or bridge (make-default-zotero-library-bridge)))
          (query-evidence
@@ -805,6 +982,57 @@
                                                     query)))
     (values item
             item-id-query)))
+
+(defun zotero-recent-change-day-key (hit)
+  (let ((timestamp (zotero-recent-change-hit-change-timestamp-of hit)))
+    (if (and timestamp (>= (length timestamp) 10))
+        (subseq timestamp 0 10)
+        "No chosen timestamp")))
+
+(defun group-zotero-recent-change-hits-by-day (hits)
+  (let ((groups '())
+        (current-day nil)
+        (current-hits '()))
+    (labels ((finish-group ()
+               (when current-day
+                 (push (list :day current-day
+                             :hits (nreverse current-hits))
+                       groups))))
+      (dolist (hit hits)
+        (let ((day (zotero-recent-change-day-key hit)))
+          (if (equal day current-day)
+              (push hit current-hits)
+              (progn
+                (finish-group)
+                (setf current-day day
+                      current-hits (list hit))))))
+      (finish-group)
+      (nreverse groups))))
+
+(defun recent-zotero-changes (&key bridge (limit 20) since include-attachments?)
+  (let* ((bridge (or bridge (make-default-zotero-library-bridge)))
+         (limit (zotero-positive-integer-or-default limit 20))
+         (since (zotero-normalize-since-value since))
+         (query-evidence
+           (run-zotero-sqlite-query
+            bridge
+            (if include-attachments?
+                "recent changes (including attachments)"
+                "recent changes")
+            (recent-zotero-changes-query-sql limit
+                                             since
+                                             include-attachments?)))
+         (hits (loop for row in (zotero-query-rows query-evidence)
+                     for row-index from 0
+                     collect (make-zotero-recent-change-hit-from-row
+                              row
+                              row-index))))
+    (make-zotero-recent-changes-query-from-evidence bridge
+                                                    limit
+                                                    since
+                                                    include-attachments?
+                                                    hits
+                                                    query-evidence)))
 
 (defun absolute-path-string-p (string)
   (and (stringp string)

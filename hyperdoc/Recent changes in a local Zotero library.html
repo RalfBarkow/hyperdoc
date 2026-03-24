@@ -1,0 +1,73 @@
+<h1>Recent changes in a local Zotero library</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This slice adds a read-only recent-changes query for the local Zotero bridge.
+  The entry point is <tt>(recent-zotero-changes &amp;key bridge limit since
+  include-attachments?)</tt>. It returns a first-class
+  <tt>zotero-recent-changes-query</tt> object whose rows are first-class
+  <tt>zotero-recent-change-hit</tt> objects rather than a page-only summary.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Zotero recent changes query"><tt>Zotero recent changes query</tt></a></li>
+  <li><a hyperbook="topics" page="Zotero recent change hit"><tt>Zotero recent change hit</tt></a></li>
+  <li><a expr="(recent-zotero-changes :limit 10)"><tt>(recent-zotero-changes :limit 10)</tt></a></li>
+  <li><a expr="(recent-zotero-changes :limit 10 :since &quot;2026-03-24&quot;)"><tt>(recent-zotero-changes :limit 10 :since &quot;2026-03-24&quot;)</tt></a></li>
+  <li><a expr="(recent-zotero-changes :limit 10 :since &quot;2026-03-24&quot; :include-attachments? t)"><tt>(recent-zotero-changes :limit 10 :since &quot;2026-03-24&quot; :include-attachments? t)</tt></a></li>
+</ul>
+
+<h2>Chosen signal</h2>
+
+<p>
+  The first slice orders by the real Zotero column <tt>items.dateModified</tt>.
+  That field is present on every row in the local <tt>items</tt> table, so it is
+  a defensible cross-item ordering signal for a single recent-changes query.
+</p>
+
+<p>
+  The inspector makes that choice explicit. Query and hit views name the chosen
+  field as <tt>items.dateModified</tt> instead of calling it a generic “last
+  changed” timestamp.
+</p>
+
+<p>
+  Attachment rows may also carry <tt>storageModTime</tt> or
+  <tt>lastProcessedModificationTime</tt> in <tt>itemAttachments</tt>. Those
+  values remain visible in the raw row and hit overview, but this slice does not
+  reinterpret them as the primary cross-item ordering field.
+</p>
+
+<h2>Parameters</h2>
+
+<ul>
+  <li><tt>bridge</tt>: optional explicit Zotero bridge; defaults to <tt>(make-default-zotero-library-bridge)</tt></li>
+  <li><tt>limit</tt>: maximum number of rows to keep in the first-class query object</li>
+  <li><tt>since</tt>: optional string prefix or full SQLite timestamp compared against <tt>items.dateModified</tt></li>
+  <li><tt>include-attachments?</tt>: when true, attachment rows are included; notes and annotations stay out of this first slice</li>
+</ul>
+
+<h2>Inspector shape</h2>
+
+<p>
+  The query object follows the same inspectable pattern as the existing Zotero
+  title, item-id, and collection query objects. It exposes:
+</p>
+
+<ul>
+  <li><b>Overview</b>: bridge, limit, since, selected attempt, and raw row count</li>
+  <li><b>Recent items</b>: first-class hit rows with item identity, chosen timestamp field, chosen timestamp value, raw row, and evidence path</li>
+  <li><b>Grouped by day</b>: the same hit objects grouped by the day prefix of the chosen timestamp</li>
+  <li><b>Raw SQL</b>: the exact SQLite query text</li>
+  <li><b>Query evidence</b>: selected attempt, attempt list, and selected rows</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Zotero library bridge for HyperDoc">Zotero library bridge for HyperDoc</a></li>
+  <li><a page="Resolve a local PDF from Zotero in HyperDoc">Resolve a local PDF from Zotero in HyperDoc</a></li>
+</ul>

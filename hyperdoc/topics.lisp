@@ -2105,6 +2105,20 @@
                  "Resolve a local PDF from Zotero in HyperDoc"
                  "Zettelkasten note lookup for Zotero resolution")))
 
+(defun zotero-recent-changes-query-topic ()
+  (make-topic
+   :id "zotero-recent-changes-query"
+   :title "Zotero recent changes query"
+   :summary "Read-only query object that orders local Zotero items by the real items.dateModified field, preserves SQLite attempt evidence, and carries typed recent-change hits."
+   :references '("Recent changes in a local Zotero library")))
+
+(defun zotero-recent-change-hit-topic ()
+  (make-topic
+   :id "zotero-recent-change-hit"
+   :title "Zotero recent change hit"
+   :summary "Typed hit object for one recent Zotero row, exposing item identity, chosen timestamp field and value, raw row data, and a stable evidence path back into the selected query attempt."
+   :references '("Recent changes in a local Zotero library")))
+
 (defun zotero-attachment-topic ()
   (make-topic
    :id "zotero-attachment"

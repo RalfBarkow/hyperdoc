@@ -31,6 +31,51 @@
                (zotero-query-display-attempt query))
               nil)))
 
+(defun zotero-recent-change-hit-table (hits)
+  (views:html
+    (:table :class "inspector-table"
+            (:tr
+             (:th (views:esc "Item ID"))
+             (:th (views:esc "Item key"))
+             (:th (views:esc "Item type"))
+             (:th (views:esc "Title"))
+             (:th (views:esc "Chosen field"))
+             (:th (views:esc "Chosen timestamp"))
+             (:th (views:esc "Evidence path"))
+             (:th (views:esc "Raw row"))
+             (:th (views:esc "Hit")))
+            (dolist (hit hits)
+              (views:html
+                (:tr
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-item-id-of hit)))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-item-key-of hit)
+                            ""))))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-item-type-of hit)
+                            ""))))
+                 (:td (views:esc
+                       (hyperdoc::zotero-item-title-of hit)))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-recent-change-hit-change-timestamp-field-of
+                             hit)
+                            ""))))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-recent-change-hit-change-timestamp-of hit)
+                            ""))))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-recent-change-hit-evidence-path-of hit)
+                            ""))))
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-item-raw-row-of hit)))
+                 (:td (views:object-ref hit))))))))
+
 (defmethod views:text-representation ((bridge hyperdoc::zotero-library-bridge))
   (format nil "Zotero bridge (~A)"
           (or (zotero-path-string (hyperdoc::zotero-db-path-of bridge))
@@ -171,6 +216,119 @@
                  (:td (views:object-ref
                        (zotero-query-row-count query)))))))))
 
+(defmethod views:text-representation ((query hyperdoc::zotero-recent-changes-query))
+  (format nil "Recent Zotero changes (~D hits)"
+          (length (hyperdoc::zotero-recent-changes-query-recent-items-of query))))
+
+(defmethod views:title-bar-action-buttons
+    ((query hyperdoc::zotero-recent-changes-query))
+  (views:html
+    (views:action-button
+     "Reload"
+     (views:thunk
+       (hyperdoc::recent-zotero-changes
+        :bridge (hyperdoc::zotero-recent-changes-query-bridge-of query)
+        :limit (hyperdoc::zotero-recent-changes-query-limit-of query)
+        :since (hyperdoc::zotero-recent-changes-query-since-of query)
+        :include-attachments?
+        (hyperdoc::zotero-recent-changes-query-include-attachments-p query)))
+     "Re-run the same recent-changes query against the configured read-only Zotero bridge.")))
+
+(views:defview 👀overview (query hyperdoc::zotero-recent-changes-query)
+  (let ((attempt (zotero-query-display-attempt query)))
+    (views:html-view :title "Overview" :priority 1
+      (views:html
+        (:table :class "inspector-table"
+                (:tr
+                 (:td (views:esc "Bridge"))
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-recent-changes-query-bridge-of query))))
+                (:tr
+                 (:td (views:esc "Limit"))
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-recent-changes-query-limit-of query))))
+                (:tr
+                 (:td (views:esc "Since"))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-recent-changes-query-since-of query)
+                            "")))))
+                (:tr
+                 (:td (views:esc "Include attachments"))
+                 (:td (:tt
+                       (views:esc
+                        (zotero-yes-no
+                         (hyperdoc::zotero-recent-changes-query-include-attachments-p
+                          query))))))
+                (:tr
+                 (:td (views:esc "Chosen change timestamp field"))
+                 (:td (:tt
+                       (views:esc
+                        (or (hyperdoc::zotero-recent-changes-query-change-timestamp-field-of
+                             query)
+                            "")))))
+                (:tr
+                 (:td (views:esc "Selected attempt"))
+                 (:td (views:object-ref attempt)))
+                (:tr
+                 (:td (views:esc "Raw row count"))
+                 (:td (views:object-ref
+                       (zotero-query-row-count query))))
+                (:tr
+                 (:td (views:esc "Recent items"))
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-recent-changes-query-recent-items-of query)))))))))
+
+(views:defview 👀recent-items (query hyperdoc::zotero-recent-changes-query)
+  (views:html-view :title "Recent items" :priority 2
+    (zotero-recent-change-hit-table
+     (hyperdoc::zotero-recent-changes-query-recent-items-of query))))
+
+(views:defview 👀grouped-by-day (query hyperdoc::zotero-recent-changes-query)
+  (views:html-view :title "Grouped by day" :priority 3
+    (views:html
+      (dolist (group (hyperdoc::group-zotero-recent-change-hits-by-day
+                      (hyperdoc::zotero-recent-changes-query-recent-items-of query)))
+        (views:html
+          (:h3 (views:esc (getf group :day)))
+          (:p (views:esc
+               (format nil "~D hit~:P" (length (getf group :hits)))))
+          (zotero-recent-change-hit-table (getf group :hits)))))))
+
+(views:defview 👀raw-sql (query hyperdoc::zotero-recent-changes-query)
+  (views:html-view :title "Raw SQL" :priority 4
+    (views:html
+      (:table :class "inspector-table"
+              (:tr
+               (:td (views:esc "Chosen field"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-changes-query-change-timestamp-field-of
+                           query)
+                          "")))))
+              (:tr
+               (:td (views:esc "SQL"))
+               (:td (:pre
+                     (views:esc
+                      (hyperdoc::zotero-query-sql-of query)))))))))
+
+(views:defview 👀query-evidence (query hyperdoc::zotero-recent-changes-query)
+  (let ((attempt (zotero-query-display-attempt query)))
+    (views:html-view :title "Query evidence" :priority 5
+      (views:html
+        (:table :class "inspector-table"
+                (:tr
+                 (:td (views:esc "Selected attempt"))
+                 (:td (views:object-ref attempt)))
+                (:tr
+                 (:td (views:esc "Attempts"))
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-query-attempts-of query))))
+                (:tr
+                 (:td (views:esc "Selected rows"))
+                 (:td (views:object-ref
+                       (hyperdoc::zotero-query-protocol-rows-of attempt)))))))))
+
 (defmethod views:text-representation ((query hyperdoc::zotero-query-evidence))
   (let ((attempt (zotero-query-display-attempt query)))
     (format nil "Zotero query ~A (~A, ~D rows)"
@@ -306,6 +464,12 @@
           (hyperdoc::zotero-item-id-of item)
           (hyperdoc::zotero-item-title-of item)))
 
+(defmethod views:text-representation ((item hyperdoc::zotero-recent-change-hit))
+  (format nil "Recent Zotero change ~A (~A)"
+          (hyperdoc::zotero-item-id-of item)
+          (or (hyperdoc::zotero-recent-change-hit-change-timestamp-of item)
+              "no chosen timestamp")))
+
 (views:defview 👀overview (item hyperdoc::zotero-item-hit)
   (views:html-view :title "Overview" :priority 1
     (views:html
@@ -352,6 +516,94 @@
                (:td (views:esc "Attachments"))
                (:td (views:object-ref
                      (hyperdoc::zotero-item-attachments-of item))))
+              (:tr
+               (:td (views:esc "Raw row"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-item-raw-row-of item))))))))
+
+(views:defview 👀overview (item hyperdoc::zotero-recent-change-hit)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr
+               (:td (views:esc "Item ID"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-item-id-of item))))
+              (:tr
+               (:td (views:esc "Item key"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-item-key-of item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Item type"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-item-type-of item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Title"))
+               (:td (views:esc
+                     (hyperdoc::zotero-item-title-of item))))
+              (:tr
+               (:td (views:esc "Chosen change timestamp field"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-change-timestamp-field-of
+                           item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Chosen change timestamp"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-change-timestamp-of item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Date added"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-date-added-of item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Item dateModified"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-item-date-modified-of
+                           item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Client dateModified"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-client-date-modified-of
+                           item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Parent item ID"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-recent-change-hit-parent-item-id-of item))))
+              (:tr
+               (:td (views:esc "Attachment path"))
+               (:td (:code
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-attachment-path-of item)
+                          "")))))
+              (:tr
+               (:td (views:esc "Attachment storageModTime"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-recent-change-hit-attachment-storage-mod-time-of
+                      item))))
+              (:tr
+               (:td (views:esc "Attachment lastProcessedModificationTime"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-recent-change-hit-attachment-last-processed-modification-time-of
+                      item))))
+              (:tr
+               (:td (views:esc "Evidence path"))
+               (:td (:tt
+                     (views:esc
+                      (or (hyperdoc::zotero-recent-change-hit-evidence-path-of item)
+                          "")))))
               (:tr
                (:td (views:esc "Raw row"))
                (:td (views:object-ref

@@ -148,6 +148,10 @@
     (item-id &key bridge)
   "lookup Zotero item by id")
 
+(define-zotero-runtime-wrapper recent-zotero-changes
+    (&key bridge limit since include-attachments?)
+  "inspect recent Zotero changes")
+
 (define-zotero-runtime-wrapper list-zotero-attachments-for-item
     (item-or-id &key bridge)
   "list Zotero attachments for item")
