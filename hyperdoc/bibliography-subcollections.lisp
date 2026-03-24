@@ -328,6 +328,22 @@
                      :initarg :execution-report
                      :initform nil)))
 
+(defun ensure-bibliography-subcollection-candidate-topics (subcollection)
+  (or (bibliography-subcollection-candidate-topics-of subcollection)
+      (setf (bibliography-subcollection-candidate-topics-of subcollection)
+            (extract-candidate-topics subcollection))))
+
+(defun ensure-bibliography-subcollection-authoring-plan (subcollection &key output-root)
+  (or (bibliography-subcollection-authoring-plan-of subcollection)
+      (let ((plan (build-hyperdoc-authoring-plan subcollection
+                                                 :output-root output-root)))
+        ;; Keep the summary surface aligned once the plan has been requested.
+        (setf (bibliography-subcollection-candidate-topics-of subcollection)
+              (hyperdoc-authoring-plan-candidate-topics-of plan)
+              (bibliography-subcollection-authoring-plan-of subcollection)
+              plan)
+        plan)))
+
 (defclass bibliography-authoring-plan-standin-report ()
   ((mode :reader bibliography-standin-mode-of
          :initarg :mode
@@ -1727,7 +1743,8 @@
     (nreverse entries)))
 
 (defun build-hyperdoc-authoring-plan (subcollection &key output-root)
-  (let* ((candidates (extract-candidate-topics subcollection))
+  (let* ((candidates (ensure-bibliography-subcollection-candidate-topics
+                      subcollection))
          (comparisons (mapcar #'compare-candidate-topic candidates))
          (decisions (mapcar (lambda (comparison)
                               (decide-authoring comparison candidates subcollection))
@@ -1770,10 +1787,9 @@
     (if (zotero-backend-unavailable-p subcollection)
         subcollection
         (and subcollection
-             (or (bibliography-subcollection-authoring-plan-of subcollection)
-                 (setf (bibliography-subcollection-authoring-plan-of subcollection)
-                       (build-hyperdoc-authoring-plan subcollection
-                                                     :output-root output-root)))))))
+             (ensure-bibliography-subcollection-authoring-plan
+              subcollection
+              :output-root output-root)))))
 
 (defun plan-materialization-write! (entry)
   (let ((path (bibliography-materialization-entry-target-path-of entry)))

@@ -289,8 +289,7 @@ COMMIT;"
   (let* ((fixture (make-bibliography-smoke-fixture))
          (source (make-bibliography-smoke-source fixture))
          (book (hyperdoc:ensure-bibliography-subcollections-hyperbook :source source))
-         (subcollection (hyperbook:find-page book "coachmark" :signal-error? t))
-         (plan (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection)))
+         (subcollection (hyperbook:find-page book "coachmark" :signal-error? t)))
     (assert-true (typep source 'hyperdoc::zotero-bibliography-source)
                  "Default bibliography source for this slice must be Zotero-backed")
     (assert-true (typep subcollection 'hyperdoc::bibliography-subcollection)
@@ -302,8 +301,28 @@ COMMIT;"
     (assert-equal 4
                   (length (hyperdoc::bibliography-subcollection-entries-of subcollection))
                   "Fixture should import four coachmark bibliography entries")
+    (assert-true (plusp (length (hyperdoc::bibliography-subcollection-candidate-topics-of
+                                 subcollection)))
+                 "Subcollection lookup must keep candidate topics inspectable without forcing the authoring plan")
+    (assert-true (null (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
+                 "Subcollection lookup must leave the authoring plan deferred until explicit request")))
+
+(defun run-bibliography-authoring-plan-deferred-smoke-test ()
+  (let* ((fixture (make-bibliography-smoke-fixture))
+         (source (make-bibliography-smoke-source fixture))
+         (book (hyperdoc:ensure-bibliography-subcollections-hyperbook :source source))
+         (subcollection (hyperbook:find-page book "coachmark" :signal-error? t))
+         (plan (hyperdoc::plan-bibliography-authoring subcollection
+                                                      :source source
+                                                      :signal-error? t)))
     (assert-true (typep plan 'hyperdoc::hyperdoc-authoring-plan)
-                 "Subcollection lookup must immediately expose its inspectable authoring plan")))
+                 "Explicit authoring-plan access must still build the inspectable plan object")
+    (assert-true (eq plan
+                     (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
+                 "Explicit authoring-plan access must cache the resulting plan on the subcollection")
+    (assert-equal (length (hyperdoc::hyperdoc-authoring-plan-candidate-topics-of plan))
+                  (length (hyperdoc::bibliography-subcollection-candidate-topics-of subcollection))
+                  "Deferred plan construction must preserve the candidate-topic inventory that page-open already exposed")))
 
 (defun run-bibliography-entry-normalization-smoke-test ()
   (let* ((source (make-bibliography-smoke-source))
@@ -439,7 +458,9 @@ COMMIT;"
   (let* ((source (make-bibliography-smoke-source))
          (subcollection (hyperdoc::coachmark-bibliography-subcollection :source source
                                                                         :signal-error? t))
-         (plan (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
+         (plan (hyperdoc::plan-bibliography-authoring subcollection
+                                                      :source source
+                                                      :signal-error? t))
          (subcollection-titles (inspector-view-titles-for-object subcollection))
          (plan-titles (inspector-view-titles-for-object plan)))
     (assert-equal "Collection summary"
@@ -539,6 +560,7 @@ COMMIT;"
 
 (defun run-bibliography-subcollections-smoke-tests ()
   (run-bibliography-subcollection-lookup-smoke-test)
+  (run-bibliography-authoring-plan-deferred-smoke-test)
   (run-bibliography-entry-normalization-smoke-test)
   (run-bibliography-candidate-extraction-smoke-test)
   (run-bibliography-topic-comparison-smoke-test)

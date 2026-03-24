@@ -278,6 +278,7 @@
 
 (defun load-zotero-bibliography-subcollection
     (query-text &key (source (make-default-bibliography-source)) signal-error? output-root)
+  (declare (ignore output-root))
   (multiple-value-bind (collection-hit collection-query)
       (lookup-zotero-collection query-text :source source :signal-error? signal-error?)
     (when collection-hit
@@ -328,13 +329,9 @@
                               :author-query author-query
                               :tag-query tag-query
                               :entries entries)))
-        (let ((plan (build-hyperdoc-authoring-plan subcollection
-                                                   :output-root output-root)))
-          (setf (bibliography-subcollection-candidate-topics-of subcollection)
-                (hyperdoc-authoring-plan-candidate-topics-of plan)
-                (bibliography-subcollection-authoring-plan-of subcollection)
-                plan)
-          subcollection)))))
+        (setf (bibliography-subcollection-candidate-topics-of subcollection)
+              (ensure-bibliography-subcollection-candidate-topics subcollection))
+        subcollection))))
 
 (defmethod load-bibliography-subcollection-using-source
     ((source zotero-bibliography-source) query-text &key signal-error? output-root)

@@ -96,7 +96,7 @@
     (views:action-button
      "Open authoring plan"
      (views:thunk
-       (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
+       (hyperdoc::ensure-bibliography-subcollection-authoring-plan subcollection))
      "Open the reviewed authoring-plan object for this bibliography subcollection.")))
 
 (views:defview 👀collection-summary (subcollection hyperdoc::bibliography-subcollection)
@@ -135,13 +135,17 @@
                (:td (views:esc "Candidate topics"))
                (:td (views:object-ref
                      (length
-                      (hyperdoc::bibliography-subcollection-candidate-topics-of
+                      (hyperdoc::ensure-bibliography-subcollection-candidate-topics
                        subcollection)))))
               (:tr
                (:td (views:esc "Authoring plan"))
-               (:td (views:object-ref
-                     (hyperdoc::bibliography-subcollection-authoring-plan-of
-                      subcollection))))))))
+               (:td
+                (if-let (plan (hyperdoc::bibliography-subcollection-authoring-plan-of
+                               subcollection))
+                  (views:object-ref plan)
+                  (views:html
+                    (:tt
+                     (views:esc "Deferred; use Open authoring plan."))))))))))
 
 (views:defview 👀entries (subcollection hyperdoc::bibliography-subcollection)
   (views:html-view :title "Entries" :priority 2
@@ -180,7 +184,7 @@
                (:th (views:esc "Collection cues"))
                (:th (views:esc "Entry cues"))
                (:th (views:esc "Entries")))
-              (dolist (candidate (hyperdoc::bibliography-subcollection-candidate-topics-of
+              (dolist (candidate (hyperdoc::ensure-bibliography-subcollection-candidate-topics
                                   subcollection))
                 (views:html
                   (:tr
