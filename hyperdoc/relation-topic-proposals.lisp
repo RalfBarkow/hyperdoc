@@ -16,9 +16,27 @@
                    :initform nil)
    (merge-status :initarg :merge-status :reader merge-status-of)))
 
+(defclass relation-topic-patch-plan ()
+  ((proposal :initarg :proposal :reader proposal-of)
+   (topics-target-path :initarg :topics-target-path
+                       :reader topics-target-path-of)
+   (topics-action :initarg :topics-action :reader topics-action-of)
+   (existing-topic :initarg :existing-topic
+                   :reader existing-topic-of
+                   :initform nil)
+   (page-target-path :initarg :page-target-path
+                     :reader page-target-path-of)
+   (page-action :initarg :page-action :reader page-action-of)
+   (topics-payload :initarg :topics-payload :reader topics-payload-of)
+   (page-payload :initarg :page-payload :reader page-payload-of)))
+
 (defmethod print-object ((object relation-topic-proposal) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (proposed-title-of object))))
+
+(defmethod print-object ((object relation-topic-patch-plan) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (proposed-title-of (proposal-of object)))))
 
 (defmethod id-of ((proposal relation-topic-proposal))
   (proposed-id-of proposal))
@@ -28,6 +46,17 @@
 
 (defmethod summary-of ((proposal relation-topic-proposal))
   (proposed-summary-of proposal))
+
+(defmethod title-of ((plan relation-topic-patch-plan))
+  (format nil "Patch plan for ~A"
+          (proposed-title-of (proposal-of plan))))
+
+(defmethod summary-of ((plan relation-topic-patch-plan))
+  (format nil
+          "Collision-aware reviewed patch plan for ~A targeting ~A and ~A."
+          (proposed-title-of (proposal-of plan))
+          (topics-target-path-of plan)
+          (page-target-path-of plan)))
 
 (defparameter *generic-relation-topic-kinds*
   '("association"
@@ -255,6 +284,75 @@
             (relation-topic-proposal-page-fragment proposal))
     (format stream "Advisory FedWiki twin delta~%~A"
             (relation-topic-proposal-fedwiki-twin-delta proposal))))
+
+(defun relation-topic-topics-lisp-payload (proposal)
+  (relation-topic-proposal-factory-form proposal))
+
+(defun relation-topic-page-file-path-candidate (proposal)
+  (format nil "hyperdoc/~A.html" (proposed-title-of proposal)))
+
+(defun relation-topic-page-file-pathname (proposal)
+  (asdf:system-relative-pathname
+   :hyperdoc
+   (relation-topic-page-file-path-candidate proposal)))
+
+(defun relation-topic-page-file-exists-p (proposal)
+  (not (null (probe-file (relation-topic-page-file-pathname proposal)))))
+
+(defun relation-topic-page-payload (proposal)
+  (relation-topic-proposal-page-fragment proposal))
+
+(defun relation-topic-patch-instructions (plan)
+  (with-output-to-string (stream)
+    (case (topics-action-of plan)
+      (:edit-existing-factory
+       (format stream
+               "Edit ~A in place because an exact-title collision already exists for ~S.~%"
+               (topics-target-path-of plan)
+               (proposed-title-of (proposal-of plan))))
+      (:append-new-factory
+       (format stream
+               "Append the new topic factory to ~A at the appropriate authored location after review.~%"
+               (topics-target-path-of plan))))
+    (case (page-action-of plan)
+      (:edit-existing-page
+       (format stream
+               "Edit the existing page file ~A in place.~%"
+               (page-target-path-of plan)))
+      (:create-new-page
+       (format stream
+               "Create the new page file ~A from the proposed payload.~%"
+               (page-target-path-of plan)))
+      (:no-page-needed
+       (format stream
+               "No page file is required yet; keep ~A as an optional authored page target only if the relation deserves a durable page.~%"
+               (page-target-path-of plan))))
+    (format stream
+            "No automatic mutation has been performed.~%")))
+
+(defun make-relation-topic-patch-plan (proposal)
+  (let* ((existing (existing-topic-of proposal))
+         (topics-action (if existing
+                            :edit-existing-factory
+                            :append-new-factory))
+         (page-target-path (relation-topic-page-file-path-candidate proposal))
+         (page-exists-p (relation-topic-page-file-exists-p proposal))
+         (page-action (cond
+                        (page-exists-p
+                         :edit-existing-page)
+                        (existing
+                         :no-page-needed)
+                        (t
+                         :create-new-page))))
+    (make-instance 'relation-topic-patch-plan
+                   :proposal proposal
+                   :topics-target-path "hyperdoc/topics.lisp"
+                   :topics-action topics-action
+                   :existing-topic existing
+                   :page-target-path page-target-path
+                   :page-action page-action
+                   :topics-payload (relation-topic-topics-lisp-payload proposal)
+                   :page-payload (relation-topic-page-payload proposal))))
 
 (defun make-relation-topic-proposal (relation)
   (let* ((title (relation-topic-title-candidate relation))

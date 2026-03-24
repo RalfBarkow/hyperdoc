@@ -377,6 +377,9 @@
 (defmethod views:text-representation ((proposal relation-topic-proposal))
   (shorten-dom-association-label (proposed-title-of proposal)))
 
+(defmethod views:text-representation ((plan relation-topic-patch-plan))
+  (shorten-dom-association-label (title-of plan)))
+
 (defun render-anchor-field-rows (rows)
   (loop for (label . value) in rows
         do (views:html
@@ -1075,7 +1078,8 @@
 
 (views:defview 👀authoring-bundle (proposal relation-topic-proposal)
   (views:html-view :title "Authoring bundle" :priority 3
-    (views:html
+    (let ((plan (make-relation-topic-patch-plan proposal)))
+      (views:html
       (:h3 "Reviewed authoring bundle")
       (:p "This bundle is advisory output only. It does not write topics.lisp, HyperDoc pages, or FedWiki files.")
       (:table :class "inspector-table"
@@ -1092,7 +1096,9 @@
             (views:esc (relation-topic-proposal-page-fragment proposal)))
       (:h4 "Advisory FedWiki twin delta")
       (:pre :style "white-space: pre-wrap"
-            (views:esc (relation-topic-proposal-fedwiki-twin-delta proposal))))))
+            (views:esc (relation-topic-proposal-fedwiki-twin-delta proposal)))
+      (:h4 "Repo patch plan")
+      (:p (views:object-ref plan))))))
 
 (views:defview 👀hyperdoc-page-fragment (proposal relation-topic-proposal)
   (views:html-view :title "HyperDoc page fragment" :priority 4
@@ -1110,8 +1116,15 @@
       (:pre :style "white-space: pre-wrap"
             (views:esc (relation-topic-proposal-fedwiki-twin-delta proposal))))))
 
+(views:defview 👀patch-plan (proposal relation-topic-proposal)
+  (views:html-view :title "Patch plan" :priority 6
+    (views:html
+      (:h3 "Collision-aware patch plan")
+      (:p "This plan identifies authored targets and payloads but does not apply any patch.")
+      (:p (views:object-ref (make-relation-topic-patch-plan proposal))))))
+
 (views:defview 👀merge-guidance (proposal relation-topic-proposal)
-  (views:html-view :title "Merge guidance" :priority 6
+  (views:html-view :title "Merge guidance" :priority 7
     (views:html
       (:h3 "Merge guidance")
       (:ul
@@ -1125,3 +1138,44 @@
                                         (merge-status-of proposal))
               (render-connect-field-row "Existing topic object"
                                         (existing-topic-of proposal))))))
+
+(views:defview 👀patch-plan (plan relation-topic-patch-plan)
+  (views:html-view :title "Patch plan" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of plan)))
+      (:p (views:esc (summary-of plan)))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Proposal" (proposal-of plan))
+              (render-connect-field-row "topics.lisp target"
+                                        (topics-target-path-of plan))
+              (render-connect-field-row "topics.lisp action"
+                                        (topics-action-of plan))
+              (render-connect-field-row "Existing topic"
+                                        (existing-topic-of plan))
+              (render-connect-field-row "Page target"
+                                        (page-target-path-of plan))
+              (render-connect-field-row "Page action"
+                                        (page-action-of plan))))))
+
+(views:defview 👀topics-lisp-payload (plan relation-topic-patch-plan)
+  (views:html-view :title "topics.lisp payload" :priority 2
+    (views:html
+      (:h3 "Copy-pasteable topics.lisp payload")
+      (:p "Use this as the reviewed factory payload for the authored topics file. It is not applied automatically.")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (topics-payload-of plan))))))
+
+(views:defview 👀page-payload (plan relation-topic-patch-plan)
+  (views:html-view :title "Page payload" :priority 3
+    (views:html
+      (:h3 "Copy-pasteable page payload")
+      (:p "Use this as the reviewed HyperDoc page payload for the candidate page file. It is not applied automatically.")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (page-payload-of plan))))))
+
+(views:defview 👀patch-instructions (plan relation-topic-patch-plan)
+  (views:html-view :title "Patch instructions" :priority 4
+    (views:html
+      (:h3 "Repo-native patch instructions")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-patch-instructions plan))))))

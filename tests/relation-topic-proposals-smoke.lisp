@@ -51,7 +51,9 @@
          (bundle
            (hyperdoc::relation-topic-proposal-authoring-bundle proposal))
          (fedwiki-delta
-           (hyperdoc::relation-topic-proposal-fedwiki-twin-delta proposal)))
+           (hyperdoc::relation-topic-proposal-fedwiki-twin-delta proposal))
+         (patch-plan
+           (hyperdoc::make-relation-topic-patch-plan proposal)))
     (relation-proposal-assert-true
      (and (stringp page-fragment)
           (plusp (length page-fragment)))
@@ -68,7 +70,26 @@
     (relation-proposal-assert-true
      (and (stringp fedwiki-delta)
           (plusp (length fedwiki-delta)))
-     "FedWiki twin delta text must be non-empty")))
+     "FedWiki twin delta text must be non-empty")
+    (relation-proposal-assert-true
+     (typep patch-plan 'hyperdoc::relation-topic-patch-plan)
+     "Patch plan must be a relation-topic-patch-plan")
+    (relation-proposal-assert-true
+     (and (stringp (hyperdoc::topics-target-path-of patch-plan))
+          (plusp (length (hyperdoc::topics-target-path-of patch-plan))))
+     "Patch plan must carry a non-empty topics.lisp target path")
+    (relation-proposal-assert-true
+     (member (hyperdoc::topics-action-of patch-plan)
+             '(:edit-existing-factory :append-new-factory))
+     "Patch plan must classify the topics.lisp action")
+    (relation-proposal-assert-true
+     (and (stringp (hyperdoc::topics-payload-of patch-plan))
+          (plusp (length (hyperdoc::topics-payload-of patch-plan))))
+     "Patch plan must carry a non-empty topics.lisp payload")
+    (relation-proposal-assert-true
+     (member (hyperdoc::page-action-of patch-plan)
+             '(:edit-existing-page :create-new-page :no-page-needed))
+     "Patch plan must classify the page action")))
 
 (defun run-relation-topic-proposal-review-wording-smoke-test ()
   (let* ((relation
