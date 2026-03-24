@@ -380,6 +380,10 @@
 (defmethod views:text-representation ((plan relation-topic-patch-plan))
   (shorten-dom-association-label (title-of plan)))
 
+(defmethod views:text-representation
+    ((application approved-relation-topic-patch-application))
+  (shorten-dom-association-label (title-of application)))
+
 (defun render-anchor-field-rows (rows)
   (loop for (label . value) in rows
         do (views:html
@@ -1179,3 +1183,52 @@
       (:h3 "Repo-native patch instructions")
       (:pre :style "white-space: pre-wrap"
             (views:esc (relation-topic-patch-instructions plan))))))
+
+(views:defview 👀application-result
+    (application approved-relation-topic-patch-application)
+  (views:html-view :title "Application result" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of application)))
+      (:p (views:esc (summary-of application)))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Patch plan"
+                                        (patch-plan-of application))
+              (render-connect-field-row "Status"
+                                        (status-of application))
+              (render-connect-field-row "Timestamp"
+                                        (timestamp-of application))
+              (render-connect-rich-field-row "Applied paths"
+                                             (applied-paths-of application))
+              (render-connect-rich-field-row "Actions performed"
+                                             (actions-performed-of application))))))
+
+(views:defview 👀applied-payloads
+    (application approved-relation-topic-patch-application)
+  (views:html-view :title "Applied payloads" :priority 2
+    (views:html
+      (:h3 "Applied payloads")
+      (if (applied-payloads-of application)
+          (loop for (kind . payload) in (applied-payloads-of application)
+                do (views:html
+                     (:h4 (views:esc (string-capitalize
+                                      (string-downcase
+                                       (symbol-name kind)))))
+                     (:pre :style "white-space: pre-wrap"
+                           (views:esc payload))))
+          (views:html
+            (:p (:span :style "opacity: 0.55;"
+                       "No payloads were written.")))))))
+
+(views:defview 👀safety-boundary
+    (application approved-relation-topic-patch-application)
+  (views:html-view :title "Safety boundary / approval evidence" :priority 3
+    (views:html
+      (:h3 "Safety boundary / approval evidence")
+      (:p "This result exists only because apply-relation-topic-patch-plan was called explicitly with a valid approval token.")
+      (:table :class "inspector-table"
+              (render-connect-field-row "Approval token"
+                                        (approval-token-of application))
+              (render-connect-field-row "Patch plan"
+                                        (patch-plan-of application))
+              (render-connect-field-row "Status"
+                                        (status-of application))))))

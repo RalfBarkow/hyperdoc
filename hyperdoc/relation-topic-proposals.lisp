@@ -30,6 +30,24 @@
    (topics-payload :initarg :topics-payload :reader topics-payload-of)
    (page-payload :initarg :page-payload :reader page-payload-of)))
 
+(defclass approved-relation-topic-patch-application ()
+  ((patch-plan :initarg :patch-plan :reader patch-plan-of)
+   (applied-paths :initarg :applied-paths :reader applied-paths-of)
+   (actions-performed :initarg :actions-performed :reader actions-performed-of)
+   (applied-payloads :initarg :applied-payloads :reader applied-payloads-of)
+   (approval-token :initarg :approval-token :reader approval-token-of)
+   (timestamp :initarg :timestamp :reader timestamp-of)
+   (status :initarg :status :reader status-of)))
+
+(define-condition relation-topic-patch-approval-required (error)
+  ((patch-plan :initarg :patch-plan :reader patch-plan-of)
+   (approval-token :initarg :approval-token :reader approval-token-of))
+  (:report
+   (lambda (condition stream)
+     (format stream
+             "Applying ~A requires an explicit valid approval token. No mutation was performed."
+             (title-of (patch-plan-of condition))))))
+
 (defmethod print-object ((object relation-topic-proposal) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (proposed-title-of object))))
@@ -37,6 +55,11 @@
 (defmethod print-object ((object relation-topic-patch-plan) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (proposed-title-of (proposal-of object)))))
+
+(defmethod print-object ((object approved-relation-topic-patch-application)
+                         stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
 
 (defmethod id-of ((proposal relation-topic-proposal))
   (proposed-id-of proposal))
@@ -58,6 +81,18 @@
           (topics-target-path-of plan)
           (page-target-path-of plan)))
 
+(defmethod title-of ((application approved-relation-topic-patch-application))
+  (format nil "Applied patch plan for ~A"
+          (proposed-title-of
+           (proposal-of (patch-plan-of application)))))
+
+(defmethod summary-of ((application approved-relation-topic-patch-application))
+  (format nil
+          "Approval-gated application result for ~A with status ~A."
+          (proposed-title-of
+           (proposal-of (patch-plan-of application)))
+          (status-of application)))
+
 (defparameter *generic-relation-topic-kinds*
   '("association"
     "association relation"
@@ -67,6 +102,13 @@
     "related"
     "unclassified association"
     "unclassified relation"))
+
+(defparameter *relation-topic-patch-approval-token*
+  "APPROVE-RELATION-TOPIC-PATCH-PLAN")
+
+(defparameter *relation-topic-patch-repo-root*
+  (uiop:ensure-directory-pathname
+   (asdf:system-source-directory :hyperdoc)))
 
 (defun relation-topic-titleize (value)
   (let* ((raw (string-trim '(#\Space #\Tab #\Newline #\Return)
@@ -285,19 +327,91 @@
     (format stream "Advisory FedWiki twin delta~%~A"
             (relation-topic-proposal-fedwiki-twin-delta proposal))))
 
+(defun relation-topic-patch-repo-root ()
+  (uiop:ensure-directory-pathname *relation-topic-patch-repo-root*))
+
+(defun relation-topic-resolve-target-pathname (path)
+  (let ((pathname (pathname path)))
+    (if (uiop:absolute-pathname-p pathname)
+        pathname
+        (merge-pathnames pathname
+                         (relation-topic-patch-repo-root)))))
+
+(defun relation-topic-read-file-string (path)
+  (uiop:read-file-string (relation-topic-resolve-target-pathname path)))
+
+(defun relation-topic-write-file-string (path content &key (if-exists :supersede))
+  (let ((pathname (relation-topic-resolve-target-pathname path)))
+    (uiop:ensure-all-directories-exist (list pathname))
+    (with-open-file (stream pathname
+                            :direction :output
+                            :if-exists if-exists
+                            :if-does-not-exist :create
+                            :external-format :utf-8)
+      (write-string content stream))
+    pathname))
+
+(defun relation-topic-form-make-topic-call (form)
+  (cond
+    ((atom form)
+     nil)
+    ((and (consp form)
+          (symbolp (first form))
+          (string= (symbol-name (first form))
+                   "MAKE-TOPIC"))
+     form)
+    (t
+     (or (relation-topic-form-make-topic-call (car form))
+         (relation-topic-form-make-topic-call (cdr form))))))
+
+(defun relation-topic-title-of-top-level-form (form)
+  (let ((call (relation-topic-form-make-topic-call form)))
+    (when call
+      (getf (rest call) :title))))
+
+(defun relation-topic-factory-bounds-by-title (path title)
+  (let ((pathname (relation-topic-resolve-target-pathname path))
+        (matches '()))
+    (with-open-file (stream pathname :direction :input :external-format :utf-8)
+      (loop with eof = (gensym "EOF")
+            for start = (file-position stream)
+            for form = (read stream nil eof)
+            until (eq form eof)
+            for end = (file-position stream)
+            when (equal (relation-topic-title-of-top-level-form form)
+                        title)
+              do (push (list :start start :end end :form form)
+                       matches)))
+    (setf matches (nreverse matches))
+    (cond
+      ((null matches)
+       (error "No topic factory with exact :title ~S found in ~A."
+              title
+              path))
+      ((cdr matches)
+       (error "Multiple topic factories with exact :title ~S found in ~A."
+              title
+              path))
+      (t
+       (first matches)))))
+
+(defun relation-topic-replace-range (content start end replacement)
+  (concatenate 'string
+               (subseq content 0 start)
+               replacement
+               (subseq content end)))
+
 (defun relation-topic-topics-lisp-payload (proposal)
   (relation-topic-proposal-factory-form proposal))
 
 (defun relation-topic-page-file-path-candidate (proposal)
   (format nil "hyperdoc/~A.html" (proposed-title-of proposal)))
 
-(defun relation-topic-page-file-pathname (proposal)
-  (asdf:system-relative-pathname
-   :hyperdoc
-   (relation-topic-page-file-path-candidate proposal)))
-
-(defun relation-topic-page-file-exists-p (proposal)
-  (not (null (probe-file (relation-topic-page-file-pathname proposal)))))
+(defun relation-topic-page-file-exists-p
+    (proposal &key (page-target-path (relation-topic-page-file-path-candidate
+                                      proposal)))
+  (not (null (probe-file (relation-topic-resolve-target-pathname
+                         page-target-path)))))
 
 (defun relation-topic-page-payload (proposal)
   (relation-topic-proposal-page-fragment proposal))
@@ -330,13 +444,19 @@
     (format stream
             "No automatic mutation has been performed.~%")))
 
-(defun make-relation-topic-patch-plan (proposal)
+(defun make-relation-topic-patch-plan
+    (proposal
+     &key
+       (topics-target-path "hyperdoc/topics.lisp")
+       (page-target-path (relation-topic-page-file-path-candidate proposal)))
   (let* ((existing (existing-topic-of proposal))
          (topics-action (if existing
                             :edit-existing-factory
                             :append-new-factory))
-         (page-target-path (relation-topic-page-file-path-candidate proposal))
-         (page-exists-p (relation-topic-page-file-exists-p proposal))
+         (page-exists-p
+           (relation-topic-page-file-exists-p
+            proposal
+            :page-target-path page-target-path))
          (page-action (cond
                         (page-exists-p
                          :edit-existing-page)
@@ -346,13 +466,102 @@
                          :create-new-page))))
     (make-instance 'relation-topic-patch-plan
                    :proposal proposal
-                   :topics-target-path "hyperdoc/topics.lisp"
+                   :topics-target-path topics-target-path
                    :topics-action topics-action
                    :existing-topic existing
                    :page-target-path page-target-path
                    :page-action page-action
                    :topics-payload (relation-topic-topics-lisp-payload proposal)
                    :page-payload (relation-topic-page-payload proposal))))
+
+(defun patch-plan-approval-token-valid-p (approval-token)
+  (and (stringp approval-token)
+       (string= approval-token
+                *relation-topic-patch-approval-token*)))
+
+(defun apply-topics-lisp-patch-plan (plan)
+  (let* ((target-path (topics-target-path-of plan))
+         (content (relation-topic-read-file-string target-path))
+         (payload (topics-payload-of plan))
+         (new-content
+           (case (topics-action-of plan)
+             (:edit-existing-factory
+              (destructuring-bind (&key start end &allow-other-keys)
+                  (relation-topic-factory-bounds-by-title
+                   target-path
+                   (proposed-title-of (proposal-of plan)))
+                (relation-topic-replace-range
+                 content
+                 start
+                 end
+                 (format nil "~A~%" payload))))
+             (:append-new-factory
+              (format nil "~A~2%~A~%"
+                      (string-right-trim '(#\Newline #\Return) content)
+                      payload))
+             (otherwise
+              (error "Unsupported topics.lisp action ~S."
+                     (topics-action-of plan))))))
+    (relation-topic-write-file-string target-path new-content)
+    (list :path target-path
+          :action (topics-action-of plan)
+          :payload payload)))
+
+(defun apply-page-patch-plan (plan)
+  (case (page-action-of plan)
+    (:no-page-needed
+     (list :path (page-target-path-of plan)
+           :action :no-page-needed
+           :payload nil))
+    (:edit-existing-page
+     (relation-topic-write-file-string (page-target-path-of plan)
+                                       (page-payload-of plan))
+     (list :path (page-target-path-of plan)
+           :action :edit-existing-page
+           :payload (page-payload-of plan)))
+    (:create-new-page
+     (relation-topic-write-file-string (page-target-path-of plan)
+                                       (page-payload-of plan)
+                                       :if-exists :error)
+     (list :path (page-target-path-of plan)
+           :action :create-new-page
+           :payload (page-payload-of plan)))
+    (otherwise
+     (error "Unsupported page action ~S."
+            (page-action-of plan)))))
+
+(defun apply-relation-topic-patch-plan (plan approval-token)
+  (unless (patch-plan-approval-token-valid-p approval-token)
+    (error 'relation-topic-patch-approval-required
+           :patch-plan plan
+           :approval-token approval-token))
+  (let* ((topics-result (apply-topics-lisp-patch-plan plan))
+         (page-result (apply-page-patch-plan plan))
+         (applied-results
+           (remove nil
+                   (list topics-result
+                         (unless (eq (getf page-result :action)
+                                     :no-page-needed)
+                           page-result))))
+         (applied-paths (mapcar (lambda (entry)
+                                  (getf entry :path))
+                                applied-results))
+         (actions-performed
+           (list (getf topics-result :action)
+                 (getf page-result :action)))
+         (applied-payloads
+           (remove nil
+                   (list (cons :topics (getf topics-result :payload))
+                         (when (getf page-result :payload)
+                           (cons :page (getf page-result :payload)))))))
+    (make-instance 'approved-relation-topic-patch-application
+                   :patch-plan plan
+                   :applied-paths applied-paths
+                   :actions-performed actions-performed
+                   :applied-payloads applied-payloads
+                   :approval-token approval-token
+                   :timestamp (get-universal-time)
+                   :status :applied)))
 
 (defun make-relation-topic-proposal (relation)
   (let* ((title (relation-topic-title-candidate relation))
