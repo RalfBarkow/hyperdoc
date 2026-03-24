@@ -471,6 +471,7 @@ async function readInspectorPaneState(page, paneIndex) {
   return page.evaluate((index) => {
     const paneNode = document.querySelectorAll(".inspector-pane")[index];
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
+    const loadingNode = activeView?.querySelector(".hyperdoc-html-page-loading");
     const titleNode =
       paneNode?.querySelector(".inspector-title-bar-object") ||
       paneNode?.querySelector(".inspector-title-bar-class");
@@ -493,11 +494,39 @@ async function readInspectorPaneState(page, paneIndex) {
             button.textContent?.trim() || ""
           )
         : [],
+      renderState: activeView?.dataset.hyperdocRenderState || null,
+      loadingVisible: !!loadingNode,
+      loadingMessage: loadingNode?.textContent?.replace(/\s+/g, " ").trim() || "",
       bodyText:
         activeView?.innerText?.replace(/\s+/g, " ").trim() || "",
       tables,
     };
   }, paneIndex);
+}
+
+async function waitForPaneBodyText(page, paneIndex, expectedText, timeout = 20_000) {
+  await expect
+    .poll(async () => (await readInspectorPaneState(page, paneIndex)).bodyText, {
+      timeout,
+    })
+    .not.toBe("");
+  if (expectedText) {
+    await expect
+      .poll(async () => (await readInspectorPaneState(page, paneIndex)).bodyText, {
+        timeout,
+      })
+      .toContain(expectedText);
+  }
+  return readInspectorPaneState(page, paneIndex);
+}
+
+async function waitForPaneLoadingBoundary(page, paneIndex, timeout = 20_000) {
+  await expect
+    .poll(async () => (await readInspectorPaneState(page, paneIndex)).loadingVisible, {
+      timeout,
+    })
+    .toBe(false);
+  return readInspectorPaneState(page, paneIndex);
 }
 
 async function toggleHelpInPane(page, paneIndex) {
@@ -705,6 +734,8 @@ module.exports = {
   settleInspectorBindings,
   startConnectInPane,
   toggleHelpInPane,
+  waitForPaneBodyText,
+  waitForPaneLoadingBoundary,
   waitForAssociationResult,
   waitForSourceProvider,
 };

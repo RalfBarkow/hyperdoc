@@ -61,6 +61,39 @@
            "0")
        :junk-allowed t))))
 
+(defun find-class-in-package (package-name class-name)
+  (let ((package (find-package package-name)))
+    (when package
+      (multiple-value-bind (symbol status)
+          (find-symbol class-name package)
+        (when status
+          (find-class symbol nil))))))
+
+(defun html-page-object-p (object)
+  (let ((hyperdoc-html-page (find-class-in-package :hyperdoc "HTML-PAGE"))
+        (hyperbook-html-page (find-class-in-package :hyperbook "HTML-PAGE")))
+    (or (and hyperdoc-html-page
+             (typep object hyperdoc-html-page))
+        (and hyperbook-html-page
+             (typep object hyperbook-html-page)))))
+
+(defun first-html-page-content-render-p (pane view)
+  (and (string= (hv:view-title view) "Content")
+       (not (html-view-realized-p view))
+       (html-page-object-p (pane-object pane))))
+
+(defun set-html-page-render-state (view-element state)
+  (setf (clog:attribute view-element "data-hyperdoc-render-state") state
+        (clog:attribute view-element "aria-busy")
+        (if (string= state "loading")
+            "true"
+            "false")))
+
+(defun show-html-page-render-loading-state (view-element)
+  (set-html-page-render-state view-element "loading")
+  (setf (clog:inner-html view-element)
+        "<div class=\"hyperdoc-html-page-loading\" role=\"status\" aria-live=\"polite\">Loading content...</div>"))
+
 (defun default-pane-selection (pane select)
   (cond
     (select
@@ -192,30 +225,38 @@
                                :ms (elapsed-millis start))))
 
 (defmethod create-view-element :around ((pane pane) parent-element (view hv:html-view))
-  (let* ((html-start (current-time-millis))
-         (html-cached? (html-view-realized-p view))
-         (html (hv:view-html view))
-         (references (hv:view-references view))
-         (assets (hv:view-assets view))
-         (html-ms (elapsed-millis html-start))
-         (html-length (length html))
-         (html-node-count (count #\< html))
-         (insert-start (current-time-millis))
-         (result (call-next-method))
-         (post-insert-ms (elapsed-millis insert-start))
-         (dom-nodes (dom-node-count parent-element)))
-    (log-inspector-performance :view/render
-                               :object (summarize-object-for-log (pane-object pane))
-                               :view (hv:view-title view)
-                               :html-cache-hit? html-cached?
-                               :html-ms html-ms
-                               :insert-ms post-insert-ms
-                               :html-length html-length
-                               :html-node-count html-node-count
-                               :reference-count (length references)
-                               :asset-count (length assets)
-                               :dom-node-count dom-nodes)
-    result))
+  (let ((loading-state? (first-html-page-content-render-p pane view)))
+    (when loading-state?
+      (show-html-page-render-loading-state parent-element)
+      (log-inspector-performance :view/loading
+                                 :object (summarize-object-for-log (pane-object pane))
+                                 :view (hv:view-title view)))
+    (let* ((html-start (current-time-millis))
+           (html-cached? (html-view-realized-p view))
+           (html (hv:view-html view))
+           (references (hv:view-references view))
+           (assets (hv:view-assets view))
+           (html-ms (elapsed-millis html-start))
+           (html-length (length html))
+           (html-node-count (count #\< html))
+           (insert-start (current-time-millis))
+           (result (call-next-method))
+           (post-insert-ms (elapsed-millis insert-start))
+           (dom-nodes (dom-node-count parent-element)))
+      (when loading-state?
+        (set-html-page-render-state parent-element "ready"))
+      (log-inspector-performance :view/render
+                                 :object (summarize-object-for-log (pane-object pane))
+                                 :view (hv:view-title view)
+                                 :html-cache-hit? html-cached?
+                                 :html-ms html-ms
+                                 :insert-ms post-insert-ms
+                                 :html-length html-length
+                                 :html-node-count html-node-count
+                                 :reference-count (length references)
+                                 :asset-count (length assets)
+                                 :dom-node-count dom-nodes)
+      result)))
 
 (in-package #:html-inspector-views/standard)
 
