@@ -16,11 +16,20 @@
   (and pathname
        (hyperdoc::pathname-namestring-or-nil pathname)))
 
+(defun zotero-query-display-attempt (query)
+  (hyperdoc::normalize-zotero-query-attempt
+   query
+   :attempted-operation 'hyperdoc::zotero-query-attempt-rows-of
+   :receiver (and query (hyperdoc::zotero-query-selected-attempt-of query))
+   :higher-level-intent
+   (and query
+        (list :inspect-zotero-query (hyperdoc::zotero-query-name-of query)))
+   :repair-hint "Inspect query evidence before assuming a selected SQLite attempt exists."))
+
 (defun zotero-query-row-count (query)
-  (let ((attempt (hyperdoc::zotero-query-selected-attempt-of query)))
-    (if attempt
-        (length (hyperdoc::zotero-query-attempt-rows-of attempt))
-        0)))
+  (length (or (hyperdoc::zotero-query-protocol-rows-of
+               (zotero-query-display-attempt query))
+              nil)))
 
 (defmethod views:text-representation ((bridge hyperdoc::zotero-library-bridge))
   (format nil "Zotero bridge (~A)"
@@ -99,7 +108,7 @@
           (length (hyperdoc::zotero-title-query-matched-items-of query))))
 
 (views:defview 👀overview (query hyperdoc::zotero-title-query)
-  (let ((attempt (hyperdoc::zotero-query-selected-attempt-of query)))
+  (let ((attempt (zotero-query-display-attempt query)))
     (views:html-view :title "Overview" :priority 1
       (views:html
         (:table :class "inspector-table"
@@ -138,7 +147,7 @@
               "miss")))
 
 (views:defview 👀overview (query hyperdoc::zotero-item-id-query)
-  (let ((attempt (hyperdoc::zotero-query-selected-attempt-of query)))
+  (let ((attempt (zotero-query-display-attempt query)))
     (views:html-view :title "Overview" :priority 1
       (views:html
         (:table :class "inspector-table"
@@ -163,10 +172,10 @@
                        (zotero-query-row-count query)))))))))
 
 (defmethod views:text-representation ((query hyperdoc::zotero-query-evidence))
-  (let ((attempt (hyperdoc::zotero-query-selected-attempt-of query)))
+  (let ((attempt (zotero-query-display-attempt query)))
     (format nil "Zotero query ~A (~A, ~D rows)"
             (hyperdoc::zotero-query-name-of query)
-            (if attempt
+            (if (typep attempt 'hyperdoc::zotero-query-attempt)
                 (zotero-keyword-label
                  (hyperdoc::zotero-query-attempt-access-mode-of attempt))
                 "error")
@@ -180,7 +189,7 @@
            (hyperdoc::zotero-query-attempt-status-of attempt))))
 
 (views:defview 👀overview (query hyperdoc::zotero-query-evidence)
-  (let ((attempt (hyperdoc::zotero-query-selected-attempt-of query)))
+  (let ((attempt (zotero-query-display-attempt query)))
     (views:html-view :title "Overview" :priority 1
       (views:html
         (:table :class "inspector-table"
@@ -194,7 +203,7 @@
                  (:td (views:esc "Selected access mode"))
                  (:td (:tt
                        (views:esc
-                        (or (and attempt
+                        (or (and (typep attempt 'hyperdoc::zotero-query-attempt)
                                  (zotero-keyword-label
                                   (hyperdoc::zotero-query-attempt-access-mode-of
                                    attempt)))
@@ -209,7 +218,7 @@
                        (hyperdoc::zotero-query-attempts-of query)))))))))
 
 (views:defview 👀raw-data (query hyperdoc::zotero-query-evidence)
-  (let ((attempt (hyperdoc::zotero-query-selected-attempt-of query)))
+  (let ((attempt (zotero-query-display-attempt query)))
     (views:html-view :title "Raw data" :priority 2
       (views:html
         (:table :class "inspector-table"
@@ -221,8 +230,7 @@
                 (:tr
                  (:td (views:esc "Selected rows"))
                  (:td (views:object-ref
-                       (and attempt
-                            (hyperdoc::zotero-query-attempt-rows-of attempt)))))
+                       (hyperdoc::zotero-query-protocol-rows-of attempt))))
                 (:tr
                  (:td (views:esc "Attempt details"))
                  (:td (views:object-ref
@@ -243,6 +251,55 @@
                                        (hyperdoc::zotero-query-attempt-command-of
                                         candidate)))
                                (hyperdoc::zotero-query-attempts-of query))))))))))
+
+(defmethod views:text-representation ((attempt hyperdoc::zotero-query-missing-attempt))
+  (format nil "Missing Zotero attempt (~A)"
+          (zotero-keyword-label
+           (hyperdoc::zotero-query-missing-attempt-status-of attempt))))
+
+(views:defview 👀overview (attempt hyperdoc::zotero-query-missing-attempt)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr
+               (:td (views:esc "Attempted operation"))
+               (:td (:tt
+                     (views:esc
+                      (prin1-to-string
+                       (hyperdoc::zotero-query-missing-attempt-operation-of attempt))))))
+              (:tr
+               (:td (views:esc "Receiver"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-query-missing-attempt-receiver-of attempt))))
+              (:tr
+               (:td (views:esc "Arguments"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-query-missing-attempt-arguments-of attempt))))
+              (:tr
+               (:td (views:esc "Higher-level intent"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-query-missing-attempt-intent-of attempt))))
+              (:tr
+               (:td (views:esc "Status"))
+               (:td (:tt
+                     (views:esc
+                      (zotero-keyword-label
+                       (hyperdoc::zotero-query-missing-attempt-status-of attempt))))))
+              (:tr
+               (:td (views:esc "Detail"))
+               (:td (:pre
+                     (views:esc
+                      (or (hyperdoc::zotero-query-missing-attempt-detail-of attempt)
+                          "")))))
+              (:tr
+               (:td (views:esc "Repair hint"))
+               (:td (views:esc
+                     (or (hyperdoc::zotero-query-missing-attempt-repair-hint-of attempt)
+                         ""))))
+              (:tr
+               (:td (views:esc "Metadata"))
+               (:td (views:object-ref
+                     (hyperdoc::zotero-query-protocol-metadata-of attempt))))))))
 
 (defmethod views:text-representation ((item hyperdoc::zotero-item-hit))
   (format nil "Zotero item ~A ~A"

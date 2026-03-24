@@ -36,6 +36,32 @@
               :initarg :exit-code
               :initform nil)))
 
+(defclass zotero-query-missing-attempt ()
+  ((query :reader zotero-query-missing-attempt-query-of
+          :initarg :query
+          :initform nil)
+   (attempted-operation :reader zotero-query-missing-attempt-operation-of
+                        :initarg :attempted-operation
+                        :initform nil)
+   (receiver :reader zotero-query-missing-attempt-receiver-of
+             :initarg :receiver
+             :initform nil)
+   (arguments :reader zotero-query-missing-attempt-arguments-of
+              :initarg :arguments
+              :initform nil)
+   (higher-level-intent :reader zotero-query-missing-attempt-intent-of
+                        :initarg :higher-level-intent
+                        :initform nil)
+   (status :reader zotero-query-missing-attempt-status-of
+           :initarg :status
+           :initform :missing)
+   (detail :reader zotero-query-missing-attempt-detail-of
+           :initarg :detail
+           :initform nil)
+   (repair-hint :reader zotero-query-missing-attempt-repair-hint-of
+                :initarg :repair-hint
+                :initform nil)))
+
 (defclass zotero-query-evidence ()
   ((name :reader zotero-query-name-of :initarg :name)
    (sql :reader zotero-query-sql-of :initarg :sql)
@@ -270,6 +296,14 @@
                 (zotero-query-attempt-access-mode-of
                  (zotero-query-selected-attempt-of object))
                 :error))))
+
+(defmethod print-object ((object zotero-query-missing-attempt) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~A ~A"
+            (or (zotero-query-missing-attempt-operation-of object)
+                :missing-operation)
+            (or (zotero-query-missing-attempt-status-of object)
+                :missing))))
 
 (defmethod print-object ((object zotero-title-query) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -614,6 +648,80 @@
        (zotero-query-selected-attempt-of query)
        (zotero-query-attempt-rows-of
         (zotero-query-selected-attempt-of query))))
+
+(defun zotero-query-failed-p (query)
+  (and query
+       (null (zotero-query-selected-attempt-of query))
+       (find-if (lambda (attempt)
+                  (eq (zotero-query-attempt-status-of attempt) :error))
+                (zotero-query-attempts-of query))))
+
+(defun zotero-query-primary-attempt (query)
+  (or (zotero-query-selected-attempt-of query)
+      (first (zotero-query-attempts-of query))))
+
+(defun zotero-query-failure-detail (query)
+  (let ((attempt (or (find-if (lambda (candidate)
+                                (eq (zotero-query-attempt-status-of candidate)
+                                    :error))
+                              (zotero-query-attempts-of query))
+                     (zotero-query-primary-attempt query))))
+    (and attempt
+         (zotero-query-attempt-detail-of attempt))))
+
+(defgeneric zotero-query-protocol-status-of (attempt-or-failure))
+(defgeneric zotero-query-protocol-rows-of (attempt-or-failure))
+(defgeneric zotero-query-protocol-detail-of (attempt-or-failure))
+(defgeneric zotero-query-protocol-metadata-of (attempt-or-failure))
+
+(defmethod zotero-query-protocol-status-of ((attempt zotero-query-attempt))
+  (zotero-query-attempt-status-of attempt))
+
+(defmethod zotero-query-protocol-rows-of ((attempt zotero-query-attempt))
+  (zotero-query-attempt-rows-of attempt))
+
+(defmethod zotero-query-protocol-detail-of ((attempt zotero-query-attempt))
+  (zotero-query-attempt-detail-of attempt))
+
+(defmethod zotero-query-protocol-metadata-of ((attempt zotero-query-attempt))
+  (list :class 'zotero-query-attempt
+        :access-mode (zotero-query-attempt-access-mode-of attempt)
+        :command (zotero-query-attempt-command-of attempt)
+        :exit-code (zotero-query-attempt-exit-code-of attempt)))
+
+(defmethod zotero-query-protocol-status-of ((attempt zotero-query-missing-attempt))
+  (zotero-query-missing-attempt-status-of attempt))
+
+(defmethod zotero-query-protocol-rows-of ((attempt zotero-query-missing-attempt))
+  nil)
+
+(defmethod zotero-query-protocol-detail-of ((attempt zotero-query-missing-attempt))
+  (zotero-query-missing-attempt-detail-of attempt))
+
+(defmethod zotero-query-protocol-metadata-of ((attempt zotero-query-missing-attempt))
+  (let ((query (zotero-query-missing-attempt-query-of attempt)))
+    (list :class 'zotero-query-missing-attempt
+          :attempted-operation (zotero-query-missing-attempt-operation-of attempt)
+          :receiver (zotero-query-missing-attempt-receiver-of attempt)
+          :arguments (zotero-query-missing-attempt-arguments-of attempt)
+          :higher-level-intent (zotero-query-missing-attempt-intent-of attempt)
+          :repair-hint (zotero-query-missing-attempt-repair-hint-of attempt)
+          :query-name (and query (zotero-query-name-of query))
+          :attempt-count (and query (length (zotero-query-attempts-of query))))))
+
+(defun normalize-zotero-query-attempt
+    (query &key attempted-operation receiver arguments higher-level-intent repair-hint)
+  (or (and query (zotero-query-selected-attempt-of query))
+      (make-instance 'zotero-query-missing-attempt
+                     :query query
+                     :attempted-operation attempted-operation
+                     :receiver receiver
+                     :arguments arguments
+                     :higher-level-intent higher-level-intent
+                     :status (if (zotero-query-failed-p query) :error :missing)
+                     :detail (or (zotero-query-failure-detail query)
+                                 "No Zotero query attempt was selected.")
+                     :repair-hint repair-hint)))
 
 (defun make-zotero-error-query (name detail)
   (make-instance 'zotero-query-evidence

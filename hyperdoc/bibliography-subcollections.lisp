@@ -99,6 +99,44 @@
                    :initarg :authoring-plan
                    :initform nil)))
 
+(defclass bibliography-subcollection-load-failure ()
+  ((source :reader bibliography-subcollection-load-failure-source-of
+           :initarg :source)
+   (source-system :reader bibliography-subcollection-load-failure-source-system-of
+                  :initarg :source-system
+                  :initform :unknown)
+   (query-text :reader bibliography-subcollection-load-failure-query-text-of
+               :initarg :query-text)
+   (stage :reader bibliography-subcollection-load-failure-stage-of
+          :initarg :stage)
+   (message :reader bibliography-subcollection-load-failure-message-of
+            :initarg :message)
+   (detail :reader bibliography-subcollection-load-failure-detail-of
+           :initarg :detail
+           :initform nil)
+   (failed-attempt :reader bibliography-subcollection-load-failure-failed-attempt-of
+                   :initarg :failed-attempt
+                   :initform nil)
+   (failed-query :reader bibliography-subcollection-load-failure-failed-query-of
+                 :initarg :failed-query
+                 :initform nil)
+   (collection-query
+    :reader bibliography-subcollection-load-failure-collection-query-of
+    :initarg :collection-query
+    :initform nil)
+   (entry-query :reader bibliography-subcollection-load-failure-entry-query-of
+                :initarg :entry-query
+                :initform nil)
+   (author-query :reader bibliography-subcollection-load-failure-author-query-of
+                 :initarg :author-query
+                 :initform nil)
+   (tag-query :reader bibliography-subcollection-load-failure-tag-query-of
+              :initarg :tag-query
+              :initform nil)))
+
+(defun bibliography-subcollection-load-failure-p (object)
+  (typep object 'bibliography-subcollection-load-failure))
+
 (defclass bibliography-entry ()
   ((source-system :reader bibliography-entry-source-system-of
                   :initarg :source-system
@@ -467,6 +505,14 @@
             (bibliography-collection-path-of
              (bibliography-subcollection-collection-hit-of object))
             (length (bibliography-subcollection-entries-of object)))))
+
+(defmethod print-object ((object bibliography-subcollection-load-failure) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~A (~A)"
+            (bibliography-subcollection-load-failure-query-text-of object)
+            (string-downcase
+             (symbol-name
+              (bibliography-subcollection-load-failure-stage-of object))))))
 
 (defmethod print-object ((object bibliography-entry) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -1770,6 +1816,7 @@
   (let ((subcollection
           (typecase subcollection-or-name
             (zotero-backend-unavailable subcollection-or-name)
+            (bibliography-subcollection-load-failure subcollection-or-name)
             (string
              (cond
                ((zotero-backend-unavailable-p source)
@@ -1784,7 +1831,8 @@
              subcollection-or-name)
             (otherwise
              (error "Unsupported bibliography authoring target ~S." subcollection-or-name)))))
-    (if (zotero-backend-unavailable-p subcollection)
+    (if (or (zotero-backend-unavailable-p subcollection)
+            (bibliography-subcollection-load-failure-p subcollection))
         subcollection
         (and subcollection
              (ensure-bibliography-subcollection-authoring-plan
@@ -1828,6 +1876,9 @@
                  :signal-error? signal-error?)))
           (cond
             ((zotero-backend-unavailable-p subcollection)
+             subcollection)
+            ((bibliography-subcollection-load-failure-p subcollection)
+             (setf (gethash lookup cache) subcollection)
              subcollection)
             (subcollection
             (setf (gethash lookup cache) subcollection)

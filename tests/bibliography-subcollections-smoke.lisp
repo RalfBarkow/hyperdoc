@@ -237,6 +237,17 @@ COMMIT;"
      :default-collection "coachmark"
      :materialization-root (merge-pathnames "materialized/" (getf fixture :root)))))
 
+(defun make-bibliography-missing-db-source (&optional fixture)
+  (let* ((fixture (or fixture (make-bibliography-smoke-fixture)))
+         (missing-db-path (merge-pathnames "missing-zotero.sqlite" (getf fixture :root)))
+         (bridge (hyperdoc::make-zotero-library-bridge
+                  :db-path missing-db-path
+                  :storage-root (getf fixture :storage-root))))
+    (hyperdoc::make-zotero-bibliography-source
+     :bridge bridge
+     :default-collection "coachmark"
+     :materialization-root (merge-pathnames "materialized-missing/" (getf fixture :root)))))
+
 (defun find-candidate-by-title (plan title)
   (find title
         (hyperdoc::hyperdoc-authoring-plan-candidate-topics-of plan)
@@ -306,6 +317,47 @@ COMMIT;"
                  "Subcollection lookup must keep candidate topics inspectable without forcing the authoring plan")
     (assert-true (null (hyperdoc::bibliography-subcollection-authoring-plan-of subcollection))
                  "Subcollection lookup must leave the authoring plan deferred until explicit request")))
+
+(defun run-bibliography-subcollection-query-failure-smoke-test ()
+  (let* ((fixture (make-bibliography-smoke-fixture))
+         (source (make-bibliography-missing-db-source fixture))
+         (book (hyperdoc:ensure-bibliography-subcollections-hyperbook :source source))
+         (result (hyperbook:find-page book "coachmark" :signal-error? nil))
+         (failed-attempt (hyperdoc::bibliography-subcollection-load-failure-failed-attempt-of result))
+         (book-titles (inspector-view-titles-for-object book))
+         (result-titles (inspector-view-titles-for-object result)))
+    (assert-true (typep result 'hyperdoc::bibliography-subcollection-load-failure)
+                 "Missing Zotero DB must return a bounded bibliography load-failure object instead of crashing")
+    (assert-equal :collection-query
+                  (hyperdoc::bibliography-subcollection-load-failure-stage-of result)
+                  "Missing Zotero DB should fail during collection lookup")
+    (assert-true (search "Zotero database not found"
+                         (hyperdoc::bibliography-subcollection-load-failure-detail-of result))
+                 "Failure object should preserve the underlying missing-database detail")
+    (assert-true (typep (hyperdoc::bibliography-subcollection-load-failure-collection-query-of result)
+                        'hyperdoc::zotero-collection-query)
+                 "Failure object must preserve the collection query evidence")
+    (assert-true (typep failed-attempt 'hyperdoc::zotero-query-missing-attempt)
+                 "The NIL selected-attempt seam should be normalized into an explicit Zotero boundary object")
+    (assert-equal :error
+                  (hyperdoc::zotero-query-protocol-status-of failed-attempt)
+                  "Missing Zotero DB should normalize into an error-status boundary attempt")
+    (assert-true (null (hyperdoc::zotero-query-protocol-rows-of failed-attempt))
+                 "Boundary attempt must answer rows safely with NIL rather than dispatching on raw NIL")
+    (assert-equal '(hyperdoc::lookup-zotero-collection "coachmark")
+                  (hyperdoc::zotero-query-missing-attempt-intent-of failed-attempt)
+                  "Boundary attempt should preserve the higher-level lookup intent")
+    (assert-true (member "Main page" book-titles :test #'string=)
+                 "Bibliography hyperbook should remain inspectable even when its main page lookup fails softly")
+    (dolist (title '("Overview" "Query evidence"))
+      (assert-true (member title result-titles :test #'string=)
+                   (format nil "Load-failure object should expose ~A" title)))
+    (let ((plan (hyperdoc::plan-bibliography-authoring
+                 "coachmark"
+                 :source source
+                 :signal-error? nil)))
+      (assert-true (typep plan 'hyperdoc::bibliography-subcollection-load-failure)
+                   "Authoring-plan entry through a missing Zotero DB must preserve the bounded failure object"))))
 
 (defun run-bibliography-authoring-plan-deferred-smoke-test ()
   (let* ((fixture (make-bibliography-smoke-fixture))
@@ -560,6 +612,7 @@ COMMIT;"
 
 (defun run-bibliography-subcollections-smoke-tests ()
   (run-bibliography-subcollection-lookup-smoke-test)
+  (run-bibliography-subcollection-query-failure-smoke-test)
   (run-bibliography-authoring-plan-deferred-smoke-test)
   (run-bibliography-entry-normalization-smoke-test)
   (run-bibliography-candidate-extraction-smoke-test)

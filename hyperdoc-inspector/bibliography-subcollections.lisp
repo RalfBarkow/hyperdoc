@@ -85,6 +85,88 @@
                          (views:esc
                           (hyperdoc::zotero-backend-unavailable-system-name-of status)))))))))
 
+(defmethod views:text-representation
+    ((failure hyperdoc::bibliography-subcollection-load-failure))
+  (format nil "Bibliography load failure ~A (~A)"
+          (hyperdoc::bibliography-subcollection-load-failure-query-text-of failure)
+          (bibliography-keyword-label
+           (hyperdoc::bibliography-subcollection-load-failure-stage-of failure))))
+
+(views:defview 👀overview (failure hyperdoc::bibliography-subcollection-load-failure)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr
+               (:td (views:esc "Requested collection"))
+               (:td (:tt
+                     (views:esc
+                      (hyperdoc::bibliography-subcollection-load-failure-query-text-of
+                       failure)))))
+              (:tr
+               (:td (views:esc "Stage"))
+               (:td (:tt
+                     (views:esc
+                      (bibliography-keyword-label
+                       (hyperdoc::bibliography-subcollection-load-failure-stage-of
+                        failure))))))
+              (:tr
+               (:td (views:esc "Message"))
+               (:td (views:esc
+                     (hyperdoc::bibliography-subcollection-load-failure-message-of
+                      failure))))
+              (:tr
+               (:td (views:esc "Detail"))
+               (:td (:pre
+                     (views:esc
+                      (or (hyperdoc::bibliography-subcollection-load-failure-detail-of
+                           failure)
+                          "")))))
+              (:tr
+               (:td (views:esc "Source"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-source-of
+                      failure))))
+              (:tr
+               (:td (views:esc "Failed attempt"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-failed-attempt-of
+                      failure))))
+              (:tr
+               (:td (views:esc "Failed query"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-failed-query-of
+                      failure))))))))
+
+(views:defview 👀query-evidence (failure hyperdoc::bibliography-subcollection-load-failure)
+  (views:html-view :title "Query evidence" :priority 2
+    (views:html
+      (:table :class "inspector-table"
+              (:tr
+               (:td (views:esc "Collection query"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-collection-query-of
+                      failure))))
+              (:tr
+               (:td (views:esc "Entry query"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-entry-query-of
+                      failure))))
+              (:tr
+               (:td (views:esc "Author query"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-author-query-of
+                      failure))))
+              (:tr
+               (:td (views:esc "Tag query"))
+               (:td (views:object-ref
+                     (hyperdoc::bibliography-subcollection-load-failure-tag-query-of
+                      failure))))))))
+
+(views:defview views:👀content (failure hyperdoc::bibliography-subcollection-load-failure)
+  (views:rename (👀overview failure)
+                :title "Failure"
+                :priority 1))
+
 (defmethod views:text-representation ((subcollection hyperdoc::bibliography-subcollection))
   (format nil "Bibliography subcollection ~A (~D entries)"
           (hyperdoc::bibliography-collection-path-of
