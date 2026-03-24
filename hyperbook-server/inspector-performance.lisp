@@ -75,6 +75,36 @@
     (t
      0)))
 
+(defun inspector-pane-element-p (element)
+  (let ((classes (or (clog:attribute element "class") "")))
+    (or (search "inspector-pane" classes :test #'char=)
+        (search "inspector-pane-maximized" classes :test #'char=))))
+
+(defun inspector-pane-count (container)
+  (count-if #'inspector-pane-element-p
+            (child-elements container)))
+
+(defun scroll-inspector-parent-to-active-edge (parent)
+  ;; Upstream always scrolls to the right edge after creating a pane. That is
+  ;; correct once multiple panes exist, but it clips the left gutter of the
+  ;; first pane on narrow viewports by introducing a small positive scroll-left.
+  (setf (clog:scroll-left parent)
+        (if (> (inspector-pane-count parent) 1)
+            (max 0 (- (clog:scroll-width parent)
+                      (clog:client-width parent)))
+            0)))
+
+(defun create-dom (pane)
+  (with-slots (clog-obj view-ids) pane
+    (let* ((parent (clog:parent-element clog-obj))
+           (title-bar (create-title-bar pane))
+           (tab-bar (create-tabs pane))
+           (body (clog:create-div clog-obj :class "inspector-body")))
+      (declare (ignore title-bar tab-bar))
+      (dolist (id view-ids)
+        (clog:create-div body :html-id id :class "inspector-view"))
+      (scroll-inspector-parent-to-active-edge parent))))
+
 ;; Replace upstream create-pane to log timings and to default class panes
 ;; to a cheap tab instead of the first source-heavy view.
 (defun create-pane (inspector object &key (select nil))
