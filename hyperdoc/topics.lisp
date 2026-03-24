@@ -2512,7 +2512,7 @@
   (make-topic
    :id "running-image-coherence"
    :title "Running image coherence"
-   :summary "The problem of keeping a live Lisp image internally consistent and intelligible as definitions, dependencies, and loaded state evolve over time."
+   :summary "The problem of keeping a live Lisp image internally consistent and intelligible as chunks, dependencies, and derived runtime state evolve and must stay fresh relative to their basis."
    :references '("A framework for maintaining the coherence of a running Lisp"
                  "McDermott Running Image Coherence Crosswalk"
                  "Drew McDermott Lisp, Planning, and Software"

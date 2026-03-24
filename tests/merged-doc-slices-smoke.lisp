@@ -116,7 +116,31 @@
                    "SBCL"
                    "SBCL Process"
                    "Understanding ASDF Systems in HyperDoc"))
-    (assert-hyperdoc-page-present title)))
+    (assert-hyperdoc-page-present title))
+  (assert-page-source-contains
+   "hyperdoc/A framework for maintaining the coherence of a running Lisp.html"
+   "piece of information")
+  (assert-page-source-contains
+   "hyperdoc/A framework for maintaining the coherence of a running Lisp.html"
+   "particular state, form, or location")
+  (assert-page-source-contains
+   "hyperdoc/A framework for maintaining the coherence of a running Lisp.html"
+   "Live image versus durable source")
+  (assert-page-source-contains
+   "hyperdoc/McDermott Running Image Coherence Crosswalk.html"
+   "<b>basis</b>, <b>update basis</b>")
+  (assert-page-source-contains
+   "hyperdoc/McDermott Running Image Coherence Crosswalk.html"
+   "<b>deriver</b> /")
+  (assert-page-source-contains
+   "hyperdoc/McDermott Running Image Coherence Crosswalk.html"
+   "managed</b> and <b>dormant</b>")
+  (assert-page-source-contains
+   "hyperdoc/McDermott Running Image Coherence Crosswalk.html"
+   "up-to-date</b> is a dependency")
+  (assert-page-source-contains
+   "hyperdoc/McDermott Running Image Coherence Crosswalk.html"
+   "relation, not mere continued existence"))
 
 (defun run-codex-handover-doc-slice-smoke-test ()
   (dolist (entry '((hyperdoc::single-slice-codex-thread-topic "Single-slice Codex thread")

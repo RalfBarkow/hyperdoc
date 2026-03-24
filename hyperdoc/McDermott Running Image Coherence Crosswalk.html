@@ -3,7 +3,9 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  This page maps the concepts from Drew McDermott’s <a page="A framework for maintaining the coherence of a running Lisp">A Framework for Maintaining the Coherence of a Running Lisp</a> onto existing HyperDoc pages and topic vocabulary.
+  This page is a crosswalk, not a second paper import. Its job is to name Drew
+  McDermott's chunk vocabulary explicitly and point to the existing HyperDoc
+  pages and local notes that now carry that vocabulary.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -13,167 +15,61 @@
   <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
 </ul>
 
-<h2>Layer 1 — Already Covered in HyperDoc</h2>
+<h2>Paper Vocabulary Now Named Locally</h2>
 
-<h3>Running Lisp Session Coherence</h3>
-<ul>
-  <li>Source-oriented and image-oriented development in Common Lisp</li>
-  <li>SBCL Process</li>
-  <li>Reloading HyperDoc After Adding Lisp Objects</li>
-</ul>
+<h3>Chunk</h3>
 
 <p>
-  The core problem—long-lived Lisp images becoming inconsistent during
-  iterative development—is already addressed operationally.
+  The paper page now imports <b>chunk</b> directly as a piece of information in
+  a particular state, form, or location. That matters in HyperDoc because a
+  source file, an in-image registry entry, and a loaded handler subset are not
+  interchangeable just because they concern the same code.
 </p>
 
-<h3>Lisp as Shell + Compiler</h3>
-<ul>
-  <li>SBCL</li>
-  <li>SBCL Process</li>
-  <li>HyperDoc Server</li>
-</ul>
-
-<h3>ASDF as Partial Solution</h3>
-<ul>
-  <li>Understanding ASDF Systems in HyperDoc</li>
-  <li>ASDF Components Workflow</li>
-  <li>ASDF Systems, Examples, and Tests in HyperDoc</li>
-</ul>
+<h3>Basis / Update Basis / Deriver</h3>
 
 <p>
-  HyperDoc already models system boundaries, load order, and reproducibility.
+  The local operational notes now use the paper's dependency vocabulary
+  explicitly: <b>basis</b>, <b>update basis</b>, and <b>deriver</b> /
+  <b>derive</b>. The relevant local anchors are
+  <a page="Core Chunk Classes">Core Chunk Classes</a> and
+  <a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a>.
 </p>
 
-<h3>Reload / Stale Image Diagnosis</h3>
-<ul>
-  <li>Undefined-function triage</li>
-  <li>asdf:load-system :force t</li>
-</ul>
+<h3>Managed vs Dormant</h3>
 
 <p>
-  This corresponds to McDermott’s observation that existing mechanisms are ad hoc.
+  The paper's distinction between <b>managed</b> and <b>dormant</b> chunks is a
+  good fit for HyperDoc's long-lived runtime. Some state is under active
+  maintenance and must stay coherent; other state may exist locally but is not
+  currently being kept current by the coherence machinery.
 </p>
 
-<h2>Layer 2 — Structural Analogies (Partial Coverage)</h2>
-
-<h3>Managed vs Dormant State</h3>
-<ul>
-  <li>Portable examples in HyperDoc</li>
-  <li>Running HyperDoc Examples</li>
-</ul>
+<h3>Up-to-date / Freshness</h3>
 
 <p>
-  Example systems behave like dormant chunks that become active when loaded.
+  The imported freshness claim is that <b>up-to-date</b> is a dependency
+  relation, not mere continued existence. A derived chunk can survive in the
+  image and still be stale if a supporting chunk is fresher. That is the bridge
+  from McDermott's paper into HyperDoc's runtime reload and repair discussions.
 </p>
 
-<h3>Execution Evidence and Rebuild</h3>
+<h2>Where the Vocabulary Lands in HyperDoc</h2>
+
 <ul>
-  <li>HyperDoc Test Runner</li>
-  <li>Execution evidence object</li>
-  <li>Check run / Check result</li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a>: narrow paper-based import of chunk definition, given/derived chunks, and freshness semantics</li>
+  <li><a page="Core Chunk Classes">Core Chunk Classes</a>: local kernel for chunk, basis, update basis, derive, derive-date, and up-to-date logic</li>
+  <li><a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a>: application of the same model to issue repair and runtime registration</li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a>: separate boundary page for rebuild authority and durable source</li>
 </ul>
+
+<h2>Boundary To Preserve</h2>
 
 <p>
-  These resemble derived artifacts, but lack explicit dependency semantics.
+  The crosswalk should sharpen one distinction, not blur it.
+  <a hyperbook="topics" page="Running image coherence"><tt>Running image coherence</tt></a>
+  is about internal consistency and freshness inside an evolving live Lisp.
+  <a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a>
+  is about which artifacts remain authoritative for rebuild and audit. The paper
+  contributes vocabulary for the first problem. It does not erase the second.
 </p>
-
-<h3>Dynamic Runtime Mutation</h3>
-<ul>
-  <li>HyperDoc Evaluation and Inspection Model</li>
-  <li>Runtime Dispatch Seams in HyperDoc</li>
-</ul>
-
-<p>
-  HyperDoc acknowledges that the object graph changes during execution,
-  but does not formalize this as a dependency network.
-</p>
-
-<h2>Layer 3 — Missing McDermott Vocabulary (Gap)</h2>
-
-<p>
-  The following concepts are not yet first-class in HyperDoc.
-  They form the core of McDermott’s contribution.
-</p>
-
-<h3>Chunk Model</h3>
-<ul>
-  <li>Chunk</li>
-  <li>Given chunk</li>
-  <li>Derived chunk</li>
-  <li>File-segment chunk</li>
-</ul>
-
-<h3>Dependency Graph</h3>
-<ul>
-  <li>Chunk basis</li>
-  <li>Update basis</li>
-  <li>Immediate supporter</li>
-  <li>Supporting path</li>
-  <li>Leaf chunk</li>
-  <li>Chunk height</li>
-</ul>
-
-<h3>Disjunction and Alternatives</h3>
-<ul>
-  <li>Or-chunk</li>
-  <li>Default disjunct</li>
-</ul>
-
-<h3>Update Semantics</h3>
-<ul>
-  <li>chunks-update</li>
-  <li>Selective rederivation</li>
-  <li>Marking and reentrancy</li>
-</ul>
-
-<h3>Cycles</h3>
-<ul>
-  <li>Stable dependency cycle</li>
-  <li>Unstable dependency cycle</li>
-  <li>Lateral chains</li>
-</ul>
-
-<h3>Fine-Grained Rebuilding</h3>
-<ul>
-  <li>Declarative reload dependency</li>
-  <li>Fine-grained session rebuilding</li>
-</ul>
-
-<h2>Key Insight for HyperDoc</h2>
-
-<p>
-  HyperDoc already solves the <em>operational</em> problem:
-  how to reload, inspect, and test a running system.
-</p>
-
-<p>
-  McDermott provides the missing <em>semantic model</em>:
-  a first-class dependency graph over runtime objects,
-  enabling principled, minimal, and correct rederivation.
-</p>
-
-<p>
-  The integration path is therefore not replacing existing pages,
-  but introducing a new topic layer that explains:
-</p>
-
-<ul>
-  <li>what exactly is being kept coherent,</li>
-  <li>how dependencies are represented,</li>
-  <li>and how updates propagate through the running image.</li>
-</ul>
-
-<h2>Proposed Topic Handles</h2>
-
-<ul>
-  <li>running-image-coherence-topic</li>
-  <li>chunk-topic</li>
-  <li>derived-chunk-topic</li>
-  <li>chunk-basis-topic</li>
-  <li>update-basis-topic</li>
-  <li>or-chunk-topic</li>
-  <li>supporting-path-topic</li>
-  <li>dependency-cycle-topic</li>
-  <li>fine-grained-rebuild-topic</li>
-</ul>

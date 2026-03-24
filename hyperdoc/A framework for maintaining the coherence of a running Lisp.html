@@ -3,9 +3,12 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  This page is a title-level anchor for Drew McDermott's 2005 Lisp Conference paper.
-  At the moment it preserves the paper's relevance to HyperDoc without pretending that the
-  full paper content has already been imported.
+  This page now imports one narrow but real part of Drew McDermott's 2005 Lisp
+  Conference paper: the chunk model and the paper's freshness vocabulary for
+  keeping those chunks up to date. It still does <em>not</em> claim that the
+  whole paper has been imported. The durable anchor here is the paper's account
+  of what counts as a chunk, how given and derived chunks differ, and why that
+  matters in a long-lived Lisp image.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -17,43 +20,134 @@
   <li><a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a></li>
 </ul>
 
-<h2>Why the title matters here</h2>
+<h2>What McDermott means by a chunk</h2>
 
 <p>
-  HyperDoc repeatedly runs into the question of how a live Lisp image can evolve without losing
-  reconstructability, inspectability, and trust in what is actually loaded. A paper explicitly framed
-  around maintaining the coherence of a running Lisp belongs close to those concerns.
+  In the imported portion of the paper, a <b>chunk</b> is a piece of information
+  in a particular state, form, or location. The point of the definition is that
+  the same broad subject matter can appear as different chunks when its form or
+  location changes.
 </p>
 
-<h2>Conservative import stance</h2>
+<p>
+  The paper's examples make the scope concrete:
+</p>
 
 <ul>
-  <li>The site gives the title, year, and venue.</li>
-  <li>It is enough to create a durable page/topic anchor.</li>
-  <li>It is not enough to claim the paper's detailed argument until the paper itself is imported.</li>
+  <li>a file on disk,</li>
+  <li>that Lisp file after it has been loaded into memory,</li>
+  <li>a subset of the S-expression handlers currently installed in the running image,</li>
+  <li>and an association between a source directory and a compile directory.</li>
 </ul>
 
 <p>
-  So this page should be read as a bridge page: it records relevance, points to existing HyperDoc
-  concerns, and leaves room for a later paper-based expansion.
+  That breadth is exactly why the model is useful for a running Lisp. A live
+  session does not only contain source files and functions. It also contains
+  registries, directory relations, loaded definitions, and other pieces of state
+  that can become stale independently.
 </p>
 
 <p>
-  The broader computational backdrop for this page is <a page="Mind and Mechanism">Mind and Mechanism</a>,
-  especially where that book treats self-modeling and computational explanation.
-  That backdrop is now locally inspectable through
-  <a page="Resolve a local PDF from Zotero in HyperDoc">Resolve a local PDF from Zotero in HyperDoc</a>.
-  But the boundary here stays narrower: running image coherence is about keeping
-  an evolving live Lisp intelligible, and that must remain distinct from
-  <a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a>,
-  which is about rebuild authority and durable source.
+  The paper also treats <tt>manages</tt> as an explicit relation, not just a
+  casual verb. One can speak loosely about the chunks a system manages, or more
+  declaratively say that a chunk is <b>managed</b> when the coherence machinery
+  takes responsibility for keeping it current. Chunks that exist but are outside
+  that responsibility are better understood as <b>dormant</b> rather than as
+  magically current.
 </p>
 
-<h2>Related</h2>
+<h2>Given and derived chunks</h2>
+
+<p>
+  The imported distinction is asymmetric. A <b>given chunk</b> is supplied to
+  the system as an input or observed state. A <b>derived chunk</b> is produced
+  from other chunks and therefore depends on them.
+</p>
+
+<p>
+  For HyperDoc, a source file, a page file on disk, or a directory relation can
+  be treated as given. A topic index in the running image, a registered runtime
+  object, or a loaded page surface is derived from those inputs. The paper's
+  vocabulary matters because it stops us from calling all of these things
+  “state” and then guessing what must be refreshed.
+</p>
+
+<p>
+  Once the distinction is explicit, a derived chunk can be described by its
+  <b>basis</b>, the chunks it depends on, and by a <b>deriver</b>, the mechanism
+  that rederives it. Some derivations also need an <b>update basis</b>: other
+  chunks that must be available during the refresh even when they are not the
+  lasting product of that refresh.
+</p>
+
+<h2>What “up to date” means</h2>
+
+<p>
+  The paper's freshness model is not just “does the thing exist”. A given chunk
+  is current only insofar as the chunk still represents the source state it is
+  meant to stand for. A derived chunk is current only when it still reflects an
+  up-to-date basis. If one of its supporting chunks is fresher than the derived
+  chunk, then the derived chunk is stale even if it is still present in the
+  image.
+</p>
+
+<p>
+  That is the part worth importing into HyperDoc: freshness is a dependency
+  claim. Existence alone is too weak. A topic registry entry, a page index, or a
+  live handler table can all continue to exist while no longer being coherent
+  with the source or runtime inputs from which they were derived.
+</p>
+
+<h2>Why the model matters for a running Lisp</h2>
+
+<p>
+  A long-lived Lisp image accumulates multiple forms of the “same” information:
+  source files, compiled outputs, loaded definitions, dynamic tables, and local
+  associations that tell the system where to find or rebuild things. McDermott's
+  chunk model makes those forms explicit instead of treating reload as an ad hoc
+  ritual.
+</p>
+
+<p>
+  That matters because <a hyperbook="topics" page="Running image coherence"><tt>running image coherence</tt></a>
+  is about the internal consistency and intelligibility of an evolving live
+  image. It is therefore distinct from
+  <a hyperbook="topics" page="Live image versus durable source"><tt>Live image versus durable source</tt></a>,
+  which is about rebuild authority and durable source of truth across sessions.
+  The chunk model helps explain the former. It does not remove the need for the
+  latter boundary.
+</p>
+
+<h2>Why this is relevant to HyperDoc</h2>
+
+<p>
+  HyperDoc works in exactly the kind of environment where this vocabulary helps:
+</p>
 
 <ul>
-  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
-  <li><a page="Mind and Mechanism compatibility with HyperDoc">Mind and Mechanism compatibility with HyperDoc</a></li>
-  <li><a page="Drew McDermott Lisp, Planning, and Software">Drew McDermott Lisp, Planning, and Software</a></li>
+  <li>a long-lived Lisp image used for iterative development,</li>
+  <li>reload and revise workflows where definitions and indexes move at different speeds,</li>
+  <li>derived state such as topic registries, page availability, and runtime support surfaces,</li>
+  <li>and a need to track dependencies explicitly instead of relying on manual “repair” sequencing.</li>
+</ul>
+
+<p>
+  The local follow-on notes already start operationalizing this import.
+  <a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a>
+  maps the vocabulary into the existing corpus.
+  <a page="Core Chunk Classes">Core Chunk Classes</a> sketches the minimal executable
+  kernel for chunks, basis, update basis, derivers, and freshness checks.
+  <a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a>
+  applies the same shift to HyperDoc's repair surfaces: make chunk truth and
+  derivation primary, not a handwritten repair script.
+</p>
+
+<h2>Related local pages</h2>
+
+<ul>
   <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Core Chunk Classes">Core Chunk Classes</a></li>
+  <li><a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a page="Drew McDermott Lisp, Planning, and Software">Drew McDermott Lisp, Planning, and Software</a></li>
 </ul>
