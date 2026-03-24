@@ -13,6 +13,40 @@
 <body>
 <h1>Association Topics for Stable Identity and Mutable Titles</h1>
 
+<in-package>hyperdoc</in-package>
+
+<p>
+  In HyperDoc, not every relation deserves durable topic identity. When a relation
+  becomes a subject of review, it should first be promoted into a reviewed topic
+  proposal object. That proposal can carry a candidate <tt>:id</tt>,
+  <tt>:title</tt>, <tt>:summary</tt>, editorial references, and an exact-title
+  merge classification without automatically editing <tt>hyperdoc/topics.lisp</tt>
+  or creating new page files.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Association topics"><tt>Association topics</tt></a></li>
+  <li><a expr="(example-association-topics-relation)"><tt>(example-association-topics-relation)</tt></a></li>
+  <li><a expr="(promote-relation-to-topic-proposal (example-association-topics-relation))"><tt>(promote-relation-to-topic-proposal (example-association-topics-relation))</tt></a></li>
+  <li><a page="How to merge proposed topic additions into hyperdoc/topics.lisp"><tt>How to merge proposed topic additions into hyperdoc/topics.lisp</tt></a></li>
+</ul>
+
+<h2>Current HyperDoc rule</h2>
+
+<p>
+  The reviewed promotion step exists because authored topic factories in
+  <tt>hyperdoc/topics.lisp</tt> are durable reconstruction points. A live relation
+  object can propose a topic, but it must not silently materialize one.
+</p>
+
+<ul>
+  <li>Use a reviewed proposal when the relation itself has become a subject.</li>
+  <li>Use exact canonical topic title as the practical merge key.</li>
+  <li>Do not add a second factory with the same exact <tt>:title</tt>.</li>
+</ul>
+
 <p>
   This specification defines how immutable slugs or stable keys and mutable titles
   can be represented in a DMX-style topic-map model in which associations are also
@@ -235,6 +269,16 @@ IdentityTitleAssociationTopic
 <p>
   That formulation scales beyond page titles to aliases, external names,
   multilingual labels, and later representation forms.
+</p>
+
+<h2>11. HyperDoc merge guidance</h2>
+
+<p>
+  Operationally, the exact canonical title remains the merge key in HyperDoc's
+  current Topics model. If a relation proposal says
+  <tt>:merge-into-existing-topic</tt>, search <tt>hyperdoc/topics.lisp</tt> for
+  that exact <tt>:title</tt> string and edit the existing factory in place. Add a
+  new factory only when the proposal says the exact title is new.
 </p>
 </body>
 </html>

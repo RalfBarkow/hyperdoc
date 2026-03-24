@@ -38,6 +38,7 @@
                              (:file "operational-targets")
                              (:file "dom-annotations")
                              (:file "git-relations")
+                             (:file "relation-topic-proposals")
                              (:file "git-commit-equivalence")
                              (:file "hyperdoc")))))
 
@@ -225,6 +226,7 @@
   :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
+                             (:file "relation-topic-proposals-smoke")
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")

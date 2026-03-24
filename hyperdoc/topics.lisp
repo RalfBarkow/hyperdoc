@@ -2524,6 +2524,15 @@
                  "A DOM-annotation connect gesture"
                  "Running image coherence")))
 
+(defun association-topics-topic ()
+  (make-topic
+   :id "association-topics"
+   :title "Association topics"
+   :summary "Reviewed topic identity for relations that deserve durable authored treatment, using exact canonical title as the merge key and a proposal step before editing topic factories."
+   :references '("Association Topics for Stable Identity and Mutable Titles"
+                 "How to merge proposed topic additions into hyperdoc/topics.lisp"
+                 "Relating the review contents to existing HyperDoc topics and pages")))
+
 (defun bootstrappability-as-social-architecture-topic ()
   (make-topic
    :id "bootstrappability-as-social-architecture"

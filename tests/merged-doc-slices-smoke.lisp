@@ -450,6 +450,22 @@
   (assert-page-source-contains "hyperdoc/Snapshot transport.html"
                                "Submit-boundary Connect session snapshot"))
 
+(defun run-association-topics-doc-slice-smoke-test ()
+  (assert-topic-function-present
+   'hyperdoc::association-topics-topic
+   "Association topics")
+  (assert-hyperdoc-page-present
+   "Association Topics for Stable Identity and Mutable Titles")
+  (assert-page-source-contains
+   "hyperdoc/Association Topics for Stable Identity and Mutable Titles.html"
+   "page=\"Association topics\"")
+  (assert-page-source-contains
+   "hyperdoc/Association Topics for Stable Identity and Mutable Titles.html"
+   "promote-relation-to-topic-proposal")
+  (assert-page-source-contains
+   "hyperdoc/Association Topics for Stable Identity and Mutable Titles.html"
+   "exact canonical title"))
+
 (defun run-merged-doc-slices-smoke-tests ()
   (run-clickable-commit-ids-doc-slice-smoke-test)
   (run-literate-tracing-doc-slice-smoke-test)
@@ -462,5 +478,6 @@
   (run-bibliography-subcollections-doc-slice-smoke-test)
   (run-dom-connect-submit-path-comparison-doc-slice-smoke-test)
   (run-snapshot-transport-doc-slice-smoke-test)
+  (run-association-topics-doc-slice-smoke-test)
   (format t "~&Merged documentation slice smoke tests passed.~%")
   t)

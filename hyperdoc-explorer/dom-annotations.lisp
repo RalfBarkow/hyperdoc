@@ -374,6 +374,9 @@
 (defmethod views:text-representation ((transport dom-connect-snapshot-transport))
   (shorten-dom-association-label (title-of transport)))
 
+(defmethod views:text-representation ((proposal relation-topic-proposal))
+  (shorten-dom-association-label (proposed-title-of proposal)))
+
 (defun render-anchor-field-rows (rows)
   (loop for (label . value) in rows
         do (views:html
@@ -553,6 +556,13 @@
         (views:html
           (:h4 "Suggested inserted step")
           (maybe-dom-object-ref (matching-inserted-step-of annotation)))))))
+
+(views:defview 👀topic-proposal (annotation dom-relation-annotation)
+  (views:html-view :title "Topic proposal" :priority 2
+    (views:html
+      (:h3 "Reviewed topic proposal")
+      (:p "Use the Operations view to inspect the promotion result without mutating authored topic factories or page files.")
+      (:p (views:object-ref (promote-relation-to-topic-proposal annotation))))))
 
 (views:defview 👀summary (snapshot dom-connect-pane-state-snapshot)
   (views:html-view :title "Summary" :priority 1
@@ -1028,3 +1038,53 @@
                  "Downstream object enabled"
                  (downstream-object-of normal-path)
                  (downstream-object-of evidence-path))))))))
+
+(views:defview 👀overview (proposal relation-topic-proposal)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:h3 (views:esc (proposed-title-of proposal)))
+      (:p (views:esc (proposed-summary-of proposal)))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Relation" (relation-of proposal))
+              (render-connect-field-row "Proposed id"
+                                        (proposed-id-of proposal))
+              (render-connect-field-row "Proposed title"
+                                        (proposed-title-of proposal))
+              (render-connect-field-row "Merge status"
+                                        (merge-status-of proposal))
+              (render-connect-field-row "Existing topic"
+                                        (existing-topic-of proposal)))
+      (:h4 "Proposed references")
+      (if (proposed-references-of proposal)
+          (views:html
+            (:ul
+             (loop for reference in (proposed-references-of proposal)
+                   do (views:html
+                        (:li (:tt (views:esc reference)))))))
+          (views:html
+            (:p (:span :style "opacity: 0.55;"
+                       "No editorial references were inferred.")))))))
+
+(views:defview 👀proposed-topic-factory (proposal relation-topic-proposal)
+  (views:html-view :title "Proposed topic factory" :priority 2
+    (views:html
+      (:h3 "Copy-pasteable topic factory")
+      (:p "This is a reviewed proposal surface only. It does not patch hyperdoc/topics.lisp.")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-proposal-factory-form proposal))))))
+
+(views:defview 👀merge-guidance (proposal relation-topic-proposal)
+  (views:html-view :title "Merge guidance" :priority 3
+    (views:html
+      (:h3 "Merge guidance")
+      (:ul
+       (:li "Search hyperdoc/topics.lisp by the exact :title string.")
+       (:li "Edit the existing factory in place when the title already exists.")
+       (:li "Add a new topic factory only when the exact title does not exist."))
+      (:table :class "inspector-table"
+              (render-connect-field-row "Exact title candidate"
+                                        (proposed-title-of proposal))
+              (render-connect-field-row "Current merge status"
+                                        (merge-status-of proposal))
+              (render-connect-field-row "Existing topic object"
+                                        (existing-topic-of proposal))))))
