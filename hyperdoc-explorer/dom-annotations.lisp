@@ -1073,8 +1073,45 @@
       (:pre :style "white-space: pre-wrap"
             (views:esc (relation-topic-proposal-factory-form proposal))))))
 
+(views:defview 👀authoring-bundle (proposal relation-topic-proposal)
+  (views:html-view :title "Authoring bundle" :priority 3
+    (views:html
+      (:h3 "Reviewed authoring bundle")
+      (:p "This bundle is advisory output only. It does not write topics.lisp, HyperDoc pages, or FedWiki files.")
+      (:table :class "inspector-table"
+              (render-connect-field-row "Current merge status"
+                                        (merge-status-of proposal))
+              (render-connect-field-row "Existing topic object"
+                                        (existing-topic-of proposal)))
+      (:p "Existing exact-title factories must be edited in place when the proposed title already exists.")
+      (:h4 "Proposed topic factory")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-proposal-factory-form proposal)))
+      (:h4 "Proposed HyperDoc page fragment")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-proposal-page-fragment proposal)))
+      (:h4 "Advisory FedWiki twin delta")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-proposal-fedwiki-twin-delta proposal))))))
+
+(views:defview 👀hyperdoc-page-fragment (proposal relation-topic-proposal)
+  (views:html-view :title "HyperDoc page fragment" :priority 4
+    (views:html
+      (:h3 "Copy-pasteable HyperDoc page fragment")
+      (:p "Replace the relation expression placeholder with a stable relation expression when the source relation is not already named.")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-proposal-page-fragment proposal))))))
+
+(views:defview 👀fedwiki-twin-delta (proposal relation-topic-proposal)
+  (views:html-view :title "FedWiki twin delta" :priority 5
+    (views:html
+      (:h3 "Advisory FedWiki twin delta")
+      (:p "This is plain-text guidance only. It does not touch the FedWiki repo.")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (relation-topic-proposal-fedwiki-twin-delta proposal))))))
+
 (views:defview 👀merge-guidance (proposal relation-topic-proposal)
-  (views:html-view :title "Merge guidance" :priority 3
+  (views:html-view :title "Merge guidance" :priority 6
     (views:html
       (:h3 "Merge guidance")
       (:ul

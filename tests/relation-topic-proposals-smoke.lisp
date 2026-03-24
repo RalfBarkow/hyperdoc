@@ -43,6 +43,33 @@
           (plusp (length factory-form)))
      "Proposed topic factory text must be non-empty")))
 
+(defun run-relation-topic-proposal-authoring-bundle-smoke-test ()
+  (let* ((relation (hyperdoc::example-association-topics-relation))
+         (proposal (hyperdoc::promote-relation-to-topic-proposal relation))
+         (page-fragment
+           (hyperdoc::relation-topic-proposal-page-fragment proposal))
+         (bundle
+           (hyperdoc::relation-topic-proposal-authoring-bundle proposal))
+         (fedwiki-delta
+           (hyperdoc::relation-topic-proposal-fedwiki-twin-delta proposal)))
+    (relation-proposal-assert-true
+     (and (stringp page-fragment)
+          (plusp (length page-fragment)))
+     "Proposed HyperDoc page fragment must be non-empty")
+    (relation-proposal-assert-true
+     (search (hyperdoc::proposed-title-of proposal)
+             page-fragment
+             :test #'char=)
+     "Proposed HyperDoc page fragment must contain the proposed title")
+    (relation-proposal-assert-true
+     (and (stringp bundle)
+          (plusp (length bundle)))
+     "Authoring bundle text must be non-empty")
+    (relation-proposal-assert-true
+     (and (stringp fedwiki-delta)
+          (plusp (length fedwiki-delta)))
+     "FedWiki twin delta text must be non-empty")))
+
 (defun run-relation-topic-proposal-review-wording-smoke-test ()
   (let* ((relation
            (make-instance
@@ -81,6 +108,7 @@
 
 (defun run-relation-topic-proposals-smoke-tests ()
   (run-relation-topic-proposal-existing-title-smoke-test)
+  (run-relation-topic-proposal-authoring-bundle-smoke-test)
   (run-relation-topic-proposal-review-wording-smoke-test)
   (format t "~&Relation topic proposal smoke tests passed.~%")
   t)

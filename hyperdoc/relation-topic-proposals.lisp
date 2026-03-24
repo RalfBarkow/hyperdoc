@@ -204,6 +204,58 @@
           (proposed-summary-of proposal)
           (proposed-references-of proposal)))
 
+(defgeneric relation-topic-proposal-source-expression (relation))
+
+(defmethod relation-topic-proposal-source-expression ((relation t))
+  "REPLACE-WITH-STABLE-RELATION-EXPR")
+
+(defmethod relation-topic-proposal-source-expression
+    ((relation dom-relation-annotation))
+  (if (string= (or (ignore-errors (id-of relation)) "")
+               "dom-relation/example-association-topics")
+      "(example-association-topics-relation)"
+      (call-next-method)))
+
+(defun relation-topic-proposal-page-fragment (proposal)
+  (let* ((relation (relation-of proposal))
+         (relation-expression
+           (relation-topic-proposal-source-expression relation))
+         (proposal-expression
+           (format nil "(promote-relation-to-topic-proposal ~A)"
+                   relation-expression)))
+    (format nil
+            "<h1>~A</h1>~%~%<in-package>hyperdoc</in-package>~%~%<p>~A</p>~%~%<h2>Inspectable objects</h2>~%~%<ul>~%  <li><a expr=~S><tt>~A</tt></a></li>~%  <li><a expr=~S><tt>~A</tt></a></li>~%</ul>~%"
+            (proposed-title-of proposal)
+            (proposed-summary-of proposal)
+            proposal-expression
+            proposal-expression
+            relation-expression
+            relation-expression)))
+
+(defun relation-topic-proposal-fedwiki-twin-delta (proposal)
+  (with-output-to-string (stream)
+    (format stream "slug: ~A~%" (proposed-id-of proposal))
+    (format stream "title: ~A~%" (proposed-title-of proposal))
+    (format stream "summary: ~A~%" (proposed-summary-of proposal))
+    (format stream "references:~%")
+    (if (proposed-references-of proposal)
+        (dolist (reference (proposed-references-of proposal))
+          (format stream "- ~A~%" reference))
+        (format stream "- none inferred~%"))))
+
+(defun relation-topic-proposal-authoring-bundle (proposal)
+  (with-output-to-string (stream)
+    (format stream "Merge status: ~A~%~%"
+            (merge-status-of proposal))
+    (format stream
+            "Reminder: search hyperdoc/topics.lisp by exact :title and edit an existing factory in place when the title already exists.~%~%")
+    (format stream "Proposed topic factory~%~A~%"
+            (relation-topic-proposal-factory-form proposal))
+    (format stream "Proposed HyperDoc page fragment~%~A~%"
+            (relation-topic-proposal-page-fragment proposal))
+    (format stream "Advisory FedWiki twin delta~%~A"
+            (relation-topic-proposal-fedwiki-twin-delta proposal))))
+
 (defun make-relation-topic-proposal (relation)
   (let* ((title (relation-topic-title-candidate relation))
          (existing (existing-topic-by-exact-title title))
