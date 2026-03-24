@@ -36,8 +36,23 @@
 (defun relation-proposal-read-string-file (path)
   (uiop:read-file-string path))
 
+(defun relation-proposal-string-occurrence-count (needle haystack)
+  (loop with start = 0
+        with step = (max 1 (length needle))
+        for position = (search needle haystack
+                               :start2 start
+                               :test #'char=)
+        while position
+        count 1
+        do (setf start (+ position step))))
+
 (defun relation-proposal-existing-topics-file-content ()
-  "(in-package :hyperdoc)\n\n(defun association-topics-topic ()\n  (make-topic\n   :id \"association-topics\"\n   :title \"Association topics\"\n   :summary \"Old summary to be replaced by the approved patch application.\"\n   :references '(\"Old reference\")))\n")
+  (format nil
+          "(in-package :hyperdoc)~%~%(defun association-topics-topic ()~%  (make-topic~%   :id \"association-topics\"~%   :title \"Association topics\"~%   :summary \"Old summary to be replaced by the approved patch application.\"~%   :references '(\"Old reference\")))~%"))
+
+(defun relation-proposal-adjacent-topics-file-content ()
+  (format nil
+          "(in-package :hyperdoc)~%~%(defun association-topics-topic ()~%  (make-topic~%   :id \"association-topics\"~%   :title \"Association topics\"~%   :summary \"Old summary to be replaced by the approved patch application.\"~%   :references '(\"Old reference\")))~%~%(defun association-topics-stable-identity-topic ()~%  (make-topic~%   :id \"association-topics-stable-identity\"~%   :title \"Association topics for stable identity\"~%   :summary \"Keep this similar-title summary unchanged.\"~%   :references '(\"Neighbor reference\")))~%"))
 
 (defun run-relation-topic-proposal-existing-title-smoke-test ()
   (let* ((relation (hyperdoc::example-association-topics-relation))
@@ -178,6 +193,73 @@
          (null (probe-file page-path))
          "Missing approval token must not create a page file")))))
 
+(defun run-relation-topic-patch-plan-exact-title-edit-smoke-test ()
+  (let* ((root (relation-proposal-make-temp-root))
+         (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
+         (page-path
+           (merge-pathnames "hyperdoc/Association topics.html" root))
+         (initial-content
+           (relation-proposal-adjacent-topics-file-content))
+         (proposal
+           (hyperdoc::promote-relation-to-topic-proposal
+            (hyperdoc::example-association-topics-relation))))
+    (relation-proposal-write-string-file topics-path initial-content)
+    (let ((hyperdoc::*relation-topic-patch-repo-root* root))
+      (let* ((plan (hyperdoc::make-relation-topic-patch-plan proposal))
+             (result
+               (hyperdoc::apply-relation-topic-patch-plan
+                plan
+                hyperdoc::*relation-topic-patch-approval-token*))
+             (updated-content
+               (relation-proposal-read-string-file topics-path)))
+        (relation-proposal-assert-equal
+         :edit-existing-factory
+         (hyperdoc::topics-action-of plan)
+         "Exact-title collision must stay on the edit-existing-factory path")
+        (relation-proposal-assert-equal
+         :no-page-needed
+         (hyperdoc::page-action-of plan)
+         "Existing exact-title topic without page file should remain no-page-needed")
+        (relation-proposal-assert-true
+         (search (hyperdoc::topics-payload-of plan)
+                 updated-content
+                 :test #'char=)
+         "Exact-title edit must replace the intended factory payload")
+        (relation-proposal-assert-true
+         (null (search "Old summary to be replaced by the approved patch application."
+                       updated-content
+                       :test #'char=))
+         "Exact-title edit must remove the replaced factory body")
+        (relation-proposal-assert-true
+         (search "Keep this similar-title summary unchanged."
+                 updated-content
+                 :test #'char=)
+         "Adjacent similar-title factories must remain unchanged")
+        (relation-proposal-assert-equal
+         1
+         (relation-proposal-string-occurrence-count
+          ":title \"Association topics\""
+          updated-content)
+         "Exact-title edit must leave only one matching exact-title factory")
+        (relation-proposal-assert-true
+         (null (probe-file page-path))
+         "Exact-title edit must not create a page outside the no-page-needed plan")
+        (relation-proposal-assert-equal
+         (list (hyperdoc::topics-target-path-of plan))
+         (hyperdoc::applied-paths-of result)
+         "Exact-title edit must write only the planned topics target path")
+        (relation-proposal-assert-true
+         (eq (hyperdoc::patch-plan-of result) plan)
+         "Application result must retain the exact patch plan object it applied")
+        (relation-proposal-assert-equal
+         (hyperdoc::relation-topic-patch-plan-identity plan)
+         (hyperdoc::patch-plan-identity-of result)
+         "Application result must record the exact patch plan identity it applied")
+        (relation-proposal-assert-equal
+         (namestring (uiop:ensure-directory-pathname root))
+         (hyperdoc::repo-root-evidence-of result)
+         "Application result must record repo-root evidence for the applied write scope")))))
+
 (defun run-relation-topic-patch-plan-approval-application-smoke-test ()
   (let* ((root (relation-proposal-make-temp-root))
          (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
@@ -206,7 +288,9 @@
                             :page-title
                             "Association Topics for Stable Identity and Mutable Titles")
              :relation-kind "Patch application seam"))))
-    (relation-proposal-write-string-file topics-path "(in-package :hyperdoc)\n")
+    (relation-proposal-write-string-file
+     topics-path
+     (format nil "(in-package :hyperdoc)~%"))
     (let ((hyperdoc::*relation-topic-patch-repo-root* root))
       (let* ((plan (hyperdoc::make-relation-topic-patch-plan proposal))
              (page-path (merge-pathnames
@@ -220,10 +304,19 @@
          (typep result 'hyperdoc::approved-relation-topic-patch-application)
          "Valid approval token must return an application result object")
         (relation-proposal-assert-equal
+         (hyperdoc::relation-topic-patch-plan-identity plan)
+         (hyperdoc::patch-plan-identity-of result)
+         "Application result must record the exact patch plan identity it applied")
+        (relation-proposal-assert-equal
          (list (hyperdoc::topics-action-of plan)
                (hyperdoc::page-action-of plan))
          (hyperdoc::actions-performed-of result)
          "Application result actions must match the patch-plan classification")
+        (relation-proposal-assert-equal
+         (list (hyperdoc::topics-target-path-of plan)
+               (hyperdoc::page-target-path-of plan))
+         (hyperdoc::applied-paths-of result)
+         "Approved application must stay confined to the planned local target paths")
         (relation-proposal-assert-true
          (search (hyperdoc::topics-payload-of plan)
                  (relation-proposal-read-string-file topics-path)
@@ -237,17 +330,88 @@
                  (relation-proposal-read-string-file page-path)
                  :test #'char=)
          "Approved application must write the page payload")
+        (relation-proposal-assert-equal
+         :relation-topic-patch-plan-token
+         (hyperdoc::approval-token-class-of result)
+         "Approved application must record safe approval token class evidence")
+        (relation-proposal-assert-true
+         (null (search hyperdoc::*relation-topic-patch-approval-token*
+                       (prin1-to-string
+                        (hyperdoc::approval-evidence-of result))
+                       :test #'char=))
+         "Approval evidence must not expose the raw approval token")
         (relation-proposal-assert-true
          (every (lambda (path)
                   (not (search ".wiki" path :test #'char=)))
                 (hyperdoc::applied-paths-of result))
          "Approved application must not write FedWiki paths")))))
 
+(defun run-relation-topic-patch-plan-append-conflict-smoke-test ()
+  (let* ((root (relation-proposal-make-temp-root))
+         (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
+         (proposal
+           (hyperdoc::promote-relation-to-topic-proposal
+            (make-instance
+             'hyperdoc::dom-relation-annotation
+             :id "dom-relation/example-append-conflict"
+             :title "Association: source -> target"
+             :summary "Minimal relation for append-conflict hardening."
+             :context-view-title "Content"
+             :source-anchor
+             (make-instance 'hyperdoc::dom-annotation-anchor
+                            :provider-kind "dom-v1"
+                            :strategy "semantic-heading"
+                            :value "source"
+                            :label "Source seam"
+                            :page-title
+                            "Association Topics for Stable Identity and Mutable Titles")
+             :target-anchor
+             (make-instance 'hyperdoc::dom-annotation-anchor
+                            :provider-kind "dom-v1"
+                            :strategy "semantic-heading"
+                            :value "target"
+                            :label "Target seam"
+                            :page-title
+                            "Association Topics for Stable Identity and Mutable Titles")
+             :relation-kind "Patch application seam")))
+         (initial-content
+           (format nil
+                   "(in-package :hyperdoc)~%~%(defun patch-application-seam-temp-topic ()~%  (make-topic~%   :id \"patch-application-seam-temp\"~%   :title \"Patch application seam\"~%   :summary \"Existing exact-title factory already present in the target file.\"~%   :references '(\"Existing target reference\")))~%"))
+         conflict-signaled)
+    (relation-proposal-write-string-file topics-path initial-content)
+    (let ((hyperdoc::*relation-topic-patch-repo-root* root))
+      (let* ((plan (hyperdoc::make-relation-topic-patch-plan proposal))
+             (page-path (merge-pathnames
+                         (hyperdoc::page-target-path-of plan)
+                         root)))
+        (relation-proposal-assert-equal
+         :append-new-factory
+         (hyperdoc::topics-action-of plan)
+         "Fresh proposals should still classify as append-new-factory before target-file hardening")
+        (handler-case
+            (hyperdoc::apply-relation-topic-patch-plan
+             plan
+             hyperdoc::*relation-topic-patch-approval-token*)
+          (hyperdoc::relation-topic-patch-plan-title-conflict ()
+            (setf conflict-signaled t)))
+        (relation-proposal-assert-true
+         conflict-signaled
+         "Append application must refuse to duplicate an existing exact-title factory in the target file")
+        (relation-proposal-assert-equal
+         initial-content
+         (relation-proposal-read-string-file topics-path)
+         "Append conflict must leave topics.lisp unchanged")
+        (relation-proposal-assert-true
+         (null (probe-file page-path))
+         "Append conflict must not create a page when topics.lisp application is refused")))))
+
 (defun run-relation-topic-proposals-smoke-tests ()
   (run-relation-topic-proposal-existing-title-smoke-test)
   (run-relation-topic-proposal-authoring-bundle-smoke-test)
   (run-relation-topic-proposal-review-wording-smoke-test)
   (run-relation-topic-patch-plan-no-approval-smoke-test)
+  (run-relation-topic-patch-plan-exact-title-edit-smoke-test)
   (run-relation-topic-patch-plan-approval-application-smoke-test)
+  (run-relation-topic-patch-plan-append-conflict-smoke-test)
   (format t "~&Relation topic proposal smoke tests passed.~%")
   t)

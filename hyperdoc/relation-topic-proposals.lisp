@@ -32,10 +32,19 @@
 
 (defclass approved-relation-topic-patch-application ()
   ((patch-plan :initarg :patch-plan :reader patch-plan-of)
+   (patch-plan-identity :initarg :patch-plan-identity
+                        :reader patch-plan-identity-of)
+   (patch-plan-evidence :initarg :patch-plan-evidence
+                        :reader patch-plan-evidence-of)
    (applied-paths :initarg :applied-paths :reader applied-paths-of)
    (actions-performed :initarg :actions-performed :reader actions-performed-of)
    (applied-payloads :initarg :applied-payloads :reader applied-payloads-of)
-   (approval-token :initarg :approval-token :reader approval-token-of)
+   (repo-root-evidence :initarg :repo-root-evidence
+                       :reader repo-root-evidence-of)
+   (approval-token-class :initarg :approval-token-class
+                         :reader approval-token-class-of)
+   (approval-evidence :initarg :approval-evidence
+                      :reader approval-evidence-of)
    (timestamp :initarg :timestamp :reader timestamp-of)
    (status :initarg :status :reader status-of)))
 
@@ -47,6 +56,18 @@
      (format stream
              "Applying ~A requires an explicit valid approval token. No mutation was performed."
              (title-of (patch-plan-of condition))))))
+
+(define-condition relation-topic-patch-plan-title-conflict (error)
+  ((patch-plan :initarg :patch-plan :reader patch-plan-of)
+   (target-path :initarg :target-path :reader target-path-of)
+   (title :initarg :title :reader conflict-title-of))
+  (:report
+   (lambda (condition stream)
+     (format stream
+             "Applying ~A would duplicate the exact :title ~S in ~A. No mutation was performed."
+             (title-of (patch-plan-of condition))
+             (conflict-title-of condition)
+             (target-path-of condition)))))
 
 (defmethod print-object ((object relation-topic-proposal) stream)
   (print-unreadable-object (object stream :type t)
@@ -330,12 +351,38 @@
 (defun relation-topic-patch-repo-root ()
   (uiop:ensure-directory-pathname *relation-topic-patch-repo-root*))
 
+(defun relation-topic-string-prefix-p (prefix string)
+  (and (<= (length prefix) (length string))
+       (string= prefix string
+                :end1 (length prefix)
+                :end2 (length prefix))))
+
+(defun relation-topic-string-suffix-p (suffix string)
+  (let ((suffix-length (length suffix))
+        (string-length (length string)))
+    (and (<= suffix-length string-length)
+         (string= suffix string
+                  :start1 0
+                  :end1 suffix-length
+                  :start2 (- string-length suffix-length)
+                  :end2 string-length))))
+
 (defun relation-topic-resolve-target-pathname (path)
   (let ((pathname (pathname path)))
     (if (uiop:absolute-pathname-p pathname)
         pathname
         (merge-pathnames pathname
                          (relation-topic-patch-repo-root)))))
+
+(defun relation-topic-supported-topics-target-p (path)
+  (and (stringp path)
+       (string= path "hyperdoc/topics.lisp")))
+
+(defun relation-topic-supported-page-target-p (path)
+  (and (stringp path)
+       (relation-topic-string-prefix-p "hyperdoc/" path)
+       (relation-topic-string-suffix-p ".html" path)
+       (not (search ".." path :test #'char=))))
 
 (defun relation-topic-read-file-string (path)
   (uiop:read-file-string (relation-topic-resolve-target-pathname path)))
@@ -369,7 +416,7 @@
     (when call
       (getf (rest call) :title))))
 
-(defun relation-topic-factory-bounds-by-title (path title)
+(defun relation-topic-factory-matches-by-title (path title)
   (let ((pathname (relation-topic-resolve-target-pathname path))
         (matches '()))
     (with-open-file (stream pathname :direction :input :external-format :utf-8)
@@ -383,6 +430,10 @@
               do (push (list :start start :end end :form form)
                        matches)))
     (setf matches (nreverse matches))
+    matches))
+
+(defun relation-topic-factory-bounds-by-title (path title)
+  (let ((matches (relation-topic-factory-matches-by-title path title)))
     (cond
       ((null matches)
        (error "No topic factory with exact :title ~S found in ~A."
@@ -400,6 +451,46 @@
                (subseq content 0 start)
                replacement
                (subseq content end)))
+
+(defun relation-topic-patch-plan-exact-title (plan)
+  (if (existing-topic-of plan)
+      (title-of (existing-topic-of plan))
+      (proposed-title-of (proposal-of plan))))
+
+(defun relation-topic-patch-plan-identity (plan)
+  (list :proposal-id (proposed-id-of (proposal-of plan))
+        :proposal-title (proposed-title-of (proposal-of plan))
+        :topics-target-path (topics-target-path-of plan)
+        :topics-action (topics-action-of plan)
+        :page-target-path (page-target-path-of plan)
+        :page-action (page-action-of plan)))
+
+(defun relation-topic-patch-plan-evidence (plan)
+  (list :identity (relation-topic-patch-plan-identity plan)
+        :existing-topic-title
+        (and (existing-topic-of plan)
+             (title-of (existing-topic-of plan)))
+        :topics-payload-length (length (topics-payload-of plan))
+        :page-payload-length (length (page-payload-of plan))))
+
+(defun relation-topic-approval-token-class (approval-token)
+  (cond
+    ((null approval-token)
+     :missing)
+    ((not (stringp approval-token))
+     :non-string)
+    ((string= approval-token
+              *relation-topic-patch-approval-token*)
+     :relation-topic-patch-plan-token)
+    (t
+     :invalid-string-token)))
+
+(defun relation-topic-approval-evidence (approval-token)
+  (list :approval-required t
+        :approval-token-class
+        (relation-topic-approval-token-class approval-token)
+        :validated (patch-plan-approval-token-valid-p approval-token)
+        :raw-token-exposed nil))
 
 (defun relation-topic-topics-lisp-payload (proposal)
   (relation-topic-proposal-factory-form proposal))
@@ -475,27 +566,38 @@
                    :page-payload (relation-topic-page-payload proposal))))
 
 (defun patch-plan-approval-token-valid-p (approval-token)
-  (and (stringp approval-token)
-       (string= approval-token
-                *relation-topic-patch-approval-token*)))
+  (eq (relation-topic-approval-token-class approval-token)
+      :relation-topic-patch-plan-token))
 
 (defun apply-topics-lisp-patch-plan (plan)
+  (unless (relation-topic-supported-topics-target-p
+           (topics-target-path-of plan))
+    (error "Unsupported topics.lisp target ~S."
+           (topics-target-path-of plan)))
   (let* ((target-path (topics-target-path-of plan))
          (content (relation-topic-read-file-string target-path))
          (payload (topics-payload-of plan))
+         (exact-title (relation-topic-patch-plan-exact-title plan))
          (new-content
            (case (topics-action-of plan)
              (:edit-existing-factory
               (destructuring-bind (&key start end &allow-other-keys)
                   (relation-topic-factory-bounds-by-title
                    target-path
-                   (proposed-title-of (proposal-of plan)))
+                   exact-title)
                 (relation-topic-replace-range
                  content
                  start
                  end
                  (format nil "~A~%" payload))))
              (:append-new-factory
+              (when (relation-topic-factory-matches-by-title
+                     target-path
+                     exact-title)
+                (error 'relation-topic-patch-plan-title-conflict
+                       :patch-plan plan
+                       :target-path target-path
+                       :title exact-title))
               (format nil "~A~2%~A~%"
                       (string-right-trim '(#\Newline #\Return) content)
                       payload))
@@ -508,6 +610,10 @@
           :payload payload)))
 
 (defun apply-page-patch-plan (plan)
+  (unless (relation-topic-supported-page-target-p
+           (page-target-path-of plan))
+    (error "Unsupported page target ~S."
+           (page-target-path-of plan)))
   (case (page-action-of plan)
     (:no-page-needed
      (list :path (page-target-path-of plan)
@@ -556,10 +662,19 @@
                            (cons :page (getf page-result :payload)))))))
     (make-instance 'approved-relation-topic-patch-application
                    :patch-plan plan
+                   :patch-plan-identity
+                   (relation-topic-patch-plan-identity plan)
+                   :patch-plan-evidence
+                   (relation-topic-patch-plan-evidence plan)
                    :applied-paths applied-paths
                    :actions-performed actions-performed
                    :applied-payloads applied-payloads
-                   :approval-token approval-token
+                   :repo-root-evidence
+                   (namestring (relation-topic-patch-repo-root))
+                   :approval-token-class
+                   (relation-topic-approval-token-class approval-token)
+                   :approval-evidence
+                   (relation-topic-approval-evidence approval-token)
                    :timestamp (get-universal-time)
                    :status :applied)))
 

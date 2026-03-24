@@ -1193,8 +1193,14 @@
       (:table :class "inspector-table"
               (render-connect-field-row "Patch plan"
                                         (patch-plan-of application))
+              (render-connect-rich-field-row "Patch plan identity"
+                                             (patch-plan-identity-of application))
+              (render-connect-rich-field-row "Patch plan evidence"
+                                             (patch-plan-evidence-of application))
               (render-connect-field-row "Status"
                                         (status-of application))
+              (render-connect-field-row "Repo root evidence"
+                                        (repo-root-evidence-of application))
               (render-connect-field-row "Timestamp"
                                         (timestamp-of application))
               (render-connect-rich-field-row "Applied paths"
@@ -1226,8 +1232,14 @@
       (:h3 "Safety boundary / approval evidence")
       (:p "This result exists only because apply-relation-topic-patch-plan was called explicitly with a valid approval token.")
       (:table :class "inspector-table"
-              (render-connect-field-row "Approval token"
-                                        (approval-token-of application))
+              (render-connect-field-row "Approval token class"
+                                        (approval-token-class-of application))
+              (render-connect-rich-field-row "Approval evidence"
+                                             (approval-evidence-of application))
+              (render-connect-rich-field-row "Patch plan identity"
+                                             (patch-plan-identity-of application))
+              (render-connect-field-row "Repo root evidence"
+                                        (repo-root-evidence-of application))
               (render-connect-field-row "Patch plan"
                                         (patch-plan-of application))
               (render-connect-field-row "Status"
