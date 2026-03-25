@@ -1248,11 +1248,12 @@
   }
 
   function syncDockCapabilities(state) {
-    if (!state) {
+    if (!state || !state.zotero) {
       return;
     }
-    if (state.zotero) {
-      state.zotero.hidden = !zoteroDockAvailable(state);
+    var shouldHideZotero = !zoteroDockAvailable(state);
+    if (!!state.zotero.hidden !== shouldHideZotero) {
+      state.zotero.hidden = shouldHideZotero;
     }
   }
 
@@ -2115,7 +2116,6 @@
     });
     var observer = new MutationObserver(function () {
       schedulePaneSurfaceSync(state);
-      syncDockCapabilities(state);
     });
     observer.observe(pane, {
       subtree: true,
