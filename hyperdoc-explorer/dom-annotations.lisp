@@ -223,7 +223,7 @@
                                :browser-message
                                (lwcells:cell-ref browser-message-cell)
                                :browser-detail
-                               (lwcells:cell-ref browser-detail-cell))))
+                               (lwcells:cell-ref browser-detail-cell)))))
                     (:span :class "hyperdoc-dock-inspect-submit"
                            :style "display:none"
                            (views:eval-button
@@ -248,7 +248,7 @@
                            :x2 "0"
                            :y2 "0"))
               (:div :class "hyperdoc-dom-connect-root hyperdoc-connect-provider-root"
-                    (render-anchor-provider-body provider))))))))
+                    (render-anchor-provider-body provider)))))))
 
 (defun render-dom-connect-surface (context-object view-title body-thunk)
   (render-anchor-provider-surface
