@@ -1,0 +1,102 @@
+<h1>Dock presentation state model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page makes the Dock coachmark model inspectable as a first-class
+  HyperDoc object instead of leaving it only in prose or JS. The model records
+  the presentation states, transitions, UX claims, and the implementation
+  evidence that grounds those claims in source files and tests.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Dock presentation state model"><tt>Dock presentation state model</tt></a></li>
+  <li><a hyperbook="topics" page="Dock capabilities in HyperDoc"><tt>Dock capabilities in HyperDoc</tt></a></li>
+  <li><a expr="(chunk-dock-presentation-model)"><tt>(chunk-dock-presentation-model)</tt></a></li>
+</ul>
+
+<h2>States</h2>
+
+<ul>
+  <li><b>latent</b>: no expanded coachmark is visible, but compact access remains.</li>
+  <li><b>introduction</b>: the Dock expands because the capability is newly relevant and needs teaching.</li>
+  <li><b>active</b>: Connect is mid-gesture, so the Dock stays expanded with task-state UI.</li>
+  <li><b>degraded</b>: the richer chrome has receded after use or dismissal, while compact access remains.</li>
+  <li><b>rediscovery</b>: the user explicitly reopens the richer coachmark layer with <b>Guide</b>.</li>
+</ul>
+
+<p>
+  Inspect the <b>States</b> view on
+  <a expr="(chunk-dock-presentation-model)"><tt>(chunk-dock-presentation-model)</tt></a>
+  to see compact representation rules, expanded representation rules, entry
+  triggers, exit conditions, and participating capabilities.
+</p>
+
+<h2>Transitions</h2>
+
+<ul>
+  <li><b>Introduction -&gt; Active</b>: starting Connect turns teaching chrome into task-state chrome.</li>
+  <li><b>Introduction -&gt; Degraded</b>: dismissing the coachmark retracts to compact capabilities.</li>
+  <li><b>Active -&gt; Degraded</b>: when the stateful Connect gesture ends, the Dock recedes.</li>
+  <li><b>Degraded -&gt; Rediscovery</b>: <b>Guide</b> reopens the richer coachmark layer.</li>
+  <li><b>Rediscovery -&gt; Degraded</b>: closing rediscovery returns the pane to compact capabilities.</li>
+</ul>
+
+<h2>Claim-code evidence</h2>
+
+<p>
+  The <b>Claims</b> view on the model does not stop at prose. Each major UX
+  claim is materialized as a claim-code relation that points to concrete
+  implementation evidence objects with repo paths and focused tests:
+</p>
+
+<ul>
+  <li><b>Degrade chrome, not capability</b>: JS state runtime, CSS coachmark styling, and the focused Playwright regression.</li>
+  <li><b>Active Connect keeps task state visible</b>: JS task-state handling, pane snapshot parsing, explorer views, and the same browser regression.</li>
+  <li><b>Provider-specific workflows stay in the pane body</b>: Touch-Fahrplan topic view, DMX pane surfaces, and the coachmark runtime.</li>
+  <li><b>Dock presentation state is inspectable</b>: current pane snapshots, explorer views, and the focused Lisp smoke.</li>
+</ul>
+
+<h2>Shared UX grammar</h2>
+
+<p>
+  The same grammar now covers the core sibling capabilities and the optional
+  provider handoffs:
+</p>
+
+<ul>
+  <li><b>Connect</b>: can be introduced, kept active with task state, degraded, and rediscovered.</li>
+  <li><b>Annotation</b>: remains a sibling capability in the same compact and coachmark system.</li>
+  <li><b>Touch-Fahrplan</b>: appears only as a contextual handoff when the provider is available; the route and report workflow remains in the pane body.</li>
+  <li><b>DMX</b>: appears only as a contextual handoff to the richer traversal surface instead of a permanent Dock identity.</li>
+</ul>
+
+<h2>Runtime inspection seam</h2>
+
+<p>
+  The current pane snapshot carries the active presentation state, presentation
+  reason, coachmark visibility, compact capabilities, coachmark capabilities,
+  and provider handoffs. The model therefore answers both:
+</p>
+
+<ul>
+  <li>what the Dock states mean in general</li>
+  <li>why the Dock is visible in a particular pane right now</li>
+</ul>
+
+<h2>Focused validation</h2>
+
+<lisp-code>
+(asdf:load-system :hyperdoc/tests)
+(hyperdoc/tests:run-dock-presentation-smoke-tests)
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Dock capabilities in HyperDoc">Dock capabilities in HyperDoc</a></li>
+  <li><a page="Touch-Fahrplan view for Zotero topic enrichment">Touch-Fahrplan view for Zotero topic enrichment</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

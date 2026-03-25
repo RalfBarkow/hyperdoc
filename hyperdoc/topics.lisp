@@ -2261,8 +2261,9 @@
   (make-topic
    :id "dock-annotation"
    :title "Annotation"
-   :summary "Generic Dock-side annotation topic/object that acts as the stable source endpoint for prefilled inspectable annotations on the current pane object, with room to specialize to DOM anchors later."
+   :summary "Generic sibling Dock capability that acts as the stable source endpoint for prefilled inspectable annotations on the current pane object, while leaving room to specialize to DOM anchors later."
    :references '("Dock capabilities in HyperDoc"
+                 "Dock presentation state model"
                  "A DOM-annotation connect gesture"
                  "Associations"
                  "Touch-Fahrplan view for Zotero topic enrichment")))
@@ -2271,10 +2272,21 @@
   (make-topic
    :id "dock-capabilities-in-hyperdoc"
    :title "Dock capabilities in HyperDoc"
-   :summary "Pane-local Dock framing that treats Connect, Inspect, and Annotation as sibling actions on the current thing, while optional providers such as Zotero appear only when their backend seam is available."
+   :summary "Pane-local Dock framing in which inspector tabs stay the durable base chrome and Connect, Inspect, and Annotation become coachmark-governed sibling capabilities, while provider-specific handoffs such as Touch-Fahrplan or DMX appear only when newly relevant."
    :references '("Dock capabilities in HyperDoc"
+                 "Dock presentation state model"
                  "Annotation"
                  "A DOM-annotation connect gesture"
+                 "Touch-Fahrplan view for Zotero topic enrichment")))
+
+ (defun dock-presentation-state-model-topic ()
+  (make-topic
+   :id "dock-presentation-state-model"
+   :title "Dock presentation state model"
+   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Connect, Annotation, Touch-Fahrplan handoff, and DMX handoff fit the same UX grammar."
+   :references '("Dock presentation state model"
+                 "Dock capabilities in HyperDoc"
+                 "Annotation"
                  "Touch-Fahrplan view for Zotero topic enrichment")))
 
 ;; ASDF workflow topics for runtime loading and undefined-function triage.

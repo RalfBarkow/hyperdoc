@@ -471,23 +471,47 @@
 (defun run-dock-capabilities-doc-slice-smoke-test ()
   (dolist (entry '((hyperdoc::dock-capabilities-in-hyperdoc-topic
                     "Dock capabilities in HyperDoc")
+                   (hyperdoc::dock-presentation-state-model-topic
+                    "Dock presentation state model")
                    (hyperdoc::annotation-topic
                     "Annotation")))
     (destructuring-bind (symbol title) entry
       (assert-topic-function-present symbol title)))
   (assert-hyperdoc-page-present "Dock capabilities in HyperDoc")
+  (assert-hyperdoc-page-present "Dock presentation state model")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
-   "(chunk-dock-annotation)")
+   "(chunk-dock-presentation-model)")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
-   "Connect state")
+   "Inspector tabs are the durable base chrome")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
-   "current pane object first")
+   "degrade chrome, not capability")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
-   "Zotero as optional Dock capability"))
+   "Touch-Fahrplan and DMX are not competing permanent Dock identities")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "Guide")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "(chunk-dock-presentation-model)")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "latent")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "rediscovery")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "claim-code")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "Touch-Fahrplan")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "DMX"))
 
 (defun run-dom-connect-submit-path-comparison-doc-slice-smoke-test ()
   (assert-topic-function-present
