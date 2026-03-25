@@ -501,6 +501,12 @@
    "hyperdoc/Dock capabilities in HyperDoc.html"
    "Guide")
   (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "source Text pages -&gt; target Annotation")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "Text pages")
+  (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "(chunk-dock-presentation-model)")
   (assert-page-source-contains
@@ -515,6 +521,9 @@
   (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "Inspection itself is not a Dock capability")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "Click a target anchor or tap Annotation.")
   (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "Touch-Fahrplan")

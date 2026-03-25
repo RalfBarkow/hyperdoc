@@ -2261,7 +2261,7 @@
   (make-topic
    :id "dock-annotation"
    :title "Annotation"
-   :summary "Generic sibling Dock capability beside Connect that acts as the stable source endpoint for prefilled inspectable annotations on the current pane object, while leaving room to specialize to DOM anchors later."
+   :summary "Generic connect target/topic-object that classifies annotation relations, so a selected source chunk or object such as Text pages can connect to Annotation and reopen the same inspectable relation later."
    :references '("Dock capabilities in HyperDoc"
                  "Dock presentation state model"
                  "A DOM-annotation connect gesture"
@@ -2272,7 +2272,7 @@
   (make-topic
    :id "dock-capabilities-in-hyperdoc"
    :title "Dock capabilities in HyperDoc"
-   :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect and Annotation become coachmark-governed Dock capabilities, and provider-specific handoffs such as Touch-Fahrplan or DMX appear only when newly relevant."
+   :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect and Annotation become coachmark-governed Dock capabilities, with Annotation available both as a generic Connect target and as a same-model current-object shortcut."
    :references '("Dock capabilities in HyperDoc"
                  "Dock presentation state model"
                  "Annotation"
@@ -2283,7 +2283,7 @@
   (make-topic
    :id "dock-presentation-state-model"
    :title "Dock presentation state model"
-   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Connect, Annotation, Touch-Fahrplan handoff, and DMX handoff fit the same UX grammar."
+   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Connect, Annotation as a target tap, Touch-Fahrplan handoff, and DMX handoff fit the same UX grammar."
    :references '("Dock presentation state model"
                  "Dock capabilities in HyperDoc"
                  "Annotation"

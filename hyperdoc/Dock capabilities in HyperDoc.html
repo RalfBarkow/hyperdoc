@@ -42,7 +42,7 @@
 
 <ul>
   <li><b>Connect</b>: the compact action stays available, while the coachmark expands only for teaching, active task state, or rediscovery.</li>
-  <li><b>Annotation</b>: compact access reopens the generic annotation object for the current pane object.</li>
+  <li><b>Annotation</b>: when Connect is waiting for a target, tapping Annotation completes the relation against the generic Annotation topic; when Connect is idle, the same control reopens the current-object annotation shortcut through that same relation model.</li>
 </ul>
 
 <p>
@@ -86,6 +86,14 @@
   <li><b>DMX</b>: introduced from the coachmark only as a handoff to the richer traversal surface such as the <b>External</b> tab.</li>
 </ul>
 
+<p>
+  The explicit annotation example for this slice is now:
+  <b>source Text pages -&gt; target Annotation</b>.
+  Selecting the <b>Text pages</b> chunk in the HyperDoc Main page and then
+  tapping <b>Annotation</b> while Connect is active creates or reopens an
+  inspectable annotation relation for <b>Text pages</b>.
+</p>
+
 <h2>Current boundary</h2>
 
 <p>
@@ -95,10 +103,18 @@
 </p>
 
 <p>
-  The current Annotation path also remains intentionally narrow:
-  <b>Annotation acts on the current pane object first</b>. It does not yet let
-  the user author a distinct durable annotation for any arbitrary DOM sub-anchor
-  inside the pane body.
+  The current Annotation path still keeps one narrow shortcut:
+  when Connect is idle, the compact <b>Annotation</b> action can reopen a
+  current-object annotation relation for the pane’s primary object. The more
+  general path is now the normal Connect gesture, where a visible source anchor
+  such as <b>Text pages</b> connects to the generic <b>Annotation</b> target.
+</p>
+
+<p>
+  This slice still does not provide a separate authoring UI for arbitrary DOM
+  sub-anchor annotation outside the Connect gesture itself. It keeps the
+  generalization narrow by making <b>Annotation</b> a normal target endpoint in
+  Connect first.
 </p>
 
 <h2>Focused validation</h2>
