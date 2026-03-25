@@ -96,6 +96,58 @@ COMMIT;")
      topic
      (make-topic-enrichment-smoke-source-designator bridge))))
 
+(defun write-topic-enrichment-smoke-route-data-file (directory &optional (entries '()))
+  (let* ((source
+           (asdf:system-relative-pathname
+            :hyperdoc
+            "hyperdoc/topic-enrichment-route-data.lisp"))
+         (target (merge-pathnames "topic-enrichment-route-data.lisp" directory))
+         (content (uiop:read-file-string source)))
+    (with-open-file (stream target
+                            :direction :output
+                            :if-exists :supersede
+                            :if-does-not-exist :create
+                            :external-format :utf-8)
+      (write-string content stream))
+    (let ((hyperdoc::*topic-enrichment-route-definitions-source-pathname*
+            target))
+      (hyperdoc::write-topic-enrichment-route-definitions! entries target))
+    target))
+
+(defmacro with-topic-enrichment-runtime-authoring-context
+    ((fixture-var route-data-path-var source-var) &body body)
+  `(let* ((,fixture-var (make-topic-enrichment-smoke-fixture))
+          (root (getf ,fixture-var :root))
+          (,route-data-path-var
+            (write-topic-enrichment-smoke-route-data-file root))
+          (bridge (make-topic-enrichment-smoke-bridge ,fixture-var))
+          (,source-var
+            (hyperdoc::make-zotero-library-source-designator
+             :id "zotero-library/default"
+             :title "Local Zotero library"
+             :summary
+             "Fixture-backed local Zotero library for runtime durable-route smoke tests."
+             :bridge-provider (lambda () bridge))))
+     (let ((hyperdoc::*topic-enrichment-route-definitions-source-pathname*
+             ,route-data-path-var)
+           (hyperdoc::*topic-enrichment-route-definitions* '()))
+       (let ((old-default-source-designators
+               (symbol-function
+                'hyperdoc::default-topic-enrichment-source-designators)))
+         (unwind-protect
+              (progn
+                (setf (symbol-function
+                       'hyperdoc::default-topic-enrichment-source-designators)
+                      (lambda ()
+                        (list ,source-var)))
+                (hyperdoc::reload-topic-enrichment-route-definitions!
+                 ,route-data-path-var)
+                (locally
+                  ,@body))
+           (setf (symbol-function
+                  'hyperdoc::default-topic-enrichment-source-designators)
+                 old-default-source-designators))))))
+
 (defun run-topic-enrichment-success-smoke-test ()
   (let* ((fixture (make-topic-enrichment-smoke-fixture))
          (route (make-topic-enrichment-smoke-route
@@ -172,18 +224,62 @@ COMMIT;")
     (assert-true (null (hyperdoc::topic-source-route-latest-successful-report route))
                  "Zero-match report must not overwrite the latest successful cache")))
 
-(defun run-topic-enrichment-route-definition-smoke-test ()
-  (let ((routes
-         (hyperdoc::topic-source-route-durable-routes-for-topic
-          (hyperdoc::chunk-topic))))
-    (assert-true (plusp (length routes))
-                 "Chunk should have at least one durable route definition.")
-    (dolist (route routes)
-      (assert-true (hyperdoc::topic-source-route-definition-of route)
-                   "Durable route must keep its definition.")
-      (assert-true (typep (hyperdoc::topic-source-route-annotation-of route)
-                          'hyperdoc::dom-relation-annotation)
-                   "Durable route should expose the Connect annotation."))))
+(defun run-topic-enrichment-runtime-authoring-smoke-test ()
+  (with-topic-enrichment-runtime-authoring-context
+      (fixture route-data-path source)
+    (declare (ignore fixture))
+    (let* ((topic (hyperdoc::chunk-topic))
+           (before-routes
+             (hyperdoc::topic-source-route-durable-routes-for-topic topic)))
+      (assert-true (null before-routes)
+                   "Chunk should begin without durable routes in the runtime-authoring smoke context.")
+      (let* ((route (hyperdoc::create-durable-topic-source-route! topic source))
+             (definition (hyperdoc::topic-source-route-definition-of route))
+             (plan (hyperdoc::topic-source-route-default-plan route))
+             (report (hyperdoc::run-topic-enrichment-query-plan plan))
+             (definition-titles (inspector-view-titles-for-object definition))
+             (route-titles (inspector-view-titles-for-object route))
+             (file-contents (uiop:read-file-string route-data-path)))
+        (assert-true definition
+                     "Runtime durable route creation should keep the authored definition object.")
+        (assert-true (typep definition
+                            'hyperdoc::topic-enrichment-route-definition)
+                     "Runtime durable route creation should return a route-definition object.")
+        (assert-true (typep (hyperdoc::topic-source-route-annotation-of route)
+                            'hyperdoc::dom-relation-annotation)
+                     "Runtime durable route should reify into the normal Connect association object.")
+        (dolist (title '("Overview" "Raw data"))
+          (assert-true (member title definition-titles :test #'string=)
+                       (format nil "Route-definition inspector should expose ~A" title)))
+        (dolist (title '("Overview" "Inputs"))
+          (assert-true (member title route-titles :test #'string=)
+                       (format nil "Runtime-authored route inspector should expose ~A" title)))
+        (assert-equal :matched
+                      (hyperdoc::topic-enrichment-report-status-of report)
+                      "Runtime-authored durable route should still execute through the explicit plan/report path.")
+        (assert-true (search "route/chunk-zotero-library-default"
+                             file-contents
+                             :test #'char=)
+                     "Runtime route authoring should persist the new route id to the authored-data file.")
+        (setf hyperdoc::*topic-enrichment-route-definitions* '())
+        (hyperdoc::reload-topic-enrichment-route-definitions! route-data-path)
+        (let* ((reopened-routes
+                 (hyperdoc::topic-source-route-durable-routes-for-topic topic))
+               (reopened-route
+                 (hyperdoc::topic-source-route-durable-route-for-topic-source
+                  topic
+                  source)))
+          (assert-equal 1
+                        (length reopened-routes)
+                        "Reloading definitions from the authored-data file should reopen the durable route.")
+          (assert-true reopened-route
+                       "The runtime-authored route should be reopenable after reload.")
+          (assert-true (hyperdoc::topic-source-route-definition-of reopened-route)
+                       "Reopened durable route should still expose its definition.")
+          (assert-true (typep (hyperdoc::topic-source-route-annotation-of
+                               reopened-route)
+                              'hyperdoc::dom-relation-annotation)
+                       "Reopened durable route should still expose the Connect annotation."))))))
 
 (defun run-topic-enrichment-blocked-plan-smoke-test ()
   (let* ((source (hyperdoc::make-zotero-library-source-designator
@@ -212,8 +308,8 @@ COMMIT;")
 
 (defun run-topic-enrichment-smoke-tests ()
   (run-topic-enrichment-blocked-plan-smoke-test)
+  (run-topic-enrichment-runtime-authoring-smoke-test)
   (run-topic-enrichment-success-smoke-test)
   (run-topic-enrichment-zero-match-smoke-test)
-  (run-topic-enrichment-route-definition-smoke-test)
   (format t "~&Topic enrichment smoke tests passed.~%")
   t)

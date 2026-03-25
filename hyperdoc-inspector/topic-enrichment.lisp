@@ -123,6 +123,54 @@
                          (hyperdoc::topic-enrichment-source-notes-of
                           source))))))))
 
+(defmethod views:text-representation
+    ((definition hyperdoc::topic-enrichment-route-definition))
+  (format nil "Durable route definition ~A"
+          (hyperdoc::title-of definition)))
+
+(views:defview 👀overview
+    (definition hyperdoc::topic-enrichment-route-definition)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Stable key"))
+                   (:td (:tt (views:esc (hyperdoc::id-of definition)))))
+              (:tr (:td (views:esc "Topic"))
+                   (:td (views:object-ref
+                         (hyperdoc::topic-enrichment-route-definition-topic-of
+                          definition))))
+              (:tr (:td (views:esc "Source designator"))
+                   (:td (views:object-ref
+                         (hyperdoc::topic-enrichment-route-definition-source-designator-of
+                          definition))))
+              (:tr (:td (views:esc "Relation kind"))
+                   (:td (:tt
+                         (views:esc
+                          (or (hyperdoc::topic-enrichment-route-definition-relation-kind-of
+                               definition)
+                              "")))))
+              (:tr (:td (views:esc "Notes"))
+                   (:td (views:esc
+                         (or (hyperdoc::topic-enrichment-route-definition-notes-of
+                              definition)
+                             ""))))))))
+
+(views:defview 👀raw-data
+    (definition hyperdoc::topic-enrichment-route-definition)
+  (views:html-view :title "Raw data" :priority 2
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Topic id"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::topic-enrichment-route-definition-topic-id-of
+                           definition)))))
+              (:tr (:td (views:esc "Source id"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::topic-enrichment-route-definition-source-id-of
+                           definition)))))))))
+
 (defmethod views:text-representation ((route hyperdoc::topic-source-route))
   (format nil "Route ~A"
           (hyperdoc::title-of route)))
@@ -164,12 +212,18 @@
                           (views:html
                            (:span :style "opacity:0.55"
                                   (views:esc "Not authored yet.")))))))
+            (:tr (:td (views:esc "Route definition"))
+                 (:td (if definition
+                          (views:object-ref definition)
+                          (views:html
+                           (:span :style "opacity:0.55"
+                                  (views:esc "Not authored yet.")))))))
             (:tr (:td (views:esc "Authoring note"))
                  (:td (views:esc
                        (or (and definition
                                 (hyperdoc::topic-enrichment-route-definition-notes-of
                                  definition))
-                           "No authoring notes."))))))
+                           "No authoring notes.")))))
 
 (views:defview 👀overview (route hyperdoc::topic-source-route)
   (let ((annotation (hyperdoc::topic-source-route-annotation-of route))

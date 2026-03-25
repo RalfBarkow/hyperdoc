@@ -50,7 +50,8 @@
               (if durable-routes
                   (views:html
                     (:table :class "inspector-table"
-                            (:tr (:th "Route")
+                            (:tr (:th "Definition")
+                                 (:th "Route")
                                  (:th "Connect relation")
                                  (:th "Notes"))
                             (dolist (route durable-routes)
@@ -60,6 +61,12 @@
                                      (topic-source-route-annotation-of route)))
                                 (views:html
                                   (:tr
+                                   (:td
+                                    (if definition
+                                        (views:object-ref definition)
+                                        (views:html
+                                          (:span :style "opacity:0.55"
+                                                 (views:esc "None yet")))))
                                    (:td (views:object-ref route))
                                    (:td
                                     (if annotation
@@ -78,17 +85,37 @@
               (:h2 (views:esc "Source palette"))
               (:table :class "inspector-table"
                       (:tr (:th "Source")
+                           (:th "Durable")
                            (:th "Route")
                            (:th "Open")
                            (:th "Run")
                            (:th "Latest report"))
                       (dolist (source sources)
-                        (let* ((route (make-topic-source-route topic source))
+                        (let* ((durable-route
+                                 (topic-source-route-durable-route-for-topic-source
+                                  topic
+                                  source))
+                               (definition
+                                 (and durable-route
+                                      (topic-source-route-definition-of
+                                       durable-route)))
+                               (route (or durable-route
+                                          (make-topic-source-route topic source)))
                                (latest-report
                                  (topic-source-route-latest-report route)))
                           (views:html
                             (:tr
                              (:td (views:object-ref source))
+                             (:td
+                              (if definition
+                                  (views:object-ref definition)
+                                  (views:action-button
+                                   "Create durable route"
+                                   (views:thunk
+                                     (create-durable-topic-source-route!
+                                      topic
+                                      source))
+                                   "Persist a durable Touch-Fahrplan route definition and open the resulting route.")))
                              (:td (views:object-ref route))
                              (:td
                               (views:action-button

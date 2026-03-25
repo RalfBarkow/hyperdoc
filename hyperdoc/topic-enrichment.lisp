@@ -272,6 +272,22 @@
    (notes :reader topic-enrichment-route-definition-notes-of
           :initarg :notes)))
 
+(defmethod id-of ((definition topic-enrichment-route-definition))
+  (topic-enrichment-route-definition-id-of definition))
+
+(defmethod title-of ((definition topic-enrichment-route-definition))
+  (format nil "~A -> ~A durable route definition"
+          (title-of (topic-enrichment-route-definition-topic-of definition))
+          (title-of
+           (topic-enrichment-route-definition-source-designator-of definition))))
+
+(defmethod summary-of ((definition topic-enrichment-route-definition))
+  (format nil
+          "Durable authored route-definition entry for topic ~A and source ~A."
+          (title-of (topic-enrichment-route-definition-topic-of definition))
+          (title-of
+           (topic-enrichment-route-definition-source-designator-of definition))))
+
 (defun make-topic-enrichment-route-definition (entry)
    (let* ((topic (find-topic-by-id (getf entry :topic-id) :signal-error? t))
          (source (or (find-topic-enrichment-source-designator-by-id
@@ -314,6 +330,14 @@
   (mapcar #'topic-source-route-from-definition
           (topic-enrichment-route-definitions-for-topic topic)))
 
+(defun topic-source-route-durable-route-for-topic-source
+    (topic source-designator)
+  (find (id-of source-designator)
+        (topic-source-route-durable-routes-for-topic topic)
+        :key (lambda (route)
+               (id-of (topic-source-route-source-designator-of route)))
+        :test #'string=))
+
 (defun topic-enrichment-route-anchor (object provider-kind view-kind view-title)
   (make-instance 'dom-annotation-anchor
                  :provider-kind provider-kind
@@ -347,6 +371,58 @@
 
 (defun topic-enrichment-route-definition-topic-id-of (definition)
   (id-of (topic-enrichment-route-definition-topic-of definition)))
+
+(defun topic-enrichment-route-definition-source-id-of (definition)
+  (id-of (topic-enrichment-route-definition-source-designator-of definition)))
+
+(defun topic-enrichment-route-definition-id-fragment (value)
+  (string-downcase
+   (substitute #\- #\/ value)))
+
+(defun topic-enrichment-route-definition-entry-id (topic source-designator)
+  (format nil "route/~A-~A"
+          (topic-enrichment-route-definition-id-fragment (id-of topic))
+          (topic-enrichment-route-definition-id-fragment
+           (id-of source-designator))))
+
+(defun make-topic-enrichment-route-definition-entry
+    (topic source-designator &key notes relation-kind)
+  (list :id (topic-enrichment-route-definition-entry-id topic source-designator)
+        :topic-id (id-of topic)
+        :source-id (id-of source-designator)
+        :relation-kind (or relation-kind "topic-enrichment-route")
+        :notes (or notes
+                   (format nil
+                           "Runtime-authored durable Touch-Fahrplan route for ~A."
+                           (title-of topic)))))
+
+(defun persist-topic-enrichment-route-definition!
+    (topic source-designator &key notes relation-kind)
+  (reload-topic-enrichment-route-definitions!)
+  (let* ((topic-id (id-of topic))
+         (source-id (id-of source-designator))
+         (existing-entry
+           (topic-enrichment-route-entry-for-topic-source topic-id source-id))
+         (entry (or existing-entry
+                    (make-topic-enrichment-route-definition-entry
+                     topic
+                     source-designator
+                     :notes notes
+                     :relation-kind relation-kind))))
+    (unless existing-entry
+      (write-topic-enrichment-route-definitions!
+       (append *topic-enrichment-route-definitions*
+               (list entry))))
+    (make-topic-enrichment-route-definition entry)))
+
+(defun create-durable-topic-source-route!
+    (topic source-designator &key notes relation-kind)
+  (topic-source-route-from-definition
+   (persist-topic-enrichment-route-definition!
+    topic
+    source-designator
+    :notes notes
+    :relation-kind relation-kind)))
 
 (defun resolve-topic-enrichment-source-bridge (source-designator)
   (let ((provider (topic-enrichment-source-bridge-provider-of source-designator)))
