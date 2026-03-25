@@ -73,6 +73,17 @@
   exposes the enrichment plan before touching Zotero.
 </p>
 
+<p>
+  In the current slice, the authored durability lives in
+  <tt>hyperdoc/topic-enrichment-route-data.lisp</tt> as
+  <tt>*topic-enrichment-route-definitions*</tt>. Reload reifies that durable
+  authored data into a <tt>topic-enrichment-route-definition</tt>, a
+  <tt>topic-source-route</tt>, and the corresponding
+  <tt>dom-relation-annotation</tt>. The runtime objects are therefore
+  reconstructable from durable authored route data rather than persisted as
+  heap objects.
+</p>
+
 <h2>First-slice source palette</h2>
 
 <p>
@@ -123,10 +134,11 @@
 <ol>
   <li>Open the topic page <a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a>.</li>
   <li>Open the <b>Touch-Fahrplan</b> pane view.</li>
-  <li>Choose the <tt>Local Zotero library</tt> tile and inspect the resulting route object.</li>
+  <li>Use the preauthored <tt>Chunk -&gt; Local Zotero library</tt> entry in <b>Durable Touch-Fahrplan routes</b> or inspect the source-palette route object for the same source.</li>
   <li>Open the exact plan and inspect its execution path.</li>
   <li>Use <b>Run plan</b> to execute the read-only title lookup.</li>
   <li>Inspect the resulting report and the inline latest-successful summary on the topic pane.</li>
+  <li>Reload and reopen <b>Chunk</b>; the same durable authored route reappears in <b>Durable Touch-Fahrplan routes</b> because it is reified from the authored route-definition data.</li>
 </ol>
 
 <h2>Focused smoke path</h2>
