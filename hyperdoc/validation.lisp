@@ -480,11 +480,11 @@
              connect-js
              "\"hyperdoc-dom-connect-inspect\"")
             (pattern-present-validation-check
-             "connect-snapshot-constructor"
-             "explorer wires Connect inspection through a session snapshot object"
+             "connect-request-evidence-constructor"
+             "explorer keeps request-evidence inspection as the surviving Connect inspection seam"
              explorer-path
              explorer
-             "make-dom-connect-session-snapshot-from-json")
+             "make-dom-connect-request-evidence-from-values")
             (pattern-absent-validation-check
              "no-visible-elements-provider-copy"
              "provider help avoids stale visible-elements wording"

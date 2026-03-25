@@ -15,6 +15,13 @@
   form.
 </p>
 
+<p>
+  The corrective decision for this slice is also explicit:
+  <b>inspection belongs to inspector tabs, not to the Dock</b>.
+  The Dock does not carry an <b>Inspect</b> action or a coachmark-side
+  inspection button.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
@@ -35,10 +42,13 @@
 
 <ul>
   <li><b>Connect</b>: the compact action stays available, while the coachmark expands only for teaching, active task state, or rediscovery.</li>
-  <li><b>Inspect</b>: compact access to the current pane object remains available even when the coachmark recedes.</li>
   <li><b>Annotation</b>: compact access reopens the generic annotation object for the current pane object.</li>
-  <li><b>Connect state</b>: the expanded coachmark still exposes the separate session-inspection seam while Connect is active or rediscovered.</li>
 </ul>
+
+<p>
+  Inspection stays in the inspector tabs and other inspector chrome outside the
+  Dock. The Dock is reserved for transient action-oriented capabilities.
+</p>
 
 <h2>Presentation grammar</h2>
 
@@ -48,7 +58,7 @@
 </p>
 
 <ul>
-  <li><b>latent</b>: no expanded guidance is visible, but compact Connect, Inspect, Annotation, and Guide access remain.</li>
+  <li><b>latent</b>: no expanded guidance is visible, but compact Connect, Annotation, and Guide access remain.</li>
   <li><b>introduction</b>: the coachmark expands because a capability has become newly relevant and needs teaching.</li>
   <li><b>active</b>: the coachmark stays open because Connect is mid-gesture and task-state controls matter.</li>
   <li><b>degraded</b>: the expanded Dock has receded after use or dismissal, while the same capability remains in compact form.</li>

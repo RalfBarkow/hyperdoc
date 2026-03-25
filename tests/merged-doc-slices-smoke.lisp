@@ -490,6 +490,12 @@
    "degrade chrome, not capability")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
+   "inspection belongs to inspector tabs, not to the Dock")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "Inspection stays in the inspector tabs")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
    "Touch-Fahrplan and DMX are not competing permanent Dock identities")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
@@ -506,6 +512,9 @@
   (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "claim-code")
+  (assert-page-source-contains
+   "hyperdoc/Dock presentation state model.html"
+   "Inspection itself is not a Dock capability")
   (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "Touch-Fahrplan")
