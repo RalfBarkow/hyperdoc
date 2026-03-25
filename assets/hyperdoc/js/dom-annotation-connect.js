@@ -710,6 +710,23 @@
     };
   }
 
+  function dockPresentationMemory() {
+    if (!window.hyperdocDockPresentationMemory) {
+      window.hyperdocDockPresentationMemory = {
+        introductionShown: false,
+        connectMastered: false
+      };
+    }
+    return window.hyperdocDockPresentationMemory;
+  }
+
+  function resetDockPresentationMemory() {
+    window.hyperdocDockPresentationMemory = {
+      introductionShown: false,
+      connectMastered: false
+    };
+  }
+
   function paneSnapshot(state) {
     var session = connectManager().session;
     return {
@@ -722,10 +739,16 @@
       enabled: !!state.enabled,
       phase: state.phase,
       helpOpen: !!state.helpOpen,
+      presentationState: state.presentationState || "latent",
+      presentationReason: state.presentationReason || null,
+      coachmarkVisible: !!state.helpOpen,
       selectedSourceLabel: anchorLabel(session && session.sourceAnchor, null),
       selectedSourcePane: !!(session && session.sourcePaneId &&
         session.sourcePaneId === state.paneId),
-      pendingRequestId: state.pendingRequest && state.pendingRequest.id || null
+      pendingRequestId: state.pendingRequest && state.pendingRequest.id || null,
+      compactCapabilities: state.compactCapabilities || [],
+      coachmarkCapabilities: state.coachmarkCapabilities || [],
+      providerHandoffs: state.providerHandoffs || []
     };
   }
 
@@ -757,7 +780,7 @@
 
   function sessionCueText(session) {
     if (!session || !session.id) {
-      return "Use Dock actions or click Connect to start.";
+      return "";
     }
     if (session.phase === "choose-source") {
       return "Click a source anchor.";
@@ -894,6 +917,8 @@
     if (!state.available || !state.dockInspectSubmit) {
       return;
     }
+    markDockCapabilityMastered(state, "inspect-opened");
+    refreshPaneStateFromSession(state);
     dispatchHiddenDockButton(state.dockInspectSubmit, {
       dispatchDelayMs: 250
     });
@@ -903,6 +928,8 @@
     if (!state.available || !state.dockAnnotationSubmit) {
       return;
     }
+    markDockCapabilityMastered(state, "annotation-opened");
+    refreshPaneStateFromSession(state);
     dispatchHiddenDockButton(state.dockAnnotationSubmit, {
       dispatchDelayMs: 250
     });
@@ -1179,29 +1206,43 @@
   }
 
   function closeHelpPanel(state) {
-    state.helpOpen = false;
-    state.slot.dataset.helpOpen = "false";
-    state.helpToggle.setAttribute("aria-expanded", "false");
-    state.helpPanel.setAttribute("aria-hidden", "true");
+    if (!state) {
+      return;
+    }
+    state.rediscoveryRequested = false;
+    refreshPaneStateFromSession(state);
+  }
+
+  function dismissCoachmark(state, reason) {
+    if (!state) {
+      return;
+    }
+    var memory = dockPresentationMemory();
+    memory.connectMastered = true;
+    state.rediscoveryRequested = false;
+    state.presentationReason = reason || "dismissed";
+    refreshPaneStateFromSession(state);
   }
 
   function toggleHelpPanel(state) {
-    state.helpOpen = !state.helpOpen;
-    state.slot.dataset.helpOpen = state.helpOpen ? "true" : "false";
-    state.helpToggle.setAttribute("aria-expanded", state.helpOpen ? "true" : "false");
-    state.helpPanel.setAttribute("aria-hidden", state.helpOpen ? "false" : "true");
+    if (!state || !state.available) {
+      return;
+    }
+    if (state.presentationState === "rediscovery") {
+      closeHelpPanel(state);
+      return;
+    }
+    state.rediscoveryRequested = true;
+    refreshPaneStateFromSession(state);
   }
 
   function updateProviderCopy(state) {
     var helpSummary = providerHelpSummary(state.surface);
-    var helpDetail = providerHelpDetail(state.surface);
-    state.helpToggle.title = helpSummary;
-    state.helpToggle.setAttribute("aria-label", helpSummary);
+    state.providerHelpSummary = helpSummary;
+    state.providerHelpDetail = providerHelpDetail(state.surface);
+    state.helpToggle.title = "Rediscover Dock guidance";
+    state.helpToggle.setAttribute("aria-label", "Rediscover Dock guidance");
     state.toggle.title = helpSummary;
-    state.helpPanel.innerHTML =
-      "<p>" + helpSummary + "</p>" +
-      "<p>" + helpDetail + "</p>" +
-      "<p>Dock also keeps Inspect and Annotation beside Connect for the current pane object.</p>";
   }
 
   function activeSurfaceForPane(pane) {
@@ -1224,18 +1265,35 @@
     return null;
   }
 
-  function touchFahrplanTabButton(pane) {
+  function tabButtonByExactText(pane, label) {
     if (!pane) {
       return null;
     }
     var tabs = pane.querySelectorAll(".inspector-tabs button");
     for (var i = 0; i < tabs.length; i += 1) {
       var text = tabs[i].textContent && tabs[i].textContent.replace(/\s+/g, " ").trim();
-      if (text === "Touch-Fahrplan") {
+      if (text === label) {
         return tabs[i];
       }
     }
     return null;
+  }
+
+  function touchFahrplanTabButton(pane) {
+    return tabButtonByExactText(pane, "Touch-Fahrplan");
+  }
+
+  function externalTabButton(pane) {
+    return tabButtonByExactText(pane, "External");
+  }
+
+  function paneTitleText(pane) {
+    if (!pane) {
+      return "";
+    }
+    var node = pane.querySelector(".inspector-title-bar-object") ||
+      pane.querySelector(".inspector-title-bar-class");
+    return collapseWhitespace(node && node.textContent || "");
   }
 
   function zoteroDockAvailable(state) {
@@ -1247,13 +1305,29 @@
     );
   }
 
+  function dmxDockAvailable(state) {
+    return !!(
+      state &&
+      /^DMX topic\b/i.test(paneTitleText(state.pane)) &&
+      externalTabButton(state.pane)
+    );
+  }
+
   function syncDockCapabilities(state) {
-    if (!state || !state.zotero) {
+    if (!state || !state.touchFahrplan || !state.dmx) {
       return;
     }
-    var shouldHideZotero = !zoteroDockAvailable(state);
-    if (!!state.zotero.hidden !== shouldHideZotero) {
-      state.zotero.hidden = shouldHideZotero;
+    var showTouchFahrplan = zoteroDockAvailable(state);
+    var showDmx = dmxDockAvailable(state);
+    state.touchFahrplan.hidden = !showTouchFahrplan;
+    state.dmx.hidden = !showDmx;
+    state.providerHandoff.hidden = !(showTouchFahrplan || showDmx);
+    state.providerHandoffs = [];
+    if (showTouchFahrplan) {
+      state.providerHandoffs.push("Touch-Fahrplan");
+    }
+    if (showDmx) {
+      state.providerHandoffs.push("DMX");
     }
   }
 
@@ -1262,6 +1336,18 @@
     if (!tab || !zoteroDockAvailable(state)) {
       return;
     }
+    markDockCapabilityMastered(state, "touch-fahrplan-opened");
+    refreshPaneStateFromSession(state);
+    tab.click();
+  }
+
+  function openDmxDockCapability(state) {
+    var tab = externalTabButton(state && state.pane);
+    if (!tab || !dmxDockAvailable(state)) {
+      return;
+    }
+    markDockCapabilityMastered(state, "dmx-opened");
+    refreshPaneStateFromSession(state);
     tab.click();
   }
 
@@ -1272,33 +1358,51 @@
     slot.dataset.hyperdocDomConnectControl = "true";
     slot.innerHTML =
       '<div class="hyperdoc-dom-connect-control hyperdoc-dock-control" data-hyperdoc-connect-ignore="true">' +
-        '<span class="hyperdoc-dock-label">Dock</span>' +
-        '<div class="hyperdoc-dock-actions">' +
-          '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
-                  'title="Click a source anchor, then a target anchor.">Connect</button>' +
-          '<button type="button" class="hyperdoc-dock-inspect hyperdoc-dock-action" ' +
-                  'title="Inspect the current pane object.">Inspect</button>' +
-          '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
-                  'title="Open or reopen the generic Annotation object for the current pane object.">Annotation</button>' +
-          '<button type="button" class="hyperdoc-dock-zotero hyperdoc-dock-action" ' +
-                  'title="Open the Touch-Fahrplan provider view for this pane." hidden>Zotero</button>' +
+        '<div class="hyperdoc-dock-compact">' +
+          '<span class="hyperdoc-dock-label">Capabilities</span>' +
+          '<div class="hyperdoc-dock-actions">' +
+            '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
+                    'title="Click a source anchor, then a target anchor.">Connect</button>' +
+            '<button type="button" class="hyperdoc-dock-inspect hyperdoc-dock-action" ' +
+                    'title="Inspect the current pane object.">Inspect</button>' +
+            '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
+                    'title="Open or reopen the generic Annotation object for the current pane object.">Annotation</button>' +
+          '</div>' +
+          '<button type="button" class="hyperdoc-dom-connect-help-toggle hyperdoc-dock-guide" ' +
+                  'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
         '</div>' +
-        '<span class="hyperdoc-dom-connect-status" hidden>Pick source</span>' +
-        '<span class="hyperdoc-dom-connect-source-summary" hidden>' +
-          '<span class="hyperdoc-dom-connect-source-summary-label">Source:</span>' +
-          '<span class="hyperdoc-dom-connect-source-chip"></span>' +
-        '</span>' +
-        '<span class="hyperdoc-dom-connect-cue">Use Dock actions or click Connect to start.</span>' +
-        '<button type="button" class="hyperdoc-dom-connect-clear" hidden>Clear</button>' +
-        '<button type="button" class="hyperdoc-dom-connect-inspect" ' +
-                'title="Inspect the current Connect session and pane states.">Connect state</button>' +
-        '<button type="button" class="hyperdoc-dom-connect-help-toggle" ' +
-                'title="How Connect works in this view" aria-label="How Connect works in this view" aria-expanded="false">?</button>' +
-        '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
-      '</div>' +
-      '<div class="hyperdoc-dom-connect-help-panel" aria-hidden="true">' +
-        '<p>Click a source anchor, then a target anchor.</p>' +
-        '<p>Connect keeps the resolved anchor and its presentation fallback separate. Esc cancels.</p>' +
+        '<div class="hyperdoc-dom-connect-help-panel hyperdoc-dock-coachmark" aria-hidden="true">' +
+          '<div class="hyperdoc-dock-coachmark-header">' +
+            '<span class="hyperdoc-dock-state-badge">Introduction</span>' +
+            '<span class="hyperdoc-dock-coachmark-title">Connect</span>' +
+          '</div>' +
+          '<p class="hyperdoc-dock-coachmark-summary"></p>' +
+          '<p class="hyperdoc-dock-coachmark-detail"></p>' +
+          '<div class="hyperdoc-dock-provider-handoff" hidden>' +
+            '<span class="hyperdoc-dock-provider-handoff-label">Open richer workflow</span>' +
+            '<div class="hyperdoc-dock-provider-actions">' +
+              '<button type="button" class="hyperdoc-dock-touch-fahrplan" ' +
+                      'title="Open the Touch-Fahrplan pane view for this topic." hidden>Touch-Fahrplan</button>' +
+              '<button type="button" class="hyperdoc-dock-dmx" ' +
+                      'title="Open the External DMX handoff view for this pane." hidden>DMX</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="hyperdoc-dock-session-state">' +
+            '<span class="hyperdoc-dom-connect-status" hidden>Pick source</span>' +
+            '<span class="hyperdoc-dom-connect-source-summary" hidden>' +
+              '<span class="hyperdoc-dom-connect-source-summary-label">Source:</span>' +
+              '<span class="hyperdoc-dom-connect-source-chip"></span>' +
+            '</span>' +
+            '<span class="hyperdoc-dom-connect-cue" hidden></span>' +
+          '</div>' +
+          '<div class="hyperdoc-dock-coachmark-actions">' +
+            '<button type="button" class="hyperdoc-dom-connect-clear" hidden>Clear</button>' +
+            '<button type="button" class="hyperdoc-dom-connect-inspect" ' +
+                    'title="Inspect the current Connect session and pane states.">Connect state</button>' +
+            '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
+            '<button type="button" class="hyperdoc-dock-dismiss">Dismiss</button>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-feedback" hidden></div>';
   }
@@ -1450,6 +1554,139 @@
     return true;
   }
 
+  function dockPresentationLabel(presentationState) {
+    if (presentationState === "introduction") {
+      return "Introduction";
+    }
+    if (presentationState === "active") {
+      return "Active";
+    }
+    if (presentationState === "degraded") {
+      return "Degraded";
+    }
+    if (presentationState === "rediscovery") {
+      return "Rediscovery";
+    }
+    return "Latent";
+  }
+
+  function markDockCapabilityMastered(state, reason) {
+    var memory = dockPresentationMemory();
+    memory.connectMastered = true;
+    state.rediscoveryRequested = false;
+    state.presentationReason = reason || "capability-used";
+  }
+
+  function dockPresentationForState(state, session, sessionVisible) {
+    var memory = dockPresentationMemory();
+    if (!state.available) {
+      return {
+        state: "hidden",
+        reason: "provider-unavailable"
+      };
+    }
+    if (sessionVisible) {
+      return {
+        state: "active",
+        reason: session && session.phase || "connect-session-active"
+      };
+    }
+    if (state.rediscoveryRequested) {
+      return {
+        state: "rediscovery",
+        reason: "rediscovery-requested"
+      };
+    }
+    if (state.presentationState === "introduction" && !memory.connectMastered) {
+      return {
+        state: "introduction",
+        reason: state.presentationReason || "newly-relevant-capability"
+      };
+    }
+    if (!memory.introductionShown) {
+      memory.introductionShown = true;
+      return {
+        state: "introduction",
+        reason: "newly-relevant-capability"
+      };
+    }
+    if (memory.connectMastered) {
+      return {
+        state: "degraded",
+        reason: state.presentationReason || "used-or-dismissed"
+      };
+    }
+    return {
+      state: "latent",
+      reason: "compact-capabilities-remain-available"
+    };
+  }
+
+  function dockCoachmarkCopy(state, presentationState) {
+    if (presentationState === "active") {
+      return {
+        title: "Connect",
+        summary: "Connect is active in this pane.",
+        detail:
+          "Task state stays in the coachmark while the richer route or traversal workflow remains in the pane body."
+      };
+    }
+    if (presentationState === "rediscovery") {
+      return {
+        title: "Connect",
+        summary: state.providerHelpSummary,
+        detail:
+          "The Dock can expand again for rediscovery, but the same capability stays available from the compact row."
+      };
+    }
+    if (presentationState === "introduction") {
+      return {
+        title: "Connect",
+        summary: state.providerHelpSummary,
+        detail:
+          "The Dock is temporarily expanded because Connect became newly relevant here. Inspect and Annotation remain available after the coachmark recedes."
+      };
+    }
+    return {
+      title: "Connect",
+      summary: "",
+      detail: ""
+    };
+  }
+
+  function applyDockPresentation(state, presentation) {
+    var coachmark = presentation.state === "introduction" ||
+      presentation.state === "active" ||
+      presentation.state === "rediscovery";
+    var copy = dockCoachmarkCopy(state, presentation.state);
+    state.presentationState = presentation.state;
+    state.presentationReason = presentation.reason || null;
+    state.helpOpen = coachmark;
+    state.slot.dataset.helpOpen = coachmark ? "true" : "false";
+    state.slot.dataset.dockPresentation = presentation.state;
+    state.control.dataset.dockPresentation = presentation.state;
+    state.helpToggle.textContent = coachmark && presentation.state === "rediscovery"
+      ? "Hide guide"
+      : "Guide";
+    state.helpToggle.setAttribute("aria-expanded", coachmark ? "true" : "false");
+    state.helpPanel.setAttribute("aria-hidden", coachmark ? "false" : "true");
+    state.stateBadge.textContent = dockPresentationLabel(presentation.state);
+    state.coachmarkTitle.textContent = copy.title;
+    state.coachmarkSummary.textContent = copy.summary;
+    state.coachmarkDetail.textContent = copy.detail;
+    state.providerHandoffLabel.textContent =
+      "Richer workflow lives in the pane body";
+    state.inspect.hidden = !coachmark;
+    state.dismiss.hidden = presentation.state === "active" || !coachmark;
+    state.compactCapabilities = ["Connect", "Inspect", "Annotation", "Guide"];
+    state.coachmarkCapabilities = coachmark
+      ? ["Connect state"].concat(state.providerHandoffs || [])
+      : [];
+    if (state.surface) {
+      state.surface.dataset.hyperdocDockPresentation = presentation.state;
+    }
+  }
+
   function refreshPaneStateFromSession(state) {
     var manager = state.manager || connectManager();
     var session = manager.session;
@@ -1458,6 +1695,8 @@
     if (!available) {
       state.enabled = false;
       state.toggle.dataset.mode = "inactive";
+      state.presentationState = "hidden";
+      state.helpOpen = false;
       if (!state.pendingRequest) {
         setPhase(state, "dormant");
       }
@@ -1471,6 +1710,7 @@
     var activeForSubmitting = session.phase === "submitting" &&
       session.id !== null;
     var sessionVisible = activeForSource || activeForTarget || activeForSubmitting;
+    var presentation;
 
     state.enabled = activeForSource || activeForTarget;
     state.toggle.dataset.mode = sessionVisible ? "active" : "inactive";
@@ -1481,15 +1721,15 @@
       if (!state.pendingRequest) {
         setPhase(state, "dormant");
       }
-      return;
-    }
-    if (session.phase === "choose-source") {
+    } else if (session.phase === "choose-source") {
       setPhase(state, activeForSource ? "select-source" : "dormant");
     } else if (session.phase === "choose-target") {
       setPhase(state, "select-target");
     } else if (session.phase === "submitting") {
       setPhase(state, "submitting");
     }
+    presentation = dockPresentationForState(state, session, sessionVisible);
+    applyDockPresentation(state, presentation);
   }
 
   function refreshAllPaneStates(manager) {
@@ -1507,16 +1747,18 @@
       enterDormant(state);
     });
     manager.session = makeIdleSession();
+    refreshAllPaneStates(manager);
   }
 
   function startConnectSession(state) {
     var manager = state.manager;
+    markDockCapabilityMastered(state, "connect-started");
     if (sessionActive(manager)) {
       resetConnectSession(manager);
     }
     liveStates(manager).forEach(function (otherState) {
       clearFeedback(otherState);
-      closeHelpPanel(otherState);
+      otherState.rediscoveryRequested = false;
       setHoverElement(otherState, null);
     });
     manager.session = {
@@ -1560,7 +1802,8 @@
       state.available = available;
       if (!available) {
         clearFeedback(state);
-        closeHelpPanel(state);
+        state.rediscoveryRequested = false;
+        state.helpOpen = false;
         setHoverElement(state, null);
         clearSource(state);
         refreshPaneStateFromSession(state);
@@ -1634,7 +1877,8 @@
     state.toggle.dataset.mode = "inactive";
     setHoverElement(state, null);
     clearSource(state);
-    closeHelpPanel(state);
+    state.rediscoveryRequested = false;
+    state.helpOpen = false;
     if (!state.pendingRequest) {
       state.requestId = null;
     }
@@ -1683,7 +1927,7 @@
     }
     liveStates(manager).forEach(function (otherState) {
       clearFeedback(otherState);
-      closeHelpPanel(otherState);
+      otherState.rediscoveryRequested = false;
       setHoverElement(otherState, null);
     });
     if (session.sourceState) {
@@ -1857,7 +2101,7 @@
     liveStates(manager).forEach(function (otherState) {
       setHoverElement(otherState, null);
       clearSource(otherState);
-      closeHelpPanel(otherState);
+      otherState.rediscoveryRequested = false;
     });
     refreshAllPaneStates(manager);
     logStage(requestId, "request-sent-to-create-open-association", {
@@ -1957,7 +2201,8 @@
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
     var dockInspect = slot.querySelector(".hyperdoc-dock-inspect");
     var annotation = slot.querySelector(".hyperdoc-dock-annotation");
-    var zotero = slot.querySelector(".hyperdoc-dock-zotero");
+    var touchFahrplan = slot.querySelector(".hyperdoc-dock-touch-fahrplan");
+    var dmx = slot.querySelector(".hyperdoc-dock-dmx");
     var cue = slot.querySelector(".hyperdoc-dom-connect-cue");
     var sourceSummary = slot.querySelector(".hyperdoc-dom-connect-source-summary");
     var sourceChip = slot.querySelector(".hyperdoc-dom-connect-source-chip");
@@ -1968,9 +2213,17 @@
     var feedback = slot.querySelector(".hyperdoc-dom-connect-feedback");
     var helpPanel = slot.querySelector(".hyperdoc-dom-connect-help-panel");
     var status = slot.querySelector(".hyperdoc-dom-connect-status");
-    if (!control || !toggle || !dockInspect || !annotation || !zotero ||
+    var stateBadge = slot.querySelector(".hyperdoc-dock-state-badge");
+    var coachmarkTitle = slot.querySelector(".hyperdoc-dock-coachmark-title");
+    var coachmarkSummary = slot.querySelector(".hyperdoc-dock-coachmark-summary");
+    var coachmarkDetail = slot.querySelector(".hyperdoc-dock-coachmark-detail");
+    var providerHandoff = slot.querySelector(".hyperdoc-dock-provider-handoff");
+    var providerHandoffLabel = slot.querySelector(".hyperdoc-dock-provider-handoff-label");
+    var dismiss = slot.querySelector(".hyperdoc-dock-dismiss");
+    if (!control || !toggle || !dockInspect || !annotation || !touchFahrplan || !dmx ||
         !cue || !sourceSummary || !sourceChip || !clear ||
-        !inspect ||
+        !inspect || !stateBadge || !coachmarkTitle || !coachmarkSummary ||
+        !coachmarkDetail || !providerHandoff || !providerHandoffLabel || !dismiss ||
         !helpToggle || !cancel || !feedback || !helpPanel || !status) {
       return null;
     }
@@ -1983,7 +2236,8 @@
       toggle: toggle,
       dockInspect: dockInspect,
       annotation: annotation,
-      zotero: zotero,
+      touchFahrplan: touchFahrplan,
+      dmx: dmx,
       cue: cue,
       sourceSummary: sourceSummary,
       sourceChip: sourceChip,
@@ -1994,10 +2248,20 @@
       helpToggle: helpToggle,
       helpPanel: helpPanel,
       status: status,
+      stateBadge: stateBadge,
+      coachmarkTitle: coachmarkTitle,
+      coachmarkSummary: coachmarkSummary,
+      coachmarkDetail: coachmarkDetail,
+      providerHandoff: providerHandoff,
+      providerHandoffLabel: providerHandoffLabel,
+      dismiss: dismiss,
       enabled: false,
       available: false,
       phase: "dormant",
       helpOpen: false,
+      presentationState: "latent",
+      presentationReason: null,
+      rediscoveryRequested: false,
       hoverElement: null,
       source: null,
       sourceElement: null,
@@ -2023,14 +2287,21 @@
       inspectSubmit: null,
       evidenceSubmit: null,
       dockInspectSubmit: null,
-      dockAnnotationSubmit: null
+      dockAnnotationSubmit: null,
+      compactCapabilities: [],
+      coachmarkCapabilities: [],
+      providerHandoffs: [],
+      providerHelpSummary: "",
+      providerHelpDetail: ""
     };
     pane.hyperdocDomConnectState = state;
     registerState(manager, state);
     slot.hidden = true;
     slot.dataset.helpOpen = "false";
+    slot.dataset.dockPresentation = "latent";
     toggle.dataset.mode = "inactive";
     control.dataset.connectState = "dormant";
+    control.dataset.dockPresentation = "latent";
     if (!helpPanel.id) {
       helpPanel.id = (slot.id || "hyperdoc-dom-connect-pane-slot") + "-help-panel";
     }
@@ -2057,10 +2328,15 @@
       event.stopPropagation();
       openCurrentAnnotation(state);
     });
-    zotero.addEventListener("click", function (event) {
+    touchFahrplan.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
       openZoteroDockCapability(state);
+    });
+    dmx.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openDmxDockCapability(state);
     });
     helpToggle.addEventListener("click", function (event) {
       event.preventDefault();
@@ -2095,9 +2371,18 @@
     cancel.addEventListener("click", function () {
       deactivate(state, true);
     });
+    dismiss.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dismissCoachmark(state, "dismissed");
+    });
     document.addEventListener("click", function (event) {
       if (state.helpOpen && !state.slot.contains(event.target)) {
-        closeHelpPanel(state);
+        if (state.presentationState === "rediscovery") {
+          closeHelpPanel(state);
+        } else if (state.presentationState === "introduction") {
+          dismissCoachmark(state, "dismissed-outside");
+        }
       }
     }, true);
     document.addEventListener("keydown", function (event) {
@@ -2197,6 +2482,14 @@
       clearFailureModes: function () {
         connectTestState().nextFailureMode = null;
         connectTestState().suppressedServerResults = {};
+      },
+      resetDockPresentation: function () {
+        resetDockPresentationMemory();
+        liveStates(connectManager()).forEach(function (state) {
+          state.rediscoveryRequested = false;
+          state.presentationReason = null;
+          refreshPaneStateFromSession(state);
+        });
       }
     }
   };

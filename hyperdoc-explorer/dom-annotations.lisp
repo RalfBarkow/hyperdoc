@@ -369,9 +369,10 @@
   (shorten-dom-association-label (title-of annotation)))
 
 (defmethod views:text-representation ((snapshot dom-connect-pane-state-snapshot))
-  (format nil "~A (~A)"
+  (format nil "~A (~A / ~A)"
           (or (pane-id-of snapshot) "pane")
-          (or (local-phase-of snapshot) "dormant")))
+          (or (local-phase-of snapshot) "dormant")
+          (or (presentation-state-of snapshot) "latent")))
 
 (defmethod views:text-representation ((entry dom-connect-transition-entry))
   (or (stage-of entry)
@@ -674,11 +675,24 @@
               (render-connect-field-row "Help open"
                                         (dom-connect-bool-label
                                          (help-open-p-of snapshot)))
+              (render-connect-field-row "Presentation state"
+                                        (presentation-state-of snapshot))
+              (render-connect-field-row "Presentation reason"
+                                        (presentation-reason-of snapshot))
+              (render-connect-field-row "Coachmark visible"
+                                        (dom-connect-bool-label
+                                         (coachmark-visible-p-of snapshot)))
               (render-connect-field-row "Selected source label"
                                         (selected-source-label-of snapshot))
               (render-connect-field-row "Selected source pane"
                                         (dom-connect-bool-label
                                          (selected-source-pane-p-of snapshot)))
+              (render-connect-rich-field-row "Compact capabilities"
+                                             (compact-capabilities-of snapshot))
+              (render-connect-rich-field-row "Coachmark capabilities"
+                                             (coachmark-capabilities-of snapshot))
+              (render-connect-rich-field-row "Provider handoffs"
+                                             (provider-handoffs-of snapshot))
               (render-connect-field-row "Pending request id"
                                         (pending-request-id-of snapshot))))))
 
@@ -765,8 +779,11 @@
                    (:th "Available")
                    (:th "Enabled")
                    (:th "Local phase")
-                   (:th "Help open")
+                   (:th "Presentation")
+                   (:th "Coachmark")
                    (:th "Selected source label")
+                   (:th "Compact capabilities")
+                   (:th "Provider handoffs")
                    (:th "Pending request"))
               (if (panes-of snapshot)
                   (loop for pane-state in (panes-of snapshot)
@@ -793,19 +810,26 @@
                                   (:td (:tt (views:esc
                                              (or (local-phase-of pane-state)
                                                  "-"))))
+                                  (:td (:tt (views:esc
+                                             (or (presentation-state-of pane-state)
+                                                 "-"))))
                                   (:td (views:esc
                                         (dom-connect-bool-label
-                                         (help-open-p-of pane-state))))
+                                         (coachmark-visible-p-of pane-state))))
                                   (:td (views:esc
                                         (or (selected-source-label-of
                                              pane-state)
                                             "-")))
+                                  (:td (render-connect-data-cell
+                                        (compact-capabilities-of pane-state)))
+                                  (:td (render-connect-data-cell
+                                        (provider-handoffs-of pane-state)))
                                   (:td (:tt (views:esc
                                              (or (pending-request-id-of
                                                   pane-state)
                                                  "-")))))))
                   (views:html
-                    (:tr (:td :colspan "11"
+                    (:tr (:td :colspan "13"
                               (:span :style "opacity: 0.55;"
                                      "No live panes are registered.")))))))))
 

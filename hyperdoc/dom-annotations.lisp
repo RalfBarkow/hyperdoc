@@ -87,6 +87,15 @@
    (enabled :initarg :enabled :initform nil :reader enabled-p-of)
    (local-phase :initarg :local-phase :initform "dormant" :reader local-phase-of)
    (help-open :initarg :help-open :initform nil :reader help-open-p-of)
+   (presentation-state :initarg :presentation-state
+                       :initform "latent"
+                       :reader presentation-state-of)
+   (presentation-reason :initarg :presentation-reason
+                        :initform nil
+                        :reader presentation-reason-of)
+   (coachmark-visible :initarg :coachmark-visible
+                      :initform nil
+                      :reader coachmark-visible-p-of)
    (selected-source-label :initarg :selected-source-label
                           :initform nil
                           :reader selected-source-label-of)
@@ -95,7 +104,16 @@
                          :reader selected-source-pane-p-of)
    (pending-request-id :initarg :pending-request-id
                        :initform nil
-                       :reader pending-request-id-of)))
+                       :reader pending-request-id-of)
+   (compact-capabilities :initarg :compact-capabilities
+                         :initform nil
+                         :reader compact-capabilities-of)
+   (coachmark-capabilities :initarg :coachmark-capabilities
+                           :initform nil
+                           :reader coachmark-capabilities-of)
+   (provider-handoffs :initarg :provider-handoffs
+                      :initform nil
+                      :reader provider-handoffs-of)))
 
 (defclass dom-connect-transition-entry ()
   ((id :initarg :id :reader id-of)
@@ -791,12 +809,13 @@
          (format nil "~A" stage))))))
 
 (defun dom-connect-pane-state-summary (pane-id local-phase provider-kind
-                                       active-tab)
-  (format nil "Pane ~A is ~A in ~A (~A)."
+                                       active-tab presentation-state)
+  (format nil "Pane ~A is ~A in ~A (~A), with Dock presentation ~A."
           (or pane-id "?")
           (or local-phase "dormant")
           (or active-tab "its current view")
-          (or provider-kind "unknown provider")))
+          (or provider-kind "unknown provider")
+          (or presentation-state "latent")))
 
 (defun dom-connect-transition-title (stage timestamp-label)
   (if (dom-connect-present-p timestamp-label)
@@ -815,6 +834,7 @@
          (context-view-title (getf json :contextViewTitle))
          (provider-kind (getf json :providerKind))
          (local-phase (getf json :phase))
+         (presentation-state (getf json :presentationState))
          (selected-source-label (getf json :selectedSourceLabel)))
     (make-instance 'dom-connect-pane-state-snapshot
                    :id (format nil "connect-pane/~A" (or pane-id "unknown"))
@@ -824,7 +844,8 @@
                              pane-id
                              local-phase
                              provider-kind
-                             active-tab)
+                             active-tab
+                             presentation-state)
                    :pane-id pane-id
                    :active-tab active-tab
                    :context-view-title context-view-title
@@ -833,9 +854,15 @@
                    :enabled (getf json :enabled)
                    :local-phase local-phase
                    :help-open (getf json :helpOpen)
+                   :presentation-state presentation-state
+                   :presentation-reason (getf json :presentationReason)
+                   :coachmark-visible (getf json :coachmarkVisible)
                    :selected-source-label selected-source-label
                    :selected-source-pane (getf json :selectedSourcePane)
-                   :pending-request-id (getf json :pendingRequestId))))
+                   :pending-request-id (getf json :pendingRequestId)
+                   :compact-capabilities (getf json :compactCapabilities)
+                   :coachmark-capabilities (getf json :coachmarkCapabilities)
+                   :provider-handoffs (getf json :providerHandoffs))))
 
 (defun maybe-dom-connect-anchor-from-json (json)
   (when (and json (listp json))

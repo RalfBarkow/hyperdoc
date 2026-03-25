@@ -26,6 +26,18 @@
 
 .hyperdoc-dom-connect-control {
   display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.42rem;
+  max-width: min(36rem, 100%);
+}
+
+.hyperdoc-dock-control {
+  justify-content: flex-start;
+}
+
+.hyperdoc-dock-compact {
+  display: inline-flex;
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
@@ -36,12 +48,7 @@
   background: rgba(255, 250, 243, 0.98);
   box-shadow: 0 4px 12px rgba(74, 52, 31, 0.08);
   min-height: 2rem;
-  max-width: min(34rem, 100%);
-}
-
-.hyperdoc-dock-control {
-  justify-content: flex-start;
-  gap: 0.6rem;
+  max-width: min(36rem, 100%);
 }
 
 .hyperdoc-dock-label {
@@ -68,7 +75,7 @@
   position: absolute;
   top: calc(100% + 0.35rem);
   right: 0;
-  width: min(18rem, 100%);
+  width: min(26rem, 100%);
   padding: 0.55rem 0.7rem;
   border: 1px solid rgba(107, 79, 47, 0.24);
   border-radius: 0.8rem;
@@ -80,10 +87,15 @@
 
 .hyperdoc-dom-connect-help-panel {
   display: none;
+  pointer-events: none;
 }
 
 .hyperdoc-dom-connect-pane-slot[data-help-open="true"] .hyperdoc-dom-connect-help-panel {
   display: block;
+}
+
+.hyperdoc-dom-connect-help-panel button {
+  pointer-events: auto;
 }
 
 .hyperdoc-dom-connect-pane-slot button {
@@ -112,32 +124,100 @@
   border-color: #8a3b2d;
 }
 
-.hyperdoc-dock-zotero {
+.hyperdoc-dock-touch-fahrplan {
   border-color: #0f766e;
   color: #115e59;
 }
 
-.hyperdoc-dock-zotero:hover,
-.hyperdoc-dock-zotero:focus {
+.hyperdoc-dock-touch-fahrplan:hover,
+.hyperdoc-dock-touch-fahrplan:focus {
   background: rgba(15, 118, 110, 0.12);
 }
 
-.hyperdoc-dom-connect-pane-slot[data-connect-state="select-source"] .hyperdoc-dom-connect-control,
-.hyperdoc-dom-connect-pane-slot[data-connect-state="select-target"] .hyperdoc-dom-connect-control,
-.hyperdoc-dom-connect-pane-slot[data-connect-state="submitting"] .hyperdoc-dom-connect-control {
+.hyperdoc-dock-dmx {
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+}
+
+.hyperdoc-dom-connect-pane-slot[data-connect-state="select-source"] .hyperdoc-dock-compact,
+.hyperdoc-dom-connect-pane-slot[data-connect-state="select-target"] .hyperdoc-dock-compact,
+.hyperdoc-dom-connect-pane-slot[data-connect-state="submitting"] .hyperdoc-dock-compact {
   border-color: rgba(194, 65, 12, 0.4);
   box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.1), 0 8px 18px rgba(74, 52, 31, 0.12);
 }
 
-.hyperdoc-dom-connect-pane-slot[data-connect-state="select-target"] .hyperdoc-dom-connect-control {
+.hyperdoc-dom-connect-pane-slot[data-connect-state="select-target"] .hyperdoc-dock-compact {
   border-color: rgba(194, 65, 12, 0.52);
   box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.14), 0 10px 20px rgba(74, 52, 31, 0.14);
 }
 
+.hyperdoc-dom-connect-pane-slot[data-dock-presentation="degraded"] .hyperdoc-dock-compact,
+.hyperdoc-dom-connect-pane-slot[data-dock-presentation="latent"] .hyperdoc-dock-compact {
+  background: rgba(255, 252, 247, 0.96);
+}
+
 .hyperdoc-dom-connect-help-toggle {
-  min-width: 1.95rem;
-  padding-inline: 0;
+  min-width: 3.5rem;
   text-align: center;
+}
+
+.hyperdoc-dock-guide {
+  border-style: dashed;
+}
+
+.hyperdoc-dock-coachmark {
+  display: none;
+}
+
+.hyperdoc-dock-coachmark-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.hyperdoc-dock-state-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(194, 65, 12, 0.12);
+  color: #9a3412;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.hyperdoc-dock-coachmark-title {
+  font-weight: 700;
+  color: #3f3428;
+}
+
+.hyperdoc-dock-provider-handoff {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+}
+
+.hyperdoc-dock-provider-handoff-label {
+  font-size: 0.82rem;
+  color: rgba(74, 55, 34, 0.74);
+}
+
+.hyperdoc-dock-provider-actions,
+.hyperdoc-dock-coachmark-actions,
+.hyperdoc-dock-session-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.hyperdoc-dock-coachmark-actions,
+.hyperdoc-dock-session-state {
+  margin-top: 0.55rem;
 }
 
 .hyperdoc-dom-connect-status {

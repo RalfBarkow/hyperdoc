@@ -28,6 +28,9 @@ function paneChrome(page, paneIndex) {
     feedback: currentPane.locator(".hyperdoc-dom-connect-feedback"),
     helpToggle: currentPane.locator(".hyperdoc-dom-connect-help-toggle"),
     helpPanel: currentPane.locator(".hyperdoc-dom-connect-help-panel"),
+    touchFahrplanButton: currentPane.locator(".hyperdoc-dock-touch-fahrplan"),
+    dmxButton: currentPane.locator(".hyperdoc-dock-dmx"),
+    dismissButton: currentPane.locator(".hyperdoc-dock-dismiss"),
   };
 }
 
@@ -47,6 +50,13 @@ async function readPaneChromeState(page, paneIndex) {
     const cancelButton = slot?.querySelector(".hyperdoc-dom-connect-cancel");
     const feedback = slot?.querySelector(".hyperdoc-dom-connect-feedback");
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
+    const stateBadge = slot?.querySelector(".hyperdoc-dock-state-badge");
+    const coachmarkSummary = slot?.querySelector(".hyperdoc-dock-coachmark-summary");
+    const coachmarkDetail = slot?.querySelector(".hyperdoc-dock-coachmark-detail");
+    const providerHandoff = slot?.querySelector(".hyperdoc-dock-provider-handoff");
+    const touchFahrplan = slot?.querySelector(".hyperdoc-dock-touch-fahrplan");
+    const dmx = slot?.querySelector(".hyperdoc-dock-dmx");
+    const dismiss = slot?.querySelector(".hyperdoc-dock-dismiss");
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
     const providerSurface = activeView?.querySelector(
       ".hyperdoc-connect-provider-surface, .hyperdoc-dom-connect-surface"
@@ -62,9 +72,14 @@ async function readPaneChromeState(page, paneIndex) {
         null,
       slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
+      presentationState: slot?.dataset.dockPresentation || null,
       connectState: slot?.dataset.connectState || null,
       toggleMode: toggle?.dataset.mode || null,
       toggleText: toggle?.textContent?.trim() || null,
+      compactActions: slot
+        ? Array.from(slot.querySelectorAll(".hyperdoc-dock-compact .hyperdoc-dock-action"))
+            .map((node) => node.textContent?.trim() || "")
+        : [],
       statusHidden: !!status?.hidden,
       statusText: status?.textContent?.trim() || null,
       cueHidden: !!cue?.hidden,
@@ -80,6 +95,19 @@ async function readPaneChromeState(page, paneIndex) {
       feedbackHidden: !!feedback?.hidden,
       feedbackKind: feedback?.dataset.kind || null,
       feedbackText: feedback?.textContent?.replace(/\s+/g, " ").trim() || null,
+      coachmarkVisible:
+        !!helpPanel && window.getComputedStyle(helpPanel).display !== "none",
+      coachmarkBadge: stateBadge?.textContent?.trim() || null,
+      coachmarkSummary: coachmarkSummary?.textContent?.replace(/\s+/g, " ").trim() || null,
+      coachmarkDetail: coachmarkDetail?.textContent?.replace(/\s+/g, " ").trim() || null,
+      providerHandoffHidden: !!providerHandoff?.hidden,
+      providerHandoffLabels: providerHandoff
+        ? Array.from(providerHandoff.querySelectorAll("button:not([hidden])"))
+            .map((node) => node.textContent?.trim() || "")
+        : [],
+      touchFahrplanHidden: !!touchFahrplan?.hidden,
+      dmxHidden: !!dmx?.hidden,
+      dismissHidden: !!dismiss?.hidden,
       providerKind: providerSurface?.dataset.hyperdocConnectProviderKind || null,
       providerViewKind: providerSurface?.dataset.hyperdocConnectViewKind || null,
       helpExpanded:

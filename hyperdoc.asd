@@ -183,6 +183,7 @@
                              (:file "parse-expr")
                              (:file "lookup-repairs")
                              (:file "dom-annotations")
+                             (:file "dock")
                              (:file "html-pages")
                              (:file "markdown-pages")
                              (:file "code-pages")
@@ -233,6 +234,7 @@
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "relation-topic-proposals-smoke")
+                             (:file "dock-presentation-smoke")
                              (:file "dock-annotation-smoke")
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")

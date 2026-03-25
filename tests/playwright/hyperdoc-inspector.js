@@ -89,7 +89,10 @@ async function openHyperDoc(page) {
       { timeout: 20_000 }
     )
     .toBeGreaterThan(0);
-  await expect(hyperdocPane.locator(".hyperdoc-dom-connect-inspect")).toBeVisible({
+  await expect(hyperdocPane.locator(".hyperdoc-dom-connect-toggle")).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(hyperdocPane.locator(".hyperdoc-dom-connect-help-toggle")).toBeVisible({
     timeout: 20_000,
   });
   await settleInspectorBindings(page);
@@ -340,6 +343,14 @@ async function clearConnectFailureModes(page) {
   });
 }
 
+async function resetDockPresentation(page) {
+  await page.evaluate(() => {
+    if (window.hyperdocDomConnect && window.hyperdocDomConnect.__test) {
+      window.hyperdocDomConnect.__test.resetDockPresentation();
+    }
+  });
+}
+
 async function startConnectInPane(page, paneIndex) {
   const currentPane = pane(page, paneIndex);
   const button = currentPane.locator(".hyperdoc-dom-connect-toggle");
@@ -381,6 +392,7 @@ async function waitForConnectChromeState(page, paneIndex, expectedState, options
 async function openConnectInspection(page, paneIndex) {
   const currentPane = pane(page, paneIndex);
   const inspectButton = currentPane.locator(".hyperdoc-dom-connect-inspect");
+  const helpToggle = currentPane.locator(".hyperdoc-dom-connect-help-toggle");
   const inspectionPaneId = await currentPane.evaluate(
     (paneNode) => paneNode.dataset.hyperdocConnectPaneId || null
   );
@@ -407,6 +419,10 @@ async function openConnectInspection(page, paneIndex) {
       }
       return panes[panes.length - 1].dataset.hyperdocConnectCapturedAt || null;
     }, inspectionPaneId);
+  if (!(await inspectButton.isVisible())) {
+    await expect(helpToggle).toBeVisible();
+    await helpToggle.click();
+  }
   await expect(inspectButton).toBeVisible();
   await inspectButton.click();
   if (matchingCountBefore === 0) {
@@ -748,6 +764,7 @@ module.exports = {
   readDomConnectTrace,
   readFedWikiStoryPaneState,
   readPaneTitles,
+  resetDockPresentation,
   readSourcePaneState,
   runContentAssociation,
   runHyperDocToFedWikiAssociation,
