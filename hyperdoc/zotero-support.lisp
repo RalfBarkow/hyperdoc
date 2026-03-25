@@ -213,6 +213,10 @@
 (define-zotero-runtime-wrapper make-default-bibliography-source ()
   "open default bibliography source")
 
+(define-zotero-runtime-wrapper execute-topic-enrichment-query-plan
+    (plan)
+  "execute topic enrichment query plan")
+
 (defun maybe-enable-zotero-runtime-support ()
   (cond
     ((not (zotero-support-enabled-p))

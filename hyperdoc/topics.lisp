@@ -2216,6 +2216,47 @@
                  "Coachmark bibliography authoring plan"
                  "Authoring Documentation in HyperDoc")))
 
+(defun topic-to-zotero-enrichment-route-topic ()
+  (make-topic
+   :id "topic-to-zotero-enrichment-route"
+   :title "Topic-to-Zotero enrichment route"
+   :summary
+   "Durable Connect association object that ties a HyperDoc topic to a read-only Zotero source designator before any live Zotero query runs."
+   :references
+   '("Touch-Fahrplan view for Zotero topic enrichment"
+     "Zotero library bridge for HyperDoc"
+     "Bibliography subcollections in HyperDoc"
+     "Associations"
+     "Normal association submit path vs evidence path")))
+
+(defun inspectable-zotero-enrichment-plan-for-a-topic-topic ()
+  (make-topic
+   :id "inspectable-zotero-enrichment-plan-for-a-topic"
+   :title "Inspectable Zotero enrichment plan for a topic"
+   :summary "Inspectable query-plan object that makes the intended Zotero query text, match mode, backend seam, execution path, and repair hints visible before the live query boundary."
+   :references '("Touch-Fahrplan view for Zotero topic enrichment"
+                 "Topic-to-Zotero enrichment route"
+                 "Zotero library bridge for HyperDoc")))
+
+(defun topic-enrichment-report-topic ()
+  (make-topic
+   :id "topic-enrichment-report"
+   :title "Topic enrichment report"
+   :summary "Inspectable report object that keeps Zotero query evidence, matched items, candidate signals, and editorial consequences separate on the enriched topic path."
+   :references '("Touch-Fahrplan view for Zotero topic enrichment"
+                 "Inspectable Zotero enrichment plan for a topic"
+                 "Bibliography subcollections in HyperDoc")))
+
+(defun touch-fahrplan-view-for-zotero-topic-enrichment-topic ()
+  (make-topic
+   :id "touch-fahrplan-view-for-zotero-topic-enrichment"
+   :title "Touch-Fahrplan view for Zotero topic enrichment"
+   :summary "Topic-pane view that presents the current topic and a small Zotero source palette, opens inspectable route and plan objects, and summarizes the latest successful enrichment report inline."
+   :references '("Touch-Fahrplan view for Zotero topic enrichment"
+                 "Topic-to-Zotero enrichment route"
+                 "Inspectable Zotero enrichment plan for a topic"
+                 "Topic enrichment report")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic
@@ -2527,6 +2568,16 @@
                  "McDermott Running Image Coherence Crosswalk"
                  "Drew McDermott Lisp, Planning, and Software"
                  "Source-oriented and image-oriented development in Common Lisp")))
+
+(defun chunk-topic ()
+  (make-topic
+   :id "chunk"
+   :title "Chunk"
+   :summary "McDermott’s inspectable unit of running-image coherence: a piece of information with a particular state, form, or location whose freshness can be maintained relative to a basis."
+   :references '("A framework for maintaining the coherence of a running Lisp"
+                 "McDermott Running Image Coherence Crosswalk"
+                 "Core Chunk Classes"
+                 "Touch-Fahrplan view for Zotero topic enrichment")))
 
 (defun normal-association-submit-path-vs-evidence-path-topic ()
   (make-topic

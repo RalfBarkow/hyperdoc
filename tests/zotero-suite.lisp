@@ -14,4 +14,5 @@
   (run-zotero-bridge-smoke-tests)
   (run-zotero-bridge-live-tests)
   (run-bibliography-subcollections-smoke-tests)
+  (run-topic-enrichment-smoke-tests)
   t)

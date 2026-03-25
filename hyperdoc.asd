@@ -34,6 +34,8 @@
                              (:file "tools")
                              (:file "zotero-support")
                              (:file "bibliography-subcollections")
+                             (:file "topic-enrichment-route-data")
+                             (:file "topic-enrichment")
                              (:file "static-route-observability")
                              (:file "operational-targets")
                              (:file "dom-annotations")
@@ -54,7 +56,8 @@
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "zotero-bridge")
-                             (:file "bibliography-zotero")))))
+                             (:file "bibliography-zotero")
+                             (:file "topic-enrichment-zotero")))))
 
 (defsystem #:hyperdoc/examples
   :description "Portable example content for HyperDoc"
@@ -120,6 +123,7 @@
                 :components ((:file "package")
                              (:file "dmx-topics")
                              (:file "bibliography-subcollections")
+                             (:file "topic-enrichment")
                              (:file "fedwiki-materialization")
                              (:file "playground-debug")
                              (:file "web-debugger")
@@ -182,6 +186,7 @@
                              (:file "markdown-pages")
                              (:file "code-pages")
                              (:file "topics")
+                             (:file "topic-enrichment")
                              (:file "links-in-code")
                              (:file "tools")
                              (:file "codemeta")
@@ -254,6 +259,7 @@
                 :serial t
                 :components ((:file "zotero-bridge-smoke")
                              (:file "bibliography-subcollections-smoke")
+                             (:file "topic-enrichment-smoke")
                              (:file "zotero-suite"))))
   :perform (test-op (op c)
              (declare (ignore op c))

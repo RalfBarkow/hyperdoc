@@ -1,0 +1,147 @@
+<h1>Touch-Fahrplan view for Zotero topic enrichment</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This slice adds a Touch-Fahrplan-style topic view that treats the current
+  HyperDoc topic as one endpoint and a read-only Zotero source designator as
+  the other. The durable model is not a hidden pane-side live query. It is an
+  explicit chain of inspectable objects:
+  <tt>topic -&gt; topic-source-route -&gt; topic-enrichment-query-plan -&gt; Zotero title query evidence -&gt; topic-enrichment-report -&gt; Touch-Fahrplan topic view</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a></li>
+  <li><a hyperbook="topics" page="Topic-to-Zotero enrichment route"><tt>Topic-to-Zotero enrichment route</tt></a></li>
+  <li><a hyperbook="topics" page="Inspectable Zotero enrichment plan for a topic"><tt>Inspectable Zotero enrichment plan for a topic</tt></a></li>
+  <li><a hyperbook="topics" page="Topic enrichment report"><tt>Topic enrichment report</tt></a></li>
+  <li><a hyperbook="topics" page="Touch-Fahrplan view for Zotero topic enrichment"><tt>Touch-Fahrplan view for Zotero topic enrichment</tt></a></li>
+  <li><a expr="(chunk-topic-source-route)"><tt>(chunk-topic-source-route)</tt></a></li>
+  <li><a expr="(chunk-topic-enrichment-query-plan)"><tt>(chunk-topic-enrichment-query-plan)</tt></a></li>
+  <li><a expr="(chunk-topic-enrichment-report)"><tt>(chunk-topic-enrichment-report)</tt></a></li>
+</ul>
+
+<h2>Model boundary</h2>
+
+<p>
+  No hidden expr-style evaluation happens at render time. The Touch-Fahrplan
+  topic pane renders a source palette and opens a durable
+  <tt>topic-source-route</tt> object first. From that route, the user opens an
+  inspectable <tt>topic-enrichment-query-plan</tt> that shows:
+</p>
+
+<ul>
+  <li>the source topic</li>
+  <li>the Zotero source designator</li>
+  <li>the proposed query text</li>
+  <li>the match mode</li>
+  <li>the intended bridge and backend seam</li>
+  <li>the expected functions and inspectable objects on the execution path</li>
+  <li>execution readiness plus failure classification and repair hint when blocked</li>
+</ul>
+
+<p>
+  Only the explicit <b>Run plan</b> action crosses the live read-only Zotero
+  boundary.
+</p>
+
+<h2>Durable Connect association</h2>
+
+<p>
+  Each topic-to-Zotero route now authors a DOM relation annotation through the
+  general Connect instrumentation. The new <b>Durable Touch-Fahrplan routes</b>
+  section on the pane lists every durable route that points from the current
+  topic to a Zotero source, and the table keeps a stable identity for that
+  Connect relation every time the pane renders.
+</p>
+
+<ul>
+  <li>The route object itself remains inspectable in the left column.</li>
+  <li>The center column opens the <tt>dom-relation-annotation</tt> handled by
+      the Connect inspector, so you can treat the route like any other
+      association.</li>
+  <li>The right column surfaces the authored note, giving you a place to
+      attach future defects, patch-target cues, or review comments.</li>
+</ul>
+
+<p>
+  This keeps the durable association available even after reloads while the
+  source palette still opens a fresh route-per-source. The Touch-Fahrplan pane
+  therefore remains the normal Connect surface with extra behavior that
+  exposes the enrichment plan before touching Zotero.
+</p>
+
+<h2>First-slice source palette</h2>
+
+<p>
+  The first slice keeps the source palette intentionally small. It exposes one
+  inspectable source designator:
+  <tt>Local Zotero library</tt>.
+  That tile resolves through the existing
+  <tt>make-default-zotero-library-bridge</tt> wrapper and therefore inherits the
+  current optional-runtime and bounded-failure behavior.
+</p>
+
+<h2>Conservative matching rule</h2>
+
+<p>
+  The default query text is the current topic title. The default plan uses
+  <tt>:exact</tt> title matching first. A broader <tt>:loose</tt> follow-up plan
+  is available only as a separate explicit inspectable object.
+</p>
+
+<p>
+  This keeps the topic view from overclaiming semantic equivalence from weak
+  Zotero matches.
+</p>
+
+<h2>Report structure</h2>
+
+<p>
+  The resulting <tt>topic-enrichment-report</tt> keeps evidence and editorial
+  consequence separate:
+</p>
+
+<ul>
+  <li><b>Evidence</b>: Zotero title-query evidence, selected-attempt or missing-attempt normalization, and matched Zotero item objects.</li>
+  <li><b>Candidate signals</b>: derived cues such as title, DOI, citation key, date, or item type from a single matched Zotero item.</li>
+  <li><b>Editorial consequences</b>: explicit inspectable suggestions about what Zotero could add to the topic surface, without treating Zotero as editorial truth.</li>
+</ul>
+
+<h2>Bounded failure style</h2>
+
+<p>
+  Zotero remains read-only and bounded. Unavailable backends, missing selected
+  attempts, zero matches, and ambiguous matches become inspectable route, plan,
+  or report surfaces rather than pane crashes.
+</p>
+
+<h2>Chunk walkthrough</h2>
+
+<ol>
+  <li>Open the topic page <a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a>.</li>
+  <li>Open the <b>Touch-Fahrplan</b> pane view.</li>
+  <li>Choose the <tt>Local Zotero library</tt> tile and inspect the resulting route object.</li>
+  <li>Open the exact plan and inspect its execution path.</li>
+  <li>Use <b>Run plan</b> to execute the read-only title lookup.</li>
+  <li>Inspect the resulting report and the inline latest-successful summary on the topic pane.</li>
+</ol>
+
+<h2>Focused smoke path</h2>
+
+<lisp-code>
+(asdf:load-system :hyperdoc/tests/zotero)
+(hyperdoc/tests:run-topic-enrichment-smoke-tests)
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Zotero library bridge for HyperDoc">Zotero library bridge for HyperDoc</a></li>
+  <li><a page="Bibliography subcollections in HyperDoc">Bibliography subcollections in HyperDoc</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

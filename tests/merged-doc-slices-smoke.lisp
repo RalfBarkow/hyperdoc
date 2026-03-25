@@ -436,6 +436,32 @@
   (assert-page-source-contains "hyperdoc/Bibliography authoring-plan stand-in inspection.html"
                                "ready before the pane-open and rendering boundary"))
 
+(defun run-topic-enrichment-doc-slice-smoke-test ()
+  (dolist (entry '((hyperdoc::chunk-topic "Chunk")
+                   (hyperdoc::topic-to-zotero-enrichment-route-topic
+                    "Topic-to-Zotero enrichment route")
+                   (hyperdoc::inspectable-zotero-enrichment-plan-for-a-topic-topic
+                    "Inspectable Zotero enrichment plan for a topic")
+                   (hyperdoc::topic-enrichment-report-topic
+                    "Topic enrichment report")
+                   (hyperdoc::touch-fahrplan-view-for-zotero-topic-enrichment-topic
+                    "Touch-Fahrplan view for Zotero topic enrichment")))
+    (destructuring-bind (symbol title) entry
+      (assert-topic-function-present symbol title)))
+  (assert-hyperdoc-page-present "Touch-Fahrplan view for Zotero topic enrichment")
+  (assert-page-source-contains
+   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
+   "(chunk-topic-enrichment-query-plan)")
+  (assert-page-source-contains
+   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
+   "topic-source-route")
+  (assert-page-source-contains
+   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
+   "No hidden expr-style evaluation happens at render time")
+  (assert-page-source-contains
+   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
+   "Run plan"))
+
 (defun run-dom-connect-submit-path-comparison-doc-slice-smoke-test ()
   (assert-topic-function-present
    'hyperdoc::normal-association-submit-path-vs-evidence-path-topic
@@ -522,6 +548,7 @@
   (run-upstream-main-merge-preparation-chain-smoke-test)
   (run-drew-mind-and-mechanism-doc-slice-smoke-test)
   (run-bibliography-subcollections-doc-slice-smoke-test)
+  (run-topic-enrichment-doc-slice-smoke-test)
   (run-dom-connect-submit-path-comparison-doc-slice-smoke-test)
   (run-snapshot-transport-doc-slice-smoke-test)
   (run-association-topics-doc-slice-smoke-test)

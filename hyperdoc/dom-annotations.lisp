@@ -1373,7 +1373,9 @@
 (defun make-dom-relation-annotation (&key context-object
                                           context-view-title
                                           source-anchor
-                                          target-anchor)
+                                          target-anchor
+                                          relation-kind
+                                          note)
   (let* ((match (matched-workflow-patch-target-info source-anchor target-anchor))
          (patch-target (getf match :patch-target))
          (defect (getf match :defect))
@@ -1396,9 +1398,11 @@
                    :target-anchor target-anchor
                    :source-object source-object
                    :target-object target-object
-                   :relation-kind (or (getf match :relation-kind)
+                   :relation-kind (or relation-kind
+                                      (getf match :relation-kind)
                                       "unclassified association")
-                   :note (or (getf match :note)
+                   :note (or note
+                             (getf match :note)
                              (dom-relation-annotation-durability-note
                               source-anchor target-anchor))
                    :matching-patch-target patch-target
