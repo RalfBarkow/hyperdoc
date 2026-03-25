@@ -1469,11 +1469,17 @@
                           (error "Missing target anchor JSON.")))
          (source-anchor (make-dom-annotation-anchor-from-json source-data))
          (target-anchor (make-dom-annotation-anchor-from-json target-data)))
-    (make-dom-relation-annotation
-     :context-object context-object
-     :context-view-title context-view-title
-     :source-anchor source-anchor
-     :target-anchor target-anchor)))
+    (or (and (call-hyperdoc-runtime "ANNOTATION-TARGET-ANCHOR-P" target-anchor)
+             (call-hyperdoc-runtime "DOCK-ANNOTATION-FOR-SOURCE-ANCHOR"
+                                    context-object
+                                    source-anchor
+                                    :context-view-title context-view-title
+                                    :target-anchor target-anchor))
+        (make-dom-relation-annotation
+         :context-object context-object
+         :context-view-title context-view-title
+         :source-anchor source-anchor
+         :target-anchor target-anchor))))
 
 (defun make-dom-relation-annotation-from-json (&key context-object
                                                     context-view-title

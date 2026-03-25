@@ -162,6 +162,8 @@
               (if (dock-zotero-capability-available-p context-object)
                   "true"
                   "false")
+              :data-hyperdoc-dock-annotation-topic-id
+              (id-of (annotation-topic))
               :data-context-object-id (dom-connect-context-object-id context-object)
               :data-context-view-title view-title
               (:div :class "hyperdoc-dom-connect-controls"
@@ -218,7 +220,7 @@
                     (:span :class "hyperdoc-dock-annotation-submit"
                            :style "display:none"
                            (views:eval-button
-                            "Open annotation"
+                            "Open current-object annotation"
                             (views:thunk
                               (dock-annotation-for-context
                                context-object
@@ -580,10 +582,16 @@
 
 (defmethod views:title-bar-action-buttons ((annotation dock-annotation))
   (views:html
+    (when (source-object-of annotation)
+      (views:html
+        (views:eval-button
+         "Open source object"
+         (views:thunk (source-object-of annotation))
+         "Open the current inspectable object that this annotation relation annotates.")))
     (views:eval-button
-     "Open target"
+     "Open Annotation topic"
      (views:thunk (target-object-of annotation))
-     "Open the current object that this Dock annotation targets.")))
+     "Open the generic Annotation topic that classifies this relation.")))
 
 (views:defview 👀overview (annotation dock-annotation)
   (views:html-view :title "Overview" :priority 1
@@ -605,23 +613,23 @@
                                             "-")))))
               (:tr (:th "Context object")
                    (:td (maybe-dom-object-ref (context-object-of annotation))))
-              (:tr (:th "Annotation topic")
+              (:tr (:th "Annotated source object")
                    (:td (maybe-dom-object-ref (source-object-of annotation))))
-              (:tr (:th "Target object")
+              (:tr (:th "Annotation topic")
                    (:td (maybe-dom-object-ref (target-object-of annotation)))))
       (:h4 "Note")
       (:pre :style "white-space: pre-wrap"
             (views:esc (or (note-of annotation) ""))))))
 
-(views:defview 👀target (annotation dock-annotation)
-  (views:html-view :title "Target" :priority 2
+(views:defview 👀source (annotation dock-annotation)
+  (views:html-view :title "Source" :priority 2
     (views:html
-      (:h4 "Target object")
-      (maybe-dom-object-ref (target-object-of annotation))
-      (:h4 "Target anchor")
-      (maybe-dom-object-ref (target-anchor-of annotation))
-      (:h4 "Annotation source")
-      (maybe-dom-object-ref (source-anchor-of annotation)))))
+      (:h4 "Annotated source object")
+      (maybe-dom-object-ref (source-object-of annotation))
+      (:h4 "Source anchor")
+      (maybe-dom-object-ref (source-anchor-of annotation))
+      (:h4 "Annotation target")
+      (maybe-dom-object-ref (target-anchor-of annotation)))))
 
 (views:defview 👀raw-data (annotation dock-annotation)
   (views:html-view :title "Raw data" :priority 3
@@ -633,7 +641,7 @@
                            (and (source-object-of annotation)
                                 (ignore-errors
                                   (id-of (source-object-of annotation)))))
-                     (cons "Target object id"
+                     (cons "Annotation topic id"
                            (and (target-object-of annotation)
                                 (ignore-errors
                                   (id-of (target-object-of annotation)))))))))))

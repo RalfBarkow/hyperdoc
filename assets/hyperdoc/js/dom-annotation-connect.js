@@ -412,6 +412,26 @@
     };
   }
 
+  function buildAnnotationTargetAnchor(state) {
+    var surface = state && state.surface;
+    var annotationTopicId =
+      surface && surface.dataset.hyperdocDockAnnotationTopicId || "dock-annotation";
+    return {
+      providerKind: "dock-v1",
+      viewKind: "dock-target",
+      viewTitle: surface && surface.dataset.contextViewTitle || null,
+      paneId: state && state.paneId || paneIdForElement(surface),
+      contextObjectId: surface && surface.dataset.contextObjectId || null,
+      strategy: "annotation-topic",
+      value: annotationTopicId,
+      label: "Annotation",
+      durabilityTier: "strong",
+      durabilityNote:
+        "The generic Annotation target is a synthetic authored anchor that classifies the relation as an annotation.",
+      objectId: annotationTopicId
+    };
+  }
+
   function buildFedwikiAnchor(element, surface, root, target) {
     var clickedElement = domAnchorCandidate(root, target) || element;
     var fallback = buildDomFallbackMetadata(clickedElement, root);
@@ -786,7 +806,7 @@
       return "Click a source anchor.";
     }
     if (session.phase === "choose-target") {
-      return "Click a target anchor.";
+      return "Click a target anchor or tap Annotation.";
     }
     return "";
   }
@@ -854,6 +874,18 @@
     dispatchHiddenDockButton(state.dockAnnotationSubmit, {
       dispatchDelayMs: 250
     });
+  }
+
+  function completeAnnotationTarget(state) {
+    var manager = state && state.manager || connectManager();
+    var session = manager.session;
+    if (!state || !state.available || !sessionActive(manager) ||
+        session.phase !== "choose-target" || !session.sourceAnchor) {
+      openCurrentAnnotation(state);
+      return;
+    }
+    markDockCapabilityMastered(state, "annotation-target-selected");
+    completeConnection(state, buildAnnotationTargetAnchor(state));
   }
 
   function clearFeedback(state) {
@@ -1285,7 +1317,7 @@
             '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
                     'title="Click a source anchor, then a target anchor.">Connect</button>' +
             '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
-                    'title="Open or reopen the generic Annotation object for the current pane object.">Annotation</button>' +
+                    'title="Tap to complete Connect to the generic Annotation target, or reopen the current-object annotation when Connect is idle.">Annotation</button>' +
           '</div>' +
           '<button type="button" class="hyperdoc-dom-connect-help-toggle hyperdoc-dock-guide" ' +
                   'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
@@ -1539,7 +1571,7 @@
         title: "Connect",
         summary: "Connect is active in this pane.",
         detail:
-          "Task state stays in the coachmark while the richer route or traversal workflow remains in the pane body."
+          "Task state stays in the coachmark while the richer route or traversal workflow remains in the pane body. Annotation is also a valid target while Connect is waiting for one."
       };
     }
     if (presentationState === "rediscovery") {
@@ -1555,7 +1587,7 @@
         title: "Connect",
         summary: state.providerHelpSummary,
         detail:
-          "The Dock is temporarily expanded because Connect became newly relevant here. Annotation remains available after the coachmark recedes, while inspection stays in the inspector tabs."
+          "The Dock is temporarily expanded because Connect became newly relevant here. Annotation remains available after the coachmark recedes and can complete an active Connect gesture as a generic target, while inspection stays in the inspector tabs."
       };
     }
     return {
@@ -2225,7 +2257,7 @@
     annotation.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
-      openCurrentAnnotation(state);
+      completeAnnotationTarget(state);
     });
     touchFahrplan.addEventListener("click", function (event) {
       event.preventDefault();

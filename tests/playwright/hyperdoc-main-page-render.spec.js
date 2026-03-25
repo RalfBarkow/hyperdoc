@@ -227,6 +227,7 @@ test("HyperDoc Main page renders in the pane", async ({ page }, testInfo) => {
   expect(finalState.paragraphColor).toBe("rgb(0, 0, 0)");
   expect(finalState.paragraphHeight).toBeGreaterThan(0);
   expect(dockActions).toEqual(
-    expect.arrayContaining(["Connect", "Inspect", "Annotation"])
+    expect.arrayContaining(["Connect", "Annotation"])
   );
+  expect(dockActions).not.toContain("Inspect");
 });

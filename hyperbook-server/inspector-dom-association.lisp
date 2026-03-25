@@ -385,6 +385,25 @@
       (ignore-errors
         (funcall (symbol-function symbol) snapshot)))))
 
+(defun call-hyperdoc-optional-accessor (symbol-name object)
+  (let ((symbol (find-symbol symbol-name :hyperdoc)))
+    (when (and symbol (fboundp symbol))
+      (ignore-errors
+        (funcall (symbol-function symbol) object)))))
+
+(defun hyperdoc-object-id (object)
+  (call-hyperdoc-optional-accessor "ID-OF" object))
+
+(defun dock-annotation-object-p (object)
+  (let ((dock-capability
+          (call-hyperdoc-optional-accessor "DOCK-CAPABILITY-OF" object))
+        (relation-kind
+          (call-hyperdoc-optional-accessor "RELATION-KIND-OF" object)))
+    (and (stringp dock-capability)
+         (string= dock-capability "Annotation")
+         (stringp relation-kind)
+         (string= relation-kind "annotation"))))
+
 (defun dom-connect-snapshot-object-p (object)
   (not (null
         (call-hyperdoc-connect-snapshot-accessor
@@ -497,6 +516,28 @@
         (let ((pane (create-pane inspector evidence)))
           (mark-dom-connect-request-evidence-pane pane request-id evidence)
           pane))))
+
+(defun find-reusable-dock-annotation-pane (inspector annotation)
+  (let ((annotation-id (hyperdoc-object-id annotation)))
+    (when (and (dock-annotation-object-p annotation)
+               (stringp annotation-id))
+      (loop for candidate in (fset:convert 'list (inspector-panes inspector))
+            for pane-object = (pane-object candidate)
+            when (and (dock-annotation-object-p pane-object)
+                      (string= (or (hyperdoc-object-id pane-object) "")
+                               annotation-id))
+              return candidate))))
+
+(defun open-dock-annotation-pane (inspector annotation)
+  (let ((existing-pane (find-reusable-dock-annotation-pane inspector annotation)))
+    (if existing-pane
+        (progn
+          (setf (pane-object existing-pane) annotation)
+          (refresh existing-pane)
+          (select-view existing-pane "Overview")
+          (clog:focus (clog-obj existing-pane))
+          existing-pane)
+        (create-pane inspector annotation))))
 
 (defun dom-association-success-message (payload)
   (cond
@@ -674,11 +715,13 @@
                          inspector submit-payload association))
                        ((dom-connect-request-evidence-object-request-id
                          association)
-                        (open-dom-connect-request-evidence-pane
-                         inspector
-                         (dom-connect-request-evidence-object-request-id
+                       (open-dom-connect-request-evidence-pane
+                        inspector
+                        (dom-connect-request-evidence-object-request-id
                           association)
-                         association))
+                        association))
+                       ((dock-annotation-object-p association)
+                        (open-dock-annotation-pane inspector association))
                        (t
                         (create-pane inspector association)))
                      (maybe-log-inspector-performance

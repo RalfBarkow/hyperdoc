@@ -180,7 +180,7 @@ test("content view opens an association through pane-chrome Connect", async ({
   expect(chromeAfterSource.statusText).toBe("Pick target");
   expect(chromeAfterSource.sourceChipText).toBe("Text pages");
   expect(chromeAfterSource.clearHidden).toBe(false);
-  expect(chromeAfterSource.cueText).toBe("Click a target anchor.");
+  expect(chromeAfterSource.cueText).toBe("Click a target anchor or tap Annotation.");
 
   expect(chromeAfterResult.toggleMode).toBe("inactive");
   expect(chromeAfterResult.feedbackKind).toBe("success");
@@ -214,6 +214,87 @@ test("content view opens an association through pane-chrome Connect", async ({
         trace.latestPaneSummary.body
       )
   ).toBe(true);
+});
+
+test("content view connects a source anchor to Annotation and reopens the same relation", async ({
+  page,
+}, testInfo) => {
+  const hyperdocPane = await openHyperDoc(page);
+
+  await clearConnectEventTrace(page);
+  await startConnectInPane(page, 1);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+
+  const chromeAfterSource = await readPaneChromeState(page, 1);
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+
+  await hyperdocPane.locator(".hyperdoc-dock-annotation").click();
+
+  const trace = await waitForAssociationResult(page);
+  const paneCountAfterFirstOpen = await page.locator(".inspector-pane").count();
+  const annotationPaneIndex = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".inspector-pane")).findIndex((paneNode) => {
+      const titleNode =
+        paneNode.querySelector(".inspector-title-bar-object") ||
+        paneNode.querySelector(".inspector-title-bar-class");
+      return (titleNode?.textContent || "").trim() === "Annotation: Text pages";
+    })
+  );
+  const annotationPane = await readInspectorPaneState(page, annotationPaneIndex);
+
+  await clearConnectEventTrace(page);
+  await startConnectInPane(page, 1);
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+  await hyperdocPane.locator(".hyperdoc-dock-annotation").click();
+
+  const secondTrace = await waitForAssociationResult(page);
+  const paneCountAfterSecondOpen = await page.locator(".inspector-pane").count();
+  const annotationPaneCount = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".inspector-pane")).filter((paneNode) => {
+      const titleNode =
+        paneNode.querySelector(".inspector-title-bar-object") ||
+        paneNode.querySelector(".inspector-title-bar-class");
+      return (titleNode?.textContent || "").trim() === "Annotation: Text pages";
+    }).length
+  );
+
+  await attachJson(testInfo, "annotation-connect-chrome-after-source.json", chromeAfterSource);
+  await attachJson(testInfo, "annotation-connect-trace.json", trace);
+  await attachJson(testInfo, "annotation-connect-pane.json", annotationPane);
+  await attachJson(testInfo, "annotation-connect-second-trace.json", secondTrace);
+
+  expect(chromeAfterSource.statusText).toBe("Pick target");
+  expect(chromeAfterSource.cueText).toBe("Click a target anchor or tap Annotation.");
+  expect(chromeAfterSource.sourceChipText).toBe("Text pages");
+
+  expect(trace.requestId).toBeTruthy();
+  expect(trace.latestStage).toBe("pane-open-succeeded");
+  expect(
+    trace.events.some(
+      (event) =>
+        event.stage === "association-payload-assembled" &&
+        event.details &&
+        event.details.target &&
+        event.details.target.providerKind === "dock-v1" &&
+        event.details.target.strategy === "annotation-topic"
+    )
+  ).toBe(true);
+  expect(paneCountAfterFirstOpen).toBe(paneCountBefore + 1);
+  expect(annotationPaneIndex).toBeGreaterThanOrEqual(0);
+  expect(annotationPane.title).toBe("Annotation: Text pages");
+  expect(annotationPane.bodyText).toContain("Annotation topic");
+  expect(annotationPane.bodyText).toContain("Text pages");
+
+  expect(secondTrace.requestId).toBeTruthy();
+  expect(secondTrace.latestStage).toBe("pane-open-succeeded");
+  expect(paneCountAfterSecondOpen).toBe(paneCountAfterFirstOpen);
+  expect(annotationPaneCount).toBe(1);
 });
 
 test("content view opens a cross-pane association through pane-chrome Connect", async ({

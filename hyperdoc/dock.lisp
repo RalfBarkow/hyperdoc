@@ -38,25 +38,10 @@ the primary pane-local object in this slice."))
 (defun dock-annotation-topic ()
   (annotation-topic))
 
-(defun make-dock-capability-anchor (capability context-object context-view-title)
-  (let ((annotation-topic (dock-annotation-topic)))
-    (make-instance 'dom-annotation-anchor
-                   :provider-kind "dock-v1"
-                   :view-kind "dock"
-                   :view-title context-view-title
-                   :context-object-id (dock-object-stable-id context-object)
-                   :strategy "dock-capability"
-                   :value (string-downcase capability)
-                   :label capability
-                   :durability-tier "strong"
-                   :durability-note
-                   "Dock capability anchors are synthetic authored anchors for pane-local actions."
-                   :object-id (dock-object-stable-id annotation-topic))))
-
-(defun make-dock-object-anchor (object context-object context-view-title)
+(defun make-dock-current-object-anchor (object context-object context-view-title)
   (make-instance 'dom-annotation-anchor
                  :provider-kind "dock-v1"
-                 :view-kind "dock-target"
+                 :view-kind "dock-source"
                  :view-title context-view-title
                  :context-object-id (dock-object-stable-id context-object)
                  :strategy "current-object"
@@ -64,96 +49,158 @@ the primary pane-local object in this slice."))
                  :label (dock-object-label object)
                  :durability-tier "medium"
                  :durability-note
-                 "This first Dock slice targets the current pane object rather than a specific DOM anchor."
+                 "Current-object Dock anchors are synthetic shortcuts for annotating the current inspectable object when no more specific source anchor has been selected."
                  :object-id (dock-object-stable-id object)))
 
-(defun dock-annotation-default-note (target-object context-view-title)
+(defun make-dock-annotation-target-anchor (context-object context-view-title)
+  (let ((annotation-topic (dock-annotation-topic)))
+    (make-instance 'dom-annotation-anchor
+                   :provider-kind "dock-v1"
+                   :view-kind "dock-target"
+                   :view-title context-view-title
+                   :context-object-id (dock-object-stable-id context-object)
+                   :strategy "annotation-topic"
+                   :value (dock-object-stable-id annotation-topic)
+                   :label (dock-object-label annotation-topic)
+                   :durability-tier "strong"
+                   :durability-note
+                   "The generic Annotation target is a synthetic authored anchor that classifies the relation as an annotation."
+                   :object-id (dock-object-stable-id annotation-topic))))
+
+(defun annotation-target-anchor-p (anchor)
+  (and anchor
+       (string= (provider-kind-of anchor) "dock-v1")
+       (string= (anchor-strategy-of anchor) "annotation-topic")
+       (let ((annotation-topic (dock-annotation-topic)))
+         (or (string= (or (anchor-object-id-of anchor) "")
+                      (dock-object-stable-id annotation-topic))
+             (string= (or (anchor-value-of anchor) "")
+                      (dock-object-stable-id annotation-topic))))))
+
+(defun dock-current-object-anchor-p (anchor)
+  (and anchor
+       (string= (provider-kind-of anchor) "dock-v1")
+       (string= (anchor-strategy-of anchor) "current-object")))
+
+(defun dock-annotation-source-label (source-anchor)
+  (or (label-of source-anchor)
+      (anchor-value-of source-anchor)
+      "source"))
+
+(defun dock-annotation-default-note (source-anchor context-view-title)
   (format nil
-          "Draft annotation for ~A.~@[ Captured from the ~A pane view.~] This first Dock slice targets the current pane object rather than a specific DOM anchor."
-          (dock-object-label target-object)
+          "Draft annotation for ~A.~@[ Captured from the ~A pane view.~] The selected source remains the thing being annotated, while Annotation is the generic target topic."
+          (dock-annotation-source-label source-anchor)
           context-view-title))
 
-(defun dock-annotation-title (target-object)
-  (format nil "Annotation: ~A" (dock-object-label target-object)))
+(defun dock-annotation-title (source-anchor)
+  (format nil "Annotation: ~A" (dock-annotation-source-label source-anchor)))
 
-(defun dock-annotation-summary (target-object context-view-title)
+(defun dock-annotation-summary (source-anchor context-view-title)
   (format nil
-          "Generic Dock annotation for ~A.~@[ The annotation was opened from the ~A pane view.~]"
-          (dock-object-label target-object)
+          "Annotation relation for ~A.~@[ The relation was opened from the ~A pane view.~] Annotation is the generic target topic."
+          (dock-annotation-source-label source-anchor)
           context-view-title))
 
-(defun dock-annotation-key (context-object context-view-title &optional target-anchor)
-  (let* ((target-object (dock-primary-object context-object))
-         (source-anchor (make-dock-capability-anchor
-                         "Annotation"
-                         context-object
-                         context-view-title))
+(defun dock-annotation-key (source-anchor context-object context-view-title
+                             &optional target-anchor)
+  (let* ((resolved-source-anchor
+           (or source-anchor
+               (make-dock-current-object-anchor
+                (dock-primary-object context-object)
+                context-object
+                context-view-title)))
          (resolved-target-anchor
            (or target-anchor
-               (make-dock-object-anchor
-                target-object context-object context-view-title))))
-    (dom-relation-annotation-id source-anchor resolved-target-anchor)))
+               (make-dock-annotation-target-anchor
+                context-object
+                context-view-title))))
+    (dom-relation-annotation-id resolved-source-anchor
+                                resolved-target-anchor)))
+
+(defun dock-annotation-source-object (context-object source-anchor)
+  (or (and (dock-current-object-anchor-p source-anchor)
+           (dock-primary-object context-object))
+      (maybe-official-step-for-anchor source-anchor)))
 
 (defun make-dock-annotation (&key context-object
                                   context-view-title
+                                  source-anchor
+                                  source-object
                                   target-anchor
-                                  target-object
                                   relation-kind
                                   note)
-  (let* ((resolved-target-object
-           (or target-object
-               (dock-primary-object context-object)))
-         (source-topic (dock-annotation-topic))
-         (source-anchor
-           (make-dock-capability-anchor
-            "Annotation"
-            context-object
-            context-view-title))
+  (let* ((resolved-source-anchor
+           (or source-anchor
+               (make-dock-current-object-anchor
+                (dock-primary-object context-object)
+                context-object
+                context-view-title)))
+         (annotation-topic (dock-annotation-topic))
          (resolved-target-anchor
            (or target-anchor
-               (make-dock-object-anchor
-                resolved-target-object
+               (make-dock-annotation-target-anchor
                 context-object
                 context-view-title)))
          (registry-key
-           (dom-relation-annotation-id source-anchor resolved-target-anchor)))
+           (dom-relation-annotation-id resolved-source-anchor
+                                       resolved-target-anchor)))
     (make-dom-relation-annotation
      :class 'dock-annotation
      :id registry-key
-     :title (dock-annotation-title resolved-target-object)
+     :title (dock-annotation-title resolved-source-anchor)
      :summary (dock-annotation-summary
-               resolved-target-object
+               resolved-source-anchor
                context-view-title)
      :context-object context-object
      :context-view-title context-view-title
-     :source-anchor source-anchor
+     :source-anchor resolved-source-anchor
      :target-anchor resolved-target-anchor
-     :source-object source-topic
-     :target-object resolved-target-object
+     :source-object (or source-object
+                        (dock-annotation-source-object
+                         context-object
+                         resolved-source-anchor))
+     :target-object annotation-topic
      :relation-kind (or relation-kind "annotation")
      :note (or note
                (dock-annotation-default-note
-                resolved-target-object
+                resolved-source-anchor
                 context-view-title))
      :registry-key registry-key
      :dock-capability "Annotation")))
 
-(defun dock-annotation-for-context (context-object &key context-view-title
-                                                   target-anchor
-                                                   target-object
-                                                   relation-kind
-                                                   note)
+(defun dock-annotation-for-source-anchor (context-object source-anchor
+                                          &key context-view-title
+                                            source-object
+                                            target-anchor
+                                            relation-kind
+                                            note)
   (let* ((annotation
            (make-dock-annotation
             :context-object context-object
             :context-view-title context-view-title
+            :source-anchor source-anchor
+            :source-object source-object
             :target-anchor target-anchor
-            :target-object target-object
             :relation-kind relation-kind
             :note note))
          (registry-key (id-of annotation)))
     (or (gethash registry-key *dock-annotations*)
         (setf (gethash registry-key *dock-annotations*) annotation))))
+
+(defun dock-annotation-for-context (context-object &key context-view-title
+                                                   relation-kind
+                                                   note)
+  (dock-annotation-for-source-anchor
+   context-object
+   (make-dock-current-object-anchor
+    (dock-primary-object context-object)
+    context-object
+    context-view-title)
+   :context-view-title context-view-title
+   :source-object (dock-primary-object context-object)
+   :relation-kind relation-kind
+   :note note))
 
 (defun dock-zotero-capability-available-p (context-object)
   (and (typep (dock-primary-object context-object) 'topic)
