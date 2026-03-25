@@ -227,10 +227,12 @@ COMMIT;")
 (defun run-topic-enrichment-runtime-authoring-smoke-test ()
   (with-topic-enrichment-runtime-authoring-context
       (fixture route-data-path source)
-    (declare (ignore fixture))
     (let* ((topic (hyperdoc::chunk-topic))
+           (fixture-database-path (getf fixture :database-path))
            (before-routes
              (hyperdoc::topic-source-route-durable-routes-for-topic topic)))
+      (assert-true fixture-database-path
+                   "Runtime-authoring smoke fixture should provide a database path.")
       (assert-true (null before-routes)
                    "Chunk should begin without durable routes in the runtime-authoring smoke context.")
       (let* ((route (hyperdoc::create-durable-topic-source-route! topic source))

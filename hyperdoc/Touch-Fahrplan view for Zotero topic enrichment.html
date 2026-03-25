@@ -67,10 +67,12 @@
 </ul>
 
 <p>
-  This keeps the durable association available even after reloads while the
-  source palette still opens a fresh route-per-source. The Touch-Fahrplan pane
-  therefore remains the normal Connect surface with extra behavior that
-  exposes the enrichment plan before touching Zotero.
+  This keeps the durable association available even after reloads. The source
+  palette now offers a visible <b>Create durable route</b> control for sources
+  that are not yet authored. That control persists the route definition through
+  the same authored-data boundary and then opens the resulting route object.
+  The Touch-Fahrplan pane therefore remains the normal Connect surface with
+  extra behavior that exposes the enrichment plan before touching Zotero.
 </p>
 
 <p>
@@ -82,6 +84,13 @@
   <tt>dom-relation-annotation</tt>. The runtime objects are therefore
   reconstructable from durable authored route data rather than persisted as
   heap objects.
+</p>
+
+<p>
+  Runtime authoring writes back into that same Lisp data file by replacing the
+  <tt>*topic-enrichment-route-definitions*</tt> form. This is honest durable
+  authoring, but it also means the working tree becomes dirty until the new
+  authored route definition is committed.
 </p>
 
 <h2>First-slice source palette</h2>
@@ -134,11 +143,12 @@
 <ol>
   <li>Open the topic page <a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a>.</li>
   <li>Open the <b>Touch-Fahrplan</b> pane view.</li>
-  <li>Use the preauthored <tt>Chunk -&gt; Local Zotero library</tt> entry in <b>Durable Touch-Fahrplan routes</b> or inspect the source-palette route object for the same source.</li>
-  <li>Open the exact plan and inspect its execution path.</li>
-  <li>Use <b>Run plan</b> to execute the read-only title lookup.</li>
+  <li>In <b>Source palette</b>, find <tt>Local Zotero library</tt> and click <b>Create durable route</b>.</li>
+  <li>Inspect the returned <tt>topic-source-route</tt>, then inspect its <tt>Route definition</tt> row if you want the durable authored entry itself.</li>
+  <li>Click <b>Open exact plan</b> and inspect the execution path.</li>
+  <li>Use <b>Run exact plan</b> or the plan inspector's <b>Run plan</b> action to execute the read-only title lookup.</li>
   <li>Inspect the resulting report and the inline latest-successful summary on the topic pane.</li>
-  <li>Reload and reopen <b>Chunk</b>; the same durable authored route reappears in <b>Durable Touch-Fahrplan routes</b> because it is reified from the authored route-definition data.</li>
+  <li>Reload or restart HyperDoc, reopen <b>Chunk</b>, reopen <b>Touch-Fahrplan</b>, and reopen the same durable route from <b>Durable Touch-Fahrplan routes</b>. It reappears because the authored route-definition entry is read back from <tt>hyperdoc/topic-enrichment-route-data.lisp</tt>.</li>
 </ol>
 
 <h2>Focused smoke path</h2>

@@ -460,7 +460,13 @@
    "No hidden expr-style evaluation happens at render time")
   (assert-page-source-contains
    "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "Run plan"))
+   "Run plan")
+  (assert-page-source-contains
+   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
+   "Create durable route")
+  (assert-page-source-contains
+   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
+   "*topic-enrichment-route-definitions*"))
 
 (defun run-dom-connect-submit-path-comparison-doc-slice-smoke-test ()
   (assert-topic-function-present
