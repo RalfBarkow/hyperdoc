@@ -155,9 +155,6 @@ the primary pane-local object in this slice."))
     (or (gethash registry-key *dock-annotations*)
         (setf (gethash registry-key *dock-annotations*) annotation))))
 
-(defun dock-inspect-object-for-context (context-object)
-  (dock-primary-object context-object))
-
 (defun dock-zotero-capability-available-p (context-object)
   (and (typep (dock-primary-object context-object) 'topic)
        (let ((bridge (ignore-errors (make-default-zotero-library-bridge))))
@@ -323,7 +320,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/degrade-chrome"
                  :title "Degrade chrome, not capability"
-                 :summary "When the Dock recedes, Connect, Inspect, and Annotation stay available in compact form."
+                 :summary "When the Dock recedes, Connect and Annotation stay available in compact form while inspection remains in the inspector tabs."
                  :claim-text
                  "The steady-state pane keeps a compact capability strip while removing introduction prose and expanded Dock chrome."
                  :evidence (list (dock-js-coachmark-evidence)
@@ -334,7 +331,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/connect-active"
                  :title "Active Connect keeps task state visible"
-                 :summary "During an in-flight Connect gesture, the expanded Dock stays visible with source, next step, clear/cancel, and state inspection."
+                 :summary "During an in-flight Connect gesture, the expanded Dock stays visible with source, next step, and clear/cancel controls."
                  :claim-text
                  "Connect uses the expanded coachmark only while the interaction is stateful, and the same pane snapshot exposes why the Dock is visible now."
                  :evidence (list (dock-js-coachmark-evidence)
@@ -369,14 +366,14 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-state/latent"
                  :title "latent"
-                 :summary "No expanded coachmark is visible, but compact Connect, Inspect, and Annotation actions remain in the pane chrome."
-                 :compact-representation "Compact capability strip with Connect, Inspect, Annotation, and Guide."
+                 :summary "No expanded coachmark is visible, but compact Connect and Annotation actions remain in the pane chrome."
+                 :compact-representation "Compact capability strip with Connect, Annotation, and Guide."
                  :expanded-representation "None."
                  :entry-triggers '("Capability is available but no active gesture or coachmark teaching is currently shown.")
                  :exit-conditions '("A newly relevant capability triggers introduction."
                                     "Guide requests rediscovery."
                                     "Connect starts and makes the interaction active.")
-                 :capabilities '("Connect" "Inspect" "Annotation")
+                 :capabilities '("Connect" "Annotation")
                  :claims (list (dock-degrade-chrome-claim))))
 
 (defun dock-introduction-state ()
@@ -390,7 +387,7 @@ the primary pane-local object in this slice."))
                  :exit-conditions '("Dismiss coachmark."
                                     "Start Connect."
                                     "Switch to a steady-state pane where only compact access remains.")
-                 :capabilities '("Connect" "Inspect" "Annotation" "Touch-Fahrplan handoff" "DMX handoff")
+                 :capabilities '("Connect" "Annotation" "Touch-Fahrplan handoff" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 
@@ -400,12 +397,12 @@ the primary pane-local object in this slice."))
                  :title "active"
                  :summary "The Dock stays expanded while the user is mid-gesture so task state remains visible."
                  :compact-representation "Compact capability strip remains present, but active Connect state owns the expanded surface."
-                 :expanded-representation "Status, next expected step, selected source summary, clear, cancel, and Connect-state inspection."
+                 :expanded-representation "Status, next expected step, selected source summary, clear, and cancel."
                  :entry-triggers '("Connect enters choose-source, choose-target, or submitting.")
                  :exit-conditions '("Association succeeds."
                                     "Connect is cancelled."
                                     "Selected source is cleared and the gesture returns to choose-source.")
-                 :capabilities '("Connect" "Inspect" "Annotation")
+                 :capabilities '("Connect" "Annotation")
                  :claims (list (dock-connect-active-claim))))
 
 (defun dock-degraded-state ()
@@ -420,7 +417,7 @@ the primary pane-local object in this slice."))
                                     "A sibling Dock action demonstrated the capability cluster.")
                  :exit-conditions '("Guide requests rediscovery."
                                     "Connect becomes active again.")
-                 :capabilities '("Connect" "Inspect" "Annotation")
+                 :capabilities '("Connect" "Annotation")
                  :claims (list (dock-degrade-chrome-claim))))
 
 (defun dock-rediscovery-state ()
@@ -434,7 +431,7 @@ the primary pane-local object in this slice."))
                  :exit-conditions '("Guide closes again."
                                     "Dismiss coachmark."
                                     "Connect becomes active.")
-                 :capabilities '("Connect" "Inspect" "Annotation" "Touch-Fahrplan handoff" "DMX handoff")
+                 :capabilities '("Connect" "Annotation" "Touch-Fahrplan handoff" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 

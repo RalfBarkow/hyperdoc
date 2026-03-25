@@ -59,8 +59,6 @@
      (or (dom-association-class-present-p
           candidate "hyperdoc-dom-connect-submit")
          (dom-association-class-present-p
-          candidate "hyperdoc-dom-connect-inspect-submit")
-         (dom-association-class-present-p
           candidate "hyperdoc-dom-connect-evidence-submit")))))
 
 (defun dom-association-payload-bearing-element (element)
@@ -118,19 +116,12 @@
         (cond
           ((and wrapper
                 (dom-association-class-present-p
-                 wrapper "hyperdoc-dom-connect-inspect-submit"))
-           "connect-snapshot-v1")
-          ((and wrapper
-                (dom-association-class-present-p
                  wrapper "hyperdoc-dom-connect-evidence-submit"))
            "connect-request-evidence-v1")
           ((and wrapper
                 (dom-association-class-present-p
                  wrapper "hyperdoc-dom-connect-submit"))
            "button-payload-v2")))
-      (and request-id
-           (uiop:string-prefix-p "connect-inspect-" request-id)
-           "connect-snapshot-v1")
       (and request-id
            (uiop:string-prefix-p "connect-evidence-" request-id)
            "connect-request-evidence-v1")
@@ -324,29 +315,6 @@
      :target-json (or (getf payload :target-json)
                       (missing-dom-association-payload pane payload "target")))))
 
-(defun call-hyperdoc-dom-connect-snapshot-constructor (&rest arguments)
-  (let* ((package (find-package :hyperdoc))
-         (symbol (and package
-                      (find-symbol "MAKE-DOM-CONNECT-SESSION-SNAPSHOT-FROM-JSON"
-                                   package))))
-    (unless (and symbol (fboundp symbol))
-      (error "HyperDoc Connect snapshot constructor is unavailable."))
-    (apply (symbol-function symbol) arguments)))
-
-(defun make-dom-connect-snapshot-from-submit-payload (pane payload)
-  (with-slots (object) pane
-    (call-hyperdoc-dom-connect-snapshot-constructor
-     :context-object object
-     :context-view-title (getf payload :context-view-title)
-     :snapshot-json
-     (or (getf payload :snapshot-json)
-         (missing-dom-association-payload pane payload "Connect snapshot")))))
-
-(defun dom-connect-snapshot-submit-payload-p (payload)
-  (let ((transport (getf payload :transport)))
-    (and (stringp transport)
-         (string= transport "connect-snapshot-v1"))))
-
 (defun dom-connect-request-evidence-submit-payload-p (payload)
   (let ((transport (getf payload :transport)))
     (and (stringp transport)
@@ -534,8 +502,6 @@
   (cond
     ((dom-connect-request-evidence-submit-payload-p payload)
      "Connect request evidence opened.")
-    ((dom-connect-snapshot-submit-payload-p payload)
-     "Connect state opened.")
     (t
      "Association pane opened.")))
 
@@ -602,7 +568,6 @@
            (association-request-p
              (and submit-payload
                   request-id
-                  (not (dom-connect-snapshot-submit-payload-p submit-payload))
                   (not (dom-connect-request-evidence-submit-payload-p
                         submit-payload))))
            (*inspector-operation-id* request-id)
@@ -688,10 +653,6 @@
                   (t
                    (let ((association
                            (cond
-                             ((dom-connect-snapshot-submit-payload-p
-                               submit-payload)
-                              (make-dom-connect-snapshot-from-submit-payload
-                               pane submit-payload))
                              (request-id
                               (make-dom-association-from-submit-payload
                                pane submit-payload))

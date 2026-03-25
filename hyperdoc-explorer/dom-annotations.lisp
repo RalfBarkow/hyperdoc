@@ -199,15 +199,6 @@
                                :context-view-title view-title
                                :source-json (lwcells:cell-ref source-cell)
                                :target-json (lwcells:cell-ref target-cell)))))
-                    (:span :class "hyperdoc-dom-connect-inspect-submit"
-                           :style "display:none"
-                           (views:eval-button
-                            "Inspect Connect state"
-                            (views:thunk
-                              (make-dom-connect-session-snapshot-from-json
-                               :context-object context-object
-                               :context-view-title view-title
-                               :snapshot-json (lwcells:cell-ref snapshot-cell)))))
                     (:span :class "hyperdoc-dom-connect-evidence-submit"
                            :style "display:none"
                            (views:eval-button
@@ -224,12 +215,6 @@
                                (lwcells:cell-ref browser-message-cell)
                                :browser-detail
                                (lwcells:cell-ref browser-detail-cell)))))
-                    (:span :class "hyperdoc-dock-inspect-submit"
-                           :style "display:none"
-                           (views:eval-button
-                            "Inspect current"
-                            (views:thunk
-                              (dock-inspect-object-for-context context-object))))
                     (:span :class "hyperdoc-dock-annotation-submit"
                            :style "display:none"
                            (views:eval-button

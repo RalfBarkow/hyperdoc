@@ -473,9 +473,9 @@
              connect-js-path
              connect-js
              "\"Click a source anchor, then a target anchor.\"")
-            (pattern-present-validation-check
-             "connect-inspect-affordance"
-             "pane chrome exposes an Inspect affordance for Connect state"
+            (pattern-absent-validation-check
+             "no-dock-inspect-affordance"
+             "Dock chrome keeps inspection out of the Dock layer"
              connect-js-path
              connect-js
              "\"hyperdoc-dom-connect-inspect\"")

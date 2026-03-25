@@ -389,86 +389,6 @@ async function waitForConnectChromeState(page, paneIndex, expectedState, options
   );
 }
 
-async function openConnectInspection(page, paneIndex) {
-  const currentPane = pane(page, paneIndex);
-  const inspectButton = currentPane.locator(".hyperdoc-dom-connect-inspect");
-  const helpToggle = currentPane.locator(".hyperdoc-dom-connect-help-toggle");
-  const inspectionPaneId = await currentPane.evaluate(
-    (paneNode) => paneNode.dataset.hyperdocConnectPaneId || null
-  );
-  const matchingInspectionPanes = page.locator(
-    `.inspector-pane[data-hyperdoc-connect-inspection="true"][data-hyperdoc-connect-inspection-pane-id="${inspectionPaneId}"]`
-  );
-  const paneCountBefore = await page.locator(".inspector-pane").count();
-  const matchingCountBefore = await matchingInspectionPanes.count();
-  const capturedAtBefore =
-    matchingCountBefore > 0
-      ? await matchingInspectionPanes
-          .nth(matchingCountBefore - 1)
-          .getAttribute("data-hyperdoc-connect-captured-at")
-      : null;
-  const latestCapturedAt = async () =>
-    page.evaluate((paneId) => {
-      const panes = Array.from(document.querySelectorAll(".inspector-pane")).filter(
-        (paneNode) =>
-          paneNode.dataset.hyperdocConnectInspection === "true" &&
-          paneNode.dataset.hyperdocConnectInspectionPaneId === paneId
-      );
-      if (panes.length === 0) {
-        return null;
-      }
-      return panes[panes.length - 1].dataset.hyperdocConnectCapturedAt || null;
-    }, inspectionPaneId);
-  if (!(await inspectButton.isVisible())) {
-    await expect(helpToggle).toBeVisible();
-    await helpToggle.click();
-  }
-  await expect(inspectButton).toBeVisible();
-  await inspectButton.click();
-  if (matchingCountBefore === 0) {
-    await expect
-      .poll(() => matchingInspectionPanes.count(), { timeout: 20_000 })
-      .toBeGreaterThan(0);
-  } else {
-    await expect
-      .poll(async () => (await latestCapturedAt()) !== capturedAtBefore, {
-        timeout: 20_000,
-      })
-      .toBe(true);
-  }
-  const snapshotIndex = await page.evaluate((paneId) => {
-    return Array.from(document.querySelectorAll(".inspector-pane")).findIndex(
-      (paneNode) =>
-        paneNode.dataset.hyperdocConnectInspection === "true" &&
-        paneNode.dataset.hyperdocConnectInspectionPaneId === paneId
-    );
-  }, inspectionPaneId);
-  expect(snapshotIndex).toBeGreaterThanOrEqual(0);
-  if (matchingCountBefore === 0) {
-    await expect
-      .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
-      .toBe(paneCountBefore + 1);
-  } else {
-    await expect
-      .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
-      .toBe(paneCountBefore);
-  }
-  const snapshotPane = pane(page, snapshotIndex);
-  await expect(snapshotPane).toBeVisible({ timeout: 20_000 });
-  await expect
-    .poll(
-      async () => snapshotPane.locator(".inspector-tabs button").allTextContents(),
-      { timeout: 20_000 }
-    )
-    .toContain("Summary");
-  await settleInspectorBindings(page);
-  return {
-    index: snapshotIndex,
-    pane: snapshotPane,
-    reused: matchingCountBefore > 0,
-  };
-}
-
 async function openConnectRequestEvidence(page, paneIndex) {
   const currentPane = pane(page, paneIndex);
   const evidenceButton = currentPane.locator(".hyperdoc-dom-connect-feedback-open-evidence");
@@ -753,7 +673,6 @@ module.exports = {
   gotoCatalog,
   openHyperDoc,
   openFedWikiPageFromTextPageLink,
-  openConnectInspection,
   openConnectRequestEvidence,
   openTextPageFromHyperDoc,
   openTopicPageFromHyperDoc,

@@ -23,8 +23,11 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(introduction.coachmarkBadge).toBe("Introduction");
   expect(introduction.coachmarkSummary).toContain("Click");
   expect(introduction.compactActions).toEqual(
-    expect.arrayContaining(["Connect", "Inspect", "Annotation"])
+    expect.arrayContaining(["Connect", "Annotation"])
   );
+  expect(introduction.compactActions).not.toContain("Inspect");
+  expect(introduction.dockInspectPresent).toBe(false);
+  expect(introduction.connectStateInspectPresent).toBe(false);
 
   const chrome = paneChrome(page, 1);
   await expect(chrome.dismissButton).toBeVisible();
@@ -36,8 +39,9 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(degraded.presentationState).toBe("degraded");
   expect(degraded.coachmarkVisible).toBe(false);
   expect(degraded.compactActions).toEqual(
-    expect.arrayContaining(["Connect", "Inspect", "Annotation"])
+    expect.arrayContaining(["Connect", "Annotation"])
   );
+  expect(degraded.compactActions).not.toContain("Inspect");
   expect(degraded.compactActions).not.toContain("Touch-Fahrplan");
   expect(degraded.compactActions).not.toContain("DMX");
 
@@ -52,7 +56,8 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(activeAfterStart.coachmarkBadge).toBe("Active");
   expect(activeAfterStart.statusText).toBe("Pick source");
   expect(activeAfterStart.cueText).toBe("Click a source anchor.");
-  expect(activeAfterStart.inspectHidden).toBe(false);
+  expect(activeAfterStart.dockInspectPresent).toBe(false);
+  expect(activeAfterStart.connectStateInspectPresent).toBe(false);
   expect(activeAfterStart.clearHidden).toBe(true);
 
   await hyperdocPane
@@ -79,8 +84,9 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(degradedAfterCancel.coachmarkVisible).toBe(false);
   expect(degradedAfterCancel.statusHidden).toBe(true);
   expect(degradedAfterCancel.compactActions).toEqual(
-    expect.arrayContaining(["Connect", "Inspect", "Annotation"])
+    expect.arrayContaining(["Connect", "Annotation"])
   );
+  expect(degradedAfterCancel.compactActions).not.toContain("Inspect");
 
   await expect(chrome.helpToggle).toBeVisible();
   await chrome.helpToggle.click();
@@ -97,4 +103,7 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(rediscovery.providerHandoffLabels).not.toContain("DMX");
   expect(rediscovery.compactActions).not.toContain("Touch-Fahrplan");
   expect(rediscovery.compactActions).not.toContain("DMX");
+  expect(rediscovery.compactActions).not.toContain("Inspect");
+  expect(rediscovery.dockInspectPresent).toBe(false);
+  expect(rediscovery.connectStateInspectPresent).toBe(false);
 });

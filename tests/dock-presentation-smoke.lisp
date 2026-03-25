@@ -44,14 +44,20 @@
               :selectedSourceLabel "Text pages"
               :selectedSourcePane t
               :pendingRequestId "assoc-123"
-              :compactCapabilities ("Connect" "Inspect" "Annotation" "Guide")
-              :coachmarkCapabilities ("Connect state" "Touch-Fahrplan")
+              :compactCapabilities ("Connect" "Annotation" "Guide")
+              :coachmarkCapabilities ("Touch-Fahrplan")
               :providerHandoffs ("Touch-Fahrplan")))))
     (assert-true (typep model 'hyperdoc::dock-presentation-model)
                  "Dock presentation model entrypoint must materialize an inspectable model object")
     (dolist (title '("latent" "introduction" "active" "degraded" "rediscovery"))
       (assert-true (member title state-titles :test #'string=)
                    (format nil "Dock model must include the ~A state" title)))
+    (dolist (state states)
+      (assert-true (not (member "Inspect"
+                                (hyperdoc::capabilities-of state)
+                                :test #'string=))
+                   (format nil "Dock state ~A should not enumerate Inspect as a Dock capability"
+                           (hyperdoc::title-of state))))
     (assert-equal 5
                   (length transitions)
                   "Dock presentation model should expose the five explicit coachmark transitions in this slice")
@@ -87,10 +93,10 @@
                   "Pane snapshot should preserve the Dock presentation reason")
     (assert-true (hyperdoc::coachmark-visible-p-of snapshot)
                  "Pane snapshot should preserve whether the expanded coachmark is visible")
-    (assert-equal '("Connect" "Inspect" "Annotation" "Guide")
+    (assert-equal '("Connect" "Annotation" "Guide")
                   (hyperdoc::compact-capabilities-of snapshot)
                   "Pane snapshot should preserve compact capability access after degradation")
-    (assert-equal '("Connect state" "Touch-Fahrplan")
+    (assert-equal '("Touch-Fahrplan")
                   (hyperdoc::coachmark-capabilities-of snapshot)
                   "Pane snapshot should expose the currently expanded coachmark capabilities")
     (assert-equal '("Touch-Fahrplan")

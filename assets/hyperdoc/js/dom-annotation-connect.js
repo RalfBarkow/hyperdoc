@@ -825,74 +825,6 @@
     state.sourceChip.textContent = label || "";
   }
 
-  function inspectConnectState(state) {
-    if (!state.available || !state.inspectSubmit) {
-      return;
-    }
-    var requestId = "connect-inspect-" + Date.now().toString(36) + "-" +
-      Math.random().toString(36).slice(2, 8);
-    var snapshotJson = JSON.stringify(debugSnapshot());
-    var button = state.inspectSubmit.querySelector("button");
-    if (button) {
-      [
-        "data-dom-association-request-id",
-        "data-dom-association-transport",
-        "data-dom-association-context-object-id",
-        "data-dom-association-context-view-title",
-        "data-dom-association-source-json",
-        "data-dom-association-target-json",
-        "data-dom-association-source-field-id",
-        "data-dom-association-target-field-id",
-        "data-dom-association-source-pane-id",
-        "data-dom-association-target-pane-id",
-        "data-dom-association-source-provider-kind",
-        "data-dom-association-target-provider-kind",
-        "data-dom-connect-inspection-pane-id",
-        "data-dom-connect-snapshot-field-id",
-        "data-dom-connect-snapshot-json"
-      ].forEach(function (attribute) {
-        button.removeAttribute(attribute);
-      });
-      button.setAttribute("data-dom-association-request-id", requestId);
-      button.setAttribute("data-dom-association-transport", "connect-snapshot-v1");
-      button.setAttribute(
-        "data-dom-association-context-object-id",
-        state.surface && state.surface.dataset.contextObjectId || ""
-      );
-      button.setAttribute(
-        "data-dom-association-context-view-title",
-        state.surface && state.surface.dataset.contextViewTitle || ""
-      );
-      button.setAttribute(
-        "data-dom-connect-inspection-pane-id",
-        state.paneId || ""
-      );
-      if (state.inspectInput) {
-        button.setAttribute(
-          "data-dom-connect-snapshot-field-id",
-          state.inspectInput.id || ""
-        );
-      }
-      button.setAttribute("data-dom-connect-snapshot-json", snapshotJson);
-      if (state.inspectInput) {
-        dispatchValue(state.inspectInput, snapshotJson);
-      }
-      if (state.requestIdInput) {
-        dispatchValue(state.requestIdInput, requestId);
-      }
-      dispatchEvalButtonWhenReady(button, {
-        click: function () {
-          button.dispatchEvent(new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-            shiftKey: true
-          }));
-        },
-        dispatchDelayMs: 250
-      });
-    }
-  }
-
   function dispatchHiddenDockButton(wrapper, clickOptions) {
     if (!wrapper) {
       return;
@@ -910,17 +842,6 @@
         }));
       },
       dispatchDelayMs: clickOptions && clickOptions.dispatchDelayMs || 250
-    });
-  }
-
-  function inspectCurrentObject(state) {
-    if (!state.available || !state.dockInspectSubmit) {
-      return;
-    }
-    markDockCapabilityMastered(state, "inspect-opened");
-    refreshPaneStateFromSession(state);
-    dispatchHiddenDockButton(state.dockInspectSubmit, {
-      dispatchDelayMs: 250
     });
   }
 
@@ -1363,8 +1284,6 @@
           '<div class="hyperdoc-dock-actions">' +
             '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
                     'title="Click a source anchor, then a target anchor.">Connect</button>' +
-            '<button type="button" class="hyperdoc-dock-inspect hyperdoc-dock-action" ' +
-                    'title="Inspect the current pane object.">Inspect</button>' +
             '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
                     'title="Open or reopen the generic Annotation object for the current pane object.">Annotation</button>' +
           '</div>' +
@@ -1397,8 +1316,6 @@
           '</div>' +
           '<div class="hyperdoc-dock-coachmark-actions">' +
             '<button type="button" class="hyperdoc-dom-connect-clear" hidden>Clear</button>' +
-            '<button type="button" class="hyperdoc-dom-connect-inspect" ' +
-                    'title="Inspect the current Connect session and pane states.">Connect state</button>' +
             '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
             '<button type="button" class="hyperdoc-dock-dismiss">Dismiss</button>' +
           '</div>' +
@@ -1495,7 +1412,6 @@
     state.browserMessageInput = null;
     state.browserDetailInput = null;
     state.submit = null;
-    state.inspectSubmit = null;
     state.evidenceSubmit = null;
     state.provider = provider;
     state.providerKind = surfaceProviderKind(surface);
@@ -1523,15 +1439,12 @@
       controls.dataset.browserDetailInputId
     );
     var submit = controls.querySelector(".hyperdoc-dom-connect-submit");
-    var inspectSubmit = controls.querySelector(".hyperdoc-dom-connect-inspect-submit");
     var evidenceSubmit = controls.querySelector(".hyperdoc-dom-connect-evidence-submit");
-    var dockInspectSubmit = controls.querySelector(".hyperdoc-dock-inspect-submit");
     var dockAnnotationSubmit = controls.querySelector(".hyperdoc-dock-annotation-submit");
     if (!sourceInput || !targetInput || !inspectInput ||
         !requestIdInput || !browserFailureKindInput ||
         !browserMessageInput || !browserDetailInput ||
-        !submit || !inspectSubmit || !evidenceSubmit ||
-        !dockInspectSubmit || !dockAnnotationSubmit) {
+        !submit || !evidenceSubmit || !dockAnnotationSubmit) {
       return false;
     }
     state.root = root;
@@ -1545,9 +1458,7 @@
     state.browserMessageInput = browserMessageInput;
     state.browserDetailInput = browserDetailInput;
     state.submit = submit;
-    state.inspectSubmit = inspectSubmit;
     state.evidenceSubmit = evidenceSubmit;
-    state.dockInspectSubmit = dockInspectSubmit;
     state.dockAnnotationSubmit = dockAnnotationSubmit;
     updateProviderCopy(state);
     syncDockCapabilities(state);
@@ -1644,7 +1555,7 @@
         title: "Connect",
         summary: state.providerHelpSummary,
         detail:
-          "The Dock is temporarily expanded because Connect became newly relevant here. Inspect and Annotation remain available after the coachmark recedes."
+          "The Dock is temporarily expanded because Connect became newly relevant here. Annotation remains available after the coachmark recedes, while inspection stays in the inspector tabs."
       };
     }
     return {
@@ -1676,11 +1587,10 @@
     state.coachmarkDetail.textContent = copy.detail;
     state.providerHandoffLabel.textContent =
       "Richer workflow lives in the pane body";
-    state.inspect.hidden = !coachmark;
     state.dismiss.hidden = presentation.state === "active" || !coachmark;
-    state.compactCapabilities = ["Connect", "Inspect", "Annotation", "Guide"];
+    state.compactCapabilities = ["Connect", "Annotation", "Guide"];
     state.coachmarkCapabilities = coachmark
-      ? ["Connect state"].concat(state.providerHandoffs || [])
+      ? (state.providerHandoffs || []).slice()
       : [];
     if (state.surface) {
       state.surface.dataset.hyperdocDockPresentation = presentation.state;
@@ -2199,7 +2109,6 @@
     var manager = connectManager();
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
-    var dockInspect = slot.querySelector(".hyperdoc-dock-inspect");
     var annotation = slot.querySelector(".hyperdoc-dock-annotation");
     var touchFahrplan = slot.querySelector(".hyperdoc-dock-touch-fahrplan");
     var dmx = slot.querySelector(".hyperdoc-dock-dmx");
@@ -2207,7 +2116,6 @@
     var sourceSummary = slot.querySelector(".hyperdoc-dom-connect-source-summary");
     var sourceChip = slot.querySelector(".hyperdoc-dom-connect-source-chip");
     var clear = slot.querySelector(".hyperdoc-dom-connect-clear");
-    var inspect = slot.querySelector(".hyperdoc-dom-connect-inspect");
     var helpToggle = slot.querySelector(".hyperdoc-dom-connect-help-toggle");
     var cancel = slot.querySelector(".hyperdoc-dom-connect-cancel");
     var feedback = slot.querySelector(".hyperdoc-dom-connect-feedback");
@@ -2220,9 +2128,9 @@
     var providerHandoff = slot.querySelector(".hyperdoc-dock-provider-handoff");
     var providerHandoffLabel = slot.querySelector(".hyperdoc-dock-provider-handoff-label");
     var dismiss = slot.querySelector(".hyperdoc-dock-dismiss");
-    if (!control || !toggle || !dockInspect || !annotation || !touchFahrplan || !dmx ||
+    if (!control || !toggle || !annotation || !touchFahrplan || !dmx ||
         !cue || !sourceSummary || !sourceChip || !clear ||
-        !inspect || !stateBadge || !coachmarkTitle || !coachmarkSummary ||
+        !stateBadge || !coachmarkTitle || !coachmarkSummary ||
         !coachmarkDetail || !providerHandoff || !providerHandoffLabel || !dismiss ||
         !helpToggle || !cancel || !feedback || !helpPanel || !status) {
       return null;
@@ -2234,7 +2142,6 @@
       slot: slot,
       control: control,
       toggle: toggle,
-      dockInspect: dockInspect,
       annotation: annotation,
       touchFahrplan: touchFahrplan,
       dmx: dmx,
@@ -2242,7 +2149,6 @@
       sourceSummary: sourceSummary,
       sourceChip: sourceChip,
       clear: clear,
-      inspect: inspect,
       cancel: cancel,
       feedback: feedback,
       helpToggle: helpToggle,
@@ -2284,9 +2190,7 @@
       browserMessageInput: null,
       browserDetailInput: null,
       submit: null,
-      inspectSubmit: null,
       evidenceSubmit: null,
-      dockInspectSubmit: null,
       dockAnnotationSubmit: null,
       compactCapabilities: [],
       coachmarkCapabilities: [],
@@ -2318,11 +2222,6 @@
         activate(state);
       }
     });
-    dockInspect.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      inspectCurrentObject(state);
-    });
     annotation.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -2347,11 +2246,6 @@
       event.preventDefault();
       event.stopPropagation();
       clearSelectedSource(state);
-    });
-    inspect.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      inspectConnectState(state);
     });
     feedback.addEventListener("click", function (event) {
       var button = event.target.closest(".hyperdoc-dom-connect-feedback-open-evidence");

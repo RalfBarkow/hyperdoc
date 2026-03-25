@@ -23,7 +23,6 @@ function paneChrome(page, paneIndex) {
     cue: currentPane.locator(".hyperdoc-dom-connect-cue"),
     sourceChip: currentPane.locator(".hyperdoc-dom-connect-source-chip"),
     clearButton: currentPane.locator(".hyperdoc-dom-connect-clear"),
-    inspectButton: currentPane.locator(".hyperdoc-dom-connect-inspect"),
     cancelButton: currentPane.locator(".hyperdoc-dom-connect-cancel"),
     feedback: currentPane.locator(".hyperdoc-dom-connect-feedback"),
     helpToggle: currentPane.locator(".hyperdoc-dom-connect-help-toggle"),
@@ -46,7 +45,6 @@ async function readPaneChromeState(page, paneIndex) {
     const sourceSummary = slot?.querySelector(".hyperdoc-dom-connect-source-summary");
     const sourceChip = slot?.querySelector(".hyperdoc-dom-connect-source-chip");
     const clearButton = slot?.querySelector(".hyperdoc-dom-connect-clear");
-    const inspectButton = slot?.querySelector(".hyperdoc-dom-connect-inspect");
     const cancelButton = slot?.querySelector(".hyperdoc-dom-connect-cancel");
     const feedback = slot?.querySelector(".hyperdoc-dom-connect-feedback");
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
@@ -57,6 +55,8 @@ async function readPaneChromeState(page, paneIndex) {
     const touchFahrplan = slot?.querySelector(".hyperdoc-dock-touch-fahrplan");
     const dmx = slot?.querySelector(".hyperdoc-dock-dmx");
     const dismiss = slot?.querySelector(".hyperdoc-dock-dismiss");
+    const dockInspect = slot?.querySelector(".hyperdoc-dock-inspect");
+    const connectStateInspect = slot?.querySelector(".hyperdoc-dom-connect-inspect");
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
     const providerSurface = activeView?.querySelector(
       ".hyperdoc-connect-provider-surface, .hyperdoc-dom-connect-surface"
@@ -89,12 +89,12 @@ async function readPaneChromeState(page, paneIndex) {
         sourceSummary?.textContent?.replace(/\s+/g, " ").trim() || null,
       sourceChipText: sourceChip?.textContent?.trim() || null,
       clearHidden: !!clearButton?.hidden,
-      inspectHidden: !!inspectButton?.hidden,
-      inspectText: inspectButton?.textContent?.trim() || null,
       cancelHidden: !!cancelButton?.hidden,
       feedbackHidden: !!feedback?.hidden,
       feedbackKind: feedback?.dataset.kind || null,
       feedbackText: feedback?.textContent?.replace(/\s+/g, " ").trim() || null,
+      dockInspectPresent: !!dockInspect,
+      connectStateInspectPresent: !!connectStateInspect,
       coachmarkVisible:
         !!helpPanel && window.getComputedStyle(helpPanel).display !== "none",
       coachmarkBadge: stateBadge?.textContent?.trim() || null,

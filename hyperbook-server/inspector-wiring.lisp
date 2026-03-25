@@ -45,11 +45,8 @@
                     (maybe-attribute-value
                      current "data-dom-association-transport")
                     (maybe-attribute-value
-                     current "data-dom-connect-inspection-pane-id")
-                    (maybe-attribute-value
                      current "data-dom-connect-request-evidence-request-id")
                     (class-present-p current "hyperdoc-dom-connect-submit")
-                    (class-present-p current "hyperdoc-dom-connect-inspect-submit")
                     (class-present-p current "hyperdoc-dom-connect-evidence-submit"))))
 
 (defun handle-inspector-inspect-click (pane element target view-ref event)
