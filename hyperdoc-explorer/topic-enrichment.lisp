@@ -109,26 +109,26 @@
                              (:td
                               (if definition
                                   (views:object-ref definition)
-                                  (views:action-button
-                                   "Create durable route"
-                                   (views:thunk
-                                     (create-durable-topic-source-route!
-                                      topic
-                                      source))
-                                   "Persist a durable Touch-Fahrplan route definition and open the resulting route.")))
+                             (views:action-button
+                               "Create durable route"
+                               (views:thunk
+                                 (create-durable-topic-source-route!
+                                  topic
+                                  source))
+                               "Persist a durable Touch-Fahrplan route definition and open the resulting route.")))
                              (:td (views:object-ref route))
                              (:td
-                              (views:action-button
+                              (views:eval-button
                                "Open route"
                                (views:thunk route)
                                "Inspect the durable relation object between this topic and Zotero source.")
-                              (views:action-button
+                              (views:eval-button
                                "Open exact plan"
                                (views:thunk
                                  (topic-source-route-default-plan route))
                                "Inspect the exact-title query plan before any live lookup runs."))
                              (:td
-                              (views:action-button
+                              (views:eval-button
                                "Run exact plan"
                                (views:thunk
                                  (run-topic-enrichment-query-plan

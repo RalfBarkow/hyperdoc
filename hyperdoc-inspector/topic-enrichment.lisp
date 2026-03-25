@@ -177,12 +177,12 @@
 
 (defmethod views:title-bar-action-buttons ((route hyperdoc::topic-source-route))
   (views:html
-    (views:action-button
+    (views:eval-button
      "Open exact plan"
      (views:thunk
        (hyperdoc::topic-source-route-default-plan route))
      "Open the inspectable exact-title query plan for this route.")
-    (views:action-button
+    (views:eval-button
      "Open loose plan"
      (views:thunk
        (hyperdoc::topic-source-route-explicit-loose-plan route))
@@ -211,19 +211,19 @@
                           (views:object-ref annotation)
                           (views:html
                            (:span :style "opacity:0.55"
-                                  (views:esc "Not authored yet.")))))))
+                                  (views:esc "Not authored yet."))))))
             (:tr (:td (views:esc "Route definition"))
                  (:td (if definition
                           (views:object-ref definition)
                           (views:html
                            (:span :style "opacity:0.55"
-                                  (views:esc "Not authored yet.")))))))
+                                  (views:esc "Not authored yet."))))))
             (:tr (:td (views:esc "Authoring note"))
                  (:td (views:esc
                        (or (and definition
                                 (hyperdoc::topic-enrichment-route-definition-notes-of
                                  definition))
-                           "No authoring notes.")))))
+                           "No authoring notes.")))))))
 
 (views:defview 👀overview (route hyperdoc::topic-source-route)
   (let ((annotation (hyperdoc::topic-source-route-annotation-of route))
@@ -260,7 +260,7 @@
 (defmethod views:title-bar-action-buttons
     ((plan hyperdoc::topic-enrichment-query-plan))
   (views:html
-    (views:action-button
+    (views:eval-button
      "Run plan"
      (views:thunk
        (hyperdoc::run-topic-enrichment-query-plan plan))
@@ -406,7 +406,7 @@
 
 (defmethod views:title-bar-action-buttons ((report hyperdoc::topic-enrichment-report))
   (views:html
-    (views:action-button
+    (views:eval-button
      "Rerun plan"
      (views:thunk
        (hyperdoc::run-topic-enrichment-query-plan
