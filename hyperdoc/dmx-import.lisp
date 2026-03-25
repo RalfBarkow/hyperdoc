@@ -259,34 +259,44 @@
     (nreverse candidates)))
 
 (defun fedwiki-import-ready-wiki-p (wiki)
-  (and (eq (hyperbook/fedwiki::status-of wiki) t)
-       (plusp (hash-table-count (hyperbook/fedwiki::pages-of wiki)))))
+  (hyperbook/fedwiki::fedwiki-ready-p wiki))
 
 (defun resolve-fedwiki-import-wiki (domain &key wiki verbose (stream *standard-output*))
   (labels ((page-count (candidate-wiki)
              (hash-table-count (hyperbook/fedwiki::pages-of candidate-wiki)))
-           (report-http-fallback (initial-wiki retry-wiki)
+           (report-http-fallback (original-protocol original-pages retry-wiki)
              (when verbose
                (format stream
                        "~&FEDWIKI_DMX_IMPORT fallback=http original-protocol=~A original-pages=~D retry-pages=~D~%"
-                       (hyperbook/fedwiki::protocol-of initial-wiki)
-                       (page-count initial-wiki)
+                       original-protocol
+                       original-pages
                        (page-count retry-wiki)))))
     (let ((resolved-wiki (or wiki
                              (hyperbook/fedwiki::get-fedwiki domain nil t))))
-      (if (or wiki
-              (fedwiki-import-ready-wiki-p resolved-wiki)
-              (not (string= (hyperbook/fedwiki::protocol-of resolved-wiki)
-                            "https")))
-          (values resolved-wiki nil)
-          (let ((retry-wiki (hyperbook/fedwiki::make-fedwiki domain :https nil)))
-            (hyperbook/fedwiki::wait-for-sitemap retry-wiki)
-            (if (> (page-count retry-wiki)
-                   (page-count resolved-wiki))
-                (progn
-                  (report-http-fallback resolved-wiki retry-wiki)
-                  (values retry-wiki t))
-                (values resolved-wiki nil)))))))
+      (hyperbook/fedwiki::wait-for-sitemap resolved-wiki)
+      (cond
+        ((and wiki
+              (null (hyperbook/fedwiki::status-of resolved-wiki)))
+         (values resolved-wiki nil))
+        ((fedwiki-import-ready-wiki-p resolved-wiki)
+         (values resolved-wiki nil))
+        ((not (string= (hyperbook/fedwiki::protocol-of resolved-wiki)
+                       "https"))
+         (values resolved-wiki nil))
+        (t
+         (let ((original-protocol (hyperbook/fedwiki::protocol-of resolved-wiki))
+               (original-pages (page-count resolved-wiki))
+               (initial-condition
+                 (and (typep (hyperbook/fedwiki::status-of resolved-wiki) 'condition)
+                      (hyperbook/fedwiki::status-of resolved-wiki))))
+           (multiple-value-bind (retry-wiki recovered-p)
+               (hyperbook/fedwiki::retry-site-data-over-http
+                resolved-wiki
+                :initial-condition initial-condition
+                :log-initial-failure? nil)
+             (when recovered-p
+               (report-http-fallback original-protocol original-pages retry-wiki))
+             (values retry-wiki recovered-p))))))))
 
 (defun fedwiki-import-source-envelope (candidate)
   (let ((json (make-hash-table :test #'equal)))

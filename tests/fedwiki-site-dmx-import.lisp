@@ -22,6 +22,17 @@
     (setf (gethash "date" entry) date)
     entry))
 
+(defun make-test-sitemap-entry (&key slug title links)
+  (let ((entry (make-hash-table :test #'equal)))
+    (setf (gethash "slug" entry) slug
+          (gethash "title" entry) title)
+    (when links
+      (let ((link-table (make-hash-table :test #'equal)))
+        (dolist (link links)
+          (setf (gethash link link-table) t))
+        (setf (gethash "links" entry) link-table)))
+    entry))
+
 (defun make-test-fedwiki ()
   (make-instance 'hyperbook/fedwiki::fedwiki
                  :id "fedwiki:sfw.c2.com"))
@@ -29,6 +40,19 @@
 (defun assert-string= (expected actual message)
   (unless (string= expected actual)
     (error "~A -- expected: ~S actual: ~S" message expected actual)))
+
+(defun assert-substring (substring string message)
+  (unless (search substring string)
+    (error "~A -- missing substring: ~S in: ~S"
+           message
+           substring
+           string)))
+
+(defun make-invalid-json-condition ()
+  (handler-case
+      (shasht:read-json "<html>")
+    (shasht:shasht-invalid-char (condition)
+      condition)))
 
 (defun run-fedwiki-summary-extraction-test ()
   (let* ((story (vector (make-test-json-item :type "image" :text "caption")
@@ -196,7 +220,122 @@
     (assert-true raised
                  "Duplicate external keys in one run must signal an error")))
 
+(defun run-fedwiki-init-http-fallback-test ()
+  (let* ((domain "wiki.ralfbarkow.test")
+         (sitemap (vector (make-test-sitemap-entry
+                           :slug "welcome-visitors"
+                           :title "Welcome Visitors")))
+         (plugins (vector "video"))
+         (fetch-calls '())
+         (events '())
+         (expected-https-sitemap
+           (hyperbook/fedwiki::wiki-url domain "https" "/system/sitemap.json"))
+         (expected-http-sitemap
+           (hyperbook/fedwiki::wiki-url domain "http" "/system/sitemap.json"))
+         (expected-http-plugins
+           (hyperbook/fedwiki::wiki-url domain "http" "/system/plugins.json"))
+         (original-fetch-json
+           (symbol-function 'hyperbook/fedwiki::fetch-json))
+         (original-note-network-init-failure
+           (symbol-function 'hyperbook/fedwiki::note-network-init-failure))
+         (original-note-http-fallback-attempt
+           (symbol-function 'hyperbook/fedwiki::note-http-fallback-attempt)))
+    (let ((hyperbook/fedwiki::*neighborhood* (make-hash-table :test #'equal)))
+      (unwind-protect
+           (progn
+             (setf (symbol-function 'hyperbook/fedwiki::fetch-json)
+                   (lambda (url)
+                     (push url fetch-calls)
+                     (cond
+                       ((string= url expected-https-sitemap)
+                        (error (make-invalid-json-condition)))
+                       ((string= url expected-http-sitemap)
+                        sitemap)
+                       ((string= url expected-http-plugins)
+                        plugins)
+                       (t
+                        (error "Unexpected FedWiki JSON URL ~S" url)))))
+             (setf (symbol-function 'hyperbook/fedwiki::note-network-init-failure)
+                   (lambda (domain-name context condition &key protocol path)
+                     (push (list :warning
+                                 domain-name
+                                 context
+                                 protocol
+                                 path
+                                 (type-of condition))
+                           events)))
+             (setf (symbol-function 'hyperbook/fedwiki::note-http-fallback-attempt)
+                   (lambda (domain-name &key from-protocol context path)
+                     (push (list :fallback
+                                 domain-name
+                                 from-protocol
+                                 context
+                                 path)
+                           events)))
+             (let* ((wiki (hyperbook/fedwiki::get-fedwiki domain nil t :https t))
+                    (page (hyperbook:find-page wiki "welcome-visitors"))
+                    (warning-event (find :warning events :key #'first))
+                    (fallback-event (find :fallback events :key #'first))
+                    (fetch-trace (format nil "~S" (nreverse fetch-calls))))
+               (assert-string= "http"
+                               (hyperbook/fedwiki::protocol-of wiki)
+                               "Recovered FedWiki init should settle on HTTP after HTML-at-JSON failure")
+               (assert-true (eq t (hyperbook/fedwiki::status-of wiki))
+                            "Recovered FedWiki init should leave the wiki in a usable status")
+               (assert-true page
+                            "Recovered FedWiki init should expose sitemap pages through normal browsing")
+               (assert-equal 1
+                             (hash-table-count (hyperbook/fedwiki::pages-of wiki))
+                             "Recovered FedWiki init should populate the pages table")
+               (assert-equal 1
+                             (hash-table-count (hyperbook/fedwiki::plugins-of wiki))
+                             "Recovered FedWiki init should still load plugin discovery data after HTTP fallback")
+               (assert-true warning-event
+                            "Recovered FedWiki init should record the original failed protocol/path/context")
+               (assert-true fallback-event
+                            "Recovered FedWiki init should record the HTTP fallback attempt")
+               (assert-string= domain
+                               (second warning-event)
+                               "The warning event should preserve the failing wiki domain")
+               (assert-string= "failed to load sitemap/plugin data"
+                               (third warning-event)
+                               "The warning event should preserve the init context")
+               (assert-string= "https"
+                               (fourth warning-event)
+                               "The warning event should preserve the original protocol")
+               (assert-string= "/system/sitemap.json"
+                               (fifth warning-event)
+                               "The warning event should preserve the failing JSON path")
+               (assert-string= domain
+                               (second fallback-event)
+                               "The fallback event should preserve the wiki domain")
+               (assert-string= "https"
+                               (third fallback-event)
+                               "The fallback event should preserve the original protocol")
+               (assert-string= "sitemap discovery"
+                               (fourth fallback-event)
+                               "The fallback event should preserve the failing stage")
+               (assert-string= "/system/sitemap.json"
+                               (fifth fallback-event)
+                               "The fallback event should preserve the failing JSON path")
+               (assert-substring expected-https-sitemap
+                                 fetch-trace
+                                 "Recovered FedWiki init should first try the HTTPS sitemap endpoint")
+               (assert-substring expected-http-sitemap
+                                 fetch-trace
+                                 "Recovered FedWiki init should retry the sitemap endpoint over HTTP")
+               (assert-substring expected-http-plugins
+                                 fetch-trace
+                                 "Recovered FedWiki init should continue plugin discovery over HTTP")))
+        (setf (symbol-function 'hyperbook/fedwiki::fetch-json)
+              original-fetch-json)
+        (setf (symbol-function 'hyperbook/fedwiki::note-network-init-failure)
+              original-note-network-init-failure)
+        (setf (symbol-function 'hyperbook/fedwiki::note-http-fallback-attempt)
+              original-note-http-fallback-attempt)))))
+
 (defun run-fedwiki-site-dmx-import-tests ()
+  (run-fedwiki-init-http-fallback-test)
   (run-fedwiki-summary-extraction-test)
   (run-fedwiki-external-key-test)
   (run-fedwiki-local-page-filter-test)

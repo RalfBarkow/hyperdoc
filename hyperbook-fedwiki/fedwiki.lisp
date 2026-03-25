@@ -28,6 +28,12 @@
    (slugs :reader slugs-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from slugs to titles and back")
+   (last-init-context :accessor last-init-context-of :initform nil
+                      :type (or null string)
+                      :documentation "The last init stage attempted while loading sitemap/plugin data")
+   (last-init-path :accessor last-init-path-of :initform nil
+                   :type (or null string)
+                   :documentation "The JSON path attempted in the last init stage")
    (protocol :reader protocol-of :initform "https" :type string
              :documentation "Either 'https' is the server supports it, else 'http'")
    (status :accessor status-of :initform nil
@@ -56,6 +62,9 @@ that occurred when reading the site map.")))
 
 (defparameter *uri-scheme* "fedwiki:")
 
+(defvar *fedwiki-init-context* "site data initialization")
+(defvar *fedwiki-init-path* nil)
+
 (defun network-init-failure-p (condition)
   (flet ((sb-bsd-sockets-condition-p (name)
            (let ((pkg (find-package :sb-bsd-sockets)))
@@ -72,13 +81,116 @@ that occurred when reading the site map.")))
         (sb-bsd-sockets-condition-p "INTERRUPTED-ERROR")
         (sb-bsd-sockets-condition-p "SOCKET-ERROR"))))
 
-(defun note-network-init-failure (domain-name context condition)
+(defun note-network-init-failure (domain-name context condition
+                                  &key protocol path)
   (format *error-output*
-          "~&[HYPERBOOK/FEDWIKI] warning: ~A for ~A: ~A (~A)~%"
+          "~&[HYPERBOOK/FEDWIKI] warning: ~A for ~A protocol=~A path=~A: ~A (~A)~%"
           context
           domain-name
+          protocol
+          path
           (type-of condition)
           condition))
+
+(defun note-http-fallback-attempt (domain-name &key from-protocol context path)
+  (format *error-output*
+          "~&[HYPERBOOK/FEDWIKI] info: attempting HTTP fallback for ~A from protocol=~A context=~A path=~A~%"
+          domain-name
+          from-protocol
+          context
+          path))
+
+(defun clear-site-data (wiki)
+  (clrhash (pages-of wiki))
+  (clrhash (remote-pages-of wiki))
+  (clrhash (plugins-of wiki))
+  (clrhash (slugs-of wiki))
+  (setf (slot-value wiki 'owner) nil
+        (last-init-context-of wiki) nil
+        (last-init-path-of wiki) nil)
+  wiki)
+
+(defun fedwiki-ready-p (wiki)
+  (and (eq (status-of wiki) t)
+       (plusp (hash-table-count (pages-of wiki)))))
+
+(defun load-site-data (wiki)
+  (clear-site-data wiki)
+  (setf (last-init-context-of wiki) "sitemap discovery"
+        (last-init-path-of wiki) "/system/sitemap.json")
+  (fetch-sitemap wiki)
+  (setf (last-init-context-of wiki) "plugin discovery"
+        (last-init-path-of wiki) "/system/plugins.json")
+  (fetch-plugin-data wiki)
+  wiki)
+
+(defun retry-site-data-over-http (wiki &key initial-condition
+                                             initial-context
+                                             initial-path
+                                             initial-protocol
+                                             (log-initial-failure? t))
+  (let* ((domain-name (domain-name-of wiki))
+         (initial-protocol (or initial-protocol
+                               (protocol-of wiki)))
+         (initial-context (or initial-context
+                              (last-init-context-of wiki)
+                              *fedwiki-init-context*))
+         (initial-path (or initial-path
+                           (last-init-path-of wiki)
+                           *fedwiki-init-path*)))
+    (when (and log-initial-failure?
+               initial-condition)
+      (note-network-init-failure domain-name
+                                 "failed to load sitemap/plugin data"
+                                 initial-condition
+                                 :protocol initial-protocol
+                                 :path initial-path))
+    (note-http-fallback-attempt domain-name
+                                :from-protocol initial-protocol
+                                :context initial-context
+                                :path initial-path)
+    (setf (slot-value wiki 'protocol) "http")
+    (handler-case
+        (progn
+          (load-site-data wiki)
+          (setf (status-of wiki) t)
+          (values wiki t))
+      (error (retry-condition)
+        (if (network-init-failure-p retry-condition)
+            (progn
+              (note-network-init-failure domain-name
+                                         "failed to load sitemap/plugin data after HTTP fallback"
+                                         retry-condition
+                                         :protocol (protocol-of wiki)
+                                         :path (or (last-init-path-of wiki)
+                                                   *fedwiki-init-path*))
+              (setf (status-of wiki) retry-condition)
+              (values wiki nil))
+            (error retry-condition))))))
+
+(defun initialize-site-data (wiki)
+  (handler-case
+      (progn
+        (load-site-data wiki)
+        (setf (status-of wiki) t)
+        (values wiki nil))
+    (error (condition)
+      (if (network-init-failure-p condition)
+          (if (string= (protocol-of wiki) "https")
+              (retry-site-data-over-http wiki
+                                         :initial-condition condition
+                                         :initial-context (last-init-context-of wiki)
+                                         :initial-path (last-init-path-of wiki)
+                                         :initial-protocol (protocol-of wiki))
+              (progn
+                (note-network-init-failure (domain-name-of wiki)
+                                           "failed to load sitemap/plugin data"
+                                           condition
+                                           :protocol (protocol-of wiki)
+                                           :path (last-init-path-of wiki))
+                (setf (status-of wiki) condition)
+                (values wiki nil)))
+          (error condition)))))
 
 (defun make-fedwiki (domain-name &key (https nil https-supplied-p))
   (let* ((wiki (make-instance 'fedwiki
@@ -107,21 +219,11 @@ that occurred when reading the site map.")))
                          (note-network-init-failure
                           domain-name
                           "HTTPS probe failed; continuing with default protocol"
-                          c)
+                          c
+                          :protocol (protocol-of wiki)
+                          :path "<https-probe>")
                          (error c)))))
-               (handler-case
-                   (progn (fetch-sitemap wiki)
-                          (fetch-plugin-data wiki)
-                          (setf (status-of wiki) t))
-                 (error (c)
-                   (if (network-init-failure-p c)
-                       (progn
-                         (note-network-init-failure
-                          domain-name
-                          "failed to load sitemap/plugin data"
-                          c)
-                         (setf (status-of wiki) c))
-                       (error c)))))))
+               (initialize-site-data wiki))))
     wiki))
 
 (defun fetch-sitemap (wiki)
