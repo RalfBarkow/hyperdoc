@@ -5,12 +5,21 @@
 (in-package :hyperdoc)
 
 (defparameter *topic-enrichment-route-definitions-source-pathname* nil)
+(defparameter *topic-enrichment-route-definitions-environment-variable*
+  "HYPERDOC_TOPIC_ENRICHMENT_ROUTE_DATA_PATH")
 
 (defparameter *topic-enrichment-route-definitions*
   '())
 
+(defun topic-enrichment-route-definitions-environment-pathname ()
+  (when-let (value
+             (uiop:getenv
+              *topic-enrichment-route-definitions-environment-variable*))
+    (pathname value)))
+
 (defun topic-enrichment-route-definitions-source-pathname ()
   (or *topic-enrichment-route-definitions-source-pathname*
+      (topic-enrichment-route-definitions-environment-pathname)
       (asdf:system-relative-pathname
        :hyperdoc
        "hyperdoc/topic-enrichment-route-data.lisp")))

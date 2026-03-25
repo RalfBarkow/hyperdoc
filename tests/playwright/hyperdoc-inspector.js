@@ -117,6 +117,28 @@ async function openTextPageFromHyperDoc(page, title) {
   return textPagePane;
 }
 
+async function openTopicPageFromHyperDoc(page, title) {
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  const hyperdocPane = pane(page, 1);
+  await activatePaneTab(page, 1, "Topics");
+  const pageCell = tableCellByExactText(hyperdocPane, title);
+  await expect(pageCell).toBeVisible();
+  await settleInspectorBindings(page);
+  await pageCell.click();
+  await expect
+    .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+    .toBe(paneCountBefore + 1);
+  const topicPagePane = pane(page, paneCountBefore);
+  await expect(topicPagePane).toBeVisible({ timeout: 20_000 });
+  await expect(
+    topicPagePane.locator(".inspector-tabs button").filter({
+      hasText: exactTextPattern("Content"),
+    })
+  ).toBeVisible({ timeout: 20_000 });
+  await settleInspectorBindings(page);
+  return topicPagePane;
+}
+
 async function openFedWikiPageFromTextPageLink(page, paneIndex, linkText) {
   const paneCountBefore = await page.locator(".inspector-pane").count();
   const sourcePane = pane(page, paneIndex);
@@ -718,6 +740,7 @@ module.exports = {
   openConnectInspection,
   openConnectRequestEvidence,
   openTextPageFromHyperDoc,
+  openTopicPageFromHyperDoc,
   pane,
   readInspectorPaneState,
   readConnectSessionState,
