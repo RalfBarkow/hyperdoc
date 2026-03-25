@@ -1585,10 +1585,20 @@
    :title "FedWiki site to DMX import"
    :summary "Runtime importer that enumerates local FedWiki pages and upserts them into DMX through an emerging plugin write model keyed by stable domain-plus-slug identities."
    :references '("FedWiki Site to DMX Import"
+                 "FedWiki JSON-init HTTP fallback"
                  "DMX FedWiki Write Model"
                  "DMX plugin extension boundary"
                  "Topics HyperBook in HyperDoc"
                  "Concepts, DMX Topics, and Topic Maps")))
+
+(defun fedwiki-json-init-http-fallback-topic ()
+  (make-topic
+   :id "fedwiki-json-init-http-fallback"
+   :title "FedWiki JSON-init HTTP fallback"
+   :summary "Shared FedWiki recovery seam that retries sitemap/plugin JSON discovery over HTTP once when the original JSON endpoint yields HTML or another init-format failure."
+   :references '("FedWiki JSON-init HTTP fallback"
+                 "Opening external FedWiki sites"
+                 "FedWiki Site to DMX Import")))
 
 (defun dmx-plugin-extension-boundary-topic ()
   (make-topic

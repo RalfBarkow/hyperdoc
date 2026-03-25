@@ -1,0 +1,57 @@
+<h1>FedWiki JSON-init HTTP fallback</h1>
+
+<p>
+  Some FedWiki sites expose a page over HTTPS well enough to answer a request,
+  but their supposed JSON discovery endpoints can still return HTML. When
+  HyperDoc asks for <tt>/system/sitemap.json</tt> or
+  <tt>/system/plugins.json</tt> and gets leading <tt>&lt;</tt> instead of JSON,
+  <tt>shasht</tt> raises <tt>shasht-invalid-char</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="FedWiki JSON-init HTTP fallback"><tt>FedWiki JSON-init HTTP fallback</tt></a></li>
+</ul>
+
+<h2>Old divergence</h2>
+
+<p>
+  Before commit <a href="https://codeberg.org/khinsen/hyperdoc/commit/97b1ce7e01655cca14032511faf92b5859974581"><tt>97b1ce7</tt></a>,
+  the normal FedWiki browsing path and the DMX importer did not share one
+  recovery rule. Normal <tt>make-fedwiki</tt> initialization only logged the
+  format failure and left the wiki status unusable, while the importer had its
+  own HTTP retry path.
+</p>
+
+<h2>Current rule</h2>
+
+<p>
+  FedWiki site-data initialization now has one shared recovery seam. When
+  sitemap or plugin JSON discovery fails with a network-init/read-format
+  condition such as <tt>shasht-invalid-char</tt>, HyperDoc logs the original
+  protocol, path, and stage, then retries site-data discovery once over
+  <tt>http</tt>.
+</p>
+
+<p>
+  If the HTTP retry succeeds, the wiki remains usable and keeps the recovered
+  final protocol <tt>http</tt>. If both attempts fail, the status remains the
+  captured error condition.
+</p>
+
+<h2>Explicit exception</h2>
+
+<p>
+  Manually constructed or explicit test wiki objects are not silently pushed
+  through automatic network fallback. That exception keeps in-memory fixtures
+  and explicit importer tests stable instead of turning them into accidental
+  live-network probes.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Opening external FedWiki sites">Opening external FedWiki sites</a></li>
+  <li><a page="FedWiki Site to DMX Import">FedWiki Site to DMX Import</a></li>
+</ul>

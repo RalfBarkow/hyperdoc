@@ -146,16 +146,18 @@ nix develop --command sbcl --no-userinit --non-interactive \
 <p>
   The importer starts from the existing FedWiki integration and therefore
   respects its initial protocol choice. If the initial HTTPS-based site load
-  does not yield usable local sitemap pages, and an explicit HTTP retry does,
-  the importer switches to HTTP for that import run and reports
+  fails while sitemap or plugin JSON discovery returns HTML or another
+  comparable init-format error, the shared FedWiki recovery seam retries site
+  data over HTTP once. When that retry succeeds, the importer keeps the
+  recovered wiki, reports the final resolved protocol, and reports
   <tt>http-fallback=T</tt> in the dry-run/live summary.
 </p>
 
 <p>
-  This fallback is importer-local. It does not globally rewrite the cached
-  FedWiki runtime model, and it is meant only to keep site import practical for
-  hosts such as <tt>sfw.c2.com</tt> whose FedWiki JSON is currently reachable
-  over HTTP but not via a matching HTTPS certificate.
+  This is now a shared browsing/import policy, not an importer-local special
+  case. The explicit exception is that manual or in-memory test wiki objects
+  are not silently pushed through automatic network fallback. See
+  <a page="FedWiki JSON-init HTTP fallback">FedWiki JSON-init HTTP fallback</a>.
 </p>
 
 <h2>Failure modes</h2>
@@ -192,5 +194,6 @@ nix develop --command sbcl --no-userinit --non-interactive \
 
 <ul>
   <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
+  <li><a hyperbook="topics" page="FedWiki JSON-init HTTP fallback"><tt>FedWiki JSON-init HTTP fallback</tt></a></li>
   <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
 </ul>

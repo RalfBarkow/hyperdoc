@@ -44,6 +44,16 @@ All later Wiki requests use (protocol-of wiki), including:
   after initial detection.
 </p>
 
+<h4>JSON init fallback</h4>
+
+<p>
+  A site can still fail after that first protocol choice if a supposed JSON
+  endpoint such as <tt>/system/sitemap.json</tt> or
+  <tt>/system/plugins.json</tt> returns HTML instead. HyperDoc now treats that
+  as a recoverable FedWiki init boundary: it logs the original protocol/path
+  context and retries JSON site-data discovery once over HTTP.
+</p>
+
 <h4>Related incident slices</h4>
 
 <p>
@@ -56,6 +66,7 @@ All later Wiki requests use (protocol-of wiki), including:
   <li><a page="FedWiki Domain Expiry and DNS Cache Decay">FedWiki Domain Expiry and DNS Cache Decay</a></li>
   <li><a page="DNS Cache Decay in Browser-Centric Systems">DNS Cache Decay in Browser-Centric Systems</a></li>
   <li><a page="Emergency Host Overrides for Federated Sites">Emergency Host Overrides for Federated Sites</a></li>
+  <li><a page="FedWiki JSON-init HTTP fallback">FedWiki JSON-init HTTP fallback</a></li>
 </ul>
 
 <h4>Related</h4>
