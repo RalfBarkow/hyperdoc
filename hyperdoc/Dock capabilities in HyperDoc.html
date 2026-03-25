@@ -1,0 +1,119 @@
+<h1>Dock capabilities in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This slice reframes the existing pane-level Connect chrome as a
+  <b>Dock</b>: the place where a pane exposes what can currently be done with
+  the thing in front of you. The current Dock keeps three sibling actions
+  visible together:
+  <tt>Connect</tt>,
+  <tt>Inspect</tt>, and
+  <tt>Annotation</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Dock capabilities in HyperDoc"><tt>Dock capabilities in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Annotation"><tt>Annotation</tt></a></li>
+  <li><a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a></li>
+  <li><a hyperbook="topics" page="Touch-Fahrplan view for Zotero topic enrichment"><tt>Touch-Fahrplan view for Zotero topic enrichment</tt></a></li>
+  <li><a expr="(chunk-dock-annotation)"><tt>(chunk-dock-annotation)</tt></a></li>
+</ul>
+
+<h2>Dock framing</h2>
+
+<p>
+  The Dock is not a parallel subsystem. It reuses the existing
+  DOM-annotation surface, hidden eval-button submit bridges, and inspector pane
+  wiring that already powered Connect. The visible pane row now groups these
+  actions as siblings:
+</p>
+
+<ul>
+  <li><b>Connect</b>: the existing two-anchor relation gesture and request-evidence flow.</li>
+  <li><b>Inspect</b>: open the current pane object directly.</li>
+  <li><b>Annotation</b>: open or reopen the generic annotation object for the current pane object.</li>
+</ul>
+
+<p>
+  The existing Connect-state inspection remains available as the separate
+  <b>Connect state</b> action, so the old inspection seam stays reachable.
+</p>
+
+<h2>Annotation object</h2>
+
+<p>
+  The new generic annotation object is a specialized
+  <tt>dom-relation-annotation</tt>, not a sibling substrate. In this slice it
+  points from the generic
+  <a hyperbook="topics" page="Annotation"><tt>Annotation</tt></a>
+  topic/object to the current pane object.
+</p>
+
+<p>
+  The resulting <tt>dock-annotation</tt> preserves at least:
+</p>
+
+<ul>
+  <li>the target object</li>
+  <li>a synthetic target anchor for the current pane object</li>
+  <li>the context view title</li>
+  <li>the generic relation-kind classification slot (<tt>annotation</tt>)</li>
+  <li>a prefilled note field</li>
+</ul>
+
+<p>
+  Reopening <b>Annotation</b> for the same current object reuses the same
+  inspectable object through the in-image
+  <tt>*dock-annotations*</tt> registry. This is honest reopenability, but it is
+  not yet durable authored persistence across restart.
+</p>
+
+<h2>Current boundary</h2>
+
+<p>
+  The acceptable narrow first slice is what is implemented here:
+  <b>Annotation acts on the current pane object first</b>.
+  It does not yet let you click an arbitrary visible DOM anchor and persist a
+  distinct annotation for that sub-anchor. The naming and object shape keep the
+  door open for that next step.
+</p>
+
+<h2>Zotero as optional Dock capability</h2>
+
+<p>
+  Touch-Fahrplan and topic enrichment remain intact, but Zotero is no longer
+  the center of the pane chrome. When the corresponding backend seam is
+  actually available, the Dock may surface a separate <b>Zotero</b> action that
+  opens the existing <b>Touch-Fahrplan</b> topic view. When it is unavailable,
+  the Dock still exists with Connect, Inspect, and Annotation.
+</p>
+
+<h2>Chunk walkthrough</h2>
+
+<ol>
+  <li>Open the topic page <a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a>.</li>
+  <li>Stay on the <b>Content</b> pane view.</li>
+  <li>Use the Dock row and click <b>Annotation</b>.</li>
+  <li>Inspect the resulting <tt>dock-annotation</tt> object.</li>
+  <li>Use the title-bar <b>Open target</b> action or the target rows to reopen the target object.</li>
+  <li>Return to <b>Chunk</b> and click <b>Annotation</b> again; the same inspectable annotation object reopens.</li>
+</ol>
+
+<h2>Focused smoke path</h2>
+
+<lisp-code>
+(asdf:load-system :hyperdoc/tests)
+(hyperdoc/tests:run-dock-annotation-smoke-tests)
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
+  <li><a page="Normal association submit path vs evidence path">Normal association submit path vs evidence path</a></li>
+  <li><a page="Touch-Fahrplan view for Zotero topic enrichment">Touch-Fahrplan view for Zotero topic enrichment</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

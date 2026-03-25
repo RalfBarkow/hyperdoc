@@ -158,6 +158,10 @@
               (anchor-provider-help-summary-of provider)
               :data-hyperdoc-connect-help-detail
               (anchor-provider-help-detail-of provider)
+              :data-hyperdoc-dock-zotero-available
+              (if (dock-zotero-capability-available-p context-object)
+                  "true"
+                  "false")
               :data-context-object-id (dom-connect-context-object-id context-object)
               :data-context-view-title view-title
               (:div :class "hyperdoc-dom-connect-controls"
@@ -219,7 +223,21 @@
                                :browser-message
                                (lwcells:cell-ref browser-message-cell)
                                :browser-detail
-                               (lwcells:cell-ref browser-detail-cell))))))
+                               (lwcells:cell-ref browser-detail-cell))))
+                    (:span :class "hyperdoc-dock-inspect-submit"
+                           :style "display:none"
+                           (views:eval-button
+                            "Inspect current"
+                            (views:thunk
+                              (dock-inspect-object-for-context context-object))))
+                    (:span :class "hyperdoc-dock-annotation-submit"
+                           :style "display:none"
+                           (views:eval-button
+                            "Open annotation"
+                            (views:thunk
+                              (dock-annotation-for-context
+                               context-object
+                               :context-view-title view-title)))))
               (:svg :class "hyperdoc-dom-connect-overlay"
                     :hidden "hidden"
                     :xmlns "http://www.w3.org/2000/svg"
@@ -230,7 +248,7 @@
                            :x2 "0"
                            :y2 "0"))
               (:div :class "hyperdoc-dom-connect-root hyperdoc-connect-provider-root"
-                    (render-anchor-provider-body provider)))))))
+                    (render-anchor-provider-body provider))))))))
 
 (defun render-dom-connect-surface (context-object view-title body-thunk)
   (render-anchor-provider-surface
@@ -345,6 +363,9 @@
       (anchor-value-of anchor)))
 
 (defmethod views:text-representation ((annotation dom-relation-annotation))
+  (shorten-dom-association-label (title-of annotation)))
+
+(defmethod views:text-representation ((annotation dock-annotation))
   (shorten-dom-association-label (title-of annotation)))
 
 (defmethod views:text-representation ((snapshot dom-connect-pane-state-snapshot))
@@ -570,6 +591,66 @@
       (:h3 "Reviewed topic proposal")
       (:p "Use the Operations view to inspect the promotion result without mutating authored topic factories or page files.")
       (:p (views:object-ref (promote-relation-to-topic-proposal annotation))))))
+
+(defmethod views:title-bar-action-buttons ((annotation dock-annotation))
+  (views:html
+    (views:eval-button
+     "Open target"
+     (views:thunk (target-object-of annotation))
+     "Open the current object that this Dock annotation targets.")))
+
+(views:defview 👀overview (annotation dock-annotation)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:h3 :class "hyperdoc-dom-association-title"
+           (views:esc (title-of annotation)))
+      (:p :class "hyperdoc-dom-association-summary"
+          (views:esc (summary-of annotation)))
+      (:table :class "inspector-table"
+              (:tr (:th "Stable key")
+                   (:td (:tt (views:esc (id-of annotation)))))
+              (:tr (:th "Dock capability")
+                   (:td (:tt (views:esc (dock-capability-of annotation)))))
+              (:tr (:th "Relation kind")
+                   (:td (:tt (views:esc (or (relation-kind-of annotation)
+                                            "-")))))
+              (:tr (:th "Context view")
+                   (:td (:tt (views:esc (or (context-view-title-of annotation)
+                                            "-")))))
+              (:tr (:th "Context object")
+                   (:td (maybe-dom-object-ref (context-object-of annotation))))
+              (:tr (:th "Annotation topic")
+                   (:td (maybe-dom-object-ref (source-object-of annotation))))
+              (:tr (:th "Target object")
+                   (:td (maybe-dom-object-ref (target-object-of annotation)))))
+      (:h4 "Note")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc (or (note-of annotation) ""))))))
+
+(views:defview 👀target (annotation dock-annotation)
+  (views:html-view :title "Target" :priority 2
+    (views:html
+      (:h4 "Target object")
+      (maybe-dom-object-ref (target-object-of annotation))
+      (:h4 "Target anchor")
+      (maybe-dom-object-ref (target-anchor-of annotation))
+      (:h4 "Annotation source")
+      (maybe-dom-object-ref (source-anchor-of annotation)))))
+
+(views:defview 👀raw-data (annotation dock-annotation)
+  (views:html-view :title "Raw data" :priority 3
+    (views:html
+      (:table :class "inspector-table"
+              (render-anchor-field-rows
+               (list (cons "Registry key" (registry-key-of annotation))
+                     (cons "Source object id"
+                           (and (source-object-of annotation)
+                                (ignore-errors
+                                  (id-of (source-object-of annotation)))))
+                     (cons "Target object id"
+                           (and (target-object-of annotation)
+                                (ignore-errors
+                                  (id-of (target-object-of annotation)))))))))))
 
 (views:defview 👀summary (snapshot dom-connect-pane-state-snapshot)
   (views:html-view :title "Summary" :priority 1

@@ -757,7 +757,7 @@
 
   function sessionCueText(session) {
     if (!session || !session.id) {
-      return "Click Connect to start.";
+      return "Use Dock actions or click Connect to start.";
     }
     if (session.phase === "choose-source") {
       return "Click a source anchor.";
@@ -868,6 +868,44 @@
         dispatchDelayMs: 250
       });
     }
+  }
+
+  function dispatchHiddenDockButton(wrapper, clickOptions) {
+    if (!wrapper) {
+      return;
+    }
+    var button = wrapper.querySelector("button");
+    if (!button) {
+      return;
+    }
+    dispatchEvalButtonWhenReady(button, {
+      click: function () {
+        button.dispatchEvent(new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+          shiftKey: true
+        }));
+      },
+      dispatchDelayMs: clickOptions && clickOptions.dispatchDelayMs || 250
+    });
+  }
+
+  function inspectCurrentObject(state) {
+    if (!state.available || !state.dockInspectSubmit) {
+      return;
+    }
+    dispatchHiddenDockButton(state.dockInspectSubmit, {
+      dispatchDelayMs: 250
+    });
+  }
+
+  function openCurrentAnnotation(state) {
+    if (!state.available || !state.dockAnnotationSubmit) {
+      return;
+    }
+    dispatchHiddenDockButton(state.dockAnnotationSubmit, {
+      dispatchDelayMs: 250
+    });
   }
 
   function clearFeedback(state) {
@@ -1162,7 +1200,8 @@
     state.toggle.title = helpSummary;
     state.helpPanel.innerHTML =
       "<p>" + helpSummary + "</p>" +
-      "<p>" + helpDetail + "</p>";
+      "<p>" + helpDetail + "</p>" +
+      "<p>Dock also keeps Inspect and Annotation beside Connect for the current pane object.</p>";
   }
 
   function activeSurfaceForPane(pane) {
@@ -1185,24 +1224,73 @@
     return null;
   }
 
+  function touchFahrplanTabButton(pane) {
+    if (!pane) {
+      return null;
+    }
+    var tabs = pane.querySelectorAll(".inspector-tabs button");
+    for (var i = 0; i < tabs.length; i += 1) {
+      var text = tabs[i].textContent && tabs[i].textContent.replace(/\s+/g, " ").trim();
+      if (text === "Touch-Fahrplan") {
+        return tabs[i];
+      }
+    }
+    return null;
+  }
+
+  function zoteroDockAvailable(state) {
+    return !!(
+      state &&
+      state.surface &&
+      state.surface.dataset.hyperdocDockZoteroAvailable === "true" &&
+      touchFahrplanTabButton(state.pane)
+    );
+  }
+
+  function syncDockCapabilities(state) {
+    if (!state) {
+      return;
+    }
+    if (state.zotero) {
+      state.zotero.hidden = !zoteroDockAvailable(state);
+    }
+  }
+
+  function openZoteroDockCapability(state) {
+    var tab = touchFahrplanTabButton(state && state.pane);
+    if (!tab || !zoteroDockAvailable(state)) {
+      return;
+    }
+    tab.click();
+  }
+
   function ensurePaneControlMarkup(slot) {
     if (!slot || slot.dataset.hyperdocDomConnectControl === "true") {
       return;
     }
     slot.dataset.hyperdocDomConnectControl = "true";
     slot.innerHTML =
-      '<div class="hyperdoc-dom-connect-control" data-hyperdoc-connect-ignore="true">' +
-        '<button type="button" class="hyperdoc-dom-connect-toggle" ' +
-                'title="Click a source anchor, then a target anchor.">Connect</button>' +
+      '<div class="hyperdoc-dom-connect-control hyperdoc-dock-control" data-hyperdoc-connect-ignore="true">' +
+        '<span class="hyperdoc-dock-label">Dock</span>' +
+        '<div class="hyperdoc-dock-actions">' +
+          '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
+                  'title="Click a source anchor, then a target anchor.">Connect</button>' +
+          '<button type="button" class="hyperdoc-dock-inspect hyperdoc-dock-action" ' +
+                  'title="Inspect the current pane object.">Inspect</button>' +
+          '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
+                  'title="Open or reopen the generic Annotation object for the current pane object.">Annotation</button>' +
+          '<button type="button" class="hyperdoc-dock-zotero hyperdoc-dock-action" ' +
+                  'title="Open the Touch-Fahrplan provider view for this pane." hidden>Zotero</button>' +
+        '</div>' +
         '<span class="hyperdoc-dom-connect-status" hidden>Pick source</span>' +
         '<span class="hyperdoc-dom-connect-source-summary" hidden>' +
           '<span class="hyperdoc-dom-connect-source-summary-label">Source:</span>' +
           '<span class="hyperdoc-dom-connect-source-chip"></span>' +
         '</span>' +
-        '<span class="hyperdoc-dom-connect-cue">Click Connect to start.</span>' +
+        '<span class="hyperdoc-dom-connect-cue">Use Dock actions or click Connect to start.</span>' +
         '<button type="button" class="hyperdoc-dom-connect-clear" hidden>Clear</button>' +
         '<button type="button" class="hyperdoc-dom-connect-inspect" ' +
-                'title="Inspect the current Connect session and pane states.">Inspect</button>' +
+                'title="Inspect the current Connect session and pane states.">Connect state</button>' +
         '<button type="button" class="hyperdoc-dom-connect-help-toggle" ' +
                 'title="How Connect works in this view" aria-label="How Connect works in this view" aria-expanded="false">?</button>' +
         '<button type="button" class="hyperdoc-dom-connect-cancel" hidden>Cancel</button>' +
@@ -1332,10 +1420,13 @@
     var submit = controls.querySelector(".hyperdoc-dom-connect-submit");
     var inspectSubmit = controls.querySelector(".hyperdoc-dom-connect-inspect-submit");
     var evidenceSubmit = controls.querySelector(".hyperdoc-dom-connect-evidence-submit");
+    var dockInspectSubmit = controls.querySelector(".hyperdoc-dock-inspect-submit");
+    var dockAnnotationSubmit = controls.querySelector(".hyperdoc-dock-annotation-submit");
     if (!sourceInput || !targetInput || !inspectInput ||
         !requestIdInput || !browserFailureKindInput ||
         !browserMessageInput || !browserDetailInput ||
-        !submit || !inspectSubmit || !evidenceSubmit) {
+        !submit || !inspectSubmit || !evidenceSubmit ||
+        !dockInspectSubmit || !dockAnnotationSubmit) {
       return false;
     }
     state.root = root;
@@ -1351,7 +1442,10 @@
     state.submit = submit;
     state.inspectSubmit = inspectSubmit;
     state.evidenceSubmit = evidenceSubmit;
+    state.dockInspectSubmit = dockInspectSubmit;
+    state.dockAnnotationSubmit = dockAnnotationSubmit;
     updateProviderCopy(state);
+    syncDockCapabilities(state);
     return true;
   }
 
@@ -1368,6 +1462,7 @@
       }
       return;
     }
+    syncDockCapabilities(state);
 
     var activeForSource = session.phase === "choose-source" &&
       session.originPaneId === state.paneId;
@@ -1859,6 +1954,9 @@
     var manager = connectManager();
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
+    var dockInspect = slot.querySelector(".hyperdoc-dock-inspect");
+    var annotation = slot.querySelector(".hyperdoc-dock-annotation");
+    var zotero = slot.querySelector(".hyperdoc-dock-zotero");
     var cue = slot.querySelector(".hyperdoc-dom-connect-cue");
     var sourceSummary = slot.querySelector(".hyperdoc-dom-connect-source-summary");
     var sourceChip = slot.querySelector(".hyperdoc-dom-connect-source-chip");
@@ -1869,7 +1967,8 @@
     var feedback = slot.querySelector(".hyperdoc-dom-connect-feedback");
     var helpPanel = slot.querySelector(".hyperdoc-dom-connect-help-panel");
     var status = slot.querySelector(".hyperdoc-dom-connect-status");
-    if (!control || !toggle || !cue || !sourceSummary || !sourceChip || !clear ||
+    if (!control || !toggle || !dockInspect || !annotation || !zotero ||
+        !cue || !sourceSummary || !sourceChip || !clear ||
         !inspect ||
         !helpToggle || !cancel || !feedback || !helpPanel || !status) {
       return null;
@@ -1881,6 +1980,9 @@
       slot: slot,
       control: control,
       toggle: toggle,
+      dockInspect: dockInspect,
+      annotation: annotation,
+      zotero: zotero,
       cue: cue,
       sourceSummary: sourceSummary,
       sourceChip: sourceChip,
@@ -1918,7 +2020,9 @@
       browserDetailInput: null,
       submit: null,
       inspectSubmit: null,
-      evidenceSubmit: null
+      evidenceSubmit: null,
+      dockInspectSubmit: null,
+      dockAnnotationSubmit: null
     };
     pane.hyperdocDomConnectState = state;
     registerState(manager, state);
@@ -1941,6 +2045,21 @@
       } else {
         activate(state);
       }
+    });
+    dockInspect.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      inspectCurrentObject(state);
+    });
+    annotation.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openCurrentAnnotation(state);
+    });
+    zotero.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openZoteroDockCapability(state);
     });
     helpToggle.addEventListener("click", function (event) {
       event.preventDefault();
@@ -1996,6 +2115,7 @@
     });
     var observer = new MutationObserver(function () {
       schedulePaneSurfaceSync(state);
+      syncDockCapabilities(state);
     });
     observer.observe(pane, {
       subtree: true,

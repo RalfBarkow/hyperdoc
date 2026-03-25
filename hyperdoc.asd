@@ -39,6 +39,7 @@
                              (:file "static-route-observability")
                              (:file "operational-targets")
                              (:file "dom-annotations")
+                             (:file "dock")
                              (:file "git-relations")
                              (:file "relation-topic-proposals")
                              (:file "git-commit-equivalence")
@@ -232,6 +233,7 @@
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "relation-topic-proposals-smoke")
+                             (:file "dock-annotation-smoke")
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")

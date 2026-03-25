@@ -39,6 +39,30 @@
   max-width: min(34rem, 100%);
 }
 
+.hyperdoc-dock-control {
+  justify-content: flex-start;
+  gap: 0.6rem;
+}
+
+.hyperdoc-dock-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(74, 55, 34, 0.72);
+}
+
+.hyperdoc-dock-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hyperdoc-dock-action {
+  font-weight: 600;
+}
+
 .hyperdoc-dom-connect-help-panel,
 .hyperdoc-dom-connect-feedback {
   position: absolute;
@@ -82,6 +106,20 @@
 .hyperdoc-dom-connect-toggle[data-mode="active"] {
   background: #8d6a3a;
   color: #fff9f0;
+}
+
+.hyperdoc-dock-annotation {
+  border-color: #8a3b2d;
+}
+
+.hyperdoc-dock-zotero {
+  border-color: #0f766e;
+  color: #115e59;
+}
+
+.hyperdoc-dock-zotero:hover,
+.hyperdoc-dock-zotero:focus {
+  background: rgba(15, 118, 110, 0.12);
 }
 
 .hyperdoc-dom-connect-pane-slot[data-connect-state="select-source"] .hyperdoc-dom-connect-control,
@@ -289,6 +327,10 @@
 
   .hyperdoc-dom-connect-control {
     justify-content: flex-start;
+  }
+
+  .hyperdoc-dock-actions {
+    width: 100%;
   }
 
   .hyperdoc-dom-connect-help-panel,

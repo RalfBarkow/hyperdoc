@@ -2257,6 +2257,26 @@
                  "Inspectable Zotero enrichment plan for a topic"
                  "Topic enrichment report")))
 
+(defun annotation-topic ()
+  (make-topic
+   :id "dock-annotation"
+   :title "Annotation"
+   :summary "Generic Dock-side annotation topic/object that acts as the stable source endpoint for prefilled inspectable annotations on the current pane object, with room to specialize to DOM anchors later."
+   :references '("Dock capabilities in HyperDoc"
+                 "A DOM-annotation connect gesture"
+                 "Associations"
+                 "Touch-Fahrplan view for Zotero topic enrichment")))
+
+(defun dock-capabilities-in-hyperdoc-topic ()
+  (make-topic
+   :id "dock-capabilities-in-hyperdoc"
+   :title "Dock capabilities in HyperDoc"
+   :summary "Pane-local Dock framing that treats Connect, Inspect, and Annotation as sibling actions on the current thing, while optional providers such as Zotero appear only when their backend seam is available."
+   :references '("Dock capabilities in HyperDoc"
+                 "Annotation"
+                 "A DOM-annotation connect gesture"
+                 "Touch-Fahrplan view for Zotero topic enrichment")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic

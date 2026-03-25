@@ -1374,40 +1374,63 @@
                                           context-view-title
                                           source-anchor
                                           target-anchor
+                                          class
+                                          id
+                                          title
+                                          summary
+                                          source-object
+                                          target-object
                                           relation-kind
-                                          note)
+                                          note
+                                          registry-key
+                                          dock-capability)
   (let* ((match (matched-workflow-patch-target-info source-anchor target-anchor))
          (patch-target (getf match :patch-target))
          (defect (getf match :defect))
          (inserted-step (getf match :inserted-step))
-         (source-object (or (maybe-official-step-for-anchor source-anchor)
-                            (and patch-target
-                                 (call-hyperdoc-runtime "FROM-STEP-OF" defect))))
-         (target-object (or (maybe-official-step-for-anchor target-anchor)
-                            (and patch-target
-                                 (call-hyperdoc-runtime "TO-STEP-OF" defect)))))
-    (make-instance 'dom-relation-annotation
-                   :id (dom-relation-annotation-id source-anchor target-anchor)
-                   :title (dom-relation-annotation-title source-anchor target-anchor)
-                   :summary (dom-relation-annotation-summary
-                             source-anchor target-anchor patch-target
-                             context-view-title)
-                   :context-object context-object
-                   :context-view-title context-view-title
-                   :source-anchor source-anchor
-                   :target-anchor target-anchor
-                   :source-object source-object
-                   :target-object target-object
-                   :relation-kind (or relation-kind
-                                      (getf match :relation-kind)
-                                      "unclassified association")
-                   :note (or note
-                             (getf match :note)
-                             (dom-relation-annotation-durability-note
-                              source-anchor target-anchor))
-                   :matching-patch-target patch-target
-                   :matching-defect defect
-                   :matching-inserted-step inserted-step)))
+         (computed-source-object
+           (or (maybe-official-step-for-anchor source-anchor)
+               (and patch-target
+                    (call-hyperdoc-runtime "FROM-STEP-OF" defect))))
+         (computed-target-object
+           (or (maybe-official-step-for-anchor target-anchor)
+               (and patch-target
+                    (call-hyperdoc-runtime "TO-STEP-OF" defect)))))
+    (apply #'make-instance
+           (or class 'dom-relation-annotation)
+           :id (or id
+                   (dom-relation-annotation-id
+                    source-anchor target-anchor))
+           :title (or title
+                      (dom-relation-annotation-title
+                       source-anchor target-anchor))
+           :summary (or summary
+                        (dom-relation-annotation-summary
+                         source-anchor target-anchor patch-target
+                         context-view-title))
+           :context-object context-object
+           :context-view-title context-view-title
+           :source-anchor source-anchor
+           :target-anchor target-anchor
+           :source-object (or source-object
+                              computed-source-object)
+           :target-object (or target-object
+                              computed-target-object)
+           :relation-kind (or relation-kind
+                              (getf match :relation-kind)
+                              "unclassified association")
+           :note (or note
+                     (getf match :note)
+                     (dom-relation-annotation-durability-note
+                      source-anchor target-anchor))
+           :matching-patch-target patch-target
+           :matching-defect defect
+           :matching-inserted-step inserted-step
+           (append
+            (when registry-key
+              (list :registry-key registry-key))
+            (when dock-capability
+              (list :dock-capability dock-capability))))))
 
 (defun make-association-annotation-from-json (&key context-object
                                                    context-view-title

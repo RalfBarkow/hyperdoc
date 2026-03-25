@@ -468,6 +468,27 @@
    "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
    "*topic-enrichment-route-definitions*"))
 
+(defun run-dock-capabilities-doc-slice-smoke-test ()
+  (dolist (entry '((hyperdoc::dock-capabilities-in-hyperdoc-topic
+                    "Dock capabilities in HyperDoc")
+                   (hyperdoc::annotation-topic
+                    "Annotation")))
+    (destructuring-bind (symbol title) entry
+      (assert-topic-function-present symbol title)))
+  (assert-hyperdoc-page-present "Dock capabilities in HyperDoc")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "(chunk-dock-annotation)")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "Connect state")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "current pane object first")
+  (assert-page-source-contains
+   "hyperdoc/Dock capabilities in HyperDoc.html"
+   "Zotero as optional Dock capability"))
+
 (defun run-dom-connect-submit-path-comparison-doc-slice-smoke-test ()
   (assert-topic-function-present
    'hyperdoc::normal-association-submit-path-vs-evidence-path-topic
@@ -555,6 +576,7 @@
   (run-drew-mind-and-mechanism-doc-slice-smoke-test)
   (run-bibliography-subcollections-doc-slice-smoke-test)
   (run-topic-enrichment-doc-slice-smoke-test)
+  (run-dock-capabilities-doc-slice-smoke-test)
   (run-dom-connect-submit-path-comparison-doc-slice-smoke-test)
   (run-snapshot-transport-doc-slice-smoke-test)
   (run-association-topics-doc-slice-smoke-test)
