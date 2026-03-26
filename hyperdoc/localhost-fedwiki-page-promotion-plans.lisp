@@ -521,6 +521,131 @@
           :dmx-dry-run-summary
           (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))))
 
+(defun localhost-fedwiki-page-promotion-plan-source-freshness-action-label
+    (artifact freshness-state)
+  (case freshness-state
+    (:fresh
+     "No action needed")
+    (:stale
+     (case artifact
+       (:page "Regenerate page artifact")
+       (:snippet "Regenerate snippet artifact")
+       (otherwise "Regenerate artifact")))
+    (:unknown-malformed-envelope
+     (case artifact
+       (:page "Repair page snapshot evidence")
+       (:snippet "Repair snippet snapshot evidence")
+       (otherwise "Repair snapshot evidence")))
+    (otherwise
+     (case artifact
+       (:page "Restore page snapshot evidence")
+       (:snippet "Restore snippet snapshot evidence")
+       (otherwise "Restore snapshot evidence")))))
+
+(defun localhost-fedwiki-page-promotion-plan-attention-severity-for-state
+    (freshness-state)
+  (case freshness-state
+    (:unknown-malformed-envelope 0)
+    (:unknown-missing-envelope 1)
+    (:stale 2)
+    (:fresh 3)
+    (otherwise 4)))
+
+(defun localhost-fedwiki-page-promotion-plan-triage-category (status)
+  (let ((page-state (getf status :page-source-freshness-state))
+        (snippet-state (getf status :snippet-source-freshness-state)))
+    (cond
+      ((and (eql page-state :fresh)
+            (eql snippet-state :fresh))
+       :all-fresh)
+      ((eql page-state snippet-state)
+       (case page-state
+         (:stale :stale)
+         (:unknown-missing-envelope :unknown-missing-envelope)
+         (:unknown-malformed-envelope :unknown-malformed-envelope)
+         (otherwise :mixed-states)))
+      (t
+       :mixed-states))))
+
+(defun localhost-fedwiki-page-promotion-plan-attention-needed-p (status)
+  (not (eql (localhost-fedwiki-page-promotion-plan-triage-category status)
+            :all-fresh)))
+
+(defun localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+    (status)
+  (let* ((page-state (getf status :page-source-freshness-state))
+         (snippet-state (getf status :snippet-source-freshness-state))
+         (page-label
+           (localhost-fedwiki-page-promotion-plan-source-freshness-action-label
+            :page
+            page-state))
+         (snippet-label
+           (localhost-fedwiki-page-promotion-plan-source-freshness-action-label
+            :snippet
+            snippet-state)))
+    (if (and (eql page-state :fresh)
+             (eql snippet-state :fresh))
+        "No action needed"
+        (format nil "Page: ~A; Snippet: ~A"
+                page-label
+                snippet-label))))
+
+(defun localhost-fedwiki-page-promotion-plan-triage-row
+    (plan &key status)
+  (let* ((resolved-status
+           (or status
+               (localhost-fedwiki-page-promotion-plan-sync-status-report plan)))
+         (page-state (getf resolved-status :page-source-freshness-state))
+         (snippet-state (getf resolved-status :snippet-source-freshness-state))
+         (attention-severity
+           (min
+            (localhost-fedwiki-page-promotion-plan-attention-severity-for-state
+             page-state)
+            (localhost-fedwiki-page-promotion-plan-attention-severity-for-state
+             snippet-state))))
+    (list :plan plan
+          :inspect-target plan
+          :plan-id (localhost-fedwiki-page-promotion-plan-id plan)
+          :title (localhost-fedwiki-page-promotion-plan-title plan)
+          :source-page-id
+          (localhost-fedwiki-page-promotion-plan-source-page-id plan)
+          :source-slug
+          (localhost-fedwiki-page-promotion-plan-source-page-slug plan)
+          :page-freshness-state page-state
+          :snippet-freshness-state snippet-state
+          :page-freshness-reason
+          (getf resolved-status :page-source-freshness-reason)
+          :snippet-freshness-reason
+          (getf resolved-status :snippet-source-freshness-reason)
+          :attention-category
+          (localhost-fedwiki-page-promotion-plan-triage-category resolved-status)
+          :attention-needed
+          (localhost-fedwiki-page-promotion-plan-attention-needed-p resolved-status)
+          :attention-severity attention-severity
+          :recommended-next-action-summary
+          (localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+           resolved-status)
+          :status resolved-status)))
+
+(defun localhost-fedwiki-page-promotion-surface-triage-rows
+    (surface &key status-overrides)
+  (sort
+   (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
+         for override = (cdr (assoc (localhost-fedwiki-page-promotion-plan-id plan)
+                                    status-overrides
+                                    :test #'equal))
+         collect
+         (localhost-fedwiki-page-promotion-plan-triage-row
+          plan
+          :status override))
+   (lambda (left right)
+     (or (< (getf left :attention-severity)
+            (getf right :attention-severity))
+         (and (= (getf left :attention-severity)
+                 (getf right :attention-severity))
+              (string-lessp (getf left :title)
+                            (getf right :title)))))))
+
 ;; Generic operations so the inspector exposes them in the Operations view.
 (defgeneric localhost-fedwiki-page-promotion-plan-sync-status (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))

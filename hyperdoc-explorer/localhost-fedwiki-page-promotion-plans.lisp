@@ -149,6 +149,19 @@
          (:div :style "margin-top: 0.35rem;"
                (views:esc (getf spec :description))))))))
 
+(defun promotion-triage-category-label (category)
+  (case category
+    (:all-fresh "all fresh")
+    (:stale "stale page and snippet")
+    (:unknown-missing-envelope "unknown (missing envelope)")
+    (:unknown-malformed-envelope "unknown (malformed envelope)")
+    (otherwise "mixed page/snippet states")))
+
+(defun promotion-attention-needed-count (rows)
+  (count-if (lambda (row)
+              (getf row :attention-needed))
+            rows))
+
 (defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
   (localhost-fedwiki-page-promotion-surface-title surface))
 
@@ -179,19 +192,73 @@
 
 (views:defview 👀overview (surface localhost-fedwiki-page-promotion-surface)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:h3 (views:esc (localhost-fedwiki-page-promotion-surface-title surface)))
-      (:p (views:esc (localhost-fedwiki-page-promotion-surface-summary surface)))
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Plan count"))
-                   (:td (:tt (views:esc
-                              (format nil "~D"
-                                      (length
-                                       (localhost-fedwiki-page-promotion-surface-plans
-                                        surface)))))))))))
+    (let* ((rows (localhost-fedwiki-page-promotion-surface-triage-rows surface))
+           (attention-needed-count (promotion-attention-needed-count rows))
+           (fresh-count (- (length rows) attention-needed-count))
+           (top-row (first rows)))
+      (views:html
+        (:h3 (views:esc (localhost-fedwiki-page-promotion-surface-title surface)))
+        (:p (views:esc (localhost-fedwiki-page-promotion-surface-summary surface)))
+        (:p (views:esc
+             "Use Triage to scan all known promotion plans by current freshness state. Attention-needed plans are ordered before all-fresh plans, with malformed and missing reflected snapshot evidence ahead of stale items."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Plan count"))
+                     (:td (:tt (views:esc (format nil "~D" (length rows))))))
+                (:tr (:td (views:esc "Attention needed"))
+                     (:td (:tt (views:esc
+                                (format nil "~D" attention-needed-count)))))
+                (:tr (:td (views:esc "All fresh"))
+                     (:td (:tt (views:esc (format nil "~D" fresh-count)))))
+                (:tr (:td (views:esc "Top triage state"))
+                     (:td (:tt (views:esc
+                                (if top-row
+                                    (promotion-triage-category-label
+                                     (getf top-row :attention-category))
+                                    "none"))))))))))
+
+(views:defview 👀triage (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Triage" :priority 2
+    (let ((rows (localhost-fedwiki-page-promotion-surface-triage-rows surface)))
+      (views:html
+        (:p "This compact triage table keeps attention-needed promotion plans ahead of all-fresh plans and links each row back to the live plan object.")
+        (:table :class "inspector-table"
+                (:tr (:th (views:esc "Plan"))
+                     (:th (views:esc "Source"))
+                     (:th (views:esc "Page freshness"))
+                     (:th (views:esc "Snippet freshness"))
+                     (:th (views:esc "Attention state"))
+                     (:th (views:esc "Recommended next action"))
+                     (:th (views:esc "Inspect")))
+                (loop for row in rows
+                      do (views:html
+                           (:tr
+                            (:td
+                             (views:esc (getf row :title))
+                             (:div :style "margin-top: 0.35rem;"
+                                   (:tt (views:esc (getf row :plan-id)))))
+                            (:td
+                             (:tt (views:esc (getf row :source-slug)))
+                             (:div :style "margin-top: 0.35rem;"
+                                   (:tt (views:esc (getf row :source-page-id)))))
+                            (:td
+                             (:tt (views:esc
+                                   (promotion-source-freshness-label
+                                    (getf row :page-freshness-state)))))
+                            (:td
+                             (:tt (views:esc
+                                   (promotion-source-freshness-label
+                                    (getf row :snippet-freshness-state)))))
+                            (:td
+                             (:tt (views:esc
+                                   (promotion-triage-category-label
+                                    (getf row :attention-category)))))
+                            (:td (views:esc
+                                  (getf row :recommended-next-action-summary)))
+                            (:td (views:object-ref
+                                  (getf row :inspect-target)))))))))))
 
 (views:defview 👀plans (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Plans" :priority 2
+  (views:html-view :title "Plans" :priority 3
     (views:html
       (:p "Each plan stays inspectable as a separate localhost FedWiki page-promotion boundary.")
       (:ul
