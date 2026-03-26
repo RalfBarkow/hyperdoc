@@ -22,6 +22,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "core")
+                             (:file "localhost-fedwiki-page-pipeline")
                              (:file "collective-knowledge-slice")
                              (:file "topics")
                              (:file "links-in-code")
