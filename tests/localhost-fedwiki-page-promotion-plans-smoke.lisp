@@ -40,6 +40,9 @@
          (collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
          (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
          (surface-views (load-inspector-views-for-object surface))
+         (surface-triage-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "Triage")))
          (collective-views (load-inspector-views-for-object collective))
          (repro-views (load-inspector-views-for-object repro))
          (collective-promoted-html
@@ -70,8 +73,22 @@
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-views "DMX dry-run"))))
     (assert-view-titles-present surface-views
-                                '("Overview" "Plans")
+                                '("Overview" "Triage" "Plans")
                                 "Promotion surface")
+    (assert-true
+     (search "attention-needed promotion plans ahead of all-fresh plans"
+             surface-triage-html
+             :test #'char=)
+     "Promotion surface triage view must explain attention-first ordering")
+    (dolist (needle (list "The Life Cycle of Collective Knowledge promotion plan"
+                          "Reproducible DevEnv as Knowledge Artifact promotion plan"
+                          "the-life-cycle-of-collective-knowledge"
+                          "reproducible-devenv-as-knowledge-artifact"
+                          "all fresh"
+                          "No action needed"))
+      (assert-true
+       (search needle surface-triage-html :test #'char=)
+       (format nil "Promotion surface triage view must expose ~A" needle)))
     (assert-view-titles-present collective-views
                                 '("Overview"
                                   "Source page"
@@ -305,6 +322,165 @@
     (assert-true
      (not (search "/Users/" repro-dmx-html :test #'char=))
      "Second real page DMX dry-run view must not leak machine-local absolute paths")))
+
+(defun run-localhost-fedwiki-page-promotion-surface-triage-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
+         (collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+         (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+         (collective-id
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective))
+         (repro-id
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro))
+         (base-rows
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows surface))
+         (collective-row
+           (find collective-id
+                 base-rows
+                 :key (lambda (row) (getf row :plan-id))
+                 :test #'equal))
+         (repro-row
+           (find repro-id
+                 base-rows
+                 :key (lambda (row) (getf row :plan-id))
+                 :test #'equal))
+         (repro-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            repro))
+         (collective-page-rest
+           (strip-artifact-envelope-line
+            (uiop:read-file-string
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
+              collective))))
+         (collective-snippet-rest
+           (strip-artifact-envelope-line
+            (uiop:read-file-string
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+              collective))))
+         (simulated-missing
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective
+            :page-contents collective-page-rest
+            :snippet-contents collective-snippet-rest))
+         (simulated-malformed
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective
+            :page-contents
+            (malformed-html-envelope-contents collective-page-rest)
+            :snippet-contents
+            (malformed-snippet-envelope-contents collective-snippet-rest)))
+         (simulated-mixed
+           (hyperdoc::plist-with-overrides
+            repro-status
+            :page-source-freshness-state :stale
+            :page-source-freshness-reason
+            "Current normalized source fingerprint fnv1a64:SIMULATEDSTALE differs from reflected snapshot fingerprint fnv1a64:D3A4A5482E15414D."
+            :page-source-freshness-recommended-action :regenerate-artifact
+            :page-source-freshness-recommended-action-label
+            "Regenerate the page artifact to refresh its reflected source snapshot evidence."
+            :page-source-freshness-recommended-operation
+            'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+            :page-source-freshness-known t
+            :page-source-freshness-unknown-reason nil
+            :page-source-fresh nil
+            :snippet-source-freshness-state :fresh
+            :snippet-source-freshness-reason
+            "Current normalized source fingerprint fnv1a64:D3A4A5482E15414D matches reflected snapshot fingerprint fnv1a64:D3A4A5482E15414D."
+            :snippet-source-freshness-recommended-action :no-regeneration-needed
+            :snippet-source-freshness-recommended-action-label
+            "No regeneration needed; the snippet artifact already reflects the current source snapshot."
+            :snippet-source-freshness-recommended-operation nil
+            :snippet-source-freshness-known t
+            :snippet-source-freshness-unknown-reason nil
+            :snippet-source-fresh t))
+         (missing-row
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+            collective
+            :status simulated-missing))
+         (malformed-row
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+            collective
+            :status simulated-malformed))
+         (mixed-row
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+            repro
+            :status simulated-mixed))
+         (ordered-rows
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+            surface
+            :status-overrides
+            (list (cons collective-id simulated-malformed)
+                  (cons repro-id simulated-mixed)))))
+    (assert-true collective-row
+                 "Promotion surface triage rows must include the collective plan")
+    (assert-true repro-row
+                 "Promotion surface triage rows must include the reproducible-devenv plan")
+    (assert-equal
+     collective-id
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (getf collective-row :inspect-target))
+     "Collective triage row inspect target must resolve to the correct plan object")
+    (assert-equal
+     repro-id
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (getf repro-row :inspect-target))
+     "Reproducible-devenv triage row inspect target must resolve to the correct plan object")
+    (assert-equal
+     :all-fresh
+     (getf collective-row :attention-category)
+     "Collective triage row must classify the current real-plan state as all fresh")
+    (assert-equal
+     :all-fresh
+     (getf repro-row :attention-category)
+     "Reproducible-devenv triage row must classify the current real-plan state as all fresh")
+    (assert-equal
+     "No action needed"
+     (getf collective-row :recommended-next-action-summary)
+     "Collective triage row must summarize the fresh case as no action needed")
+    (assert-equal
+     :unknown-missing-envelope
+     (getf missing-row :attention-category)
+     "Missing-envelope triage row must classify unknown missing state explicitly")
+    (assert-equal
+     :unknown-malformed-envelope
+     (getf malformed-row :attention-category)
+     "Malformed-envelope triage row must classify unknown malformed state explicitly")
+    (assert-equal
+     :mixed-states
+     (getf mixed-row :attention-category)
+     "Mixed triage row must classify differing page/snippet freshness states explicitly")
+    (assert-equal
+     :stale
+     (getf mixed-row :page-freshness-state)
+     "Mixed triage row must preserve the simulated stale page state")
+    (assert-equal
+     :fresh
+     (getf mixed-row :snippet-freshness-state)
+     "Mixed triage row must preserve the simulated fresh snippet state")
+    (assert-equal
+     collective-id
+     (getf (first ordered-rows) :plan-id)
+     "Malformed attention-needed triage rows must sort ahead of mixed stale rows")
+    (assert-equal
+     :unknown-malformed-envelope
+     (getf (first ordered-rows) :attention-category)
+     "The first ordered triage row must expose the highest-priority malformed state")
+    (assert-equal
+     repro-id
+     (getf (second ordered-rows) :plan-id)
+     "Mixed stale rows must sort after malformed rows when both need attention")
+    (assert-true
+     (string= (getf mixed-row :recommended-next-action-summary)
+              "Page: Regenerate page artifact; Snippet: No action needed")
+     "Mixed triage rows must summarize page/snippet next actions compactly")
+    (assert-true
+     (string= (getf missing-row :recommended-next-action-summary)
+              "Page: Restore page snapshot evidence; Snippet: Restore snippet snapshot evidence")
+     "Missing-envelope triage rows must summarize restore actions compactly")
+    (assert-true
+     (string= (getf malformed-row :recommended-next-action-summary)
+              "Page: Repair page snapshot evidence; Snippet: Repair snippet snapshot evidence")
+     "Malformed-envelope triage rows must summarize repair actions compactly")))
 
 (defun run-localhost-fedwiki-page-promotion-entry-point-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -1200,6 +1376,7 @@
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
+  (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
   (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
   (run-localhost-fedwiki-page-promotion-operations-smoke-test)
   (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
