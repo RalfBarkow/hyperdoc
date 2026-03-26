@@ -21,6 +21,19 @@
     (assert-true (smoke-find-view-by-title views title)
                  (format nil "~A must expose a ~A view" label title))))
 
+(defun strip-artifact-envelope-line (contents)
+  (nth-value 1 (hyperdoc::split-string-first-line contents)))
+
+(defun malformed-html-envelope-contents (body)
+  (format nil "<!-- ~A (:BROKEN~%~A"
+          hyperdoc::+localhost-fedwiki-page-source-snapshot-envelope-tag+
+          body))
+
+(defun malformed-snippet-envelope-contents (body)
+  (format nil ";; ~A (:BROKEN~%~A"
+          hyperdoc::+localhost-fedwiki-page-source-snapshot-envelope-tag+
+          body))
+
 (defun run-localhost-fedwiki-page-promotion-plan-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
@@ -98,6 +111,12 @@
      (search "Snippet source fresh" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose snippet source freshness")
     (assert-true
+     (search "Page reflected snapshot" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose page reflected-snapshot state")
+    (assert-true
+     (search "Snippet reflected snapshot" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose snippet reflected-snapshot state")
+    (assert-true
      (search "Current source fingerprint" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose the current source fingerprint")
     (assert-true
@@ -141,6 +160,12 @@
     (assert-true
      (search "Snippet source fresh" repro-overview-html :test #'char=)
      "Second real-page overview must expose snippet source freshness")
+    (assert-true
+     (search "Page reflected snapshot" repro-overview-html :test #'char=)
+     "Second real-page overview must expose page reflected-snapshot state")
+    (assert-true
+     (search "Snippet reflected snapshot" repro-overview-html :test #'char=)
+     "Second real-page overview must expose snippet reflected-snapshot state")
     (assert-true
      (search "Current source fingerprint" repro-overview-html :test #'char=)
      "Second real-page overview must expose the current source fingerprint")
@@ -415,6 +440,22 @@
          (repro-status
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
             repro))
+         (collective-page-rest
+           (strip-artifact-envelope-line collective-page-before))
+         (collective-snippet-rest
+           (strip-artifact-envelope-line collective-snippet-before))
+         (missing-envelope-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective
+            :page-contents collective-page-rest
+            :snippet-contents collective-snippet-rest))
+         (malformed-envelope-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective
+            :page-contents
+            (malformed-html-envelope-contents collective-page-rest)
+            :snippet-contents
+            (malformed-snippet-envelope-contents collective-snippet-rest)))
          (collective-dmx-string (prin1-to-string collective-dmx-review))
          (repro-dmx-string (prin1-to-string repro-dmx-review))
          (simulated-out-of-sync
@@ -447,12 +488,68 @@
     (assert-true
      (getf collective-status :page-source-fresh)
      "Collective knowledge page artifact must be fresh relative to the current source snapshot")
+    (assert-equal
+     :present
+     (getf collective-status :page-reflected-snapshot-status)
+     "Collective knowledge page artifact must reflect a valid source snapshot envelope")
+    (assert-equal
+     :present
+     (getf collective-status :snippet-reflected-snapshot-status)
+     "Collective knowledge snippet artifact must reflect a valid source snapshot envelope")
+    (assert-true
+     (getf collective-status :page-reflected-snapshot-present)
+     "Collective knowledge page artifact must report the reflected snapshot as present")
+    (assert-true
+     (not (getf collective-status :page-reflected-snapshot-malformed))
+     "Collective knowledge page artifact must not report a malformed reflected snapshot")
+    (assert-true
+     (getf collective-status :snippet-reflected-snapshot-present)
+     "Collective knowledge snippet artifact must report the reflected snapshot as present")
+    (assert-true
+     (not (getf collective-status :snippet-reflected-snapshot-malformed))
+     "Collective knowledge snippet artifact must not report a malformed reflected snapshot")
+    (assert-equal
+     :fresh
+     (getf collective-status :page-source-freshness-state)
+     "Collective knowledge page artifact must classify source freshness as fresh when the envelope matches")
+    (assert-equal
+     :fresh
+     (getf collective-status :snippet-source-freshness-state)
+     "Collective knowledge snippet artifact must classify source freshness as fresh when the envelope matches")
+    (assert-true
+     (getf collective-status :page-source-freshness-known)
+     "Collective knowledge page artifact must report source freshness as known when the envelope is valid")
+    (assert-true
+     (getf collective-status :snippet-source-freshness-known)
+     "Collective knowledge snippet artifact must report source freshness as known when the envelope is valid")
     (assert-true
      (getf collective-status :snippet-source-fresh)
      "Collective knowledge snippet artifact must be fresh relative to the current source snapshot")
     (assert-true
      (getf repro-status :page-source-fresh)
      "Second real-page artifact must be fresh relative to the current source snapshot")
+    (assert-equal
+     :present
+     (getf repro-status :page-reflected-snapshot-status)
+     "Second real-page artifact must reflect a valid source snapshot envelope")
+    (assert-equal
+     :present
+     (getf repro-status :snippet-reflected-snapshot-status)
+     "Second real-page snippet must reflect a valid source snapshot envelope")
+    (assert-equal
+     :fresh
+     (getf repro-status :page-source-freshness-state)
+     "Second real-page artifact must classify source freshness as fresh when the envelope matches")
+    (assert-equal
+     :fresh
+     (getf repro-status :snippet-source-freshness-state)
+     "Second real-page snippet must classify source freshness as fresh when the envelope matches")
+    (assert-true
+     (getf repro-status :page-source-freshness-known)
+     "Second real-page artifact must report source freshness as known when the envelope is valid")
+    (assert-true
+     (getf repro-status :snippet-source-freshness-known)
+     "Second real-page snippet must report source freshness as known when the envelope is valid")
     (assert-true
      (getf repro-status :snippet-source-fresh)
      "Second real-page snippet must be fresh relative to the current source snapshot")
@@ -531,6 +628,74 @@
     (assert-true (not (getf simulated-out-of-sync :snippet-synced))
                  "Test seam must surface out-of-sync snippet status")
     (assert-true
+     (not (getf missing-envelope-status :page-reflected-snapshot-present))
+     "Missing page envelopes must fail soft by reporting no reflected snapshot")
+    (assert-true
+     (not (getf missing-envelope-status :page-reflected-snapshot-malformed))
+     "Missing page envelopes must not be misclassified as malformed")
+    (assert-true
+     (not (getf missing-envelope-status :page-source-freshness-known))
+     "Missing page envelopes must classify source freshness as unknown")
+    (assert-equal
+     :unknown-missing-envelope
+     (getf missing-envelope-status :page-source-freshness-state)
+     "Missing page envelopes must classify source freshness as unknown because the envelope is missing")
+    (assert-equal
+     :missing-envelope
+     (getf missing-envelope-status :page-source-freshness-unknown-reason)
+     "Missing page envelopes must preserve the explicit unknown reason")
+    (assert-true
+     (not (getf missing-envelope-status :snippet-reflected-snapshot-present))
+     "Missing snippet envelopes must fail soft by reporting no reflected snapshot")
+    (assert-true
+     (not (getf missing-envelope-status :snippet-reflected-snapshot-malformed))
+     "Missing snippet envelopes must not be misclassified as malformed")
+    (assert-true
+     (not (getf missing-envelope-status :snippet-source-freshness-known))
+     "Missing snippet envelopes must classify source freshness as unknown")
+    (assert-equal
+     :unknown-missing-envelope
+     (getf missing-envelope-status :snippet-source-freshness-state)
+     "Missing snippet envelopes must classify source freshness as unknown because the envelope is missing")
+    (assert-equal
+     :missing-envelope
+     (getf missing-envelope-status :snippet-source-freshness-unknown-reason)
+     "Missing snippet envelopes must preserve the explicit unknown reason")
+    (assert-true
+     (not (getf malformed-envelope-status :page-reflected-snapshot-present))
+     "Malformed page envelopes must fail soft by reporting no valid reflected snapshot")
+    (assert-true
+     (getf malformed-envelope-status :page-reflected-snapshot-malformed)
+     "Malformed page envelopes must preserve the malformed classification")
+    (assert-true
+     (not (getf malformed-envelope-status :page-source-freshness-known))
+     "Malformed page envelopes must classify source freshness as unknown")
+    (assert-equal
+     :unknown-malformed-envelope
+     (getf malformed-envelope-status :page-source-freshness-state)
+     "Malformed page envelopes must classify source freshness as unknown because the envelope is malformed")
+    (assert-equal
+     :malformed-envelope
+     (getf malformed-envelope-status :page-source-freshness-unknown-reason)
+     "Malformed page envelopes must preserve the explicit malformed reason")
+    (assert-true
+     (not (getf malformed-envelope-status :snippet-reflected-snapshot-present))
+     "Malformed snippet envelopes must fail soft by reporting no valid reflected snapshot")
+    (assert-true
+     (getf malformed-envelope-status :snippet-reflected-snapshot-malformed)
+     "Malformed snippet envelopes must preserve the malformed classification")
+    (assert-true
+     (not (getf malformed-envelope-status :snippet-source-freshness-known))
+     "Malformed snippet envelopes must classify source freshness as unknown")
+    (assert-equal
+     :unknown-malformed-envelope
+     (getf malformed-envelope-status :snippet-source-freshness-state)
+     "Malformed snippet envelopes must classify source freshness as unknown because the envelope is malformed")
+    (assert-equal
+     :malformed-envelope
+     (getf malformed-envelope-status :snippet-source-freshness-unknown-reason)
+     "Malformed snippet envelopes must preserve the explicit malformed reason")
+    (assert-true
      (getf simulated-stale-source :page-synced)
      "Stale-source simulation must not require mutating the page artifact bytes")
     (assert-true
@@ -539,9 +704,17 @@
     (assert-true
      (not (getf simulated-stale-source :page-source-fresh))
      "Test seam must surface stale page-source freshness without mutating the real FedWiki page")
+    (assert-equal
+     :stale
+     (getf simulated-stale-source :page-source-freshness-state)
+     "Stale-source simulation must classify page freshness as stale")
     (assert-true
      (not (getf simulated-stale-source :snippet-source-fresh))
      "Test seam must surface stale snippet-source freshness without mutating the real FedWiki page")
+    (assert-equal
+     :stale
+     (getf simulated-stale-source :snippet-source-freshness-state)
+     "Stale-source simulation must classify snippet freshness as stale")
     (assert-true
      (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
              collective-dmx-string

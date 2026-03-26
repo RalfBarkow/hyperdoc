@@ -144,6 +144,87 @@
      (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
       expected-topic-snippet)
      "Committed topic snippet must embed a source snapshot comment")
+    (multiple-value-bind (page-first-line page-body)
+        (hyperdoc::split-string-first-line expected-page)
+      (assert-true
+       (hyperdoc::string-prefix-p*
+        hyperdoc::+localhost-fedwiki-page-source-snapshot-page-prefix+
+        page-first-line)
+       "Committed page artifact must keep the source snapshot in an inert HTML comment")
+      (assert-true
+       (search "<h1>The Life Cycle of Collective Knowledge</h1>"
+               page-body
+               :test #'char=)
+       "Committed page artifact body must still start with rendered HTML content after the inert comment")
+      (assert-true
+       (not (search hyperdoc::+localhost-fedwiki-page-source-snapshot-envelope-tag+
+                    page-body
+                    :test #'char=))
+       "Committed page artifact must not leak the snapshot tag into visible page body content"))
+    (multiple-value-bind (snippet-first-line snippet-rest)
+        (hyperdoc::split-string-first-line expected-topic-snippet)
+      (declare (ignore snippet-rest))
+      (assert-true
+       (hyperdoc::string-prefix-p*
+        hyperdoc::+localhost-fedwiki-page-source-snapshot-snippet-prefix+
+        snippet-first-line)
+       "Committed topic snippet must keep the source snapshot in a reader-safe Lisp comment")
+      (assert-equal
+       :topic-factory-snippet
+       (with-input-from-string (stream expected-topic-snippet)
+         (let ((*read-eval* nil))
+           (first (read stream nil :eof))))
+       "Committed topic snippet must remain reader-safe because the envelope comment is skipped before the snippet form")
+      (let* ((temp-path
+               (merge-pathnames
+                (format nil "hyperdoc-snippet-envelope-load-smoke-~D.lisp"
+                        (get-universal-time))
+                (uiop:temporary-directory))))
+        (unwind-protect
+             (progn
+               (setf (symbol-value 'cl-user::*hyperdoc-snippet-envelope-load-smoke*)
+                     :unset)
+               (with-open-file (stream temp-path
+                                       :direction :output
+                                       :if-exists :supersede
+                                       :if-does-not-exist :create
+                                       :external-format :utf-8)
+                 (write-line snippet-first-line stream)
+                 (write-line "(in-package :cl-user)" stream)
+                 (write-line "(defparameter *hyperdoc-snippet-envelope-load-smoke* :loaded)" stream))
+               (load temp-path)
+               (assert-equal
+                :loaded
+                (symbol-value 'cl-user::*hyperdoc-snippet-envelope-load-smoke*)
+                "The Lisp snapshot envelope comment must stay load-safe when it prefixes a loadable file"))
+          (when (uiop:file-exists-p temp-path)
+            (delete-file temp-path)))))
+    (let ((page-reflection
+            (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
+             expected-page))
+          (snippet-reflection
+            (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot-reflection
+             expected-topic-snippet)))
+      (assert-equal
+       :present
+       (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-status
+        page-reflection)
+       "Committed page artifact must reflect a valid source snapshot envelope")
+      (assert-equal
+       :present
+       (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-status
+        snippet-reflection)
+       "Committed topic snippet must reflect a valid source snapshot envelope")
+      (assert-true
+       (null
+        (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+         page-reflection))
+       "Valid page envelopes must not report parse errors")
+      (assert-true
+       (null
+        (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+         snippet-reflection))
+       "Valid snippet envelopes must not report parse errors"))
     (assert-equal
      expected-page
      (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
