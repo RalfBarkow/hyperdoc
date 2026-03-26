@@ -40,7 +40,16 @@ async function waitForMatchingPane(page, pattern) {
   return matchingPaneTitles(page, pattern);
 }
 
-test("Shift-click Connect opens a reusable runtime snapshot pane and preserves trailing panes", async ({
+async function waitForPaneCount(page, expectedCount) {
+  await expect
+    .poll(async () => page.locator(".inspector-pane").count(), {
+      timeout: 20_000,
+    })
+    .toBe(expectedCount);
+  return expectedCount;
+}
+
+test("Repeated Shift-click Connect reuses the runtime snapshot pane and preserves trailing panes", async ({
   page,
 }, testInfo) => {
   const linkedPageTitle = "Creating a HyperDoc";
@@ -54,17 +63,21 @@ test("Shift-click Connect opens a reusable runtime snapshot pane and preserves t
   await chrome.connectToggle.click({ modifiers: ["Shift"] });
 
   const runtimePanes = await waitForMatchingPane(page, /^Connect session/);
-  const paneCountAfterFirstShift = await page.locator(".inspector-pane").count();
+  const paneCountAfterFirstShift = await waitForPaneCount(page, paneCountBefore + 1);
   const runtimePane = await readInspectorPaneState(page, runtimePanes[0].index);
   const titlesAfterFirstShift = await readPaneTitles(page);
 
   await chrome.connectToggle.click({ modifiers: ["Shift"] });
 
-  const paneCountAfterSecondShift = await page.locator(".inspector-pane").count();
-  const runtimePaneCountAfterSecondShift = (await matchingPaneTitles(
+  const paneCountAfterSecondShift = await waitForPaneCount(
     page,
-    /^Connect session/
-  )).length;
+    paneCountAfterFirstShift
+  );
+  await expect
+    .poll(async () => (await matchingPaneTitles(page, /^Connect session/)).length, {
+      timeout: 20_000,
+    })
+    .toBe(1);
   const titlesAfterSecondShift = await readPaneTitles(page);
 
   await attachJson(testInfo, "connect-shift-runtime-pane.json", runtimePane);
@@ -78,10 +91,12 @@ test("Shift-click Connect opens a reusable runtime snapshot pane and preserves t
     titlesAfterFirstShift.some((entry) => entry.title === linkedPageTitle)
   ).toBe(true);
   expect(paneCountAfterSecondShift).toBe(paneCountAfterFirstShift);
-  expect(runtimePaneCountAfterSecondShift).toBe(1);
+  expect(
+    titlesAfterSecondShift.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
 });
 
-test("Option/Alt-click Connect opens the model side and closes trailing panes", async ({
+test("Option/Alt-click Connect opens the model side, closes trailing panes, and stays single-pane on repeat", async ({
   page,
 }, testInfo) => {
   const linkedPageTitle = "Creating a HyperDoc";
@@ -90,6 +105,8 @@ test("Option/Alt-click Connect opens the model side and closes trailing panes", 
   await activatePaneTab(page, 1, "Main page");
 
   const chrome = paneChrome(page, 1);
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+
   await chrome.connectToggle.click({ modifiers: ["Alt"] });
 
   const modelPanes = await waitForMatchingPane(
@@ -101,19 +118,45 @@ test("Option/Alt-click Connect opens the model side and closes trailing panes", 
     modelPanes[0].index,
     "Operational comparison of the standard association submit path and the request-evidence path"
   );
-  const titles = await readPaneTitles(page);
+  const paneCountAfterFirstAlt = await waitForPaneCount(page, paneCountBefore);
+  const titlesAfterFirstAlt = await readPaneTitles(page);
+
+  await chrome.connectToggle.click({ modifiers: ["Alt"] });
+
+  const paneCountAfterSecondAlt = await waitForPaneCount(page, paneCountAfterFirstAlt);
+  await expect
+    .poll(
+      async () =>
+        (
+          await matchingPaneTitles(
+            page,
+            /^Normal association submit path vs evidence path$/
+          )
+        ).length,
+      {
+        timeout: 20_000,
+      }
+    )
+    .toBe(1);
+  const titlesAfterSecondAlt = await readPaneTitles(page);
 
   await attachJson(testInfo, "connect-alt-model-pane.json", modelPane);
-  await attachJson(testInfo, "connect-alt-model-titles.json", titles);
+  await attachJson(testInfo, "connect-alt-model-titles-first.json", titlesAfterFirstAlt);
+  await attachJson(
+    testInfo,
+    "connect-alt-model-titles-second.json",
+    titlesAfterSecondAlt
+  );
 
   expect(modelPane.activeTab).toBe("Comparison");
   expect(modelPane.bodyText).toContain(
     "Operational comparison of the standard association submit path and the request-evidence path"
   );
-  expect(titles.some((entry) => entry.title === linkedPageTitle)).toBe(false);
+  expect(titlesAfterFirstAlt.some((entry) => entry.title === linkedPageTitle)).toBe(false);
+  expect(paneCountAfterSecondAlt).toBe(paneCountAfterFirstAlt);
 });
 
-test("Shift+Option/Alt-click Connect opens the model side and preserves trailing panes", async ({
+test("Repeated Shift+Option/Alt-click Connect reuses the model side and preserves trailing panes", async ({
   page,
 }, testInfo) => {
   const linkedPageTitle = "Creating a HyperDoc";
@@ -135,15 +178,52 @@ test("Shift+Option/Alt-click Connect opens the model side and preserves trailing
     modelPanes[0].index,
     "Operational comparison of the standard association submit path and the request-evidence path"
   );
-  const paneCountAfter = await page.locator(".inspector-pane").count();
-  const titles = await readPaneTitles(page);
+  const paneCountAfterFirstShiftAlt = await waitForPaneCount(page, paneCountBefore + 1);
+  const titlesAfterFirstShiftAlt = await readPaneTitles(page);
+
+  await chrome.connectToggle.click({ modifiers: ["Shift", "Alt"] });
+
+  const paneCountAfterSecondShiftAlt = await waitForPaneCount(
+    page,
+    paneCountAfterFirstShiftAlt
+  );
+  await expect
+    .poll(
+      async () =>
+        (
+          await matchingPaneTitles(
+            page,
+            /^Normal association submit path vs evidence path$/
+          )
+        ).length,
+      {
+        timeout: 20_000,
+      }
+    )
+    .toBe(1);
+  const titlesAfterSecondShiftAlt = await readPaneTitles(page);
 
   await attachJson(testInfo, "connect-shift-alt-model-pane.json", modelPane);
-  await attachJson(testInfo, "connect-shift-alt-model-titles.json", titles);
+  await attachJson(
+    testInfo,
+    "connect-shift-alt-model-titles-first.json",
+    titlesAfterFirstShiftAlt
+  );
+  await attachJson(
+    testInfo,
+    "connect-shift-alt-model-titles-second.json",
+    titlesAfterSecondShiftAlt
+  );
 
-  expect(paneCountAfter).toBe(paneCountBefore + 1);
+  expect(paneCountAfterFirstShiftAlt).toBe(paneCountBefore + 1);
   expect(modelPane.activeTab).toBe("Comparison");
-  expect(titles.some((entry) => entry.title === linkedPageTitle)).toBe(true);
+  expect(
+    titlesAfterFirstShiftAlt.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
+  expect(paneCountAfterSecondShiftAlt).toBe(paneCountAfterFirstShiftAlt);
+  expect(
+    titlesAfterSecondShiftAlt.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
 });
 
 test("Annotation modifier-clicks reuse the semantic pane and expose the claim/evidence side", async ({
@@ -162,11 +242,11 @@ test("Annotation modifier-clicks reuse the semantic pane and expose the claim/ev
     semanticPanes[0].index,
     "Annotation topic"
   );
-  const paneCountAfterPlainClick = await page.locator(".inspector-pane").count();
+  const paneCountAfterPlainClick = await waitForPaneCount(page, paneCountBefore + 1);
 
   await chrome.annotationButton.click({ modifiers: ["Shift"] });
 
-  const paneCountAfterShiftClick = await page.locator(".inspector-pane").count();
+  const paneCountAfterShiftClick = await waitForPaneCount(page, paneCountAfterPlainClick);
   const semanticPaneCountAfterShift = (await matchingPaneTitles(
     page,
     /^Annotation:/
@@ -201,7 +281,63 @@ test("Annotation modifier-clicks reuse the semantic pane and expose the claim/ev
   ).toBe(false);
 });
 
-test("Guide modifier-clicks open the Dock model and its claim/evidence side", async ({
+test("Repeated Shift-click Annotation with no semantic relation reuses the generic fallback pane", async ({
+  page,
+}, testInfo) => {
+  const linkedPageTitle = "Creating a HyperDoc";
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, linkedPageTitle);
+  await activatePaneTab(page, 2, "Content");
+
+  const chrome = paneChrome(page, 2);
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+
+  await chrome.annotationButton.click({ modifiers: ["Shift"] });
+
+  const paneCountAfterFirstShift = await waitForPaneCount(page, paneCountBefore + 1);
+  const fallbackPane = await waitForPaneBodyText(
+    page,
+    paneCountAfterFirstShift - 1,
+    "Generic route target/topic-object that classifies annotation relations"
+  );
+  const titlesAfterFirstShift = await readPaneTitles(page);
+  const fallbackTitle = fallbackPane.title;
+
+  await chrome.annotationButton.click({ modifiers: ["Shift"] });
+
+  const paneCountAfterSecondShift = await waitForPaneCount(
+    page,
+    paneCountAfterFirstShift
+  );
+  await expect
+    .poll(
+      async () =>
+        (await readPaneTitles(page)).filter((entry) => entry.title === fallbackTitle).length,
+      { timeout: 20_000 }
+    )
+    .toBe(1);
+  const titlesAfterSecondShift = await readPaneTitles(page);
+
+  await attachJson(testInfo, "annotation-fallback-pane.json", fallbackPane);
+  await attachJson(
+    testInfo,
+    "annotation-fallback-titles-first.json",
+    titlesAfterFirstShift
+  );
+  await attachJson(
+    testInfo,
+    "annotation-fallback-titles-second.json",
+    titlesAfterSecondShift
+  );
+
+  expect(paneCountAfterFirstShift).toBe(paneCountBefore + 1);
+  expect(fallbackPane.bodyText).toContain(
+    "Generic route target/topic-object that classifies annotation relations"
+  );
+  expect(paneCountAfterSecondShift).toBe(paneCountAfterFirstShift);
+});
+
+test("Repeated Shift-click Guide reuses the Dock model pane and preserves trailing panes", async ({
   page,
 }, testInfo) => {
   const linkedPageTitle = "Creating a HyperDoc";
@@ -220,10 +356,55 @@ test("Guide modifier-clicks open the Dock model and its claim/evidence side", as
     modelPanes[0].index,
     "Inspectable state model for the Dock as a progressive enhancement over inspector tabs"
   );
-  const paneCountAfterShift = await page.locator(".inspector-pane").count();
-  const titlesAfterShift = await readPaneTitles(page);
+  const paneCountAfterFirstShift = await waitForPaneCount(page, paneCountBefore + 1);
+  const titlesAfterFirstShift = await readPaneTitles(page);
 
-  await chrome.helpToggle.click({ modifiers: ["Alt"] });
+  await chrome.helpToggle.click({ modifiers: ["Shift"] });
+
+  const paneCountAfterSecondShift = await waitForPaneCount(
+    page,
+    paneCountAfterFirstShift
+  );
+  await expect
+    .poll(async () => (await matchingPaneTitles(page, /^Dock presentation model$/)).length, {
+      timeout: 20_000,
+    })
+    .toBe(1);
+  const titlesAfterSecondShift = await readPaneTitles(page);
+
+  await attachJson(testInfo, "guide-model-pane.json", modelPane);
+  await attachJson(testInfo, "guide-titles-after-shift.json", titlesAfterFirstShift);
+  await attachJson(
+    testInfo,
+    "guide-titles-after-second-shift.json",
+    titlesAfterSecondShift
+  );
+
+  expect(paneCountAfterFirstShift).toBe(paneCountBefore + 1);
+  expect(modelPane.bodyText).toContain(
+    "Inspectable state model for the Dock as a progressive enhancement over inspector tabs"
+  );
+  expect(
+    titlesAfterFirstShift.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
+  expect(paneCountAfterSecondShift).toBe(paneCountAfterFirstShift);
+  expect(
+    titlesAfterSecondShift.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
+});
+
+test("Repeated Shift+Option/Alt-click Guide reuses the claim/evidence pane and preserves trailing panes", async ({
+  page,
+}, testInfo) => {
+  const linkedPageTitle = "Creating a HyperDoc";
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, linkedPageTitle);
+  await activatePaneTab(page, 1, "Main page");
+
+  const chrome = paneChrome(page, 1);
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+
+  await chrome.helpToggle.click({ modifiers: ["Shift", "Alt"] });
 
   const evidencePanes = await waitForMatchingPane(
     page,
@@ -234,22 +415,47 @@ test("Guide modifier-clicks open the Dock model and its claim/evidence side", as
     evidencePanes[0].index,
     "The current pane snapshot and the durable Dock model make the runtime presentation state and its implementation evidence inspectable"
   );
-  const titlesAfterAlt = await readPaneTitles(page);
+  const paneCountAfterFirstShiftAlt = await waitForPaneCount(page, paneCountBefore + 1);
+  const titlesAfterFirstShiftAlt = await readPaneTitles(page);
 
-  await attachJson(testInfo, "guide-model-pane.json", modelPane);
-  await attachJson(testInfo, "guide-evidence-pane.json", evidencePane);
-  await attachJson(testInfo, "guide-titles-after-shift.json", titlesAfterShift);
-  await attachJson(testInfo, "guide-titles-after-alt.json", titlesAfterAlt);
+  await chrome.helpToggle.click({ modifiers: ["Shift", "Alt"] });
 
-  expect(paneCountAfterShift).toBe(paneCountBefore + 1);
-  expect(modelPane.bodyText).toContain(
-    "Inspectable state model for the Dock as a progressive enhancement over inspector tabs"
+  const paneCountAfterSecondShiftAlt = await waitForPaneCount(
+    page,
+    paneCountAfterFirstShiftAlt
   );
-  expect(
-    titlesAfterShift.some((entry) => entry.title === linkedPageTitle)
-  ).toBe(true);
+  await expect
+    .poll(
+      async () =>
+        (await matchingPaneTitles(page, /^Dock presentation state is inspectable$/)).length,
+      {
+        timeout: 20_000,
+      }
+    )
+    .toBe(1);
+  const titlesAfterSecondShiftAlt = await readPaneTitles(page);
+
+  await attachJson(testInfo, "guide-evidence-pane.json", evidencePane);
+  await attachJson(
+    testInfo,
+    "guide-titles-after-shift-alt.json",
+    titlesAfterFirstShiftAlt
+  );
+  await attachJson(
+    testInfo,
+    "guide-titles-after-second-shift-alt.json",
+    titlesAfterSecondShiftAlt
+  );
+
+  expect(paneCountAfterFirstShiftAlt).toBe(paneCountBefore + 1);
   expect(evidencePane.bodyText).toContain(
     "The current pane snapshot and the durable Dock model make the runtime presentation state and its implementation evidence inspectable"
   );
-  expect(titlesAfterAlt.some((entry) => entry.title === linkedPageTitle)).toBe(false);
+  expect(
+    titlesAfterFirstShiftAlt.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
+  expect(paneCountAfterSecondShiftAlt).toBe(paneCountAfterFirstShiftAlt);
+  expect(
+    titlesAfterSecondShiftAlt.some((entry) => entry.title === linkedPageTitle)
+  ).toBe(true);
 });
