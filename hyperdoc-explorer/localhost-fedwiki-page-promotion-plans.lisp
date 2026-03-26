@@ -46,6 +46,11 @@
 (defmethod views:text-representation ((topic localhost-fedwiki-promoted-topic-data))
   (localhost-fedwiki-promoted-topic-data-title topic))
 
+(views:defview 👀promotion-plan (source localhost-fedwiki-source-data)
+  (topic-localhost-fedwiki-promotion-plan-view
+   (find-localhost-fedwiki-page-promotion-plan-for-source source)
+   "This normalized localhost FedWiki source page can open its promotion plan directly so the inspect boundary stays separate from local artifact writes and DMX writes."))
+
 (views:defview 👀overview (surface localhost-fedwiki-page-promotion-surface)
   (views:html-view :title "Overview" :priority 1
     (views:html

@@ -28,6 +28,10 @@
   summary
   plans)
 
+(defun localhost-fedwiki-page-promotion-plans ()
+  (list (the-life-cycle-of-collective-knowledge-promotion-plan)
+        (reproducible-devenv-as-knowledge-artifact-promotion-plan)))
+
 (defmethod print-object ((plan localhost-fedwiki-page-promotion-plan) stream)
   (print-unreadable-object (plan stream :type t)
     (format stream "~A"
@@ -61,6 +65,14 @@
 (defun localhost-fedwiki-page-promotion-plan-source-page-path (plan)
   (localhost-fedwiki-source-data-fedwiki-relative-path
    (localhost-fedwiki-page-promotion-plan-source plan)))
+
+(defun localhost-fedwiki-page-promotion-plan-related-topic-id (plan)
+  (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
+        :related-topic-id))
+
+(defun localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title (plan)
+  (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
+        :related-hyperdoc-page-title))
 
 (defun localhost-fedwiki-page-promotion-plan-topic-count (plan)
   (length (localhost-fedwiki-page-promotion-plan-promoted-topic-chunks plan)))
@@ -145,6 +157,63 @@
   (copy-tree
    (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
          :provenance)))
+
+(defun find-localhost-fedwiki-page-promotion-plan-if
+    (predicate &key signal-error? error-context)
+  (or (find-if predicate
+               (localhost-fedwiki-page-promotion-plans))
+      (when signal-error?
+        (error "No localhost FedWiki page promotion plan for ~A."
+               (or error-context "the requested designator")))))
+
+(defun find-localhost-fedwiki-page-promotion-plan-for-topic-id
+    (topic-id &key signal-error?)
+  (find-localhost-fedwiki-page-promotion-plan-if
+   (lambda (plan)
+     (equal topic-id
+            (localhost-fedwiki-page-promotion-plan-related-topic-id plan)))
+   :signal-error? signal-error?
+   :error-context (format nil "topic id ~S" topic-id)))
+
+(defun find-localhost-fedwiki-page-promotion-plan-for-topic
+    (topic &key signal-error?)
+  (and topic
+       (find-localhost-fedwiki-page-promotion-plan-for-topic-id
+        (id-of topic)
+        :signal-error? signal-error?)))
+
+(defun find-localhost-fedwiki-page-promotion-plan-for-topic-page
+    (page &key signal-error?)
+  (and page
+       (find-localhost-fedwiki-page-promotion-plan-for-topic
+        (topic-of page)
+        :signal-error? signal-error?)))
+
+(defun find-localhost-fedwiki-page-promotion-plan-for-source-page-id
+    (page-id &key signal-error?)
+  (find-localhost-fedwiki-page-promotion-plan-if
+   (lambda (plan)
+     (equal page-id
+            (localhost-fedwiki-page-promotion-plan-source-page-id plan)))
+   :signal-error? signal-error?
+   :error-context (format nil "source page id ~S" page-id)))
+
+(defun find-localhost-fedwiki-page-promotion-plan-for-source
+    (source &key signal-error?)
+  (and source
+       (find-localhost-fedwiki-page-promotion-plan-for-source-page-id
+        (localhost-fedwiki-source-data-fedwiki-page-id source)
+        :signal-error? signal-error?)))
+
+(defun find-localhost-fedwiki-page-promotion-plan-for-hyperdoc-page-title
+    (title &key signal-error?)
+  (find-localhost-fedwiki-page-promotion-plan-if
+   (lambda (plan)
+     (equal title
+            (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
+             plan)))
+   :signal-error? signal-error?
+   :error-context (format nil "HyperDoc page title ~S" title)))
 
 (defun ensure-localhost-fedwiki-page-promotion-dmx-support ()
   (or (fboundp 'plan-topic-factory-snippet-dmx-write)
@@ -281,5 +350,4 @@
    :summary
    "Reusable inspectable workflow surface for localhost FedWiki page promotion plans, their local composed outputs, and their dry-run DMX snippet twins."
    :plans
-   (list (the-life-cycle-of-collective-knowledge-promotion-plan)
-         (reproducible-devenv-as-knowledge-artifact-promotion-plan))))
+   (localhost-fedwiki-page-promotion-plans)))
