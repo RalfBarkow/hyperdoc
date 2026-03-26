@@ -156,6 +156,9 @@
              :test #'char=)
      "Collective knowledge overview must surface the no-change page recommendation")
     (assert-true
+     (search "No action needed" collective-overview-html :test #'char=)
+     "Collective knowledge overview must surface a passive no-action affordance")
+    (assert-true
      (search "No regeneration needed; the snippet artifact already reflects the current source snapshot."
              collective-overview-html
              :test #'char=)
@@ -227,6 +230,9 @@
              :test #'char=)
      "Second real-page overview must surface the no-change page recommendation")
     (assert-true
+     (search "No action needed" repro-overview-html :test #'char=)
+     "Second real-page overview must surface a passive no-action affordance")
+    (assert-true
      (search "No regeneration needed; the snippet artifact already reflects the current source snapshot."
              repro-overview-html
              :test #'char=)
@@ -265,6 +271,9 @@
              :test #'char=)
      "Collective knowledge source freshness view must expose page remediation guidance")
     (assert-true
+     (search "No action needed" collective-freshness-html :test #'char=)
+     "Collective knowledge source freshness view must expose a passive no-action affordance")
+    (assert-true
      (search "matches reflected snapshot fingerprint" repro-freshness-html :test #'char=)
      "Second real-page source freshness view must explain the aligned no-change case")
     (assert-true
@@ -272,6 +281,9 @@
              repro-freshness-html
              :test #'char=)
      "Second real-page source freshness view must expose page remediation guidance")
+    (assert-true
+     (search "No action needed" repro-freshness-html :test #'char=)
+     "Second real-page source freshness view must expose a passive no-action affordance")
     (assert-true
      (search "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
              collective-dmx-html
@@ -559,7 +571,39 @@
             (hyperdoc::plist-with-overrides
              (getf collective-status :current-source-snapshot)
              :fingerprint "fnv1a64:SIMULATEDSTALE"
-             :summary "story-items=simulated; source snapshot intentionally stale for smoke coverage"))))
+             :summary "story-items=simulated; source snapshot intentionally stale for smoke coverage")))
+         (collective-page-fresh-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :page
+            collective-status))
+         (collective-snippet-fresh-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :snippet
+            collective-status))
+         (stale-page-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :page
+            simulated-stale-source))
+         (stale-snippet-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :snippet
+            simulated-stale-source))
+         (missing-page-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :page
+            missing-envelope-status))
+         (missing-snippet-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :snippet
+            missing-envelope-status))
+         (malformed-page-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :page
+            malformed-envelope-status))
+         (malformed-snippet-affordance
+           (hyperdoc::promotion-source-freshness-affordance-spec
+            :snippet
+            malformed-envelope-status)))
     (dolist (html (list collective-overview-html
                         repro-overview-html))
       (assert-true
@@ -619,6 +663,10 @@
      (getf collective-status :page-source-freshness-recommended-action)
      "Collective knowledge page artifact must recommend no regeneration in the no-change case")
     (assert-equal
+     nil
+     (getf collective-status :page-source-freshness-recommended-operation)
+     "Collective knowledge page artifact must not expose a mutating recommended operation in the no-change case")
+    (assert-equal
      "No regeneration needed; the page artifact already reflects the current source snapshot."
      (getf collective-status :page-source-freshness-recommended-action-label)
      "Collective knowledge page artifact must expose the no-change page recommendation")
@@ -630,6 +678,10 @@
      :no-regeneration-needed
      (getf collective-status :snippet-source-freshness-recommended-action)
      "Collective knowledge snippet artifact must recommend no regeneration in the no-change case")
+    (assert-equal
+     nil
+     (getf collective-status :snippet-source-freshness-recommended-operation)
+     "Collective knowledge snippet artifact must not expose a mutating recommended operation in the no-change case")
     (assert-equal
      "No regeneration needed; the snippet artifact already reflects the current source snapshot."
      (getf collective-status :snippet-source-freshness-recommended-action-label)
@@ -676,6 +728,10 @@
      (getf repro-status :page-source-freshness-recommended-action)
      "Second real-page artifact must recommend no regeneration in the no-change case")
     (assert-equal
+     nil
+     (getf repro-status :page-source-freshness-recommended-operation)
+     "Second real-page artifact must not expose a mutating recommended operation in the no-change case")
+    (assert-equal
      "No regeneration needed; the page artifact already reflects the current source snapshot."
      (getf repro-status :page-source-freshness-recommended-action-label)
      "Second real-page artifact must expose the no-change page recommendation")
@@ -687,6 +743,10 @@
      :no-regeneration-needed
      (getf repro-status :snippet-source-freshness-recommended-action)
      "Second real-page snippet must recommend no regeneration in the no-change case")
+    (assert-equal
+     nil
+     (getf repro-status :snippet-source-freshness-recommended-operation)
+     "Second real-page snippet must not expose a mutating recommended operation in the no-change case")
     (assert-equal
      "No regeneration needed; the snippet artifact already reflects the current source snapshot."
      (getf repro-status :snippet-source-freshness-recommended-action-label)
@@ -803,6 +863,10 @@
      "Regenerate the page artifact to restore reflected source snapshot evidence."
      (getf missing-envelope-status :page-source-freshness-recommended-action-label)
      "Missing page envelopes must recommend restoring reflected snapshot evidence")
+    (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+     (getf missing-envelope-status :page-source-freshness-recommended-operation)
+     "Missing page envelopes must map to the existing page-regeneration operation")
     (assert-true
      (not (getf missing-envelope-status :snippet-reflected-snapshot-present))
      "Missing snippet envelopes must fail soft by reporting no reflected snapshot")
@@ -832,6 +896,10 @@
      "Regenerate the snippet artifact to restore reflected source snapshot evidence."
      (getf missing-envelope-status :snippet-source-freshness-recommended-action-label)
      "Missing snippet envelopes must recommend restoring reflected snapshot evidence")
+    (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
+     (getf missing-envelope-status :snippet-source-freshness-recommended-operation)
+     "Missing snippet envelopes must map to the existing snippet-regeneration operation")
     (assert-true
      (not (getf malformed-envelope-status :page-reflected-snapshot-present))
      "Malformed page envelopes must fail soft by reporting no valid reflected snapshot")
@@ -862,6 +930,10 @@
      "Regenerate the page artifact to repair reflected source snapshot evidence."
      (getf malformed-envelope-status :page-source-freshness-recommended-action-label)
      "Malformed page envelopes must recommend repairing reflected snapshot evidence")
+    (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+     (getf malformed-envelope-status :page-source-freshness-recommended-operation)
+     "Malformed page envelopes must map to the existing page-regeneration operation")
     (assert-true
      (not (getf malformed-envelope-status :snippet-reflected-snapshot-present))
      "Malformed snippet envelopes must fail soft by reporting no valid reflected snapshot")
@@ -892,6 +964,10 @@
      "Regenerate the snippet artifact to repair reflected source snapshot evidence."
      (getf malformed-envelope-status :snippet-source-freshness-recommended-action-label)
      "Malformed snippet envelopes must recommend repairing reflected snapshot evidence")
+    (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
+     (getf malformed-envelope-status :snippet-source-freshness-recommended-operation)
+     "Malformed snippet envelopes must map to the existing snippet-regeneration operation")
     (assert-true
      (getf simulated-stale-source :page-synced)
      "Stale-source simulation must not require mutating the page artifact bytes")
@@ -924,6 +1000,10 @@
      (getf simulated-stale-source :page-source-freshness-recommended-action-label)
      "Stale-source simulation must recommend refreshing the page artifact evidence")
     (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+     (getf simulated-stale-source :page-source-freshness-recommended-operation)
+     "Stale-source simulation must map to the existing page-regeneration operation")
+    (assert-equal
      (getf collective-status :page-reflected-snapshot-fingerprint)
      (getf simulated-stale-source :page-reflected-snapshot-fingerprint)
      "Stale-source simulation must preserve the reflected page fingerprint for comparison")
@@ -947,6 +1027,78 @@
      "Regenerate the snippet artifact to refresh its reflected source snapshot evidence."
      (getf simulated-stale-source :snippet-source-freshness-recommended-action-label)
      "Stale-source simulation must recommend refreshing the snippet artifact evidence")
+    (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
+     (getf simulated-stale-source :snippet-source-freshness-recommended-operation)
+     "Stale-source simulation must map to the existing snippet-regeneration operation")
+    (assert-equal
+     :passive
+     (getf collective-page-fresh-affordance :kind)
+     "Fresh page status must render a passive affordance")
+    (assert-equal
+     "No action needed"
+     (getf collective-page-fresh-affordance :label)
+     "Fresh page status must render a no-action-needed affordance")
+    (assert-equal
+     nil
+     (getf collective-page-fresh-affordance :operation)
+     "Fresh page status must not surface a mutating affordance")
+    (assert-equal
+     :passive
+     (getf collective-snippet-fresh-affordance :kind)
+     "Fresh snippet status must render a passive affordance")
+    (assert-equal
+     :action
+     (getf stale-page-affordance :kind)
+     "Stale page status must render an action affordance")
+    (assert-equal
+     "Regenerate page artifact"
+     (getf stale-page-affordance :label)
+     "Stale page status must surface the regenerate affordance")
+    (assert-equal
+     'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+     (getf stale-page-affordance :operation)
+     "Stale page affordance must resolve to the existing page-regeneration operation")
+    (assert-equal
+     :action
+     (getf stale-snippet-affordance :kind)
+     "Stale snippet status must render an action affordance")
+    (assert-equal
+     "Regenerate snippet artifact"
+     (getf stale-snippet-affordance :label)
+     "Stale snippet status must surface the regenerate affordance")
+    (assert-equal
+     :action
+     (getf missing-page-affordance :kind)
+     "Missing page-envelope status must render an action affordance")
+    (assert-equal
+     "Restore page snapshot evidence"
+     (getf missing-page-affordance :label)
+     "Missing page-envelope status must surface the restore affordance")
+    (assert-equal
+     :action
+     (getf missing-snippet-affordance :kind)
+     "Missing snippet-envelope status must render an action affordance")
+    (assert-equal
+     "Restore snippet snapshot evidence"
+     (getf missing-snippet-affordance :label)
+     "Missing snippet-envelope status must surface the restore affordance")
+    (assert-equal
+     :action
+     (getf malformed-page-affordance :kind)
+     "Malformed page-envelope status must render an action affordance")
+    (assert-equal
+     "Repair page snapshot evidence"
+     (getf malformed-page-affordance :label)
+     "Malformed page-envelope status must surface the repair affordance")
+    (assert-equal
+     :action
+     (getf malformed-snippet-affordance :kind)
+     "Malformed snippet-envelope status must render an action affordance")
+    (assert-equal
+     "Repair snippet snapshot evidence"
+     (getf malformed-snippet-affordance :label)
+     "Malformed snippet-envelope status must surface the repair affordance")
     (assert-equal
      (getf collective-status :snippet-reflected-snapshot-fingerprint)
      (getf simulated-stale-source :snippet-reflected-snapshot-fingerprint)
