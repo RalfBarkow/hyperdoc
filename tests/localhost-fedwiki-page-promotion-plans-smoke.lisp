@@ -92,6 +92,21 @@
      (search "Snippet synced" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose snippet sync status")
     (assert-true
+     (search "Page source fresh" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose page source freshness")
+    (assert-true
+     (search "Snippet source fresh" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose snippet source freshness")
+    (assert-true
+     (search "Current source fingerprint" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose the current source fingerprint")
+    (assert-true
+     (search "Current source summary" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose the current source summary")
+    (assert-true
+     (search "fnv1a64:" collective-overview-html :test #'char-equal)
+     "Collective knowledge overview must expose the normalized source fingerprint value")
+    (assert-true
      (search "story-item-fragment" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose fragment-based provenance modes")
     (assert-true
@@ -120,6 +135,21 @@
     (assert-true
      (search "Snippet synced" repro-overview-html :test #'char=)
      "Second real-page overview must expose snippet sync status")
+    (assert-true
+     (search "Page source fresh" repro-overview-html :test #'char=)
+     "Second real-page overview must expose page source freshness")
+    (assert-true
+     (search "Snippet source fresh" repro-overview-html :test #'char=)
+     "Second real-page overview must expose snippet source freshness")
+    (assert-true
+     (search "Current source fingerprint" repro-overview-html :test #'char=)
+     "Second real-page overview must expose the current source fingerprint")
+    (assert-true
+     (search "Current source summary" repro-overview-html :test #'char=)
+     "Second real-page overview must expose the current source summary")
+    (assert-true
+     (search "fnv1a64:" repro-overview-html :test #'char-equal)
+     "Second real-page overview must expose the normalized source fingerprint value")
     (assert-true
      (search "multi-item-derived" repro-overview-html :test #'char=)
      "Second real-page overview must expose multi-item provenance modes")
@@ -379,13 +409,27 @@
          (repro-dmx-review
            (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
             repro))
+         (collective-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective))
+         (repro-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            repro))
          (collective-dmx-string (prin1-to-string collective-dmx-review))
          (repro-dmx-string (prin1-to-string repro-dmx-review))
          (simulated-out-of-sync
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
             collective
             :page-contents "out-of-sync page"
-            :snippet-contents "out-of-sync snippet")))
+            :snippet-contents "out-of-sync snippet"))
+         (simulated-stale-source
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective
+            :current-source-snapshot
+            (hyperdoc::plist-with-overrides
+             (getf collective-status :current-source-snapshot)
+             :fingerprint "fnv1a64:SIMULATEDSTALE"
+             :summary "story-items=simulated; source snapshot intentionally stale for smoke coverage"))))
     (dolist (html (list collective-overview-html
                         repro-overview-html))
       (assert-true
@@ -400,6 +444,26 @@
       (assert-true
        (search "Inspect sync status" html :test #'char=)
        "Overview must present the human-facing sync-status action"))
+    (assert-true
+     (getf collective-status :page-source-fresh)
+     "Collective knowledge page artifact must be fresh relative to the current source snapshot")
+    (assert-true
+     (getf collective-status :snippet-source-fresh)
+     "Collective knowledge snippet artifact must be fresh relative to the current source snapshot")
+    (assert-true
+     (getf repro-status :page-source-fresh)
+     "Second real-page artifact must be fresh relative to the current source snapshot")
+    (assert-true
+     (getf repro-status :snippet-source-fresh)
+     "Second real-page snippet must be fresh relative to the current source snapshot")
+    (assert-true
+     (search "fnv1a64:" (or (getf collective-status :current-source-fingerprint) "")
+             :test #'char-equal)
+     "Collective knowledge status must expose the normalized source fingerprint")
+    (assert-true
+     (search "fnv1a64:" (or (getf repro-status :current-source-fingerprint) "")
+             :test #'char-equal)
+     "Second real-page status must expose the normalized source fingerprint")
     (dolist (html (list collective-operations-html repro-operations-html))
       (assert-true
        (search "REGENERATE-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-PAGE-ARTIFACT"
@@ -467,6 +531,18 @@
     (assert-true (not (getf simulated-out-of-sync :snippet-synced))
                  "Test seam must surface out-of-sync snippet status")
     (assert-true
+     (getf simulated-stale-source :page-synced)
+     "Stale-source simulation must not require mutating the page artifact bytes")
+    (assert-true
+     (getf simulated-stale-source :snippet-synced)
+     "Stale-source simulation must not require mutating the snippet artifact bytes")
+    (assert-true
+     (not (getf simulated-stale-source :page-source-fresh))
+     "Test seam must surface stale page-source freshness without mutating the real FedWiki page")
+    (assert-true
+     (not (getf simulated-stale-source :snippet-source-fresh))
+     "Test seam must surface stale snippet-source freshness without mutating the real FedWiki page")
+    (assert-true
      (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
              collective-dmx-string
              :test #'char=)
@@ -526,16 +602,28 @@
         (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)))
     (assert-true
      (hyperdoc::localhost-fedwiki-page-promotion-plan-page-output-synced-p collective)
-     "Collective knowledge page output must stay unchanged after adding inspectable plans")
+     "Collective knowledge page output must stay synced with the current artifact rendering")
     (assert-true
      (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-output-synced-p collective)
-     "Collective knowledge snippet output must stay unchanged after adding inspectable plans")
+     "Collective knowledge snippet output must stay synced with the current artifact rendering")
     (assert-true
      (hyperdoc::localhost-fedwiki-page-promotion-plan-page-output-synced-p repro)
-     "Second real-page output must stay unchanged after adding inspectable plans")
+     "Second real-page output must stay synced with the current artifact rendering")
     (assert-true
      (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-output-synced-p repro)
-     "Second real-page snippet output must stay unchanged after adding inspectable plans")))
+     "Second real-page snippet output must stay synced with the current artifact rendering")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p collective)
+     "Collective knowledge page output must stay fresh relative to the current source snapshot")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p collective)
+     "Collective knowledge snippet output must stay fresh relative to the current source snapshot")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p repro)
+     "Second real-page output must stay fresh relative to the current source snapshot")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p repro)
+     "Second real-page snippet output must stay fresh relative to the current source snapshot")))
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)

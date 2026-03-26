@@ -112,6 +112,8 @@
           (uiop:read-file-string
            (reproducible-devenv-relative-path
             "assets/reproducible-devenv-as-knowledge-artifact-topic.lisp")))
+        (source
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
         (rendered-page
           (hyperdoc::render-reproducible-devenv-as-knowledge-artifact-page))
         (rendered-topic-snippet
@@ -122,12 +124,26 @@
     (assert-true
      (search "<tt>multi-item-derived</tt> provenance" rendered-page)
      "Rendered page wording must state multi-item-derived provenance for the umbrella topic")
-    (assert-equal expected-page
-                  rendered-page
-                  "Rendered HyperDoc page must stay in sync with the committed page")
-    (assert-equal expected-topic-snippet
-                  rendered-topic-snippet
-                  "Rendered topic-factory snippet must stay in sync with the committed asset")))
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot
+      expected-page)
+     "Committed page artifact must embed a source snapshot comment")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
+      expected-topic-snippet)
+     "Committed topic snippet must embed a source snapshot comment")
+    (assert-equal
+     expected-page
+     (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
+      rendered-page
+      source)
+     "Committed HyperDoc page must stay in sync with the rendered page plus the source snapshot envelope")
+    (assert-equal
+     expected-topic-snippet
+     (hyperdoc::render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+      rendered-topic-snippet
+      source)
+     "Committed topic-factory snippet must stay in sync with the rendered snippet plus the source snapshot envelope")))
 
 (defun run-reproducible-devenv-as-knowledge-artifact-generated-output-idempotence-smoke-test ()
   (let ((page-path

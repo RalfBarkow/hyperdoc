@@ -123,6 +123,8 @@
         (expected-topic-snippet (uiop:read-file-string
                                  (collective-knowledge-relative-path
                                   "assets/the-life-cycle-of-collective-knowledge-topic.lisp")))
+        (source
+          (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
         (rendered-page
           (hyperdoc::render-the-life-cycle-of-collective-knowledge-page))
         (rendered-topic-snippet
@@ -134,12 +136,26 @@
     (assert-true
      (search "fragment-level rather than whole-item-level" rendered-page)
      "Rendered page must explicitly distinguish fragment-level derivation from whole-item provenance")
-    (assert-equal expected-page
-                  rendered-page
-                  "Rendered HyperDoc page must stay in sync with the committed page")
-    (assert-equal expected-topic-snippet
-                  rendered-topic-snippet
-                  "Rendered topic-factory snippet must stay in sync with the committed asset")))
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot
+      expected-page)
+     "Committed page artifact must embed a source snapshot comment")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
+      expected-topic-snippet)
+     "Committed topic snippet must embed a source snapshot comment")
+    (assert-equal
+     expected-page
+     (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
+      rendered-page
+      source)
+     "Committed HyperDoc page must stay in sync with the rendered page plus the source snapshot envelope")
+    (assert-equal
+     expected-topic-snippet
+     (hyperdoc::render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+      rendered-topic-snippet
+      source)
+     "Committed topic-factory snippet must stay in sync with the rendered snippet plus the source snapshot envelope")))
 
 (defun run-collective-knowledge-generated-output-idempotence-smoke-test ()
   (let ((page-path
