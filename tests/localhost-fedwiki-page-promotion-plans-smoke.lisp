@@ -48,9 +48,15 @@
          (collective-overview-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Overview")))
+         (collective-freshness-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-views "Source freshness")))
          (repro-overview-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-views "Overview")))
+         (repro-freshness-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-views "Source freshness")))
          (collective-story-items-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Story items")))
@@ -73,6 +79,7 @@
                                   "Fragments"
                                   "Promoted topics"
                                   "Page output"
+                                  "Source freshness"
                                   "Snippet metadata"
                                   "DMX dry-run")
                                 "Collective knowledge promotion plan")
@@ -83,6 +90,7 @@
                                   "Fragments"
                                   "Promoted topics"
                                   "Page output"
+                                  "Source freshness"
                                   "Snippet metadata"
                                   "DMX dry-run")
                                 "Reproducible DevEnv promotion plan")
@@ -131,6 +139,11 @@
     (assert-true
      (search "DMX dry-run summary available" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose DMX dry-run summary availability")
+    (assert-true
+     (search "fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed"
+             collective-overview-html
+             :test #'char=)
+     "Collective knowledge overview must explain the concise freshness wording")
     (dolist (label '("Regenerate page artifact"
                      "Regenerate snippet artifact"
                      "Regenerate both artifacts"
@@ -181,6 +194,11 @@
     (assert-true
      (search "DMX dry-run summary available" repro-overview-html :test #'char=)
      "Second real-page overview must expose DMX dry-run summary availability")
+    (assert-true
+     (search "fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed"
+             repro-overview-html
+             :test #'char=)
+     "Second real-page overview must explain the concise freshness wording")
     (dolist (label '("Regenerate page artifact"
                      "Regenerate snippet artifact"
                      "Regenerate both artifacts"
@@ -189,6 +207,26 @@
       (assert-true
        (search label repro-overview-html :test #'char=)
        (format nil "Second real-page overview must expose the human-facing action label ~A" label)))
+    (dolist (html (list collective-freshness-html
+                        repro-freshness-html))
+      (assert-true
+       (search "Current source fingerprint" html :test #'char=)
+       "Source freshness view must expose the current source fingerprint")
+      (assert-true
+       (search "Reflected snapshot fingerprint" html :test #'char=)
+       "Source freshness view must expose the reflected snapshot fingerprint")
+      (assert-true
+       (search "Diagnostic reason" html :test #'char=)
+       "Source freshness view must expose a human-facing diagnostic reason")
+      (assert-true
+       (search "fingerprint-based comparisons, not semantic diffs" html :test #'char=)
+       "Source freshness view must state the conservative fingerprint-based diagnostic model"))
+    (assert-true
+     (search "matches reflected snapshot fingerprint" collective-freshness-html :test #'char=)
+     "Collective knowledge source freshness view must explain the aligned no-change case")
+    (assert-true
+     (search "matches reflected snapshot fingerprint" repro-freshness-html :test #'char=)
+     "Second real-page source freshness view must explain the aligned no-change case")
     (assert-true
      (search "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
              collective-dmx-html
@@ -434,6 +472,12 @@
          (repro-dmx-review
            (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
             repro))
+         (collective-freshness-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-views "Source freshness")))
+         (repro-freshness-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-views "Source freshness")))
          (collective-status
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
             collective))
@@ -513,6 +557,19 @@
      (getf collective-status :page-source-freshness-state)
      "Collective knowledge page artifact must classify source freshness as fresh when the envelope matches")
     (assert-equal
+     (getf collective-status :current-source-fingerprint)
+     (getf collective-status :page-reflected-snapshot-fingerprint)
+     "Collective knowledge page artifact must align the current and reflected fingerprints in the no-change case")
+    (assert-equal
+     (getf collective-status :current-source-fingerprint)
+     (getf collective-status :snippet-reflected-snapshot-fingerprint)
+     "Collective knowledge snippet artifact must align the current and reflected fingerprints in the no-change case")
+    (assert-true
+     (search "matches reflected snapshot fingerprint"
+             (or (getf collective-status :page-source-freshness-reason) "")
+             :test #'char=)
+     "Collective knowledge page artifact must explain the fresh result with an alignment reason")
+    (assert-equal
      :fresh
      (getf collective-status :snippet-source-freshness-state)
      "Collective knowledge snippet artifact must classify source freshness as fresh when the envelope matches")
@@ -540,6 +597,19 @@
      :fresh
      (getf repro-status :page-source-freshness-state)
      "Second real-page artifact must classify source freshness as fresh when the envelope matches")
+    (assert-equal
+     (getf repro-status :current-source-fingerprint)
+     (getf repro-status :page-reflected-snapshot-fingerprint)
+     "Second real-page artifact must align the current and reflected fingerprints in the no-change case")
+    (assert-equal
+     (getf repro-status :current-source-fingerprint)
+     (getf repro-status :snippet-reflected-snapshot-fingerprint)
+     "Second real-page snippet must align the current and reflected fingerprints in the no-change case")
+    (assert-true
+     (search "matches reflected snapshot fingerprint"
+             (or (getf repro-status :page-source-freshness-reason) "")
+             :test #'char=)
+     "Second real-page artifact must explain the fresh result with an alignment reason")
     (assert-equal
      :fresh
      (getf repro-status :snippet-source-freshness-state)
@@ -644,6 +714,10 @@
      :missing-envelope
      (getf missing-envelope-status :page-source-freshness-unknown-reason)
      "Missing page envelopes must preserve the explicit unknown reason")
+    (assert-equal
+     "Reflected source snapshot envelope is missing."
+     (getf missing-envelope-status :page-source-freshness-reason)
+     "Missing page envelopes must keep a human-facing diagnostic reason")
     (assert-true
      (not (getf missing-envelope-status :snippet-reflected-snapshot-present))
      "Missing snippet envelopes must fail soft by reporting no reflected snapshot")
@@ -661,6 +735,10 @@
      :missing-envelope
      (getf missing-envelope-status :snippet-source-freshness-unknown-reason)
      "Missing snippet envelopes must preserve the explicit unknown reason")
+    (assert-equal
+     "Reflected source snapshot envelope is missing."
+     (getf missing-envelope-status :snippet-source-freshness-reason)
+     "Missing snippet envelopes must keep a human-facing diagnostic reason")
     (assert-true
      (not (getf malformed-envelope-status :page-reflected-snapshot-present))
      "Malformed page envelopes must fail soft by reporting no valid reflected snapshot")
@@ -679,6 +757,11 @@
      (getf malformed-envelope-status :page-source-freshness-unknown-reason)
      "Malformed page envelopes must preserve the explicit malformed reason")
     (assert-true
+     (search "malformed"
+             (or (getf malformed-envelope-status :page-source-freshness-reason) "")
+             :test #'char-equal)
+     "Malformed page envelopes must keep a human-facing diagnostic reason")
+    (assert-true
      (not (getf malformed-envelope-status :snippet-reflected-snapshot-present))
      "Malformed snippet envelopes must fail soft by reporting no valid reflected snapshot")
     (assert-true
@@ -696,6 +779,11 @@
      (getf malformed-envelope-status :snippet-source-freshness-unknown-reason)
      "Malformed snippet envelopes must preserve the explicit malformed reason")
     (assert-true
+     (search "malformed"
+             (or (getf malformed-envelope-status :snippet-source-freshness-reason) "")
+             :test #'char-equal)
+     "Malformed snippet envelopes must keep a human-facing diagnostic reason")
+    (assert-true
      (getf simulated-stale-source :page-synced)
      "Stale-source simulation must not require mutating the page artifact bytes")
     (assert-true
@@ -709,12 +797,47 @@
      (getf simulated-stale-source :page-source-freshness-state)
      "Stale-source simulation must classify page freshness as stale")
     (assert-true
+     (search "differs from reflected snapshot fingerprint"
+             (or (getf simulated-stale-source :page-source-freshness-reason) "")
+             :test #'char=)
+     "Stale-source simulation must explain the page mismatch with a fingerprint-difference reason")
+    (assert-true
+     (search "fnv1a64:SIMULATEDSTALE"
+             (or (getf simulated-stale-source :page-source-freshness-reason) "")
+             :test #'char-equal)
+     "Stale-source simulation must expose the simulated current fingerprint in the page mismatch reason")
+    (assert-equal
+     (getf collective-status :page-reflected-snapshot-fingerprint)
+     (getf simulated-stale-source :page-reflected-snapshot-fingerprint)
+     "Stale-source simulation must preserve the reflected page fingerprint for comparison")
+    (assert-true
      (not (getf simulated-stale-source :snippet-source-fresh))
      "Test seam must surface stale snippet-source freshness without mutating the real FedWiki page")
     (assert-equal
      :stale
      (getf simulated-stale-source :snippet-source-freshness-state)
      "Stale-source simulation must classify snippet freshness as stale")
+    (assert-true
+     (search "differs from reflected snapshot fingerprint"
+             (or (getf simulated-stale-source :snippet-source-freshness-reason) "")
+             :test #'char=)
+     "Stale-source simulation must explain the snippet mismatch with a fingerprint-difference reason")
+    (assert-equal
+     (getf collective-status :snippet-reflected-snapshot-fingerprint)
+     (getf simulated-stale-source :snippet-reflected-snapshot-fingerprint)
+     "Stale-source simulation must preserve the reflected snippet fingerprint for comparison")
+    (assert-true
+     (search "Reflected snapshot fingerprint" collective-freshness-html :test #'char=)
+     "Collective knowledge source freshness view must expose reflected snapshot fingerprint diagnostics")
+    (assert-true
+     (search "Reflected snapshot fingerprint" repro-freshness-html :test #'char=)
+     "Second real-page source freshness view must expose reflected snapshot fingerprint diagnostics")
+    (assert-true
+     (search "Freshness result" collective-freshness-html :test #'char=)
+     "Collective knowledge source freshness view must expose freshness result diagnostics")
+    (assert-true
+     (search "Freshness result" repro-freshness-html :test #'char=)
+     "Second real-page source freshness view must expose freshness result diagnostics")
     (assert-true
      (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
              collective-dmx-string
