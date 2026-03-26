@@ -201,53 +201,93 @@
    (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
          :provenance)))
 
-(defun localhost-fedwiki-page-promotion-plan-page-source-snapshot
+(defun localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
     (plan &key file-contents)
   (let ((path (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan)))
-    (and (or file-contents
-             (uiop:file-exists-p path))
-         (localhost-fedwiki-page-artifact-reflected-source-snapshot
-          (or file-contents
-              (uiop:read-file-string path))))))
+    (if (or file-contents
+            (uiop:file-exists-p path))
+        (localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
+         (or file-contents
+             (uiop:read-file-string path)))
+        (make-localhost-fedwiki-source-snapshot-envelope-reflection
+         :artifact-kind :hyperdoc-html-page
+         :status :missing))))
+
+(defun localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
+    (plan &key file-contents)
+  (let ((path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
+    (if (or file-contents
+            (uiop:file-exists-p path))
+        (localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot-reflection
+         (or file-contents
+             (uiop:read-file-string path)))
+        (make-localhost-fedwiki-source-snapshot-envelope-reflection
+         :artifact-kind :topic-factory-lisp-snippet
+         :status :missing))))
+
+(defun localhost-fedwiki-page-promotion-plan-page-source-snapshot
+    (plan &key file-contents)
+  (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+   (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
+    plan
+    :file-contents file-contents)))
 
 (defun localhost-fedwiki-page-promotion-plan-snippet-source-snapshot
     (plan &key file-contents)
-  (let ((path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
-    (and (or file-contents
-             (uiop:file-exists-p path))
-         (localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
-          (or file-contents
-              (uiop:read-file-string path))))))
+  (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+   (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
+    plan
+    :file-contents file-contents)))
+
+(defun localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+    (reflection current-source-snapshot)
+  (case (localhost-fedwiki-source-snapshot-envelope-reflection-status reflection)
+    (:present
+     (if (and current-source-snapshot
+              (equal (getf (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+                            reflection)
+                           :fingerprint)
+                     (getf current-source-snapshot :fingerprint)))
+         :fresh
+         :stale))
+    (:malformed
+     :unknown-malformed-envelope)
+    (otherwise
+     :unknown-missing-envelope)))
+
+(defun localhost-fedwiki-page-promotion-plan-page-source-freshness-state
+    (plan &key file-contents current-source-snapshot)
+  (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+   (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
+    plan
+    :file-contents file-contents)
+   (or current-source-snapshot
+       (localhost-fedwiki-page-promotion-plan-current-source-snapshot plan))))
+
+(defun localhost-fedwiki-page-promotion-plan-snippet-source-freshness-state
+    (plan &key file-contents current-source-snapshot)
+  (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+   (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
+    plan
+    :file-contents file-contents)
+   (or current-source-snapshot
+       (localhost-fedwiki-page-promotion-plan-current-source-snapshot plan))))
 
 (defun localhost-fedwiki-page-promotion-plan-page-source-fresh-p
     (plan &key file-contents current-source-snapshot)
-  (let ((artifact-snapshot
-          (localhost-fedwiki-page-promotion-plan-page-source-snapshot
-           plan
-           :file-contents file-contents))
-        (current-snapshot
-          (or current-source-snapshot
-              (localhost-fedwiki-page-promotion-plan-current-source-snapshot
-               plan))))
-    (and artifact-snapshot
-         current-snapshot
-         (equal (getf artifact-snapshot :fingerprint)
-                (getf current-snapshot :fingerprint)))))
+  (eql (localhost-fedwiki-page-promotion-plan-page-source-freshness-state
+        plan
+        :file-contents file-contents
+        :current-source-snapshot current-source-snapshot)
+       :fresh))
 
 (defun localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p
     (plan &key file-contents current-source-snapshot)
-  (let ((artifact-snapshot
-          (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot
-           plan
-           :file-contents file-contents))
-        (current-snapshot
-          (or current-source-snapshot
-              (localhost-fedwiki-page-promotion-plan-current-source-snapshot
-               plan))))
-    (and artifact-snapshot
-         current-snapshot
-         (equal (getf artifact-snapshot :fingerprint)
-                (getf current-snapshot :fingerprint)))))
+  (eql (localhost-fedwiki-page-promotion-plan-snippet-source-freshness-state
+        plan
+        :file-contents file-contents
+        :current-source-snapshot current-source-snapshot)
+       :fresh))
 
 (defun localhost-fedwiki-page-promotion-plan-sync-status-report
     (plan
@@ -256,14 +296,28 @@
            (or current-source-snapshot
                (localhost-fedwiki-page-promotion-plan-current-source-snapshot
                 plan)))
-         (page-source-snapshot
-           (localhost-fedwiki-page-promotion-plan-page-source-snapshot
+         (page-reflection
+           (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
             plan
             :file-contents page-contents))
-         (snippet-source-snapshot
-           (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot
+         (snippet-reflection
+           (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
             plan
-            :file-contents snippet-contents)))
+            :file-contents snippet-contents))
+         (page-source-snapshot
+           (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+            page-reflection))
+         (snippet-source-snapshot
+           (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+            snippet-reflection))
+         (page-freshness-state
+           (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+            page-reflection
+            resolved-current-source-snapshot))
+         (snippet-freshness-state
+           (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+            snippet-reflection
+            resolved-current-source-snapshot)))
     (list :plan-id
           (localhost-fedwiki-page-promotion-plan-id plan)
           :page-path
@@ -280,16 +334,50 @@
           (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
            plan
            :file-contents snippet-contents)
+          :page-reflected-snapshot-status
+          (localhost-fedwiki-source-snapshot-envelope-reflection-status
+           page-reflection)
+          :page-reflected-snapshot-present
+          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                page-reflection)
+               :present)
+          :page-reflected-snapshot-malformed
+          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                page-reflection)
+               :malformed)
+          :page-source-freshness-state
+          page-freshness-state
+          :page-source-freshness-known
+          (not (null (member page-freshness-state
+                             '(:fresh :stale))))
+          :page-source-freshness-unknown-reason
+          (case page-freshness-state
+            (:unknown-malformed-envelope :malformed-envelope)
+            (:unknown-missing-envelope :missing-envelope))
           :page-source-fresh
-          (localhost-fedwiki-page-promotion-plan-page-source-fresh-p
-           plan
-           :file-contents page-contents
-           :current-source-snapshot resolved-current-source-snapshot)
+          (eql page-freshness-state :fresh)
+          :snippet-reflected-snapshot-status
+          (localhost-fedwiki-source-snapshot-envelope-reflection-status
+           snippet-reflection)
+          :snippet-reflected-snapshot-present
+          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                snippet-reflection)
+               :present)
+          :snippet-reflected-snapshot-malformed
+          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                snippet-reflection)
+               :malformed)
+          :snippet-source-freshness-state
+          snippet-freshness-state
+          :snippet-source-freshness-known
+          (not (null (member snippet-freshness-state
+                             '(:fresh :stale))))
+          :snippet-source-freshness-unknown-reason
+          (case snippet-freshness-state
+            (:unknown-malformed-envelope :malformed-envelope)
+            (:unknown-missing-envelope :missing-envelope))
           :snippet-source-fresh
-          (localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p
-           plan
-           :file-contents snippet-contents
-           :current-source-snapshot resolved-current-source-snapshot)
+          (eql snippet-freshness-state :fresh)
           :current-source-snapshot
           (copy-tree resolved-current-source-snapshot)
           :current-source-fingerprint

@@ -95,6 +95,17 @@
   " -->")
 (defparameter +localhost-fedwiki-page-source-snapshot-snippet-prefix+
   ";; HYPERDOC_LOCALHOST_FEDWIKI_SOURCE_SNAPSHOT ")
+(defparameter +localhost-fedwiki-page-source-snapshot-envelope-tag+
+  "HYPERDOC_LOCALHOST_FEDWIKI_SOURCE_SNAPSHOT")
+(defparameter +localhost-fedwiki-page-source-snapshot-envelope-format-version+
+  1)
+
+(defstruct localhost-fedwiki-source-snapshot-envelope-reflection
+  artifact-kind
+  status
+  snapshot
+  error-message
+  line)
 
 (defun split-blank-line-blocks (text)
   (with-input-from-string (stream (or text ""))
@@ -406,18 +417,48 @@
           :page-create-date
           (fedwiki-page-create-date raw-page))))
 
+(defun localhost-fedwiki-source-snapshot-envelope-prefix (artifact-kind)
+  (ecase artifact-kind
+    (:hyperdoc-html-page
+     +localhost-fedwiki-page-source-snapshot-page-prefix+)
+    (:topic-factory-lisp-snippet
+     +localhost-fedwiki-page-source-snapshot-snippet-prefix+)))
+
+(defun localhost-fedwiki-source-snapshot-envelope-suffix (artifact-kind)
+  (ecase artifact-kind
+    (:hyperdoc-html-page
+     +localhost-fedwiki-page-source-snapshot-page-suffix+)
+    (:topic-factory-lisp-snippet
+     nil)))
+
+(defun localhost-fedwiki-source-snapshot-envelope-line
+    (artifact-kind snapshot-metadata)
+  (format nil "~A~A~@[~A~]"
+          (localhost-fedwiki-source-snapshot-envelope-prefix artifact-kind)
+          (serialize-localhost-fedwiki-source-snapshot-object snapshot-metadata)
+          (localhost-fedwiki-source-snapshot-envelope-suffix artifact-kind)))
+
+(defun valid-localhost-fedwiki-source-snapshot-metadata-p (object)
+  (and (alexandria:proper-list-p object)
+       (evenp (length object))
+       (string= (or (getf object :snapshot-kind) "")
+                "localhost-fedwiki-page-source-snapshot")
+       (eql (getf object :snapshot-format-version)
+            +localhost-fedwiki-page-source-snapshot-envelope-format-version+)
+       (stringp (getf object :fingerprint))
+       (stringp (getf object :summary))
+       (stringp (getf object :source-page-id))
+       (stringp (getf object :source-page-path))))
+
 (defun render-localhost-fedwiki-page-source-snapshot-page-comment (source-data)
-  (format nil "~A~A~A"
-          +localhost-fedwiki-page-source-snapshot-page-prefix+
-          (serialize-localhost-fedwiki-source-snapshot-object
-           (localhost-fedwiki-source-snapshot-metadata source-data))
-          +localhost-fedwiki-page-source-snapshot-page-suffix+))
+  (localhost-fedwiki-source-snapshot-envelope-line
+   :hyperdoc-html-page
+   (localhost-fedwiki-source-snapshot-metadata source-data)))
 
 (defun render-localhost-fedwiki-page-source-snapshot-snippet-comment (source-data)
-  (format nil "~A~A"
-          +localhost-fedwiki-page-source-snapshot-snippet-prefix+
-          (serialize-localhost-fedwiki-source-snapshot-object
-           (localhost-fedwiki-source-snapshot-metadata source-data))))
+  (localhost-fedwiki-source-snapshot-envelope-line
+   :topic-factory-lisp-snippet
+   (localhost-fedwiki-source-snapshot-metadata source-data)))
 
 (defun render-localhost-fedwiki-page-artifact-with-source-snapshot
     (page-html source-data)
@@ -425,6 +466,7 @@
           (render-localhost-fedwiki-page-source-snapshot-page-comment source-data)
           (strip-leading-localhost-fedwiki-source-snapshot-line
            page-html
+           :hyperdoc-html-page
            +localhost-fedwiki-page-source-snapshot-page-prefix+
            +localhost-fedwiki-page-source-snapshot-page-suffix+)))
 
@@ -434,6 +476,7 @@
           (render-localhost-fedwiki-page-source-snapshot-snippet-comment source-data)
           (strip-leading-localhost-fedwiki-source-snapshot-line
            snippet-text
+           :topic-factory-lisp-snippet
            +localhost-fedwiki-page-source-snapshot-snippet-prefix+)))
 
 (defun split-string-first-line (string)
@@ -445,40 +488,131 @@
                 (subseq string (1+ newline-position))
                 ""))))
 
+(defun whitespace-only-string-p (string)
+  (every (lambda (character)
+           (find character '(#\Space #\Tab #\Newline #\Return)))
+         string))
+
 (defun parse-localhost-fedwiki-source-snapshot-line
     (line prefix &optional suffix)
-  (when (and (string-prefix-p* prefix line)
-             (or (null suffix)
-                 (string-suffix-p* suffix line)))
-    (let* ((start (length prefix))
-           (end (if suffix
-                    (- (length line) (length suffix))
-                    (length line))))
-      (read-from-string (subseq line start end)))))
+  (let ((reflection
+          (reflect-localhost-fedwiki-source-snapshot-envelope-line
+           :custom
+           line
+           prefix
+           suffix)))
+    (when (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                reflection)
+               :present)
+      (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+       reflection))))
+
+(defun reflect-localhost-fedwiki-source-snapshot-envelope-line
+    (artifact-kind line prefix &optional suffix)
+  (cond
+    ((and (string-prefix-p* prefix line)
+          suffix
+          (not (string-suffix-p* suffix line)))
+     (make-localhost-fedwiki-source-snapshot-envelope-reflection
+      :artifact-kind artifact-kind
+      :status :malformed
+      :error-message "Envelope prefix was present but the closing suffix was missing."
+      :line line))
+    ((not (string-prefix-p* prefix line))
+     (make-localhost-fedwiki-source-snapshot-envelope-reflection
+      :artifact-kind artifact-kind
+      :status :missing
+      :line line))
+    (t
+     (let* ((start (length prefix))
+            (end (if suffix
+                     (- (length line) (length suffix))
+                     (length line)))
+            (payload (subseq line start end)))
+       (handler-case
+           (let ((*read-eval* nil))
+             (multiple-value-bind (object position)
+                 (read-from-string payload nil :eof)
+               (cond
+                 ((eq object :eof)
+                  (make-localhost-fedwiki-source-snapshot-envelope-reflection
+                   :artifact-kind artifact-kind
+                   :status :malformed
+                   :error-message "Envelope payload was empty."
+                   :line line))
+                 ((not (whitespace-only-string-p (subseq payload position)))
+                  (make-localhost-fedwiki-source-snapshot-envelope-reflection
+                   :artifact-kind artifact-kind
+                   :status :malformed
+                   :error-message "Envelope payload contained trailing non-whitespace."
+                   :line line))
+                 ((not (valid-localhost-fedwiki-source-snapshot-metadata-p object))
+                  (make-localhost-fedwiki-source-snapshot-envelope-reflection
+                   :artifact-kind artifact-kind
+                   :status :malformed
+                   :error-message "Envelope payload was not valid source snapshot metadata."
+                   :line line))
+                 (t
+                  (make-localhost-fedwiki-source-snapshot-envelope-reflection
+                   :artifact-kind artifact-kind
+                   :status :present
+                   :snapshot object
+                   :line line)))))
+         (error (condition)
+           (make-localhost-fedwiki-source-snapshot-envelope-reflection
+            :artifact-kind artifact-kind
+            :status :malformed
+            :error-message (princ-to-string condition)
+            :line line)))))))
+
+(defun reflect-localhost-fedwiki-source-snapshot-envelope
+    (artifact-kind string)
+  (multiple-value-bind (line)
+      (split-string-first-line string)
+    (reflect-localhost-fedwiki-source-snapshot-envelope-line
+     artifact-kind
+     line
+     (localhost-fedwiki-source-snapshot-envelope-prefix artifact-kind)
+     (localhost-fedwiki-source-snapshot-envelope-suffix artifact-kind))))
 
 (defun strip-leading-localhost-fedwiki-source-snapshot-line
-    (string prefix &optional suffix)
+    (string artifact-kind prefix &optional suffix)
   (multiple-value-bind (line remainder)
       (split-string-first-line string)
-    (if (parse-localhost-fedwiki-source-snapshot-line line prefix suffix)
+    (if (not (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                   (reflect-localhost-fedwiki-source-snapshot-envelope-line
+                    artifact-kind
+                    line
+                    prefix
+                    suffix))
+                  :missing))
         remainder
         string)))
 
 (defun localhost-fedwiki-page-artifact-reflected-source-snapshot (page-html)
-  (multiple-value-bind (line)
-      (split-string-first-line page-html)
-    (parse-localhost-fedwiki-source-snapshot-line
-     line
-     +localhost-fedwiki-page-source-snapshot-page-prefix+
-     +localhost-fedwiki-page-source-snapshot-page-suffix+)))
+  (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+   (reflect-localhost-fedwiki-source-snapshot-envelope
+    :hyperdoc-html-page
+    page-html)))
+
+(defun localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
+    (page-html)
+  (reflect-localhost-fedwiki-source-snapshot-envelope
+   :hyperdoc-html-page
+   page-html))
 
 (defun localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
     (snippet-text)
-  (multiple-value-bind (line)
-      (split-string-first-line snippet-text)
-    (parse-localhost-fedwiki-source-snapshot-line
-     line
-     +localhost-fedwiki-page-source-snapshot-snippet-prefix+)))
+  (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+   (reflect-localhost-fedwiki-source-snapshot-envelope
+    :topic-factory-lisp-snippet
+    snippet-text)))
+
+(defun localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot-reflection
+    (snippet-text)
+  (reflect-localhost-fedwiki-source-snapshot-envelope
+   :topic-factory-lisp-snippet
+   snippet-text))
 
 (defun default-localhost-fedwiki-primary-item-selector (story-items)
   (find "paragraph"

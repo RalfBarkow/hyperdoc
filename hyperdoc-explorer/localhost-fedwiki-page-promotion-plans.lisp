@@ -53,6 +53,19 @@
   (or (getf status :current-source-summary)
       "unavailable"))
 
+(defun promotion-reflected-snapshot-status-label (status-key)
+  (case status-key
+    (:present "present")
+    (:malformed "malformed")
+    (otherwise "missing")))
+
+(defun promotion-source-freshness-label (freshness-state)
+  (case freshness-state
+    (:fresh "yes")
+    (:stale "no")
+    (:unknown-malformed-envelope "unknown (malformed envelope)")
+    (otherwise "unknown (missing envelope)")))
+
 (defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
   (localhost-fedwiki-page-promotion-surface-title surface))
 
@@ -117,7 +130,7 @@
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
         (:h4 (views:esc "Status and actions"))
         (:p (views:esc
-             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is still fresh relative to the current normalized localhost FedWiki page snapshot, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
+             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is still fresh relative to the current normalized localhost FedWiki page snapshot, whether freshness is unknown because the reflected envelope is missing or malformed, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Page synced?"))
                      (:td (:tt (views:esc
@@ -127,14 +140,22 @@
                      (:td (:tt (views:esc
                                 (promotion-yes/no-label
                                  (getf status :snippet-synced))))))
+                (:tr (:td (views:esc "Page reflected snapshot"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :page-reflected-snapshot-status))))))
+                (:tr (:td (views:esc "Snippet reflected snapshot"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :snippet-reflected-snapshot-status))))))
                 (:tr (:td (views:esc "Page source fresh?"))
                      (:td (:tt (views:esc
-                                (promotion-yes/no-label
-                                 (getf status :page-source-fresh))))))
+                                (promotion-source-freshness-label
+                                 (getf status :page-source-freshness-state))))))
                 (:tr (:td (views:esc "Snippet source fresh?"))
                      (:td (:tt (views:esc
-                                (promotion-yes/no-label
-                                 (getf status :snippet-source-fresh))))))
+                                (promotion-source-freshness-label
+                                 (getf status :snippet-source-freshness-state))))))
                 (:tr (:td (views:esc "Source page id"))
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-page-id
@@ -243,12 +264,20 @@
                                  (getf status :snippet-synced))))))
                 (:tr (:td (views:esc "Page source fresh"))
                      (:td (:tt (views:esc
-                                (promotion-yes/no-label
-                                 (getf status :page-source-fresh))))))
+                                (promotion-source-freshness-label
+                                 (getf status :page-source-freshness-state))))))
                 (:tr (:td (views:esc "Snippet source fresh"))
                      (:td (:tt (views:esc
-                                (promotion-yes/no-label
-                                 (getf status :snippet-source-fresh))))))
+                                (promotion-source-freshness-label
+                                 (getf status :snippet-source-freshness-state))))))
+                (:tr (:td (views:esc "Page reflected snapshot"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :page-reflected-snapshot-status))))))
+                (:tr (:td (views:esc "Snippet reflected snapshot"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :snippet-reflected-snapshot-status))))))
                 (:tr (:td (views:esc "Current source fingerprint"))
                      (:td (:tt (views:esc
                                 (promotion-current-source-fingerprint-label
@@ -589,14 +618,24 @@
                                 plan))))))
               (:tr (:td (views:esc "Page source snapshot fresh"))
                    (:td (:tt (views:esc
-                              (promotion-yes/no-label
-                               (localhost-fedwiki-page-promotion-plan-page-source-fresh-p
-                                plan))))))
+                              (promotion-source-freshness-label
+                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
+                                     :page-source-freshness-state))))))
               (:tr (:td (views:esc "Snippet source snapshot fresh"))
                    (:td (:tt (views:esc
-                              (promotion-yes/no-label
-                               (localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p
-                                plan))))))))))
+                              (promotion-source-freshness-label
+                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
+                                     :snippet-source-freshness-state))))))
+              (:tr (:td (views:esc "Page reflected snapshot"))
+                   (:td (:tt (views:esc
+                              (promotion-reflected-snapshot-status-label
+                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
+                                     :page-reflected-snapshot-status))))))
+              (:tr (:td (views:esc "Snippet reflected snapshot"))
+                   (:td (:tt (views:esc
+                              (promotion-reflected-snapshot-status-label
+                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
+                                     :snippet-reflected-snapshot-status))))))))))
 
 (views:defview 👀snippet-metadata (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Snippet metadata" :priority 7
