@@ -71,7 +71,15 @@
   ((topics-by-external-key
     :reader topics-by-external-key-of
     :initarg :topics-by-external-key
-    :initform (make-hash-table :test #'equal))))
+    :initform (make-hash-table :test #'equal))
+   (topicmap-memberships
+    :reader topicmap-memberships-of
+    :initarg :topicmap-memberships
+    :initform (make-hash-table :test #'equal))
+   (next-topic-id
+    :accessor next-topic-id-of
+    :initarg :next-topic-id
+    :initform 1000)))
 
 (defclass http-dmx-import-client (dmx-import-client)
   ((base-url :reader dmx-import-base-url-of :initarg :base-url :initform nil)
@@ -87,6 +95,27 @@
 (defgeneric dmx-import-find-existing-topic (client external-key))
 (defgeneric dmx-import-create-topic (client payload))
 (defgeneric dmx-import-update-topic (client existing-topic payload))
+(defgeneric dmx-import-topic-in-topicmap-p (client topicmap-id topic-id))
+(defgeneric dmx-import-add-topic-to-topicmap (client topicmap-id topic-id view-props))
+(defgeneric dmx-import-set-topic-view-props (client topicmap-id topic-id view-props))
+
+(defun dmx-import-object-id (topic)
+  (cond
+    ((hash-table-p topic)
+     (or (gethash "id" topic)
+         (when-let (nested (gethash "topic" topic))
+           (and (hash-table-p nested)
+                (gethash "id" nested)))))
+    ((listp topic)
+     (or (getf topic :id)
+         (when-let (nested (getf topic :topic))
+           (and (listp nested)
+                (getf nested :id)))))
+    (t
+     nil)))
+
+(defun memory-topicmap-membership-key (topicmap-id topic-id)
+  (list topicmap-id topic-id))
 
 (defmethod dmx-import-find-existing-topic ((client null-dmx-import-client) external-key)
   (declare (ignore external-key))
@@ -102,17 +131,59 @@
   (error 'fedwiki-dmx-import-error
          :message "Dry-run/null DMX client cannot perform live writes"))
 
+(defmethod dmx-import-topic-in-topicmap-p ((client null-dmx-import-client) topicmap-id topic-id)
+  (declare (ignore topicmap-id topic-id))
+  nil)
+
+(defmethod dmx-import-add-topic-to-topicmap ((client null-dmx-import-client) topicmap-id topic-id view-props)
+  (declare (ignore topicmap-id topic-id view-props))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live topicmap writes"))
+
+(defmethod dmx-import-set-topic-view-props ((client null-dmx-import-client) topicmap-id topic-id view-props)
+  (declare (ignore topicmap-id topic-id view-props))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live topicmap writes"))
+
 (defmethod dmx-import-find-existing-topic ((client memory-dmx-import-client) external-key)
   (gethash external-key (topics-by-external-key-of client)))
 
 (defmethod dmx-import-create-topic ((client memory-dmx-import-client) payload)
-  (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
-        payload))
+  (let* ((id (or (getf payload :id)
+                 (prog1 (next-topic-id-of client)
+                   (incf (next-topic-id-of client)))))
+         (stored (list* :id id payload)))
+    (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
+          stored)
+    stored))
 
 (defmethod dmx-import-update-topic ((client memory-dmx-import-client) existing-topic payload)
-  (declare (ignore existing-topic))
-  (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
-        payload))
+  (let* ((id (or (dmx-import-object-id existing-topic)
+                 (getf payload :id)
+                 (prog1 (next-topic-id-of client)
+                   (incf (next-topic-id-of client)))))
+         (stored (list* :id id payload)))
+    (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
+          stored)
+    stored))
+
+(defmethod dmx-import-topic-in-topicmap-p ((client memory-dmx-import-client) topicmap-id topic-id)
+  (not (null (gethash (memory-topicmap-membership-key topicmap-id topic-id)
+                      (topicmap-memberships-of client)))))
+
+(defmethod dmx-import-add-topic-to-topicmap ((client memory-dmx-import-client)
+                                             topicmap-id topic-id view-props)
+  (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
+                 (topicmap-memberships-of client))
+        view-props)
+  view-props)
+
+(defmethod dmx-import-set-topic-view-props ((client memory-dmx-import-client)
+                                            topicmap-id topic-id view-props)
+  (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
+                 (topicmap-memberships-of client))
+        view-props)
+  view-props)
 
 (defun encode-base64-octets (octets)
   (with-output-to-string (stream)
@@ -509,20 +580,21 @@
   (and (hash-table-p topic)
        (gethash "id" topic)))
 
-(defun http-request-json (client method url &key payload allow-404?)
+(defun http-request-json (client method url &key payload body-object allow-404?)
   (let* ((normalized-url (normalize-http-client-url client url))
          (headers (append (when (dmx-import-authorization-header-of client)
                             (list (cons "Authorization"
                                         (dmx-import-authorization-header-of client))))
-                          (when payload
+                          (when (or payload body-object)
                             '(("Content-Type" . "application/json")))))
          (request-args (append (list normalized-url
                                      :method method
                                      :want-stream t
                                      :additional-headers headers)
-                               (when payload
+                               (when (or payload body-object)
                                  (list :content (encode-json-string
-                                                 (dmx-import-json-object payload))
+                                                 (or body-object
+                                                     (dmx-import-json-object payload)))
                                        :content-type "application/json")))))
     (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
         (apply #'drakma:http-request request-args)
@@ -575,7 +647,7 @@
 
 (defmethod dmx-import-update-topic ((client http-dmx-import-client) existing-topic payload)
   (validate-http-dmx-import-client client :live? t)
-  (let ((topic-id (dmx-topic-id existing-topic)))
+  (let ((topic-id (dmx-import-object-id existing-topic)))
     (unless topic-id
       (error 'fedwiki-dmx-import-error
              :message (format nil

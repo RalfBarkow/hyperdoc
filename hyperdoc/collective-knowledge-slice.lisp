@@ -373,6 +373,8 @@
       (format stream "</p>~%~%")
       (format stream "<ul>~%")
       (format stream "  <li><a expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-dmx-snippet-chunk)\"><tt>DMX twin/snippet chunk</tt></a></li>~%")
+      (format stream "  <li><tt>plan-topic-factory-snippet-dmx-write</tt> for plan-only inspection.</li>~%")
+      (format stream "  <li><tt>execute-topic-factory-snippet-dmx-write</tt> for explicit dry-run or live execution.</li>~%")
       (format stream "  <li><a page=\"DMX FedWiki Write Model\">DMX FedWiki Write Model</a></li>~%")
       (format stream "  <li><a hyperbook=\"topics\" page=\"Runtime write live-proof gate\"><tt>Runtime write live-proof gate</tt></a></li>~%")
       (format stream "</ul>~%~%")

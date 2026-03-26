@@ -104,7 +104,8 @@
                #:uiop)
   :components ((:module "hyperdoc"
                 :serial t
-                :components ((:file "dmx-import")))))
+                :components ((:file "dmx-import")
+                             (:file "topic-factory-snippet-dmx")))))
 
 (defsystem #:hyperdoc/inspector
   :description "HyperDoc for the moldable inspector"
@@ -243,6 +244,7 @@
                              (:file "authored-html-render-safety-smoke")
                              (:file "page-lookup-issues-smoke")
                              (:file "collective-knowledge-slice-smoke")
+                             (:file "topic-factory-snippet-dmx-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")
