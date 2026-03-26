@@ -23,6 +23,28 @@
   (or (getf provenance key)
       "n/a"))
 
+(defun promotion-provenance-modes-present (plan)
+  (sort
+   (remove-duplicates
+    (loop for row in (localhost-fedwiki-page-promotion-plan-provenance-rows plan)
+          for granularity = (getf row :granularity)
+          when granularity
+            collect (string-downcase (promotion-code-string granularity)))
+    :test #'string=)
+   #'string<))
+
+(defun promotion-dmx-summary-availability-label (summary)
+  (if (getf summary :available)
+      "available"
+      "unavailable"))
+
+(defun promotion-dmx-summary-label (summary)
+  (if (getf summary :available)
+      (format nil "~A / ~A"
+              (getf summary :topic-action)
+              (getf summary :topicmap-action))
+      "unavailable"))
+
 (defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
   (localhost-fedwiki-page-promotion-surface-title surface))
 
@@ -78,11 +100,78 @@
     (let ((source (localhost-fedwiki-page-promotion-plan-source plan))
           (status
             (localhost-fedwiki-page-promotion-plan-sync-status plan))
+          (provenance-modes
+            (promotion-provenance-modes-present plan))
           (dmx-summary
             (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)))
       (views:html
         (:h3 (views:esc (localhost-fedwiki-page-promotion-plan-title plan)))
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
+        (:h4 (views:esc "Status and actions"))
+        (:p (views:esc
+             "Use this compact surface to check whether the local artifacts are in sync, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Page synced?"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :page-synced))))))
+                (:tr (:td (views:esc "Snippet synced?"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :snippet-synced))))))
+                (:tr (:td (views:esc "Source page id"))
+                     (:td (:tt (views:esc
+                                (localhost-fedwiki-source-data-fedwiki-page-id
+                                 source)))))
+                (:tr (:td (views:esc "Source slug"))
+                     (:td (:tt (views:esc
+                                (localhost-fedwiki-source-data-fedwiki-slug
+                                 source)))))
+                (:tr (:td (views:esc "Provenance modes present"))
+                     (:td (:tt (views:esc
+                                (promotion-list-string provenance-modes)))))
+                (:tr (:td (views:esc "DMX dry-run summary available"))
+                     (:td (:tt (views:esc
+                                (promotion-dmx-summary-availability-label
+                                 dmx-summary)))))
+                (:tr (:td (views:esc "DMX dry-run summary"))
+                     (:td (:tt (views:esc
+                                (promotion-dmx-summary-label dmx-summary))))))
+        (:ul
+         (:li
+          (views:eval-button
+           "Regenerate page artifact"
+           (views:thunk
+             (regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+              plan))
+           "Rewrite the composed HyperDoc page artifact for this promotion plan and inspect the result."))
+         (:li
+          (views:eval-button
+           "Regenerate snippet artifact"
+           (views:thunk
+             (regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
+              plan))
+           "Rewrite the topic-factory snippet artifact for this promotion plan and inspect the result."))
+         (:li
+          (views:eval-button
+           "Regenerate both artifacts"
+           (views:thunk
+             (regenerate-localhost-fedwiki-page-promotion-plan-artifacts
+              plan))
+           "Rewrite both the composed page and topic-factory snippet artifacts for this promotion plan and inspect the result."))
+         (:li
+          (views:eval-button
+           "Review DMX dry-run"
+           (views:thunk
+             (review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+              plan))
+           "Run the explicit DMX dry-run review for this promotion plan and inspect the canonical evidence."))
+         (:li
+          (views:eval-button
+           "Inspect sync status"
+           (views:thunk
+             (localhost-fedwiki-page-promotion-plan-sync-status plan))
+           "Inspect the current page/snippet sync state for this promotion plan.")))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Source page id"))
                      (:td (:tt (views:esc
@@ -130,11 +219,8 @@
                                  (getf status :snippet-synced))))))
                 (:tr (:td (views:esc "DMX dry-run"))
                      (:td (:tt (views:esc
-                                (if (getf dmx-summary :available)
-                                    (format nil "~A / ~A"
-                                            (getf dmx-summary :topic-action)
-                                            (getf dmx-summary :topicmap-action))
-                                    "unavailable"))))))))))
+                                (promotion-dmx-summary-label
+                                 dmx-summary))))))))))
 
 (views:defview 👀source-page (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Source page" :priority 2
