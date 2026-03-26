@@ -22,6 +22,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "core")
+                             (:file "collective-knowledge-slice")
                              (:file "topics")
                              (:file "links-in-code")
                              (:file "defining")
@@ -230,7 +231,7 @@
   :serial t
   :depends-on (#:hyperdoc/dmx-import
                #:hyperdoc/explorer)
-  :components ((:module "tests"
+                :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "relation-topic-proposals-smoke")
@@ -241,6 +242,7 @@
                              (:file "fedwiki-materialization-smoke")
                              (:file "authored-html-render-safety-smoke")
                              (:file "page-lookup-issues-smoke")
+                             (:file "collective-knowledge-slice-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")

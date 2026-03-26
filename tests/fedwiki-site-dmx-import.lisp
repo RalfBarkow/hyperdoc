@@ -353,6 +353,7 @@
   (run-article-allegation-slice-smoke-tests)
   (run-fedwiki-materialization-smoke-tests)
   (run-page-lookup-issues-smoke-tests)
+  (run-collective-knowledge-slice-smoke-tests)
   (run-fedwiki-site-dmx-import-tests)
   (run-fedwiki-story-items-smoke-tests)
   (run-check-runner-smoke-tests)

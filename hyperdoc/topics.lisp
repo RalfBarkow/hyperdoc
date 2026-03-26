@@ -2512,6 +2512,44 @@
                  "Understanding ASDF Systems in HyperDoc"
                  "SBCL Process")))
 
+(defun make-the-life-cycle-of-collective-knowledge-topic (topic-id)
+  (let ((chunk (find-the-life-cycle-of-collective-knowledge-topic-chunk
+                topic-id
+                :signal-error? t)))
+    (make-topic
+     :id (id-of chunk)
+     :title (title-of chunk)
+     :summary (summary-of chunk)
+     :references (references-of chunk))))
+
+(defun the-life-cycle-of-collective-knowledge-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "the-life-cycle-of-collective-knowledge"))
+
+(defun collective-knowledge-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "collective-knowledge"))
+
+(defun refinement-of-information-into-knowledge-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "refinement-of-information-into-knowledge"))
+
+(defun digital-fragility-of-software-source-code-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "digital-fragility-of-software-source-code"))
+
+(defun computational-reproducibility-is-not-enough-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "computational-reproducibility-is-not-enough"))
+
+(defun software-interoperability-across-time-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "software-interoperability-across-time"))
+
+(defun stable-software-environments-topic ()
+  (make-the-life-cycle-of-collective-knowledge-topic
+   "stable-software-environments"))
+
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"
