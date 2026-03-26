@@ -144,6 +144,22 @@
              collective-overview-html
              :test #'char=)
      "Collective knowledge overview must explain the concise freshness wording")
+    (assert-true
+     (search "Page recommended next action" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose page remediation guidance")
+    (assert-true
+     (search "Snippet recommended next action" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose snippet remediation guidance")
+    (assert-true
+     (search "No regeneration needed; the page artifact already reflects the current source snapshot."
+             collective-overview-html
+             :test #'char=)
+     "Collective knowledge overview must surface the no-change page recommendation")
+    (assert-true
+     (search "No regeneration needed; the snippet artifact already reflects the current source snapshot."
+             collective-overview-html
+             :test #'char=)
+     "Collective knowledge overview must surface the no-change snippet recommendation")
     (dolist (label '("Regenerate page artifact"
                      "Regenerate snippet artifact"
                      "Regenerate both artifacts"
@@ -199,6 +215,22 @@
              repro-overview-html
              :test #'char=)
      "Second real-page overview must explain the concise freshness wording")
+    (assert-true
+     (search "Page recommended next action" repro-overview-html :test #'char=)
+     "Second real-page overview must expose page remediation guidance")
+    (assert-true
+     (search "Snippet recommended next action" repro-overview-html :test #'char=)
+     "Second real-page overview must expose snippet remediation guidance")
+    (assert-true
+     (search "No regeneration needed; the page artifact already reflects the current source snapshot."
+             repro-overview-html
+             :test #'char=)
+     "Second real-page overview must surface the no-change page recommendation")
+    (assert-true
+     (search "No regeneration needed; the snippet artifact already reflects the current source snapshot."
+             repro-overview-html
+             :test #'char=)
+     "Second real-page overview must surface the no-change snippet recommendation")
     (dolist (label '("Regenerate page artifact"
                      "Regenerate snippet artifact"
                      "Regenerate both artifacts"
@@ -219,14 +251,27 @@
        (search "Diagnostic reason" html :test #'char=)
        "Source freshness view must expose a human-facing diagnostic reason")
       (assert-true
+       (search "Recommended next action" html :test #'char=)
+       "Source freshness view must expose remediation guidance")
+      (assert-true
        (search "fingerprint-based comparisons, not semantic diffs" html :test #'char=)
        "Source freshness view must state the conservative fingerprint-based diagnostic model"))
     (assert-true
      (search "matches reflected snapshot fingerprint" collective-freshness-html :test #'char=)
      "Collective knowledge source freshness view must explain the aligned no-change case")
     (assert-true
+     (search "No regeneration needed; the page artifact already reflects the current source snapshot."
+             collective-freshness-html
+             :test #'char=)
+     "Collective knowledge source freshness view must expose page remediation guidance")
+    (assert-true
      (search "matches reflected snapshot fingerprint" repro-freshness-html :test #'char=)
      "Second real-page source freshness view must explain the aligned no-change case")
+    (assert-true
+     (search "No regeneration needed; the page artifact already reflects the current source snapshot."
+             repro-freshness-html
+             :test #'char=)
+     "Second real-page source freshness view must expose page remediation guidance")
     (assert-true
      (search "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
              collective-dmx-html
@@ -570,9 +615,25 @@
              :test #'char=)
      "Collective knowledge page artifact must explain the fresh result with an alignment reason")
     (assert-equal
+     :no-regeneration-needed
+     (getf collective-status :page-source-freshness-recommended-action)
+     "Collective knowledge page artifact must recommend no regeneration in the no-change case")
+    (assert-equal
+     "No regeneration needed; the page artifact already reflects the current source snapshot."
+     (getf collective-status :page-source-freshness-recommended-action-label)
+     "Collective knowledge page artifact must expose the no-change page recommendation")
+    (assert-equal
      :fresh
      (getf collective-status :snippet-source-freshness-state)
      "Collective knowledge snippet artifact must classify source freshness as fresh when the envelope matches")
+    (assert-equal
+     :no-regeneration-needed
+     (getf collective-status :snippet-source-freshness-recommended-action)
+     "Collective knowledge snippet artifact must recommend no regeneration in the no-change case")
+    (assert-equal
+     "No regeneration needed; the snippet artifact already reflects the current source snapshot."
+     (getf collective-status :snippet-source-freshness-recommended-action-label)
+     "Collective knowledge snippet artifact must expose the no-change snippet recommendation")
     (assert-true
      (getf collective-status :page-source-freshness-known)
      "Collective knowledge page artifact must report source freshness as known when the envelope is valid")
@@ -611,9 +672,25 @@
              :test #'char=)
      "Second real-page artifact must explain the fresh result with an alignment reason")
     (assert-equal
+     :no-regeneration-needed
+     (getf repro-status :page-source-freshness-recommended-action)
+     "Second real-page artifact must recommend no regeneration in the no-change case")
+    (assert-equal
+     "No regeneration needed; the page artifact already reflects the current source snapshot."
+     (getf repro-status :page-source-freshness-recommended-action-label)
+     "Second real-page artifact must expose the no-change page recommendation")
+    (assert-equal
      :fresh
      (getf repro-status :snippet-source-freshness-state)
      "Second real-page snippet must classify source freshness as fresh when the envelope matches")
+    (assert-equal
+     :no-regeneration-needed
+     (getf repro-status :snippet-source-freshness-recommended-action)
+     "Second real-page snippet must recommend no regeneration in the no-change case")
+    (assert-equal
+     "No regeneration needed; the snippet artifact already reflects the current source snapshot."
+     (getf repro-status :snippet-source-freshness-recommended-action-label)
+     "Second real-page snippet must expose the no-change snippet recommendation")
     (assert-true
      (getf repro-status :page-source-freshness-known)
      "Second real-page artifact must report source freshness as known when the envelope is valid")
@@ -718,6 +795,14 @@
      "Reflected source snapshot envelope is missing."
      (getf missing-envelope-status :page-source-freshness-reason)
      "Missing page envelopes must keep a human-facing diagnostic reason")
+    (assert-equal
+     :regenerate-artifact
+     (getf missing-envelope-status :page-source-freshness-recommended-action)
+     "Missing page envelopes must recommend regeneration")
+    (assert-equal
+     "Regenerate the page artifact to restore reflected source snapshot evidence."
+     (getf missing-envelope-status :page-source-freshness-recommended-action-label)
+     "Missing page envelopes must recommend restoring reflected snapshot evidence")
     (assert-true
      (not (getf missing-envelope-status :snippet-reflected-snapshot-present))
      "Missing snippet envelopes must fail soft by reporting no reflected snapshot")
@@ -739,6 +824,14 @@
      "Reflected source snapshot envelope is missing."
      (getf missing-envelope-status :snippet-source-freshness-reason)
      "Missing snippet envelopes must keep a human-facing diagnostic reason")
+    (assert-equal
+     :regenerate-artifact
+     (getf missing-envelope-status :snippet-source-freshness-recommended-action)
+     "Missing snippet envelopes must recommend regeneration")
+    (assert-equal
+     "Regenerate the snippet artifact to restore reflected source snapshot evidence."
+     (getf missing-envelope-status :snippet-source-freshness-recommended-action-label)
+     "Missing snippet envelopes must recommend restoring reflected snapshot evidence")
     (assert-true
      (not (getf malformed-envelope-status :page-reflected-snapshot-present))
      "Malformed page envelopes must fail soft by reporting no valid reflected snapshot")
@@ -761,6 +854,14 @@
              (or (getf malformed-envelope-status :page-source-freshness-reason) "")
              :test #'char-equal)
      "Malformed page envelopes must keep a human-facing diagnostic reason")
+    (assert-equal
+     :regenerate-artifact
+     (getf malformed-envelope-status :page-source-freshness-recommended-action)
+     "Malformed page envelopes must recommend regeneration")
+    (assert-equal
+     "Regenerate the page artifact to repair reflected source snapshot evidence."
+     (getf malformed-envelope-status :page-source-freshness-recommended-action-label)
+     "Malformed page envelopes must recommend repairing reflected snapshot evidence")
     (assert-true
      (not (getf malformed-envelope-status :snippet-reflected-snapshot-present))
      "Malformed snippet envelopes must fail soft by reporting no valid reflected snapshot")
@@ -783,6 +884,14 @@
              (or (getf malformed-envelope-status :snippet-source-freshness-reason) "")
              :test #'char-equal)
      "Malformed snippet envelopes must keep a human-facing diagnostic reason")
+    (assert-equal
+     :regenerate-artifact
+     (getf malformed-envelope-status :snippet-source-freshness-recommended-action)
+     "Malformed snippet envelopes must recommend regeneration")
+    (assert-equal
+     "Regenerate the snippet artifact to repair reflected source snapshot evidence."
+     (getf malformed-envelope-status :snippet-source-freshness-recommended-action-label)
+     "Malformed snippet envelopes must recommend repairing reflected snapshot evidence")
     (assert-true
      (getf simulated-stale-source :page-synced)
      "Stale-source simulation must not require mutating the page artifact bytes")
@@ -807,6 +916,14 @@
              :test #'char-equal)
      "Stale-source simulation must expose the simulated current fingerprint in the page mismatch reason")
     (assert-equal
+     :regenerate-artifact
+     (getf simulated-stale-source :page-source-freshness-recommended-action)
+     "Stale-source simulation must recommend page regeneration")
+    (assert-equal
+     "Regenerate the page artifact to refresh its reflected source snapshot evidence."
+     (getf simulated-stale-source :page-source-freshness-recommended-action-label)
+     "Stale-source simulation must recommend refreshing the page artifact evidence")
+    (assert-equal
      (getf collective-status :page-reflected-snapshot-fingerprint)
      (getf simulated-stale-source :page-reflected-snapshot-fingerprint)
      "Stale-source simulation must preserve the reflected page fingerprint for comparison")
@@ -822,6 +939,14 @@
              (or (getf simulated-stale-source :snippet-source-freshness-reason) "")
              :test #'char=)
      "Stale-source simulation must explain the snippet mismatch with a fingerprint-difference reason")
+    (assert-equal
+     :regenerate-artifact
+     (getf simulated-stale-source :snippet-source-freshness-recommended-action)
+     "Stale-source simulation must recommend snippet regeneration")
+    (assert-equal
+     "Regenerate the snippet artifact to refresh its reflected source snapshot evidence."
+     (getf simulated-stale-source :snippet-source-freshness-recommended-action-label)
+     "Stale-source simulation must recommend refreshing the snippet artifact evidence")
     (assert-equal
      (getf collective-status :snippet-reflected-snapshot-fingerprint)
      (getf simulated-stale-source :snippet-reflected-snapshot-fingerprint)
