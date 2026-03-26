@@ -24,6 +24,7 @@
                              (:file "core")
                              (:file "localhost-fedwiki-page-pipeline")
                              (:file "collective-knowledge-slice")
+                             (:file "reproducible-devenv-as-knowledge-artifact-slice")
                              (:file "topics")
                              (:file "links-in-code")
                              (:file "defining")

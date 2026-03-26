@@ -2550,6 +2550,28 @@
   (make-the-life-cycle-of-collective-knowledge-topic
    "stable-software-environments"))
 
+(defun make-reproducible-devenv-as-knowledge-artifact-topic (topic-id)
+  (let ((chunk (find-reproducible-devenv-as-knowledge-artifact-topic-chunk
+                topic-id
+                :signal-error? t)))
+    (make-topic
+     :id (id-of chunk)
+     :title (title-of chunk)
+     :summary (summary-of chunk)
+     :references (references-of chunk))))
+
+(defun reproducible-devenv-as-knowledge-artifact-topic ()
+  (make-reproducible-devenv-as-knowledge-artifact-topic
+   "reproducible-devenv-as-knowledge-artifact"))
+
+(defun devenv-as-knowledge-artifact-topic ()
+  (make-reproducible-devenv-as-knowledge-artifact-topic
+   "devenv-as-knowledge-artifact"))
+
+(defun environment-topic-traceability-topic ()
+  (make-reproducible-devenv-as-knowledge-artifact-topic
+   "environment-topic-traceability"))
+
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"
