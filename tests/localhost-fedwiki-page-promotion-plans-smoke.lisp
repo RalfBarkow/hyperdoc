@@ -32,6 +32,9 @@
          (collective-promoted-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Promoted topics")))
+         (collective-overview-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-views "Overview")))
          (collective-story-items-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Story items")))
@@ -76,6 +79,12 @@
     (assert-true
      (search "story-item" collective-story-items-html :test #'char=)
      "Collective knowledge story-items view must preserve whole-item normalized provenance")
+    (assert-true
+     (search "Page synced" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose page sync status")
+    (assert-true
+     (search "Snippet synced" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose snippet sync status")
     (assert-true
      (search "story-item" repro-promoted-html :test #'char=)
      "Second real page promoted-topics view must expose whole-item-derived subtopics")
@@ -273,6 +282,144 @@
              :test #'char=)
      "Second real-page source entry point must preserve the canonical source page id")))
 
+(defun run-localhost-fedwiki-page-promotion-operations-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+         (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+         (collective-views (load-inspector-views-for-object collective))
+         (repro-views (load-inspector-views-for-object repro))
+         (collective-operations-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-views
+                                      "<span style=\"color: #666;\">Operations</span>")))
+         (repro-operations-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-views
+                                      "<span style=\"color: #666;\">Operations</span>")))
+         (collective-page-path
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
+            collective))
+         (collective-snippet-path
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+            collective))
+         (repro-page-path
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
+            repro))
+         (repro-snippet-path
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+            repro))
+         (collective-page-before (uiop:read-file-string collective-page-path))
+         (collective-snippet-before (uiop:read-file-string collective-snippet-path))
+         (repro-page-before (uiop:read-file-string repro-page-path))
+         (repro-snippet-before (uiop:read-file-string repro-snippet-path))
+         (collective-page-result
+           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+            collective))
+         (repro-snippet-result
+           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
+            repro))
+         (collective-both-result
+           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-artifacts
+            collective))
+         (repro-both-result
+           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-artifacts
+            repro))
+         (collective-dmx-review
+           (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+            collective))
+         (repro-dmx-review
+           (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+            repro))
+         (collective-dmx-string (prin1-to-string collective-dmx-review))
+         (repro-dmx-string (prin1-to-string repro-dmx-review))
+         (simulated-out-of-sync
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            collective
+            :page-contents "out-of-sync page"
+            :snippet-contents "out-of-sync snippet")))
+    (dolist (html (list collective-operations-html repro-operations-html))
+      (assert-true
+       (search "REGENERATE-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-PAGE-ARTIFACT"
+               html
+               :test #'char-equal)
+       "Operations view must expose page-artifact regeneration")
+      (assert-true
+       (search "REGENERATE-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-SNIPPET-ARTIFACT"
+               html
+               :test #'char-equal)
+       "Operations view must expose snippet-artifact regeneration")
+      (assert-true
+       (search "REGENERATE-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-ARTIFACTS"
+               html
+               :test #'char-equal)
+       "Operations view must expose combined artifact regeneration")
+      (assert-true
+       (search "LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-SYNC-STATUS"
+               html
+               :test #'char-equal)
+       "Operations view must expose sync-status reporting")
+      (assert-true
+       (search "REVIEW-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-DMX-DRY-RUN"
+               html
+               :test #'char-equal)
+       "Operations view must expose DMX dry-run review"))
+    (assert-equal :page-artifact-regenerated
+                  (getf collective-page-result :action)
+                  "Page regeneration must report the correct action")
+    (assert-equal :snippet-artifact-regenerated
+                  (getf repro-snippet-result :action)
+                  "Snippet regeneration must report the correct action")
+    (assert-equal :all-artifacts-regenerated
+                  (getf collective-both-result :action)
+                  "Combined regeneration must report the correct action")
+    (assert-equal :all-artifacts-regenerated
+                  (getf repro-both-result :action)
+                  "Combined regeneration must report the correct action for the second real page")
+    (assert-true
+     (getf collective-both-result :page-synced)
+     "Collective knowledge artifacts must remain page-synced after regeneration")
+    (assert-true
+     (getf collective-both-result :snippet-synced)
+     "Collective knowledge artifacts must remain snippet-synced after regeneration")
+    (assert-true
+     (getf repro-both-result :page-synced)
+     "Second real-page artifacts must remain page-synced after regeneration")
+    (assert-true
+     (getf repro-both-result :snippet-synced)
+     "Second real-page artifacts must remain snippet-synced after regeneration")
+    (assert-equal collective-page-before
+                  (uiop:read-file-string collective-page-path)
+                  "Collective knowledge page bytes must stay stable after regeneration")
+    (assert-equal collective-snippet-before
+                  (uiop:read-file-string collective-snippet-path)
+                  "Collective knowledge snippet bytes must stay stable after regeneration")
+    (assert-equal repro-page-before
+                  (uiop:read-file-string repro-page-path)
+                  "Second real-page bytes must stay stable after regeneration")
+    (assert-equal repro-snippet-before
+                  (uiop:read-file-string repro-snippet-path)
+                  "Second real-page snippet bytes must stay stable after regeneration")
+    (assert-true (not (getf simulated-out-of-sync :page-synced))
+                 "Test seam must surface out-of-sync page status")
+    (assert-true (not (getf simulated-out-of-sync :snippet-synced))
+                 "Test seam must surface out-of-sync snippet status")
+    (assert-true
+     (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+             collective-dmx-string
+             :test #'char=)
+     "DMX dry-run review must keep canonical source ids for collective knowledge")
+    (assert-true
+     (search "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
+             repro-dmx-string
+             :test #'char=)
+     "DMX dry-run review must keep canonical source ids for the second real page")
+    (assert-true
+     (not (search "/Users/" collective-dmx-string :test #'char=))
+     "DMX dry-run review must not leak absolute paths for collective knowledge")
+    (assert-true
+     (not (search "/Users/" repro-dmx-string :test #'char=))
+     "DMX dry-run review must not leak absolute paths for the second real page")))
+
 (defun run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test ()
   (let ((workflow-page-source
           (uiop:read-file-string
@@ -330,6 +477,7 @@
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
   (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
+  (run-localhost-fedwiki-page-promotion-operations-smoke-test)
   (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
   (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
