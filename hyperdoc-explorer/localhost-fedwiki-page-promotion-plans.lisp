@@ -69,6 +69,9 @@
   (or (getf status key)
       "unavailable"))
 
+(defun promotion-source-freshness-recommended-operation (status key)
+  (getf status key))
+
 (defun promotion-reflected-snapshot-error-label (status key)
   (or (getf status key)
       "none"))
@@ -85,6 +88,66 @@
     (:stale "stale")
     (:unknown-malformed-envelope "unknown (malformed envelope)")
     (otherwise "unknown (missing envelope)")))
+
+(defun promotion-source-freshness-affordance-spec (artifact status)
+  (let* ((state-key
+           (case artifact
+             (:page :page-source-freshness-state)
+             (:snippet :snippet-source-freshness-state)))
+         (label-key
+           (case artifact
+             (:page :page-source-freshness-recommended-action-label)
+             (:snippet :snippet-source-freshness-recommended-action-label)))
+         (operation-key
+           (case artifact
+             (:page :page-source-freshness-recommended-operation)
+             (:snippet :snippet-source-freshness-recommended-operation)))
+         (state (getf status state-key))
+         (description
+           (promotion-source-freshness-recommendation-label status label-key))
+         (operation
+           (promotion-source-freshness-recommended-operation status operation-key))
+         (button-label
+           (case state
+             (:stale
+              (case artifact
+                (:page "Regenerate page artifact")
+                (:snippet "Regenerate snippet artifact")))
+             (:unknown-missing-envelope
+              (case artifact
+                (:page "Restore page snapshot evidence")
+                (:snippet "Restore snippet snapshot evidence")))
+             (:unknown-malformed-envelope
+              (case artifact
+                (:page "Repair page snapshot evidence")
+                (:snippet "Repair snippet snapshot evidence"))))))
+    (if operation
+        (list :kind :action
+              :label button-label
+              :description description
+              :operation operation)
+        (list :kind :passive
+              :label "No action needed"
+              :description description
+              :operation nil))))
+
+(defun promotion-source-freshness-affordance-html (plan artifact status)
+  (let ((spec (promotion-source-freshness-affordance-spec artifact status)))
+    (case (getf spec :kind)
+      (:action
+       (views:html
+         (views:eval-button
+          (getf spec :label)
+          (views:thunk
+            (funcall (getf spec :operation) plan))
+          (getf spec :description))
+         (:div :style "margin-top: 0.35rem;"
+               (views:esc (getf spec :description)))))
+      (otherwise
+       (views:html
+         (:span :style "color: #666;" (views:esc (getf spec :label)))
+         (:div :style "margin-top: 0.35rem;"
+               (views:esc (getf spec :description))))))))
 
 (defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
   (localhost-fedwiki-page-promotion-surface-title surface))
@@ -177,15 +240,17 @@
                                 (promotion-source-freshness-label
                                  (getf status :snippet-source-freshness-state))))))
                 (:tr (:td (views:esc "Page recommended next action"))
-                     (:td (views:esc
-                           (promotion-source-freshness-recommendation-label
-                            status
-                            :page-source-freshness-recommended-action-label))))
+                     (:td
+                      (promotion-source-freshness-affordance-html
+                       plan
+                       :page
+                       status)))
                 (:tr (:td (views:esc "Snippet recommended next action"))
-                     (:td (views:esc
-                           (promotion-source-freshness-recommendation-label
-                            status
-                            :snippet-source-freshness-recommended-action-label))))
+                     (:td
+                      (promotion-source-freshness-affordance-html
+                       plan
+                       :snippet
+                       status)))
                 (:tr (:td (views:esc "Source page id"))
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-page-id
@@ -357,10 +422,11 @@
                             status
                             :page-source-freshness-reason))))
                 (:tr (:td (views:esc "Recommended next action"))
-                     (:td (views:esc
-                           (promotion-source-freshness-recommendation-label
-                            status
-                            :page-source-freshness-recommended-action-label))))
+                     (:td
+                      (promotion-source-freshness-affordance-html
+                       plan
+                       :page
+                       status)))
                 (:tr (:td (views:esc "Malformed detail"))
                      (:td (views:esc
                            (promotion-reflected-snapshot-error-label
@@ -392,10 +458,11 @@
                             status
                             :snippet-source-freshness-reason))))
                 (:tr (:td (views:esc "Recommended next action"))
-                     (:td (views:esc
-                           (promotion-source-freshness-recommendation-label
-                            status
-                            :snippet-source-freshness-recommended-action-label))))
+                     (:td
+                      (promotion-source-freshness-affordance-html
+                       plan
+                       :snippet
+                       status)))
                 (:tr (:td (views:esc "Malformed detail"))
                      (:td (views:esc
                            (promotion-reflected-snapshot-error-label

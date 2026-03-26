@@ -316,7 +316,7 @@
              (format nil
                      "No regeneration needed; the ~A already reflects the current source snapshot."
                      artifact-label)
-             :operation operation))
+             :operation nil))
       (:stale
        (list :action :regenerate-artifact
              :label
