@@ -36,15 +36,29 @@
                   (gethash hyperdoc::*dmx-topic-factory-snippet-page-title-type-uri*
                            children)
                   "Payload must keep the related HyperDoc page title")
+    (assert-equal "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                  (gethash hyperdoc::*dmx-topic-factory-snippet-source-file-type-uri*
+                           children)
+                  "Payload must use the repo-relative snippet source path")
     (assert-equal "the-life-cycle-of-collective-knowledge"
                   (gethash hyperdoc::*dmx-topic-factory-snippet-topic-id-type-uri*
                            children)
                   "Payload must keep the related umbrella topic id")
     (assert-true
-     (search "localhost-fedwiki-page"
+     (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
              (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
                       children))
-     "Payload provenance must preserve the localhost FedWiki source kind")
+     "Payload provenance must preserve the canonical FedWiki page id")
+    (assert-true
+     (search "pages/the-life-cycle-of-collective-knowledge"
+             (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
+                      children))
+     "Payload provenance must preserve the repo-relative FedWiki page path")
+    (assert-true
+     (not (search "/Users/"
+                  (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
+                           children)))
+     "Payload provenance must not preserve machine-local absolute paths")
     (assert-true
      (search "defun THE-LIFE-CYCLE-OF-COLLECTIVE-KNOWLEDGE-TOPIC"
              (gethash hyperdoc::*dmx-topic-factory-snippet-text-type-uri*
@@ -67,6 +81,9 @@
                  "Dry-run create output must expose CREATE")
     (assert-true (search "topicmap-action=ADD" output)
                  "Dry-run create output must expose topicmap ADD")
+    (assert-true (search "source=assets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                         output)
+                 "Dry-run create output must expose the canonical repo-relative snippet path")
     (assert-equal 0 (hash-table-count (hyperdoc::topics-by-external-key-of client))
                   "Dry-run create must not mutate the memory client topic store")
     (assert-equal 0 (hash-table-count (hyperdoc::topicmap-memberships-of client))

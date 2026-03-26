@@ -16,26 +16,59 @@
 
 (defun run-collective-knowledge-chunk-parse-smoke-test ()
   (let* ((parsed (hyperdoc::parse-the-life-cycle-of-collective-knowledge-chunks))
-         (source (getf parsed :source-asset))
+         (source (getf parsed :source-fedwiki-page))
          (definition (getf parsed :topic-definition))
          (umbrella (getf parsed :umbrella-topic))
          (subtopics (getf parsed :subtopics))
          (page (getf parsed :topic-page))
-         (dmx (getf parsed :dmx-snippet)))
-    (assert-true (typep source 'hyperdoc::source-asset-chunk)
-                 "Source asset must parse into a source-asset chunk")
+         (dmx (getf parsed :dmx-snippet))
+         (first-item (first (hyperdoc::story-items-of source)))
+         (second-item (second (hyperdoc::story-items-of source)))
+         (first-provenance (hyperdoc::provenance-of (first subtopics))))
+    (assert-true (typep source 'hyperdoc::localhost-fedwiki-source-chunk)
+                 "Source parse must read the localhost FedWiki page into a source chunk")
+    (assert-equal "pages/the-life-cycle-of-collective-knowledge"
+                  (hyperdoc::source-path-of source)
+                  "Source chunk must keep the repo-relative localhost FedWiki page path")
+    (assert-equal 2
+                  (length (hyperdoc::story-items-of source))
+                  "Source parse must preserve the real localhost FedWiki story item structure")
+    (assert-equal "paragraph"
+                  (hyperdoc::item-type-of first-item)
+                  "First normalized story item type")
+    (assert-equal "assets"
+                  (hyperdoc::item-type-of second-item)
+                  "Second normalized story item type")
     (assert-true (typep definition 'hyperdoc::topic-definition-chunk)
                  "Topic asset must parse into a topic-definition chunk")
     (assert-true (typep umbrella 'hyperdoc::subtopic-chunk)
                  "Umbrella topic must parse into a topic-shaped chunk")
     (assert-equal 6 (length subtopics)
-                  "Source asset must yield the six requested reusable subtopics")
+                  "FedWiki-derived source must yield the six requested reusable subtopics")
     (assert-equal "collective-knowledge"
                   (hyperbook:id-of (first subtopics))
                   "First derived subtopic id")
     (assert-equal "The Life Cycle of Collective Knowledge"
                   (hyperbook:title-of umbrella)
                   "Umbrella topic title")
+    (assert-equal "the-life-cycle-of-collective-knowledge"
+                  (getf first-provenance :source-page-slug)
+                  "Derived topic chunks must preserve FedWiki page provenance")
+    (assert-true
+     (or (getf first-provenance :source-story-item-id)
+         (integerp (getf first-provenance :source-story-item-index)))
+     "Derived topic chunks must preserve item identity or item index provenance")
+    (assert-true (plusp (getf first-provenance :journal-action-count))
+                 "Derived topic chunks must preserve journal provenance when available")
+    (assert-true (string= "story-item-id-and-journal"
+                          (getf first-provenance :provenance-classification))
+                 "Derived topic chunks must classify provenance completeness")
+    (assert-equal "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+                  (hyperdoc::source-origin-id-of definition)
+                  "Topic definition must point back to the canonical FedWiki page id")
+    (assert-equal "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                  (hyperdoc::source-path-of definition)
+                  "Topic definition must keep repo-relative snippet source paths")
     (assert-true (search "hyperdoc:topic-factory-snippet/the-life-cycle-of-collective-knowledge-topic-set"
                          (hyperdoc::snippet-uri-of dmx))
                  "DMX snippet chunk must keep the stable snippet URI")
@@ -60,6 +93,24 @@
     (assert-equal expected-topic-snippet
                   rendered-topic-snippet
                   "Rendered topic-factory snippet must stay in sync with the committed asset")))
+
+(defun run-collective-knowledge-generated-output-idempotence-smoke-test ()
+  (let ((page-path
+          (collective-knowledge-relative-path
+           "hyperdoc/The Life Cycle of Collective Knowledge.html"))
+        (snippet-path
+          (collective-knowledge-relative-path
+           "assets/the-life-cycle-of-collective-knowledge-topic.lisp")))
+    (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
+    (let ((first-page (uiop:read-file-string page-path))
+          (first-snippet (uiop:read-file-string snippet-path)))
+      (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
+      (assert-equal first-page
+                    (uiop:read-file-string page-path)
+                    "Repeated page generation must be idempotent")
+      (assert-equal first-snippet
+                    (uiop:read-file-string snippet-path)
+                    "Repeated topic snippet generation must be idempotent"))))
 
 (defun run-collective-knowledge-topic-presence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -90,6 +141,7 @@
 (defun run-collective-knowledge-slice-smoke-tests ()
   (run-collective-knowledge-chunk-parse-smoke-test)
   (run-collective-knowledge-render-smoke-test)
+  (run-collective-knowledge-generated-output-idempotence-smoke-test)
   (run-collective-knowledge-topic-presence-smoke-test)
   (format t "~&Collective knowledge slice smoke tests passed.~%")
   t)
