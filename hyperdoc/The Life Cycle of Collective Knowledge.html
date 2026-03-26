@@ -17,24 +17,19 @@
 <h2>Source claim</h2>
 
 <p>
-  Source-oriented and image-oriented development in Common Lisp
-Opening external FedWiki sites
+  The life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication that remain intelligible and reusable across time.
  </p>
 
 <p>
   This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, and eventually detached from its original representation.
-FedWiki source
+
+The central claim is that collective knowledge depends on representations that stay usable long enough to be reviewed, recombined, and carried forward. Natural-language documents often degrade gracefully across decades, but software source code is much more fragile because it depends on machines, runtimes, toolchains, and surrounding environments.
+
+Archiving old environments improves reproducibility, but the stronger demand for collective knowledge is interoperability across time: later work must be able to inspect, compare, and reuse earlier software components instead of only freezing them as historical snapshots.
 
 This is the point at which the FedWiki note connects directly to HyperDoc's long-term interest in Common Lisp. The note presents Common Lisp as an example of a stable, standardized, multi-implementation language whose software can remain usable over long spans of time.
-Claim carried by this page
 
 The life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication that remain intelligible and reusable across time.
-Inspectable objects
-
-The Life Cycle of Collective Knowledge
-
-Source-oriented and image-oriented development in Common Lisp
-Opening external FedWiki sites
  </p>
 
 <h2>Reusable topic chunks</h2>
@@ -53,8 +48,11 @@ Opening external FedWiki sites
 
 <p>
   The page composition remains local: the localhost FedWiki page is parsed into
-  normalized story-item records, topic-shaped chunks are extracted from that
-  structure, the topic-factory snippet stays as a separate authored asset, and
+  normalized story-item records plus paragraph-fragment records. The current page
+  is semantically one large paragraph story item, so the reusable topic chunks
+  preserve fragment-level provenance within that item instead of claiming
+  independent whole-item origins. The topic-factory snippet stays as a separate
+  authored asset, and
   this page renders from those chunks without depending on a DMX lookup or write.
 </p>
 
@@ -89,6 +87,12 @@ Opening external FedWiki sites
 
 <p>
   External source URL: <a href="https://hyperdoc.wiki.khinsen.net/view/the-life-cycle-of-collective-knowledge"><tt>https://hyperdoc.wiki.khinsen.net/view/the-life-cycle-of-collective-knowledge</tt></a>. Parsed story items: <tt>2</tt>.
+</p>
+
+<p>
+  The current reusable topics are derived from <tt>7</tt> paragraph fragments
+  inside the primary FedWiki paragraph item, so the provenance reported by the
+  derived chunks is fragment-level rather than whole-item-level.
 </p>
 
 <h2>Inspectable objects</h2>
