@@ -19,6 +19,7 @@ function paneChrome(page, paneIndex) {
     connectRow: currentPane.locator(".hyperdoc-dom-connect-pane-slot"),
     connectControl: currentPane.locator(".hyperdoc-dom-connect-control"),
     connectToggle: currentPane.locator(".hyperdoc-dom-connect-toggle"),
+    annotationButton: currentPane.locator(".hyperdoc-dock-annotation"),
     status: currentPane.locator(".hyperdoc-dom-connect-status"),
     cue: currentPane.locator(".hyperdoc-dom-connect-cue"),
     sourceChip: currentPane.locator(".hyperdoc-dom-connect-source-chip"),
