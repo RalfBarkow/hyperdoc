@@ -29,9 +29,11 @@ Semantic boundary:
   authored result must read as a first-class route, not as a transient swipe
 
 Current follow-up note:
-- the running pane now also exposes a visible `Inspect` action beside `Connect`
-- that action opens a real Connect state snapshot object with `Summary`, `Panes`, `Transitions`, and `Payload / Anchors` views
-- repeated `Inspect` clicks from the same live pane reuse that Connect inspection pane instead of opening an unbounded stack of duplicates
+- plain click on `Connect` still starts the existing gesture
+- `Shift`-click on `Connect` opens the live Connect state snapshot object with `Summary`, `Panes`, `Transitions`, and `Payload / Anchors` views
+- `Option` / `Alt`-click on `Connect` opens the deeper model/evidence side behind the same capability
+- repeated modifier-click inspection from the same live pane reuses the same inspection target where the existing inspector reuse rules already apply, instead of opening an unbounded stack of duplicates
+- `Shift` + `Option` / `Alt` follows the model/evidence path while preserving trailing right-hand panes
 - the inspection surface reports current phase/session state and recent stage-log entries without changing the semantic-first persistence contract
 
 This should be the general substrate.

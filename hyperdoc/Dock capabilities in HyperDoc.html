@@ -58,6 +58,28 @@
   Dock. The Dock is reserved for transient action-oriented capabilities.
 </p>
 
+<h2>Expert inspection contract</h2>
+
+<p>
+  Expert inspection now lives on the existing capability controls through
+  modifier clicks rather than through a separate visible Inspect capability:
+</p>
+
+<ul>
+  <li>plain click: keep the existing capability action</li>
+  <li><b>Shift</b>-click: inspect the capability's current semantic or runtime object</li>
+  <li><b>Option</b>/<b>Alt</b>-click: inspect the model, source, or evidence side behind that capability</li>
+  <li><b>Shift</b>+<b>Option</b>/<b>Alt</b>-click: inspect that same model/evidence target while preserving trailing right-hand panes</li>
+</ul>
+
+<p>
+  In the current runtime this means <b>Connect</b> opens either the live
+  session snapshot or the submit-path comparison object, <b>Annotation</b>
+  opens either the current semantic relation or its claim/evidence surface,
+  and <b>Guide</b> opens either the Dock presentation model or the claim that
+  makes its runtime evidence inspectable.
+</p>
+
 <h2>Presentation grammar</h2>
 
 <p>
