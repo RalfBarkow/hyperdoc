@@ -423,13 +423,19 @@
         (reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)))
 
 (defun write-reproducible-devenv-as-knowledge-artifact-artifacts ()
-  (let ((snippet-path (reproducible-devenv-as-knowledge-artifact-topic-asset-path))
-        (page-path (reproducible-devenv-as-knowledge-artifact-page-pathname)))
+  (let* ((source
+           (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
+         (snippet-path (reproducible-devenv-as-knowledge-artifact-topic-asset-path))
+         (page-path (reproducible-devenv-as-knowledge-artifact-page-pathname)))
     (write-utf8-file-string
      snippet-path
-     (render-reproducible-devenv-as-knowledge-artifact-topic-factory-snippet))
+     (render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+      (render-reproducible-devenv-as-knowledge-artifact-topic-factory-snippet)
+      source))
     (write-utf8-file-string
      page-path
-     (render-reproducible-devenv-as-knowledge-artifact-page))
+     (render-localhost-fedwiki-page-artifact-with-source-snapshot
+      (render-reproducible-devenv-as-knowledge-artifact-page)
+      source))
     (list :topic-asset (hyperdoc-relative-path-string snippet-path)
           :page (hyperdoc-relative-path-string page-path))))

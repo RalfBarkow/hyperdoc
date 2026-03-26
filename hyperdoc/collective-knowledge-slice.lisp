@@ -1036,11 +1036,17 @@
         (the-life-cycle-of-collective-knowledge-dmx-snippet-chunk)))
 
 (defun write-the-life-cycle-of-collective-knowledge-artifacts ()
-  (let ((snippet-path (the-life-cycle-of-collective-knowledge-topic-asset-path))
-        (page-path (the-life-cycle-of-collective-knowledge-page-pathname)))
+  (let* ((source
+           (the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
+         (snippet-path (the-life-cycle-of-collective-knowledge-topic-asset-path))
+         (page-path (the-life-cycle-of-collective-knowledge-page-pathname)))
     (write-utf8-file-string snippet-path
-                            (render-the-life-cycle-of-collective-knowledge-topic-factory-snippet))
+                            (render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+                             (render-the-life-cycle-of-collective-knowledge-topic-factory-snippet)
+                             source))
     (write-utf8-file-string page-path
-                            (render-the-life-cycle-of-collective-knowledge-page))
+                            (render-localhost-fedwiki-page-artifact-with-source-snapshot
+                             (render-the-life-cycle-of-collective-knowledge-page)
+                             source))
     (list :topic-asset (hyperdoc-relative-path-string snippet-path)
           :page (hyperdoc-relative-path-string page-path))))

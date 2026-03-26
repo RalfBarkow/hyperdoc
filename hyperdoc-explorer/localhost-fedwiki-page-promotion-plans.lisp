@@ -45,6 +45,14 @@
               (getf summary :topicmap-action))
       "unavailable"))
 
+(defun promotion-current-source-fingerprint-label (status)
+  (or (getf status :current-source-fingerprint)
+      "unavailable"))
+
+(defun promotion-current-source-summary-label (status)
+  (or (getf status :current-source-summary)
+      "unavailable"))
+
 (defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
   (localhost-fedwiki-page-promotion-surface-title surface))
 
@@ -109,7 +117,7 @@
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
         (:h4 (views:esc "Status and actions"))
         (:p (views:esc
-             "Use this compact surface to check whether the local artifacts are in sync, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
+             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is still fresh relative to the current normalized localhost FedWiki page snapshot, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Page synced?"))
                      (:td (:tt (views:esc
@@ -119,6 +127,14 @@
                      (:td (:tt (views:esc
                                 (promotion-yes/no-label
                                  (getf status :snippet-synced))))))
+                (:tr (:td (views:esc "Page source fresh?"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :page-source-fresh))))))
+                (:tr (:td (views:esc "Snippet source fresh?"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :snippet-source-fresh))))))
                 (:tr (:td (views:esc "Source page id"))
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-page-id
@@ -127,6 +143,14 @@
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-slug
                                  source)))))
+                (:tr (:td (views:esc "Current source fingerprint"))
+                     (:td (:tt (views:esc
+                                (promotion-current-source-fingerprint-label
+                                 status)))))
+                (:tr (:td (views:esc "Current source summary"))
+                     (:td (:tt (views:esc
+                                (promotion-current-source-summary-label
+                                 status)))))
                 (:tr (:td (views:esc "Provenance modes present"))
                      (:td (:tt (views:esc
                                 (promotion-list-string provenance-modes)))))
@@ -217,6 +241,18 @@
                      (:td (:tt (views:esc
                                 (promotion-yes/no-label
                                  (getf status :snippet-synced))))))
+                (:tr (:td (views:esc "Page source fresh"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :page-source-fresh))))))
+                (:tr (:td (views:esc "Snippet source fresh"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :snippet-source-fresh))))))
+                (:tr (:td (views:esc "Current source fingerprint"))
+                     (:td (:tt (views:esc
+                                (promotion-current-source-fingerprint-label
+                                 status)))))
                 (:tr (:td (views:esc "DMX dry-run"))
                      (:td (:tt (views:esc
                                 (promotion-dmx-summary-label
@@ -550,6 +586,16 @@
                    (:td (:tt (views:esc
                               (promotion-yes/no-label
                                (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
+                                plan))))))
+              (:tr (:td (views:esc "Page source snapshot fresh"))
+                   (:td (:tt (views:esc
+                              (promotion-yes/no-label
+                               (localhost-fedwiki-page-promotion-plan-page-source-fresh-p
+                                plan))))))
+              (:tr (:td (views:esc "Snippet source snapshot fresh"))
+                   (:td (:tt (views:esc
+                              (promotion-yes/no-label
+                               (localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p
                                 plan))))))))))
 
 (views:defview 👀snippet-metadata (plan localhost-fedwiki-page-promotion-plan)

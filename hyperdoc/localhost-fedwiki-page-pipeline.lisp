@@ -89,6 +89,13 @@
   subtopics
   topic-chunks)
 
+(defparameter +localhost-fedwiki-page-source-snapshot-page-prefix+
+  "<!-- HYPERDOC_LOCALHOST_FEDWIKI_SOURCE_SNAPSHOT ")
+(defparameter +localhost-fedwiki-page-source-snapshot-page-suffix+
+  " -->")
+(defparameter +localhost-fedwiki-page-source-snapshot-snippet-prefix+
+  ";; HYPERDOC_LOCALHOST_FEDWIKI_SOURCE_SNAPSHOT ")
+
 (defun split-blank-line-blocks (text)
   (with-input-from-string (stream (or text ""))
     (loop with current-lines = '()
@@ -131,6 +138,24 @@
                    (flush-current)))
       (flush-current))
     (format nil "~{~A~^-~}" (nreverse tokens))))
+
+(defun string-prefix-p* (prefix string)
+  (and (<= (length prefix) (length string))
+       (string= prefix
+                string
+                :end1 (length prefix)
+                :end2 (length prefix))))
+
+(defun string-suffix-p* (suffix string)
+  (let ((suffix-length (length suffix))
+        (string-length (length string)))
+    (and (<= suffix-length string-length)
+         (string= suffix
+                  string
+                  :start1 0
+                  :end1 suffix-length
+                  :start2 (- string-length suffix-length)
+                  :end2 string-length))))
 
 (defun plist-keys (plist)
   (loop for tail on plist by #'cddr
@@ -219,6 +244,14 @@
               :key (lambda (entry) (getf entry :type)))
         :date))
 
+(defun localhost-fedwiki-page-last-journal-date (page)
+  (reduce #'max
+          (loop for entry in (or (getf page :journal) '())
+                for date = (getf entry :date)
+                when (numberp date)
+                  collect date)
+          :initial-value 0))
+
 (defun fedwiki-story-item-source-id* (page-id item-id item-index)
   (if item-id
       (format nil "~A#story-item/~A"
@@ -232,6 +265,220 @@
   (fedwiki-story-item-source-id* (localhost-fedwiki-item-data-page-id item-data)
                                  (localhost-fedwiki-item-data-item-id item-data)
                                  (localhost-fedwiki-item-data-item-index item-data)))
+
+(defun localhost-fedwiki-source-page-id* (source)
+  (typecase source
+    (localhost-fedwiki-source-data
+     (localhost-fedwiki-source-data-fedwiki-page-id source))
+    (t
+     (funcall (symbol-function 'fedwiki-page-id-of) source))))
+
+(defun localhost-fedwiki-source-page-slug* (source)
+  (typecase source
+    (localhost-fedwiki-source-data
+     (localhost-fedwiki-source-data-fedwiki-slug source))
+    (t
+     (funcall (symbol-function 'fedwiki-slug-of) source))))
+
+(defun localhost-fedwiki-source-page-path* (source)
+  (typecase source
+    (localhost-fedwiki-source-data
+     (localhost-fedwiki-source-data-fedwiki-relative-path source))
+    (t
+     (funcall (symbol-function 'fedwiki-relative-path-of) source))))
+
+(defun localhost-fedwiki-source-page-title* (source)
+  (typecase source
+    (localhost-fedwiki-source-data
+     (localhost-fedwiki-source-data-fedwiki-title source))
+    (t
+     (funcall (symbol-function 'fedwiki-title-of) source))))
+
+(defun localhost-fedwiki-source-story-items* (source)
+  (typecase source
+    (localhost-fedwiki-source-data
+     (localhost-fedwiki-source-data-story-items source))
+    (t
+     (funcall (symbol-function 'story-items-of) source))))
+
+(defun localhost-fedwiki-source-raw-page* (source)
+  (typecase source
+    (localhost-fedwiki-source-data
+     (localhost-fedwiki-source-data-raw-page source))
+    (t
+     (funcall (symbol-function 'raw-page-of) source))))
+
+(defun localhost-fedwiki-item-fragments* (item)
+  (typecase item
+    (localhost-fedwiki-item-data
+     (localhost-fedwiki-item-data-fragments item))
+    (t
+     (funcall (symbol-function 'fragments-of) item))))
+
+(defun localhost-fedwiki-source-fragment-count (source-data)
+  (loop for item in (localhost-fedwiki-source-story-items* source-data)
+        sum (length (localhost-fedwiki-item-fragments* item))))
+
+(defun localhost-fedwiki-source-snapshot-fingerprint-input (source-data)
+  (let ((raw-page (localhost-fedwiki-source-raw-page* source-data)))
+    (list :source-page-id
+          (localhost-fedwiki-source-page-id* source-data)
+          :source-page-slug
+          (localhost-fedwiki-source-page-slug* source-data)
+          :source-page-path
+          (localhost-fedwiki-source-page-path* source-data)
+          :source-page-title
+          (localhost-fedwiki-source-page-title* source-data)
+          :story
+          (copy-tree (or (getf raw-page :story) '()))
+          :journal
+          (copy-tree (or (getf raw-page :journal) '())))))
+
+(defun serialize-localhost-fedwiki-source-snapshot-object (object)
+  (let ((*print-pretty* nil)
+        (*print-array* nil)
+        (*print-circle* nil)
+        (*print-level* nil)
+        (*print-length* nil)
+        (*print-readably* nil)
+        (*print-escape* t)
+        (*print-case* :upcase)
+        (*package* (find-package :keyword)))
+    (prin1-to-string object)))
+
+(defun fnv1a-64-hex-string (string)
+  (let ((hash #xcbf29ce484222325)
+        (prime #x100000001b3))
+    (flet ((mix-byte (byte)
+             (setf hash (ldb (byte 64 0)
+                             (* (logxor hash byte) prime)))))
+      (loop for char across string
+            for code = (char-code char)
+            do (mix-byte (ldb (byte 8 0) code))
+               (mix-byte (ldb (byte 8 8) code))
+               (mix-byte (ldb (byte 8 16) code))
+               (mix-byte (ldb (byte 8 24) code))))
+    (format nil "fnv1a64:~16,'0x" hash)))
+
+(defun localhost-fedwiki-source-snapshot-summary (source-data)
+  (let ((raw-page (localhost-fedwiki-source-raw-page* source-data)))
+    (format nil "story-items=~D; fragments=~D; journal=~D; last-journal=~A"
+            (length (or (getf raw-page :story) '()))
+            (localhost-fedwiki-source-fragment-count source-data)
+            (length (or (getf raw-page :journal) '()))
+            (let ((last-date (localhost-fedwiki-page-last-journal-date raw-page)))
+              (if (zerop last-date)
+                  "n/a"
+                  (format nil "~D" last-date))))))
+
+(defun localhost-fedwiki-source-snapshot-metadata (source-data)
+  (let* ((fingerprint-input
+           (localhost-fedwiki-source-snapshot-fingerprint-input source-data))
+         (fingerprint-string
+           (serialize-localhost-fedwiki-source-snapshot-object fingerprint-input))
+         (raw-page (localhost-fedwiki-source-raw-page* source-data)))
+    (list :snapshot-kind "localhost-fedwiki-page-source-snapshot"
+          :snapshot-format-version 1
+          :fingerprint-algorithm
+          "fnv1a-64-over-normalized-raw-page-story-and-journal"
+          :fingerprint
+          (fnv1a-64-hex-string fingerprint-string)
+          :summary
+          (localhost-fedwiki-source-snapshot-summary source-data)
+          :source-page-id
+          (localhost-fedwiki-source-page-id* source-data)
+          :source-page-slug
+          (localhost-fedwiki-source-page-slug* source-data)
+          :source-page-path
+          (localhost-fedwiki-source-page-path* source-data)
+          :source-page-title
+          (localhost-fedwiki-source-page-title* source-data)
+          :story-item-count
+          (length (or (getf raw-page :story) '()))
+          :fragment-count
+          (localhost-fedwiki-source-fragment-count source-data)
+          :journal-entry-count
+          (length (or (getf raw-page :journal) '()))
+          :journal-last-date
+          (let ((last-date (localhost-fedwiki-page-last-journal-date raw-page)))
+            (unless (zerop last-date)
+              last-date))
+          :page-create-date
+          (fedwiki-page-create-date raw-page))))
+
+(defun render-localhost-fedwiki-page-source-snapshot-page-comment (source-data)
+  (format nil "~A~A~A"
+          +localhost-fedwiki-page-source-snapshot-page-prefix+
+          (serialize-localhost-fedwiki-source-snapshot-object
+           (localhost-fedwiki-source-snapshot-metadata source-data))
+          +localhost-fedwiki-page-source-snapshot-page-suffix+))
+
+(defun render-localhost-fedwiki-page-source-snapshot-snippet-comment (source-data)
+  (format nil "~A~A"
+          +localhost-fedwiki-page-source-snapshot-snippet-prefix+
+          (serialize-localhost-fedwiki-source-snapshot-object
+           (localhost-fedwiki-source-snapshot-metadata source-data))))
+
+(defun render-localhost-fedwiki-page-artifact-with-source-snapshot
+    (page-html source-data)
+  (format nil "~A~%~A"
+          (render-localhost-fedwiki-page-source-snapshot-page-comment source-data)
+          (strip-leading-localhost-fedwiki-source-snapshot-line
+           page-html
+           +localhost-fedwiki-page-source-snapshot-page-prefix+
+           +localhost-fedwiki-page-source-snapshot-page-suffix+)))
+
+(defun render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+    (snippet-text source-data)
+  (format nil "~A~%~A"
+          (render-localhost-fedwiki-page-source-snapshot-snippet-comment source-data)
+          (strip-leading-localhost-fedwiki-source-snapshot-line
+           snippet-text
+           +localhost-fedwiki-page-source-snapshot-snippet-prefix+)))
+
+(defun split-string-first-line (string)
+  (let ((newline-position (position #\Newline string)))
+    (values (if newline-position
+                (subseq string 0 newline-position)
+                string)
+            (if newline-position
+                (subseq string (1+ newline-position))
+                ""))))
+
+(defun parse-localhost-fedwiki-source-snapshot-line
+    (line prefix &optional suffix)
+  (when (and (string-prefix-p* prefix line)
+             (or (null suffix)
+                 (string-suffix-p* suffix line)))
+    (let* ((start (length prefix))
+           (end (if suffix
+                    (- (length line) (length suffix))
+                    (length line))))
+      (read-from-string (subseq line start end)))))
+
+(defun strip-leading-localhost-fedwiki-source-snapshot-line
+    (string prefix &optional suffix)
+  (multiple-value-bind (line remainder)
+      (split-string-first-line string)
+    (if (parse-localhost-fedwiki-source-snapshot-line line prefix suffix)
+        remainder
+        string)))
+
+(defun localhost-fedwiki-page-artifact-reflected-source-snapshot (page-html)
+  (multiple-value-bind (line)
+      (split-string-first-line page-html)
+    (parse-localhost-fedwiki-source-snapshot-line
+     line
+     +localhost-fedwiki-page-source-snapshot-page-prefix+
+     +localhost-fedwiki-page-source-snapshot-page-suffix+)))
+
+(defun localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
+    (snippet-text)
+  (multiple-value-bind (line)
+      (split-string-first-line snippet-text)
+    (parse-localhost-fedwiki-source-snapshot-line
+     line
+     +localhost-fedwiki-page-source-snapshot-snippet-prefix+)))
 
 (defun default-localhost-fedwiki-primary-item-selector (story-items)
   (find "paragraph"

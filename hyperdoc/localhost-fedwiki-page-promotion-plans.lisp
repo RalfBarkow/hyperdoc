@@ -130,6 +130,20 @@
     (funcall renderer)
     ""))
 
+(defun localhost-fedwiki-page-promotion-plan-rendered-page-artifact (plan)
+  (render-localhost-fedwiki-page-artifact-with-source-snapshot
+   (localhost-fedwiki-page-promotion-plan-rendered-page plan)
+   (localhost-fedwiki-page-promotion-plan-source plan)))
+
+(defun localhost-fedwiki-page-promotion-plan-rendered-snippet-artifact (plan)
+  (render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+   (snippet-text-of (localhost-fedwiki-page-promotion-plan-topic-definition plan))
+   (localhost-fedwiki-page-promotion-plan-source plan)))
+
+(defun localhost-fedwiki-page-promotion-plan-current-source-snapshot (plan)
+  (localhost-fedwiki-source-snapshot-metadata
+   (localhost-fedwiki-page-promotion-plan-source plan)))
+
 (defun write-localhost-fedwiki-page-promotion-plan-string-artifact (path content)
   (ensure-directories-exist path)
   (with-open-file (stream path
@@ -144,15 +158,14 @@
   (let ((path (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan)))
     (write-localhost-fedwiki-page-promotion-plan-string-artifact
      path
-     (localhost-fedwiki-page-promotion-plan-rendered-page plan))
+     (localhost-fedwiki-page-promotion-plan-rendered-page-artifact plan))
     path))
 
 (defun localhost-fedwiki-page-promotion-plan-write-snippet-artifact (plan)
-  (let* ((definition (localhost-fedwiki-page-promotion-plan-topic-definition plan))
-         (path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
+  (let ((path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
     (write-localhost-fedwiki-page-promotion-plan-string-artifact
      path
-     (snippet-text-of definition))
+     (localhost-fedwiki-page-promotion-plan-rendered-snippet-artifact plan))
     path))
 
 (defun localhost-fedwiki-page-promotion-plan-write-local-artifacts (plan)
@@ -171,45 +184,124 @@
          (string=
           (or file-contents
               (uiop:read-file-string path))
-          (localhost-fedwiki-page-promotion-plan-rendered-page plan)))))
+          (localhost-fedwiki-page-promotion-plan-rendered-page-artifact plan)))))
 
 (defun localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
     (plan &key file-contents)
-  (let* ((definition (localhost-fedwiki-page-promotion-plan-topic-definition plan))
-         (path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
+  (let ((path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
     (and (or file-contents
              (uiop:file-exists-p path))
          (string=
           (or file-contents
               (uiop:read-file-string path))
-          (snippet-text-of definition)))))
+          (localhost-fedwiki-page-promotion-plan-rendered-snippet-artifact plan)))))
 
 (defun localhost-fedwiki-page-promotion-plan-snippet-provenance (plan)
   (copy-tree
    (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
          :provenance)))
 
+(defun localhost-fedwiki-page-promotion-plan-page-source-snapshot
+    (plan &key file-contents)
+  (let ((path (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan)))
+    (and (or file-contents
+             (uiop:file-exists-p path))
+         (localhost-fedwiki-page-artifact-reflected-source-snapshot
+          (or file-contents
+              (uiop:read-file-string path))))))
+
+(defun localhost-fedwiki-page-promotion-plan-snippet-source-snapshot
+    (plan &key file-contents)
+  (let ((path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
+    (and (or file-contents
+             (uiop:file-exists-p path))
+         (localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
+          (or file-contents
+              (uiop:read-file-string path))))))
+
+(defun localhost-fedwiki-page-promotion-plan-page-source-fresh-p
+    (plan &key file-contents current-source-snapshot)
+  (let ((artifact-snapshot
+          (localhost-fedwiki-page-promotion-plan-page-source-snapshot
+           plan
+           :file-contents file-contents))
+        (current-snapshot
+          (or current-source-snapshot
+              (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+               plan))))
+    (and artifact-snapshot
+         current-snapshot
+         (equal (getf artifact-snapshot :fingerprint)
+                (getf current-snapshot :fingerprint)))))
+
+(defun localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p
+    (plan &key file-contents current-source-snapshot)
+  (let ((artifact-snapshot
+          (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot
+           plan
+           :file-contents file-contents))
+        (current-snapshot
+          (or current-source-snapshot
+              (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+               plan))))
+    (and artifact-snapshot
+         current-snapshot
+         (equal (getf artifact-snapshot :fingerprint)
+                (getf current-snapshot :fingerprint)))))
+
 (defun localhost-fedwiki-page-promotion-plan-sync-status-report
     (plan
-     &key page-contents snippet-contents)
-  (list :plan-id
-        (localhost-fedwiki-page-promotion-plan-id plan)
-        :page-path
-        (namestring
-         (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan))
-        :snippet-path
-        (namestring
-         (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan))
-        :page-synced
-        (localhost-fedwiki-page-promotion-plan-page-output-synced-p
-         plan
-         :file-contents page-contents)
-        :snippet-synced
-        (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
-         plan
-         :file-contents snippet-contents)
-        :dmx-dry-run-summary
-        (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)))
+     &key page-contents snippet-contents current-source-snapshot)
+  (let* ((resolved-current-source-snapshot
+           (or current-source-snapshot
+               (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+                plan)))
+         (page-source-snapshot
+           (localhost-fedwiki-page-promotion-plan-page-source-snapshot
+            plan
+            :file-contents page-contents))
+         (snippet-source-snapshot
+           (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot
+            plan
+            :file-contents snippet-contents)))
+    (list :plan-id
+          (localhost-fedwiki-page-promotion-plan-id plan)
+          :page-path
+          (namestring
+           (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan))
+          :snippet-path
+          (namestring
+           (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan))
+          :page-synced
+          (localhost-fedwiki-page-promotion-plan-page-output-synced-p
+           plan
+           :file-contents page-contents)
+          :snippet-synced
+          (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
+           plan
+           :file-contents snippet-contents)
+          :page-source-fresh
+          (localhost-fedwiki-page-promotion-plan-page-source-fresh-p
+           plan
+           :file-contents page-contents
+           :current-source-snapshot resolved-current-source-snapshot)
+          :snippet-source-fresh
+          (localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p
+           plan
+           :file-contents snippet-contents
+           :current-source-snapshot resolved-current-source-snapshot)
+          :current-source-snapshot
+          (copy-tree resolved-current-source-snapshot)
+          :current-source-fingerprint
+          (getf resolved-current-source-snapshot :fingerprint)
+          :current-source-summary
+          (getf resolved-current-source-snapshot :summary)
+          :page-source-snapshot
+          (copy-tree page-source-snapshot)
+          :snippet-source-snapshot
+          (copy-tree snippet-source-snapshot)
+          :dmx-dry-run-summary
+          (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))))
 
 ;; Generic operations so the inspector exposes them in the Operations view.
 (defgeneric localhost-fedwiki-page-promotion-plan-sync-status (plan)

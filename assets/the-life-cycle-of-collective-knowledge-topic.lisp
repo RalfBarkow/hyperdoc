@@ -1,3 +1,4 @@
+;; HYPERDOC_LOCALHOST_FEDWIKI_SOURCE_SNAPSHOT (:SNAPSHOT-KIND "localhost-fedwiki-page-source-snapshot" :SNAPSHOT-FORMAT-VERSION 1 :FINGERPRINT-ALGORITHM "fnv1a-64-over-normalized-raw-page-story-and-journal" :FINGERPRINT "fnv1a64:168557695B6C63A3" :SUMMARY "story-items=2; fragments=7; journal=6; last-journal=1774540104897" :SOURCE-PAGE-ID "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge" :SOURCE-PAGE-SLUG "the-life-cycle-of-collective-knowledge" :SOURCE-PAGE-PATH "pages/the-life-cycle-of-collective-knowledge" :SOURCE-PAGE-TITLE "The Life Cycle of Collective Knowledge" :STORY-ITEM-COUNT 2 :FRAGMENT-COUNT 7 :JOURNAL-ENTRY-COUNT 6 :JOURNAL-LAST-DATE 1774540104897 :PAGE-CREATE-DATE 1774540076497)
 
 (:TOPIC-FACTORY-SNIPPET :ID "the-life-cycle-of-collective-knowledge-topic-set"
  :SOURCE-FILE "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
