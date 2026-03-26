@@ -3,25 +3,38 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  This authored HyperDoc page is composed from the local source asset
-  <tt>assets/The Life Cycle of Collective Knowledge.html</tt> and the separate topic-factory snippet asset
-  <tt>assets/the-life-cycle-of-collective-knowledge-topic.lisp</tt>.
+  This authored HyperDoc page is composed from FedWiki-derived chunks read from the
+  localhost page <tt>fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge</tt> at repo-relative source path <tt>pages/the-life-cycle-of-collective-knowledge</tt>.
 </p>
 
 <p>
-  The local composition path stays usable without DMX. The DMX writer is a
-  separate, explicit, dry-run-first twin path for the snippet bundle, not a
-  live proxy for this authored page.
+  The local composition path stays usable without DMX. The topic-factory snippet asset
+  <tt>assets/the-life-cycle-of-collective-knowledge-topic.lisp</tt> remains a separate derived artifact, and the DMX writer stays a
+  separate, explicit, dry-run-first twin path rather than a live proxy for this
+  authored page.
 </p>
 
 <h2>Source claim</h2>
 
 <p>
-  The life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication that remain intelligible and reusable across time.
+  Source-oriented and image-oriented development in Common Lisp
+Opening external FedWiki sites
  </p>
 
 <p>
-  This slice anchors Konrad Hinsen's note about how collective knowledge is published, reviewed, cited, combined, and eventually detached from any single original representation. For HyperDoc, the key consequence is that software publication must support later inspection and reuse rather than only archival preservation.
+  This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, and eventually detached from its original representation.
+FedWiki source
+
+This is the point at which the FedWiki note connects directly to HyperDoc's long-term interest in Common Lisp. The note presents Common Lisp as an example of a stable, standardized, multi-implementation language whose software can remain usable over long spans of time.
+Claim carried by this page
+
+The life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication that remain intelligible and reusable across time.
+Inspectable objects
+
+The Life Cycle of Collective Knowledge
+
+Source-oriented and image-oriented development in Common Lisp
+Opening external FedWiki sites
  </p>
 
 <h2>Reusable topic chunks</h2>
@@ -39,13 +52,14 @@
 <h2>Local composition path</h2>
 
 <p>
-  The page composition remains local: the source asset is parsed into topic-shaped
-  chunks, the topic-factory snippet stays as a separate authored asset, and this
-  page is rendered from those chunks without depending on a DMX lookup or write.
+  The page composition remains local: the localhost FedWiki page is parsed into
+  normalized story-item records, topic-shaped chunks are extracted from that
+  structure, the topic-factory snippet stays as a separate authored asset, and
+  this page renders from those chunks without depending on a DMX lookup or write.
 </p>
 
 <ul>
-  <li><a expr="(hyperdoc::the-life-cycle-of-collective-knowledge-source-asset-chunk)"><tt>Source asset chunk</tt></a></li>
+  <li><a expr="(hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)"><tt>Localhost FedWiki source chunk</tt></a></li>
   <li><a expr="(hyperdoc::the-life-cycle-of-collective-knowledge-topic-definition-chunk)"><tt>Topic-definition chunk</tt></a></li>
   <li><a expr="(hyperdoc::the-life-cycle-of-collective-knowledge-subtopic-chunks)"><tt>Subtopic chunks</tt></a></li>
   <li><a expr="(hyperdoc::the-life-cycle-of-collective-knowledge-topic-page-chunk)"><tt>Topic-page chunk</tt></a></li>
@@ -55,7 +69,7 @@
 
 <p>
   The DMX twin/snippet chunk writes the topic-factory bundle under the stable URI
-  <tt>hyperdoc:topic-factory-snippet/the-life-cycle-of-collective-knowledge-topic-set</tt>. It carries snippet text, source-file provenance, the
+  <tt>hyperdoc:topic-factory-snippet/the-life-cycle-of-collective-knowledge-topic-set</tt>. It carries snippet text, canonical source-file provenance, the
   related HyperDoc page title, and the related umbrella topic id <tt>the-life-cycle-of-collective-knowledge</tt>.
 </p>
 
@@ -70,11 +84,11 @@
 <h2>FedWiki source</h2>
 
 <p>
-  Source FedWiki slug: <tt>the-life-cycle-of-collective-knowledge</tt>. Source page title: <tt>The Life Cycle of Collective Knowledge</tt>.
+  Source FedWiki page id: <tt>fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge</tt>. Repo-relative page path: <tt>pages/the-life-cycle-of-collective-knowledge</tt>.
 </p>
 
 <p>
-  External source URL: <a href="https://hyperdoc.wiki.khinsen.net/view/the-life-cycle-of-collective-knowledge"><tt>https://hyperdoc.wiki.khinsen.net/view/the-life-cycle-of-collective-knowledge</tt></a>.
+  External source URL: <a href="https://hyperdoc.wiki.khinsen.net/view/the-life-cycle-of-collective-knowledge"><tt>https://hyperdoc.wiki.khinsen.net/view/the-life-cycle-of-collective-knowledge</tt></a>. Parsed story items: <tt>2</tt>.
 </p>
 
 <h2>Inspectable objects</h2>
