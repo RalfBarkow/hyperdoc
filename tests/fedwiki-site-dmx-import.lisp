@@ -356,6 +356,7 @@
   (run-collective-knowledge-slice-smoke-tests)
   (run-reproducible-devenv-as-knowledge-artifact-slice-smoke-tests)
   (run-localhost-fedwiki-page-pipeline-smoke-tests)
+  (run-localhost-fedwiki-page-promotion-plans-smoke-tests)
   (run-topic-factory-snippet-dmx-smoke-tests)
   (run-fedwiki-site-dmx-import-tests)
   (run-fedwiki-story-items-smoke-tests)

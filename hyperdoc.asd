@@ -250,6 +250,7 @@
                              (:file "collective-knowledge-slice-smoke")
                              (:file "reproducible-devenv-as-knowledge-artifact-slice-smoke")
                              (:file "localhost-fedwiki-page-pipeline-smoke")
+                             (:file "localhost-fedwiki-page-promotion-plans-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
