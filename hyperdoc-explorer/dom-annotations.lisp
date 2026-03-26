@@ -224,7 +224,61 @@
                             (views:thunk
                               (dock-annotation-for-context
                                context-object
-                               :context-view-title view-title)))))
+                               :context-view-title view-title))))
+                    (:span :class "hyperdoc-dock-connect-runtime-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Inspect current Connect runtime"
+                            (views:thunk
+                              (connect-capability-runtime-target
+                               :context-object context-object
+                               :context-view-title view-title
+                               :snapshot-json (lwcells:cell-ref snapshot-cell)))))
+                    (:span :class "hyperdoc-dock-connect-evidence-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Inspect Connect model and evidence"
+                            (views:thunk
+                              (connect-capability-evidence-target))))
+                    (:span :class "hyperdoc-dock-annotation-semantic-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Inspect current Annotation semantic target"
+                            (views:thunk
+                              (annotation-capability-semantic-target
+                               :context-object context-object
+                               :context-view-title view-title
+                               :source-json (lwcells:cell-ref source-cell)))))
+                    (:span :class "hyperdoc-dock-annotation-evidence-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Inspect Annotation claim and evidence"
+                            (views:thunk
+                              (annotation-capability-evidence-target))))
+                    (:span :class "hyperdoc-dock-guide-model-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Inspect Dock presentation model"
+                            (views:thunk
+                              (guide-capability-model-target))))
+                    (:span :class "hyperdoc-dock-guide-evidence-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Inspect Dock runtime claim and evidence"
+                            (views:thunk
+                              (guide-capability-evidence-target)))))
               (:svg :class "hyperdoc-dom-connect-overlay"
                     :hidden "hidden"
                     :xmlns "http://www.w3.org/2000/svg"

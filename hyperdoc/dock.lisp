@@ -188,6 +188,15 @@ the primary pane-local object in this slice."))
     (or (gethash registry-key *dock-annotations*)
         (setf (gethash registry-key *dock-annotations*) annotation))))
 
+(defun find-dock-annotation-for-source-anchor (context-object source-anchor
+                                               &key context-view-title
+                                                 target-anchor)
+  (gethash (dock-annotation-key source-anchor
+                                context-object
+                                context-view-title
+                                target-anchor)
+           *dock-annotations*))
+
 (defun dock-annotation-for-context (context-object &key context-view-title
                                                    relation-kind
                                                    note)
@@ -201,6 +210,35 @@ the primary pane-local object in this slice."))
    :source-object (dock-primary-object context-object)
    :relation-kind relation-kind
    :note note))
+
+(defun find-dock-annotation-for-context (context-object &key context-view-title)
+  (find-dock-annotation-for-source-anchor
+   context-object
+   (make-dock-current-object-anchor
+    (dock-primary-object context-object)
+    context-object
+    context-view-title)
+   :context-view-title context-view-title))
+
+(defun annotation-capability-semantic-target (&key context-object
+                                                   context-view-title
+                                                   source-json)
+  (let* ((source-anchor
+           (and source-json
+                (maybe-dom-connect-anchor-from-json-string source-json)))
+         (existing-annotation
+           (cond
+             (source-anchor
+              (find-dock-annotation-for-source-anchor
+               context-object
+               source-anchor
+               :context-view-title context-view-title))
+             (t
+              (find-dock-annotation-for-context
+               context-object
+               :context-view-title context-view-title)))))
+    (or existing-annotation
+        (annotation-topic))))
 
 (defun dock-zotero-capability-available-p (context-object)
   (and (typep (dock-primary-object context-object) 'topic)
@@ -362,6 +400,54 @@ the primary pane-local object in this slice."))
    "test"
    "tests/dock-presentation-smoke.lisp"
    :target-name "run-dock-presentation-smoke-tests"))
+
+(defun dock-annotation-runtime-evidence ()
+  (make-dock-implementation-evidence
+   "dock-evidence/annotation-runtime"
+   "Dock Annotation capability runtime"
+   "The Dock capability buttons dispatch plain, Shift, and Option/Alt clicks to semantic annotation or claim/evidence targets without introducing a separate visible Inspect control."
+   "source file"
+   "assets/hyperdoc/js/dom-annotation-connect.js"
+   :target-name "Dock Annotation expert dispatch"))
+
+(defun dock-annotation-model-evidence ()
+  (make-dock-implementation-evidence
+   "dock-evidence/annotation-model"
+   "Dock Annotation semantic model"
+   "Current-object Annotation and source->Annotation relations materialize as reusable dock-annotation objects keyed by source and target anchors."
+   "source file"
+   "hyperdoc/dock.lisp"
+   :target-name "annotation-capability-semantic-target"))
+
+(defun dock-annotation-views-evidence ()
+  (make-dock-implementation-evidence
+   "dock-evidence/annotation-views"
+   "Dock Annotation hidden inspection bridges"
+   "The connectable surface exposes hidden expert targets so Dock modifier-clicks can inspect Annotation semantics or claim/evidence objects through the existing inspector wiring."
+   "source file"
+   "hyperdoc-explorer/dom-annotations.lisp"
+   :target-name "hyperdoc-dock-annotation-semantic-submit"))
+
+(defun dock-annotation-smoke-evidence ()
+  (make-dock-implementation-evidence
+   "dock-evidence/annotation-smoke"
+   "Dock Annotation smoke coverage"
+   "Focused smoke coverage keeps the Dock Annotation relation model stable and reusable across current-object and source->Annotation paths."
+   "test"
+   "tests/dock-annotation-smoke.lisp"
+   :target-name "run-dock-annotation-smoke-tests"))
+
+(defun annotation-capability-evidence-target ()
+  (make-instance 'dock-claim-code-relation
+                 :id "dock-claim/annotation-capability"
+                 :title "Annotation capability stays a semantic relation"
+                 :summary "Modifier-click inspection on Annotation opens either the existing semantic relation or the supporting claim/evidence side without adding a permanent Dock Inspect control."
+                 :claim-text
+                 "Annotation remains a first-class semantic relation anchored in the current pane context; expert inspection can jump either to that relation or to the implementation evidence that explains how the Dock resolves it."
+                 :evidence (list (dock-annotation-runtime-evidence)
+                                 (dock-annotation-model-evidence)
+                                 (dock-annotation-views-evidence)
+                                 (dock-annotation-smoke-evidence))))
 
 (defun dock-degrade-chrome-claim ()
   (make-instance 'dock-claim-code-relation
@@ -560,3 +646,9 @@ the primary pane-local object in this slice."))
 
 (defun chunk-dock-presentation-model ()
   (dock-presentation-model))
+
+(defun guide-capability-model-target ()
+  (dock-presentation-model))
+
+(defun guide-capability-evidence-target ()
+  (dock-runtime-inspection-claim))

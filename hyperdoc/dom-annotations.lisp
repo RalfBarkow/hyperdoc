@@ -1013,6 +1013,17 @@
      :panes panes
      :transitions transitions)))
 
+(defun connect-capability-runtime-target (&key context-object
+                                               context-view-title
+                                               snapshot-json)
+  (make-dom-connect-session-snapshot-from-json
+   :context-object context-object
+   :context-view-title context-view-title
+   :snapshot-json snapshot-json))
+
+(defun connect-capability-evidence-target ()
+  (dom-connect-submit-path-comparison))
+
 (defparameter *dom-connect-request-evidence-max-entries* 160)
 (defvar *dom-connect-request-evidence-table* (make-hash-table :test #'equal))
 (defvar *dom-connect-request-evidence-order* nil)

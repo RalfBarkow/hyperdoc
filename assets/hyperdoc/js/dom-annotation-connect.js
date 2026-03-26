@@ -800,7 +800,7 @@
 
   function sessionCueText(session) {
     if (!session || !session.id) {
-      return "";
+      return "Click Connect to start.";
     }
     if (session.phase === "choose-source") {
       return "Click a source anchor.";
@@ -858,11 +858,80 @@
         button.dispatchEvent(new MouseEvent("click", {
           bubbles: true,
           cancelable: true,
-          shiftKey: true
+          shiftKey: !!(clickOptions && clickOptions.shiftKey)
         }));
       },
       dispatchDelayMs: clickOptions && clickOptions.dispatchDelayMs || 250
     });
+  }
+
+  function currentSessionSourceJson() {
+    var session = connectManager().session;
+    return session && session.sourceAnchor
+      ? JSON.stringify(session.sourceAnchor)
+      : "";
+  }
+
+  function currentSessionRequestId() {
+    var session = connectManager().session;
+    return session && session.id || "";
+  }
+
+  function writeCapabilityInspectionState(state) {
+    if (!state) {
+      return;
+    }
+    if (state.inspectInput) {
+      dispatchValue(state.inspectInput, JSON.stringify(debugSnapshot()));
+    }
+    if (state.sourceInput) {
+      dispatchValue(state.sourceInput, currentSessionSourceJson());
+    }
+    if (state.requestIdInput) {
+      dispatchValue(state.requestIdInput, currentSessionRequestId());
+    }
+  }
+
+  function inspectConnectCapability(state, event) {
+    if (!state || !state.available) {
+      return;
+    }
+    writeCapabilityInspectionState(state);
+    dispatchHiddenDockButton(
+      event.altKey ? state.connectEvidenceSubmit : state.connectRuntimeSubmit,
+      {
+        shiftKey: !!event.shiftKey,
+        dispatchDelayMs: 250
+      }
+    );
+  }
+
+  function inspectAnnotationCapability(state, event) {
+    if (!state || !state.available) {
+      return;
+    }
+    writeCapabilityInspectionState(state);
+    dispatchHiddenDockButton(
+      event.altKey ? state.annotationEvidenceSubmit : state.annotationSemanticSubmit,
+      {
+        shiftKey: !!event.shiftKey,
+        dispatchDelayMs: 250
+      }
+    );
+  }
+
+  function inspectGuideCapability(state, event) {
+    if (!state || !state.available) {
+      return;
+    }
+    writeCapabilityInspectionState(state);
+    dispatchHiddenDockButton(
+      event.altKey ? state.guideEvidenceSubmit : state.guideModelSubmit,
+      {
+        shiftKey: !!event.shiftKey,
+        dispatchDelayMs: 250
+      }
+    );
   }
 
   function openCurrentAnnotation(state) {
@@ -872,6 +941,7 @@
     markDockCapabilityMastered(state, "annotation-opened");
     refreshPaneStateFromSession(state);
     dispatchHiddenDockButton(state.dockAnnotationSubmit, {
+      shiftKey: true,
       dispatchDelayMs: 250
     });
   }
@@ -1445,6 +1515,13 @@
     state.browserDetailInput = null;
     state.submit = null;
     state.evidenceSubmit = null;
+    state.dockAnnotationSubmit = null;
+    state.connectRuntimeSubmit = null;
+    state.connectEvidenceSubmit = null;
+    state.annotationSemanticSubmit = null;
+    state.annotationEvidenceSubmit = null;
+    state.guideModelSubmit = null;
+    state.guideEvidenceSubmit = null;
     state.provider = provider;
     state.providerKind = surfaceProviderKind(surface);
     if (!surface) {
@@ -1473,10 +1550,19 @@
     var submit = controls.querySelector(".hyperdoc-dom-connect-submit");
     var evidenceSubmit = controls.querySelector(".hyperdoc-dom-connect-evidence-submit");
     var dockAnnotationSubmit = controls.querySelector(".hyperdoc-dock-annotation-submit");
+    var connectRuntimeSubmit = controls.querySelector(".hyperdoc-dock-connect-runtime-submit");
+    var connectEvidenceSubmit = controls.querySelector(".hyperdoc-dock-connect-evidence-submit");
+    var annotationSemanticSubmit = controls.querySelector(".hyperdoc-dock-annotation-semantic-submit");
+    var annotationEvidenceSubmit = controls.querySelector(".hyperdoc-dock-annotation-evidence-submit");
+    var guideModelSubmit = controls.querySelector(".hyperdoc-dock-guide-model-submit");
+    var guideEvidenceSubmit = controls.querySelector(".hyperdoc-dock-guide-evidence-submit");
     if (!sourceInput || !targetInput || !inspectInput ||
         !requestIdInput || !browserFailureKindInput ||
         !browserMessageInput || !browserDetailInput ||
-        !submit || !evidenceSubmit || !dockAnnotationSubmit) {
+        !submit || !evidenceSubmit || !dockAnnotationSubmit ||
+        !connectRuntimeSubmit || !connectEvidenceSubmit ||
+        !annotationSemanticSubmit || !annotationEvidenceSubmit ||
+        !guideModelSubmit || !guideEvidenceSubmit) {
       return false;
     }
     state.root = root;
@@ -1492,6 +1578,12 @@
     state.submit = submit;
     state.evidenceSubmit = evidenceSubmit;
     state.dockAnnotationSubmit = dockAnnotationSubmit;
+    state.connectRuntimeSubmit = connectRuntimeSubmit;
+    state.connectEvidenceSubmit = connectEvidenceSubmit;
+    state.annotationSemanticSubmit = annotationSemanticSubmit;
+    state.annotationEvidenceSubmit = annotationEvidenceSubmit;
+    state.guideModelSubmit = guideModelSubmit;
+    state.guideEvidenceSubmit = guideEvidenceSubmit;
     updateProviderCopy(state);
     syncDockCapabilities(state);
     return true;
@@ -2224,6 +2316,12 @@
       submit: null,
       evidenceSubmit: null,
       dockAnnotationSubmit: null,
+      connectRuntimeSubmit: null,
+      connectEvidenceSubmit: null,
+      annotationSemanticSubmit: null,
+      annotationEvidenceSubmit: null,
+      guideModelSubmit: null,
+      guideEvidenceSubmit: null,
       compactCapabilities: [],
       coachmarkCapabilities: [],
       providerHandoffs: [],
@@ -2244,8 +2342,14 @@
     helpToggle.setAttribute("aria-controls", helpPanel.id);
     helpToggle.setAttribute("aria-expanded", "false");
     helpPanel.setAttribute("aria-hidden", "true");
-    toggle.addEventListener("click", function () {
+    toggle.addEventListener("click", function (event) {
       if (!state.available) {
+        return;
+      }
+      if (event.shiftKey || event.altKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        inspectConnectCapability(state, event);
         return;
       }
       if (sessionActive(state.manager)) {
@@ -2257,6 +2361,10 @@
     annotation.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
+      if (event.shiftKey || event.altKey) {
+        inspectAnnotationCapability(state, event);
+        return;
+      }
       completeAnnotationTarget(state);
     });
     touchFahrplan.addEventListener("click", function (event) {
@@ -2272,6 +2380,10 @@
     helpToggle.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
+      if (event.shiftKey || event.altKey) {
+        inspectGuideCapability(state, event);
+        return;
+      }
       toggleHelpPanel(state);
     });
     clear.addEventListener("click", function (event) {
