@@ -391,8 +391,18 @@
       (ignore-errors
         (funcall (symbol-function symbol) object)))))
 
+(defun dom-association-present-string (value)
+  (and (stringp value)
+       (let ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return) value)))
+         (and (> (length trimmed) 0)
+              (not (member trimmed '("undefined" "null") :test #'string=))
+              trimmed))))
+
 (defun hyperdoc-object-id (object)
   (call-hyperdoc-optional-accessor "ID-OF" object))
+
+(defun stable-hyperdoc-object-id (object)
+  (dom-association-present-string (hyperdoc-object-id object)))
 
 (defun dock-annotation-object-p (object)
   (let ((dock-capability
@@ -417,12 +427,25 @@
   (setf (clog:attribute (clog-obj pane) attribute-name)
         (or value "")))
 
+(defun dom-connect-snapshot-pane-reuse-key (payload snapshot)
+  (or (dom-association-present-string
+       (getf payload :inspection-pane-id))
+      (dom-association-present-string
+       (call-hyperdoc-connect-snapshot-accessor "ORIGIN-PANE-ID-OF" snapshot))
+      (dom-association-present-string
+       (call-hyperdoc-connect-snapshot-accessor "SOURCE-PANE-ID-OF" snapshot))
+      (dom-association-present-string
+       (getf payload :source-pane-id))))
+
 (defun mark-dom-connect-snapshot-pane (pane payload snapshot)
   (set-connect-snapshot-pane-attribute
    pane "data-hyperdoc-connect-inspection" "true")
   (set-connect-snapshot-pane-attribute
    pane "data-hyperdoc-connect-inspection-pane-id"
    (getf payload :inspection-pane-id))
+  (set-connect-snapshot-pane-attribute
+   pane "data-hyperdoc-connect-reuse-key"
+   (dom-connect-snapshot-pane-reuse-key payload snapshot))
   (set-connect-snapshot-pane-attribute
    pane "data-hyperdoc-connect-session-id"
    (call-hyperdoc-connect-snapshot-accessor "SESSION-ID-OF" snapshot))
@@ -449,24 +472,24 @@
    (call-hyperdoc-connect-request-evidence-accessor
     "UPDATED-AT-LABEL-OF" evidence)))
 
-(defun dom-connect-snapshot-pane-match-p (pane inspection-pane-id)
+(defun dom-connect-snapshot-pane-match-p (pane reuse-key)
   (let ((marked (dom-association-attribute-value
                  (clog-obj pane)
                  "data-hyperdoc-connect-inspection"))
-        (pane-id (dom-association-attribute-value
-                  (clog-obj pane)
-                  "data-hyperdoc-connect-inspection-pane-id")))
-    (and (stringp inspection-pane-id)
+        (pane-reuse-key (dom-association-attribute-value
+                         (clog-obj pane)
+                         "data-hyperdoc-connect-reuse-key")))
+    (and (stringp reuse-key)
          (stringp marked)
-         (stringp pane-id)
+         (stringp pane-reuse-key)
          (string= marked "true")
-         (string= pane-id inspection-pane-id))))
+         (string= pane-reuse-key reuse-key))))
 
-(defun find-reusable-dom-connect-snapshot-pane (inspector payload)
-  (let ((inspection-pane-id (getf payload :inspection-pane-id)))
-    (when inspection-pane-id
+(defun find-reusable-dom-connect-snapshot-pane (inspector payload snapshot)
+  (let ((reuse-key (dom-connect-snapshot-pane-reuse-key payload snapshot)))
+    (when reuse-key
       (loop for candidate in (fset:convert 'list (inspector-panes inspector))
-            when (dom-connect-snapshot-pane-match-p candidate inspection-pane-id)
+            when (dom-connect-snapshot-pane-match-p candidate reuse-key)
               return candidate))))
 
 (defun dom-connect-request-evidence-pane-match-p (pane request-id)
@@ -488,7 +511,8 @@
           return candidate))
 
 (defun open-dom-connect-snapshot-pane (inspector payload snapshot)
-  (let ((existing-pane (find-reusable-dom-connect-snapshot-pane inspector payload)))
+  (let ((existing-pane
+          (find-reusable-dom-connect-snapshot-pane inspector payload snapshot)))
     (if existing-pane
         (progn
           (setf (pane-object existing-pane) snapshot)
@@ -517,14 +541,35 @@
           (mark-dom-connect-request-evidence-pane pane request-id evidence)
           pane))))
 
+(defun find-reusable-hyperdoc-object-pane (inspector object)
+  (let ((object-id (stable-hyperdoc-object-id object)))
+    (when object-id
+      (loop for candidate in (fset:convert 'list (inspector-panes inspector))
+            for pane-object = (pane-object candidate)
+            when (string= (or (stable-hyperdoc-object-id pane-object) "")
+                          object-id)
+              return candidate))))
+
+(defun open-hyperdoc-object-pane (inspector object &key (select nil))
+  (let ((existing-pane (find-reusable-hyperdoc-object-pane inspector object)))
+    (if existing-pane
+        (progn
+          (setf (pane-object existing-pane) object)
+          (refresh existing-pane)
+          (select-view existing-pane
+                       (default-pane-selection existing-pane select))
+          (clog:focus (clog-obj existing-pane))
+          existing-pane)
+        (create-pane inspector object :select select))))
+
 (defun find-reusable-dock-annotation-pane (inspector annotation)
-  (let ((annotation-id (hyperdoc-object-id annotation)))
+  (let ((annotation-id (stable-hyperdoc-object-id annotation)))
     (when (and (dock-annotation-object-p annotation)
                (stringp annotation-id))
       (loop for candidate in (fset:convert 'list (inspector-panes inspector))
             for pane-object = (pane-object candidate)
             when (and (dock-annotation-object-p pane-object)
-                      (string= (or (hyperdoc-object-id pane-object) "")
+                      (string= (or (stable-hyperdoc-object-id pane-object) "")
                                annotation-id))
               return candidate))))
 
@@ -723,7 +768,7 @@
                        ((dock-annotation-object-p association)
                         (open-dock-annotation-pane inspector association))
                        (t
-                        (create-pane inspector association)))
+                        (open-hyperdoc-object-pane inspector association)))
                      (maybe-log-inspector-performance
                       :dom-association/pane-open-succeeded
                       :mode :evaluated-object
