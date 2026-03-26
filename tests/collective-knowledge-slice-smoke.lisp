@@ -16,6 +16,7 @@
 
 (defun run-collective-knowledge-chunk-parse-smoke-test ()
   (let* ((parsed (hyperdoc::parse-the-life-cycle-of-collective-knowledge-chunks))
+         (pipeline (hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline))
          (source (getf parsed :source-fedwiki-page))
          (definition (getf parsed :topic-definition))
          (umbrella (getf parsed :umbrella-topic))
@@ -27,6 +28,14 @@
          (first-fragment (first (hyperdoc::fragments-of first-item)))
          (definition-provenance (hyperdoc::provenance-of definition))
          (first-provenance (hyperdoc::provenance-of (first subtopics))))
+    (assert-true
+     (typep pipeline 'hyperdoc::localhost-fedwiki-page-pipeline-result)
+     "Collective knowledge must now run through the generic localhost FedWiki page pipeline")
+    (assert-equal
+     "the-life-cycle-of-collective-knowledge"
+     (hyperdoc::localhost-fedwiki-page-pipeline-spec-id
+      (hyperdoc::localhost-fedwiki-page-pipeline-result-spec pipeline))
+     "Collective knowledge must configure the generic pipeline through a page-specific spec")
     (assert-true (typep source 'hyperdoc::localhost-fedwiki-source-chunk)
                  "Source parse must read the localhost FedWiki page into a source chunk")
     (assert-equal "pages/the-life-cycle-of-collective-knowledge"
