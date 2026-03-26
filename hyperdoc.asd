@@ -246,6 +246,7 @@
                              (:file "authored-html-render-safety-smoke")
                              (:file "page-lookup-issues-smoke")
                              (:file "collective-knowledge-slice-smoke")
+                             (:file "reproducible-devenv-as-knowledge-artifact-slice-smoke")
                              (:file "localhost-fedwiki-page-pipeline-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
                              (:file "fedwiki-site-dmx-import")
