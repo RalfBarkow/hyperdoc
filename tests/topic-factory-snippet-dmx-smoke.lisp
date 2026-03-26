@@ -22,7 +22,15 @@
                 *topic-factory-snippet-dmx-workspace-topicmap-id*
                 :client client))
          (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
-         (children (getf payload :children)))
+         (children (getf payload :children))
+         (provenance-json
+           (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
+                    children))
+         (provenance-object (shasht:read-json provenance-json))
+         (fragment-ordinals
+           (sort (coerce (gethash "source_fragment_ordinals" provenance-object)
+                         'list)
+                 #'<)))
     (assert-equal :create
                   (hyperdoc::topic-factory-snippet-dmx-write-plan-topic-action plan)
                   "Fresh snippet plan must start with CREATE")
@@ -46,18 +54,20 @@
                   "Payload must keep the related umbrella topic id")
     (assert-true
      (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
-             (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
-                      children))
+             provenance-json)
      "Payload provenance must preserve the canonical FedWiki page id")
     (assert-true
      (search "pages/the-life-cycle-of-collective-knowledge"
-             (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
-                      children))
+             provenance-json)
      "Payload provenance must preserve the repo-relative FedWiki page path")
+    (assert-equal "story-item-fragment"
+                  (gethash "provenance_granularity" provenance-object)
+                  "Payload provenance JSON must preserve fragment-level provenance granularity")
+    (assert-equal '(0 3 4 5 6)
+                  fragment-ordinals
+     "Payload provenance JSON must preserve fragment ordinals with canonical provenance")
     (assert-true
-     (not (search "/Users/"
-                  (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
-                           children)))
+     (not (search "/Users/" provenance-json))
      "Payload provenance must not preserve machine-local absolute paths")
     (assert-true
      (search "defun THE-LIFE-CYCLE-OF-COLLECTIVE-KNOWLEDGE-TOPIC"

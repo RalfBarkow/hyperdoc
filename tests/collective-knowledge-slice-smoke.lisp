@@ -24,6 +24,8 @@
          (dmx (getf parsed :dmx-snippet))
          (first-item (first (hyperdoc::story-items-of source)))
          (second-item (second (hyperdoc::story-items-of source)))
+         (first-fragment (first (hyperdoc::fragments-of first-item)))
+         (definition-provenance (hyperdoc::provenance-of definition))
          (first-provenance (hyperdoc::provenance-of (first subtopics))))
     (assert-true (typep source 'hyperdoc::localhost-fedwiki-source-chunk)
                  "Source parse must read the localhost FedWiki page into a source chunk")
@@ -39,6 +41,20 @@
     (assert-equal "assets"
                   (hyperdoc::item-type-of second-item)
                   "Second normalized story item type")
+    (assert-equal "story-item"
+                  (getf (hyperdoc::provenance-of first-item) :provenance-granularity)
+                  "Whole normalized story items must keep story-item provenance granularity")
+    (assert-true (typep first-fragment 'hyperdoc::localhost-fedwiki-fragment-record)
+                 "Paragraph story items must expose normalized fragment records")
+    (assert-equal "story-item-fragment"
+                  (getf (hyperdoc::provenance-of first-fragment) :provenance-granularity)
+                  "Normalized fragments must keep story-item-fragment provenance granularity")
+    (assert-equal "segment:0"
+                  (hyperdoc::fragment-anchor-of first-fragment)
+                  "Normalized fragments must expose stable fragment anchors")
+    (assert-equal "intro"
+                  (hyperdoc::section-key-of first-fragment)
+                  "Normalized fragments must expose section keys")
     (assert-true (typep definition 'hyperdoc::topic-definition-chunk)
                  "Topic asset must parse into a topic-definition chunk")
     (assert-true (typep umbrella 'hyperdoc::subtopic-chunk)
@@ -63,12 +79,27 @@
     (assert-true (string= "story-item-id-and-journal"
                           (getf first-provenance :provenance-classification))
                  "Derived topic chunks must classify provenance completeness")
+    (assert-equal "story-item-fragment"
+                  (getf first-provenance :provenance-granularity)
+                  "Derived topic chunks must classify fragment-level provenance explicitly")
+    (assert-equal '(0 3 6)
+                  (getf first-provenance :source-fragment-ordinals)
+                  "Derived topic chunks must preserve fragment ordinals inside the source story item")
+    (assert-equal '("segment:0" "segment:3" "segment:6")
+                  (getf first-provenance :source-fragment-anchors)
+                  "Derived topic chunks must preserve fragment anchors")
+    (assert-true (search "paragraph fragments within one localhost FedWiki story item"
+                         (getf first-provenance :derivation-note))
+                 "Derived topic chunks must describe the fragment split rule")
     (assert-equal "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
                   (hyperdoc::source-origin-id-of definition)
                   "Topic definition must point back to the canonical FedWiki page id")
     (assert-equal "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
                   (hyperdoc::source-path-of definition)
                   "Topic definition must keep repo-relative snippet source paths")
+    (assert-equal "story-item-fragment"
+                  (getf definition-provenance :provenance-granularity)
+                  "Topic-definition metadata must preserve fragment-based provenance granularity")
     (assert-true (search "hyperdoc:topic-factory-snippet/the-life-cycle-of-collective-knowledge-topic-set"
                          (hyperdoc::snippet-uri-of dmx))
                  "DMX snippet chunk must keep the stable snippet URI")
@@ -87,6 +118,13 @@
           (hyperdoc::render-the-life-cycle-of-collective-knowledge-page))
         (rendered-topic-snippet
           (hyperdoc::render-the-life-cycle-of-collective-knowledge-topic-factory-snippet)))
+    (assert-true
+     (search "preserve fragment-level provenance within that item instead of claiming"
+             rendered-page)
+     "Rendered page wording must state fragment-level provenance instead of overclaiming item-level provenance")
+    (assert-true
+     (search "fragment-level rather than whole-item-level" rendered-page)
+     "Rendered page must explicitly distinguish fragment-level derivation from whole-item provenance")
     (assert-equal expected-page
                   rendered-page
                   "Rendered HyperDoc page must stay in sync with the committed page")
