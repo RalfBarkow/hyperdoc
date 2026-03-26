@@ -294,6 +294,51 @@
       (otherwise
        "Reflected source snapshot envelope is missing."))))
 
+(defun localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+    (artifact freshness-state)
+  (let ((artifact-label
+          (case artifact
+            (:page "page artifact")
+            (:snippet "snippet artifact")
+            (otherwise "artifact")))
+        (operation
+          (case artifact
+            (:page
+             'regenerate-localhost-fedwiki-page-promotion-plan-page-artifact)
+            (:snippet
+             'regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact)
+            (otherwise
+             'localhost-fedwiki-page-promotion-plan-sync-status))))
+    (case freshness-state
+      (:fresh
+       (list :action :no-regeneration-needed
+             :label
+             (format nil
+                     "No regeneration needed; the ~A already reflects the current source snapshot."
+                     artifact-label)
+             :operation operation))
+      (:stale
+       (list :action :regenerate-artifact
+             :label
+             (format nil
+                     "Regenerate the ~A to refresh its reflected source snapshot evidence."
+                     artifact-label)
+             :operation operation))
+      (:unknown-malformed-envelope
+       (list :action :regenerate-artifact
+             :label
+             (format nil
+                     "Regenerate the ~A to repair reflected source snapshot evidence."
+                     artifact-label)
+             :operation operation))
+      (otherwise
+       (list :action :regenerate-artifact
+             :label
+             (format nil
+                     "Regenerate the ~A to restore reflected source snapshot evidence."
+                     artifact-label)
+             :operation operation)))))
+
 (defun localhost-fedwiki-page-promotion-plan-page-source-freshness-state
     (plan &key file-contents current-source-snapshot)
   (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
@@ -364,7 +409,15 @@
          (snippet-freshness-reason
            (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
             snippet-reflection
-            resolved-current-source-snapshot)))
+            resolved-current-source-snapshot))
+         (page-freshness-recommendation
+           (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+            :page
+            page-freshness-state))
+         (snippet-freshness-recommendation
+           (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+            :snippet
+            snippet-freshness-state)))
     (list :plan-id
           (localhost-fedwiki-page-promotion-plan-id plan)
           :page-path
@@ -403,6 +456,12 @@
           page-freshness-state
           :page-source-freshness-reason
           page-freshness-reason
+          :page-source-freshness-recommended-action
+          (getf page-freshness-recommendation :action)
+          :page-source-freshness-recommended-action-label
+          (getf page-freshness-recommendation :label)
+          :page-source-freshness-recommended-operation
+          (getf page-freshness-recommendation :operation)
           :page-source-freshness-known
           (not (null (member page-freshness-state
                              '(:fresh :stale))))
@@ -434,6 +493,12 @@
           snippet-freshness-state
           :snippet-source-freshness-reason
           snippet-freshness-reason
+          :snippet-source-freshness-recommended-action
+          (getf snippet-freshness-recommendation :action)
+          :snippet-source-freshness-recommended-action-label
+          (getf snippet-freshness-recommendation :label)
+          :snippet-source-freshness-recommended-operation
+          (getf snippet-freshness-recommendation :operation)
           :snippet-source-freshness-known
           (not (null (member snippet-freshness-state
                              '(:fresh :stale))))

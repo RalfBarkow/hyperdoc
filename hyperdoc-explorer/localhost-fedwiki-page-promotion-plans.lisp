@@ -65,6 +65,10 @@
   (or (getf status key)
       "unavailable"))
 
+(defun promotion-source-freshness-recommendation-label (status key)
+  (or (getf status key)
+      "unavailable"))
+
 (defun promotion-reflected-snapshot-error-label (status key)
   (or (getf status key)
       "none"))
@@ -146,7 +150,7 @@
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
         (:h4 (views:esc "Status and actions"))
         (:p (views:esc
-             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
+             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed, see the next safe action for each artifact, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Page synced?"))
                      (:td (:tt (views:esc
@@ -172,6 +176,16 @@
                      (:td (:tt (views:esc
                                 (promotion-source-freshness-label
                                  (getf status :snippet-source-freshness-state))))))
+                (:tr (:td (views:esc "Page recommended next action"))
+                     (:td (views:esc
+                           (promotion-source-freshness-recommendation-label
+                            status
+                            :page-source-freshness-recommended-action-label))))
+                (:tr (:td (views:esc "Snippet recommended next action"))
+                     (:td (views:esc
+                           (promotion-source-freshness-recommendation-label
+                            status
+                            :snippet-source-freshness-recommended-action-label))))
                 (:tr (:td (views:esc "Source page id"))
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-page-id
@@ -342,6 +356,11 @@
                            (promotion-source-freshness-reason-label
                             status
                             :page-source-freshness-reason))))
+                (:tr (:td (views:esc "Recommended next action"))
+                     (:td (views:esc
+                           (promotion-source-freshness-recommendation-label
+                            status
+                            :page-source-freshness-recommended-action-label))))
                 (:tr (:td (views:esc "Malformed detail"))
                      (:td (views:esc
                            (promotion-reflected-snapshot-error-label
@@ -372,6 +391,11 @@
                            (promotion-source-freshness-reason-label
                             status
                             :snippet-source-freshness-reason))))
+                (:tr (:td (views:esc "Recommended next action"))
+                     (:td (views:esc
+                           (promotion-source-freshness-recommendation-label
+                            status
+                            :snippet-source-freshness-recommended-action-label))))
                 (:tr (:td (views:esc "Malformed detail"))
                      (:td (views:esc
                            (promotion-reflected-snapshot-error-label
