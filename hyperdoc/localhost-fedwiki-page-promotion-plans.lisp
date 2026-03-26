@@ -130,6 +130,31 @@
     (funcall renderer)
     ""))
 
+(defun write-localhost-fedwiki-page-promotion-plan-string-artifact (path content)
+  (ensure-directories-exist path)
+  (with-open-file (stream path
+                          :direction :output
+                          :if-exists :supersede
+                          :if-does-not-exist :create
+                          :external-format :utf-8)
+    (write-string content stream))
+  path)
+
+(defun localhost-fedwiki-page-promotion-plan-write-page-artifact (plan)
+  (let ((path (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan)))
+    (write-localhost-fedwiki-page-promotion-plan-string-artifact
+     path
+     (localhost-fedwiki-page-promotion-plan-rendered-page plan))
+    path))
+
+(defun localhost-fedwiki-page-promotion-plan-write-snippet-artifact (plan)
+  (let* ((definition (localhost-fedwiki-page-promotion-plan-topic-definition plan))
+         (path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
+    (write-localhost-fedwiki-page-promotion-plan-string-artifact
+     path
+     (snippet-text-of definition))
+    path))
+
 (defun localhost-fedwiki-page-promotion-plan-write-local-artifacts (plan)
   (if-let (writer (localhost-fedwiki-page-promotion-plan-local-artifact-writer plan))
     (funcall writer)
@@ -138,25 +163,89 @@
 (defun write-localhost-fedwiki-page-promotion-plan-artifacts (plan)
   (localhost-fedwiki-page-promotion-plan-write-local-artifacts plan))
 
-(defun localhost-fedwiki-page-promotion-plan-page-output-synced-p (plan)
+(defun localhost-fedwiki-page-promotion-plan-page-output-synced-p
+    (plan &key file-contents)
   (let ((path (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan)))
-    (and (uiop:file-exists-p path)
+    (and (or file-contents
+             (uiop:file-exists-p path))
          (string=
-          (uiop:read-file-string path)
+          (or file-contents
+              (uiop:read-file-string path))
           (localhost-fedwiki-page-promotion-plan-rendered-page plan)))))
 
-(defun localhost-fedwiki-page-promotion-plan-snippet-output-synced-p (plan)
+(defun localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
+    (plan &key file-contents)
   (let* ((definition (localhost-fedwiki-page-promotion-plan-topic-definition plan))
          (path (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan)))
-    (and (uiop:file-exists-p path)
+    (and (or file-contents
+             (uiop:file-exists-p path))
          (string=
-          (uiop:read-file-string path)
+          (or file-contents
+              (uiop:read-file-string path))
           (snippet-text-of definition)))))
 
 (defun localhost-fedwiki-page-promotion-plan-snippet-provenance (plan)
   (copy-tree
    (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
          :provenance)))
+
+(defun localhost-fedwiki-page-promotion-plan-sync-status-report
+    (plan
+     &key page-contents snippet-contents)
+  (list :plan-id
+        (localhost-fedwiki-page-promotion-plan-id plan)
+        :page-path
+        (namestring
+         (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan))
+        :snippet-path
+        (namestring
+         (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan))
+        :page-synced
+        (localhost-fedwiki-page-promotion-plan-page-output-synced-p
+         plan
+         :file-contents page-contents)
+        :snippet-synced
+        (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
+         plan
+         :file-contents snippet-contents)
+        :dmx-dry-run-summary
+        (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)))
+
+;; Generic operations so the inspector exposes them in the Operations view.
+(defgeneric localhost-fedwiki-page-promotion-plan-sync-status (plan)
+  (:method ((plan localhost-fedwiki-page-promotion-plan))
+    (localhost-fedwiki-page-promotion-plan-sync-status-report plan)))
+
+(defgeneric regenerate-localhost-fedwiki-page-promotion-plan-page-artifact (plan)
+  (:method ((plan localhost-fedwiki-page-promotion-plan))
+    (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
+    (append
+     (list :action :page-artifact-regenerated)
+     (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))
+
+(defgeneric regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact (plan)
+  (:method ((plan localhost-fedwiki-page-promotion-plan))
+    (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
+    (append
+     (list :action :snippet-artifact-regenerated)
+     (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))
+
+(defgeneric regenerate-localhost-fedwiki-page-promotion-plan-artifacts (plan)
+  (:method ((plan localhost-fedwiki-page-promotion-plan))
+    (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
+    (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
+    (append
+     (list :action :all-artifacts-regenerated)
+     (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))
+
+(defgeneric review-localhost-fedwiki-page-promotion-plan-dmx-dry-run (plan)
+  (:method ((plan localhost-fedwiki-page-promotion-plan))
+    (list :plan-id
+          (localhost-fedwiki-page-promotion-plan-id plan)
+          :summary
+          (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)
+          :evidence
+          (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan))))
 
 (defun find-localhost-fedwiki-page-promotion-plan-if
     (predicate &key signal-error? error-context)

@@ -76,6 +76,8 @@
 (views:defview 👀overview (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Overview" :priority 1
     (let ((source (localhost-fedwiki-page-promotion-plan-source plan))
+          (status
+            (localhost-fedwiki-page-promotion-plan-sync-status plan))
           (dmx-summary
             (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)))
       (views:html
@@ -118,6 +120,14 @@
                                 (snippet-id-of
                                  (localhost-fedwiki-page-promotion-plan-topic-definition
                                   plan))))))
+                (:tr (:td (views:esc "Page synced"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :page-synced))))))
+                (:tr (:td (views:esc "Snippet synced"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf status :snippet-synced))))))
                 (:tr (:td (views:esc "DMX dry-run"))
                      (:td (:tt (views:esc
                                 (if (getf dmx-summary :available)
