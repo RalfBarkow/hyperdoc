@@ -35,6 +35,9 @@
          (collective-overview-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Overview")))
+         (repro-overview-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-views "Overview")))
          (collective-story-items-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Story items")))
@@ -80,17 +83,57 @@
      (search "story-item" collective-story-items-html :test #'char=)
      "Collective knowledge story-items view must preserve whole-item normalized provenance")
     (assert-true
+     (search "Status and actions" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose the compact status-and-actions surface")
+    (assert-true
      (search "Page synced" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose page sync status")
     (assert-true
      (search "Snippet synced" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose snippet sync status")
     (assert-true
+     (search "story-item-fragment" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose fragment-based provenance modes")
+    (assert-true
+     (search "DMX dry-run summary available" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose DMX dry-run summary availability")
+    (dolist (label '("Regenerate page artifact"
+                     "Regenerate snippet artifact"
+                     "Regenerate both artifacts"
+                     "Review DMX dry-run"
+                     "Inspect sync status"))
+      (assert-true
+       (search label collective-overview-html :test #'char=)
+       (format nil "Collective knowledge overview must expose the human-facing action label ~A" label)))
+    (assert-true
      (search "story-item" repro-promoted-html :test #'char=)
      "Second real page promoted-topics view must expose whole-item-derived subtopics")
     (assert-true
      (search "multi-item-derived" repro-promoted-html :test #'char=)
      "Second real page promoted-topics view must expose the multi-item-derived umbrella provenance")
+    (assert-true
+     (search "Status and actions" repro-overview-html :test #'char=)
+     "Second real-page overview must expose the compact status-and-actions surface")
+    (assert-true
+     (search "Page synced" repro-overview-html :test #'char=)
+     "Second real-page overview must expose page sync status")
+    (assert-true
+     (search "Snippet synced" repro-overview-html :test #'char=)
+     "Second real-page overview must expose snippet sync status")
+    (assert-true
+     (search "multi-item-derived" repro-overview-html :test #'char=)
+     "Second real-page overview must expose multi-item provenance modes")
+    (assert-true
+     (search "DMX dry-run summary available" repro-overview-html :test #'char=)
+     "Second real-page overview must expose DMX dry-run summary availability")
+    (dolist (label '("Regenerate page artifact"
+                     "Regenerate snippet artifact"
+                     "Regenerate both artifacts"
+                     "Review DMX dry-run"
+                     "Inspect sync status"))
+      (assert-true
+       (search label repro-overview-html :test #'char=)
+       (format nil "Second real-page overview must expose the human-facing action label ~A" label)))
     (assert-true
      (search "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
              collective-dmx-html
@@ -288,6 +331,12 @@
          (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
          (collective-views (load-inspector-views-for-object collective))
          (repro-views (load-inspector-views-for-object repro))
+         (collective-overview-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-views "Overview")))
+         (repro-overview-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-views "Overview")))
          (collective-operations-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views
@@ -337,6 +386,20 @@
             collective
             :page-contents "out-of-sync page"
             :snippet-contents "out-of-sync snippet")))
+    (dolist (html (list collective-overview-html
+                        repro-overview-html))
+      (assert-true
+       (search "Status and actions" html :test #'char=)
+       "Overview must keep the compact status-and-actions section")
+      (assert-true
+       (search "Regenerate both artifacts" html :test #'char=)
+       "Overview must present human-facing regeneration actions")
+      (assert-true
+       (search "Review DMX dry-run" html :test #'char=)
+       "Overview must present the human-facing DMX dry-run review action")
+      (assert-true
+       (search "Inspect sync status" html :test #'char=)
+       "Overview must present the human-facing sync-status action"))
     (dolist (html (list collective-operations-html repro-operations-html))
       (assert-true
        (search "REGENERATE-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLAN-PAGE-ARTIFACT"
