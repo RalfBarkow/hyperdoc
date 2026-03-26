@@ -104,6 +104,175 @@
      (not (search "/Users/" repro-dmx-html :test #'char=))
      "Second real page DMX dry-run view must not leak machine-local absolute paths")))
 
+(defun run-localhost-fedwiki-page-promotion-entry-point-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((collective-plan
+           (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+         (repro-plan
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+         (collective-topic-page
+           (hyperbook:find-page hyperdoc::*topics*
+                                "The Life Cycle of Collective Knowledge"
+                                :signal-error? t))
+         (repro-topic-page
+           (hyperbook:find-page hyperdoc::*topics*
+                                "Reproducible DevEnv as Knowledge Artifact"
+                                :signal-error? t))
+         (workflow-topic-page
+           (hyperbook:find-page hyperdoc::*topics*
+                                "Localhost FedWiki page promotion workflow"
+                                :signal-error? t))
+         (collective-topic (hyperdoc::the-life-cycle-of-collective-knowledge-topic))
+         (repro-topic
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-topic))
+         (workflow-topic
+           (hyperdoc::localhost-fedwiki-page-promotion-workflow-topic))
+         (collective-source
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-source collective-plan))
+         (repro-source
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-source repro-plan))
+         (collective-topic-page-views
+           (load-inspector-views-for-object collective-topic-page))
+         (repro-topic-page-views
+           (load-inspector-views-for-object repro-topic-page))
+         (workflow-topic-page-views
+           (load-inspector-views-for-object workflow-topic-page))
+         (collective-topic-views
+           (load-inspector-views-for-object collective-topic))
+         (repro-topic-views
+           (load-inspector-views-for-object repro-topic))
+         (workflow-topic-views
+           (load-inspector-views-for-object workflow-topic))
+         (collective-source-views
+           (load-inspector-views-for-object collective-source))
+         (repro-source-views
+           (load-inspector-views-for-object repro-source))
+         (collective-topic-page-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-topic-page-views
+                                      "Promotion plan")))
+         (repro-topic-page-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-topic-page-views
+                                      "Promotion plan")))
+         (collective-topic-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-topic-views
+                                      "Promotion plan")))
+         (repro-topic-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-topic-views
+                                      "Promotion plan")))
+         (collective-source-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-source-views
+                                      "Promotion plan")))
+         (repro-source-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-source-views
+                                      "Promotion plan"))))
+    (assert-true
+     (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
+      collective-topic-page)
+     "Collective knowledge topic page must resolve to a promotion plan")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
+       collective-topic-page))
+     "Collective knowledge topic page must resolve to the correct promotion plan")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
+       repro-topic-page))
+     "Second real-page topic page must resolve to the correct promotion plan")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic
+       collective-topic))
+     "Collective knowledge topic object must resolve to the correct promotion plan")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic
+       repro-topic))
+     "Second real-page topic object must resolve to the correct promotion plan")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-source
+       collective-source))
+     "Collective knowledge source page must resolve to the correct promotion plan")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-source
+       repro-source))
+     "Second real-page source page must resolve to the correct promotion plan")
+    (assert-true
+     (smoke-find-view-by-title collective-topic-page-views "Promotion plan")
+     "Collective knowledge topic page must expose a Promotion plan entry point")
+    (assert-true
+     (smoke-find-view-by-title repro-topic-page-views "Promotion plan")
+     "Second real-page topic page must expose a Promotion plan entry point")
+    (assert-true
+     (smoke-find-view-by-title collective-topic-views "Promotion plan")
+     "Collective knowledge topic object must expose a Promotion plan entry point")
+    (assert-true
+     (smoke-find-view-by-title repro-topic-views "Promotion plan")
+     "Second real-page topic object must expose a Promotion plan entry point")
+    (assert-true
+     (smoke-find-view-by-title collective-source-views "Promotion plan")
+     "Collective knowledge source object must expose a Promotion plan entry point")
+    (assert-true
+     (smoke-find-view-by-title repro-source-views "Promotion plan")
+     "Second real-page source object must expose a Promotion plan entry point")
+    (assert-true
+     (null (smoke-find-view-by-title workflow-topic-page-views "Promotion plan"))
+     "Unrelated workflow topic page must not grow a promotion-plan entry point")
+    (assert-true
+     (null (smoke-find-view-by-title workflow-topic-views "Promotion plan"))
+     "Unrelated workflow topic object must not grow a promotion-plan entry point")
+    (dolist (html (list collective-topic-page-html
+                        repro-topic-page-html
+                        collective-topic-html
+                        repro-topic-html
+                        collective-source-html
+                        repro-source-html))
+      (assert-true
+       (search "Promoted topics" html :test #'char=)
+       "Each promotion-plan entry point must link to provenance review")
+      (assert-true
+       (search "Page output" html :test #'char=)
+       "Each promotion-plan entry point must link to output-status review")
+      (assert-true
+       (search "DMX dry-run" html :test #'char=)
+       "Each promotion-plan entry point must link to DMX dry-run evidence"))
+    (assert-true
+     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+             collective-topic-page-html
+             :test #'char=)
+     "Collective knowledge topic-page entry point must name the correct plan id")
+    (assert-true
+     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+             repro-topic-page-html
+             :test #'char=)
+     "Second real-page topic-page entry point must name the correct plan id")
+    (assert-true
+     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-id
+              collective-plan)
+             collective-source-html
+             :test #'char=)
+     "Collective knowledge source entry point must preserve the canonical source page id")
+    (assert-true
+     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-id
+              repro-plan)
+             repro-source-html
+             :test #'char=)
+     "Second real-page source entry point must preserve the canonical source page id")))
+
 (defun run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test ()
   (let ((workflow-page-source
           (uiop:read-file-string
@@ -160,6 +329,7 @@
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
+  (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
   (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
   (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
