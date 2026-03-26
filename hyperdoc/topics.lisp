@@ -2572,6 +2572,18 @@
   (make-reproducible-devenv-as-knowledge-artifact-topic
    "environment-topic-traceability"))
 
+(defun localhost-fedwiki-page-promotion-workflow-topic ()
+  (make-topic
+   :id "localhost-fedwiki-page-promotion-workflow"
+   :title "Localhost FedWiki page promotion workflow"
+   :summary "Reusable workflow that reads a localhost FedWiki page, normalizes story items and fragments, promotes topic chunks, composes a durable HyperDoc page, and optionally plans a dry-run DMX snippet twin without collapsing authored pages into live proxies."
+   :references '("Localhost FedWiki page promotion workflow"
+                 "The Life Cycle of Collective Knowledge"
+                 "Reproducible DevEnv as Knowledge Artifact"
+                 "Authored topic factories"
+                 "DMX FedWiki Write Model"
+                 "Documentation Surfaces in HyperDoc")))
+
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"
