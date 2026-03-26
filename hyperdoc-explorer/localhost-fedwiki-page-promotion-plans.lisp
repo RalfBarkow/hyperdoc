@@ -53,6 +53,22 @@
   (or (getf status :current-source-summary)
       "unavailable"))
 
+(defun promotion-reflected-snapshot-fingerprint-label (status key)
+  (or (getf status key)
+      "unavailable"))
+
+(defun promotion-reflected-snapshot-summary-label (status key)
+  (or (getf status key)
+      "unavailable"))
+
+(defun promotion-source-freshness-reason-label (status key)
+  (or (getf status key)
+      "unavailable"))
+
+(defun promotion-reflected-snapshot-error-label (status key)
+  (or (getf status key)
+      "none"))
+
 (defun promotion-reflected-snapshot-status-label (status-key)
   (case status-key
     (:present "present")
@@ -61,8 +77,8 @@
 
 (defun promotion-source-freshness-label (freshness-state)
   (case freshness-state
-    (:fresh "yes")
-    (:stale "no")
+    (:fresh "fresh")
+    (:stale "stale")
     (:unknown-malformed-envelope "unknown (malformed envelope)")
     (otherwise "unknown (missing envelope)")))
 
@@ -130,7 +146,7 @@
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
         (:h4 (views:esc "Status and actions"))
         (:p (views:esc
-             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is still fresh relative to the current normalized localhost FedWiki page snapshot, whether freshness is unknown because the reflected envelope is missing or malformed, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
+             "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Page synced?"))
                      (:td (:tt (views:esc
@@ -286,6 +302,81 @@
                      (:td (:tt (views:esc
                                 (promotion-dmx-summary-label
                                  dmx-summary))))))))))
+
+(views:defview 👀source-freshness (plan localhost-fedwiki-page-promotion-plan)
+  (views:html-view :title "Source freshness" :priority 7
+    (let ((status (localhost-fedwiki-page-promotion-plan-sync-status plan)))
+      (views:html
+        (:p "These diagnostics compare the current normalized localhost FedWiki source snapshot against the reflected snapshots embedded in the committed page and snippet artifacts. Stale reasons are fingerprint-based comparisons, not semantic diffs of the source text.")
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Current source fingerprint"))
+                     (:td (:tt (views:esc
+                                (promotion-current-source-fingerprint-label
+                                 status)))))
+                (:tr (:td (views:esc "Current source summary"))
+                     (:td (:tt (views:esc
+                                (promotion-current-source-summary-label
+                                 status))))))
+        (:h4 (views:esc "Page artifact"))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Reflected snapshot status"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :page-reflected-snapshot-status))))))
+                (:tr (:td (views:esc "Reflected snapshot fingerprint"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-fingerprint-label
+                                 status
+                                 :page-reflected-snapshot-fingerprint)))))
+                (:tr (:td (views:esc "Reflected snapshot summary"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-summary-label
+                                 status
+                                 :page-reflected-snapshot-summary)))))
+                (:tr (:td (views:esc "Freshness result"))
+                     (:td (:tt (views:esc
+                                (promotion-source-freshness-label
+                                 (getf status :page-source-freshness-state))))))
+                (:tr (:td (views:esc "Diagnostic reason"))
+                     (:td (views:esc
+                           (promotion-source-freshness-reason-label
+                            status
+                            :page-source-freshness-reason))))
+                (:tr (:td (views:esc "Malformed detail"))
+                     (:td (views:esc
+                           (promotion-reflected-snapshot-error-label
+                            status
+                            :page-reflected-snapshot-error-message)))))
+        (:h4 (views:esc "Snippet artifact"))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Reflected snapshot status"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :snippet-reflected-snapshot-status))))))
+                (:tr (:td (views:esc "Reflected snapshot fingerprint"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-fingerprint-label
+                                 status
+                                 :snippet-reflected-snapshot-fingerprint)))))
+                (:tr (:td (views:esc "Reflected snapshot summary"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-summary-label
+                                 status
+                                 :snippet-reflected-snapshot-summary)))))
+                (:tr (:td (views:esc "Freshness result"))
+                     (:td (:tt (views:esc
+                                (promotion-source-freshness-label
+                                 (getf status :snippet-source-freshness-state))))))
+                (:tr (:td (views:esc "Diagnostic reason"))
+                     (:td (views:esc
+                           (promotion-source-freshness-reason-label
+                            status
+                            :snippet-source-freshness-reason))))
+                (:tr (:td (views:esc "Malformed detail"))
+                     (:td (views:esc
+                           (promotion-reflected-snapshot-error-label
+                            status
+                            :snippet-reflected-snapshot-error-message)))))))))
 
 (views:defview 👀source-page (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Source page" :priority 2
@@ -589,56 +680,53 @@
 
 (views:defview 👀page-output (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Page output" :priority 6
-    (views:html
-      (:p "This boundary is still local and durable. The plan points at the authored HyperDoc page target and the explicit local writer entry point, without turning the page into a live DMX proxy.")
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Composed page target"))
-                   (:td (:tt (views:esc
-                              (localhost-fedwiki-page-promotion-plan-composed-page-target
-                               plan)))))
-              (:tr (:td (views:esc "Renderer"))
-                   (:td (:tt (views:esc
-                              (promotion-code-string
-                               (localhost-fedwiki-page-promotion-plan-page-renderer
-                                plan))))))
-              (:tr (:td (views:esc "Local writer"))
-                   (:td (:tt (views:esc
-                              (promotion-code-string
-                               (localhost-fedwiki-page-promotion-plan-local-artifact-writer
-                                plan))))))
-              (:tr (:td (views:esc "Committed page matches renderer"))
-                   (:td (:tt (views:esc
-                              (promotion-yes/no-label
-                               (localhost-fedwiki-page-promotion-plan-page-output-synced-p
-                                plan))))))
-              (:tr (:td (views:esc "Committed snippet matches metadata"))
-                   (:td (:tt (views:esc
-                              (promotion-yes/no-label
-                               (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
-                                plan))))))
-              (:tr (:td (views:esc "Page source snapshot fresh"))
-                   (:td (:tt (views:esc
-                              (promotion-source-freshness-label
-                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
-                                     :page-source-freshness-state))))))
-              (:tr (:td (views:esc "Snippet source snapshot fresh"))
-                   (:td (:tt (views:esc
-                              (promotion-source-freshness-label
-                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
-                                     :snippet-source-freshness-state))))))
-              (:tr (:td (views:esc "Page reflected snapshot"))
-                   (:td (:tt (views:esc
-                              (promotion-reflected-snapshot-status-label
-                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
-                                     :page-reflected-snapshot-status))))))
-              (:tr (:td (views:esc "Snippet reflected snapshot"))
-                   (:td (:tt (views:esc
-                              (promotion-reflected-snapshot-status-label
-                               (getf (localhost-fedwiki-page-promotion-plan-sync-status plan)
-                                     :snippet-reflected-snapshot-status))))))))))
+    (let ((status (localhost-fedwiki-page-promotion-plan-sync-status plan)))
+      (views:html
+        (:p "This boundary is still local and durable. The plan points at the authored HyperDoc page target and the explicit local writer entry point, without turning the page into a live DMX proxy.")
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Composed page target"))
+                     (:td (:tt (views:esc
+                                (localhost-fedwiki-page-promotion-plan-composed-page-target
+                                 plan)))))
+                (:tr (:td (views:esc "Renderer"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (localhost-fedwiki-page-promotion-plan-page-renderer
+                                  plan))))))
+                (:tr (:td (views:esc "Local writer"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (localhost-fedwiki-page-promotion-plan-local-artifact-writer
+                                  plan))))))
+                (:tr (:td (views:esc "Committed page matches renderer"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (localhost-fedwiki-page-promotion-plan-page-output-synced-p
+                                  plan))))))
+                (:tr (:td (views:esc "Committed snippet matches metadata"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
+                                  plan))))))
+                (:tr (:td (views:esc "Page source snapshot fresh"))
+                     (:td (:tt (views:esc
+                                (promotion-source-freshness-label
+                                 (getf status :page-source-freshness-state))))))
+                (:tr (:td (views:esc "Snippet source snapshot fresh"))
+                     (:td (:tt (views:esc
+                                (promotion-source-freshness-label
+                                 (getf status :snippet-source-freshness-state))))))
+                (:tr (:td (views:esc "Page reflected snapshot"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :page-reflected-snapshot-status))))))
+                (:tr (:td (views:esc "Snippet reflected snapshot"))
+                     (:td (:tt (views:esc
+                                (promotion-reflected-snapshot-status-label
+                                 (getf status :snippet-reflected-snapshot-status)))))))))))
 
 (views:defview 👀snippet-metadata (plan localhost-fedwiki-page-promotion-plan)
-  (views:html-view :title "Snippet metadata" :priority 7
+  (views:html-view :title "Snippet metadata" :priority 8
     (let* ((metadata (localhost-fedwiki-page-promotion-plan-topic-factory-metadata
                       plan))
            (provenance (getf metadata :provenance)))
@@ -688,7 +776,7 @@
                                  :provenance-classification))))))))))
 
 (views:defview 👀dmx-dry-run (plan localhost-fedwiki-page-promotion-plan)
-  (views:html-view :title "DMX dry-run" :priority 8
+  (views:html-view :title "DMX dry-run" :priority 9
     (let* ((summary (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))
            (provenance (getf summary :provenance))
            (evidence (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan)))

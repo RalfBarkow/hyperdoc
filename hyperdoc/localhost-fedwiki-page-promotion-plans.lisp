@@ -255,6 +255,45 @@
     (otherwise
      :unknown-missing-envelope)))
 
+(defun localhost-fedwiki-source-snapshot-fingerprint-field (snapshot)
+  (and snapshot
+       (getf snapshot :fingerprint)))
+
+(defun localhost-fedwiki-source-snapshot-summary-field (snapshot)
+  (and snapshot
+       (getf snapshot :summary)))
+
+(defun localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+    (reflection current-source-snapshot)
+  (let* ((state
+           (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+            reflection
+            current-source-snapshot))
+         (reflected-snapshot
+           (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+            reflection))
+         (current-fingerprint
+           (localhost-fedwiki-source-snapshot-fingerprint-field
+            current-source-snapshot))
+         (reflected-fingerprint
+           (localhost-fedwiki-source-snapshot-fingerprint-field
+            reflected-snapshot)))
+    (case state
+      (:fresh
+       (format nil "Current normalized source fingerprint ~A matches reflected snapshot fingerprint ~A."
+               (or current-fingerprint "n/a")
+               (or reflected-fingerprint "n/a")))
+      (:stale
+       (format nil "Current normalized source fingerprint ~A differs from reflected snapshot fingerprint ~A."
+               (or current-fingerprint "n/a")
+               (or reflected-fingerprint "n/a")))
+      (:unknown-malformed-envelope
+       (format nil "Reflected source snapshot envelope is malformed~@[: ~A~]."
+               (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+                reflection)))
+      (otherwise
+       "Reflected source snapshot envelope is missing."))))
+
 (defun localhost-fedwiki-page-promotion-plan-page-source-freshness-state
     (plan &key file-contents current-source-snapshot)
   (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
@@ -317,6 +356,14 @@
          (snippet-freshness-state
            (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
             snippet-reflection
+            resolved-current-source-snapshot))
+         (page-freshness-reason
+           (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+            page-reflection
+            resolved-current-source-snapshot))
+         (snippet-freshness-reason
+           (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+            snippet-reflection
             resolved-current-source-snapshot)))
     (list :plan-id
           (localhost-fedwiki-page-promotion-plan-id plan)
@@ -345,8 +392,17 @@
           (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
                 page-reflection)
                :malformed)
+          :page-reflected-snapshot-fingerprint
+          (localhost-fedwiki-source-snapshot-fingerprint-field page-source-snapshot)
+          :page-reflected-snapshot-summary
+          (localhost-fedwiki-source-snapshot-summary-field page-source-snapshot)
+          :page-reflected-snapshot-error-message
+          (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+           page-reflection)
           :page-source-freshness-state
           page-freshness-state
+          :page-source-freshness-reason
+          page-freshness-reason
           :page-source-freshness-known
           (not (null (member page-freshness-state
                              '(:fresh :stale))))
@@ -367,8 +423,17 @@
           (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
                 snippet-reflection)
                :malformed)
+          :snippet-reflected-snapshot-fingerprint
+          (localhost-fedwiki-source-snapshot-fingerprint-field snippet-source-snapshot)
+          :snippet-reflected-snapshot-summary
+          (localhost-fedwiki-source-snapshot-summary-field snippet-source-snapshot)
+          :snippet-reflected-snapshot-error-message
+          (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+           snippet-reflection)
           :snippet-source-freshness-state
           snippet-freshness-state
+          :snippet-source-freshness-reason
+          snippet-freshness-reason
           :snippet-source-freshness-known
           (not (null (member snippet-freshness-state
                              '(:fresh :stale))))
