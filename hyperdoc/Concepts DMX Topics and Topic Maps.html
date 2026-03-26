@@ -114,6 +114,13 @@
   associations.
 </p>
 
+<p>
+  Touch-Fahrplan is a user-facing rendering of the same rule. Topics can be
+  read as stations, associations can be read as routes between stations, and
+  the route itself still remains a first-class topic rather than a disposable
+  connector.
+</p>
+
 <h2>Operational definition of subject identity</h2>
 
 <p>
@@ -223,6 +230,13 @@
   string label.
 </p>
 
+<p>
+  When role semantics matter, DMX keeps them explicit through participant roles
+  such as <tt>player1</tt> and <tt>player2</tt>. Touch-Fahrplan route-laying
+  should preserve that strength rather than flattening the route into a vague
+  directional swipe or a provider-branded shortcut.
+</p>
+
 <h2>Why this matters for ownership and architecture</h2>
 
 <p>
@@ -254,7 +268,9 @@
 <p>
   That includes relations themselves. Once associations are also topics, the
   system can talk about relations in the same explicit way that it talks about
-  entities, pages, tools, and workflows.
+  entities, pages, tools, and workflows. Touch-Fahrplan simply gives that same
+  first-class association model a station/route reading at the user-facing
+  surface.
 </p>
 
 <h2>Related</h2>

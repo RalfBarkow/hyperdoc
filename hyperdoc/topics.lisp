@@ -643,7 +643,7 @@
   (make-topic
    :id "concepts-dmx-topics-and-topic-maps"
    :title "Concepts, DMX Topics, and Topic Maps"
-   :summary "Explains the relation between concepts, topic maps, and DMX topics and now provides an explicit click path into DMX-backed runtime proxy objects."
+   :summary "Explains how concepts, topic maps, and DMX topics relate, why associations are first-class topics, and how Touch-Fahrplan's station/route metaphor preserves that stronger model."
    :references '("Concept"
                  "Topic Map"
                  "DMX Topic"
@@ -1613,7 +1613,7 @@
   (make-topic
    :id "dmx-twins"
    :title "DMX twins"
-   :summary "Correspondence model for DMX-side artifacts that mirror HyperDoc page/topic intent without implying literal structural identity, runtime-proxy equivalence, or live synchronization."
+   :summary "Correspondence model for DMX-side artifacts that mirror HyperDoc page/topic intent, including first-class route/association subjects with explicit roles when needed, without implying literal structural identity or live synchronization."
    :references '("DMX twins"
                  "Documentation Surfaces in HyperDoc"
                  "Page/topic/twin correspondence"
@@ -2221,7 +2221,7 @@
    :id "topic-to-zotero-enrichment-route"
    :title "Topic-to-Zotero enrichment route"
    :summary
-   "Durable Connect association object that ties a HyperDoc topic to a read-only Zotero source designator before any live Zotero query runs."
+   "First-class route/association object that ties one HyperDoc topic station to a read-only Zotero source station before any live Zotero query runs."
    :references
    '("Touch-Fahrplan view for Zotero topic enrichment"
      "Zotero library bridge for HyperDoc"
@@ -2251,7 +2251,7 @@
   (make-topic
    :id "touch-fahrplan-view-for-zotero-topic-enrichment"
    :title "Touch-Fahrplan view for Zotero topic enrichment"
-   :summary "Topic-pane view that presents the current topic and a small Zotero source palette, opens inspectable route and plan objects, and summarizes the latest successful enrichment report inline."
+   :summary "Topic-pane view that treats topics and sources as stations, prefers the user-facing action label Lay route, opens inspectable route and plan objects, and summarizes the latest successful enrichment report inline."
    :references '("Touch-Fahrplan view for Zotero topic enrichment"
                  "Topic-to-Zotero enrichment route"
                  "Inspectable Zotero enrichment plan for a topic"
@@ -2261,7 +2261,7 @@
   (make-topic
    :id "dock-annotation"
    :title "Annotation"
-   :summary "Generic connect target/topic-object that classifies annotation relations, so a selected source chunk or object such as Text pages can connect to Annotation and reopen the same inspectable relation later."
+   :summary "Generic route target/topic-object that classifies annotation relations, so a selected source station such as Text pages can lay a route to Annotation and reopen the same inspectable relation later."
    :references '("Dock capabilities in HyperDoc"
                  "Dock presentation state model"
                  "A DOM-annotation connect gesture"
@@ -2272,7 +2272,7 @@
   (make-topic
    :id "dock-capabilities-in-hyperdoc"
    :title "Dock capabilities in HyperDoc"
-   :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect and Annotation become coachmark-governed Dock capabilities, with Annotation available both as a generic Connect target and as a same-model current-object shortcut."
+   :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect is introduced to users as Lay route, Annotation remains a sibling capability, and richer Touch-Fahrplan or DMX route/traversal workflows stay in the pane body."
    :references '("Dock capabilities in HyperDoc"
                  "Dock presentation state model"
                  "Annotation"
@@ -2283,7 +2283,7 @@
   (make-topic
    :id "dock-presentation-state-model"
    :title "Dock presentation state model"
-   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Connect, Annotation as a target tap, Touch-Fahrplan handoff, and DMX handoff fit the same UX grammar."
+   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Lay route / Connect, Annotation, Touch-Fahrplan route-laying, and DMX traversal fit the same UX grammar."
    :references '("Dock presentation state model"
                  "Dock capabilities in HyperDoc"
                  "Annotation"

@@ -70,6 +70,37 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
   - keep fast-moving collaborative trail in localhost FedWiki pages,
   - maintain navigable links/counterparts per topic instead of forcing identical content in both places.
 
+## Touch-Fahrplan Route Terminology
+
+When a slice touches Connect, Dock, Annotation, Touch-Fahrplan, or DMX
+association authoring, keep this wording model durable across prompts, docs,
+and user-facing copy:
+
+- User-facing concept: `route-laying gesture`
+- Preferred user-facing action label: `Lay route`
+- Touch-Fahrplan metaphor:
+  - topics are stations
+  - associations are routes between stations
+  - the route is itself a first-class topic/object
+- Low-level implementation term: `drag-to-connect`
+- Acceptable non-drag fallback term: `two-tap route-laying`
+- Avoid as canonical term: plain `swipe`
+
+Preserve these semantic distinctions:
+
+- `Lay route` = author a new association topic / route topic between two
+  stations/topics
+- `Follow route` = traverse an existing association / route
+- Keep the DMX idea that the association is itself first-class and preserve
+  player-role framing such as `player1` and `player2` where relevant
+- Do not make DMX or Touch-Fahrplan a competing permanent Dock identity
+- Keep HyperDoc's Dock as the capability-introduction layer
+- Keep richer route/traversal UI in the pane body or another dedicated surface
+- Keep Annotation as a sibling capability in the same grammar
+
+When one sentence needs both layers, prefer explicit phrasing such as:
+`Touch-Fahrplan route-laying gesture (implemented initially as drag-to-connect).`
+
 ## Codex task execution rules
 
 - Work one slice per thread. Do not switch to a different slice inside the same thread unless I explicitly retarget the task.

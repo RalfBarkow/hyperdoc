@@ -50,6 +50,9 @@
 <ul>
   <li>HyperBook is the abstract page-and-link substrate; HyperDoc is the documentation-oriented realization layered on top of it.</li>
   <li>Keep authored pages, stable topic objects, and live runtime objects distinct unless the slice explicitly bridges them.</li>
+  <li>When a slice touches Connect, Dock, Annotation, Touch-Fahrplan, or DMX association authoring, keep the Touch-Fahrplan-first route metaphor durable: topics are stations, associations are routes between stations, the route is itself first-class, and <tt>Lay route</tt> is the preferred user-facing label.</li>
+  <li>Use <tt>drag-to-connect</tt> only for low-level mechanics and <tt>two-tap route-laying</tt> for the non-drag fallback; do not use plain <tt>swipe</tt> as the canonical term.</li>
+  <li>Preserve the distinction between laying a route and following a route, and keep richer route/traversal UI in the pane body or another dedicated surface while the Dock remains the capability-introduction layer.</li>
   <li>Keep core <tt>:hyperdoc</tt> loadable without Zotero; optional Zotero behavior belongs in <tt>:hyperdoc/zotero</tt> and <tt>:hyperdoc/inspector/zotero</tt>.</li>
   <li><tt>HYPERDOC_ENABLE_ZOTERO</tt> is the authoritative runtime seam for Zotero; disabled mode should surface explicit unavailable objects rather than crashing or pretending live behavior exists.</li>
   <li>Bibliography authoring is review-first: live/import objects and generated plans may propose materialization, but they must not silently rewrite authored pages or <tt>topics.lisp</tt>.</li>
@@ -69,6 +72,7 @@
   <li>Prefer fewer authored HyperDoc guidance files over preserving prompt iteration history as durable pages.</li>
   <li>Keep adjacent documentation edits tightly coupled to the slice that justified them.</li>
   <li>Ask for exact validation outcomes rather than generic success language.</li>
+  <li>When prompts describe route authoring, prefer Touch-Fahrplan route-laying language over generic connect/swipe/provider-first wording.</li>
 </ul>
 
 <h2>Inventory outcome</h2>
@@ -90,6 +94,9 @@
 Then work from these repo truths:
 - HyperBook is the abstract page-and-link substrate; HyperDoc is the documentation-oriented realization layered on top of it.
 - Keep authored pages, stable topic objects, and live runtime objects distinct unless the slice explicitly bridges them.
+- For Connect/Touch-Fahrplan/DMX authoring slices, use Touch-Fahrplan-first route language: topics are stations, associations are routes between stations, the route is itself first-class, and <tt>Lay route</tt> is the preferred user-facing label.
+- Use <tt>drag-to-connect</tt> only for the implementation mechanic and <tt>two-tap route-laying</tt> for the non-drag fallback. Avoid plain <tt>swipe</tt> as the durable term.
+- Keep the distinction between laying a route and following a route, and keep the Dock as the capability-introduction layer while richer route/traversal UI lives in the pane body or another dedicated surface.
 - Zotero is optional. Preserve the boundary where core :hyperdoc stays loadable without Zotero, and the optional backend lives in :hyperdoc/zotero and :hyperdoc/inspector/zotero.
 - HYPERDOC_ENABLE_ZOTERO is the authoritative runtime seam for Zotero. Disabled mode must degrade explicitly to unavailable objects instead of crashing or faking live behavior.
 - Bibliography authoring is review-first: live/import objects and generated authoring plans may propose materialization, but they must not silently rewrite authored pages or topics.lisp.
@@ -108,6 +115,8 @@ Goal
 Architecture constraints
 - Do not collapse HyperBook and HyperDoc into one concept in code or docs.
 - Do not treat a topic object, an authored page, and a runtime object as interchangeable.
+- Do not flatten a first-class route/association into a disposable connector or a directional swipe metaphor.
+- Do not make Touch-Fahrplan or DMX a competing permanent Dock identity.
 - Do not reintroduce a hard Zotero dependency into core systems.
 - Do not make generated outputs authoritative by accident.
 - Do not create extra Codex-guidance pages beyond the canonical durable page and its minimal continuity shell.

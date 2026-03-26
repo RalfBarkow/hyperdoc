@@ -1,17 +1,32 @@
 # A DOM-annotation connect gesture
 
+Legacy title retained for continuity. The canonical user-facing concept in
+this cluster is the Touch-Fahrplan route-laying gesture. Prefer `Lay route`
+for user-facing copy, `drag-to-connect` for implementation mechanics,
+`two-tap route-laying` for the non-drag fallback, and avoid plain `swipe` as
+the durable term.
+
 We are in ~/workspace/hyperdoc.
 You may also inspect ~/workspace/dmx-platform for UX reference.
 
 Refinement of the previous design:
 
-Do not scope the connect gesture only to “existing inspectable objects”.
+Do not scope the route-laying gesture only to “existing inspectable objects”.
 Instead, implement a more general first slice:
 
-A DOM-annotation connect gesture between any two DOM elements within a single rendered tree/pane.
+A Touch-Fahrplan route-laying gesture between any two DOM elements within a
+single rendered tree/pane.
 
 Goal:
-Create a reusable HyperDoc capability where a user can connect any two rendered DOM elements in one pane, producing a relation annotation anchored to those two DOM positions.
+Create a reusable HyperDoc capability where a user can lay a route between any
+two rendered DOM elements in one pane, producing a first-class relation/route
+annotation anchored to those two DOM positions.
+
+Semantic boundary:
+- Lay route = author a new relation/route topic between two visible anchors
+- Follow route = traverse an existing relation/route
+- In this first slice the visible anchors may still be DOM elements, but the
+  authored result must read as a first-class route, not as a transient swipe
 
 Current follow-up note:
 - the running pane now also exposes a visible `Inspect` action beside `Connect`
@@ -24,7 +39,7 @@ The existing “missing step between Boot Raspberry Pi from flashed card and Edi
 
 Why this is better:
 - more general than object-only connections
-- closer to the DMX “draw a relation between two visible things” UX
+- closer to the DMX “lay a route between two visible things” UX
 - lets HyperDoc treat rendered prose/headings/list items/links as annotatable anchors
 - avoids prematurely locking the feature to one object family
 
@@ -48,24 +63,28 @@ Return a short grounded summary of:
 Find where rendered pane DOM is created and where click/mouse events can be attached for a single inspector pane.
 Identify the narrowest place to add a pane-local connect mode.
 
-3. Implement a general connect mode for one rendered pane
+3. Implement a general route-laying mode for one rendered pane
 MVP interaction:
-- user activates a pane-local Connect affordance such as “Connect” or “Annotate relation”
-- first click picks a source DOM element in that pane
-- moving the mouse shows a temporary visible line/overlay or equivalent live connection affordance
-- second click picks a target DOM element in the same pane
-- completion creates or opens a relation annotation object prefilled with:
+- user activates a pane-local `Lay route` affordance
+  - compatibility label `Connect` is acceptable if the UI cannot yet rename it
+- first click picks a source DOM element / source station in that pane
+- moving the mouse shows a temporary visible line/overlay or equivalent live route affordance
+- second click picks a target DOM element / target station in the same pane
+- completion creates or opens a first-class relation annotation / route object prefilled with:
   - source DOM anchor
   - target DOM anchor
   - pane/page/object context
 
 If a true drag-line is too invasive for the first slice, acceptable fallback:
-- click source
-- visible “connecting…” state
-- click target
+- two-tap route-laying:
+  - click source
+  - visible “laying route…” state
+  - click target
 - with a temporary overlay if possible
 
-But prefer an actual temporary line if it is cheap in the current CLOG inspector architecture.
+But prefer an actual temporary line if it is cheap in the current CLOG
+inspector architecture. That line is the initial `drag-to-connect`
+implementation of the route-laying gesture.
 
 4. Define the anchor model
 For this first slice, anchor the relation to DOM elements, not just objects.
@@ -89,6 +108,8 @@ Create or reuse a general relation-annotation / patch-target object with:
 
 Prefer reusing existing annotation/patch-target machinery if possible.
 Do not invent a parallel unrelated object model if HyperDoc already has one that can carry source/target anchors.
+The resulting object should be describable as a first-class route between two
+stations/topics, not only as an invisible payload blob.
 
 6. Make the first concrete use case work
 Use this concrete workflow example to prove the feature:
@@ -102,14 +123,15 @@ Use this concrete workflow example to prove the feature:
   - or similar inserted-step topic
 
 Important:
-The gesture should operate on the rendered DOM items themselves, not require the user to separately inspect both objects first.
+The route-laying gesture should operate on the rendered DOM items themselves,
+not require the user to separately inspect both objects first.
 
 7. UI expectations
 At minimum provide:
-- a visible connect-mode affordance in the pane
+- a visible `Lay route` affordance in the pane
 - visible source selection
-- visible temporary connection state
-- created/prefilled relation annotation object after target selection
+- visible temporary route-laying state
+- created/prefilled relation annotation / route object after target selection
 - immediate inspectability of that resulting object
 
 If there is already an “Edit / Patch Target” surface, it is acceptable and preferred to land there prefilled after the DOM gesture.
@@ -124,7 +146,7 @@ Do not solve:
 Do solve:
 - one pane
 - rendered DOM elements
-- temporary connection gesture
+- temporary route-laying gesture
 - relation annotation object creation/prefill
 - one verified workflow example
 
@@ -132,7 +154,7 @@ Do solve:
 Return:
 - the DMX interaction pattern you found
 - the HyperDoc insertion point you chose
-- the exact gesture the user performs
+- the exact route-laying gesture the user performs
 - the anchor representation used
 - the exact created/prefilled object shape
 - the exact files changed

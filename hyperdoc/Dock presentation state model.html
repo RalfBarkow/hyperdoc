@@ -12,7 +12,8 @@
 <p>
   Inspection itself is not a Dock capability in this slice. Inspector tabs are
   the durable inspection surface; the Dock governs only transient
-  action-oriented capabilities and provider handoffs.
+  action-oriented capabilities plus route-laying and route-following
+  introductions.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -28,7 +29,7 @@
 <ul>
   <li><b>latent</b>: no expanded coachmark is visible, but compact access remains.</li>
   <li><b>introduction</b>: the Dock expands because the capability is newly relevant and needs teaching.</li>
-  <li><b>active</b>: Connect is mid-gesture, so the Dock stays expanded with task-state UI.</li>
+  <li><b>active</b>: <b>Lay route</b> / Connect is mid-gesture, so the Dock stays expanded with task-state UI.</li>
   <li><b>degraded</b>: the richer chrome has receded after use or dismissal, while compact access remains.</li>
   <li><b>rediscovery</b>: the user explicitly reopens the richer coachmark layer with <b>Guide</b>.</li>
 </ul>
@@ -43,9 +44,9 @@
 <h2>Transitions</h2>
 
 <ul>
-  <li><b>Introduction -&gt; Active</b>: starting Connect turns teaching chrome into task-state chrome.</li>
+  <li><b>Introduction -&gt; Active</b>: starting <b>Lay route</b> turns teaching chrome into task-state chrome.</li>
   <li><b>Introduction -&gt; Degraded</b>: dismissing the coachmark retracts to compact capabilities.</li>
-  <li><b>Active -&gt; Degraded</b>: when the stateful Connect gesture ends, the Dock recedes.</li>
+  <li><b>Active -&gt; Degraded</b>: when the stateful route-laying gesture ends, the Dock recedes.</li>
   <li><b>Degraded -&gt; Rediscovery</b>: <b>Guide</b> reopens the richer coachmark layer.</li>
   <li><b>Rediscovery -&gt; Degraded</b>: closing rediscovery returns the pane to compact capabilities.</li>
 </ul>
@@ -60,24 +61,32 @@
 
 <ul>
   <li><b>Degrade chrome, not capability</b>: JS state runtime, CSS coachmark styling, and the focused Playwright regression.</li>
-  <li><b>Active Connect keeps task state visible</b>: JS task-state handling, pane snapshot parsing, explorer views, and the same browser regression.</li>
-  <li><b>Provider-specific workflows stay in the pane body</b>: Touch-Fahrplan topic view, DMX pane surfaces, and the coachmark runtime.</li>
+  <li><b>Active route-laying keeps task state visible</b>: JS task-state handling, pane snapshot parsing, explorer views, and the same browser regression.</li>
+  <li><b>Route/traversal workflows stay in the pane body</b>: Touch-Fahrplan topic view, DMX pane surfaces, and the coachmark runtime.</li>
   <li><b>Dock presentation state is inspectable</b>: current pane snapshots, explorer views, and the focused Lisp smoke.</li>
 </ul>
 
 <h2>Shared UX grammar</h2>
 
 <p>
-  The same grammar now covers the Dock capabilities and the optional provider
-  handoffs:
+  The same grammar now covers the Dock capabilities and the optional
+  route/traversal handoffs:
 </p>
 
 <ul>
-  <li><b>Connect</b>: can be introduced, kept active with task state, degraded, and rediscovered.</li>
-  <li><b>Annotation</b>: remains a sibling capability in the same compact and coachmark system, and can act as the target tap that completes an active Connect gesture.</li>
-  <li><b>Touch-Fahrplan</b>: appears only as a contextual handoff when the provider is available; the route and report workflow remains in the pane body.</li>
-  <li><b>DMX</b>: appears only as a contextual handoff to the richer traversal surface instead of a permanent Dock identity.</li>
+  <li><b>Lay route</b> (<b>Connect</b> capability): can be introduced, kept active with task state, degraded, and rediscovered.</li>
+  <li><b>Annotation</b>: remains a sibling capability in the same compact and coachmark system, and can act as the target tap that completes an active route-laying gesture.</li>
+  <li><b>Touch-Fahrplan</b>: appears only as a contextual station/route handoff; the richer route and report workflow remains in the pane body.</li>
+  <li><b>DMX</b>: appears only as a contextual traversal handoff to the richer surface instead of a permanent Dock identity, while preserving first-class association objects and explicit roles such as <tt>player1</tt> and <tt>player2</tt> where relevant.</li>
 </ul>
+
+<p>
+  Durable wording stays one layer above mechanics: the user is laying a route
+  between stations. The first implementation may still surface low-level
+  <tt>drag-to-connect</tt> or click-target mechanics, with
+  <tt>two-tap route-laying</tt> as the non-drag fallback, but those mechanics
+  are subordinate to the route metaphor rather than a replacement for it.
+</p>
 
 <p>
   In the current runtime, active Connect uses the cue
@@ -92,7 +101,7 @@
 <p>
   The current pane snapshot carries the active presentation state, presentation
   reason, coachmark visibility, compact capabilities, coachmark capabilities,
-  and provider handoffs. The model therefore answers both:
+  and route/traversal handoffs. The model therefore answers both:
 </p>
 
 <ul>

@@ -5,8 +5,8 @@
 <p>
   Inspector tabs are the durable base chrome. The <b>Dock</b> is now a
   pane-local coachmark layer that progressively enhances those tabs when a
-  capability has become newly relevant, is currently active, or needs
-  rediscovery.
+  capability such as <b>Lay route</b>, <b>Annotation</b>, or <b>Guide</b> has
+  become newly relevant, is currently active, or needs rediscovery.
 </p>
 
 <p>
@@ -20,6 +20,14 @@
   <b>inspection belongs to inspector tabs, not to the Dock</b>.
   The Dock does not carry an <b>Inspect</b> action or a coachmark-side
   inspection button.
+</p>
+
+<p>
+  In this grammar, <b>Connect</b> remains the capability name, but the
+  preferred user-facing action label is <b>Lay route</b> whenever the
+  Touch-Fahrplan metaphor is legible. Topics read as stations, associations
+  read as routes between stations, and the authored route is itself a
+  first-class association topic/object rather than a disposable line.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -41,8 +49,8 @@
 </p>
 
 <ul>
-  <li><b>Connect</b>: the compact action stays available, while the coachmark expands only for teaching, active task state, or rediscovery.</li>
-  <li><b>Annotation</b>: when Connect is waiting for a target, tapping Annotation completes the relation against the generic Annotation topic; when Connect is idle, the same control reopens the current-object annotation shortcut through that same relation model.</li>
+  <li><b>Lay route</b> (<b>Connect</b> capability): the compact action stays available, while the coachmark expands only for teaching, active task state, or rediscovery. The first implementation mechanic may still be <tt>drag-to-connect</tt>, with <tt>two-tap route-laying</tt> as the non-drag fallback.</li>
+  <li><b>Annotation</b>: when <b>Lay route</b> is waiting for a target station, tapping Annotation completes the relation against the generic Annotation topic; when Connect is idle, the same control reopens the current-object annotation shortcut through that same relation model.</li>
 </ul>
 
 <p>
@@ -58,9 +66,9 @@
 </p>
 
 <ul>
-  <li><b>latent</b>: no expanded guidance is visible, but compact Connect, Annotation, and Guide access remain.</li>
+  <li><b>latent</b>: no expanded guidance is visible, but compact <b>Lay route</b>, Annotation, and Guide access remain.</li>
   <li><b>introduction</b>: the coachmark expands because a capability has become newly relevant and needs teaching.</li>
-  <li><b>active</b>: the coachmark stays open because Connect is mid-gesture and task-state controls matter.</li>
+  <li><b>active</b>: the coachmark stays open because <b>Lay route</b> is mid-gesture and task-state controls matter.</li>
   <li><b>degraded</b>: the expanded Dock has receded after use or dismissal, while the same capability remains in compact form.</li>
   <li><b>rediscovery</b>: the user explicitly reopens the richer coachmark layer through <b>Guide</b>.</li>
 </ul>
@@ -72,25 +80,25 @@
   explorer views, and focused tests.
 </p>
 
-<h2>Connect, Annotation, and provider handoffs</h2>
+<h2>Lay route, Annotation, and route/traversal handoffs</h2>
 
 <p>
-  <b>Connect</b> and <b>Annotation</b> are sibling capabilities in the same
+  <b>Lay route</b> and <b>Annotation</b> are sibling capabilities in the same
   system. Touch-Fahrplan and DMX are not competing permanent Dock identities.
-  The coachmark may introduce them as contextual handoffs, but the richer
-  workflow belongs in the pane body:
+  The coachmark may introduce route-laying or route-following possibilities,
+  but the richer workflow belongs in the pane body:
 </p>
 
 <ul>
-  <li><b>Touch-Fahrplan</b>: introduced from the coachmark when the Zotero-backed topic workflow is available, while the route and report UI remain in the topic pane.</li>
-  <li><b>DMX</b>: introduced from the coachmark only as a handoff to the richer traversal surface such as the <b>External</b> tab.</li>
+  <li><b>Touch-Fahrplan</b>: introduced from the coachmark as a station/route surface when the Zotero-backed workflow is available, while the richer route and report UI remain in the topic pane.</li>
+  <li><b>DMX</b>: introduced from the coachmark only as a handoff to the richer traversal surface such as the <b>External</b> tab. The route object remains compatible with explicit DMX participant roles such as <tt>player1</tt> and <tt>player2</tt> when that extra structure matters.</li>
 </ul>
 
 <p>
   The explicit annotation example for this slice is now:
-  <b>source Text pages -&gt; target Annotation</b>.
+  <b>Lay route from Text pages to Annotation</b>.
   Selecting the <b>Text pages</b> chunk in the HyperDoc Main page and then
-  tapping <b>Annotation</b> while Connect is active creates or reopens an
+  tapping <b>Annotation</b> while <b>Lay route</b> is active creates or reopens an
   inspectable annotation relation for <b>Text pages</b>.
 </p>
 
@@ -104,15 +112,16 @@
 
 <p>
   The current Annotation path still keeps one narrow shortcut:
-  when Connect is idle, the compact <b>Annotation</b> action can reopen a
+  when <b>Lay route</b> / Connect is idle, the compact <b>Annotation</b> action can reopen a
   current-object annotation relation for the pane’s primary object. The more
-  general path is now the normal Connect gesture, where a visible source anchor
-  such as <b>Text pages</b> connects to the generic <b>Annotation</b> target.
+  general path is now the normal route-laying gesture, where a visible source
+  station such as <b>Text pages</b> lays a route to the generic
+  <b>Annotation</b> target.
 </p>
 
 <p>
   This slice still does not provide a separate authoring UI for arbitrary DOM
-  sub-anchor annotation outside the Connect gesture itself. It keeps the
+  sub-anchor annotation outside the route-laying gesture itself. It keeps the
   generalization narrow by making <b>Annotation</b> a normal target endpoint in
   Connect first.
 </p>
@@ -131,6 +140,7 @@
   <li><a page="Dock presentation state model">Dock presentation state model</a></li>
   <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
   <li><a page="Touch-Fahrplan view for Zotero topic enrichment">Touch-Fahrplan view for Zotero topic enrichment</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
   <li><a page="Normal association submit path vs evidence path">Normal association submit path vs evidence path</a></li>
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
 </ul>
