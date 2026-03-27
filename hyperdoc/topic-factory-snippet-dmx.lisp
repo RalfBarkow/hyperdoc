@@ -25,6 +25,12 @@
   "zettelkasten.zettel.title")
 (defparameter *dmx-zettelkasten-zettel-content-type-uri*
   "zettelkasten.zettel.content")
+(defparameter *dmx-notes-note-type-uri*
+  "dmx.notes.note")
+(defparameter *dmx-notes-title-type-uri*
+  "dmx.notes.title")
+(defparameter *dmx-notes-text-type-uri*
+  "dmx.notes.text")
 (defparameter *topic-factory-snippet-dmx-default-view-props*
   '(:x 160 :y 120 :visibility t :pinned nil))
 
@@ -108,6 +114,19 @@
   (string= (or topic-type-uri "")
            *dmx-zettelkasten-zettel-type-uri*))
 
+(defun dmx-notes-note-topic-type-uri-p (topic-type-uri)
+  (string= (or topic-type-uri "")
+           *dmx-notes-note-type-uri*))
+
+(defun topic-factory-snippet-dmx-title-content-carrier-spec (topic-type-uri)
+  (cond
+    ((zettelkasten-zettel-topic-type-uri-p topic-type-uri)
+     (list :title-type-uri *dmx-zettelkasten-zettel-title-type-uri*
+           :content-type-uri *dmx-zettelkasten-zettel-content-type-uri*))
+    ((dmx-notes-note-topic-type-uri-p topic-type-uri)
+     (list :title-type-uri *dmx-notes-title-type-uri*
+           :content-type-uri *dmx-notes-text-type-uri*))))
+
 (defun topic-factory-snippet-dmx-default-children
     (definition workspace-topicmap-id)
   (let ((children (make-hash-table :test #'equal)))
@@ -125,22 +144,28 @@
           (topic-factory-snippet-provenance-json definition workspace-topicmap-id))
     children))
 
-(defun topic-factory-snippet-dmx-zettel-children (definition topic-value)
+(defun topic-factory-snippet-dmx-title-content-children
+    (definition topic-value title-type-uri content-type-uri)
   (let ((children (make-hash-table :test #'equal)))
-    (setf (gethash *dmx-zettelkasten-zettel-title-type-uri* children)
+    (setf (gethash title-type-uri children)
           (or topic-value
               (title-of definition))
-          (gethash *dmx-zettelkasten-zettel-content-type-uri* children)
+          (gethash content-type-uri children)
           (snippet-text-of definition))
     children))
 
 (defun topic-factory-snippet-dmx-children
     (definition workspace-topicmap-id &key topic-type-uri topic-value)
-  (if (zettelkasten-zettel-topic-type-uri-p topic-type-uri)
-      (topic-factory-snippet-dmx-zettel-children definition topic-value)
-      (topic-factory-snippet-dmx-default-children
-       definition
-       workspace-topicmap-id)))
+  (if-let (carrier-spec
+           (topic-factory-snippet-dmx-title-content-carrier-spec topic-type-uri))
+    (topic-factory-snippet-dmx-title-content-children
+     definition
+     topic-value
+     (getf carrier-spec :title-type-uri)
+     (getf carrier-spec :content-type-uri))
+    (topic-factory-snippet-dmx-default-children
+     definition
+     workspace-topicmap-id)))
 
 (defun topic-factory-snippet-dmx-payload (definition workspace-topicmap-id
                                            &key topic-type-uri topic-value)

@@ -20,7 +20,7 @@
   "hyperdoc/Localhost FedWiki page promotion workflow.html")
 
 (defparameter *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
-  "zettelkasten.zettel")
+  "dmx.notes.note")
 
 (defstruct localhost-fedwiki-page-promotion-plan
   id

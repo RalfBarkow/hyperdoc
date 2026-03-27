@@ -539,6 +539,15 @@
     (with-output-to-string (stream)
       (funcall encoder object stream))))
 
+(defun dmx-import-children-json-object (children)
+  (when children
+    (let ((json (make-hash-table :test #'equal)))
+      (maphash (lambda (child-type-uri child-value)
+                 (setf (gethash child-type-uri json)
+                       child-value))
+               children)
+      json)))
+
 (defun dmx-import-json-object (payload)
   (let ((json (make-hash-table :test #'equal)))
     (labels ((put (key value)
@@ -548,7 +557,9 @@
       (put "uri" (getf payload :uri))
       (put "typeUri" (getf payload :type-uri))
       (put "value" (getf payload :value))
-      (put "children" (getf payload :children)))
+      (put "children"
+           (dmx-import-children-json-object
+            (getf payload :children))))
     json))
 
 (defun normalize-http-client-url (client url)
