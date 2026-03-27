@@ -373,6 +373,18 @@
                (format stream "  and the umbrella topic records multi-item provenance across both source items.~%")
                (format stream "</p>")))
             (list
+             :title "Promotion workflow"
+             :body-html
+             (render-localhost-fedwiki-promotion-workflow-section-html
+              :promotion-plan-expression
+              "(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)"
+              :source-expression
+              "(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)"
+              :source-page-id
+              (fedwiki-page-id-of source)
+              :source-page-path
+              (fedwiki-relative-path-of source)))
+            (list
              :title "Inspectable objects"
              :body-html
              (with-output-to-string (stream)

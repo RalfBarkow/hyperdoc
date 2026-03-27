@@ -1219,3 +1219,27 @@
                      (getf section-block :body-html))
              (unless (eq section-block last-section-block)
                (format stream "~%~%"))))))
+
+(defun render-localhost-fedwiki-promotion-workflow-section-html
+    (&key promotion-plan-expression
+          source-expression
+          source-page-id
+          source-page-path)
+  (with-output-to-string (stream)
+    (format stream "<p>~%")
+    (format stream "  This generated HyperDoc page can reopen its promotion workflow for source page~%")
+    (format stream "  <tt>~A</tt> at repo-relative path <tt>~A</tt>, without leaving the durable~%"
+            source-page-id
+            source-page-path)
+    (format stream "  authored artifact surface.~%")
+    (format stream "</p>~%~%")
+    (format stream "<ul>~%")
+    (format stream "  <li><a expr=\"~A\" view=\"Overview\"><tt>Promotion plan overview</tt></a></li>~%"
+            promotion-plan-expression)
+    (format stream "  <li><a expr=\"~A\" view=\"Source freshness\"><tt>Review source freshness</tt></a></li>~%"
+            promotion-plan-expression)
+    (format stream "  <li><a expr=\"~A\" view=\"Source page\"><tt>Promotion-plan source page view</tt></a></li>~%"
+            promotion-plan-expression)
+    (format stream "  <li><a expr=\"~A\" view=\"Summary\"><tt>Normalized localhost source object</tt></a></li>~%"
+            source-expression)
+    (format stream "</ul>")))

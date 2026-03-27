@@ -997,6 +997,17 @@
       (format stream "  inside the primary FedWiki paragraph item, so the provenance reported by the~%")
       (format stream "  derived chunks is fragment-level rather than whole-item-level.~%")
       (format stream "</p>~%~%")
+      (format stream "<h2>Promotion workflow</h2>~%~%")
+      (format stream "~A~%~%"
+              (render-localhost-fedwiki-promotion-workflow-section-html
+               :promotion-plan-expression
+               "(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)"
+               :source-expression
+               "(hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)"
+               :source-page-id
+               (fedwiki-page-id-of source)
+               :source-page-path
+               (fedwiki-relative-path-of source)))
       (format stream "<h2>Inspectable objects</h2>~%~%")
       (format stream "<ul>~%")
       (format stream "~A~%" (render-the-life-cycle-topic-list-item umbrella))
