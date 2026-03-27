@@ -71,6 +71,9 @@
          (surface-mixed-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title surface-views "Mixed states")))
+         (surface-handover-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "DMX handover")))
          (collective-views (load-inspector-views-for-object collective))
          (repro-views (load-inspector-views-for-object repro))
          (collective-promoted-html
@@ -133,6 +136,22 @@
       (assert-true
        (search label surface-overview-html :test #'char=)
        (format nil "Promotion surface overview must expose the triage count label ~A" label)))
+    (dolist (needle (list "DMX backend block."
+                          "Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471."
+                          "No further DMX writes should be attempted until backend/admin repair."
+                          "Repair runbook page"
+                          "Inspect repair runbook object"))
+      (assert-true
+       (search needle surface-overview-html :test #'char=)
+       (format nil "Promotion surface overview must expose ~A" needle)))
+    (dolist (needle (list "DMX backend block."
+                          "Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471."
+                          "No further DMX writes should be attempted until backend/admin repair."
+                          "Repair runbook page"
+                          "Inspect repair runbook object"))
+      (assert-true
+       (search needle surface-handover-html :test #'char=)
+       (format nil "Promotion surface DMX handover must expose ~A" needle)))
     (assert-true
      (search "attention-needed promotion plans ahead of all-fresh plans"
              surface-triage-html
@@ -1919,6 +1938,8 @@
          (handover-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title views "DMX handover")))
+         (runbook-page (hyperdoc::promotion-dmx-repair-runbook-page))
+         (runbook-object (hyperdoc::promotion-dmx-repair-runbook-object))
          (definition
            (hyperdoc::localhost-fedwiki-page-promotion-handover-topic-definition-chunk
             surface))
@@ -1937,6 +1958,16 @@
     (assert-true
      (smoke-find-view-by-title views "DMX handover")
      "Promotion surface must expose the DMX handover view")
+    (assert-true runbook-page
+                 "DMX blocked-state note must resolve the repair runbook page")
+    (assert-true runbook-object
+                 "DMX blocked-state note must resolve the repair runbook object")
+    (assert-equal "DMX topicmap 919822 repair runbook"
+                  (hyperbook:title-of runbook-page)
+                  "DMX blocked-state note must target the repair runbook page")
+    (assert-equal "DMX topicmap 919822 repair runbook"
+                  (hyperdoc::dmx-topicmap-repair-runbook-title runbook-object)
+                  "DMX blocked-state note must target the repair runbook object")
     (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-topic-title*
                   (getf summary :topic-title)
                   "DMX handover summary must preserve the seed topic title")
@@ -2001,7 +2032,12 @@
                    "topic-action=CREATE"
                    "topicmap-action=ADD"
                    "workspace-topicmap-id=919822"
-                   "source=hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"))
+                   "source=hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"
+                   "DMX backend block."
+                   "Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471."
+                   "No further DMX writes should be attempted until backend/admin repair."
+                   "Repair runbook page"
+                   "Inspect repair runbook object"))
       (assert-true
        (or (search needle handover-html :test #'char=)
            (search needle evidence :test #'char=))
