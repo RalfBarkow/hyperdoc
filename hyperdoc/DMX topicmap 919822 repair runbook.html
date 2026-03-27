@@ -1,0 +1,92 @@
+<h1>DMX topicmap 919822 repair runbook</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX
+  topicmap 919822 repair runbook</tt></a> is the durable HyperDoc checkpoint
+  for the backend defect in DMX topicmap <tt>919822</tt> (<tt>context-window</tt>).
+  It keeps the current diagnosis inspectable, stays read-first and dry-run-first,
+  and does not guess the hidden backend write payload for repairing the broken
+  topicmap-context memberships.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Overview"><tt>dmx-topicmap-919822-repair-runbook</tt> Overview</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Healthy specimen"><tt>dmx-topicmap-919822-repair-runbook</tt> Healthy specimen</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Broken assocs"><tt>dmx-topicmap-919822-repair-runbook</tt> Broken assocs</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Evidence"><tt>dmx-topicmap-919822-repair-runbook</tt> Evidence</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Candidate repairs"><tt>dmx-topicmap-919822-repair-runbook</tt> Candidate repairs</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Dry-run"><tt>dmx-topicmap-919822-repair-runbook</tt> Dry-run</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Unknowns"><tt>dmx-topicmap-919822-repair-runbook</tt> Unknowns</a></li>
+  <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Operations"><tt>dmx-topicmap-919822-repair-runbook</tt> Operations</a></li>
+</ul>
+
+<h2>Problem capsule</h2>
+
+<p>
+  The broken objects are not the note topics themselves. The readable notes
+  still exist. The defect sits in the topicmap-scoped
+  <tt>dmx.topicmaps.topicmap_context</tt> memberships and their missing view
+  properties.
+</p>
+
+<ul>
+  <li><tt>921404</tt> is the broken membership assoc for topic <tt>921352</tt>.</li>
+  <li><tt>921471</tt> is the broken membership assoc for topic <tt>921464</tt>.</li>
+  <li>Healthy comparison specimen: topic <tt>921494</tt> resolves through assoc <tt>921503</tt>.</li>
+</ul>
+
+<h2>Accepted evidence boundary</h2>
+
+<ul>
+  <li><tt>topicmaps/object/921352</tt> fails on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921404</tt>.</li>
+  <li><tt>topicmaps/object/921464</tt> fails on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921471</tt>.</li>
+  <li><tt>topicmaps/919822</tt> fails on missing <tt>dmx.topicmaps.x</tt> for assoc <tt>921471</tt>.</li>
+</ul>
+
+<h2>Containment</h2>
+
+<p>
+  Topicmap <tt>919822</tt> should not receive further speculative writes until a
+  backend/admin repair path is confirmed. This runbook therefore exposes
+  read-only evidence, dry-run checklists, and post-repair verification instead
+  of a live repair action. No POST, PUT, or DELETE is attached to this runbook object.
+</p>
+
+<h2>Why HyperDoc code changes are not justified now</h2>
+
+<p>
+  The public API proves which assocs are broken. The public API does not expose the exact write payload for <tt>/topicmaps/919822/assoc/&lt;assoc-id&gt;</tt>.
+  That means the remaining uncertainty is a DMX backend/admin contract problem,
+  not a HyperDoc modeling problem.
+</p>
+
+<h2>Smallest likely repair</h2>
+
+<p>
+  The smallest likely repair is backend/admin work on assocs <tt>921404</tt>
+  and <tt>921471</tt>: either add the missing topicmap-scoped assoc view props,
+  or remove and correctly recreate those memberships through the real backend
+  route.
+</p>
+
+<h2>Post-repair gate before resuming DMX seeding</h2>
+
+<ol>
+  <li><tt>topicmaps/object/921352</tt> must return <tt>200 OK</tt>.</li>
+  <li><tt>topicmaps/object/921464</tt> must return <tt>200 OK</tt>.</li>
+  <li><tt>topicmaps/919822</tt> must return <tt>200 OK</tt>.</li>
+  <li>Only then should DMX seeding or topicmap-local writes resume.</li>
+</ol>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+</ul>

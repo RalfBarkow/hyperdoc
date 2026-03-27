@@ -2584,6 +2584,16 @@
                  "DMX FedWiki Write Model"
                  "Documentation Surfaces in HyperDoc")))
 
+(defun dmx-topicmap-919822-repair-runbook-topic ()
+  (make-topic
+   :id "dmx-topicmap-919822-repair-runbook"
+   :title "DMX topicmap 919822 repair runbook"
+   :summary "Read-first HyperDoc runbook for diagnosing the broken topicmap-context membership/view-props defect in DMX topicmap 919822 without guessing the hidden backend repair payload."
+   :references '("DMX topicmap 919822 repair runbook"
+                 "Localhost FedWiki page promotion workflow"
+                 "DMX FedWiki Write Model"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"

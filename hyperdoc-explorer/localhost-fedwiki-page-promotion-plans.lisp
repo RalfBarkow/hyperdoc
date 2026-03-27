@@ -171,6 +171,240 @@
          (:div :style "margin-top: 0.35rem;"
                (views:esc (getf spec :description))))))))
 
+(defun repair-runbook-mode-label (mode)
+  (case mode
+    (:read-only "read-only")
+    (otherwise (promotion-code-string mode))))
+
+(defun repair-runbook-candidate-status-label (status)
+  (case status
+    (:admin-required "admin required")
+    (otherwise (promotion-code-string status))))
+
+(defmethod views:text-representation ((runbook dmx-topicmap-repair-runbook))
+  (format nil "Runbook: ~A" (dmx-topicmap-repair-runbook-title runbook)))
+
+(views:defview 👀overview (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Overview" :priority 1
+    (let* ((healthy (dmx-topicmap-repair-runbook-healthy-specimen runbook))
+           (broken (dmx-topicmap-repair-runbook-broken-assocs runbook)))
+      (views:html
+        (:p (views:esc (dmx-topicmap-repair-runbook-summary runbook)))
+        (:p (views:esc
+             "This runbook is intentionally diagnostic and dry-run-first. It isolates the broken topicmap-context membership/view-props layer in topicmap 919822 and does not justify HyperDoc-side writer changes while the backend repair contract remains opaque."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Topicmap id"))
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        (dmx-topicmap-repair-runbook-topicmap-id
+                                         runbook))))))
+                (:tr (:td (views:esc "Workspace/context"))
+                     (:td (:tt (views:esc
+                                (dmx-topicmap-repair-runbook-workspace-name
+                                 runbook)))))
+                (:tr (:td (views:esc "Topicmap route"))
+                     (:td (:tt (views:esc
+                                (dmx-topicmap-repair-runbook-topicmap-route
+                                 runbook)))))
+                (:tr (:td (views:esc "Healthy comparison topic"))
+                     (:td (:tt (views:esc
+                                (format nil "~D" (getf healthy :topic-id))))))
+                (:tr (:td (views:esc "Healthy comparison assoc"))
+                     (:td (:tt (views:esc
+                                (format nil "~D" (getf healthy :assoc-id))))))
+                (:tr (:td (views:esc "Broken assoc ids"))
+                     (:td (:tt (views:esc
+                                (format nil "~{~D~^, ~}"
+                                        (loop for row in broken
+                                              collect (getf row :assoc-id)))))))
+                (:tr (:td (views:esc "Default operation mode"))
+                     (:td (:tt (views:esc
+                                (repair-runbook-mode-label
+                                 (dmx-topicmap-repair-runbook-default-operation-mode
+                                  runbook))))))
+                (:tr (:td (views:esc "DMX writes enabled by default"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (dmx-topicmap-repair-runbook-write-enabled-p
+                                  runbook))))))
+                (:tr (:td (views:esc "Source file"))
+                     (:td (:tt (views:esc
+                                (dmx-topicmap-repair-runbook-source-file
+                                 runbook))))))
+        (:ul
+         (:li (views:esc
+               "The note topics themselves remain readable; the defect is at the topicmap-context membership/view-props layer."))
+         (:li (views:esc
+               "Topicmap 919822 should not receive further writes until backend/admin repair is complete."))
+         (:li (views:esc
+               "After repair, verify topicmaps/object/921352, topicmaps/object/921464, and topicmaps/919822 before resuming DMX seeding work.")))))))
+
+(views:defview 👀healthy-specimen (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Healthy specimen" :priority 2
+    (let ((healthy (dmx-topicmap-repair-runbook-healthy-specimen runbook)))
+      (views:html
+        (:p (views:esc
+             "Topic 921494 is the accepted healthy comparison specimen inside topicmap 919822. It proves the assoc class and the membership shape without proving the hidden write payload."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Topic id"))
+                     (:td (:tt (views:esc
+                                (format nil "~D" (getf healthy :topic-id))))))
+                (:tr (:td (views:esc "Assoc id"))
+                     (:td (:tt (views:esc
+                                (format nil "~D" (getf healthy :assoc-id))))))
+                (:tr (:td (views:esc "Assoc type"))
+                     (:td (:tt (views:esc
+                                (getf healthy :assoc-type)))))
+                (:tr (:td (views:esc "Topic readable"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf healthy :topic-readable-p))))))
+                (:tr (:td (views:esc "Topicmap-object lookup readable"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf healthy :topicmap-object-readable-p))))))
+                (:tr (:td (views:esc "Summary"))
+                     (:td (views:esc (getf healthy :summary)))))))))
+
+(views:defview 👀broken-assocs (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Broken assocs" :priority 3
+    (views:html
+      (:p (views:esc
+           "These are the broken topicmap-context membership/view assocs currently blocking healthy lookup inside topicmap 919822."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Assoc id"))
+                    (:th (views:esc "Topic id"))
+                    (:th (views:esc "Assoc type"))
+                    (:th (views:esc "Topic readable"))
+                    (:th (views:esc "Observed failure"))))
+              (:tbody
+               (loop for row in (dmx-topicmap-repair-runbook-broken-assocs runbook)
+                     do (views:html
+                          (:tr
+                           (:td (:tt (views:esc
+                                      (format nil "~D" (getf row :assoc-id)))))
+                           (:td (:tt (views:esc
+                                      (format nil "~D" (getf row :topic-id)))))
+                           (:td (:tt (views:esc
+                                      (getf row :assoc-type))))
+                           (:td (:tt (views:esc
+                                      (promotion-yes/no-label
+                                       (getf row :topic-readable-p)))))
+                           (:td (views:esc
+                                 (or (getf row :topicmap-object-failure)
+                                     (getf row :topicmap-failure)
+                                     "n/a")))))))))))
+
+(views:defview 👀evidence (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Evidence" :priority 4
+    (views:html
+      (:p (views:esc
+           "This evidence table stays on the accepted read-only boundary. It records exactly which public reads succeed and which ones fail."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Endpoint"))
+                    (:th (views:esc "Observed result"))))
+              (:tbody
+               (loop for row in (dmx-topicmap-repair-runbook-evidence-rows runbook)
+                     do (views:html
+                          (:tr
+                           (:td (:tt (views:esc (getf row :endpoint))))
+                           (:td (views:esc (getf row :result)))))))))))
+
+(views:defview 👀candidate-repairs (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Candidate repairs" :priority 5
+    (views:html
+      (:p (views:esc
+           "These are the smallest plausible backend/admin repair targets. They are kept descriptive only; this runbook does not execute them."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Candidate"))
+                    (:th (views:esc "Status"))
+                    (:th (views:esc "Summary"))))
+              (:tbody
+               (loop for row in (dmx-topicmap-repair-runbook-candidate-repairs runbook)
+                     do (views:html
+                          (:tr
+                           (:td (:tt (views:esc (getf row :label))))
+                           (:td (:tt (views:esc
+                                      (repair-runbook-candidate-status-label
+                                       (getf row :status)))))
+                           (:td (views:esc (getf row :summary))))))))
+      (:ul
+       (:li (views:esc
+             "Smallest likely repair target: add the missing topicmap-scoped assoc view props to 921404 and 921471."))
+       (:li (views:esc
+             "Fallback repair target: remove and correctly recreate those memberships through the real backend/admin route."))))))
+
+(views:defview 👀dry-run (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Dry-run" :priority 6
+    (views:html
+      (:p (views:esc
+           "This checklist is read-only by default. It exists to help an admin learn the current failure boundary before any repair write is attempted."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Step"))
+                    (:th (views:esc "Read-only command"))
+                    (:th (views:esc "Expected observation"))))
+              (:tbody
+               (loop for row in (dmx-topicmap-repair-runbook-dry-run-checklist runbook)
+                     do (views:html
+                          (:tr
+                           (:td (views:esc (getf row :step)))
+                           (:td (:pre :style "white-space: pre-wrap; margin: 0;"
+                                      (views:esc (getf row :command))))
+                           (:td (views:esc (getf row :expected))))))))
+      (:h4 (views:esc "Post-repair verification"))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Step"))
+                    (:th (views:esc "Verification command"))
+                    (:th (views:esc "Success condition"))))
+              (:tbody
+               (loop for row in (dmx-topicmap-repair-runbook-post-repair-checklist
+                                 runbook)
+                     do (views:html
+                          (:tr
+                           (:td (views:esc (getf row :step)))
+                           (:td (:pre :style "white-space: pre-wrap; margin: 0;"
+                                      (views:esc (getf row :command))))
+                           (:td (views:esc (getf row :expected)))))))))))
+
+(views:defview 👀unknowns (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Unknowns" :priority 7
+    (views:html
+      (:p (views:esc
+           "These are the remaining backend uncertainties. They are why HyperDoc-side writer changes and speculative repair writes are out of scope for this slice."))
+      (:ul
+       (loop for item in (dmx-topicmap-repair-runbook-unknowns runbook)
+             do (views:html
+                  (:li (views:esc item))))))))
+
+(views:defview 👀operations (runbook dmx-topicmap-repair-runbook)
+  (views:html-view :title "Operations" :priority 8
+    (views:html
+      (:p (views:esc
+           "Operations stay passive in this runbook. No DMX repair call is wired here by default."))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Default mode"))
+                   (:td (:tt (views:esc
+                              (repair-runbook-mode-label
+                               (dmx-topicmap-repair-runbook-default-operation-mode
+                                runbook))))))
+              (:tr (:td (views:esc "Writes enabled"))
+                   (:td (:tt (views:esc
+                              (promotion-yes/no-label
+                               (dmx-topicmap-repair-runbook-write-enabled-p
+                                runbook))))))
+              (:tr (:td (views:esc "Backend/admin inspect first"))
+                   (:td (:tt (views:esc "/topicmaps/919822/assoc/921503"))))
+              (:tr (:td (views:esc "Blocked repair targets"))
+                   (:td (:tt (views:esc "921404, 921471"))))
+              (:tr (:td (views:esc "Why no default repair action"))
+                   (:td (views:esc
+                         "The public API does not reveal the exact write payload for /topicmaps/919822/assoc/<assoc-id>.")))))))
+
 (views:defview 👀workflow-status (page html-page)
   (when-let ((plan (find-localhost-fedwiki-page-promotion-plan-for-generated-page
                     page)))

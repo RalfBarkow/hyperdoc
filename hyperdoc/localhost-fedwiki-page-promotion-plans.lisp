@@ -43,6 +43,32 @@
   summary
   plans)
 
+(defparameter *dmx-topicmap-919822-repair-runbook-topicmap-id* 919822)
+(defparameter *dmx-topicmap-919822-repair-runbook-workspace-name*
+  "context-window")
+(defparameter *dmx-topicmap-919822-repair-runbook-page-path*
+  "hyperdoc/DMX topicmap 919822 repair runbook.html")
+(defparameter *dmx-topicmap-919822-repair-runbook-source-file*
+  "hyperdoc/localhost-fedwiki-page-promotion-plans.lisp")
+
+(defstruct dmx-topicmap-repair-runbook
+  id
+  title
+  summary
+  topicmap-id
+  workspace-name
+  topicmap-route
+  broken-assocs
+  healthy-specimen
+  evidence-rows
+  candidate-repairs
+  dry-run-checklist
+  post-repair-checklist
+  unknowns
+  write-enabled-p
+  default-operation-mode
+  source-file)
+
 (defun localhost-fedwiki-page-promotion-plans ()
   (list (the-life-cycle-of-collective-knowledge-promotion-plan)
         (reproducible-devenv-as-knowledge-artifact-promotion-plan)))
@@ -56,6 +82,140 @@
   (print-unreadable-object (surface stream :type t)
     (format stream "~A"
             (localhost-fedwiki-page-promotion-surface-title surface))))
+
+(defmethod print-object ((runbook dmx-topicmap-repair-runbook) stream)
+  (print-unreadable-object (runbook stream :type t)
+    (format stream "~A"
+            (dmx-topicmap-repair-runbook-title runbook))))
+
+(defun dmx-topicmap-webclient-route (topicmap-id)
+  (format nil "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/~D/topic/~D"
+          topicmap-id
+          topicmap-id))
+
+(defun dmx-topicmap-919822-repair-runbook ()
+  (make-dmx-topicmap-repair-runbook
+   :id "dmx-topicmap-919822-repair-runbook"
+   :title "DMX topicmap 919822 repair runbook"
+   :summary
+   "Read-first and dry-run-first repair runbook for the broken topicmap-context membership/view-props defect in DMX topicmap 919822."
+   :topicmap-id *dmx-topicmap-919822-repair-runbook-topicmap-id*
+   :workspace-name *dmx-topicmap-919822-repair-runbook-workspace-name*
+   :topicmap-route
+   (dmx-topicmap-webclient-route
+    *dmx-topicmap-919822-repair-runbook-topicmap-id*)
+   :broken-assocs
+   (list
+    (list :assoc-id 921404
+          :assoc-type "dmx.topicmaps.topicmap_context"
+          :topic-id 921352
+          :topic-label "Broken membership for note topic 921352"
+          :topic-readable-p t
+          :topicmap-object-failure
+          "topicmaps/object/921352 fails on missing dmx.topicmaps.visibility for assoc 921404")
+    (list :assoc-id 921471
+          :assoc-type "dmx.topicmaps.topicmap_context"
+          :topic-id 921464
+          :topic-label "Broken membership for note topic 921464"
+          :topic-readable-p t
+          :topicmap-object-failure
+          "topicmaps/object/921464 fails on missing dmx.topicmaps.visibility for assoc 921471"
+          :topicmap-failure
+          "topicmaps/919822 fails on missing dmx.topicmaps.x for assoc 921471"))
+   :healthy-specimen
+   (list :topic-id 921494
+         :assoc-id 921503
+         :assoc-type "dmx.topicmaps.topicmap_context"
+         :topic-readable-p t
+         :topicmap-object-readable-p t
+         :summary
+         "Healthy comparison specimen: topic 921494 resolves through assoc 921503 inside topicmap 919822.")
+   :evidence-rows
+   (list
+    (list :endpoint "/core/topic/921494?children=true&assocChildren=true"
+          :result
+          "200 OK: topic 921494 is readable as dmx.notes.note with title/text children.")
+    (list :endpoint "/topicmaps/object/921494"
+          :result
+          "200 OK: topic 921494 resolves through topicmap-context assoc 921503 into topicmap 919822.")
+    (list :endpoint "/core/assoc/921404?children=true&assocChildren=true"
+          :result
+          "200 OK: assoc 921404 is a dmx.topicmaps.topicmap_context link from topicmap 919822 to topic 921352.")
+    (list :endpoint "/core/assoc/921471?children=true&assocChildren=true"
+          :result
+          "200 OK: assoc 921471 is a dmx.topicmaps.topicmap_context link from topicmap 919822 to topic 921464.")
+    (list :endpoint "/topicmaps/object/921352"
+          :result
+          "500 Server Error: missing dmx.topicmaps.visibility for NodeImpl#921404.")
+    (list :endpoint "/topicmaps/object/921464"
+          :result
+          "500 Server Error: missing dmx.topicmaps.visibility for NodeImpl#921471.")
+    (list :endpoint "/topicmaps/919822"
+          :result
+          "500 Server Error: missing dmx.topicmaps.x for NodeImpl#921471."))
+   :candidate-repairs
+   (list
+    (list :id :repair-assoc-view-props
+          :label "Repair assoc view props in place"
+          :summary
+          "Backend/admin path adds the missing topicmap-scoped assoc view props for 921404 and 921471."
+          :status :admin-required)
+    (list :id :recreate-membership
+          :label "Remove and correctly recreate broken memberships"
+          :summary
+          "Backend/admin path removes the broken topicmap-context assocs and recreates them through the real membership route."
+          :status :admin-required))
+   :dry-run-checklist
+   (list
+    (list :step "Confirm the healthy comparison specimen"
+          :command
+          "nix develop --command curl -sS -i 'https://dmx.ralfbarkow.ch/topicmaps/object/921494'"
+          :expected
+          "Returns 200 OK and exposes assoc 921503 for topic 921494 inside topicmap 919822.")
+    (list :step "Confirm broken membership 921404"
+          :command
+          "nix develop --command curl -sS -i 'https://dmx.ralfbarkow.ch/topicmaps/object/921352'"
+          :expected
+          "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921404.")
+    (list :step "Confirm broken membership 921471"
+          :command
+          "nix develop --command curl -sS -i 'https://dmx.ralfbarkow.ch/topicmaps/object/921464'"
+          :expected
+          "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921471.")
+    (list :step "Confirm topicmap fetch is still blocked"
+          :command
+          "nix develop --command curl -sS -i -H 'Accept: application/json' 'https://dmx.ralfbarkow.ch/topicmaps/919822'"
+          :expected
+          "Returns 500 and names missing dmx.topicmaps.x for assoc 921471.")
+    (list :step "Default mode remains read-only"
+          :command "No POST, PUT, or DELETE is attached to this runbook object."
+          :expected
+          "Dry-run inspection remains read-first until a backend/admin repair contract is explicitly proven."))
+   :post-repair-checklist
+   (list
+    (list :step "Verify topic 921352 membership"
+          :command
+          "nix develop --command curl -sS -i 'https://dmx.ralfbarkow.ch/topicmaps/object/921352'"
+          :expected
+          "Returns 200 OK with no missing-visibility failure.")
+    (list :step "Verify topic 921464 membership"
+          :command
+          "nix develop --command curl -sS -i 'https://dmx.ralfbarkow.ch/topicmaps/object/921464'"
+          :expected
+          "Returns 200 OK with no missing-visibility failure.")
+    (list :step "Verify topicmap 919822 fetch"
+          :command
+          "nix develop --command curl -sS -i -H 'Accept: application/json' 'https://dmx.ralfbarkow.ch/topicmaps/919822'"
+          :expected
+          "Returns 200 OK with no missing-x failure before any DMX seeding work resumes."))
+   :unknowns
+   (list
+    "The public API proves the broken assoc ids but does not expose the exact write payload for /topicmaps/919822/assoc/<assoc-id>."
+    "Healthy and broken topicmap-context assocs look the same on /core/assoc readback; the decisive difference appears only through topicmap-scoped lookup."
+    "HyperDoc-side writer changes are not justified while the backend write contract for repairing topicmap-scoped assoc view props remains opaque.")
+   :write-enabled-p nil
+   :default-operation-mode :read-only
+   :source-file *dmx-topicmap-919822-repair-runbook-source-file*))
 
 (defun localhost-fedwiki-page-promotion-plan-source (plan)
   (localhost-fedwiki-page-pipeline-result-source
