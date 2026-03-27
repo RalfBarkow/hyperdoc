@@ -51,6 +51,27 @@
 (defparameter *dmx-topicmap-919822-repair-runbook-source-file*
   "hyperdoc/localhost-fedwiki-page-promotion-plans.lisp")
 
+(defparameter *localhost-fedwiki-page-promotion-plan-specs*
+  (list
+   (list :id "the-life-cycle-of-collective-knowledge-promotion-plan"
+         :related-topic-id "the-life-cycle-of-collective-knowledge"
+         :source-page-id
+         (the-life-cycle-of-collective-knowledge-fedwiki-page-id)
+         :related-hyperdoc-page-title
+         "The Life Cycle of Collective Knowledge"
+         :constructor
+         'the-life-cycle-of-collective-knowledge-promotion-plan)
+   (list :id "reproducible-devenv-as-knowledge-artifact-promotion-plan"
+         :related-topic-id "reproducible-devenv-as-knowledge-artifact"
+         :source-page-id
+         (format nil "fedwiki:~A/~A"
+                 *reproducible-devenv-as-knowledge-artifact-fedwiki-site*
+                 *reproducible-devenv-as-knowledge-artifact-fedwiki-slug*)
+         :related-hyperdoc-page-title
+         "Reproducible DevEnv as Knowledge Artifact"
+         :constructor
+         'reproducible-devenv-as-knowledge-artifact-promotion-plan)))
+
 (defstruct dmx-topicmap-repair-runbook
   id
   title
@@ -70,8 +91,19 @@
   source-file)
 
 (defun localhost-fedwiki-page-promotion-plans ()
-  (list (the-life-cycle-of-collective-knowledge-promotion-plan)
-        (reproducible-devenv-as-knowledge-artifact-promotion-plan)))
+  (mapcar #'instantiate-localhost-fedwiki-page-promotion-plan
+          *localhost-fedwiki-page-promotion-plan-specs*))
+
+(defun instantiate-localhost-fedwiki-page-promotion-plan (spec)
+  (funcall (symbol-function (getf spec :constructor))))
+
+(defun find-localhost-fedwiki-page-promotion-plan-spec-if
+    (predicate &key signal-error? error-context)
+  (or (find-if predicate
+               *localhost-fedwiki-page-promotion-plan-specs*)
+      (when signal-error?
+        (error "No localhost FedWiki page promotion plan for ~A."
+               (or error-context "the requested designator")))))
 
 (defmethod print-object ((plan localhost-fedwiki-page-promotion-plan) stream)
   (print-unreadable-object (plan stream :type t)
@@ -1089,22 +1121,16 @@
           :evidence
           (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan))))
 
-(defun find-localhost-fedwiki-page-promotion-plan-if
-    (predicate &key signal-error? error-context)
-  (or (find-if predicate
-               (localhost-fedwiki-page-promotion-plans))
-      (when signal-error?
-        (error "No localhost FedWiki page promotion plan for ~A."
-               (or error-context "the requested designator")))))
-
 (defun find-localhost-fedwiki-page-promotion-plan-for-topic-id
     (topic-id &key signal-error?)
-  (find-localhost-fedwiki-page-promotion-plan-if
-   (lambda (plan)
-     (equal topic-id
-            (localhost-fedwiki-page-promotion-plan-related-topic-id plan)))
-   :signal-error? signal-error?
-   :error-context (format nil "topic id ~S" topic-id)))
+  (when-let ((spec
+               (find-localhost-fedwiki-page-promotion-plan-spec-if
+                (lambda (entry)
+                  (equal topic-id
+                         (getf entry :related-topic-id)))
+                :signal-error? signal-error?
+                :error-context (format nil "topic id ~S" topic-id))))
+    (instantiate-localhost-fedwiki-page-promotion-plan spec)))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-topic
     (topic &key signal-error?)
@@ -1122,12 +1148,14 @@
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-source-page-id
     (page-id &key signal-error?)
-  (find-localhost-fedwiki-page-promotion-plan-if
-   (lambda (plan)
-     (equal page-id
-            (localhost-fedwiki-page-promotion-plan-source-page-id plan)))
-   :signal-error? signal-error?
-   :error-context (format nil "source page id ~S" page-id)))
+  (when-let ((spec
+               (find-localhost-fedwiki-page-promotion-plan-spec-if
+                (lambda (entry)
+                  (equal page-id
+                         (getf entry :source-page-id)))
+                :signal-error? signal-error?
+                :error-context (format nil "source page id ~S" page-id))))
+    (instantiate-localhost-fedwiki-page-promotion-plan spec)))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-source
     (source &key signal-error?)
@@ -1138,13 +1166,14 @@
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-hyperdoc-page-title
     (title &key signal-error?)
-  (find-localhost-fedwiki-page-promotion-plan-if
-   (lambda (plan)
-     (equal title
-            (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
-             plan)))
-   :signal-error? signal-error?
-   :error-context (format nil "HyperDoc page title ~S" title)))
+  (when-let ((spec
+               (find-localhost-fedwiki-page-promotion-plan-spec-if
+                (lambda (entry)
+                  (equal title
+                         (getf entry :related-hyperdoc-page-title)))
+                :signal-error? signal-error?
+                :error-context (format nil "HyperDoc page title ~S" title))))
+    (instantiate-localhost-fedwiki-page-promotion-plan spec)))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-generated-page
     (page &key signal-error?)

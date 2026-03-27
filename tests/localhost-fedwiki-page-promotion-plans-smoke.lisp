@@ -2218,6 +2218,39 @@
      (hyperdoc::dmx-topicmap-repair-runbook-default-operation-mode runbook)
      "Repair runbook must stay read-only by default")))
 
+(defun explosive-localhost-fedwiki-page-promotion-plan ()
+  (error "Unrelated promotion-plan constructor should not run while opening the DMX repair runbook topic page."))
+
+(defun run-localhost-fedwiki-page-promotion-lookup-boundary-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((topic-page
+           (hyperbook:find-page hyperdoc::*topics*
+                                "DMX topicmap 919822 repair runbook"
+                                :signal-error? t))
+         (views
+           (let ((hyperdoc::*localhost-fedwiki-page-promotion-plan-specs*
+                   (list
+                    (list :id "explosive-promotion-plan"
+                          :related-topic-id "some-other-topic"
+                          :source-page-id
+                          "fedwiki:wiki.ralfbarkow.ch/some-other-topic"
+                          :related-hyperdoc-page-title
+                          "Some Other Topic"
+                          :constructor
+                          'explosive-localhost-fedwiki-page-promotion-plan))))
+             (assert-equal
+              nil
+              (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
+               topic-page)
+              "Unrelated promotion-plan constructors must not run while looking up the repair runbook topic page")
+             (load-inspector-views-for-object topic-page))))
+    (assert-true
+     (smoke-find-view-by-title views "Content")
+     "Repair runbook topic page must keep opening when unrelated promotion-plan constructors are present")
+    (assert-true
+     (null (smoke-find-view-by-title views "Promotion plan"))
+     "Repair runbook topic page must not expose a promotion-plan entry point when no plan matches it")))
+
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
   (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
@@ -2225,6 +2258,7 @@
   (run-localhost-fedwiki-page-promotion-operations-smoke-test)
   (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
   (run-dmx-topicmap-919822-repair-runbook-smoke-test)
+  (run-localhost-fedwiki-page-promotion-lookup-boundary-smoke-test)
   (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
   (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
