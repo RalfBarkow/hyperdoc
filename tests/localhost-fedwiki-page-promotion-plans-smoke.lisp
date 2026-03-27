@@ -124,7 +124,10 @@
                           "the-life-cycle-of-collective-knowledge"
                           "reproducible-devenv-as-knowledge-artifact"
                           "all fresh"
-                          "No action needed"))
+                          "No action needed"
+                          "Inspect plan"
+                          "Review freshness"
+                          "Review no-action status"))
       (assert-true
        (search needle surface-triage-html :test #'char=)
        (format nil "Promotion surface triage view must expose ~A" needle)))
@@ -403,6 +406,30 @@
          (repro-status
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
             repro))
+         (count-attention-spec
+           (hyperdoc::promotion-triage-count-drilldown-spec
+            surface
+            :attention-needed))
+         (count-all-fresh-spec
+           (hyperdoc::promotion-triage-count-drilldown-spec
+            surface
+            :all-fresh))
+         (count-stale-spec
+           (hyperdoc::promotion-triage-count-drilldown-spec
+            surface
+            :stale))
+         (count-missing-spec
+           (hyperdoc::promotion-triage-count-drilldown-spec
+            surface
+            :unknown-missing-envelope))
+         (count-malformed-spec
+           (hyperdoc::promotion-triage-count-drilldown-spec
+            surface
+            :unknown-malformed-envelope))
+         (count-mixed-spec
+           (hyperdoc::promotion-triage-count-drilldown-spec
+            surface
+            :mixed-states))
          (collective-page-rest
            (strip-artifact-envelope-line
             (uiop:read-file-string
@@ -462,6 +489,10 @@
            (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
             collective
             :status simulated-missing))
+         (stale-row
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+            repro
+            :status simulated-stale))
          (malformed-row
            (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
             collective
@@ -470,6 +501,20 @@
            (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
             repro
             :status simulated-mixed))
+         (collective-inspect-spec
+           (hyperdoc::promotion-triage-row-inspect-spec collective-row))
+         (collective-freshness-spec
+           (hyperdoc::promotion-triage-row-freshness-spec collective-row))
+         (fresh-action-spec
+           (hyperdoc::promotion-triage-row-action-review-spec collective-row))
+         (stale-action-spec
+           (hyperdoc::promotion-triage-row-action-review-spec stale-row))
+         (missing-action-spec
+           (hyperdoc::promotion-triage-row-action-review-spec missing-row))
+         (malformed-action-spec
+           (hyperdoc::promotion-triage-row-action-review-spec malformed-row))
+         (mixed-action-spec
+           (hyperdoc::promotion-triage-row-action-review-spec mixed-row))
          (ordered-rows
            (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
             surface
@@ -532,6 +577,33 @@
      0
      (getf base-counts :attention-needed)
      "Promotion surface base triage counts must show no attention-needed plans when both are fresh")
+    (assert-true
+     (eq surface (getf count-attention-spec :target))
+     "Attention-needed count drill-down must keep the aggregate surface as its target")
+    (assert-equal
+     "Attention needed"
+     (getf count-attention-spec :select)
+     "Attention-needed count drill-down must select the attention-needed filtered scope")
+    (assert-equal
+     "All fresh"
+     (getf count-all-fresh-spec :select)
+     "All-fresh count drill-down must select the all-fresh filtered scope")
+    (assert-equal
+     "Stale"
+     (getf count-stale-spec :select)
+     "Stale count drill-down must select the stale filtered scope")
+    (assert-equal
+     "Unknown missing envelope"
+     (getf count-missing-spec :select)
+     "Missing-envelope count drill-down must select the missing-envelope filtered scope")
+    (assert-equal
+     "Unknown malformed envelope"
+     (getf count-malformed-spec :select)
+     "Malformed-envelope count drill-down must select the malformed-envelope filtered scope")
+    (assert-equal
+     "Mixed states"
+     (getf count-mixed-spec :select)
+     "Mixed-state count drill-down must select the mixed-states filtered scope")
     (assert-equal
      collective-id
      (hyperdoc::localhost-fedwiki-page-promotion-plan-id
@@ -550,6 +622,22 @@
      :all-fresh
      (getf repro-row :attention-category)
      "Reproducible-devenv triage row must classify the current real-plan state as all fresh")
+    (assert-equal
+     "Overview"
+     (getf collective-inspect-spec :select)
+     "Row-level inspect drill-down must open the per-plan Overview view")
+    (assert-equal
+     "Source freshness"
+     (getf collective-freshness-spec :select)
+     "Row-level freshness drill-down must open the per-plan Source freshness view")
+    (assert-equal
+     "Overview"
+     (getf fresh-action-spec :select)
+     "Fresh row action drill-down must open the per-plan Overview view")
+    (assert-equal
+     "Review no-action status"
+     (getf fresh-action-spec :label)
+     "Fresh row action drill-down must expose a passive no-action label")
     (assert-equal
      "No action needed"
      (getf collective-row :recommended-next-action-summary)
@@ -590,6 +678,38 @@
      :fresh
      (getf mixed-row :snippet-freshness-state)
      "Mixed triage row must preserve the simulated fresh snippet state")
+    (assert-equal
+     "Overview"
+     (getf stale-action-spec :select)
+     "Stale row action drill-down must open the per-plan Overview action surface")
+    (assert-equal
+     "Review stale action"
+     (getf stale-action-spec :label)
+     "Stale row action drill-down must expose a stale-specific review label")
+    (assert-equal
+     "Source freshness"
+     (getf missing-action-spec :select)
+     "Missing-envelope row action drill-down must open the per-plan Source freshness view")
+    (assert-equal
+     "Review restore action"
+     (getf missing-action-spec :label)
+     "Missing-envelope row action drill-down must expose a restore-specific label")
+    (assert-equal
+     "Source freshness"
+     (getf malformed-action-spec :select)
+     "Malformed-envelope row action drill-down must open the per-plan Source freshness view")
+    (assert-equal
+     "Review repair action"
+     (getf malformed-action-spec :label)
+     "Malformed-envelope row action drill-down must expose a repair-specific label")
+    (assert-equal
+     "Source freshness"
+     (getf mixed-action-spec :select)
+     "Mixed row action drill-down must open the per-plan Source freshness view")
+    (assert-equal
+     "Review mixed action"
+     (getf mixed-action-spec :label)
+     "Mixed row action drill-down must expose a mixed-state label")
     (assert-equal
      collective-id
      (getf (first ordered-rows) :plan-id)
