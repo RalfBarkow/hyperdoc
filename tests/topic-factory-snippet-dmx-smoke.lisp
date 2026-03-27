@@ -13,6 +13,9 @@
 
 (defparameter *topic-factory-snippet-dmx-workspace-topicmap-id* 919822)
 
+(defparameter *topic-factory-snippet-dmx-custom-topic-value*
+  "HyperDoc localhost FedWiki promotion workflow")
+
 (defun run-topic-factory-snippet-dmx-plan-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7000))
@@ -135,9 +138,42 @@
       (assert-equal 1 (hash-table-count (hyperdoc::topicmap-memberships-of client))
                     "Dry-run update must not change topicmap membership count"))))
 
+(defun run-topic-factory-snippet-dmx-custom-topic-value-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 7000))
+         (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
+                nil
+                :workspace-topicmap-id
+                *topic-factory-snippet-dmx-workspace-topicmap-id*
+                :client client
+                :topic-value *topic-factory-snippet-dmx-custom-topic-value*))
+         (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
+         (output
+           (with-output-to-string (stream)
+             (hyperdoc::execute-topic-factory-snippet-dmx-write
+              nil
+              :workspace-topicmap-id
+              *topic-factory-snippet-dmx-workspace-topicmap-id*
+              :client client
+              :topic-value *topic-factory-snippet-dmx-custom-topic-value*
+              :dry-run t
+              :stream stream))))
+    (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
+                  (getf payload :value)
+                  "Custom topic-value override must be preserved in the DMX payload")
+    (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
+                  (hyperdoc::topic-factory-snippet-dmx-write-plan-topic-value
+                   plan)
+                  "Custom topic-value override must be preserved in the write plan")
+    (assert-true
+     (search "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=\"HyperDoc localhost FedWiki promotion workflow\""
+             output)
+     "Dry-run evidence must expose the custom DMX topic title override")))
+
 (defun run-topic-factory-snippet-dmx-smoke-tests ()
   (run-topic-factory-snippet-dmx-plan-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-create-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-update-smoke-test)
+  (run-topic-factory-snippet-dmx-custom-topic-value-smoke-test)
   (format t "~&Topic-factory snippet DMX smoke tests passed.~%")
   t)

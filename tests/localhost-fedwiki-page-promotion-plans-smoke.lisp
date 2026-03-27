@@ -1907,12 +1907,114 @@
      (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p repro)
      "Second real-page snippet output must stay fresh relative to the current source snapshot")))
 
+(defun run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
+         (views (load-inspector-views-for-object surface))
+         (handover-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "DMX handover")))
+         (definition
+           (hyperdoc::localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+            surface))
+         (summary
+           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary
+            :surface surface))
+         (evidence
+           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence
+            :surface surface))
+         (plan
+           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-plan
+            :surface surface))
+         (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
+         (children (getf payload :children))
+         (provenance-json
+           (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
+                    children))
+         (body (hyperdoc::snippet-text-of definition)))
+    (assert-true
+     (smoke-find-view-by-title views "DMX handover")
+     "Promotion surface must expose the DMX handover view")
+    (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-topic-title*
+                  (getf summary :topic-title)
+                  "DMX handover summary must preserve the seed topic title")
+    (assert-equal 919822
+                  (getf summary :workspace-topicmap-id)
+                  "DMX handover summary must target topicmap 919822")
+    (assert-equal
+     "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/919822/topic/919822"
+     (getf summary :workspace-topicmap-route)
+     "DMX handover summary must preserve the explicit DMX topicmap route")
+    (assert-equal :create
+                  (getf summary :topic-action)
+                  "DMX handover summary must start with CREATE on a fresh memory client")
+    (assert-equal :add
+                  (getf summary :topicmap-action)
+                  "DMX handover summary must add the seed topic to the explicit workspace topicmap")
+    (assert-equal "hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"
+                  (getf summary :source-path)
+                  "DMX handover summary must preserve the repo-relative source file path")
+    (assert-equal "hyperdoc:topic-factory-snippet/hyperdoc-localhost-fedwiki-promotion-workflow-handover"
+                  (getf summary :uri)
+                  "DMX handover summary must preserve the stable topic URI")
+    (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-topic-title*
+                  (getf payload :value)
+                  "DMX handover payload must preserve the human-facing topic title")
+    (dolist (needle
+             (list "Current status"
+                   "Current boundaries"
+                   "Proven real instances"
+                   "Current workflow loop"
+                   "Next DMX-oriented work"
+                   "Identifiers and links"
+                   "The Life Cycle of Collective Knowledge"
+                   "Reproducible DevEnv as Knowledge Artifact"
+                   "localhost-fedwiki-page-promotion-workflow"
+                   "topicmap 919822"))
+      (assert-true
+       (search needle body :test #'char=)
+       (format nil "DMX handover body must expose ~A" needle)))
+    (dolist (needle
+             (list "DMX handover"
+                   "HyperDoc localhost FedWiki promotion workflow"
+                   "topicmap/919822/topic/919822"
+                   "Current status"
+                   "Next DMX-oriented work"
+                   "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=\"HyperDoc localhost FedWiki promotion workflow\""
+                   "topic-action=CREATE"
+                   "topicmap-action=ADD"
+                   "workspace-topicmap-id=919822"
+                   "source=hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"))
+      (assert-true
+       (or (search needle handover-html :test #'char=)
+           (search needle evidence :test #'char=))
+       (format nil "DMX handover inspector/evidence must expose ~A" needle)))
+    (assert-true
+     (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+             provenance-json)
+     "DMX handover provenance must preserve the first canonical FedWiki page id")
+    (assert-true
+     (search "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
+             provenance-json)
+     "DMX handover provenance must preserve the second canonical FedWiki page id")
+    (assert-true
+     (search "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/919822/topic/919822"
+             provenance-json)
+     "DMX handover provenance must preserve the explicit target topicmap route")
+    (assert-true
+     (not (search "/Users/" provenance-json))
+     "DMX handover provenance must not preserve machine-local absolute paths")
+    (assert-true
+     (not (search "/Users/" evidence))
+     "DMX handover dry-run evidence must not preserve machine-local absolute paths")))
+
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
   (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
   (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
   (run-localhost-fedwiki-page-promotion-operations-smoke-test)
   (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
+  (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
   (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
   t)
