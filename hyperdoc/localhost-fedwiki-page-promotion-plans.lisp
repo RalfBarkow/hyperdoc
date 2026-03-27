@@ -74,6 +74,31 @@
   (getf (localhost-fedwiki-page-promotion-plan-topic-factory-metadata plan)
         :related-hyperdoc-page-title))
 
+(defun localhost-fedwiki-page-promotion-plan-generated-page
+    (plan &key signal-error?)
+  (let ((hyperdoc (and (boundp '*hyperdoc*)
+                       (symbol-value '*hyperdoc*)))
+        (title (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
+                plan)))
+    (if (and hyperdoc title)
+        (find-page hyperdoc title :signal-error? signal-error?)
+        (when signal-error?
+          (error "No generated HyperDoc page is available for ~A."
+                 (or (and plan
+                          (localhost-fedwiki-page-promotion-plan-id plan))
+                     "the requested promotion plan"))))))
+
+(defun localhost-fedwiki-source-generated-page (source &key signal-error?)
+  (if-let (plan (find-localhost-fedwiki-page-promotion-plan-for-source
+                 source
+                 :signal-error? signal-error?))
+    (localhost-fedwiki-page-promotion-plan-generated-page
+     plan
+     :signal-error? signal-error?)
+    (when signal-error?
+      (error "No generated HyperDoc page is available for source page ~A."
+             (localhost-fedwiki-source-data-fedwiki-page-id source)))))
+
 (defun localhost-fedwiki-page-promotion-plan-topic-count (plan)
   (length (localhost-fedwiki-page-promotion-plan-promoted-topic-chunks plan)))
 

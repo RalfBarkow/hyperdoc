@@ -45,6 +45,15 @@
               (getf summary :topicmap-action))
       "unavailable"))
 
+(defun promotion-generated-page-link-html (page &key (display "Review generated page"))
+  (if page
+      (views:object-ref page
+                        :display display
+                        :select "Content")
+      (views:html
+        (:span :style "color: #666;"
+               (views:esc "unavailable")))))
+
 (defun promotion-current-source-fingerprint-label (status)
   (or (getf status :current-source-fingerprint)
       "unavailable"))
@@ -510,6 +519,8 @@
 (views:defview 👀overview (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Overview" :priority 1
     (let ((source (localhost-fedwiki-page-promotion-plan-source plan))
+          (generated-page
+            (localhost-fedwiki-page-promotion-plan-generated-page plan))
           (status
             (localhost-fedwiki-page-promotion-plan-sync-status plan))
           (provenance-modes
@@ -567,6 +578,11 @@
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-slug
                                  source)))))
+                (:tr (:td (views:esc "Generated HyperDoc page"))
+                     (:td
+                      (promotion-generated-page-link-html
+                       generated-page
+                       :display "Review generated page")))
                 (:tr (:td (views:esc "Current source fingerprint"))
                      (:td (:tt (views:esc
                                 (promotion-current-source-fingerprint-label
@@ -652,6 +668,11 @@
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-page-promotion-plan-composed-page-target
                                  plan)))))
+                (:tr (:td (views:esc "Generated HyperDoc page"))
+                     (:td
+                      (promotion-generated-page-link-html
+                       generated-page
+                       :display "Review generated page")))
                 (:tr (:td (views:esc "Snippet id"))
                      (:td (:tt (views:esc
                                 (snippet-id-of
@@ -780,12 +801,19 @@
 (views:defview 👀source-page (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Source page" :priority 2
     (let* ((source (localhost-fedwiki-page-promotion-plan-source plan))
+           (generated-page
+             (localhost-fedwiki-page-promotion-plan-generated-page plan))
            (provenance (localhost-fedwiki-source-data-provenance source)))
       (views:html
         (:p "Normalized localhost FedWiki page source. This is the read boundary for promotion, before any local HyperDoc write or DMX write step.")
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Normalized source object"))
                      (:td (views:object-ref source)))
+                (:tr (:td (views:esc "Generated HyperDoc page"))
+                     (:td
+                      (promotion-generated-page-link-html
+                       generated-page
+                       :display "Open generated page")))
                 (:tr (:td (views:esc "Page title"))
                      (:td (views:esc
                            (localhost-fedwiki-source-data-fedwiki-title source))))
@@ -821,7 +849,9 @@
 
 (views:defview 👀summary (source localhost-fedwiki-source-data)
   (views:html-view :title "Summary" :priority 1
-    (let ((provenance (localhost-fedwiki-source-data-provenance source)))
+    (let ((provenance (localhost-fedwiki-source-data-provenance source))
+          (generated-page
+            (localhost-fedwiki-source-generated-page source)))
       (views:html
         (:h3 (views:esc (localhost-fedwiki-source-data-title source)))
         (:p (views:esc (localhost-fedwiki-source-data-summary source)))
@@ -834,6 +864,11 @@
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-relative-path
                                  source)))))
+                (:tr (:td (views:esc "Generated HyperDoc page"))
+                     (:td
+                      (promotion-generated-page-link-html
+                       generated-page
+                       :display "Open generated page")))
                 (:tr (:td (views:esc "Story item count"))
                      (:td (:tt (views:esc
                                 (format nil "~D"
