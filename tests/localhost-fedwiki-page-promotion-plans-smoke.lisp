@@ -40,9 +40,32 @@
          (collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
          (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
          (surface-views (load-inspector-views-for-object surface))
+         (surface-overview-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "Overview")))
          (surface-triage-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title surface-views "Triage")))
+         (surface-attention-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "Attention needed")))
+         (surface-all-fresh-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "All fresh")))
+         (surface-stale-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "Stale")))
+         (surface-missing-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views
+                                      "Unknown missing envelope")))
+         (surface-malformed-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views
+                                      "Unknown malformed envelope")))
+         (surface-mixed-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title surface-views "Mixed states")))
          (collective-views (load-inspector-views-for-object collective))
          (repro-views (load-inspector-views-for-object repro))
          (collective-promoted-html
@@ -73,8 +96,24 @@
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-views "DMX dry-run"))))
     (assert-view-titles-present surface-views
-                                '("Overview" "Triage" "Plans")
+                                '("Overview"
+                                  "Triage"
+                                  "Attention needed"
+                                  "All fresh"
+                                  "Stale"
+                                  "Unknown missing envelope"
+                                  "Unknown malformed envelope"
+                                  "Mixed states"
+                                  "Plans")
                                 "Promotion surface")
+    (dolist (label '("All fresh"
+                     "Stale"
+                     "Unknown missing envelope"
+                     "Unknown malformed envelope"
+                     "Mixed states"))
+      (assert-true
+       (search label surface-overview-html :test #'char=)
+       (format nil "Promotion surface overview must expose the triage count label ~A" label)))
     (assert-true
      (search "attention-needed promotion plans ahead of all-fresh plans"
              surface-triage-html
@@ -89,6 +128,20 @@
       (assert-true
        (search needle surface-triage-html :test #'char=)
        (format nil "Promotion surface triage view must expose ~A" needle)))
+    (dolist (html (list surface-attention-html
+                        surface-stale-html
+                        surface-missing-html
+                        surface-malformed-html
+                        surface-mixed-html))
+      (assert-true
+       (search "No promotion plans match this scope." html :test #'char=)
+       "Empty aggregate filter views must explain that no plans match the current scope"))
+    (dolist (needle (list "The Life Cycle of Collective Knowledge promotion plan"
+                          "Reproducible DevEnv as Knowledge Artifact promotion plan"
+                          "No action needed"))
+      (assert-true
+       (search needle surface-all-fresh-html :test #'char=)
+       (format nil "The all-fresh aggregate filter view must expose ~A" needle)))
     (assert-view-titles-present collective-views
                                 '("Overview"
                                   "Source page"
@@ -334,6 +387,9 @@
            (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro))
          (base-rows
            (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows surface))
+         (base-counts
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
+            surface))
          (collective-row
            (find collective-id
                  base-rows
@@ -362,6 +418,15 @@
             collective
             :page-contents collective-page-rest
             :snippet-contents collective-snippet-rest))
+         (simulated-stale
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+            repro
+            :current-source-snapshot
+            (hyperdoc::plist-with-overrides
+             (getf repro-status :current-source-snapshot)
+             :fingerprint "fnv1a64:SIMULATEDSTALE"
+             :summary
+             "story-items=simulated; source snapshot intentionally stale for triage counts")) )
          (simulated-malformed
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
             collective
@@ -410,11 +475,63 @@
             surface
             :status-overrides
             (list (cons collective-id simulated-malformed)
+                  (cons repro-id simulated-mixed))))
+         (missing-stale-counts
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
+            surface
+            :status-overrides
+            (list (cons collective-id simulated-missing)
+                  (cons repro-id simulated-stale))))
+         (malformed-mixed-counts
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
+            surface
+            :status-overrides
+            (list (cons collective-id simulated-malformed)
+                  (cons repro-id simulated-mixed))))
+         (attention-rows
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+            surface
+            :filter :attention-needed
+            :status-overrides
+            (list (cons collective-id simulated-malformed)
+                  (cons repro-id simulated-mixed))))
+         (missing-filter-rows
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+            surface
+            :filter :unknown-missing-envelope
+            :status-overrides
+            (list (cons collective-id simulated-missing)
+                  (cons repro-id simulated-stale))))
+         (stale-filter-rows
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+            surface
+            :filter :stale
+            :status-overrides
+            (list (cons collective-id simulated-missing)
+                  (cons repro-id simulated-stale))))
+         (mixed-filter-rows
+           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+            surface
+            :filter :mixed-states
+            :status-overrides
+            (list (cons collective-id simulated-malformed)
                   (cons repro-id simulated-mixed)))))
     (assert-true collective-row
                  "Promotion surface triage rows must include the collective plan")
     (assert-true repro-row
                  "Promotion surface triage rows must include the reproducible-devenv plan")
+    (assert-equal
+     2
+     (getf base-counts :plan-count)
+     "Promotion surface base triage counts must expose both real plans")
+    (assert-equal
+     2
+     (getf base-counts :all-fresh)
+     "Promotion surface base triage counts must classify both real plans as all fresh")
+    (assert-equal
+     0
+     (getf base-counts :attention-needed)
+     "Promotion surface base triage counts must show no attention-needed plans when both are fresh")
     (assert-equal
      collective-id
      (hyperdoc::localhost-fedwiki-page-promotion-plan-id
@@ -437,6 +554,22 @@
      "No action needed"
      (getf collective-row :recommended-next-action-summary)
      "Collective triage row must summarize the fresh case as no action needed")
+    (assert-equal
+     1
+     (getf missing-stale-counts :unknown-missing-envelope)
+     "Simulated counts must expose one unknown-missing-envelope plan")
+    (assert-equal
+     1
+     (getf missing-stale-counts :stale)
+     "Simulated counts must expose one stale plan")
+    (assert-equal
+     1
+     (getf malformed-mixed-counts :unknown-malformed-envelope)
+     "Simulated counts must expose one unknown-malformed-envelope plan")
+    (assert-equal
+     1
+     (getf malformed-mixed-counts :mixed-states)
+     "Simulated counts must expose one mixed-states plan")
     (assert-equal
      :unknown-missing-envelope
      (getf missing-row :attention-category)
@@ -469,6 +602,27 @@
      repro-id
      (getf (second ordered-rows) :plan-id)
      "Mixed stale rows must sort after malformed rows when both need attention")
+    (assert-equal
+     2
+     (length attention-rows)
+     "Attention-needed filter must keep both simulated attention-needed rows")
+    (assert-equal
+     collective-id
+     (getf (first missing-filter-rows) :plan-id)
+     "Unknown-missing filter must keep only the matching plan")
+    (assert-equal
+     repro-id
+     (getf (first stale-filter-rows) :plan-id)
+     "Stale filter must keep only the matching plan")
+    (assert-equal
+     repro-id
+     (getf (first mixed-filter-rows) :plan-id)
+     "Mixed-states filter must keep only the matching plan")
+    (assert-equal
+     repro-id
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id
+      (getf (first mixed-filter-rows) :inspect-target))
+     "Filtered triage rows must keep direct inspect targets intact")
     (assert-true
      (string= (getf mixed-row :recommended-next-action-summary)
               "Page: Regenerate page artifact; Snippet: No action needed")
