@@ -48,6 +48,16 @@
 (defun promotion-dmx-live-write-label (value)
   (if value "configured" "not configured"))
 
+(defun promotion-dmx-repair-runbook-page ()
+  (let ((hyperdoc (and (boundp '*hyperdoc*)
+                       (symbol-value '*hyperdoc*))))
+    (when hyperdoc
+      (find-page hyperdoc
+                 "DMX topicmap 919822 repair runbook"))))
+
+(defun promotion-dmx-repair-runbook-object ()
+  (dmx-topicmap-919822-repair-runbook))
+
 (defun promotion-generated-page-link-html (page &key (display "Review generated page"))
   (if page
       (views:object-ref page
@@ -66,6 +76,25 @@
       (views:html
         (:span :style "color: #666;"
                (views:esc fallback)))))
+
+(defun promotion-dmx-backend-block-html ()
+  (let ((page (promotion-dmx-repair-runbook-page))
+        (runbook (promotion-dmx-repair-runbook-object)))
+    (views:html
+      (:div :style "margin: 0.85rem 0; padding: 0.8rem; border: 1px solid #b86; background: #fff8f2;"
+            (:strong (views:esc "DMX backend block."))
+            (:span (views:esc
+                    " Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471. No further DMX writes should be attempted until backend/admin repair."))
+            (:div :style "margin-top: 0.45rem;"
+                  (promotion-object-link-html
+                   page
+                   :display "Repair runbook page"
+                   :select "Content")
+                  (views:esc " · ")
+                  (promotion-object-link-html
+                   runbook
+                   :display "Inspect repair runbook object"
+                   :select "Overview"))))))
 
 (defun promotion-current-source-fingerprint-label (status)
   (or (getf status :current-source-fingerprint)
@@ -734,6 +763,7 @@
         (:p (views:esc (localhost-fedwiki-page-promotion-surface-summary surface)))
         (:p (views:esc
              "Use Triage to scan all known promotion plans by current freshness state. Attention-needed plans are ordered before all-fresh plans, with malformed and missing reflected snapshot evidence ahead of stale items. The filter-specific subviews keep the same ordering within each scope."))
+        (promotion-dmx-backend-block-html)
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Plan count"))
                      (:td (:tt (views:esc
@@ -830,6 +860,7 @@
       (views:html
         (:p (views:esc
              "This one-topic DMX handover keeps HyperDoc as the richer diagnostic and authoring environment while seeding the explicit DMX target topicmap with the current workflow checkpoint. Live DMX write stays separate and conservative; this view shows the ready-to-execute topic payload plus canonical dry-run evidence."))
+        (promotion-dmx-backend-block-html)
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Target topicmap id"))
                      (:td (:tt (views:esc
