@@ -19,12 +19,19 @@
   "hyperdoc.topic_factory_snippet.provenance_json")
 (defparameter *dmx-topic-factory-snippet-workspace-topicmap-type-uri*
   "hyperdoc.topic_factory_snippet.workspace_topicmap_id")
+(defparameter *dmx-zettelkasten-zettel-type-uri*
+  "zettelkasten.zettel")
+(defparameter *dmx-zettelkasten-zettel-title-type-uri*
+  "zettelkasten.zettel.title")
+(defparameter *dmx-zettelkasten-zettel-content-type-uri*
+  "zettelkasten.zettel.content")
 (defparameter *topic-factory-snippet-dmx-default-view-props*
   '(:x 160 :y 120 :visibility t :pinned nil))
 
 (defstruct topic-factory-snippet-dmx-write-plan
   snippet-id
   uri
+  topic-type-uri
   topic-value
   workspace-topicmap-id
   view-props
@@ -97,7 +104,12 @@
                   :related-topic-id (related-topic-id-of definition)
                   :source-file (source-path-of definition))))))
 
-(defun topic-factory-snippet-dmx-children (definition workspace-topicmap-id)
+(defun zettelkasten-zettel-topic-type-uri-p (topic-type-uri)
+  (string= (or topic-type-uri "")
+           *dmx-zettelkasten-zettel-type-uri*))
+
+(defun topic-factory-snippet-dmx-default-children
+    (definition workspace-topicmap-id)
   (let ((children (make-hash-table :test #'equal)))
     (setf (gethash *dmx-topic-factory-snippet-text-type-uri* children)
           (snippet-text-of definition)
@@ -113,6 +125,23 @@
           (topic-factory-snippet-provenance-json definition workspace-topicmap-id))
     children))
 
+(defun topic-factory-snippet-dmx-zettel-children (definition topic-value)
+  (let ((children (make-hash-table :test #'equal)))
+    (setf (gethash *dmx-zettelkasten-zettel-title-type-uri* children)
+          (or topic-value
+              (title-of definition))
+          (gethash *dmx-zettelkasten-zettel-content-type-uri* children)
+          (snippet-text-of definition))
+    children))
+
+(defun topic-factory-snippet-dmx-children
+    (definition workspace-topicmap-id &key topic-type-uri topic-value)
+  (if (zettelkasten-zettel-topic-type-uri-p topic-type-uri)
+      (topic-factory-snippet-dmx-zettel-children definition topic-value)
+      (topic-factory-snippet-dmx-default-children
+       definition
+       workspace-topicmap-id)))
+
 (defun topic-factory-snippet-dmx-payload (definition workspace-topicmap-id
                                            &key topic-type-uri topic-value)
   (let ((uri (make-the-life-cycle-of-collective-knowledge-dmx-snippet-uri
@@ -123,8 +152,11 @@
                         *dmx-topic-factory-snippet-type-uri*)
           :value (or topic-value
                      (snippet-id-of definition))
-          :children (topic-factory-snippet-dmx-children definition
-                                                        workspace-topicmap-id))))
+          :children (topic-factory-snippet-dmx-children
+                     definition
+                     workspace-topicmap-id
+                     :topic-type-uri topic-type-uri
+                     :topic-value topic-value))))
 
 (defun dmx-topicmap-memberships-path (object-id)
   (format nil "/topicmaps/object/~D" object-id))
@@ -198,6 +230,7 @@
     (make-topic-factory-snippet-dmx-write-plan
      :snippet-id (snippet-id-of definition)
      :uri (getf payload :uri)
+     :topic-type-uri (getf payload :type-uri)
      :topic-value (getf payload :value)
      :workspace-topicmap-id resolved-topicmap-id
      :view-props resolved-view-props
@@ -231,6 +264,9 @@
   (format stream
           "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=~S~%"
           (topic-factory-snippet-dmx-write-plan-topic-value plan))
+  (format stream
+          "TOPIC_FACTORY_SNIPPET_DMX_TYPE uri=~S~%"
+          (topic-factory-snippet-dmx-write-plan-topic-type-uri plan))
   (format stream
           "TOPIC_FACTORY_SNIPPET_DMX_DETAILS related-page=~S related-topic-id=~S source=~A~%"
           (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title plan)

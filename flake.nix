@@ -425,6 +425,7 @@ PY
 
           shellHook = ''
             export HYPERDOC_ROOT="$PWD"
+            export HYPERDOC_DMX_IMPORT_BASE_URL="''${HYPERDOC_DMX_IMPORT_BASE_URL:-https://dmx.ralfbarkow.ch}"
             export PATH="${sbclEnv}/bin:$PATH"
             current_registry="''${CL_SOURCE_REGISTRY:-}"
             filtered_registry=""

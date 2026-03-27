@@ -19,6 +19,9 @@
 (defparameter *localhost-fedwiki-page-promotion-handover-workflow-page-path*
   "hyperdoc/Localhost FedWiki page promotion workflow.html")
 
+(defparameter *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
+  "zettelkasten.zettel")
+
 (defstruct localhost-fedwiki-page-promotion-plan
   id
   title
@@ -1031,6 +1034,8 @@
      :client
      (or client
          (make-localhost-fedwiki-page-promotion-memory-dmx-client))
+     :topic-type-uri
+     *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
      :topic-value
      *localhost-fedwiki-page-promotion-handover-topic-title*)))
 
@@ -1056,6 +1061,8 @@
             :snippet-id
             (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
             :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+            :topic-type-uri
+            (topic-factory-snippet-dmx-write-plan-topic-type-uri dmx-plan)
             :workspace-topicmap-id
             (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
             :workspace-topicmap-route
@@ -1129,6 +1136,8 @@
             :workspace-topicmap-id resolved-topicmap-id
             :client resolved-client
             :dry-run dry-run
+            :topic-type-uri
+            *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
             :topic-value *localhost-fedwiki-page-promotion-handover-topic-title*
             :stream stream))
          (plan (getf result :plan))
@@ -1145,6 +1154,8 @@
     (append result
             (list :topic-title
                   *localhost-fedwiki-page-promotion-handover-topic-title*
+                  :topic-type-uri
+                  *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
                   :topic-body
                   (snippet-text-of
                    (localhost-fedwiki-page-promotion-handover-topic-definition-chunk

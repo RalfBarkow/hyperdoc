@@ -580,6 +580,23 @@
   (and (hash-table-p topic)
        (gethash "id" topic)))
 
+(defun http-response-body-string (stream)
+  (when stream
+    (ignore-errors
+      (uiop:slurp-stream-string stream))))
+
+(defun blank-http-response-body-p (body)
+  (or (null body)
+      (zerop (length (string-trim '(#\Space #\Tab #\Newline #\Return) body)))))
+
+(defun parse-http-response-body-json (body)
+  (if (blank-http-response-body-p body)
+      nil
+      (handler-case
+          (shasht:read-json body)
+        (error ()
+          body))))
+
 (defun http-request-json (client method url &key payload body-object allow-404?)
   (let* ((normalized-url (normalize-http-client-url client url))
          (headers (append (when (dmx-import-authorization-header-of client)
@@ -600,24 +617,22 @@
         (apply #'drakma:http-request request-args)
       (declare (ignore response-headers response-uri must-close))
       (unwind-protect
-           (cond
-             ((and allow-404? (= status-code 404))
-              nil)
-             ((http-success-status-p status-code)
-              (handler-case
-                  (shasht:read-json stream)
-                (error ()
-                  (when stream
-                    (uiop:slurp-input-stream stream)))))
-             (t
-              (error 'dmx-import-http-error
-                     :message (or reason-phrase
-                                  "DMX import request failed")
-                     :url normalized-url
-                     :status-code status-code
-                     :response-body (when stream
-                                      (ignore-errors
-                                        (uiop:slurp-input-stream stream))))))
+           (let ((body (http-response-body-string stream)))
+             (cond
+               ((and allow-404? (= status-code 404))
+                nil)
+               ((or (= status-code 204)
+                    (= status-code 205))
+                nil)
+               ((http-success-status-p status-code)
+                (parse-http-response-body-json body))
+               (t
+                (error 'dmx-import-http-error
+                       :message (or reason-phrase
+                                    "DMX import request failed")
+                       :url normalized-url
+                       :status-code status-code
+                       :response-body body))))
         (when stream
           (ignore-errors (close stream)))))))
 
