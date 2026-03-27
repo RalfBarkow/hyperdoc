@@ -193,37 +193,123 @@
     (otherwise
      "This compact triage table keeps attention-needed promotion plans ahead of all-fresh plans and links each row back to the live plan object.")))
 
-(defun promotion-triage-counts-table-html (counts)
+(defun promotion-triage-count-drilldown-spec (surface key)
+  (let* ((filter
+           (case key
+             (:attention-needed :attention-needed)
+             (:all-fresh :all-fresh)
+             (:stale :stale)
+             (:unknown-missing-envelope :unknown-missing-envelope)
+             (:unknown-malformed-envelope :unknown-malformed-envelope)
+             (:mixed-states :mixed-states)))
+         (title (and filter
+                     (promotion-triage-filter-title filter))))
+    (when title
+      (list :target surface
+            :select title
+            :label title))))
+
+(defun promotion-triage-count-label-html (surface label key)
+  (let ((spec (promotion-triage-count-drilldown-spec surface key)))
+    (if spec
+        (views:object-ref (getf spec :target)
+                          :display label
+                          :select (getf spec :select))
+        (views:html
+          (views:esc label)))))
+
+(defun promotion-triage-counts-table-html (surface counts)
   (views:html
     (:table :class "inspector-table"
             (:tr (:td (views:esc "Plan count"))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value counts :plan-count)))))
-            (:tr (:td (views:esc "Attention needed"))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "Attention needed"
+                       :attention-needed))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value counts
                                                           :attention-needed)))))
-            (:tr (:td (views:esc "All fresh"))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "All fresh"
+                       :all-fresh))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value counts :all-fresh)))))
-            (:tr (:td (views:esc "Stale"))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "Stale"
+                       :stale))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value counts :stale)))))
-            (:tr (:td (views:esc "Unknown missing envelope"))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "Unknown missing envelope"
+                       :unknown-missing-envelope))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value
                              counts
                              :unknown-missing-envelope)))))
-            (:tr (:td (views:esc "Unknown malformed envelope"))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "Unknown malformed envelope"
+                       :unknown-malformed-envelope))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value
                              counts
                              :unknown-malformed-envelope)))))
-            (:tr (:td (views:esc "Mixed states"))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "Mixed states"
+                       :mixed-states))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value
                              counts
                              :mixed-states))))))))
+
+(defun promotion-triage-row-inspect-spec (row)
+  (list :target (getf row :inspect-target)
+        :select "Overview"
+        :label "Inspect plan"))
+
+(defun promotion-triage-row-freshness-spec (row)
+  (list :target (getf row :inspect-target)
+        :select "Source freshness"
+        :label "Review freshness"))
+
+(defun promotion-triage-row-action-review-spec (row)
+  (let ((target (getf row :inspect-target)))
+    (case (getf row :attention-category)
+      (:all-fresh
+       (list :target target
+             :select "Overview"
+             :label "Review no-action status"))
+      (:stale
+       (list :target target
+             :select "Overview"
+             :label "Review stale action"))
+      (:unknown-missing-envelope
+       (list :target target
+             :select "Source freshness"
+             :label "Review restore action"))
+      (:unknown-malformed-envelope
+       (list :target target
+             :select "Source freshness"
+             :label "Review repair action"))
+      (:mixed-states
+       (list :target target
+             :select "Source freshness"
+             :label "Review mixed action"))
+      (otherwise
+       (list :target target
+             :select "Overview"
+             :label "Review action")))))
+
+(defun promotion-triage-drilldown-html (spec)
+  (views:object-ref (getf spec :target)
+                    :display (getf spec :label)
+                    :select (getf spec :select)))
 
 (defun promotion-triage-rows-table-html (rows)
   (if rows
@@ -235,8 +321,13 @@
                      (:th (views:esc "Snippet freshness"))
                      (:th (views:esc "Attention state"))
                      (:th (views:esc "Recommended next action"))
-                     (:th (views:esc "Inspect")))
+                     (:th (views:esc "Inspect plan"))
+                     (:th (views:esc "Review freshness"))
+                     (:th (views:esc "Review action")))
                 (loop for row in rows
+                      for inspect-spec = (promotion-triage-row-inspect-spec row)
+                      for freshness-spec = (promotion-triage-row-freshness-spec row)
+                      for action-spec = (promotion-triage-row-action-review-spec row)
                       do (views:html
                            (:tr
                             (:td
@@ -259,10 +350,15 @@
                              (:tt (views:esc
                                    (promotion-triage-category-label
                                     (getf row :attention-category)))))
-                            (:td (views:esc
-                                  (getf row :recommended-next-action-summary)))
-                            (:td (views:object-ref
-                                  (getf row :inspect-target))))))))
+                            (:td
+                             (views:esc
+                              (getf row :recommended-next-action-summary)))
+                            (:td
+                             (promotion-triage-drilldown-html inspect-spec))
+                            (:td
+                             (promotion-triage-drilldown-html freshness-spec))
+                            (:td
+                             (promotion-triage-drilldown-html action-spec)))))))
       (views:html
         (:p "No promotion plans match this scope."))))
 
@@ -274,7 +370,7 @@
     (views:html
       (:p (views:esc (promotion-triage-filter-description filter)))
       (:h4 (views:esc "Counts"))
-      (promotion-triage-counts-table-html counts)
+      (promotion-triage-counts-table-html surface counts)
       (:h4 (views:esc (promotion-triage-filter-title filter)))
       (promotion-triage-rows-table-html rows))))
 
@@ -321,30 +417,48 @@
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value counts
                                                               :plan-count)))))
-                (:tr (:td (views:esc "Attention needed"))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "Attention needed"
+                           :attention-needed))
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value
                                  counts
                                  :attention-needed)))))
-                (:tr (:td (views:esc "All fresh"))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "All fresh"
+                           :all-fresh))
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value counts
                                                               :all-fresh)))))
-                (:tr (:td (views:esc "Stale"))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "Stale"
+                           :stale))
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value counts
                                                               :stale)))))
-                (:tr (:td (views:esc "Unknown missing envelope"))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "Unknown missing envelope"
+                           :unknown-missing-envelope))
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value
                                  counts
                                  :unknown-missing-envelope)))))
-                (:tr (:td (views:esc "Unknown malformed envelope"))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "Unknown malformed envelope"
+                           :unknown-malformed-envelope))
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value
                                  counts
                                  :unknown-malformed-envelope)))))
-                (:tr (:td (views:esc "Mixed states"))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "Mixed states"
+                           :mixed-states))
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value
                                  counts
