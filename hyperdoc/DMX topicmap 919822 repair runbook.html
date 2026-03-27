@@ -6,9 +6,9 @@
   <a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX
   topicmap 919822 repair runbook</tt></a> is the durable HyperDoc checkpoint
   for the backend defect in DMX topicmap <tt>919822</tt> (<tt>context-window</tt>).
-  It keeps the current diagnosis inspectable, stays read-first and dry-run-first,
-  and does not guess the hidden backend write payload for repairing the broken
-  topicmap-context memberships.
+  It now records the exact malformed-store defect, the validated bounded repair,
+  the live execution record, and the verification and rollback steps for the
+  broken topicmap-context memberships.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -37,6 +37,8 @@
 <ul>
   <li><tt>921404</tt> is the broken membership assoc for topic <tt>921352</tt>.</li>
   <li><tt>921471</tt> is the broken membership assoc for topic <tt>921464</tt>.</li>
+  <li>Both broken assocs had only short keys <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, <tt>pinned</tt>.</li>
+  <li>The current DMX fetch path requires <tt>dmx.topicmaps.x</tt>, <tt>dmx.topicmaps.y</tt>, <tt>dmx.topicmaps.visibility</tt>, and <tt>dmx.topicmaps.pinned</tt>.</li>
   <li>Healthy comparison specimen: topic <tt>921494</tt> resolves through assoc <tt>921503</tt>.</li>
 </ul>
 
@@ -46,33 +48,101 @@
   <li><tt>topicmaps/object/921352</tt> fails on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921404</tt>.</li>
   <li><tt>topicmaps/object/921464</tt> fails on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921471</tt>.</li>
   <li><tt>topicmaps/919822</tt> fails on missing <tt>dmx.topicmaps.x</tt> for assoc <tt>921471</tt>.</li>
+  <li>Offline inspection of the copied store and the stopped live store both proved the same short-key-only shape with <tt>x=160</tt>, <tt>y=120</tt>, <tt>visibility=true</tt>, <tt>pinned=false</tt>.</li>
 </ul>
 
 <h2>Containment</h2>
 
 <p>
-  Topicmap <tt>919822</tt> should not receive further speculative writes until a
-  backend/admin repair path is confirmed. This runbook therefore exposes
-  read-only evidence, dry-run checklists, and post-repair verification instead
-  of a live repair action. No POST, PUT, or DELETE is attached to this runbook object.
+  The bounded repair set is now confirmed and executed. No broader write is
+  justified unless a future audit finds the same safe short-key-only shape on
+  additional <tt>dmx.topicmaps.topicmap_context</tt> assocs.
 </p>
 
 <h2>Why HyperDoc code changes are not justified now</h2>
 
 <p>
   The public API proves which assocs are broken. The public API does not expose the exact write payload for <tt>/topicmaps/919822/assoc/&lt;assoc-id&gt;</tt>.
-  That means the remaining uncertainty is a DMX backend/admin contract problem,
-  not a HyperDoc modeling problem.
+  The original writer still remains unproven and is best classified as a
+  stale, external, or custom mutation path unless stronger evidence appears.
+  That is still a DMX backend/admin contract problem, not a HyperDoc modeling
+  problem.
 </p>
 
-<h2>Smallest likely repair</h2>
+<h2>Validated minimal repair</h2>
 
 <p>
-  The smallest likely repair is backend/admin work on assocs <tt>921404</tt>
-  and <tt>921471</tt>: either add the missing topicmap-scoped assoc view props,
-  or remove and correctly recreate those memberships through the real backend
-  route.
+  The validated minimal repair is to copy the existing short-key values into
+  the long-form <tt>dmx.topicmaps.*</tt> keys and keep the short keys in place.
 </p>
+
+<pre>
+START ctx=node(921404,921471)
+SET ctx.`dmx.topicmaps.x` = ctx.x,
+    ctx.`dmx.topicmaps.y` = ctx.y,
+    ctx.`dmx.topicmaps.visibility` = ctx.visibility,
+    ctx.`dmx.topicmaps.pinned` = ctx.pinned
+RETURN ID(ctx) AS repairedCtxId,
+       ctx.`dmx.topicmaps.x`, ctx.`dmx.topicmaps.y`,
+       ctx.`dmx.topicmaps.visibility`, ctx.`dmx.topicmaps.pinned`;
+</pre>
+
+<h2>Verification queries</h2>
+
+<pre>
+START ctx=node(921404,921471)
+RETURN ID(ctx) AS ctxId,
+       ctx.`dmx.topicmaps.x`, ctx.`dmx.topicmaps.y`,
+       ctx.`dmx.topicmaps.visibility`, ctx.`dmx.topicmaps.pinned`,
+       ctx.x, ctx.y, ctx.visibility, ctx.pinned
+ORDER BY ctxId;
+
+START tm=node(919822)
+MATCH (ctx)-[:`dmx.core.default`]-&gt;(tm), (ctx)-[:`dmx.topicmaps.topicmap_content`]-&gt;(content)
+WHERE ctx.typeUri = 'dmx.topicmaps.topicmap_context'
+  AND content.nodeType = 'topic'
+  AND ctx.`dmx.topicmaps.x` IS NULL
+RETURN ID(ctx) AS stillBrokenCtxId;
+
+START ctx=node(*)
+MATCH (ctx)-[:`dmx.core.default`]-&gt;(tm), (ctx)-[:`dmx.topicmaps.topicmap_content`]-&gt;(content)
+WHERE ctx.typeUri = 'dmx.topicmaps.topicmap_context'
+  AND ctx.`dmx.topicmaps.x` IS NULL
+  AND ctx.x IS NOT NULL
+RETURN ID(ctx) AS ctxId, ID(tm) AS topicmapId, ID(content) AS contentId,
+       content.nodeType, content.typeUri, ctx.x, ctx.y, ctx.visibility, ctx.pinned
+ORDER BY ctxId;
+</pre>
+
+<h2>Rollback</h2>
+
+<p>
+  Preferred rollback is restoring the pre-repair filesystem backup. Logical
+  rollback is bounded to the four copied long-form keys:
+</p>
+
+<pre>
+START ctx=node(921404,921471)
+REMOVE ctx.`dmx.topicmaps.x`
+REMOVE ctx.`dmx.topicmaps.y`
+REMOVE ctx.`dmx.topicmaps.visibility`
+REMOVE ctx.`dmx.topicmaps.pinned`
+RETURN ID(ctx) AS rolledBackCtxId;
+</pre>
+
+<h2>Live execution record</h2>
+
+<ul>
+  <li>Host: <tt>dmx.ralfbarkow.ch</tt></li>
+  <li>Service: <tt>dmx.service</tt></li>
+  <li>DB path: <tt>/var/lib/dmx/dmx-db</tt></li>
+  <li>Pre-repair backup: <tt>/var/lib/dmx/backups/dmx-db.pre-repair-20260327-225216</tt></li>
+  <li>Stopped-store preflight matched the copied-store defect exactly: <tt>921404</tt> and <tt>921471</tt> were the only malformed short-key-only topic-player context nodes.</li>
+  <li>Post-repair stopped-store audit returned <tt>allMalformed=0</tt>, <tt>topicPlayerMalformed=0</tt>, <tt>assocPlayerMalformed=0</tt>.</li>
+  <li>Live API proof: <tt>https://dmx.ralfbarkow.ch/topicmaps/919822?children=true</tt> with <tt>Accept: application/json</tt> returned <tt>200 OK</tt>.</li>
+  <li>Live object proof: <tt>topicmaps/object/921352</tt> and <tt>topicmaps/object/921464</tt> returned <tt>200 OK</tt>.</li>
+  <li>No fresh <tt>NotFoundException</tt> was observed in the post-repair log window for the successful JSON fetch.</li>
+</ul>
 
 <h2>Post-repair gate before resuming DMX seeding</h2>
 
@@ -80,6 +150,7 @@
   <li><tt>topicmaps/object/921352</tt> must return <tt>200 OK</tt>.</li>
   <li><tt>topicmaps/object/921464</tt> must return <tt>200 OK</tt>.</li>
   <li><tt>topicmaps/919822</tt> must return <tt>200 OK</tt>.</li>
+  <li>Whole-store malformed-shape audit must return zero remaining short-key-only topicmap-context nodes.</li>
   <li>Only then should DMX seeding or topicmap-local writes resume.</li>
 </ol>
 
