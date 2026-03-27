@@ -1583,9 +1583,45 @@
      "DMX dry-run review must not leak absolute paths for the second real page")))
 
 (defun run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test ()
-  (let ((workflow-page-source
-          (uiop:read-file-string
-           (localhost-fedwiki-page-promotion-workflow-relative-path))))
+  (let* ((workflow-page-source
+           (uiop:read-file-string
+            (localhost-fedwiki-page-promotion-workflow-relative-path)))
+         (collective-page-source
+           (uiop:read-file-string
+            (asdf:system-relative-pathname
+             :hyperdoc
+             "hyperdoc/The Life Cycle of Collective Knowledge.html")))
+         (repro-page-source
+           (uiop:read-file-string
+            (asdf:system-relative-pathname
+             :hyperdoc
+             "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html")))
+         (collective-page
+           (hyperbook:find-page hyperdoc::*hyperdoc*
+                                "The Life Cycle of Collective Knowledge"
+                                :signal-error? t))
+         (repro-page
+           (hyperbook:find-page hyperdoc::*hyperdoc*
+                                "Reproducible DevEnv as Knowledge Artifact"
+                                :signal-error? t))
+         (collective-page-views
+           (load-inspector-views-for-object collective-page))
+         (repro-page-views
+           (load-inspector-views-for-object repro-page))
+         (collective-content-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-page-views "Content")))
+         (repro-content-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-page-views "Content")))
+         (collective-plan
+           (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+         (repro-plan
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+         (collective-source
+           (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
+         (repro-source
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)))
     (assert-true
      (fboundp 'hyperdoc::localhost-fedwiki-page-promotion-workflow-topic)
      "Workflow topic function must be present")
@@ -1618,7 +1654,55 @@
      (search "execute-topic-factory-snippet-dmx-write ... :dry-run nil"
              workflow-page-source
              :test #'char=)
-     "Workflow page must keep the optional live DMX write boundary explicit and separate")))
+     "Workflow page must keep the optional live DMX write boundary explicit and separate")
+    (dolist (page-view-html (list collective-content-html
+                                  repro-content-html))
+      (assert-true
+       (search "Promotion workflow" page-view-html :test #'char=)
+       "Generated page content view must expose the Promotion workflow section")
+      (assert-true
+       (search "Promotion plan overview" page-view-html :test #'char=)
+       "Generated page content view must expose the promotion-plan back-link")
+      (assert-true
+       (search "Review source freshness" page-view-html :test #'char=)
+       "Generated page content view must expose the source-freshness back-link")
+      (assert-true
+       (search "Normalized localhost source object" page-view-html :test #'char=)
+       "Generated page content view must expose the normalized-source back-link"))
+    (dolist (needle
+             '("expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Overview\""
+               "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source freshness\""
+               "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source page\""
+               "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)\" view=\"Summary\""))
+      (assert-true
+       (search needle collective-page-source :test #'char=)
+       (format nil "Collective knowledge generated page must contain authored navigation ~A"
+               needle)))
+    (dolist (needle
+             '("expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Overview\""
+               "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Source freshness\""
+               "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Source page\""
+               "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)\" view=\"Summary\""))
+      (assert-true
+       (search needle repro-page-source :test #'char=)
+       (format nil "Second real generated page must contain authored navigation ~A"
+               needle)))
+    (assert-equal
+     "the-life-cycle-of-collective-knowledge-promotion-plan"
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+     "Collective knowledge generated page must link back to the correct promotion plan object")
+    (assert-equal
+     "reproducible-devenv-as-knowledge-artifact-promotion-plan"
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+     "Second real generated page must link back to the correct promotion plan object")
+    (assert-equal
+     "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+     (hyperdoc::fedwiki-page-id-of collective-source)
+     "Collective knowledge generated page must link back to the correct normalized source object")
+    (assert-equal
+     "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
+     (hyperdoc::fedwiki-page-id-of repro-source)
+     "Second real generated page must link back to the correct normalized source object")))
 
 (defun run-localhost-fedwiki-page-promotion-output-sync-smoke-test ()
   (let ((collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
