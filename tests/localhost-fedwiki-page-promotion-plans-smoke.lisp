@@ -1707,9 +1707,15 @@
          (collective-content-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-page-views "Content")))
+         (collective-status-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-page-views "Workflow status")))
          (repro-content-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-page-views "Content")))
+         (repro-status-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-page-views "Workflow status")))
          (collective-plan
            (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
          (repro-plan
@@ -1717,7 +1723,15 @@
          (collective-source
            (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
          (repro-source
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)))
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
+         (collective-page-plan
+           (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-generated-page
+            collective-page
+            :signal-error? t))
+         (repro-page-plan
+           (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-generated-page
+            repro-page
+            :signal-error? t)))
     (assert-true
      (fboundp 'hyperdoc::localhost-fedwiki-page-promotion-workflow-topic)
      "Workflow topic function must be present")
@@ -1765,6 +1779,41 @@
       (assert-true
        (search "Normalized localhost source object" page-view-html :test #'char=)
        "Generated page content view must expose the normalized-source back-link"))
+    (dolist (status-html (list collective-status-html
+                               repro-status-html))
+      (assert-true
+       (search "Promotion plan id" status-html :test #'char=)
+       "Generated page workflow-status view must expose the linked promotion plan id")
+      (assert-true
+       (search "Linked localhost source id" status-html :test #'char=)
+       "Generated page workflow-status view must expose the linked localhost source id")
+      (assert-true
+       (search "Linked localhost source slug" status-html :test #'char=)
+       "Generated page workflow-status view must expose the linked localhost source slug")
+      (assert-true
+       (search "Page source freshness" status-html :test #'char=)
+       "Generated page workflow-status view must expose page freshness")
+      (assert-true
+       (search "Snippet source freshness" status-html :test #'char=)
+       "Generated page workflow-status view must expose snippet freshness")
+      (assert-true
+       (search "Recommended next action summary" status-html :test #'char=)
+       "Generated page workflow-status view must expose recommended next-action summary")
+      (assert-true
+       (search "Promotion plan overview" status-html :test #'char=)
+       "Generated page workflow-status view must link to the promotion plan overview")
+      (assert-true
+       (search "Review source freshness" status-html :test #'char=)
+       "Generated page workflow-status view must link to source freshness")
+      (assert-true
+       (search "Review source page" status-html :test #'char=)
+       "Generated page workflow-status view must link to the source-page surface"))
+    (assert-true
+     (search "No action needed" collective-status-html :test #'char=)
+     "Collective knowledge generated page workflow-status view must expose the fresh no-action summary")
+    (assert-true
+     (search "No action needed" repro-status-html :test #'char=)
+     "Second real generated page workflow-status view must expose the fresh no-action summary")
     (dolist (needle
              '("expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Overview\""
                "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source freshness\""
@@ -1788,9 +1837,17 @@
      (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
      "Collective knowledge generated page must link back to the correct promotion plan object")
     (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-page-plan)
+     "Collective knowledge generated page workflow-status surface must resolve to the correct promotion plan object")
+    (assert-equal
      "reproducible-devenv-as-knowledge-artifact-promotion-plan"
      (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
      "Second real generated page must link back to the correct promotion plan object")
+    (assert-equal
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-page-plan)
+     "Second real generated page workflow-status surface must resolve to the correct promotion plan object")
     (assert-equal
      "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
      (hyperdoc::fedwiki-page-id-of collective-source)
@@ -1798,7 +1855,29 @@
     (assert-equal
      "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
      (hyperdoc::fedwiki-page-id-of repro-source)
-     "Second real generated page must link back to the correct normalized source object")))
+     "Second real generated page must link back to the correct normalized source object")
+    (assert-true
+     (search (hyperdoc::fedwiki-page-id-of collective-source)
+             collective-status-html
+             :test #'char=)
+     "Collective knowledge generated page workflow-status surface must expose the canonical source id")
+    (assert-true
+     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-slug
+              collective-plan)
+             collective-status-html
+             :test #'char=)
+     "Collective knowledge generated page workflow-status surface must expose the canonical source slug")
+    (assert-true
+     (search (hyperdoc::fedwiki-page-id-of repro-source)
+             repro-status-html
+             :test #'char=)
+     "Second real generated page workflow-status surface must expose the canonical source id")
+    (assert-true
+     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-slug
+              repro-plan)
+             repro-status-html
+             :test #'char=)
+     "Second real generated page workflow-status surface must expose the canonical source slug")))
 
 (defun run-localhost-fedwiki-page-promotion-output-sync-smoke-test ()
   (let ((collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
