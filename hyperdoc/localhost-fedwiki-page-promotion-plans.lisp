@@ -816,6 +816,13 @@
    :signal-error? signal-error?
    :error-context (format nil "HyperDoc page title ~S" title)))
 
+(defun find-localhost-fedwiki-page-promotion-plan-for-generated-page
+    (page &key signal-error?)
+  (and page
+       (find-localhost-fedwiki-page-promotion-plan-for-hyperdoc-page-title
+        (title-of page)
+        :signal-error? signal-error?)))
+
 (defun ensure-localhost-fedwiki-page-promotion-dmx-support ()
   (or (fboundp 'plan-topic-factory-snippet-dmx-write)
       (ignore-errors

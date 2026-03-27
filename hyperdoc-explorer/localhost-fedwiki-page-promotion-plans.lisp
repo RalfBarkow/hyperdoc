@@ -54,6 +54,16 @@
         (:span :style "color: #666;"
                (views:esc "unavailable")))))
 
+(defun promotion-object-link-html
+    (object &key display select (fallback "unavailable"))
+  (if object
+      (views:object-ref object
+                        :display display
+                        :select select)
+      (views:html
+        (:span :style "color: #666;"
+               (views:esc fallback)))))
+
 (defun promotion-current-source-fingerprint-label (status)
   (or (getf status :current-source-fingerprint)
       "unavailable"))
@@ -157,6 +167,72 @@
          (:span :style "color: #666;" (views:esc (getf spec :label)))
          (:div :style "margin-top: 0.35rem;"
                (views:esc (getf spec :description))))))))
+
+(views:defview 👀workflow-status (page html-page)
+  (when-let ((plan (find-localhost-fedwiki-page-promotion-plan-for-generated-page
+                    page)))
+    (let* ((source (localhost-fedwiki-page-promotion-plan-source plan))
+           (status (localhost-fedwiki-page-promotion-plan-sync-status plan)))
+      (views:html-view :title "Workflow status" :priority 2
+        (views:html
+          (:p (views:esc
+               "Current promotion workflow status for this generated page. These values are derived from the linked promotion plan so freshness and next-action guidance stay consistent with the source-side workflow surfaces."))
+          (:table :class "inspector-table"
+                  (:tr (:td (views:esc "Promotion plan"))
+                       (:td
+                        (promotion-object-link-html
+                         plan
+                         :display
+                         (localhost-fedwiki-page-promotion-plan-title plan)
+                         :select "Overview")))
+                  (:tr (:td (views:esc "Promotion plan id"))
+                       (:td (:tt (views:esc
+                                  (localhost-fedwiki-page-promotion-plan-id
+                                   plan)))))
+                  (:tr (:td (views:esc "Linked localhost source"))
+                       (:td
+                        (promotion-object-link-html
+                         source
+                         :display "Open source object"
+                         :select "Summary")))
+                  (:tr (:td (views:esc "Linked localhost source id"))
+                       (:td (:tt (views:esc
+                                  (localhost-fedwiki-source-data-fedwiki-page-id
+                                   source)))))
+                  (:tr (:td (views:esc "Linked localhost source slug"))
+                       (:td (:tt (views:esc
+                                  (localhost-fedwiki-source-data-fedwiki-slug
+                                   source)))))
+                  (:tr (:td (views:esc "Page source freshness"))
+                       (:td (:tt (views:esc
+                                  (promotion-source-freshness-label
+                                   (getf status
+                                         :page-source-freshness-state))))))
+                  (:tr (:td (views:esc "Snippet source freshness"))
+                       (:td (:tt (views:esc
+                                  (promotion-source-freshness-label
+                                   (getf status
+                                         :snippet-source-freshness-state))))))
+                  (:tr (:td (views:esc "Recommended next action summary"))
+                       (:td (views:esc
+                             (localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+                              status)))))
+          (:ul
+           (:li
+            (promotion-object-link-html
+             plan
+             :display "Promotion plan overview"
+             :select "Overview"))
+           (:li
+            (promotion-object-link-html
+             plan
+             :display "Review source freshness"
+             :select "Source freshness"))
+           (:li
+            (promotion-object-link-html
+             plan
+             :display "Review source page"
+             :select "Source page"))))))))
 
 (defun promotion-triage-category-label (category)
   (case category
