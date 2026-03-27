@@ -77,12 +77,18 @@
          (collective-freshness-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Source freshness")))
+         (collective-source-page-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-views "Source page")))
          (repro-overview-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-views "Overview")))
          (repro-freshness-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-views "Source freshness")))
+         (repro-source-page-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-views "Source page")))
          (collective-story-items-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title collective-views "Story items")))
@@ -94,7 +100,15 @@
             (smoke-find-view-by-title repro-views "Promoted topics")))
          (repro-dmx-html
            (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "DMX dry-run"))))
+            (smoke-find-view-by-title repro-views "DMX dry-run")))
+         (collective-generated-page
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+            collective
+            :signal-error? t))
+         (repro-generated-page
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+            repro
+            :signal-error? t)))
     (assert-view-titles-present surface-views
                                 '("Overview"
                                   "Triage"
@@ -210,6 +224,12 @@
      (search "story-item-fragment" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose fragment-based provenance modes")
     (assert-true
+     (search "Generated HyperDoc page" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose the generated HyperDoc page link")
+    (assert-true
+     (search "Review generated page" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose a human-facing generated-page review link")
+    (assert-true
      (search "DMX dry-run summary available" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose DMX dry-run summary availability")
     (assert-true
@@ -284,6 +304,12 @@
      (search "multi-item-derived" repro-overview-html :test #'char=)
      "Second real-page overview must expose multi-item provenance modes")
     (assert-true
+     (search "Generated HyperDoc page" repro-overview-html :test #'char=)
+     "Second real-page overview must expose the generated HyperDoc page link")
+    (assert-true
+     (search "Review generated page" repro-overview-html :test #'char=)
+     "Second real-page overview must expose a human-facing generated-page review link")
+    (assert-true
      (search "DMX dry-run summary available" repro-overview-html :test #'char=)
      "Second real-page overview must expose DMX dry-run summary availability")
     (assert-true
@@ -357,6 +383,22 @@
     (assert-true
      (search "No action needed" repro-freshness-html :test #'char=)
      "Second real-page source freshness view must expose a passive no-action affordance")
+    (dolist (html (list collective-source-page-html
+                        repro-source-page-html))
+      (assert-true
+       (search "Generated HyperDoc page" html :test #'char=)
+       "Source page view must expose a generated-page link")
+      (assert-true
+       (search "Open generated page" html :test #'char=)
+       "Source page view must expose a human-facing generated-page entry point"))
+    (assert-equal
+     "The Life Cycle of Collective Knowledge"
+     (hyperbook:title-of collective-generated-page)
+     "Collective knowledge plan must resolve the correct durable HyperDoc page")
+    (assert-equal
+     "Reproducible DevEnv as Knowledge Artifact"
+     (hyperbook:title-of repro-generated-page)
+     "Second real-page plan must resolve the correct durable HyperDoc page")
     (assert-true
      (search "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
              collective-dmx-html
@@ -822,7 +864,31 @@
          (repro-source-html
            (html-inspector-views:view-html
             (smoke-find-view-by-title repro-source-views
-                                      "Promotion plan"))))
+                                      "Promotion plan")))
+         (collective-source-summary-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title collective-source-views
+                                      "Summary")))
+         (repro-source-summary-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title repro-source-views
+                                      "Summary")))
+         (collective-generated-page
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+            collective-plan
+            :signal-error? t))
+         (repro-generated-page
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+            repro-plan
+            :signal-error? t))
+         (collective-source-generated-page
+           (hyperdoc::localhost-fedwiki-source-generated-page
+            collective-source
+            :signal-error? t))
+         (repro-source-generated-page
+           (hyperdoc::localhost-fedwiki-source-generated-page
+            repro-source
+            :signal-error? t)))
     (assert-true
      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
       collective-topic-page)
@@ -882,6 +948,12 @@
      (smoke-find-view-by-title repro-source-views "Promotion plan")
      "Second real-page source object must expose a Promotion plan entry point")
     (assert-true
+     (smoke-find-view-by-title collective-source-views "Summary")
+     "Collective knowledge source object must keep its Summary view")
+    (assert-true
+     (smoke-find-view-by-title repro-source-views "Summary")
+     "Second real-page source object must keep its Summary view")
+    (assert-true
      (null (smoke-find-view-by-title workflow-topic-page-views "Promotion plan"))
      "Unrelated workflow topic page must not grow a promotion-plan entry point")
     (assert-true
@@ -923,7 +995,31 @@
               repro-plan)
              repro-source-html
              :test #'char=)
-     "Second real-page source entry point must preserve the canonical source page id")))
+     "Second real-page source entry point must preserve the canonical source page id")
+    (dolist (html (list collective-source-summary-html
+                        repro-source-summary-html))
+      (assert-true
+       (search "Generated HyperDoc page" html :test #'char=)
+       "Normalized source summary must expose the generated HyperDoc page link")
+      (assert-true
+       (search "Open generated page" html :test #'char=)
+       "Normalized source summary must expose a human-facing generated-page link"))
+    (assert-equal
+     "The Life Cycle of Collective Knowledge"
+     (hyperbook:title-of collective-generated-page)
+     "Collective knowledge plan must resolve the correct generated HyperDoc page")
+    (assert-equal
+     "Reproducible DevEnv as Knowledge Artifact"
+     (hyperbook:title-of repro-generated-page)
+     "Second real-page plan must resolve the correct generated HyperDoc page")
+    (assert-equal
+     "The Life Cycle of Collective Knowledge"
+     (hyperbook:title-of collective-source-generated-page)
+     "Collective knowledge source object must resolve the correct generated HyperDoc page")
+    (assert-equal
+     "Reproducible DevEnv as Knowledge Artifact"
+     (hyperbook:title-of repro-source-generated-page)
+     "Second real-page source object must resolve the correct generated HyperDoc page")))
 
 (defun run-localhost-fedwiki-page-promotion-operations-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
