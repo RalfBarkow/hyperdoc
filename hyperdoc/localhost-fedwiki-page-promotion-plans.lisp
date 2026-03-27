@@ -627,24 +627,76 @@
            resolved-status)
           :status resolved-status)))
 
+(defun localhost-fedwiki-page-promotion-surface-triage-row-matches-filter-p
+    (row filter)
+  (case filter
+    (:all t)
+    (:attention-needed
+     (getf row :attention-needed))
+    (:all-fresh
+     (eql (getf row :attention-category) :all-fresh))
+    (:stale
+     (eql (getf row :attention-category) :stale))
+    (:unknown-missing-envelope
+     (eql (getf row :attention-category) :unknown-missing-envelope))
+    (:unknown-malformed-envelope
+     (eql (getf row :attention-category) :unknown-malformed-envelope))
+    (:mixed-states
+     (eql (getf row :attention-category) :mixed-states))
+    (otherwise
+     t)))
+
 (defun localhost-fedwiki-page-promotion-surface-triage-rows
+    (surface &key status-overrides (filter :all))
+  (remove-if-not
+   (lambda (row)
+     (localhost-fedwiki-page-promotion-surface-triage-row-matches-filter-p
+      row
+      filter))
+   (sort
+    (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
+          for override = (cdr (assoc (localhost-fedwiki-page-promotion-plan-id
+                                      plan)
+                                     status-overrides
+                                     :test #'equal))
+          collect
+          (localhost-fedwiki-page-promotion-plan-triage-row
+           plan
+           :status override))
+    (lambda (left right)
+      (or (< (getf left :attention-severity)
+             (getf right :attention-severity))
+          (and (= (getf left :attention-severity)
+                  (getf right :attention-severity))
+               (string-lessp (getf left :title)
+                             (getf right :title))))))))
+
+(defun localhost-fedwiki-page-promotion-surface-triage-counts
     (surface &key status-overrides)
-  (sort
-   (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
-         for override = (cdr (assoc (localhost-fedwiki-page-promotion-plan-id plan)
-                                    status-overrides
-                                    :test #'equal))
-         collect
-         (localhost-fedwiki-page-promotion-plan-triage-row
-          plan
-          :status override))
-   (lambda (left right)
-     (or (< (getf left :attention-severity)
-            (getf right :attention-severity))
-         (and (= (getf left :attention-severity)
-                 (getf right :attention-severity))
-              (string-lessp (getf left :title)
-                            (getf right :title)))))))
+  (let ((rows (localhost-fedwiki-page-promotion-surface-triage-rows
+               surface
+               :status-overrides status-overrides)))
+    (list :plan-count (length rows)
+          :attention-needed
+          (count-if (lambda (row)
+                      (getf row :attention-needed))
+                    rows)
+          :all-fresh
+          (count :all-fresh rows :key (lambda (row) (getf row :attention-category)))
+          :stale
+          (count :stale rows :key (lambda (row) (getf row :attention-category)))
+          :unknown-missing-envelope
+          (count :unknown-missing-envelope
+                 rows
+                 :key (lambda (row) (getf row :attention-category)))
+          :unknown-malformed-envelope
+          (count :unknown-malformed-envelope
+                 rows
+                 :key (lambda (row) (getf row :attention-category)))
+          :mixed-states
+          (count :mixed-states
+                 rows
+                 :key (lambda (row) (getf row :attention-category))))))
 
 ;; Generic operations so the inspector exposes them in the Operations view.
 (defgeneric localhost-fedwiki-page-promotion-plan-sync-status (plan)

@@ -162,65 +162,72 @@
               (getf row :attention-needed))
             rows))
 
-(defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
-  (localhost-fedwiki-page-promotion-surface-title surface))
+(defun promotion-triage-count-value (counts key)
+  (format nil "~D"
+          (or (getf counts key) 0)))
 
-(defmethod views:text-representation ((plan localhost-fedwiki-page-promotion-plan))
-  (localhost-fedwiki-page-promotion-plan-title plan))
+(defun promotion-triage-filter-title (filter)
+  (case filter
+    (:attention-needed "Attention needed")
+    (:all-fresh "All fresh")
+    (:stale "Stale")
+    (:unknown-missing-envelope "Unknown missing envelope")
+    (:unknown-malformed-envelope "Unknown malformed envelope")
+    (:mixed-states "Mixed states")
+    (otherwise "Triage")))
 
-(defmethod views:text-representation ((source localhost-fedwiki-source-data))
-  (localhost-fedwiki-source-data-fedwiki-page-id source))
+(defun promotion-triage-filter-description (filter)
+  (case filter
+    (:attention-needed
+     "This scope keeps only plans that currently need attention, still ordered from malformed through missing and stale states.")
+    (:all-fresh
+     "This scope keeps only plans whose page and snippet artifacts are both currently fresh.")
+    (:stale
+     "This scope keeps only plans whose page and snippet artifacts are both currently stale.")
+    (:unknown-missing-envelope
+     "This scope keeps only plans whose reflected snapshot evidence is currently missing.")
+    (:unknown-malformed-envelope
+     "This scope keeps only plans whose reflected snapshot evidence is currently malformed.")
+    (:mixed-states
+     "This scope keeps only plans whose page and snippet freshness states currently differ.")
+    (otherwise
+     "This compact triage table keeps attention-needed promotion plans ahead of all-fresh plans and links each row back to the live plan object.")))
 
-(defmethod views:text-representation ((item localhost-fedwiki-item-data))
-  (format nil "story item ~D (~A)"
-          (localhost-fedwiki-item-data-item-index item)
-          (localhost-fedwiki-item-data-item-type item)))
+(defun promotion-triage-counts-table-html (counts)
+  (views:html
+    (:table :class "inspector-table"
+            (:tr (:td (views:esc "Plan count"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value counts :plan-count)))))
+            (:tr (:td (views:esc "Attention needed"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value counts
+                                                          :attention-needed)))))
+            (:tr (:td (views:esc "All fresh"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value counts :all-fresh)))))
+            (:tr (:td (views:esc "Stale"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value counts :stale)))))
+            (:tr (:td (views:esc "Unknown missing envelope"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value
+                             counts
+                             :unknown-missing-envelope)))))
+            (:tr (:td (views:esc "Unknown malformed envelope"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value
+                             counts
+                             :unknown-malformed-envelope)))))
+            (:tr (:td (views:esc "Mixed states"))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value
+                             counts
+                             :mixed-states))))))))
 
-(defmethod views:text-representation ((fragment localhost-fedwiki-fragment-data))
-  (format nil "fragment ~D (~A)"
-          (localhost-fedwiki-fragment-data-fragment-index fragment)
-          (or (localhost-fedwiki-fragment-data-section-key fragment)
-              (localhost-fedwiki-fragment-data-fragment-anchor fragment))))
-
-(defmethod views:text-representation ((topic localhost-fedwiki-promoted-topic-data))
-  (localhost-fedwiki-promoted-topic-data-title topic))
-
-(views:defview 👀promotion-plan (source localhost-fedwiki-source-data)
-  (topic-localhost-fedwiki-promotion-plan-view
-   (find-localhost-fedwiki-page-promotion-plan-for-source source)
-   "This normalized localhost FedWiki source page can open its promotion plan directly so the inspect boundary stays separate from local artifact writes and DMX writes."))
-
-(views:defview 👀overview (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Overview" :priority 1
-    (let* ((rows (localhost-fedwiki-page-promotion-surface-triage-rows surface))
-           (attention-needed-count (promotion-attention-needed-count rows))
-           (fresh-count (- (length rows) attention-needed-count))
-           (top-row (first rows)))
+(defun promotion-triage-rows-table-html (rows)
+  (if rows
       (views:html
-        (:h3 (views:esc (localhost-fedwiki-page-promotion-surface-title surface)))
-        (:p (views:esc (localhost-fedwiki-page-promotion-surface-summary surface)))
-        (:p (views:esc
-             "Use Triage to scan all known promotion plans by current freshness state. Attention-needed plans are ordered before all-fresh plans, with malformed and missing reflected snapshot evidence ahead of stale items."))
-        (:table :class "inspector-table"
-                (:tr (:td (views:esc "Plan count"))
-                     (:td (:tt (views:esc (format nil "~D" (length rows))))))
-                (:tr (:td (views:esc "Attention needed"))
-                     (:td (:tt (views:esc
-                                (format nil "~D" attention-needed-count)))))
-                (:tr (:td (views:esc "All fresh"))
-                     (:td (:tt (views:esc (format nil "~D" fresh-count)))))
-                (:tr (:td (views:esc "Top triage state"))
-                     (:td (:tt (views:esc
-                                (if top-row
-                                    (promotion-triage-category-label
-                                     (getf top-row :attention-category))
-                                    "none"))))))))))
-
-(views:defview 👀triage (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Triage" :priority 2
-    (let ((rows (localhost-fedwiki-page-promotion-surface-triage-rows surface)))
-      (views:html
-        (:p "This compact triage table keeps attention-needed promotion plans ahead of all-fresh plans and links each row back to the live plan object.")
         (:table :class "inspector-table"
                 (:tr (:th (views:esc "Plan"))
                      (:th (views:esc "Source"))
@@ -255,10 +262,130 @@
                             (:td (views:esc
                                   (getf row :recommended-next-action-summary)))
                             (:td (views:object-ref
-                                  (getf row :inspect-target)))))))))))
+                                  (getf row :inspect-target))))))))
+      (views:html
+        (:p "No promotion plans match this scope."))))
+
+(defun promotion-triage-scope-html (surface filter)
+  (let ((counts (localhost-fedwiki-page-promotion-surface-triage-counts surface))
+        (rows (localhost-fedwiki-page-promotion-surface-triage-rows
+               surface
+               :filter filter)))
+    (views:html
+      (:p (views:esc (promotion-triage-filter-description filter)))
+      (:h4 (views:esc "Counts"))
+      (promotion-triage-counts-table-html counts)
+      (:h4 (views:esc (promotion-triage-filter-title filter)))
+      (promotion-triage-rows-table-html rows))))
+
+(defmethod views:text-representation ((surface localhost-fedwiki-page-promotion-surface))
+  (localhost-fedwiki-page-promotion-surface-title surface))
+
+(defmethod views:text-representation ((plan localhost-fedwiki-page-promotion-plan))
+  (localhost-fedwiki-page-promotion-plan-title plan))
+
+(defmethod views:text-representation ((source localhost-fedwiki-source-data))
+  (localhost-fedwiki-source-data-fedwiki-page-id source))
+
+(defmethod views:text-representation ((item localhost-fedwiki-item-data))
+  (format nil "story item ~D (~A)"
+          (localhost-fedwiki-item-data-item-index item)
+          (localhost-fedwiki-item-data-item-type item)))
+
+(defmethod views:text-representation ((fragment localhost-fedwiki-fragment-data))
+  (format nil "fragment ~D (~A)"
+          (localhost-fedwiki-fragment-data-fragment-index fragment)
+          (or (localhost-fedwiki-fragment-data-section-key fragment)
+              (localhost-fedwiki-fragment-data-fragment-anchor fragment))))
+
+(defmethod views:text-representation ((topic localhost-fedwiki-promoted-topic-data))
+  (localhost-fedwiki-promoted-topic-data-title topic))
+
+(views:defview 👀promotion-plan (source localhost-fedwiki-source-data)
+  (topic-localhost-fedwiki-promotion-plan-view
+   (find-localhost-fedwiki-page-promotion-plan-for-source source)
+   "This normalized localhost FedWiki source page can open its promotion plan directly so the inspect boundary stays separate from local artifact writes and DMX writes."))
+
+(views:defview 👀overview (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Overview" :priority 1
+    (let* ((rows (localhost-fedwiki-page-promotion-surface-triage-rows surface))
+           (counts (localhost-fedwiki-page-promotion-surface-triage-counts surface))
+           (top-row (first rows)))
+      (views:html
+        (:h3 (views:esc (localhost-fedwiki-page-promotion-surface-title surface)))
+        (:p (views:esc (localhost-fedwiki-page-promotion-surface-summary surface)))
+        (:p (views:esc
+             "Use Triage to scan all known promotion plans by current freshness state. Attention-needed plans are ordered before all-fresh plans, with malformed and missing reflected snapshot evidence ahead of stale items. The filter-specific subviews keep the same ordering within each scope."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Plan count"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value counts
+                                                              :plan-count)))))
+                (:tr (:td (views:esc "Attention needed"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value
+                                 counts
+                                 :attention-needed)))))
+                (:tr (:td (views:esc "All fresh"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value counts
+                                                              :all-fresh)))))
+                (:tr (:td (views:esc "Stale"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value counts
+                                                              :stale)))))
+                (:tr (:td (views:esc "Unknown missing envelope"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value
+                                 counts
+                                 :unknown-missing-envelope)))))
+                (:tr (:td (views:esc "Unknown malformed envelope"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value
+                                 counts
+                                 :unknown-malformed-envelope)))))
+                (:tr (:td (views:esc "Mixed states"))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value
+                                 counts
+                                 :mixed-states)))))
+                (:tr (:td (views:esc "Top triage state"))
+                     (:td (:tt (views:esc
+                                (if top-row
+                                    (promotion-triage-category-label
+                                     (getf top-row :attention-category))
+                                    "none"))))))))))
+
+(views:defview 👀triage (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Triage" :priority 2
+    (promotion-triage-scope-html surface :all)))
+
+(views:defview 👀attention-needed (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Attention needed" :priority 3
+    (promotion-triage-scope-html surface :attention-needed)))
+
+(views:defview 👀all-fresh (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "All fresh" :priority 4
+    (promotion-triage-scope-html surface :all-fresh)))
+
+(views:defview 👀stale (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Stale" :priority 5
+    (promotion-triage-scope-html surface :stale)))
+
+(views:defview 👀unknown-missing-envelope (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Unknown missing envelope" :priority 6
+    (promotion-triage-scope-html surface :unknown-missing-envelope)))
+
+(views:defview 👀unknown-malformed-envelope (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Unknown malformed envelope" :priority 7
+    (promotion-triage-scope-html surface :unknown-malformed-envelope)))
+
+(views:defview 👀mixed-states (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Mixed states" :priority 8
+    (promotion-triage-scope-html surface :mixed-states)))
 
 (views:defview 👀plans (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Plans" :priority 3
+  (views:html-view :title "Plans" :priority 9
     (views:html
       (:p "Each plan stays inspectable as a separate localhost FedWiki page-promotion boundary.")
       (:ul
