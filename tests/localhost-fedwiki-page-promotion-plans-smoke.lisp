@@ -1928,9 +1928,6 @@
             :surface surface))
          (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
          (children (getf payload :children))
-         (provenance-json
-           (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
-                    children))
          (body (hyperdoc::snippet-text-of definition)))
     (assert-true
      (smoke-find-view-by-title views "DMX handover")
@@ -1957,9 +1954,23 @@
     (assert-equal "hyperdoc:topic-factory-snippet/hyperdoc-localhost-fedwiki-promotion-workflow-handover"
                   (getf summary :uri)
                   "DMX handover summary must preserve the stable topic URI")
+    (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
+                  (getf summary :topic-type-uri)
+                  "DMX handover summary must preserve the installed live-write topic type")
     (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-topic-title*
                   (getf payload :value)
                   "DMX handover payload must preserve the human-facing topic title")
+    (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
+                  (getf payload :type-uri)
+                  "DMX handover payload must use the installed live-write topic type")
+    (assert-equal hyperdoc::*localhost-fedwiki-page-promotion-handover-topic-title*
+                  (gethash hyperdoc::*dmx-notes-title-type-uri*
+                           children)
+                  "DMX handover payload must place the accepted handover title into the note title child")
+    (assert-equal body
+                  (gethash hyperdoc::*dmx-notes-text-type-uri*
+                           children)
+                  "DMX handover payload must place the accepted handover body into the note text child")
     (dolist (needle
              (list "Current status"
                    "Current boundaries"
@@ -1981,6 +1992,7 @@
                    "Current status"
                    "Next DMX-oriented work"
                    "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=\"HyperDoc localhost FedWiki promotion workflow\""
+                   "TOPIC_FACTORY_SNIPPET_DMX_TYPE uri=\"dmx.notes.note\""
                    "topic-action=CREATE"
                    "topicmap-action=ADD"
                    "workspace-topicmap-id=919822"
@@ -1990,23 +2002,23 @@
            (search needle evidence :test #'char=))
        (format nil "DMX handover inspector/evidence must expose ~A" needle)))
     (assert-true
+     (not (search "/Users/" evidence))
+     "DMX handover dry-run evidence must not preserve machine-local absolute paths")
+    (assert-true
      (search "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
-             provenance-json)
-     "DMX handover provenance must preserve the first canonical FedWiki page id")
+             body)
+     "DMX handover body must preserve the first canonical FedWiki page id")
     (assert-true
      (search "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
-             provenance-json)
-     "DMX handover provenance must preserve the second canonical FedWiki page id")
+             body)
+     "DMX handover body must preserve the second canonical FedWiki page id")
     (assert-true
      (search "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/919822/topic/919822"
-             provenance-json)
-     "DMX handover provenance must preserve the explicit target topicmap route")
+             body)
+     "DMX handover body must preserve the explicit target topicmap route")
     (assert-true
-     (not (search "/Users/" provenance-json))
-     "DMX handover provenance must not preserve machine-local absolute paths")
-    (assert-true
-     (not (search "/Users/" evidence))
-     "DMX handover dry-run evidence must not preserve machine-local absolute paths")))
+     (not (search "/Users/" body))
+     "DMX handover body must not preserve machine-local absolute paths")))
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)

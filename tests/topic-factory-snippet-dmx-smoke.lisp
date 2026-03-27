@@ -170,10 +170,86 @@
              output)
      "Dry-run evidence must expose the custom DMX topic title override")))
 
+(defun run-topic-factory-snippet-dmx-zettel-payload-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 7000))
+         (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
+                nil
+                :workspace-topicmap-id
+                *topic-factory-snippet-dmx-workspace-topicmap-id*
+                :client client
+                :topic-type-uri hyperdoc::*dmx-zettelkasten-zettel-type-uri*
+                :topic-value *topic-factory-snippet-dmx-custom-topic-value*))
+         (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
+         (children (getf payload :children))
+         (json (hyperdoc::dmx-import-json-object payload))
+         (json-children (gethash "children" json))
+         (json-title
+           (gethash hyperdoc::*dmx-zettelkasten-zettel-title-type-uri*
+                    json-children))
+         (json-content
+           (gethash hyperdoc::*dmx-zettelkasten-zettel-content-type-uri*
+                    json-children)))
+    (assert-equal hyperdoc::*dmx-zettelkasten-zettel-type-uri*
+                  (getf payload :type-uri)
+                  "Zettel payload must preserve the explicit zettel topic type")
+    (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
+                  (getf payload :value)
+                  "Zettel payload must preserve the explicit human-facing topic value")
+    (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
+                  (gethash hyperdoc::*dmx-zettelkasten-zettel-title-type-uri*
+                           children)
+                  "Zettel payload must map the explicit topic value into the installed zettel title child")
+    (assert-true
+     (search "defun THE-LIFE-CYCLE-OF-COLLECTIVE-KNOWLEDGE-TOPIC"
+             (gethash hyperdoc::*dmx-zettelkasten-zettel-content-type-uri*
+                      children))
+     "Zettel payload must map the snippet text into the installed zettel content child")
+    (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
+                  (gethash "value" json)
+                  "HTTP JSON must preserve the explicit human-facing topic value at the top level")
+    (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
+                  json-title
+                  "HTTP JSON must serialize the zettel title child as its plain TopicModel child value")
+    (assert-true
+     (search "defun THE-LIFE-CYCLE-OF-COLLECTIVE-KNOWLEDGE-TOPIC"
+             json-content)
+     "HTTP JSON must preserve the zettel content text as the plain TopicModel child value")))
+
+(defun run-topic-factory-snippet-dmx-http-no-content-plan-smoke-test ()
+  (let ((original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method &allow-other-keys)
+                   (assert-true (search "/core/topic/uri/" url)
+                                "HTTP lookup test must probe the DMX topic URI endpoint")
+                   (assert-equal :get method
+                                 "HTTP lookup test must only exercise the lookup GET")
+                   (values (make-string-input-stream "") 204 nil nil nil "No Content")))
+           (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                         :base-url "https://dmx.ralfbarkow.ch"))
+                  (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
+                         nil
+                         :workspace-topicmap-id
+                         *topic-factory-snippet-dmx-workspace-topicmap-id*
+                         :client client)))
+             (assert-equal :create
+                           (hyperdoc::topic-factory-snippet-dmx-write-plan-topic-action
+                            plan)
+                           "HTTP 204 lookup must still classify the snippet write as CREATE")
+             (assert-equal :add
+                           (hyperdoc::topic-factory-snippet-dmx-write-plan-topicmap-action
+                            plan)
+                           "HTTP 204 lookup must still classify missing topicmap membership as ADD")))
+      (setf (symbol-function 'drakma:http-request) original))))
+
 (defun run-topic-factory-snippet-dmx-smoke-tests ()
   (run-topic-factory-snippet-dmx-plan-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-create-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-update-smoke-test)
   (run-topic-factory-snippet-dmx-custom-topic-value-smoke-test)
+  (run-topic-factory-snippet-dmx-zettel-payload-smoke-test)
+  (run-topic-factory-snippet-dmx-http-no-content-plan-smoke-test)
   (format t "~&Topic-factory snippet DMX smoke tests passed.~%")
   t)
