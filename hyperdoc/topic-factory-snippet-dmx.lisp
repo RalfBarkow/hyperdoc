@@ -25,6 +25,7 @@
 (defstruct topic-factory-snippet-dmx-write-plan
   snippet-id
   uri
+  topic-value
   workspace-topicmap-id
   view-props
   topic-action
@@ -113,14 +114,15 @@
     children))
 
 (defun topic-factory-snippet-dmx-payload (definition workspace-topicmap-id
-                                           &key topic-type-uri)
+                                           &key topic-type-uri topic-value)
   (let ((uri (make-the-life-cycle-of-collective-knowledge-dmx-snippet-uri
               (snippet-id-of definition))))
     (list :uri uri
           :external-key uri
           :type-uri (or topic-type-uri
                         *dmx-topic-factory-snippet-type-uri*)
-          :value (snippet-id-of definition)
+          :value (or topic-value
+                     (snippet-id-of definition))
           :children (topic-factory-snippet-dmx-children definition
                                                         workspace-topicmap-id))))
 
@@ -173,7 +175,7 @@
 
 (defun plan-topic-factory-snippet-dmx-write
     (snippet-source
-     &key workspace-topicmap-id client topic-type-uri view-props)
+     &key workspace-topicmap-id client topic-type-uri view-props topic-value)
   (let* ((definition (normalize-topic-factory-snippet-source snippet-source))
          (resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
@@ -184,7 +186,8 @@
                (make-default-dmx-import-client :dry-run t :verbose nil)))
          (payload (topic-factory-snippet-dmx-payload definition
                                                      resolved-topicmap-id
-                                                     :topic-type-uri topic-type-uri))
+                                                     :topic-type-uri topic-type-uri
+                                                     :topic-value topic-value))
          (existing-topic (dmx-import-find-existing-topic resolved-client
                                                          (getf payload :external-key)))
          (existing-topic-id (dmx-import-object-id existing-topic))
@@ -195,6 +198,7 @@
     (make-topic-factory-snippet-dmx-write-plan
      :snippet-id (snippet-id-of definition)
      :uri (getf payload :uri)
+     :topic-value (getf payload :value)
      :workspace-topicmap-id resolved-topicmap-id
      :view-props resolved-view-props
      :topic-action (if existing-topic :update :create)
@@ -225,6 +229,9 @@
             (topic-factory-snippet-dmx-write-plan-topicmap-action plan)))
           (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id plan))
   (format stream
+          "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=~S~%"
+          (topic-factory-snippet-dmx-write-plan-topic-value plan))
+  (format stream
           "TOPIC_FACTORY_SNIPPET_DMX_DETAILS related-page=~S related-topic-id=~S source=~A~%"
           (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title plan)
           (topic-factory-snippet-dmx-write-plan-related-topic-id plan)
@@ -239,6 +246,7 @@
 (defun execute-topic-factory-snippet-dmx-write
     (snippet-source
      &key workspace-topicmap-id client (dry-run t) topic-type-uri view-props
+       topic-value
        (stream *standard-output*))
   (let* ((resolved-client
            (or client
@@ -248,7 +256,8 @@
                 :workspace-topicmap-id workspace-topicmap-id
                 :client resolved-client
                 :topic-type-uri topic-type-uri
-                :view-props view-props)))
+                :view-props view-props
+                :topic-value topic-value)))
     (when (and dry-run
                (typep resolved-client 'null-dmx-import-client))
       (format stream

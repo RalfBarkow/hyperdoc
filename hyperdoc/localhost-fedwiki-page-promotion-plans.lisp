@@ -7,6 +7,18 @@
 (defparameter *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*
   919822)
 
+(defparameter *localhost-fedwiki-page-promotion-handover-topic-title*
+  "HyperDoc localhost FedWiki promotion workflow")
+
+(defparameter *localhost-fedwiki-page-promotion-handover-snippet-id*
+  "hyperdoc-localhost-fedwiki-promotion-workflow-handover")
+
+(defparameter *localhost-fedwiki-page-promotion-handover-source-file*
+  "hyperdoc/localhost-fedwiki-page-promotion-plans.lisp")
+
+(defparameter *localhost-fedwiki-page-promotion-handover-workflow-page-path*
+  "hyperdoc/Localhost FedWiki page promotion workflow.html")
+
 (defstruct localhost-fedwiki-page-promotion-plan
   id
   title
@@ -723,6 +735,161 @@
                  rows
                  :key (lambda (row) (getf row :attention-category))))))
 
+(defun localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+    (&optional
+       (topicmap-id
+         *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+  (format nil
+          "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/~D/topic/~D"
+          topicmap-id
+          topicmap-id))
+
+(defun localhost-fedwiki-page-promotion-handover-related-topic-ids
+    (&optional
+       (surface (current-localhost-fedwiki-page-promotion-surface)))
+  (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
+        collect (localhost-fedwiki-page-promotion-plan-related-topic-id plan)))
+
+(defun localhost-fedwiki-page-promotion-handover-plan-ids
+    (&optional
+       (surface (current-localhost-fedwiki-page-promotion-surface)))
+  (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
+        collect (localhost-fedwiki-page-promotion-plan-id plan)))
+
+(defun localhost-fedwiki-page-promotion-handover-source-page-ids
+    (&optional
+       (surface (current-localhost-fedwiki-page-promotion-surface)))
+  (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
+        collect (localhost-fedwiki-page-promotion-plan-source-page-id plan)))
+
+(defun localhost-fedwiki-page-promotion-handover-generated-page-titles
+    (&optional
+       (surface (current-localhost-fedwiki-page-promotion-surface)))
+  (loop for plan in (localhost-fedwiki-page-promotion-surface-plans surface)
+        collect (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
+                 plan)))
+
+(defun localhost-fedwiki-page-promotion-handover-topic-body
+    (&optional
+       (surface (current-localhost-fedwiki-page-promotion-surface)))
+  (let* ((plans (localhost-fedwiki-page-promotion-surface-plans surface))
+         (counts (localhost-fedwiki-page-promotion-surface-triage-counts surface))
+         (topicmap-id
+           *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+    (with-output-to-string (stream)
+      (format stream
+              "This one-topic handover seeds DMX topicmap ~D with the current HyperDoc-side localhost FedWiki promotion workflow checkpoint and the identifiers needed to continue there.~2%"
+              topicmap-id)
+      (format stream "Current status~%")
+      (format stream
+              "- The generalized localhost FedWiki page promotion pipeline exists in HyperDoc.~%")
+      (format stream
+              "- ~D real page instances are wired through it.~%"
+              (length plans))
+      (format stream
+              "- Promotion plans are inspectable, actionable, freshness-aware, and triageable.~%")
+      (format stream
+              "- Current triage counts: attention-needed=~D, all-fresh=~D, stale=~D, unknown-missing-envelope=~D, unknown-malformed-envelope=~D, mixed-states=~D.~2%"
+              (getf counts :attention-needed)
+              (getf counts :all-fresh)
+              (getf counts :stale)
+              (getf counts :unknown-missing-envelope)
+              (getf counts :unknown-malformed-envelope)
+              (getf counts :mixed-states))
+      (format stream "Current boundaries~%")
+      (format stream
+              "- HyperDoc remains the authoritative inspection and authoring side.~%")
+      (format stream
+              "- The DMX write path stays intentionally narrow, explicit, and dry-run-first.~%")
+      (format stream
+              "- This slice does not introduce full HyperDoc-to-DMX sync, bulk topic creation, or live automatic repair.~2%")
+      (format stream "Proven real instances~%")
+      (dolist (plan plans)
+        (format stream
+                "- ~A (~A).~%"
+                (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
+                 plan)
+                (localhost-fedwiki-page-promotion-plan-id plan)))
+      (format stream "~%Current workflow loop~%")
+      (format stream
+              "- normalized localhost source object -> promotion plan -> generated HyperDoc page.~%")
+      (format stream
+              "- Round-trip navigation is available between source object, promotion plan, and generated page.~2%")
+      (format stream "Next DMX-oriented work~%")
+      (format stream
+              "- Decide the durable DMX topic model for promotion plans, source pages, and generated pages.~%")
+      (format stream
+              "- Decide which workflow objects deserve first-class DMX topics.~%")
+      (format stream
+              "- Decide whether DMX should mirror only summary state or also provenance, freshness, and action state.~2%")
+      (format stream "Identifiers and links~%")
+      (format stream "- Target topicmap route: ~A~%"
+              (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+               topicmap-id))
+      (format stream "- Workflow page: Localhost FedWiki page promotion workflow~%")
+      (format stream "- Workflow topic id: localhost-fedwiki-page-promotion-workflow~%")
+      (format stream "- Promotion plan ids: ~{~A~^; ~}.~%"
+              (localhost-fedwiki-page-promotion-handover-plan-ids surface))
+      (format stream "- Source page ids: ~{~A~^; ~}.~%"
+              (localhost-fedwiki-page-promotion-handover-source-page-ids surface))
+      (format stream "- Generated page titles: ~{~A~^; ~}.~%"
+              (localhost-fedwiki-page-promotion-handover-generated-page-titles
+               surface)))))
+
+(defun localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+    (&optional
+       (surface (current-localhost-fedwiki-page-promotion-surface)))
+  (make-instance 'topic-definition-chunk
+                 :id *localhost-fedwiki-page-promotion-handover-snippet-id*
+                 :title *localhost-fedwiki-page-promotion-handover-topic-title*
+                 :summary
+                 "One-topic DMX handover seed for the accepted localhost FedWiki promotion workflow checkpoint."
+                 :source-path *localhost-fedwiki-page-promotion-handover-source-file*
+                 :references '("Localhost FedWiki page promotion workflow"
+                               "DMX FedWiki Write Model")
+                 :snippet-id *localhost-fedwiki-page-promotion-handover-snippet-id*
+                 :snippet-text
+                 (localhost-fedwiki-page-promotion-handover-topic-body surface)
+                 :source-origin-id "localhost-fedwiki-page-promotion-workflow"
+                 :source-origin-path
+                 *localhost-fedwiki-page-promotion-handover-workflow-page-path*
+                 :related-hyperdoc-page-title
+                 "Localhost FedWiki page promotion workflow"
+                 :related-topic-id
+                 "localhost-fedwiki-page-promotion-workflow"
+                 :related-topic-ids
+                 (localhost-fedwiki-page-promotion-handover-related-topic-ids
+                  surface)
+                 :provenance
+                 (list :handover-kind
+                       :hyperdoc-localhost-fedwiki-promotion-workflow
+                       :workspace-topicmap-id
+                       *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*
+                       :workspace-topicmap-route
+                       (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route)
+                       :workflow-page-title
+                       "Localhost FedWiki page promotion workflow"
+                       :workflow-topic-id
+                       "localhost-fedwiki-page-promotion-workflow"
+                       :promotion-plan-ids
+                       (localhost-fedwiki-page-promotion-handover-plan-ids
+                        surface)
+                       :source-page-ids
+                       (localhost-fedwiki-page-promotion-handover-source-page-ids
+                        surface)
+                       :generated-page-titles
+                       (localhost-fedwiki-page-promotion-handover-generated-page-titles
+                        surface)
+                       :current-boundary
+                       "hyperdoc-authoritative-inspection"
+                       :dmx-write-boundary
+                       "explicit-single-topic-write"
+                       :out-of-scope
+                       '("full-sync"
+                         "bulk-topic-creation"
+                         "automatic-backfill"
+                         "live-automatic-repair"))))
+
 ;; Generic operations so the inspector exposes them in the Operations view.
 (defgeneric localhost-fedwiki-page-promotion-plan-sync-status (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
@@ -834,6 +1001,161 @@
     (when (find-class 'memory-dmx-import-client nil)
       (make-instance 'memory-dmx-import-client :next-topic-id 7000))))
 
+(defun make-localhost-fedwiki-page-promotion-default-dmx-client
+    (&key dry-run verbose)
+  (when (ensure-localhost-fedwiki-page-promotion-dmx-support)
+    (funcall (symbol-function 'make-default-dmx-import-client)
+             :dry-run dry-run
+             :verbose verbose)))
+
+(defun localhost-fedwiki-page-promotion-live-dmx-client-configured-p ()
+  (let ((client
+          (make-localhost-fedwiki-page-promotion-default-dmx-client
+           :dry-run nil
+           :verbose nil)))
+    (and client
+         (not (typep client 'null-dmx-import-client)))))
+
+(defun localhost-fedwiki-page-promotion-handover-dmx-write-plan
+    (&key
+       (surface (current-localhost-fedwiki-page-promotion-surface))
+       workspace-topicmap-id
+       client)
+  (when (ensure-localhost-fedwiki-page-promotion-dmx-support)
+    (funcall
+     (symbol-function 'plan-topic-factory-snippet-dmx-write)
+     (localhost-fedwiki-page-promotion-handover-topic-definition-chunk surface)
+     :workspace-topicmap-id
+     (or workspace-topicmap-id
+         *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*)
+     :client
+     (or client
+         (make-localhost-fedwiki-page-promotion-memory-dmx-client))
+     :topic-value
+     *localhost-fedwiki-page-promotion-handover-topic-title*)))
+
+(defun localhost-fedwiki-page-promotion-handover-dmx-write-summary
+    (&key
+       (surface (current-localhost-fedwiki-page-promotion-surface))
+       workspace-topicmap-id
+       client)
+  (let* ((resolved-topicmap-id
+           (or workspace-topicmap-id
+               *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+         (definition
+           (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+            surface)))
+    (if-let (dmx-plan
+             (localhost-fedwiki-page-promotion-handover-dmx-write-plan
+              :surface surface
+              :workspace-topicmap-id resolved-topicmap-id
+              :client client))
+      (list :available t
+            :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
+            :topic-body (snippet-text-of definition)
+            :snippet-id
+            (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
+            :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+            :workspace-topicmap-id
+            (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
+            :workspace-topicmap-route
+            (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+             resolved-topicmap-id)
+            :topic-action
+            (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
+            :topicmap-action
+            (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
+            :source-path
+            (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
+            :related-hyperdoc-page-title
+            (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
+             dmx-plan)
+            :related-topic-id
+            (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
+            :provenance
+            (copy-tree
+             (topic-factory-snippet-dmx-write-plan-provenance dmx-plan))
+            :live-write-configured
+            (localhost-fedwiki-page-promotion-live-dmx-client-configured-p))
+      (list :available nil
+            :workspace-topicmap-id resolved-topicmap-id
+            :workspace-topicmap-route
+            (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+             resolved-topicmap-id)
+            :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
+            :topic-body (snippet-text-of definition)
+            :message
+            "DMX handover planner is unavailable; load :hyperdoc/dmx-import to inspect the ready-to-execute payload."))))
+
+(defun localhost-fedwiki-page-promotion-handover-dmx-write-evidence
+    (&key
+       (surface (current-localhost-fedwiki-page-promotion-surface))
+       workspace-topicmap-id
+       client)
+  (if (ensure-localhost-fedwiki-page-promotion-dmx-support)
+      (with-output-to-string (stream)
+        (execute-localhost-fedwiki-page-promotion-handover-dmx-write
+         :surface surface
+         :workspace-topicmap-id workspace-topicmap-id
+         :client client
+         :dry-run t
+         :stream stream))
+      "DMX handover execution support is unavailable; load :hyperdoc/dmx-import to render dry-run evidence."))
+
+(defun execute-localhost-fedwiki-page-promotion-handover-dmx-write
+    (&key
+       (surface (current-localhost-fedwiki-page-promotion-surface))
+       workspace-topicmap-id
+       client
+       (dry-run t)
+       (stream *standard-output*))
+  (unless (ensure-localhost-fedwiki-page-promotion-dmx-support)
+    (error "DMX handover execution support is unavailable; load :hyperdoc/dmx-import first."))
+  (let* ((resolved-topicmap-id
+           (or workspace-topicmap-id
+               *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+         (resolved-client
+           (or client
+               (if dry-run
+                   (make-localhost-fedwiki-page-promotion-memory-dmx-client)
+                   (make-localhost-fedwiki-page-promotion-default-dmx-client
+                    :dry-run nil
+                    :verbose nil))))
+         (result
+           (funcall
+            (symbol-function 'execute-topic-factory-snippet-dmx-write)
+            (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+             surface)
+            :workspace-topicmap-id resolved-topicmap-id
+            :client resolved-client
+            :dry-run dry-run
+            :topic-value *localhost-fedwiki-page-promotion-handover-topic-title*
+            :stream stream))
+         (plan (getf result :plan))
+         (topic-id
+           (and (not dry-run)
+                resolved-client
+                plan
+                (let ((topic
+                        (dmx-import-find-existing-topic
+                         resolved-client
+                         (getf (topic-factory-snippet-dmx-write-plan-payload plan)
+                               :external-key))))
+                  (dmx-import-object-id topic)))))
+    (append result
+            (list :topic-title
+                  *localhost-fedwiki-page-promotion-handover-topic-title*
+                  :topic-body
+                  (snippet-text-of
+                   (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+                    surface))
+                  :workspace-topicmap-route
+                  (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+                   resolved-topicmap-id)
+                  :topic-id topic-id
+                  :live-write-configured
+                  (localhost-fedwiki-page-promotion-live-dmx-client-configured-p)))))
+
 (defun localhost-fedwiki-page-promotion-plan-dmx-dry-run-plan
     (plan
      &key workspace-topicmap-id client)
@@ -899,6 +1221,16 @@
                  :dry-run t
                  :stream stream))
       "DMX dry-run execution support is unavailable; load :hyperdoc/dmx-import to render dry-run evidence."))
+
+(defgeneric review-localhost-fedwiki-page-promotion-handover-dmx-dry-run
+    (surface)
+  (:method ((surface localhost-fedwiki-page-promotion-surface))
+    (list :summary
+          (localhost-fedwiki-page-promotion-handover-dmx-write-summary
+           :surface surface)
+          :evidence
+          (localhost-fedwiki-page-promotion-handover-dmx-write-evidence
+           :surface surface))))
 
 (defun the-life-cycle-of-collective-knowledge-promotion-plan ()
   (make-localhost-fedwiki-page-promotion-plan

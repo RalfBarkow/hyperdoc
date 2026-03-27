@@ -45,6 +45,9 @@
               (getf summary :topicmap-action))
       "unavailable"))
 
+(defun promotion-dmx-live-write-label (value)
+  (if value "configured" "not configured"))
+
 (defun promotion-generated-page-link-html (page &key (display "Review generated page"))
   (if page
       (views:object-ref page
@@ -583,8 +586,68 @@
   (views:html-view :title "Mixed states" :priority 8
     (promotion-triage-scope-html surface :mixed-states)))
 
+(views:defview 👀dmx-handover (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "DMX handover" :priority 9
+    (let* ((review
+             (review-localhost-fedwiki-page-promotion-handover-dmx-dry-run
+              surface))
+           (summary (getf review :summary))
+           (evidence (getf review :evidence)))
+      (views:html
+        (:p (views:esc
+             "This one-topic DMX handover keeps HyperDoc as the richer diagnostic and authoring environment while seeding the explicit DMX target topicmap with the current workflow checkpoint. Live DMX write stays separate and conservative; this view shows the ready-to-execute topic payload plus canonical dry-run evidence."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Target topicmap id"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :workspace-topicmap-id))))))
+                (:tr (:td (views:esc "Target topicmap route"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :workspace-topicmap-route)
+                                    "unavailable")))))
+                (:tr (:td (views:esc "Topic title"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :topic-title)
+                                    "unavailable")))))
+                (:tr (:td (views:esc "Snippet id"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :snippet-id))))))
+                (:tr (:td (views:esc "Topic URI"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :uri))))))
+                (:tr (:td (views:esc "Topic action"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :topic-action))))))
+                (:tr (:td (views:esc "Topicmap action"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :topicmap-action))))))
+                (:tr (:td (views:esc "Related HyperDoc page"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :related-hyperdoc-page-title))))))
+                (:tr (:td (views:esc "Related topic id"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :related-topic-id))))))
+                (:tr (:td (views:esc "Live DMX write"))
+                     (:td (:tt (views:esc
+                                (promotion-dmx-live-write-label
+                                 (getf summary :live-write-configured)))))))
+        (:h4 (views:esc "Seed topic body"))
+        (:pre :style "white-space: pre-wrap;"
+              (views:esc (or (getf summary :topic-body)
+                             (getf summary :message)
+                             "unavailable")))
+        (:h4 (views:esc "Dry-run evidence"))
+        (:pre :style "white-space: pre-wrap;"
+              (views:esc evidence))))))
+
 (views:defview 👀plans (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Plans" :priority 9
+  (views:html-view :title "Plans" :priority 10
     (views:html
       (:p "Each plan stays inspectable as a separate localhost FedWiki page-promotion boundary.")
       (:ul
