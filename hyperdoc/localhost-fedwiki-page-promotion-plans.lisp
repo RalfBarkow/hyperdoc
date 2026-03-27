@@ -27,6 +27,7 @@
   title
   summary
   pipeline
+  source-issue
   source-chunk
   promoted-topic-chunks
   topic-page
@@ -37,6 +38,34 @@
   local-artifact-writer
   page-renderer
   default-workspace-topicmap-id)
+
+(defclass localhost-fedwiki-page-promotion-source-unavailable-issue ()
+  ((plan-id :initarg :plan-id
+            :reader localhost-fedwiki-page-promotion-source-unavailable-issue-plan-id)
+   (plan-title :initarg :plan-title
+               :reader localhost-fedwiki-page-promotion-source-unavailable-issue-plan-title)
+   (classification :initarg :classification
+                   :initform :source-unavailable
+                   :reader localhost-fedwiki-page-promotion-source-unavailable-issue-classification)
+   (source-page-id :initarg :source-page-id
+                   :reader localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id)
+   (source-page-slug :initarg :source-page-slug
+                     :reader localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-slug)
+   (source-page-path :initarg :source-page-path
+                     :reader localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path)
+   (source-page-title :initarg :source-page-title
+                      :reader localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-title)
+   (source-html-url :initarg :source-html-url
+                    :reader localhost-fedwiki-page-promotion-source-unavailable-issue-source-html-url)
+   (missing-pathname :initarg :missing-pathname
+                     :initform nil
+                     :reader localhost-fedwiki-page-promotion-source-unavailable-issue-missing-pathname)
+   (condition :initarg :condition
+              :reader localhost-fedwiki-page-promotion-source-unavailable-issue-condition)
+   (condition-type :initarg :condition-type
+                   :reader localhost-fedwiki-page-promotion-source-unavailable-issue-condition-type)
+   (condition-message :initarg :condition-message
+                      :reader localhost-fedwiki-page-promotion-source-unavailable-issue-condition-message)))
 
 (defstruct localhost-fedwiki-page-promotion-surface
   title
@@ -97,6 +126,43 @@
 (defun instantiate-localhost-fedwiki-page-promotion-plan (spec)
   (funcall (symbol-function (getf spec :constructor))))
 
+(defun localhost-fedwiki-page-promotion-missing-source-file-error-p (condition)
+  (let ((pathname (ignore-errors (file-error-pathname condition))))
+    (and pathname
+         (not (uiop:file-exists-p pathname)))))
+
+(defun localhost-fedwiki-page-promotion-issue-missing-pathname (condition)
+  (let ((pathname (ignore-errors (file-error-pathname condition))))
+    (when pathname
+      (namestring pathname))))
+
+(defun make-localhost-fedwiki-page-promotion-source-unavailable-issue
+    (plan-id plan-title spec condition)
+  (make-instance
+   'localhost-fedwiki-page-promotion-source-unavailable-issue
+   :plan-id plan-id
+   :plan-title plan-title
+   :source-page-id (localhost-fedwiki-page-pipeline-page-id spec)
+   :source-page-slug (localhost-fedwiki-page-pipeline-spec-slug spec)
+   :source-page-path (localhost-fedwiki-page-pipeline-page-relative-path spec)
+   :source-page-title (localhost-fedwiki-page-pipeline-spec-page-title spec)
+   :source-html-url (localhost-fedwiki-page-pipeline-spec-html-url spec)
+   :missing-pathname
+   (localhost-fedwiki-page-promotion-issue-missing-pathname condition)
+   :condition condition
+   :condition-type (type-of condition)
+   :condition-message (princ-to-string condition)))
+
+(defun localhost-fedwiki-page-promotion-source-unavailable-reason (issue)
+  (format nil
+          "Configured localhost FedWiki source page ~A at ~A is unavailable because its page file is missing~@[: ~A~]."
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+           issue)
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+           issue)
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-condition-message
+           issue)))
+
 (defun find-localhost-fedwiki-page-promotion-plan-spec-if
     (predicate &key signal-error? error-context)
   (or (find-if predicate
@@ -109,6 +175,28 @@
   (print-unreadable-object (plan stream :type t)
     (format stream "~A"
             (localhost-fedwiki-page-promotion-plan-title plan))))
+
+(defmethod print-object
+    ((issue localhost-fedwiki-page-promotion-source-unavailable-issue) stream)
+  (print-unreadable-object (issue stream :type t)
+    (format stream "~A"
+            (localhost-fedwiki-page-promotion-source-unavailable-issue-plan-title
+             issue))))
+
+(defmethod title-of
+    ((issue localhost-fedwiki-page-promotion-source-unavailable-issue))
+  (format nil "~A source unavailable"
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-plan-title
+           issue)))
+
+(defmethod summary-of
+    ((issue localhost-fedwiki-page-promotion-source-unavailable-issue))
+  (format nil
+          "Configured localhost FedWiki source page ~A at ~A is unavailable because its page file is missing."
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+           issue)
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+           issue)))
 
 (defmethod print-object ((surface localhost-fedwiki-page-promotion-surface) stream)
   (print-unreadable-object (surface stream :type t)
@@ -249,9 +337,251 @@
    :default-operation-mode :read-only
    :source-file *dmx-topicmap-919822-repair-runbook-source-file*))
 
+(defun make-localhost-fedwiki-page-promotion-source-unavailable-source
+    (spec issue)
+  (let* ((page-title
+           (or (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-title
+                issue)
+               (localhost-fedwiki-page-pipeline-spec-page-title spec)
+               (localhost-fedwiki-page-pipeline-spec-slug spec)))
+         (summary-fallback
+           (or (localhost-fedwiki-page-pipeline-spec-source-summary-fallback spec)
+               (format nil "Localhost FedWiki source page for ~A." page-title)))
+         (reason
+           (localhost-fedwiki-page-promotion-source-unavailable-reason issue))
+         (raw-page
+           (list :title page-title
+                 :story '()
+                 :journal '())))
+    (make-localhost-fedwiki-source-data
+     :id (or (localhost-fedwiki-page-pipeline-spec-source-chunk-id spec)
+             (format nil "~A-localhost-fedwiki-source"
+                     (localhost-fedwiki-page-pipeline-spec-id spec)))
+     :title
+     (or (localhost-fedwiki-page-pipeline-spec-source-chunk-title spec)
+         (format nil "~A localhost FedWiki source" page-title))
+     :summary
+     (format nil "~A Source unavailable." summary-fallback)
+     :source-path
+     (localhost-fedwiki-page-pipeline-page-relative-path spec)
+     :references
+     (list (localhost-fedwiki-page-pipeline-page-id spec)
+           (localhost-fedwiki-page-pipeline-spec-html-url spec))
+     :fedwiki-site (localhost-fedwiki-page-pipeline-spec-site spec)
+     :fedwiki-page-id (localhost-fedwiki-page-pipeline-page-id spec)
+     :fedwiki-slug (localhost-fedwiki-page-pipeline-spec-slug spec)
+     :fedwiki-title page-title
+     :fedwiki-url (localhost-fedwiki-page-pipeline-spec-html-url spec)
+     :fedwiki-relative-path
+     (localhost-fedwiki-page-pipeline-page-relative-path spec)
+     :claim reason
+     :story-items '()
+     :raw-page raw-page
+     :provenance
+     (list :source-kind "localhost-fedwiki-page"
+           :source-page-id (localhost-fedwiki-page-pipeline-page-id spec)
+           :source-page-slug
+           (localhost-fedwiki-page-pipeline-spec-slug spec)
+           :source-page-path
+           (localhost-fedwiki-page-pipeline-page-relative-path spec)
+           :source-availability-state "source-unavailable"
+           :source-availability-classification
+           "source-page-missing"
+           :source-availability-reason reason
+           :story-item-count 0
+           :journal-entry-count 0
+           :provenance-granularity "source-unavailable"
+           :provenance-classification "source-page-missing"))))
+
+(defun make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+    (issue source-file related-hyperdoc-page-title related-topic-id snippet-id)
+  (list :id snippet-id
+        :source-file source-file
+        :source-origin-id
+        (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+         issue)
+        :source-origin-path
+        (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+         issue)
+        :related-hyperdoc-page-title related-hyperdoc-page-title
+        :related-topic-id related-topic-id
+        :related-topic-ids (list related-topic-id)
+        :provenance
+        (list :source-page-id
+              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+               issue)
+              :source-page-path
+              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+               issue)
+              :source-availability-state "source-unavailable"
+              :provenance-granularity "source-unavailable"
+              :provenance-classification "source-page-missing")))
+
+(defun make-localhost-fedwiki-page-promotion-source-unavailable-topic-definition
+    (issue source-file related-hyperdoc-page-title related-topic-id snippet-id)
+  (let ((metadata
+          (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+           issue
+           source-file
+           related-hyperdoc-page-title
+           related-topic-id
+           snippet-id)))
+    (make-instance
+     'topic-definition-chunk
+     :id snippet-id
+     :title
+     (format nil "~A topic-definition chunk"
+             related-hyperdoc-page-title)
+     :summary
+     "Topic-definition chunk stays inspectable while the localhost FedWiki source page is unavailable."
+     :source-path source-file
+     :references
+     (list (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+            issue)
+           related-hyperdoc-page-title)
+     :snippet-id snippet-id
+     :snippet-text ""
+     :source-origin-id (getf metadata :source-origin-id)
+     :source-origin-path (getf metadata :source-origin-path)
+     :related-hyperdoc-page-title related-hyperdoc-page-title
+     :related-topic-id related-topic-id
+     :related-topic-ids (list related-topic-id)
+     :provenance (copy-tree (getf metadata :provenance)))))
+
+(defun make-localhost-fedwiki-page-promotion-source-unavailable-dmx-snippet
+    (issue source-file related-hyperdoc-page-title related-topic-id snippet-id)
+  (let ((metadata
+          (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+           issue
+           source-file
+           related-hyperdoc-page-title
+           related-topic-id
+           snippet-id)))
+    (make-instance
+     'dmx-snippet-chunk
+     :id (format nil "~A-dmx" snippet-id)
+     :title
+     (format nil "~A DMX snippet chunk"
+             related-hyperdoc-page-title)
+     :summary
+     "DMX dry-run stays unavailable until the configured localhost FedWiki source page is restored."
+     :source-path source-file
+     :references
+     (list (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+            issue)
+           "DMX FedWiki Write Model"
+           "Runtime write live-proof gate")
+     :snippet-id snippet-id
+     :snippet-uri (format nil "hyperdoc:topic-factory-snippet/~A" snippet-id)
+     :snippet-text ""
+     :related-hyperdoc-page-title related-hyperdoc-page-title
+     :related-topic-id related-topic-id
+     :related-topic-ids (list related-topic-id)
+     :provenance (copy-tree (getf metadata :provenance)))))
+
+(defun make-localhost-fedwiki-page-promotion-source-unavailable-plan
+    (&key id
+          title
+          summary
+          spec
+          condition
+          composed-page-target
+          source-file
+          related-hyperdoc-page-title
+          related-topic-id
+          snippet-id
+          default-workspace-topicmap-id)
+  (let* ((issue
+           (make-localhost-fedwiki-page-promotion-source-unavailable-issue
+            id
+            title
+            spec
+            condition))
+         (source
+           (make-localhost-fedwiki-page-promotion-source-unavailable-source
+            spec
+            issue))
+         (topic-factory-metadata
+           (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+            issue
+            source-file
+            related-hyperdoc-page-title
+            related-topic-id
+            snippet-id)))
+    (make-localhost-fedwiki-page-promotion-plan
+     :id id
+     :title title
+     :summary summary
+     :pipeline
+     (make-localhost-fedwiki-page-pipeline-result
+      :spec spec
+      :raw-page (copy-tree (localhost-fedwiki-source-data-raw-page source))
+      :source source
+      :primary-item nil
+      :topic-specs '()
+      :umbrella-topic nil
+      :subtopics '()
+      :topic-chunks '())
+     :source-issue issue
+     :source-chunk nil
+     :promoted-topic-chunks '()
+     :topic-page nil
+     :topic-definition
+     (make-localhost-fedwiki-page-promotion-source-unavailable-topic-definition
+      issue
+      source-file
+      related-hyperdoc-page-title
+      related-topic-id
+      snippet-id)
+     :dmx-snippet
+     (make-localhost-fedwiki-page-promotion-source-unavailable-dmx-snippet
+      issue
+      source-file
+      related-hyperdoc-page-title
+      related-topic-id
+      snippet-id)
+     :composed-page-target composed-page-target
+     :topic-factory-metadata topic-factory-metadata
+     :local-artifact-writer nil
+     :page-renderer nil
+     :default-workspace-topicmap-id default-workspace-topicmap-id)))
+
+(defun make-localhost-fedwiki-page-promotion-plan-with-source-fallback
+    (&key id
+          title
+          summary
+          spec
+          build
+          composed-page-target
+          source-file
+          related-hyperdoc-page-title
+          related-topic-id
+          snippet-id
+          default-workspace-topicmap-id)
+  (handler-case
+      (funcall build)
+    (file-error (condition)
+      (if (localhost-fedwiki-page-promotion-missing-source-file-error-p condition)
+          (make-localhost-fedwiki-page-promotion-source-unavailable-plan
+           :id id
+           :title title
+           :summary summary
+           :spec spec
+           :condition condition
+           :composed-page-target composed-page-target
+           :source-file source-file
+           :related-hyperdoc-page-title related-hyperdoc-page-title
+           :related-topic-id related-topic-id
+           :snippet-id snippet-id
+           :default-workspace-topicmap-id default-workspace-topicmap-id)
+          (error condition)))))
+
 (defun localhost-fedwiki-page-promotion-plan-source (plan)
   (localhost-fedwiki-page-pipeline-result-source
    (localhost-fedwiki-page-promotion-plan-pipeline plan)))
+
+(defun localhost-fedwiki-page-promotion-plan-source-unavailable-p (plan)
+  (not (null (localhost-fedwiki-page-promotion-plan-source-issue plan))))
 
 (defun localhost-fedwiki-page-promotion-plan-story-items (plan)
   (localhost-fedwiki-source-data-story-items
@@ -373,8 +703,9 @@
    (localhost-fedwiki-page-promotion-plan-source plan)))
 
 (defun localhost-fedwiki-page-promotion-plan-current-source-snapshot (plan)
-  (localhost-fedwiki-source-snapshot-metadata
-   (localhost-fedwiki-page-promotion-plan-source plan)))
+  (unless (localhost-fedwiki-page-promotion-plan-source-unavailable-p plan)
+    (localhost-fedwiki-source-snapshot-metadata
+     (localhost-fedwiki-page-promotion-plan-source plan))))
 
 (defun write-localhost-fedwiki-page-promotion-plan-string-artifact (path content)
   (ensure-directories-exist path)
@@ -573,21 +904,27 @@
 
 (defun localhost-fedwiki-page-promotion-plan-page-source-freshness-state
     (plan &key file-contents current-source-snapshot)
-  (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-   (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
-    plan
-    :file-contents file-contents)
-   (or current-source-snapshot
-       (localhost-fedwiki-page-promotion-plan-current-source-snapshot plan))))
+  (if (localhost-fedwiki-page-promotion-plan-source-unavailable-p plan)
+      :source-unavailable
+      (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+       (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
+        plan
+        :file-contents file-contents)
+       (or current-source-snapshot
+           (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+            plan)))))
 
 (defun localhost-fedwiki-page-promotion-plan-snippet-source-freshness-state
     (plan &key file-contents current-source-snapshot)
-  (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-   (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
-    plan
-    :file-contents file-contents)
-   (or current-source-snapshot
-       (localhost-fedwiki-page-promotion-plan-current-source-snapshot plan))))
+  (if (localhost-fedwiki-page-promotion-plan-source-unavailable-p plan)
+      :source-unavailable
+      (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+       (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
+        plan
+        :file-contents file-contents)
+       (or current-source-snapshot
+           (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+            plan)))))
 
 (defun localhost-fedwiki-page-promotion-plan-page-source-fresh-p
     (plan &key file-contents current-source-snapshot)
@@ -608,11 +945,7 @@
 (defun localhost-fedwiki-page-promotion-plan-sync-status-report
     (plan
      &key page-contents snippet-contents current-source-snapshot)
-  (let* ((resolved-current-source-snapshot
-           (or current-source-snapshot
-               (localhost-fedwiki-page-promotion-plan-current-source-snapshot
-                plan)))
-         (page-reflection
+  (let* ((page-reflection
            (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
             plan
             :file-contents page-contents))
@@ -626,138 +959,242 @@
          (snippet-source-snapshot
            (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
             snippet-reflection))
-         (page-freshness-state
-           (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-            page-reflection
-            resolved-current-source-snapshot))
-         (snippet-freshness-state
-           (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-            snippet-reflection
-            resolved-current-source-snapshot))
-         (page-freshness-reason
-           (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
-            page-reflection
-            resolved-current-source-snapshot))
-         (snippet-freshness-reason
-           (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
-            snippet-reflection
-            resolved-current-source-snapshot))
-         (page-freshness-recommendation
-           (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
-            :page
-            page-freshness-state))
-         (snippet-freshness-recommendation
-           (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
-            :snippet
-            snippet-freshness-state)))
-    (list :plan-id
-          (localhost-fedwiki-page-promotion-plan-id plan)
-          :page-path
-          (namestring
-           (localhost-fedwiki-page-promotion-plan-composed-page-pathname plan))
-          :snippet-path
-          (namestring
-           (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname plan))
-          :page-synced
-          (localhost-fedwiki-page-promotion-plan-page-output-synced-p
-           plan
-           :file-contents page-contents)
-          :snippet-synced
-          (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
-           plan
-           :file-contents snippet-contents)
-          :page-reflected-snapshot-status
-          (localhost-fedwiki-source-snapshot-envelope-reflection-status
-           page-reflection)
-          :page-reflected-snapshot-present
-          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
-                page-reflection)
-               :present)
-          :page-reflected-snapshot-malformed
-          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
-                page-reflection)
-               :malformed)
-          :page-reflected-snapshot-fingerprint
-          (localhost-fedwiki-source-snapshot-fingerprint-field page-source-snapshot)
-          :page-reflected-snapshot-summary
-          (localhost-fedwiki-source-snapshot-summary-field page-source-snapshot)
-          :page-reflected-snapshot-error-message
-          (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
-           page-reflection)
-          :page-source-freshness-state
-          page-freshness-state
-          :page-source-freshness-reason
-          page-freshness-reason
-          :page-source-freshness-recommended-action
-          (getf page-freshness-recommendation :action)
-          :page-source-freshness-recommended-action-label
-          (getf page-freshness-recommendation :label)
-          :page-source-freshness-recommended-operation
-          (getf page-freshness-recommendation :operation)
-          :page-source-freshness-known
-          (not (null (member page-freshness-state
-                             '(:fresh :stale))))
-          :page-source-freshness-unknown-reason
-          (case page-freshness-state
-            (:unknown-malformed-envelope :malformed-envelope)
-            (:unknown-missing-envelope :missing-envelope))
-          :page-source-fresh
-          (eql page-freshness-state :fresh)
-          :snippet-reflected-snapshot-status
-          (localhost-fedwiki-source-snapshot-envelope-reflection-status
-           snippet-reflection)
-          :snippet-reflected-snapshot-present
-          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
-                snippet-reflection)
-               :present)
-          :snippet-reflected-snapshot-malformed
-          (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
-                snippet-reflection)
-               :malformed)
-          :snippet-reflected-snapshot-fingerprint
-          (localhost-fedwiki-source-snapshot-fingerprint-field snippet-source-snapshot)
-          :snippet-reflected-snapshot-summary
-          (localhost-fedwiki-source-snapshot-summary-field snippet-source-snapshot)
-          :snippet-reflected-snapshot-error-message
-          (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
-           snippet-reflection)
-          :snippet-source-freshness-state
-          snippet-freshness-state
-          :snippet-source-freshness-reason
-          snippet-freshness-reason
-          :snippet-source-freshness-recommended-action
-          (getf snippet-freshness-recommendation :action)
-          :snippet-source-freshness-recommended-action-label
-          (getf snippet-freshness-recommendation :label)
-          :snippet-source-freshness-recommended-operation
-          (getf snippet-freshness-recommendation :operation)
-          :snippet-source-freshness-known
-          (not (null (member snippet-freshness-state
-                             '(:fresh :stale))))
-          :snippet-source-freshness-unknown-reason
-          (case snippet-freshness-state
-            (:unknown-malformed-envelope :malformed-envelope)
-            (:unknown-missing-envelope :missing-envelope))
-          :snippet-source-fresh
-          (eql snippet-freshness-state :fresh)
-          :current-source-snapshot
-          (copy-tree resolved-current-source-snapshot)
-          :current-source-fingerprint
-          (getf resolved-current-source-snapshot :fingerprint)
-          :current-source-summary
-          (getf resolved-current-source-snapshot :summary)
-          :page-source-snapshot
-          (copy-tree page-source-snapshot)
-          :snippet-source-snapshot
-          (copy-tree snippet-source-snapshot)
-          :dmx-dry-run-summary
-          (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))))
+         (source-issue
+           (localhost-fedwiki-page-promotion-plan-source-issue plan)))
+    (if source-issue
+        (let ((reason
+                (localhost-fedwiki-page-promotion-source-unavailable-reason
+                 source-issue)))
+          (list :plan-id
+                (localhost-fedwiki-page-promotion-plan-id plan)
+                :page-path
+                (namestring
+                 (localhost-fedwiki-page-promotion-plan-composed-page-pathname
+                  plan))
+                :snippet-path
+                (namestring
+                 (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+                  plan))
+                :source-availability-state :source-unavailable
+                :source-availability-reason reason
+                :source-issue source-issue
+                :page-synced nil
+                :snippet-synced nil
+                :page-reflected-snapshot-status
+                (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                 page-reflection)
+                :page-reflected-snapshot-present
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      page-reflection)
+                     :present)
+                :page-reflected-snapshot-malformed
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      page-reflection)
+                     :malformed)
+                :page-reflected-snapshot-fingerprint
+                (localhost-fedwiki-source-snapshot-fingerprint-field
+                 page-source-snapshot)
+                :page-reflected-snapshot-summary
+                (localhost-fedwiki-source-snapshot-summary-field
+                 page-source-snapshot)
+                :page-reflected-snapshot-error-message
+                (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+                 page-reflection)
+                :page-source-freshness-state :source-unavailable
+                :page-source-freshness-reason reason
+                :page-source-freshness-recommended-action :inspect-source-issue
+                :page-source-freshness-recommended-action-label
+                "Inspect the source-unavailable issue; regeneration stays blocked until the localhost FedWiki page file is restored."
+                :page-source-freshness-recommended-operation nil
+                :page-source-freshness-known nil
+                :page-source-freshness-unknown-reason :source-unavailable
+                :page-source-fresh nil
+                :snippet-reflected-snapshot-status
+                (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                 snippet-reflection)
+                :snippet-reflected-snapshot-present
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      snippet-reflection)
+                     :present)
+                :snippet-reflected-snapshot-malformed
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      snippet-reflection)
+                     :malformed)
+                :snippet-reflected-snapshot-fingerprint
+                (localhost-fedwiki-source-snapshot-fingerprint-field
+                 snippet-source-snapshot)
+                :snippet-reflected-snapshot-summary
+                (localhost-fedwiki-source-snapshot-summary-field
+                 snippet-source-snapshot)
+                :snippet-reflected-snapshot-error-message
+                (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+                 snippet-reflection)
+                :snippet-source-freshness-state :source-unavailable
+                :snippet-source-freshness-reason reason
+                :snippet-source-freshness-recommended-action
+                :inspect-source-issue
+                :snippet-source-freshness-recommended-action-label
+                "Inspect the source-unavailable issue; regeneration stays blocked until the localhost FedWiki page file is restored."
+                :snippet-source-freshness-recommended-operation nil
+                :snippet-source-freshness-known nil
+                :snippet-source-freshness-unknown-reason :source-unavailable
+                :snippet-source-fresh nil
+                :current-source-snapshot nil
+                :current-source-fingerprint nil
+                :current-source-summary (summary-of source-issue)
+                :page-source-snapshot (copy-tree page-source-snapshot)
+                :snippet-source-snapshot (copy-tree snippet-source-snapshot)
+                :dmx-dry-run-summary
+                (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
+                 plan)))
+        (let* ((resolved-current-source-snapshot
+                 (or current-source-snapshot
+                     (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+                      plan)))
+               (page-freshness-state
+                 (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+                  page-reflection
+                  resolved-current-source-snapshot))
+               (snippet-freshness-state
+                 (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+                  snippet-reflection
+                  resolved-current-source-snapshot))
+               (page-freshness-reason
+                 (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+                  page-reflection
+                  resolved-current-source-snapshot))
+               (snippet-freshness-reason
+                 (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+                  snippet-reflection
+                  resolved-current-source-snapshot))
+               (page-freshness-recommendation
+                 (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+                  :page
+                  page-freshness-state))
+               (snippet-freshness-recommendation
+                 (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+                  :snippet
+                  snippet-freshness-state)))
+          (list :plan-id
+                (localhost-fedwiki-page-promotion-plan-id plan)
+                :page-path
+                (namestring
+                 (localhost-fedwiki-page-promotion-plan-composed-page-pathname
+                  plan))
+                :snippet-path
+                (namestring
+                 (localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+                  plan))
+                :source-availability-state :available
+                :source-availability-reason nil
+                :source-issue nil
+                :page-synced
+                (localhost-fedwiki-page-promotion-plan-page-output-synced-p
+                 plan
+                 :file-contents page-contents)
+                :snippet-synced
+                (localhost-fedwiki-page-promotion-plan-snippet-output-synced-p
+                 plan
+                 :file-contents snippet-contents)
+                :page-reflected-snapshot-status
+                (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                 page-reflection)
+                :page-reflected-snapshot-present
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      page-reflection)
+                     :present)
+                :page-reflected-snapshot-malformed
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      page-reflection)
+                     :malformed)
+                :page-reflected-snapshot-fingerprint
+                (localhost-fedwiki-source-snapshot-fingerprint-field
+                 page-source-snapshot)
+                :page-reflected-snapshot-summary
+                (localhost-fedwiki-source-snapshot-summary-field
+                 page-source-snapshot)
+                :page-reflected-snapshot-error-message
+                (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+                 page-reflection)
+                :page-source-freshness-state
+                page-freshness-state
+                :page-source-freshness-reason
+                page-freshness-reason
+                :page-source-freshness-recommended-action
+                (getf page-freshness-recommendation :action)
+                :page-source-freshness-recommended-action-label
+                (getf page-freshness-recommendation :label)
+                :page-source-freshness-recommended-operation
+                (getf page-freshness-recommendation :operation)
+                :page-source-freshness-known
+                (not (null (member page-freshness-state
+                                   '(:fresh :stale))))
+                :page-source-freshness-unknown-reason
+                (case page-freshness-state
+                  (:unknown-malformed-envelope :malformed-envelope)
+                  (:unknown-missing-envelope :missing-envelope))
+                :page-source-fresh
+                (eql page-freshness-state :fresh)
+                :snippet-reflected-snapshot-status
+                (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                 snippet-reflection)
+                :snippet-reflected-snapshot-present
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      snippet-reflection)
+                     :present)
+                :snippet-reflected-snapshot-malformed
+                (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
+                      snippet-reflection)
+                     :malformed)
+                :snippet-reflected-snapshot-fingerprint
+                (localhost-fedwiki-source-snapshot-fingerprint-field
+                 snippet-source-snapshot)
+                :snippet-reflected-snapshot-summary
+                (localhost-fedwiki-source-snapshot-summary-field
+                 snippet-source-snapshot)
+                :snippet-reflected-snapshot-error-message
+                (localhost-fedwiki-source-snapshot-envelope-reflection-error-message
+                 snippet-reflection)
+                :snippet-source-freshness-state
+                snippet-freshness-state
+                :snippet-source-freshness-reason
+                snippet-freshness-reason
+                :snippet-source-freshness-recommended-action
+                (getf snippet-freshness-recommendation :action)
+                :snippet-source-freshness-recommended-action-label
+                (getf snippet-freshness-recommendation :label)
+                :snippet-source-freshness-recommended-operation
+                (getf snippet-freshness-recommendation :operation)
+                :snippet-source-freshness-known
+                (not (null (member snippet-freshness-state
+                                   '(:fresh :stale))))
+                :snippet-source-freshness-unknown-reason
+                (case snippet-freshness-state
+                  (:unknown-malformed-envelope :malformed-envelope)
+                  (:unknown-missing-envelope :missing-envelope))
+                :snippet-source-fresh
+                (eql snippet-freshness-state :fresh)
+                :current-source-snapshot
+                (copy-tree resolved-current-source-snapshot)
+                :current-source-fingerprint
+                (getf resolved-current-source-snapshot :fingerprint)
+                :current-source-summary
+                (getf resolved-current-source-snapshot :summary)
+                :page-source-snapshot
+                (copy-tree page-source-snapshot)
+                :snippet-source-snapshot
+                (copy-tree snippet-source-snapshot)
+                :dmx-dry-run-summary
+                (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
+                 plan))))))
 
 (defun localhost-fedwiki-page-promotion-plan-source-freshness-action-label
     (artifact freshness-state)
   (case freshness-state
     (:fresh
      "No action needed")
+    (:source-unavailable
+     "Inspect source-unavailable issue")
     (:stale
      (case artifact
        (:page "Regenerate page artifact")
@@ -777,6 +1214,7 @@
 (defun localhost-fedwiki-page-promotion-plan-attention-severity-for-state
     (freshness-state)
   (case freshness-state
+    (:source-unavailable 0)
     (:unknown-malformed-envelope 0)
     (:unknown-missing-envelope 1)
     (:stale 2)
@@ -792,6 +1230,7 @@
        :all-fresh)
       ((eql page-state snippet-state)
        (case page-state
+         (:source-unavailable :source-unavailable)
          (:stale :stale)
          (:unknown-missing-envelope :unknown-missing-envelope)
          (:unknown-malformed-envelope :unknown-malformed-envelope)
@@ -867,6 +1306,8 @@
      (getf row :attention-needed))
     (:all-fresh
      (eql (getf row :attention-category) :all-fresh))
+    (:source-unavailable
+     (eql (getf row :attention-category) :source-unavailable))
     (:stale
      (eql (getf row :attention-category) :stale))
     (:unknown-missing-envelope
@@ -915,6 +1356,10 @@
                     rows)
           :all-fresh
           (count :all-fresh rows :key (lambda (row) (getf row :attention-category)))
+          :source-unavailable
+          (count :source-unavailable
+                 rows
+                 :key (lambda (row) (getf row :attention-category)))
           :stale
           (count :stale rows :key (lambda (row) (getf row :attention-category)))
           :unknown-missing-envelope
@@ -1092,34 +1537,45 @@
 
 (defgeneric regenerate-localhost-fedwiki-page-promotion-plan-page-artifact (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
-    (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
-    (append
-     (list :action :page-artifact-regenerated)
-     (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))
+    (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
+      issue
+      (progn
+        (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
+        (append
+         (list :action :page-artifact-regenerated)
+         (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))))
 
 (defgeneric regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
-    (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
-    (append
-     (list :action :snippet-artifact-regenerated)
-     (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))
+    (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
+      issue
+      (progn
+        (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
+        (append
+         (list :action :snippet-artifact-regenerated)
+         (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))))
 
 (defgeneric regenerate-localhost-fedwiki-page-promotion-plan-artifacts (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
-    (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
-    (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
-    (append
-     (list :action :all-artifacts-regenerated)
-     (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))
+    (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
+      issue
+      (progn
+        (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
+        (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
+        (append
+         (list :action :all-artifacts-regenerated)
+         (localhost-fedwiki-page-promotion-plan-sync-status-report plan))))))
 
 (defgeneric review-localhost-fedwiki-page-promotion-plan-dmx-dry-run (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
-    (list :plan-id
-          (localhost-fedwiki-page-promotion-plan-id plan)
-          :summary
-          (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)
-          :evidence
-          (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan))))
+    (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
+      issue
+      (list :plan-id
+            (localhost-fedwiki-page-promotion-plan-id plan)
+            :summary
+            (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)
+            :evidence
+            (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan)))))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-topic-id
     (topic-id &key signal-error?)
@@ -1374,53 +1830,72 @@
 (defun localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
     (plan
      &key workspace-topicmap-id client)
-  (if-let (dmx-plan
-           (localhost-fedwiki-page-promotion-plan-dmx-dry-run-plan
-            plan
-            :workspace-topicmap-id workspace-topicmap-id
-            :client client))
-    (list :available t
-          :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
-          :snippet-id
-          (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
-          :workspace-topicmap-id
-          (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
-          :topic-action
-          (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
-          :topicmap-action
-          (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
-          :source-path
-          (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
-          :related-hyperdoc-page-title
-          (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
-           dmx-plan)
-          :related-topic-id
-          (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
-          :provenance
-          (copy-tree
-           (topic-factory-snippet-dmx-write-plan-provenance dmx-plan)))
+  (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
     (list :available nil
+          :classification :source-unavailable
+          :source-issue issue
+          :source-page-id
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+           issue)
+          :source-page-path
+          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+           issue)
           :message
-          "DMX dry-run planner is unavailable; load :hyperdoc/dmx-import to inspect the dry-run plan.")))
+          (format nil
+                  "DMX dry-run is unavailable because the configured localhost FedWiki source page file is missing for ~A at ~A."
+                  (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+                   issue)
+                  (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+                   issue)))
+    (if-let (dmx-plan
+             (localhost-fedwiki-page-promotion-plan-dmx-dry-run-plan
+              plan
+              :workspace-topicmap-id workspace-topicmap-id
+              :client client))
+      (list :available t
+            :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+            :snippet-id
+            (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
+            :workspace-topicmap-id
+            (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
+            :topic-action
+            (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
+            :topicmap-action
+            (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
+            :source-path
+            (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
+            :related-hyperdoc-page-title
+            (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
+             dmx-plan)
+            :related-topic-id
+            (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
+            :provenance
+            (copy-tree
+             (topic-factory-snippet-dmx-write-plan-provenance dmx-plan)))
+      (list :available nil
+            :message
+            "DMX dry-run planner is unavailable; load :hyperdoc/dmx-import to inspect the dry-run plan."))))
 
 (defun localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
     (plan
      &key workspace-topicmap-id client)
-  (if (ensure-localhost-fedwiki-page-promotion-dmx-support)
-      (with-output-to-string (stream)
-        (funcall (symbol-function 'execute-topic-factory-snippet-dmx-write)
-                 (localhost-fedwiki-page-promotion-plan-topic-definition plan)
-                 :workspace-topicmap-id
-                 (or workspace-topicmap-id
-                     (localhost-fedwiki-page-promotion-plan-default-workspace-topicmap-id
-                      plan)
-                     *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*)
-                 :client
-                 (or client
-                     (make-localhost-fedwiki-page-promotion-memory-dmx-client))
-                 :dry-run t
-                 :stream stream))
-      "DMX dry-run execution support is unavailable; load :hyperdoc/dmx-import to render dry-run evidence."))
+  (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
+    (localhost-fedwiki-page-promotion-source-unavailable-reason issue)
+    (if (ensure-localhost-fedwiki-page-promotion-dmx-support)
+        (with-output-to-string (stream)
+          (funcall (symbol-function 'execute-topic-factory-snippet-dmx-write)
+                   (localhost-fedwiki-page-promotion-plan-topic-definition plan)
+                   :workspace-topicmap-id
+                   (or workspace-topicmap-id
+                       (localhost-fedwiki-page-promotion-plan-default-workspace-topicmap-id
+                        plan)
+                       *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*)
+                   :client
+                   (or client
+                       (make-localhost-fedwiki-page-promotion-memory-dmx-client))
+                   :dry-run t
+                   :stream stream))
+        "DMX dry-run execution support is unavailable; load :hyperdoc/dmx-import to render dry-run evidence.")))
 
 (defgeneric review-localhost-fedwiki-page-promotion-handover-dmx-dry-run
     (surface)
@@ -1433,56 +1908,88 @@
            :surface surface))))
 
 (defun the-life-cycle-of-collective-knowledge-promotion-plan ()
-  (make-localhost-fedwiki-page-promotion-plan
+  (make-localhost-fedwiki-page-promotion-plan-with-source-fallback
    :id "the-life-cycle-of-collective-knowledge-promotion-plan"
    :title "The Life Cycle of Collective Knowledge promotion plan"
    :summary
    "Inspectable plan for promoting fragment-derived topic chunks and local artifacts from the localhost FedWiki page the-life-cycle-of-collective-knowledge."
-   :pipeline (the-life-cycle-of-collective-knowledge-page-pipeline)
-   :source-chunk
-   (the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)
-   :promoted-topic-chunks
-   (the-life-cycle-of-collective-knowledge-topic-chunks)
-   :topic-page (the-life-cycle-of-collective-knowledge-topic-page-chunk)
-   :topic-definition
-   (the-life-cycle-of-collective-knowledge-topic-definition-chunk)
-   :dmx-snippet (the-life-cycle-of-collective-knowledge-dmx-snippet-chunk)
+   :spec (the-life-cycle-of-collective-knowledge-page-pipeline-spec)
    :composed-page-target *the-life-cycle-of-collective-knowledge-page-path*
-   :topic-factory-metadata
-   (the-life-cycle-of-collective-knowledge-topic-factory-metadata)
-   :local-artifact-writer
-   'write-the-life-cycle-of-collective-knowledge-artifacts
-   :page-renderer
-   'render-the-life-cycle-of-collective-knowledge-page
+   :source-file *the-life-cycle-of-collective-knowledge-topic-asset*
+   :related-hyperdoc-page-title "The Life Cycle of Collective Knowledge"
+   :related-topic-id "the-life-cycle-of-collective-knowledge"
+   :snippet-id "the-life-cycle-of-collective-knowledge-topic-set"
    :default-workspace-topicmap-id
-   *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+   *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*
+   :build
+   (lambda ()
+     (make-localhost-fedwiki-page-promotion-plan
+      :id "the-life-cycle-of-collective-knowledge-promotion-plan"
+      :title "The Life Cycle of Collective Knowledge promotion plan"
+      :summary
+      "Inspectable plan for promoting fragment-derived topic chunks and local artifacts from the localhost FedWiki page the-life-cycle-of-collective-knowledge."
+      :pipeline (the-life-cycle-of-collective-knowledge-page-pipeline)
+      :source-issue nil
+      :source-chunk
+      (the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)
+      :promoted-topic-chunks
+      (the-life-cycle-of-collective-knowledge-topic-chunks)
+      :topic-page (the-life-cycle-of-collective-knowledge-topic-page-chunk)
+      :topic-definition
+      (the-life-cycle-of-collective-knowledge-topic-definition-chunk)
+      :dmx-snippet (the-life-cycle-of-collective-knowledge-dmx-snippet-chunk)
+      :composed-page-target *the-life-cycle-of-collective-knowledge-page-path*
+      :topic-factory-metadata
+      (the-life-cycle-of-collective-knowledge-topic-factory-metadata)
+      :local-artifact-writer
+      'write-the-life-cycle-of-collective-knowledge-artifacts
+      :page-renderer
+      'render-the-life-cycle-of-collective-knowledge-page
+      :default-workspace-topicmap-id
+      *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))))
 
 (defun reproducible-devenv-as-knowledge-artifact-promotion-plan ()
-  (make-localhost-fedwiki-page-promotion-plan
+  (make-localhost-fedwiki-page-promotion-plan-with-source-fallback
    :id "reproducible-devenv-as-knowledge-artifact-promotion-plan"
    :title "Reproducible DevEnv as Knowledge Artifact promotion plan"
    :summary
    "Inspectable plan for promoting whole-item topic chunks and local artifacts from the localhost FedWiki page reproducible-devenv-as-knowledge-artifact."
-   :pipeline (reproducible-devenv-as-knowledge-artifact-page-pipeline)
-   :source-chunk
-   (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)
-   :promoted-topic-chunks
-   (reproducible-devenv-as-knowledge-artifact-topic-chunks)
-   :topic-page
-   (reproducible-devenv-as-knowledge-artifact-topic-page-chunk)
-   :topic-definition
-   (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)
-   :dmx-snippet
-   (reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)
+   :spec (reproducible-devenv-as-knowledge-artifact-page-pipeline-spec)
    :composed-page-target *reproducible-devenv-as-knowledge-artifact-page-path*
-   :topic-factory-metadata
-   (reproducible-devenv-as-knowledge-artifact-topic-factory-metadata)
-   :local-artifact-writer
-   'write-reproducible-devenv-as-knowledge-artifact-artifacts
-   :page-renderer
-   'render-reproducible-devenv-as-knowledge-artifact-page
+   :source-file *reproducible-devenv-as-knowledge-artifact-topic-asset*
+   :related-hyperdoc-page-title "Reproducible DevEnv as Knowledge Artifact"
+   :related-topic-id "reproducible-devenv-as-knowledge-artifact"
+   :snippet-id "reproducible-devenv-as-knowledge-artifact-topic-set"
    :default-workspace-topicmap-id
-   *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+   *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*
+   :build
+   (lambda ()
+     (make-localhost-fedwiki-page-promotion-plan
+      :id "reproducible-devenv-as-knowledge-artifact-promotion-plan"
+      :title "Reproducible DevEnv as Knowledge Artifact promotion plan"
+      :summary
+      "Inspectable plan for promoting whole-item topic chunks and local artifacts from the localhost FedWiki page reproducible-devenv-as-knowledge-artifact."
+      :pipeline (reproducible-devenv-as-knowledge-artifact-page-pipeline)
+      :source-issue nil
+      :source-chunk
+      (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)
+      :promoted-topic-chunks
+      (reproducible-devenv-as-knowledge-artifact-topic-chunks)
+      :topic-page
+      (reproducible-devenv-as-knowledge-artifact-topic-page-chunk)
+      :topic-definition
+      (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)
+      :dmx-snippet
+      (reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)
+      :composed-page-target *reproducible-devenv-as-knowledge-artifact-page-path*
+      :topic-factory-metadata
+      (reproducible-devenv-as-knowledge-artifact-topic-factory-metadata)
+      :local-artifact-writer
+      'write-reproducible-devenv-as-knowledge-artifact-artifacts
+      :page-renderer
+      'render-reproducible-devenv-as-knowledge-artifact-page
+      :default-workspace-topicmap-id
+      *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))))
 
 (defun current-localhost-fedwiki-page-promotion-surface ()
   (make-localhost-fedwiki-page-promotion-surface

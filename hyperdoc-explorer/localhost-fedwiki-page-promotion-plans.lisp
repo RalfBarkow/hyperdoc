@@ -48,6 +48,11 @@
 (defun promotion-dmx-live-write-label (value)
   (if value "configured" "not configured"))
 
+(defun promotion-source-availability-label (state)
+  (case state
+    (:source-unavailable "source unavailable")
+    (otherwise "available")))
+
 (defun promotion-dmx-repair-runbook-page ()
   (let ((hyperdoc (and (boundp '*hyperdoc*)
                        (symbol-value '*hyperdoc*))))
@@ -135,6 +140,7 @@
 
 (defun promotion-source-freshness-label (freshness-state)
   (case freshness-state
+    (:source-unavailable "source unavailable")
     (:fresh "fresh")
     (:stale "stale")
     (:unknown-malformed-envelope "unknown (malformed envelope)")
@@ -160,6 +166,8 @@
            (promotion-source-freshness-recommended-operation status operation-key))
          (button-label
            (case state
+             (:source-unavailable
+              "Inspect source issue")
              (:stale
               (case artifact
                 (:page "Regenerate page artifact")
@@ -178,7 +186,7 @@
               :description description
               :operation operation)
         (list :kind :passive
-              :label "No action needed"
+              :label (or button-label "No action needed")
               :description description
               :operation nil))))
 
@@ -503,6 +511,7 @@
 (defun promotion-triage-category-label (category)
   (case category
     (:all-fresh "all fresh")
+    (:source-unavailable "source unavailable")
     (:stale "stale page and snippet")
     (:unknown-missing-envelope "unknown (missing envelope)")
     (:unknown-malformed-envelope "unknown (malformed envelope)")
@@ -521,6 +530,7 @@
   (case filter
     (:attention-needed "Attention needed")
     (:all-fresh "All fresh")
+    (:source-unavailable "Source unavailable")
     (:stale "Stale")
     (:unknown-missing-envelope "Unknown missing envelope")
     (:unknown-malformed-envelope "Unknown malformed envelope")
@@ -533,6 +543,8 @@
      "This scope keeps only plans that currently need attention, still ordered from malformed through missing and stale states.")
     (:all-fresh
      "This scope keeps only plans whose page and snippet artifacts are both currently fresh.")
+    (:source-unavailable
+     "This scope keeps only plans whose configured localhost FedWiki source page file is currently unavailable.")
     (:stale
      "This scope keeps only plans whose page and snippet artifacts are both currently stale.")
     (:unknown-missing-envelope
@@ -546,9 +558,10 @@
 
 (defun promotion-triage-count-drilldown-spec (surface key)
   (let* ((filter
-           (case key
+         (case key
              (:attention-needed :attention-needed)
              (:all-fresh :all-fresh)
+             (:source-unavailable :source-unavailable)
              (:stale :stale)
              (:unknown-missing-envelope :unknown-missing-envelope)
              (:unknown-malformed-envelope :unknown-malformed-envelope)
@@ -588,6 +601,14 @@
                        :all-fresh))
                  (:td (:tt (views:esc
                             (promotion-triage-count-value counts :all-fresh)))))
+            (:tr (:td (promotion-triage-count-label-html
+                       surface
+                       "Source unavailable"
+                       :source-unavailable))
+                 (:td (:tt (views:esc
+                            (promotion-triage-count-value
+                             counts
+                             :source-unavailable)))))
             (:tr (:td (promotion-triage-count-label-html
                        surface
                        "Stale"
@@ -636,6 +657,10 @@
        (list :target target
              :select "Overview"
              :label "Review no-action status"))
+      (:source-unavailable
+       (list :target target
+             :select "Source page"
+             :label "Review source issue"))
       (:stale
        (list :target target
              :select "Overview"
@@ -731,6 +756,10 @@
 (defmethod views:text-representation ((plan localhost-fedwiki-page-promotion-plan))
   (localhost-fedwiki-page-promotion-plan-title plan))
 
+(defmethod views:text-representation
+    ((issue localhost-fedwiki-page-promotion-source-unavailable-issue))
+  (title-of issue))
+
 (defmethod views:text-representation ((source localhost-fedwiki-source-data))
   (localhost-fedwiki-source-data-fedwiki-page-id source))
 
@@ -747,6 +776,64 @@
 
 (defmethod views:text-representation ((topic localhost-fedwiki-promoted-topic-data))
   (localhost-fedwiki-promoted-topic-data-title topic))
+
+(views:defview 👀overview (issue localhost-fedwiki-page-promotion-source-unavailable-issue)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:h3 (views:esc (title-of issue)))
+      (:p (views:esc (summary-of issue)))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Classification"))
+                   (:td (:tt (views:esc
+                              (promotion-code-string
+                               (localhost-fedwiki-page-promotion-source-unavailable-issue-classification
+                                issue))))))
+              (:tr (:td (views:esc "Plan id"))
+                   (:td (:tt (views:esc
+                              (localhost-fedwiki-page-promotion-source-unavailable-issue-plan-id
+                               issue)))))
+              (:tr (:td (views:esc "Source page id"))
+                   (:td (:tt (views:esc
+                              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+                               issue)))))
+              (:tr (:td (views:esc "Source slug"))
+                   (:td (:tt (views:esc
+                              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-slug
+                               issue)))))
+              (:tr (:td (views:esc "Source path"))
+                   (:td (:tt (views:esc
+                              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+                               issue)))))
+              (:tr (:td (views:esc "Source title"))
+                   (:td (:tt (views:esc
+                              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-title
+                               issue)))))
+              (:tr (:td (views:esc "Source URL"))
+                   (:td (:tt (views:esc
+                              (localhost-fedwiki-page-promotion-source-unavailable-issue-source-html-url
+                               issue)))))
+              (:tr (:td (views:esc "Observed missing pathname"))
+                   (:td (:tt (views:esc
+                              (or (localhost-fedwiki-page-promotion-source-unavailable-issue-missing-pathname
+                                   issue)
+                                  "n/a")))))
+              (:tr (:td (views:esc "Condition type"))
+                   (:td (:tt (views:esc
+                              (promotion-code-string
+                               (localhost-fedwiki-page-promotion-source-unavailable-issue-condition-type
+                                issue))))))
+              (:tr (:td (views:esc "Condition message"))
+                   (:td (views:esc
+                         (localhost-fedwiki-page-promotion-source-unavailable-issue-condition-message
+                          issue))))))))
+
+(views:defview 👀condition (issue localhost-fedwiki-page-promotion-source-unavailable-issue)
+  (views:html-view :title "Condition" :priority 2
+    (views:html
+      (:pre :style "white-space: pre-wrap;"
+            (views:esc
+             (localhost-fedwiki-page-promotion-source-unavailable-reason
+              issue))))))
 
 (views:defview 👀promotion-plan (source localhost-fedwiki-source-data)
   (topic-localhost-fedwiki-promotion-plan-view
@@ -784,6 +871,14 @@
                      (:td (:tt (views:esc
                                 (promotion-triage-count-value counts
                                                               :all-fresh)))))
+                (:tr (:td (promotion-triage-count-label-html
+                           surface
+                           "Source unavailable"
+                           :source-unavailable))
+                     (:td (:tt (views:esc
+                                (promotion-triage-count-value
+                                 counts
+                                 :source-unavailable)))))
                 (:tr (:td (promotion-triage-count-label-html
                            surface
                            "Stale"
@@ -834,24 +929,28 @@
   (views:html-view :title "All fresh" :priority 4
     (promotion-triage-scope-html surface :all-fresh)))
 
+(views:defview 👀source-unavailable (surface localhost-fedwiki-page-promotion-surface)
+  (views:html-view :title "Source unavailable" :priority 5
+    (promotion-triage-scope-html surface :source-unavailable)))
+
 (views:defview 👀stale (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Stale" :priority 5
+  (views:html-view :title "Stale" :priority 6
     (promotion-triage-scope-html surface :stale)))
 
 (views:defview 👀unknown-missing-envelope (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Unknown missing envelope" :priority 6
+  (views:html-view :title "Unknown missing envelope" :priority 7
     (promotion-triage-scope-html surface :unknown-missing-envelope)))
 
 (views:defview 👀unknown-malformed-envelope (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Unknown malformed envelope" :priority 7
+  (views:html-view :title "Unknown malformed envelope" :priority 8
     (promotion-triage-scope-html surface :unknown-malformed-envelope)))
 
 (views:defview 👀mixed-states (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Mixed states" :priority 8
+  (views:html-view :title "Mixed states" :priority 9
     (promotion-triage-scope-html surface :mixed-states)))
 
 (views:defview 👀dmx-handover (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "DMX handover" :priority 9
+  (views:html-view :title "DMX handover" :priority 10
     (let* ((review
              (review-localhost-fedwiki-page-promotion-handover-dmx-dry-run
               surface))
@@ -912,7 +1011,7 @@
               (views:esc evidence))))))
 
 (views:defview 👀plans (surface localhost-fedwiki-page-promotion-surface)
-  (views:html-view :title "Plans" :priority 10
+  (views:html-view :title "Plans" :priority 11
     (views:html
       (:p "Each plan stays inspectable as a separate localhost FedWiki page-promotion boundary.")
       (:ul
@@ -923,6 +1022,8 @@
 (views:defview 👀overview (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Overview" :priority 1
     (let ((source (localhost-fedwiki-page-promotion-plan-source plan))
+          (source-issue
+            (localhost-fedwiki-page-promotion-plan-source-issue plan))
           (generated-page
             (localhost-fedwiki-page-promotion-plan-generated-page plan))
           (status
@@ -934,10 +1035,30 @@
       (views:html
         (:h3 (views:esc (localhost-fedwiki-page-promotion-plan-title plan)))
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
+        (when source-issue
+          (views:html
+            (:p (views:esc
+                 "This plan stays open on a fail-soft boundary. The configured localhost FedWiki source page file is currently unavailable, so source-derived story items, promoted topics, and DMX dry-run stay degraded until that page file is restored."))
+            (:p
+             (promotion-object-link-html
+              source-issue
+              :display "Inspect source-unavailable issue"
+              :select "Overview"))))
         (:h4 (views:esc "Status and actions"))
         (:p (views:esc
              "Use this compact surface to check whether the local artifacts are in sync, whether their embedded source snapshot is fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed, see the next safe action for each artifact, confirm the provenance modes present in the promoted topics, and trigger explicit local regeneration or DMX dry-run review without switching to the raw Operations tab."))
         (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source availability"))
+                     (:td (:tt (views:esc
+                                (promotion-source-availability-label
+                                 (getf status :source-availability-state))))))
+                (:tr (:td (views:esc "Source issue"))
+                     (:td
+                      (promotion-object-link-html
+                       source-issue
+                       :display "Inspect source-unavailable issue"
+                       :select "Overview"
+                       :fallback "none")))
                 (:tr (:td (views:esc "Page synced?"))
                      (:td (:tt (views:esc
                                 (promotion-yes/no-label
@@ -981,6 +1102,10 @@
                 (:tr (:td (views:esc "Source slug"))
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-slug
+                                 source)))))
+                (:tr (:td (views:esc "Source path"))
+                     (:td (:tt (views:esc
+                                (localhost-fedwiki-source-data-fedwiki-relative-path
                                  source)))))
                 (:tr (:td (views:esc "Generated HyperDoc page"))
                      (:td
@@ -1041,6 +1166,10 @@
              (localhost-fedwiki-page-promotion-plan-sync-status plan))
            "Inspect the current page/snippet sync state for this promotion plan.")))
         (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source availability"))
+                     (:td (:tt (views:esc
+                                (promotion-source-availability-label
+                                 (getf status :source-availability-state))))))
                 (:tr (:td (views:esc "Source page id"))
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-page-id
@@ -1053,6 +1182,13 @@
                      (:td (:tt (views:esc
                                 (localhost-fedwiki-source-data-fedwiki-relative-path
                                  source)))))
+                (:tr (:td (views:esc "Source issue"))
+                     (:td
+                      (promotion-object-link-html
+                       source-issue
+                       :display "Inspect source-unavailable issue"
+                       :select "Overview"
+                       :fallback "none")))
                 (:tr (:td (views:esc "Story items"))
                      (:td (:tt (views:esc
                                 (format nil "~D"
@@ -1117,10 +1253,23 @@
 
 (views:defview 👀source-freshness (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Source freshness" :priority 7
-    (let ((status (localhost-fedwiki-page-promotion-plan-sync-status plan)))
+    (let ((status (localhost-fedwiki-page-promotion-plan-sync-status plan))
+          (source-issue
+            (localhost-fedwiki-page-promotion-plan-source-issue plan)))
       (views:html
         (:p "These diagnostics compare the current normalized localhost FedWiki source snapshot against the reflected snapshots embedded in the committed page and snippet artifacts. Stale reasons are fingerprint-based comparisons, not semantic diffs of the source text.")
         (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source availability"))
+                     (:td (:tt (views:esc
+                                (promotion-source-availability-label
+                                 (getf status :source-availability-state))))))
+                (:tr (:td (views:esc "Source issue"))
+                     (:td
+                      (promotion-object-link-html
+                       source-issue
+                       :display "Inspect source-unavailable issue"
+                       :select "Overview"
+                       :fallback "none")))
                 (:tr (:td (views:esc "Current source fingerprint"))
                      (:td (:tt (views:esc
                                 (promotion-current-source-fingerprint-label
@@ -1205,12 +1354,36 @@
 (views:defview 👀source-page (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "Source page" :priority 2
     (let* ((source (localhost-fedwiki-page-promotion-plan-source plan))
+           (source-issue
+             (localhost-fedwiki-page-promotion-plan-source-issue plan))
+           (status
+             (localhost-fedwiki-page-promotion-plan-sync-status plan))
            (generated-page
              (localhost-fedwiki-page-promotion-plan-generated-page plan))
            (provenance (localhost-fedwiki-source-data-provenance source)))
       (views:html
         (:p "Normalized localhost FedWiki page source. This is the read boundary for promotion, before any local HyperDoc write or DMX write step.")
+        (when source-issue
+          (views:html
+            (:p (views:esc
+                 "This Source page view is degraded on the exact missing-file boundary. HyperDoc keeps the canonical source identity and path inspectable while the localhost FedWiki page file itself is unavailable."))
+            (:p
+             (promotion-object-link-html
+              source-issue
+              :display "Inspect source-unavailable issue"
+              :select "Overview"))))
         (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source availability"))
+                     (:td (:tt (views:esc
+                                (promotion-source-availability-label
+                                 (getf status :source-availability-state))))))
+                (:tr (:td (views:esc "Source issue"))
+                     (:td
+                      (promotion-object-link-html
+                       source-issue
+                       :display "Inspect source-unavailable issue"
+                       :select "Overview"
+                       :fallback "none")))
                 (:tr (:td (views:esc "Normalized source object"))
                      (:td (views:object-ref source)))
                 (:tr (:td (views:esc "Generated HyperDoc page"))
@@ -1616,6 +1789,8 @@
 (views:defview 👀dmx-dry-run (plan localhost-fedwiki-page-promotion-plan)
   (views:html-view :title "DMX dry-run" :priority 9
     (let* ((summary (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))
+           (source-issue
+             (localhost-fedwiki-page-promotion-plan-source-issue plan))
            (provenance (getf summary :provenance))
            (evidence (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan)))
       (views:html
@@ -1682,4 +1857,31 @@
               (:pre :style "white-space: pre-wrap;"
                     (views:esc evidence)))
             (views:html
-              (:p (views:esc (getf summary :message))))))))))
+              (if (eql (getf summary :classification) :source-unavailable)
+                  (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Classification"))
+                                 (:td (:tt (views:esc
+                                            (promotion-code-string
+                                             (getf summary :classification))))))
+                            (:tr (:td (views:esc "Source page id"))
+                                 (:td (:tt (views:esc
+                                            (or (getf summary :source-page-id)
+                                                "n/a")))))
+                            (:tr (:td (views:esc "Source page path"))
+                                 (:td (:tt (views:esc
+                                            (or (getf summary :source-page-path)
+                                                "n/a")))))
+                            (:tr (:td (views:esc "Source issue"))
+                                 (:td
+                                  (promotion-object-link-html
+                                   source-issue
+                                   :display "Inspect source-unavailable issue"
+                                   :select "Overview"
+                                   :fallback "none"))))
+                    (:p (views:esc (getf summary :message)))
+                    (:h4 (views:esc "Dry-run evidence"))
+                    (:pre :style "white-space: pre-wrap;"
+                          (views:esc evidence)))
+                  (views:html
+                    (:p (views:esc (getf summary :message))))))))))))
