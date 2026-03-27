@@ -16,6 +16,11 @@
    :hyperdoc
    "hyperdoc/Localhost FedWiki page promotion workflow.html"))
 
+(defun dmx-topicmap-919822-repair-runbook-relative-path ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/DMX topicmap 919822 repair runbook.html"))
+
 (defun assert-view-titles-present (views titles label)
   (dolist (title titles)
     (assert-true (smoke-find-view-by-title views title)
@@ -2020,12 +2025,170 @@
      (not (search "/Users/" body))
      "DMX handover body must not preserve machine-local absolute paths")))
 
+(defun run-dmx-topicmap-919822-repair-runbook-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-source
+           (uiop:read-file-string
+            (dmx-topicmap-919822-repair-runbook-relative-path)))
+         (page
+           (hyperbook:find-page hyperdoc::*hyperdoc*
+                                "DMX topicmap 919822 repair runbook"
+                                :signal-error? t))
+         (topic-page
+           (hyperbook:find-page hyperdoc::*topics*
+                                "DMX topicmap 919822 repair runbook"
+                                :signal-error? t))
+         (runbook (hyperdoc::dmx-topicmap-919822-repair-runbook))
+         (views (load-inspector-views-for-object runbook))
+         (overview-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Overview")))
+         (healthy-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Healthy specimen")))
+         (broken-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Broken assocs")))
+         (evidence-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Evidence")))
+         (dry-run-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Dry-run")))
+         (unknowns-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Unknowns")))
+         (operations-html
+           (html-inspector-views:view-html
+            (smoke-find-view-by-title views "Operations"))))
+    (assert-true
+     (fboundp 'hyperdoc::dmx-topicmap-919822-repair-runbook-topic)
+     "Repair runbook topic function must be present")
+    (assert-true page
+                 "Repair runbook HyperDoc page must be browseable")
+    (assert-true topic-page
+                 "Repair runbook topic page must be browseable in Topics")
+    (assert-view-titles-present
+     views
+     '("Overview"
+       "Healthy specimen"
+       "Broken assocs"
+       "Evidence"
+       "Candidate repairs"
+       "Dry-run"
+       "Unknowns"
+       "Operations")
+     "DMX topicmap 919822 repair runbook")
+    (dolist (needle
+             '("dmx-topicmap-919822-repair-runbook"
+               "Healthy specimen"
+               "Broken assocs"
+               "Dry-run"
+               "Unknowns"
+               "Operations"
+               "921404"
+               "921471"
+               "921494"
+               "921503"
+               "topicmaps/object/921352"
+               "topicmaps/object/921464"
+               "topicmaps/919822"
+               "dmx.topicmaps.visibility"
+               "dmx.topicmaps.x"
+               "No POST, PUT, or DELETE is attached to this runbook object."
+               "The public API does not expose the exact write payload for <tt>/topicmaps/919822/assoc/&lt;assoc-id&gt;</tt>."))
+      (assert-true
+       (search needle page-source :test #'char=)
+       (format nil "Repair runbook page must expose ~A" needle)))
+    (dolist (needle
+             '("Topicmap id"
+               "919822"
+               "context-window"
+               "Healthy comparison topic"
+               "921494"
+               "Healthy comparison assoc"
+               "921503"
+               "Broken assoc ids"
+               "921404, 921471"
+               "DMX writes enabled by default"
+               "no"))
+      (assert-true
+       (search needle overview-html :test #'char=)
+       (format nil "Repair runbook overview must expose ~A" needle)))
+    (dolist (needle
+             '("Topic 921494 is the accepted healthy comparison specimen"
+               "921494"
+               "921503"
+               "dmx.topicmaps.topicmap_context"))
+      (assert-true
+       (search needle healthy-html :test #'char=)
+       (format nil "Repair runbook healthy-specimen view must expose ~A"
+               needle)))
+    (dolist (needle
+             '("921404"
+               "921352"
+               "921471"
+               "921464"
+               "dmx.topicmaps.topicmap_context"
+               "topicmaps/object/921352 fails on missing dmx.topicmaps.visibility for assoc 921404"
+               "topicmaps/object/921464 fails on missing dmx.topicmaps.visibility for assoc 921471"))
+      (assert-true
+       (search needle broken-html :test #'char=)
+       (format nil "Repair runbook broken-assocs view must expose ~A" needle)))
+    (dolist (needle
+             '("/core/topic/921494?children=true&amp;assocChildren=true"
+               "/topicmaps/object/921494"
+               "/core/assoc/921404?children=true&amp;assocChildren=true"
+               "/core/assoc/921471?children=true&amp;assocChildren=true"
+               "/topicmaps/919822"))
+      (assert-true
+       (search needle evidence-html :test #'char=)
+       (format nil "Repair runbook evidence view must expose ~A" needle)))
+    (dolist (needle
+             '("This checklist is read-only by default."
+               "No POST, PUT, or DELETE is attached to this runbook object."
+               "Returns 200 OK and exposes assoc 921503"
+               "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921404."
+               "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921471."
+               "Post-repair verification"
+               "Returns 200 OK with no missing-x failure before any DMX seeding work resumes."))
+      (assert-true
+       (search needle dry-run-html :test #'char=)
+       (format nil "Repair runbook dry-run view must expose ~A" needle)))
+    (dolist (needle
+             '("HyperDoc-side writer changes are not justified"
+               "public API proves the broken assoc ids"
+               "does not expose the exact write payload"))
+      (assert-true
+       (search needle unknowns-html :test #'char-equal)
+       (format nil "Repair runbook unknowns view must expose ~A" needle)))
+    (dolist (needle
+             '("Operations stay passive in this runbook."
+               "Default mode"
+               "read-only"
+               "Writes enabled"
+               "no"
+               "/topicmaps/919822/assoc/921503"
+               "921404, 921471"
+               "The public API does not reveal the exact write payload for /topicmaps/919822/assoc/&lt;assoc-id&gt;."))
+      (assert-true
+       (search needle operations-html :test #'char=)
+       (format nil "Repair runbook operations view must expose ~A" needle)))
+    (assert-true
+     (null (hyperdoc::dmx-topicmap-repair-runbook-write-enabled-p runbook))
+     "Repair runbook must keep DMX writes disabled by default")
+    (assert-equal
+     :read-only
+     (hyperdoc::dmx-topicmap-repair-runbook-default-operation-mode runbook)
+     "Repair runbook must stay read-only by default")))
+
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
   (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
   (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
   (run-localhost-fedwiki-page-promotion-operations-smoke-test)
   (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
+  (run-dmx-topicmap-919822-repair-runbook-smoke-test)
   (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
   (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
