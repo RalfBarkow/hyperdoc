@@ -91,12 +91,18 @@ imports = [
 
 <ul>
   <li><tt>/etc/nixos/hyperdoc/hyperdoc-mcp-release.nix</tt> - host-owned copy of the reusable module.</li>
-  <li><tt>/etc/nixos/hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix</tt> - host-owned sidecar with <tt>services.hyperdocMcp.package</tt> pinned to a concrete <tt>/nix/store</tt> path.</li>
+  <li><tt>/etc/nixos/hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix</tt> - host-owned sidecar with <tt>services.hyperdocMcp.packagePath</tt> pinned as a quoted concrete <tt>/nix/store</tt> path.</li>
 </ul>
 
 <p>
   That keeps <tt>/etc/nixos</tt> authoritative while removing mutable checkout
   imports from the final production activation path.
+</p>
+
+<p>
+  The quoted <tt>packagePath</tt> form matters for flake-based
+  <tt>/etc/nixos</tt>: it keeps evaluation pure while still pointing systemd at
+  the pinned release root.
 </p>
 
 <h2>Operator steps</h2>
