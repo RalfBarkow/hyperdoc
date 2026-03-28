@@ -82,9 +82,93 @@
   typed adapters only.
 </p>
 
+<h2>Current pre-activation state</h2>
+
+<ul>
+  <li>The repo-side service definition is present at <tt>services.hyperdocMcp</tt>.</li>
+  <li>The reverse proxy target is <tt>https://mcp.dreyeck.ch/mcp</tt> -&gt; <tt>http://127.0.0.1:8787/mcp</tt>.</li>
+  <li><tt>HYPERDOC_MCP_ENABLE_LIVE_WRITES</tt> stays <tt>0</tt> by default on <tt>dreyeck-ch</tt>.</li>
+  <li>The last public probe before activation returned <tt>400 Requested Wiki Does Not Exist</tt>, and <tt>hyperdoc-mcp.service</tt> was not yet present on the host.</li>
+</ul>
+
+<h2>Operator activation checklist</h2>
+
+<ol>
+  <li>Verify repo-side deployment state on the local controller:
+<pre>
+nix build .#hyperdoc-release
+nix eval .#nixosConfigurations.dreyeck-ch.config.systemd.services.hyperdoc-mcp.serviceConfig.ExecStart --raw
+nix eval '.#nixosConfigurations.dreyeck-ch.config.services.nginx.virtualHosts."mcp.dreyeck.ch".locations."/mcp".proxyPass' --raw
+nix eval .#nixosConfigurations.dreyeck-ch.config.systemd.services.hyperdoc-mcp.environment.HYPERDOC_MCP_ENABLE_LIVE_WRITES --raw
+</pre>
+  </li>
+  <li>Confirm the host is reachable before activation:
+<pre>
+ssh rgb@dreyeck.ch 'hostname; command -v nixos-rebuild; systemctl status hyperdoc-mcp --no-pager --lines=0 || true'
+curl -i https://mcp.dreyeck.ch/mcp
+</pre>
+  </li>
+  <li>Run cautious remote activation:
+<pre>
+nixos-rebuild dry-activate --flake .#dreyeck-ch --build-host rgb@dreyeck.ch --target-host rgb@dreyeck.ch
+nixos-rebuild test --flake .#dreyeck-ch --build-host rgb@dreyeck.ch --target-host rgb@dreyeck.ch
+</pre>
+  </li>
+  <li>Probe the remote MCP surface after <tt>dry-activate</tt> and again after <tt>test</tt>:
+<pre>
+ssh rgb@dreyeck.ch 'systemctl status hyperdoc-mcp --no-pager --lines=20'
+curl -i https://mcp.dreyeck.ch/mcp
+DMX_MCP_URL=https://mcp.dreyeck.ch/mcp python3 tools/probe-dmx-mcp-server.py
+DMX_MCP_URL=https://mcp.dreyeck.ch/mcp DMX_MCP_TOPIC_URI=dmx://topic/907120 python3 tools/probe-dmx-mcp-server.py
+</pre>
+  </li>
+  <li>If all checks stay green, make activation persistent:
+<pre>
+nixos-rebuild switch --flake .#dreyeck-ch --build-host rgb@dreyeck.ch --target-host rgb@dreyeck.ch
+</pre>
+  </li>
+</ol>
+
+<h2>Good outputs</h2>
+
+<ul>
+  <li><tt>systemctl status hyperdoc-mcp</tt> shows <tt>active (running)</tt> and <tt>hyperdoc-mcp-release-start</tt>.</li>
+  <li><tt>curl -i https://mcp.dreyeck.ch/mcp</tt> returns HTTP <tt>405</tt> with the JSON error <tt>method_not_allowed</tt>.</li>
+  <li>The MCP probe reports <tt>INIT_STATUS 200</tt>, <tt>WORKSPACE_READ_STATUS 200</tt>, <tt>WORKSPACE_TOPICMAP_ID 919822</tt>, and <tt>TOPIC_TITLE DMX incident remediation for HyperDoc</tt>.</li>
+  <li>The probe still reports <tt>DRY_RUN_STATUS 200</tt> and <tt>DRY_RUN_VALIDATION_STATUS canonical</tt>.</li>
+</ul>
+
+<h2>Failure checks</h2>
+
+<ul>
+  <li><tt>Unit hyperdoc-mcp.service could not be found.</tt> means the new generation is not active.</li>
+  <li><tt>Requested Wiki Does Not Exist</tt> on <tt>https://mcp.dreyeck.ch/mcp</tt> means the nginx host is still missing or not serving the MCP route.</li>
+  <li><tt>INIT_STATUS</tt>, <tt>WORKSPACE_READ_STATUS</tt>, or <tt>TOPIC_READ_STATUS</tt> other than <tt>200</tt> means stop before <tt>switch</tt>.</li>
+  <li>If the probe output loses <tt>workspace/context-window</tt> or the guarded tools, stop and inspect the activated service before proceeding.</li>
+</ul>
+
+<h2>Rollback</h2>
+
+<ol>
+  <li>Rollback the host generation:
+<pre>
+ssh rgb@dreyeck.ch 'sudo nixos-rebuild switch --rollback'
+</pre>
+  </li>
+  <li>If a specific generation must be restored:
+<pre>
+ssh rgb@dreyeck.ch 'sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bin/switch-to-configuration switch'
+</pre>
+  </li>
+  <li>Re-run the remote MCP probes and confirm the host is back in its last known-good state before attempting another activation.</li>
+</ol>
+
 <h2>Related</h2>
 
 <ul>
+  <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a></li>
+  <li><a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a></li>
+  <li><a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
