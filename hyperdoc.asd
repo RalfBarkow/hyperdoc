@@ -269,6 +269,7 @@
                              (:file "topic-factory-snippet-dmx-smoke")
                              (:file "dmx-mcp-smoke")
                              (:file "dmx-incident-arc-smoke")
+                             (:file "dmx-shared-workspace-docs-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")

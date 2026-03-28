@@ -1,0 +1,82 @@
+<h1>DMX machine-readable read paths</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX
+  machine-readable read paths</tt></a> records the explicit DMX HTTP routes
+  that HyperDoc and the MCP server should treat as canonical. The key rule is
+  simple: read through tool-facing JSON endpoints, not through browser hash
+  routes or UI state assumptions.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
+</ul>
+
+<h2>Canonical topic read path</h2>
+
+<p>
+  Use:
+</p>
+
+<pre>
+/core/topic/&lt;id&gt;?children=true&amp;assocChildren=true
+</pre>
+
+<p>
+  This is the canonical machine-readable path for full topic reads, including
+  the note topics used in the context-window workspace.
+</p>
+
+<h2>Canonical topicmap read path</h2>
+
+<p>
+  Use:
+</p>
+
+<pre>
+/topicmaps/&lt;id&gt;?children=true
+</pre>
+
+<p>
+  This is the machine-readable topicmap projection used for workspace and
+  topicmap reads.
+</p>
+
+<h2>What not to treat as a machine contract</h2>
+
+<ul>
+  <li>DMX webclient hash routes.</li>
+  <li>Browser-visible SPA state.</li>
+  <li>Topicmap membership effects inferred only from UI placement.</li>
+</ul>
+
+<p>
+  Those are valid navigation surfaces for a person, but not the durable read
+  boundary for tools or proof-oriented diagnostics.
+</p>
+
+<h2>MCP projection</h2>
+
+<p>
+  The HyperDoc MCP server projects the same canonical boundary as
+  <tt>workspace/context-window</tt>, <tt>topic/&lt;id&gt;</tt>, and
+  <tt>topicmap/&lt;id&gt;</tt>. That projection exists to make the same DMX state
+  readable by Codex, ChatGPT, and the operator without requiring each client
+  to rediscover raw DMX routes independently.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+</ul>

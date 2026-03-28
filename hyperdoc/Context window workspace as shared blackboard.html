@@ -1,0 +1,81 @@
+<h1>Context window workspace as shared blackboard</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context
+  window workspace as shared blackboard</tt></a> defines how
+  <tt>topicmap 919822</tt>, the <tt>context-window</tt> workspace with sharing
+  mode <tt>Common</tt>, should be used now: as a small curated blackboard
+  between me, ChatGPT, and Codex, not as a raw transcript archive, an
+  undifferentiated transcript dump, or a substitute for durable HyperDoc
+  pages.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="Use a DMX Common workspace as a world read/write context window"><tt>Use a DMX Common workspace as a world read/write context window</tt></a></li>
+</ul>
+
+<h2>Workspace identity</h2>
+
+<ul>
+  <li>Topicmap id: <tt>919822</tt></li>
+  <li>Workspace name: <tt>context-window</tt></li>
+  <li>Sharing mode: <tt>Common</tt></li>
+</ul>
+
+<h2>What belongs here</h2>
+
+<ul>
+  <li>Current incident and repair status that multiple agents need to share.</li>
+  <li>Stable contract notes such as the note read/write boundary and machine-readable read paths.</li>
+  <li>Shared workflow surfaces such as the localhost FedWiki promotion workflow and its handover seam.</li>
+  <li>Short current-state mirrors of durable HyperDoc pages that should be reachable through DMX read paths and MCP resources.</li>
+</ul>
+
+<h2>What does not belong here</h2>
+
+<ul>
+  <li>Raw transcript blobs copied in full.</li>
+  <li>Speculative backend repair experiments against DMX.</li>
+  <li>Generic unsafe write tools that bypass HyperDoc validation.</li>
+  <li>The sole authoritative copy of architecture or workflow decisions.</li>
+</ul>
+
+<h2>Read and write boundary</h2>
+
+<p>
+  The workspace should be readable both through the direct DMX machine-readable
+  paths and through the MCP resource surface. Writes stay conservative:
+  workspace notes and handovers may be appended or updated through the guarded
+  parent-note boundary, while generic raw topicmap mutations remain out of
+  scope.
+</p>
+
+<h2>Why this is needed now</h2>
+
+<p>
+  The shared workspace only serves its real purpose when the important incident,
+  architecture, workflow, and handover context is actually present and
+  reachable there. HyperDoc remains the richer diagnostic and authoring side,
+  but the workspace must hold enough curated state to work as a common
+  blackboard between the human operator, ChatGPT, and Codex.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+</ul>

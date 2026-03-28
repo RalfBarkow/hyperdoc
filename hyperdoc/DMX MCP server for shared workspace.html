@@ -1,0 +1,95 @@
+<h1>DMX MCP server for shared workspace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX
+  MCP server for shared workspace</tt></a> records the current HyperDoc-side
+  Streamable HTTP MCP server boundary for the <tt>context-window</tt>
+  workspace. The accepted foundation is local and Codex-first: it exposes the
+  shared workspace and selected DMX topics or topicmaps as resources, keeps
+  the write surface narrow and validated, and stays honest about what is still
+  unproven for remote deployment.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a hyperbook="topics" page="Use a DMX Common workspace as a world read/write context window"><tt>Use a DMX Common workspace as a world read/write context window</tt></a></li>
+  <li><a hyperbook="topics" page="Codex read/write boundary for a DMX topicmap"><tt>Codex read/write boundary for a DMX topicmap</tt></a></li>
+</ul>
+
+<h2>Purpose</h2>
+
+<p>
+  The MCP server is the shared machine-facing seam between HyperDoc and DMX.
+  It lets Codex now, and ChatGPT later when attached to the same remote MCP
+  boundary, read the same curated workspace state and use the same narrow
+  note/handover tools instead of improvising directly against the raw DMX
+  HTTP surface.
+</p>
+
+<h2>Current resource surface</h2>
+
+<ul>
+  <li><tt>workspace/context-window</tt></li>
+  <li><tt>topic/&lt;id&gt;</tt></li>
+  <li><tt>topicmap/&lt;id&gt;</tt></li>
+</ul>
+
+<p>
+  These resources resolve through the same machine-readable DMX read paths that
+  HyperDoc already treats as canonical.
+</p>
+
+<h2>Current tool surface</h2>
+
+<ul>
+  <li><tt>validated_dmx_write_dry_run</tt></li>
+  <li><tt>append_workspace_note</tt></li>
+  <li><tt>update_workspace_note</tt></li>
+  <li><tt>create_handover</tt></li>
+</ul>
+
+<p>
+  The server deliberately does <b>not</b> expose a generic raw DMX JSON write
+  tool or arbitrary topicmap mutation surface.
+</p>
+
+<h2>Guardrails</h2>
+
+<ul>
+  <li>Topic reads use the canonical machine-readable read boundary.</li>
+  <li>Workspace note writes use the parent-note write boundary.</li>
+  <li>Topicmap-context-like payloads are normalized and validated before dry-run or live execution.</li>
+  <li>Dry-run stays the preferred planning mode before live mutation.</li>
+</ul>
+
+<h2>Deployment boundary</h2>
+
+<p>
+  The current implementation is accepted as a local, Codex-first foundation.
+  The next deployable shape for <tt>dreyeck.ch</tt> is a separate HyperDoc-side
+  service and reverse-proxy route that reuses the same Lisp code and keeps the
+  same guarded tool surface. The remote endpoint should not claim more than the
+  currently proven boundaries: the original malformed DMX writer remains
+  unproven, so the MCP server must continue to mediate writes through narrow
+  typed adapters only.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+</ul>

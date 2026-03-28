@@ -1,0 +1,68 @@
+<h1>Shared-workspace collaboration model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace
+  collaboration model</tt></a> states the operating model between me,
+  ChatGPT, and Codex. HyperDoc remains the durable reference and inspection
+  side, the <tt>context-window</tt> workspace becomes the curated shared
+  blackboard, and the MCP server is the typed machine-facing boundary that
+  keeps both reads and writes narrow enough to trust.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Codex read/write boundary for a DMX topicmap"><tt>Codex read/write boundary for a DMX topicmap</tt></a></li>
+</ul>
+
+<h2>Role split</h2>
+
+<ul>
+  <li><b>HyperDoc</b>: durable pages, inspectable topics, diagnostics, and design conclusions.</li>
+  <li><b>Context window workspace</b>: current shared state, curated mirrors, handovers, and short collaboration memory.</li>
+  <li><b>MCP server</b>: typed shared entry point that exposes the same resources and guarded tools to multiple agents.</li>
+</ul>
+
+<h2>Operating loop</h2>
+
+<ol>
+  <li>Capture stable conclusions in durable HyperDoc pages and topics.</li>
+  <li>Mirror the high-value current state into the shared workspace as curated notes or existing DMX workflow topics.</li>
+  <li>Let Codex, ChatGPT, and the operator read the same machine-facing workspace state through MCP or direct machine-readable DMX reads.</li>
+  <li>Push clarified conclusions back into HyperDoc instead of treating DMX as the sole authority.</li>
+</ol>
+
+<h2>Boundaries</h2>
+
+<ul>
+  <li>Do not use the workspace as a raw transcript archive.</li>
+  <li>Do not widen the write surface into generic unsafe DMX mutation.</li>
+  <li>Keep dry-run-first behavior where the backend contract is still uncertain.</li>
+  <li>Keep the original malformed writer classified as unknown until it is actually proven.</li>
+</ul>
+
+<h2>Why this model matters now</h2>
+
+<p>
+  The accepted DMX and HyperDoc work already proved that a sparse or implicit
+  workspace does not function as a real common blackboard. The collaboration
+  model becomes useful only when the key incident, contract, workflow, and
+  deployment context is durably documented in HyperDoc and explicitly mirrored
+  into the shared workspace.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+</ul>

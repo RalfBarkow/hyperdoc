@@ -1,0 +1,73 @@
+<h1>DMX note read/write boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note
+  read/write boundary</tt></a> records the smallest stable contract HyperDoc
+  can rely on for note mutation: read the note through the full parent-note
+  projection, but write by updating the parent <tt>dmx.notes.note</tt>
+  payload. The text child is replaced through the parent update; it is not a
+  stable in-place mutation target on its own.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+</ul>
+
+<h2>Expectation preserved</h2>
+
+<ul>
+  <li>Expectation: the visible <tt>dmx.notes.text</tt> child topic could be mutated directly in place.</li>
+  <li>Observed reality: the reliable public write boundary is the parent <tt>dmx.notes.note</tt>, not the child topic.</li>
+  <li>Why the expectation was plausible: direct machine-readable reads expose the child topic id and value.</li>
+  <li>Classification: disappointed expectation.</li>
+  <li>Resolution: update the parent note with the new child value and reread the parent to verify the persisted result.</li>
+</ul>
+
+<h2>Read boundary</h2>
+
+<ul>
+  <li>Read the full note through <tt>/core/topic/&lt;id&gt;?children=true&amp;assocChildren=true</tt>.</li>
+  <li>Treat <tt>children["dmx.notes.text"]</tt> as the readable note body projection.</li>
+  <li>Use direct child-topic reads for diagnosis only, not as proof of the write boundary.</li>
+</ul>
+
+<h2>Write boundary</h2>
+
+<ul>
+  <li>Write the parent <tt>dmx.notes.note</tt> payload.</li>
+  <li>Set the updated note body in <tt>children["dmx.notes.text"].value</tt>.</li>
+  <li>Expect the text child topic to be replaced or reassigned during that parent update.</li>
+</ul>
+
+<h2>Verification boundary</h2>
+
+<p>
+  After a live note write, reread the parent note through the machine-readable
+  path with cache-busting or no-cache semantics. Do not treat a stale plain
+  reread as authoritative proof that the write failed.
+</p>
+
+<h2>MCP implication</h2>
+
+<p>
+  The narrow MCP write tools <tt>append_workspace_note</tt>,
+  <tt>update_workspace_note</tt>, and <tt>create_handover</tt> keep this same
+  parent-note boundary. They should not be widened into arbitrary child-topic
+  mutation tools.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+</ul>

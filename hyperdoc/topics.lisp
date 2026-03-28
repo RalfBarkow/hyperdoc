@@ -2636,6 +2636,9 @@
                  "Authored topic factories"
                  "DMX FedWiki Write Model"
                  "HyperDoc DMX architectural implications"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "Shared-workspace collaboration model"
                  "Documentation Surfaces in HyperDoc")))
 
 (defun dmx-fedwiki-write-model-topic ()
@@ -2645,6 +2648,9 @@
    :summary "HyperDoc-side DMX write contract that treats DMX as a valuable but untrusted persistence boundary and routes topicmap-context writes through canonical long-form payload validation."
    :references '("DMX FedWiki Write Model"
                  "DMX topicmap 919822 repair runbook"
+                 "DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "DMX MCP server for shared workspace"
                  "HyperDoc DMX architectural implications"
                  "FedWiki Site to DMX Import"
                  "Localhost FedWiki page promotion workflow")))
@@ -2655,6 +2661,10 @@
    :title "DMX topicmap 919822 repair runbook"
    :summary "Durable incident and repair runbook for the short-key-only topicmap-context defect that broke DMX topicmap 919822, including diagnosis, live repair, wider audit, and rollback."
    :references '("DMX topicmap 919822 repair runbook"
+                 "DMX machine-readable read paths"
+                 "DMX note read/write boundary"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
                  "Localhost FedWiki page promotion workflow"
                  "DMX FedWiki Write Model"
                  "HyperDoc DMX architectural implications"
@@ -2668,8 +2678,77 @@
    :references '("HyperDoc DMX architectural implications"
                  "DMX topicmap 919822 repair runbook"
                  "DMX FedWiki Write Model"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "Shared-workspace collaboration model"
+                 "DMX note read/write boundary"
                  "Localhost FedWiki page promotion workflow"
                  "Failure as Inspectable Object")))
+
+(defun dmx-mcp-server-for-shared-workspace-topic ()
+  (make-topic
+   :id "dmx-mcp-server-for-shared-workspace"
+   :title "DMX MCP server for shared workspace"
+   :summary "Streamable HTTP MCP server in HyperDoc that exposes the context-window workspace and selected DMX topics/topicmaps as resources while keeping writes on a narrow validated note and handover boundary."
+   :references '("DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "Shared-workspace collaboration model"
+                 "DMX FedWiki Write Model"
+                 "HyperDoc DMX architectural implications"
+                 "Localhost FedWiki page promotion workflow")))
+
+(defun context-window-workspace-as-shared-blackboard-topic ()
+  (make-topic
+   :id "context-window-workspace-as-shared-blackboard"
+   :title "Context window workspace as shared blackboard"
+   :summary "Treat DMX topicmap 919822, context-window, as a small curated shared blackboard between me, ChatGPT, and Codex, populated through durable mirrors and guarded note or handover writes instead of a raw transcript archive."
+   :references '("Context window workspace as shared blackboard"
+                 "DMX MCP server for shared workspace"
+                 "Shared-workspace collaboration model"
+                 "DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "HyperDoc DMX architectural implications"
+                 "Localhost FedWiki page promotion workflow"
+                 "DMX topicmap 919822 repair runbook")))
+
+(defun dmx-note-read-write-boundary-topic ()
+  (make-topic
+   :id "dmx-note-read-write-boundary"
+   :title "DMX note read/write boundary"
+   :summary "Read DMX notes through the full parent-note topic projection, but write them only by updating the parent dmx.notes.note payload, which replaces the dmx.notes.text child rather than mutating that child in place."
+   :references '("DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "DMX FedWiki Write Model"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "Shared-workspace collaboration model")))
+
+(defun dmx-machine-readable-read-paths-topic ()
+  (make-topic
+   :id "dmx-machine-readable-read-paths"
+   :title "DMX machine-readable read paths"
+   :summary "Canonical machine-readable DMX reads use explicit core/topic and topicmaps endpoints with children included, while webclient hash routes remain browser navigation surfaces rather than tool-facing contracts."
+   :references '("DMX machine-readable read paths"
+                 "DMX topicmap 919822 repair runbook"
+                 "DMX note read/write boundary"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "Shared-workspace collaboration model")))
+
+(defun shared-workspace-collaboration-model-topic ()
+  (make-topic
+   :id "shared-workspace-collaboration-model"
+   :title "Shared-workspace collaboration model"
+   :summary "The collaboration model keeps HyperDoc as the durable design and inspection side, uses the context-window workspace as a curated common blackboard, and lets me, ChatGPT, and Codex converge through the same MCP-facing DMX surfaces."
+   :references '("Shared-workspace collaboration model"
+                 "Context window workspace as shared blackboard"
+                 "DMX MCP server for shared workspace"
+                 "DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "HyperDoc DMX architectural implications"
+                 "Localhost FedWiki page promotion workflow")))
 
 (defun image-oriented-development-topic ()
   (make-topic

@@ -14,6 +14,9 @@
 
 <ul>
   <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
   <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
   <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
   <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
@@ -79,6 +82,14 @@
   <li><tt>localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary</tt> and related handover surfaces: promotion-plan wrappers that keep the normalized payload inspectable.</li>
 </ol>
 
+<h2>Adjacent read and note boundaries</h2>
+
+<ul>
+  <li>Machine-facing reads should use the canonical topic and topicmap JSON paths documented in <a page="DMX machine-readable read paths">DMX machine-readable read paths</a>.</li>
+  <li>Note updates should respect the parent-note boundary documented in <a page="DMX note read/write boundary">DMX note read/write boundary</a>.</li>
+  <li>The MCP server reuses these same boundaries instead of exposing a generic raw DMX write surface.</li>
+</ul>
+
 <h2>Diagnostics and fail-soft behavior</h2>
 
 <p>
@@ -112,6 +123,9 @@
 
 <ul>
   <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
   <li><a page="FedWiki Site to DMX Import">FedWiki Site to DMX Import</a></li>
