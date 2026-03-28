@@ -8,9 +8,17 @@ in
     enable = mkEnableOption "HyperDoc DMX MCP service";
 
     package = mkOption {
-      type = types.package;
+      type = types.nullOr types.package;
+      default = null;
       description = "HyperDoc package exposing bin/hyperdoc-mcp-release-start.";
       example = lib.literalExpression "self.packages.${pkgs.system}.hyperdoc-release";
+    };
+
+    packagePath = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Pinned executable root as a plain string path exposing bin/hyperdoc-mcp-release-start.";
+      example = "/nix/store/0123456789abcdefghijklmnopqrstuv-hyperdoc-release";
     };
 
     serviceName = mkOption {
@@ -93,7 +101,19 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (let
+    execRoot =
+      if cfg.package != null
+      then "${cfg.package}"
+      else cfg.packagePath;
+  in {
+    assertions = [
+      {
+        assertion = cfg.package != null || cfg.packagePath != null;
+        message = "services.hyperdocMcp requires either package or packagePath to expose bin/hyperdoc-mcp-release-start.";
+      }
+    ];
+
     users.groups = optionalAttrs (cfg.group == "hyperdoc-mcp") {
       hyperdoc-mcp = { };
     };
@@ -121,7 +141,7 @@ in
         User = cfg.user;
         Group = cfg.group;
         WorkingDirectory = cfg.dataDir;
-        ExecStart = "${cfg.package}/bin/hyperdoc-mcp-release-start";
+        ExecStart = "${execRoot}/bin/hyperdoc-mcp-release-start";
         Restart = "on-failure";
         RestartSec = "3s";
         NoNewPrivileges = true;
@@ -158,5 +178,5 @@ in
         };
       };
     };
-  };
+  });
 }

@@ -13,7 +13,7 @@ Default target directory:
 Behavior:
 - copies nix/modules/hyperdoc-mcp-release.nix into the target directory
 - renders dreyeck-hyperdoc-mcp-sidecar.nix in the target directory
-- pins services.hyperdocMcp.package to a concrete /nix/store path
+- pins services.hyperdocMcp.packagePath to a concrete /nix/store path string
 
 Options:
   --target-dir DIR    install into DIR instead of /etc/nixos/hyperdoc
@@ -68,7 +68,7 @@ cat >"$sidecar_target" <<EOF
   # This is the hardened steady-state path for dreyeck:
   # - host-owned import path inside /etc/nixos
   # - repo module copied into the host config tree
-  # - MCP package pinned to a concrete /nix/store path
+  # - MCP executable root pinned as a quoted /nix/store path
   #
   # Refresh after a new HyperDoc release by rerunning the installer.
   imports = [
@@ -77,7 +77,7 @@ cat >"$sidecar_target" <<EOF
 
   services.hyperdocMcp = {
     enable = true;
-    package = $package_path;
+    packagePath = "$package_path";
     bindAddress = "127.0.0.1";
     port = 8787;
     dataDir = "/var/lib/hyperdoc/mcp";
