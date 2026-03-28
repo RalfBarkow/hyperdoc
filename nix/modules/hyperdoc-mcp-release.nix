@@ -21,13 +21,13 @@ in
 
     user = mkOption {
       type = types.str;
-      default = "hyperdoc";
+      default = "hyperdoc-mcp";
       description = "Runtime user for the HyperDoc MCP service.";
     };
 
     group = mkOption {
       type = types.str;
-      default = "hyperdoc";
+      default = "hyperdoc-mcp";
       description = "Runtime group for the HyperDoc MCP service.";
     };
 
@@ -94,12 +94,12 @@ in
   };
 
   config = mkIf cfg.enable {
-    users.groups = optionalAttrs (cfg.group == "hyperdoc") {
-      hyperdoc = { };
+    users.groups = optionalAttrs (cfg.group == "hyperdoc-mcp") {
+      hyperdoc-mcp = { };
     };
 
-    users.users = optionalAttrs (cfg.user == "hyperdoc") {
-      hyperdoc = {
+    users.users = optionalAttrs (cfg.user == "hyperdoc-mcp") {
+      hyperdoc-mcp = {
         isSystemUser = true;
         group = cfg.group;
         home = cfg.dataDir;

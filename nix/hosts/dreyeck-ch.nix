@@ -41,4 +41,7 @@
     reverseProxyHost = "mcp.dreyeck.ch";
     reverseProxyPath = "/mcp";
   };
+
+  security.acme.acceptTerms = true;
+  security.acme.certs."mcp.dreyeck.ch".email = "ralf.barkow@me.com";
 }
