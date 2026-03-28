@@ -5,6 +5,7 @@
 (defparameter *dmx-mcp-smoke-workspace-topicmap-id* 919822)
 (defparameter *dmx-mcp-smoke-primary-topic-id* 907120)
 (defparameter *dmx-mcp-smoke-secondary-topic-id* 921494)
+(defparameter *dmx-mcp-live-secondary-topic-id* 921464)
 
 (defun mcp-assert-true (condition message)
   (unless condition
@@ -72,6 +73,22 @@
      :bearer-token nil
      :allowed-origins nil
      :live-writes-enabled-p t
+     :sessions (make-hash-table :test #'equal)
+     :log-stream nil)))
+
+(defun make-dmx-mcp-live-server ()
+  (let ((client (or (hyperdoc::make-http-dmx-import-client-from-environment
+                     :verbose nil)
+                    (error "Live DMX MCP smoke test requires HYPERDOC_DMX_IMPORT_BASE_URL"))))
+    (hyperdoc::make-dmx-mcp-server
+     :read-client client
+     :write-client client
+     :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
+     :known-topic-ids (list *dmx-mcp-smoke-primary-topic-id*
+                            *dmx-mcp-live-secondary-topic-id*)
+     :bearer-token nil
+     :allowed-origins nil
+     :live-writes-enabled-p nil
      :sessions (make-hash-table :test #'equal)
      :log-stream nil)))
 
@@ -357,3 +374,207 @@
   (run-dmx-mcp-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
+
+(defun run-dmx-mcp-live-read-smoke-test ()
+  (let* ((port (mcp-test-port))
+         (url (format nil "http://127.0.0.1:~D/mcp" port))
+         (server (make-dmx-mcp-live-server))
+         (workspace-note-count nil)
+         (primary-title nil)
+         (secondary-title nil)
+         (dry-run-status nil)
+         (invalid-status-label nil)
+         (invalid-forbidden-keys nil))
+    (unwind-protect
+         (progn
+           (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+           (sleep 0.2)
+           (multiple-value-bind (initialize-body initialize-status initialize-headers)
+               (mcp-test-call
+                url
+                (mcp-test-json-object
+                 "jsonrpc" "2.0"
+                 "id" 101
+                 "method" "initialize"
+                 "params"
+                 (mcp-test-json-object
+                  "protocolVersion" "2025-03-26"
+                  "clientInfo" (mcp-test-json-object
+                                "name" "hyperdoc-live-smoke"
+                                "version" "1.0"))))
+             (mcp-assert-equal 200 initialize-status "live initialize status")
+             (let ((session-id (mcp-test-response-header initialize-headers "Mcp-Session-Id")))
+               (mcp-assert-true session-id "live initialize must return Mcp-Session-Id")
+               (mcp-assert-equal "hyperdoc-dmx-mcp"
+                                 (gethash "name"
+                                          (gethash "serverInfo"
+                                                   (gethash "result" initialize-body)))
+                                 "live initialize serverInfo.name")
+               (multiple-value-bind (_ notify-status __)
+                   (mcp-test-notify-initialized url session-id)
+                 (declare (ignore _ __))
+                 (mcp-assert-equal 202 notify-status "live initialized notification status"))
+               (multiple-value-bind (resources-body resources-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 102
+                                   "method" "resources/list")
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 resources-status "live resources/list status")
+                 (let* ((resources (hyperdoc::json-array-elements
+                                    (gethash "resources"
+                                             (gethash "result" resources-body))))
+                        (resource-uris (mapcar (lambda (resource)
+                                                 (gethash "uri" resource))
+                                               resources)))
+                   (dolist (resource-uri (list "dmx://workspace/context-window"
+                                               "dmx://topic/907120"
+                                               "dmx://topic/921464"))
+                     (mcp-assert-true
+                      (member resource-uri resource-uris :test #'string=)
+                      (format nil "live resources/list must include ~A" resource-uri)))))
+               (multiple-value-bind (workspace-body workspace-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 103
+                                   "method" "resources/read"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "uri" "dmx://workspace/context-window"))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 workspace-status "live workspace read status")
+                 (let* ((contents (hyperdoc::json-array-elements
+                                   (gethash "contents"
+                                            (gethash "result" workspace-body))))
+                        (workspace-json (shasht:read-json
+                                         (gethash "text" (first contents)))))
+                   (mcp-assert-equal *dmx-mcp-smoke-workspace-topicmap-id*
+                                     (gethash "topicmapId"
+                                              (gethash "workspace" workspace-json))
+                                     "live workspace summary topicmap id")
+                   (mcp-assert-true
+                    (integerp (gethash "noteCount" workspace-json))
+                    "live workspace summary must expose noteCount")
+                   (mcp-assert-true
+                    (find *dmx-mcp-smoke-primary-topic-id*
+                          (mapcar (lambda (summary) (gethash "id" summary))
+                                  (hyperdoc::json-array-elements
+                                   (gethash "notes" workspace-json))))
+                    "live workspace summary must include topic 907120")
+                   (setf workspace-note-count
+                         (gethash "noteCount" workspace-json))))
+               (dolist (resource-uri '("dmx://topic/907120" "dmx://topic/921464"))
+                 (multiple-value-bind (topic-body topic-status _)
+                     (mcp-test-call url
+                                    (mcp-test-json-object
+                                     "jsonrpc" "2.0"
+                                     "id" 104
+                                     "method" "resources/read"
+                                     "params" (mcp-test-json-object
+                                               "uri" resource-uri))
+                                    :session-id session-id)
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 topic-status
+                                     (format nil "live resource read status for ~A" resource-uri))
+                   (let* ((contents (hyperdoc::json-array-elements
+                                     (gethash "contents"
+                                              (gethash "result" topic-body))))
+                          (topic-json (shasht:read-json
+                                       (gethash "text" (first contents)))))
+                     (mcp-assert-true
+                      (hyperdoc::dmx-non-empty-string-p (gethash "title" topic-json))
+                      (format nil "live topic resource must expose title for ~A" resource-uri))
+                     (cond
+                       ((string= resource-uri "dmx://topic/907120")
+                        (setf primary-title (gethash "title" topic-json)))
+                       ((string= resource-uri "dmx://topic/921464")
+                        (setf secondary-title (gethash "title" topic-json))))))
+               (multiple-value-bind (dry-run-body dry-run-http-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 105
+                                   "method" "tools/call"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "name" "validated_dmx_write_dry_run"
+                                    "arguments"
+                                    (mcp-test-json-object
+                                     "writeKind" "topicmap_context_add"
+                                     "topicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                                     "topicId" *dmx-mcp-smoke-primary-topic-id*
+                                     "viewProps"
+                                     (mcp-test-view-props :x 333 :y 444))))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 dry-run-http-status "live validated_dmx_write_dry_run status")
+                 (let* ((tool-result (gethash "result" dry-run-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "live canonical dry-run must not be flagged as error")
+                   (mcp-assert-equal 333
+                                     (gethash "dmx.topicmaps.x"
+                                              (gethash "normalizedPayload" structured))
+                                     "live dry-run normalized x")
+                   (mcp-assert-equal "canonical"
+                                     (gethash "validationStatus" structured)
+                                     "live dry-run validation status")
+                   (setf dry-run-status
+                         (gethash "validationStatus" structured))))
+               (multiple-value-bind (invalid-body invalid-http-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 106
+                                   "method" "tools/call"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "name" "validated_dmx_write_dry_run"
+                                    "arguments"
+                                    (mcp-test-json-object
+                                     "writeKind" "topicmap_context_add"
+                                     "topicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                                     "topicId" *dmx-mcp-smoke-primary-topic-id*
+                                     "viewProps"
+                                     (mcp-test-json-object
+                                      "x" 1
+                                      "y" 2
+                                      "visibility" t
+                                      "pinned" nil))))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 invalid-http-status "live invalid dry-run status")
+                 (let* ((tool-result (gethash "result" invalid-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true (gethash "isError" tool-result)
+                                    "live short-key dry-run must be flagged as error")
+                   (mcp-assert-equal "validation_error"
+                                     (gethash "status" structured)
+                                     "live short-key rejection status")
+                   (mcp-assert-true
+                    (member "x"
+                            (hyperdoc::json-array-elements
+                             (gethash "forbiddenShortKeys" structured))
+                            :test #'string=)
+                    "live short-key rejection must name x")
+                   (setf invalid-status-label
+                         (gethash "status" structured)
+                         invalid-forbidden-keys
+                         (hyperdoc::json-array-elements
+                          (gethash "forbiddenShortKeys" structured)))))))
+      (hyperdoc::stop-dmx-mcp-server)))
+  (format t
+          "~&DMX MCP live read smoke passed. workspace-topicmap=~D note-count=~D topic907120=~S topic921464=~S dry-run-status=~A invalid-status=~A forbidden-short-keys=~S~%"
+          *dmx-mcp-smoke-workspace-topicmap-id*
+          workspace-note-count
+          primary-title
+          secondary-title
+          dry-run-status
+          invalid-status-label
+          invalid-forbidden-keys)
+  t)))
