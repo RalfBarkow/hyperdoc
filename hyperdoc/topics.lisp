@@ -881,7 +881,7 @@
   (make-topic
    :id "dreyeck-mcp-additive-host-integration"
    :title "dreyeck MCP additive host integration"
-   :summary "Keep the MCP package and reusable NixOS module in the HyperDoc repo, but import an additive sidecar module into authoritative /etc/nixos so hyperdoc-mcp runs beside the existing workspace-based hyperdoc.service without replacing the host definition."
+   :summary "Keep the MCP package and reusable NixOS module in the HyperDoc repo, but install a host-owned module copy and store-pinned additive sidecar under /etc/nixos so hyperdoc-mcp runs beside the existing workspace-based hyperdoc.service without evaluating a mutable checkout at activation time."
    :references '("Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
                  "DMX MCP server for shared workspace"
                  "Roll back HyperDoc on dreyeck.ch")))

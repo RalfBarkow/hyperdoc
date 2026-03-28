@@ -47,7 +47,8 @@
 <ul>
   <li>Owns the MCP Lisp runtime and guarded tool contract.</li>
   <li>Owns the reusable NixOS module <tt>nix/modules/hyperdoc-mcp-release.nix</tt>.</li>
-  <li>Owns the additive sidecar file <tt>nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix</tt>.</li>
+  <li>Owns the recovery-bridge sidecar file <tt>nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix</tt>.</li>
+  <li>Owns the installer <tt>tools/install-dreyeck-hyperdoc-mcp-sidecar.sh</tt> that materializes a host-owned steady-state copy inside <tt>/etc/nixos</tt>.</li>
   <li>Must not become the authoritative definition of the whole <tt>dreyeck.ch</tt> host.</li>
 </ul>
 
@@ -56,16 +57,17 @@
 <ul>
   <li>Owns the active host definition, imported modules, users, sshd, firewall, and other production-local settings.</li>
   <li>Activates the additive MCP sidecar beside the existing <tt>hyperdoc.service</tt>.</li>
+  <li>Owns the final steady-state import path <tt>./hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix</tt>.</li>
   <li>Owns the final nginx and ACME activation path because those are host-wide concerns.</li>
 </ul>
 
-<h2>Smallest additive config slice</h2>
+<h2>Temporary bridge</h2>
 
 <p>
-  The repo-side sidecar file is
+  The repo-side bridge file is
   <tt>/home/rgb/workspace/hyperdoc/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix</tt>.
-  Import that file from <tt>/etc/nixos/configuration.nix</tt> or from the
-  host's existing import tree.
+  It is acceptable only as a temporary recovery bridge when the host-owned copy
+  is missing and MCP must be restored quickly.
 </p>
 
 <pre>
@@ -76,29 +78,50 @@ imports = [
 </pre>
 
 <p>
-  The sidecar only adds <tt>hyperdoc-mcp</tt>, binds it to
-  <tt>127.0.0.1:8787</tt>, proxies <tt>https://mcp.dreyeck.ch/mcp</tt> through
-  nginx, and keeps <tt>HYPERDOC_MCP_ENABLE_LIVE_WRITES=0</tt> by default. It
-  does not edit the existing <tt>hyperdoc.service</tt> deployment.
+  This bridge still evaluates a mutable checkout at activation time, so it is
+  not the hardened steady-state recommendation.
+</p>
+
+<h2>Hardened steady-state path</h2>
+
+<p>
+  The steady-state path installs host-owned copies under
+  <tt>/etc/nixos/hyperdoc</tt>:
+</p>
+
+<ul>
+  <li><tt>/etc/nixos/hyperdoc/hyperdoc-mcp-release.nix</tt> - host-owned copy of the reusable module.</li>
+  <li><tt>/etc/nixos/hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix</tt> - host-owned sidecar with <tt>services.hyperdocMcp.package</tt> pinned to a concrete <tt>/nix/store</tt> path.</li>
+</ul>
+
+<p>
+  That keeps <tt>/etc/nixos</tt> authoritative while removing mutable checkout
+  imports from the final production activation path.
 </p>
 
 <h2>Operator steps</h2>
 
 <ol>
-  <li>Confirm the repo-side sidecar is present on dreyeck:
+  <li>Install the hardened host-owned copy from the repo checkout:
 <pre>
-ls /home/rgb/workspace/hyperdoc/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix
-nix flake metadata /home/rgb/workspace/hyperdoc
+sudo mkdir -p /etc/nixos/hyperdoc
+sudo /home/rgb/workspace/hyperdoc/tools/install-dreyeck-hyperdoc-mcp-sidecar.sh --target-dir /etc/nixos/hyperdoc
 </pre>
   </li>
-  <li>Add the import to the authoritative host config:
+  <li>Import the host-owned sidecar from the authoritative host config:
 <pre>
 sudoedit /etc/nixos/configuration.nix
 </pre>
   </li>
-  <li>If dreyeck already uses a host-owned flake in <tt>/etc/nixos</tt>, keep
-  using that host-owned activation path. Do not replace it with
-  <tt>/home/rgb/workspace/hyperdoc#dreyeck-ch</tt>.</li>
+  <li>Add or keep the durable import path:
+<pre>
+imports = [
+  ./hardware-configuration.nix
+  ./hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix
+];
+</pre>
+  </li>
+  <li>If dreyeck already uses a host-owned flake in <tt>/etc/nixos</tt>, keep using that host-owned activation path. Do not replace it with <tt>/home/rgb/workspace/hyperdoc#dreyeck-ch</tt>.</li>
   <li>Test the additive activation without making it persistent:
 <pre>
 sudo nixos-rebuild test
@@ -119,6 +142,7 @@ DMX_MCP_URL=https://mcp.dreyeck.ch/mcp DMX_MCP_TOPIC_URI=dmx://topic/907120 pyth
 sudo nixos-rebuild switch
 </pre>
   </li>
+  <li>Refresh the pinned package after a newer HyperDoc MCP build by rerunning the installer, then repeating <tt>test</tt> before <tt>switch</tt>.</li>
 </ol>
 
 <h2>Good outputs</h2>
@@ -158,6 +182,7 @@ sudo nixos-rebuild switch
   <li>If the host-owned activation proposes unrelated core host changes, stop; this MCP slice is meant to be additive.</li>
   <li>If <tt>http://127.0.0.1:8787/mcp</tt> fails, inspect <tt>hyperdoc-mcp.service</tt>, not nginx.</li>
   <li>If local MCP and public HTTPS both work but <tt>HTTP-01</tt> still times out, inspect public <tt>port 80</tt> reachability and DNS, not the MCP app.</li>
+  <li>If the host-owned copy is missing or broken and recovery cannot wait, temporarily import the repo bridge path, restore service, then reinstall the host-owned steady-state copy before the next persistent activation.</li>
 </ul>
 
 <h2>Rollback</h2>
