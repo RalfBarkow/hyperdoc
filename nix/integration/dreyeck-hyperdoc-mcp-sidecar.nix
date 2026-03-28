@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 let
   hyperdocRepo = /home/rgb/workspace/hyperdoc;
   hyperdocFlake = builtins.getFlake (toString hyperdocRepo);
@@ -31,8 +31,6 @@ in
     ];
     reverseProxyHost = "mcp.dreyeck.ch";
     reverseProxyPath = "/mcp";
+    useACMEHost = "dreyeck.ch";
   };
-
-  security.acme.certs."mcp.dreyeck.ch".email =
-    lib.mkDefault "ralf.barkow@me.com";
 }

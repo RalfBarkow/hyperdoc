@@ -99,6 +99,13 @@ in
       default = "/mcp";
       description = "HTTP path exposed by the reverse proxy for the MCP endpoint.";
     };
+
+    useACMEHost = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Optional existing ACME host whose certificate should be reused for the reverse-proxy vhost.";
+      example = "dreyeck.ch";
+    };
   };
 
   config = mkIf cfg.enable (let
@@ -164,7 +171,6 @@ in
       enable = true;
       recommendedProxySettings = true;
       virtualHosts.${cfg.reverseProxyHost} = {
-        enableACME = true;
         forceSSL = true;
         locations.${cfg.reverseProxyPath} = {
           proxyPass = "http://${cfg.bindAddress}:${toString cfg.port}/mcp";
@@ -176,6 +182,10 @@ in
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           '';
         };
+      } // optionalAttrs (cfg.useACMEHost != null) {
+        useACMEHost = cfg.useACMEHost;
+      } // optionalAttrs (cfg.useACMEHost == null) {
+        enableACME = true;
       };
     };
   });
