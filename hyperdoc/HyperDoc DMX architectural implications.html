@@ -1,0 +1,82 @@
+<h1>HyperDoc DMX architectural implications</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc
+  DMX architectural implications</tt></a> captures the durable design
+  consequences of the topicmap <tt>919822</tt> incident. The incident did not
+  justify abandoning DMX, but it did justify a tighter HyperDoc-side contract:
+  DMX is useful, yet generic DMX persistence boundaries cannot be assumed safe
+  by default.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
+  <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="topics" page="Localhost FedWiki page promotion workflow"><tt>Localhost FedWiki page promotion workflow</tt></a></li>
+  <li><a hyperbook="topics" page="Failure as Inspectable Object"><tt>Failure as Inspectable Object</tt></a></li>
+</ul>
+
+<h2>Strategic conclusions</h2>
+
+<ul>
+  <li>HyperDoc should never rely on generic DMX writes being safe by default.</li>
+  <li>HyperDoc should send DMX writes only through narrow typed normalized adapters.</li>
+  <li>Plan-first and dry-run-first behavior should remain the default operational discipline.</li>
+  <li>HyperDoc should validate payloads before every DMX write.</li>
+  <li>HyperDoc should treat DMX as synchronizable/projected persistence, not as sole authority for authored HyperDoc artifacts.</li>
+  <li>HyperDoc should keep bounded issue objects and fail-soft degradation when a source or write boundary fails.</li>
+  <li>HyperDoc should maintain a small DMX hygiene toolkit rather than a broad migration framework.</li>
+</ul>
+
+<h2>Expectation handling</h2>
+
+<p>
+  The incident created two different expectation classes and both matter
+  architecturally.
+</p>
+
+<ul>
+  <li>Disappointed expectation: the first local HyperDoc disconnect looked like the DMX database defect, but part of the observed crash came from an unrelated eager promotion-plan instantiation boundary. HyperDoc had to repair that fail-soft seam so the real DMX defect could be isolated.</li>
+  <li>False expectation: once the copied-store and live-store diagnosis were complete, it was no longer defensible to assume that generic DMX <tt>ViewProps</tt> writes were safe simply because current checked stock client code uses long-form keys.</li>
+</ul>
+
+<h2>Current architectural rule set</h2>
+
+<ol>
+  <li>Keep authored HyperDoc pages and topic-factory snippets durable and local.</li>
+  <li>Use inspectable plan objects as the operational surface.</li>
+  <li>Show the normalized DMX payload before any live write.</li>
+  <li>Reject malformed topicmap-context payloads at the HyperDoc boundary.</li>
+  <li>Preserve source ids, source paths, and provenance when degradation is necessary.</li>
+  <li>Keep live DMX writes explicit, bounded, and easy to audit or roll back.</li>
+</ol>
+
+<h2>Remaining unknowns</h2>
+
+<ul>
+  <li>The original writer that created the malformed short-key-only assocs is still unproven.</li>
+  <li>The strongest current evidence points to a stale, external, or custom sender using the generic DMX <tt>ViewProps</tt> write seam.</li>
+  <li>That uncertainty is precisely why HyperDoc now narrows its own contract instead of assuming the surrounding ecosystem is clean.</li>
+</ul>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="hyperdoc-dmx-architectural-implications">HyperDoc DMX architectural implications</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+  <li><a page="Failure as Inspectable Object">Failure as Inspectable Object</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+</ul>

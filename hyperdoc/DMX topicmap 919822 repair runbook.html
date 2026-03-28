@@ -4,11 +4,13 @@
 
 <p>
   <a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX
-  topicmap 919822 repair runbook</tt></a> is the durable HyperDoc checkpoint
-  for the backend defect in DMX topicmap <tt>919822</tt> (<tt>context-window</tt>).
-  It now records the exact malformed-store defect, the validated bounded repair,
-  the live execution record, and the verification and rollback steps for the
-  broken topicmap-context memberships.
+  topicmap 919822 repair runbook</tt></a> preserves the full incident arc for
+  the live DMX failure
+  <tt>Fetching topicmap 919822 failed</tt> with
+  <tt>org.neo4j.graphdb.NotFoundException: 'dmx.topicmaps.x' property not found
+  for NodeImpl#921471</tt>. It records what was actually proven, what was
+  repaired, what remains unknown, and why HyperDoc now narrows its own DMX
+  write boundary.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -25,55 +27,65 @@
   <li><a expr="(dmx-topicmap-919822-repair-runbook)" view="Operations"><tt>dmx-topicmap-919822-repair-runbook</tt> Operations</a></li>
 </ul>
 
-<h2>Problem capsule</h2>
+<h2>Incident summary</h2>
 
 <p>
-  The broken objects are not the note topics themselves. The readable notes
-  still exist. The defect sits in the topicmap-scoped
-  <tt>dmx.topicmaps.topicmap_context</tt> memberships and their missing view
-  properties.
+  The live defect was not in the note topics themselves. The broken objects
+  were two topicmap-scoped <tt>dmx.topicmaps.topicmap_context</tt> assocs:
+  <tt>921404</tt> and <tt>921471</tt>. Both had only the short keys
+  <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, and <tt>pinned</tt> while the
+  checked DMX fetch path expected the long-form keys
+  <tt>dmx.topicmaps.x</tt>, <tt>dmx.topicmaps.y</tt>,
+  <tt>dmx.topicmaps.visibility</tt>, and
+  <tt>dmx.topicmaps.pinned</tt>.
 </p>
+
+<h2>Forum and historical context</h2>
 
 <ul>
-  <li><tt>921404</tt> is the broken membership assoc for topic <tt>921352</tt>.</li>
-  <li><tt>921471</tt> is the broken membership assoc for topic <tt>921464</tt>.</li>
-  <li>Both broken assocs had only short keys <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, <tt>pinned</tt>.</li>
-  <li>The current DMX fetch path requires <tt>dmx.topicmaps.x</tt>, <tt>dmx.topicmaps.y</tt>, <tt>dmx.topicmaps.visibility</tt>, and <tt>dmx.topicmaps.pinned</tt>.</li>
-  <li>Healthy comparison specimen: topic <tt>921494</tt> resolves through assoc <tt>921503</tt>.</li>
+  <li>The same bug class had been discussed before in DMX admin/operator context.</li>
+  <li>Historically, the response was an admin-side database repair rather than a UI-only workaround.</li>
+  <li>That public context did not prove the original writer path; it framed the incident as a store-shape defect, not a normal topicmap usage error.</li>
 </ul>
 
-<h2>Accepted evidence boundary</h2>
+<h2>Conversation arc preserved as durable chronology</h2>
+
+<ol>
+  <li>Initial HyperDoc repro work found a separate local disconnect path: opening the repair runbook in HyperDoc eagerly instantiated an unrelated localhost promotion plan and crashed on a missing FedWiki source page file.</li>
+  <li>That expectation was a disappointed one rather than a false one. The DMX failure was real, but the first local boundary was polluted by an unrelated HyperDoc fail-soft defect.</li>
+  <li>HyperDoc was repaired first to stop the unrelated disconnect and keep inspectable issue objects for missing localhost source pages.</li>
+  <li>A copied remote DB snapshot was then inspected read-only on the MacBook.</li>
+  <li>The copied-store diagnosis proved the exact property-shape mismatch on <tt>921404</tt> and <tt>921471</tt>.</li>
+  <li>The same bounded defect was confirmed on the live store, repaired after backup, and verified with a wider audit.</li>
+  <li>A read-side guard was added in <tt>dmx-topicmaps</tt> so malformed topicmap-context assocs fail with explicit diagnostics instead of raw property lookup crashes.</li>
+  <li>Writer-boundary archaeology then proved a current permissive server write seam: generic DMX <tt>ViewProps</tt> endpoints can persist raw short-key payloads unchanged if a sender posts them.</li>
+  <li>The original sender still remains unproven, so HyperDoc now treats DMX as a valuable but untrusted persistence boundary and validates its own writes explicitly.</li>
+</ol>
+
+<h2>Exact defect shape</h2>
 
 <ul>
-  <li><tt>topicmaps/object/921352</tt> fails on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921404</tt>.</li>
-  <li><tt>topicmaps/object/921464</tt> fails on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921471</tt>.</li>
-  <li><tt>topicmaps/919822</tt> fails on missing <tt>dmx.topicmaps.x</tt> for assoc <tt>921471</tt>.</li>
-  <li>Offline inspection of the copied store and the stopped live store both proved the same short-key-only shape with <tt>x=160</tt>, <tt>y=120</tt>, <tt>visibility=true</tt>, <tt>pinned=false</tt>.</li>
+  <li>Broken assocs: <tt>921404</tt> and <tt>921471</tt></li>
+  <li>Assoc type: <tt>dmx.topicmaps.topicmap_context</tt></li>
+  <li>Present short keys: <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, <tt>pinned</tt></li>
+  <li>Missing long-form keys: <tt>dmx.topicmaps.x</tt>, <tt>dmx.topicmaps.y</tt>, <tt>dmx.topicmaps.visibility</tt>, <tt>dmx.topicmaps.pinned</tt></li>
+  <li>Healthy comparison specimen: topic <tt>921494</tt> via assoc <tt>921503</tt></li>
 </ul>
 
-<h2>Containment</h2>
+<h2>Read-side evidence boundary</h2>
 
-<p>
-  The bounded repair set is now confirmed and executed. No broader write is
-  justified unless a future audit finds the same safe short-key-only shape on
-  additional <tt>dmx.topicmaps.topicmap_context</tt> assocs.
-</p>
-
-<h2>Why HyperDoc code changes are not justified now</h2>
-
-<p>
-  The public API proves which assocs are broken. The public API does not expose the exact write payload for <tt>/topicmaps/919822/assoc/&lt;assoc-id&gt;</tt>.
-  The original writer still remains unproven and is best classified as a
-  stale, external, or custom mutation path unless stronger evidence appears.
-  That is still a DMX backend/admin contract problem, not a HyperDoc modeling
-  problem.
-</p>
+<ul>
+  <li><tt>topicmaps/object/921352</tt> failed on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921404</tt>.</li>
+  <li><tt>topicmaps/object/921464</tt> failed on missing <tt>dmx.topicmaps.visibility</tt> for assoc <tt>921471</tt>.</li>
+  <li><tt>topicmaps/919822</tt> failed on missing <tt>dmx.topicmaps.x</tt> for assoc <tt>921471</tt>.</li>
+  <li>Copied-store and stopped live-store inspection both showed the same short-key-only values: <tt>x=160</tt>, <tt>y=120</tt>, <tt>visibility=true</tt>, <tt>pinned=false</tt>.</li>
+</ul>
 
 <h2>Validated minimal repair</h2>
 
 <p>
-  The validated minimal repair is to copy the existing short-key values into
-  the long-form <tt>dmx.topicmaps.*</tt> keys and keep the short keys in place.
+  The bounded repair was to copy the existing short-key values into the
+  long-form keys and keep the short keys in place.
 </p>
 
 <pre>
@@ -114,11 +126,42 @@ RETURN ID(ctx) AS ctxId, ID(tm) AS topicmapId, ID(content) AS contentId,
 ORDER BY ctxId;
 </pre>
 
+<h2>Live execution record</h2>
+
+<ul>
+  <li>Host: <tt>dmx.ralfbarkow.ch</tt></li>
+  <li>Service: <tt>dmx.service</tt></li>
+  <li>DB path: <tt>/var/lib/dmx/dmx-db</tt></li>
+  <li>Pre-repair backup: <tt>/var/lib/dmx/backups/dmx-db.pre-repair-20260327-225216</tt></li>
+  <li>Preflight proved the live store matched the copied-store defect exactly.</li>
+  <li>The wider audit returned zero additional malformed topicmap-context nodes after repair.</li>
+  <li>Post-repair live API proof: <tt>https://dmx.ralfbarkow.ch/topicmaps/919822?children=true</tt> with <tt>Accept: application/json</tt> returned <tt>200 OK</tt>.</li>
+  <li>Post-repair live object proof: <tt>topicmaps/object/921352</tt> and <tt>topicmaps/object/921464</tt> returned <tt>200 OK</tt>.</li>
+</ul>
+
+<h2>Why HyperDoc now narrows its own write boundary</h2>
+
+<p>
+  The earlier dry-run framing was no longer sufficient once writer-boundary
+  archaeology proved that generic DMX <tt>ViewProps</tt> endpoints can persist
+  malformed short-key-only payloads unchanged. HyperDoc still does not claim to
+  know the historical writer, but it now has enough evidence to prevent itself
+  from recreating the same defect class.
+</p>
+
+<ul>
+  <li>Proven: stock checked read paths expect long-form keys.</li>
+  <li>Proven: current checked stock client paths use long-form keys.</li>
+  <li>Proven: generic DMX <tt>ViewProps</tt> endpoints can persist malformed short-key-only payloads unchanged if a sender submits them.</li>
+  <li>Proven: generic write endpoints can preserve malformed short-key payloads if a sender submits them.</li>
+  <li>Unproven: the exact original sender remains unknown and is still best classified as stale, external, or custom mutation.</li>
+</ul>
+
 <h2>Rollback</h2>
 
 <p>
   Preferred rollback is restoring the pre-repair filesystem backup. Logical
-  rollback is bounded to the four copied long-form keys:
+  rollback remains bounded to the four copied long-form keys:
 </p>
 
 <pre>
@@ -130,34 +173,18 @@ REMOVE ctx.`dmx.topicmaps.pinned`
 RETURN ID(ctx) AS rolledBackCtxId;
 </pre>
 
-<h2>Live execution record</h2>
+<h2>FedWiki twin</h2>
 
-<ul>
-  <li>Host: <tt>dmx.ralfbarkow.ch</tt></li>
-  <li>Service: <tt>dmx.service</tt></li>
-  <li>DB path: <tt>/var/lib/dmx/dmx-db</tt></li>
-  <li>Pre-repair backup: <tt>/var/lib/dmx/backups/dmx-db.pre-repair-20260327-225216</tt></li>
-  <li>Stopped-store preflight matched the copied-store defect exactly: <tt>921404</tt> and <tt>921471</tt> were the only malformed short-key-only topic-player context nodes.</li>
-  <li>Post-repair stopped-store audit returned <tt>allMalformed=0</tt>, <tt>topicPlayerMalformed=0</tt>, <tt>assocPlayerMalformed=0</tt>.</li>
-  <li>Live API proof: <tt>https://dmx.ralfbarkow.ch/topicmaps/919822?children=true</tt> with <tt>Accept: application/json</tt> returned <tt>200 OK</tt>.</li>
-  <li>Live object proof: <tt>topicmaps/object/921352</tt> and <tt>topicmaps/object/921464</tt> returned <tt>200 OK</tt>.</li>
-  <li>No fresh <tt>NotFoundException</tt> was observed in the post-repair log window for the successful JSON fetch.</li>
-</ul>
-
-<h2>Post-repair gate before resuming DMX seeding</h2>
-
-<ol>
-  <li><tt>topicmaps/object/921352</tt> must return <tt>200 OK</tt>.</li>
-  <li><tt>topicmaps/object/921464</tt> must return <tt>200 OK</tt>.</li>
-  <li><tt>topicmaps/919822</tt> must return <tt>200 OK</tt>.</li>
-  <li>Whole-store malformed-shape audit must return zero remaining short-key-only topicmap-context nodes.</li>
-  <li>Only then should DMX seeding or topicmap-local writes resume.</li>
-</ol>
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dmx-topicmap-919822-repair-runbook">DMX topicmap 919822 repair runbook</a>.
+</p>
 
 <h2>Related</h2>
 
 <ul>
-  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
   <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
 </ul>

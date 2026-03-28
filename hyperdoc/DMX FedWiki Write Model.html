@@ -1,75 +1,119 @@
 <h1>DMX FedWiki Write Model</h1>
 
-<p>
-  This page documents the current write model exposed by <tt>dmx-fedwiki</tt>,
-  an early-stage DMX plugin under development. It extends DMX with
-  FedWiki-oriented functionality, but it should be read as an emerging plugin
-  model rather than a finalized DMX platform contract.
-</p>
-
-<h2>WIP plugin boundary</h2>
+<in-package>hyperdoc</in-package>
 
 <p>
-  <tt>dmx-fedwiki</tt> is a DMX plugin, not settled DMX core. The current
-  <tt>fedwiki.page</tt> topic type, child-topic conventions, and materialization
-  behavior are useful for integration work, but they remain plugin-level
-  extensions of DMX while the plugin is still very early-stage.
-</p>
-
-<p>
-  That means documentary and topic-level integration can move ahead now, while
-  runtime assumptions, importer bindings, and API-contract claims should remain
-  conservative until the plugin behavior is stabilized or absorbed into a
-  broader platform contract.
-</p>
-
-<h2>Current plugin-level write model</h2>
-
-<p>
-  The current HyperDoc importer reuses the plugin's <tt>fedwiki.page</tt> topic
-  type together with typed children such as <tt>fedwiki.slug</tt>,
-  <tt>fedwiki.title</tt>, and <tt>fedwiki.page.json</tt>. For idempotent
-  synchronization, HyperDoc stores the stable external key
-  <tt>fedwiki:&lt;domain&gt;/&lt;slug&gt;</tt> as the DMX topic <tt>uri</tt> and
-  keeps the fuller FedWiki provenance envelope inside
-  <tt>fedwiki.page.json</tt>.
-</p>
-
-<p>
-  The HTTP endpoints used for lookup and write are DMX core REST endpoints, but
-  the choice to model imported FedWiki pages this way comes from the
-  plugin-level extension, not from a finalized FedWiki write contract in DMX
-  core itself.
-</p>
-
-<h2>Runtime caution</h2>
-
-<p>
-  It is reasonable to document this boundary now and to add authored topic
-  handles for it. It is not yet reasonable to claim that all future DMX
-  FedWiki-related importers, proxies, or synchronization tools should assume
-  this model is permanent.
-</p>
-
-<h2>Proof boundary</h2>
-
-<p>
-  A plugin-level write model can be correctly implemented and still remain not
-  yet live-proven. For this slice, the importer path is implemented and
-  config-guarded, and its dry-run behavior has been verified, but operational
-  proof still requires replay against a configured target.
-</p>
-
-<p>
-  Until a real create-then-update cycle has succeeded against such a target,
-  the correct evidence language stays conservative: implemented,
-  config-guarded, dry-run verified, and not yet live-proven.
+  <a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write
+  Model</tt></a> records the write contract HyperDoc now accepts for DMX
+  integration after the topicmap <tt>919822</tt> incident. The key conclusion
+  is narrow and durable: DMX is a valuable but untrusted persistence boundary,
+  so HyperDoc must validate topicmap-context payloads before every write.
 </p>
 
 <h2>Inspectable objects</h2>
 
 <ul>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
   <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
   <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
   <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
+</ul>
+
+<h2>Why this page changed</h2>
+
+<p>
+  Earlier DMX/FedWiki notes described an emerging plugin-level write model.
+  The <tt>919822</tt> incident tightened the boundary. We now know that the
+  checked DMX read path expects long-form topicmap view props, while the
+  generic DMX <tt>ViewProps</tt> write endpoints can persist malformed
+  short-key-only shapes unchanged if a sender submits them.
+</p>
+
+<ul>
+  <li>Proven read expectation: <tt>dmx.topicmaps.x</tt>, <tt>dmx.topicmaps.y</tt>, <tt>dmx.topicmaps.visibility</tt>, <tt>dmx.topicmaps.pinned</tt>.</li>
+  <li>Proven malformed shape: bare <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, <tt>pinned</tt> on <tt>dmx.topicmaps.topicmap_context</tt> assocs.</li>
+  <li>Proven effect: topicmap fetch can fail with <tt>NotFoundException</tt> on the missing long-form key.</li>
+  <li>Unproven part: the original sender that wrote the malformed live assocs remains unknown.</li>
+</ul>
+
+<h2>Canonical topicmap-context payload contract</h2>
+
+<p>
+  HyperDoc's topicmap-context-like writes now accept only the canonical
+  long-form keys. Short keys are treated as invalid input at the HyperDoc
+  boundary rather than being forwarded to DMX.
+</p>
+
+<pre>
+{
+  "dmx.topicmaps.x": 160,
+  "dmx.topicmaps.y": 120,
+  "dmx.topicmaps.visibility": true,
+  "dmx.topicmaps.pinned": false
+}
+</pre>
+
+<p>Forbidden short keys for this payload class:</p>
+
+<ul>
+  <li><tt>x</tt></li>
+  <li><tt>y</tt></li>
+  <li><tt>visibility</tt></li>
+  <li><tt>pinned</tt></li>
+</ul>
+
+<h2>HyperDoc-side guarded write boundary</h2>
+
+<p>
+  HyperDoc now keeps the DMX write seam narrow and typed. Topic creation and
+  update still go through the shared import client, but topicmap-context view
+  writes must pass through the canonical payload normalizer/validator first.
+</p>
+
+<ol>
+  <li><tt>dmx-import-create-topic</tt> / <tt>dmx-import-update-topic</tt>: typed topic upsert payloads for the DMX topic itself.</li>
+  <li><tt>dmx-import-add-topic-to-topicmap</tt> / <tt>dmx-import-set-topic-view-props</tt>: guarded topicmap-context view writes.</li>
+  <li><tt>plan-topic-factory-snippet-dmx-write</tt>: dry-run planning that surfaces normalized payload and validation status before write.</li>
+  <li><tt>execute-topic-factory-snippet-dmx-write</tt>: explicit dry-run or live execution on the same guarded boundary.</li>
+  <li><tt>localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary</tt> and related handover surfaces: promotion-plan wrappers that keep the normalized payload inspectable.</li>
+</ol>
+
+<h2>Diagnostics and fail-soft behavior</h2>
+
+<p>
+  Validation failures now become explicit structured errors or bounded
+  inspectable issue summaries instead of silent malformed writes.
+</p>
+
+<ul>
+  <li><tt>dmx-topicmap-view-props-validation-error</tt> names the boundary, missing long-form keys, forbidden short keys, and invalid field types.</li>
+  <li>Promotion-plan dry-run and handover surfaces expose <tt>view-props-validation-status</tt>, forbidden short keys, and the normalized payload JSON.</li>
+  <li>Missing localhost FedWiki source pages degrade separately to <tt>:source-unavailable</tt> issue objects; they are not silently conflated with DMX payload validation.</li>
+</ul>
+
+<h2>Scope boundary</h2>
+
+<p>
+  This write model is intentionally narrow. It does not claim to redesign DMX
+  storage, implement a general migration framework, or prove the identity of
+  the original writer. It only states what HyperDoc now requires before it
+  sends DMX writes.
+</p>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dmx-fedwiki-write-model">DMX FedWiki Write Model</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+  <li><a page="FedWiki Site to DMX Import">FedWiki Site to DMX Import</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
 </ul>

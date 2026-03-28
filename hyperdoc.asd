@@ -252,6 +252,7 @@
                              (:file "localhost-fedwiki-page-pipeline-smoke")
                              (:file "localhost-fedwiki-page-promotion-plans-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
+                             (:file "dmx-incident-arc-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")

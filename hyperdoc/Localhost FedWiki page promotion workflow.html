@@ -4,10 +4,11 @@
 
 <p>
   <a hyperbook="topics" page="Localhost FedWiki page promotion workflow"><tt>Localhost
-  FedWiki page promotion workflow</tt></a> is the reusable operational path
-  for reading a real localhost FedWiki page, normalizing its story items and
-  fragments, promoting topic-shaped chunks, composing a durable local HyperDoc
-  page, and preparing a separate dry-run-first DMX topic-factory snippet twin.
+  FedWiki page promotion workflow</tt></a> is the reusable path for reading a
+  real localhost FedWiki page, normalizing story items and fragments,
+  promoting topic chunks, composing a durable local HyperDoc page, and then
+  optionally planning or executing a guarded DMX snippet twin write on a
+  separate dry-run-first boundary.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -17,18 +18,28 @@
   <li><a expr="(current-localhost-fedwiki-page-promotion-surface)" view="Overview"><tt>current-localhost-fedwiki-page-promotion-surface</tt> Overview</a></li>
   <li><a expr="(current-localhost-fedwiki-page-promotion-surface)" view="Plans"><tt>current-localhost-fedwiki-page-promotion-surface</tt> Plans</a></li>
   <li><a expr="(the-life-cycle-of-collective-knowledge-promotion-plan)" view="Overview"><tt>the-life-cycle-of-collective-knowledge-promotion-plan</tt> Overview</a></li>
-  <li><a expr="(the-life-cycle-of-collective-knowledge-promotion-plan)" view="Promoted topics"><tt>the-life-cycle-of-collective-knowledge-promotion-plan</tt> Promoted topics</a></li>
   <li><a expr="(the-life-cycle-of-collective-knowledge-promotion-plan)" view="DMX dry-run"><tt>the-life-cycle-of-collective-knowledge-promotion-plan</tt> DMX dry-run</a></li>
   <li><a expr="(reproducible-devenv-as-knowledge-artifact-promotion-plan)" view="Overview"><tt>reproducible-devenv-as-knowledge-artifact-promotion-plan</tt> Overview</a></li>
-  <li><a expr="(reproducible-devenv-as-knowledge-artifact-promotion-plan)" view="Promoted topics"><tt>reproducible-devenv-as-knowledge-artifact-promotion-plan</tt> Promoted topics</a></li>
   <li><a expr="(reproducible-devenv-as-knowledge-artifact-promotion-plan)" view="DMX dry-run"><tt>reproducible-devenv-as-knowledge-artifact-promotion-plan</tt> DMX dry-run</a></li>
+</ul>
+
+<h2>Current real-page instances</h2>
+
+<p>
+  The current two real localhost FedWiki promotions intentionally exercise two
+  different fail-soft states on top of the same workflow.
+</p>
+
+<ul>
+  <li><a page="The Life Cycle of Collective Knowledge">The Life Cycle of Collective Knowledge</a>: the durable HyperDoc page and topic-factory snippet remain present, but the configured localhost FedWiki source page file is currently missing, so the plan degrades to an inspectable <tt>:source-unavailable</tt> issue state.</li>
+  <li><a page="Reproducible DevEnv as Knowledge Artifact">Reproducible DevEnv as Knowledge Artifact</a>: the source page remains available and the plan stays healthy, fresh, and dry-run capable on the guarded DMX boundary.</li>
 </ul>
 
 <h2>Workflow boundary</h2>
 
 <p>
-  The plan object is the inspectable boundary. It surfaces the localhost
-  source page id, slug, repo-relative path, normalized story items, normalized
+  The promotion plan object remains the inspectable contract. It surfaces the
+  localhost source page id and path, normalized story items, normalized
   fragments, promoted topic chunks, provenance classifications, local page
   target, topic-factory snippet metadata, and the separate DMX dry-run plan
   summary.
@@ -37,29 +48,57 @@
 <h2>Execution boundaries</h2>
 
 <ol>
-  <li><tt>inspect/plan</tt>: open a promotion plan object's <tt>Overview</tt>, <tt>Source page</tt>, <tt>Story items</tt>, <tt>Fragments</tt>, and <tt>Promoted topics</tt> views.</li>
+  <li><tt>inspect/plan</tt>: open a promotion plan object's <tt>Overview</tt>, <tt>Source page</tt>, <tt>Story items</tt>, <tt>Fragments</tt>, <tt>Promoted topics</tt>, and <tt>DMX dry-run</tt> views.</li>
   <li><tt>compose/write local HyperDoc artifacts</tt>: use <tt>(write-localhost-fedwiki-page-promotion-plan-artifacts plan)</tt> to regenerate the durable local page and snippet asset from the plan's configured writer.</li>
   <li><tt>dry-run DMX snippet write</tt>: inspect the plan object's <tt>DMX dry-run</tt> view or call <tt>(localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)</tt> / <tt>(localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan)</tt>.</li>
-  <li><tt>optional live DMX write</tt>: remain on the separate explicit writer path through <tt>(execute-topic-factory-snippet-dmx-write ... :dry-run nil)</tt> with an explicit workspace topicmap id. The authored HyperDoc page stays local and durable either way.</li>
+  <li><tt>optional live DMX write</tt>: remain on the separate explicit writer path through <tt>(execute-topic-factory-snippet-dmx-write ... :dry-run nil)</tt> with an explicit workspace topicmap id.</li>
 </ol>
 
-<h2>Current real-page instances</h2>
+<h2>DMX boundary after the 919822 incident</h2>
 
 <p>
-  The current two real localhost FedWiki promotions intentionally exercise
-  different provenance modes while sharing the same generic mechanism.
+  This workflow no longer treats generic DMX writes as safe by default. Any
+  topicmap-context-like write now goes through the HyperDoc-side long-form
+  payload normalizer/validator first.
 </p>
 
 <ul>
-  <li><a page="The Life Cycle of Collective Knowledge">The Life Cycle of Collective Knowledge</a>: one paragraph story item is split into fragment-derived reusable topics, so the promoted chunks expose <tt>story-item-fragment</tt> provenance.</li>
-  <li><a page="Reproducible DevEnv as Knowledge Artifact">Reproducible DevEnv as Knowledge Artifact</a>: the two promoted subtopics stay whole-item-derived while the umbrella topic exposes <tt>multi-item-derived</tt> provenance across both paragraph items.</li>
+  <li>Dry-run surfaces expose <tt>view-props-validation-status</tt>.</li>
+  <li>Dry-run surfaces expose forbidden short keys when present.</li>
+  <li>Dry-run surfaces expose the normalized topicmap view payload JSON.</li>
+  <li>Live writes remain conservative and explicit; dry-run evidence stays first-class.</li>
+  <li>HyperDoc treats DMX as synchronizable/projected, not as sole authority for the authored local page and snippet artifacts.</li>
 </ul>
+
+<h2>Continuation path</h2>
+
+<p>
+  The accepted continuation is to keep the existing localhost FedWiki ->
+  normalized topic chunks -> composed HyperDoc page -> topic-factory snippet ->
+  DMX snippet twin flow, but only on top of the guarded write boundary.
+</p>
+
+<ul>
+  <li>Keep plan-first inspection.</li>
+  <li>Keep dry-run-first DMX evidence.</li>
+  <li>Preserve fail-soft issue objects when source pages or payloads are invalid.</li>
+  <li>Do not broaden this workflow into full DMX sync until the contract is better understood.</li>
+</ul>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="localhost-fedwiki-page-promotion-workflow">Localhost FedWiki page promotion workflow</a>.
+</p>
 
 <h2>Related</h2>
 
 <ul>
   <li><a page="The Life Cycle of Collective Knowledge">The Life Cycle of Collective Knowledge</a></li>
   <li><a page="Reproducible DevEnv as Knowledge Artifact">Reproducible DevEnv as Knowledge Artifact</a></li>
-  <li><a page="Authored topic factories">Authored topic factories</a></li>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Authored topic factories">Authored topic factories</a></li>
 </ul>
