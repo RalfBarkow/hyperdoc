@@ -284,6 +284,13 @@
    "resourceUri" (dmx-mcp-topic-resource-uri
                   (dmx-json-object-value topic "id"))))
 
+(defun dmx-mcp-note-summaries (topic-summaries)
+  (remove-if-not
+   (lambda (summary)
+     (string= (or (gethash "typeUri" summary) "")
+              *dmx-notes-note-type-uri*))
+   topic-summaries))
+
 (defun dmx-mcp-topicmap-topic-summaries (topicmap-json)
   (sort
    (loop for topic in (or (and topicmap-json
@@ -294,24 +301,23 @@
    :key (lambda (summary)
           (gethash "id" summary))))
 
-(defun dmx-mcp-workspace-summary (server)
-  (let* ((topicmap-id (dmx-mcp-server-workspace-topicmap-id server))
+(defun dmx-mcp-workspace-summary (server &optional topicmap-id)
+  (let* ((resolved-topicmap-id (or topicmap-id
+                                   (dmx-mcp-server-workspace-topicmap-id server)))
          (topicmap-json (dmx-import-read-topicmap
                          (dmx-mcp-server-read-client server)
-                         topicmap-id))
+                         resolved-topicmap-id))
          (topicmap-topic (and topicmap-json (gethash "topic" topicmap-json)))
          (topic-summaries (and topicmap-json
                                (dmx-mcp-topicmap-topic-summaries topicmap-json)))
-         (note-summaries
-           (remove-if-not
-            (lambda (summary)
-              (string= (or (gethash "typeUri" summary) "")
-                       *dmx-notes-note-type-uri*))
-            topic-summaries)))
+         (note-summaries (dmx-mcp-note-summaries topic-summaries)))
     (dmx-mcp-json-object
      "workspace" (dmx-mcp-json-object
-                  "slug" "context-window"
-                  "topicmapId" topicmap-id
+                  "slug" (if (eql resolved-topicmap-id
+                                   (dmx-mcp-server-workspace-topicmap-id server))
+                             "context-window"
+                             (format nil "topicmap-~D" resolved-topicmap-id))
+                  "topicmapId" resolved-topicmap-id
                   "topicmapTitle" (and topicmap-topic
                                        (dmx-mcp-topic-title topicmap-topic)))
      "topicCount" (length topic-summaries)
@@ -341,7 +347,8 @@
 
 (defun dmx-mcp-topicmap-projection (topicmap-json)
   (let* ((topicmap-topic (gethash "topic" topicmap-json))
-         (topic-summaries (dmx-mcp-topicmap-topic-summaries topicmap-json)))
+         (topic-summaries (dmx-mcp-topicmap-topic-summaries topicmap-json))
+         (note-summaries (dmx-mcp-note-summaries topic-summaries)))
     (dmx-mcp-json-object
      "id" (dmx-json-object-value topicmap-topic "id")
      "uri" (dmx-json-object-value topicmap-topic "uri")
@@ -349,6 +356,8 @@
      "title" (dmx-mcp-topic-title topicmap-topic)
      "topicCount" (length topic-summaries)
      "topics" (coerce topic-summaries 'vector)
+     "noteCount" (length note-summaries)
+     "notes" (coerce note-summaries 'vector)
      "assocsCount"
      (length (json-array-elements (gethash "assocs" topicmap-json)))
      "viewProps" (gethash "viewProps" topicmap-json))))
@@ -569,6 +578,83 @@
      "writeKind" "handover_create"
      "summary" result)))
 
+(defun dmx-mcp-read-topicmap-tool (server arguments)
+  (let* ((topicmap-id (or (parse-positive-integer
+                           (gethash "topicmapId" arguments))
+                          (dmx-mcp-server-workspace-topicmap-id server)))
+         (topicmap-json (dmx-import-read-topicmap
+                         (dmx-mcp-server-read-client server)
+                         topicmap-id)))
+    (unless topicmap-json
+      (error 'fedwiki-dmx-import-error
+             :message (format nil "Unknown DMX topicmap ~D" topicmap-id)))
+    (dmx-mcp-json-object
+     "topicmapId" topicmap-id
+     "projection" (dmx-mcp-topicmap-projection topicmap-json)
+     "source" (dmx-mcp-json-object
+               "resourceUri" (dmx-mcp-topicmap-resource-uri topicmap-id)
+               "readPath" (format nil "/topicmaps/~D?children=true" topicmap-id)))))
+
+(defun dmx-mcp-read-topic-tool (server arguments)
+  (let* ((topic-id (or (parse-positive-integer
+                        (gethash "topicId" arguments))
+                       (error 'fedwiki-dmx-import-error
+                              :message "topicId is required for read_dmx_topic")))
+         (topic (dmx-import-read-topic
+                 (dmx-mcp-server-read-client server)
+                 topic-id)))
+    (unless topic
+      (error 'fedwiki-dmx-import-error
+             :message (format nil "Unknown DMX topic ~D" topic-id)))
+    (dmx-mcp-json-object
+     "topicId" topic-id
+     "topic" (dmx-mcp-topic-projection topic)
+     "source" (dmx-mcp-json-object
+               "resourceUri" (dmx-mcp-topic-resource-uri topic-id)
+               "readPath" (format nil "/core/topic/~D?children=true&assocChildren=true"
+                                  topic-id)))))
+
+(defun dmx-mcp-resolve-workspace-note-tool (server arguments)
+  (let* ((note-key
+           (or (dmx-mcp-argument arguments "noteKey")
+               (error 'fedwiki-dmx-import-error
+                      :message "noteKey is required for resolve_workspace_note")))
+         (resolution
+           (resolve-dmx-workspace-note
+            :workspace-topicmap-id
+            (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                (dmx-mcp-server-workspace-topicmap-id server))
+            :client (dmx-mcp-server-read-client server)
+            :note-key note-key
+            :note-kind :workspace-note))
+         (existing-topic
+           (dmx-workspace-note-resolution-existing-topic resolution)))
+    (dmx-mcp-json-object
+     "noteKey" (dmx-workspace-note-resolution-note-key resolution)
+     "uri" (dmx-workspace-note-resolution-uri resolution)
+     "workspaceTopicmapId"
+     (dmx-workspace-note-resolution-workspace-topicmap-id resolution)
+     "existingTopicId"
+     (dmx-workspace-note-resolution-existing-topic-id resolution)
+     "inTopicmap"
+     (and (dmx-workspace-note-resolution-existing-topic-id resolution)
+          (dmx-workspace-note-resolution-in-topicmap-p resolution))
+     "topicAction"
+     (format nil "~(~A~)" (dmx-workspace-note-resolution-topic-action resolution))
+     "topicmapAction"
+     (format nil "~(~A~)" (dmx-workspace-note-resolution-topicmap-action resolution))
+     "lookup" (dmx-mcp-json-object
+               "kind" "uri_lookup"
+               "resourceUri"
+               (and (dmx-workspace-note-resolution-existing-topic-id resolution)
+                    (dmx-mcp-topic-resource-uri
+                     (dmx-workspace-note-resolution-existing-topic-id resolution)))
+               "lookupPath"
+               (format nil "/core/topic/uri/<uri>?~A"
+                       *dmx-topic-fetch-query-string*))
+     "topic" (and existing-topic
+                  (dmx-mcp-topic-projection existing-topic)))))
+
 (defun dmx-mcp-call-dry-run-tool (server arguments)
   (let ((write-kind (gethash "writeKind" arguments)))
     (cond
@@ -597,6 +683,15 @@
           (cond
             ((equal tool-name "validated_dmx_write_dry_run")
              (dmx-mcp-tool-result (dmx-mcp-call-dry-run-tool server arguments)))
+            ((equal tool-name "read_dmx_topicmap")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-topicmap-tool server arguments)))
+            ((equal tool-name "read_dmx_topic")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-topic-tool server arguments)))
+            ((equal tool-name "resolve_workspace_note")
+             (dmx-mcp-tool-result
+              (dmx-mcp-resolve-workspace-note-tool server arguments)))
             ((equal tool-name "append_workspace_note")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -701,8 +796,45 @@
       "noteKey" (dmx-mcp-json-object "type" "string")
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "viewProps" (dmx-mcp-json-object "type" "object")
-      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "title" "text")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_dmx_topicmap"
+    "description"
+    "Read a DMX topicmap projection, defaulting to the current shared workspace topicmap, including topic and note ids."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicmapId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_dmx_topic"
+    "description"
+    "Read a DMX topic by id, including note body and selected child metadata when present."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "resolve_workspace_note"
+    "description"
+    "Resolve a workspace note by noteKey through the read client and report the existing topic id plus topicmap membership."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array "noteKey")
      "additionalProperties" t))
    (dmx-mcp-json-object
     "name" "update_workspace_note"

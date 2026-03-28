@@ -37,6 +37,17 @@
   existing-topic
   existing-topic-id)
 
+(defstruct dmx-workspace-note-resolution
+  note-kind
+  note-key
+  uri
+  workspace-topicmap-id
+  existing-topic
+  existing-topic-id
+  in-topicmap-p
+  topic-action
+  topicmap-action)
+
 (defun dmx-json-object-value (object key)
   (cond
     ((hash-table-p object)
@@ -178,6 +189,40 @@
              (dmx-topicmap-view-props-json-string
               (dmx-workspace-note-write-plan-view-props plan)))))
 
+(defun resolve-dmx-workspace-note
+    (&key workspace-topicmap-id client note-key title uri (note-kind :workspace-note))
+  (let* ((resolved-topicmap-id
+           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+         (resolved-client
+           (or client
+               (make-default-dmx-import-client :dry-run t :verbose nil)))
+         (resolved-note-key
+           (normalize-dmx-workspace-note-key
+            note-key
+            (or title "workspace note")
+            note-kind))
+         (resolved-uri
+           (or uri
+               (dmx-workspace-note-uri note-kind resolved-note-key)))
+         (existing-topic
+           (dmx-import-find-existing-topic resolved-client resolved-uri))
+         (existing-topic-id (dmx-import-object-id existing-topic))
+         (in-topicmap-p
+           (and existing-topic-id
+                (dmx-import-topic-in-topicmap-p resolved-client
+                                               resolved-topicmap-id
+                                               existing-topic-id))))
+    (make-dmx-workspace-note-resolution
+     :note-kind note-kind
+     :note-key resolved-note-key
+     :uri resolved-uri
+     :workspace-topicmap-id resolved-topicmap-id
+     :existing-topic existing-topic
+     :existing-topic-id existing-topic-id
+     :in-topicmap-p in-topicmap-p
+     :topic-action (if existing-topic :update :create)
+     :topicmap-action (if in-topicmap-p :already-present :add))))
+
 (defun plan-dmx-workspace-note-write
     (title
      text
@@ -200,20 +245,27 @@
          (resolved-client
            (or client
                (make-default-dmx-import-client :dry-run t :verbose nil)))
+         (resolution
+           (resolve-dmx-workspace-note
+            :workspace-topicmap-id resolved-topicmap-id
+            :client resolved-client
+            :note-key note-key
+            :title resolved-title
+            :uri uri
+            :note-kind note-kind))
          (resolved-note-key
-           (normalize-dmx-workspace-note-key note-key resolved-title note-kind))
+           (dmx-workspace-note-resolution-note-key resolution))
          (resolved-uri
-           (or uri
-               (dmx-workspace-note-uri note-kind resolved-note-key)))
+           (dmx-workspace-note-resolution-uri resolution))
          (payload (dmx-workspace-note-payload resolved-title
                                               resolved-text
                                               resolved-uri))
-         (existing-topic (dmx-import-find-existing-topic resolved-client resolved-uri))
-         (existing-topic-id (dmx-import-object-id existing-topic))
-         (in-topicmap-p (and existing-topic-id
-                             (dmx-import-topic-in-topicmap-p resolved-client
-                                                            resolved-topicmap-id
-                                                            existing-topic-id))))
+         (existing-topic
+           (dmx-workspace-note-resolution-existing-topic resolution))
+         (existing-topic-id
+           (dmx-workspace-note-resolution-existing-topic-id resolution))
+         (in-topicmap-p
+           (dmx-workspace-note-resolution-in-topicmap-p resolution)))
     (multiple-value-bind (resolved-view-props view-props-normalization)
         (normalize-dmx-workspace-note-view-props
          view-props

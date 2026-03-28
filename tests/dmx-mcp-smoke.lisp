@@ -6,6 +6,8 @@
 (defparameter *dmx-mcp-smoke-primary-topic-id* 907120)
 (defparameter *dmx-mcp-smoke-secondary-topic-id* 921494)
 (defparameter *dmx-mcp-live-secondary-topic-id* 921464)
+(defparameter *dmx-mcp-smoke-primary-note-key*
+  "dmx-incident-remediation-for-hyperdoc")
 
 (defun mcp-assert-true (condition message)
   (unless condition
@@ -138,14 +140,20 @@
             "Guarded update payload must still carry the note text child"))
       (setf (symbol-function 'drakma:http-request) original))))
 
-(defun mcp-test-seed-note (client id title text &key (topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*) (x 160) (y 120))
+(defun mcp-test-seed-note
+    (client id title text
+     &key (topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*)
+          (x 160)
+          (y 120)
+          uri)
   (let ((topic (hyperdoc::dmx-import-create-topic
                 client
                 (list* :id id
                        (hyperdoc::dmx-workspace-note-payload
                         title
                         text
-                        (format nil "hyperdoc:mcp/test/note/~D" id))))))
+                        (or uri
+                            (format nil "hyperdoc:mcp/test/note/~D" id)))))))
     (hyperdoc::dmx-import-add-topic-to-topicmap
      client
      topicmap-id
@@ -159,7 +167,10 @@
     (mcp-test-seed-note client
                         *dmx-mcp-smoke-primary-topic-id*
                         "DMX incident remediation for HyperDoc"
-                        "Live MCP smoke topic body")
+                        "Live MCP smoke topic body"
+                        :uri (hyperdoc::dmx-workspace-note-uri
+                              :workspace-note
+                              *dmx-mcp-smoke-primary-note-key*))
     (mcp-test-seed-note client
                         *dmx-mcp-smoke-secondary-topic-id*
                         "Topic factory snippet probe"
@@ -337,17 +348,139 @@
                                   (gethash "tools"
                                            (gethash "result" tools-body))))))
                    (dolist (tool-name '("validated_dmx_write_dry_run"
+                                        "read_dmx_topicmap"
+                                        "read_dmx_topic"
+                                        "resolve_workspace_note"
                                         "append_workspace_note"
                                         "update_workspace_note"
                                         "create_handover"))
                      (mcp-assert-true
                       (member tool-name tool-names :test #'string=)
                       (format nil "tools/list must include ~A" tool-name)))))
-               (multiple-value-bind (dry-run-body dry-run-status _)
+               (multiple-value-bind (topicmap-body topicmap-status _)
                    (mcp-test-call url
                                   (mcp-test-json-object
                                    "jsonrpc" "2.0"
                                    "id" 6
+                                   "method" "tools/call"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "name" "read_dmx_topicmap"
+                                    "arguments" (mcp-test-json-object)))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 topicmap-status "read_dmx_topicmap status")
+                 (let* ((tool-result (gethash "result" topicmap-body))
+                        (structured (gethash "structuredContent" tool-result))
+                        (projection (gethash "projection" structured))
+                        (note-ids (mapcar (lambda (summary) (gethash "id" summary))
+                                          (hyperdoc::json-array-elements
+                                           (gethash "notes" projection)))))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "read_dmx_topicmap must not be flagged as error")
+                   (mcp-assert-equal *dmx-mcp-smoke-workspace-topicmap-id*
+                                     (gethash "topicmapId" structured)
+                                     "read_dmx_topicmap topicmap id")
+                   (mcp-assert-equal 2
+                                     (gethash "noteCount" projection)
+                                     "read_dmx_topicmap note count")
+                   (mcp-assert-true
+                    (member *dmx-mcp-smoke-primary-topic-id* note-ids :test #'eql)
+                    "read_dmx_topicmap must include the primary note id")))
+               (multiple-value-bind (topic-body topic-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 7
+                                   "method" "tools/call"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "name" "read_dmx_topic"
+                                    "arguments"
+                                    (mcp-test-json-object
+                                     "topicId" *dmx-mcp-smoke-primary-topic-id*)))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 topic-status "read_dmx_topic status")
+                 (let* ((tool-result (gethash "result" topic-body))
+                        (structured (gethash "structuredContent" tool-result))
+                        (topic (gethash "topic" structured)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "read_dmx_topic must not be flagged as error")
+                   (mcp-assert-equal "DMX incident remediation for HyperDoc"
+                                     (gethash "title" topic)
+                                     "read_dmx_topic title")
+                   (mcp-assert-equal "Live MCP smoke topic body"
+                                     (gethash "text" topic)
+                                     "read_dmx_topic text")))
+               (multiple-value-bind (resolve-body resolve-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 8
+                                   "method" "tools/call"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "name" "resolve_workspace_note"
+                                    "arguments"
+                                    (mcp-test-json-object
+                                     "noteKey" *dmx-mcp-smoke-primary-note-key*)))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 resolve-status "resolve_workspace_note status")
+                 (let* ((tool-result (gethash "result" resolve-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "resolve_workspace_note must not be flagged as error")
+                   (mcp-assert-equal *dmx-mcp-smoke-primary-topic-id*
+                                     (gethash "existingTopicId" structured)
+                                     "resolve_workspace_note existing topic id")
+                   (mcp-assert-equal "update"
+                                     (gethash "topicAction" structured)
+                                     "resolve_workspace_note topic action")
+                   (mcp-assert-equal "already-present"
+                                     (gethash "topicmapAction" structured)
+                                     "resolve_workspace_note topicmap action")))
+               (multiple-value-bind (dry-run-body dry-run-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 9
+                                   "method" "tools/call"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "name" "append_workspace_note"
+                                    "arguments"
+                                    (mcp-test-json-object
+                                     "title" "DMX incident remediation for HyperDoc"
+                                     "text" "Updated body through dry-run."
+                                     "noteKey" *dmx-mcp-smoke-primary-note-key*
+                                     "dryRun" t)))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 dry-run-status "append_workspace_note dry-run status")
+                 (let* ((tool-result (gethash "result" dry-run-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "append_workspace_note dry-run must not be flagged as error")
+                   (mcp-assert-equal *dmx-mcp-smoke-primary-topic-id*
+                                     (gethash "existing-topic-id" structured)
+                                     "append_workspace_note dry-run existing topic id")
+                   (mcp-assert-equal "update"
+                                     (gethash "topic-action" structured)
+                                     "append_workspace_note dry-run topic action")
+                   (mcp-assert-equal "already-present"
+                                     (gethash "topicmap-action" structured)
+                                     "append_workspace_note dry-run topicmap action")))
+               (multiple-value-bind (validated-body dry-run-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 10
                                    "method" "tools/call"
                                    "params"
                                    (mcp-test-json-object
@@ -362,7 +495,7 @@
                                   :session-id session-id)
                  (declare (ignore _))
                  (mcp-assert-equal 200 dry-run-status "validated_dmx_write_dry_run status")
-                 (let* ((tool-result (gethash "result" dry-run-body))
+                 (let* ((tool-result (gethash "result" validated-body))
                         (structured (gethash "structuredContent" tool-result)))
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
@@ -381,7 +514,7 @@
                    (mcp-test-call url
                                   (mcp-test-json-object
                                    "jsonrpc" "2.0"
-                                   "id" 7
+                                   "id" 11
                                    "method" "tools/call"
                                    "params"
                                    (mcp-test-json-object
@@ -417,7 +550,7 @@
                    (mcp-test-call url
                                   (mcp-test-json-object
                                    "jsonrpc" "2.0"
-                                   "id" 8
+                                   "id" 12
                                    "method" "tools/call"
                                    "params"
                                    (mcp-test-json-object
@@ -444,7 +577,7 @@
                      (mcp-test-call url
                                     (mcp-test-json-object
                                      "jsonrpc" "2.0"
-                                     "id" 9
+                                     "id" 13
                                      "method" "resources/read"
                                      "params"
                                      (mcp-test-json-object

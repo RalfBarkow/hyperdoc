@@ -395,21 +395,28 @@
 (defun memory-dmx-import-topic-payload->json (topic)
   (when topic
     (let ((json (make-hash-table :test #'equal))
-          (children-json (make-hash-table :test #'equal)))
+          (children-json (make-hash-table :test #'equal))
+          (children (getf topic :children)))
       (labels ((put (key value)
                  (setf (gethash key json) value)))
         (put "id" (dmx-import-object-id topic))
         (put "uri" (or (getf topic :uri) ""))
         (put "typeUri" (or (getf topic :type-uri) ""))
         (put "value" (getf topic :value))
-        (loop for (child-type-uri child-value) on (getf topic :children) by #'cddr
-              do (let ((child-json (make-hash-table :test #'equal)))
+        (flet ((record-child (child-type-uri child-value)
+                 (let ((child-json (make-hash-table :test #'equal)))
                    (setf (gethash "id" child-json) -1
                          (gethash "uri" child-json) ""
                          (gethash "typeUri" child-json) child-type-uri
                          (gethash "value" child-json) child-value
                          (gethash "children" child-json) (make-hash-table :test #'equal))
-                   (setf (gethash child-type-uri children-json) child-json)))
+                   (setf (gethash child-type-uri children-json) child-json))))
+          (cond
+            ((hash-table-p children)
+             (maphash #'record-child children))
+            ((listp children)
+             (loop for (child-type-uri child-value) on children by #'cddr
+                   do (record-child child-type-uri child-value)))))
         (setf (gethash "children" json) children-json)
         json))))
 
