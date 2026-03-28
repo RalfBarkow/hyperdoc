@@ -5,7 +5,12 @@
     ../modules/hyperdoc-mcp-release.nix
   ];
 
-  # Host-specific deployment profile for dreyeck.ch.
+  # Historical full-host deployment profile for dreyeck.ch.
+  #
+  # Production activation on the live host remains authoritative in /etc/nixos.
+  # For MCP on the real host, import
+  # /home/rgb/workspace/hyperdoc/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix
+  # from /etc/nixos instead of switching this full profile.
   boot.loader.grub.enable = true;
   boot.loader.grub.devices = [ "/dev/sda" ];
   networking.useDHCP = false;
