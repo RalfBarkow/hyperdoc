@@ -91,7 +91,7 @@ imports = [
 
 <ul>
   <li><tt>/etc/nixos/hyperdoc/hyperdoc-mcp-release.nix</tt> - host-owned copy of the reusable module.</li>
-  <li><tt>/etc/nixos/hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix</tt> - host-owned sidecar with <tt>services.hyperdocMcp.packagePath</tt> pinned as a quoted concrete <tt>/nix/store</tt> path.</li>
+  <li><tt>/etc/nixos/hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix</tt> - host-owned sidecar with <tt>services.hyperdocMcp.packagePath</tt> pinned as a quoted concrete <tt>/nix/store</tt> path and <tt>useACMEHost = "dreyeck.ch"</tt>.</li>
 </ul>
 
 <p>
@@ -103,6 +103,13 @@ imports = [
   The quoted <tt>packagePath</tt> form matters for flake-based
   <tt>/etc/nixos</tt>: it keeps evaluation pure while still pointing systemd at
   the pinned release root.
+</p>
+
+<p>
+  The sidecar should reuse dreyeck's existing wildcard-certificate model via
+  <tt>useACMEHost = "dreyeck.ch"</tt>. Do not add a dedicated
+  <tt>security.acme.certs."mcp.dreyeck.ch"</tt> lifecycle for MCP on this
+  host.
 </p>
 
 <h2>Operator steps</h2>
@@ -156,30 +163,32 @@ sudo nixos-rebuild switch
 <ul>
   <li><tt>systemctl status hyperdoc-mcp</tt> shows <tt>active (running)</tt> and <tt>hyperdoc-mcp-release-start</tt>.</li>
   <li><tt>curl -i http://127.0.0.1:8787/mcp</tt> returns HTTP <tt>405</tt> with the JSON error <tt>method_not_allowed</tt>.</li>
-  <li><tt>curl -i https://mcp.dreyeck.ch/mcp</tt> returns the same MCP surface through nginx.</li>
+  <li><tt>curl -i https://mcp.dreyeck.ch/mcp</tt> returns HTTP <tt>405</tt> through nginx, and HTTP <tt>405</tt> over HTTPS means TLS terminated successfully and the live <tt>/mcp</tt> route reached the MCP handler.</li>
   <li>The probe still reports <tt>INIT_STATUS 200</tt>, <tt>WORKSPACE_READ_STATUS 200</tt>, <tt>WORKSPACE_TOPICMAP_ID 919822</tt>, and <tt>DRY_RUN_VALIDATION_STATUS canonical</tt>.</li>
 </ul>
 
-<h2>ACME diagnosis for mcp.dreyeck.ch</h2>
+<h2>Certificate boundary on dreyeck</h2>
 
 <p>
-  The observed facts already narrow the failure boundary:
+  The plausible expectation was that adding <tt>mcp.dreyeck.ch</tt> would
+  require its own dedicated ACME lifecycle because it is a separate nginx
+  virtual host.
 </p>
 
-<ul>
-  <li>The MCP app working locally proves the Lisp runtime and <tt>127.0.0.1:8787</tt> bind are correct.</li>
-  <li>The nginx proxy path working proves <tt>mcp.dreyeck.ch/mcp</tt> is wired to the MCP service.</li>
-  <li>The HTTPS route answering proves nginx is serving the virtual host on <tt>443</tt>.</li>
-  <li>The local manual challenge probe reaching nginx and returning <tt>404</tt> is expected outside an active ACME order; it proves nginx saw the request but had no challenge file to serve at that moment.</li>
-  <li>The Let's Encrypt <tt>HTTP-01</tt> timeout therefore points to public <tt>port 80</tt> reachability or authoritative DNS path problems before the request reaches nginx. It does not implicate the MCP application or the proven <tt>/mcp</tt> reverse-proxy route.</li>
-</ul>
+<p>
+  The observed reality on dreyeck is different: <tt>curl -i
+  https://mcp.dreyeck.ch/mcp</tt> returning HTTP <tt>405</tt> proves the HTTPS
+  vhost is already live, nginx is terminating TLS, and the request reaches the
+  MCP route. A <tt>405 method_not_allowed</tt> at that URL is an application
+  contract signal, not a certificate failure.
+</p>
 
 <p>
-  The next checks therefore belong at the host edge: confirm the public
-  <tt>A</tt> and <tt>AAAA</tt> records for <tt>mcp.dreyeck.ch</tt>, confirm
-  public <tt>port 80</tt> reachability to dreyeck, and confirm that no
-  firewall, router, or IPv6 mismatch drops the ACME challenge before nginx can
-  answer it.
+  This is a disappointed expectation because introducing an isolated MCP vhost
+  made a separate certificate flow look plausible. The repaired boundary is to
+  reuse the host's existing wildcard certificate model from
+  <tt>/etc/nixos/nginx-wiki.nix</tt> with <tt>useACMEHost = "dreyeck.ch"</tt>
+  instead of creating <tt>security.acme.certs."mcp.dreyeck.ch"</tt>.
 </p>
 
 <h2>Failure checks</h2>
@@ -187,7 +196,7 @@ sudo nixos-rebuild switch
 <ul>
   <li>If the host-owned activation proposes unrelated core host changes, stop; this MCP slice is meant to be additive.</li>
   <li>If <tt>http://127.0.0.1:8787/mcp</tt> fails, inspect <tt>hyperdoc-mcp.service</tt>, not nginx.</li>
-  <li>If local MCP and public HTTPS both work but <tt>HTTP-01</tt> still times out, inspect public <tt>port 80</tt> reachability and DNS, not the MCP app.</li>
+  <li>If <tt>https://mcp.dreyeck.ch/mcp</tt> stops returning HTTP <tt>405</tt>, inspect nginx vhost wiring or wildcard-certificate reuse on the host; do not add a dedicated MCP ACME flow as a first response.</li>
   <li>If the host-owned copy is missing or broken and recovery cannot wait, temporarily import the repo bridge path, restore service, then reinstall the host-owned steady-state copy before the next persistent activation.</li>
 </ul>
 

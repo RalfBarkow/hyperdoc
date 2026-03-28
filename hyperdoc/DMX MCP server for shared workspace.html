@@ -135,18 +135,19 @@
 <p>
   Use
   <a page="Add HyperDoc MCP beside the authoritative host config on dreyeck.ch">Add HyperDoc MCP beside the authoritative host config on dreyeck.ch</a>
-  for the additive sidecar config, exact operator steps, and the ACME
-  diagnosis. The workspace import remains a temporary bridge only; the
-  hardened steady-state path installs a host-owned sidecar under
-  <tt>/etc/nixos</tt>. Do not activate <tt>.#dreyeck-ch</tt> on the live host
-  for this slice.
+  for the additive sidecar config, exact operator steps, and the wildcard
+  certificate reuse model. The workspace import remains a temporary bridge
+  only; the hardened steady-state path installs a host-owned sidecar under
+  <tt>/etc/nixos</tt> and reuses <tt>useACMEHost = "dreyeck.ch"</tt> rather
+  than introducing a dedicated MCP certificate flow. Do not activate
+  <tt>.#dreyeck-ch</tt> on the live host for this slice.
 </p>
 
 <h2>Good outputs</h2>
 
 <ul>
   <li><tt>systemctl status hyperdoc-mcp</tt> shows <tt>active (running)</tt> and <tt>hyperdoc-mcp-release-start</tt>.</li>
-  <li><tt>curl -i http://127.0.0.1:8787/mcp</tt> and <tt>curl -i https://mcp.dreyeck.ch/mcp</tt> both return HTTP <tt>405</tt> with the JSON error <tt>method_not_allowed</tt>.</li>
+  <li><tt>curl -i http://127.0.0.1:8787/mcp</tt> and <tt>curl -i https://mcp.dreyeck.ch/mcp</tt> both return HTTP <tt>405</tt> with the JSON error <tt>method_not_allowed</tt>, and the HTTPS <tt>405</tt> proves the live nginx route is terminating TLS and reaching MCP.</li>
   <li>The MCP probe reports <tt>INIT_STATUS 200</tt>, <tt>WORKSPACE_READ_STATUS 200</tt>, <tt>WORKSPACE_TOPICMAP_ID 919822</tt>, and <tt>TOPIC_TITLE DMX incident remediation for HyperDoc</tt>.</li>
   <li>The probe still reports <tt>DRY_RUN_STATUS 200</tt> and <tt>DRY_RUN_VALIDATION_STATUS canonical</tt>.</li>
 </ul>
@@ -157,7 +158,7 @@
   <li>If the host-owned activation proposes unrelated core host changes, stop; the MCP slice is meant to be additive.</li>
   <li><tt>Unit hyperdoc-mcp.service could not be found.</tt> means the new generation is not active.</li>
   <li><tt>INIT_STATUS</tt>, <tt>WORKSPACE_READ_STATUS</tt>, or <tt>TOPIC_READ_STATUS</tt> other than <tt>200</tt> means stop before <tt>switch</tt>.</li>
-  <li>If local MCP and public HTTPS both work but ACME <tt>HTTP-01</tt> still times out, inspect public <tt>port 80</tt> reachability and DNS, not the MCP app.</li>
+  <li>If <tt>https://mcp.dreyeck.ch/mcp</tt> is already returning HTTP <tt>405</tt>, treat the route and certificate boundary as live; do not open a dedicated ACME workflow for MCP on dreyeck.</li>
   <li>If the probe output loses <tt>workspace/context-window</tt> or the guarded tools, stop and inspect the activated service before proceeding.</li>
 </ul>
 
