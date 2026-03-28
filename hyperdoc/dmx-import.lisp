@@ -925,9 +925,7 @@
          (headers (append (when (dmx-import-authorization-header-of client)
                             (list (cons "Authorization"
                                         (dmx-import-authorization-header-of client))))
-                          extra-headers
-                          (when (or payload body-object)
-                            '(("Content-Type" . "application/json")))))
+                          extra-headers))
          (request-args (append (list normalized-url
                                      :method method
                                      :want-stream t
