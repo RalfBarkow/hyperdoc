@@ -128,6 +128,8 @@
    (verbose :reader dmx-import-verbose-of :initarg :verbose :initform nil)))
 
 (defgeneric dmx-import-find-existing-topic (client external-key))
+(defgeneric dmx-import-read-topic (client topic-id))
+(defgeneric dmx-import-read-topicmap (client topicmap-id))
 (defgeneric dmx-import-create-topic (client payload))
 (defgeneric dmx-import-update-topic (client existing-topic payload))
 (defgeneric dmx-import-topic-in-topicmap-p (client topicmap-id topic-id))
@@ -355,6 +357,14 @@
   (declare (ignore external-key))
   nil)
 
+(defmethod dmx-import-read-topic ((client null-dmx-import-client) topic-id)
+  (declare (ignore topic-id))
+  nil)
+
+(defmethod dmx-import-read-topicmap ((client null-dmx-import-client) topicmap-id)
+  (declare (ignore topicmap-id))
+  nil)
+
 (defmethod dmx-import-create-topic ((client null-dmx-import-client) payload)
   (declare (ignore payload))
   (error 'fedwiki-dmx-import-error
@@ -381,6 +391,57 @@
 
 (defmethod dmx-import-find-existing-topic ((client memory-dmx-import-client) external-key)
   (gethash external-key (topics-by-external-key-of client)))
+
+(defun memory-dmx-import-topic-payload->json (topic)
+  (when topic
+    (let ((json (make-hash-table :test #'equal))
+          (children-json (make-hash-table :test #'equal)))
+      (labels ((put (key value)
+                 (setf (gethash key json) value)))
+        (put "id" (dmx-import-object-id topic))
+        (put "uri" (or (getf topic :uri) ""))
+        (put "typeUri" (or (getf topic :type-uri) ""))
+        (put "value" (getf topic :value))
+        (loop for (child-type-uri child-value) on (getf topic :children) by #'cddr
+              do (let ((child-json (make-hash-table :test #'equal)))
+                   (setf (gethash "id" child-json) -1
+                         (gethash "uri" child-json) ""
+                         (gethash "typeUri" child-json) child-type-uri
+                         (gethash "value" child-json) child-value
+                         (gethash "children" child-json) (make-hash-table :test #'equal))
+                   (setf (gethash child-type-uri children-json) child-json)))
+        (setf (gethash "children" json) children-json)
+        json))))
+
+(defmethod dmx-import-read-topic ((client memory-dmx-import-client) topic-id)
+  (memory-dmx-import-topic-payload->json
+   (find topic-id
+         (alexandria:hash-table-values (topics-by-external-key-of client))
+         :key #'dmx-import-object-id
+         :test #'eql)))
+
+(defmethod dmx-import-read-topicmap ((client memory-dmx-import-client) topicmap-id)
+  (let ((topicmap-topic-json (make-hash-table :test #'equal))
+        (json (make-hash-table :test #'equal))
+        (topics '()))
+    (setf (gethash "id" topicmap-topic-json) topicmap-id
+          (gethash "uri" topicmap-topic-json) ""
+          (gethash "typeUri" topicmap-topic-json) "dmx.topicmaps.topicmap"
+          (gethash "value" topicmap-topic-json) (format nil "Memory topicmap ~D" topicmap-id)
+          (gethash "children" topicmap-topic-json) (make-hash-table :test #'equal))
+    (maphash
+     (lambda (membership-key view-props)
+       (destructuring-bind (membership-topicmap-id topic-id) membership-key
+         (when (eql membership-topicmap-id topicmap-id)
+           (when-let (topic-json (dmx-import-read-topic client topic-id))
+             (setf (gethash "viewProps" topic-json) view-props)
+             (push topic-json topics)))))
+     (topicmap-memberships-of client))
+    (setf (gethash "topic" json) topicmap-topic-json
+          (gethash "viewProps" json) (make-hash-table :test #'equal)
+          (gethash "topics" json) (coerce (nreverse topics) 'vector)
+          (gethash "assocs" json) #())
+    json))
 
 (defmethod dmx-import-create-topic ((client memory-dmx-import-client) payload)
   (let* ((id (or (getf payload :id)
@@ -859,11 +920,12 @@
         (error ()
           body))))
 
-(defun http-request-json (client method url &key payload body-object allow-404?)
+(defun http-request-json (client method url &key payload body-object allow-404? extra-headers)
   (let* ((normalized-url (normalize-http-client-url client url))
          (headers (append (when (dmx-import-authorization-header-of client)
                             (list (cons "Authorization"
                                         (dmx-import-authorization-header-of client))))
+                          extra-headers
                           (when (or payload body-object)
                             '(("Content-Type" . "application/json")))))
          (request-args (append (list normalized-url
@@ -907,6 +969,21 @@
              :message "Incomplete live DMX import configuration"
              :missing-keys (nreverse missing)))
     (nreverse missing)))
+
+(defmethod dmx-import-read-topic ((client http-dmx-import-client) topic-id)
+  (validate-http-dmx-import-client client)
+  (http-request-json client
+                     :get
+                     (format nil "/core/topic/~D?~A"
+                             topic-id
+                             *dmx-topic-fetch-query-string*)))
+
+(defmethod dmx-import-read-topicmap ((client http-dmx-import-client) topicmap-id)
+  (validate-http-dmx-import-client client)
+  (http-request-json client
+                     :get
+                     (format nil "/topicmaps/~D?children=true" topicmap-id)
+                     :extra-headers '(("Accept" . "application/json"))))
 
 (defmethod dmx-import-find-existing-topic ((client http-dmx-import-client) external-key)
   (validate-http-dmx-import-client client)

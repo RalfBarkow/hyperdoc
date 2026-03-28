@@ -37,6 +37,9 @@
            #:read-article-allegation-slice-input
            #:render-article-allegation-slice-bundle
            #:write-article-allegation-slice-bundle
+           ;; DMX MCP server
+           #:serve-dmx-mcp-server
+           #:stop-dmx-mcp-server
            ;; FedWiki page materialization
            #:plan-fedwiki-page-materialization
            #:plan-fedwiki-slice-materialization

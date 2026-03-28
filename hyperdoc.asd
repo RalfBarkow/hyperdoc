@@ -108,7 +108,22 @@
   :components ((:module "hyperdoc"
                 :serial t
                 :components ((:file "dmx-import")
-                             (:file "topic-factory-snippet-dmx")))))
+                             (:file "topic-factory-snippet-dmx")
+                             (:file "dmx-workspace-notes")))))
+
+(defsystem #:hyperdoc/mcp
+  :description "Streamable HTTP MCP server for the DMX shared workspace"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc/dmx-import
+               #:hunchentoot)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "mcp-server")))))
 
 (defsystem #:hyperdoc/inspector
   :description "HyperDoc for the moldable inspector"
@@ -234,7 +249,7 @@
   :license  "BSD"
   :version "0.0.1"
   :serial t
-  :depends-on (#:hyperdoc/dmx-import
+  :depends-on (#:hyperdoc/mcp
                #:hyperdoc/explorer)
                 :components ((:module "tests"
                 :serial t
@@ -252,6 +267,7 @@
                              (:file "localhost-fedwiki-page-pipeline-smoke")
                              (:file "localhost-fedwiki-page-promotion-plans-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
+                             (:file "dmx-mcp-smoke")
                              (:file "dmx-incident-arc-smoke")
                              (:file "fedwiki-site-dmx-import")
                              (:file "check-runner-smoke")
