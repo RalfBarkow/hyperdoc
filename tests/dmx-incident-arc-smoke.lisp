@@ -59,7 +59,8 @@
      "dmx.topicmaps.x"
      "Forbidden short keys"
      "plan-topic-factory-snippet-dmx-write"
-     "execute-topic-factory-snippet-dmx-write"))
+     "execute-topic-factory-snippet-dmx-write"
+     "validated_dmx_write_dry_run"))
   (assert-page-contains-all
    (read-dmx-incident-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
@@ -67,7 +68,8 @@
    '("generic DMX persistence boundaries cannot be assumed safe by default"
      "narrow typed normalized adapters"
      "Plan-first and dry-run-first behavior"
-     "synchronizable/projected persistence"))
+     "synchronizable/projected persistence"
+     "shared blackboard"))
   (assert-page-contains-all
    (read-dmx-incident-page
     "hyperdoc/Localhost FedWiki page promotion workflow.html")
@@ -75,12 +77,35 @@
    '(":source-unavailable"
      "normalized topicmap view payload JSON"
      "synchronizable/projected"
-     "guarded DMX boundary")))
+     "guarded DMX boundary"
+     "create_handover"))
+  (assert-page-contains-all
+   (read-dmx-incident-page
+    "hyperdoc/DMX MCP server for shared workspace.html")
+   "DMX MCP server for shared workspace"
+   '("client -> DMX MCP server -> HyperDoc-side validated DMX adapter -> DMX backend"
+     "workspace/context-window"
+     "validated_dmx_write_dry_run"
+     ".codex/config.toml"
+     "Streamable HTTP"))
+  (assert-page-contains-all
+   (read-dmx-incident-page
+    "hyperdoc/Context window workspace as shared blackboard.html")
+   "Context window workspace as shared blackboard"
+   '("shared blackboard"
+     "topic 907120"
+     "create_handover"
+     "append_workspace_note"
+     "simple durable history")))
 
 (defun run-dmx-incident-topic-availability-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (dolist (entry '((hyperdoc::dmx-fedwiki-write-model-topic
                     "DMX FedWiki Write Model")
+                   (hyperdoc::dmx-mcp-server-shared-workspace-topic
+                    "DMX MCP server for shared workspace")
+                   (hyperdoc::context-window-workspace-shared-blackboard-topic
+                    "Context window workspace as shared blackboard")
                    (hyperdoc::dmx-topicmap-919822-repair-runbook-topic
                     "DMX topicmap 919822 repair runbook")
                    (hyperdoc::hyperdoc-dmx-architectural-implications-topic
@@ -103,6 +128,8 @@
          (format nil "Missing Topics HyperBook page ~A" title)))))
   (dolist (page-title '("DMX topicmap 919822 repair runbook"
                         "DMX FedWiki Write Model"
+                        "DMX MCP server for shared workspace"
+                        "Context window workspace as shared blackboard"
                         "HyperDoc DMX architectural implications"
                         "Localhost FedWiki page promotion workflow"))
     (assert-true

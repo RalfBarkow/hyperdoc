@@ -36,6 +36,19 @@
   <li>HyperDoc should maintain a small DMX hygiene toolkit rather than a broad migration framework.</li>
 </ul>
 
+<h2>Shared workspace implication</h2>
+
+<p>
+  The incident also changed how collaborative tooling should touch DMX.
+</p>
+
+<ul>
+  <li>Shared-workspace access should happen through a narrow MCP server, not through copied terminal transcripts or raw DMX endpoint knowledge.</li>
+  <li>The context-window workspace should act as a shared blackboard with typed note/handover tools, not as a general-purpose DMX mutation surface.</li>
+  <li>Machine-readable topic reads should use <tt>/core/topic/&lt;id&gt;?children=true&amp;assocChildren=true</tt>, not hash-route webclient URLs.</li>
+  <li>That keeps Codex and future ChatGPT connector clients on the same validated HyperDoc-side adapter boundary.</li>
+</ul>
+
 <h2>Expectation handling</h2>
 
 <p>
@@ -80,6 +93,8 @@
 
 <ul>
   <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>

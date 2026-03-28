@@ -90,6 +90,20 @@
   <li>The MCP server reuses these same boundaries instead of exposing a generic raw DMX write surface.</li>
 </ul>
 
+<h2>MCP boundary on the same contract</h2>
+
+<p>
+  The DMX MCP server for shared workspace does not introduce a second write
+  model. It reuses the same HyperDoc-side guarded contract.
+</p>
+
+<ul>
+  <li><tt>workspace/context-window</tt>, <tt>topic/&lt;id&gt;</tt>, and <tt>topicmap/&lt;id&gt;</tt> resources wrap canonical DMX read paths instead of teaching clients raw URLs.</li>
+  <li><tt>validated_dmx_write_dry_run</tt> exposes normalized payload and validation status before mutation.</li>
+  <li><tt>append_workspace_note</tt>, <tt>update_workspace_note</tt>, and <tt>create_handover</tt> stay on typed note/topic payloads rather than arbitrary raw DMX writes.</li>
+  <li>No generic raw <tt>ViewProps</tt> passthrough is exposed through MCP.</li>
+</ul>
+
 <h2>Diagnostics and fail-soft behavior</h2>
 
 <p>
@@ -126,6 +140,7 @@
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
   <li><a page="FedWiki Site to DMX Import">FedWiki Site to DMX Import</a></li>

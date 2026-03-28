@@ -4,12 +4,12 @@
 
 <p>
   <a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context
-  window workspace as shared blackboard</tt></a> defines how
-  <tt>topicmap 919822</tt>, the <tt>context-window</tt> workspace with sharing
-  mode <tt>Common</tt>, should be used now: as a small curated blackboard
-  between me, ChatGPT, and Codex, not as a raw transcript archive, an
-  undifferentiated transcript dump, or a substitute for durable HyperDoc
-  pages.
+  window workspace as shared blackboard</tt></a> defines the collaboration
+  model for DMX topicmap <tt>919822</tt>, the <tt>context-window</tt>
+  workspace with sharing mode <tt>Common</tt>: a small curated blackboard
+  where me, Codex, and later ChatGPT can inspect current state, exchange
+  handovers, and post bounded work notes without turning the workspace into a
+  raw transcript archive or a substitute for durable HyperDoc pages.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -18,8 +18,11 @@
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
   <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="Localhost FedWiki page promotion workflow"><tt>Localhost FedWiki page promotion workflow</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
   <li><a hyperbook="topics" page="Use a DMX Common workspace as a world read/write context window"><tt>Use a DMX Common workspace as a world read/write context window</tt></a></li>
 </ul>
 
@@ -59,14 +62,74 @@
   scope.
 </p>
 
+<h2>Workspace model</h2>
+
+<p>
+  The context-window topicmap remains a shared blackboard, not a raw database
+  playground.
+</p>
+
+<ul>
+  <li>Read the current workspace summary through <tt>workspace/context-window</tt>.</li>
+  <li>Read durable note topics such as topic 907120 through <tt>topic/&lt;id&gt;</tt>.</li>
+  <li>Create a new handover with <tt>create_handover</tt>.</li>
+  <li>Add a narrow work note with <tt>append_workspace_note</tt>.</li>
+  <li>Revise an existing note with <tt>update_workspace_note</tt>.</li>
+  <li>Keep a simple durable history in the workspace rather than overwriting arbitrary unrelated topics.</li>
+</ul>
+
+<h2>Why this stays narrow</h2>
+
+<p>
+  The workspace is useful precisely because it is constrained.
+</p>
+
+<ul>
+  <li>It gives collaboration tools a common handoff surface.</li>
+  <li>It avoids making every DMX topic editable by every integration.</li>
+  <li>It preserves a plan-first and dry-run-first workflow for writes that affect topicmap state.</li>
+  <li>It keeps fail-soft issue reporting separate from operational work notes.</li>
+</ul>
+
+<h2>Current shared-workspace evidence</h2>
+
+<p>
+  The MCP live-read smoke showed the current workspace topicmap id
+  <tt>919822</tt>, confirmed that topic 907120 is readable as
+  <tt>DMX incident remediation for HyperDoc</tt>, and confirmed that another
+  workspace topic <tt>921464</tt> remains readable as
+  <tt>codex uri-title-text probe</tt>.
+</p>
+
+<h2>Relation to the localhost FedWiki -&gt; DMX pipeline</h2>
+
+<p>
+  The shared blackboard does not replace the localhost FedWiki promotion plan.
+  It complements it.
+</p>
+
+<ul>
+  <li>The promotion plan remains the inspectable source/plan/workflow object.</li>
+  <li>Dry-run DMX evidence remains first-class on the plan.</li>
+  <li>A handover note can summarize the plan state and point the next agent to the right local artifact or dry-run result.</li>
+  <li>Live DMX snippet or topicmap writes still go through the same guarded HyperDoc adapter.</li>
+</ul>
+
 <h2>Why this is needed now</h2>
 
 <p>
-  The shared workspace only serves its real purpose when the important incident,
-  architecture, workflow, and handover context is actually present and
-  reachable there. HyperDoc remains the richer diagnostic and authoring side,
-  but the workspace must hold enough curated state to work as a common
+  The shared workspace only serves its real purpose when the important
+  incident, architecture, workflow, and handover context is actually present
+  and reachable there. HyperDoc remains the richer diagnostic and authoring
+  side, but the workspace must hold enough curated state to work as a common
   blackboard between the human operator, ChatGPT, and Codex.
+</p>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="context-window-workspace-shared-blackboard">Context window workspace as shared blackboard</a>.
 </p>
 
 <h2>Related</h2>
@@ -74,8 +137,10 @@
 <ul>
   <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
 </ul>

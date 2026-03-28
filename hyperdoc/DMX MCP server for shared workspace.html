@@ -3,10 +3,11 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  <a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX
-  MCP server for shared workspace</tt></a> records the current HyperDoc-side
-  Streamable HTTP MCP server boundary for the <tt>context-window</tt>
-  workspace. The accepted foundation is local and Codex-first: it exposes the
+  <a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP
+  server for shared workspace</tt></a> is the narrow Streamable HTTP boundary
+  that turns the DMX context-window workspace into a shared blackboard for me,
+  Codex, and later ChatGPT, without bypassing HyperDoc's guarded DMX write
+  contract. The accepted foundation is local and Codex-first: it exposes the
   shared workspace and selected DMX topics or topicmaps as resources, keeps
   the write surface narrow and validated, and stays honest about what is still
   unproven for remote deployment.
@@ -17,6 +18,9 @@
 <ul>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
+  <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
   <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
@@ -67,7 +71,38 @@
   <li>Topic reads use the canonical machine-readable read boundary.</li>
   <li>Workspace note writes use the parent-note write boundary.</li>
   <li>Topicmap-context-like payloads are normalized and validated before dry-run or live execution.</li>
+  <li>Forbidden short keys <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, and <tt>pinned</tt> are rejected at the HyperDoc boundary.</li>
+  <li>Dry-run output shows normalized payload and validation status before any live mutation.</li>
   <li>Dry-run stays the preferred planning mode before live mutation.</li>
+  <li>Live writes stay disabled unless explicit DMX credentials and the live-write flag are configured.</li>
+  <li>Bearer-token and allowed-origin checks keep the remote boundary narrow.</li>
+</ul>
+
+<h2>Why this server exists</h2>
+
+<p>
+  The incident arc around topicmap <tt>919822</tt> proved two things at once:
+  a shared DMX workspace is operationally useful, and raw generic DMX write
+  endpoints are not safe enough to expose directly to collaboration tools.
+</p>
+
+<p>
+  The durable boundary is therefore:
+  <tt>client -> DMX MCP server -> HyperDoc-side validated DMX adapter -> DMX backend</tt>.
+</p>
+
+<h2>Codex connection</h2>
+
+<p>
+  The current project-local Codex entry is <tt>.codex/config.toml</tt> with the
+  local Streamable HTTP endpoint <tt>http://127.0.0.1:8787/mcp</tt>.
+</p>
+
+<ul>
+  <li><tt>codex mcp list --json</tt> shows the configured <tt>dmx-context-window</tt> server.</li>
+  <li><tt>codex mcp get dmx-context-window --json</tt> confirms the Streamable HTTP transport and URL.</li>
+  <li>The MCP server itself was proven live against <tt>https://dmx.ralfbarkow.ch</tt> by reading <tt>workspace/context-window</tt>, topic <tt>907120</tt>, and topic <tt>921464</tt>, then running <tt>validated_dmx_write_dry_run</tt>.</li>
+  <li>Future ChatGPT connector/app attachment should use the same HTTPS-exposed server rather than a separate raw DMX bridge.</li>
 </ul>
 
 <h2>Deployment boundary</h2>
@@ -147,6 +182,22 @@ nixos-rebuild switch --flake .#dreyeck-ch --build-host rgb@dreyeck.ch --target-h
   <li>If the probe output loses <tt>workspace/context-window</tt> or the guarded tools, stop and inspect the activated service before proceeding.</li>
 </ul>
 
+<h2>Out of scope</h2>
+
+<ul>
+  <li>No generic DMX admin surface.</li>
+  <li>No arbitrary topicmap mutation tools.</li>
+  <li>No full DMX synchronization framework.</li>
+  <li>No claim that ChatGPT connector attachment was exercised in this slice.</li>
+</ul>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dmx-mcp-server-shared-workspace">DMX MCP server for shared workspace</a>.
+</p>
+
 <h2>Rollback</h2>
 
 <ol>
@@ -176,4 +227,5 @@ ssh rgb@dreyeck.ch 'sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bi
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
 </ul>

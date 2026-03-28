@@ -91,6 +91,7 @@
   <li>For direct tool or API reads, use <tt>/core/topic/&lt;id&gt;?children=true&amp;assocChildren=true</tt>.</li>
   <li>Confirmed example: <tt>https://dmx.ralfbarkow.ch/core/topic/907120?children=true&amp;assocChildren=true</tt> returned the full note topic <tt>DMX incident remediation for HyperDoc</tt>.</li>
   <li>DMX webclient hash-route URLs are browser navigation entry points, not the canonical machine-readable read boundary for tool fetches.</li>
+  <li>The DMX MCP server for shared workspace now wraps this canonical read path so Codex and future ChatGPT connector clients do not need raw DMX URL knowledge.</li>
 </ul>
 
 <h2>Validated minimal repair</h2>
