@@ -509,6 +509,11 @@ EOF
           program = "${releasePackage}/bin/hyperdoc-release-start";
         };
 
+        apps.mcp-release = {
+          type = "app";
+          program = "${releasePackage}/bin/hyperdoc-mcp-release-start";
+        };
+
         apps.release-verify = {
           type = "app";
           program = "${releasePackage}/bin/hyperdoc-release-verify";
@@ -538,6 +543,7 @@ EOF
     perSystem // {
       nixosModules = {
         hyperdoc-release = import ./nix/modules/hyperdoc-release.nix;
+        hyperdoc-mcp-release = import ./nix/modules/hyperdoc-mcp-release.nix;
         dreyeck-ch = import ./nix/hosts/dreyeck-ch.nix;
       };
 
@@ -551,6 +557,7 @@ EOF
             system.stateVersion = lib.mkDefault "24.11";
             networking.hostName = lib.mkDefault "dreyeck-ch";
             services.hyperdoc.package = self.packages.${pkgs.system}.hyperdoc-release;
+            services.hyperdocMcp.package = self.packages.${pkgs.system}.hyperdoc-release;
 
             environment.systemPackages = with pkgs; [
               git

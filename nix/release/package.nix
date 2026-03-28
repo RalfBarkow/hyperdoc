@@ -93,6 +93,53 @@ let
     '';
   };
 
+  mcpStartScript = pkgs.writeShellApplication {
+    name = "hyperdoc-mcp-release-start";
+    runtimeInputs = [
+      pkgs.git
+    ];
+    text = ''
+      set -euo pipefail
+      ${runtimeInit}
+
+      export HYPERDOC_MCP_BIND_ADDRESS="''${HYPERDOC_MCP_BIND_ADDRESS:-127.0.0.1}"
+      export HYPERDOC_MCP_PORT="''${HYPERDOC_MCP_PORT:-8787}"
+      export HYPERDOC_MCP_ENABLE_LIVE_WRITES="''${HYPERDOC_MCP_ENABLE_LIVE_WRITES:-0}"
+      export HYPERDOC_MCP_WORKSPACE_TOPICMAP_ID="''${HYPERDOC_MCP_WORKSPACE_TOPICMAP_ID:-919822}"
+
+      echo "HyperDoc MCP release: $HYPERDOC_RELEASE_ID"
+      echo "HyperDoc MCP revision: $HYPERDOC_RELEASE_REV"
+      echo "HyperDoc MCP flake.lock sha256: $HYPERDOC_RELEASE_FLAKE_LOCK_SHA256"
+      echo "HyperDoc MCP bind: $HYPERDOC_MCP_BIND_ADDRESS:$HYPERDOC_MCP_PORT"
+      echo "HyperDoc MCP workspace topicmap: $HYPERDOC_MCP_WORKSPACE_TOPICMAP_ID"
+      echo "HyperDoc MCP live writes: $HYPERDOC_MCP_ENABLE_LIVE_WRITES"
+
+      exec ${sbclEnv}/bin/sbcl \
+        --no-userinit \
+        --non-interactive \
+        --disable-debugger \
+        --eval '(require :asdf)' \
+        --eval '(asdf:load-system :hyperdoc/mcp)' \
+        --eval '(sb-sys:enable-interrupt
+                   sb-unix:sigint
+                   (lambda (signal code scp)
+                     (declare (ignore signal code scp))
+                     (format t "~&Stopping DMX MCP server (Ctrl-C).~%")
+                     (finish-output)
+                     (sb-ext:exit :code 130 :abort t)))' \
+        --eval '(let* ((port (or (ignore-errors (parse-integer (or (uiop:getenv "HYPERDOC_MCP_PORT") "8787")))
+                                 8787))
+                       (address (or (uiop:getenv "HYPERDOC_MCP_BIND_ADDRESS")
+                                    "127.0.0.1")))
+                  (hyperdoc:serve-dmx-mcp-server
+                   :port port
+                   :address address)
+                  (format t "DMX_MCP_SERVER_READY~%")
+                  (finish-output)
+                  (loop (sleep 3600)))'
+    '';
+  };
+
   infoScript = pkgs.writeShellApplication {
     name = "hyperdoc-release-info";
     runtimeInputs = [ pkgs.coreutils ];
@@ -334,7 +381,7 @@ let
 in
 pkgs.symlinkJoin {
   name = "hyperdoc-release-${releaseId}";
-  paths = [ startScript infoScript verifyScript ];
+  paths = [ startScript mcpStartScript infoScript verifyScript ];
   postBuild = ''
     mkdir -p "$out/share/hyperdoc"
     ln -s ${releaseSource} "$out/share/hyperdoc/source"

@@ -1,6 +1,9 @@
 { ... }:
 {
-  imports = [ ../modules/hyperdoc-release.nix ];
+  imports = [
+    ../modules/hyperdoc-release.nix
+    ../modules/hyperdoc-mcp-release.nix
+  ];
 
   # Host-specific deployment profile for dreyeck.ch.
   boot.loader.grub.enable = true;
@@ -20,5 +23,22 @@
     publicOrigin = "https://dreyeck.ch";
     dataDir = "/var/lib/hyperdoc/data";
     gitRepositoryRoot = "/home/rgb/workspace/hyperdoc";
+  };
+
+  services.hyperdocMcp = {
+    enable = true;
+    serviceName = "hyperdoc-mcp";
+    bindAddress = "127.0.0.1";
+    port = 8787;
+    dataDir = "/var/lib/hyperdoc/mcp";
+    workspaceTopicmapId = 919822;
+    dmxBaseUrl = "https://dmx.ralfbarkow.ch";
+    enableLiveWrites = false;
+    allowedOrigins = [
+      "https://dreyeck.ch"
+      "https://mcp.dreyeck.ch"
+    ];
+    reverseProxyHost = "mcp.dreyeck.ch";
+    reverseProxyPath = "/mcp";
   };
 }
