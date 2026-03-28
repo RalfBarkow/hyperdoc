@@ -49,6 +49,9 @@
     "hyperdoc/DMX MCP server for shared workspace.html")
    "DMX MCP server for shared workspace"
    '("workspace/context-window"
+     "read_dmx_topicmap"
+     "read_dmx_topic"
+     "resolve_workspace_note"
      "append_workspace_note"
      "update_workspace_note"
      "create_handover"
@@ -68,7 +71,10 @@
    '("dmx.notes.note"
      "dmx.notes.text"
      "The text child is replaced"
-     "cache-busting or no-cache semantics"))
+     "cache-busting or no-cache semantics"
+     "append_workspace_note"
+     "existing-topic-id"
+     "topicmap_context_add"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/DMX machine-readable read paths.html")

@@ -2685,7 +2685,7 @@
   (make-topic
    :id "context-window-workspace-shared-blackboard"
    :title "Context window workspace as shared blackboard"
-   :summary "Collaboration model in which DMX topicmap 919822 acts as a bounded shared blackboard for me, Codex, and later ChatGPT through typed note and handover tools instead of arbitrary topic mutation."
+   :summary "Collaboration model in which DMX topicmap 919822 acts as a bounded shared blackboard for me, ChatGPT, and Codex through typed note and handover tools instead of arbitrary topic mutation."
    :references '("Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
                  "DMX FedWiki Write Model"
@@ -2729,7 +2729,7 @@
   (make-topic
    :id "dmx-mcp-server-for-shared-workspace"
    :title "DMX MCP server for shared workspace"
-   :summary "Streamable HTTP MCP server in HyperDoc that exposes the context-window workspace and selected DMX topics/topicmaps as resources while keeping writes on a narrow validated note and handover boundary."
+   :summary "Streamable HTTP MCP server in HyperDoc that exposes the context-window workspace and selected DMX topics/topicmaps as resources and read tools while keeping writes on a narrow validated note and handover boundary."
    :references '("DMX MCP server for shared workspace"
                  "Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
                  "Context window workspace as shared blackboard"
@@ -2758,7 +2758,7 @@
   (make-topic
    :id "dmx-note-read-write-boundary"
    :title "DMX note read/write boundary"
-   :summary "Read DMX notes through the full parent-note topic projection, but write them only by updating the parent dmx.notes.note payload, which replaces the dmx.notes.text child rather than mutating that child in place."
+   :summary "Read DMX notes through the full parent-note topic projection, write them only by updating the parent dmx.notes.note payload, and treat append_workspace_note as noteKey-idempotent only when the read client can resolve the existing parent note."
    :references '("DMX note read/write boundary"
                  "DMX machine-readable read paths"
                  "DMX FedWiki Write Model"

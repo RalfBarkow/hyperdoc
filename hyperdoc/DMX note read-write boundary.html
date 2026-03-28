@@ -63,6 +63,25 @@
   mutation tools.
 </p>
 
+<h2>noteKey boundary</h2>
+
+<ul>
+  <li><tt>append_workspace_note</tt> is intended to be idempotent by <tt>noteKey</tt> when the read client can resolve the existing parent note URI.</li>
+  <li>Dry run and live execution both plan through the same URI lookup before choosing create vs. update.</li>
+  <li>A dry run with non-empty <tt>existing-topic-id</tt> proves that the reused <tt>noteKey</tt> resolved to an existing note.</li>
+  <li>A dry run with empty <tt>existing-topic-id</tt> does not prove create semantics; it means the note is absent or the current read surface cannot resolve it.</li>
+  <li><tt>update_workspace_note</tt> still requires a concrete <tt>topicId</tt>, so callers need a prior read lookup or explicit id when revising an existing note.</li>
+</ul>
+
+<h2>topicmap-context implication</h2>
+
+<p>
+  The guarded <tt>topicmap_context_add</tt> dry-run boundary remains separate
+  from note idempotency. It requires both <tt>topicmapId</tt> and
+  <tt>topicId</tt>; callers must read or resolve the concrete topic first
+  rather than inferring it from note text alone.
+</p>
+
 <h2>Related</h2>
 
 <ul>
