@@ -81,6 +81,14 @@
   <li>Copied-store and stopped live-store inspection both showed the same short-key-only values: <tt>x=160</tt>, <tt>y=120</tt>, <tt>visibility=true</tt>, <tt>pinned=false</tt>.</li>
 </ul>
 
+<h2>Canonical machine-readable topic read path</h2>
+
+<ul>
+  <li>For direct tool or API reads, use <tt>/core/topic/&lt;id&gt;?children=true&amp;assocChildren=true</tt>.</li>
+  <li>Confirmed example: <tt>https://dmx.ralfbarkow.ch/core/topic/907120?children=true&amp;assocChildren=true</tt> returned the full note topic <tt>DMX incident remediation for HyperDoc</tt>.</li>
+  <li>DMX webclient hash-route URLs are browser navigation entry points, not the canonical machine-readable read boundary for tool fetches.</li>
+</ul>
+
 <h2>Validated minimal repair</h2>
 
 <p>
