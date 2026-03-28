@@ -4,11 +4,15 @@ let
   hyperdocFlake = builtins.getFlake (toString hyperdocRepo);
 in
 {
-  # Import this file from /etc/nixos to add HyperDoc MCP beside the existing
-  # workspace-based hyperdoc.service deployment on dreyeck.
+  # Temporary recovery bridge only.
   #
-  # The HyperDoc repo remains responsible for the reusable MCP package and
-  # module. The host's authoritative system definition stays in /etc/nixos.
+  # Final steady-state path:
+  # 1. run tools/install-dreyeck-hyperdoc-mcp-sidecar.sh
+  # 2. install host-owned copies under /etc/nixos/hyperdoc
+  # 3. import the host-owned /etc/nixos/hyperdoc/dreyeck-hyperdoc-mcp-sidecar.nix
+  #
+  # Keep this repo-import path only as a short-lived escape hatch if the
+  # host-owned copy is missing and recovery must happen quickly.
   imports = [
     (hyperdocRepo + "/nix/modules/hyperdoc-mcp-release.nix")
   ];
