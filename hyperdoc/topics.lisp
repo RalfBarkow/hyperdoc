@@ -877,6 +877,15 @@
                  "Deploy dreyeck.ch from the local flake"
                  "Verify HyperDoc locally before deployment")))
 
+(defun dreyeck-mcp-additive-host-integration-topic ()
+  (make-topic
+   :id "dreyeck-mcp-additive-host-integration"
+   :title "dreyeck MCP additive host integration"
+   :summary "Keep the MCP package and reusable NixOS module in the HyperDoc repo, but import an additive sidecar module into authoritative /etc/nixos so hyperdoc-mcp runs beside the existing workspace-based hyperdoc.service without replacing the host definition."
+   :references '("Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
+                 "DMX MCP server for shared workspace"
+                 "Roll back HyperDoc on dreyeck.ch")))
+
 (defun git-repository-root-override-semantics-topic ()
   (make-topic
    :id "git-repository-root-override-semantics"
@@ -2665,6 +2674,7 @@
    :title "DMX MCP server for shared workspace"
    :summary "Streamable HTTP MCP server that projects the DMX context-window workspace as a shared blackboard and routes every narrow write through HyperDoc's validated DMX adapter instead of raw permissive DMX endpoints."
    :references '("DMX MCP server for shared workspace"
+                 "Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
                  "Context window workspace as shared blackboard"
                  "DMX FedWiki Write Model"
                  "HyperDoc DMX architectural implications"
@@ -2721,6 +2731,7 @@
    :title "DMX MCP server for shared workspace"
    :summary "Streamable HTTP MCP server in HyperDoc that exposes the context-window workspace and selected DMX topics/topicmaps as resources while keeping writes on a narrow validated note and handover boundary."
    :references '("DMX MCP server for shared workspace"
+                 "Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
                  "Context window workspace as shared blackboard"
                  "DMX note read/write boundary"
                  "DMX machine-readable read paths"

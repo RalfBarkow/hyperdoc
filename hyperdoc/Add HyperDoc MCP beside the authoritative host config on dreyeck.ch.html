@@ -1,0 +1,193 @@
+<h1>Add HyperDoc MCP beside the authoritative host config on dreyeck.ch</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Add <tt>hyperdoc-mcp</tt> as a sidecar service in dreyeck's existing host
+  configuration. Do not switch the live host to
+  <tt>nixosConfigurations.dreyeck-ch</tt> for this slice.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="dreyeck MCP additive host integration"><tt>dreyeck MCP additive host integration</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="Deployment command locality"><tt>Deployment command locality</tt></a></li>
+  <li><a hyperbook="topics" page="NixOS generation rollback"><tt>NixOS generation rollback</tt></a></li>
+</ul>
+
+<h2>Boundary correction</h2>
+
+<p>
+  The plausible expectation was that the repo-owned
+  <tt>nixosConfigurations.dreyeck-ch</tt> would be the cleanest activation path
+  because it already described the MCP service, nginx route, and ACME intent.
+</p>
+
+<p>
+  The observed reality is that switching that full host profile on
+  <tt>dreyeck.ch</tt> replaced core host-owned definitions such as
+  <tt>rgb</tt>, <tt>sshd</tt>, and other production-local settings. Rollback
+  restored the real host model.
+</p>
+
+<p>
+  This is a disappointed expectation, not a merely false one, because the repo
+  already shipped a full host profile that looked deployable for the production
+  host. The repair is to move production activation authority back to
+  <tt>/etc/nixos</tt> and keep the repo responsible only for reusable MCP
+  artifacts.
+</p>
+
+<h2>Integration split</h2>
+
+<h3>HyperDoc repo</h3>
+
+<ul>
+  <li>Owns the MCP Lisp runtime and guarded tool contract.</li>
+  <li>Owns the reusable NixOS module <tt>nix/modules/hyperdoc-mcp-release.nix</tt>.</li>
+  <li>Owns the additive sidecar file <tt>nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix</tt>.</li>
+  <li>Must not become the authoritative definition of the whole <tt>dreyeck.ch</tt> host.</li>
+</ul>
+
+<h3>/etc/nixos on dreyeck</h3>
+
+<ul>
+  <li>Owns the active host definition, imported modules, users, sshd, firewall, and other production-local settings.</li>
+  <li>Activates the additive MCP sidecar beside the existing <tt>hyperdoc.service</tt>.</li>
+  <li>Owns the final nginx and ACME activation path because those are host-wide concerns.</li>
+</ul>
+
+<h2>Smallest additive config slice</h2>
+
+<p>
+  The repo-side sidecar file is
+  <tt>/home/rgb/workspace/hyperdoc/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix</tt>.
+  Import that file from <tt>/etc/nixos/configuration.nix</tt> or from the
+  host's existing import tree.
+</p>
+
+<pre>
+imports = [
+  ./hardware-configuration.nix
+  /home/rgb/workspace/hyperdoc/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix
+];
+</pre>
+
+<p>
+  The sidecar only adds <tt>hyperdoc-mcp</tt>, binds it to
+  <tt>127.0.0.1:8787</tt>, proxies <tt>https://mcp.dreyeck.ch/mcp</tt> through
+  nginx, and keeps <tt>HYPERDOC_MCP_ENABLE_LIVE_WRITES=0</tt> by default. It
+  does not edit the existing <tt>hyperdoc.service</tt> deployment.
+</p>
+
+<h2>Operator steps</h2>
+
+<ol>
+  <li>Confirm the repo-side sidecar is present on dreyeck:
+<pre>
+ls /home/rgb/workspace/hyperdoc/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix
+nix flake metadata /home/rgb/workspace/hyperdoc
+</pre>
+  </li>
+  <li>Add the import to the authoritative host config:
+<pre>
+sudoedit /etc/nixos/configuration.nix
+</pre>
+  </li>
+  <li>If dreyeck already uses a host-owned flake in <tt>/etc/nixos</tt>, keep
+  using that host-owned activation path. Do not replace it with
+  <tt>/home/rgb/workspace/hyperdoc#dreyeck-ch</tt>.</li>
+  <li>Test the additive activation without making it persistent:
+<pre>
+sudo nixos-rebuild test
+</pre>
+  </li>
+  <li>Probe the service contract on the host and through nginx:
+<pre>
+systemctl status hyperdoc-mcp --no-pager --lines=20
+curl -i http://127.0.0.1:8787/mcp
+curl -i https://mcp.dreyeck.ch/mcp
+DMX_MCP_URL=https://mcp.dreyeck.ch/mcp python3 /home/rgb/workspace/hyperdoc/tools/probe-dmx-mcp-server.py
+DMX_MCP_URL=https://mcp.dreyeck.ch/mcp DMX_MCP_TOPIC_URI=dmx://topic/907120 python3 /home/rgb/workspace/hyperdoc/tools/probe-dmx-mcp-server.py
+</pre>
+  </li>
+  <li>If all probes remain green, persist the same <tt>/etc/nixos</tt>
+  generation:
+<pre>
+sudo nixos-rebuild switch
+</pre>
+  </li>
+</ol>
+
+<h2>Good outputs</h2>
+
+<ul>
+  <li><tt>systemctl status hyperdoc-mcp</tt> shows <tt>active (running)</tt> and <tt>hyperdoc-mcp-release-start</tt>.</li>
+  <li><tt>curl -i http://127.0.0.1:8787/mcp</tt> returns HTTP <tt>405</tt> with the JSON error <tt>method_not_allowed</tt>.</li>
+  <li><tt>curl -i https://mcp.dreyeck.ch/mcp</tt> returns the same MCP surface through nginx.</li>
+  <li>The probe still reports <tt>INIT_STATUS 200</tt>, <tt>WORKSPACE_READ_STATUS 200</tt>, <tt>WORKSPACE_TOPICMAP_ID 919822</tt>, and <tt>DRY_RUN_VALIDATION_STATUS canonical</tt>.</li>
+</ul>
+
+<h2>ACME diagnosis for mcp.dreyeck.ch</h2>
+
+<p>
+  The observed facts already narrow the failure boundary:
+</p>
+
+<ul>
+  <li>The MCP app working locally proves the Lisp runtime and <tt>127.0.0.1:8787</tt> bind are correct.</li>
+  <li>The nginx proxy path working proves <tt>mcp.dreyeck.ch/mcp</tt> is wired to the MCP service.</li>
+  <li>The HTTPS route answering proves nginx is serving the virtual host on <tt>443</tt>.</li>
+  <li>The local manual challenge probe reaching nginx and returning <tt>404</tt> is expected outside an active ACME order; it proves nginx saw the request but had no challenge file to serve at that moment.</li>
+  <li>The Let's Encrypt <tt>HTTP-01</tt> timeout therefore points to public <tt>port 80</tt> reachability or authoritative DNS path problems before the request reaches nginx. It does not implicate the MCP application or the proven <tt>/mcp</tt> reverse-proxy route.</li>
+</ul>
+
+<p>
+  The next checks therefore belong at the host edge: confirm the public
+  <tt>A</tt> and <tt>AAAA</tt> records for <tt>mcp.dreyeck.ch</tt>, confirm
+  public <tt>port 80</tt> reachability to dreyeck, and confirm that no
+  firewall, router, or IPv6 mismatch drops the ACME challenge before nginx can
+  answer it.
+</p>
+
+<h2>Failure checks</h2>
+
+<ul>
+  <li>If the host-owned activation proposes unrelated core host changes, stop; this MCP slice is meant to be additive.</li>
+  <li>If <tt>http://127.0.0.1:8787/mcp</tt> fails, inspect <tt>hyperdoc-mcp.service</tt>, not nginx.</li>
+  <li>If local MCP and public HTTPS both work but <tt>HTTP-01</tt> still times out, inspect public <tt>port 80</tt> reachability and DNS, not the MCP app.</li>
+</ul>
+
+<h2>Rollback</h2>
+
+<ol>
+  <li>Rollback the host-owned generation:
+<pre>
+sudo nixos-rebuild switch --rollback
+</pre>
+  </li>
+  <li>If a specific generation must be restored:
+<pre>
+sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bin/switch-to-configuration switch
+</pre>
+  </li>
+  <li>Re-run the local MCP and nginx probes before attempting another activation.</li>
+</ol>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dreyeck-mcp-additive-host-integration">dreyeck MCP additive host integration</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Roll back HyperDoc on dreyeck.ch">Roll back HyperDoc on dreyeck.ch</a></li>
+  <li><a page="Verify HyperDoc on dreyeck.ch">Verify HyperDoc on dreyeck.ch</a></li>
+  <li><a page="Back up dreyeck.ch before deployment">Back up dreyeck.ch before deployment</a></li>
+</ul>
