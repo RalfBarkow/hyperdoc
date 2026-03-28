@@ -38,6 +38,106 @@
   (hyperdoc::make-dmx-topicmap-view-props-json-object
    :x x :y y :visibility visibility :pinned pinned))
 
+(defun mcp-test-header-value (headers name)
+  (cdr (find name headers :test #'string-equal :key #'car)))
+
+(defun mcp-test-json-stream (object)
+  (make-string-input-stream (hyperdoc::encode-json-string object)))
+
+(defun run-dmx-workspace-note-http-single-content-type-smoke-test ()
+  (let ((original (symbol-function 'drakma:http-request))
+        (create-call nil)
+        (add-call nil)
+        (update-call nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method additional-headers content content-type
+                               &allow-other-keys)
+                   (cond
+                     ((and (eq method :get)
+                           (search "/core/topic/uri/" url))
+                      (values (make-string-input-stream "") 404 nil nil nil "Not Found"))
+                     ((and (eq method :post)
+                           (search "/core/topic" url))
+                      (setf create-call (list :url url
+                                              :headers additional-headers
+                                              :content-type content-type
+                                              :content content))
+                      (values
+                       (mcp-test-json-stream
+                        (mcp-test-json-object
+                         "id" 921742
+                         "uri" "hyperdoc:mcp/workspace-note/context-window-workspace-as-shared-blackboard"
+                         "typeUri" "dmx.notes.note"
+                         "value" "Context window workspace as shared blackboard"))
+                       200 nil nil nil "OK"))
+                     ((and (eq method :post)
+                           (search "/topicmaps/919822/topic/921742" url))
+                      (setf add-call (list :url url
+                                           :headers additional-headers
+                                           :content-type content-type
+                                           :content content))
+                      (values (make-string-input-stream "") 204 nil nil nil "No Content"))
+                     ((and (eq method :get)
+                           (search "/core/topic/907120?" url))
+                      (values
+                       (mcp-test-json-stream
+                        (mcp-test-json-object
+                         "id" 907120
+                         "uri" "dmx://topic/907120"
+                         "typeUri" "dmx.notes.note"
+                         "value" "DMX incident remediation for HyperDoc"
+                         "children" (mcp-test-json-object
+                                     "dmx.notes.title" "DMX incident remediation for HyperDoc"
+                                     "dmx.notes.text" "Existing remediation body")))
+                       200 nil nil nil "OK"))
+                     ((and (eq method :put)
+                           (search "/core/topic/907120" url))
+                      (setf update-call (list :url url
+                                              :headers additional-headers
+                                              :content-type content-type
+                                              :content content))
+                      (values
+                       (mcp-test-json-stream
+                        (mcp-test-json-object
+                         "id" 907120
+                         "uri" "dmx://topic/907120"
+                         "typeUri" "dmx.notes.note"
+                         "value" "DMX incident remediation for HyperDoc"))
+                       200 nil nil nil "OK"))
+                     (t
+                      (error "Unexpected Drakma call ~S ~S" method url)))))
+           (let ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                        :base-url "https://dmx.ralfbarkow.ch")))
+             (hyperdoc::execute-dmx-workspace-note-write
+              "Context window workspace as shared blackboard"
+              "Shared-blackboard intent and collaboration context."
+              :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
+              :client client
+              :note-key "context-window-workspace-as-shared-blackboard"
+              :dry-run nil)
+             (hyperdoc::execute-dmx-workspace-note-update
+              907120
+              :text "Updated remediation body."
+              :client client
+              :dry-run nil))
+           (dolist (call (list create-call add-call update-call))
+             (mcp-assert-true call "Each guarded HTTP write call must be captured")
+             (mcp-assert-equal "application/json"
+                               (getf call :content-type)
+                               "Guarded HTTP write must keep Drakma content-type")
+             (mcp-assert-true
+              (null (mcp-test-header-value (getf call :headers) "Content-Type"))
+              "Guarded HTTP write must not duplicate Content-Type in additional headers"))
+           (mcp-assert-true
+            (search "\"dmx.notes.title\"" (getf create-call :content))
+            "Guarded create payload must still carry the note title child")
+           (mcp-assert-true
+            (search "\"dmx.notes.text\"" (getf update-call :content))
+            "Guarded update payload must still carry the note text child"))
+      (setf (symbol-function 'drakma:http-request) original))))
+
 (defun mcp-test-seed-note (client id title text &key (topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*) (x 160) (y 120))
   (let ((topic (hyperdoc::dmx-import-create-topic
                 client
@@ -371,6 +471,7 @@
   t)
 
 (defun run-dmx-mcp-smoke-tests ()
+  (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-mcp-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
