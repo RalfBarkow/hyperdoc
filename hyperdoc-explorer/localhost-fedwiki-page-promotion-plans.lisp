@@ -86,10 +86,10 @@
   (let ((page (promotion-dmx-repair-runbook-page))
         (runbook (promotion-dmx-repair-runbook-object)))
     (views:html
-      (:div :style "margin: 0.85rem 0; padding: 0.8rem; border: 1px solid #b86; background: #fff8f2;"
-            (:strong (views:esc "DMX backend block."))
+      (:div :style "margin: 0.85rem 0; padding: 0.8rem; border: 1px solid #7a9; background: #f4fbf6;"
+            (:strong (views:esc "DMX repair and guarded-write boundary."))
             (:span (views:esc
-                    " Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471. No further DMX writes should be attempted until backend/admin repair."))
+                    " Topicmap 919822 was repaired live after the short-key-only topicmap-context defect on assocs 921404 and 921471. HyperDoc now keeps DMX writes behind explicit long-form payload validation and dry-run-first review. The original writer remains unproven, so DMX is treated as a valuable but untrusted persistence boundary."))
             (:div :style "margin-top: 0.45rem;"
                   (promotion-object-link-html
                    page
@@ -228,7 +228,7 @@
       (views:html
         (:p (views:esc (dmx-topicmap-repair-runbook-summary runbook)))
         (:p (views:esc
-             "This runbook is intentionally diagnostic and dry-run-first. It isolates the broken topicmap-context membership/view-props layer in topicmap 919822 and does not justify HyperDoc-side writer changes while the backend repair contract remains opaque."))
+             "This runbook is intentionally diagnostic and dry-run-first. It isolates the broken topicmap-context membership/view-props layer in topicmap 919822, preserves the bounded live repair, and now explains why HyperDoc keeps its own DMX writes behind a separate guarded long-form payload boundary while the original writer remains unknown."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Topicmap id"))
                      (:td (:tt (views:esc
@@ -438,9 +438,9 @@
                    (:td (:tt (views:esc "/topicmaps/919822/assoc/921503"))))
               (:tr (:td (views:esc "Blocked repair targets"))
                    (:td (:tt (views:esc "921404, 921471"))))
-              (:tr (:td (views:esc "Why no default repair action"))
+              (:tr (:td (views:esc "Why no default writer trust"))
                    (:td (views:esc
-                         "The public API does not reveal the exact write payload for /topicmaps/919822/assoc/<assoc-id>.")))))))
+                         "The public API does not reveal the original write payload for /topicmaps/919822/assoc/<assoc-id>, so HyperDoc now validates its own writes explicitly instead of assuming generic DMX view-prop writes are safe.")))))))
 
 (views:defview 👀workflow-status (page html-page)
   (when-let ((plan (find-localhost-fedwiki-page-promotion-plan-for-generated-page
@@ -989,6 +989,14 @@
                      (:td (:tt (views:esc
                                 (promotion-code-string
                                  (getf summary :topicmap-action))))))
+                (:tr (:td (views:esc "View-props validation"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :view-props-validation-status))))))
+                (:tr (:td (views:esc "Forbidden short keys"))
+                     (:td (:tt (views:esc
+                                (promotion-list-string
+                                 (getf summary :forbidden-short-keys))))))
                 (:tr (:td (views:esc "Related HyperDoc page"))
                      (:td (:tt (views:esc
                                 (promotion-code-string
@@ -1001,6 +1009,10 @@
                      (:td (:tt (views:esc
                                 (promotion-dmx-live-write-label
                                  (getf summary :live-write-configured)))))))
+        (:h4 (views:esc "Normalized topicmap view payload"))
+        (:pre :style "white-space: pre-wrap;"
+              (views:esc (or (getf summary :normalized-view-props-json)
+                             "unavailable")))
         (:h4 (views:esc "Seed topic body"))
         (:pre :style "white-space: pre-wrap;"
               (views:esc (or (getf summary :topic-body)
@@ -1791,6 +1803,7 @@
     (let* ((summary (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))
            (source-issue
              (localhost-fedwiki-page-promotion-plan-source-issue plan))
+           (classification (getf summary :classification))
            (provenance (getf summary :provenance))
            (evidence (localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence plan)))
       (views:html
@@ -1812,6 +1825,14 @@
                            (:td (:tt (views:esc
                                       (promotion-code-string
                                        (getf summary :topicmap-action))))))
+                      (:tr (:td (views:esc "View-props validation"))
+                           (:td (:tt (views:esc
+                                      (promotion-code-string
+                                       (getf summary :view-props-validation-status))))))
+                      (:tr (:td (views:esc "Forbidden short keys"))
+                           (:td (:tt (views:esc
+                                      (promotion-list-string
+                                       (getf summary :forbidden-short-keys))))))
                       (:tr (:td (views:esc "Source file"))
                            (:td (:tt (views:esc
                                       (or (getf summary :source-path) "n/a")))))
@@ -1853,35 +1874,72 @@
                            (:td (:tt (views:esc
                                       (promotion-list-string
                                        (getf provenance :source-fragment-ordinals)))))))
+              (:h4 (views:esc "Normalized topicmap view payload"))
+              (:pre :style "white-space: pre-wrap;"
+                    (views:esc (or (getf summary :normalized-view-props-json)
+                                   "unavailable")))
               (:h4 (views:esc "Dry-run evidence"))
               (:pre :style "white-space: pre-wrap;"
                     (views:esc evidence)))
-            (views:html
-              (if (eql (getf summary :classification) :source-unavailable)
-                  (views:html
-                    (:table :class "inspector-table"
-                            (:tr (:td (views:esc "Classification"))
-                                 (:td (:tt (views:esc
-                                            (promotion-code-string
-                                             (getf summary :classification))))))
-                            (:tr (:td (views:esc "Source page id"))
-                                 (:td (:tt (views:esc
-                                            (or (getf summary :source-page-id)
-                                                "n/a")))))
-                            (:tr (:td (views:esc "Source page path"))
-                                 (:td (:tt (views:esc
-                                            (or (getf summary :source-page-path)
-                                                "n/a")))))
-                            (:tr (:td (views:esc "Source issue"))
-                                 (:td
-                                  (promotion-object-link-html
-                                   source-issue
-                                   :display "Inspect source-unavailable issue"
-                                   :select "Overview"
-                                   :fallback "none"))))
-                    (:p (views:esc (getf summary :message)))
-                    (:h4 (views:esc "Dry-run evidence"))
-                    (:pre :style "white-space: pre-wrap;"
-                          (views:esc evidence)))
-                  (views:html
-                    (:p (views:esc (getf summary :message))))))))))))
+            (if (eql classification :source-unavailable)
+                (views:html
+                  (:table :class "inspector-table"
+                          (:tr (:td (views:esc "Classification"))
+                               (:td (:tt (views:esc
+                                          (promotion-code-string
+                                           classification)))))
+                          (:tr (:td (views:esc "Source page id"))
+                               (:td (:tt (views:esc
+                                          (or (getf summary :source-page-id)
+                                              "n/a")))))
+                          (:tr (:td (views:esc "Source page path"))
+                               (:td (:tt (views:esc
+                                          (or (getf summary :source-page-path)
+                                              "n/a")))))
+                          (:tr (:td (views:esc "Source issue"))
+                               (:td
+                                (promotion-object-link-html
+                                 source-issue
+                                 :display "Inspect source-unavailable issue"
+                                 :select "Overview"
+                                 :fallback "none"))))
+                  (:p (views:esc (getf summary :message)))
+                  (:h4 (views:esc "Dry-run evidence"))
+                  (:pre :style "white-space: pre-wrap;"
+                        (views:esc evidence)))
+                (if (eql classification :payload-invalid)
+                    (views:html
+                      (:table :class "inspector-table"
+                              (:tr (:td (views:esc "Classification"))
+                                   (:td (:tt (views:esc
+                                              (promotion-code-string
+                                               classification)))))
+                              (:tr (:td (views:esc "Workspace topicmap id"))
+                                   (:td (:tt (views:esc
+                                              (promotion-code-string
+                                               (getf summary :workspace-topicmap-id))))))
+                              (:tr (:td (views:esc "Missing long-form keys"))
+                                   (:td (:tt (views:esc
+                                              (promotion-list-string
+                                               (getf summary :missing-long-keys))))))
+                              (:tr (:td (views:esc "Forbidden short keys"))
+                                   (:td (:tt (views:esc
+                                              (promotion-list-string
+                                               (getf summary :forbidden-short-keys))))))
+                              (:tr (:td (views:esc "Validation error"))
+                                   (:td
+                                    (promotion-object-link-html
+                                     (getf summary :validation-error)
+                                     :display "Inspect validation error"
+                                     :select "Condition"
+                                     :fallback "none"))))
+                      (:p (views:esc (getf summary :message)))
+                      (:h4 (views:esc "Normalized topicmap view payload"))
+                      (:pre :style "white-space: pre-wrap;"
+                            (views:esc (or (getf summary :normalized-view-props-json)
+                                           "unavailable")))
+                      (:h4 (views:esc "Dry-run evidence"))
+                      (:pre :style "white-space: pre-wrap;"
+                            (views:esc evidence)))
+                    (views:html
+                      (:p (views:esc (getf summary :message))))))))))))

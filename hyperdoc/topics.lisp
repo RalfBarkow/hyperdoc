@@ -2512,15 +2512,72 @@
                  "Understanding ASDF Systems in HyperDoc"
                  "SBCL Process")))
 
+(defun generated-topic-asset-form-operator-named-p (value name)
+  (and (symbolp value)
+       (string= (symbol-name value) name)))
+
+(defun generated-topic-asset-topic-plist (form)
+  (when (and (consp form)
+             (generated-topic-asset-form-operator-named-p
+              (first form)
+              "DEFUN"))
+    (let ((body (cdddr form)))
+      (when (and (= (length body) 1)
+                 (consp (first body))
+                 (generated-topic-asset-form-operator-named-p
+                  (first (first body))
+                  "MAKE-TOPIC"))
+        (rest (first body))))))
+
+(defun unquote-generated-topic-value (value)
+  (if (and (consp value)
+           (eq (first value) 'quote))
+      (second value)
+      value))
+
+(defun generated-topic-from-asset (asset-relative-path topic-id)
+  (let ((asset-path (asdf:system-relative-pathname :hyperdoc asset-relative-path)))
+    (when (uiop:file-exists-p asset-path)
+      (with-open-file (stream asset-path
+                              :direction :input
+                              :external-format :utf-8)
+        (loop for form = (read stream nil :eof)
+              until (eq form :eof)
+              for topic-plist = (generated-topic-asset-topic-plist form)
+              when (and topic-plist
+                        (string= (or (getf topic-plist :id) "")
+                                 topic-id))
+                do (return
+                     (make-topic
+                      :id (getf topic-plist :id)
+                      :title (getf topic-plist :title)
+                      :summary (getf topic-plist :summary)
+                      :references
+                      (copy-list
+                       (unquote-generated-topic-value
+                        (getf topic-plist :references))))))))))
+
+(defun make-generated-page-topic-with-fallback
+    (topic-id chunk-finder asset-relative-path)
+  (handler-case
+      (let ((chunk (funcall chunk-finder topic-id :signal-error? t)))
+        (make-topic
+         :id (id-of chunk)
+         :title (title-of chunk)
+         :summary (summary-of chunk)
+         :references (references-of chunk)))
+    (error (condition)
+      (or (generated-topic-from-asset asset-relative-path topic-id)
+          (error "Failed to reconstruct generated topic ~S from source pipeline (~A) or fallback asset ~A."
+                 topic-id
+                 condition
+                 asset-relative-path)))))
+
 (defun make-the-life-cycle-of-collective-knowledge-topic (topic-id)
-  (let ((chunk (find-the-life-cycle-of-collective-knowledge-topic-chunk
-                topic-id
-                :signal-error? t)))
-    (make-topic
-     :id (id-of chunk)
-     :title (title-of chunk)
-     :summary (summary-of chunk)
-     :references (references-of chunk))))
+  (make-generated-page-topic-with-fallback
+   topic-id
+   #'find-the-life-cycle-of-collective-knowledge-topic-chunk
+   *the-life-cycle-of-collective-knowledge-topic-asset*))
 
 (defun the-life-cycle-of-collective-knowledge-topic ()
   (make-the-life-cycle-of-collective-knowledge-topic
@@ -2551,14 +2608,10 @@
    "stable-software-environments"))
 
 (defun make-reproducible-devenv-as-knowledge-artifact-topic (topic-id)
-  (let ((chunk (find-reproducible-devenv-as-knowledge-artifact-topic-chunk
-                topic-id
-                :signal-error? t)))
-    (make-topic
-     :id (id-of chunk)
-     :title (title-of chunk)
-     :summary (summary-of chunk)
-     :references (references-of chunk))))
+  (make-generated-page-topic-with-fallback
+   topic-id
+   #'find-reproducible-devenv-as-knowledge-artifact-topic-chunk
+   *reproducible-devenv-as-knowledge-artifact-topic-asset*))
 
 (defun reproducible-devenv-as-knowledge-artifact-topic ()
   (make-reproducible-devenv-as-knowledge-artifact-topic
@@ -2576,23 +2629,47 @@
   (make-topic
    :id "localhost-fedwiki-page-promotion-workflow"
    :title "Localhost FedWiki page promotion workflow"
-   :summary "Reusable workflow that reads a localhost FedWiki page, normalizes story items and fragments, promotes topic chunks, composes a durable HyperDoc page, and optionally plans a dry-run DMX snippet twin without collapsing authored pages into live proxies."
+   :summary "Reusable workflow that reads a localhost FedWiki page, normalizes story items and fragments, promotes topic chunks, composes a durable HyperDoc page, and routes optional DMX dry-run or live snippet writes through a guarded long-form payload boundary without collapsing authored pages into live proxies."
    :references '("Localhost FedWiki page promotion workflow"
                  "The Life Cycle of Collective Knowledge"
                  "Reproducible DevEnv as Knowledge Artifact"
                  "Authored topic factories"
                  "DMX FedWiki Write Model"
+                 "HyperDoc DMX architectural implications"
                  "Documentation Surfaces in HyperDoc")))
+
+(defun dmx-fedwiki-write-model-topic ()
+  (make-topic
+   :id "dmx-fedwiki-write-model"
+   :title "DMX FedWiki Write Model"
+   :summary "HyperDoc-side DMX write contract that treats DMX as a valuable but untrusted persistence boundary and routes topicmap-context writes through canonical long-form payload validation."
+   :references '("DMX FedWiki Write Model"
+                 "DMX topicmap 919822 repair runbook"
+                 "HyperDoc DMX architectural implications"
+                 "FedWiki Site to DMX Import"
+                 "Localhost FedWiki page promotion workflow")))
 
 (defun dmx-topicmap-919822-repair-runbook-topic ()
   (make-topic
    :id "dmx-topicmap-919822-repair-runbook"
    :title "DMX topicmap 919822 repair runbook"
-   :summary "Read-first HyperDoc runbook for diagnosing the broken topicmap-context membership/view-props defect in DMX topicmap 919822 without guessing the hidden backend repair payload."
+   :summary "Durable incident and repair runbook for the short-key-only topicmap-context defect that broke DMX topicmap 919822, including diagnosis, live repair, wider audit, and rollback."
    :references '("DMX topicmap 919822 repair runbook"
                  "Localhost FedWiki page promotion workflow"
                  "DMX FedWiki Write Model"
+                 "HyperDoc DMX architectural implications"
                  "Concepts, DMX Topics, and Topic Maps")))
+
+(defun hyperdoc-dmx-architectural-implications-topic ()
+  (make-topic
+   :id "hyperdoc-dmx-architectural-implications"
+   :title "HyperDoc DMX architectural implications"
+   :summary "Architectural consequences of the DMX topicmap 919822 incident: HyperDoc keeps DMX writes narrow, typed, dry-run-first, and fail-soft because generic DMX persistence boundaries cannot be assumed safe by default."
+   :references '("HyperDoc DMX architectural implications"
+                 "DMX topicmap 919822 repair runbook"
+                 "DMX FedWiki Write Model"
+                 "Localhost FedWiki page promotion workflow"
+                 "Failure as Inspectable Object")))
 
 (defun image-oriented-development-topic ()
   (make-topic

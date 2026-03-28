@@ -43,6 +43,41 @@
                      (dmx-import-http-status-code-of condition)
                      (dmx-import-http-url-of condition)))))
 
+(define-condition dmx-topicmap-view-props-validation-error (fedwiki-dmx-import-error)
+  ((boundary
+    :reader dmx-topicmap-view-props-validation-boundary-of
+    :initarg :boundary)
+   (payload
+    :reader dmx-topicmap-view-props-validation-payload-of
+    :initarg :payload)
+   (normalized-payload
+    :reader dmx-topicmap-view-props-validation-normalized-payload-of
+    :initarg :normalized-payload
+    :initform nil)
+   (missing-long-keys
+    :reader dmx-topicmap-view-props-validation-missing-long-keys-of
+    :initarg :missing-long-keys
+    :initform nil)
+   (forbidden-short-keys
+    :reader dmx-topicmap-view-props-validation-forbidden-short-keys-of
+    :initarg :forbidden-short-keys
+    :initform nil)
+   (unknown-keys
+    :reader dmx-topicmap-view-props-validation-unknown-keys-of
+    :initarg :unknown-keys
+    :initform nil)
+   (duplicate-fields
+    :reader dmx-topicmap-view-props-validation-duplicate-fields-of
+    :initarg :duplicate-fields
+    :initform nil)
+   (invalid-field-types
+    :reader dmx-topicmap-view-props-validation-invalid-field-types-of
+    :initarg :invalid-field-types
+    :initform nil))
+  (:report (lambda (condition stream)
+             (format stream "~A"
+                     (fedwiki-dmx-import-message-of condition)))))
+
 (defstruct fedwiki-import-candidate
   external-key
   domain
@@ -98,6 +133,205 @@
 (defgeneric dmx-import-topic-in-topicmap-p (client topicmap-id topic-id))
 (defgeneric dmx-import-add-topic-to-topicmap (client topicmap-id topic-id view-props))
 (defgeneric dmx-import-set-topic-view-props (client topicmap-id topic-id view-props))
+
+(defparameter *dmx-topicmap-view-prop-specs*
+  '((:field :x
+     :long-key "dmx.topicmaps.x"
+     :short-key "x"
+     :type-label "integer")
+    (:field :y
+     :long-key "dmx.topicmaps.y"
+     :short-key "y"
+     :type-label "integer")
+    (:field :visibility
+     :long-key "dmx.topicmaps.visibility"
+     :short-key "visibility"
+     :type-label "boolean")
+    (:field :pinned
+     :long-key "dmx.topicmaps.pinned"
+     :short-key "pinned"
+     :type-label "boolean")))
+
+(defun dmx-topicmap-view-prop-spec-by-field (field)
+  (find field
+        *dmx-topicmap-view-prop-specs*
+        :test #'eq
+        :key (lambda (spec) (getf spec :field))))
+
+(defun dmx-topicmap-view-prop-spec-by-key-name (key-name)
+  (find key-name
+        *dmx-topicmap-view-prop-specs*
+        :test #'string=
+        :key (lambda (spec)
+               (or (and (string= key-name (getf spec :long-key))
+                        (getf spec :long-key))
+                   (and (string= key-name (getf spec :short-key))
+                        (getf spec :short-key))))))
+
+(defun dmx-topicmap-view-prop-key-name (key)
+  (cond
+    ((stringp key)
+     (string-downcase key))
+    ((symbolp key)
+     (string-downcase (symbol-name key)))
+    (t
+     nil)))
+
+(defun dmx-topicmap-view-prop-entries (view-props boundary)
+  (cond
+    ((hash-table-p view-props)
+     (loop for key being the hash-keys of view-props using (hash-value value)
+           collect (cons key value)))
+    ((listp view-props)
+     (unless (evenp (length view-props))
+       (error 'dmx-topicmap-view-props-validation-error
+              :message (format nil
+                               "DMX topicmap view-props validation failed at ~A; property list has odd length"
+                               boundary)
+              :boundary boundary
+              :payload view-props))
+     (loop for (key value) on view-props by #'cddr
+           collect (cons key value)))
+    (t
+     (error 'dmx-topicmap-view-props-validation-error
+            :message (format nil
+                             "DMX topicmap view-props validation failed at ~A; unsupported payload type ~S"
+                             boundary
+                             (type-of view-props))
+            :boundary boundary
+            :payload view-props))))
+
+(defun dmx-topicmap-view-prop-boolean-p (value)
+  (or (eq value t)
+      (null value)))
+
+(defun dmx-topicmap-view-prop-valid-type-p (field value)
+  (ecase field
+    (:x (integerp value))
+    (:y (integerp value))
+    (:visibility (dmx-topicmap-view-prop-boolean-p value))
+    (:pinned (dmx-topicmap-view-prop-boolean-p value))))
+
+(defun make-dmx-topicmap-view-props-json-object (&key x y visibility pinned)
+  (let ((json (make-hash-table :test #'equal)))
+    (setf (gethash "dmx.topicmaps.x" json) x
+          (gethash "dmx.topicmaps.y" json) y
+          (gethash "dmx.topicmaps.visibility" json) visibility
+          (gethash "dmx.topicmaps.pinned" json) pinned)
+    json))
+
+(defun dmx-topicmap-view-props-value (view-props field)
+  (gethash (getf (dmx-topicmap-view-prop-spec-by-field field) :long-key)
+           view-props))
+
+(defun dmx-topicmap-view-props-json-string (view-props)
+  (format nil
+          "{\"dmx.topicmaps.x\":~D,\"dmx.topicmaps.y\":~D,\"dmx.topicmaps.visibility\":~:[false~;true~],\"dmx.topicmaps.pinned\":~:[false~;true~]}"
+          (dmx-topicmap-view-props-value view-props :x)
+          (dmx-topicmap-view-props-value view-props :y)
+          (dmx-topicmap-view-props-value view-props :visibility)
+          (dmx-topicmap-view-props-value view-props :pinned)))
+
+(defun dmx-topicmap-view-props-validation-message
+    (boundary missing-long-keys forbidden-short-keys unknown-keys duplicate-fields invalid-field-types)
+  (with-output-to-string (stream)
+    (format stream
+            "DMX topicmap view-props validation failed at ~A"
+            boundary)
+    (when missing-long-keys
+      (format stream
+              "; missing long-form keys: ~{~A~^, ~}"
+              missing-long-keys))
+    (when forbidden-short-keys
+      (format stream
+              "; forbidden short keys: ~{~A~^, ~}"
+              forbidden-short-keys))
+    (when unknown-keys
+      (format stream
+              "; unknown keys: ~{~A~^, ~}"
+              unknown-keys))
+    (when duplicate-fields
+      (format stream
+              "; duplicate fields: ~{~A~^, ~}"
+              duplicate-fields))
+    (when invalid-field-types
+      (format stream
+              "; invalid field types: ~{~A~^, ~}"
+              invalid-field-types))))
+
+(defun normalize-dmx-topicmap-view-props (view-props &key boundary)
+  (let ((values (make-hash-table :test #'eq))
+        (seen-fields (make-hash-table :test #'eq))
+        (forbidden-short-keys '())
+        (unknown-keys '())
+        (duplicate-fields '()))
+    (dolist (entry (dmx-topicmap-view-prop-entries view-props boundary))
+      (let* ((raw-key (car entry))
+             (value (cdr entry))
+             (key-name (dmx-topicmap-view-prop-key-name raw-key))
+             (spec (and key-name
+                        (dmx-topicmap-view-prop-spec-by-key-name key-name))))
+        (cond
+          ((null key-name)
+           (push (format nil "~S" raw-key) unknown-keys))
+          ((null spec)
+           (push key-name unknown-keys))
+          (t
+           (let ((field (getf spec :field)))
+             (when (string= key-name (getf spec :short-key))
+               (pushnew key-name forbidden-short-keys :test #'string=))
+             (if (gethash field seen-fields)
+                 (pushnew (string-downcase (symbol-name field))
+                          duplicate-fields
+                          :test #'string=)
+                 (setf (gethash field values) value
+                       (gethash field seen-fields) t)))))))
+    (let* ((missing-long-keys
+             (loop for spec in *dmx-topicmap-view-prop-specs*
+                   for field = (getf spec :field)
+                   unless (gethash field seen-fields)
+                     collect (getf spec :long-key)))
+           (invalid-field-types
+             (loop for spec in *dmx-topicmap-view-prop-specs*
+                   for field = (getf spec :field)
+                   for value = (gethash field values)
+                   when (and (gethash field seen-fields)
+                             (not (dmx-topicmap-view-prop-valid-type-p field value)))
+                     collect (format nil
+                                     "~A expected ~A but got ~S"
+                                     (getf spec :long-key)
+                                     (getf spec :type-label)
+                                     value)))
+           (normalized-payload
+             (make-dmx-topicmap-view-props-json-object
+              :x (gethash :x values)
+              :y (gethash :y values)
+              :visibility (gethash :visibility values)
+              :pinned (gethash :pinned values))))
+      (when (or missing-long-keys
+                forbidden-short-keys
+                unknown-keys
+                duplicate-fields
+                invalid-field-types)
+        (error 'dmx-topicmap-view-props-validation-error
+               :message (dmx-topicmap-view-props-validation-message
+                         boundary
+                         missing-long-keys
+                         forbidden-short-keys
+                         unknown-keys
+                         duplicate-fields
+                         invalid-field-types)
+               :boundary boundary
+               :payload view-props
+               :normalized-payload normalized-payload
+               :missing-long-keys missing-long-keys
+               :forbidden-short-keys forbidden-short-keys
+               :unknown-keys unknown-keys
+               :duplicate-fields duplicate-fields
+               :invalid-field-types invalid-field-types))
+      (values normalized-payload
+              (list :status :canonical
+                    :forbidden-short-keys nil)))))
 
 (defun dmx-import-object-id (topic)
   (cond
@@ -173,17 +407,25 @@
 
 (defmethod dmx-import-add-topic-to-topicmap ((client memory-dmx-import-client)
                                              topicmap-id topic-id view-props)
+  (multiple-value-bind (normalized-view-props)
+      (normalize-dmx-topicmap-view-props
+       view-props
+       :boundary 'dmx-import-add-topic-to-topicmap)
   (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
                  (topicmap-memberships-of client))
-        view-props)
-  view-props)
+        normalized-view-props)
+    normalized-view-props))
 
 (defmethod dmx-import-set-topic-view-props ((client memory-dmx-import-client)
                                             topicmap-id topic-id view-props)
+  (multiple-value-bind (normalized-view-props)
+      (normalize-dmx-topicmap-view-props
+       view-props
+       :boundary 'dmx-import-set-topic-view-props)
   (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
                  (topicmap-memberships-of client))
-        view-props)
-  view-props)
+        normalized-view-props)
+    normalized-view-props))
 
 (defun encode-base64-octets (octets)
   (with-output-to-string (stream)
@@ -591,6 +833,15 @@
   (and (hash-table-p topic)
        (gethash "id" topic)))
 
+(defun dmx-topicmap-memberships-path (object-id)
+  (format nil "/topicmaps/object/~D" object-id))
+
+(defun dmx-topicmap-add-topic-path (topicmap-id topic-id)
+  (format nil "/topicmaps/~D/topic/~D" topicmap-id topic-id))
+
+(defun dmx-topicmap-set-topic-view-props-path (topicmap-id topic-id)
+  (format nil "/topicmaps/~D/topic/~D" topicmap-id topic-id))
+
 (defun http-response-body-string (stream)
   (when stream
     (ignore-errors
@@ -683,6 +934,44 @@
                        :put
                        (dmx-topic-update-path topic-id)
                        :payload (list* :id topic-id payload))))
+
+(defun http-topic-present-in-topicmap-p (client topicmap-id topic-id)
+  (let ((topicmaps (http-request-json client
+                                      :get
+                                      (dmx-topicmap-memberships-path topic-id))))
+    (find topicmap-id
+          (json-array-elements topicmaps)
+          :key #'dmx-import-object-id
+          :test #'eql)))
+
+(defmethod dmx-import-topic-in-topicmap-p ((client http-dmx-import-client) topicmap-id topic-id)
+  (validate-http-dmx-import-client client)
+  (and topic-id
+       (http-topic-present-in-topicmap-p client topicmap-id topic-id)))
+
+(defmethod dmx-import-add-topic-to-topicmap ((client http-dmx-import-client)
+                                             topicmap-id topic-id view-props)
+  (validate-http-dmx-import-client client :live? t)
+  (multiple-value-bind (normalized-view-props)
+      (normalize-dmx-topicmap-view-props
+       view-props
+       :boundary 'dmx-import-add-topic-to-topicmap)
+    (http-request-json client
+                       :post
+                       (dmx-topicmap-add-topic-path topicmap-id topic-id)
+                       :body-object normalized-view-props)))
+
+(defmethod dmx-import-set-topic-view-props ((client http-dmx-import-client)
+                                            topicmap-id topic-id view-props)
+  (validate-http-dmx-import-client client :live? t)
+  (multiple-value-bind (normalized-view-props)
+      (normalize-dmx-topicmap-view-props
+       view-props
+       :boundary 'dmx-import-set-topic-view-props)
+    (http-request-json client
+                       :put
+                       (dmx-topicmap-set-topic-view-props-path topicmap-id topic-id)
+                       :body-object normalized-view-props)))
 
 (defun getenv-non-empty (name)
   (let ((value (uiop:getenv name)))

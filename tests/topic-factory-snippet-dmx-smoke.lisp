@@ -16,11 +16,38 @@
 (defparameter *topic-factory-snippet-dmx-custom-topic-value*
   "HyperDoc localhost FedWiki promotion workflow")
 
+(defun make-test-topic-factory-snippet-definition ()
+  (make-instance
+   'hyperdoc::topic-definition-chunk
+   :id "the-life-cycle-of-collective-knowledge-topic-set"
+   :title "The Life Cycle of Collective Knowledge"
+   :summary "Collective knowledge remains alive only when its representations stay usable long enough to be reviewed, recombined, and reused across time."
+   :source-path "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
+   :references '("fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge")
+   :snippet-id "the-life-cycle-of-collective-knowledge-topic-set"
+   :snippet-text
+   (uiop:read-file-string
+    (asdf:system-relative-pathname
+     :hyperdoc
+     "assets/the-life-cycle-of-collective-knowledge-topic.lisp"))
+   :source-origin-id "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+   :source-origin-path "pages/the-life-cycle-of-collective-knowledge"
+   :related-hyperdoc-page-title "The Life Cycle of Collective Knowledge"
+   :related-topic-id "the-life-cycle-of-collective-knowledge"
+   :related-topic-ids '("the-life-cycle-of-collective-knowledge")
+   :provenance
+   '(:provenance-granularity "story-item-fragment"
+     :provenance-classification "story-item-id-and-journal"
+     :source-page-id "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+     :source-page-path "pages/the-life-cycle-of-collective-knowledge"
+     :source-fragment-ordinals (0 3 4 5 6))))
+
 (defun run-topic-factory-snippet-dmx-plan-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7000))
+         (definition (make-test-topic-factory-snippet-definition))
          (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
-                nil
+                definition
                 :workspace-topicmap-id
                 *topic-factory-snippet-dmx-workspace-topicmap-id*
                 :client client))
@@ -33,7 +60,11 @@
          (fragment-ordinals
            (sort (coerce (gethash "source_fragment_ordinals" provenance-object)
                          'list)
-                 #'<)))
+                 #'<))
+         (view-props (hyperdoc::topic-factory-snippet-dmx-write-plan-view-props plan))
+         (normalization
+           (hyperdoc::topic-factory-snippet-dmx-write-plan-view-props-normalization
+            plan)))
     (assert-equal :create
                   (hyperdoc::topic-factory-snippet-dmx-write-plan-topic-action plan)
                   "Fresh snippet plan must start with CREATE")
@@ -69,6 +100,16 @@
     (assert-equal '(0 3 4 5 6)
                   fragment-ordinals
      "Payload provenance JSON must preserve fragment ordinals with canonical provenance")
+    (assert-equal :canonical
+                  (getf normalization :status)
+                  "Snippet plan must keep canonical topicmap view props at the HyperDoc boundary")
+    (assert-equal nil
+                  (getf normalization :forbidden-short-keys)
+                  "Snippet plan must not preserve forbidden short keys in canonical view-props")
+    (assert-true
+     (search "\"dmx.topicmaps.x\":160"
+             (hyperdoc::dmx-topicmap-view-props-json-string view-props))
+     "Snippet plan must preserve the canonical long-form x key in the normalized topicmap payload")
     (assert-true
      (not (search "/Users/" provenance-json))
      "Payload provenance must not preserve machine-local absolute paths")
@@ -81,10 +122,11 @@
 (defun run-topic-factory-snippet-dmx-dry-run-create-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7000))
+         (definition (make-test-topic-factory-snippet-definition))
          (output
            (with-output-to-string (stream)
              (hyperdoc::execute-topic-factory-snippet-dmx-write
-              nil
+              definition
               :workspace-topicmap-id
               *topic-factory-snippet-dmx-workspace-topicmap-id*
               :client client
@@ -94,6 +136,12 @@
                  "Dry-run create output must expose CREATE")
     (assert-true (search "topicmap-action=ADD" output)
                  "Dry-run create output must expose topicmap ADD")
+    (assert-true
+     (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL" output)
+     "Dry-run create output must expose canonical topicmap view-props validation status")
+    (assert-true
+     (search "\"dmx.topicmaps.x\":160" output)
+     "Dry-run create output must expose the normalized long-form topicmap view payload")
     (assert-true (search "source=assets/the-life-cycle-of-collective-knowledge-topic.lisp"
                          output)
                  "Dry-run create output must expose the canonical repo-relative snippet path")
@@ -105,8 +153,9 @@
 (defun run-topic-factory-snippet-dmx-dry-run-update-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7000))
+         (definition (make-test-topic-factory-snippet-definition))
          (bootstrap-plan (hyperdoc::plan-topic-factory-snippet-dmx-write
-                          nil
+                          definition
                           :workspace-topicmap-id
                           *topic-factory-snippet-dmx-workspace-topicmap-id*
                           :client client))
@@ -118,11 +167,12 @@
      client
      *topic-factory-snippet-dmx-workspace-topicmap-id*
      7010
-     '(:x 10 :y 20 :visibility t :pinned nil))
+     (hyperdoc::make-dmx-topicmap-view-props-json-object
+      :x 10 :y 20 :visibility t :pinned nil))
     (let ((output
             (with-output-to-string (stream)
               (hyperdoc::execute-topic-factory-snippet-dmx-write
-               nil
+               definition
                :workspace-topicmap-id
                *topic-factory-snippet-dmx-workspace-topicmap-id*
                :client client
@@ -138,11 +188,66 @@
       (assert-equal 1 (hash-table-count (hyperdoc::topicmap-memberships-of client))
                     "Dry-run update must not change topicmap membership count"))))
 
+(defun run-topic-factory-snippet-dmx-short-key-view-props-rejected-smoke-test ()
+  (let ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                               :next-topic-id 7000)))
+    (handler-case
+        (progn
+          (hyperdoc::dmx-import-add-topic-to-topicmap
+           client
+           *topic-factory-snippet-dmx-workspace-topicmap-id*
+           7010
+           '(:x 10 :y 20 :visibility t :pinned nil))
+          (error "Expected short-key topicmap view props to be rejected before write"))
+      (hyperdoc::dmx-topicmap-view-props-validation-error (condition)
+        (let ((message (hyperdoc::fedwiki-dmx-import-message-of condition)))
+          (assert-true
+           (search "forbidden short keys" message)
+           "Short-key validation error must classify the payload as using forbidden short keys")
+          (assert-true
+           (search "x" message)
+           "Short-key validation error must name the forbidden short x key"))))))
+
+(defun run-topic-factory-snippet-dmx-http-long-form-view-props-smoke-test ()
+  (let ((original (symbol-function 'drakma:http-request))
+        (captured-content nil)
+        (captured-method nil)
+        (captured-url nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method content &allow-other-keys)
+                   (setf captured-url url
+                         captured-method method
+                         captured-content content)
+                   (values (make-string-input-stream "") 204 nil nil nil "No Content")))
+           (let ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                        :base-url "https://dmx.ralfbarkow.ch")))
+             (hyperdoc::dmx-import-add-topic-to-topicmap
+              client
+              *topic-factory-snippet-dmx-workspace-topicmap-id*
+              7010
+              (hyperdoc::make-dmx-topicmap-view-props-json-object
+               :x 160 :y 120 :visibility t :pinned nil))
+             (assert-equal :post captured-method
+                           "HTTP topicmap add must stay a POST")
+             (assert-true
+              (search "/topicmaps/919822/topic/7010" captured-url)
+             "HTTP topicmap add must target the topicmap membership endpoint")
+             (assert-true
+              (search "\"dmx.topicmaps.x\"" captured-content)
+              "HTTP topicmap add must serialize long-form x in the outbound JSON")
+             (assert-true
+              (not (search "\"x\"" captured-content))
+              "HTTP topicmap add must not serialize forbidden short x in the outbound JSON")))
+      (setf (symbol-function 'drakma:http-request) original))))
+
 (defun run-topic-factory-snippet-dmx-custom-topic-value-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7000))
+         (definition (make-test-topic-factory-snippet-definition))
          (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
-                nil
+                definition
                 :workspace-topicmap-id
                 *topic-factory-snippet-dmx-workspace-topicmap-id*
                 :client client
@@ -151,7 +256,7 @@
          (output
            (with-output-to-string (stream)
              (hyperdoc::execute-topic-factory-snippet-dmx-write
-              nil
+              definition
               :workspace-topicmap-id
               *topic-factory-snippet-dmx-workspace-topicmap-id*
               :client client
@@ -173,8 +278,9 @@
 (defun run-topic-factory-snippet-dmx-zettel-payload-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7000))
+         (definition (make-test-topic-factory-snippet-definition))
          (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
-                nil
+                definition
                 :workspace-topicmap-id
                 *topic-factory-snippet-dmx-workspace-topicmap-id*
                 :client client
@@ -229,8 +335,9 @@
                    (values (make-string-input-stream "") 204 nil nil nil "No Content")))
            (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
                                          :base-url "https://dmx.ralfbarkow.ch"))
+                  (definition (make-test-topic-factory-snippet-definition))
                   (plan (hyperdoc::plan-topic-factory-snippet-dmx-write
-                         nil
+                         definition
                          :workspace-topicmap-id
                          *topic-factory-snippet-dmx-workspace-topicmap-id*
                          :client client)))
@@ -248,6 +355,8 @@
   (run-topic-factory-snippet-dmx-plan-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-create-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-update-smoke-test)
+  (run-topic-factory-snippet-dmx-short-key-view-props-rejected-smoke-test)
+  (run-topic-factory-snippet-dmx-http-long-form-view-props-smoke-test)
   (run-topic-factory-snippet-dmx-custom-topic-value-smoke-test)
   (run-topic-factory-snippet-dmx-zettel-payload-smoke-test)
   (run-topic-factory-snippet-dmx-http-no-content-plan-smoke-test)

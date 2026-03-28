@@ -174,17 +174,17 @@
       (assert-true
        (search label surface-overview-html :test #'char=)
        (format nil "Promotion surface overview must expose the triage count label ~A" label)))
-    (dolist (needle (list "DMX backend block."
-                          "Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471."
-                          "No further DMX writes should be attempted until backend/admin repair."
+    (dolist (needle (list "DMX repair and guarded-write boundary."
+                          "Topicmap 919822 was repaired live after the short-key-only topicmap-context defect on assocs 921404 and 921471."
+                          "valuable but untrusted persistence boundary"
                           "Repair runbook page"
                           "Inspect repair runbook object"))
       (assert-true
        (search needle surface-overview-html :test #'char=)
        (format nil "Promotion surface overview must expose ~A" needle)))
-    (dolist (needle (list "DMX backend block."
-                          "Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471."
-                          "No further DMX writes should be attempted until backend/admin repair."
+    (dolist (needle (list "DMX repair and guarded-write boundary."
+                          "Topicmap 919822 was repaired live after the short-key-only topicmap-context defect on assocs 921404 and 921471."
+                          "valuable but untrusted persistence boundary"
                           "Repair runbook page"
                           "Inspect repair runbook object"))
       (assert-true
@@ -199,25 +199,35 @@
                           "Reproducible DevEnv as Knowledge Artifact promotion plan"
                           "the-life-cycle-of-collective-knowledge"
                           "reproducible-devenv-as-knowledge-artifact"
-                          "all fresh"
+                          "source unavailable"
                           "No action needed"
                           "Inspect plan"
                           "Review freshness"
-                          "Review no-action status"))
+                          "Review no-action status"
+                          "Review source issue"))
       (assert-true
        (search needle surface-triage-html :test #'char=)
        (format nil "Promotion surface triage view must expose ~A" needle)))
-    (dolist (html (list surface-attention-html
-                        surface-stale-html
-                        surface-source-unavailable-html
+    (dolist (needle (list "The Life Cycle of Collective Knowledge promotion plan"
+                          "source unavailable"
+                          "Review source issue"))
+      (assert-true
+       (search needle surface-attention-html :test #'char=)
+       (format nil "Attention-needed aggregate filter view must expose ~A" needle)))
+    (dolist (needle (list "The Life Cycle of Collective Knowledge promotion plan"
+                          "Inspect source-unavailable issue"
+                          "source unavailable"))
+      (assert-true
+       (search needle surface-source-unavailable-html :test #'char=)
+       (format nil "Source-unavailable aggregate filter view must expose ~A" needle)))
+    (dolist (html (list surface-stale-html
                         surface-missing-html
                         surface-malformed-html
                         surface-mixed-html))
       (assert-true
        (search "No promotion plans match this scope." html :test #'char=)
        "Empty aggregate filter views must explain that no plans match the current scope"))
-    (dolist (needle (list "The Life Cycle of Collective Knowledge promotion plan"
-                          "Reproducible DevEnv as Knowledge Artifact promotion plan"
+    (dolist (needle (list "Reproducible DevEnv as Knowledge Artifact promotion plan"
                           "No action needed"))
       (assert-true
        (search needle surface-all-fresh-html :test #'char=)
@@ -245,29 +255,17 @@
                                   "DMX dry-run")
                                 "Reproducible DevEnv promotion plan")
     (assert-true
-     (search "story-item-fragment" collective-promoted-html :test #'char=)
-     "Collective knowledge promoted-topics view must expose fragment-derived provenance")
-    (assert-true
-     (search "story-item-id-and-journal" collective-promoted-html :test #'char=)
-     "Collective knowledge promoted-topics view must expose provenance classification")
-    (assert-true
-     (search "story-item" collective-story-items-html :test #'char=)
-     "Collective knowledge story-items view must preserve whole-item normalized provenance")
-    (assert-true
      (search "Status and actions" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose the compact status-and-actions surface")
     (assert-true
-     (search "Page synced" collective-overview-html :test #'char=)
-     "Collective knowledge overview must expose page sync status")
+     (search "fail-soft boundary" collective-overview-html :test #'char=)
+     "Collective knowledge overview must explain the fail-soft source-unavailable boundary")
     (assert-true
-     (search "Snippet synced" collective-overview-html :test #'char=)
-     "Collective knowledge overview must expose snippet sync status")
+     (search "source unavailable" collective-overview-html :test #'char-equal)
+     "Collective knowledge overview must expose source-unavailable status")
     (assert-true
-     (search "Page source fresh" collective-overview-html :test #'char=)
-     "Collective knowledge overview must expose page source freshness")
-    (assert-true
-     (search "Snippet source fresh" collective-overview-html :test #'char=)
-     "Collective knowledge overview must expose snippet source freshness")
+     (search "Inspect source-unavailable issue" collective-overview-html :test #'char=)
+     "Collective knowledge overview must expose the bounded source issue affordance")
     (assert-true
      (search "Page reflected snapshot" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose page reflected-snapshot state")
@@ -281,12 +279,6 @@
      (search "Current source summary" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose the current source summary")
     (assert-true
-     (search "fnv1a64:" collective-overview-html :test #'char-equal)
-     "Collective knowledge overview must expose the normalized source fingerprint value")
-    (assert-true
-     (search "story-item-fragment" collective-overview-html :test #'char=)
-     "Collective knowledge overview must expose fragment-based provenance modes")
-    (assert-true
      (search "Generated HyperDoc page" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose the generated HyperDoc page link")
     (assert-true
@@ -296,29 +288,11 @@
      (search "DMX dry-run summary available" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose DMX dry-run summary availability")
     (assert-true
-     (search "fresh, stale because the reflected fingerprint differs, or unknown because the reflected envelope is missing or malformed"
-             collective-overview-html
-             :test #'char=)
-     "Collective knowledge overview must explain the concise freshness wording")
-    (assert-true
      (search "Page recommended next action" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose page remediation guidance")
     (assert-true
      (search "Snippet recommended next action" collective-overview-html :test #'char=)
      "Collective knowledge overview must expose snippet remediation guidance")
-    (assert-true
-     (search "No regeneration needed; the page artifact already reflects the current source snapshot."
-             collective-overview-html
-             :test #'char=)
-     "Collective knowledge overview must surface the no-change page recommendation")
-    (assert-true
-     (search "No action needed" collective-overview-html :test #'char=)
-     "Collective knowledge overview must surface a passive no-action affordance")
-    (assert-true
-     (search "No regeneration needed; the snippet artifact already reflects the current source snapshot."
-             collective-overview-html
-             :test #'char=)
-     "Collective knowledge overview must surface the no-change snippet recommendation")
     (dolist (label '("Regenerate page artifact"
                      "Regenerate snippet artifact"
                      "Regenerate both artifacts"
@@ -425,16 +399,13 @@
        (search "fingerprint-based comparisons, not semantic diffs" html :test #'char=)
        "Source freshness view must state the conservative fingerprint-based diagnostic model"))
     (assert-true
-     (search "matches reflected snapshot fingerprint" collective-freshness-html :test #'char=)
-     "Collective knowledge source freshness view must explain the aligned no-change case")
+     (search "source unavailable" collective-freshness-html :test #'char-equal)
+     "Collective knowledge source freshness view must expose source-unavailable classification")
     (assert-true
-     (search "No regeneration needed; the page artifact already reflects the current source snapshot."
+     (search "Inspect source-unavailable issue"
              collective-freshness-html
              :test #'char=)
-     "Collective knowledge source freshness view must expose page remediation guidance")
-    (assert-true
-     (search "No action needed" collective-freshness-html :test #'char=)
-     "Collective knowledge source freshness view must expose a passive no-action affordance")
+     "Collective knowledge source freshness view must expose source-unavailable remediation guidance")
     (assert-true
      (search "matches reflected snapshot fingerprint" repro-freshness-html :test #'char=)
      "Second real-page source freshness view must explain the aligned no-change case")
@@ -454,6 +425,12 @@
       (assert-true
        (search "Open generated page" html :test #'char=)
        "Source page view must expose a human-facing generated-page entry point"))
+    (assert-true
+     (search "exact missing-file boundary" collective-source-page-html :test #'char=)
+     "Collective knowledge source-page view must explain the degraded missing-file boundary")
+    (assert-true
+     (search "Inspect source-unavailable issue" collective-source-page-html :test #'char=)
+     "Collective knowledge source-page view must expose the bounded source issue link")
     (assert-equal
      "The Life Cycle of Collective Knowledge"
      (hyperbook:title-of collective-generated-page)
@@ -463,23 +440,8 @@
      (hyperbook:title-of repro-generated-page)
      "Second real-page plan must resolve the correct durable HyperDoc page")
     (assert-true
-     (search "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
-             collective-dmx-html
-             :test #'char=)
-     "Collective knowledge DMX dry-run view must keep repo-relative snippet source metadata")
-    (assert-true
-     (search "pages/the-life-cycle-of-collective-knowledge"
-             collective-dmx-html
-             :test #'char=)
-     "Collective knowledge DMX dry-run view must keep repo-relative FedWiki provenance")
-    (assert-true
      (not (search "/Users/" collective-dmx-html :test #'char=))
      "Collective knowledge DMX dry-run view must not leak machine-local absolute paths")
-    (assert-true
-     (search "pages/reproducible-devenv-as-knowledge-artifact"
-             repro-dmx-html
-             :test #'char=)
-     "Second real page DMX dry-run view must keep repo-relative FedWiki provenance")
     (assert-true
      (not (search "/Users/" repro-dmx-html :test #'char=))
      "Second real page DMX dry-run view must not leak machine-local absolute paths")))
@@ -535,21 +497,21 @@
            (hyperdoc::promotion-triage-count-drilldown-spec
             surface
             :mixed-states))
-         (collective-page-rest
+         (repro-page-rest
            (strip-artifact-envelope-line
             (uiop:read-file-string
              (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
-              collective))))
-         (collective-snippet-rest
+              repro))))
+         (repro-snippet-rest
            (strip-artifact-envelope-line
             (uiop:read-file-string
              (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
-              collective))))
+              repro))))
          (simulated-missing
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective
-            :page-contents collective-page-rest
-            :snippet-contents collective-snippet-rest))
+            repro
+            :page-contents repro-page-rest
+            :snippet-contents repro-snippet-rest))
          (simulated-stale
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
             repro
@@ -561,11 +523,11 @@
              "story-items=simulated; source snapshot intentionally stale for triage counts")) )
          (simulated-malformed
            (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective
+            repro
             :page-contents
-            (malformed-html-envelope-contents collective-page-rest)
+            (malformed-html-envelope-contents repro-page-rest)
             :snippet-contents
-            (malformed-snippet-envelope-contents collective-snippet-rest)))
+            (malformed-snippet-envelope-contents repro-snippet-rest)))
          (simulated-mixed
            (hyperdoc::plist-with-overrides
             repro-status
@@ -611,6 +573,8 @@
          (collective-freshness-spec
            (hyperdoc::promotion-triage-row-freshness-spec collective-row))
          (fresh-action-spec
+           (hyperdoc::promotion-triage-row-action-review-spec repro-row))
+         (collective-action-spec
            (hyperdoc::promotion-triage-row-action-review-spec collective-row))
          (stale-action-spec
            (hyperdoc::promotion-triage-row-action-review-spec stale-row))
@@ -675,13 +639,17 @@
      (getf base-counts :plan-count)
      "Promotion surface base triage counts must expose both real plans")
     (assert-equal
-     2
+     1
      (getf base-counts :all-fresh)
-     "Promotion surface base triage counts must classify both real plans as all fresh")
+     "Promotion surface base triage counts must keep the healthy real plan in the all-fresh bucket")
     (assert-equal
-     0
+     1
      (getf base-counts :attention-needed)
-     "Promotion surface base triage counts must show no attention-needed plans when both are fresh")
+     "Promotion surface base triage counts must mark the source-unavailable plan as attention-needed")
+    (assert-equal
+     1
+     (getf base-counts :source-unavailable)
+     "Promotion surface base triage counts must classify the missing-source real plan as source-unavailable")
     (assert-true
      (eq surface (getf count-attention-spec :target))
      "Attention-needed count drill-down must keep the aggregate surface as its target")
@@ -720,9 +688,9 @@
       (getf repro-row :inspect-target))
      "Reproducible-devenv triage row inspect target must resolve to the correct plan object")
     (assert-equal
-     :all-fresh
+     :source-unavailable
      (getf collective-row :attention-category)
-     "Collective triage row must classify the current real-plan state as all fresh")
+     "Collective triage row must classify the current real-plan state as source-unavailable")
     (assert-equal
      :all-fresh
      (getf repro-row :attention-category)
@@ -736,6 +704,14 @@
      (getf collective-freshness-spec :select)
      "Row-level freshness drill-down must open the per-plan Source freshness view")
     (assert-equal
+     "Source page"
+     (getf collective-action-spec :select)
+     "Source-unavailable row action drill-down must open the per-plan Source page view")
+    (assert-equal
+     "Review source issue"
+     (getf collective-action-spec :label)
+     "Source-unavailable row action drill-down must expose a source-issue label")
+    (assert-equal
      "Overview"
      (getf fresh-action-spec :select)
      "Fresh row action drill-down must open the per-plan Overview view")
@@ -743,10 +719,10 @@
      "Review no-action status"
      (getf fresh-action-spec :label)
      "Fresh row action drill-down must expose a passive no-action label")
-    (assert-equal
-     "No action needed"
-     (getf collective-row :recommended-next-action-summary)
-     "Collective triage row must summarize the fresh case as no action needed")
+    (assert-true
+     (string= (getf collective-row :recommended-next-action-summary)
+              "Page: Inspect source-unavailable issue; Snippet: Inspect source-unavailable issue")
+     "Collective triage row must summarize the source-unavailable next actions compactly")
     (assert-equal
      1
      (getf missing-stale-counts :unknown-missing-envelope)
@@ -1958,11 +1934,11 @@
      (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-output-synced-p repro)
      "Second real-page snippet output must stay synced with the current artifact rendering")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p collective)
-     "Collective knowledge page output must stay fresh relative to the current source snapshot")
+     (not (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p collective))
+     "Collective knowledge page output must no longer report fresh while the localhost source file is unavailable")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p collective)
-     "Collective knowledge snippet output must stay fresh relative to the current source snapshot")
+     (not (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p collective))
+     "Collective knowledge snippet output must no longer report fresh while the localhost source file is unavailable")
     (assert-true
      (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p repro)
      "Second real-page output must stay fresh relative to the current source snapshot")
@@ -2023,6 +1999,16 @@
     (assert-equal :add
                   (getf summary :topicmap-action)
                   "DMX handover summary must add the seed topic to the explicit workspace topicmap")
+    (assert-equal :canonical
+                  (getf summary :view-props-validation-status)
+                  "DMX handover summary must expose canonical topicmap view-props validation status")
+    (assert-equal nil
+                  (getf summary :forbidden-short-keys)
+                  "DMX handover summary must not preserve forbidden short keys")
+    (assert-true
+     (search "\"dmx.topicmaps.x\":160"
+             (getf summary :normalized-view-props-json))
+     "DMX handover summary must expose the normalized long-form topicmap payload")
     (assert-equal "hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"
                   (getf summary :source-path)
                   "DMX handover summary must preserve the repo-relative source file path")
@@ -2070,11 +2056,13 @@
                    "TOPIC_FACTORY_SNIPPET_DMX_TYPE uri=\"dmx.notes.note\""
                    "topic-action=CREATE"
                    "topicmap-action=ADD"
+                   "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
+                   "\"dmx.topicmaps.x\":160"
                    "workspace-topicmap-id=919822"
                    "source=hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"
-                   "DMX backend block."
-                   "Topicmap 919822 is currently blocked by broken topicmap-context assocs 921404 and 921471."
-                   "No further DMX writes should be attempted until backend/admin repair."
+                   "DMX repair and guarded-write boundary."
+                   "Topicmap 919822 was repaired live after the short-key-only topicmap-context defect on assocs 921404 and 921471."
+                   "valuable but untrusted persistence boundary"
                    "Repair runbook page"
                    "Inspect repair runbook object"))
       (assert-true
@@ -2099,6 +2087,37 @@
     (assert-true
      (not (search "/Users/" body))
      "DMX handover body must not preserve machine-local absolute paths")))
+
+(defun run-localhost-fedwiki-page-promotion-guarded-dmx-dry-run-smoke-test ()
+  (let* ((plan (first-healthy-real-localhost-fedwiki-page-promotion-plan))
+         (summary
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
+            plan))
+         (evidence
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
+            plan)))
+    (assert-true plan
+                 "A healthy real promotion plan must remain available for guarded DMX dry-run coverage")
+    (assert-true
+     (getf summary :available)
+     "Real localhost FedWiki promotion plan must keep the DMX dry-run available through the guarded boundary")
+    (assert-equal :canonical
+                  (getf summary :view-props-validation-status)
+                  "Real localhost FedWiki promotion plan must expose canonical topicmap view-props validation status")
+    (assert-equal nil
+                  (getf summary :forbidden-short-keys)
+                  "Real localhost FedWiki promotion plan must not preserve forbidden short keys in the dry-run summary")
+    (assert-true
+     (search "\"dmx.topicmaps.x\":160"
+             (getf summary :normalized-view-props-json))
+     "Real localhost FedWiki promotion plan must expose the normalized long-form topicmap payload")
+    (assert-true
+     (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
+             evidence)
+     "Real localhost FedWiki promotion dry-run evidence must expose canonical topicmap view-props validation status")
+    (assert-true
+     (search "\"dmx.topicmaps.x\":160" evidence)
+     "Real localhost FedWiki promotion dry-run evidence must expose the normalized long-form topicmap payload")))
 
 (defun run-dmx-topicmap-919822-repair-runbook-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -2458,6 +2477,7 @@
   (run-localhost-fedwiki-page-promotion-lookup-boundary-smoke-test)
   (run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test)
   (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
+  (run-localhost-fedwiki-page-promotion-guarded-dmx-dry-run-smoke-test)
   (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
   t)

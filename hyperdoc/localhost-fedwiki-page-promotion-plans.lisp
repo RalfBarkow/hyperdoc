@@ -1418,7 +1418,7 @@
            *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
     (with-output-to-string (stream)
       (format stream
-              "This one-topic handover seeds DMX topicmap ~D with the current HyperDoc-side localhost FedWiki promotion workflow checkpoint and the identifiers needed to continue there.~2%"
+              "This one-topic handover seeds DMX topicmap ~D with the current HyperDoc-side localhost FedWiki promotion workflow checkpoint and the identifiers needed to continue there through the guarded DMX write boundary.~2%"
               topicmap-id)
       (format stream "Current status~%")
       (format stream
@@ -1427,11 +1427,14 @@
               "- ~D real page instances are wired through it.~%"
               (length plans))
       (format stream
-              "- Promotion plans are inspectable, actionable, freshness-aware, and triageable.~%")
+              "- Promotion plans are inspectable, fail-soft, freshness-aware, triageable, and DMX-dry-run-capable.~%")
       (format stream
-              "- Current triage counts: attention-needed=~D, all-fresh=~D, stale=~D, unknown-missing-envelope=~D, unknown-malformed-envelope=~D, mixed-states=~D.~2%"
+              "- Topicmap 919822 was repaired live after malformed short-key-only topicmap-context assocs 921404 and 921471 were diagnosed and fixed in place. The original writer remains unproven.~%")
+      (format stream
+              "- Current triage counts: attention-needed=~D, all-fresh=~D, source-unavailable=~D, stale=~D, unknown-missing-envelope=~D, unknown-malformed-envelope=~D, mixed-states=~D.~2%"
               (getf counts :attention-needed)
               (getf counts :all-fresh)
+              (getf counts :source-unavailable)
               (getf counts :stale)
               (getf counts :unknown-missing-envelope)
               (getf counts :unknown-malformed-envelope)
@@ -1440,7 +1443,9 @@
       (format stream
               "- HyperDoc remains the authoritative inspection and authoring side.~%")
       (format stream
-              "- The DMX write path stays intentionally narrow, explicit, and dry-run-first.~%")
+              "- DMX writes pass only through narrow normalized adapters with canonical long-form topicmap view props.~%")
+      (format stream
+              "- Dry-run remains first-class; DMX is treated as synchronizable/projected, not sole authority.~%")
       (format stream
               "- This slice does not introduce full HyperDoc-to-DMX sync, bulk topic creation, or live automatic repair.~2%")
       (format stream "Proven real instances~%")
@@ -1449,19 +1454,19 @@
                 "- ~A (~A).~%"
                 (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
                  plan)
-                (localhost-fedwiki-page-promotion-plan-id plan)))
+               (localhost-fedwiki-page-promotion-plan-id plan)))
       (format stream "~%Current workflow loop~%")
       (format stream
-              "- normalized localhost source object -> promotion plan -> generated HyperDoc page.~%")
+              "- normalized localhost source object -> promotion plan -> generated HyperDoc page -> topic-factory snippet -> guarded DMX dry-run/write.~%")
       (format stream
               "- Round-trip navigation is available between source object, promotion plan, and generated page.~2%")
       (format stream "Next DMX-oriented work~%")
       (format stream
-              "- Decide the durable DMX topic model for promotion plans, source pages, and generated pages.~%")
+              "- Continue the snippet/topic twin flow on the guarded boundary.~%")
       (format stream
-              "- Decide which workflow objects deserve first-class DMX topics.~%")
+              "- Surface normalized payloads and validation status in plan objects before any live write.~%")
       (format stream
-              "- Decide whether DMX should mirror only summary state or also provenance, freshness, and action state.~2%")
+              "- Keep investigating the original short-key writer separately; do not broaden the live sync contract until that mutation boundary is better understood.~2%")
       (format stream "Identifiers and links~%")
       (format stream "- Target topicmap route: ~A~%"
               (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
@@ -1664,6 +1669,42 @@
     (and client
          (not (typep client 'null-dmx-import-client)))))
 
+(defun localhost-fedwiki-page-promotion-dmx-validation-error-p (condition)
+  (ignore-errors
+    (typep condition 'dmx-topicmap-view-props-validation-error)))
+
+(defun call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
+    (thunk validation-error-handler)
+  (handler-case
+      (funcall thunk)
+    (error (condition)
+      (if (localhost-fedwiki-page-promotion-dmx-validation-error-p condition)
+          (funcall validation-error-handler condition)
+          (error condition)))))
+
+(defun localhost-fedwiki-page-promotion-dmx-validation-failure-summary
+    (condition
+     &key workspace-topicmap-id workspace-topicmap-route topic-title topic-body)
+  (list :available nil
+        :classification :payload-invalid
+        :validation-error condition
+        :workspace-topicmap-id workspace-topicmap-id
+        :workspace-topicmap-route workspace-topicmap-route
+        :topic-title topic-title
+        :topic-body topic-body
+        :normalized-view-props-json
+        (when-let ((normalized-payload
+                     (dmx-topicmap-view-props-validation-normalized-payload-of
+                      condition)))
+          (dmx-topicmap-view-props-json-string normalized-payload))
+        :forbidden-short-keys
+        (copy-list
+         (dmx-topicmap-view-props-validation-forbidden-short-keys-of condition))
+        :missing-long-keys
+        (copy-list
+         (dmx-topicmap-view-props-validation-missing-long-keys-of condition))
+        :message (fedwiki-dmx-import-message-of condition)))
+
 (defun localhost-fedwiki-page-promotion-handover-dmx-write-plan
     (&key
        (surface (current-localhost-fedwiki-page-promotion-surface))
@@ -1695,49 +1736,72 @@
          (definition
            (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
             surface)))
-    (if-let (dmx-plan
-             (localhost-fedwiki-page-promotion-handover-dmx-write-plan
-              :surface surface
-              :workspace-topicmap-id resolved-topicmap-id
-              :client client))
-      (list :available t
-            :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
-            :topic-body (snippet-text-of definition)
-            :snippet-id
-            (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
-            :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
-            :topic-type-uri
-            (topic-factory-snippet-dmx-write-plan-topic-type-uri dmx-plan)
-            :workspace-topicmap-id
-            (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
-            :workspace-topicmap-route
-            (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
-             resolved-topicmap-id)
-            :topic-action
-            (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
-            :topicmap-action
-            (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
-            :source-path
-            (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
-            :related-hyperdoc-page-title
-            (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
-             dmx-plan)
-            :related-topic-id
-            (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
-            :provenance
-            (copy-tree
-             (topic-factory-snippet-dmx-write-plan-provenance dmx-plan))
-            :live-write-configured
-            (localhost-fedwiki-page-promotion-live-dmx-client-configured-p))
-      (list :available nil
-            :workspace-topicmap-id resolved-topicmap-id
-            :workspace-topicmap-route
-            (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
-             resolved-topicmap-id)
-            :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
-            :topic-body (snippet-text-of definition)
-            :message
-            "DMX handover planner is unavailable; load :hyperdoc/dmx-import to inspect the ready-to-execute payload."))))
+    (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
+     (lambda ()
+       (if-let (dmx-plan
+                (localhost-fedwiki-page-promotion-handover-dmx-write-plan
+                 :surface surface
+                 :workspace-topicmap-id resolved-topicmap-id
+                 :client client))
+         (list :available t
+               :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
+               :topic-body (snippet-text-of definition)
+               :snippet-id
+               (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
+               :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+               :topic-type-uri
+               (topic-factory-snippet-dmx-write-plan-topic-type-uri dmx-plan)
+               :workspace-topicmap-id
+               (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
+               :workspace-topicmap-route
+               (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+                resolved-topicmap-id)
+               :topic-action
+               (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
+               :topicmap-action
+               (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
+               :view-props-validation-status
+               (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                      dmx-plan)
+                     :status)
+               :forbidden-short-keys
+               (copy-list
+                (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                       dmx-plan)
+                      :forbidden-short-keys))
+               :normalized-view-props-json
+               (dmx-topicmap-view-props-json-string
+                (topic-factory-snippet-dmx-write-plan-view-props dmx-plan))
+               :source-path
+               (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
+               :related-hyperdoc-page-title
+               (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
+                dmx-plan)
+               :related-topic-id
+               (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
+               :provenance
+               (copy-tree
+                (topic-factory-snippet-dmx-write-plan-provenance dmx-plan))
+               :live-write-configured
+               (localhost-fedwiki-page-promotion-live-dmx-client-configured-p))
+         (list :available nil
+               :workspace-topicmap-id resolved-topicmap-id
+               :workspace-topicmap-route
+               (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+                resolved-topicmap-id)
+               :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
+               :topic-body (snippet-text-of definition)
+               :message
+               "DMX handover planner is unavailable; load :hyperdoc/dmx-import to inspect the ready-to-execute payload.")))
+     (lambda (condition)
+       (localhost-fedwiki-page-promotion-dmx-validation-failure-summary
+        condition
+        :workspace-topicmap-id resolved-topicmap-id
+        :workspace-topicmap-route
+        (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+         resolved-topicmap-id)
+        :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
+        :topic-body (snippet-text-of definition))))))
 
 (defun localhost-fedwiki-page-promotion-handover-dmx-write-evidence
     (&key
@@ -1745,13 +1809,16 @@
        workspace-topicmap-id
        client)
   (if (ensure-localhost-fedwiki-page-promotion-dmx-support)
-      (with-output-to-string (stream)
-        (execute-localhost-fedwiki-page-promotion-handover-dmx-write
-         :surface surface
-         :workspace-topicmap-id workspace-topicmap-id
-         :client client
-         :dry-run t
-         :stream stream))
+      (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
+       (lambda ()
+         (with-output-to-string (stream)
+           (execute-localhost-fedwiki-page-promotion-handover-dmx-write
+            :surface surface
+            :workspace-topicmap-id workspace-topicmap-id
+            :client client
+            :dry-run t
+            :stream stream)))
+       #'fedwiki-dmx-import-message-of)
       "DMX handover execution support is unavailable; load :hyperdoc/dmx-import to render dry-run evidence."))
 
 (defun execute-localhost-fedwiki-page-promotion-handover-dmx-write
@@ -1847,34 +1914,66 @@
                    issue)
                   (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
                    issue)))
-    (if-let (dmx-plan
-             (localhost-fedwiki-page-promotion-plan-dmx-dry-run-plan
-              plan
-              :workspace-topicmap-id workspace-topicmap-id
-              :client client))
-      (list :available t
-            :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
-            :snippet-id
-            (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
-            :workspace-topicmap-id
-            (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
-            :topic-action
-            (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
-            :topicmap-action
-            (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
-            :source-path
-            (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
-            :related-hyperdoc-page-title
-            (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
-             dmx-plan)
-            :related-topic-id
-            (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
-            :provenance
-            (copy-tree
-             (topic-factory-snippet-dmx-write-plan-provenance dmx-plan)))
-      (list :available nil
-            :message
-            "DMX dry-run planner is unavailable; load :hyperdoc/dmx-import to inspect the dry-run plan."))))
+    (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
+     (lambda ()
+       (if-let (dmx-plan
+                (localhost-fedwiki-page-promotion-plan-dmx-dry-run-plan
+                 plan
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :client client))
+         (list :available t
+               :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+               :snippet-id
+               (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
+               :workspace-topicmap-id
+               (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
+               :topic-action
+               (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
+               :topicmap-action
+               (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
+               :view-props-validation-status
+               (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                      dmx-plan)
+                     :status)
+               :forbidden-short-keys
+               (copy-list
+                (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                       dmx-plan)
+                      :forbidden-short-keys))
+               :normalized-view-props-json
+               (dmx-topicmap-view-props-json-string
+                (topic-factory-snippet-dmx-write-plan-view-props dmx-plan))
+               :source-path
+               (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
+               :related-hyperdoc-page-title
+               (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
+                dmx-plan)
+               :related-topic-id
+               (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
+               :provenance
+               (copy-tree
+                (topic-factory-snippet-dmx-write-plan-provenance dmx-plan)))
+         (list :available nil
+               :message
+               "DMX dry-run planner is unavailable; load :hyperdoc/dmx-import to inspect the dry-run plan.")))
+     (lambda (condition)
+       (localhost-fedwiki-page-promotion-dmx-validation-failure-summary
+        condition
+        :workspace-topicmap-id
+        (or workspace-topicmap-id
+            (localhost-fedwiki-page-promotion-plan-default-workspace-topicmap-id
+             plan)
+            *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*)
+        :workspace-topicmap-route
+        (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+         (or workspace-topicmap-id
+             (localhost-fedwiki-page-promotion-plan-default-workspace-topicmap-id
+              plan)
+             *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+        :topic-title (localhost-fedwiki-page-promotion-plan-title plan)
+        :topic-body
+        (snippet-text-of
+         (localhost-fedwiki-page-promotion-plan-topic-definition plan)))))))
 
 (defun localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
     (plan
@@ -1882,19 +1981,22 @@
   (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
     (localhost-fedwiki-page-promotion-source-unavailable-reason issue)
     (if (ensure-localhost-fedwiki-page-promotion-dmx-support)
-        (with-output-to-string (stream)
-          (funcall (symbol-function 'execute-topic-factory-snippet-dmx-write)
-                   (localhost-fedwiki-page-promotion-plan-topic-definition plan)
-                   :workspace-topicmap-id
-                   (or workspace-topicmap-id
-                       (localhost-fedwiki-page-promotion-plan-default-workspace-topicmap-id
-                        plan)
-                       *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*)
-                   :client
-                   (or client
-                       (make-localhost-fedwiki-page-promotion-memory-dmx-client))
-                   :dry-run t
-                   :stream stream))
+        (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
+         (lambda ()
+           (with-output-to-string (stream)
+             (funcall (symbol-function 'execute-topic-factory-snippet-dmx-write)
+                      (localhost-fedwiki-page-promotion-plan-topic-definition plan)
+                      :workspace-topicmap-id
+                      (or workspace-topicmap-id
+                          (localhost-fedwiki-page-promotion-plan-default-workspace-topicmap-id
+                           plan)
+                          *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*)
+                      :client
+                      (or client
+                          (make-localhost-fedwiki-page-promotion-memory-dmx-client))
+                      :dry-run t
+                      :stream stream)))
+         #'fedwiki-dmx-import-message-of)
         "DMX dry-run execution support is unavailable; load :hyperdoc/dmx-import to render dry-run evidence.")))
 
 (defgeneric review-localhost-fedwiki-page-promotion-handover-dmx-dry-run

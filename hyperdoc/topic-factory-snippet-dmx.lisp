@@ -41,6 +41,7 @@
   topic-value
   workspace-topicmap-id
   view-props
+  view-props-normalization
   topic-action
   topicmap-action
   payload
@@ -84,11 +85,18 @@
              :message "Topic-factory snippet DMX write requires an explicit workspace topicmap id")))
 
 (defun normalize-topic-factory-snippet-view-props (view-props)
-  (let ((plist (or view-props *topic-factory-snippet-dmx-default-view-props*)))
-    (list :x (or (getf plist :x) 160)
-          :y (or (getf plist :y) 120)
-          :visibility (if (null (getf plist :visibility)) t (getf plist :visibility))
-          :pinned (if (null (getf plist :pinned)) nil (getf plist :pinned)))))
+  (if view-props
+      (normalize-dmx-topicmap-view-props
+       view-props
+       :boundary 'plan-topic-factory-snippet-dmx-write)
+      (values
+       (make-dmx-topicmap-view-props-json-object
+        :x (getf *topic-factory-snippet-dmx-default-view-props* :x)
+        :y (getf *topic-factory-snippet-dmx-default-view-props* :y)
+        :visibility (getf *topic-factory-snippet-dmx-default-view-props* :visibility)
+        :pinned (getf *topic-factory-snippet-dmx-default-view-props* :pinned))
+       (list :status :canonical
+             :forbidden-short-keys nil))))
 
 (defun plist->json-hash (plist)
   (let ((hash (make-hash-table :test #'equal)))
@@ -183,61 +191,12 @@
                      :topic-type-uri topic-type-uri
                      :topic-value topic-value))))
 
-(defun dmx-topicmap-memberships-path (object-id)
-  (format nil "/topicmaps/object/~D" object-id))
-
-(defun dmx-topicmap-add-topic-path (topicmap-id topic-id)
-  (format nil "/topicmaps/~D/topic/~D" topicmap-id topic-id))
-
-(defun dmx-topicmap-set-topic-view-props-path (topicmap-id topic-id)
-  (format nil "/topicmaps/~D/topic/~D" topicmap-id topic-id))
-
-(defun topic-factory-snippet-view-props-json (view-props)
-  (let ((hash (make-hash-table :test #'equal)))
-    (setf (gethash "x" hash) (getf view-props :x)
-          (gethash "y" hash) (getf view-props :y)
-          (gethash "visibility" hash) (getf view-props :visibility)
-          (gethash "pinned" hash) (getf view-props :pinned))
-    hash))
-
-(defun http-topic-present-in-topicmap-p (client topicmap-id topic-id)
-  (let ((topicmaps (http-request-json client
-                                      :get
-                                      (dmx-topicmap-memberships-path topic-id))))
-    (find topicmap-id
-          (json-array-elements topicmaps)
-          :key #'dmx-import-object-id
-          :test #'eql)))
-
-(defmethod dmx-import-topic-in-topicmap-p ((client http-dmx-import-client) topicmap-id topic-id)
-  (validate-http-dmx-import-client client)
-  (and topic-id
-       (http-topic-present-in-topicmap-p client topicmap-id topic-id)))
-
-(defmethod dmx-import-add-topic-to-topicmap ((client http-dmx-import-client)
-                                             topicmap-id topic-id view-props)
-  (validate-http-dmx-import-client client :live? t)
-  (http-request-json client
-                     :post
-                     (dmx-topicmap-add-topic-path topicmap-id topic-id)
-                     :body-object (topic-factory-snippet-view-props-json view-props)))
-
-(defmethod dmx-import-set-topic-view-props ((client http-dmx-import-client)
-                                            topicmap-id topic-id view-props)
-  (validate-http-dmx-import-client client :live? t)
-  (http-request-json client
-                     :put
-                     (dmx-topicmap-set-topic-view-props-path topicmap-id topic-id)
-                     :body-object (topic-factory-snippet-view-props-json view-props)))
-
 (defun plan-topic-factory-snippet-dmx-write
     (snippet-source
      &key workspace-topicmap-id client topic-type-uri view-props topic-value)
   (let* ((definition (normalize-topic-factory-snippet-source snippet-source))
          (resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
-         (resolved-view-props
-           (normalize-topic-factory-snippet-view-props view-props))
          (resolved-client
            (or client
                (make-default-dmx-import-client :dry-run t :verbose nil)))
@@ -252,23 +211,26 @@
                              (dmx-import-topic-in-topicmap-p resolved-client
                                                             resolved-topicmap-id
                                                             existing-topic-id))))
-    (make-topic-factory-snippet-dmx-write-plan
-     :snippet-id (snippet-id-of definition)
-     :uri (getf payload :uri)
-     :topic-type-uri (getf payload :type-uri)
-     :topic-value (getf payload :value)
-     :workspace-topicmap-id resolved-topicmap-id
-     :view-props resolved-view-props
-     :topic-action (if existing-topic :update :create)
-     :topicmap-action (if in-topicmap-p :already-present :add)
-     :payload payload
-     :existing-topic existing-topic
-     :existing-topic-id existing-topic-id
-     :source-path (source-path-of definition)
-     :related-hyperdoc-page-title
-     (related-hyperdoc-page-title-of definition)
-     :related-topic-id (related-topic-id-of definition)
-     :provenance (copy-tree (provenance-of definition)))))
+    (multiple-value-bind (resolved-view-props view-props-normalization)
+        (normalize-topic-factory-snippet-view-props view-props)
+      (make-topic-factory-snippet-dmx-write-plan
+       :snippet-id (snippet-id-of definition)
+       :uri (getf payload :uri)
+       :topic-type-uri (getf payload :type-uri)
+       :topic-value (getf payload :value)
+       :workspace-topicmap-id resolved-topicmap-id
+       :view-props resolved-view-props
+       :view-props-normalization view-props-normalization
+       :topic-action (if existing-topic :update :create)
+       :topicmap-action (if in-topicmap-p :already-present :add)
+       :payload payload
+       :existing-topic existing-topic
+       :existing-topic-id existing-topic-id
+       :source-path (source-path-of definition)
+       :related-hyperdoc-page-title
+       (related-hyperdoc-page-title-of definition)
+       :related-topic-id (related-topic-id-of definition)
+       :provenance (copy-tree (provenance-of definition))))))
 
 (defun render-topic-factory-snippet-dmx-plan (plan
                                               &key
@@ -297,12 +259,24 @@
           (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title plan)
           (topic-factory-snippet-dmx-write-plan-related-topic-id plan)
           (topic-factory-snippet-dmx-write-plan-source-path plan))
-  (format stream
-          "TOPIC_FACTORY_SNIPPET_DMX_VIEW x=~D y=~D visibility=~:[NIL~;T~] pinned=~:[NIL~;T~]~%"
-          (getf (topic-factory-snippet-dmx-write-plan-view-props plan) :x)
-          (getf (topic-factory-snippet-dmx-write-plan-view-props plan) :y)
-          (getf (topic-factory-snippet-dmx-write-plan-view-props plan) :visibility)
-          (getf (topic-factory-snippet-dmx-write-plan-view-props plan) :pinned)))
+  (let ((view-props (topic-factory-snippet-dmx-write-plan-view-props plan))
+        (normalization
+          (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)))
+    (format stream
+            "TOPIC_FACTORY_SNIPPET_DMX_VIEW x=~D y=~D visibility=~:[NIL~;T~] pinned=~:[NIL~;T~]~%"
+            (dmx-topicmap-view-props-value view-props :x)
+            (dmx-topicmap-view-props-value view-props :y)
+            (dmx-topicmap-view-props-value view-props :visibility)
+            (dmx-topicmap-view-props-value view-props :pinned))
+    (format stream
+            "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=~A forbidden-short-keys=~S~%"
+            (string-upcase
+             (symbol-name
+              (getf normalization :status)))
+            (getf normalization :forbidden-short-keys))
+    (format stream
+            "TOPIC_FACTORY_SNIPPET_DMX_VIEW_PAYLOAD ~A~%"
+            (dmx-topicmap-view-props-json-string view-props))))
 
 (defun execute-topic-factory-snippet-dmx-write
     (snippet-source
@@ -373,6 +347,16 @@
           (topic-factory-snippet-dmx-write-plan-topic-action plan)
           :topicmap-action
           (topic-factory-snippet-dmx-write-plan-topicmap-action plan)
+          :view-props-validation-status
+          (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)
+                :status)
+          :forbidden-short-keys
+          (copy-list
+           (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)
+                 :forbidden-short-keys))
+          :normalized-view-props-json
+          (dmx-topicmap-view-props-json-string
+           (topic-factory-snippet-dmx-write-plan-view-props plan))
           :uri (topic-factory-snippet-dmx-write-plan-uri plan)
           :workspace-topicmap-id
           (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id plan))))
