@@ -67,9 +67,11 @@
 
 <ul>
   <li><tt>append_workspace_note</tt> is intended to be idempotent by <tt>noteKey</tt> when the read client can resolve the existing parent note URI.</li>
+  <li>That guarantee is currently limited to HyperDoc-created notes whose preserved URI remains readable as <tt>hyperdoc:mcp/...</tt>.</li>
   <li>Dry run and live execution both plan through the same URI lookup before choosing create vs. update.</li>
   <li>A dry run with non-empty <tt>existing-topic-id</tt> proves that the reused <tt>noteKey</tt> resolved to an existing note.</li>
   <li>A dry run with empty <tt>existing-topic-id</tt> does not prove create semantics; it means the note is absent or the current read surface cannot resolve it.</li>
+  <li>If a live note projection comes back with <tt>uri=""</tt>, HyperDoc currently has no title-based fallback resolver for <tt>noteKey</tt>; that lookup remains unproven.</li>
   <li><tt>update_workspace_note</tt> still requires a concrete <tt>topicId</tt>, so callers need a prior read lookup or explicit id when revising an existing note.</li>
 </ul>
 

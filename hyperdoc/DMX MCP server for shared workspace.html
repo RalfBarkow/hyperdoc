@@ -181,6 +181,14 @@
 </p>
 
 <p>
+  The current live guarantee is narrower than "any note with matching title":
+  HyperDoc-created workspace notes that keep a preserved
+  <tt>hyperdoc:mcp/...</tt> URI resolve correctly by <tt>noteKey</tt>, while
+  live notes whose projection returns <tt>uri=""</tt> do not currently have a
+  title-based fallback resolver.
+</p>
+
+<p>
   <tt>update_workspace_note</tt> still requires an explicit
   <tt>topicId</tt>. Use <tt>read_dmx_topicmap</tt>, <tt>read_dmx_topic</tt>, or
   <tt>resolve_workspace_note</tt> first when the caller does not already know

@@ -74,6 +74,8 @@
      "cache-busting or no-cache semantics"
      "append_workspace_note"
      "existing-topic-id"
+     "HyperDoc-created notes whose preserved URI"
+     "uri=\"\""
      "topicmap_context_add"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
