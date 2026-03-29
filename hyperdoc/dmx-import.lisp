@@ -43,6 +43,18 @@
                      (dmx-import-http-status-code-of condition)
                      (dmx-import-http-url-of condition)))))
 
+(define-condition dmx-import-unsupported-operation-error (fedwiki-dmx-import-error)
+  ((operation :reader dmx-import-unsupported-operation-of :initarg :operation)
+   (endpoint :reader dmx-import-unsupported-endpoint-of
+             :initarg :endpoint
+             :initform nil)
+   (reason :reader dmx-import-unsupported-reason-of
+           :initarg :reason
+           :initform nil))
+  (:report (lambda (condition stream)
+             (format stream "~A"
+                     (fedwiki-dmx-import-message-of condition)))))
+
 (define-condition dmx-topicmap-view-props-validation-error (fedwiki-dmx-import-error)
   ((boundary
     :reader dmx-topicmap-view-props-validation-boundary-of
@@ -135,6 +147,8 @@
 (defgeneric dmx-import-topic-in-topicmap-p (client topicmap-id topic-id))
 (defgeneric dmx-import-add-topic-to-topicmap (client topicmap-id topic-id view-props))
 (defgeneric dmx-import-set-topic-view-props (client topicmap-id topic-id view-props))
+(defgeneric dmx-import-remove-topic-from-topicmap (client topicmap-id topic-id))
+(defgeneric dmx-import-delete-topic (client topic-id))
 
 (defparameter *dmx-topicmap-view-prop-specs*
   '((:field :x
@@ -389,6 +403,16 @@
   (error 'fedwiki-dmx-import-error
          :message "Dry-run/null DMX client cannot perform live topicmap writes"))
 
+(defmethod dmx-import-remove-topic-from-topicmap ((client null-dmx-import-client) topicmap-id topic-id)
+  (declare (ignore topicmap-id topic-id))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live topicmap unlink writes"))
+
+(defmethod dmx-import-delete-topic ((client null-dmx-import-client) topic-id)
+  (declare (ignore topic-id))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live deletes"))
+
 (defmethod dmx-import-find-existing-topic ((client memory-dmx-import-client) external-key)
   (gethash external-key (topics-by-external-key-of client)))
 
@@ -494,6 +518,30 @@
                  (topicmap-memberships-of client))
         normalized-view-props)
     normalized-view-props))
+
+(defmethod dmx-import-remove-topic-from-topicmap ((client memory-dmx-import-client)
+                                                  topicmap-id topic-id)
+  (remhash (memory-topicmap-membership-key topicmap-id topic-id)
+           (topicmap-memberships-of client))
+  nil)
+
+(defmethod dmx-import-delete-topic ((client memory-dmx-import-client) topic-id)
+  (let ((external-keys-to-delete '())
+        (memberships-to-delete '()))
+    (maphash (lambda (external-key topic)
+               (when (eql topic-id (dmx-import-object-id topic))
+                 (push external-key external-keys-to-delete)))
+             (topics-by-external-key-of client))
+    (maphash (lambda (membership-key view-props)
+               (declare (ignore view-props))
+               (when (eql topic-id (second membership-key))
+                 (push membership-key memberships-to-delete)))
+             (topicmap-memberships-of client))
+    (dolist (external-key external-keys-to-delete)
+      (remhash external-key (topics-by-external-key-of client)))
+    (dolist (membership-key memberships-to-delete)
+      (remhash membership-key (topicmap-memberships-of client)))
+    nil))
 
 (defun encode-base64-octets (octets)
   (with-output-to-string (stream)
@@ -1054,6 +1102,30 @@
                        :put
                        (dmx-topicmap-set-topic-view-props-path topicmap-id topic-id)
                        :body-object normalized-view-props)))
+
+(defmethod dmx-import-remove-topic-from-topicmap ((client http-dmx-import-client)
+                                                  topicmap-id topic-id)
+  (validate-http-dmx-import-client client :live? t)
+  ;; The current repo contract proves POST/PUT on /topicmaps/<topicmap>/<topic>
+  ;; but does not prove DELETE there. OPTIONS on the live route currently omits
+  ;; DELETE, so live unlink stays intentionally unsupported until a typed
+  ;; contract is demonstrated.
+  (error 'dmx-import-unsupported-operation-error
+         :message
+         (format nil
+                 "Live topicmap unlink is unsupported because DELETE is not proven for ~A"
+                 (dmx-topicmap-add-topic-path topicmap-id topic-id))
+         :operation :remove-topic-from-topicmap
+         :endpoint (dmx-topicmap-add-topic-path topicmap-id topic-id)
+         :reason "OPTIONS on the live DMX route does not advertise DELETE"))
+
+(defmethod dmx-import-delete-topic ((client http-dmx-import-client) topic-id)
+  (validate-http-dmx-import-client client :live? t)
+  ;; DELETE on /core/topic/<id> is part of the currently proven DMX HTTP
+  ;; contract: OPTIONS on the live route advertises DELETE for topic resources.
+  (http-request-json client
+                     :delete
+                     (dmx-topic-update-path topic-id)))
 
 (defun getenv-non-empty (name)
   (let ((value (uiop:getenv name)))

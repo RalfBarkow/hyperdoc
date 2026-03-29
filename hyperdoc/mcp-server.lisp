@@ -489,6 +489,37 @@
       (coerce (dmx-workspace-note-validation-missing-fields-of condition) 'vector)
       "invalidFields"
       (coerce (dmx-workspace-note-validation-invalid-fields-of condition) 'vector)))
+    (dmx-workspace-topic-validation-error
+     (dmx-mcp-json-object
+      "status" "validation_error"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "boundary"
+      (format nil "~A"
+              (dmx-workspace-topic-validation-boundary-of condition))
+      "missingFields"
+      (coerce (dmx-workspace-topic-validation-missing-fields-of condition) 'vector)
+      "invalidFields"
+      (coerce (dmx-workspace-topic-validation-invalid-fields-of condition) 'vector)))
+    (dmx-workspace-topic-ownership-error
+     (dmx-mcp-json-object
+      "status" "ownership_error"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "topicId" (dmx-workspace-topic-ownership-topic-id-of condition)
+      "ownershipClass"
+      (format nil "~(~A~)" (dmx-workspace-topic-ownership-class-of condition))
+      "uri" (dmx-workspace-topic-ownership-uri-of condition)
+      "allowedActions"
+      (coerce (mapcar (lambda (action) (format nil "~(~A~)" action))
+                      (dmx-workspace-topic-ownership-allowed-actions-of condition))
+              'vector)))
+    (dmx-import-unsupported-operation-error
+     (dmx-mcp-json-object
+      "status" "unsupported_operation"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "operation"
+      (format nil "~(~A~)" (dmx-import-unsupported-operation-of condition))
+      "endpoint" (dmx-import-unsupported-endpoint-of condition)
+      "reason" (dmx-import-unsupported-reason-of condition)))
     (t
      (dmx-mcp-json-object
       "status" "error"
@@ -524,6 +555,31 @@
        "normalizedPayload" normalized-view-props
        "intendedEndpoint"
        (dmx-topicmap-add-topic-path topicmap-id topic-id)))))
+
+(defun dmx-mcp-dry-run-topicmap-context-upsert (server arguments)
+  (dmx-mcp-json-object
+   "writeKind" "topicmap_context_upsert"
+   "summary"
+   (execute-dmx-workspace-topicmap-context-upsert
+    (gethash "topicId" arguments)
+    :workspace-topicmap-id
+    (or (dmx-mcp-argument arguments "topicmapId")
+        (dmx-mcp-server-workspace-topicmap-id server))
+    :client (dmx-mcp-server-read-client server)
+    :view-props (gethash "viewProps" arguments)
+    :dry-run t)))
+
+(defun dmx-mcp-dry-run-topicmap-context-remove (server arguments)
+  (dmx-mcp-json-object
+   "writeKind" "topicmap_context_remove"
+   "summary"
+   (execute-dmx-workspace-topicmap-context-remove
+    (gethash "topicId" arguments)
+    :workspace-topicmap-id
+    (or (dmx-mcp-argument arguments "topicmapId")
+        (dmx-mcp-server-workspace-topicmap-id server))
+    :client (dmx-mcp-server-read-client server)
+    :dry-run t)))
 
 (defun dmx-mcp-dry-run-workspace-note (server arguments)
   (let ((summary
@@ -660,6 +716,10 @@
     (cond
       ((equal write-kind "topicmap_context_add")
        (dmx-mcp-dry-run-topicmap-context arguments))
+      ((equal write-kind "topicmap_context_upsert")
+       (dmx-mcp-dry-run-topicmap-context-upsert server arguments))
+      ((equal write-kind "topicmap_context_remove")
+       (dmx-mcp-dry-run-topicmap-context-remove server arguments))
       ((equal write-kind "workspace_note_create")
        (dmx-mcp-dry-run-workspace-note server arguments))
       ((equal write-kind "workspace_note_update")
@@ -736,6 +796,71 @@
                :note-key (dmx-mcp-argument arguments "noteKey")
                :uri (dmx-mcp-argument arguments "uri")
                :dry-run dry-run)))
+            ((equal tool-name "upsert_workspace_topicmap_context")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topicmap-context-upsert
+               (gethash "topicId" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "topicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :view-props (gethash "viewProps" arguments)
+               :dry-run dry-run)))
+            ((equal tool-name "remove_workspace_topic_from_topicmap")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topicmap-context-remove
+               (gethash "topicId" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "topicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "delete_workspace_topic")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topic-delete
+               (gethash "topicId" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "delete_workspace_note")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-note-delete
+               :note-key (dmx-mcp-argument arguments "noteKey")
+               :topic-id (dmx-mcp-argument arguments "topicId")
+               :note-kind (dmx-mcp-argument arguments "noteKind")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "upsert_workspace_topic_factory_snippet")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topic-factory-snippet-upsert
+               :snippet-id (dmx-mcp-argument arguments "snippetId")
+               :snippet-text (dmx-mcp-argument arguments "snippetText")
+               :source-path (dmx-mcp-argument arguments "sourcePath")
+               :source-origin-id (dmx-mcp-argument arguments "sourceOriginId")
+               :source-origin-path (dmx-mcp-argument arguments "sourceOriginPath")
+               :related-hyperdoc-page-title
+               (dmx-mcp-argument arguments "relatedHyperdocPageTitle")
+               :related-topic-id (dmx-mcp-argument arguments "relatedTopicId")
+               :references (gethash "references" arguments)
+               :provenance (gethash "provenance" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :topic-type-uri (dmx-mcp-argument arguments "topicTypeUri")
+               :view-props (gethash "viewProps" arguments)
+               :topic-value (dmx-mcp-argument arguments "topicValue")
+               :dry-run dry-run)))
             (t
              (dmx-mcp-tool-result
               (dmx-mcp-json-object
@@ -746,6 +871,15 @@
           (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
                                :is-error t))
         (dmx-workspace-note-validation-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-workspace-topic-validation-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-workspace-topic-ownership-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-import-unsupported-operation-error (condition)
           (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
                                :is-error t))
         (fedwiki-dmx-import-error (condition)
@@ -767,6 +901,8 @@
                    "type" "string"
                    "enum" (dmx-mcp-json-array
                            "topicmap_context_add"
+                           "topicmap_context_upsert"
+                           "topicmap_context_remove"
                            "workspace_note_create"
                            "workspace_note_update"
                            "handover_create"))
@@ -798,6 +934,35 @@
       "viewProps" (dmx-mcp-json-object "type" "object")
      "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "title" "text")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "upsert_workspace_topicmap_context"
+    "description"
+    "Ensure a typed topicmap-context placement for an existing topic by adding it to a workspace topicmap or updating its validated long-form view props."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "topicmapId" (dmx-mcp-json-object "type" "integer")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId" "viewProps")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "remove_workspace_topic_from_topicmap"
+    "description"
+    "Plan or execute a typed workspace-topic unlink from a topicmap. Live HTTP unlink remains disabled until a DELETE contract is proven for the topicmap membership route."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "topicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
      "additionalProperties" t))
    (dmx-mcp-json-object
     "name" "read_dmx_topicmap"
@@ -848,8 +1013,64 @@
       "topicId" (dmx-mcp-json-object "type" "integer")
       "title" (dmx-mcp-json-object "type" "string")
       "text" (dmx-mcp-json-object "type" "string")
+     "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "delete_workspace_note"
+    "description"
+    "Hard-delete a HyperDoc-owned workspace note or handover by noteKey or topic id. Foreign notes are rejected by the ownership guard."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKind" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "delete_workspace_topic"
+    "description"
+    "Hard-delete a HyperDoc-owned workspace topic by topic id. Ownership checks reject foreign topics and unsupported delete targets."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "upsert_workspace_topic_factory_snippet"
+    "description"
+    "Create or update a HyperDoc-owned topic-factory snippet twin and place it into the shared workspace topicmap through the guarded topic/topicmap adapter."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "snippetId" (dmx-mcp-json-object "type" "string")
+      "snippetText" (dmx-mcp-json-object "type" "string")
+      "sourcePath" (dmx-mcp-json-object "type" "string")
+      "sourceOriginId" (dmx-mcp-json-object "type" "string")
+      "sourceOriginPath" (dmx-mcp-json-object "type" "string")
+      "relatedHyperdocPageTitle" (dmx-mcp-json-object "type" "string")
+      "relatedTopicId" (dmx-mcp-json-object "type" "string")
+      "references" (dmx-mcp-json-object "type" "array"
+                                        "items" (dmx-mcp-json-object "type" "string"))
+      "provenance" (dmx-mcp-json-object "type" "object")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "topicTypeUri" (dmx-mcp-json-object "type" "string")
+      "topicValue" (dmx-mcp-json-object "type" "string")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "snippetId" "snippetText" "sourcePath")
      "additionalProperties" t))
    (dmx-mcp-json-object
     "name" "create_handover"

@@ -231,6 +231,46 @@
                              ("Mcp-Session-Id" . ,session-id)))
     (values body status headers)))
 
+(defun mcp-test-call-tool (url session-id id name &optional (arguments (mcp-test-json-object)))
+  (mcp-test-call url
+                 (mcp-test-json-object
+                  "jsonrpc" "2.0"
+                  "id" id
+                  "method" "tools/call"
+                  "params"
+                  (mcp-test-json-object
+                   "name" name
+                   "arguments" arguments))
+                 :session-id session-id))
+
+(defun mcp-test-open-session (url &key (id 1) (client-name "hyperdoc-smoke") (client-version "1.0"))
+  (multiple-value-bind (initialize-body initialize-status initialize-headers)
+      (mcp-test-call
+       url
+       (mcp-test-json-object
+        "jsonrpc" "2.0"
+        "id" id
+        "method" "initialize"
+        "params"
+        (mcp-test-json-object
+         "protocolVersion" "2025-03-26"
+         "clientInfo" (mcp-test-json-object
+                       "name" client-name
+                       "version" client-version))))
+    (mcp-assert-equal 200 initialize-status "initialize status")
+    (let ((session-id (mcp-test-response-header initialize-headers "Mcp-Session-Id")))
+      (mcp-assert-true session-id "initialize must return Mcp-Session-Id")
+      (mcp-assert-equal "hyperdoc-dmx-mcp"
+                        (gethash "name"
+                                 (gethash "serverInfo"
+                                          (gethash "result" initialize-body)))
+                        "initialize serverInfo.name")
+      (multiple-value-bind (_ notify-status __)
+          (mcp-test-notify-initialized url session-id)
+        (declare (ignore _ __))
+        (mcp-assert-equal 202 notify-status "initialized notification status"))
+      session-id)))
+
 (defun run-dmx-mcp-smoke-test ()
   (let* ((port (mcp-test-port))
          (url (format nil "http://127.0.0.1:~D/mcp" port))
@@ -353,6 +393,11 @@
                                         "resolve_workspace_note"
                                         "append_workspace_note"
                                         "update_workspace_note"
+                                        "upsert_workspace_topicmap_context"
+                                        "remove_workspace_topic_from_topicmap"
+                                        "delete_workspace_note"
+                                        "delete_workspace_topic"
+                                        "upsert_workspace_topic_factory_snippet"
                                         "create_handover"))
                      (mcp-assert-true
                       (member tool-name tool-names :test #'string=)
@@ -603,9 +648,311 @@
       (hyperdoc::stop-dmx-mcp-server)))
   t)
 
+(defun run-dmx-import-delete-and-remove-contract-smoke-test ()
+  (let ((original (symbol-function 'drakma:http-request))
+        (captured-delete-call nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method &allow-other-keys)
+                   (setf captured-delete-call (list :url url :method method))
+                   (values (make-string-input-stream "") 204 nil nil nil "No Content")))
+           (let ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                        :base-url "https://dmx.ralfbarkow.ch"
+                                        :authorization-header "Bearer test-token")))
+             (hyperdoc::dmx-import-delete-topic client 907120)
+             (mcp-assert-equal :delete
+                               (getf captured-delete-call :method)
+                               "HTTP topic delete must stay a DELETE")
+             (mcp-assert-true
+              (search "/core/topic/907120" (getf captured-delete-call :url))
+              "HTTP topic delete must target /core/topic/<id>")
+             (handler-case
+                 (progn
+                   (hyperdoc::dmx-import-remove-topic-from-topicmap
+                    client
+                    *dmx-mcp-smoke-workspace-topicmap-id*
+                    *dmx-mcp-smoke-primary-topic-id*)
+                   (error "Expected live HTTP topicmap unlink to stay unsupported"))
+               (hyperdoc::dmx-import-unsupported-operation-error (condition)
+                 (mcp-assert-true
+                  (search "/topicmaps/919822/topic/907120"
+                          (hyperdoc::dmx-import-unsupported-endpoint-of condition))
+                  "Unsupported topicmap unlink must name the membership endpoint")
+                 (mcp-assert-true
+                  (search "DELETE"
+                          (hyperdoc::fedwiki-dmx-import-message-of condition))
+                  "Unsupported topicmap unlink must explain the missing DELETE proof")))))
+      (setf (symbol-function 'drakma:http-request) original))))
+
+(defun run-dmx-mcp-workspace-topic-lifecycle-smoke-test ()
+  (let* ((port (mcp-test-port))
+         (url (format nil "http://127.0.0.1:~D/mcp" port))
+         (server (make-dmx-mcp-smoke-server))
+         (client (hyperdoc::dmx-mcp-server-write-client server))
+         (foreign-topic-id 921650))
+    (mcp-test-seed-note client
+                        foreign-topic-id
+                        "Foreign workspace note"
+                        "Foreign note body"
+                        :uri (format nil "dmx://foreign/topic/~D" foreign-topic-id))
+    (unwind-protect
+         (progn
+           (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+           (sleep 0.2)
+           (let* ((session-id
+                    (mcp-test-open-session url
+                                           :id 201
+                                           :client-name "hyperdoc-lifecycle-smoke"))
+                  (definition (make-test-topic-factory-snippet-definition))
+                  (snippet-id (hyperdoc::snippet-id-of definition))
+                  (snippet-source-path (hyperdoc::source-path-of definition))
+                  (snippet-related-page
+                    (hyperdoc::related-hyperdoc-page-title-of definition))
+                  (snippet-related-topic-id
+                    (hyperdoc::related-topic-id-of definition))
+                  (snippet-uri nil)
+                  (snippet-topic-id nil))
+             (multiple-value-bind (snippet-body snippet-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  202
+                  "upsert_workspace_topic_factory_snippet"
+                  (mcp-test-json-object
+                   "snippetId" snippet-id
+                   "snippetText" (hyperdoc::snippet-text-of definition)
+                   "sourcePath" snippet-source-path
+                   "relatedHyperdocPageTitle" snippet-related-page
+                   "relatedTopicId" snippet-related-topic-id
+                   "topicValue" "HyperDoc snippet twin smoke topic"
+                   "viewProps" (mcp-test-view-props :x 410 :y 430)
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 snippet-status
+                                 "upsert_workspace_topic_factory_snippet create status")
+               (let* ((tool-result (gethash "result" snippet-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "topic-factory snippet upsert create must succeed")
+                 (mcp-assert-equal "create"
+                                   (gethash "topic-action" structured)
+                                   "topic-factory snippet create must expose CREATE")
+                 (mcp-assert-equal "add"
+                                   (gethash "topicmap-action" structured)
+                                   "topic-factory snippet create must expose ADD")
+                 (setf snippet-uri (gethash "uri" structured)
+                       snippet-topic-id (gethash "topic-id" structured))))
+             (mcp-assert-true (integerp snippet-topic-id)
+                              "Snippet upsert create must return a topic id")
+             (mcp-assert-true
+              (hyperdoc::dmx-import-topic-in-topicmap-p
+               client
+               *dmx-mcp-smoke-workspace-topicmap-id*
+               snippet-topic-id)
+              "Snippet upsert create must place the topic in the workspace topicmap")
+             (multiple-value-bind (snippet-update-body snippet-update-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  203
+                  "upsert_workspace_topic_factory_snippet"
+                  (mcp-test-json-object
+                   "snippetId" snippet-id
+                   "snippetText" "Updated snippet text through MCP."
+                   "sourcePath" snippet-source-path
+                   "relatedHyperdocPageTitle" snippet-related-page
+                   "relatedTopicId" snippet-related-topic-id
+                   "topicValue" "HyperDoc snippet twin smoke topic"
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 snippet-update-status
+                                 "upsert_workspace_topic_factory_snippet update status")
+               (let* ((tool-result (gethash "result" snippet-update-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (updated-topic (hyperdoc::dmx-import-read-topic client snippet-topic-id)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "topic-factory snippet upsert update must succeed")
+                 (mcp-assert-equal "update"
+                                   (gethash "topic-action" structured)
+                                   "topic-factory snippet update must expose UPDATE")
+                 (mcp-assert-equal "already-present"
+                                   (gethash "topicmap-action" structured)
+                                   "topic-factory snippet update must preserve membership")
+                 (mcp-assert-equal
+                  "Updated snippet text through MCP."
+                  (hyperdoc::dmx-json-child-value
+                   updated-topic
+                   hyperdoc::*dmx-topic-factory-snippet-text-type-uri*)
+                  "topic-factory snippet update must replace the snippet text child")))
+             (multiple-value-bind (placement-body placement-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  204
+                  "upsert_workspace_topicmap_context"
+                  (mcp-test-json-object
+                   "topicId" *dmx-mcp-smoke-secondary-topic-id*
+                   "viewProps" (mcp-test-view-props :x 333 :y 444)
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 placement-status
+                                 "upsert_workspace_topicmap_context status")
+               (let* ((tool-result (gethash "result" placement-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (view-props
+                        (gethash (hyperdoc::memory-topicmap-membership-key
+                                  *dmx-mcp-smoke-workspace-topicmap-id*
+                                  *dmx-mcp-smoke-secondary-topic-id*)
+                                 (hyperdoc::topicmap-memberships-of client))))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "upsert_workspace_topicmap_context must succeed")
+                 (mcp-assert-equal "set-view-props"
+                                   (gethash "topicmap-action" structured)
+                                   "Existing membership must expose SET-VIEW-PROPS")
+                 (mcp-assert-equal 333
+                                   (gethash "dmx.topicmaps.x" view-props)
+                                   "Live topicmap-context upsert must update x")))
+             (multiple-value-bind (invalid-body invalid-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  205
+                  "upsert_workspace_topicmap_context"
+                  (mcp-test-json-object
+                   "topicId" *dmx-mcp-smoke-secondary-topic-id*
+                   "viewProps"
+                   (mcp-test-json-object
+                    "x" 1
+                    "y" 2
+                    "visibility" t
+                    "pinned" nil)
+                   "dryRun" t))
+               (declare (ignore _))
+               (mcp-assert-equal 200 invalid-status
+                                 "Invalid topicmap-context dry-run status")
+               (let* ((tool-result (gethash "result" invalid-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (gethash "isError" tool-result)
+                  "Short-key topicmap-context upsert must be flagged as error")
+                 (mcp-assert-equal "validation_error"
+                                   (gethash "status" structured)
+                                   "Short-key topicmap-context upsert must surface validation_error")
+                 (mcp-assert-true
+                  (member "x"
+                          (hyperdoc::json-array-elements
+                           (gethash "forbiddenShortKeys" structured))
+                          :test #'string=)
+                  "Short-key topicmap-context upsert must name x")))
+             (multiple-value-bind (remove-body remove-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  206
+                  "remove_workspace_topic_from_topicmap"
+                  (mcp-test-json-object
+                   "topicId" *dmx-mcp-smoke-secondary-topic-id*
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 remove-status
+                                 "remove_workspace_topic_from_topicmap status")
+               (let* ((tool-result (gethash "result" remove-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Memory-backed topicmap remove must succeed")
+                 (mcp-assert-equal "remove"
+                                   (gethash "topicmap-action" structured)
+                                   "Memory-backed topicmap remove must expose REMOVE"))
+               (mcp-assert-true
+                (null (gethash (hyperdoc::memory-topicmap-membership-key
+                                *dmx-mcp-smoke-workspace-topicmap-id*
+                                *dmx-mcp-smoke-secondary-topic-id*)
+                               (hyperdoc::topicmap-memberships-of client)))
+                "Topicmap remove must drop the membership while keeping the topic"))
+             (multiple-value-bind (foreign-delete-body foreign-delete-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  207
+                  "delete_workspace_topic"
+                  (mcp-test-json-object
+                   "topicId" foreign-topic-id
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 foreign-delete-status
+                                 "Foreign topic delete status")
+               (let* ((tool-result (gethash "result" foreign-delete-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (gethash "isError" tool-result)
+                  "Foreign topic delete must be ownership-blocked")
+                 (mcp-assert-equal "ownership_error"
+                                   (gethash "status" structured)
+                                   "Foreign topic delete must surface ownership_error"))
+               (mcp-assert-true
+                (hyperdoc::dmx-import-read-topic client foreign-topic-id)
+                "Ownership-blocked foreign topic delete must leave the topic intact"))
+             (multiple-value-bind (note-delete-body note-delete-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  208
+                  "delete_workspace_note"
+                  (mcp-test-json-object
+                   "noteKey" *dmx-mcp-smoke-primary-note-key*
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 note-delete-status
+                                 "delete_workspace_note status")
+               (let* ((tool-result (gethash "result" note-delete-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "delete_workspace_note must succeed for HyperDoc-owned notes")
+                 (mcp-assert-equal "hard-delete"
+                                   (gethash "delete-action" structured)
+                                   "delete_workspace_note must expose hard-delete"))
+               (mcp-assert-true
+                (null (hyperdoc::dmx-import-read-topic
+                       client
+                       *dmx-mcp-smoke-primary-topic-id*))
+                "delete_workspace_note must remove the owned note topic"))
+             (multiple-value-bind (snippet-delete-body snippet-delete-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  209
+                  "delete_workspace_topic"
+                  (mcp-test-json-object
+                   "topicId" snippet-topic-id
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 snippet-delete-status
+                                 "delete_workspace_topic status")
+               (let* ((tool-result (gethash "result" snippet-delete-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "delete_workspace_topic must succeed for HyperDoc-owned snippet twins")
+                 (mcp-assert-equal snippet-uri
+                                   (gethash "topic-uri" structured)
+                                   "delete_workspace_topic must surface the deleted HyperDoc snippet URI"))
+               (mcp-assert-true
+                (null (hyperdoc::dmx-import-read-topic client snippet-topic-id))
+                "delete_workspace_topic must remove the owned snippet twin"))))
+      (hyperdoc::stop-dmx-mcp-server)))
+  t)
+
 (defun run-dmx-mcp-smoke-tests ()
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
+  (run-dmx-import-delete-and-remove-contract-smoke-test)
   (run-dmx-mcp-smoke-test)
+  (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
 
