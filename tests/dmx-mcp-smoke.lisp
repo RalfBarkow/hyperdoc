@@ -948,11 +948,155 @@
       (hyperdoc::stop-dmx-mcp-server)))
   t)
 
+(defun run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test ()
+  (let* ((port (mcp-test-port))
+         (url (format nil "http://127.0.0.1:~D/mcp" port))
+         (server (make-dmx-mcp-smoke-server))
+         (client (hyperdoc::dmx-mcp-server-write-client server))
+         (foreign-topic-id 921651)
+         (owned-topic-id nil))
+    (mcp-test-seed-note client
+                        foreign-topic-id
+                        "Foreign workspace lifecycle topic"
+                        "Foreign topic body"
+                        :uri (format nil "dmx://foreign/topic/~D" foreign-topic-id))
+    (unwind-protect
+         (progn
+           (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+           (sleep 0.2)
+           (let* ((session-id
+                    (mcp-test-open-session url
+                                           :id 301
+                                           :client-name "hyperdoc-owned-lifecycle-smoke"))
+                  (definition (make-test-topic-factory-snippet-definition))
+                  (snippet-id (hyperdoc::snippet-id-of definition))
+                  (snippet-source-path (hyperdoc::source-path-of definition))
+                  (snippet-related-page
+                    (hyperdoc::related-hyperdoc-page-title-of definition))
+                  (snippet-related-topic-id
+                    (hyperdoc::related-topic-id-of definition)))
+             (multiple-value-bind (create-body create-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  302
+                  "upsert_workspace_topic_factory_snippet"
+                  (mcp-test-json-object
+                   "snippetId" snippet-id
+                   "snippetText" "Guarded lifecycle proof snippet text."
+                   "sourcePath" snippet-source-path
+                   "relatedHyperdocPageTitle" snippet-related-page
+                   "relatedTopicId" snippet-related-topic-id
+                   "topicValue" "Guarded lifecycle proof topic"
+                   "viewProps" (mcp-test-view-props :x 520 :y 540)
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 create-status
+                                 "Owned topic lifecycle proof create status")
+               (let* ((tool-result (gethash "result" create-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Owned topic lifecycle proof create must succeed")
+                 (mcp-assert-equal "create"
+                                   (gethash "topic-action" structured)
+                                   "Owned topic lifecycle proof must create the snippet twin")
+                 (mcp-assert-equal "add"
+                                   (gethash "topicmap-action" structured)
+                                   "Owned topic lifecycle proof must add the topic to the workspace")
+                  (setf owned-topic-id (gethash "topic-id" structured)))
+             (mcp-assert-true (integerp owned-topic-id)
+                              "Owned topic lifecycle proof must return a topic id")
+             (mcp-assert-true
+              (hyperdoc::dmx-import-topic-in-topicmap-p
+               client
+               *dmx-mcp-smoke-workspace-topicmap-id*
+               owned-topic-id)
+              "Owned topic lifecycle proof must place the topic in the workspace topicmap")
+             (multiple-value-bind (remove-body remove-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  303
+                  "remove_workspace_topic_from_topicmap"
+                  (mcp-test-json-object
+                   "topicId" owned-topic-id
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 remove-status
+                                 "Owned topic lifecycle proof remove status")
+               (let* ((tool-result (gethash "result" remove-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Owned topic lifecycle proof remove must succeed on the memory client")
+                 (mcp-assert-equal "remove"
+                                   (gethash "topicmap-action" structured)
+                                   "Owned topic lifecycle proof remove must expose REMOVE")))
+             (mcp-assert-true
+              (null (gethash (hyperdoc::memory-topicmap-membership-key
+                              *dmx-mcp-smoke-workspace-topicmap-id*
+                              owned-topic-id)
+                             (hyperdoc::topicmap-memberships-of client)))
+              "Owned topic lifecycle proof remove must leave the topic alive but absent from the topicmap")
+             (mcp-assert-true
+              (hyperdoc::dmx-import-read-topic client owned-topic-id)
+              "Owned topic lifecycle proof remove must not hard-delete the topic")
+             (multiple-value-bind (delete-body delete-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  304
+                  "delete_workspace_topic"
+                  (mcp-test-json-object
+                   "topicId" owned-topic-id
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 delete-status
+                                 "Owned topic lifecycle proof delete status")
+               (let* ((tool-result (gethash "result" delete-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Owned topic lifecycle proof delete must succeed")
+                 (mcp-assert-equal "hard-delete"
+                                   (gethash "delete-action" structured)
+                                   "Owned topic lifecycle proof delete must expose HARD-DELETE")))
+             (mcp-assert-true
+              (null (hyperdoc::dmx-import-read-topic client owned-topic-id))
+              "Owned topic lifecycle proof delete must remove the HyperDoc-owned topic")
+             (multiple-value-bind (foreign-delete-body foreign-delete-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  305
+                  "delete_workspace_topic"
+                  (mcp-test-json-object
+                   "topicId" foreign-topic-id
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 foreign-delete-status
+                                 "Owned topic lifecycle proof foreign delete status")
+               (let* ((tool-result (gethash "result" foreign-delete-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (gethash "isError" tool-result)
+                  "Owned topic lifecycle proof must reject foreign hard delete")
+                 (mcp-assert-equal "ownership_error"
+                                   (gethash "status" structured)
+                                   "Owned topic lifecycle proof foreign delete must surface ownership_error")))
+             (mcp-assert-true
+              (hyperdoc::dmx-import-read-topic client foreign-topic-id)
+              "Owned topic lifecycle proof foreign delete must leave the foreign topic intact"))))
+      (hyperdoc::stop-dmx-mcp-server)))
+  t)
+
 (defun run-dmx-mcp-smoke-tests ()
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-import-delete-and-remove-contract-smoke-test)
   (run-dmx-mcp-smoke-test)
   (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
+  (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
 
