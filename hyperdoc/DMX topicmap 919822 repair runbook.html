@@ -167,6 +167,8 @@ ORDER BY ctxId;
   <li>Proven: current checked stock client paths use long-form keys.</li>
   <li>Proven: generic DMX <tt>ViewProps</tt> endpoints can persist malformed short-key-only payloads unchanged if a sender submits them.</li>
   <li>Proven: generic write endpoints can preserve malformed short-key payloads if a sender submits them.</li>
+  <li>Proven: <tt>OPTIONS /core/topic/&lt;id&gt;</tt> advertises <tt>DELETE</tt>, so HyperDoc can support ownership-limited hard delete on the parent topic boundary.</li>
+  <li>Unproven: <tt>DELETE /topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt> on the live topicmap membership route, so HyperDoc keeps topicmap unlink as dry-run-first and non-live over HTTP.</li>
   <li>Unproven: the exact original sender remains unknown and is still best classified as stale, external, or custom mutation.</li>
 </ul>
 

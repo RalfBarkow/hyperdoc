@@ -54,6 +54,15 @@
      "resolve_workspace_note"
      "append_workspace_note"
      "update_workspace_note"
+     "delete_workspace_note"
+     "delete_workspace_topic"
+     "upsert_workspace_topicmap_context"
+     "remove_workspace_topic_from_topicmap"
+     "upsert_workspace_topic_factory_snippet"
+     "topicmap_context_upsert"
+     "topicmap_context_remove"
+     "Hard delete is limited by ownership checks"
+     "live HTTP unlink remains intentionally unsupported"
      "create_handover"
      "generic raw DMX JSON write"))
   (assert-shared-workspace-page-contains-all
@@ -73,10 +82,15 @@
      "The text child is replaced"
      "cache-busting or no-cache semantics"
      "append_workspace_note"
+     "delete_workspace_note"
+     "/core/topic/&lt;id&gt;"
      "existing-topic-id"
      "HyperDoc-created notes whose preserved URI"
      "uri=\"\""
-     "topicmap_context_add"))
+     "topicmap_context_add"
+     "topicmap_context_upsert"
+     "topicmap_context_remove"
+     "Live HTTP unlink is still intentionally unsupported"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/DMX machine-readable read paths.html")
@@ -91,14 +105,27 @@
    '("me, ChatGPT, and Codex"
      "curated shared blackboard"
      "HyperDoc remains the durable reference"
-     "MCP server is the typed machine-facing boundary"))
+     "MCP server is the typed machine-facing boundary"
+     "ownership-limited delete"
+     "live topicmap unlink as unsupported"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/DMX FedWiki Write Model.html")
    "DMX FedWiki Write Model"
    '("DMX note read/write boundary"
      "DMX machine-readable read paths"
-     "DMX MCP server for shared workspace"))
+     "DMX MCP server for shared workspace"
+     "topicmap_context_upsert"
+     "delete_workspace_topic"
+     "OPTIONS /core/topic/&lt;id&gt;"
+     "No archive or tombstone mutation contract is claimed yet"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX topicmap 919822 repair runbook.html")
+   "DMX topicmap 919822 repair runbook"
+   '("OPTIONS /core/topic/&lt;id&gt;"
+     "DELETE /topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;"
+     "dry-run-first and non-live over HTTP"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")

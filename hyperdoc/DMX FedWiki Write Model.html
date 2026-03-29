@@ -77,6 +77,8 @@
 <ol>
   <li><tt>dmx-import-create-topic</tt> / <tt>dmx-import-update-topic</tt>: typed topic upsert payloads for the DMX topic itself.</li>
   <li><tt>dmx-import-add-topic-to-topicmap</tt> / <tt>dmx-import-set-topic-view-props</tt>: guarded topicmap-context view writes.</li>
+  <li><tt>dmx-import-delete-topic</tt>: hard delete on <tt>/core/topic/&lt;id&gt;</tt>, used only behind ownership checks.</li>
+  <li><tt>dmx-import-remove-topic-from-topicmap</tt>: typed unlink helper with memory-client support for smoke coverage; live HTTP unlink stays unsupported until the membership DELETE contract is proven.</li>
   <li><tt>plan-topic-factory-snippet-dmx-write</tt>: dry-run planning that surfaces normalized payload and validation status before write.</li>
   <li><tt>execute-topic-factory-snippet-dmx-write</tt>: explicit dry-run or live execution on the same guarded boundary.</li>
   <li><tt>localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary</tt> and related handover surfaces: promotion-plan wrappers that keep the normalized payload inspectable.</li>
@@ -99,9 +101,21 @@
 
 <ul>
   <li><tt>workspace/context-window</tt>, <tt>topic/&lt;id&gt;</tt>, and <tt>topicmap/&lt;id&gt;</tt> resources wrap canonical DMX read paths instead of teaching clients raw URLs.</li>
-  <li><tt>validated_dmx_write_dry_run</tt> exposes normalized payload and validation status before mutation.</li>
-  <li><tt>append_workspace_note</tt>, <tt>update_workspace_note</tt>, and <tt>create_handover</tt> stay on typed note/topic payloads rather than arbitrary raw DMX writes.</li>
+  <li><tt>validated_dmx_write_dry_run</tt> exposes normalized payload and validation status before mutation, including <tt>topicmap_context_upsert</tt> and <tt>topicmap_context_remove</tt>.</li>
+  <li><tt>append_workspace_note</tt>, <tt>update_workspace_note</tt>, <tt>delete_workspace_note</tt>, and <tt>create_handover</tt> stay on typed note/topic payloads rather than arbitrary raw DMX writes.</li>
+  <li><tt>upsert_workspace_topicmap_context</tt> and <tt>upsert_workspace_topic_factory_snippet</tt> provide the supported typed path for placing HyperDoc-managed topics into workspace topicmap <tt>919822</tt>.</li>
+  <li><tt>delete_workspace_topic</tt> is ownership-limited to HyperDoc-owned workspace artifacts; foreign topics are rejected.</li>
+  <li><tt>remove_workspace_topic_from_topicmap</tt> exists as a typed unlink tool, but live HTTP execution remains intentionally unsupported until the membership DELETE contract is proven.</li>
   <li>No generic raw <tt>ViewProps</tt> passthrough is exposed through MCP.</li>
+</ul>
+
+<h2>Delete and unlink boundary</h2>
+
+<ul>
+  <li>Proven backend contract: <tt>OPTIONS /core/topic/&lt;id&gt;</tt> advertises <tt>DELETE</tt>, so HyperDoc can support ownership-limited hard delete on the parent topic endpoint.</li>
+  <li>Unproven backend contract: <tt>OPTIONS /topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt> did not advertise <tt>DELETE</tt>, so HyperDoc does not claim live HTTP unlink support on that route.</li>
+  <li>Current safe result: HyperDoc-owned workspace notes, handovers, and topic-factory snippet twins may be hard-deleted; foreign topics default to non-destructive handling.</li>
+  <li>No archive or tombstone mutation contract is claimed yet because the backend boundary for that shape remains unproven.</li>
 </ul>
 
 <h2>Diagnostics and fail-soft behavior</h2>

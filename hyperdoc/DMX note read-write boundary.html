@@ -58,10 +58,19 @@
 
 <p>
   The narrow MCP write tools <tt>append_workspace_note</tt>,
-  <tt>update_workspace_note</tt>, and <tt>create_handover</tt> keep this same
-  parent-note boundary. They should not be widened into arbitrary child-topic
-  mutation tools.
+  <tt>update_workspace_note</tt>, <tt>delete_workspace_note</tt>, and
+  <tt>create_handover</tt> keep this same parent-note boundary. They should not
+  be widened into arbitrary child-topic mutation tools.
 </p>
+
+<h2>Delete boundary</h2>
+
+<ul>
+  <li>Hard delete is proven for the parent topic endpoint <tt>/core/topic/&lt;id&gt;</tt>.</li>
+  <li><tt>delete_workspace_note</tt> resolves the parent note by <tt>noteKey</tt> or uses a concrete <tt>topicId</tt>, then hard-deletes that parent note topic.</li>
+  <li>Hard delete is ownership-limited to HyperDoc-owned workspace notes and handovers. Foreign notes are rejected.</li>
+  <li>This is a different boundary from topicmap unlink. If the caller only wants to remove workspace placement, use the typed topicmap remove planning surface instead of assuming note delete semantics.</li>
+</ul>
 
 <h2>noteKey boundary</h2>
 
@@ -78,10 +87,13 @@
 <h2>topicmap-context implication</h2>
 
 <p>
-  The guarded <tt>topicmap_context_add</tt> dry-run boundary remains separate
-  from note idempotency. It requires both <tt>topicmapId</tt> and
-  <tt>topicId</tt>; callers must read or resolve the concrete topic first
-  rather than inferring it from note text alone.
+  The guarded <tt>topicmap_context_add</tt>,
+  <tt>topicmap_context_upsert</tt>, and <tt>topicmap_context_remove</tt>
+  boundaries remain separate from note idempotency. They require concrete
+  topicmap and topic ids; callers must read or resolve the concrete topic first
+  rather than inferring it from note text alone. Live HTTP unlink is still
+  intentionally unsupported until DELETE on the topicmap membership route is
+  proven.
 </p>
 
 <h2>Related</h2>

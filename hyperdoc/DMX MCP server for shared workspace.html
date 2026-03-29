@@ -60,6 +60,11 @@
   <li><tt>validated_dmx_write_dry_run</tt></li>
   <li><tt>append_workspace_note</tt></li>
   <li><tt>update_workspace_note</tt></li>
+  <li><tt>delete_workspace_note</tt></li>
+  <li><tt>delete_workspace_topic</tt></li>
+  <li><tt>upsert_workspace_topicmap_context</tt></li>
+  <li><tt>remove_workspace_topic_from_topicmap</tt></li>
+  <li><tt>upsert_workspace_topic_factory_snippet</tt></li>
   <li><tt>create_handover</tt></li>
 </ul>
 
@@ -70,6 +75,18 @@
   arbitrary topicmap mutation surface.
 </p>
 
+<p>
+  The new write tools stay typed and narrow. <tt>upsert_workspace_topicmap_context</tt>
+  can add an existing topic to topicmap <tt>919822</tt> or update its validated
+  long-form view props, <tt>upsert_workspace_topic_factory_snippet</tt> can
+  create or update a HyperDoc-owned snippet twin and place it into the
+  workspace, and <tt>delete_workspace_note</tt> or
+  <tt>delete_workspace_topic</tt> can hard-delete only HyperDoc-owned workspace
+  artifacts. <tt>remove_workspace_topic_from_topicmap</tt> exists as a guarded
+  unlink plan surface, but live HTTP unlink remains intentionally unsupported
+  until DELETE on the topicmap membership route is actually proven.
+</p>
+
 <h2>Guardrails</h2>
 
 <ul>
@@ -77,6 +94,9 @@
   <li>Tool-only clients can list topicmap <tt>919822</tt>, inspect note/topic ids, and fetch note bodies without broadening into generic DMX admin APIs.</li>
   <li>Workspace note writes use the parent-note write boundary.</li>
   <li>Topicmap-context-like payloads are normalized and validated before dry-run or live execution.</li>
+  <li>Typed workspace topic placement is limited to validated topicmap-context upsert and HyperDoc-owned topic-factory snippet upsert.</li>
+  <li>Hard delete is limited by ownership checks to HyperDoc-owned workspace notes, handovers, and topic-factory snippet twins.</li>
+  <li>Topic hard delete is proven only on <tt>/core/topic/&lt;id&gt;</tt>; live HTTP unlink on <tt>/topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt> is still unproven and therefore unsupported.</li>
   <li>Forbidden short keys <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, and <tt>pinned</tt> are rejected at the HyperDoc boundary.</li>
   <li>Dry-run output shows normalized payload and validation status before any live mutation.</li>
   <li>Dry-run stays the preferred planning mode before live mutation.</li>
@@ -159,6 +179,9 @@
   <li><tt>read_dmx_topicmap</tt> for topicmap <tt>919822</tt> returns current topic ids and note ids.</li>
   <li><tt>read_dmx_topic</tt> returns the readable note body and selected metadata for a concrete <tt>topicId</tt>.</li>
   <li><tt>resolve_workspace_note</tt> returns <tt>existingTopicId</tt> when a reused <tt>noteKey</tt> resolves through the read client.</li>
+  <li><tt>validated_dmx_write_dry_run</tt> now accepts <tt>topicmap_context_upsert</tt> and <tt>topicmap_context_remove</tt> in addition to the note and handover shapes.</li>
+  <li><tt>upsert_workspace_topic_factory_snippet</tt> returns a typed create-or-update summary with topic id, topic action, topicmap action, and normalized view-props JSON.</li>
+  <li><tt>delete_workspace_note</tt> and <tt>delete_workspace_topic</tt> return ownership-guarded hard-delete summaries instead of generic mutation results.</li>
 </ul>
 
 <h2>noteKey resolution semantics</h2>
@@ -203,6 +226,7 @@
   <li><tt>INIT_STATUS</tt>, <tt>WORKSPACE_READ_STATUS</tt>, or <tt>TOPIC_READ_STATUS</tt> other than <tt>200</tt> means stop before <tt>switch</tt>.</li>
   <li>If <tt>https://mcp.dreyeck.ch/mcp</tt> is already returning HTTP <tt>405</tt>, treat the route and certificate boundary as live; do not open a dedicated ACME workflow for MCP on dreyeck.</li>
   <li>If <tt>topicmap_context_add</tt> is planned without both <tt>topicmapId</tt> and <tt>topicId</tt>, stop; the guarded dry-run boundary intentionally refuses underspecified topicmap writes.</li>
+  <li>If <tt>remove_workspace_topic_from_topicmap</tt> reports <tt>unsupported_operation</tt> for a live HTTP client, treat that as the expected current boundary rather than as proof that raw DMX unlink is safe.</li>
   <li>If dry-run <tt>append_workspace_note</tt> keeps returning an empty <tt>existing-topic-id</tt> for a reused <tt>noteKey</tt>, inspect the read surface first instead of assuming idempotent update semantics.</li>
   <li>If the probe output loses <tt>workspace/context-window</tt> or the guarded tools, stop and inspect the activated service before proceeding.</li>
 </ul>
@@ -212,6 +236,9 @@
 <ul>
   <li>No generic DMX admin surface.</li>
   <li>No arbitrary topicmap mutation tools.</li>
+  <li>No live HTTP topicmap unlink until DELETE on the membership route is proven.</li>
+  <li>No foreign-topic hard delete through MCP.</li>
+  <li>No archive or tombstone mutation contract claimed until a typed backend boundary is proven.</li>
   <li>No full DMX synchronization framework.</li>
   <li>No claim that ChatGPT connector attachment was exercised in this slice.</li>
 </ul>

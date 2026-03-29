@@ -26,7 +26,7 @@
 <ul>
   <li><b>HyperDoc</b>: durable pages, inspectable topics, diagnostics, and design conclusions.</li>
   <li><b>Context window workspace</b>: current shared state, curated mirrors, handovers, and short collaboration memory.</li>
-  <li><b>MCP server</b>: typed shared entry point that exposes the same resources and guarded tools to multiple agents.</li>
+  <li><b>MCP server</b>: typed shared entry point that exposes the same resources and guarded tools to multiple agents, including validated topic placement and ownership-limited delete.</li>
 </ul>
 
 <h2>Operating loop</h2>
@@ -35,6 +35,7 @@
   <li>Capture stable conclusions in durable HyperDoc pages and topics.</li>
   <li>Mirror the high-value current state into the shared workspace as curated notes or existing DMX workflow topics.</li>
   <li>Let Codex, ChatGPT, and the operator read the same machine-facing workspace state through MCP or direct machine-readable DMX reads.</li>
+  <li>Use the same MCP boundary for live note writes, HyperDoc-owned topic upsert, and ownership-limited delete only when the client is attached to the same guarded server with live writes enabled.</li>
   <li>Push clarified conclusions back into HyperDoc instead of treating DMX as the sole authority.</li>
 </ol>
 
@@ -44,6 +45,7 @@
   <li>Do not use the workspace as a raw transcript archive.</li>
   <li>Do not widen the write surface into generic unsafe DMX mutation.</li>
   <li>Keep dry-run-first behavior where the backend contract is still uncertain.</li>
+  <li>Keep topic hard delete limited to HyperDoc-owned workspace artifacts, and treat live topicmap unlink as unsupported until the backend contract is proven.</li>
   <li>Keep the original malformed writer classified as unknown until it is actually proven.</li>
 </ul>
 
