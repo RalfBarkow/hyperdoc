@@ -63,6 +63,9 @@
      "topicmap_context_remove"
      "Hard delete is limited by ownership checks"
      "live HTTP unlink remains intentionally unsupported"
+     "remote HTTPS"
+     "developer mode"
+     "publish or refresh a custom app/connector"
      "create_handover"
      "generic raw DMX JSON write"))
   (assert-shared-workspace-page-contains-all
@@ -128,6 +131,21 @@
      "dry-run-first and non-live over HTTP"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
+    "hyperdoc/Using guarded workspace topic lifecycle tools.html")
+   "Using guarded workspace topic lifecycle tools"
+   '("upsert_workspace_topic_factory_snippet"
+     "upsert_workspace_topicmap_context"
+     "remove_workspace_topic_from_topicmap"
+     "delete_workspace_note"
+     "delete_workspace_topic"
+     "validated_dmx_write_dry_run"
+     "read_dmx_topicmap"
+     "read_dmx_topic"
+     "dry-run-first"
+     "HyperDoc-owned workspace notes, handovers, and topic-factory snippet twins"
+     "topicmapId = 919822"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
    "HyperDoc DMX architectural implications"
    '("Context window workspace as shared blackboard"
@@ -147,11 +165,13 @@
                    (hyperdoc::context-window-workspace-as-shared-blackboard-topic
                     "Context window workspace as shared blackboard")
                    (hyperdoc::dmx-note-read-write-boundary-topic
-                    "DMX note read/write boundary")
+                   "DMX note read/write boundary")
                    (hyperdoc::dmx-machine-readable-read-paths-topic
                     "DMX machine-readable read paths")
                    (hyperdoc::shared-workspace-collaboration-model-topic
-                    "Shared-workspace collaboration model")))
+                    "Shared-workspace collaboration model")
+                   (hyperdoc::using-guarded-workspace-topic-lifecycle-tools-topic
+                    "Using guarded workspace topic lifecycle tools")))
     (destructuring-bind (symbol title) entry
       (assert-true (fboundp symbol)
                    (format nil "Missing topic function ~A" symbol))
@@ -166,7 +186,8 @@
                         "Context window workspace as shared blackboard"
                         "DMX note read/write boundary"
                         "DMX machine-readable read paths"
-                        "Shared-workspace collaboration model"))
+                        "Shared-workspace collaboration model"
+                        "Using guarded workspace topic lifecycle tools"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))

@@ -2791,6 +2791,18 @@
                  "HyperDoc DMX architectural implications"
                  "Localhost FedWiki page promotion workflow")))
 
+(defun using-guarded-workspace-topic-lifecycle-tools-topic ()
+  (make-topic
+   :id "using-guarded-workspace-topic-lifecycle-tools"
+   :title "Using guarded workspace topic lifecycle tools"
+   :summary "Operational runbook for creating, updating, placing, unlinking, and ownership-limited deleting of guarded workspace topics in topicmap 919822 through the MCP boundary."
+   :references '("Using guarded workspace topic lifecycle tools"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "DMX note read/write boundary"
+                 "DMX FedWiki Write Model"
+                 "Shared-workspace collaboration model")))
+
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"

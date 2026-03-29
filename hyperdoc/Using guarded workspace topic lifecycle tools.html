@@ -1,0 +1,109 @@
+<h1>Using guarded workspace topic lifecycle tools</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using
+  guarded workspace topic lifecycle tools</tt></a> is the concise runbook for
+  creating, updating, placing, unlinking, and deleting workspace artifacts in
+  the guarded DMX shared-workspace boundary. It keeps topicmap
+  <tt>919822</tt> usable for real work without widening HyperDoc into a
+  generic DMX mutation surface.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+</ul>
+
+<h2>Supported create, update, and upsert paths</h2>
+
+<ul>
+  <li><tt>append_workspace_note</tt>: create or update a typed workspace note on the parent-note boundary.</li>
+  <li><tt>update_workspace_note</tt>: update an existing workspace note by concrete <tt>topicId</tt>.</li>
+  <li><tt>upsert_workspace_topic_factory_snippet</tt>: create or update a HyperDoc-owned topic-factory snippet twin and place it into topicmap <tt>919822</tt>.</li>
+  <li><tt>upsert_workspace_topicmap_context</tt>: add an existing topic to the workspace topicmap or refresh its validated long-form view props.</li>
+</ul>
+
+<p>
+  Use <tt>upsert_workspace_topic_factory_snippet</tt> when you need a
+  HyperDoc-owned topic to exist in the workspace. Use
+  <tt>upsert_workspace_topicmap_context</tt> when the topic already exists and
+  you only need typed placement or validated repositioning.
+</p>
+
+<h2>Unlink versus hard delete</h2>
+
+<ul>
+  <li><tt>remove_workspace_topic_from_topicmap</tt> is unlink only. It removes topicmap membership and should leave the topic itself intact.</li>
+  <li><tt>delete_workspace_note</tt> and <tt>delete_workspace_topic</tt> are hard delete only. They target <tt>/core/topic/&lt;id&gt;</tt>, not the topicmap membership route.</li>
+  <li>On the current HTTP client, live unlink is still intentionally unsupported because DELETE on <tt>/topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt> is not yet proven.</li>
+</ul>
+
+<h2>Ownership limits</h2>
+
+<ul>
+  <li>Hard delete is allowed only for HyperDoc-owned workspace notes, handovers, and topic-factory snippet twins.</li>
+  <li>Foreign topics are never generic hard-delete targets through this MCP boundary.</li>
+  <li>Topic placement itself is not ownership-limited, but it still stays typed and validated.</li>
+</ul>
+
+<h2>Dry-run-first practice</h2>
+
+<ol>
+  <li>Inspect the current topicmap through <tt>read_dmx_topicmap</tt>.</li>
+  <li>If needed, inspect the concrete topic through <tt>read_dmx_topic</tt>.</li>
+  <li>Run <tt>validated_dmx_write_dry_run</tt> for <tt>topicmap_context_upsert</tt> or <tt>topicmap_context_remove</tt> before a live topicmap-context mutation.</li>
+  <li>Run the live tool only after the dry-run summary shows the intended action and normalized payload.</li>
+</ol>
+
+<p>
+  The checked-in call sheet with exact MCP payloads lives at
+  <tt>tools/guarded-workspace-topic-lifecycle-mcp-rehearsal.md</tt>. Keep the
+  operational workflow explicitly <tt>dry-run-first</tt> whenever a live write
+  would change workspace state.
+</p>
+
+<h2>If a topic is already present</h2>
+
+<ul>
+  <li>If <tt>upsert_workspace_topic_factory_snippet</tt> returns <tt>topic-action update</tt> and <tt>topicmap-action already-present</tt>, treat that as the expected idempotent update path, not as a collision defect.</li>
+  <li>If <tt>upsert_workspace_topicmap_context</tt> returns <tt>topicmap-action set-view-props</tt>, the topic was already present; the tool is now updating validated view props instead of adding a second membership.</li>
+  <li>If a note already exists, use <tt>resolve_workspace_note</tt> or <tt>read_dmx_topic</tt> to confirm the concrete target before revising or deleting it.</li>
+</ul>
+
+<h2>Inspect before and after</h2>
+
+<ul>
+  <li><tt>read_dmx_topicmap</tt> with <tt>topicmapId = 919822</tt> shows current topic ids and note ids in the workspace.</li>
+  <li><tt>read_dmx_topic</tt> with the concrete <tt>topicId</tt> confirms title, note body, and selected child metadata.</li>
+  <li>After a live upsert, reread both the topicmap and the topic.</li>
+  <li>After a delete, reread the topic to confirm absence. After an unlink, reread the topicmap to confirm membership removal without assuming topic deletion.</li>
+</ul>
+
+<h2>ChatGPT and Codex use</h2>
+
+<p>
+  Codex can already use these tools when attached to the same MCP server.
+  ChatGPT can use the same tool surface only after the remote HTTPS MCP
+  endpoint is registered as a custom app/connector in a ChatGPT workspace that
+  supports developer mode and full MCP actions, and only after the server-side
+  live-write gate and DMX credentials are enabled for write actions.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+</ul>

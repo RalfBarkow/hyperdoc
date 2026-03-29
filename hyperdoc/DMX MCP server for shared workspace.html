@@ -24,6 +24,7 @@
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
   <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
   <li><a hyperbook="topics" page="Use a DMX Common workspace as a world read/write context window"><tt>Use a DMX Common workspace as a world read/write context window</tt></a></li>
   <li><a hyperbook="topics" page="Codex read/write boundary for a DMX topicmap"><tt>Codex read/write boundary for a DMX topicmap</tt></a></li>
 </ul>
@@ -128,8 +129,31 @@
   <li><tt>codex mcp list --json</tt> shows the configured <tt>dmx-context-window</tt> server.</li>
   <li><tt>codex mcp get dmx-context-window --json</tt> confirms the Streamable HTTP transport and URL.</li>
   <li>The MCP server itself was proven live against <tt>https://dmx.ralfbarkow.ch</tt> by reading <tt>workspace/context-window</tt>, topic <tt>907120</tt>, and topic <tt>921464</tt>, then running <tt>validated_dmx_write_dry_run</tt>.</li>
-  <li>Future ChatGPT connector/app attachment should use the same HTTPS-exposed server rather than a separate raw DMX bridge.</li>
+  <li>ChatGPT should use this same HTTPS-exposed server rather than a separate raw DMX bridge.</li>
 </ul>
+
+<h2>ChatGPT connector readiness</h2>
+
+<p>
+  The server-side tool surface is now sufficient. The remaining integration
+  step is on the ChatGPT side: attach the same remote HTTPS
+  <tt>/mcp</tt> endpoint as a custom app or connector instead of trying to add
+  another raw DMX bridge.
+</p>
+
+<ol>
+  <li>Expose the MCP server at a remote HTTPS endpoint such as <tt>https://mcp.dreyeck.ch/mcp</tt>. ChatGPT cannot attach to the local <tt>127.0.0.1</tt> development URL.</li>
+  <li>In a ChatGPT Business or Enterprise/Edu web workspace with developer mode enabled, create and publish or refresh a custom app/connector for that MCP endpoint.</li>
+  <li>If the connector uses authentication, configure that auth at connector creation time. For OAuth/OpenID Connect, make sure refresh or offline access is actually issued so the connector remains usable after the initial token expires.</li>
+  <li>Write tools still depend on the server-side live-write gate: <tt>HYPERDOC_MCP_ENABLE_LIVE_WRITES=1</tt>, working <tt>HYPERDOC_DMX_IMPORT_*</tt> credentials, and any expected bearer-token or allowed-origin checks on the HyperDoc side.</li>
+  <li>After tool definitions change, refresh the connector action list in ChatGPT before assuming the new tools are callable.</li>
+</ol>
+
+<p>
+  So the concrete remaining blocker is no longer another HyperDoc feature. It
+  is connector registration, approval, and auth on the ChatGPT workspace side,
+  plus the existing live-write gate for DMX mutation.
+</p>
 
 <h2>Deployment boundary (corrected)</h2>
 
@@ -182,6 +206,7 @@
   <li><tt>validated_dmx_write_dry_run</tt> now accepts <tt>topicmap_context_upsert</tt> and <tt>topicmap_context_remove</tt> in addition to the note and handover shapes.</li>
   <li><tt>upsert_workspace_topic_factory_snippet</tt> returns a typed create-or-update summary with topic id, topic action, topicmap action, and normalized view-props JSON.</li>
   <li><tt>delete_workspace_note</tt> and <tt>delete_workspace_topic</tt> return ownership-guarded hard-delete summaries instead of generic mutation results.</li>
+  <li><tt>Using guarded workspace topic lifecycle tools</tt> and <tt>tools/guarded-workspace-topic-lifecycle-mcp-rehearsal.md</tt> provide the first-live runbook and exact call shapes.</li>
 </ul>
 
 <h2>noteKey resolution semantics</h2>
@@ -240,7 +265,7 @@
   <li>No foreign-topic hard delete through MCP.</li>
   <li>No archive or tombstone mutation contract claimed until a typed backend boundary is proven.</li>
   <li>No full DMX synchronization framework.</li>
-  <li>No claim that ChatGPT connector attachment was exercised in this slice.</li>
+  <li>No claim that ChatGPT connector attachment was exercised in this slice; the remaining work is connector registration and approval, not another DMX write primitive.</li>
 </ul>
 
 <h2>FedWiki twin</h2>
