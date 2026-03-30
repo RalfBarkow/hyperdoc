@@ -134,6 +134,10 @@
     :reader dmx-import-authorization-header-of
     :initarg :authorization-header
     :initform nil)
+   (workspace-id
+    :reader dmx-import-workspace-id-of
+    :initarg :workspace-id
+    :initform nil)
    (topic-type-uri :reader dmx-import-topic-type-uri-of
                    :initarg :topic-type-uri
                    :initform *dmx-fedwiki-page-type-uri*)
@@ -980,6 +984,10 @@
          (headers (append (when (dmx-import-authorization-header-of client)
                             (list (cons "Authorization"
                                         (dmx-import-authorization-header-of client))))
+                          (when (dmx-import-workspace-id-of client)
+                            (list (cons "Cookie"
+                                        (format nil "dmx_workspace_id=~D"
+                                                (dmx-import-workspace-id-of client)))))
                           extra-headers))
          (request-args (append (list normalized-url
                                      :method method
@@ -1137,6 +1145,15 @@
   (let* ((base-url (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL"))
          (topic-type-uri
            (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI"))
+         (workspace-id
+           (let ((value (getenv-non-empty "HYPERDOC_DMX_IMPORT_WORKSPACE_ID")))
+             (when value
+               (or (parse-positive-integer value)
+                   (error 'dmx-import-config-error
+                          :message
+                          (format nil
+                                  "Invalid DMX import workspace id ~S in HYPERDOC_DMX_IMPORT_WORKSPACE_ID"
+                                  value))))))
          (auth-header
            (or (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_HEADER")
                (let ((username (getenv-non-empty "HYPERDOC_DMX_IMPORT_USERNAME"))
@@ -1152,6 +1169,7 @@
                                                (and legacy-auth-token
                                                     (format nil "Bearer ~A"
                                                             legacy-auth-token)))
+                     :workspace-id workspace-id
                      :topic-type-uri (or topic-type-uri
                                          *dmx-fedwiki-page-type-uri*)
                      :verbose verbose))))

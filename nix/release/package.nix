@@ -112,6 +112,9 @@ let
       echo "HyperDoc MCP flake.lock sha256: $HYPERDOC_RELEASE_FLAKE_LOCK_SHA256"
       echo "HyperDoc MCP bind: $HYPERDOC_MCP_BIND_ADDRESS:$HYPERDOC_MCP_PORT"
       echo "HyperDoc MCP workspace topicmap: $HYPERDOC_MCP_WORKSPACE_TOPICMAP_ID"
+      if [ -n "''${HYPERDOC_DMX_IMPORT_WORKSPACE_ID:-}" ]; then
+        echo "HyperDoc DMX workspace assignment: $HYPERDOC_DMX_IMPORT_WORKSPACE_ID"
+      fi
       echo "HyperDoc MCP live writes: $HYPERDOC_MCP_ENABLE_LIVE_WRITES"
 
       exec ${sbclEnv}/bin/sbcl \

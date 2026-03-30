@@ -69,6 +69,18 @@ in
       description = "Optional DMX base URL used by the MCP read/write adapter.";
     };
 
+    dmxWorkspaceId = mkOption {
+      type = types.nullOr types.int;
+      default = null;
+      description = "Optional DMX workspace topic id sent as the default dmx_workspace_id cookie for guarded DMX writes.";
+    };
+
+    dmxImportEnvironmentFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Optional EnvironmentFile exporting HYPERDOC_DMX_IMPORT_AUTH_* credentials for authenticated DMX writes.";
+    };
+
     enableLiveWrites = mkOption {
       type = types.bool;
       default = false;
@@ -152,8 +164,11 @@ in
         Restart = "on-failure";
         RestartSec = "3s";
         NoNewPrivileges = true;
-      } // optionalAttrs (cfg.bearerTokenFile != null) {
-        EnvironmentFile = cfg.bearerTokenFile;
+      } // optionalAttrs (cfg.bearerTokenFile != null || cfg.dmxImportEnvironmentFile != null) {
+        EnvironmentFile = builtins.filter (path: path != null) [
+          cfg.bearerTokenFile
+          cfg.dmxImportEnvironmentFile
+        ];
       };
       environment = {
         HYPERDOC_MCP_BIND_ADDRESS = cfg.bindAddress;
@@ -164,6 +179,8 @@ in
         HYPERDOC_MCP_ALLOWED_ORIGINS = concatStringsSep "," cfg.allowedOrigins;
       } // optionalAttrs (cfg.dmxBaseUrl != null) {
         HYPERDOC_DMX_IMPORT_BASE_URL = cfg.dmxBaseUrl;
+      } // optionalAttrs (cfg.dmxWorkspaceId != null) {
+        HYPERDOC_DMX_IMPORT_WORKSPACE_ID = toString cfg.dmxWorkspaceId;
       };
     };
 

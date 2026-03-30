@@ -83,6 +83,7 @@ cat >"$sidecar_target" <<EOF
     dataDir = "/var/lib/hyperdoc/mcp";
     workspaceTopicmapId = 919822;
     dmxBaseUrl = "https://dmx.ralfbarkow.ch";
+    dmxWorkspaceId = 919815;
     enableLiveWrites = false;
     allowedOrigins = [
       "https://mcp.dreyeck.ch"

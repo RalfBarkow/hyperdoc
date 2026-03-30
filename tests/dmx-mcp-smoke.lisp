@@ -111,7 +111,8 @@
                      (t
                       (error "Unexpected Drakma call ~S ~S" method url)))))
            (let ((client (make-instance 'hyperdoc::http-dmx-import-client
-                                        :base-url "https://dmx.ralfbarkow.ch")))
+                                        :base-url "https://dmx.ralfbarkow.ch"
+                                        :workspace-id 919815)))
              (hyperdoc::execute-dmx-workspace-note-write
               "Context window workspace as shared blackboard"
               "Shared-blackboard intent and collaboration context."
@@ -129,6 +130,9 @@
              (mcp-assert-equal "application/json"
                                (getf call :content-type)
                                "Guarded HTTP write must keep Drakma content-type")
+             (mcp-assert-equal "dmx_workspace_id=919815"
+                               (mcp-test-header-value (getf call :headers) "Cookie")
+                               "Guarded HTTP write must carry the configured DMX workspace cookie")
              (mcp-assert-true
               (null (mcp-test-header-value (getf call :headers) "Content-Type"))
               "Guarded HTTP write must not duplicate Content-Type in additional headers"))
