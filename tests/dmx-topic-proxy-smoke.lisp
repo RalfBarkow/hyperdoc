@@ -799,6 +799,12 @@
                        ((search "/access-control/login" url)
                         (assert-equal :post method
                                       "Repair-console debug trace must POST the login bootstrap")
+                        (assert-true
+                         (search "Basic "
+                                 (cdr (assoc "Authorization"
+                                             additional-headers
+                                             :test #'string-equal)))
+                         "Repair-console debug trace must send Basic auth on the login bootstrap")
                         (values (make-string-input-stream "")
                                 204
                                 '(("Set-Cookie" . "JSESSIONID=session-123;Path=/;SameSite=Strict"))
@@ -806,12 +812,11 @@
                        ((search "/workspaces/919815/object/922464" url)
                         (assert-equal :put method
                                       "Repair-console debug trace must PUT the workspace assignment")
-                        (assert-true
-                         (search "Basic "
-                                 (cdr (assoc "Authorization"
-                                             additional-headers
-                                             :test #'string-equal)))
-                         "Repair-console debug trace must preserve the Basic authorization header")
+                        (assert-equal nil
+                                      (cdr (assoc "Authorization"
+                                                  additional-headers
+                                                  :test #'string-equal))
+                                      "Repair-console debug trace must switch to session-only auth on the guarded PUT")
                         (assert-equal "JSESSIONID=session-123; dmx_workspace_id=919815"
                                       (cdr (assoc "Cookie"
                                                   additional-headers
@@ -886,6 +891,9 @@
                (assert-true
                 (getf debug-report :session-cookie-captured-p)
                 "Repair-console debug trace must record that JSESSIONID was captured in memory")
+               (assert-equal nil
+                             (getf debug-report :guarded-put-authorization-scheme)
+                             "Repair-console debug trace must redact the guarded PUT as session-only after bootstrap")
                (assert-equal "JSESSIONID + dmx_workspace_id"
                              (getf debug-report :guarded-put-cookie-shape)
                              "Repair-console debug trace must redact the guarded PUT cookie shape")
@@ -913,6 +921,12 @@
                (assert-equal 200
                              (getf debug-report :topicmap-readback-status-code)
                              "Repair-console debug trace must expose the post-failure topicmap readback status")
+               (assert-equal nil
+                             (getf result :result-workspace-id)
+                             "Repair-console debug trace must preserve the missing workspace assignment after failed readback")
+               (assert-true
+                (getf result :result-in-topicmap-p)
+                "Repair-console debug trace must preserve the successful topicmap readback even after the failed PUT")
                (assert-equal "S13 terminal failure"
                              (getf debug-report :current-state-label)
                              "Repair-console debug trace must identify the terminal failure state")

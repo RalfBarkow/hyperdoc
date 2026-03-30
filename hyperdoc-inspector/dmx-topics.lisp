@@ -217,17 +217,34 @@
         :test #'eq))
 
 (defun capture-dmx-repair-client-readbacks (client topic-id topicmap-id)
-  (when (typep client 'hyperdoc::http-dmx-import-client)
-    (handler-case
-        (hyperdoc::dmx-import-read-topic-workspace client topic-id)
-      (error ()
-        nil))
-    (when topicmap-id
+  (let ((workspace nil)
+        (workspace-read-p nil)
+        (in-topicmap-p nil)
+        (topicmap-read-p nil))
+    (when (typep client 'hyperdoc::http-dmx-import-client)
       (handler-case
-          (hyperdoc::dmx-import-topic-in-topicmap-p client topicmap-id topic-id)
+          (setf workspace
+                (hyperdoc::dmx-import-read-topic-workspace client topic-id)
+                workspace-read-p t)
         (error ()
-          nil))))
-  client)
+          (setf workspace nil
+                workspace-read-p nil)))
+      (when topicmap-id
+        (handler-case
+            (setf in-topicmap-p
+                  (and (hyperdoc::dmx-import-topic-in-topicmap-p
+                        client
+                        topicmap-id
+                        topic-id)
+                       t)
+                  topicmap-read-p t)
+          (error ()
+            (setf in-topicmap-p nil
+                  topicmap-read-p nil)))))
+    (list :workspace workspace
+          :workspace-read-p workspace-read-p
+          :in-topicmap-p in-topicmap-p
+          :topicmap-read-p topicmap-read-p)))
 
 (defun dmx-repair-debug-request-summary (event)
   (when event
@@ -470,6 +487,8 @@
                  :session-cookie-captured-p
                  (and session-extracted
                       (getf session-extracted :session-cookie-captured-p))
+                 :guarded-put-authorization-scheme
+                 (getf guarded-request :authorization-scheme)
                  :guarded-put-cookie-shape
                  (getf guarded-request :cookie-shape)
                  :guarded-put-jsessionid-cookie-p
@@ -592,6 +611,7 @@
                      :authorization-header-provided-p nil
                      :auth-token-provided-p nil)))
          (execution nil)
+         (readbacks nil)
          (success-p nil)
          (message nil)
          (result nil))
@@ -615,32 +635,54 @@
       (error (condition)
         (setf success-p nil
               message (princ-to-string condition))))
-    (capture-dmx-repair-client-readbacks client
-                                         topic-id
-                                         (hyperdoc::dmx-topicmap-id-of page))
-    (setf result
-          (sanitize-dmx-repair-result topic-id
-                                      diagnostics
-                                      execution
-                                      :dry-run dry-run
-                                      :auth-mode auth-mode
-                                      :success-p success-p
-                                      :debug-report
-                                      (build-dmx-repair-debug-report
-                                       client
-                                       normalized-auth-context
-                                       (append (or execution '())
-                                               (list :result-in-topicmap-p
-                                                     (and execution
-                                                          (getf execution
-                                                                :result-in-topicmap-p))
-                                                     :result-workspace-id
-                                                     (and execution
-                                                          (getf execution
-                                                                :result-workspace-id))
-                                                     :message message))
-                                       success-p)
-                                      :message message))
+    (setf readbacks
+          (capture-dmx-repair-client-readbacks client
+                                               topic-id
+                                               (hyperdoc::dmx-topicmap-id-of page)))
+    (let* ((result-workspace
+             (and (getf readbacks :workspace-read-p)
+                  (getf readbacks :workspace)))
+           (result-workspace-id
+             (cond
+               ((getf readbacks :workspace-read-p)
+                (hyperdoc::dmx-import-object-id result-workspace))
+               (t
+                (and execution
+                     (getf execution :result-workspace-id)))))
+           (result-workspace-title
+             (cond
+               ((getf readbacks :workspace-read-p)
+                (hyperdoc::dmx-workspace-title-from-topic result-workspace))
+               (t
+                (and execution
+                     (getf execution :result-workspace-title)))))
+           (result-in-topicmap-p
+             (cond
+               ((getf readbacks :topicmap-read-p)
+                (and (getf readbacks :in-topicmap-p) t))
+               (t
+                (and execution
+                     (getf execution :result-in-topicmap-p)))))
+           (result-payload
+             (append (or execution '())
+                     (list :result-in-topicmap-p result-in-topicmap-p
+                           :result-workspace-id result-workspace-id
+                           :result-workspace-title result-workspace-title
+                           :message message))))
+      (setf result
+            (sanitize-dmx-repair-result topic-id
+                                        diagnostics
+                                        result-payload
+                                        :dry-run dry-run
+                                        :auth-mode auth-mode
+                                        :success-p success-p
+                                        :debug-report
+                                        (build-dmx-repair-debug-report
+                                         client
+                                         normalized-auth-context
+                                         result-payload
+                                         success-p)
+                                        :message message)))
     (handler-case
         (ensure-dmx-topic-proxy-readbacks page)
       (error (condition)
@@ -838,6 +880,11 @@
                    (:td (:tt (views:esc
                               (yes/no-label
                                (getf debug-report :session-cookie-captured-p))))))
+              (:tr (:td (views:esc "Guarded PUT auth"))
+                   (:td (:tt (views:esc
+                              (or (getf debug-report
+                                        :guarded-put-authorization-scheme)
+                                  "none")))))
               (:tr (:td (views:esc "Guarded PUT cookie shape"))
                    (:td (:tt (views:esc
                               (or (getf debug-report :guarded-put-cookie-shape)
