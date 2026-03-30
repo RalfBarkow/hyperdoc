@@ -27,7 +27,7 @@ in
     dmxBaseUrl = "https://dmx.ralfbarkow.ch";
     dmxWorkspaceId = 919815;
     dmxImportEnvironmentFile = "-/etc/nixos/hyperdoc/dmx-import.env";
-    enableLiveWrites = false;
+    enableLiveWrites = true;
     allowedOrigins = [
       "https://mcp.dreyeck.ch"
     ];
