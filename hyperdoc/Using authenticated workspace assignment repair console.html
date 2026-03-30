@@ -1,0 +1,145 @@
+<h1>Using authenticated workspace assignment repair console</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the narrow HyperDoc-side mutation surface for
+  workspace-assignment backfill.
+  Diagnosis stays read-only in the existing DMX object inspector and repair
+  triage views.
+  Mutation now happens in a separate <tt>Repair console</tt> tab that asks for
+  explicit credentials at action time, builds an authenticated DMX client
+  ephemerally, and then calls the same guarded workspace-assignment repair
+  executor already used behind the MCP tool
+  <tt>repair_workspace_topic_assignment</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-repair-triage)"><tt>(make-dmx-shared-workspace-repair-triage)</tt></a></li>
+</ul>
+
+<h2>Console entrypoints</h2>
+
+<p>
+  There are two entrypoints into the repair console:
+</p>
+
+<ul>
+  <li>single object: open a <tt>dmx-topic-proxy</tt> such as <tt>922464</tt> and select the <tt>Repair console</tt> tab</li>
+  <li>backlog: open <tt>(make-dmx-shared-workspace-repair-triage)</tt> and select the <tt>Repair console</tt> tab</li>
+</ul>
+
+<p>
+  Both entrypoints keep the same operational split intact:
+</p>
+
+<ul>
+  <li>workspace assignment target remains <tt>919815</tt></li>
+  <li>topicmap placement remains <tt>919822</tt></li>
+  <li>foreign objects such as <tt>922451</tt> stay excluded</li>
+  <li>already-correct objects such as <tt>922586</tt> stay excluded from backlog repair</li>
+</ul>
+
+<h2>Credential modes</h2>
+
+<p>
+  The repair console supports explicit credential mode selection.
+  The current first cut offers:
+</p>
+
+<ul>
+  <li><tt>username/password</tt></li>
+  <li><tt>authorization header</tt></li>
+  <li><tt>bearer token</tt></li>
+</ul>
+
+<p>
+  The UI keeps the active mode explicit and only uses the fields relevant to
+  the selected mode for the current action.
+</p>
+
+<h2>Ephemeral credential handling</h2>
+
+<p>
+  Credentials are ephemeral in this flow.
+  They are entered into the repair console, used immediately to construct an
+  authenticated HTTP DMX client, and then discarded with the console refresh
+  after the action returns.
+</p>
+
+<ul>
+  <li>They are not written into topic content.</li>
+  <li>They are not written into workspace notes or handovers.</li>
+  <li>They are not written into long-lived host environment files.</li>
+  <li>The console stores only sanitized repair results such as topic id, workspace readback, topicmap preservation, outcome, and error message.</li>
+</ul>
+
+<h2>Guarded execution path</h2>
+
+<p>
+  The console does not invent a second mutation path.
+  It threads explicit credentials into an ephemeral
+  <tt>http-dmx-import-client</tt> and then calls
+  <tt>execute-dmx-workspace-topic-workspace-assignment-repair</tt>.
+  That is the same guarded repair semantics already used by the MCP surface.
+</p>
+
+<h2>Single-topic flow</h2>
+
+<ol>
+  <li>Open <tt>922464</tt> through <tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt>.</li>
+  <li>Read the <tt>Workspace diagnostics</tt> tab first.</li>
+  <li>Switch to <tt>Repair console</tt>.</li>
+  <li>Select a credential mode and enter credentials.</li>
+  <li>Run <tt>Dry-run selected topic</tt> first if you want a no-mutation readiness check.</li>
+  <li>Run <tt>Repair selected topic</tt> for the live mutation.</li>
+  <li>Inspect the per-topic live result readback in the same console.</li>
+</ol>
+
+<h2>Backlog flow</h2>
+
+<ol>
+  <li>Open <tt>(make-dmx-shared-workspace-repair-triage)</tt>.</li>
+  <li>Review the read-only <tt>Repair triage</tt> tab first.</li>
+  <li>Switch to <tt>Repair console</tt>.</li>
+  <li>Select a credential mode and enter credentials.</li>
+  <li>Use <tt>Dry-run selected topic</tt> or <tt>Repair selected topic</tt> for one backlog item.</li>
+  <li>Use <tt>Dry-run backlog</tt> or <tt>Repair backlog</tt> for the whole current backlog.</li>
+  <li>Inspect the per-topic live result readback table after the action.</li>
+</ol>
+
+<h2>Acceptance cases</h2>
+
+<ul>
+  <li><tt>922464</tt> is the canary repair candidate: it is HyperDoc-owned, in topicmap <tt>919822</tt>, and missing workspace assignment before repair.</li>
+  <li><tt>922586</tt> is the already-correct control: it should show workspace assignment <tt>919815</tt> and should not need repair.</li>
+  <li><tt>922451</tt> is the foreign control: it should stay excluded from guarded workspace-assignment repair.</li>
+</ul>
+
+<h2>Current live boundary</h2>
+
+<p>
+  This console removes the need to hunt for secrets in host service config just
+  to backfill workspace assignment.
+  It does not itself provide a general DMX login system, and it does not widen
+  HyperDoc into a raw DMX mutation surface.
+  Live repair still depends on the user supplying valid DMX credentials in the
+  console at action time.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+</ul>

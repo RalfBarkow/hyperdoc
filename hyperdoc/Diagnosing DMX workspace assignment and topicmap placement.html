@@ -17,6 +17,7 @@
 <ul>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
   <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
@@ -63,9 +64,11 @@
 
 <p>
   This is intentionally read-only.
-  No DMX login form is required for this first version because the view only
-  reads public machine-readable endpoints.
-  Guarded repair and backfill actions remain separate.
+  Diagnosis remains read-only and needs no login because this inspector only
+  reads machine-readable DMX endpoints.
+  The new authenticated mutation surface is separate:
+  the <tt>Repair console</tt> tab on the same object, documented in
+  <a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a>.
 </p>
 
 <h2>Acceptance cases</h2>
@@ -142,8 +145,10 @@
   <tt>in topicmap but unassigned</tt>, the separate follow-up path is the
   guarded repair tool:
   <tt>repair_workspace_topic_assignment</tt>.
-  That repair path still requires authenticated DMX writes and remains outside
-  this read-only inspector slice.
+  In HyperDoc that follow-up now lives in the separate authenticated
+  <tt>Repair console</tt> tab, which threads explicit ephemeral credentials
+  into the same guarded repair executor without collapsing workspace assignment
+  into topicmap placement.
 </p>
 
 <p>
@@ -158,6 +163,7 @@
 
 <ul>
   <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
   <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>

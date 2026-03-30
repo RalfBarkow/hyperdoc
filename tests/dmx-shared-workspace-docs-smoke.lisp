@@ -151,6 +151,7 @@
    "Diagnosing DMX workspace assignment and topicmap placement"
    '("Workspace diagnostics"
      "Diagnosing DMX workspace repair triage"
+     "Using authenticated workspace assignment repair console"
      "workspace assignment"
      "topicmap placement"
      "919815"
@@ -158,8 +159,9 @@
      "922464"
      "922586"
      "922451"
-     "repair_workspace_topic_assignment"
-     "No DMX login form is required for this first version"))
+      "repair_workspace_topic_assignment"
+     "Diagnosis remains read-only and needs no login"
+     "Repair console"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/Diagnosing DMX workspace repair triage.html")
@@ -176,8 +178,26 @@
      "922565"
      "922586"
      "922451"
-     "read-only"
-     "make-dmx-shared-workspace-repair-triage"))
+      "read-only"
+     "make-dmx-shared-workspace-repair-triage"
+     "Repair console"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/Using authenticated workspace assignment repair console.html")
+   "Using authenticated workspace assignment repair console"
+   '("Repair console"
+     "username/password"
+     "authorization header"
+     "bearer token"
+     "ephemeral"
+     "919815"
+     "919822"
+     "922464"
+     "922586"
+     "922451"
+     "selected topic"
+     "backlog"
+     "execute-dmx-workspace-topic-workspace-assignment-repair"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
@@ -209,7 +229,9 @@
                    (hyperdoc::diagnosing-dmx-workspace-assignment-and-topicmap-placement-topic
                     "Diagnosing DMX workspace assignment and topicmap placement")
                    (hyperdoc::diagnosing-dmx-workspace-repair-triage-topic
-                    "Diagnosing DMX workspace repair triage")))
+                    "Diagnosing DMX workspace repair triage")
+                   (hyperdoc::using-authenticated-workspace-assignment-repair-console-topic
+                    "Using authenticated workspace assignment repair console")))
     (destructuring-bind (symbol title) entry
       (assert-true (fboundp symbol)
                    (format nil "Missing topic function ~A" symbol))
@@ -227,7 +249,8 @@
                         "Shared-workspace collaboration model"
                         "Using guarded workspace topic lifecycle tools"
                         "Diagnosing DMX workspace assignment and topicmap placement"
-                        "Diagnosing DMX workspace repair triage"))
+                        "Diagnosing DMX workspace repair triage"
+                        "Using authenticated workspace assignment repair console"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))

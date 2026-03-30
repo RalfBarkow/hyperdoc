@@ -17,6 +17,7 @@
 <ul>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
   <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-repair-triage)"><tt>(make-dmx-shared-workspace-repair-triage)</tt></a></li>
@@ -44,6 +45,8 @@
 <p>
   The batch view remains read-only and keeps workspace assignment distinct
   from topicmap placement.
+  The matching mutation surface is now the separate authenticated
+  <tt>Repair console</tt> tab on the same object.
   It shows at least:
 </p>
 
@@ -60,6 +63,8 @@
   The raw evidence remains inspectable in the separate
   <tt>Raw projection</tt> tab, which exposes the source endpoint, the raw
   topicmap projection, and the enumerated topic ids used for the triage.
+  The repair console uses that same filtered backlog but still keeps explicit
+  authentication and mutation separate from the diagnosis view.
 </p>
 
 <h2>Acceptance set for the current repair defect</h2>
@@ -106,13 +111,14 @@
 <p>
   That is why the filter is intentionally narrow.
   It is not a general list of all unassigned objects, and it does not mix
-  repair actions into the inspector.
+  repair actions into the read-only triage table.
 </p>
 
 <h2>Related</h2>
 
 <ul>
   <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
   <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
