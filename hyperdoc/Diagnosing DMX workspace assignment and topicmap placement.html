@@ -15,12 +15,13 @@
 <h2>Inspectable objects</h2>
 
 <ul>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
   <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
   <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
-  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
+  <li><a expr="(make-operational-definition-note-proxy)"><tt>(make-operational-definition-note-proxy)</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-topic-proxy 922586)"><tt>(make-dmx-shared-workspace-topic-proxy 922586)</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-topic-proxy 922451)"><tt>(make-dmx-shared-workspace-topic-proxy 922451)</tt></a></li>
 </ul>
@@ -42,6 +43,16 @@
   It does not infer or synthesize workspace assignment.
   The inspector reads that separately from the live
   <tt>/workspaces/object/&lt;id&gt;</tt> endpoint.
+</p>
+
+<h2>Title-first canary opener</h2>
+
+<p>
+  For the current canary, you do not need to start from the raw id.
+  Open
+  <a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a>,
+  then launch the real object through
+  <a expr="(make-operational-definition-note-proxy)"><tt>(make-operational-definition-note-proxy)</tt></a>.
 </p>
 
 <h2>What the new inspector view shows</h2>
@@ -77,7 +88,7 @@
 
 <p>
   Open
-  <a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a>.
+  <a expr="(make-operational-definition-note-proxy)"><tt>(make-operational-definition-note-proxy)</tt></a>.
   The expected diagnosis is:
 </p>
 

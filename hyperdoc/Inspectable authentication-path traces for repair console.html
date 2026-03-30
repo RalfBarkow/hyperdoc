@@ -17,10 +17,11 @@
 
 <ul>
   <li><a hyperbook="topics" page="Inspectable authentication-path traces for repair console"><tt>Inspectable authentication-path traces for repair console</tt></a></li>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a></li>
   <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
-  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
+  <li><a expr="(make-operational-definition-note-proxy)"><tt>(make-operational-definition-note-proxy)</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-topic-proxy 922586)"><tt>(make-dmx-shared-workspace-topic-proxy 922586)</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-repair-triage)"><tt>(make-dmx-shared-workspace-repair-triage)</tt></a></li>
 </ul>
@@ -212,7 +213,7 @@
 </p>
 
 <ol>
-  <li>Open <tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt>, read <tt>Workspace diagnostics</tt>, then switch to <tt>Repair console</tt>.</li>
+  <li>Open <a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a>, launch <tt>(make-operational-definition-note-proxy)</tt>, read <tt>Workspace diagnostics</tt>, then switch to <tt>Repair console</tt>.</li>
   <li>Select <tt>Username + password</tt>.</li>
   <li>Enter <tt>rgb</tt> and the password only into the current UI fields.</li>
   <li>Press <tt>Repair selected topic</tt>.</li>
@@ -424,7 +425,7 @@ Content-Length: 0
 
 <p>
   Stay in the patched local HyperDoc instance, open
-  <tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt>, switch to
+  <tt>(make-operational-definition-note-proxy)</tt>, switch to
   <tt>Repair console</tt>, select <tt>Username + password</tt>, and retry once
   while watching the browser network panel.
   Capture three concrete artifacts:

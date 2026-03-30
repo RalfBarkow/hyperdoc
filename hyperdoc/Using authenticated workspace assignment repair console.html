@@ -18,10 +18,11 @@
 
 <ul>
   <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
   <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
-  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
+  <li><a expr="(make-operational-definition-note-proxy)"><tt>(make-operational-definition-note-proxy)</tt></a></li>
   <li><a expr="(make-dmx-shared-workspace-repair-triage)"><tt>(make-dmx-shared-workspace-repair-triage)</tt></a></li>
 </ul>
 
@@ -32,7 +33,7 @@
 </p>
 
 <ul>
-  <li>single object: open a <tt>dmx-topic-proxy</tt> such as <tt>922464</tt> and select the <tt>Repair console</tt> tab</li>
+  <li>single object: open the title-first launcher page <a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a>, then open <tt>(make-operational-definition-note-proxy)</tt> and select the <tt>Repair console</tt> tab</li>
   <li>backlog: open <tt>(make-dmx-shared-workspace-repair-triage)</tt> and select the <tt>Repair console</tt> tab</li>
 </ul>
 
@@ -94,7 +95,8 @@
 <h2>Single-topic flow</h2>
 
 <ol>
-  <li>Open <tt>922464</tt> through <tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt>.</li>
+  <li>Open <a page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a>.</li>
+  <li>Launch the real object through <tt>(make-operational-definition-note-proxy)</tt>.</li>
   <li>Read the <tt>Workspace diagnostics</tt> tab first.</li>
   <li>Switch to <tt>Repair console</tt>.</li>
   <li>Select a credential mode and enter credentials.</li>

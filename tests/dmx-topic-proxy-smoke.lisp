@@ -978,6 +978,21 @@
     (unless raised
       (error "Bad topicmap helper input must signal HYPERDOC::UNKNOWN-DMX-TOPIC-IDENTIFIER"))))
 
+(defun run-operational-definition-launcher-helper-test ()
+  (let ((proxy (hyperdoc::make-operational-definition-note-proxy)))
+    (assert-type 'hyperdoc::dmx-topic-proxy
+                 proxy
+                 "Operational-definition launcher must return DMX proxy")
+    (assert-equal 922464
+                  (hyperdoc::dmx-topic-id-of proxy)
+                  "Operational-definition launcher topic-id")
+    (assert-equal 919822
+                  (hyperdoc::dmx-topicmap-id-of proxy)
+                  "Operational-definition launcher topicmap-id")
+    (assert-equal (expected-dmx-topicmap-url 919822)
+                  (hyperdoc::dmx-webclient-url proxy)
+                  "Operational-definition launcher must keep the shared workspace topicmap URL")))
+
 (defun run-unknown-wrapper-smoke-test ()
   (let ((raised nil))
     (handler-case
@@ -991,6 +1006,7 @@
   (dolist (spec *dmx-wrapper-smoke-specs*)
     (run-one-wrapper-smoke-test spec))
   (run-topicmap-designator-helper-test)
+  (run-operational-definition-launcher-helper-test)
   (run-topicmap-endpoint-regression-test)
   (run-workspace-diagnostics-regression-test)
   (run-workspace-repair-triage-regression-test)
@@ -998,6 +1014,6 @@
   (run-repair-console-helper-regression-test)
   (run-repair-console-debug-trace-regression-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console debug trace regression + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console debug trace regression + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)

@@ -147,9 +147,21 @@
      "topicmapId = 919822"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
+    "hyperdoc/Operational definition: chunk, chunk note, manifest note, content topic.html")
+   "Operational definition: chunk, chunk note, manifest note, content topic"
+   '("make-operational-definition-note-proxy"
+     "Workspace diagnostics"
+     "Repair console"
+     "922980"
+     "reminder note"
+     "922464"
+     "919822"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
     "hyperdoc/Diagnosing DMX workspace assignment and topicmap placement.html")
    "Diagnosing DMX workspace assignment and topicmap placement"
    '("Workspace diagnostics"
+     "make-operational-definition-note-proxy"
      "Diagnosing DMX workspace repair triage"
      "Using authenticated workspace assignment repair console"
      "workspace assignment"
@@ -186,6 +198,8 @@
     "hyperdoc/Using authenticated workspace assignment repair console.html")
    "Using authenticated workspace assignment repair console"
    '("Repair console"
+     "Operational definition: chunk, chunk note, manifest note, content topic"
+     "make-operational-definition-note-proxy"
      "username/password"
      "authorization header"
      "bearer token"
@@ -203,6 +217,7 @@
     "hyperdoc/Inspectable authentication-path traces for repair console.html")
    "Inspectable authentication-path traces for repair console"
    '("Authentication state machine"
+     "make-operational-definition-note-proxy"
      "POST /access-control/login"
      "JSESSIONID"
      "PUT /workspaces/919815/object/922464"
@@ -250,6 +265,8 @@
                     "Diagnosing DMX workspace repair triage")
                    (hyperdoc::using-authenticated-workspace-assignment-repair-console-topic
                     "Using authenticated workspace assignment repair console")
+                   (hyperdoc::operational-definition-chunk-chunk-note-manifest-note-content-topic
+                    "Operational definition: chunk, chunk note, manifest note, content topic")
                    (hyperdoc::inspectable-authentication-path-traces-for-repair-console-topic
                     "Inspectable authentication-path traces for repair console")))
     (destructuring-bind (symbol title) entry
@@ -271,6 +288,7 @@
                         "Diagnosing DMX workspace assignment and topicmap placement"
                         "Diagnosing DMX workspace repair triage"
                         "Using authenticated workspace assignment repair console"
+                        "Operational definition: chunk, chunk note, manifest note, content topic"
                         "Inspectable authentication-path traces for repair console"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)

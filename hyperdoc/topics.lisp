@@ -820,6 +820,13 @@
                         :topicmap-id topicmap-id
                         :base-url base-url))
 
+(defun make-operational-definition-note-proxy
+    (&key (topicmap-id *dmx-context-window-topicmap-id*)
+       (base-url *dmx-base-url*))
+  (make-dmx-shared-workspace-topic-proxy 922464
+                                         :topicmap-id topicmap-id
+                                         :base-url base-url))
+
 (defun make-dmx-workspace-repair-triage
     (&key (topicmap-id *dmx-context-window-topicmap-id*)
        (base-url *dmx-base-url*))
@@ -3309,6 +3316,17 @@
                  "Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
                  "DMX note read/write boundary")))
+
+(defun operational-definition-chunk-chunk-note-manifest-note-content-topic ()
+  (make-topic
+   :id "operational-definition-chunk-chunk-note-manifest-note-content-topic"
+   :title "Operational definition: chunk, chunk note, manifest note, content topic"
+   :summary "Title-first launcher entry for the live DMX workspace note behind canary 922464, opening the real DMX topic proxy with Workspace diagnostics and Repair console instead of a reminder note."
+   :references '("Operational definition: chunk, chunk note, manifest note, content topic"
+                 "Using authenticated workspace assignment repair console"
+                 "Diagnosing DMX workspace assignment and topicmap placement"
+                 "Inspectable authentication-path traces for repair console"
+                 "Chunk notes and manifest notes in a DMX workspace")))
 
 (defun diagnosing-dmx-workspace-repair-triage-topic ()
   (make-topic

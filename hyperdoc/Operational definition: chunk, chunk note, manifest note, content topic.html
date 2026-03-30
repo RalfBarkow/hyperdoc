@@ -1,0 +1,61 @@
+<h1>Operational definition: chunk, chunk note, manifest note, content topic</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is a title-first launcher for the live DMX workspace note with the
+  same title.
+  It opens the real <tt>dmx-topic-proxy</tt> for the canary object in topicmap
+  <tt>919822</tt>, so the resulting inspector exposes the
+  <tt>Workspace diagnostics</tt> and <tt>Repair console</tt> tabs.
+  It is not a copied note body and not merely a reminder note.
+</p>
+
+<h2>Open the real object</h2>
+
+<ul>
+  <li><a expr="(make-operational-definition-note-proxy)"><tt>(make-operational-definition-note-proxy)</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a> as the raw-id equivalent</li>
+</ul>
+
+<h2>What this opens</h2>
+
+<ul>
+  <li>the live DMX object currently known as topic <tt>922464</tt></li>
+  <li>topicmap context fixed to <tt>919822</tt></li>
+  <li>the real object inspector, including <tt>Workspace diagnostics</tt> and <tt>Repair console</tt></li>
+</ul>
+
+<h2>Why this launcher exists</h2>
+
+<p>
+  The repair and debugging workflow had drifted into raw-id navigation, which
+  made the canary awkward to open by its human title.
+  This page restores a human-facing path:
+  open the page by title, then open the real object through the named helper.
+</p>
+
+<p>
+  Live Dreyeck readback confirms that topic <tt>922980</tt> is only a plain
+  <tt>dmx.notes.note</tt> titled <tt>Open topic 922464</tt>.
+  It is a reminder note, not an actual launcher surface and not the real object
+  with the <tt>Repair console</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Operational definition: chunk, chunk note, manifest note, content topic"><tt>Operational definition: chunk, chunk note, manifest note, content topic</tt></a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Chunk notes and manifest notes in a DMX workspace">Chunk notes and manifest notes in a DMX workspace</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>
