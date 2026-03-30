@@ -696,11 +696,15 @@
     (unwind-protect
          (progn
            (setf (symbol-function 'drakma:http-request)
-                 (lambda (url &key method additional-headers &allow-other-keys)
+                 (lambda (url &key method additional-headers content-type content content-length
+                               &allow-other-keys)
                    (setf captured-assign-call
                          (list :url url
                                :method method
-                               :headers additional-headers))
+                               :headers additional-headers
+                               :content-type content-type
+                               :content content
+                               :content-length content-length))
                    (values
                     (mcp-test-json-stream
                      (mcp-test-json-object
@@ -726,11 +730,29 @@
                                 (getf captured-assign-call :headers)
                                 "Authorization")
                                "HTTP workspace assignment must carry the configured auth header")
+             (mcp-assert-equal "application/json"
+                               (mcp-test-header-value
+                                (getf captured-assign-call :headers)
+                                "Accept")
+                               "HTTP workspace assignment must ask for JSON readback")
              (mcp-assert-equal "dmx_workspace_id=919815"
                                (mcp-test-header-value
                                 (getf captured-assign-call :headers)
                                 "Cookie")
-                               "HTTP workspace assignment must preserve the configured workspace cookie")))
+                               "HTTP workspace assignment must preserve the configured workspace cookie")
+             (mcp-assert-equal ""
+                               (getf captured-assign-call :content)
+                               "HTTP workspace assignment must send an explicit empty body")
+             (mcp-assert-equal 0
+                               (getf captured-assign-call :content-length)
+                               "HTTP workspace assignment must send an explicit zero Content-Length")
+             (mcp-assert-equal nil
+                               (getf captured-assign-call :content-type)
+                               "HTTP workspace assignment must not let Drakma fall back to form media")
+             (mcp-assert-true
+              (null (mcp-test-header-value (getf captured-assign-call :headers)
+                                           "Content-Type"))
+              "HTTP workspace assignment must not duplicate Content-Type in additional headers")))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-dmx-mcp-workspace-topic-lifecycle-smoke-test ()

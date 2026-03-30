@@ -1042,7 +1042,12 @@
         (error ()
           body))))
 
-(defun http-request-json (client method url &key payload body-object allow-404? extra-headers)
+(defun http-request-json
+    (client method url
+     &key payload body-object allow-404? extra-headers
+       ((:raw-content raw-content) nil raw-content-provided-p)
+       (content-type nil content-type-provided-p)
+       (content-length nil content-length-provided-p))
   (let* ((normalized-url (normalize-http-client-url client url))
          (headers (append (when (dmx-import-authorization-header-of client)
                             (list (cons "Authorization"
@@ -1052,15 +1057,23 @@
                                         (format nil "dmx_workspace_id=~D"
                                                 (dmx-import-workspace-id-of client)))))
                           extra-headers))
-         (request-args (append (list normalized-url
-                                     :method method
-                                     :want-stream t
-                                     :additional-headers headers)
-                               (when (or payload body-object)
-                                 (list :content (encode-json-string
-                                                 (or body-object
-                                                     (dmx-import-json-object payload)))
-                                       :content-type "application/json")))))
+         (request-args
+           (append (list normalized-url
+                         :method method
+                         :want-stream t
+                         :additional-headers headers)
+                   (cond
+                     ((or payload body-object)
+                      (list :content (encode-json-string
+                                      (or body-object
+                                          (dmx-import-json-object payload)))
+                            :content-type "application/json"))
+                     (raw-content-provided-p
+                      (append (list :content raw-content)
+                              (when content-type-provided-p
+                                (list :content-type content-type))
+                              (when content-length-provided-p
+                                (list :content-length content-length))))))))
     (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
         (apply #'drakma:http-request request-args)
       (declare (ignore response-headers response-uri must-close))
@@ -1160,9 +1173,17 @@
   (ensure-http-dmx-import-authenticated-operation
    client
    :assign-topic-to-workspace)
+  ;; Drakma turns a PUT with no explicit body into an empty
+  ;; application/x-www-form-urlencoded request. The live DMX workspace
+  ;; assignment route accepts PUT, but rejects that implicit form media
+  ;; type with HTTP 415. Force an explicit zero-length body instead.
   (http-request-json client
                      :put
-                     (dmx-workspace-assign-object-path workspace-id topic-id)))
+                     (dmx-workspace-assign-object-path workspace-id topic-id)
+                     :extra-headers '(("Accept" . "application/json"))
+                     :raw-content ""
+                     :content-type nil
+                     :content-length 0))
 
 (defun http-topic-present-in-topicmap-p (client topicmap-id topic-id)
   (let ((topicmaps (http-request-json client
