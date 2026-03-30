@@ -472,6 +472,240 @@
               "Repair triage must still use the per-topic workspace endpoint"))
         (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http)))))
 
+(defun run-explicit-dmx-repair-client-builder-test ()
+  (let ((basic-client
+          (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+           :base-url "https://dmx.ralfbarkow.ch"
+           :workspace-id 919815
+           :auth-mode :basic
+           :username "rgb"
+           :password "secret"))
+        (header-client
+          (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+           :base-url "https://dmx.ralfbarkow.ch"
+           :workspace-id 919815
+           :auth-mode :header
+           :authorization-header "Basic abc123"))
+        (token-client
+          (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+           :base-url "https://dmx.ralfbarkow.ch"
+           :workspace-id 919815
+           :auth-mode :token
+           :auth-token "tok-123")))
+    (assert-equal "https://dmx.ralfbarkow.ch"
+                  (hyperdoc::dmx-import-base-url-of basic-client)
+                  "Explicit auth builder must preserve the base URL")
+    (assert-equal 919815
+                  (hyperdoc::dmx-import-workspace-id-of basic-client)
+                  "Explicit auth builder must preserve the workspace id")
+    (assert-true
+     (search "Basic " (hyperdoc::dmx-import-authorization-header-of basic-client))
+     "Basic auth mode must synthesize a Basic authorization header")
+    (assert-equal "Basic abc123"
+                  (hyperdoc::dmx-import-authorization-header-of header-client)
+                  "Header auth mode must preserve the explicit authorization header")
+    (assert-equal "Bearer tok-123"
+                  (hyperdoc::dmx-import-authorization-header-of token-client)
+                  "Token auth mode must synthesize a Bearer authorization header")))
+
+(defun run-repair-console-helper-regression-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client))
+         (triage-page (hyperdoc::make-dmx-shared-workspace-repair-triage))
+         (single-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 922464))
+         (book (hyperbook:hyperbook-of triage-page))
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
+    (labels ((make-view-props (x y)
+               (let ((json (make-hash-table :test #'equal)))
+                 (setf (gethash "dmx.topicmaps.x" json) x
+                       (gethash "dmx.topicmaps.y" json) y
+                       (gethash "dmx.topicmaps.visibility" json) t
+                       (gethash "dmx.topicmaps.pinned" json) nil)
+                 json))
+             (seed-topic (id uri value)
+               (hyperdoc::dmx-import-create-topic
+                client
+                (list :id id
+                      :uri uri
+                      :external-key uri
+                      :type-uri "dmx.notes.note"
+                      :value value
+                      :children nil)))
+             (topicmap-memberships-json (topic-id)
+               (let ((memberships '()))
+                 (maphash
+                  (lambda (membership-key view-props)
+                    (declare (ignore view-props))
+                    (destructuring-bind (topicmap-id member-topic-id) membership-key
+                      (when (eql member-topic-id topic-id)
+                        (let ((membership (make-hash-table :test #'equal))
+                              (assoc (make-hash-table :test #'equal)))
+                          (setf (gethash "id" membership) topicmap-id
+                                (gethash "value" membership) "context-window"
+                                (gethash "assoc" membership) assoc
+                                (gethash "id" assoc) (+ 1000 topic-id))
+                          (push membership memberships)))))
+                  (hyperdoc::topicmap-memberships-of client))
+                 (coerce (nreverse memberships) 'vector)))
+             (topicmap-core-json ()
+               (let ((json (make-hash-table :test #'equal)))
+                 (setf (gethash "id" json) 919822
+                       (gethash "uri" json) ""
+                       (gethash "typeUri" json) "dmx.topicmaps.topicmap"
+                       (gethash "value" json) "context-window"
+                       (gethash "children" json) (make-hash-table :test #'equal))
+                 json))
+             (memory-body-for-topic (topic-id)
+               (let ((topic (hyperdoc::dmx-import-read-topic client topic-id)))
+                 (if topic
+                     (values (hyperdoc::encode-json-string topic)
+                             200
+                             (expected-dmx-core-topic-url topic-id)
+                             "OK")
+                     (values "" 404 (expected-dmx-core-topic-url topic-id) "Not Found")))))
+      (declare (ignore book))
+      (seed-topic 922451
+                  "hyperdoc:mcp/auth-probe-20260330-1"
+                  "auth probe")
+      (seed-topic 922464
+                  "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"
+                  "Operational definition: chunk, chunk note, manifest note, content topic")
+      (seed-topic 922500
+                  "hyperdoc:mcp/handover/handover-codex-remediate-probe-topic-922451"
+                  "Remediate probe topic 922451 outside topicmap 919822")
+      (seed-topic 922586
+                  "hyperdoc:mcp/workspace-note/guarded-default-workspace-owner-verification-2026-03-30"
+                  "Guarded workspace default verification note")
+      (dolist (topic-id '(922451 922464 922500 922586))
+        (hyperdoc::dmx-import-add-topic-to-topicmap
+         client
+         919822
+         topic-id
+         (make-view-props (+ 10 (mod topic-id 50))
+                          (+ 20 (mod topic-id 40)))))
+      (hyperdoc::dmx-import-assign-topic-to-workspace client 919815 922586)
+      (clrhash (hyperdoc::dmx-cache-of (hyperbook:hyperbook-of single-proxy)))
+      (clrhash (hyperdoc::dmx-cache-of (hyperbook:hyperbook-of triage-page)))
+      (setf (hyperdoc::dmx-cache-order-of (hyperbook:hyperbook-of single-proxy)) nil
+            (hyperdoc::dmx-cache-order-of (hyperbook:hyperbook-of triage-page)) nil)
+      (unwind-protect
+           (progn
+             (setf (symbol-function 'hyperdoc::dmx-http-request-body)
+                   (lambda (book endpoint &key parameters accept)
+                     (declare (ignore book parameters accept))
+                     (cond
+                       ((string= endpoint "/topicmaps/919822")
+                        (values
+                         (hyperdoc::encode-json-string
+                          (hyperdoc::dmx-import-read-topicmap client 919822))
+                         200
+                         (expected-dmx-topicmap-projection-url 919822)
+                         "OK"))
+                       ((string= endpoint "/core/topic/919822")
+                        (values
+                         (hyperdoc::encode-json-string (topicmap-core-json))
+                         200
+                         (expected-dmx-core-topic-url 919822)
+                         "OK"))
+                       ((search "/core/topic/" endpoint)
+                        (memory-body-for-topic
+                         (parse-integer (subseq endpoint (length "/core/topic/")))))
+                       ((search "/workspaces/object/" endpoint)
+                        (let* ((topic-id (parse-integer
+                                          (subseq endpoint
+                                                  (length "/workspaces/object/"))))
+                               (workspace (hyperdoc::dmx-import-read-topic-workspace
+                                           client
+                                           topic-id)))
+                          (if workspace
+                              (values (hyperdoc::encode-json-string workspace)
+                                      200
+                                      (expected-dmx-workspace-object-url topic-id)
+                                      "OK")
+                              (values ""
+                                      204
+                                      (expected-dmx-workspace-object-url topic-id)
+                                      "No Content"))))
+                       ((search "/topicmaps/object/" endpoint)
+                        (let ((topic-id (parse-integer
+                                         (subseq endpoint
+                                                 (length "/topicmaps/object/")))))
+                          (values
+                           (hyperdoc::encode-json-string
+                            (topicmap-memberships-json topic-id))
+                           200
+                           (expected-dmx-topicmap-memberships-url topic-id)
+                           "OK")))
+                       ((string= endpoint "/access-control/workspace/919815/owner")
+                        (values "rgb" 200 (expected-dmx-workspace-owner-url 919815) "OK"))
+                       (t
+                        (error "Unexpected DMX repair-console fetch ~S" endpoint)))))
+             (hyperdoc::ensure-dmx-workspace-repair-triage triage-page :force? t)
+             (assert-equal '(922464 922500)
+                           (mapcar #'hyperdoc::dmx-topic-id-of
+                                   (hyperdoc::dmx-repair-topic-proxies-of triage-page))
+                           "Repair console triage must begin with the two unassigned HyperDoc-owned topics")
+             (let ((single-result
+                     (hyperdoc/inspector::repair-topic-proxy-with-client
+                      single-proxy
+                      client
+                      :dry-run nil
+                      :auth-mode :header)))
+               (assert-true (getf single-result :success-p)
+                            "Single-topic repair helper must succeed on a HyperDoc-owned unassigned topic")
+               (assert-equal 919815
+                             (getf single-result :result-workspace-id)
+                             "Single-topic repair helper must read back workspace 919815")
+               (assert-true
+                (getf single-result :result-in-topicmap-p)
+                "Single-topic repair helper must keep topicmap placement intact")
+               (assert-equal 919815
+                             (hyperdoc::dmx-topic-diagnostics-workspace-id
+                              (hyperdoc::dmx-diagnostics-of single-proxy))
+                             "Single-topic proxy diagnostics must refresh to workspace 919815"))
+             (hyperdoc::ensure-dmx-workspace-repair-triage triage-page :force? t)
+             (assert-equal '(922500)
+                           (mapcar #'hyperdoc::dmx-topic-id-of
+                                   (hyperdoc::dmx-repair-topic-proxies-of triage-page))
+                           "The repaired canary must disappear from backlog triage")
+             (let ((backlog-results
+                     (hyperdoc/inspector::repair-workspace-triage-backlog-with-client
+                      triage-page
+                      client
+                      :dry-run nil
+                      :auth-mode :header)))
+               (assert-equal '(922500)
+                             (mapcar (lambda (result) (getf result :topic-id))
+                                     backlog-results)
+                             "Backlog repair helper must repair only the remaining backlog topic")
+               (assert-true
+                (every (lambda (result)
+                         (and (getf result :success-p)
+                              (eql (getf result :result-workspace-id) 919815)
+                              (getf result :result-in-topicmap-p)))
+                       backlog-results)
+                "Backlog repair helper must read back workspace 919815 while preserving topicmap placement"))
+             (hyperdoc::ensure-dmx-workspace-repair-triage triage-page :force? t)
+             (assert-equal nil
+                           (mapcar #'hyperdoc::dmx-topic-id-of
+                                   (hyperdoc::dmx-repair-topic-proxies-of triage-page))
+                           "Repair triage must empty after backlog repair completes")
+             (assert-equal 919815
+                           (hyperdoc::dmx-import-object-id
+                            (hyperdoc::dmx-import-read-topic-workspace client 922464))
+                           "Canary topic must now be assigned in the memory client")
+             (assert-equal 919815
+                           (hyperdoc::dmx-import-object-id
+                            (hyperdoc::dmx-import-read-topic-workspace client 922500))
+                           "Backlog topic must now be assigned in the memory client")
+             (assert-equal 919815
+                           (hyperdoc::dmx-import-object-id
+                            (hyperdoc::dmx-import-read-topic-workspace client 922586))
+                           "Already-correct control must remain assigned")
+             (assert-equal nil
+                           (hyperdoc::dmx-import-read-topic-workspace client 922451)
+                           "Foreign control must remain excluded from repair"))
+        (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http)))))
+
 (defun run-topicmap-designator-helper-test ()
   (let* ((id 913836)
          (url "https://dmx.ralfbarkow.ch/core/topic/913836?children=true&assocChildren=true")
@@ -514,7 +748,9 @@
   (run-topicmap-endpoint-regression-test)
   (run-workspace-diagnostics-regression-test)
   (run-workspace-repair-triage-regression-test)
+  (run-explicit-dmx-repair-client-builder-test)
+  (run-repair-console-helper-regression-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)

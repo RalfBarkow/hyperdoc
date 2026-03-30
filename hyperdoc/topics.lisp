@@ -59,6 +59,7 @@
    (workspace-owner :accessor dmx-workspace-owner-of :initform nil)
    (topicmap-memberships :accessor dmx-topicmap-memberships-of :initform nil)
    (diagnostics :accessor dmx-diagnostics-of :initform nil)
+   (repair-results :accessor dmx-repair-results-of :initform nil)
    (topicmap-data :accessor dmx-topicmap-data-of :initform nil)
    (related-topics :accessor dmx-related-topics-of :initform nil)
    (load-error :accessor dmx-load-error-of :initform nil)))
@@ -68,6 +69,8 @@
    (topicmap-projection :accessor dmx-topicmap-projection-of :initform nil)
    (topic-proxies :accessor dmx-triage-topic-proxies-of :initform nil)
    (repair-topic-proxies :accessor dmx-repair-topic-proxies-of :initform nil)
+   (repair-results :accessor dmx-repair-results-of :initform nil)
+   (repair-summary :accessor dmx-repair-summary-of :initform nil)
    (load-error :accessor dmx-load-error-of :initform nil)))
 
 (defstruct dmx-topic-diagnostics
@@ -3319,6 +3322,64 @@
                  "DMX MCP server for shared workspace"
                  "DMX note read/write boundary")))
 
+(defun using-authenticated-workspace-assignment-repair-console-topic ()
+  (make-topic
+   :id "using-authenticated-workspace-assignment-repair-console"
+   :title "Using authenticated workspace assignment repair console"
+   :summary "HyperDoc-side repair console that keeps diagnosis read-only, accepts explicit ephemeral DMX credentials at action time, and reuses the guarded workspace-assignment repair executor for one object or the current backlog."
+   :references '("Using authenticated workspace assignment repair console"
+                 "Diagnosing DMX workspace assignment and topicmap placement"
+                 "Diagnosing DMX workspace repair triage"
+                 "Using guarded workspace topic lifecycle tools"
+                 "DMX note read/write boundary"
+                 "Context window workspace as shared blackboard")))
+
+(defun exchange-artifact-topic ()
+  (make-topic
+   :id "exchange-artifact"
+   :title "Exchange artifact"
+   :summary "Larger transport object that must be exchanged through the topicmap as multiple notes, indexed by exactly one manifest note and not authoritative for the underlying content topics."
+   :references '("Chunk notes and manifest notes in a DMX workspace"
+                 "Manifest note"
+                 "Chunk note"
+                 "Content topic"
+                 "Context window workspace as shared blackboard"
+                 "Shared-workspace collaboration model")))
+
+(defun manifest-note-topic ()
+  (make-topic
+   :id "manifest-note"
+   :title "Manifest note"
+   :summary "Authoritative index note for one exchange artifact that says what the whole artifact is, how many parts it has, what each part covers, and whether the partition is lossless."
+   :references '("Chunk notes and manifest notes in a DMX workspace"
+                 "Exchange artifact"
+                 "Chunk note"
+                 "DMX note read/write boundary"
+                 "Context window workspace as shared blackboard")))
+
+(defun chunk-note-topic ()
+  (make-topic
+   :id "chunk-note"
+   :title "Chunk note"
+   :summary "A dmx.notes.note transport container for exactly one declared part of an exchange artifact, durable for replay and audit but not primary subject matter."
+   :references '("Chunk notes and manifest notes in a DMX workspace"
+                 "Exchange artifact"
+                 "Manifest note"
+                 "Chunk"
+                 "Context window workspace as shared blackboard"
+                 "DMX note read/write boundary"
+                 "Declarative chunk wiring for page-lookup issues and first real Topics chunk")))
+
+(defun content-topic ()
+  (make-topic
+   :id "content-topic"
+   :title "Content topic"
+   :summary "Normal workspace topic whose purpose is substantive knowledge; if a chunk note carries a readout of that topic, the topic remains authoritative for the underlying subject matter."
+   :references '("Chunk notes and manifest notes in a DMX workspace"
+                 "Exchange artifact"
+                 "Context window workspace as shared blackboard"
+                 "Concepts, DMX Topics, and Topic Maps")))
+
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"
@@ -3416,6 +3477,7 @@
    :references '("A framework for maintaining the coherence of a running Lisp"
                  "McDermott Running Image Coherence Crosswalk"
                  "Core Chunk Classes"
+                 "Chunk notes and manifest notes in a DMX workspace"
                  "Touch-Fahrplan view for Zotero topic enrichment")))
 
 (defun normal-association-submit-path-vs-evidence-path-topic ()

@@ -135,9 +135,11 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperdoc
+               #:hyperdoc/dmx-import
                #:hyperbook/server
                #:hyperbook/wikipedia
                #:html-inspector-views
+               #:html-inspector-views/reactive
                #:clog-moldable-inspector
                #:trivial-package-local-nicknames)
   :components ((:module "hyperdoc-inspector"

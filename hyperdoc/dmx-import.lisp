@@ -1232,6 +1232,112 @@
          (> (length value) 0)
          value)))
 
+(defun normalize-http-dmx-import-string (value field boundary &key required?)
+  (let ((string (and value
+                     (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                  (princ-to-string value)))))
+    (cond
+      ((and string (> (length string) 0))
+       string)
+      (required?
+       (error 'dmx-import-config-error
+              :message (format nil
+                               "Incomplete explicit DMX import auth at ~A: missing ~A"
+                               boundary
+                               field)
+              :missing-keys (list (princ-to-string field))))
+      (t
+       nil))))
+
+(defun normalize-http-dmx-import-auth-mode (value boundary)
+  (cond
+    ((or (eq value :basic)
+         (string-equal value "basic")
+         (string-equal value "username-password")
+         (string-equal value "username_password"))
+     :basic)
+    ((or (eq value :header)
+         (string-equal value "header")
+         (string-equal value "auth-header")
+         (string-equal value "auth_header"))
+     :header)
+    ((or (eq value :token)
+         (string-equal value "token")
+         (string-equal value "bearer")
+         (string-equal value "bearer-token")
+         (string-equal value "bearer_token"))
+     :token)
+    (t
+     (error 'dmx-import-config-error
+            :message (format nil
+                             "Invalid explicit DMX import auth mode ~S at ~A"
+                             value
+                             boundary)
+            :missing-keys '("auth-mode")))))
+
+(defun explicit-http-dmx-import-authorization-header
+    (&key auth-mode authorization-header auth-token username password
+       (boundary 'explicit-http-dmx-import-authorization-header))
+  (ecase (normalize-http-dmx-import-auth-mode auth-mode boundary)
+    (:basic
+     (basic-authorization-header
+      (normalize-http-dmx-import-string username :username boundary :required? t)
+      (normalize-http-dmx-import-string password :password boundary :required? t)))
+    (:header
+     (normalize-http-dmx-import-string authorization-header
+                                       :authorization-header
+                                       boundary
+                                       :required? t))
+    (:token
+     (format nil
+             "Bearer ~A"
+             (normalize-http-dmx-import-string auth-token
+                                               :auth-token
+                                               boundary
+                                               :required? t)))))
+
+(defun make-http-dmx-import-client-from-explicit-auth
+    (&key base-url workspace-id topic-type-uri verbose auth-mode
+       authorization-header auth-token username password)
+  (let* ((boundary 'make-http-dmx-import-client-from-explicit-auth)
+         (resolved-base-url
+           (or (normalize-http-dmx-import-string base-url :base-url boundary)
+               (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL")))
+         (resolved-workspace-id
+           (cond
+             ((null workspace-id) nil)
+             (t
+              (or (parse-positive-integer workspace-id)
+                  (and (integerp workspace-id) (plusp workspace-id) workspace-id)
+                  (error 'dmx-import-config-error
+                         :message (format nil
+                                          "Invalid explicit DMX import workspace id ~S at ~A"
+                                          workspace-id
+                                          boundary)
+                         :missing-keys '("workspace-id"))))))
+         (resolved-topic-type-uri
+           (or (normalize-http-dmx-import-string topic-type-uri :topic-type-uri boundary)
+               (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI")
+               *dmx-fedwiki-page-type-uri*))
+         (resolved-auth-header
+           (explicit-http-dmx-import-authorization-header
+            :auth-mode auth-mode
+            :authorization-header authorization-header
+            :auth-token auth-token
+            :username username
+            :password password
+            :boundary boundary)))
+    (unless resolved-base-url
+      (error 'dmx-import-config-error
+             :message "Incomplete explicit DMX import configuration"
+             :missing-keys '("HYPERDOC_DMX_IMPORT_BASE_URL" "base-url")))
+    (make-instance 'http-dmx-import-client
+                   :base-url resolved-base-url
+                   :authorization-header resolved-auth-header
+                   :workspace-id resolved-workspace-id
+                   :topic-type-uri resolved-topic-type-uri
+                   :verbose verbose)))
+
 (defun make-http-dmx-import-client-from-environment (&key verbose)
   (let* ((base-url (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL"))
          (topic-type-uri
