@@ -43,6 +43,10 @@
     (otherwise
      (string-downcase (format nil "~A" status)))))
 
+(defun dmx-diagnostic-ownership-label (diagnostics)
+  (format nil "~(~A~)"
+          (hyperdoc::dmx-topic-diagnostics-ownership-class diagnostics)))
+
 (defun render-maybe-code (value)
   (if value
       (views:html (:code (views:esc (format nil "~A" value))))
@@ -101,6 +105,10 @@
           (hyperdoc::dmx-topic-id-of page)
           (hyperdoc::dmx-topicmap-id-of page)))
 
+(defmethod views:text-representation ((page hyperdoc::dmx-workspace-repair-triage))
+  (format nil "DMX workspace repair triage (topicmap ~D)"
+          (hyperdoc::dmx-topicmap-id-of page)))
+
 (defmethod views:title-bar-action-buttons ((page hyperdoc::dmx-topic-proxy))
   (views:html
     (views:action-button "Reload"
@@ -111,6 +119,21 @@
                            (hyperdoc::ensure-dmx-topicmap-data page :force? t)
                            (hyperdoc::ensure-dmx-related-topics page :force? t)
                            (hyperdoc::ensure-dmx-topic-diagnostics page :force? t)
+                           t))
+    " "
+    (views:action-button html-inspector-views/standard:*icon-open-external*
+                         (views:thunk
+                           (clog:open-browser
+                            :url (hyperdoc::dmx-topicmap-webclient-url page)))
+                         nil)))
+
+(defmethod views:title-bar-action-buttons ((page hyperdoc::dmx-workspace-repair-triage))
+  (views:html
+    (views:action-button "Reload"
+                         (views:thunk
+                           (hyperdoc::ensure-dmx-workspace-repair-triage
+                            page
+                            :force? t)
                            t))
     " "
     (views:action-button html-inspector-views/standard:*icon-open-external*
@@ -379,3 +402,110 @@
       (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
           :target "_blank"
           (views:esc "Open topicmap entry in DMX webclient")))))
+
+(views:defview 👀overview (page hyperdoc::dmx-workspace-repair-triage)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Repair triage" :priority 1
+    (let* ((projection (hyperdoc::dmx-topicmap-projection-of page))
+           (topic-proxies (hyperdoc::dmx-triage-topic-proxies-of page))
+           (repair-proxies (hyperdoc::dmx-repair-topic-proxies-of page))
+           (repair-topic-ids
+             (mapcar #'hyperdoc::dmx-topic-id-of repair-proxies)))
+      (if projection
+          (views:html
+            (:p (views:esc
+                 "Read-only triage for HyperDoc-owned objects in the selected topicmap that still lack workspace assignment. Workspace assignment and topicmap placement remain separate diagnostics."))
+            (:table :class "inspector-table"
+                    (:tr (:td (views:esc "Selected topicmap"))
+                         (:td (views:object-ref
+                               (hyperdoc::make-dmx-topicmap-proxy
+                                (hyperdoc::dmx-topicmap-id-of page)))))
+                    (:tr (:td (views:esc "Projection source"))
+                         (:td (render-dmx-diagnostic-url
+                               (hyperdoc::dmx-topicmap-projection-url page))))
+                    (:tr (:td (views:esc "Projected topic count"))
+                         (:td (render-maybe-code (length topic-proxies))))
+                    (:tr (:td (views:esc "Actionable repair candidates"))
+                         (:td (render-maybe-code (length repair-proxies))))
+                    (:tr (:td (views:esc "Candidate topic ids"))
+                         (:td (views:object-ref repair-topic-ids))))
+            (if repair-proxies
+                (views:html
+                  (:table :class "inspector-table"
+                          (:tr (:th (views:esc "Topic"))
+                               (:th (views:esc "Title/value"))
+                               (:th (views:esc "Ownership"))
+                               (:th (views:esc "In selected topicmap"))
+                               (:th (views:esc "Workspace assignment"))
+                               (:th (views:esc "Derived status")))
+                          (dolist (proxy repair-proxies)
+                            (let ((diagnostics (hyperdoc::dmx-diagnostics-of proxy)))
+                              (views:html
+                                (:tr (:td (views:object-ref
+                                           proxy
+                                           :display (format nil "~D"
+                                                            (hyperdoc::dmx-topic-id-of
+                                                             proxy))))
+                                     (:td (views:esc
+                                           (or (hyperdoc::dmx-topic-diagnostics-topic-title
+                                                diagnostics)
+                                               "n/a")))
+                                     (:td (:tt (views:esc
+                                                (dmx-diagnostic-ownership-label
+                                                 diagnostics))))
+                                     (:td (:tt (views:esc
+                                                (yes/no-label
+                                                 (hyperdoc::dmx-topic-diagnostics-selected-topicmap-membership-p
+                                                  diagnostics)))))
+                                     (:td (render-workspace-reference page diagnostics))
+                                     (:td (:tt (views:esc
+                                                (dmx-diagnostic-status-label
+                                                 (hyperdoc::dmx-topic-diagnostics-status
+                                                  diagnostics))))))))))
+                (views:html
+                  (:p (views:esc
+                       "No HyperDoc-owned topics in the selected topicmap currently match the missing-workspace-assignment defect.")))))
+          (views:html
+            (:p (views:esc
+                 "Repair triage could not be derived from the current read-only DMX fetches."))
+            (if-let (condition (hyperdoc::dmx-load-error-of page))
+              (views:object-ref condition)
+              (views:html
+                (:span :style "opacity: 0.55;"
+                       "No topicmap projection available.")))))))))
+
+(views:defview 👀raw-fetched-data (page hyperdoc::dmx-workspace-repair-triage)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Raw projection" :priority 2
+    (let ((projection (hyperdoc::dmx-topicmap-projection-of page))
+          (repair-proxies (hyperdoc::dmx-repair-topic-proxies-of page))
+          (condition (hyperdoc::dmx-load-error-of page)))
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Projection source"))
+                     (:td (render-dmx-diagnostic-url
+                           (hyperdoc::dmx-topicmap-projection-url page))))
+                (:tr (:td (views:esc "Projected topic ids"))
+                     (:td (views:object-ref
+                           (and projection
+                                (hyperdoc::dmx-topicmap-projection-topic-ids
+                                 projection)))))
+                (:tr (:td (views:esc "Repair topic ids"))
+                     (:td (views:object-ref
+                           (mapcar #'hyperdoc::dmx-topic-id-of repair-proxies))))
+                (:tr (:td (views:esc "Topicmap projection JSON"))
+                     (:td (views:object-ref
+                           (or projection
+                               condition
+                               "not loaded"))))
+                (when condition
+                  (views:html
+                    (:tr (:td (views:esc "Load error"))
+                         (:td (views:object-ref condition))))))))))
+
+(views:defview 👀external (page hyperdoc::dmx-workspace-repair-triage)
+  (views:html-view :title "External" :priority 3
+    (views:html
+      (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
+          :target "_blank"
+          (views:esc "Open selected topicmap in DMX webclient")))))

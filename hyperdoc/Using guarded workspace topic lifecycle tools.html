@@ -16,6 +16,7 @@
 <ul>
   <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
   <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
@@ -85,6 +86,7 @@
   <li><tt>read_dmx_topicmap</tt> with <tt>topicmapId = 919822</tt> shows current topic ids and note ids in the workspace.</li>
   <li><tt>read_dmx_topic</tt> with the concrete <tt>topicId</tt> confirms title, note body, and selected child metadata.</li>
   <li>The HyperDoc-side read-only counterpart is <a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a>, which opens a <tt>dmx-topic-proxy</tt> and keeps workspace assignment separate from topicmap placement.</li>
+  <li>For the current maintenance defect set, use <a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a> to list HyperDoc-owned objects in topicmap <tt>919822</tt> that still need workspace-assignment backfill.</li>
   <li>After a live upsert, reread both the topicmap and the topic.</li>
   <li>After a delete, reread the topic to confirm absence. After an unlink, reread the topicmap to confirm membership removal without assuming topic deletion.</li>
 </ul>
@@ -102,6 +104,7 @@
 <h2>Related</h2>
 
 <ul>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
   <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>

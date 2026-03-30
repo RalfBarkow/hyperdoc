@@ -150,6 +150,7 @@
     "hyperdoc/Diagnosing DMX workspace assignment and topicmap placement.html")
    "Diagnosing DMX workspace assignment and topicmap placement"
    '("Workspace diagnostics"
+     "Diagnosing DMX workspace repair triage"
      "workspace assignment"
      "topicmap placement"
      "919815"
@@ -159,6 +160,24 @@
      "922451"
      "repair_workspace_topic_assignment"
      "No DMX login form is required for this first version"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/Diagnosing DMX workspace repair triage.html")
+   "Diagnosing DMX workspace repair triage"
+   '("Repair triage"
+     "/topicmaps/919822?children=true"
+     "HyperDoc-owned"
+     "workspace assignment missing"
+     "922464"
+     "922479"
+     "922500"
+     "922515"
+     "922532"
+     "922565"
+     "922586"
+     "922451"
+     "read-only"
+     "make-dmx-shared-workspace-repair-triage"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
@@ -182,13 +201,15 @@
                    (hyperdoc::dmx-note-read-write-boundary-topic
                    "DMX note read/write boundary")
                    (hyperdoc::dmx-machine-readable-read-paths-topic
-                    "DMX machine-readable read paths")
+                   "DMX machine-readable read paths")
                    (hyperdoc::shared-workspace-collaboration-model-topic
                    "Shared-workspace collaboration model")
                    (hyperdoc::using-guarded-workspace-topic-lifecycle-tools-topic
                     "Using guarded workspace topic lifecycle tools")
                    (hyperdoc::diagnosing-dmx-workspace-assignment-and-topicmap-placement-topic
-                    "Diagnosing DMX workspace assignment and topicmap placement")))
+                    "Diagnosing DMX workspace assignment and topicmap placement")
+                   (hyperdoc::diagnosing-dmx-workspace-repair-triage-topic
+                    "Diagnosing DMX workspace repair triage")))
     (destructuring-bind (symbol title) entry
       (assert-true (fboundp symbol)
                    (format nil "Missing topic function ~A" symbol))
@@ -205,7 +226,8 @@
                         "DMX machine-readable read paths"
                         "Shared-workspace collaboration model"
                         "Using guarded workspace topic lifecycle tools"
-                        "Diagnosing DMX workspace assignment and topicmap placement"))
+                        "Diagnosing DMX workspace assignment and topicmap placement"
+                        "Diagnosing DMX workspace repair triage"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))

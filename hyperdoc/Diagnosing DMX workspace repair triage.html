@@ -1,0 +1,119 @@
+<h1>Diagnosing DMX workspace repair triage</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page adds the read-only batch companion to
+  <a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing
+  DMX workspace assignment and topicmap placement</a>.
+  Instead of opening one DMX object, it reads the selected topicmap projection
+  from <tt>/topicmaps/919822?children=true</tt>, reuses the same per-topic
+  diagnostics model, and filters to the actionable defect class:
+  HyperDoc-owned, in topicmap <tt>919822</tt>, workspace assignment missing.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-repair-triage)"><tt>(make-dmx-shared-workspace-repair-triage)</tt></a></li>
+</ul>
+
+<h2>How to invoke the batch view</h2>
+
+<p>
+  Use either of these runtime handles:
+</p>
+
+<ul>
+  <li><tt>(make-dmx-workspace-repair-triage :topicmap-id 919822)</tt></li>
+  <li><tt>(make-dmx-shared-workspace-repair-triage)</tt></li>
+</ul>
+
+<p>
+  The second helper is the convenience entrypoint for the
+  <tt>context-window</tt> shared blackboard.
+  The inspector view title is <tt>Repair triage</tt>.
+</p>
+
+<h2>What the triage view shows</h2>
+
+<p>
+  The batch view remains read-only and keeps workspace assignment distinct
+  from topicmap placement.
+  It shows at least:
+</p>
+
+<ul>
+  <li>topic id</li>
+  <li>title or value</li>
+  <li>ownership classification</li>
+  <li>whether the object is in the selected topicmap</li>
+  <li>workspace assignment</li>
+  <li>derived status</li>
+</ul>
+
+<p>
+  The raw evidence remains inspectable in the separate
+  <tt>Raw projection</tt> tab, which exposes the source endpoint, the raw
+  topicmap projection, and the enumerated topic ids used for the triage.
+</p>
+
+<h2>Acceptance set for the current repair defect</h2>
+
+<p>
+  At minimum, the current repair triage must include these six pre-fix guarded
+  notes as repair candidates:
+</p>
+
+<ul>
+  <li><tt>922464</tt></li>
+  <li><tt>922479</tt></li>
+  <li><tt>922500</tt></li>
+  <li><tt>922515</tt></li>
+  <li><tt>922532</tt></li>
+  <li><tt>922565</tt></li>
+</ul>
+
+<p>
+  These should <b>not</b> appear as needing repair:
+</p>
+
+<ul>
+  <li><tt>922586</tt>, because workspace assignment is already present as <tt>919815</tt></li>
+  <li><tt>922451</tt>, because it is a foreign object even though it is visible in topicmap <tt>919822</tt></li>
+</ul>
+
+<p>
+  The live repair set may be larger than this minimum acceptance set whenever
+  additional HyperDoc-owned objects in topicmap <tt>919822</tt> still lack
+  workspace assignment.
+</p>
+
+<h2>Why this view exists</h2>
+
+<p>
+  The single-object diagnostics view proves the distinction for one object.
+  The triage view turns the same distinction into an inspectable maintenance
+  list:
+  “show the HyperDoc-owned objects that are visible in the shared blackboard
+  but still need authenticated workspace-assignment backfill.”
+</p>
+
+<p>
+  That is why the filter is intentionally narrow.
+  It is not a general list of all unassigned objects, and it does not mix
+  repair actions into the inspector.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+</ul>
