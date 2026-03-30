@@ -3334,6 +3334,18 @@
                  "DMX note read/write boundary"
                  "Context window workspace as shared blackboard")))
 
+(defun inspectable-authentication-path-traces-for-repair-console-topic ()
+  (make-topic
+   :id "inspectable-authentication-path-traces-for-repair-console"
+   :title "Inspectable authentication-path traces for repair console"
+   :summary "Step-by-step auth-state-machine guide for the HyperDoc repair console, including username/password session bootstrap, direct header/token request shapes, result readback evidence, and a 922464-focused 401 debugging checklist."
+   :references '("Inspectable authentication-path traces for repair console"
+                 "Using authenticated workspace assignment repair console"
+                 "Diagnosing DMX workspace assignment and topicmap placement"
+                 "Diagnosing DMX workspace repair triage"
+                 "DMX note read/write boundary"
+                 "Context window workspace as shared blackboard")))
+
 (defun exchange-artifact-topic ()
   (make-topic
    :id "exchange-artifact"

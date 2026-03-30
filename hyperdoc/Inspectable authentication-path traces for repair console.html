@@ -1,0 +1,454 @@
+<h1>Inspectable authentication-path traces for repair console</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page makes the repair-console authentication path step-through
+  inspectable from four angles at once:
+  the HyperDoc UI, the network trace, the responsible source files, and the
+  smoke tests that already lock parts of the path down.
+  The current canary remains topic <tt>922464</tt> in topicmap <tt>919822</tt>,
+  with workspace-assignment target <tt>919815</tt>.
+  The page documents the authentication path itself.
+  It does not widen HyperDoc into a general DMX login system.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Inspectable authentication-path traces for repair console"><tt>Inspectable authentication-path traces for repair console</tt></a></li>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922586)"><tt>(make-dmx-shared-workspace-topic-proxy 922586)</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-repair-triage)"><tt>(make-dmx-shared-workspace-repair-triage)</tt></a></li>
+</ul>
+
+<h2>Authentication state machine</h2>
+
+<table>
+  <tr>
+    <th>State</th>
+    <th>Meaning</th>
+    <th>Primary evidence</th>
+  </tr>
+  <tr>
+    <td><tt>S0 no credentials entered</tt></td>
+    <td>The repair console is open, but no credential fields have been used for an action yet.</td>
+    <td>UI inputs are blank and result table is still old or empty.</td>
+  </tr>
+  <tr>
+    <td><tt>S1 credentials captured in UI</tt></td>
+    <td>User has typed values into the currently relevant inputs.</td>
+    <td>Visible UI inputs change, but no network traffic exists yet.</td>
+  </tr>
+  <tr>
+    <td><tt>S2 auth mode selected</tt></td>
+    <td>The active mode is <tt>username/password</tt>, <tt>authorization header</tt>, or <tt>bearer token</tt>.</td>
+    <td>The repair console shows the active mode label.</td>
+  </tr>
+  <tr>
+    <td><tt>S3 explicit auth client built</tt></td>
+    <td>HyperDoc has constructed an ephemeral authenticated DMX client for the current action only.</td>
+    <td>No credential persistence appears in readback tables or topic content.</td>
+  </tr>
+  <tr>
+    <td><tt>S4 bootstrap request prepared</tt></td>
+    <td>Only for <tt>username/password</tt>: the client has decided it must log in first and obtain a session.</td>
+    <td>The next network request should be <tt>POST /access-control/login</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S5 bootstrap request sent</tt></td>
+    <td>The DMX login bootstrap request is on the wire.</td>
+    <td>Browser network panel shows <tt>POST /access-control/login</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S6 bootstrap response received</tt></td>
+    <td>DMX has responded to the login bootstrap.</td>
+    <td>Expected success shape: <tt>204 No Content</tt> plus <tt>Set-Cookie: JSESSIONID=...</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S7 session material extracted</tt></td>
+    <td>HyperDoc has extracted <tt>JSESSIONID</tt> ephemerally from the bootstrap response.</td>
+    <td>Next guarded request should carry <tt>Cookie: JSESSIONID=...; dmx_workspace_id=919815</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S8 guarded repair request prepared</tt></td>
+    <td>The existing guarded executor has planned the workspace-assignment repair for the selected topic.</td>
+    <td>The next request should be <tt>PUT /workspaces/919815/object/&lt;topic-id&gt;</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S9 guarded repair request sent</tt></td>
+    <td>The workspace-assignment request is on the wire.</td>
+    <td>Browser network panel shows the <tt>PUT</tt> request.</td>
+  </tr>
+  <tr>
+    <td><tt>S10 guarded repair response received</tt></td>
+    <td>DMX has answered the guarded repair request.</td>
+    <td>Success should stop the <tt>204</tt> defect on <tt>/workspaces/object/&lt;topic-id&gt;</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S11 result readback refreshed</tt></td>
+    <td>HyperDoc has re-read topic, workspace, topicmap membership, and derived diagnostics.</td>
+    <td>The result table and diagnostics tab change without storing credentials.</td>
+  </tr>
+  <tr>
+    <td><tt>S12 terminal success</tt></td>
+    <td>The topic is assigned to workspace <tt>919815</tt> and still present in topicmap <tt>919822</tt>.</td>
+    <td>Result table says <tt>verified</tt>; workspace readback is no longer <tt>204</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S13 terminal failure</tt></td>
+    <td>The action ended in an error and the result table records the failure without persisting credentials.</td>
+    <td>Result table says <tt>error</tt> and shows the failing endpoint/message.</td>
+  </tr>
+</table>
+
+<h2>Transition map</h2>
+
+<table>
+  <tr>
+    <th>Transition</th>
+    <th>Trigger</th>
+    <th>Functions and files</th>
+    <th>Expected network evidence</th>
+    <th>Expected UI evidence</th>
+  </tr>
+  <tr>
+    <td><tt>S0 -&gt; S1</tt></td>
+    <td>User types credentials into the repair console.</td>
+    <td><tt>views:defview 👀repair-console</tt> in <tt>hyperdoc-inspector/dmx-topics.lisp</tt>.</td>
+    <td>No request yet.</td>
+    <td>Username, password, header, or token input changes.</td>
+  </tr>
+  <tr>
+    <td><tt>S1 -&gt; S2</tt></td>
+    <td>User selects the active mode.</td>
+    <td><tt>dmx-repair-console-auth-mode-label</tt> in <tt>hyperdoc-inspector/dmx-topics.lisp</tt>.</td>
+    <td>No request yet.</td>
+    <td>Active mode row updates to <tt>username/password</tt>, <tt>authorization header</tt>, or <tt>bearer token</tt>.</td>
+  </tr>
+  <tr>
+    <td><tt>S2 -&gt; S3</tt></td>
+    <td>User presses <tt>Dry-run selected topic</tt>, <tt>Repair selected topic</tt>, <tt>Dry-run backlog</tt>, or <tt>Repair backlog</tt>.</td>
+    <td><tt>repair-topic-proxy-with-explicit-auth</tt>, <tt>repair-workspace-triage-backlog-with-explicit-auth</tt>, and <tt>make-explicit-dmx-repair-client</tt> in <tt>hyperdoc-inspector/dmx-topics.lisp</tt>; <tt>make-http-dmx-import-client-from-explicit-auth</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td>No request yet.</td>
+    <td>Action is running; the next visible change should be in the result table.</td>
+  </tr>
+  <tr>
+    <td><tt>S3 -&gt; S4</tt></td>
+    <td>The selected mode normalizes to <tt>:basic</tt>.</td>
+    <td><tt>normalize-http-dmx-import-auth-mode</tt> and <tt>make-http-dmx-import-client-from-explicit-auth</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td>No request yet, but the client is marked <tt>session-login-required-p</tt>.</td>
+    <td>No extra UI change beyond the chosen mode.</td>
+  </tr>
+  <tr>
+    <td><tt>S4 -&gt; S5</tt></td>
+    <td>The guarded executor reaches the authenticated write boundary.</td>
+    <td><tt>ensure-http-dmx-import-authenticated-operation</tt> and <tt>bootstrap-http-dmx-import-session</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td><tt>POST /access-control/login</tt> with <tt>Authorization: Basic ...</tt>, empty body, no workspace cookie.</td>
+    <td>No result table change yet.</td>
+  </tr>
+  <tr>
+    <td><tt>S5 -&gt; S6</tt></td>
+    <td>DMX answers the bootstrap request.</td>
+    <td><tt>bootstrap-http-dmx-import-session</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td>Expected success: <tt>204 No Content</tt> with <tt>Set-Cookie: JSESSIONID=...</tt>.</td>
+    <td>No UI change yet unless the bootstrap fails.</td>
+  </tr>
+  <tr>
+    <td><tt>S6 -&gt; S7</tt></td>
+    <td>HyperDoc extracts the session cookie.</td>
+    <td><tt>http-response-header-value</tt>, <tt>parse-set-cookie-cookie-pair</tt>, and <tt>bootstrap-http-dmx-import-session</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td>No extra request. The next <tt>PUT</tt> should include the extracted cookie.</td>
+    <td>No credential fields become part of the result table.</td>
+  </tr>
+  <tr>
+    <td><tt>S3 or S7 -&gt; S8</tt></td>
+    <td>The guarded executor plans the repair.</td>
+    <td><tt>repair-topic-proxy-with-client</tt> in <tt>hyperdoc-inspector/dmx-topics.lisp</tt>; <tt>plan-dmx-workspace-topic-workspace-assignment-repair</tt> and <tt>execute-dmx-workspace-topic-workspace-assignment-repair</tt> in <tt>hyperdoc/dmx-workspace-topics.lisp</tt>.</td>
+    <td>No new request yet.</td>
+    <td>The selected topic and target workspace remain visible in the console.</td>
+  </tr>
+  <tr>
+    <td><tt>S8 -&gt; S9</tt></td>
+    <td>The live repair call is executed.</td>
+    <td><tt>dmx-import-assign-topic-to-workspace</tt> and <tt>http-request-json</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td><tt>PUT /workspaces/919815/object/&lt;topic-id&gt;</tt> with empty body, <tt>Accept: application/json</tt>, and cookie <tt>dmx_workspace_id=919815</tt>; in username/password mode the cookie must also include <tt>JSESSIONID=...</tt>.</td>
+    <td>No result table update yet.</td>
+  </tr>
+  <tr>
+    <td><tt>S9 -&gt; S10</tt></td>
+    <td>DMX answers the guarded repair request.</td>
+    <td><tt>http-request-json</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
+    <td>Success should be <tt>200</tt>. Current failing canary is <tt>401</tt> on this step.</td>
+    <td>Failure becomes visible in the result table message.</td>
+  </tr>
+  <tr>
+    <td><tt>S10 -&gt; S11</tt></td>
+    <td>HyperDoc refreshes live readback after the action.</td>
+    <td><tt>execute-dmx-workspace-topic-workspace-assignment-repair</tt> in <tt>hyperdoc/dmx-workspace-topics.lisp</tt>; <tt>ensure-dmx-topic-proxy-readbacks</tt> in <tt>hyperdoc-inspector/dmx-topics.lisp</tt>.</td>
+    <td><tt>GET /workspaces/object/&lt;topic-id&gt;</tt>, <tt>GET /topicmaps/object/&lt;topic-id&gt;</tt>, plus topic/topicmap readbacks.</td>
+    <td>Result table fills in workspace readback, in-topicmap flag, outcome, and message.</td>
+  </tr>
+  <tr>
+    <td><tt>S11 -&gt; S12/S13</tt></td>
+    <td>Derived outcome is classified.</td>
+    <td><tt>sanitize-dmx-repair-result</tt>, <tt>render-dmx-repair-results-table</tt>, and <tt>dmx-repair-console-outcome-label</tt> in <tt>hyperdoc-inspector/dmx-topics.lisp</tt>.</td>
+    <td>No new request.</td>
+    <td>Outcome becomes <tt>verified</tt>, <tt>already assigned</tt>, <tt>dry-run</tt>, or <tt>error</tt>.</td>
+  </tr>
+</table>
+
+<h2>Worked example: username/password mode after the session-bootstrap fix</h2>
+
+<p>
+  This is the current intended flow for canary topic <tt>922464</tt>.
+  It is test-proven in the HyperDoc smoke suite and tied to the DMX backend's
+  own login contract.
+  It is not yet claimed as live-successful for <tt>922464</tt>; the current
+  live failure is still a <tt>401</tt> on the guarded <tt>PUT</tt>.
+</p>
+
+<ol>
+  <li>Open <tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt>, read <tt>Workspace diagnostics</tt>, then switch to <tt>Repair console</tt>.</li>
+  <li>Select <tt>Username + password</tt>.</li>
+  <li>Enter <tt>rgb</tt> and the password only into the current UI fields.</li>
+  <li>Press <tt>Repair selected topic</tt>.</li>
+  <li>HyperDoc builds the explicit-auth client, marks it as requiring login bootstrap, and then executes the existing guarded repair path.</li>
+</ol>
+
+<h3>Expected bootstrap request</h3>
+
+<pre>
+POST /access-control/login HTTP/1.1
+Authorization: Basic &lt;base64(username:password)&gt;
+Content-Length: 0
+
+&lt;empty body&gt;
+</pre>
+
+<p>
+  Expected success response:
+</p>
+
+<pre>
+HTTP/1.1 204 No Content
+Set-Cookie: JSESSIONID=&lt;session-id&gt;;Path=/;SameSite=Strict
+</pre>
+
+<p>
+  Source path:
+  <tt>make-http-dmx-import-client-from-explicit-auth</tt>,
+  <tt>ensure-http-dmx-import-authenticated-operation</tt>, and
+  <tt>bootstrap-http-dmx-import-session</tt> in
+  <tt>hyperdoc/dmx-import.lisp</tt>.
+</p>
+
+<h3>Expected guarded repair request</h3>
+
+<pre>
+PUT /workspaces/919815/object/922464 HTTP/1.1
+Authorization: Basic &lt;base64(username:password)&gt;
+Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
+Accept: application/json
+Content-Length: 0
+
+&lt;empty body&gt;
+</pre>
+
+<p>
+  Expected success response:
+</p>
+
+<pre>
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{... workspace object 919815 ...}
+</pre>
+
+<p>
+  Source path:
+  <tt>execute-dmx-workspace-topic-workspace-assignment-repair</tt> in
+  <tt>hyperdoc/dmx-workspace-topics.lisp</tt> and
+  <tt>dmx-import-assign-topic-to-workspace</tt> in
+  <tt>hyperdoc/dmx-import.lisp</tt>.
+</p>
+
+<h3>Expected readback refresh</h3>
+
+<pre>
+GET /workspaces/object/922464
+GET /topicmaps/object/922464
+</pre>
+
+<p>
+  Expected success readback:
+</p>
+
+<ul>
+  <li><tt>/workspaces/object/922464</tt> no longer returns <tt>204 No Content</tt></li>
+  <li>workspace id resolves to <tt>919815</tt></li>
+  <li>topicmap membership still includes <tt>919822</tt></li>
+  <li>the result table shows <tt>verified</tt></li>
+</ul>
+
+<h2>Worked examples: direct-header modes</h2>
+
+<p>
+  Header and bearer-token modes stay narrower than username/password mode.
+  They do not perform a login bootstrap.
+  They pass the caller-supplied authorization material directly to the same
+  guarded repair executor.
+  These modes are builder-proven and request-shape-proven in HyperDoc, but not
+  yet claimed as live-successful for <tt>922464</tt>.
+</p>
+
+<h3>Authorization header mode</h3>
+
+<pre>
+PUT /workspaces/919815/object/922464 HTTP/1.1
+Authorization: &lt;caller-supplied header&gt;
+Cookie: dmx_workspace_id=919815
+Accept: application/json
+Content-Length: 0
+
+&lt;empty body&gt;
+</pre>
+
+<p>
+  No <tt>POST /access-control/login</tt> is expected in this mode.
+  The explicit header is used verbatim by
+  <tt>explicit-http-dmx-import-authorization-header</tt> and
+  <tt>make-http-dmx-import-client-from-explicit-auth</tt> in
+  <tt>hyperdoc/dmx-import.lisp</tt>.
+</p>
+
+<h3>Bearer token mode</h3>
+
+<pre>
+PUT /workspaces/919815/object/922464 HTTP/1.1
+Authorization: Bearer &lt;token&gt;
+Cookie: dmx_workspace_id=919815
+Accept: application/json
+Content-Length: 0
+
+&lt;empty body&gt;
+</pre>
+
+<p>
+  No bootstrap is expected here either.
+  The token path is synthesized by
+  <tt>explicit-http-dmx-import-authorization-header</tt> and then passed
+  through the same guarded executor.
+</p>
+
+<h2>Source file and test map</h2>
+
+<table>
+  <tr>
+    <th>Concern</th>
+    <th>Functions</th>
+    <th>Files</th>
+    <th>Coverage</th>
+  </tr>
+  <tr>
+    <td>Single-object repair console UI</td>
+    <td><tt>views:defview 👀repair-console</tt> for <tt>dmx-topic-proxy</tt></td>
+    <td><tt>hyperdoc-inspector/dmx-topics.lisp</tt></td>
+    <td>Repair-console helper regression and topic-proxy smokes</td>
+  </tr>
+  <tr>
+    <td>Backlog repair console UI</td>
+    <td><tt>views:defview 👀repair-console</tt> for <tt>dmx-workspace-repair-triage</tt></td>
+    <td><tt>hyperdoc-inspector/dmx-topics.lisp</tt></td>
+    <td>Repair-triage regression and topic-proxy smokes</td>
+  </tr>
+  <tr>
+    <td>Auth-mode normalization and explicit client build</td>
+    <td><tt>normalize-http-dmx-import-auth-mode</tt>, <tt>explicit-http-dmx-import-authorization-header</tt>, <tt>make-http-dmx-import-client-from-explicit-auth</tt></td>
+    <td><tt>hyperdoc/dmx-import.lisp</tt></td>
+    <td><tt>run-explicit-dmx-repair-client-builder-test</tt> in <tt>tests/dmx-topic-proxy-smoke.lisp</tt></td>
+  </tr>
+  <tr>
+    <td>Username/password login bootstrap</td>
+    <td><tt>bootstrap-http-dmx-import-session</tt>, <tt>ensure-http-dmx-import-authenticated-operation</tt></td>
+    <td><tt>hyperdoc/dmx-import.lisp</tt></td>
+    <td><tt>run-dmx-import-explicit-basic-login-bootstrap-smoke-test</tt> in <tt>tests/dmx-mcp-smoke.lisp</tt></td>
+  </tr>
+  <tr>
+    <td>Workspace-assignment request contract</td>
+    <td><tt>dmx-import-assign-topic-to-workspace</tt>, <tt>http-request-json</tt></td>
+    <td><tt>hyperdoc/dmx-import.lisp</tt></td>
+    <td><tt>run-dmx-import-workspace-assignment-contract-smoke-test</tt> in <tt>tests/dmx-mcp-smoke.lisp</tt></td>
+  </tr>
+  <tr>
+    <td>Guarded repair planning and live readback</td>
+    <td><tt>plan-dmx-workspace-topic-workspace-assignment-repair</tt>, <tt>execute-dmx-workspace-topic-workspace-assignment-repair</tt></td>
+    <td><tt>hyperdoc/dmx-workspace-topics.lisp</tt></td>
+    <td><tt>run-dmx-mcp-workspace-assignment-repair-smoke-test</tt> in <tt>tests/dmx-mcp-smoke.lisp</tt></td>
+  </tr>
+  <tr>
+    <td>Result sanitization and console readback</td>
+    <td><tt>sanitize-dmx-repair-result</tt>, <tt>render-dmx-repair-results-table</tt>, <tt>ensure-dmx-topic-proxy-readbacks</tt></td>
+    <td><tt>hyperdoc-inspector/dmx-topics.lisp</tt></td>
+    <td>Repair-console helper regression and workspace diagnostics regressions</td>
+  </tr>
+</table>
+
+<h2>Current 401 on 922464: breakpoint checklist</h2>
+
+<ol>
+  <li>Confirm you are using the patched local HyperDoc instance at <tt>http://127.0.0.1:8080/boot.html</tt>, not an older browser tab or runtime.</li>
+  <li>Open the single-object repair console for <tt>922464</tt> and verify the active mode label is <tt>username/password</tt>.</li>
+  <li>Click <tt>Repair selected topic</tt> and inspect the browser network panel.</li>
+  <li>Did <tt>POST /access-control/login</tt> run at all?
+    If not, the runtime is stale or the mode was not normalized to <tt>:basic</tt>.</li>
+  <li>Did the bootstrap response return success with <tt>Set-Cookie: JSESSIONID=...</tt>?
+    If not, the credentials or login policy failed before the guarded <tt>PUT</tt>.</li>
+  <li>Was <tt>JSESSIONID</tt> actually captured and attached to the guarded <tt>PUT</tt>?
+    The <tt>Cookie</tt> header must be <tt>JSESSIONID=...; dmx_workspace_id=919815</tt>.</li>
+  <li>If the <tt>PUT</tt> still returns <tt>401</tt>, inspect the response body.
+    A body that still reports user <tt>&lt;anonymous&gt;</tt> points to missing or ignored session state.
+    A body that names <tt>rgb</tt> points to an authorization or ownership boundary instead.</li>
+  <li>Did the same credentials succeed anywhere else?
+    The minimum proof is that the login bootstrap itself succeeds.
+    If needed, compare against the DMX webclient login trace, which also uses <tt>POST /access-control/login</tt> with Basic auth.</li>
+  <li>After each attempt, re-check <tt>/workspaces/object/922464</tt> and <tt>/topicmaps/object/922464</tt>.
+    Success must clear the workspace <tt>204</tt> without changing topicmap placement.</li>
+</ol>
+
+<h2>Recommended next canary action for 922464</h2>
+
+<p>
+  Stay in the patched local HyperDoc instance, open
+  <tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt>, switch to
+  <tt>Repair console</tt>, select <tt>Username + password</tt>, and retry once
+  while watching the browser network panel.
+  Capture three concrete artifacts:
+</p>
+
+<ol>
+  <li>the <tt>POST /access-control/login</tt> request and response headers</li>
+  <li>the <tt>PUT /workspaces/919815/object/922464</tt> request headers and response body</li>
+  <li>the refreshed readback for <tt>/workspaces/object/922464</tt> and <tt>/topicmaps/object/922464</tt></li>
+</ol>
+
+<p>
+  If the login bootstrap is <tt>204</tt> and the <tt>PUT</tt> still fails, the
+  next distinction is no longer about the request contract.
+  It is whether DMX still sees the request as anonymous or sees <tt>rgb</tt>
+  but denies the write.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+</ul>

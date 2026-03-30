@@ -200,6 +200,24 @@
      "execute-dmx-workspace-topic-workspace-assignment-repair"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
+    "hyperdoc/Inspectable authentication-path traces for repair console.html")
+   "Inspectable authentication-path traces for repair console"
+   '("Authentication state machine"
+     "POST /access-control/login"
+     "JSESSIONID"
+     "PUT /workspaces/919815/object/922464"
+     "username/password"
+     "authorization header"
+     "bearer token"
+     "result readback refreshed"
+     "922464"
+     "922586"
+     "http://127.0.0.1:8080/boot.html"
+     "401"
+     "same credentials succeed anywhere else"
+     "DMX webclient login trace"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
    "HyperDoc DMX architectural implications"
    '("Context window workspace as shared blackboard"
@@ -231,7 +249,9 @@
                    (hyperdoc::diagnosing-dmx-workspace-repair-triage-topic
                     "Diagnosing DMX workspace repair triage")
                    (hyperdoc::using-authenticated-workspace-assignment-repair-console-topic
-                    "Using authenticated workspace assignment repair console")))
+                    "Using authenticated workspace assignment repair console")
+                   (hyperdoc::inspectable-authentication-path-traces-for-repair-console-topic
+                    "Inspectable authentication-path traces for repair console")))
     (destructuring-bind (symbol title) entry
       (assert-true (fboundp symbol)
                    (format nil "Missing topic function ~A" symbol))
@@ -250,7 +270,8 @@
                         "Using guarded workspace topic lifecycle tools"
                         "Diagnosing DMX workspace assignment and topicmap placement"
                         "Diagnosing DMX workspace repair triage"
-                        "Using authenticated workspace assignment repair console"))
+                        "Using authenticated workspace assignment repair console"
+                        "Inspectable authentication-path traces for repair console"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))
