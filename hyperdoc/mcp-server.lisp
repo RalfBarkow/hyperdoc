@@ -582,6 +582,19 @@
     :client (dmx-mcp-server-read-client server)
     :dry-run t)))
 
+(defun dmx-mcp-dry-run-workspace-assignment-repair (server arguments)
+  (dmx-mcp-json-object
+   "writeKind" "workspace_assignment_repair"
+   "summary"
+   (execute-dmx-workspace-topic-workspace-assignment-repair
+    (gethash "topicId" arguments)
+    :workspace-id (dmx-mcp-argument arguments "workspaceId")
+    :workspace-topicmap-id
+    (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+        (dmx-mcp-server-workspace-topicmap-id server))
+    :client (dmx-mcp-server-read-client server)
+    :dry-run t)))
+
 (defun dmx-mcp-dry-run-workspace-note (server arguments)
   (let ((summary
           (plan-dmx-workspace-note-write
@@ -721,6 +734,8 @@
        (dmx-mcp-dry-run-topicmap-context-upsert server arguments))
       ((equal write-kind "topicmap_context_remove")
        (dmx-mcp-dry-run-topicmap-context-remove server arguments))
+      ((equal write-kind "workspace_assignment_repair")
+       (dmx-mcp-dry-run-workspace-assignment-repair server arguments))
       ((equal write-kind "workspace_note_create")
        (dmx-mcp-dry-run-workspace-note server arguments))
       ((equal write-kind "workspace_note_update")
@@ -818,6 +833,17 @@
                    (dmx-mcp-server-workspace-topicmap-id server))
                :client (dmx-mcp-server-write-client server)
                :dry-run dry-run)))
+            ((equal tool-name "repair_workspace_topic_assignment")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topic-workspace-assignment-repair
+               (gethash "topicId" arguments)
+               :workspace-id (dmx-mcp-argument arguments "workspaceId")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
             ((equal tool-name "delete_workspace_topic")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -904,11 +930,13 @@
                            "topicmap_context_add"
                            "topicmap_context_upsert"
                            "topicmap_context_remove"
+                           "workspace_assignment_repair"
                            "workspace_note_create"
                            "workspace_note_update"
                            "handover_create"))
       "topicmapId" (dmx-mcp-json-object "type" "integer")
       "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
       "title" (dmx-mcp-json-object "type" "string")
       "text" (dmx-mcp-json-object "type" "string")
       "summary" (dmx-mcp-json-object "type" "string")
@@ -962,6 +990,21 @@
      (dmx-mcp-json-object
       "topicId" (dmx-mcp-json-object "type" "integer")
       "topicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "repair_workspace_topic_assignment"
+    "description"
+    "Read, validate, and backfill a HyperDoc-owned topic's DMX workspace assignment without changing topicmap placement."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "topicId")
      "additionalProperties" t))

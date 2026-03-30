@@ -84,6 +84,7 @@ cat >"$sidecar_target" <<EOF
     workspaceTopicmapId = 919822;
     dmxBaseUrl = "https://dmx.ralfbarkow.ch";
     dmxWorkspaceId = 919815;
+    dmxImportEnvironmentFile = "-/etc/nixos/hyperdoc/dmx-import.env";
     enableLiveWrites = false;
     allowedOrigins = [
       "https://mcp.dreyeck.ch"

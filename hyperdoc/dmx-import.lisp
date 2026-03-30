@@ -123,6 +123,10 @@
     :reader topicmap-memberships-of
     :initarg :topicmap-memberships
     :initform (make-hash-table :test #'equal))
+   (workspace-assignments
+    :reader workspace-assignments-of
+    :initarg :workspace-assignments
+    :initform (make-hash-table :test #'eql))
    (next-topic-id
     :accessor next-topic-id-of
     :initarg :next-topic-id
@@ -146,8 +150,10 @@
 (defgeneric dmx-import-find-existing-topic (client external-key))
 (defgeneric dmx-import-read-topic (client topic-id))
 (defgeneric dmx-import-read-topicmap (client topicmap-id))
+(defgeneric dmx-import-read-topic-workspace (client topic-id))
 (defgeneric dmx-import-create-topic (client payload))
 (defgeneric dmx-import-update-topic (client existing-topic payload))
+(defgeneric dmx-import-assign-topic-to-workspace (client workspace-id topic-id))
 (defgeneric dmx-import-topic-in-topicmap-p (client topicmap-id topic-id))
 (defgeneric dmx-import-add-topic-to-topicmap (client topicmap-id topic-id view-props))
 (defgeneric dmx-import-set-topic-view-props (client topicmap-id topic-id view-props))
@@ -383,6 +389,10 @@
   (declare (ignore topicmap-id))
   nil)
 
+(defmethod dmx-import-read-topic-workspace ((client null-dmx-import-client) topic-id)
+  (declare (ignore topic-id))
+  nil)
+
 (defmethod dmx-import-create-topic ((client null-dmx-import-client) payload)
   (declare (ignore payload))
   (error 'fedwiki-dmx-import-error
@@ -392,6 +402,12 @@
   (declare (ignore existing-topic payload))
   (error 'fedwiki-dmx-import-error
          :message "Dry-run/null DMX client cannot perform live writes"))
+
+(defmethod dmx-import-assign-topic-to-workspace ((client null-dmx-import-client)
+                                                 workspace-id topic-id)
+  (declare (ignore workspace-id topic-id))
+  (error 'fedwiki-dmx-import-error
+         :message "Dry-run/null DMX client cannot perform live workspace assignment writes"))
 
 (defmethod dmx-import-topic-in-topicmap-p ((client null-dmx-import-client) topicmap-id topic-id)
   (declare (ignore topicmap-id topic-id))
@@ -478,6 +494,20 @@
           (gethash "assocs" json) #())
     json))
 
+(defun memory-dmx-import-workspace-json (workspace-id)
+  (let ((json (make-hash-table :test #'equal))
+        (children (make-hash-table :test #'equal)))
+    (setf (gethash "id" json) workspace-id
+          (gethash "uri" json) ""
+          (gethash "typeUri" json) "dmx.workspaces.workspace"
+          (gethash "value" json) (format nil "Memory workspace ~D" workspace-id)
+          (gethash "children" json) children)
+    json))
+
+(defmethod dmx-import-read-topic-workspace ((client memory-dmx-import-client) topic-id)
+  (when-let (workspace-id (gethash topic-id (workspace-assignments-of client)))
+    (memory-dmx-import-workspace-json workspace-id)))
+
 (defmethod dmx-import-create-topic ((client memory-dmx-import-client) payload)
   (let* ((id (or (getf payload :id)
                  (prog1 (next-topic-id-of client)
@@ -496,6 +526,32 @@
     (setf (gethash (getf payload :external-key) (topics-by-external-key-of client))
           stored)
     stored))
+
+(defmethod dmx-import-assign-topic-to-workspace ((client memory-dmx-import-client)
+                                                 workspace-id topic-id)
+  (let ((resolved-workspace-id
+          (or (parse-positive-integer workspace-id)
+              (and (integerp workspace-id) (plusp workspace-id) workspace-id)
+              (error 'fedwiki-dmx-import-error
+                     :message (format nil
+                                      "Workspace assignment requires a positive workspace id, got ~S"
+                                      workspace-id))))
+        (resolved-topic-id
+          (or (parse-positive-integer topic-id)
+              (and (integerp topic-id) (plusp topic-id) topic-id)
+              (error 'fedwiki-dmx-import-error
+                     :message (format nil
+                                      "Workspace assignment requires a positive topic id, got ~S"
+                                      topic-id)))))
+    (unless (dmx-import-read-topic client resolved-topic-id)
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "Cannot assign missing DMX topic ~D to workspace ~D"
+                              resolved-topic-id
+                              resolved-workspace-id)))
+    (setf (gethash resolved-topic-id (workspace-assignments-of client))
+          resolved-workspace-id)
+    (dmx-import-read-topic-workspace client resolved-topic-id)))
 
 (defmethod dmx-import-topic-in-topicmap-p ((client memory-dmx-import-client) topicmap-id topic-id)
   (not (null (gethash (memory-topicmap-membership-key topicmap-id topic-id)
@@ -545,6 +601,7 @@
       (remhash external-key (topics-by-external-key-of client)))
     (dolist (membership-key memberships-to-delete)
       (remhash membership-key (topicmap-memberships-of client)))
+    (remhash topic-id (workspace-assignments-of client))
     nil))
 
 (defun encode-base64-octets (octets)
@@ -956,6 +1013,12 @@
 (defun dmx-topicmap-memberships-path (object-id)
   (format nil "/topicmaps/object/~D" object-id))
 
+(defun dmx-workspace-object-path (object-id)
+  (format nil "/workspaces/object/~D" object-id))
+
+(defun dmx-workspace-assign-object-path (workspace-id object-id)
+  (format nil "/workspaces/~D/object/~D" workspace-id object-id))
+
 (defun dmx-topicmap-add-topic-path (topicmap-id topic-id)
   (format nil "/topicmaps/~D/topic/~D" topicmap-id topic-id))
 
@@ -1031,6 +1094,18 @@
              :missing-keys (nreverse missing)))
     (nreverse missing)))
 
+(defun ensure-http-dmx-import-authenticated-operation (client operation)
+  (unless (dmx-import-authorization-header-of client)
+    (error 'dmx-import-config-error
+           :message
+           (format nil
+                   "Authenticated DMX operation ~A requires HYPERDOC_DMX_IMPORT_AUTH_HEADER, HYPERDOC_DMX_IMPORT_USERNAME/HYPERDOC_DMX_IMPORT_PASSWORD, or HYPERDOC_DMX_IMPORT_AUTH_TOKEN"
+                   operation)
+           :missing-keys '("HYPERDOC_DMX_IMPORT_AUTH_HEADER"
+                           "HYPERDOC_DMX_IMPORT_USERNAME"
+                           "HYPERDOC_DMX_IMPORT_PASSWORD"
+                           "HYPERDOC_DMX_IMPORT_AUTH_TOKEN"))))
+
 (defmethod dmx-import-read-topic ((client http-dmx-import-client) topic-id)
   (validate-http-dmx-import-client client)
   (http-request-json client
@@ -1045,6 +1120,12 @@
                      :get
                      (format nil "/topicmaps/~D?children=true" topicmap-id)
                      :extra-headers '(("Accept" . "application/json"))))
+
+(defmethod dmx-import-read-topic-workspace ((client http-dmx-import-client) topic-id)
+  (validate-http-dmx-import-client client)
+  (http-request-json client
+                     :get
+                     (dmx-workspace-object-path topic-id)))
 
 (defmethod dmx-import-find-existing-topic ((client http-dmx-import-client) external-key)
   (validate-http-dmx-import-client client)
@@ -1072,6 +1153,16 @@
                        :put
                        (dmx-topic-update-path topic-id)
                        :payload (list* :id topic-id payload))))
+
+(defmethod dmx-import-assign-topic-to-workspace ((client http-dmx-import-client)
+                                                 workspace-id topic-id)
+  (validate-http-dmx-import-client client :live? t)
+  (ensure-http-dmx-import-authenticated-operation
+   client
+   :assign-topic-to-workspace)
+  (http-request-json client
+                     :put
+                     (dmx-workspace-assign-object-path workspace-id topic-id)))
 
 (defun http-topic-present-in-topicmap-p (client topicmap-id topic-id)
   (let ((topicmaps (http-request-json client

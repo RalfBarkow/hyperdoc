@@ -399,6 +399,7 @@
                                         "update_workspace_note"
                                         "upsert_workspace_topicmap_context"
                                         "remove_workspace_topic_from_topicmap"
+                                        "repair_workspace_topic_assignment"
                                         "delete_workspace_note"
                                         "delete_workspace_topic"
                                         "upsert_workspace_topic_factory_snippet"
@@ -686,7 +687,50 @@
                  (mcp-assert-true
                   (search "DELETE"
                           (hyperdoc::fedwiki-dmx-import-message-of condition))
-                  "Unsupported topicmap unlink must explain the missing DELETE proof")))))
+                 "Unsupported topicmap unlink must explain the missing DELETE proof")))))
+      (setf (symbol-function 'drakma:http-request) original))))
+
+(defun run-dmx-import-workspace-assignment-contract-smoke-test ()
+  (let ((original (symbol-function 'drakma:http-request))
+        (captured-assign-call nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method additional-headers &allow-other-keys)
+                   (setf captured-assign-call
+                         (list :url url
+                               :method method
+                               :headers additional-headers))
+                   (values
+                    (mcp-test-json-stream
+                     (mcp-test-json-object
+                      "id" 919815
+                      "uri" ""
+                      "typeUri" "dmx.workspaces.workspace"
+                      "value" "context-window"))
+                    200 nil nil nil "OK")))
+           (let ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                        :base-url "https://dmx.ralfbarkow.ch"
+                                        :authorization-header "Bearer test-token"
+                                        :workspace-id 919815)))
+             (hyperdoc::dmx-import-assign-topic-to-workspace client 919815 922464)
+             (mcp-assert-equal :put
+                               (getf captured-assign-call :method)
+                               "HTTP workspace assignment must stay a PUT")
+             (mcp-assert-true
+              (search "/workspaces/919815/object/922464"
+                      (getf captured-assign-call :url))
+              "HTTP workspace assignment must target /workspaces/<workspace>/object/<topic>")
+             (mcp-assert-equal "Bearer test-token"
+                               (mcp-test-header-value
+                                (getf captured-assign-call :headers)
+                                "Authorization")
+                               "HTTP workspace assignment must carry the configured auth header")
+             (mcp-assert-equal "dmx_workspace_id=919815"
+                               (mcp-test-header-value
+                                (getf captured-assign-call :headers)
+                                "Cookie")
+                               "HTTP workspace assignment must preserve the configured workspace cookie")))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-dmx-mcp-workspace-topic-lifecycle-smoke-test ()
@@ -1095,12 +1139,129 @@
       (hyperdoc::stop-dmx-mcp-server)))
   t)
 
+(defun run-dmx-mcp-workspace-assignment-repair-smoke-test ()
+  (let* ((port (mcp-test-port))
+         (url (format nil "http://127.0.0.1:~D/mcp" port))
+         (server (make-dmx-mcp-smoke-server))
+         (client (hyperdoc::dmx-mcp-server-write-client server))
+         (owned-topic-id 921662)
+         (foreign-topic-id 921663))
+    (mcp-test-seed-note client
+                        owned-topic-id
+                        "Owned pre-fix note"
+                        "Owned topic body"
+                        :uri (hyperdoc::dmx-workspace-note-uri
+                              :workspace-note
+                              "owned-prefx-note"))
+    (mcp-test-seed-note client
+                        foreign-topic-id
+                        "Foreign pre-fix note"
+                        "Foreign topic body"
+                        :uri (format nil "dmx://foreign/topic/~D" foreign-topic-id))
+    (unwind-protect
+         (progn
+           (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+           (sleep 0.2)
+           (let ((session-id
+                   (mcp-test-open-session url
+                                          :id 401
+                                          :client-name "hyperdoc-assignment-repair-smoke")))
+             (multiple-value-bind (dry-run-body dry-run-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  402
+                  "validated_dmx_write_dry_run"
+                  (mcp-test-json-object
+                   "writeKind" "workspace_assignment_repair"
+                   "topicId" owned-topic-id
+                   "workspaceId" 919815
+                   "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*))
+               (declare (ignore _))
+               (mcp-assert-equal 200 dry-run-status
+                                 "workspace_assignment_repair dry-run status")
+               (let* ((tool-result (gethash "result" dry-run-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (summary (gethash "summary" structured)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "workspace_assignment_repair dry-run must not be flagged as error")
+                 (mcp-assert-equal "assign"
+                                   (gethash "workspace-action" summary)
+                                   "workspace_assignment_repair dry-run must expose ASSIGN")
+                 (mcp-assert-equal 919815
+                                   (gethash "workspace-id" summary)
+                                   "workspace_assignment_repair dry-run must carry the target workspace id")))
+             (mcp-assert-true
+              (null (hyperdoc::dmx-import-read-topic-workspace client owned-topic-id))
+              "Owned pre-fix note must start without a workspace assignment")
+             (multiple-value-bind (repair-body repair-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  403
+                  "repair_workspace_topic_assignment"
+                  (mcp-test-json-object
+                   "topicId" owned-topic-id
+                   "workspaceId" 919815
+                   "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 repair-status
+                                 "repair_workspace_topic_assignment status")
+               (let* ((tool-result (gethash "result" repair-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (workspace (hyperdoc::dmx-import-read-topic-workspace
+                                  client
+                                  owned-topic-id)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "repair_workspace_topic_assignment must succeed for HyperDoc-owned topics")
+                 (mcp-assert-equal 919815
+                                   (gethash "result-workspace-id" structured)
+                                   "repair_workspace_topic_assignment must return the repaired workspace id")
+                 (mcp-assert-equal 919815
+                                   (hyperdoc::dmx-import-object-id workspace)
+                                   "repair_workspace_topic_assignment must persist the workspace assignment")
+                 (mcp-assert-equal t
+                                   (gethash "result-in-topicmap-p" structured)
+                                   "repair_workspace_topic_assignment must leave topicmap placement intact")))
+             (multiple-value-bind (foreign-body foreign-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  404
+                  "repair_workspace_topic_assignment"
+                  (mcp-test-json-object
+                   "topicId" foreign-topic-id
+                   "workspaceId" 919815
+                   "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                   "dryRun" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 foreign-status
+                                 "Foreign workspace assignment repair status")
+               (let* ((tool-result (gethash "result" foreign-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (gethash "isError" tool-result)
+                  "Foreign workspace assignment repair must be ownership-blocked")
+                 (mcp-assert-equal "ownership_error"
+                                   (gethash "status" structured)
+                                   "Foreign workspace assignment repair must surface ownership_error")))
+             (mcp-assert-true
+             (null (hyperdoc::dmx-import-read-topic-workspace client foreign-topic-id))
+              "Foreign topic must remain without a workspace assignment after rejection")))
+      (hyperdoc::stop-dmx-mcp-server))
+  t))
+
 (defun run-dmx-mcp-smoke-tests ()
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-import-delete-and-remove-contract-smoke-test)
+  (run-dmx-import-workspace-assignment-contract-smoke-test)
   (run-dmx-mcp-smoke-test)
   (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
+  (run-dmx-mcp-workspace-assignment-repair-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
 

@@ -76,9 +76,9 @@ in
     };
 
     dmxImportEnvironmentFile = mkOption {
-      type = types.nullOr types.path;
+      type = types.nullOr types.str;
       default = null;
-      description = "Optional EnvironmentFile exporting HYPERDOC_DMX_IMPORT_AUTH_* credentials for authenticated DMX writes.";
+      description = "Optional systemd EnvironmentFile path string exporting HYPERDOC_DMX_IMPORT_AUTH_* credentials for authenticated DMX writes.";
     };
 
     enableLiveWrites = mkOption {
@@ -94,9 +94,9 @@ in
     };
 
     bearerTokenFile = mkOption {
-      type = types.nullOr types.path;
+      type = types.nullOr types.str;
       default = null;
-      description = "Optional EnvironmentFile exporting HYPERDOC_MCP_BEARER_TOKEN=... for guarded live writes.";
+      description = "Optional systemd EnvironmentFile path string exporting HYPERDOC_MCP_BEARER_TOKEN=... for guarded live writes.";
     };
 
     reverseProxyHost = mkOption {

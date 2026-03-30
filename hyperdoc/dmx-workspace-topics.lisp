@@ -78,6 +78,23 @@
   intended-method
   intended-endpoint)
 
+(defstruct dmx-workspace-topic-workspace-assignment-plan
+  operation
+  topic-id
+  workspace-id
+  workspace-topicmap-id
+  topic-uri
+  topic-type-uri
+  topic-title
+  in-topicmap-p
+  ownership
+  current-workspace-id
+  current-workspace-title
+  workspace-action
+  intended-method
+  intended-endpoint
+  authentication-required-p)
+
 (defun dmx-workspace-topic-validation-message (boundary missing-fields invalid-fields)
   (with-output-to-string (stream)
     (format stream "DMX workspace topic validation failed at ~A" boundary)
@@ -253,6 +270,40 @@
         :intended-endpoint (dmx-workspace-topicmap-membership-plan-intended-endpoint plan)
         :live-supported-p (dmx-workspace-topicmap-membership-plan-live-supported-p plan)
         :support-reason (dmx-workspace-topicmap-membership-plan-support-reason plan)))
+
+(defun dmx-workspace-topic-workspace-assignment-plan-summary (plan)
+  (let ((ownership (dmx-workspace-topic-workspace-assignment-plan-ownership plan)))
+    (list :operation
+          (dmx-workspace-topic-workspace-assignment-plan-operation plan)
+          :topic-id
+          (dmx-workspace-topic-workspace-assignment-plan-topic-id plan)
+          :workspace-id
+          (dmx-workspace-topic-workspace-assignment-plan-workspace-id plan)
+          :workspace-topicmap-id
+          (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
+          :topic-uri
+          (dmx-workspace-topic-workspace-assignment-plan-topic-uri plan)
+          :topic-type-uri
+          (dmx-workspace-topic-workspace-assignment-plan-topic-type-uri plan)
+          :topic-title
+          (dmx-workspace-topic-workspace-assignment-plan-topic-title plan)
+          :in-topicmap-p
+          (dmx-workspace-topic-workspace-assignment-plan-in-topicmap-p plan)
+          :ownership-class (dmx-workspace-topic-ownership-class ownership)
+          :hyperdoc-owned-p (dmx-workspace-topic-ownership-owned-p ownership)
+          :ownership-reason (dmx-workspace-topic-ownership-reason ownership)
+          :current-workspace-id
+          (dmx-workspace-topic-workspace-assignment-plan-current-workspace-id plan)
+          :current-workspace-title
+          (dmx-workspace-topic-workspace-assignment-plan-current-workspace-title plan)
+          :workspace-action
+          (dmx-workspace-topic-workspace-assignment-plan-workspace-action plan)
+          :authentication-required-p
+          (dmx-workspace-topic-workspace-assignment-plan-authentication-required-p plan)
+          :intended-method
+          (dmx-workspace-topic-workspace-assignment-plan-intended-method plan)
+          :intended-endpoint
+          (dmx-workspace-topic-workspace-assignment-plan-intended-endpoint plan))))
 
 (defun normalize-dmx-workspace-topic-references (value)
   (remove-duplicates
@@ -516,6 +567,141 @@
          (dmx-workspace-topicmap-membership-plan-topic-id plan))))
     (append (dmx-workspace-topicmap-membership-plan-summary plan)
             (list :dry-run dry-run))))
+
+(defun resolve-dmx-workspace-assignment-target-id (workspace-id client boundary)
+  (or (and workspace-id
+           (normalize-dmx-workspace-topic-id
+            workspace-id
+            :workspace-id
+            boundary
+            :required? t))
+      (and (typep client 'http-dmx-import-client)
+           (dmx-import-workspace-id-of client))
+      (error 'fedwiki-dmx-import-error
+             :message
+             (format nil
+                     "DMX workspace assignment repair requires an explicit workspace id or a configured HYPERDOC_DMX_IMPORT_WORKSPACE_ID at ~A"
+                     boundary))))
+
+(defun dmx-workspace-title-from-topic (workspace)
+  (and workspace
+       (or (dmx-json-child-value workspace "dmx.workspaces.workspace_name")
+           (dmx-json-object-value workspace "value"))))
+
+(defun plan-dmx-workspace-topic-workspace-assignment-repair
+    (topic-id &key workspace-id workspace-topicmap-id client)
+  (let* ((resolved-topic-id
+           (normalize-dmx-workspace-topic-id
+            topic-id
+            :topic-id
+            'plan-dmx-workspace-topic-workspace-assignment-repair
+            :required? t))
+         (resolved-client
+           (or client
+               (make-default-dmx-import-client :dry-run t :verbose nil)))
+         (resolved-workspace-id
+           (resolve-dmx-workspace-assignment-target-id
+            workspace-id
+            resolved-client
+            'plan-dmx-workspace-topic-workspace-assignment-repair))
+         (resolved-topicmap-id
+           (and workspace-topicmap-id
+                (normalize-required-workspace-topicmap-id workspace-topicmap-id)))
+         (topic (dmx-import-read-topic resolved-client resolved-topic-id)))
+    (unless topic
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "Cannot repair workspace assignment for missing DMX topic ~D"
+                              resolved-topic-id)))
+    (let* ((ownership (classify-dmx-workspace-topic-ownership topic))
+           (current-workspace
+             (dmx-import-read-topic-workspace resolved-client resolved-topic-id))
+           (current-workspace-id (dmx-import-object-id current-workspace))
+           (in-topicmap-p
+             (and resolved-topicmap-id
+                  (dmx-import-topic-in-topicmap-p resolved-client
+                                                 resolved-topicmap-id
+                                                 resolved-topic-id))))
+      (unless (dmx-workspace-topic-ownership-owned-p ownership)
+        (error 'dmx-workspace-topic-ownership-error
+               :message
+               (format nil
+                       "Workspace assignment repair is limited to HyperDoc-owned topics; topic ~D is ~A"
+                       resolved-topic-id
+                       (dmx-workspace-topic-ownership-class ownership))
+               :topic-id resolved-topic-id
+               :ownership-class (dmx-workspace-topic-ownership-class ownership)
+               :uri (dmx-workspace-topic-ownership-uri ownership)
+               :allowed-actions '(:repair-workspace-assignment)))
+      (when (and current-workspace-id
+                 (not (eql current-workspace-id resolved-workspace-id)))
+        (error 'fedwiki-dmx-import-error
+               :message
+               (format nil
+                       "Workspace assignment repair refuses to move topic ~D from workspace ~D to workspace ~D"
+                       resolved-topic-id
+                       current-workspace-id
+                       resolved-workspace-id)))
+      (make-dmx-workspace-topic-workspace-assignment-plan
+       :operation :workspace-assignment-repair
+       :topic-id resolved-topic-id
+       :workspace-id resolved-workspace-id
+       :workspace-topicmap-id resolved-topicmap-id
+       :topic-uri (dmx-json-object-value topic "uri")
+       :topic-type-uri (dmx-json-object-value topic "typeUri")
+       :topic-title (dmx-workspace-topic-title topic)
+       :in-topicmap-p in-topicmap-p
+       :ownership ownership
+       :current-workspace-id current-workspace-id
+       :current-workspace-title
+       (dmx-workspace-title-from-topic current-workspace)
+       :workspace-action
+       (if (eql current-workspace-id resolved-workspace-id)
+           :already-assigned
+           :assign)
+       :intended-method :put
+       :intended-endpoint
+       (dmx-workspace-assign-object-path resolved-workspace-id resolved-topic-id)
+       :authentication-required-p
+       (typep resolved-client 'http-dmx-import-client)))))
+
+(defun execute-dmx-workspace-topic-workspace-assignment-repair
+    (topic-id &key workspace-id workspace-topicmap-id client (dry-run t))
+  (let* ((resolved-client
+           (or client
+               (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
+         (plan (plan-dmx-workspace-topic-workspace-assignment-repair
+                topic-id
+                :workspace-id workspace-id
+                :workspace-topicmap-id workspace-topicmap-id
+                :client resolved-client)))
+    (unless dry-run
+      (when (eql (dmx-workspace-topic-workspace-assignment-plan-workspace-action plan)
+                 :assign)
+        (dmx-import-assign-topic-to-workspace
+         resolved-client
+         (dmx-workspace-topic-workspace-assignment-plan-workspace-id plan)
+         (dmx-workspace-topic-workspace-assignment-plan-topic-id plan))))
+    (let* ((result-workspace
+             (dmx-import-read-topic-workspace
+              resolved-client
+              (dmx-workspace-topic-workspace-assignment-plan-topic-id plan)))
+           (result-workspace-id (dmx-import-object-id result-workspace))
+           (result-in-topicmap-p
+             (let ((topicmap-id
+                     (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id
+                      plan)))
+               (and topicmap-id
+                    (dmx-import-topic-in-topicmap-p
+                     resolved-client
+                     topicmap-id
+                     (dmx-workspace-topic-workspace-assignment-plan-topic-id plan))))))
+      (append (dmx-workspace-topic-workspace-assignment-plan-summary plan)
+              (list :dry-run dry-run
+                    :result-workspace-id result-workspace-id
+                    :result-workspace-title
+                    (dmx-workspace-title-from-topic result-workspace)
+                    :result-in-topicmap-p result-in-topicmap-p)))))
 
 (defun plan-dmx-workspace-topic-delete
     (topic-id &key workspace-topicmap-id client note-key note-kind)
