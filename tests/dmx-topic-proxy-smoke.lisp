@@ -706,6 +706,252 @@
                            "Foreign control must remain excluded from repair"))
         (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http)))))
 
+(defun run-repair-console-debug-trace-regression-test ()
+  (let* ((single-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 922464))
+         (book (hyperbook:hyperbook-of single-proxy))
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
+         (original-drakma (symbol-function 'drakma:http-request)))
+    (labels ((make-membership (topicmap-id assoc-id &optional (value "context-window"))
+               (let ((membership (make-hash-table :test #'equal))
+                     (assoc (make-hash-table :test #'equal)))
+                 (setf (gethash "id" membership) topicmap-id
+                       (gethash "value" membership) value
+                       (gethash "assoc" membership) assoc
+                       (gethash "id" assoc) assoc-id)
+                 membership))
+             (make-topic-json (id uri type-uri value)
+               (let ((json (make-hash-table :test #'equal))
+                     (children (make-hash-table :test #'equal)))
+                 (setf (gethash "id" json) id
+                       (gethash "uri" json) uri
+                       (gethash "typeUri" json) type-uri
+                       (gethash "value" json) value
+                       (gethash "children" json) children)
+                 json))
+             (topicmap-core-json ()
+               (make-topic-json 919822 "" "dmx.topicmaps.topicmap" "context-window"))
+             (topicmap-memberships-json (topic-id)
+               (declare (ignore topic-id))
+               (vector (make-membership 919822 922471)))
+             (json-stream (object)
+               (make-string-input-stream (hyperdoc::encode-json-string object))))
+      (clrhash (hyperdoc::dmx-cache-of book))
+      (setf (hyperdoc::dmx-cache-order-of book) nil
+            (hyperdoc::dmx-topic-data-of single-proxy) nil
+            (hyperdoc::dmx-workspace-data-of single-proxy) nil
+            (hyperdoc::dmx-workspace-owner-of single-proxy) nil
+            (hyperdoc::dmx-topicmap-memberships-of single-proxy) nil
+            (hyperdoc::dmx-diagnostics-of single-proxy) nil
+            (hyperdoc::dmx-topicmap-data-of single-proxy) nil
+            (hyperdoc::dmx-related-topics-of single-proxy) nil
+            (hyperdoc::dmx-repair-results-of single-proxy) nil
+            (hyperdoc::dmx-load-error-of single-proxy) nil)
+      (unwind-protect
+           (progn
+             (setf (symbol-function 'hyperdoc::dmx-http-request-body)
+                   (lambda (book endpoint &key parameters accept)
+                     (declare (ignore book parameters accept))
+                     (cond
+                       ((string= endpoint "/core/topic/922464")
+                        (values
+                         (hyperdoc::encode-json-string
+                          (make-topic-json
+                           922464
+                           "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"
+                           "dmx.notes.note"
+                           "Operational definition: chunk, chunk note, manifest note, content topic"))
+                         200
+                         (expected-dmx-core-topic-url 922464)
+                         "OK"))
+                       ((string= endpoint "/core/topic/919822")
+                        (values
+                         (hyperdoc::encode-json-string (topicmap-core-json))
+                         200
+                         (expected-dmx-core-topic-url 919822)
+                         "OK"))
+                       ((string= endpoint "/workspaces/object/922464")
+                        (values "" 204 (expected-dmx-workspace-object-url 922464) "No Content"))
+                       ((string= endpoint "/topicmaps/object/922464")
+                        (values
+                         (hyperdoc::encode-json-string
+                          (topicmap-memberships-json 922464))
+                         200
+                         (expected-dmx-topicmap-memberships-url 922464)
+                         "OK"))
+                       (t
+                        (error "Unexpected DMX repair-console fetch ~S" endpoint)))))
+             (setf (symbol-function 'drakma:http-request)
+                   (lambda (url &key method additional-headers content-type content
+                               content-length want-stream &allow-other-keys)
+                     (declare (ignore want-stream))
+                     (cond
+                       ((search "/core/topic/922464" url)
+                        (values
+                         (json-stream
+                          (make-topic-json
+                           922464
+                           "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"
+                           "dmx.notes.note"
+                           "Operational definition: chunk, chunk note, manifest note, content topic"))
+                         200
+                         nil
+                         nil nil "OK"))
+                       ((search "/access-control/login" url)
+                        (assert-equal :post method
+                                      "Repair-console debug trace must POST the login bootstrap")
+                        (values (make-string-input-stream "")
+                                204
+                                '(("Set-Cookie" . "JSESSIONID=session-123;Path=/;SameSite=Strict"))
+                                nil nil "No Content"))
+                       ((search "/workspaces/919815/object/922464" url)
+                        (assert-equal :put method
+                                      "Repair-console debug trace must PUT the workspace assignment")
+                        (assert-true
+                         (search "Basic "
+                                 (cdr (assoc "Authorization"
+                                             additional-headers
+                                             :test #'string-equal)))
+                         "Repair-console debug trace must preserve the Basic authorization header")
+                        (assert-equal "JSESSIONID=session-123; dmx_workspace_id=919815"
+                                      (cdr (assoc "Cookie"
+                                                  additional-headers
+                                                  :test #'string-equal))
+                                      "Repair-console debug trace must attach JSESSIONID and dmx_workspace_id on the guarded PUT")
+                        (assert-equal "application/json"
+                                      (cdr (assoc "Accept"
+                                                  additional-headers
+                                                  :test #'string-equal))
+                                      "Repair-console debug trace must ask for JSON on the guarded PUT")
+                        (assert-equal nil
+                                      content-type
+                                      "Repair-console debug trace must leave Content-Type unset on the guarded PUT")
+                        (assert-equal 0
+                                      content-length
+                                      "Repair-console debug trace must keep Content-Length 0 on the guarded PUT")
+                        (assert-equal ""
+                                      content
+                                      "Repair-console debug trace must send an explicit empty body on the guarded PUT")
+                        (values (make-string-input-stream "")
+                                401
+                                nil
+                                nil nil "Unauthorized"))
+                       ((search "/workspaces/object/922464" url)
+                        (values (make-string-input-stream "")
+                                204
+                                nil
+                                nil nil "No Content"))
+                       ((search "/topicmaps/object/922464" url)
+                        (values (json-stream (topicmap-memberships-json 922464))
+                                200
+                                nil
+                                nil nil "OK"))
+                       (t
+                        (error "Unexpected Drakma repair-console call ~S" url)))))
+             (let* ((auth-context
+                      (hyperdoc/inspector::build-dmx-repair-auth-context
+                       :auth-mode :basic
+                       :username "rgb"
+                       :password "secret"))
+                    (client
+                      (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+                       :base-url "https://dmx.ralfbarkow.ch"
+                       :workspace-id 919815
+                       :auth-mode :basic
+                       :username "rgb"
+                       :password "secret"))
+                    (result
+                      (hyperdoc/inspector::repair-topic-proxy-with-client
+                       single-proxy
+                       client
+                       :dry-run nil
+                       :auth-mode :basic
+                       :auth-context auth-context))
+                    (debug-report (getf result :debug-report))
+                    (states (getf debug-report :states)))
+               (assert-true
+                (not (getf result :success-p))
+                "Repair-console debug trace regression must surface the guarded PUT failure")
+               (assert-equal :basic
+                             (getf debug-report :auth-mode)
+                             "Repair-console debug trace must preserve the selected auth mode")
+               (assert-true
+                (getf debug-report :bootstrap-ran-p)
+                "Repair-console debug trace must show the login bootstrap ran")
+               (assert-equal 204
+                             (getf debug-report :bootstrap-status-code)
+                             "Repair-console debug trace must record the bootstrap status")
+               (assert-true
+                (getf debug-report :bootstrap-set-cookie-jsessionid-p)
+                "Repair-console debug trace must record the Set-Cookie JSESSIONID receipt")
+               (assert-true
+                (getf debug-report :session-cookie-captured-p)
+                "Repair-console debug trace must record that JSESSIONID was captured in memory")
+               (assert-equal "JSESSIONID + dmx_workspace_id"
+                             (getf debug-report :guarded-put-cookie-shape)
+                             "Repair-console debug trace must redact the guarded PUT cookie shape")
+               (assert-true
+                (getf debug-report :guarded-put-jsessionid-cookie-p)
+                "Repair-console debug trace must prove the guarded PUT carried JSESSIONID")
+               (assert-true
+                (getf debug-report :guarded-put-workspace-cookie-p)
+                "Repair-console debug trace must prove the guarded PUT carried the workspace cookie")
+               (assert-equal "application/json"
+                             (getf debug-report :guarded-put-accept-header)
+                             "Repair-console debug trace must expose the guarded PUT Accept header")
+               (assert-equal 0
+                             (getf debug-report :guarded-put-content-length)
+                             "Repair-console debug trace must expose the guarded PUT Content-Length")
+               (assert-true
+                (getf debug-report :guarded-put-empty-body-p)
+                "Repair-console debug trace must expose the guarded PUT empty-body flag")
+               (assert-equal 401
+                             (getf debug-report :guarded-put-status-code)
+                             "Repair-console debug trace must expose the guarded PUT failure status")
+               (assert-equal 204
+                             (getf debug-report :workspace-readback-status-code)
+                             "Repair-console debug trace must expose the post-failure workspace readback status")
+               (assert-equal 200
+                             (getf debug-report :topicmap-readback-status-code)
+                             "Repair-console debug trace must expose the post-failure topicmap readback status")
+               (assert-equal "S13 terminal failure"
+                             (getf debug-report :current-state-label)
+                             "Repair-console debug trace must identify the terminal failure state")
+               (assert-equal "S9 -> S10 (guarded PUT reached DMX with JSESSIONID but returned 401)"
+                             (getf debug-report :failure-transition)
+                             "Repair-console debug trace must pinpoint the failing transition")
+               (assert-true
+                (getf (find :s5 states
+                            :key (lambda (row) (getf row :state))
+                            :test #'eq)
+                      :reached-p)
+                "Repair-console debug trace must mark S5 reached")
+               (assert-true
+                (getf (find :s10 states
+                            :key (lambda (row) (getf row :state))
+                            :test #'eq)
+                      :reached-p)
+                "Repair-console debug trace must mark S10 reached")
+               (assert-true
+                (getf (find :s11 states
+                            :key (lambda (row) (getf row :state))
+                            :test #'eq)
+                      :reached-p)
+                "Repair-console debug trace must mark S11 reached after the failed PUT")
+               (assert-true
+                (getf (find :s13 states
+                            :key (lambda (row) (getf row :state))
+                            :test #'eq)
+                      :reached-p)
+                "Repair-console debug trace must mark S13 reached")
+               (assert-true
+                (not (getf (find :s12 states
+                                 :key (lambda (row) (getf row :state))
+                                 :test #'eq)
+                           :reached-p))
+                "Repair-console debug trace must leave S12 unreached on error"))))
+        (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http
+              (symbol-function 'drakma:http-request) original-drakma))))
+
 (defun run-topicmap-designator-helper-test ()
   (let* ((id 913836)
          (url "https://dmx.ralfbarkow.ch/core/topic/913836?children=true&assocChildren=true")
@@ -750,7 +996,8 @@
   (run-workspace-repair-triage-regression-test)
   (run-explicit-dmx-repair-client-builder-test)
   (run-repair-console-helper-regression-test)
+  (run-repair-console-debug-trace-regression-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console debug trace regression + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)

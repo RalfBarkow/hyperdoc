@@ -146,6 +146,10 @@
     :reader dmx-import-session-login-required-p-of
     :initarg :session-login-required-p
     :initform nil)
+   (debug-events
+    :accessor dmx-import-debug-events-of
+    :initarg :debug-events
+    :initform nil)
    (workspace-id
     :reader dmx-import-workspace-id-of
     :initarg :workspace-id
@@ -1051,6 +1055,66 @@
                         (string name)
                         (symbol (symbol-name name))))))))
 
+(defun http-request-relative-path (client normalized-url)
+  (let ((base-url (dmx-import-base-url-of client)))
+    (if (and base-url
+             (<= (length base-url) (length normalized-url))
+             (string-equal base-url
+                           normalized-url
+                           :end2 (length base-url)))
+        (subseq normalized-url (length base-url))
+        normalized-url)))
+
+(defun summarize-http-authorization-scheme (authorization-header)
+  (cond
+    ((null authorization-header) nil)
+    ((search "Basic " authorization-header :test #'char-equal)
+     "Basic")
+    ((search "Bearer " authorization-header :test #'char-equal)
+     "Bearer")
+    (t
+     "Custom")))
+
+(defun cookie-contains-token-p (cookie-header token)
+  (and cookie-header
+       (search token cookie-header :test #'char-equal)))
+
+(defun summarize-http-cookie-shape (cookie-header)
+  (cond
+    ((null cookie-header)
+     "none")
+    ((and (cookie-contains-token-p cookie-header "JSESSIONID=")
+          (cookie-contains-token-p cookie-header "dmx_workspace_id="))
+     "JSESSIONID + dmx_workspace_id")
+    ((cookie-contains-token-p cookie-header "JSESSIONID=")
+     "JSESSIONID only")
+    ((cookie-contains-token-p cookie-header "dmx_workspace_id=")
+     "dmx_workspace_id only")
+    (t
+     "other")))
+
+(defun append-http-dmx-import-debug-event (client state &rest fields)
+  (when (typep client 'http-dmx-import-client)
+    (setf (dmx-import-debug-events-of client)
+          (append (dmx-import-debug-events-of client)
+                  (list (append (list :state state) fields)))))
+  client)
+
+(defun classify-http-dmx-debug-request (method relative-path)
+  (cond
+    ((and (eq method :put)
+          (search "/workspaces/" relative-path :test #'char-equal)
+          (search "/object/" relative-path :test #'char-equal))
+     :workspace-assignment)
+    ((and (eq method :get)
+          (search "/workspaces/object/" relative-path :test #'char-equal))
+     :workspace-readback)
+    ((and (eq method :get)
+          (search "/topicmaps/object/" relative-path :test #'char-equal))
+     :topicmap-readback)
+    (t
+     nil)))
+
 (defun parse-set-cookie-cookie-pair (header &key cookie-name)
   (when header
     (let* ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return) header))
@@ -1068,6 +1132,18 @@
   (let ((normalized-url
           (normalize-http-client-url client
                                      (dmx-access-control-login-path))))
+    (append-http-dmx-import-debug-event
+     client
+     :s5-bootstrap-request-sent
+     :method :post
+     :path (http-request-relative-path client normalized-url)
+     :authorization-scheme
+     (summarize-http-authorization-scheme
+      (dmx-import-authorization-header-of client))
+     :cookie-shape "none"
+     :content-type nil
+     :content-length 0
+     :empty-body-p t)
     (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
         (drakma:http-request normalized-url
                              :method :post
@@ -1081,6 +1157,18 @@
       (declare (ignore response-uri must-close))
       (unwind-protect
            (let ((body (http-response-body-string stream)))
+             (append-http-dmx-import-debug-event
+              client
+              :s6-bootstrap-response-received
+              :method :post
+              :path (http-request-relative-path client normalized-url)
+              :status-code status-code
+              :set-cookie-jsessionid-p
+              (and (http-response-header-value response-headers "Set-Cookie")
+                   (parse-set-cookie-cookie-pair
+                    (http-response-header-value response-headers "Set-Cookie")
+                    :cookie-name "JSESSIONID")
+                   t))
              (if (http-success-status-p status-code)
                  (let ((session-cookie
                          (parse-set-cookie-cookie-pair
@@ -1092,7 +1180,13 @@
                             :url normalized-url
                             :status-code status-code
                             :response-body body))
-                   (setf (dmx-import-session-cookie-of client) session-cookie))
+                   (setf (dmx-import-session-cookie-of client) session-cookie)
+                   (append-http-dmx-import-debug-event
+                    client
+                    :s7-session-material-extracted
+                    :session-cookie-captured-p t
+                    :cookie-shape
+                    (summarize-http-cookie-shape session-cookie)))
                  (error 'dmx-import-http-error
                         :message (or reason-phrase
                                      "DMX login request failed")
@@ -1121,6 +1215,7 @@
        (content-type nil content-type-provided-p)
        (content-length nil content-length-provided-p))
   (let* ((normalized-url (normalize-http-client-url client url))
+         (relative-path (http-request-relative-path client normalized-url))
          (cookie-values
            (append (when (dmx-import-session-cookie-of client)
                      (list (dmx-import-session-cookie-of client)))
@@ -1134,6 +1229,8 @@
                             (list (cons "Cookie"
                                         (format nil "~{~A~^; ~}" cookie-values))))
                           extra-headers))
+         (request-kind
+           (classify-http-dmx-debug-request method relative-path))
          (request-args
            (append (list normalized-url
                          :method method
@@ -1151,11 +1248,61 @@
                                 (list :content-type content-type))
                               (when content-length-provided-p
                                 (list :content-length content-length))))))))
+    (when (eql request-kind :workspace-assignment)
+      (append-http-dmx-import-debug-event
+       client
+       :s9-guarded-repair-request-sent
+       :method method
+       :path relative-path
+       :authorization-scheme
+       (summarize-http-authorization-scheme
+        (http-response-header-value headers "Authorization"))
+       :cookie-shape
+       (summarize-http-cookie-shape
+        (http-response-header-value headers "Cookie"))
+       :jsessionid-cookie-p
+       (and (cookie-contains-token-p
+             (http-response-header-value headers "Cookie")
+             "JSESSIONID=")
+            t)
+       :workspace-cookie-p
+       (and (cookie-contains-token-p
+             (http-response-header-value headers "Cookie")
+             "dmx_workspace_id=")
+            t)
+       :accept-header (http-response-header-value headers "Accept")
+       :content-type content-type
+       :content-length content-length
+       :empty-body-p
+       (cond
+         (payload t)
+         (body-object t)
+         (raw-content-provided-p
+          (and (stringp raw-content)
+               (zerop (length raw-content))))
+         (t
+          nil))))
     (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
         (apply #'drakma:http-request request-args)
-      (declare (ignore response-headers response-uri must-close))
+      (declare (ignore response-uri must-close))
       (unwind-protect
            (let ((body (http-response-body-string stream)))
+             (when request-kind
+               (append-http-dmx-import-debug-event
+                client
+                (case request-kind
+                  (:workspace-assignment :s10-guarded-repair-response-received)
+                  (:workspace-readback :s11-workspace-readback)
+                  (:topicmap-readback :s11-topicmap-readback))
+                :method method
+                :path relative-path
+                :status-code status-code
+                :set-cookie-jsessionid-p
+                (and (http-response-header-value response-headers "Set-Cookie")
+                     (parse-set-cookie-cookie-pair
+                      (http-response-header-value response-headers "Set-Cookie")
+                      :cookie-name "JSESSIONID")
+                     t)))
              (cond
                ((and allow-404? (= status-code 404))
                 nil)
@@ -1197,6 +1344,13 @@
                            "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
   (when (and (dmx-import-session-login-required-p-of client)
              (null (dmx-import-session-cookie-of client)))
+    (append-http-dmx-import-debug-event
+     client
+     :s4-bootstrap-request-prepared
+     :operation operation
+     :authorization-scheme
+     (summarize-http-authorization-scheme
+      (dmx-import-authorization-header-of client)))
     (bootstrap-http-dmx-import-session client)))
 
 (defmethod dmx-import-read-topic ((client http-dmx-import-client) topic-id)
@@ -1257,6 +1411,32 @@
   ;; application/x-www-form-urlencoded request. The live DMX workspace
   ;; assignment route accepts PUT, but rejects that implicit form media
   ;; type with HTTP 415. Force an explicit zero-length body instead.
+  (append-http-dmx-import-debug-event
+   client
+   :s8-guarded-repair-request-prepared
+   :method :put
+   :path (dmx-workspace-assign-object-path workspace-id topic-id)
+   :authorization-scheme
+   (summarize-http-authorization-scheme
+    (dmx-import-authorization-header-of client))
+   :cookie-shape
+   (summarize-http-cookie-shape
+    (format nil
+            "~{~A~^; ~}"
+            (append (when (dmx-import-session-cookie-of client)
+                      (list (dmx-import-session-cookie-of client)))
+                    (when (dmx-import-workspace-id-of client)
+                      (list (format nil
+                                    "dmx_workspace_id=~D"
+                                    (dmx-import-workspace-id-of client)))))))
+   :jsessionid-cookie-p
+   (and (dmx-import-session-cookie-of client) t)
+   :workspace-cookie-p
+   (and (dmx-import-workspace-id-of client) t)
+   :accept-header "application/json"
+   :content-type nil
+   :content-length 0
+   :empty-body-p t)
   (http-request-json client
                      :put
                      (dmx-workspace-assign-object-path workspace-id topic-id)
@@ -1434,13 +1614,24 @@
       (error 'dmx-import-config-error
              :message "Incomplete explicit DMX import configuration"
              :missing-keys '("HYPERDOC_DMX_IMPORT_BASE_URL" "base-url")))
-    (make-instance 'http-dmx-import-client
-                   :base-url resolved-base-url
-                   :authorization-header resolved-auth-header
-                   :session-login-required-p (eq resolved-auth-mode :basic)
-                   :workspace-id resolved-workspace-id
-                   :topic-type-uri resolved-topic-type-uri
-                   :verbose verbose)))
+    (let ((client
+            (make-instance 'http-dmx-import-client
+                           :base-url resolved-base-url
+                           :authorization-header resolved-auth-header
+                           :session-login-required-p (eq resolved-auth-mode :basic)
+                           :workspace-id resolved-workspace-id
+                           :topic-type-uri resolved-topic-type-uri
+                           :verbose verbose)))
+      (append-http-dmx-import-debug-event
+       client
+       :s3-explicit-auth-client-built
+       :auth-mode resolved-auth-mode
+       :authorization-scheme
+       (summarize-http-authorization-scheme resolved-auth-header)
+       :session-login-required-p
+       (and (eq resolved-auth-mode :basic) t)
+       :workspace-id resolved-workspace-id)
+      client)))
 
 (defun make-http-dmx-import-client-from-environment (&key verbose)
   (let* ((base-url (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL"))
