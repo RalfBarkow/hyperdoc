@@ -1075,6 +1075,20 @@
     (t
      "Custom")))
 
+(defun effective-http-dmx-import-authorization-header
+    (client &key bootstrap-request-p)
+  (let ((authorization-header (dmx-import-authorization-header-of client)))
+    (cond
+      ((null authorization-header)
+       nil)
+      ((and (not bootstrap-request-p)
+            (typep client 'http-dmx-import-client)
+            (dmx-import-session-login-required-p-of client)
+            (dmx-import-session-cookie-of client))
+       nil)
+      (t
+       authorization-header))))
+
 (defun cookie-contains-token-p (cookie-header token)
   (and cookie-header
        (search token cookie-header :test #'char-equal)))
@@ -1129,9 +1143,13 @@
           cookie-pair))))
 
 (defun bootstrap-http-dmx-import-session (client)
-  (let ((normalized-url
-          (normalize-http-client-url client
-                                     (dmx-access-control-login-path))))
+  (let* ((authorization-header
+           (effective-http-dmx-import-authorization-header
+            client
+            :bootstrap-request-p t))
+         (normalized-url
+           (normalize-http-client-url client
+                                      (dmx-access-control-login-path))))
     (append-http-dmx-import-debug-event
      client
      :s5-bootstrap-request-sent
@@ -1139,7 +1157,7 @@
      :path (http-request-relative-path client normalized-url)
      :authorization-scheme
      (summarize-http-authorization-scheme
-      (dmx-import-authorization-header-of client))
+      authorization-header)
      :cookie-shape "none"
      :content-type nil
      :content-length 0
@@ -1149,8 +1167,9 @@
                              :method :post
                              :want-stream t
                              :additional-headers
-                             (list (cons "Authorization"
-                                         (dmx-import-authorization-header-of client)))
+                             (when authorization-header
+                               (list (cons "Authorization"
+                                           authorization-header)))
                              :content ""
                              :content-length 0
                              :content-type nil)
@@ -1216,15 +1235,17 @@
        (content-length nil content-length-provided-p))
   (let* ((normalized-url (normalize-http-client-url client url))
          (relative-path (http-request-relative-path client normalized-url))
+         (authorization-header
+           (effective-http-dmx-import-authorization-header client))
          (cookie-values
            (append (when (dmx-import-session-cookie-of client)
                      (list (dmx-import-session-cookie-of client)))
                    (when (dmx-import-workspace-id-of client)
                      (list (format nil "dmx_workspace_id=~D"
                                    (dmx-import-workspace-id-of client))))))
-         (headers (append (when (dmx-import-authorization-header-of client)
+         (headers (append (when authorization-header
                             (list (cons "Authorization"
-                                        (dmx-import-authorization-header-of client))))
+                                        authorization-header)))
                           (when cookie-values
                             (list (cons "Cookie"
                                         (format nil "~{~A~^; ~}" cookie-values))))
@@ -1350,7 +1371,9 @@
      :operation operation
      :authorization-scheme
      (summarize-http-authorization-scheme
-      (dmx-import-authorization-header-of client)))
+      (effective-http-dmx-import-authorization-header
+       client
+       :bootstrap-request-p t)))
     (bootstrap-http-dmx-import-session client)))
 
 (defmethod dmx-import-read-topic ((client http-dmx-import-client) topic-id)
@@ -1418,7 +1441,7 @@
    :path (dmx-workspace-assign-object-path workspace-id topic-id)
    :authorization-scheme
    (summarize-http-authorization-scheme
-    (dmx-import-authorization-header-of client))
+    (effective-http-dmx-import-authorization-header client))
    :cookie-shape
    (summarize-http-cookie-shape
     (format nil

@@ -826,13 +826,13 @@
                                    (getf assign-call :method)
                                    "Workspace assignment must remain a PUT after login bootstrap")
                  (mcp-assert-true
-                  (search "/workspaces/919815/object/922464"
-                          (getf assign-call :url))
+                 (search "/workspaces/919815/object/922464"
+                         (getf assign-call :url))
                   "Workspace assignment must still target /workspaces/<workspace>/object/<topic>")
-                 (mcp-assert-true
-                  (search "Basic " (mcp-test-header-value (getf assign-call :headers)
-                                                          "Authorization"))
-                  "Workspace assignment may still carry the Basic authorization header after login bootstrap")
+                 (mcp-assert-equal nil
+                                   (mcp-test-header-value (getf assign-call :headers)
+                                                          "Authorization")
+                                   "Workspace assignment must switch to session-only auth after login bootstrap")
                  (mcp-assert-equal "JSESSIONID=session-123; dmx_workspace_id=919815"
                                    (mcp-test-header-value (getf assign-call :headers)
                                                           "Cookie")
