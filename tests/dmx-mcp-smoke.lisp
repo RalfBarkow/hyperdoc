@@ -755,6 +755,93 @@
               "HTTP workspace assignment must not duplicate Content-Type in additional headers")))
       (setf (symbol-function 'drakma:http-request) original))))
 
+(defun run-dmx-import-explicit-basic-login-bootstrap-smoke-test ()
+  (let ((original (symbol-function 'drakma:http-request))
+        (captured-calls '()))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method additional-headers content-type content content-length
+                               &allow-other-keys)
+                   (push (list :url url
+                               :method method
+                               :headers additional-headers
+                               :content-type content-type
+                               :content content
+                               :content-length content-length)
+                         captured-calls)
+                   (cond
+                     ((search "/access-control/login" url)
+                      (values nil
+                              204
+                              '(("Set-Cookie" . "JSESSIONID=session-123;Path=/;SameSite=Strict"))
+                              nil nil "No Content"))
+                     (t
+                      (values
+                       (mcp-test-json-stream
+                        (mcp-test-json-object
+                         "id" 919815
+                         "uri" ""
+                         "typeUri" "dmx.workspaces.workspace"
+                         "value" "context-window"))
+                       200 nil nil nil "OK")))))
+           (let ((client
+                   (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+                    :base-url "https://dmx.ralfbarkow.ch"
+                    :workspace-id 919815
+                    :auth-mode :basic
+                    :username "rgb"
+                    :password "secret")))
+             (hyperdoc::dmx-import-assign-topic-to-workspace client 919815 922464)
+             (let ((calls (nreverse captured-calls)))
+               (mcp-assert-equal 2
+                                 (length calls)
+                                 "Basic auth mode must bootstrap one DMX login before the workspace assignment PUT")
+               (let ((login-call (first calls))
+                     (assign-call (second calls)))
+                 (mcp-assert-equal :post
+                                   (getf login-call :method)
+                                   "Username/password mode must bootstrap /access-control/login with POST")
+                 (mcp-assert-true
+                  (search "/access-control/login" (getf login-call :url))
+                  "Username/password mode must hit the DMX login endpoint first")
+                 (mcp-assert-true
+                  (search "Basic " (mcp-test-header-value (getf login-call :headers)
+                                                          "Authorization"))
+                  "Username/password mode must send a Basic authorization header on login")
+                 (mcp-assert-equal nil
+                                   (mcp-test-header-value (getf login-call :headers)
+                                                          "Cookie")
+                                   "Login bootstrap must not send the workspace cookie")
+                 (mcp-assert-equal ""
+                                   (getf login-call :content)
+                                   "Login bootstrap must send an explicit empty body")
+                 (mcp-assert-equal 0
+                                   (getf login-call :content-length)
+                                   "Login bootstrap must send an explicit zero Content-Length")
+                 (mcp-assert-equal nil
+                                   (getf login-call :content-type)
+                                   "Login bootstrap must not force a content type")
+                 (mcp-assert-equal :put
+                                   (getf assign-call :method)
+                                   "Workspace assignment must remain a PUT after login bootstrap")
+                 (mcp-assert-true
+                  (search "/workspaces/919815/object/922464"
+                          (getf assign-call :url))
+                  "Workspace assignment must still target /workspaces/<workspace>/object/<topic>")
+                 (mcp-assert-true
+                  (search "Basic " (mcp-test-header-value (getf assign-call :headers)
+                                                          "Authorization"))
+                  "Workspace assignment may still carry the Basic authorization header after login bootstrap")
+                 (mcp-assert-equal "JSESSIONID=session-123; dmx_workspace_id=919815"
+                                   (mcp-test-header-value (getf assign-call :headers)
+                                                          "Cookie")
+                                   "Workspace assignment must combine JSESSIONID with the workspace cookie")
+                 (mcp-assert-equal "JSESSIONID=session-123"
+                                   (hyperdoc::dmx-import-session-cookie-of client)
+                                   "The explicit-auth client must retain the bootstrapped JSESSIONID in memory")))))
+      (setf (symbol-function 'drakma:http-request) original))))
+
 (defun run-dmx-mcp-workspace-topic-lifecycle-smoke-test ()
   (let* ((port (mcp-test-port))
          (url (format nil "http://127.0.0.1:~D/mcp" port))
@@ -1280,6 +1367,7 @@
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-import-delete-and-remove-contract-smoke-test)
   (run-dmx-import-workspace-assignment-contract-smoke-test)
+  (run-dmx-import-explicit-basic-login-bootstrap-smoke-test)
   (run-dmx-mcp-smoke-test)
   (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
