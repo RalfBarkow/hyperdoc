@@ -451,15 +451,16 @@
   (and (dmx-mcp-server-live-writes-enabled-p server)
        (or (typep (dmx-mcp-server-write-client server) 'memory-dmx-import-client)
            (and (typep (dmx-mcp-server-write-client server) 'http-dmx-import-client)
-                (dmx-import-base-url-of (dmx-mcp-server-write-client server))
-                (dmx-import-authorization-header-of
-                 (dmx-mcp-server-write-client server))))))
+                ;; The guarded MCP boundary is enforced on the HyperDoc side.
+                ;; DMX auth headers are optional transport details, not a hard
+                ;; precondition for live availability.
+                (dmx-import-base-url-of (dmx-mcp-server-write-client server))))))
 
 (defun dmx-mcp-write-unavailable-error ()
   (dmx-mcp-json-object
    "status" "write_unavailable"
    "message"
-   "Live DMX writes are disabled. Set HYPERDOC_MCP_ENABLE_LIVE_WRITES=1 and configure DMX write credentials before calling live tools."))
+   "Live DMX writes are disabled. Set HYPERDOC_MCP_ENABLE_LIVE_WRITES=1 and configure a usable DMX import base URL before calling live tools."))
 
 (defun dmx-mcp-validation-error-object (condition)
   (typecase condition
