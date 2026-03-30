@@ -10,6 +10,14 @@
 (defparameter *dmx-default-topic-id* 912384)
 (defparameter *dmx-cache-max-entries* 32)
 (defparameter *dmx-cache-ttl-seconds* 120)
+(defparameter *dmx-context-window-workspace-id* 919815)
+(defparameter *dmx-context-window-topicmap-id* 919822)
+(defparameter *dmx-proxy-workspace-note-uri-prefix*
+  "hyperdoc:mcp/workspace-note/")
+(defparameter *dmx-proxy-handover-uri-prefix*
+  "hyperdoc:mcp/handover/")
+(defparameter *dmx-proxy-topic-factory-snippet-uri-prefix*
+  "hyperdoc:topic-factory-snippet/")
 
 (define-condition dmx-proxy-error (error)
   ((url :reader dmx-error-url-of :initarg :url)
@@ -47,9 +55,34 @@
   ((topic-id :reader dmx-topic-id-of :type integer :initarg :topic-id)
    (topicmap-id :reader dmx-topicmap-id-of :type integer :initarg :topicmap-id)
    (topic-data :accessor dmx-topic-data-of :initform nil)
+   (workspace-data :accessor dmx-workspace-data-of :initform nil)
+   (workspace-owner :accessor dmx-workspace-owner-of :initform nil)
+   (topicmap-memberships :accessor dmx-topicmap-memberships-of :initform nil)
+   (diagnostics :accessor dmx-diagnostics-of :initform nil)
    (topicmap-data :accessor dmx-topicmap-data-of :initform nil)
    (related-topics :accessor dmx-related-topics-of :initform nil)
    (load-error :accessor dmx-load-error-of :initform nil)))
+
+(defstruct dmx-topic-diagnostics
+  topic-id
+  topicmap-id
+  topic-uri
+  topic-type-uri
+  topic-title
+  workspace-id
+  workspace-title
+  workspace-owner
+  topicmap-memberships
+  selected-topicmap-membership-p
+  ownership-class
+  ownership-reason
+  hyperdoc-owned-p
+  note-key
+  handover-key
+  source-endpoints
+  status
+  status-reason
+  repair-needed-p)
 
 (defmethod hb:title-of ((page dmx-topic-proxy))
   (or (and (dmx-topic-data-of page)
@@ -74,6 +107,15 @@
 (defun dmx-core-topic-endpoint (id)
   (format nil "/core/topic/~D" id))
 
+(defun dmx-workspace-object-endpoint (id)
+  (format nil "/workspaces/object/~D" id))
+
+(defun dmx-topicmap-memberships-endpoint (id)
+  (format nil "/topicmaps/object/~D" id))
+
+(defun dmx-workspace-owner-endpoint (workspace-id)
+  (format nil "/access-control/workspace/~D/owner" workspace-id))
+
 (defun dmx-children+assoc-parameters ()
   '(("children" . "true")
     ("assocChildren" . "true")))
@@ -97,6 +139,44 @@
           (and parameters
                (dmx-query-string parameters))))
 
+(defun dmx-http-success-status-p (status-code)
+  (and status-code (<= 200 status-code 299)))
+
+(defun blank-dmx-http-response-body-p (body)
+  (or (null body)
+      (zerop (length (string-trim '(#\Space #\Tab #\Newline #\Return) body)))))
+
+(defun dmx-http-request-body (book endpoint &key parameters)
+  (let* ((request-url (format nil "~A~A" (dmx-base-url-of book) endpoint))
+         (display-url (dmx-endpoint-url book endpoint :parameters parameters))
+         (request-args (append (list request-url
+                                     :method :get
+                                     :want-stream t)
+                               (when parameters
+                                 (list :parameters parameters)))))
+    (handler-case
+        (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
+            (apply #'drakma:http-request request-args)
+          (declare (ignore response-headers response-uri must-close))
+          (unwind-protect
+               (values (and stream
+                            (ignore-errors
+                              (uiop:slurp-stream-string stream)))
+                       status-code
+                       display-url
+                       reason-phrase)
+            (when stream
+              (ignore-errors (close stream)))))
+      (error (cause)
+        (error 'dmx-proxy-error
+               :url display-url
+               :message "Failed to fetch DMX data"
+               :cause cause)))))
+
+(defun parse-dmx-http-json-body (body)
+  (unless (blank-dmx-http-response-body-p body)
+    (shasht:read-json body)))
+
 (defun dmx-core-topic-url (book id &key (parameters (dmx-children+assoc-parameters)))
   (dmx-endpoint-url book
                     (dmx-core-topic-endpoint id)
@@ -106,6 +186,57 @@
   (dmx-core-topic-url (hb:hyperbook-of page)
                       (dmx-topicmap-id-of page)
                       :parameters (dmx-children+assoc-parameters)))
+
+(defun dmx-workspace-object-url (page)
+  (dmx-endpoint-url (hb:hyperbook-of page)
+                    (dmx-workspace-object-endpoint (dmx-topic-id-of page))))
+
+(defun dmx-topicmap-memberships-url (page)
+  (dmx-endpoint-url (hb:hyperbook-of page)
+                    (dmx-topicmap-memberships-endpoint (dmx-topic-id-of page))))
+
+(defun dmx-workspace-owner-url (page workspace-id)
+  (and workspace-id
+       (dmx-endpoint-url (hb:hyperbook-of page)
+                         (dmx-workspace-owner-endpoint workspace-id))))
+
+(defun dmx-fetch-json (book endpoint &key parameters)
+  (multiple-value-bind (body status-code display-url reason-phrase)
+      (dmx-http-request-body book endpoint :parameters parameters)
+    (cond
+      ((or (eql status-code 204)
+           (eql status-code 205))
+       nil)
+      ((dmx-http-success-status-p status-code)
+       (parse-dmx-http-json-body body))
+      (t
+       (error 'dmx-proxy-error
+              :url display-url
+              :message (or reason-phrase
+                           (format nil "DMX request failed with HTTP ~D"
+                                   status-code))
+              :cause body)))))
+
+(defun dmx-fetch-optional-json (book endpoint &key parameters)
+  (dmx-fetch-json book endpoint :parameters parameters))
+
+(defun dmx-fetch-text (book endpoint &key parameters)
+  (multiple-value-bind (body status-code display-url reason-phrase)
+      (dmx-http-request-body book endpoint :parameters parameters)
+    (cond
+      ((or (eql status-code 204)
+           (eql status-code 205))
+       nil)
+      ((dmx-http-success-status-p status-code)
+       (and body
+            (string-trim '(#\Space #\Tab #\Newline #\Return) body)))
+      (t
+       (error 'dmx-proxy-error
+              :url display-url
+              :message (or reason-phrase
+                           (format nil "DMX request failed with HTTP ~D"
+                                   status-code))
+              :cause body)))))
 
 (defun fetch-dmx-core-topic-data (book id)
   (dmx-fetch-json book
@@ -233,25 +364,6 @@
   (or (dmx-cache-get book key)
       (dmx-cache-put book key (funcall thunk))))
 
-(defun dmx-fetch-json (book endpoint &key parameters)
-  (let* ((request-url (format nil "~A~A" (dmx-base-url-of book) endpoint))
-         (display-url (dmx-endpoint-url book endpoint :parameters parameters))
-         (request-args (append (list request-url
-                                     :method :get
-                                     :want-stream t)
-                               (when parameters
-                                 (list :parameters parameters)))))
-    (handler-case
-        (let ((stream (apply #'drakma:http-request request-args)))
-          (unwind-protect
-               (shasht:read-json stream)
-            (ignore-errors (close stream))))
-      (error (cause)
-        (error 'dmx-proxy-error
-               :url display-url
-               :message "Failed to fetch DMX JSON"
-               :cause cause)))))
-
 (defun fetch-dmx-topic-data (page)
   (let* ((book (hb:hyperbook-of page))
          (topic-id (dmx-topic-id-of page))
@@ -278,6 +390,35 @@
      book key
      (lambda ()
        (fetch-dmx-core-topic-data book topicmap-id)))))
+
+(defun fetch-dmx-workspace-data (page)
+  (let* ((book (hb:hyperbook-of page))
+         (topic-id (dmx-topic-id-of page))
+         (key (dmx-cache-key :workspace topic-id)))
+    (dmx-cache-fetch
+     book key
+     (lambda ()
+       (dmx-fetch-optional-json book
+                                (dmx-workspace-object-endpoint topic-id))))))
+
+(defun fetch-dmx-topicmap-memberships (page)
+  (let* ((book (hb:hyperbook-of page))
+         (topic-id (dmx-topic-id-of page))
+         (key (dmx-cache-key :topicmap-memberships topic-id)))
+    (dmx-cache-fetch
+     book key
+     (lambda ()
+       (dmx-fetch-optional-json book
+                                (dmx-topicmap-memberships-endpoint topic-id))))))
+
+(defun fetch-dmx-workspace-owner (page workspace-id)
+  (let* ((book (hb:hyperbook-of page))
+         (key (dmx-cache-key :workspace-owner workspace-id)))
+    (dmx-cache-fetch
+     book key
+     (lambda ()
+       (dmx-fetch-text book
+                       (dmx-workspace-owner-endpoint workspace-id))))))
 
 (defun ensure-dmx-topic-data (page &key force?)
   (when (or force?
@@ -318,6 +459,197 @@
         (setf (dmx-load-error-of page) condition))))
   page)
 
+(defun ensure-dmx-workspace-data (page &key force?)
+  (when (or force?
+            (null (dmx-workspace-data-of page)))
+    (handler-case
+        (progn
+          (setf (dmx-workspace-data-of page)
+                (fetch-dmx-workspace-data page))
+          (setf (dmx-workspace-owner-of page) nil)
+          (setf (dmx-diagnostics-of page) nil)
+          (setf (dmx-load-error-of page) nil))
+      (dmx-proxy-error (condition)
+        (setf (dmx-workspace-data-of page) nil)
+        (setf (dmx-workspace-owner-of page) nil)
+        (setf (dmx-diagnostics-of page) nil)
+        (setf (dmx-load-error-of page) condition))))
+  page)
+
+(defun ensure-dmx-topicmap-memberships (page &key force?)
+  (when (or force?
+            (null (dmx-topicmap-memberships-of page)))
+    (handler-case
+        (progn
+          (setf (dmx-topicmap-memberships-of page)
+                (or (fetch-dmx-topicmap-memberships page)
+                    #()))
+          (setf (dmx-diagnostics-of page) nil)
+          (setf (dmx-load-error-of page) nil))
+      (dmx-proxy-error (condition)
+        (setf (dmx-topicmap-memberships-of page) #())
+        (setf (dmx-diagnostics-of page) nil)
+        (setf (dmx-load-error-of page) condition))))
+  page)
+
+(defun dmx-json-object-field (object key)
+  (and (hash-table-p object)
+       (gethash key object)))
+
+(defun dmx-json-object-id (object)
+  (dmx-json-object-field object "id"))
+
+(defun dmx-json-field-value (object)
+  (dmx-json-object-field object "value"))
+
+(defun dmx-vector-elements (value)
+  (cond
+    ((null value) '())
+    ((vectorp value) (coerce value 'list))
+    ((listp value) value)
+    (t (list value))))
+
+(defun dmx-topic-title-from-topic-data (topic-data)
+  (or (dmx-json-field-value topic-data)
+      (format nil "DMX Topic ~D"
+              (or (dmx-json-object-id topic-data) 0))))
+
+(defun dmx-uri-suffix-after-prefix (uri prefix)
+  (and (stringp uri)
+       (uiop:string-prefix-p prefix uri)
+       (subseq uri (length prefix))))
+
+(defun dmx-topic-ownership-summary (topic-data)
+  (let ((uri (or (dmx-json-object-field topic-data "uri") "")))
+    (cond
+      ((dmx-uri-suffix-after-prefix uri *dmx-proxy-workspace-note-uri-prefix*)
+       (list :class :hyperdoc-workspace-note
+             :owned-p t
+             :reason "HyperDoc workspace-note URI prefix"
+             :note-key
+             (dmx-uri-suffix-after-prefix uri
+                                          *dmx-proxy-workspace-note-uri-prefix*)
+             :handover-key nil))
+      ((dmx-uri-suffix-after-prefix uri *dmx-proxy-handover-uri-prefix*)
+       (list :class :hyperdoc-handover
+             :owned-p t
+             :reason "HyperDoc handover URI prefix"
+             :note-key nil
+             :handover-key
+             (dmx-uri-suffix-after-prefix uri
+                                          *dmx-proxy-handover-uri-prefix*)))
+      ((dmx-uri-suffix-after-prefix uri *dmx-proxy-topic-factory-snippet-uri-prefix*)
+       (list :class :hyperdoc-topic-factory-snippet
+             :owned-p t
+             :reason "HyperDoc topic-factory snippet URI prefix"
+             :note-key nil
+             :handover-key nil))
+      (t
+       (list :class :foreign
+             :owned-p nil
+             :reason "No HyperDoc-owned URI prefix matched"
+             :note-key nil
+             :handover-key nil)))))
+
+(defun dmx-membership-topicmap-id (membership)
+  (dmx-json-object-id membership))
+
+(defun dmx-topic-diagnostic-status-summary
+    (ownership-class hyperdoc-owned-p selected-topicmap-membership-p workspace-id)
+  (cond
+    ((eq ownership-class :foreign)
+     (values :foreign-object
+             nil
+             "No HyperDoc-owned URI prefix matched for this object."))
+    ((and selected-topicmap-membership-p
+          (null workspace-id))
+     (values :in-topicmap-but-unassigned
+             hyperdoc-owned-p
+             "The object is present in the selected topicmap but has no workspace assignment."))
+    ((null workspace-id)
+     (values :missing-workspace-assignment
+             hyperdoc-owned-p
+             "The object has no workspace assignment."))
+    (t
+     (values :ok
+             nil
+             "Workspace assignment and selected topicmap placement are both present."))))
+
+(defun compute-dmx-topic-diagnostics (page)
+  (let* ((topic-data (dmx-topic-data-of page))
+         (workspace-data (dmx-workspace-data-of page))
+         (workspace-id (dmx-json-object-id workspace-data))
+         (workspace-title (dmx-json-field-value workspace-data))
+         (workspace-owner (and workspace-id
+                               (or (dmx-workspace-owner-of page)
+                                   (setf (dmx-workspace-owner-of page)
+                                         (fetch-dmx-workspace-owner page
+                                                                    workspace-id)))))
+         (memberships (dmx-vector-elements (dmx-topicmap-memberships-of page)))
+         (selected-topicmap-id (dmx-topicmap-id-of page))
+         (selected-topicmap-membership-p
+           (loop for membership in memberships
+                 thereis (eql selected-topicmap-id
+                              (dmx-membership-topicmap-id membership))))
+         (ownership (dmx-topic-ownership-summary topic-data))
+         (topic-uri (dmx-json-object-field topic-data "uri"))
+         (topic-type-uri (dmx-json-object-field topic-data "typeUri"))
+         (topic-title (dmx-topic-title-from-topic-data topic-data))
+         (source-endpoints
+           (list (cons "topic"
+                       (dmx-core-topic-url (hyperbook:hyperbook-of page)
+                                           (dmx-topic-id-of page)
+                                           :parameters (dmx-children+assoc-parameters)))
+                 (cons "workspace-assignment"
+                       (dmx-workspace-object-url page))
+                 (cons "topicmap-memberships"
+                       (dmx-topicmap-memberships-url page))
+                 (cons "workspace-owner"
+                       (dmx-workspace-owner-url page workspace-id)))))
+    (multiple-value-bind (status repair-needed-p status-reason)
+        (dmx-topic-diagnostic-status-summary
+         (getf ownership :class)
+         (getf ownership :owned-p)
+         selected-topicmap-membership-p
+         workspace-id)
+      (make-dmx-topic-diagnostics
+       :topic-id (dmx-topic-id-of page)
+       :topicmap-id selected-topicmap-id
+       :topic-uri topic-uri
+       :topic-type-uri topic-type-uri
+       :topic-title topic-title
+       :workspace-id workspace-id
+       :workspace-title workspace-title
+       :workspace-owner workspace-owner
+       :topicmap-memberships memberships
+       :selected-topicmap-membership-p selected-topicmap-membership-p
+       :ownership-class (getf ownership :class)
+       :ownership-reason (getf ownership :reason)
+       :hyperdoc-owned-p (getf ownership :owned-p)
+       :note-key (getf ownership :note-key)
+       :handover-key (getf ownership :handover-key)
+       :source-endpoints source-endpoints
+       :status status
+       :status-reason status-reason
+       :repair-needed-p repair-needed-p))))
+
+(defun ensure-dmx-topic-diagnostics (page &key force?)
+  (ensure-dmx-topic-data page :force? force?)
+  (ensure-dmx-topicmap-data page :force? force?)
+  (ensure-dmx-workspace-data page :force? force?)
+  (ensure-dmx-topicmap-memberships page :force? force?)
+  (when (or force?
+            (null (dmx-diagnostics-of page)))
+    (handler-case
+        (progn
+          (setf (dmx-diagnostics-of page)
+                (compute-dmx-topic-diagnostics page))
+          (setf (dmx-load-error-of page) nil))
+      (dmx-proxy-error (condition)
+        (setf (dmx-diagnostics-of page) nil)
+        (setf (dmx-load-error-of page) condition))))
+  page)
+
 (defun make-dmx-topic-proxy (&key topic-id topicmap-id
                                    (base-url *dmx-base-url*))
   (let ((resolved-topic-id (or (parse-positive-integer topic-id)
@@ -338,6 +670,15 @@
     (make-dmx-topic-proxy :topic-id id
                           :topicmap-id id
                           :base-url base-url)))
+
+(defun make-dmx-shared-workspace-topic-proxy (topic-id
+                                              &key
+                                                (topicmap-id
+                                                 *dmx-context-window-topicmap-id*)
+                                                (base-url *dmx-base-url*))
+  (make-dmx-topic-proxy :topic-id topic-id
+                        :topicmap-id topicmap-id
+                        :base-url base-url))
 
 ;; Inspectable topic objects used by expr links and the Topics hyperbook.
 (defclass topic ()
@@ -2803,6 +3144,16 @@
                  "DMX FedWiki Write Model"
                  "Shared-workspace collaboration model")))
 
+(defun diagnosing-dmx-workspace-assignment-and-topicmap-placement-topic ()
+  (make-topic
+   :id "diagnosing-dmx-workspace-assignment-and-topicmap-placement"
+   :title "Diagnosing DMX workspace assignment and topicmap placement"
+   :summary "Read-only inspector walkthrough for one DMX object that keeps workspace assignment separate from topicmap placement and exposes the raw endpoints used to diagnose missing workspace assignment defects."
+   :references '("Diagnosing DMX workspace assignment and topicmap placement"
+                 "Using guarded workspace topic lifecycle tools"
+                 "Context window workspace as shared blackboard"
+                 "DMX MCP server for shared workspace"
+                 "DMX note read/write boundary")))
 (defun image-oriented-development-topic ()
   (make-topic
    :id "image-oriented-development"

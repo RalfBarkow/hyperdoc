@@ -134,6 +134,7 @@
     "hyperdoc/Using guarded workspace topic lifecycle tools.html")
    "Using guarded workspace topic lifecycle tools"
    '("upsert_workspace_topic_factory_snippet"
+     "Diagnosing DMX workspace assignment and topicmap placement"
      "upsert_workspace_topicmap_context"
      "remove_workspace_topic_from_topicmap"
      "delete_workspace_note"
@@ -144,6 +145,20 @@
      "dry-run-first"
      "HyperDoc-owned workspace notes, handovers, and topic-factory snippet twins"
      "topicmapId = 919822"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/Diagnosing DMX workspace assignment and topicmap placement.html")
+   "Diagnosing DMX workspace assignment and topicmap placement"
+   '("Workspace diagnostics"
+     "workspace assignment"
+     "topicmap placement"
+     "919815"
+     "919822"
+     "922464"
+     "922586"
+     "922451"
+     "repair_workspace_topic_assignment"
+     "No DMX login form is required for this first version"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
@@ -169,9 +184,11 @@
                    (hyperdoc::dmx-machine-readable-read-paths-topic
                     "DMX machine-readable read paths")
                    (hyperdoc::shared-workspace-collaboration-model-topic
-                    "Shared-workspace collaboration model")
+                   "Shared-workspace collaboration model")
                    (hyperdoc::using-guarded-workspace-topic-lifecycle-tools-topic
-                    "Using guarded workspace topic lifecycle tools")))
+                    "Using guarded workspace topic lifecycle tools")
+                   (hyperdoc::diagnosing-dmx-workspace-assignment-and-topicmap-placement-topic
+                    "Diagnosing DMX workspace assignment and topicmap placement")))
     (destructuring-bind (symbol title) entry
       (assert-true (fboundp symbol)
                    (format nil "Missing topic function ~A" symbol))
@@ -187,7 +204,8 @@
                         "DMX note read/write boundary"
                         "DMX machine-readable read paths"
                         "Shared-workspace collaboration model"
-                        "Using guarded workspace topic lifecycle tools"))
+                        "Using guarded workspace topic lifecycle tools"
+                        "Diagnosing DMX workspace assignment and topicmap placement"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))

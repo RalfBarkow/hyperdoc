@@ -1,0 +1,155 @@
+<h1>Diagnosing DMX workspace assignment and topicmap placement</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the read-only walkthrough for diagnosing one DMX object through
+  HyperDoc without collapsing two different layers:
+  workspace assignment and topicmap placement.
+  The runtime object is still the existing
+  <tt>hyperdoc::dmx-topic-proxy</tt>;
+  the difference is that its inspector now exposes a dedicated
+  <tt>Workspace diagnostics</tt> tab.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922586)"><tt>(make-dmx-shared-workspace-topic-proxy 922586)</tt></a></li>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922451)"><tt>(make-dmx-shared-workspace-topic-proxy 922451)</tt></a></li>
+</ul>
+
+<h2>How to inspect one object by id</h2>
+
+<p>
+  Use either of these runtime handles:
+</p>
+
+<ul>
+  <li><tt>(make-dmx-topic-proxy :topic-id &lt;id&gt; :topicmap-id 919822)</tt></li>
+  <li><tt>(make-dmx-shared-workspace-topic-proxy &lt;id&gt;)</tt></li>
+</ul>
+
+<p>
+  The second helper fixes the topicmap context to
+  <tt>919822</tt>, the <tt>context-window</tt> topicmap.
+  It does not infer or synthesize workspace assignment.
+  The inspector reads that separately from the live
+  <tt>/workspaces/object/&lt;id&gt;</tt> endpoint.
+</p>
+
+<h2>What the new inspector view shows</h2>
+
+<p>
+  Open a DMX topic proxy and then select the
+  <tt>Workspace diagnostics</tt> tab.
+  The tab shows at least:
+</p>
+
+<ul>
+  <li>topic id, URI, topic type, and title/value</li>
+  <li>workspace assignment and workspace owner</li>
+  <li>topicmap memberships, with the selected topicmap called out explicitly</li>
+  <li>whether the object is HyperDoc-owned or foreign</li>
+  <li>note key or handover key when the URI exposes one</li>
+  <li>derived status and whether repair is needed</li>
+  <li>the exact source endpoints and raw readouts used for the diagnosis</li>
+</ul>
+
+<p>
+  This is intentionally read-only.
+  No DMX login form is required for this first version because the view only
+  reads public machine-readable endpoints.
+  Guarded repair and backfill actions remain separate.
+</p>
+
+<h2>Acceptance cases</h2>
+
+<h3>Case 1: <tt>922464</tt></h3>
+
+<p>
+  Open
+  <a expr="(make-dmx-shared-workspace-topic-proxy 922464)"><tt>(make-dmx-shared-workspace-topic-proxy 922464)</tt></a>.
+  The expected diagnosis is:
+</p>
+
+<ul>
+  <li>topicmap placement present in <tt>919822</tt></li>
+  <li>workspace assignment missing</li>
+  <li>derived status: <tt>in topicmap but unassigned</tt></li>
+  <li>repair needed: yes</li>
+</ul>
+
+<h3>Case 2: <tt>922586</tt></h3>
+
+<p>
+  Open
+  <a expr="(make-dmx-shared-workspace-topic-proxy 922586)"><tt>(make-dmx-shared-workspace-topic-proxy 922586)</tt></a>.
+  The expected diagnosis is:
+</p>
+
+<ul>
+  <li>topicmap placement present in <tt>919822</tt></li>
+  <li>workspace assignment present as <tt>919815</tt></li>
+  <li>workspace owner present as <tt>rgb</tt></li>
+  <li>derived status: <tt>OK</tt></li>
+</ul>
+
+<h3>Case 3: <tt>922451</tt></h3>
+
+<p>
+  Open
+  <a expr="(make-dmx-shared-workspace-topic-proxy 922451)"><tt>(make-dmx-shared-workspace-topic-proxy 922451)</tt></a>.
+  This is the stray probe topic kept as a foreign maintenance case.
+  The expected diagnosis is:
+</p>
+
+<ul>
+  <li>topicmap placement visible in <tt>919822</tt></li>
+  <li>no workspace assignment</li>
+  <li>ownership class: foreign</li>
+  <li>derived status: <tt>foreign object</tt></li>
+</ul>
+
+<h2>Why the distinction matters</h2>
+
+<p>
+  Topicmap placement answers:
+  “Is this object visible in the shared blackboard topicmap?”
+</p>
+
+<p>
+  Workspace assignment answers:
+  “Does DMX consider this object to belong to workspace
+  <tt>919815</tt>?”
+</p>
+
+<p>
+  They are related operationally, but they are not the same fact.
+  The pre-fix defect existed precisely because a note could be visible in
+  topicmap <tt>919822</tt> while still lacking workspace assignment.
+</p>
+
+<h2>Follow-up boundary</h2>
+
+<p>
+  If the diagnostics tab shows a HyperDoc-owned topic as
+  <tt>in topicmap but unassigned</tt>, the separate follow-up path is the
+  guarded repair tool:
+  <tt>repair_workspace_topic_assignment</tt>.
+  That repair path still requires authenticated DMX writes and remains outside
+  this read-only inspector slice.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Demonstrating DMX Topic Proxies in HyperDoc">Demonstrating DMX Topic Proxies in HyperDoc</a></li>
+</ul>
