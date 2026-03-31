@@ -18,6 +18,7 @@
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
   <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
 </ul>
 
 <h2>Expectation preserved</h2>
@@ -63,6 +64,18 @@
   be widened into arbitrary child-topic mutation tools.
 </p>
 
+<h2>Journal implication</h2>
+
+<p>
+  The same parent-note boundary is now journaled. HyperDoc-managed note writes
+  emit <tt>note-create</tt>, <tt>note-update</tt>, <tt>note-archive</tt>, and
+  <tt>note-delete</tt> events against the stable note subject key, and note
+  restore stays explicit through <tt>restore_workspace_note_revision</tt>. If a
+  note is changed out of band, the journal can only infer that change by
+  snapshot reconciliation, so the event is marked
+  <tt>synthesized-from-diff</tt>.
+</p>
+
 <h2>Delete boundary</h2>
 
 <ul>
@@ -102,5 +115,6 @@
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
 </ul>

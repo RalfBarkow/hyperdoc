@@ -59,9 +59,17 @@
      "upsert_workspace_topicmap_context"
      "remove_workspace_topic_from_topicmap"
      "upsert_workspace_topic_factory_snippet"
+     "read_workspace_journal"
+     "read_topic_journal"
+     "list_workspace_topic_revisions"
+     "restore_workspace_topic_revision"
+     "restore_workspace_note_revision"
      "topicmap_context_upsert"
      "topicmap_context_remove"
      "Hard delete is limited by ownership checks"
+     "journalTopicCount"
+     "journal-event-preview"
+     "synthesized-from-diff"
      "live HTTP unlink remains intentionally unsupported"
      "remote HTTPS"
      "developer mode"
@@ -75,6 +83,9 @@
    '("topicmap 919822"
      "context-window"
      "me, ChatGPT, and Codex"
+     "DMX workspace journal model"
+     "restore_workspace_note_revision"
+     "synthesized-from-diff"
      "raw transcript archive"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
@@ -86,6 +97,9 @@
      "cache-busting or no-cache semantics"
      "append_workspace_note"
      "delete_workspace_note"
+     "note-create"
+     "note-archive"
+     "restore_workspace_note_revision"
      "/core/topic/&lt;id&gt;"
      "existing-topic-id"
      "HyperDoc-created notes whose preserved URI"
@@ -109,6 +123,9 @@
      "curated shared blackboard"
      "HyperDoc remains the durable reference"
      "MCP server is the typed machine-facing boundary"
+     "read_workspace_journal"
+     "synthesized-from-diff"
+     "explicit action"
      "ownership-limited delete"
      "live topicmap unlink as unsupported"))
   (assert-shared-workspace-page-contains-all
@@ -118,10 +135,41 @@
    '("DMX note read/write boundary"
      "DMX machine-readable read paths"
      "DMX MCP server for shared workspace"
+     "DMX workspace journal model"
      "topicmap_context_upsert"
      "delete_workspace_topic"
+     "companion-workspace-note"
      "OPTIONS /core/topic/&lt;id&gt;"
      "No archive or tombstone mutation contract is claimed yet"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX workspace journal model.html")
+   "DMX workspace journal model"
+   '("companion-workspace-note"
+     "hyperdoc:mcp/workspace-journal/"
+     "archive-topic"
+     "note-archive"
+     "synthesized-from-diff"
+     "read_workspace_journal"
+     "read_topic_journal"
+     "restore_workspace_topic_revision"
+     "restore_workspace_note_revision"
+     "not expose a raw \"write arbitrary journal event\" tool"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/FedWiki Journal Tools in HyperDoc.html")
+   "FedWiki Journal Tools in HyperDoc"
+   '("DMX workspace journal model"
+     "companion-workspace-note"
+     "synthesized-from-diff"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/Journalmatic Revision Replay.html")
+   "Journalmatic Revision Replay"
+   '("DMX workspace journal model"
+     "restore_workspace_topic_revision"
+     "restore_workspace_note_revision"
+     "synthesized-from-diff"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/DMX topicmap 919822 repair runbook.html")
@@ -251,6 +299,8 @@
                     "DMX MCP server for shared workspace")
                    (hyperdoc::context-window-workspace-as-shared-blackboard-topic
                     "Context window workspace as shared blackboard")
+                   (hyperdoc::dmx-workspace-journal-model-topic
+                    "DMX workspace journal model")
                    (hyperdoc::dmx-note-read-write-boundary-topic
                    "DMX note read/write boundary")
                    (hyperdoc::dmx-machine-readable-read-paths-topic
@@ -281,6 +331,7 @@
          (format nil "Missing Topics HyperBook page ~A" title)))))
   (dolist (page-title '("DMX MCP server for shared workspace"
                         "Context window workspace as shared blackboard"
+                        "DMX workspace journal model"
                         "DMX note read/write boundary"
                         "DMX machine-readable read paths"
                         "Shared-workspace collaboration model"

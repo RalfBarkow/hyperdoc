@@ -57,10 +57,28 @@
   that can break chronology after local editing or remote forks.
 </p>
 
+<h4>Analogy and limit</h4>
+
+<p>
+  The new <a page="DMX workspace journal model">DMX workspace journal model</a>
+  borrows FedWiki's journal discipline, but not by pretending DMX already ships
+  the same history contract. HyperDoc owns that workspace journal layer
+  directly through companion-workspace-note streams, explicit replay, and
+  explicit restore.
+</p>
+
+<p>
+  That comparison is useful precisely because the limits stay visible: FedWiki
+  page journals are native page artifacts, while DMX workspace history is
+  partly direct in-band observation and partly
+  <tt>synthesized-from-diff</tt> reconciliation for out-of-band changes.
+</p>
+
 <h4>Related</h4>
 
 <ul>
   <li><a page="FedWiki Page-Generation Workflow">FedWiki Page-Generation Workflow</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a hyperbook="hyperdoc" page="Story Neighborhood Workflow">Story Neighborhood Workflow</a></li>
   <li><a hyperbook="hyperdoc" page="Graph-Rooted Publishing">Graph-Rooted Publishing</a></li>
 </ul>

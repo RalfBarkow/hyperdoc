@@ -110,7 +110,8 @@
                 :components ((:file "dmx-import")
                              (:file "topic-factory-snippet-dmx")
                              (:file "dmx-workspace-notes")
-                             (:file "dmx-workspace-topics")))))
+                             (:file "dmx-workspace-topics")
+                             (:file "dmx-workspace-journal")))))
 
 (defsystem #:hyperdoc/mcp
   :description "Streamable HTTP MCP server for the DMX shared workspace"

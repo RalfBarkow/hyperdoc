@@ -36,6 +36,8 @@
 
 (defparameter *hyperdoc-workspace-note-uri-prefix* "hyperdoc:mcp/workspace-note/")
 (defparameter *hyperdoc-handover-uri-prefix* "hyperdoc:mcp/handover/")
+(defparameter *hyperdoc-workspace-journal-uri-prefix*
+  "hyperdoc:mcp/workspace-journal/")
 (defparameter *hyperdoc-topic-factory-snippet-uri-prefix*
   "hyperdoc:topic-factory-snippet/")
 
@@ -192,6 +194,15 @@
         :workspace-topicmap-id workspace-topicmap-id
         :owned-p t
         :reason "HyperDoc handover URI prefix"))
+      ((dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix* uri)
+       (make-dmx-workspace-topic-ownership
+        :class :hyperdoc-workspace-journal
+        :uri uri
+        :external-key external-key
+        :type-uri type-uri
+        :workspace-topicmap-id workspace-topicmap-id
+        :owned-p t
+        :reason "HyperDoc workspace journal URI prefix"))
       ((dmx-string-prefix-p *hyperdoc-topic-factory-snippet-uri-prefix* uri)
        (make-dmx-workspace-topic-ownership
         :class :hyperdoc-topic-factory-snippet
@@ -478,23 +489,87 @@
                 topic-id
                 :workspace-topicmap-id workspace-topicmap-id
                 :client resolved-client
-                :view-props view-props)))
+                :view-props view-props))
+         (current-topic (dmx-import-read-topic
+                         resolved-client
+                         (dmx-workspace-topicmap-membership-plan-topic-id plan)))
+         (current-state
+           (dmx-workspace-journal-live-snapshot
+            resolved-client
+            current-topic
+            (dmx-workspace-topicmap-membership-plan-topicmap-id plan)))
+         (subject-key (gethash "subjectKey" current-state))
+         (lookup (gethash "subjectLookup" current-state))
+         (next-preview
+           (dmx-workspace-journal-snapshot-from-payload
+            subject-key
+            (gethash "kind" lookup)
+            (gethash "value" lookup)
+            (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+            (dmx-workspace-journal-deep-copy (gethash "payload" current-state))
+            :subject-uri (gethash "subjectUri" current-state)
+            :subject-kind (gethash "subjectKind" current-state)
+            :ownership-class (gethash "ownershipClass" current-state)
+            :note-key (gethash "noteKey" current-state)
+            :note-kind (gethash "noteKind" current-state)
+            :topic-id (gethash "topicId" current-state)
+            :in-topicmap t
+            :view-props (dmx-workspace-topicmap-membership-plan-view-props plan)
+            :workspace-id (gethash "workspaceId" current-state)
+            :workspace-title (gethash "workspaceTitle" current-state)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            current-state
+            next-preview)))
     (unless dry-run
-      (ecase (dmx-workspace-topicmap-membership-plan-topicmap-action plan)
-        (:add
-         (dmx-import-add-topic-to-topicmap
-          resolved-client
-          (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
-          (dmx-workspace-topicmap-membership-plan-topic-id plan)
-          (dmx-workspace-topicmap-membership-plan-view-props plan)))
-        (:set-view-props
-         (dmx-import-set-topic-view-props
-          resolved-client
-          (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
-          (dmx-workspace-topicmap-membership-plan-topic-id plan)
-          (dmx-workspace-topicmap-membership-plan-view-props plan)))))
+      (let ((previous-state
+              (dmx-workspace-journal-prepare-transition
+               resolved-client
+               subject-key
+               (gethash "kind" lookup)
+               (gethash "value" lookup)
+               (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+               :subject-uri (gethash "subjectUri" current-state)
+               :subject-kind (gethash "subjectKind" current-state)
+               :ownership-class (gethash "ownershipClass" current-state)
+               :note-key (gethash "noteKey" current-state)
+               :note-kind (gethash "noteKind" current-state))))
+        (ecase (dmx-workspace-topicmap-membership-plan-topicmap-action plan)
+          (:add
+           (dmx-import-add-topic-to-topicmap
+            resolved-client
+            (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+            (dmx-workspace-topicmap-membership-plan-topic-id plan)
+            (dmx-workspace-topicmap-membership-plan-view-props plan)))
+          (:set-view-props
+           (dmx-import-set-topic-view-props
+            resolved-client
+            (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+            (dmx-workspace-topicmap-membership-plan-topic-id plan)
+            (dmx-workspace-topicmap-membership-plan-view-props plan))))
+        (let* ((after-topic
+                 (dmx-import-read-topic
+                  resolved-client
+                  (dmx-workspace-topicmap-membership-plan-topic-id plan)))
+               (after-state
+                 (dmx-workspace-journal-live-snapshot
+                  resolved-client
+                  after-topic
+                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan)))
+               (journal-events
+                 (dmx-workspace-journal-record-transition
+                  resolved-client
+                  previous-state
+                  after-state
+                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan))))
+          (return-from execute-dmx-workspace-topicmap-context-upsert
+            (append (dmx-workspace-topicmap-membership-plan-summary plan)
+                    (list :dry-run dry-run
+                          :journal-subject-key subject-key
+                          :journal-event-count (length journal-events)))))))
     (append (dmx-workspace-topicmap-membership-plan-summary plan)
-            (list :dry-run dry-run))))
+            (list :dry-run dry-run
+                  :journal-event-preview journal-preview))))
 
 (defun plan-dmx-workspace-topicmap-context-remove
     (topic-id &key workspace-topicmap-id client)
@@ -549,7 +624,39 @@
          (plan (plan-dmx-workspace-topicmap-context-remove
                 topic-id
                 :workspace-topicmap-id workspace-topicmap-id
-                :client resolved-client)))
+                :client resolved-client))
+         (current-topic
+           (dmx-import-read-topic
+            resolved-client
+            (dmx-workspace-topicmap-membership-plan-topic-id plan)))
+         (current-state
+           (dmx-workspace-journal-live-snapshot
+            resolved-client
+            current-topic
+            (dmx-workspace-topicmap-membership-plan-topicmap-id plan)))
+         (subject-key (gethash "subjectKey" current-state))
+         (lookup (gethash "subjectLookup" current-state))
+         (next-preview
+           (dmx-workspace-journal-snapshot-from-payload
+            subject-key
+            (gethash "kind" lookup)
+            (gethash "value" lookup)
+            (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+            (dmx-workspace-journal-deep-copy (gethash "payload" current-state))
+            :subject-uri (gethash "subjectUri" current-state)
+            :subject-kind (gethash "subjectKind" current-state)
+            :ownership-class (gethash "ownershipClass" current-state)
+            :note-key (gethash "noteKey" current-state)
+            :note-kind (gethash "noteKind" current-state)
+            :topic-id (gethash "topicId" current-state)
+            :in-topicmap nil
+            :view-props nil
+            :workspace-id (gethash "workspaceId" current-state)
+            :workspace-title (gethash "workspaceTitle" current-state)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            current-state
+            next-preview)))
     (unless dry-run
       (unless (dmx-workspace-topicmap-membership-plan-live-supported-p plan)
         (error 'dmx-import-unsupported-operation-error
@@ -560,13 +667,46 @@
                (dmx-workspace-topicmap-membership-plan-intended-endpoint plan)
                :reason
                (dmx-workspace-topicmap-membership-plan-support-reason plan)))
-      (when (eql (dmx-workspace-topicmap-membership-plan-topicmap-action plan) :remove)
-        (dmx-import-remove-topic-from-topicmap
-         resolved-client
-         (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
-         (dmx-workspace-topicmap-membership-plan-topic-id plan))))
+      (let ((previous-state
+              (dmx-workspace-journal-prepare-transition
+               resolved-client
+               subject-key
+               (gethash "kind" lookup)
+               (gethash "value" lookup)
+               (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+               :subject-uri (gethash "subjectUri" current-state)
+               :subject-kind (gethash "subjectKind" current-state)
+               :ownership-class (gethash "ownershipClass" current-state)
+               :note-key (gethash "noteKey" current-state)
+               :note-kind (gethash "noteKind" current-state))))
+        (when (eql (dmx-workspace-topicmap-membership-plan-topicmap-action plan) :remove)
+          (dmx-import-remove-topic-from-topicmap
+           resolved-client
+           (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+           (dmx-workspace-topicmap-membership-plan-topic-id plan)))
+        (let* ((after-topic
+                 (dmx-import-read-topic
+                  resolved-client
+                  (dmx-workspace-topicmap-membership-plan-topic-id plan)))
+               (after-state
+                 (dmx-workspace-journal-live-snapshot
+                  resolved-client
+                  after-topic
+                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan)))
+               (journal-events
+                 (dmx-workspace-journal-record-transition
+                  resolved-client
+                  previous-state
+                  after-state
+                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan))))
+          (return-from execute-dmx-workspace-topicmap-context-remove
+            (append (dmx-workspace-topicmap-membership-plan-summary plan)
+                    (list :dry-run dry-run
+                          :journal-subject-key subject-key
+                          :journal-event-count (length journal-events)))))))
     (append (dmx-workspace-topicmap-membership-plan-summary plan)
-            (list :dry-run dry-run))))
+            (list :dry-run dry-run
+                  :journal-event-preview journal-preview))))
 
 (defun resolve-dmx-workspace-assignment-target-id (workspace-id client boundary)
   (or (and workspace-id
@@ -674,14 +814,63 @@
                 topic-id
                 :workspace-id workspace-id
                 :workspace-topicmap-id workspace-topicmap-id
-                :client resolved-client)))
+                :client resolved-client))
+         (current-topic
+           (dmx-import-read-topic
+            resolved-client
+            (dmx-workspace-topic-workspace-assignment-plan-topic-id plan)))
+         (current-state
+           (dmx-workspace-journal-live-snapshot
+            resolved-client
+            current-topic
+            (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
+                *dmx-context-window-topicmap-id*)))
+         (subject-key (gethash "subjectKey" current-state))
+         (lookup (gethash "subjectLookup" current-state))
+         (next-preview
+           (let ((snapshot (dmx-workspace-journal-deep-copy current-state)))
+             (setf (gethash "workspaceId" snapshot)
+                   (dmx-workspace-topic-workspace-assignment-plan-workspace-id plan))
+             snapshot))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            current-state
+            next-preview)))
     (unless dry-run
-      (when (eql (dmx-workspace-topic-workspace-assignment-plan-workspace-action plan)
-                 :assign)
-        (dmx-import-assign-topic-to-workspace
-         resolved-client
-         (dmx-workspace-topic-workspace-assignment-plan-workspace-id plan)
-         (dmx-workspace-topic-workspace-assignment-plan-topic-id plan))))
+      (let ((previous-state
+              (dmx-workspace-journal-prepare-transition
+               resolved-client
+               subject-key
+               (gethash "kind" lookup)
+               (gethash "value" lookup)
+               (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
+                   *dmx-context-window-topicmap-id*)
+               :subject-uri (gethash "subjectUri" current-state)
+               :subject-kind (gethash "subjectKind" current-state)
+               :ownership-class (gethash "ownershipClass" current-state)
+               :note-key (gethash "noteKey" current-state)
+               :note-kind (gethash "noteKind" current-state))))
+        (when (eql (dmx-workspace-topic-workspace-assignment-plan-workspace-action plan)
+                   :assign)
+          (dmx-import-assign-topic-to-workspace
+           resolved-client
+           (dmx-workspace-topic-workspace-assignment-plan-workspace-id plan)
+           (dmx-workspace-topic-workspace-assignment-plan-topic-id plan)))
+        (let ((after-state
+                (dmx-workspace-journal-live-snapshot
+                 resolved-client
+                 (dmx-import-read-topic
+                  resolved-client
+                  (dmx-workspace-topic-workspace-assignment-plan-topic-id plan))
+                 (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id
+                      plan)
+                     *dmx-context-window-topicmap-id*))))
+          (dmx-workspace-journal-record-transition
+           resolved-client
+           previous-state
+           after-state
+           (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
+               *dmx-context-window-topicmap-id*)))))
     (let* ((result-workspace
              (dmx-import-read-topic-workspace
               resolved-client
@@ -694,10 +883,12 @@
                (and topicmap-id
                     (dmx-import-topic-in-topicmap-p
                      resolved-client
-                     topicmap-id
-                     (dmx-workspace-topic-workspace-assignment-plan-topic-id plan))))))
+                    topicmap-id
+                    (dmx-workspace-topic-workspace-assignment-plan-topic-id plan))))))
       (append (dmx-workspace-topic-workspace-assignment-plan-summary plan)
               (list :dry-run dry-run
+                    :journal-subject-key subject-key
+                    :journal-event-preview (and dry-run journal-preview)
                     :result-workspace-id result-workspace-id
                     :result-workspace-title
                     (dmx-workspace-title-from-topic result-workspace)
@@ -765,12 +956,65 @@
          (plan (plan-dmx-workspace-topic-delete
                 topic-id
                 :workspace-topicmap-id workspace-topicmap-id
-                :client resolved-client)))
+                :client resolved-client))
+         (current-topic (dmx-import-read-topic
+                         resolved-client
+                         (dmx-workspace-topic-delete-plan-topic-id plan)))
+         (current-state
+           (dmx-workspace-journal-live-snapshot
+            resolved-client
+            current-topic
+            (or (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+                *dmx-context-window-topicmap-id*)))
+         (subject-key (gethash "subjectKey" current-state))
+         (lookup (gethash "subjectLookup" current-state))
+         (next-preview
+           (dmx-workspace-journal-absent-snapshot
+            subject-key
+            (gethash "kind" lookup)
+            (gethash "value" lookup)
+            (or (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+                *dmx-context-window-topicmap-id*)
+            :subject-uri (gethash "subjectUri" current-state)
+            :subject-kind (gethash "subjectKind" current-state)
+            :ownership-class (gethash "ownershipClass" current-state)
+            :note-key (gethash "noteKey" current-state)
+            :note-kind (gethash "noteKind" current-state)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            current-state
+            next-preview)))
     (unless dry-run
-      (dmx-import-delete-topic resolved-client
-                               (dmx-workspace-topic-delete-plan-topic-id plan)))
+      (let ((previous-state
+              (dmx-workspace-journal-prepare-transition
+               resolved-client
+               subject-key
+               (gethash "kind" lookup)
+               (gethash "value" lookup)
+               (or (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+                   *dmx-context-window-topicmap-id*)
+               :subject-uri (gethash "subjectUri" current-state)
+               :subject-kind (gethash "subjectKind" current-state)
+               :ownership-class (gethash "ownershipClass" current-state)
+               :note-key (gethash "noteKey" current-state)
+               :note-kind (gethash "noteKind" current-state))))
+        (dmx-import-delete-topic resolved-client
+                                 (dmx-workspace-topic-delete-plan-topic-id plan))
+        (let ((journal-events
+                (dmx-workspace-journal-record-transition
+                 resolved-client
+                 previous-state
+                 next-preview
+                 (or (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+                     *dmx-context-window-topicmap-id*))))
+          (return-from execute-dmx-workspace-topic-delete
+            (append (dmx-workspace-topic-delete-plan-summary plan)
+                    (list :dry-run dry-run
+                          :journal-subject-key subject-key
+                          :journal-event-count (length journal-events)))))))
     (append (dmx-workspace-topic-delete-plan-summary plan)
-            (list :dry-run dry-run))))
+            (list :dry-run dry-run
+                  :journal-event-preview journal-preview))))
 
 (defun plan-dmx-workspace-note-delete
     (&key note-key topic-id note-kind workspace-topicmap-id client)
@@ -841,12 +1085,62 @@
                 :topic-id topic-id
                 :note-kind note-kind
                 :workspace-topicmap-id workspace-topicmap-id
-                :client resolved-client)))
+                :client resolved-client))
+         (current-topic
+           (dmx-import-read-topic
+            resolved-client
+            (dmx-workspace-topic-delete-plan-topic-id plan)))
+         (current-state
+           (dmx-workspace-journal-live-snapshot
+            resolved-client
+            current-topic
+            (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)))
+         (subject-key (gethash "subjectKey" current-state))
+         (lookup (gethash "subjectLookup" current-state))
+         (next-preview
+           (dmx-workspace-journal-absent-snapshot
+            subject-key
+            (gethash "kind" lookup)
+            (gethash "value" lookup)
+            (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+            :subject-uri (gethash "subjectUri" current-state)
+            :subject-kind (gethash "subjectKind" current-state)
+            :ownership-class (gethash "ownershipClass" current-state)
+            :note-key (gethash "noteKey" current-state)
+            :note-kind (gethash "noteKind" current-state)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            current-state
+            next-preview)))
     (unless dry-run
-      (dmx-import-delete-topic resolved-client
-                               (dmx-workspace-topic-delete-plan-topic-id plan)))
+      (let ((previous-state
+              (dmx-workspace-journal-prepare-transition
+               resolved-client
+               subject-key
+               (gethash "kind" lookup)
+               (gethash "value" lookup)
+               (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+               :subject-uri (gethash "subjectUri" current-state)
+               :subject-kind (gethash "subjectKind" current-state)
+               :ownership-class (gethash "ownershipClass" current-state)
+               :note-key (gethash "noteKey" current-state)
+               :note-kind (gethash "noteKind" current-state))))
+        (dmx-import-delete-topic resolved-client
+                                 (dmx-workspace-topic-delete-plan-topic-id plan))
+        (let ((journal-events
+                (dmx-workspace-journal-record-transition
+                 resolved-client
+                 previous-state
+                 next-preview
+                 (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan))))
+          (return-from execute-dmx-workspace-note-delete
+            (append (dmx-workspace-topic-delete-plan-summary plan)
+                    (list :dry-run dry-run
+                          :journal-subject-key subject-key
+                          :journal-event-count (length journal-events)))))))
     (append (dmx-workspace-topic-delete-plan-summary plan)
-            (list :dry-run dry-run))))
+            (list :dry-run dry-run
+                  :journal-event-preview journal-preview))))
 
 (defun execute-dmx-workspace-topic-factory-snippet-upsert
     (&key snippet-id snippet-text source-path source-origin-id source-origin-path
@@ -868,7 +1162,65 @@
             :source-origin-id source-origin-id
             :source-origin-path source-origin-path
             :provenance provenance))
+         (planned
+           (plan-topic-factory-snippet-dmx-write
+            definition
+            :workspace-topicmap-id workspace-topicmap-id
+            :client resolved-client
+            :topic-type-uri topic-type-uri
+            :view-props view-props
+            :topic-value topic-value))
+         (subject-key (topic-factory-snippet-dmx-write-plan-uri planned))
+         (previous-preview
+           (if-let (existing-topic
+                    (topic-factory-snippet-dmx-write-plan-existing-topic planned))
+             (dmx-workspace-journal-live-snapshot
+              resolved-client
+              existing-topic
+              (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id planned))
+             (dmx-workspace-journal-absent-snapshot
+              subject-key
+              "uri"
+              subject-key
+              (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id planned)
+              :subject-uri subject-key
+              :subject-kind "workspace-topic"
+              :ownership-class "hyperdoc-topic-factory-snippet")))
+         (next-preview
+           (dmx-workspace-journal-snapshot-from-payload
+            subject-key
+            "uri"
+            subject-key
+            (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id planned)
+            (dmx-workspace-journal-payload-json-from-payload
+             (topic-factory-snippet-dmx-write-plan-payload planned))
+            :subject-uri subject-key
+            :subject-kind "workspace-topic"
+            :ownership-class "hyperdoc-topic-factory-snippet"
+            :topic-id (topic-factory-snippet-dmx-write-plan-existing-topic-id planned)
+            :in-topicmap t
+            :view-props
+            (if (eql (topic-factory-snippet-dmx-write-plan-topicmap-action planned) :add)
+                (topic-factory-snippet-dmx-write-plan-view-props planned)
+                (gethash "viewProps" previous-preview))
+            :workspace-id (gethash "workspaceId" previous-preview)
+            :workspace-title (gethash "workspaceTitle" previous-preview)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            previous-preview
+            next-preview))
          (stream (make-string-output-stream))
+         (previous-state
+           (and (not dry-run)
+                (dmx-workspace-journal-prepare-transition
+                 resolved-client
+                 subject-key
+                 "uri"
+                 subject-key
+                 (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id planned)
+                 :subject-uri subject-key
+                 :subject-kind "workspace-topic"
+                 :ownership-class "hyperdoc-topic-factory-snippet")))
          (result
            (execute-topic-factory-snippet-dmx-write
             definition
@@ -888,30 +1240,51 @@
          (topic-id
            (dmx-import-object-id existing-topic)))
     (declare (ignore execution-log))
-    (list :operation :workspace-topic-factory-snippet-upsert
-          :dry-run dry-run
-          :topic-id topic-id
-          :snippet-id (topic-factory-snippet-dmx-write-plan-snippet-id plan)
-          :uri (topic-factory-snippet-dmx-write-plan-uri plan)
-          :workspace-topicmap-id
-          (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id plan)
-          :topic-action
-          (topic-factory-snippet-dmx-write-plan-topic-action plan)
-          :topicmap-action
-          (topic-factory-snippet-dmx-write-plan-topicmap-action plan)
-          :topic-type-uri
-          (topic-factory-snippet-dmx-write-plan-topic-type-uri plan)
-          :topic-value
-          (topic-factory-snippet-dmx-write-plan-topic-value plan)
-          :source-path
-          (topic-factory-snippet-dmx-write-plan-source-path plan)
-          :related-hyperdoc-page-title
-          (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title plan)
-          :related-topic-id
-          (topic-factory-snippet-dmx-write-plan-related-topic-id plan)
-          :view-props-validation-status
-          (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)
-                :status)
-          :normalized-view-props-json
-          (dmx-topicmap-view-props-json-string
-           (topic-factory-snippet-dmx-write-plan-view-props plan)))))
+    (let ((summary
+            (list :operation :workspace-topic-factory-snippet-upsert
+                  :dry-run dry-run
+                  :topic-id topic-id
+                  :snippet-id (topic-factory-snippet-dmx-write-plan-snippet-id plan)
+                  :uri (topic-factory-snippet-dmx-write-plan-uri plan)
+                  :workspace-topicmap-id
+                  (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id plan)
+                  :topic-action
+                  (topic-factory-snippet-dmx-write-plan-topic-action plan)
+                  :topicmap-action
+                  (topic-factory-snippet-dmx-write-plan-topicmap-action plan)
+                  :topic-type-uri
+                  (topic-factory-snippet-dmx-write-plan-topic-type-uri plan)
+                  :topic-value
+                  (topic-factory-snippet-dmx-write-plan-topic-value plan)
+                  :source-path
+                  (topic-factory-snippet-dmx-write-plan-source-path plan)
+                  :related-hyperdoc-page-title
+                  (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title plan)
+                  :related-topic-id
+                  (topic-factory-snippet-dmx-write-plan-related-topic-id plan)
+                  :view-props-validation-status
+                  (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)
+                        :status)
+                  :normalized-view-props-json
+                  (dmx-topicmap-view-props-json-string
+                   (topic-factory-snippet-dmx-write-plan-view-props plan)))))
+      (if dry-run
+          (append summary
+                  (list :journal-event-preview journal-preview))
+          (let* ((after-topic (dmx-import-read-topic resolved-client topic-id))
+                 (after-state
+                   (dmx-workspace-journal-live-snapshot
+                    resolved-client
+                    after-topic
+                    (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id
+                     plan)))
+                 (journal-events
+                   (dmx-workspace-journal-record-transition
+                    resolved-client
+                    previous-state
+                    after-state
+                    (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id
+                     plan))))
+            (append summary
+                    (list :journal-subject-key subject-key
+                          :journal-event-count (length journal-events))))))))

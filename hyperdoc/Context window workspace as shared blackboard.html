@@ -20,7 +20,13 @@
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
   <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="Exchange artifact"><tt>Exchange artifact</tt></a></li>
+  <li><a hyperbook="topics" page="Manifest note"><tt>Manifest note</tt></a></li>
+  <li><a hyperbook="topics" page="Chunk note"><tt>Chunk note</tt></a></li>
+  <li><a hyperbook="topics" page="Content topic"><tt>Content topic</tt></a></li>
+  <li><a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a></li>
   <li><a hyperbook="topics" page="Localhost FedWiki page promotion workflow"><tt>Localhost FedWiki page promotion workflow</tt></a></li>
   <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
   <li><a hyperbook="topics" page="Use a DMX Common workspace as a world read/write context window"><tt>Use a DMX Common workspace as a world read/write context window</tt></a></li>
@@ -52,6 +58,29 @@
   <li>The sole authoritative copy of architecture or workflow decisions.</li>
 </ul>
 
+<h2>Exchange artifacts</h2>
+
+<p>
+  When a workspace readout is too large or awkward for one safe note or one
+  chat message, materialize it as one exchange artifact: one manifest note
+  plus one or more chunk notes. Those transport topics are not the underlying
+  content topics.
+</p>
+
+<ul>
+  <li>Do not use bare <tt>chunk</tt> for transport here; keep bare <tt>Chunk</tt> for HyperDoc's running-image coherence model.</li>
+  <li>Every exchange artifact has exactly one manifest note, and that manifest is the entrypoint.</li>
+  <li>Every chunk note declares artifact membership, part number and total count, and declared coverage such as topic ids or ranges.</li>
+  <li>Chunk notes are transport-layer topics: durable enough for replay and audit, but not automatically conceptual notes.</li>
+  <li>Content topics remain authoritative for the subject matter being described.</li>
+  <li>If chunk exchange yields durable conclusions, promote those conclusions into normal content topics instead of leaving them only inside chunk notes.</li>
+</ul>
+
+<p>
+  The current exhaustive workspace readout in topicmap <tt>919822</tt> is one
+  exchange artifact with one manifest note and <tt>12</tt> chunk notes.
+</p>
+
 <h2>Read and write boundary</h2>
 
 <p>
@@ -61,7 +90,9 @@
   parent-note boundary, HyperDoc-owned snippet twins may be upserted through
   the guarded topic/topicmap adapter, and validated topicmap-context upsert can
   place an existing topic into the workspace or update its long-form view
-  props. Generic raw topicmap mutations remain out of scope.
+  props. Every guarded write also emits a HyperDoc-owned journal event, and
+  restore stays explicit through typed restore tools instead of hidden editor
+  undo. Generic raw topicmap mutations remain out of scope.
 </p>
 
 <h2>Workspace model</h2>
@@ -82,8 +113,21 @@
   <li>Add an existing topic to topicmap <tt>919822</tt> or update its validated view props with <tt>upsert_workspace_topicmap_context</tt>.</li>
   <li>Plan a typed topicmap unlink with <tt>remove_workspace_topic_from_topicmap</tt>, while treating live HTTP unlink as intentionally unsupported until the membership DELETE contract is proven.</li>
   <li>Delete a HyperDoc-owned snippet twin with <tt>delete_workspace_topic</tt>.</li>
+  <li>Inspect journal history through <tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, and <tt>list_workspace_topic_revisions</tt>.</li>
+  <li>Restore an owned note or topic through <tt>restore_workspace_note_revision</tt> or <tt>restore_workspace_topic_revision</tt>.</li>
   <li>Keep a simple durable history in the workspace rather than overwriting arbitrary unrelated topics.</li>
 </ul>
+
+<h2>Journaled history boundary</h2>
+
+<p>
+  Topicmap <tt>919822</tt> now has a HyperDoc-owned journal layer. In-band
+  writes are recorded directly through the same guarded workflow, while
+  out-of-band changes are reconciled by snapshot diff and marked
+  <tt>synthesized-from-diff</tt>. The workspace therefore offers bounded
+  replayable history without claiming that DMX already provides a native
+  revision feed.
+</p>
 
 <h2>Why this stays narrow</h2>
 
@@ -147,7 +191,9 @@
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
   <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="Chunk notes and manifest notes in a DMX workspace">Chunk notes and manifest notes in a DMX workspace</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>

@@ -287,9 +287,14 @@
 (defun dmx-mcp-note-summaries (topic-summaries)
   (remove-if-not
    (lambda (summary)
-     (string= (or (gethash "typeUri" summary) "")
-              *dmx-notes-note-type-uri*))
+     (and (string= (or (gethash "typeUri" summary) "")
+                   *dmx-notes-note-type-uri*)
+          (not (dmx-workspace-journal-note-summary-p summary))))
    topic-summaries))
+
+(defun dmx-mcp-journal-topic-summaries (topic-summaries)
+  (remove-if-not #'dmx-workspace-journal-note-summary-p
+                 topic-summaries))
 
 (defun dmx-mcp-topicmap-topic-summaries (topicmap-json)
   (sort
@@ -310,7 +315,10 @@
          (topicmap-topic (and topicmap-json (gethash "topic" topicmap-json)))
          (topic-summaries (and topicmap-json
                                (dmx-mcp-topicmap-topic-summaries topicmap-json)))
-         (note-summaries (dmx-mcp-note-summaries topic-summaries)))
+         (journal-summaries (dmx-mcp-journal-topic-summaries topic-summaries))
+         (visible-topic-summaries
+           (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
+         (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
     (dmx-mcp-json-object
      "workspace" (dmx-mcp-json-object
                   "slug" (if (eql resolved-topicmap-id
@@ -320,10 +328,12 @@
                   "topicmapId" resolved-topicmap-id
                   "topicmapTitle" (and topicmap-topic
                                        (dmx-mcp-topic-title topicmap-topic)))
-     "topicCount" (length topic-summaries)
+     "topicCount" (length visible-topic-summaries)
      "noteCount" (length note-summaries)
-     "topics" (coerce topic-summaries 'vector)
+     "journalTopicCount" (length journal-summaries)
+     "topics" (coerce visible-topic-summaries 'vector)
      "notes" (coerce note-summaries 'vector)
+     "journalTopics" (coerce journal-summaries 'vector)
      "source" (dmx-mcp-json-object
                "readPath" "/topicmaps/<id>?children=true"
                "topicReadPath" "/core/topic/<id>?children=true&assocChildren=true"))))
@@ -348,16 +358,21 @@
 (defun dmx-mcp-topicmap-projection (topicmap-json)
   (let* ((topicmap-topic (gethash "topic" topicmap-json))
          (topic-summaries (dmx-mcp-topicmap-topic-summaries topicmap-json))
-         (note-summaries (dmx-mcp-note-summaries topic-summaries)))
+         (journal-summaries (dmx-mcp-journal-topic-summaries topic-summaries))
+         (visible-topic-summaries
+           (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
+         (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
     (dmx-mcp-json-object
      "id" (dmx-json-object-value topicmap-topic "id")
      "uri" (dmx-json-object-value topicmap-topic "uri")
      "typeUri" (dmx-json-object-value topicmap-topic "typeUri")
      "title" (dmx-mcp-topic-title topicmap-topic)
-     "topicCount" (length topic-summaries)
-     "topics" (coerce topic-summaries 'vector)
+     "topicCount" (length visible-topic-summaries)
+     "topics" (coerce visible-topic-summaries 'vector)
      "noteCount" (length note-summaries)
      "notes" (coerce note-summaries 'vector)
+     "journalTopicCount" (length journal-summaries)
+     "journalTopics" (coerce journal-summaries 'vector)
      "assocsCount"
      (length (json-array-elements (gethash "assocs" topicmap-json)))
      "viewProps" (gethash "viewProps" topicmap-json))))
@@ -370,9 +385,9 @@
            (loop for topic in (or (and topicmap-json
                                        (json-array-elements (gethash "topics" topicmap-json)))
                                   '())
-                 for topic-id = (dmx-json-object-value topic "id")
-                 when topic-id
-                   collect topic-id)))
+                 unless (dmx-workspace-journal-topic-p topic)
+                   collect (dmx-json-object-value topic "id") into topic-ids
+                 finally (return (remove nil topic-ids)))))
     (remove-duplicates
      (append (dmx-mcp-server-known-topic-ids server)
              workspace-topic-ids)
@@ -689,6 +704,10 @@
            (or (dmx-mcp-argument arguments "noteKey")
                (error 'fedwiki-dmx-import-error
                       :message "noteKey is required for resolve_workspace_note")))
+         (note-kind
+           (normalize-dmx-workspace-note-kind-designator
+            (dmx-mcp-argument arguments "noteKind")
+            'dmx-mcp-resolve-workspace-note-tool))
          (resolution
            (resolve-dmx-workspace-note
             :workspace-topicmap-id
@@ -696,11 +715,13 @@
                 (dmx-mcp-server-workspace-topicmap-id server))
             :client (dmx-mcp-server-read-client server)
             :note-key note-key
-            :note-kind :workspace-note))
+            :note-kind note-kind))
          (existing-topic
            (dmx-workspace-note-resolution-existing-topic resolution)))
     (dmx-mcp-json-object
      "noteKey" (dmx-workspace-note-resolution-note-key resolution)
+     "noteKind" (format nil "~(~A~)"
+                        (dmx-workspace-note-resolution-note-kind resolution))
      "uri" (dmx-workspace-note-resolution-uri resolution)
      "workspaceTopicmapId"
      (dmx-workspace-note-resolution-workspace-topicmap-id resolution)
@@ -724,6 +745,62 @@
                        *dmx-topic-fetch-query-string*))
      "topic" (and existing-topic
                   (dmx-mcp-topic-projection existing-topic)))))
+
+(defun dmx-mcp-read-workspace-journal-tool (server arguments)
+  (read-dmx-workspace-journal
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :reconcile (dmx-mcp-argument arguments "reconcile" t)))
+
+(defun dmx-mcp-read-topic-journal-tool (server arguments)
+  (read-dmx-topic-journal
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :note-key (dmx-mcp-argument arguments "noteKey")
+   :note-kind (dmx-mcp-argument arguments "noteKind")
+   :reconcile (dmx-mcp-argument arguments "reconcile" t)))
+
+(defun dmx-mcp-list-workspace-topic-revisions-tool (server arguments)
+  (list-dmx-workspace-topic-revisions
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :note-key (dmx-mcp-argument arguments "noteKey")
+   :note-kind (dmx-mcp-argument arguments "noteKind")
+   :reconcile (dmx-mcp-argument arguments "reconcile" t)))
+
+(defun dmx-mcp-restore-workspace-topic-revision-tool (server arguments)
+  (restore-dmx-workspace-topic-revision
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :revision (dmx-mcp-argument arguments "revision")
+   :dry-run (dmx-mcp-argument arguments "dryRun" t)))
+
+(defun dmx-mcp-restore-workspace-note-revision-tool (server arguments)
+  (restore-dmx-workspace-note-revision
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :note-key (dmx-mcp-argument arguments "noteKey")
+   :note-kind (dmx-mcp-argument arguments "noteKind")
+   :revision (dmx-mcp-argument arguments "revision")
+   :dry-run (dmx-mcp-argument arguments "dryRun" t)))
 
 (defun dmx-mcp-call-dry-run-tool (server arguments)
   (let ((write-kind (gethash "writeKind" arguments)))
@@ -768,6 +845,15 @@
             ((equal tool-name "resolve_workspace_note")
              (dmx-mcp-tool-result
               (dmx-mcp-resolve-workspace-note-tool server arguments)))
+            ((equal tool-name "read_workspace_journal")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-workspace-journal-tool server arguments)))
+            ((equal tool-name "read_topic_journal")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-topic-journal-tool server arguments)))
+            ((equal tool-name "list_workspace_topic_revisions")
+             (dmx-mcp-tool-result
+              (dmx-mcp-list-workspace-topic-revisions-tool server arguments)))
             ((equal tool-name "append_workspace_note")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -789,6 +875,9 @@
                (gethash "topicId" arguments)
                :title (dmx-mcp-argument arguments "title")
                :text (dmx-mcp-argument arguments "text")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
                :client (dmx-mcp-server-write-client server)
                :dry-run dry-run)))
             ((equal tool-name "create_handover")
@@ -866,6 +955,14 @@
                    (dmx-mcp-server-workspace-topicmap-id server))
                :client (dmx-mcp-server-write-client server)
                :dry-run dry-run)))
+            ((equal tool-name "restore_workspace_topic_revision")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (dmx-mcp-restore-workspace-topic-revision-tool server arguments)))
+            ((equal tool-name "restore_workspace_note_revision")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (dmx-mcp-restore-workspace-note-revision-tool server arguments)))
             ((equal tool-name "upsert_workspace_topic_factory_snippet")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -1035,15 +1132,66 @@
    (dmx-mcp-json-object
     "name" "resolve_workspace_note"
     "description"
-    "Resolve a workspace note by noteKey through the read client and report the existing topic id plus topicmap membership."
+    "Resolve a workspace note or handover by noteKey through the read client and report the existing topic id plus topicmap membership."
     "inputSchema"
     (dmx-mcp-json-object
      "type" "object"
      "properties"
      (dmx-mcp-json-object
       "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string"
+                                       "enum" (dmx-mcp-json-array
+                                               "workspace-note"
+                                               "handover"))
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer"))
      "required" (dmx-mcp-json-array "noteKey")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_workspace_journal"
+    "description"
+    "Read the HyperDoc-owned journal overview for the shared workspace, optionally reconciling synthesized out-of-band events from snapshot diff."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "reconcile" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_topic_journal"
+    "description"
+    "Read the full journal stream for one workspace topic or note subject."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "reconcile" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "list_workspace_topic_revisions"
+    "description"
+    "List the revision headers for one workspace topic or note subject without returning the full event payloads."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "reconcile" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
      "additionalProperties" t))
    (dmx-mcp-json-object
     "name" "update_workspace_note"
@@ -1057,7 +1205,8 @@
       "topicId" (dmx-mcp-json-object "type" "integer")
       "title" (dmx-mcp-json-object "type" "string")
       "text" (dmx-mcp-json-object "type" "string")
-     "dryRun" (dmx-mcp-json-object "type" "boolean"))
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "topicId")
      "additionalProperties" t))
    (dmx-mcp-json-object
@@ -1089,6 +1238,40 @@
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "restore_workspace_topic_revision"
+    "description"
+    "Restore a workspace topic to a prior journaled state without rewriting history; missing owned topics are recreated, and missing topicmap membership is reattached explicitly."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "revision" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "restore_workspace_note_revision"
+    "description"
+    "Restore a workspace note or handover to a prior journaled state without treating the editor as an implicit undo stack."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string")
+      "revision" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
      "additionalProperties" t))
    (dmx-mcp-json-object
     "name" "upsert_workspace_topic_factory_snippet"

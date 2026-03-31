@@ -1,0 +1,158 @@
+<h1>DMX workspace journal model</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace
+  journal model</tt></a> defines the HyperDoc-owned revision layer for the
+  DMX common workspace topicmap <tt>919822</tt>. It is deliberately narrower
+  than a generic DMX mutation framework: HyperDoc keeps journal ownership,
+  replay, restore, and out-of-band detection inside its guarded boundary
+  instead of assuming DMX already provides a native FedWiki-style revision
+  store.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="FedWiki Journal Tools in HyperDoc"><tt>FedWiki Journal Tools in HyperDoc</tt></a></li>
+  <li><a hyperbook="hyperdoc" page="Journalmatic Revision Replay"><tt>Journalmatic Revision Replay</tt></a></li>
+</ul>
+
+<h2>Storage model</h2>
+
+<p>
+  The implemented storage model is <tt>companion-workspace-note</tt>. Every
+  journal stream is stored as one hidden HyperDoc-owned workspace note whose
+  URI starts with <tt>hyperdoc:mcp/workspace-journal/</tt>. The note lives in
+  topicmap <tt>919822</tt>, but HyperDoc places it off-canvas with hidden view
+  props and excludes those companion topics from normal visible workspace
+  counts.
+</p>
+
+<p>
+  Journal ownership attaches to the stable HyperDoc-managed subject key. When
+  a preserved URI exists, that URI becomes the subject key. Otherwise HyperDoc
+  falls back to a stable synthetic key such as <tt>dmx:topic/&lt;id&gt;</tt>.
+</p>
+
+<h2>Journal scope</h2>
+
+<ul>
+  <li>Workspace notes and handovers managed through HyperDoc.</li>
+  <li>HyperDoc-owned workspace topics such as topic-factory snippet twins.</li>
+  <li>Topicmap membership changes in topicmap <tt>919822</tt>.</li>
+  <li>Validated topicmap view-props changes when they are performed through HyperDoc.</li>
+</ul>
+
+<h2>Event model</h2>
+
+<p>
+  Journal events are durable structured records with subject key, topic id when
+  known, topicmap id when relevant, actor classification, timestamp, previous
+  state, next state, and observation kind.
+</p>
+
+<ul>
+  <li><tt>create-topic</tt></li>
+  <li><tt>update-topic</tt></li>
+  <li><tt>add-to-topicmap</tt></li>
+  <li><tt>remove-from-topicmap</tt></li>
+  <li><tt>archive-topic</tt></li>
+  <li><tt>delete-topic</tt></li>
+  <li><tt>restore-topic</tt></li>
+  <li><tt>restore-topicmap-membership</tt></li>
+  <li><tt>update-view-props</tt></li>
+  <li><tt>note-create</tt></li>
+  <li><tt>note-update</tt></li>
+  <li><tt>note-archive</tt></li>
+  <li><tt>note-delete</tt></li>
+  <li><tt>repair-workspace-assignment</tt></li>
+</ul>
+
+<p>
+  Delete flows are explicit. HyperDoc records an <tt>archive-topic</tt> or
+  <tt>note-archive</tt> event before the destructive
+  <tt>delete-topic</tt> or <tt>note-delete</tt> event, so the last complete
+  state remains inspectable and replayable without rewriting history.
+</p>
+
+<h2>Replay and restore</h2>
+
+<p>
+  Current state is reconstructed by replaying ordered journal events. Restore
+  is also explicit: HyperDoc replays to a chosen revision, performs the minimal
+  create/update/reattach steps needed to materialize that target state again,
+  rereads the visible DMX state, and validates that the replayed target matches
+  the live result.
+</p>
+
+<ul>
+  <li><tt>read_workspace_journal</tt> reads the bounded workspace-wide overview.</li>
+  <li><tt>read_topic_journal</tt> reads one subject stream with revisions and full events.</li>
+  <li><tt>list_workspace_topic_revisions</tt> exposes the revision list without widening into raw event writes.</li>
+  <li><tt>restore_workspace_topic_revision</tt> restores a topic revision.</li>
+  <li><tt>restore_workspace_note_revision</tt> restores a note or handover revision.</li>
+</ul>
+
+<h2>Observed versus synthesized history</h2>
+
+<p>
+  In-band HyperDoc writes emit journal events as part of the same guarded
+  workflow, and dry run can preview the event shape through
+  <tt>journal-event-preview</tt>. Out-of-band writes are different. HyperDoc
+  has not proven an authoritative DMX event stream, revision feed, or native
+  replay contract in the repo-used backend path.
+</p>
+
+<p>
+  For that reason, out-of-band detection for topicmap <tt>919822</tt> falls
+  back to periodic snapshot reconciliation. Inferred events are marked
+  <tt>synthesized-from-diff</tt> rather than being overclaimed as directly
+  observed backend history.
+</p>
+
+<h2>Restore safety</h2>
+
+<ul>
+  <li>HyperDoc-owned absent topics can be recreated from the last complete journaled state.</li>
+  <li>Removed topicmap membership can be restored explicitly without hidden editor undo.</li>
+  <li>Foreign or non-owned absent topics are not hard-recreated blindly; restore returns a repair candidate instead.</li>
+  <li>If the backend cannot prove a safer native archive/tombstone contract, the journal's archive event is the bounded preserved tombstone signal HyperDoc owns.</li>
+</ul>
+
+<h2>Why this stays narrow</h2>
+
+<p>
+  This model is intentionally smaller than "DMX as a revision database." It
+  does not expose a raw "write arbitrary journal event" tool, does not claim a
+  native DMX workspace event stream, and does not widen the shared workspace
+  into generic mutation middleware. It only journals the guarded HyperDoc
+  write surface plus bounded snapshot-diff reconciliation for topicmap
+  <tt>919822</tt>.
+</p>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dmx-workspace-journal-model">DMX workspace journal model</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="FedWiki Journal Tools in HyperDoc">FedWiki Journal Tools in HyperDoc</a></li>
+  <li><a page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+</ul>

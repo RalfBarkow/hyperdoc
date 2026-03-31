@@ -18,6 +18,7 @@
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
   <li><a hyperbook="topics" page="Codex read/write boundary for a DMX topicmap"><tt>Codex read/write boundary for a DMX topicmap</tt></a></li>
 </ul>
 
@@ -35,9 +36,21 @@
   <li>Capture stable conclusions in durable HyperDoc pages and topics.</li>
   <li>Mirror the high-value current state into the shared workspace as curated notes or existing DMX workflow topics.</li>
   <li>Let Codex, ChatGPT, and the operator read the same machine-facing workspace state through MCP or direct machine-readable DMX reads.</li>
-  <li>Use the same MCP boundary for live note writes, HyperDoc-owned topic upsert, and ownership-limited delete only when the client is attached to the same guarded server with live writes enabled.</li>
+  <li>Use the same MCP boundary for live note writes, HyperDoc-owned topic upsert, ownership-limited delete, and explicit restore only when the client is attached to the same guarded server with live writes enabled.</li>
   <li>Push clarified conclusions back into HyperDoc instead of treating DMX as the sole authority.</li>
 </ol>
+
+<h2>History discipline</h2>
+
+<p>
+  Collaboration stays explicit about history. HyperDoc-managed writes emit
+  durable journal events, <tt>read_topic_journal</tt> and
+  <tt>read_workspace_journal</tt> expose bounded inspection surfaces, and
+  restore is an explicit action rather than editor magic. Out-of-band changes
+  can be discovered only through bounded snapshot diff today, so those entries
+  are marked <tt>synthesized-from-diff</tt> instead of being advertised as a
+  native DMX event stream.
+</p>
 
 <h2>Boundaries</h2>
 
@@ -46,6 +59,7 @@
   <li>Do not widen the write surface into generic unsafe DMX mutation.</li>
   <li>Keep dry-run-first behavior where the backend contract is still uncertain.</li>
   <li>Keep topic hard delete limited to HyperDoc-owned workspace artifacts, and treat live topicmap unlink as unsupported until the backend contract is proven.</li>
+  <li>Keep undo/redo explicit through restore tools, journal replay, and repair candidates rather than hidden mutable state.</li>
   <li>Keep the original malformed writer classified as unknown until it is actually proven.</li>
 </ul>
 
@@ -65,6 +79,7 @@
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
 </ul>

@@ -22,6 +22,7 @@
   <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
   <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
   <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
   <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
@@ -67,6 +68,11 @@
   <li><tt>remove_workspace_topic_from_topicmap</tt></li>
   <li><tt>upsert_workspace_topic_factory_snippet</tt></li>
   <li><tt>create_handover</tt></li>
+  <li><tt>read_workspace_journal</tt></li>
+  <li><tt>read_topic_journal</tt></li>
+  <li><tt>list_workspace_topic_revisions</tt></li>
+  <li><tt>restore_workspace_topic_revision</tt></li>
+  <li><tt>restore_workspace_note_revision</tt></li>
 </ul>
 
 <p>
@@ -88,6 +94,28 @@
   until DELETE on the topicmap membership route is actually proven.
 </p>
 
+<h2>Journal and restore surface</h2>
+
+<p>
+  The shared-workspace tool surface is now journal-aware. Guarded writes expose
+  <tt>journal-event-preview</tt> in dry run and return
+  <tt>journal-subject-key</tt> plus <tt>journal-event-count</tt> on live
+  execution. History inspection stays typed through
+  <tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, and
+  <tt>list_workspace_topic_revisions</tt>, while explicit restore stays bounded
+  to <tt>restore_workspace_topic_revision</tt> and
+  <tt>restore_workspace_note_revision</tt>.
+</p>
+
+<p>
+  Normal workspace projections exclude hidden companion journal notes from
+  visible topic counts, but report journal metadata such as
+  <tt>journalTopicCount</tt>. In-band history is observed directly through the
+  HyperDoc write path; out-of-band reconciliation is marked
+  <tt>synthesized-from-diff</tt> because no authoritative DMX revision feed is
+  proven here.
+</p>
+
 <h2>Guardrails</h2>
 
 <ul>
@@ -100,6 +128,7 @@
   <li>Topic hard delete is proven only on <tt>/core/topic/&lt;id&gt;</tt>; live HTTP unlink on <tt>/topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt> is still unproven and therefore unsupported.</li>
   <li>Forbidden short keys <tt>x</tt>, <tt>y</tt>, <tt>visibility</tt>, and <tt>pinned</tt> are rejected at the HyperDoc boundary.</li>
   <li>Dry-run output shows normalized payload and validation status before any live mutation.</li>
+  <li>Dry-run output can also preview the journal event shape before live mutation.</li>
   <li>Dry-run stays the preferred planning mode before live mutation.</li>
   <li>Live writes stay disabled unless explicit DMX credentials and the live-write flag are configured.</li>
   <li>Bearer-token and allowed-origin checks keep the remote boundary narrow.</li>
@@ -301,6 +330,7 @@ ssh rgb@dreyeck.ch 'sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bi
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>

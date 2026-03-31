@@ -43,9 +43,29 @@
   comparing it to the visible page state.
 </p>
 
+<h4>DMX workspace implication</h4>
+
+<p>
+  HyperDoc now uses the same replay discipline for the
+  <a page="DMX workspace journal model">DMX workspace journal model</a>.
+  <tt>read_topic_journal</tt> and <tt>read_workspace_journal</tt> reconstruct
+  bounded shared-workspace state by replaying ordered events, and
+  <tt>restore_workspace_topic_revision</tt> or
+  <tt>restore_workspace_note_revision</tt> validate restore by replaying to the
+  target revision and comparing it with the reread visible DMX state.
+</p>
+
+<p>
+  The important difference is provenance. In-band workspace writes are direct
+  HyperDoc observations, but out-of-band changes are only
+  <tt>synthesized-from-diff</tt> because no authoritative DMX revision feed is
+  proven in the repo-used path.
+</p>
+
 <h4>Related</h4>
 
 <ul>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a hyperbook="hyperdoc" page="Journalmatic Journal Checker">Journalmatic Journal Checker</a></li>
   <li><a hyperbook="hyperdoc" page="Journalmatic Repair Tools">Journalmatic Repair Tools</a></li>
 </ul>

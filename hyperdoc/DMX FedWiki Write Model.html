@@ -17,6 +17,7 @@
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
   <li><a hyperbook="topics" page="FedWiki site to DMX import"><tt>FedWiki site to DMX import</tt></a></li>
   <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
   <li><a hyperbook="topics" page="Runtime write live-proof gate"><tt>Runtime write live-proof gate</tt></a></li>
@@ -106,8 +107,26 @@
   <li><tt>upsert_workspace_topicmap_context</tt> and <tt>upsert_workspace_topic_factory_snippet</tt> provide the supported typed path for placing HyperDoc-managed topics into workspace topicmap <tt>919822</tt>.</li>
   <li><tt>delete_workspace_topic</tt> is ownership-limited to HyperDoc-owned workspace artifacts; foreign topics are rejected.</li>
   <li><tt>remove_workspace_topic_from_topicmap</tt> exists as a typed unlink tool, but live HTTP execution remains intentionally unsupported until the membership DELETE contract is proven.</li>
+  <li><tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, <tt>list_workspace_topic_revisions</tt>, <tt>restore_workspace_topic_revision</tt>, and <tt>restore_workspace_note_revision</tt> add bounded history inspection and explicit restore without exposing raw journal writes.</li>
   <li>No generic raw <tt>ViewProps</tt> passthrough is exposed through MCP.</li>
 </ul>
+
+<h2>HyperDoc-owned journal layer</h2>
+
+<p>
+  The shared workspace now has a HyperDoc-owned journal layer documented in
+  <a page="DMX workspace journal model">DMX workspace journal model</a>. The
+  storage model is <tt>companion-workspace-note</tt>: one hidden journal note
+  per stable subject stream. That is intentionally narrower than claiming DMX
+  itself is already a replayable revision database.
+</p>
+
+<p>
+  In-band guarded writes emit direct journal events, while out-of-band changes
+  in topicmap <tt>919822</tt> are synthesized from snapshot diff and labeled
+  <tt>synthesized-from-diff</tt>. This remains a bounded collaboration and
+  repair model, not a generic DMX mutation framework.
+</p>
 
 <h2>Delete and unlink boundary</h2>
 
@@ -154,6 +173,7 @@
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>

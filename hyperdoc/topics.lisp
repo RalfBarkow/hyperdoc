@@ -3161,6 +3161,7 @@
    :title "DMX FedWiki Write Model"
    :summary "HyperDoc-side DMX write contract that treats DMX as a valuable but untrusted persistence boundary and routes topicmap-context writes through canonical long-form payload validation."
    :references '("DMX FedWiki Write Model"
+                 "DMX workspace journal model"
                  "DMX MCP server for shared workspace"
                  "Context window workspace as shared blackboard"
                  "DMX topicmap 919822 repair runbook"
@@ -3179,6 +3180,7 @@
    :references '("DMX MCP server for shared workspace"
                  "Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
                  "Context window workspace as shared blackboard"
+                 "DMX workspace journal model"
                  "DMX FedWiki Write Model"
                  "HyperDoc DMX architectural implications"
                  "DMX topicmap 919822 repair runbook"
@@ -3236,12 +3238,27 @@
    :references '("DMX MCP server for shared workspace"
                  "Add HyperDoc MCP beside the authoritative host config on dreyeck.ch"
                  "Context window workspace as shared blackboard"
+                 "DMX workspace journal model"
                  "DMX note read/write boundary"
                  "DMX machine-readable read paths"
                  "Shared-workspace collaboration model"
                  "DMX FedWiki Write Model"
                  "HyperDoc DMX architectural implications"
                  "Localhost FedWiki page promotion workflow")))
+
+(defun dmx-workspace-journal-model-topic ()
+  (make-topic
+   :id "dmx-workspace-journal-model"
+   :title "DMX workspace journal model"
+   :summary "HyperDoc-owned replayable journal layer for shared-workspace notes, topics, and topicmap membership in DMX topicmap 919822, with explicit restore and diff-based out-of-band reconciliation."
+   :references '("DMX workspace journal model"
+                 "Context window workspace as shared blackboard"
+                 "Shared-workspace collaboration model"
+                 "DMX MCP server for shared workspace"
+                 "DMX note read/write boundary"
+                 "DMX FedWiki Write Model"
+                 "FedWiki Journal Tools in HyperDoc"
+                 "Journalmatic Revision Replay")))
 
 (defun context-window-workspace-as-shared-blackboard-topic ()
   (make-topic
@@ -3250,6 +3267,7 @@
    :summary "Treat DMX topicmap 919822, context-window, as a small curated shared blackboard between me, ChatGPT, and Codex, populated through durable mirrors and guarded note or handover writes instead of a raw transcript archive."
    :references '("Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
+                 "DMX workspace journal model"
                  "Shared-workspace collaboration model"
                  "DMX note read/write boundary"
                  "DMX machine-readable read paths"
@@ -3266,6 +3284,7 @@
                  "DMX machine-readable read paths"
                  "DMX FedWiki Write Model"
                  "DMX MCP server for shared workspace"
+                 "DMX workspace journal model"
                  "Context window workspace as shared blackboard"
                  "Shared-workspace collaboration model")))
 
@@ -3289,6 +3308,7 @@
    :references '("Shared-workspace collaboration model"
                  "Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
+                 "DMX workspace journal model"
                  "DMX note read/write boundary"
                  "DMX machine-readable read paths"
                  "HyperDoc DMX architectural implications"

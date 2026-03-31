@@ -48,6 +48,19 @@
   topic-action
   topicmap-action)
 
+(defun dmx-json-camel-case->hyphenated-key (key)
+  (with-output-to-string (stream)
+    (loop for index below (length key)
+          for char = (char key index)
+          for previous-char = (and (plusp index)
+                                   (char key (1- index)))
+          do (when (and previous-char
+                        (upper-case-p char)
+                        (or (lower-case-p previous-char)
+                            (digit-char-p previous-char)))
+               (write-char #\- stream))
+             (write-char (char-downcase char) stream))))
+
 (defun dmx-json-object-value (object key)
   (cond
     ((hash-table-p object)
@@ -56,6 +69,9 @@
      (or (getf object (intern (string-upcase key) :keyword))
          (getf object (intern (string-upcase
                                (substitute #\- #\_ key))
+                              :keyword))
+         (getf object (intern (string-upcase
+                               (dmx-json-camel-case->hyphenated-key key))
                               :keyword))))
     (t
      nil)))
@@ -304,11 +320,77 @@
                 :view-props view-props
                 :note-key note-key
                 :uri uri
-                :note-kind note-kind)))
+                :note-kind note-kind))
+         (subject-kind (format nil "~(~A~)" note-kind))
+         (subject-key (dmx-workspace-note-write-plan-uri plan))
+         (previous-preview
+           (if-let (existing-topic
+                    (dmx-workspace-note-write-plan-existing-topic plan))
+             (dmx-workspace-journal-live-snapshot
+              resolved-client
+              existing-topic
+              (dmx-workspace-note-write-plan-workspace-topicmap-id plan))
+             (dmx-workspace-journal-absent-snapshot
+              subject-key
+              "uri"
+              subject-key
+              (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+              :subject-uri subject-key
+              :subject-kind subject-kind
+              :ownership-class
+              (if (eq note-kind :handover)
+                  "hyperdoc-handover"
+                  "hyperdoc-workspace-note")
+              :note-key (dmx-workspace-note-write-plan-note-key plan)
+              :note-kind subject-kind)))
+         (next-preview
+           (dmx-workspace-journal-snapshot-from-payload
+            subject-key
+            "uri"
+            subject-key
+            (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+            (dmx-workspace-journal-payload-json-from-payload
+             (dmx-workspace-note-write-plan-payload plan))
+            :subject-uri subject-key
+            :subject-kind subject-kind
+            :ownership-class
+            (if (eq note-kind :handover)
+                "hyperdoc-handover"
+                "hyperdoc-workspace-note")
+            :note-key (dmx-workspace-note-write-plan-note-key plan)
+            :note-kind subject-kind
+            :topic-id (dmx-workspace-note-write-plan-existing-topic-id plan)
+            :in-topicmap t
+            :view-props
+            (if (eql (dmx-workspace-note-write-plan-topicmap-action plan) :add)
+                (dmx-workspace-note-write-plan-view-props plan)
+                (gethash "viewProps" previous-preview))
+            :workspace-id (gethash "workspaceId" previous-preview)
+            :workspace-title (gethash "workspaceTitle" previous-preview)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            previous-preview
+            next-preview)))
     (if dry-run
         (append (dmx-workspace-note-plan-summary plan)
-                (list :dry-run t))
-        (let* ((topic (ecase (dmx-workspace-note-write-plan-topic-action plan)
+                (list :dry-run t
+                      :journal-event-preview journal-preview))
+        (let* ((previous-state
+                 (dmx-workspace-journal-prepare-transition
+                  resolved-client
+                  subject-key
+                  "uri"
+                  subject-key
+                  (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+                  :subject-uri subject-key
+                  :subject-kind subject-kind
+                  :ownership-class
+                  (if (eq note-kind :handover)
+                      "hyperdoc-handover"
+                      "hyperdoc-workspace-note")
+                  :note-key (dmx-workspace-note-write-plan-note-key plan)
+                  :note-kind subject-kind))
+               (topic (ecase (dmx-workspace-note-write-plan-topic-action plan)
                         (:create
                          (dmx-import-create-topic resolved-client
                                                   (dmx-workspace-note-write-plan-payload plan)))
@@ -323,11 +405,26 @@
              (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
              topic-id
              (dmx-workspace-note-write-plan-view-props plan)))
+          (let* ((after-topic (dmx-import-read-topic resolved-client topic-id))
+                 (after-state
+                   (dmx-workspace-journal-live-snapshot
+                    resolved-client
+                    after-topic
+                    (dmx-workspace-note-write-plan-workspace-topicmap-id plan)))
+                 (journal-events
+                   (dmx-workspace-journal-record-transition
+                    resolved-client
+                    previous-state
+                    after-state
+                    (dmx-workspace-note-write-plan-workspace-topicmap-id plan))))
           (append (dmx-workspace-note-plan-summary plan)
                   (list :dry-run nil
-                        :topic-id topic-id))))))
+                        :topic-id topic-id
+                        :journal-subject-key subject-key
+                        :journal-event-count (length journal-events))))))))
 
-(defun plan-dmx-workspace-note-update (topic-id &key title text client)
+(defun plan-dmx-workspace-note-update
+    (topic-id &key title text client workspace-topicmap-id)
   (let* ((resolved-topic-id
            (or (parse-positive-integer topic-id)
                (error 'fedwiki-dmx-import-error
@@ -337,6 +434,9 @@
          (resolved-client
            (or client
                (make-default-dmx-import-client :dry-run t :verbose nil)))
+         (resolved-topicmap-id
+           (or workspace-topicmap-id
+               *dmx-context-window-topicmap-id*))
          (existing-topic (dmx-import-read-topic resolved-client resolved-topic-id)))
     (unless existing-topic
       (error 'fedwiki-dmx-import-error
@@ -375,7 +475,7 @@
        :note-kind :workspace-note
        :note-key nil
        :uri uri
-       :workspace-topicmap-id nil
+       :workspace-topicmap-id resolved-topicmap-id
        :title resolved-title
        :text resolved-text
        :view-props nil
@@ -387,24 +487,79 @@
        :existing-topic existing-topic
        :existing-topic-id resolved-topic-id))))
 
-(defun execute-dmx-workspace-note-update (topic-id &key title text client (dry-run t))
+(defun execute-dmx-workspace-note-update
+    (topic-id &key title text client workspace-topicmap-id (dry-run t))
   (let* ((resolved-client
            (or client
                (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
          (plan (plan-dmx-workspace-note-update topic-id
                                               :title title
                                               :text text
-                                              :client resolved-client)))
+                                              :client resolved-client
+                                              :workspace-topicmap-id
+                                              workspace-topicmap-id))
+         (subject-key (dmx-workspace-note-write-plan-uri plan))
+         (subject-kind "workspace-note")
+         (previous-preview
+           (dmx-workspace-journal-live-snapshot
+            resolved-client
+            (dmx-workspace-note-write-plan-existing-topic plan)
+            (dmx-workspace-note-write-plan-workspace-topicmap-id plan)))
+         (next-preview
+           (dmx-workspace-journal-snapshot-from-payload
+            subject-key
+            "uri"
+            subject-key
+            (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+            (dmx-workspace-journal-payload-json-from-payload
+             (dmx-workspace-note-write-plan-payload plan))
+            :subject-uri subject-key
+            :subject-kind subject-kind
+            :ownership-class "hyperdoc-workspace-note"
+            :topic-id (dmx-workspace-note-write-plan-existing-topic-id plan)
+            :in-topicmap (gethash "inTopicmap" previous-preview)
+            :view-props (gethash "viewProps" previous-preview)
+            :workspace-id (gethash "workspaceId" previous-preview)
+            :workspace-title (gethash "workspaceTitle" previous-preview)))
+         (journal-preview
+           (dmx-workspace-journal-transition-preview
+            previous-preview
+            next-preview)))
     (if dry-run
         (append (dmx-workspace-note-plan-summary plan)
                 (list :dry-run t
-                      :topic-id (dmx-workspace-note-write-plan-existing-topic-id plan)))
-        (let ((topic (dmx-import-update-topic resolved-client
+                      :topic-id (dmx-workspace-note-write-plan-existing-topic-id plan)
+                      :journal-event-preview journal-preview))
+        (let* ((previous-state
+                 (dmx-workspace-journal-prepare-transition
+                  resolved-client
+                  subject-key
+                  "uri"
+                  subject-key
+                  (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+                  :subject-uri subject-key
+                  :subject-kind subject-kind
+                  :ownership-class "hyperdoc-workspace-note"))
+               (topic (dmx-import-update-topic resolved-client
                                               (dmx-workspace-note-write-plan-existing-topic plan)
-                                              (dmx-workspace-note-write-plan-payload plan))))
+                                              (dmx-workspace-note-write-plan-payload plan)))
+               (after-state
+                 (dmx-workspace-journal-live-snapshot
+                  resolved-client
+                  (dmx-import-read-topic resolved-client
+                                         (dmx-import-object-id topic))
+                  (dmx-workspace-note-write-plan-workspace-topicmap-id plan)))
+               (journal-events
+                 (dmx-workspace-journal-record-transition
+                  resolved-client
+                  previous-state
+                  after-state
+                  (dmx-workspace-note-write-plan-workspace-topicmap-id plan))))
           (append (dmx-workspace-note-plan-summary plan)
                   (list :dry-run nil
-                        :topic-id (dmx-import-object-id topic)))))))
+                        :topic-id (dmx-import-object-id topic)
+                        :journal-subject-key subject-key
+                        :journal-event-count (length journal-events)))))))
 
 (defun dmx-workspace-handover-body
     (&key from-agent to-agent summary requested-action artifacts status)
