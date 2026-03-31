@@ -1,0 +1,116 @@
+<h1>Code path graphs in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Code path graphs in HyperDoc"><tt>Code path
+  graphs in HyperDoc</tt></a> defines a reusable inspectable graph object
+  family for two closely related jobs: curated architectural call graphs and
+  traced runtime code paths. HyperDoc renders from graph objects with multiple
+  inspector views rather than treating one static diagram as the source of
+  truth.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Code path graphs in HyperDoc"><tt>Code path graphs in HyperDoc</tt></a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Overview"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Overview</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Nodes"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Nodes</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Focused paths"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Focused paths</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="DOT export"><tt>dmx-workspace-journal-reconcile-call-graph</tt> DOT export</a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX workspace journal reconcile call graph</tt></a></li>
+  <li><a hyperbook="topics" page="Diagramming Debugger Surface"><tt>Diagramming Debugger Surface</tt></a></li>
+  <li><a hyperbook="topics" page="Playground stepper surface"><tt>Playground stepper surface</tt></a></li>
+  <li><a hyperbook="topics" page="Graphviz sequence export"><tt>Graphviz sequence export</tt></a></li>
+</ul>
+
+<h2>Why HyperDoc Starts Here</h2>
+
+<ul>
+  <li>Start from inspectable objects, not from an exhaustive static Lisp call-graph extractor.</li>
+  <li>Keep nodes and edges typed and inspectable so one graph can support several views.</li>
+  <li>Allow curated graphs and traced graphs to share the same rendering and export path.</li>
+  <li>Keep Graphviz DOT export derived from the graph object rather than making DOT the only representation.</li>
+</ul>
+
+<h2>Shared Object Shape</h2>
+
+<p>
+  The reusable base object is <tt>code-path-graph</tt>. It carries stable graph
+  identity and editorial framing through <tt>id</tt>, <tt>title</tt>, and
+  <tt>summary</tt>, plus the graph payload in <tt>entrypoints</tt>,
+  <tt>nodes</tt>, <tt>edges</tt>, optional <tt>trace-events</tt>, and optional
+  <tt>focus-paths</tt>.
+</p>
+
+<p>
+  Nodes carry meaningful path steps such as read entrypoints, diff engines,
+  explicit write helpers, runtime step events, or terminal states. Each node
+  can also point back to a concrete source anchor through
+  <tt>source-file</tt>/<tt>source-function</tt> and, when useful, to a runtime
+  object anchor, HyperDoc topic id, or literal <tt>expr</tt> handle.
+</p>
+
+<p>
+  Edges carry <tt>from</tt>, <tt>to</tt>, <tt>kind</tt>, <tt>status</tt>, and
+  <tt>summary</tt>, plus optional flags such as <tt>write-capable-p</tt>. That
+  is enough to show safe read paths, suppressed write edges, or traced runtime
+  transitions without inventing a generic persistence layer.
+</p>
+
+<h2>Default Inspector Views</h2>
+
+<ul>
+  <li><b>Overview</b>: graph counts, entrypoints, focus-path list, and graph-specific summary extras</li>
+  <li><b>Nodes</b>: source-backed node catalog with optional object/topic anchors</li>
+  <li><b>Edges</b>: typed transitions with status and write-capable flags</li>
+  <li><b>Focused paths</b>: curated or traced subpaths through the graph</li>
+  <li><b>Source references</b>: concrete source anchors for the live graph nodes</li>
+  <li><b>DOT export</b>: Graphviz DOT text derived from the current graph object</li>
+</ul>
+
+<h2>Two Concrete Uses</h2>
+
+<ul>
+  <li><b>Curated architectural graph:</b> <a page="DMX workspace journal reconcile call graph">DMX workspace journal reconcile call graph</a> models the reconcile-on-read boundary around companion journal note <tt>924694</tt> in topicmap <tt>919822</tt>. It keeps the active read path, focused paths, and the suppressed write edge inspectable.</li>
+  <li><b>Traced runtime graph:</b> the live Playground stepper now derives a <tt>playground-stepper-code-path-graph</tt> object from the current stepped source selection. That turns runtime step state into the same reusable graph surface instead of requiring a separate one-off picture object.</li>
+</ul>
+
+<h2>Relation To The Diagramming Debugger Surface</h2>
+
+<p>
+  <a page="Diagramming Debugger Surface">Diagramming Debugger Surface</a> already
+  established the practical design direction: meaningful runtime steps,
+  explicit trace events, inspector views, and Graphviz export. The reusable
+  code-path-graph abstraction generalizes that successful pattern so the same
+  rendering vocabulary also works for curated architectural diagrams like the
+  DMX reconcile boundary.
+</p>
+
+<h2>Boundary</h2>
+
+<p>
+  This slice does not introduce a generic raw graph persistence layer, and it
+  does not promise an exhaustive static Lisp call graph. The graph object is
+  an inspectable runtime/documentation surface first. If a future slice adds
+  tracing or static extraction, it should still materialize its results into
+  this graph object family rather than bypassing it.
+</p>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="code-path-graphs-in-hyperdoc">Code path graphs in HyperDoc</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX workspace journal reconcile call graph">DMX workspace journal reconcile call graph</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="Diagramming Debugger Surface">Diagramming Debugger Surface</a></li>
+  <li><a page="Stepper Debugger Surface">Stepper Debugger Surface</a></li>
+  <li><a page="Smalltalk Browser Frame and Scene in HyperDoc">Smalltalk Browser Frame and Scene in HyperDoc</a></li>
+</ul>

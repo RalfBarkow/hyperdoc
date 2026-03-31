@@ -12,14 +12,26 @@
   <tt>read_topic_journal</tt> runs with <tt>reconcile=true</tt>.
 </p>
 
+<p>
+  It is also the first concrete instance of the reusable
+  <a page="Code path graphs in HyperDoc">code-path-graph</a> abstraction, so
+  the same graph object now supports generic <b>Nodes</b>, <b>Focused paths</b>,
+  <b>Source references</b>, and <b>DOT export</b> views in addition to the
+  domain-specific read/write boundary views.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
   <li><a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX workspace journal reconcile call graph</tt></a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Overview"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Overview</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Nodes"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Nodes</a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Read flow"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Read flow</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Focused paths"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Focused paths</a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Write-capable edges"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Write-capable edges</a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Source references"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Source references</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="DOT export"><tt>dmx-workspace-journal-reconcile-call-graph</tt> DOT export</a></li>
+  <li><a hyperbook="topics" page="Code path graphs in HyperDoc"><tt>Code path graphs in HyperDoc</tt></a></li>
   <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
   <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
 </ul>
@@ -64,6 +76,7 @@
 <h2>Related</h2>
 
 <ul>
+  <li><a page="Code path graphs in HyperDoc">Code path graphs in HyperDoc</a></li>
   <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>

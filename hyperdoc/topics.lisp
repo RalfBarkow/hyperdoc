@@ -842,281 +842,6 @@
   (make-dmx-workspace-repair-triage :topicmap-id topicmap-id
                                     :base-url base-url))
 
-(defstruct dmx-workspace-journal-reconcile-call-graph
-  id
-  title
-  summary
-  workspace-id
-  workspace-topicmap-id
-  resolved-note-topic-id
-  resolved-note-key
-  resolved-topicmap-context-assoc-id
-  companion-journal-topic-id
-  failing-endpoints
-  nodes
-  edges)
-
-(defun dmx-workspace-journal-reconcile-call-graph ()
-  (make-dmx-workspace-journal-reconcile-call-graph
-   :id "dmx-workspace-journal-reconcile-call-graph"
-   :title "DMX workspace journal reconcile call graph"
-   :summary
-   "Inspectable call graph for reconcile-on-read in workspace topicmap 919822, centered on companion journal note 924694 and the write-capable persistence edge that must stay suppressed during read reconciliation."
-   :workspace-id 919815
-   :workspace-topicmap-id 919822
-   :resolved-note-topic-id 923609
-   :resolved-note-key
-   "handover-assist-with-assoc-by-assoc-proof-for-shared-workspace-boundary-3983920759"
-   :resolved-topicmap-context-assoc-id 923622
-   :companion-journal-topic-id 924694
-   :failing-endpoints
-   (list
-    (list :surface "Live adapter reconcile read"
-          :endpoint "/core/topic/924694"
-          :status "500"
-          :summary
-          "Direct adapter-side failure observed while reconcile=true was traversing the companion journal note.")
-    (list :surface "Authoritative nix-side reproduce"
-          :endpoint "/topicmaps/919822/topic/924694"
-          :status "500"
-          :summary
-          "Read reconciliation write-touched the companion note membership path before the read-only patch."))
-   :nodes
-   (list
-    (list :id "read-workspace-journal"
-          :label "read-dmx-workspace-journal"
-          :role :read-entry
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "read-dmx-workspace-journal"
-          :summary
-          "Workspace-wide journal read entrypoint; when reconcile is true it now forces :persist-events-p nil.")
-    (list :id "read-topic-journal"
-          :label "read-dmx-topic-journal"
-          :role :read-entry
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "read-dmx-topic-journal"
-          :summary
-          "Single-subject journal read entrypoint; it resolves one stream through the same reconcile-on-read boundary.")
-    (list :id "locate-stream"
-          :label "dmx-workspace-journal-locate-stream"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-locate-stream"
-          :summary
-          "Selects a stream by subject key or topic id and routes reconcile=true reads through workspace reconciliation.")
-    (list :id "reconcile-workspace"
-          :label "dmx-workspace-journal-reconcile-workspace"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-reconcile-workspace"
-          :summary
-          "Collects stored streams, derives live snapshots from topicmap 919822, and reconciles each subject.")
-    (list :id "collect-streams"
-          :label "dmx-workspace-journal-collect-streams"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-collect-streams"
-          :summary
-          "Reads the hidden companion journal notes already present in topicmap 919822.")
-    (list :id "live-topic-snapshots"
-          :label "dmx-workspace-journal-live-topic-snapshots"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-live-topic-snapshots"
-          :summary
-          "Builds the live snapshot table from the visible topicmap projection while skipping companion journal notes themselves.")
-    (list :id "reconcile-subject"
-          :label "dmx-workspace-journal-reconcile-subject"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-reconcile-subject"
-          :summary
-          "Diffs the stored stream against the current live state and decides whether synthesized events stay in memory or are persisted.")
-    (list :id "read-stream"
-          :label "dmx-workspace-journal-read-stream"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-read-stream"
-          :summary
-          "Reads the existing companion journal note stream or synthesizes an empty base stream.")
-    (list :id "live-snapshot-from-stream"
-          :label "dmx-workspace-journal-live-snapshot-from-stream"
-          :role :read-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-live-snapshot-from-stream"
-          :summary
-          "Refreshes the current DMX state for one subject from the live backend.")
-    (list :id "transition-events"
-          :label "dmx-workspace-journal-transition-events"
-          :role :diff-engine
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-transition-events"
-          :summary
-          "Synthesizes the event diff between stored and live snapshots, including topicmap membership and view-props changes.")
-    (list :id "apply-events-to-stream"
-          :label "dmx-workspace-journal-apply-events-to-stream"
-          :role :safe-read-edge
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-apply-events-to-stream"
-          :summary
-          "Applies synthesized events to the in-memory stream only and updates currentRevision without touching DMX.")
-    (list :id "append-events"
-          :label "dmx-workspace-journal-append-events"
-          :role :write-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-append-events"
-          :summary
-          "Shared append helper for real writes; it is legitimate on explicit write paths but must be suppressed during reconcile-on-read.")
-    (list :id "persist-stream"
-          :label "dmx-workspace-journal-persist-stream"
-          :role :write-helper
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-persist-stream"
-          :summary
-          "Persists the companion journal note and reattaches it to topicmap 919822 if the membership probe thinks it is absent.")
-    (list :id "prepare-transition"
-          :label "dmx-workspace-journal-prepare-transition"
-          :role :write-entry
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-prepare-transition"
-          :summary
-          "Explicit write preflight; it may reconcile first, but only to prepare a guarded write path.")
-    (list :id "record-transition"
-          :label "dmx-workspace-journal-record-transition"
-          :role :write-entry
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "dmx-workspace-journal-record-transition"
-          :summary
-          "Explicit guarded write recorder; it persists journal events after a real topic or note mutation.")
-    (list :id "restore-topic-revision"
-          :label "restore-dmx-workspace-topic-revision"
-          :role :write-entry
-          :source-file "hyperdoc/dmx-workspace-journal.lisp"
-          :source-function "restore-dmx-workspace-topic-revision"
-          :summary
-          "Explicit restore path; it may persist restore events after validating the live result.")
-    (list :id "companion-journal-note"
-          :label "Companion journal note 924694"
-          :role :backend-target
-          :source-file nil
-          :source-function nil
-          :summary
-          "Hidden HyperDoc-owned workspace-journal note in topicmap 919822 that must not be mutated, reattached, or otherwise write-touched during reconcile-on-read."))
-   :edges
-   (list
-    (list :from "read-workspace-journal"
-          :to "reconcile-workspace"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "reconcile=true enters workspace reconciliation in read-only mode.")
-    (list :from "read-topic-journal"
-          :to "locate-stream"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Single-subject reads resolve a stream before returning revisions and current state.")
-    (list :from "locate-stream"
-          :to "reconcile-workspace"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "reconcile=true topic reads reuse workspace reconciliation rather than bypassing it.")
-    (list :from "reconcile-workspace"
-          :to "collect-streams"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Load the stored companion journal streams already present in topicmap 919822.")
-    (list :from "reconcile-workspace"
-          :to "live-topic-snapshots"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Read the current visible topicmap projection and derive live snapshots.")
-    (list :from "reconcile-workspace"
-          :to "reconcile-subject"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Every stored or newly discovered subject is reconciled against the live snapshot table.")
-    (list :from "reconcile-subject"
-          :to "read-stream"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Open the companion note stream or synthesize an empty base stream.")
-    (list :from "reconcile-subject"
-          :to "live-snapshot-from-stream"
-          :kind :read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Read the live DMX state for the subject currently being reconciled.")
-    (list :from "reconcile-subject"
-          :to "transition-events"
-          :kind :read-diff
-          :status :active
-          :write-capable-p nil
-          :summary
-          "Derive synthesized events from the stored/live snapshot diff.")
-    (list :from "reconcile-subject"
-          :to "apply-events-to-stream"
-          :kind :safe-read
-          :status :active
-          :write-capable-p nil
-          :summary
-          "The active reconcile-on-read edge: synthesized events are applied to the in-memory stream only.")
-    (list :from "reconcile-subject"
-          :to "append-events"
-          :kind :suppressed-write
-          :status :suppressed
-          :write-capable-p t
-          :summary
-          "Previously used during reconcile-on-read; now suppressed unless the caller explicitly allows persistence.")
-    (list :from "append-events"
-          :to "persist-stream"
-          :kind :write
-          :status :write-path
-          :write-capable-p t
-          :summary
-          "Legitimate write helper edge for explicit journal writes and restores.")
-    (list :from "persist-stream"
-          :to "companion-journal-note"
-          :kind :backend-write
-          :status :write-path
-          :write-capable-p t
-          :summary
-          "Writes the hidden companion note payload and may call add-to-topicmap when membership appears absent.")
-    (list :from "prepare-transition"
-          :to "reconcile-subject"
-          :kind :write-preflight
-          :status :write-path
-          :write-capable-p nil
-          :summary
-          "Allowed pre-write state sync before a guarded mutation preview.")
-    (list :from "record-transition"
-          :to "append-events"
-          :kind :write
-          :status :write-path
-          :write-capable-p t
-          :summary
-          "Normal guarded write path that records in-band journal events after a real mutation.")
-    (list :from "restore-topic-revision"
-          :to "append-events"
-          :kind :write
-          :status :write-path
-          :write-capable-p t
-          :summary
-          "Explicit restore path that persists restore events after validation."))))
-
 ;; Inspectable topic objects used by expr links and the Topics hyperbook.
 (defclass topic ()
   ((id :accessor id-of :initarg :id)
@@ -3558,6 +3283,7 @@
    :title "DMX workspace journal reconcile call graph"
    :summary "Inspectable call graph for reconcile-on-read in topicmap 919822, showing why companion journal note 924694 must stay on an in-memory-only diff path while explicit write flows still use the append/persist edge."
    :references '("DMX workspace journal reconcile call graph"
+                 "Code path graphs in HyperDoc"
                  "DMX workspace journal model"
                  "DMX topicmap 919822 repair runbook"
                  "DMX note read/write boundary"
@@ -3932,8 +3658,20 @@
    :title "Playground stepper surface"
    :summary "Stepper model and run/step/reset operations used by the Playground execution flow."
    :references '("hyperbook-server/playground-stepper.lisp"
+                 "Code path graphs in HyperDoc"
                  "Stepper Debugger Surface"
                  "Playground restarts")))
+
+(defun code-path-graphs-in-hyperdoc-topic ()
+  (make-topic
+   :id "code-path-graphs-in-hyperdoc"
+   :title "Code path graphs in HyperDoc"
+   :summary "Reusable inspectable graph abstraction for curated architectural call graphs and traced runtime code paths, with multiple views and Graphviz DOT export."
+   :references '("Code path graphs in HyperDoc"
+                 "DMX workspace journal reconcile call graph"
+                 "Diagramming Debugger Surface"
+                 "Graphviz sequence export"
+                 "hyperdoc/code-path-graphs.lisp")))
 
 (defun diagramming-debugger-surface-topic ()
   (make-topic
@@ -3941,6 +3679,7 @@
    :title "Diagramming Debugger Surface"
    :summary "Playground diagramming debugger that records step events and derives collaboration/message traces."
    :references '("Diagramming Debugger Surface"
+                 "Code path graphs in HyperDoc"
                  "Stepper Debugger Surface")))
 
 (defun step-trace-message-events-topic ()
@@ -3955,7 +3694,8 @@
    :id "graphviz-sequence-export"
    :title "Graphviz sequence export"
    :summary "Diagramming debugger exports Graphviz DOT text for collaboration-flow rendering."
-   :references '("Diagramming Debugger Surface")))
+   :references '("Diagramming Debugger Surface"
+                 "Code path graphs in HyperDoc")))
 
 ;; Backward-compatibility alias.
 (defun mermaid-sequence-export-topic ()

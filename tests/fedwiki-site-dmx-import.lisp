@@ -346,6 +346,7 @@
   t)
 
 (defun run-hyperdoc-tests ()
+  (run-code-path-graphs-smoke-tests)
   (run-dmx-topic-proxy-smoke-tests)
   (run-relation-topic-proposals-smoke-tests)
   (run-dock-presentation-smoke-tests)

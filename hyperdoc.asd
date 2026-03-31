@@ -26,6 +26,7 @@
                              (:file "collective-knowledge-slice")
                              (:file "reproducible-devenv-as-knowledge-artifact-slice")
                              (:file "localhost-fedwiki-page-promotion-plans")
+                             (:file "code-path-graphs")
                              (:file "topics")
                              (:file "links-in-code")
                              (:file "defining")
@@ -147,6 +148,7 @@
   :components ((:module "hyperdoc-inspector"
                 :serial t
                 :components ((:file "package")
+                             (:file "code-path-graphs")
                              (:file "dmx-topics")
                              (:file "bibliography-subcollections")
                              (:file "topic-enrichment")
@@ -259,6 +261,7 @@
                 :components ((:module "tests"
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
+                             (:file "code-path-graphs-smoke")
                              (:file "relation-topic-proposals-smoke")
                              (:file "dock-presentation-smoke")
                              (:file "dock-annotation-smoke")
