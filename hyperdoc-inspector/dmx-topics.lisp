@@ -61,6 +61,65 @@
       (views:html
         (:span :style "opacity: 0.55;" "n/a"))))
 
+(defun dmx-journal-call-graph-node (graph node-id)
+  (find node-id
+        (hyperdoc::dmx-workspace-journal-reconcile-call-graph-nodes graph)
+        :test #'string=
+        :key (lambda (node) (getf node :id))))
+
+(defun dmx-journal-call-graph-node-label (graph node-id)
+  (or (getf (dmx-journal-call-graph-node graph node-id) :label)
+      node-id))
+
+(defun dmx-journal-call-graph-role-label (role)
+  (case role
+    (:read-entry "read entry")
+    (:read-helper "read helper")
+    (:diff-engine "diff engine")
+    (:safe-read-edge "in-memory read edge")
+    (:write-helper "write helper")
+    (:write-entry "explicit write path")
+    (:backend-target "backend target")
+    (otherwise
+     (string-downcase (format nil "~A" role)))))
+
+(defun dmx-journal-call-graph-edge-kind-label (kind)
+  (case kind
+    (:read "read")
+    (:read-diff "read diff")
+    (:safe-read "safe read")
+    (:suppressed-write "suppressed write")
+    (:write "write")
+    (:write-preflight "write preflight")
+    (:backend-write "backend write")
+    (otherwise
+     (string-downcase (format nil "~A" kind)))))
+
+(defun dmx-journal-call-graph-edge-status-label (status)
+  (case status
+    (:active "active during reconcile-on-read")
+    (:suppressed "suppressed during reconcile-on-read")
+    (:write-path "explicit write path only")
+    (otherwise
+     (string-downcase (format nil "~A" status)))))
+
+(defun render-dmx-journal-call-graph-source (node)
+  (let ((file (getf node :source-file))
+        (function (getf node :source-function)))
+    (if file
+        (views:html
+          (:code
+           (views:esc
+            (if function
+                (format nil "~A :: ~A" file function)
+                file))))
+        (views:html
+          (:span :style "opacity: 0.55;" "runtime target")))))
+
+(defun dmx-journal-call-graph-overview-diagram ()
+  (format nil
+          "read-dmx-workspace-journal(reconcile=t)~%  -> dmx-workspace-journal-reconcile-workspace(:persist-events-p nil)~%     -> dmx-workspace-journal-reconcile-subject~%        -> dmx-workspace-journal-transition-events~%        -> dmx-workspace-journal-apply-events-to-stream  ; active~%        X> dmx-workspace-journal-append-events       ; suppressed during read~%            -> dmx-workspace-journal-persist-stream~%               -> companion journal note 924694~%~%read-dmx-topic-journal(reconcile=t)~%  -> dmx-workspace-journal-locate-stream~%     -> dmx-workspace-journal-reconcile-workspace(:persist-events-p nil)"))
+
 (defun render-workspace-reference (page diagnostics)
   (let ((workspace-id (hyperdoc::dmx-topic-diagnostics-workspace-id diagnostics))
         (workspace-title (hyperdoc::dmx-topic-diagnostics-workspace-title diagnostics)))
@@ -986,6 +1045,12 @@
   (format nil "DMX workspace repair triage (topicmap ~D)"
           (hyperdoc::dmx-topicmap-id-of page)))
 
+(defmethod views:text-representation
+    ((graph hyperdoc::dmx-workspace-journal-reconcile-call-graph))
+  (format nil "DMX workspace journal reconcile call graph (topicmap ~D)"
+          (hyperdoc::dmx-workspace-journal-reconcile-call-graph-workspace-topicmap-id
+           graph)))
+
 (defmethod views:title-bar-action-buttons ((page hyperdoc::dmx-topic-proxy))
   (views:html
     (views:action-button "Reload"
@@ -1680,3 +1745,233 @@
                                          :topicmap-id (hyperdoc::dmx-topicmap-id-of page))
         (render-dmx-repair-debug-traces
          (hyperdoc::dmx-repair-results-of page))))))
+
+(views:defview 👀overview
+    (graph hyperdoc::dmx-workspace-journal-reconcile-call-graph)
+  (views:html-view :title "Overview" :priority 1
+    (let ((topicmap-id
+            (hyperdoc::dmx-workspace-journal-reconcile-call-graph-workspace-topicmap-id
+             graph))
+          (workspace-id
+            (hyperdoc::dmx-workspace-journal-reconcile-call-graph-workspace-id
+             graph))
+          (note-topic-id
+            (hyperdoc::dmx-workspace-journal-reconcile-call-graph-resolved-note-topic-id
+             graph))
+          (companion-topic-id
+            (hyperdoc::dmx-workspace-journal-reconcile-call-graph-companion-journal-topic-id
+             graph)))
+      (views:html
+        (:p (views:esc
+             (hyperdoc::dmx-workspace-journal-reconcile-call-graph-summary
+              graph)))
+        (:p (views:esc
+             "The healthy handover note 923609 resolves and reads cleanly; the defect lives lower in reconcile-time handling of the companion workspace-journal note 924694. This view keeps the read path, the suppressed write edge, and the still-legitimate explicit write paths visible in one place."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Workspace topicmap"))
+                     (:td (views:object-ref
+                           (hyperdoc::make-dmx-topicmap-proxy topicmap-id)
+                           :display (format nil "~D" topicmap-id))))
+                (:tr (:td (views:esc "Workspace"))
+                     (:td (views:object-ref
+                           (hyperdoc::make-dmx-topic-proxy
+                            :topic-id workspace-id
+                            :topicmap-id topicmap-id)
+                           :display (format nil "~D" workspace-id))))
+                (:tr (:td (views:esc "Healthy resolved note topic"))
+                     (:td (views:object-ref
+                           (hyperdoc::make-dmx-shared-workspace-topic-proxy
+                            note-topic-id)
+                           :display (format nil "~D" note-topic-id)
+                           :select "Workspace diagnostics")))
+                (:tr (:td (views:esc "Healthy topicmap-context assoc"))
+                     (:td (render-maybe-code
+                           (hyperdoc::dmx-workspace-journal-reconcile-call-graph-resolved-topicmap-context-assoc-id
+                            graph))))
+                (:tr (:td (views:esc "Healthy noteKey"))
+                     (:td (render-maybe-code
+                           (hyperdoc::dmx-workspace-journal-reconcile-call-graph-resolved-note-key
+                            graph))))
+                (:tr (:td (views:esc "Companion journal note"))
+                     (:td (views:object-ref
+                           (hyperdoc::make-dmx-shared-workspace-topic-proxy
+                            companion-topic-id)
+                           :display (format nil "~D" companion-topic-id)
+                           :select "Workspace diagnostics"))))
+        (:h4 "Call graph")
+        (:pre :style "white-space: pre-wrap;"
+              (views:esc (dmx-journal-call-graph-overview-diagram)))
+        (:h4 "Observed failure surfaces")
+        (:table :class "inspector-table"
+                (:thead
+                 (:tr (:th (views:esc "Surface"))
+                      (:th (views:esc "Endpoint"))
+                      (:th (views:esc "Status"))
+                      (:th (views:esc "Why it matters"))))
+                (:tbody
+                 (dolist (row
+                           (hyperdoc::dmx-workspace-journal-reconcile-call-graph-failing-endpoints
+                            graph))
+                   (views:html
+                     (:tr
+                      (:td (views:esc (getf row :surface)))
+                      (:td (:code (views:esc (getf row :endpoint))))
+                      (:td (:tt (views:esc (getf row :status))))
+                      (:td (views:esc (getf row :summary))))))))
+        (:ul
+         (:li (views:esc
+               "reconcile=false remains the storage-preserving control path; it reads existing journal streams without synthesizing or persisting anything."))
+         (:li (views:esc
+               "reconcile=true may still synthesize diff events, but those events now stay in memory on the read path."))
+         (:li (views:esc
+               "Explicit write paths such as guarded updates and restores still use the append/persist edge intentionally.")))))))
+
+(views:defview 👀read-flow
+    (graph hyperdoc::dmx-workspace-journal-reconcile-call-graph)
+  (views:html-view :title "Read flow" :priority 2
+    (views:html
+      (:p (views:esc
+           "These are the active nodes and edges for reconcile-on-read after the patch. The path stays side-effect free by routing synthesized diff events to the in-memory apply helper instead of the append/persist path."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Node"))
+                    (:th (views:esc "Role"))
+                    (:th (views:esc "Source"))
+                    (:th (views:esc "Summary"))))
+              (:tbody
+               (dolist (node
+                         (remove-if (lambda (node)
+                                      (member (getf node :role)
+                                              '(:write-helper :write-entry
+                                                :backend-target)
+                                              :test #'eq))
+                                    (hyperdoc::dmx-workspace-journal-reconcile-call-graph-nodes
+                                     graph)))
+                 (views:html
+                   (:tr
+                    (:td (:tt (views:esc (getf node :label))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-role-label
+                                (getf node :role)))))
+                    (:td (render-dmx-journal-call-graph-source node))
+                    (:td (views:esc (getf node :summary))))))))
+      (:h4 "Active reconcile-on-read edges")
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "From"))
+                    (:th (views:esc "To"))
+                    (:th (views:esc "Kind"))
+                    (:th (views:esc "Summary"))))
+              (:tbody
+               (dolist (edge
+                         (remove-if-not
+                          (lambda (edge)
+                            (eq (getf edge :status) :active))
+                          (hyperdoc::dmx-workspace-journal-reconcile-call-graph-edges
+                           graph)))
+                 (views:html
+                   (:tr
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-node-label
+                                graph
+                                (getf edge :from)))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-node-label
+                                graph
+                                (getf edge :to)))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-edge-kind-label
+                                (getf edge :kind)))))
+                    (:td (views:esc (getf edge :summary)))))))))))
+
+(views:defview 👀write-capable-edges
+    (graph hyperdoc::dmx-workspace-journal-reconcile-call-graph)
+  (views:html-view :title "Write-capable edges" :priority 3
+    (views:html
+      (:p (views:esc
+           "These edges can mutate or reattach the companion journal note. The first row is the edge that must stay suppressed during reconcile-on-read; the remaining rows are still legitimate on explicit write paths."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "From"))
+                    (:th (views:esc "To"))
+                    (:th (views:esc "Edge kind"))
+                    (:th (views:esc "Reconcile-on-read status"))
+                    (:th (views:esc "Summary"))))
+              (:tbody
+               (dolist (edge
+                         (remove-if-not
+                          (lambda (edge)
+                            (getf edge :write-capable-p))
+                          (hyperdoc::dmx-workspace-journal-reconcile-call-graph-edges
+                           graph)))
+                 (views:html
+                   (:tr
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-node-label
+                                graph
+                                (getf edge :from)))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-node-label
+                                graph
+                                (getf edge :to)))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-edge-kind-label
+                                (getf edge :kind)))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-edge-status-label
+                                (getf edge :status)))))
+                    (:td (views:esc (getf edge :summary))))))))
+      (:ul
+       (:li (views:esc
+             "reconcile-subject -> append-events is the specific edge that used to let read reconciliation write-touch companion note 924694."))
+       (:li (views:esc
+             "append-events -> persist-stream remains valid for explicit guarded writes and restore journaling."))
+       (:li (views:esc
+             "persist-stream is the last HyperDoc-owned boundary before DMX update/create and topicmap reattach requests are sent."))))))
+
+(views:defview 👀source-references
+    (graph hyperdoc::dmx-workspace-journal-reconcile-call-graph)
+  (views:html-view :title "Source references" :priority 4
+    (views:html
+      (:p (views:esc
+           "Source-backed reference table for the current reconcile/read boundary. This keeps the diagram tied to the actual functions rather than a prose-only incident summary."))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th (views:esc "Function or target"))
+                    (:th (views:esc "Role"))
+                    (:th (views:esc "Source"))
+                    (:th (views:esc "Why it matters"))))
+              (:tbody
+               (dolist (node
+                         (hyperdoc::dmx-workspace-journal-reconcile-call-graph-nodes
+                          graph))
+                 (views:html
+                   (:tr
+                    (:td (:tt (views:esc (getf node :label))))
+                    (:td (:tt (views:esc
+                               (dmx-journal-call-graph-role-label
+                                (getf node :role)))))
+                    (:td (render-dmx-journal-call-graph-source node))
+                    (:td (views:esc (getf node :summary))))))))
+      (:h4 "Open live DMX objects")
+      (:ul
+       (:li
+        (views:object-ref
+         (hyperdoc::make-dmx-topicmap-proxy
+          (hyperdoc::dmx-workspace-journal-reconcile-call-graph-workspace-topicmap-id
+           graph))
+         :display "Topicmap 919822"))
+       (:li
+        (views:object-ref
+         (hyperdoc::make-dmx-shared-workspace-topic-proxy
+          (hyperdoc::dmx-workspace-journal-reconcile-call-graph-resolved-note-topic-id
+           graph))
+         :display "Healthy note topic 923609"
+         :select "Workspace diagnostics"))
+       (:li
+        (views:object-ref
+         (hyperdoc::make-dmx-shared-workspace-topic-proxy
+          (hyperdoc::dmx-workspace-journal-reconcile-call-graph-companion-journal-topic-id
+           graph))
+         :display "Companion journal note 924694"
+         :select "Workspace diagnostics"))))))

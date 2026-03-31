@@ -593,8 +593,7 @@
 (defun dmx-workspace-journal-stream-events-list (stream)
   (json-array-elements (gethash "events" stream)))
 
-(defun dmx-workspace-journal-append-events
-    (client stream existing-topic workspace-topicmap-id events)
+(defun dmx-workspace-journal-apply-events-to-stream (stream events)
   (let* ((current-events (dmx-workspace-journal-stream-events-list stream))
          (next-revision (1+ (or (gethash "currentRevision" stream) 0)))
          (augmented-events
@@ -608,11 +607,17 @@
           (gethash "currentRevision" stream)
           (+ (or (gethash "currentRevision" stream) 0)
              (length augmented-events)))
+    stream))
+
+(defun dmx-workspace-journal-append-events
+    (client stream existing-topic workspace-topicmap-id events)
+  (let ((updated-stream
+          (dmx-workspace-journal-apply-events-to-stream stream events)))
     (dmx-workspace-journal-persist-stream client
-                                          stream
+                                          updated-stream
                                           existing-topic
                                           workspace-topicmap-id)
-    stream))
+    updated-stream))
 
 (defun dmx-workspace-journal-subject-snapshot-from-stream (stream)
   (dmx-workspace-journal-absent-snapshot
@@ -661,7 +666,8 @@
 (defun dmx-workspace-journal-reconcile-subject
     (client subject-key lookup-kind lookup-value workspace-topicmap-id
      &key subject-uri subject-kind ownership-class note-key note-kind
-       live-snapshot)
+       live-snapshot
+       (persist-events-p t))
   (multiple-value-bind (stream existing-topic)
       (dmx-workspace-journal-read-stream
        client
@@ -689,13 +695,17 @@
               current-live-state
               *dmx-workspace-journal-diff-observation-kind*
               *dmx-workspace-journal-diff-actor*)))
-      (when (and events
-                 (not *dmx-workspace-journal-suppressed-p*))
-        (dmx-workspace-journal-append-events client
-                                             stream
-                                             existing-topic
-                                             workspace-topicmap-id
-                                             events))
+      (when events
+        (if (or *dmx-workspace-journal-suppressed-p*
+                (not persist-events-p))
+            ;; Read reconciliation must stay side-effect free. Apply the
+            ;; synthesized diff to the in-memory stream only.
+            (dmx-workspace-journal-apply-events-to-stream stream events)
+            (dmx-workspace-journal-append-events client
+                                                 stream
+                                                 existing-topic
+                                                 workspace-topicmap-id
+                                                 events)))
       (values current-live-state
               events
               stream))))
@@ -814,7 +824,7 @@
     snapshots))
 
 (defun dmx-workspace-journal-reconcile-workspace
-    (client workspace-topicmap-id)
+    (client workspace-topicmap-id &key (persist-events-p t))
   (multiple-value-bind (streams topicmap-json)
       (dmx-workspace-journal-collect-streams client workspace-topicmap-id)
     (let* ((live-snapshots
@@ -842,7 +852,8 @@
                 :ownership-class (gethash "ownershipClass" snapshot)
                 :note-key (gethash "noteKey" snapshot)
                 :note-kind (gethash "noteKind" snapshot)
-                :live-snapshot snapshot)
+                :live-snapshot snapshot
+                :persist-events-p persist-events-p)
              (declare (ignore _))
              (incf synthesized-event-count (length events))
              (setf (gethash subject-key stream-table) stream))))
@@ -862,7 +873,8 @@
                 :ownership-class (gethash "ownershipClass" stream)
                 :note-key (gethash "noteKey" stream)
                 :note-kind (gethash "noteKind" stream)
-                :live-snapshot live-snapshot)
+                :live-snapshot live-snapshot
+                :persist-events-p persist-events-p)
              (declare (ignore _))
              (incf synthesized-event-count (length events))
              (push reconciled-stream reconciled-streams))))
@@ -928,7 +940,8 @@
         (if reconcile
             (dmx-workspace-journal-reconcile-workspace
              resolved-client
-             resolved-topicmap-id)
+             resolved-topicmap-id
+             :persist-events-p nil)
             (multiple-value-bind (loaded-streams _)
                 (dmx-workspace-journal-collect-streams
                  resolved-client
@@ -1011,7 +1024,8 @@
         (if reconcile
             (dmx-workspace-journal-reconcile-workspace
              resolved-client
-             resolved-topicmap-id)
+             resolved-topicmap-id
+             :persist-events-p nil)
             (dmx-workspace-journal-collect-streams
              resolved-client
              resolved-topicmap-id))

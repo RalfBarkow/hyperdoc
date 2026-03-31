@@ -16,6 +16,7 @@
 
 <ul>
   <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX workspace journal reconcile call graph</tt></a></li>
   <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
   <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
@@ -118,6 +119,18 @@
   observed backend history.
 </p>
 
+<h2>Reconcile-on-read boundary</h2>
+
+<p>
+  The live call-graph surface
+  <a page="DMX workspace journal reconcile call graph">DMX workspace journal
+  reconcile call graph</a> makes one boundary explicit: reconcile-on-read may
+  synthesize diff events in memory, but it must not persist or reattach the
+  hidden companion journal notes while a read is in progress. The concrete
+  incident anchor for that rule is companion journal note <tt>924694</tt> in
+  topicmap <tt>919822</tt>.
+</p>
+
 <h2>Restore safety</h2>
 
 <ul>
@@ -148,6 +161,7 @@
 <h2>Related</h2>
 
 <ul>
+  <li><a page="DMX workspace journal reconcile call graph">DMX workspace journal reconcile call graph</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>

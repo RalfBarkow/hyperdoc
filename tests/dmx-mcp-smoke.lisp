@@ -978,6 +978,36 @@
                  (mcp-assert-equal "synthesized-from-diff"
                                    (gethash "observationKind" last-event)
                                    "Out-of-band topicmap removal must be marked synthesized-from-diff")))
+             (multiple-value-bind (stored-body stored-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  4071
+                  "read_topic_journal"
+                  (mcp-test-json-object
+                   "noteKey" note-key
+                   "reconcile" nil))
+               (declare (ignore _))
+               (mcp-assert-equal 200 stored-status
+                                 "read_topic_journal stored status")
+               (let* ((tool-result (gethash "result" stored-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (current-state (gethash "currentState" structured))
+                      (events (hyperdoc::json-array-elements
+                               (gethash "events" structured))))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Stored note journal must succeed after a reconciled read")
+                 (mcp-assert-equal updated-revision
+                                   (gethash "currentRevision" structured)
+                                   "Reconciled read must not persist synthesized events")
+                 (mcp-assert-true
+                  (gethash "inTopicmap" current-state)
+                  "Stored journal state must remain unchanged for reconcile=false")
+                 (mcp-assert-equal
+                  "note-update"
+                  (gethash "eventType" (car (last events)))
+                  "Stored journal stream must still end at the explicit note-update event")))
              (multiple-value-bind (restore-membership-body restore-membership-status _)
                  (mcp-test-call-tool
                   url
@@ -1155,7 +1185,26 @@
         (mcp-assert-equal
          '("create-topic" "add-to-topicmap")
          (mcp-journal-event-types events)
-         "Foreign out-of-band create must be synthesized into create-topic plus add-to-topicmap")))
+         "Foreign out-of-band create must be synthesized into create-topic plus add-to-topicmap"))
+      ;; Reconcile-on-read is intentionally side-effect free. Materialize a
+      ;; durable baseline through the explicit journal-write preflight before
+      ;; exercising delete/restore guardrails.
+      (let* ((live-topic (hyperdoc::dmx-import-read-topic client topic-id))
+             (metadata
+               (hyperdoc::dmx-workspace-journal-subject-metadata-from-topic
+                live-topic))
+             (lookup (gethash "subjectLookup" metadata)))
+        (hyperdoc::dmx-workspace-journal-prepare-transition
+         client
+         (gethash "subjectKey" metadata)
+         (gethash "kind" lookup)
+         (gethash "value" lookup)
+         *dmx-mcp-smoke-workspace-topicmap-id*
+         :subject-uri (gethash "subjectUri" metadata)
+         :subject-kind (gethash "subjectKind" metadata)
+         :ownership-class (gethash "ownershipClass" metadata)
+         :note-key (gethash "noteKey" metadata)
+         :note-kind (gethash "noteKind" metadata))))
     (hyperdoc::dmx-import-delete-topic client topic-id)
     (let* ((deleted-journal
              (hyperdoc::read-dmx-topic-journal
