@@ -110,6 +110,7 @@
                 :components ((:file "dmx-import")
                              (:file "topic-factory-snippet-dmx")
                              (:file "dmx-workspace-notes")
+                             (:file "dmx-annotations")
                              (:file "dmx-workspace-topics")
                              (:file "dmx-workspace-journal")))))
 
@@ -261,6 +262,7 @@
                              (:file "relation-topic-proposals-smoke")
                              (:file "dock-presentation-smoke")
                              (:file "dock-annotation-smoke")
+                             (:file "dmx-annotations-smoke")
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")

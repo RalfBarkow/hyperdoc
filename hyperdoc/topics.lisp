@@ -3260,6 +3260,22 @@
                  "FedWiki Journal Tools in HyperDoc"
                  "Journalmatic Revision Replay")))
 
+(defun workspace-native-annotations-in-a-dmx-workspace-topic ()
+  (make-topic
+   :id "workspace-native-annotations-in-a-dmx-workspace"
+   :title "Workspace-native annotations in a DMX workspace"
+   :summary "Pattern where a pane-local dock annotation is persisted as a first-class hyperdoc.annotation topic in topicmap 919822, while source/target/context/supersedes bindings remain durable payload-only typed child records in v1 and authored promotion stays separate."
+   :references '("Workspace-native annotations in a DMX workspace"
+                 "Annotation"
+                 "Add or edit an annotation from a path context menu"
+                 "Context window workspace as shared blackboard"
+                 "Using guarded workspace topic lifecycle tools"
+                 "DMX FedWiki Write Model"
+                 "DMX workspace journal model"
+                 "DMX note read/write boundary"
+                 "Localhost FedWiki page promotion workflow"
+                 "Chunk notes and manifest notes in a DMX workspace")))
+
 (defun context-window-workspace-as-shared-blackboard-topic ()
   (make-topic
    :id "context-window-workspace-as-shared-blackboard"

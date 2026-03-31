@@ -350,6 +350,7 @@
   (run-relation-topic-proposals-smoke-tests)
   (run-dock-presentation-smoke-tests)
   (run-dock-annotation-smoke-tests)
+  (run-dmx-annotations-smoke-tests)
   (run-article-allegation-slice-smoke-tests)
   (run-fedwiki-materialization-smoke-tests)
   (run-page-lookup-issues-smoke-tests)

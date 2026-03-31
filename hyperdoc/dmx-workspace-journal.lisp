@@ -81,6 +81,7 @@
   (case (dmx-workspace-topic-ownership-class ownership)
     (:hyperdoc-workspace-note "workspace-note")
     (:hyperdoc-handover "handover")
+    (:hyperdoc-workspace-annotation "workspace-annotation")
     (:hyperdoc-topic-factory-snippet "workspace-topic")
     (:hyperdoc-workspace-journal "workspace-journal")
     (otherwise "workspace-topic")))
@@ -1075,6 +1076,7 @@
   (member (gethash "ownershipClass" snapshot)
           '("hyperdoc-workspace-note"
             "hyperdoc-handover"
+            "hyperdoc-workspace-annotation"
             "hyperdoc-topic-factory-snippet")
           :test #'string=))
 

@@ -1,0 +1,127 @@
+<h1>Workspace-native annotations in a DMX workspace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Workspace-native annotations in a DMX workspace"><tt>Workspace-native
+  annotations in a DMX workspace</tt></a> defines the v1 pattern that
+  persists a pane-local <a hyperbook="topics" page="Annotation"><tt>dock
+  annotation</tt></a> as a first-class <tt>hyperdoc.annotation</tt> content
+  topic in DMX topicmap <tt>919822</tt>, <tt>context-window</tt>, while
+  keeping authored HyperDoc/FedWiki promotion separate and preserving the
+  guarded shared-workspace rule: narrow, typed, dry-run-first writes instead of
+  generic raw DMX mutation.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Workspace-native annotations in a DMX workspace"><tt>Workspace-native annotations in a DMX workspace</tt></a></li>
+  <li><a hyperbook="topics" page="Annotation"><tt>Annotation</tt></a></li>
+  <li><a hyperbook="topics" page="Add or edit an annotation from a path context menu"><tt>Add or edit an annotation from a path context menu</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Localhost FedWiki page promotion workflow"><tt>Localhost FedWiki page promotion workflow</tt></a></li>
+</ul>
+
+<h2>Pattern summary</h2>
+
+<ol>
+  <li>A pane-local <tt>dock-annotation</tt> remains the runtime front end while the user is drafting or editing.</li>
+  <li>A dry-run write plan materializes the intended workspace topic payload for topicmap <tt>919822</tt>.</li>
+  <li>The live path persists one first-class <tt>hyperdoc.annotation</tt> topic and places it into the workspace.</li>
+  <li>The persisted topic reopens as a stable <tt>workspace-dock-annotation</tt> inspectable object by workspace topic id.</li>
+  <li>Journal and restore operate on that owned workspace topic through the existing typed workspace journal boundary.</li>
+</ol>
+
+<h2>Persisted annotation topic fields</h2>
+
+<p>
+  The persisted parent topic carries the authored annotation state needed to
+  reopen the relation later without depending on the original pane-local
+  object identity.
+</p>
+
+<ul>
+  <li>Textual fields: <tt>title</tt>, <tt>summary</tt>, <tt>text</tt>, <tt>relation_kind</tt>, <tt>status</tt>.</li>
+  <li>Anchor fields: <tt>source_anchor_json</tt>, <tt>target_anchor_json</tt>.</li>
+  <li>Context fields: <tt>context_object_id</tt>, <tt>context_view_title</tt>.</li>
+  <li>Object refs: <tt>source_object_ref</tt>, <tt>target_object_ref</tt>.</li>
+  <li>Runtime/provenance fields: <tt>runtime_relation_id</tt>, <tt>provenance_json</tt>, <tt>workspace_topicmap_id</tt>.</li>
+</ul>
+
+<h2>Binding status in v1</h2>
+
+<p>
+  <b>In v1, the binding objects are payload-only, not first-class typed
+  workspace topics or generic DMX associations.</b>
+</p>
+
+<ul>
+  <li>The first-class persisted workspace object is the parent <tt>hyperdoc.annotation</tt> topic.</li>
+  <li><tt>annotation-source-binding</tt>, <tt>annotation-target-binding</tt>, <tt>annotation-context-binding</tt>, and <tt>annotation-supersedes</tt> are durable typed child payloads stored on that parent topic.</li>
+  <li>Those binding payloads keep explicit <tt>player1</tt> and <tt>player2</tt> refs so the authored relation boundary stays readable and reviewable.</li>
+  <li>They are inspectable and journaled as part of the parent annotation topic state.</li>
+  <li>They are not created through a separate guarded assoc-create surface in v1.</li>
+</ul>
+
+<h2>Why bindings stay payload-only in v1</h2>
+
+<ul>
+  <li>The guarded workspace model already has a proven typed topic write path, while generic assoc creation is still intentionally out of scope.</li>
+  <li>Payload-only bindings preserve explicit player-role structure without widening HyperDoc into a raw association writer.</li>
+  <li>Journal replay and restore stay simpler because one owned parent topic remains the restore subject.</li>
+  <li>This keeps authored promotion separate: workspace save persists runtime annotation state, not reviewed repo content.</li>
+</ul>
+
+<h2>Write and restore boundary</h2>
+
+<ul>
+  <li>Dry run and live execution follow the same typed workspace-annotation write plan.</li>
+  <li>Live save emits journal events through the workspace journal layer rather than bypassing it.</li>
+  <li>Reopen by topic id yields a stable <tt>workspace-dock-annotation</tt> object for later inspection and revision.</li>
+  <li>Superseding an annotation creates a new parent annotation topic whose payload records the typed <tt>annotation-supersedes</tt> child binding.</li>
+  <li>Restore uses the existing typed revision tools for owned workspace topics rather than hidden editor undo.</li>
+</ul>
+
+<h2>What save does not do</h2>
+
+<ul>
+  <li>It does not use chunk notes or manifest notes as transport for annotation state.</li>
+  <li>It does not mutate <tt>hyperdoc/topics.lisp</tt>, authored HyperDoc pages, or localhost FedWiki pages on annotation save.</li>
+  <li>It does not turn runtime workspace save into automatic authored promotion.</li>
+  <li>It does not introduce a generic unsafe DMX mutation surface.</li>
+</ul>
+
+<h2>Promotion boundary</h2>
+
+<p>
+  The persisted workspace annotation is a durable runtime/content topic in the
+  shared workspace. If an annotation should become reviewed authored source,
+  that promotion still goes through the separate relation-topic proposal path
+  and normal documentation review, not through the live workspace save action
+  itself.
+</p>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="workspace-native-annotations-in-a-dmx-workspace">Workspace-native annotations in a DMX workspace</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Add or edit an annotation from a path context menu">Add or edit an annotation from a path context menu</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="Chunk notes and manifest notes in a DMX workspace">Chunk notes and manifest notes in a DMX workspace</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+</ul>

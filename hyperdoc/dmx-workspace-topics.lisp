@@ -36,6 +36,8 @@
 
 (defparameter *hyperdoc-workspace-note-uri-prefix* "hyperdoc:mcp/workspace-note/")
 (defparameter *hyperdoc-handover-uri-prefix* "hyperdoc:mcp/handover/")
+(defparameter *hyperdoc-workspace-annotation-uri-prefix*
+  "hyperdoc:mcp/workspace-annotation/")
 (defparameter *hyperdoc-workspace-journal-uri-prefix*
   "hyperdoc:mcp/workspace-journal/")
 (defparameter *hyperdoc-topic-factory-snippet-uri-prefix*
@@ -161,8 +163,10 @@
       "Untitled topic"))
 
 (defun dmx-workspace-topicmap-child-id (topic)
-  (let ((value (dmx-json-child-value topic
-                                     *dmx-topic-factory-snippet-workspace-topicmap-type-uri*)))
+  (let ((value (or (dmx-json-child-value topic
+                                         *dmx-topic-factory-snippet-workspace-topicmap-type-uri*)
+                   (dmx-json-child-value topic
+                                         *dmx-workspace-annotation-workspace-topicmap-type-uri*))))
     (or (parse-positive-integer value)
         (and (integerp value)
              (plusp value)
@@ -194,6 +198,15 @@
         :workspace-topicmap-id workspace-topicmap-id
         :owned-p t
         :reason "HyperDoc handover URI prefix"))
+      ((dmx-string-prefix-p *hyperdoc-workspace-annotation-uri-prefix* uri)
+       (make-dmx-workspace-topic-ownership
+        :class :hyperdoc-workspace-annotation
+        :uri uri
+        :external-key external-key
+        :type-uri type-uri
+        :workspace-topicmap-id workspace-topicmap-id
+        :owned-p t
+        :reason "HyperDoc workspace annotation URI prefix"))
       ((dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix* uri)
        (make-dmx-workspace-topic-ownership
         :class :hyperdoc-workspace-journal

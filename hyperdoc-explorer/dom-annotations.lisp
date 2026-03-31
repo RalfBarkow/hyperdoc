@@ -16,6 +16,30 @@
     (t
      (views:object-ref value))))
 
+(defun render-workspace-annotation-binding-player-row (binding player-key)
+  (let ((player (and binding (gethash player-key binding))))
+    (when player
+      (views:html
+        (:tr (:th (views:esc (format nil "~A role" player-key)))
+             (:td (:tt (views:esc (or (gethash "role" player) "-")))))
+        (:tr (:th (views:esc (format nil "~A ref kind" player-key)))
+             (:td (:tt (views:esc (or (gethash "refKind" player) "-")))))
+        (:tr (:th (views:esc (format nil "~A ref value" player-key)))
+             (:td (:tt (views:esc (format nil "~A"
+                                          (or (gethash "refValue" player) "-"))))))))))
+
+(defun render-workspace-annotation-binding-table (binding)
+  (if binding
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th "Binding type")
+                     (:td (:tt (views:esc (or (gethash "bindingType" binding)
+                                              "-")))))
+                (render-workspace-annotation-binding-player-row binding "player1")
+                (render-workspace-annotation-binding-player-row binding "player2")))
+      (views:html
+        (:p (:tt "-")))))
+
 (defun include-dom-annotation-connect-assets ()
   (views:add-asset-path "/hyperdoc/"
                         (asdf:system-relative-pathname
@@ -698,7 +722,98 @@
                      (cons "Annotation topic id"
                            (and (target-object-of annotation)
                                 (ignore-errors
-                                  (id-of (target-object-of annotation)))))))))))
+                                  (id-of (target-object-of annotation)))))
+                     (when (workspace-dock-annotation-p annotation)
+                       (cons "Workspace topic id"
+                             (workspace-annotation-topic-id-of annotation)))))))))
+
+(views:defview 👀workspace (annotation dock-annotation)
+  (views:html-view :title "Workspace" :priority 4
+    (let ((persisted-p (workspace-dock-annotation-p annotation)))
+      (views:html
+        (:p (views:esc
+             "Workspace persistence stays typed and dry-run-first. Saving this annotation writes a HyperDoc-owned annotation topic into DMX workspace topicmap 919822 without touching authored repo files."))
+        (:table :class "inspector-table"
+                (:tr (:th "Workspace state")
+                     (:td (:tt (views:esc (if persisted-p
+                                              "persisted"
+                                              "draft")))))
+                (:tr (:th "Target topicmap")
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        *dmx-context-window-topicmap-id*)))))
+        (when persisted-p
+          (views:html
+            (:table :class "inspector-table"
+                    (:tr (:th "Workspace topic id")
+                         (:td (:tt (views:esc
+                                    (format nil "~D"
+                                            (workspace-annotation-topic-id-of
+                                             annotation))))))
+                    (:tr (:th "Workspace topic uri")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-topic-uri-of
+                                     annotation)))))
+                    (:tr (:th "Workspace status")
+                         (:td (:tt (views:esc
+                                    (or (workspace-annotation-status-of annotation)
+                                        "-"))))))))
+        (:p
+         (views:eval-button
+          "Inspect workspace write plan"
+          (views:thunk
+            (plan-dmx-workspace-annotation-write-from-object
+             annotation
+             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+          "Render the typed DMX write plan without mutating DMX."))
+        (:p
+         (views:eval-button
+          (if persisted-p
+              "Update workspace topic"
+              "Persist to workspace")
+          (views:thunk
+            (persist-dock-annotation-to-workspace
+             annotation
+             :workspace-topicmap-id *dmx-context-window-topicmap-id*
+             :dry-run nil))
+          "Create or update the typed HyperDoc annotation topic in the shared workspace."))
+        (when persisted-p
+          (views:html
+            (:p
+             (views:eval-button
+              "Reopen by workspace topic id"
+              (views:thunk
+                (read-dmx-workspace-annotation
+                 :topic-id (workspace-annotation-topic-id-of annotation)
+                 :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+              "Reopen the persisted annotation through its stable DMX topic id."))
+            (:p
+             (views:eval-button
+              "Inspect workspace journal"
+              (views:thunk
+                (read-dmx-topic-journal
+                 :workspace-topicmap-id *dmx-context-window-topicmap-id*
+                 :topic-id (workspace-annotation-topic-id-of annotation)
+                 :reconcile nil))
+              "Inspect the stored workspace journal stream for this annotation topic.")))))))))
+
+(views:defview 👀bindings (annotation workspace-dock-annotation)
+  (views:html-view :title "Bindings" :priority 5
+    (views:html
+      (:h4 "Source binding")
+      (render-workspace-annotation-binding-table
+       (workspace-annotation-source-binding-of annotation))
+      (:h4 "Target binding")
+      (render-workspace-annotation-binding-table
+       (workspace-annotation-target-binding-of annotation))
+      (:h4 "Context binding")
+      (render-workspace-annotation-binding-table
+       (workspace-annotation-context-binding-of annotation))
+      (when (workspace-annotation-supersedes-binding-of annotation)
+        (views:html
+          (:h4 "Supersedes")
+          (render-workspace-annotation-binding-table
+           (workspace-annotation-supersedes-binding-of annotation)))))))
 
 (views:defview 👀summary (snapshot dom-connect-pane-state-snapshot)
   (views:html-view :title "Summary" :priority 1
