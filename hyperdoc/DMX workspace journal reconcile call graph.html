@@ -1,0 +1,72 @@
+<h1>DMX workspace journal reconcile call graph</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX
+  workspace journal reconcile call graph</tt></a> turns the reconcile-on-read
+  boundary into a live inspectable surface. It centers the healthy handover
+  topic <tt>923609</tt>, companion journal note <tt>924694</tt>, workspace
+  topicmap <tt>919822</tt>, and the write-capable persistence edge that must
+  stay suppressed while <tt>read_workspace_journal</tt> or
+  <tt>read_topic_journal</tt> runs with <tt>reconcile=true</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX workspace journal reconcile call graph</tt></a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Overview"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Overview</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Read flow"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Read flow</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Write-capable edges"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Write-capable edges</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Source references"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Source references</a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
+</ul>
+
+<h2>Expectation preserved</h2>
+
+<p>
+  The reasonable expectation was that <tt>reconcile=true</tt> would remain a
+  read surface. Observed reality was different: the healthy handover topic
+  <tt>923609</tt> resolved and read correctly, but reconcile-time handling
+  still write-touched companion journal note <tt>924694</tt> and triggered
+  backend 500s. That is a disappointed expectation case, not a false one,
+  because the exposed surface was a read tool.
+</p>
+
+<h2>What the live view shows</h2>
+
+<ul>
+  <li>The active reconcile-on-read path for <tt>read_workspace_journal</tt> and <tt>read_topic_journal</tt>.</li>
+  <li>The exact edge where synthesized diff events now stay in memory only.</li>
+  <li>The explicit write paths that still legitimately use the append and persist helpers.</li>
+  <li>The concrete live anchors: topicmap <tt>919822</tt>, assoc <tt>923622</tt>, healthy note topic <tt>923609</tt>, and companion journal note <tt>924694</tt>.</li>
+</ul>
+
+<h2>Why this boundary matters</h2>
+
+<p>
+  The workspace journal model is allowed to infer
+  <tt>synthesized-from-diff</tt> events because no authoritative DMX revision
+  feed is proven. But inference during a read must not collapse into mutation.
+  Otherwise the read path becomes able to mutate or reattach the hidden
+  companion journal notes it is trying to inspect.
+</p>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dmx-workspace-journal-reconcile-call-graph">DMX workspace journal reconcile call graph</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+</ul>
