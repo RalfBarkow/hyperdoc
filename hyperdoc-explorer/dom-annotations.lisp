@@ -40,6 +40,88 @@
       (views:html
         (:p (:tt "-")))))
 
+(defun workspace-annotation-persistence-client-label (client)
+  (cond
+    ((null client)
+     "default live client")
+    (t
+     (format nil "~(~A~)" (class-name (class-of client))))))
+
+(defun workspace-annotation-persistence-preview-journal-count (preview)
+  (let ((events (and preview (getf preview :journal-event-preview))))
+    (if events
+        (length (hyperdoc::json-array-elements events))
+        0)))
+
+(defun render-workspace-annotation-persistence-preview (preview preview-error)
+  (if preview-error
+      (views:html
+        (:h4 "Dry-run preview error")
+        (:pre :style "white-space: pre-wrap"
+              (views:esc (format nil "~A" preview-error))))
+      (if preview
+          (views:html
+            (:table :class "inspector-table"
+                    (:tr (:th "Annotation key")
+                         (:td (:tt (views:esc (or (getf preview :annotation-key)
+                                                  "-")))))
+                    (:tr (:th "Workspace topicmap")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (or (getf preview :workspace-topicmap-id)
+                                                "-"))))))
+                    (:tr (:th "Workspace")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (or (getf preview :workspace-id)
+                                                "-"))))))
+                    (:tr (:th "Topic action")
+                         (:td (:tt (views:esc (format nil "~A"
+                                                      (or (getf preview :topic-action)
+                                                          "-"))))))
+                    (:tr (:th "Workspace action")
+                         (:td (:tt (views:esc (format nil "~A"
+                                                      (or (getf preview :workspace-action)
+                                                          "-"))))))
+                    (:tr (:th "Topicmap action")
+                         (:td (:tt (views:esc (format nil "~A"
+                                                      (or (getf preview :topicmap-action)
+                                                          "-"))))))
+                    (:tr (:th "Validation")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (or (getf preview :payload-validation-status)
+                                                "-"))))))
+                    (:tr (:th "Preview journal events")
+                         (:td (:tt (views:esc
+                                    (format nil "~D"
+                                            (workspace-annotation-persistence-preview-journal-count
+                                             preview))))))))
+          (views:html
+            (:p (:span :style "opacity: 0.55;"
+                       "No dry-run preview available."))))))
+
+(defun render-workspace-annotation-persistence-stage-table (report)
+  (let ((stages (workspace-annotation-persistence-report-stage-results-of report)))
+    (views:html
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th "Stage")
+                    (:th "Status")
+                    (:th "Summary")
+                    (:th "Detail")))
+              (:tbody
+               (dolist (entry stages)
+                 (views:html
+                   (:tr
+                    (:td (:tt (views:esc (or (getf entry :label)
+                                             (format nil "~A" (getf entry :stage))))))
+                    (:td (:tt (views:esc (format nil "~A"
+                                                 (or (getf entry :status)
+                                                     "-")))))
+                    (:td (views:esc (or (getf entry :summary) "")))
+                    (:td (views:esc (or (getf entry :detail) "")))))))))))
+
 (defun include-dom-annotation-connect-assets ()
   (views:add-asset-path "/hyperdoc/"
                         (asdf:system-relative-pathname
@@ -433,6 +515,25 @@
 (defmethod views:text-representation ((annotation dock-annotation))
   (shorten-dom-association-label (title-of annotation)))
 
+(defmethod views:text-representation
+    ((debug workspace-annotation-persistence-debug))
+  (format nil "Workspace persistence debug (~A)"
+          (or (workspace-annotation-persistence-debug-annotation-key-of debug)
+              (id-of (workspace-annotation-persistence-debug-annotation-of debug))
+              "annotation")))
+
+(defmethod views:text-representation
+    ((report workspace-annotation-persistence-report))
+  (format nil "Workspace persistence ~A (~A)"
+          (if (eq (workspace-annotation-persistence-report-status-of report)
+                  :persisted)
+              "report"
+              "failure")
+          (or (workspace-annotation-persistence-report-annotation-key-of report)
+              (workspace-annotation-persistence-report-runtime-relation-id-of
+               report)
+              "annotation")))
+
 (defmethod views:text-representation ((snapshot dom-connect-pane-state-snapshot))
   (format nil "~A (~A / ~A)"
           (or (pane-id-of snapshot) "pane")
@@ -768,6 +869,22 @@
           "Render the typed DMX write plan without mutating DMX."))
         (:p
          (views:eval-button
+          "Debug workspace persistence"
+          (views:thunk
+            (debug-dock-annotation-workspace-persistence
+             annotation
+             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+          "Open the exact persist form, a dry-run preview, and a step-through debug surface for the live write path."))
+        (:p
+         (views:eval-button
+          "Trace workspace persistence path"
+          (views:thunk
+            (trace-dock-annotation-workspace-persistence-path
+             annotation
+             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+          "Inspect the persistence boundary as a reusable code-path graph before running the live write."))
+        (:p
+         (views:eval-button
           (if persisted-p
               "Update workspace topic"
               "Persist to workspace")
@@ -796,6 +913,189 @@
                  :topic-id (workspace-annotation-topic-id-of annotation)
                  :reconcile nil))
               "Inspect the stored workspace journal stream for this annotation topic.")))))))))
+
+(views:defview 👀overview (debug workspace-annotation-persistence-debug)
+  (views:html-view :title "Overview" :priority 1
+    (let ((annotation (workspace-annotation-persistence-debug-annotation-of debug))
+          (preview (workspace-annotation-persistence-debug-dry-run-preview-of debug))
+          (preview-error (workspace-annotation-persistence-debug-preview-error-of
+                          debug)))
+      (views:html
+        (:p (views:esc
+             "This debug surface keeps the current annotation bound to * for Playground stepping, shows the exact persist form the workspace button would use, and turns the live write into a staged report instead of an opaque eval action."))
+        (:table :class "inspector-table"
+                (:tr (:th "Annotation")
+                     (:td (views:object-ref annotation)))
+                (:tr (:th "Annotation key")
+                     (:td (:tt (views:esc
+                                (or (workspace-annotation-persistence-debug-annotation-key-of
+                                     debug)
+                                    "-")))))
+                (:tr (:th "Runtime relation id")
+                     (:td (:tt (views:esc
+                                (or (workspace-annotation-persistence-debug-runtime-relation-id-of
+                                     debug)
+                                    "-")))))
+                (:tr (:th "Workspace topicmap")
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        (workspace-annotation-persistence-debug-workspace-topicmap-id-of
+                                         debug))))))
+                (:tr (:th "Workspace override")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (or (workspace-annotation-persistence-debug-workspace-id-of
+                                             debug)
+                                            "-"))))))
+                (:tr (:th "Execution client")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-persistence-client-label
+                                 (workspace-annotation-persistence-debug-client-of
+                                  debug)))))))
+        (:p
+         (views:eval-button
+          "Open persistence stepper"
+          (views:thunk
+            (clog-moldable-inspector::make-playground-stepper
+             annotation
+             (workspace-annotation-persistence-debug-stepper-source-of debug)))
+          "Step the dry-run plan form first and then the exact live persist form with the current annotation bound to *."))
+        (:p
+         (views:eval-button
+          "Run live persistence report"
+          (views:thunk
+            (run-dock-annotation-workspace-persistence-debug
+             annotation
+             :workspace-topicmap-id
+             (workspace-annotation-persistence-debug-workspace-topicmap-id-of
+              debug)
+             :workspace-id
+             (workspace-annotation-persistence-debug-workspace-id-of debug)
+             :client
+             (workspace-annotation-persistence-debug-client-of debug)
+             :view-props
+             (workspace-annotation-persistence-debug-view-props-of debug)
+             :status
+             (workspace-annotation-persistence-debug-requested-status-of debug)
+             :supersedes-topic-id
+             (workspace-annotation-persistence-debug-supersedes-topic-id-of
+              debug)
+             :annotation-key
+             (workspace-annotation-persistence-debug-annotation-key-override-of
+              debug)
+             :provenance-json
+             (workspace-annotation-persistence-debug-provenance-json-of debug)))
+          "Execute the live persistence path and classify which write stage succeeded or failed."))
+        (:p
+         (views:eval-button
+          "Trace workspace persistence path"
+          (views:thunk
+            (workspace-annotation-persistence-debug-graph debug))
+          "Open the reusable code-path graph for this annotation persistence path."))
+        (when (workspace-annotation-persistence-debug-last-report-of debug)
+          (views:html
+            (:p
+             (views:object-ref
+              (workspace-annotation-persistence-debug-last-report-of debug)
+              :display "Last live persistence report"))))
+        (:h4 "Dry-run preview")
+        (render-workspace-annotation-persistence-preview preview preview-error)))))
+
+(views:defview 👀form (debug workspace-annotation-persistence-debug)
+  (views:html-view :title "Form" :priority 2
+    (views:html
+      (:h4 "Exact persist form")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (workspace-annotation-persistence-debug-exact-form-of debug)))
+      (:h4 "Stepper source")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (workspace-annotation-persistence-debug-stepper-source-of debug))))))
+
+(views:defview 👀overview (report workspace-annotation-persistence-report)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc
+           "Live workspace persistence report with exact form, dry-run preview, and explicit stage classification. This surfaces whether failure happened during topic upsert, workspace assignment, topicmap placement, journal recording, or reopen."))
+      (:table :class "inspector-table"
+              (:tr (:th "Status")
+                   (:td (:tt (views:esc
+                              (format nil "~A"
+                                      (workspace-annotation-persistence-report-status-of
+                                       report))))))
+              (:tr (:th "Failure stage")
+                   (:td (:tt (views:esc
+                              (format nil "~A"
+                                      (or (workspace-annotation-persistence-report-failure-stage-of
+                                           report)
+                                          "-"))))))
+              (:tr (:th "Annotation key")
+                   (:td (:tt (views:esc
+                              (or (workspace-annotation-persistence-report-annotation-key-of
+                                   report)
+                                  "-")))))
+              (:tr (:th "Runtime relation id")
+                   (:td (:tt (views:esc
+                              (or (workspace-annotation-persistence-report-runtime-relation-id-of
+                                   report)
+                                  "-")))))
+              (:tr (:th "Workspace topicmap")
+                   (:td (:tt (views:esc
+                              (format nil "~D"
+                                      (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                                       report))))))
+              (:tr (:th "Persisted topic id")
+                   (:td (:tt (views:esc
+                              (format nil "~A"
+                                      (or (workspace-annotation-persistence-report-persisted-topic-id-of
+                                           report)
+                                          "-")))))))
+      (when-let (persisted
+                   (workspace-annotation-persistence-report-persisted-annotation-of
+                    report))
+        (views:html
+          (:p (views:object-ref persisted :display "Persisted workspace annotation"))))
+      (when-let (condition
+                   (workspace-annotation-persistence-report-condition-of report))
+        (views:html
+          (:h4 "Condition")
+          (:pre :style "white-space: pre-wrap"
+                (views:esc (format nil "~A" condition)))))
+      (:p
+       (views:eval-button
+        "Open persistence stepper"
+        (views:thunk
+          (clog-moldable-inspector::make-playground-stepper
+           (workspace-annotation-persistence-report-annotation-of report)
+           (workspace-annotation-persistence-report-stepper-source-of report)))
+        "Replay the same stepper source with the current annotation bound to *."))
+      (:p
+       (views:eval-button
+        "Trace workspace persistence path"
+        (views:thunk
+          (workspace-annotation-persistence-report-graph report))
+        "Open the staged code-path graph for this live persistence report."))
+      (:h4 "Dry-run preview")
+      (render-workspace-annotation-persistence-preview
+       (workspace-annotation-persistence-report-dry-run-preview-of report)
+       nil))))
+
+(views:defview 👀stages (report workspace-annotation-persistence-report)
+  (views:html-view :title "Stages" :priority 2
+    (render-workspace-annotation-persistence-stage-table report)))
+
+(views:defview 👀form (report workspace-annotation-persistence-report)
+  (views:html-view :title "Form" :priority 3
+    (views:html
+      (:h4 "Exact persist form")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (workspace-annotation-persistence-report-exact-form-of report)))
+      (:h4 "Stepper source")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (workspace-annotation-persistence-report-stepper-source-of report))))))        
 
 (views:defview 👀bindings (annotation workspace-dock-annotation)
   (views:html-view :title "Bindings" :priority 5

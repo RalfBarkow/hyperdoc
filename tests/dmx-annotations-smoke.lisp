@@ -13,9 +13,34 @@
 (defparameter *dmx-annotations-smoke-workspace-topicmap-id* 919822)
 (defparameter *dmx-annotations-smoke-workspace-id* 919815)
 
+(defclass failing-topicmap-placement-dmx-import-client
+    (hyperdoc::memory-dmx-import-client)
+  ())
+
+(defmethod hyperdoc::dmx-import-add-topic-to-topicmap
+    ((client failing-topicmap-placement-dmx-import-client)
+     topicmap-id
+     topic-id
+     view-props)
+  (declare (ignore client topicmap-id topic-id view-props))
+  (error "Simulated topicmap placement failure"))
+
 (defun annotation-journal-event-types (events)
   (mapcar (lambda (event) (gethash "eventType" event))
           (hyperdoc::json-array-elements events)))
+
+(defun dmx-annotation-smoke-find-view-by-title (views title)
+  (find title
+        views
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun dmx-annotation-smoke-load-inspector-views-for-object (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
 
 (defun make-test-dock-annotation (&key note
                                        (context-view-title "Main page")
@@ -244,11 +269,149 @@
                   (hyperdoc::note-of restored)
                   "Workspace annotation restore must recover the earlier persisted text")))
 
+(defun run-dmx-workspace-annotation-debug-surface-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object
+                 annotation))
+         (workspace-view
+           (dmx-annotation-smoke-find-view-by-title views "Workspace"))
+         (workspace-html
+           (and workspace-view
+                (html-inspector-views:view-html workspace-view)))
+         (debug (hyperdoc::debug-dock-annotation-workspace-persistence
+                 annotation
+                 :workspace-topicmap-id
+                 *dmx-annotations-smoke-workspace-topicmap-id*
+                 :client client))
+         (stepper
+           (clog-moldable-inspector::make-playground-stepper
+            annotation
+            (hyperdoc::workspace-annotation-persistence-debug-stepper-source-of
+             debug)))
+         (graph (hyperdoc::workspace-annotation-persistence-debug-graph debug)))
+    (assert-true
+     (typep debug 'hyperdoc::workspace-annotation-persistence-debug)
+     "Debug workspace persistence must return an inspectable debug object")
+    (assert-true
+     (search "Debug workspace persistence" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the Debug workspace persistence action")
+    (assert-true
+     (search "Trace workspace persistence path" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the Trace workspace persistence path action")
+    (assert-true
+     (getf (hyperdoc::workspace-annotation-persistence-debug-dry-run-preview-of
+            debug)
+           :dry-run)
+     "Debug workspace persistence must preload the dry-run preview")
+    (assert-true
+     (search "persist-dock-annotation-to-workspace"
+             (hyperdoc::workspace-annotation-persistence-debug-exact-form-of
+              debug)
+             :test #'char-equal)
+     "Debug workspace persistence must expose the exact persist form")
+    (assert-true
+     (search "plan-dmx-workspace-annotation-write-from-object"
+             (hyperdoc::workspace-annotation-persistence-debug-stepper-source-of
+              debug))
+     "Debug workspace persistence stepper source must stage the plan form first")
+    (assert-true
+     (typep stepper 'clog-moldable-inspector::playground-stepper)
+     "Debug workspace persistence must be step-throughable through the Playground stepper")
+    (assert-true
+     (typep graph 'hyperdoc::code-path-graph)
+     "Debug workspace persistence must expose a reusable code-path graph")
+    (assert-true
+     (hyperdoc::code-path-graph-node graph "topicmap-placement")
+     "Workspace persistence graph must expose the topicmap placement stage explicitly")))
+
+(defun run-dmx-workspace-annotation-debug-report-success-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation))
+         (report (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client)))
+    (assert-true
+     (typep report 'hyperdoc::workspace-annotation-persistence-report)
+     "Live workspace persistence debug must return an inspectable report")
+    (assert-equal :persisted
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   report)
+                  "Successful live workspace persistence debug must classify the run as persisted")
+    (assert-equal nil
+                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                   report)
+                  "Successful live workspace persistence debug must not report a failure stage")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-persisted-annotation-of
+             report)
+            'hyperdoc::workspace-dock-annotation)
+     "Successful live workspace persistence debug must reopen the persisted annotation")
+    (assert-true
+     (getf (hyperdoc::workspace-annotation-persistence-report-raw-result-of
+            report)
+           :topic-id)
+     "Successful live workspace persistence debug must expose the persisted topic id in the raw result")))
+
+(defun run-dmx-workspace-annotation-debug-report-failure-smoke-test ()
+  (let* ((client (make-instance 'failing-topicmap-placement-dmx-import-client
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation))
+         (report (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client))
+         (failure-stage
+           (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+            report))
+         (topic-upsert
+           (hyperdoc::workspace-annotation-persistence-stage-result
+            report
+            :topic-upsert))
+         (topicmap-placement
+           (hyperdoc::workspace-annotation-persistence-stage-result
+            report
+            :topicmap-placement)))
+    (assert-equal :failed
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   report)
+                  "Topicmap placement failure must surface as a failed persistence report")
+    (assert-equal :topicmap-placement
+                  failure-stage
+                  "Topicmap placement failures must be classified at the topicmap-placement stage")
+    (assert-equal :completed
+                  (getf topic-upsert :status)
+                  "The report must preserve earlier completed stages before the failure")
+    (assert-equal :error
+                  (getf topicmap-placement :status)
+                  "The report must mark the failing topicmap placement stage as error")
+    (assert-true
+     (search "Simulated topicmap placement failure"
+             (format nil "~A"
+                     (hyperdoc::workspace-annotation-persistence-report-condition-of
+                      report)))
+     "The report must preserve the live condition text")
+    (assert-true
+     (search "persist-dock-annotation-to-workspace"
+             (hyperdoc::workspace-annotation-persistence-report-exact-form-of
+              report)
+             :test #'char-equal)
+     "The report must preserve the exact persist form that was attempted")))
+
 (defun run-dmx-annotations-smoke-tests ()
   (run-dmx-workspace-annotation-plan-smoke-test)
   (run-dmx-workspace-annotation-dry-run-smoke-test)
   (run-dmx-workspace-annotation-live-create-and-reopen-smoke-test)
   (run-dmx-workspace-annotation-supersede-smoke-test)
   (run-dmx-workspace-annotation-restore-smoke-test)
+  (run-dmx-workspace-annotation-debug-surface-smoke-test)
+  (run-dmx-workspace-annotation-debug-report-success-smoke-test)
+  (run-dmx-workspace-annotation-debug-report-failure-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)

@@ -91,6 +91,140 @@
   existing-topic-id
   current-workspace-id)
 
+(defparameter *dmx-workspace-annotation-persistence-stage-order*
+  '(:normalize-annotation
+    :build-write-plan
+    :validate-payload
+    :prepare-transition
+    :topic-upsert
+    :workspace-assignment
+    :topicmap-placement
+    :journal-transition
+    :reopen-persisted-annotation))
+
+(defclass workspace-annotation-persistence-debug ()
+  ((annotation
+    :initarg :annotation
+    :reader workspace-annotation-persistence-debug-annotation-of)
+   (workspace-topicmap-id
+    :initarg :workspace-topicmap-id
+    :reader workspace-annotation-persistence-debug-workspace-topicmap-id-of)
+   (workspace-id
+    :initarg :workspace-id
+    :initform nil
+    :reader workspace-annotation-persistence-debug-workspace-id-of)
+   (client
+    :initarg :client
+    :initform nil
+    :reader workspace-annotation-persistence-debug-client-of)
+   (view-props
+    :initarg :view-props
+    :initform nil
+    :reader workspace-annotation-persistence-debug-view-props-of)
+   (requested-status
+    :initarg :requested-status
+    :initform nil
+    :reader workspace-annotation-persistence-debug-requested-status-of)
+   (supersedes-topic-id
+    :initarg :supersedes-topic-id
+    :initform nil
+    :reader workspace-annotation-persistence-debug-supersedes-topic-id-of)
+   (annotation-key-override
+    :initarg :annotation-key-override
+    :initform nil
+    :reader workspace-annotation-persistence-debug-annotation-key-override-of)
+   (provenance-json
+    :initarg :provenance-json
+    :initform nil
+    :reader workspace-annotation-persistence-debug-provenance-json-of)
+   (exact-form
+    :initarg :exact-form
+    :reader workspace-annotation-persistence-debug-exact-form-of)
+   (stepper-source
+    :initarg :stepper-source
+    :reader workspace-annotation-persistence-debug-stepper-source-of)
+   (dry-run-preview
+    :initarg :dry-run-preview
+    :initform nil
+    :reader workspace-annotation-persistence-debug-dry-run-preview-of)
+   (preview-error
+    :initarg :preview-error
+    :initform nil
+    :reader workspace-annotation-persistence-debug-preview-error-of)
+   (annotation-key
+    :initarg :annotation-key
+    :initform nil
+    :reader workspace-annotation-persistence-debug-annotation-key-of)
+   (runtime-relation-id
+    :initarg :runtime-relation-id
+    :initform nil
+    :reader workspace-annotation-persistence-debug-runtime-relation-id-of)
+   (last-report
+    :initarg :last-report
+    :initform nil
+    :accessor workspace-annotation-persistence-debug-last-report-of)))
+
+(defclass workspace-annotation-persistence-report ()
+  ((annotation
+    :initarg :annotation
+    :reader workspace-annotation-persistence-report-annotation-of)
+   (workspace-topicmap-id
+    :initarg :workspace-topicmap-id
+    :reader workspace-annotation-persistence-report-workspace-topicmap-id-of)
+   (workspace-id
+    :initarg :workspace-id
+    :initform nil
+    :reader workspace-annotation-persistence-report-workspace-id-of)
+   (client
+    :initarg :client
+    :initform nil
+    :reader workspace-annotation-persistence-report-client-of)
+   (exact-form
+    :initarg :exact-form
+    :reader workspace-annotation-persistence-report-exact-form-of)
+   (stepper-source
+    :initarg :stepper-source
+    :reader workspace-annotation-persistence-report-stepper-source-of)
+   (dry-run-preview
+    :initarg :dry-run-preview
+    :initform nil
+    :reader workspace-annotation-persistence-report-dry-run-preview-of)
+   (annotation-key
+    :initarg :annotation-key
+    :initform nil
+    :reader workspace-annotation-persistence-report-annotation-key-of)
+   (runtime-relation-id
+    :initarg :runtime-relation-id
+    :initform nil
+    :reader workspace-annotation-persistence-report-runtime-relation-id-of)
+   (stage-results
+    :initarg :stage-results
+    :initform '()
+    :reader workspace-annotation-persistence-report-stage-results-of)
+   (report-status
+    :initarg :report-status
+    :reader workspace-annotation-persistence-report-status-of)
+   (failure-stage
+    :initarg :failure-stage
+    :initform nil
+    :reader workspace-annotation-persistence-report-failure-stage-of)
+   (condition
+    :initarg :condition
+    :initform nil
+    :reader workspace-annotation-persistence-report-condition-of)
+   (raw-result
+    :initarg :raw-result
+    :initform nil
+    :reader workspace-annotation-persistence-report-raw-result-of)
+   (persisted-topic-id
+    :initarg :persisted-topic-id
+    :initform nil
+    :reader workspace-annotation-persistence-report-persisted-topic-id-of)
+   (persisted-annotation
+    :initarg :persisted-annotation
+    :initform nil
+    :reader workspace-annotation-persistence-report-persisted-annotation-of)))
+
 (defclass workspace-dock-annotation (dock-annotation)
   ((workspace-topic-id
     :initarg :workspace-topic-id
@@ -160,6 +294,393 @@
 
 (defun workspace-dock-annotation-p (object)
   (typep object 'workspace-dock-annotation))
+
+(defun workspace-annotation-persistence-stage-label (stage)
+  (case stage
+    (:normalize-annotation "Normalize annotation")
+    (:build-write-plan "Build write plan")
+    (:validate-payload "Validate payload and view props")
+    (:prepare-transition "Prepare workspace journal transition")
+    (:topic-upsert "Execute topic upsert")
+    (:workspace-assignment "Assign topic to workspace")
+    (:topicmap-placement "Add topic to workspace topicmap")
+    (:journal-transition "Emit workspace journal event")
+    (:reopen-persisted-annotation "Reopen persisted annotation")
+    (otherwise
+     (code-path-graph-human-label stage))))
+
+(defun workspace-annotation-persistence-stage-entry
+    (stage status summary &key detail)
+  (list :stage stage
+        :label (workspace-annotation-persistence-stage-label stage)
+        :status status
+        :summary summary
+        :detail detail))
+
+(defun workspace-annotation-persistence-stage-result (report stage)
+  (find stage
+        (workspace-annotation-persistence-report-stage-results-of report)
+        :test #'eq
+        :key (lambda (entry) (getf entry :stage))))
+
+(defun workspace-annotation-persistence-stepper-display-form ()
+  (with-standard-io-syntax
+    (let ((*package* (find-package :hyperdoc)))
+      (prin1-to-string
+       '(persist-dock-annotation-to-workspace
+         *
+         :workspace-topicmap-id *dmx-context-window-topicmap-id*
+         :dry-run nil)))))
+
+(defun workspace-annotation-persistence-stepper-source (workspace-topicmap-id)
+  (format nil
+          "(hyperdoc::plan-dmx-workspace-annotation-write-from-object * :workspace-topicmap-id ~D)~%~%(hyperdoc::persist-dock-annotation-to-workspace * :workspace-topicmap-id ~D :dry-run nil)"
+          workspace-topicmap-id
+          workspace-topicmap-id))
+
+(defun workspace-annotation-persistence-runtime-relation-id (annotation)
+  (or (and (workspace-dock-annotation-p annotation)
+           (workspace-annotation-runtime-relation-id-of annotation))
+      (id-of annotation)))
+
+(defun workspace-annotation-persistence-derived-key
+    (annotation workspace-topicmap-id &key annotation-key-override)
+  (or (and (workspace-dock-annotation-p annotation)
+           (workspace-annotation-key-of annotation))
+      annotation-key-override
+      (ignore-errors
+        (getf (dmx-workspace-annotation-from-object
+               annotation
+               workspace-topicmap-id
+               :annotation-key annotation-key-override)
+              :annotation-key))
+      (ignore-errors
+        (normalize-dmx-workspace-annotation-key
+         annotation-key-override
+         (title-of annotation)
+         (workspace-annotation-persistence-runtime-relation-id annotation)))))
+
+(defun workspace-annotation-persistence-preview
+    (annotation workspace-topicmap-id
+     &key workspace-id client view-props status supersedes-topic-id
+       annotation-key provenance-json)
+  (execute-dmx-workspace-annotation-write-from-object
+   annotation
+   :workspace-topicmap-id workspace-topicmap-id
+   :workspace-id workspace-id
+   :client client
+   :view-props view-props
+   :status status
+   :supersedes-topic-id supersedes-topic-id
+   :annotation-key annotation-key
+   :provenance-json provenance-json
+   :dry-run t))
+
+(defun debug-dock-annotation-workspace-persistence
+    (annotation &key workspace-topicmap-id workspace-id client view-props
+       status supersedes-topic-id annotation-key provenance-json)
+  (let* ((resolved-topicmap-id
+           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+         (preview nil)
+         (preview-error nil))
+    (handler-case
+        (setf preview
+              (workspace-annotation-persistence-preview
+               annotation
+               resolved-topicmap-id
+               :workspace-id workspace-id
+               :client client
+               :view-props view-props
+               :status status
+               :supersedes-topic-id supersedes-topic-id
+               :annotation-key annotation-key
+               :provenance-json provenance-json))
+      (error (condition)
+        (setf preview-error condition)))
+    (make-instance
+     'workspace-annotation-persistence-debug
+     :annotation annotation
+     :workspace-topicmap-id resolved-topicmap-id
+     :workspace-id workspace-id
+     :client client
+     :view-props view-props
+     :requested-status status
+     :supersedes-topic-id supersedes-topic-id
+     :annotation-key-override annotation-key
+     :provenance-json provenance-json
+     :exact-form (workspace-annotation-persistence-stepper-display-form)
+     :stepper-source
+     (workspace-annotation-persistence-stepper-source resolved-topicmap-id)
+     :dry-run-preview preview
+     :preview-error preview-error
+     :annotation-key
+     (or (getf preview :annotation-key)
+         (workspace-annotation-persistence-derived-key
+          annotation
+          resolved-topicmap-id
+          :annotation-key-override annotation-key))
+     :runtime-relation-id
+     (workspace-annotation-persistence-runtime-relation-id annotation))))
+
+(defun workspace-annotation-persistence-stage-status (report stage)
+  (or (and report
+           (getf (workspace-annotation-persistence-stage-result report stage)
+                 :status))
+      :pending))
+
+(defun workspace-annotation-persistence-stage-summary (report stage fallback)
+  (or (and report
+           (getf (workspace-annotation-persistence-stage-result report stage)
+                 :summary))
+      fallback))
+
+(defun workspace-annotation-persistence-code-path-graph
+    (annotation workspace-topicmap-id &key annotation-key runtime-relation-id
+       report)
+  (let ((persisted (and report
+                        (workspace-annotation-persistence-report-persisted-annotation-of
+                         report))))
+    (make-code-path-graph
+     :id "workspace-annotation-persistence-path"
+     :title "Workspace annotation persistence path"
+     :summary
+     (format nil
+             "Structured path for persisting a Dock annotation into DMX workspace topicmap ~D. It makes the exact write stages explicit so topic upsert, workspace assignment, topicmap placement, journal recording, and reopen failures stop looking like one opaque button."
+             workspace-topicmap-id)
+     :entrypoints
+     (list
+      (list :id "debug-action"
+            :label "Debug workspace persistence"
+            :summary
+            "Inspectable entrypoint that exposes the exact persist form, the dry-run preview, and the staged live report.")
+      (list :id "persist-action"
+            :label "Persist to workspace"
+            :summary
+            "The existing live annotation action; it remains available unchanged."))    
+     :nodes
+     (list
+      (list :id "annotation"
+            :label "Dock annotation"
+            :role :runtime-input
+            :object annotation
+            :summary
+            "Current pane-local annotation object bound to * for the stepper surface.")
+      (list :id "normalize"
+            :label "dmx-workspace-annotation-from-object"
+            :role :read-helper
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "dmx-workspace-annotation-from-object"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :normalize-annotation
+             "Normalize the draft annotation into the typed workspace payload fields."))
+      (list :id "plan"
+            :label "plan-dmx-workspace-annotation-write-from-object"
+            :role :read-helper
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "plan-dmx-workspace-annotation-write-from-object"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :build-write-plan
+             "Build the typed DMX annotation write plan from the current annotation object."))
+      (list :id "validate"
+            :label "Validate payload and view props"
+            :role :diff-engine
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "plan-dmx-workspace-annotation-write"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :validate-payload
+             "Confirm canonical payload fields and normalized topicmap view props before any live write."))
+      (list :id "prepare-transition"
+            :label "dmx-workspace-journal-prepare-transition"
+            :role :write-preflight
+            :source-file "hyperdoc/dmx-workspace-journal.lisp"
+            :source-function "dmx-workspace-journal-prepare-transition"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :prepare-transition
+             "Capture the previous workspace-journal state before the live write."))
+      (list :id "topic-upsert"
+            :label "Topic upsert"
+            :role :write-entry
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "execute-dmx-workspace-annotation-write"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :topic-upsert
+             "Create or update the typed hyperdoc.annotation topic."))
+      (list :id "workspace-assignment"
+            :label "dmx-import-assign-topic-to-workspace"
+            :role :write-helper
+            :source-file "hyperdoc/dmx-import.lisp"
+            :source-function "dmx-import-assign-topic-to-workspace"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :workspace-assignment
+             "Assign the annotation topic to workspace 919815 when needed."))
+      (list :id "topicmap-placement"
+            :label "dmx-import-add-topic-to-topicmap"
+            :role :write-helper
+            :source-file "hyperdoc/dmx-import.lisp"
+            :source-function "dmx-import-add-topic-to-topicmap"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :topicmap-placement
+             "Place the annotation topic into workspace topicmap 919822 with guarded view props."))
+      (list :id "journal-transition"
+            :label "dmx-workspace-journal-record-transition"
+            :role :write-entry
+            :source-file "hyperdoc/dmx-workspace-journal.lisp"
+            :source-function "dmx-workspace-journal-record-transition"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :journal-transition
+             "Append the durable workspace-journal events for the live annotation write."))
+      (list :id "reopen"
+            :label "read-dmx-workspace-annotation"
+            :role :read-entry
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "read-dmx-workspace-annotation"
+            :summary
+            (workspace-annotation-persistence-stage-summary
+             report
+             :reopen-persisted-annotation
+             "Reopen the persisted annotation as a stable workspace-dock-annotation object."))
+      (list :id "result"
+            :label
+            (if persisted
+                (format nil "Workspace annotation ~D"
+                        (workspace-annotation-topic-id-of persisted))
+                "Persisted workspace annotation")
+            :role :runtime-value
+            :object persisted
+            :summary
+            (if persisted
+                (format nil
+                        "Persisted annotation reopened through workspace topic id ~D."
+                        (workspace-annotation-topic-id-of persisted))
+                (format nil
+                        "Expected result object for annotation key ~A and runtime relation id ~A."
+                        (or annotation-key "-")
+                        (or runtime-relation-id "-")))))
+     :edges
+     (list
+      (list :from "annotation"
+            :to "normalize"
+            :kind :read
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :normalize-annotation)
+            :summary "Normalize the current annotation object into typed workspace fields.")
+      (list :from "normalize"
+            :to "plan"
+            :kind :read
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :build-write-plan)
+            :summary "Build the typed write plan for the annotation payload.")
+      (list :from "plan"
+            :to "validate"
+            :kind :read-diff
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :validate-payload)
+            :summary "Validate payload fields and normalize topicmap view props before writing.")
+      (list :from "validate"
+            :to "prepare-transition"
+            :kind :write-preflight
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :prepare-transition)
+            :summary "Capture the previous journal state before the write begins.")
+      (list :from "prepare-transition"
+            :to "topic-upsert"
+            :kind :write
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :topic-upsert)
+            :write-capable-p t
+            :summary "Create or update the annotation topic.")
+      (list :from "topic-upsert"
+            :to "workspace-assignment"
+            :kind :write
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :workspace-assignment)
+            :write-capable-p t
+            :summary "Assign the topic to workspace 919815 when the plan requires it.")
+      (list :from "workspace-assignment"
+            :to "topicmap-placement"
+            :kind :write
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :topicmap-placement)
+            :write-capable-p t
+            :summary "Add the topic to workspace topicmap 919822 when the plan requires it.")
+      (list :from "topicmap-placement"
+            :to "journal-transition"
+            :kind :write
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :journal-transition)
+            :write-capable-p t
+            :summary "Record the journal transition after the live mutation succeeds.")
+      (list :from "journal-transition"
+            :to "reopen"
+            :kind :read
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :reopen-persisted-annotation)
+            :summary "Reopen the persisted annotation by workspace topic id.")
+      (list :from "reopen"
+            :to "result"
+            :kind :result
+            :status (workspace-annotation-persistence-stage-status
+                     report
+                     :reopen-persisted-annotation)
+            :summary "Yield the stable workspace annotation inspectable object."))
+     :focus-paths
+     (list
+      (list :id "main-persist-path"
+            :label "Main persist path"
+            :summary
+            "The typed persistence path from the current Dock annotation to the reopened workspace annotation."
+            :node-ids
+            '("annotation"
+              "normalize"
+              "plan"
+              "validate"
+              "prepare-transition"
+              "topic-upsert"
+              "workspace-assignment"
+              "topicmap-placement"
+              "journal-transition"
+              "reopen"
+              "result"))))))
+
+(defun trace-dock-annotation-workspace-persistence-path
+    (annotation &key workspace-topicmap-id annotation-key runtime-relation-id)
+  (let ((resolved-topicmap-id
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id)))
+    (workspace-annotation-persistence-code-path-graph
+     annotation
+     resolved-topicmap-id
+     :annotation-key
+     (or annotation-key
+         (workspace-annotation-persistence-derived-key annotation
+                                                      resolved-topicmap-id))
+     :runtime-relation-id
+     (or runtime-relation-id
+         (workspace-annotation-persistence-runtime-relation-id annotation)))))
 
 (defun dmx-workspace-annotation-plist-p (value)
   (and (listp value)
@@ -1007,6 +1528,255 @@
                        :client client
                        :view-props view-props
                        :dry-run dry-run))))
+
+(defun run-dock-annotation-workspace-persistence-debug
+    (annotation &key workspace-topicmap-id workspace-id client view-props
+       status supersedes-topic-id annotation-key provenance-json)
+  (let* ((debug
+           (debug-dock-annotation-workspace-persistence
+            annotation
+            :workspace-topicmap-id workspace-topicmap-id
+            :workspace-id workspace-id
+            :client client
+            :view-props view-props
+            :status status
+            :supersedes-topic-id supersedes-topic-id
+            :annotation-key annotation-key
+            :provenance-json provenance-json))
+         (stage-results '())
+         (failure-stage nil)
+         (failure-condition nil)
+         (persisted-topic-id nil)
+         (persisted-annotation nil)
+         (raw-result nil)
+         (resolved-client
+           (or client
+               (make-default-dmx-import-client :dry-run nil :verbose nil)))
+         (resolved-topicmap-id
+           (workspace-annotation-persistence-debug-workspace-topicmap-id-of debug))
+         (subject-key nil)
+         (previous-state nil)
+         (plan nil))
+    (labels ((record-stage (stage status summary &key detail)
+               (push (workspace-annotation-persistence-stage-entry
+                      stage
+                      status
+                      summary
+                      :detail detail)
+                     stage-results))
+             (run-stage (stage summary thunk &key detail)
+               (handler-case
+                   (let ((value (funcall thunk)))
+                     (record-stage stage :completed summary :detail detail)
+                     value)
+                 (error (condition)
+                   (setf failure-stage stage
+                         failure-condition condition)
+                   (record-stage stage
+                                 :error
+                                 summary
+                                 :detail (or detail
+                                             (format nil "~A" condition)))
+                   (error condition)))))
+      (handler-case
+          (let ((normalized nil)
+                (topic nil)
+                (topic-id* nil)
+                (after-topic nil)
+                (after-state nil)
+                (journal-events nil))
+            (setf normalized
+                  (run-stage
+                   :normalize-annotation
+                   "Derived the typed workspace annotation fields from the current Dock annotation."
+                   (lambda ()
+                     (dmx-workspace-annotation-from-object
+                      annotation
+                      resolved-topicmap-id
+                      :status status
+                      :supersedes-topic-id supersedes-topic-id
+                      :annotation-key annotation-key
+                      :provenance-json provenance-json))))
+            (setf plan
+                  (run-stage
+                   :build-write-plan
+                   "Built the typed DMX write plan for the annotation payload."
+                   (lambda ()
+                     (apply #'plan-dmx-workspace-annotation-write
+                            (append normalized
+                                    (list :workspace-id workspace-id
+                                          :client resolved-client
+                                          :view-props view-props))))))
+            (record-stage
+             :validate-payload
+             :completed
+             (format nil
+                     "Payload validation is ~A; topic action ~A, workspace action ~A, topicmap action ~A."
+                     (dmx-workspace-annotation-write-plan-payload-validation-status
+                      plan)
+                     (dmx-workspace-annotation-write-plan-topic-action plan)
+                     (dmx-workspace-annotation-write-plan-workspace-action plan)
+                     (dmx-workspace-annotation-write-plan-topicmap-action plan))
+             :detail
+             (and (dmx-workspace-annotation-write-plan-view-props plan)
+                  (dmx-topicmap-view-props-json-string
+                   (dmx-workspace-annotation-write-plan-view-props plan))))
+            (setf subject-key (dmx-workspace-annotation-write-plan-uri plan))
+            (setf previous-state
+                  (run-stage
+                   :prepare-transition
+                   "Loaded the previous workspace-journal state for this annotation subject."
+                   (lambda ()
+                     (dmx-workspace-journal-prepare-transition
+                      resolved-client
+                      subject-key
+                      "uri"
+                      subject-key
+                      resolved-topicmap-id
+                      :subject-uri subject-key
+                      :subject-kind "workspace-annotation"
+                      :ownership-class "hyperdoc-workspace-annotation"))))
+            (setf topic
+                  (run-stage
+                   :topic-upsert
+                   (format nil
+                           "Executed the live annotation topic ~A step."
+                           (dmx-workspace-annotation-write-plan-topic-action
+                            plan))
+                   (lambda ()
+                     (ecase (dmx-workspace-annotation-write-plan-topic-action
+                             plan)
+                       (:create
+                        (dmx-import-create-topic
+                         resolved-client
+                         (dmx-workspace-annotation-write-plan-payload plan)))
+                       (:update
+                        (dmx-import-update-topic
+                         resolved-client
+                         (dmx-workspace-annotation-write-plan-existing-topic
+                          plan)
+                         (dmx-workspace-annotation-write-plan-payload
+                          plan)))))))
+            (setf topic-id* (dmx-import-object-id topic)
+                  persisted-topic-id topic-id*)
+            (if (eql (dmx-workspace-annotation-write-plan-workspace-action plan)
+                     :assign)
+                (run-stage
+                 :workspace-assignment
+                 (format nil
+                         "Assigned topic ~D to workspace ~D."
+                         topic-id*
+                         (dmx-workspace-annotation-write-plan-workspace-id plan))
+                 (lambda ()
+                   (dmx-import-assign-topic-to-workspace
+                    resolved-client
+                    (dmx-workspace-annotation-write-plan-workspace-id plan)
+                    topic-id*)))
+                (record-stage
+                 :workspace-assignment
+                 :skipped
+                 "Workspace assignment was already current; no additional write was needed."))
+            (if (eql (dmx-workspace-annotation-write-plan-topicmap-action plan)
+                     :add)
+                (run-stage
+                 :topicmap-placement
+                 (format nil
+                         "Added topic ~D to workspace topicmap ~D."
+                         topic-id*
+                         resolved-topicmap-id)
+                 (lambda ()
+                   (dmx-import-add-topic-to-topicmap
+                    resolved-client
+                    resolved-topicmap-id
+                    topic-id*
+                    (dmx-workspace-annotation-write-plan-view-props plan))))
+                (record-stage
+                 :topicmap-placement
+                 :skipped
+                 "Topicmap placement was already present; no add-to-topicmap write was needed."))
+            (setf after-topic (dmx-import-read-topic resolved-client topic-id*)
+                  after-state
+                  (dmx-workspace-journal-live-snapshot
+                   resolved-client
+                   after-topic
+                   resolved-topicmap-id))
+            (setf journal-events
+                  (run-stage
+                   :journal-transition
+                   "Recorded the workspace journal transition for the live annotation write."
+                   (lambda ()
+                     (dmx-workspace-journal-record-transition
+                      resolved-client
+                      previous-state
+                      after-state
+                      resolved-topicmap-id))))
+            (setf raw-result
+                  (append (dmx-workspace-annotation-plan-summary plan)
+                          (list :dry-run nil
+                                :topic-id topic-id*
+                                :journal-subject-key subject-key
+                                :journal-event-count (length journal-events))))
+            (setf persisted-annotation
+                  (run-stage
+                   :reopen-persisted-annotation
+                   (format nil
+                           "Reopened persisted annotation topic ~D as workspace-dock-annotation."
+                           topic-id*)
+                   (lambda ()
+                     (read-dmx-workspace-annotation
+                      :topic-id topic-id*
+                      :workspace-topicmap-id resolved-topicmap-id
+                      :client resolved-client)))))
+        (error (condition)
+          (setf failure-condition (or failure-condition condition))))
+      (let ((report
+              (make-instance
+               'workspace-annotation-persistence-report
+               :annotation annotation
+               :workspace-topicmap-id resolved-topicmap-id
+               :workspace-id workspace-id
+               :client client
+               :exact-form
+               (workspace-annotation-persistence-debug-exact-form-of debug)
+               :stepper-source
+               (workspace-annotation-persistence-debug-stepper-source-of debug)
+               :dry-run-preview
+               (workspace-annotation-persistence-debug-dry-run-preview-of debug)
+               :annotation-key
+               (workspace-annotation-persistence-debug-annotation-key-of debug)
+               :runtime-relation-id
+               (workspace-annotation-persistence-debug-runtime-relation-id-of
+                debug)
+               :stage-results (nreverse stage-results)
+               :report-status (if failure-stage :failed :persisted)
+               :failure-stage failure-stage
+               :condition failure-condition
+               :raw-result raw-result
+               :persisted-topic-id persisted-topic-id
+               :persisted-annotation persisted-annotation)))
+        (setf (workspace-annotation-persistence-debug-last-report-of debug)
+              report)
+        report))))
+
+(defun workspace-annotation-persistence-debug-graph (debug)
+  (workspace-annotation-persistence-code-path-graph
+   (workspace-annotation-persistence-debug-annotation-of debug)
+   (workspace-annotation-persistence-debug-workspace-topicmap-id-of debug)
+   :annotation-key
+   (workspace-annotation-persistence-debug-annotation-key-of debug)
+   :runtime-relation-id
+   (workspace-annotation-persistence-debug-runtime-relation-id-of debug)
+   :report (workspace-annotation-persistence-debug-last-report-of debug)))
+
+(defun workspace-annotation-persistence-report-graph (report)
+  (workspace-annotation-persistence-code-path-graph
+   (workspace-annotation-persistence-report-annotation-of report)
+   (workspace-annotation-persistence-report-workspace-topicmap-id-of report)
+   :annotation-key
+   (workspace-annotation-persistence-report-annotation-key-of report)
+   :runtime-relation-id
+   (workspace-annotation-persistence-report-runtime-relation-id-of report)
+   :report report))
 
 (defun dmx-workspace-annotation-child-json (topic child-type-uri)
   (let ((json-string (dmx-json-child-value topic child-type-uri)))
