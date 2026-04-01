@@ -3265,7 +3265,7 @@
   (make-topic
    :id "workspace-native-annotations-in-a-dmx-workspace"
    :title "Workspace-native annotations in a DMX workspace"
-   :summary "Pattern where a pane-local dock annotation is persisted as a first-class hyperdoc.annotation topic in topicmap 919822, while source/target/context/supersedes bindings remain durable payload-only typed child records in v1 and authored promotion stays separate."
+   :summary "Pattern where a pane-local dock annotation preserves native hyperdoc.annotation semantics, while current live HTTP persistence normally stores the full native payload losslessly inside a dmx.notes.note compatibility carrier in topicmap 919822 and reopens as a workspace-dock-annotation; authored promotion stays separate."
    :references '("Workspace-native annotations in a DMX workspace"
                  "Annotation"
                  "Add or edit an annotation from a path context menu"

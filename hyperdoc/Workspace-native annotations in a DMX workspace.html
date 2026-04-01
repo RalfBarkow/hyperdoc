@@ -5,12 +5,17 @@
 <p>
   <a hyperbook="topics" page="Workspace-native annotations in a DMX workspace"><tt>Workspace-native
   annotations in a DMX workspace</tt></a> defines the v1 pattern that
-  persists a pane-local <a hyperbook="topics" page="Annotation"><tt>dock
-  annotation</tt></a> as a first-class <tt>hyperdoc.annotation</tt> content
-  topic in DMX topicmap <tt>919822</tt>, <tt>context-window</tt>, while
-  keeping authored HyperDoc/FedWiki promotion separate and preserving the
-  guarded shared-workspace rule: narrow, typed, dry-run-first writes instead of
-  generic raw DMX mutation.
+  preserves a pane-local <a hyperbook="topics" page="Annotation"><tt>dock
+  annotation</tt></a> as a durable workspace annotation in DMX topicmap
+  <tt>919822</tt>, <tt>context-window</tt>. The semantic contract stays native
+  annotation semantics and coherent reopen as a
+  <tt>workspace-dock-annotation</tt>. The conceptual native form is a
+  <tt>hyperdoc.annotation</tt> payload model, but on current live HTTP
+  backends the normal persist path uses deliberate compatibility storage
+  through a <tt>dmx.notes.note</tt> carrier that stores the full native payload
+  losslessly. Authored HyperDoc/FedWiki promotion still stays separate, and
+  the guarded shared-workspace rule remains narrow, typed, dry-run-first
+  writes instead of generic raw DMX mutation.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -31,18 +36,54 @@
 
 <ol>
   <li>A pane-local <tt>dock-annotation</tt> remains the runtime front end while the user is drafting or editing.</li>
-  <li>A dry-run write plan materializes the intended workspace topic payload for topicmap <tt>919822</tt>.</li>
-  <li>The live path persists one first-class <tt>hyperdoc.annotation</tt> topic and places it into the workspace.</li>
-  <li>The persisted topic reopens as a stable <tt>workspace-dock-annotation</tt> inspectable object by workspace topic id.</li>
+  <li>A dry-run write plan materializes the intended native annotation payload and the chosen workspace/topicmap destination for topicmap <tt>919822</tt>.</li>
+  <li>On current live HTTP backends, the normal persist path writes a deliberate <tt>dmx.notes.note</tt> compatibility carrier whose envelope stores the full native annotation payload under <tt>nativePayload</tt>.</li>
+  <li>Raw <tt>hyperdoc.annotation</tt> create-topic remains a diagnostic/backend-capability boundary unless that type family is installed explicitly.</li>
+  <li>The persisted workspace topic still reopens as a stable <tt>workspace-dock-annotation</tt> inspectable object by workspace topic id.</li>
   <li>Journal and restore operate on that owned workspace topic through the existing typed workspace journal boundary.</li>
 </ol>
 
-<h2>Persisted annotation topic fields</h2>
+<h2>Semantic contract</h2>
 
 <p>
-  The persisted parent topic carries the authored annotation state needed to
-  reopen the relation later without depending on the original pane-local
-  object identity.
+  Save preserves annotation semantics, not merely visibility. Workspace
+  assignment remains distinct from topicmap placement, and authored promotion
+  remains a separate review path.
+</p>
+
+<ul>
+  <li>Live save must reopen coherently as a <tt>workspace-dock-annotation</tt>.</li>
+  <li>The stored object must preserve source/target/context/supersedes structure, runtime relation id, and provenance.</li>
+  <li>Topicmap placement in <tt>919822</tt> is shared-blackboard visibility, not a substitute for workspace assignment to <tt>919815</tt>.</li>
+  <li>Compatibility storage is acceptable only because it preserves the full native annotation payload losslessly and reconstructs the workspace annotation on reopen.</li>
+</ul>
+
+<h2>Native payload model and current live carrier</h2>
+
+<p>
+  The native or ideal model is still one workspace-owned
+  <tt>hyperdoc.annotation</tt> payload with typed child binding payloads.
+  Current live HTTP backends do not expose that type family, so HyperDoc uses
+  a deliberate compatibility carrier instead of pretending that native backend
+  support exists.
+</p>
+
+<ul>
+  <li>Conceptual native form: <tt>hyperdoc.annotation</tt>.</li>
+  <li>Current live carrier type: <tt>dmx.notes.note</tt>.</li>
+  <li>Carrier payload: a compatibility envelope whose <tt>nativePayload</tt> field stores the full native annotation payload losslessly.</li>
+  <li>Reopen result: <tt>workspace-dock-annotation</tt>, not “just a note”.</li>
+  <li>Native <tt>hyperdoc.annotation</tt> create-topic is a diagnostic/backend-capability probe unless the backend installs that type family explicitly.</li>
+</ul>
+
+<h2>Preserved annotation payload fields</h2>
+
+<p>
+  These fields belong to the native annotation payload model. If a backend
+  ever supports <tt>hyperdoc.annotation</tt> directly, they can live on that
+  native topic. On current live HTTP backends, HyperDoc stores them losslessly
+  inside the <tt>dmx.notes.note</tt> compatibility carrier under
+  <tt>nativePayload</tt>.
 </p>
 
 <ul>
@@ -57,14 +98,17 @@
 
 <p>
   <b>In v1, the binding objects are payload-only, not first-class typed
-  workspace topics or generic DMX associations.</b>
+  workspace topics or generic DMX associations.</b> This statement describes
+  the native annotation payload model, not a promise that the current live
+  backend physically stores a native <tt>hyperdoc.annotation</tt> topic.
 </p>
 
 <ul>
-  <li>The first-class persisted workspace object is the parent <tt>hyperdoc.annotation</tt> topic.</li>
-  <li><tt>annotation-source-binding</tt>, <tt>annotation-target-binding</tt>, <tt>annotation-context-binding</tt>, and <tt>annotation-supersedes</tt> are durable typed child payloads stored on that parent topic.</li>
+  <li>The semantic parent object is the native <tt>hyperdoc.annotation</tt> payload model.</li>
+  <li>On current live HTTP backends, the physical workspace topic is a <tt>dmx.notes.note</tt> carrier whose compatibility envelope stores that payload under <tt>nativePayload</tt>.</li>
+  <li><tt>annotation-source-binding</tt>, <tt>annotation-target-binding</tt>, <tt>annotation-context-binding</tt>, and <tt>annotation-supersedes</tt> are durable typed child payloads inside that native annotation payload.</li>
   <li>Those binding payloads keep explicit <tt>player1</tt> and <tt>player2</tt> refs so the authored relation boundary stays readable and reviewable.</li>
-  <li>They are inspectable and journaled as part of the parent annotation topic state.</li>
+  <li>They are inspectable, journaled, and reopened as part of the workspace annotation state.</li>
   <li>They are not created through a separate guarded assoc-create surface in v1.</li>
 </ul>
 
@@ -80,10 +124,11 @@
 <h2>Write and restore boundary</h2>
 
 <ul>
-  <li>Dry run and live execution follow the same typed workspace-annotation write plan.</li>
+  <li>Dry run and live execution follow the same typed workspace-annotation write plan and surface the chosen destination plus storage mode.</li>
+  <li>On current live HTTP backends, the normal save path preflights raw <tt>hyperdoc.annotation</tt> support and then uses compatibility storage via <tt>dmx.notes.note</tt> when native create-topic is unsupported.</li>
   <li>Live save emits journal events through the workspace journal layer rather than bypassing it.</li>
   <li>Reopen by topic id yields a stable <tt>workspace-dock-annotation</tt> object for later inspection and revision.</li>
-  <li>Superseding an annotation creates a new parent annotation topic whose payload records the typed <tt>annotation-supersedes</tt> child binding.</li>
+  <li>Superseding an annotation creates a new workspace annotation record whose payload records the typed <tt>annotation-supersedes</tt> child binding.</li>
   <li>Restore uses the existing typed revision tools for owned workspace topics rather than hidden editor undo.</li>
 </ul>
 
@@ -91,6 +136,8 @@
 
 <ul>
   <li>It does not use chunk notes or manifest notes as transport for annotation state.</li>
+  <li>It does not treat compatibility storage as “just a note” or discard annotation structure.</li>
+  <li>It does not infer workspace assignment from topicmap visibility or treat topicmap-only placement as saved enough.</li>
   <li>It does not mutate <tt>hyperdoc/topics.lisp</tt>, authored HyperDoc pages, or localhost FedWiki pages on annotation save.</li>
   <li>It does not turn runtime workspace save into automatic authored promotion.</li>
   <li>It does not introduce a generic unsafe DMX mutation surface.</li>
