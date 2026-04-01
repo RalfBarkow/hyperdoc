@@ -128,10 +128,22 @@
         (:table :class "inspector-table"
                 (dolist (entry headers)
                   (views:html
-                    (:tr (:th (views:esc (car entry)))
-                         (:td (:tt (views:esc (or (cdr entry) "-")))))))))
+                    (:tr (:th (views:esc
+                               (workspace-annotation-render-value (car entry))))
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (cdr entry))))))))))
       (views:html
         (:p (:tt "-")))))
+
+(defun workspace-annotation-render-value (value &key (default "-"))
+  (cond
+    ((null value)
+     default)
+    ((stringp value)
+     value)
+    (t
+     (format nil "~A" value))))
 
 (defun render-workspace-annotation-http-evidence-table
     (evidence &key payload-json planned-topic-action planned-workspace-action
@@ -142,15 +154,18 @@
                  (:td (:tt (views:esc (format nil "~A"
                                               (or (getf evidence :method) "-"))))))
             (:tr (:th "Path")
-                 (:td (:tt (views:esc (or (getf evidence :path)
-                                          (getf evidence :url)
-                                          "-")))))
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (or (getf evidence :path)
+                                 (getf evidence :url)))))))
             (:tr (:th "Auth mode")
-                 (:td (:tt (views:esc (or (getf evidence :auth-mode-summary)
-                                          "-")))))
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :auth-mode-summary))))))
             (:tr (:th "Authorization scheme")
-                 (:td (:tt (views:esc (or (getf evidence :authorization-scheme)
-                                          "-")))))
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :authorization-scheme))))))
             (:tr (:th "Bootstrap/login happened")
                  (:td (:tt (views:esc (format nil "~A"
                                               (or (getf evidence :bootstrap-ran-p)
@@ -164,11 +179,13 @@
                                               (or (getf evidence :session-cookie-captured-p)
                                                   nil))))))
             (:tr (:th "Cookie shape")
-                 (:td (:tt (views:esc (or (getf evidence :cookie-shape)
-                                          "-")))))
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :cookie-shape))))))
             (:tr (:th "Request content type")
-                 (:td (:tt (views:esc (or (getf evidence :request-content-type)
-                                          "-")))))
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :request-content-type))))))
             (:tr (:th "Request content length")
                  (:td (:tt (views:esc (format nil "~A"
                                               (or (getf evidence :request-content-length)
@@ -190,23 +207,27 @@
                                               (or (getf evidence :response-status-code)
                                                   "-"))))))
             (:tr (:th "Response reason")
-                 (:td (:tt (views:esc (or (getf evidence :response-reason-phrase)
-                                          "-"))))))
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :response-reason-phrase)))))))
     (when payload-json
       (views:html
         (:h4 "Request payload JSON")
         (:pre :style "white-space: pre-wrap"
-              (views:esc payload-json))))
+              (views:esc
+               (workspace-annotation-render-value payload-json :default "")))))
     (when-let (request-body (getf evidence :request-body))
       (views:html
         (:h4 "Request body sent")
         (:pre :style "white-space: pre-wrap"
-              (views:esc request-body))))
+              (views:esc
+               (workspace-annotation-render-value request-body :default "")))))
     (when-let (response-body (getf evidence :response-body))
       (views:html
         (:h4 "Response body")
         (:pre :style "white-space: pre-wrap"
-              (views:esc response-body))))
+              (views:esc
+               (workspace-annotation-render-value response-body :default "")))))
     (:h4 "Relevant response headers")
     (render-workspace-annotation-http-response-headers
      (getf evidence :response-headers))))

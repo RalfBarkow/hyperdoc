@@ -678,8 +678,75 @@
               (search "\"field\":\"children\""
                       (or (getf report-evidence :response-body) "")
                       :test #'char-equal)
-              "Persistence report must preserve the backend response body for topic-upsert failures"))))
-      (setf (symbol-function 'drakma:http-request) original)))
+              "Persistence report must preserve the backend response body for topic-upsert failures")))
+      (setf (symbol-function 'drakma:http-request) original))))
+
+(defun run-dmx-workspace-annotation-create-topic-probe-render-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer test-token"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*))
+         (annotation (make-test-dock-annotation :note "Probe render with T"))
+         (original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method want-stream content-type content
+                             content-length additional-headers
+                             &allow-other-keys)
+                   (declare (ignore method
+                                    want-stream
+                                    content-type
+                                    content
+                                    content-length
+                                    additional-headers))
+                   (cond
+                     ((search "/core/topic/uri/" url)
+                      (values (make-string-input-stream "")
+                              404
+                              '(("Content-Type" . "application/json"))
+                              nil nil "Not Found"))
+                     ((search "/core/topic" url)
+                      ;; Live Drakma evidence can carry a boolean reason phrase.
+                      (values (make-string-input-stream
+                               "{\"error\":\"validation failed\",\"field\":\"children\"}")
+                              500
+                              '(("Content-Type" . "application/json")
+                                ("Set-Cookie" . "JSESSIONID=abc123; Path=/"))
+                              nil
+                              nil
+                              t))
+                     (t
+                      (error "Unexpected create-topic probe render HTTP call ~S"
+                             url)))))
+           (let* ((probe (hyperdoc::probe-live-create-topic-for-dock-annotation
+                          annotation
+                          :workspace-topicmap-id
+                          *dmx-annotations-smoke-workspace-topicmap-id*
+                          :client client))
+                  (views (dmx-annotation-smoke-load-inspector-views-for-object
+                          probe))
+                  (overview
+                    (dmx-annotation-smoke-find-view-by-title views "Overview"))
+                  (html (and overview
+                             (html-inspector-views:view-html overview))))
+             (assert-true
+              (typep probe 'hyperdoc::workspace-annotation-create-topic-probe-report)
+              "Create-topic probe render smoke must build the inspectable probe report")
+             (assert-true
+              overview
+              "Create-topic probe render smoke must find the Overview view")
+             (assert-true
+              (stringp html)
+              "Create-topic probe Overview must render to HTML even when response-reason-phrase is T")
+             (assert-true
+              (search "/core/topic" html :test #'char-equal)
+              "Rendered create-topic probe Overview must preserve the endpoint path")
+             (assert-true
+              (search "validation failed" html :test #'char-equal)
+              "Rendered create-topic probe Overview must preserve the response body")))
+      (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
@@ -738,6 +805,7 @@
   (run-dmx-workspace-annotation-backend-compatibility-probe-smoke-test)
   (run-dmx-http-unicode-json-request-smoke-test)
   (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)
+  (run-dmx-workspace-annotation-create-topic-probe-render-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)
