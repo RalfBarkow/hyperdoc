@@ -1093,6 +1093,101 @@
   (eq (workspace-annotation-persistence-report-status-of report)
       :pending-auth))
 
+(defun workspace-annotation-persistence-report-saved-topic-id-of (report)
+  (or (workspace-annotation-persistence-report-persisted-topic-id-of report)
+      (let ((plan (workspace-annotation-persistence-report-plan-of report)))
+        (or (and plan
+                 (dmx-workspace-annotation-write-plan-existing-topic-id plan))
+            (and plan
+                 (if-let (topic
+                          (dmx-workspace-annotation-write-plan-existing-topic
+                           plan))
+                   (dmx-import-object-id topic)))))
+      (let ((annotation
+              (workspace-annotation-persistence-report-annotation-of report)))
+        (and (typep annotation 'workspace-dock-annotation)
+             (workspace-annotation-topic-id-of annotation)))))
+
+(defun workspace-annotation-persistence-report-existing-saved-topic-p (report)
+  (let ((plan (workspace-annotation-persistence-report-plan-of report)))
+    (and plan
+         (eq (dmx-workspace-annotation-write-plan-topic-action plan)
+             :update)
+         (workspace-annotation-persistence-report-saved-topic-id-of report))))
+
+(defun workspace-annotation-persistence-report-saved-storage-mode-of (report)
+  (or (if-let (persisted
+               (workspace-annotation-persistence-report-persisted-annotation-of
+                report))
+        (workspace-annotation-storage-mode-of persisted))
+      (let ((annotation
+              (workspace-annotation-persistence-report-annotation-of report)))
+        (and (typep annotation 'workspace-dock-annotation)
+             (workspace-annotation-storage-mode-of annotation)))
+      (let ((plan (workspace-annotation-persistence-report-plan-of report)))
+        (and plan
+             (dmx-workspace-annotation-write-plan-storage-mode plan)))))
+
+(defun workspace-annotation-persistence-report-saved-carrier-type-uri-of
+    (report)
+  (or (if-let (persisted
+               (workspace-annotation-persistence-report-persisted-annotation-of
+                report))
+        (workspace-annotation-carrier-type-uri-of persisted))
+      (let ((annotation
+              (workspace-annotation-persistence-report-annotation-of report)))
+        (and (typep annotation 'workspace-dock-annotation)
+             (workspace-annotation-carrier-type-uri-of annotation)))
+      (let ((plan (workspace-annotation-persistence-report-plan-of report)))
+        (and plan
+             (dmx-workspace-annotation-write-plan-carrier-type-uri plan)))))
+
+(defun workspace-annotation-persistence-report-saved-annotation-of (report)
+  (or (workspace-annotation-persistence-report-persisted-annotation-of report)
+      (let* ((annotation
+               (workspace-annotation-persistence-report-annotation-of report))
+             (saved-topic-id
+               (workspace-annotation-persistence-report-saved-topic-id-of
+                report)))
+        (and (typep annotation 'workspace-dock-annotation)
+             (eql (workspace-annotation-topic-id-of annotation)
+                  saved-topic-id)
+             annotation))
+      (let ((saved-topic-id
+              (workspace-annotation-persistence-report-saved-topic-id-of
+               report))
+            (workspace-topicmap-id
+              (workspace-annotation-persistence-report-workspace-topicmap-id-of
+               report))
+            (client (workspace-annotation-persistence-report-client-of report)))
+        (and saved-topic-id
+             workspace-topicmap-id
+             client
+             (ignore-errors
+               (read-dmx-workspace-annotation
+                :topic-id saved-topic-id
+                :workspace-topicmap-id workspace-topicmap-id
+                :client client))))))
+
+(defun workspace-annotation-persistence-report-saved-carrier-topic-proxy-of
+    (report)
+  (let ((saved-topic-id
+          (workspace-annotation-persistence-report-saved-topic-id-of report))
+        (workspace-topicmap-id
+          (workspace-annotation-persistence-report-workspace-topicmap-id-of
+           report))
+        (client (workspace-annotation-persistence-report-client-of report)))
+    (and saved-topic-id
+         workspace-topicmap-id
+         (ignore-errors
+           (make-dmx-topic-proxy
+            :topic-id saved-topic-id
+            :topicmap-id workspace-topicmap-id
+            :base-url
+            (or (and (typep client 'http-dmx-import-client)
+                     (dmx-import-base-url-of client))
+                *dmx-base-url*))))))
+
 (defun workspace-annotation-stage-results-with-entry (stage-results entry)
   (let ((replaced-p nil)
         (stage (getf entry :stage))

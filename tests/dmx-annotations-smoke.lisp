@@ -39,6 +39,10 @@
     :initarg :assignment-auth-available-p
     :initform nil)))
 
+(defclass failing-topic-update-dmx-import-client
+    (compatibility-storage-http-dmx-import-client)
+  ())
+
 (defun make-type-support-topic-json (type-uri)
   (let ((json (make-hash-table :test #'equal)))
     (setf (gethash "id" json) (+ 970000 (sxhash type-uri))
@@ -93,6 +97,13 @@
                              "HYPERDOC_DMX_IMPORT_USERNAME"
                              "HYPERDOC_DMX_IMPORT_PASSWORD"
                              "HYPERDOC_DMX_IMPORT_AUTH_TOKEN"))))
+
+(defmethod hyperdoc::dmx-import-update-topic
+    ((client failing-topic-update-dmx-import-client)
+     existing-topic
+     payload)
+  (declare (ignore client existing-topic payload))
+  (error "Simulated topic update failure"))
 
 (defmethod hyperdoc::dmx-import-create-topic
     ((client latin1-failing-topic-create-dmx-import-client)
@@ -1208,6 +1219,106 @@
      (null (search "Assigned topic" html :test #'char-equal))
      "Pending-auth Overview must not falsely claim that workspace assignment already happened")))
 
+(defun run-dmx-workspace-annotation-saved-topic-surface-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (create-client
+           (make-instance 'compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9400))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Saved topic surface smoke")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client create-client
+            :dry-run nil))
+         (saved-topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
+         (update-client
+           (make-instance 'failing-topic-update-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9401))
+         (report
+           (hyperdoc::run-dock-annotation-workspace-persistence-debug
+            persisted
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client update-client))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object report))
+         (overview (dmx-annotation-smoke-find-view-by-title views "Overview"))
+         (html (and overview
+                    (html-inspector-views:view-html overview))))
+    (assert-true
+     (typep report 'hyperdoc::workspace-annotation-persistence-report)
+     "Existing persisted annotation update failures must still return an inspectable persistence report")
+    (assert-equal :failed
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   report)
+                  "A simulated carrier update failure must keep the report in failed status")
+    (assert-equal :topic-upsert
+                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                   report)
+                  "The saved-topic surface smoke must fail exactly at topic-upsert")
+    (assert-equal :update
+                  (hyperdoc::dmx-workspace-annotation-write-plan-topic-action
+                   (hyperdoc::workspace-annotation-persistence-report-plan-of
+                    report))
+                  "The saved-topic surface smoke must exercise the existing-topic UPDATE path")
+    (assert-equal saved-topic-id
+                  (hyperdoc::workspace-annotation-persistence-report-saved-topic-id-of
+                   report)
+                  "Update-failure reports must preserve the already-saved topic id")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-saved-annotation-of
+             report)
+            'hyperdoc::workspace-dock-annotation)
+     "Update-failure reports must expose the semantic reopened workspace annotation object")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-saved-carrier-topic-proxy-of
+             report)
+            'hyperdoc::dmx-topic-proxy)
+     "Update-failure reports must expose the physical saved carrier topic proxy")
+    (assert-true
+     overview
+     "Update-failure reports must expose an Overview view")
+    (assert-true
+     (stringp html)
+     "Update-failure reports must render an Overview HTML surface")
+    (assert-true
+     (search "Saved annotation topic" html :test #'char-equal)
+     "The Overview must surface the already-saved annotation topic explicitly")
+    (assert-true
+     (search "Saved annotation object" html :test #'char-equal)
+     "The Overview must expose the semantic reopened annotation object")
+    (assert-true
+     (search "Saved carrier topic" html :test #'char-equal)
+     "The Overview must expose the physical saved carrier topic")
+    (assert-true
+     (search (format nil "~D" saved-topic-id) html :test #'char-equal)
+     "The Overview must include the already-saved topic id")
+    (assert-true
+     (search "context-window workspace (919815)" html :test #'char-equal)
+     "The Overview must show the saved workspace with a human-readable label")
+    (assert-true
+     (search "context-window topicmap (919822)" html :test #'char-equal)
+     "The Overview must show the saved topicmap with a human-readable label")
+    (assert-true
+     (search "dmx.notes.note" html :test #'char-equal)
+     "The Overview must keep the physical carrier type explicit")))
+
 (defun run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test ()
   (let* ((topics (make-hash-table :test #'equal))
          (topicmap-memberships (make-hash-table :test #'equal))
@@ -1369,6 +1480,7 @@
   (run-dmx-workspace-annotation-no-client-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-render-smoke-test)
+  (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
   (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)

@@ -171,6 +171,88 @@
             (:p (:span :style "opacity: 0.55;"
                        "No dry-run preview available."))))))
 
+(defun render-workspace-annotation-saved-topic-surface (report)
+  (let* ((plan (workspace-annotation-persistence-report-plan-of report))
+         (saved-topic-id
+           (workspace-annotation-persistence-report-saved-topic-id-of report))
+         (saved-annotation
+           (workspace-annotation-persistence-report-saved-annotation-of
+            report))
+         (saved-carrier-topic
+           (workspace-annotation-persistence-report-saved-carrier-topic-proxy-of
+            report))
+         (destination (and plan
+                           (dmx-workspace-annotation-write-plan-destination
+                            plan))))
+    (when saved-topic-id
+      (views:html
+        (:h4 "Saved annotation topic")
+        (:p (views:esc
+             "This annotation was already saved before the current live update attempt. The saved carrier topic is the physical DMX object; reopening the same topic id reconstructs the semantic workspace annotation object."))
+        (:table :class "inspector-table"
+                (:tr (:th "Saved workspace topic id")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 saved-topic-id)))))
+                (render-workspace-annotation-destination-rows
+                 :workspace-id
+                 (and plan
+                      (dmx-workspace-annotation-write-plan-workspace-id plan))
+                 :workspace-topicmap-id
+                 (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                  report)
+                 :workspace-label
+                 (and destination
+                      (dmx-workspace-annotation-workspace-label
+                       (dmx-workspace-annotation-destination-workspace-id
+                        destination)))
+                 :workspace-topicmap-label
+                 (dmx-workspace-annotation-topicmap-label
+                  (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                   report))
+                 :destination-source-label
+                 (workspace-annotation-render-value
+                  (and destination
+                       (dmx-workspace-annotation-destination-source-label
+                        (dmx-workspace-annotation-destination-source
+                         destination))))
+                 :workspace-source-label
+                 (workspace-annotation-render-value
+                  (and destination
+                       (dmx-workspace-annotation-destination-source-label
+                        (dmx-workspace-annotation-destination-workspace-source
+                         destination))))
+                 :topicmap-source-label
+                 (workspace-annotation-render-value
+                  (and destination
+                       (dmx-workspace-annotation-destination-source-label
+                        (dmx-workspace-annotation-destination-topicmap-source
+                         destination))))
+                 :destination-rationale
+                 (and destination
+                      (dmx-workspace-annotation-destination-rationale
+                       destination)))
+                (:tr (:th "Storage mode")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-storage-mode-label
+                                 (workspace-annotation-persistence-report-saved-storage-mode-of
+                                  report))))))
+                (:tr (:th "Carrier type")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-report-saved-carrier-type-uri-of
+                                  report)))))))
+        (when saved-annotation
+          (views:html
+            (:p (views:object-ref
+                 saved-annotation
+                 :display "Saved annotation object"))))
+        (when saved-carrier-topic
+          (views:html
+            (:p (views:object-ref
+                 saved-carrier-topic
+                 :display "Saved carrier topic"))))))))
+
 (defun render-workspace-annotation-persistence-stage-table (report)
   (let ((stages (workspace-annotation-persistence-report-stage-results-of report)))
     (views:html
@@ -1416,17 +1498,22 @@
                (and plan
                     (dmx-workspace-annotation-destination-rationale
                      (dmx-workspace-annotation-write-plan-destination plan))))
-              (:tr (:th "Persisted topic id")
+              (:tr (:th "Workspace topic id")
                    (:td (:tt (views:esc
                               (format nil "~A"
-                                      (or (workspace-annotation-persistence-report-persisted-topic-id-of
+                                      (or (workspace-annotation-persistence-report-saved-topic-id-of
                                            report)
                                           "-")))))))
-      (when-let (persisted
-                   (workspace-annotation-persistence-report-persisted-annotation-of
-                    report))
-        (views:html
-          (:p (views:object-ref persisted :display "Persisted workspace annotation"))))
+      (if (workspace-annotation-persistence-report-existing-saved-topic-p
+           report)
+          (render-workspace-annotation-saved-topic-surface report)
+          (when-let (persisted
+                       (workspace-annotation-persistence-report-persisted-annotation-of
+                        report))
+            (views:html
+              (:p (views:object-ref
+                   persisted
+                   :display "Persisted workspace annotation")))))
       (when-let (condition
                    (workspace-annotation-persistence-report-condition-of report))
         (views:html
