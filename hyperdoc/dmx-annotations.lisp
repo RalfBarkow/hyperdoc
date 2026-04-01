@@ -589,6 +589,18 @@
     (otherwise
      (string-downcase (format nil "~A" source)))))
 
+(defun dmx-workspace-annotation-workspace-label (workspace-id)
+  (when workspace-id
+    (if (eql workspace-id *dmx-context-window-workspace-id*)
+        (format nil "context-window workspace (~D)" workspace-id)
+        (format nil "workspace (~D)" workspace-id))))
+
+(defun dmx-workspace-annotation-topicmap-label (workspace-topicmap-id)
+  (when workspace-topicmap-id
+    (if (eql workspace-topicmap-id *dmx-context-window-topicmap-id*)
+        (format nil "context-window topicmap (~D)" workspace-topicmap-id)
+        (format nil "workspace topicmap (~D)" workspace-topicmap-id))))
+
 (defun normalize-optional-workspace-topicmap-id (workspace-topicmap-id)
   (when workspace-topicmap-id
     (or (parse-positive-integer workspace-topicmap-id)
@@ -1052,6 +1064,24 @@
            (and destination
                 (dmx-workspace-annotation-destination-source-label
                  (dmx-workspace-annotation-destination-source destination)))
+           :workspace-source
+           (and destination
+                (dmx-workspace-annotation-destination-workspace-source
+                 destination))
+           :workspace-source-label
+           (and destination
+                (dmx-workspace-annotation-destination-source-label
+                 (dmx-workspace-annotation-destination-workspace-source
+                  destination)))
+           :topicmap-source
+           (and destination
+                (dmx-workspace-annotation-destination-topicmap-source
+                 destination))
+           :topicmap-source-label
+           (and destination
+                (dmx-workspace-annotation-destination-source-label
+                 (dmx-workspace-annotation-destination-topicmap-source
+                  destination)))
            :destination-rationale
            (and destination
                 (dmx-workspace-annotation-destination-rationale destination))
@@ -2872,7 +2902,13 @@
                       summary
                       :detail detail)
                      stage-results))
-             (run-stage (stage summary thunk &key detail)
+             (materialize-stage-detail (detail &optional condition)
+               (typecase detail
+                 (function
+                  (funcall detail condition))
+                 (t
+                  detail)))
+             (run-stage (stage summary thunk &key detail error-summary error-detail)
                (handler-case
                    (let ((value (funcall thunk)))
                      (record-stage stage :completed summary :detail detail)
@@ -2882,8 +2918,10 @@
                          failure-condition condition)
                    (record-stage stage
                                  :error
-                                 summary
-                                 :detail (or detail
+                                 (or error-summary summary)
+                                 :detail (or (materialize-stage-detail
+                                              error-detail
+                                              condition)
                                              (format nil "~A" condition)))
                    (error condition)))))
       (handler-case
@@ -2977,15 +3015,36 @@
                      :assign)
                 (run-stage
                  :workspace-assignment
-                 (format nil
-                         "Assigned topic ~D to workspace ~D."
-                         topic-id*
-                         (dmx-workspace-annotation-write-plan-workspace-id plan))
+                 "Assigned the created topic to the selected workspace."
                  (lambda ()
                    (dmx-import-assign-topic-to-workspace
                     resolved-client
                     (dmx-workspace-annotation-write-plan-workspace-id plan)
-                    topic-id*)))
+                    topic-id*))
+                 :detail
+                 (format nil
+                         "Assigned created topic ~D to ~A. Topicmap placement in ~A remains a later separate step."
+                         topic-id*
+                         (dmx-workspace-annotation-workspace-label
+                          (dmx-workspace-annotation-write-plan-workspace-id
+                           plan))
+                         (dmx-workspace-annotation-topicmap-label
+                          resolved-topicmap-id))
+                 :error-summary
+                 "Workspace assignment blocked"
+                 :error-detail
+                 (lambda (condition)
+                   (format nil
+                           "Created topic ~D, but assignment to ~A could not start because ~A. Topicmap placement in ~A remains a later separate step; visibility there is not enough."
+                           topic-id*
+                           (dmx-workspace-annotation-workspace-label
+                            (dmx-workspace-annotation-write-plan-workspace-id
+                             plan))
+                           (if (typep condition 'dmx-import-config-error)
+                               "DMX auth is missing"
+                               (format nil "~A" condition))
+                           (dmx-workspace-annotation-topicmap-label
+                            resolved-topicmap-id))))
                 (record-stage
                  :workspace-assignment
                  :skipped

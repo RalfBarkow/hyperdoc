@@ -60,31 +60,48 @@
          (dmx-workspace-annotation-destination-topicmap-source destination)))))))
 
 (defun render-workspace-annotation-destination-rows
-    (&key workspace-id workspace-topicmap-id destination-source-label
+    (&key workspace-id workspace-topicmap-id workspace-label
+       workspace-topicmap-label destination-source-label
        workspace-source-label topicmap-source-label destination-rationale)
-  (views:html
-    (:tr (:th "Workspace")
-         (:td (:tt (views:esc
-                    (workspace-annotation-render-value workspace-id)))))
-    (:tr (:th "Workspace topicmap")
-         (:td (:tt (views:esc
-                    (workspace-annotation-render-value workspace-topicmap-id)))))
-    (:tr (:th "Destination source")
-         (:td (:tt (views:esc
-                    (workspace-annotation-render-value
-                     destination-source-label)))))
-    (:tr (:th "Workspace source")
-         (:td (:tt (views:esc
-                    (workspace-annotation-render-value
-                     workspace-source-label)))))
-    (:tr (:th "Topicmap source")
-         (:td (:tt (views:esc
-                    (workspace-annotation-render-value
-                     topicmap-source-label)))))
-    (:tr (:th "Destination rationale")
-         (:td (views:esc
-               (workspace-annotation-render-value
-                destination-rationale))))))
+  (let ((resolved-workspace-label
+          (or workspace-label
+              (dmx-workspace-annotation-workspace-label workspace-id)))
+        (resolved-topicmap-label
+          (or workspace-topicmap-label
+              (dmx-workspace-annotation-topicmap-label
+               workspace-topicmap-id))))
+    (views:html
+      (:tr (:th "Workspace")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value
+                       resolved-workspace-label)))))
+      (:tr (:th "Topicmap")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value
+                       resolved-topicmap-label)))))
+      (:tr (:th "Workspace id")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value workspace-id)))))
+      (:tr (:th "Topicmap id")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value
+                       workspace-topicmap-id)))))
+      (:tr (:th "Destination source")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value
+                       destination-source-label)))))
+      (:tr (:th "Workspace source")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value
+                       workspace-source-label)))))
+      (:tr (:th "Topicmap source")
+           (:td (:tt (views:esc
+                      (workspace-annotation-render-value
+                       topicmap-source-label)))))
+      (:tr (:th "Destination rationale")
+           (:td (views:esc
+                 (workspace-annotation-render-value
+                  destination-rationale)))))))
 
 (defun workspace-annotation-persistence-preview-journal-count (preview)
   (let ((events (and preview (getf preview :journal-event-preview))))
@@ -1457,30 +1474,28 @@
       (when (workspace-annotation-pending-auth-p report)
         (let (mode-cell username-cell password-cell header-cell token-cell)
           (views:html
-            (:h4 "Workspace assignment pending auth")
+            (:h4 "Workspace assignment blocked")
             (:p (views:esc
-                 "Create-topic already succeeded for the selected annotation carrier, but the next guarded mutation step requires authenticated workspace assignment. Topicmap placement remains a later separate step; visibility in topicmap 919822 is not a substitute for belonging to workspace 919815. This surface keeps the created topic id, the pending assignment endpoint, the current auth summary, and a one-shot explicit-auth continuation together in one inspectable object."))
+                 "Topic creation already succeeded for the selected annotation carrier, but assignment to the selected workspace could not start because DMX auth is missing. This is the designed pending-auth boundary. Workspace assignment and topicmap placement remain separate guarded steps; visibility in the topicmap is not a substitute for belonging to the workspace."))
             (:table :class "inspector-table"
-                    (:tr (:th "Created topic id")
+                    (:tr (:th "Created topic")
                          (:td (:tt (views:esc
                                     (workspace-annotation-render-value
                                      (getf assignment-auth-context
                                            :created-topic-id))))))
-                    (:tr (:th "Workspace id")
-                         (:td (:tt (views:esc
-                                    (workspace-annotation-render-value
-                                     (getf assignment-auth-context
-                                           :workspace-id))))))
-                    (:tr (:th "Workspace topicmap")
-                         (:td (:tt (views:esc
-                                    (workspace-annotation-render-value
-                                     (getf assignment-auth-context
-                                           :workspace-topicmap-id))))))
-                    (:tr (:th "Destination source")
-                         (:td (:tt (views:esc
-                                    (workspace-annotation-render-value
-                                     (getf assignment-auth-context
-                                           :destination-source-label))))))
+                    (render-workspace-annotation-destination-rows
+                     :workspace-id
+                     (getf assignment-auth-context :workspace-id)
+                     :workspace-topicmap-id
+                     (getf assignment-auth-context :workspace-topicmap-id)
+                     :destination-source-label
+                     (getf assignment-auth-context :destination-source-label)
+                     :workspace-source-label
+                     (getf assignment-auth-context :workspace-source-label)
+                     :topicmap-source-label
+                     (getf assignment-auth-context :topicmap-source-label)
+                     :destination-rationale
+                     (getf assignment-auth-context :destination-rationale))
                     (:tr (:th "Assignment endpoint")
                          (:td (:tt (views:esc
                                     (workspace-annotation-render-value
@@ -1515,14 +1530,12 @@
                                                    :available-auth-modes))
                                       (format nil
                                               "~{~A~^, ~}"
-                                              (mapcar #'workspace-annotation-auth-mode-label
+                                      (mapcar #'workspace-annotation-auth-mode-label
                                                       modes))
                                       "-")))))
-                    (:tr (:th "Destination rationale")
+                    (:tr (:th "Assignment boundary")
                          (:td (views:esc
-                               (workspace-annotation-render-value
-                                (getf assignment-auth-context
-                                      :destination-rationale))))))
+                               "Workspace assignment is not the same as topicmap placement. Topicmap visibility alone is not a saved-enough outcome."))))
             (when-let (explicit-condition
                          (getf assignment-auth-context :explicit-auth-condition))
               (views:html

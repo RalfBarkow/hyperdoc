@@ -1176,8 +1176,8 @@
      (stringp html)
      "Pending-auth persistence report Overview must render to HTML")
     (assert-true
-     (search "Workspace assignment pending auth" html :test #'char-equal)
-     "Pending-auth Overview must explain the blocked assignment boundary")
+     (search "Workspace assignment blocked" html :test #'char-equal)
+     "Pending-auth Overview must explain the blocked assignment boundary without implying that assignment already succeeded")
     (assert-true
      (search "Continue with explicit auth" html :test #'char-equal)
      "Pending-auth Overview must expose the explicit-auth continuation action")
@@ -1185,8 +1185,28 @@
      (search "Destination source" html :test #'char-equal)
      "Pending-auth Overview must expose the resolved destination explicitly")
     (assert-true
-     (search "not a substitute" html :test #'char-equal)
-     "Pending-auth Overview must keep topicmap placement distinct from workspace assignment")))
+     (search "context-window workspace (919815)" html :test #'char-equal)
+     "Pending-auth Overview must expose the destination workspace with a human-readable label")
+    (assert-true
+     (search "context-window topicmap (919822)" html :test #'char-equal)
+     "Pending-auth Overview must expose the destination topicmap with a human-readable label")
+    (assert-true
+     (search "current HTTP client/workspace context" html
+             :test #'char-equal)
+     "Pending-auth Overview must expose the workspace side of the destination rationale")
+    (assert-true
+     (search "explicit user choice" html
+             :test #'char-equal)
+     "Pending-auth Overview must expose the destination rationale")
+    (assert-true
+     (search "DMX auth is missing" html :test #'char-equal)
+     "Pending-auth Overview must explain that assignment is blocked before it starts because auth is missing")
+    (assert-true
+     (search "not a saved-enough outcome" html :test #'char-equal)
+     "Pending-auth Overview must keep topicmap placement distinct from workspace assignment")
+    (assert-true
+     (null (search "Assigned topic" html :test #'char-equal))
+     "Pending-auth Overview must not falsely claim that workspace assignment already happened")))
 
 (defun run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test ()
   (let* ((topics (make-hash-table :test #'equal))
