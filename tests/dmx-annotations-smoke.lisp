@@ -487,6 +487,12 @@
      (search "Probe live create-topic" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the Probe live create-topic action")
     (assert-true
+     (search "Destination source" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the resolved save destination explicitly")
+    (assert-true
+     (search "context-window default fallback" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must label the context-window destination as a fallback, not as the only save story")
+    (assert-true
      (getf (hyperdoc::workspace-annotation-persistence-debug-dry-run-preview-of
             debug)
            :dry-run)
@@ -622,6 +628,96 @@
     (assert-equal 8230
                   (getf diagnostics :code-point)
                   "Transport diagnostics must preserve the Unicode code point")))
+
+(defun run-dmx-workspace-annotation-destination-default-resolution-smoke-test ()
+  (let* ((annotation (make-test-dock-annotation :note "Default destination"))
+         (destination
+           (hyperdoc::resolve-dmx-workspace-annotation-destination
+            annotation
+            :client (make-instance 'hyperdoc::memory-dmx-import-client
+                                   :next-topic-id 9300)))
+         (preview
+           (hyperdoc::workspace-annotation-persistence-preview
+            annotation
+            nil
+            :client (make-instance 'hyperdoc::memory-dmx-import-client
+                                   :next-topic-id 9301))))
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (hyperdoc::dmx-workspace-annotation-destination-workspace-id
+                   destination)
+                  "Default destination resolution must still fall back to the context-window workspace when nothing more specific exists")
+    (assert-equal *dmx-annotations-smoke-workspace-topicmap-id*
+                  (hyperdoc::dmx-workspace-annotation-destination-workspace-topicmap-id
+                   destination)
+                  "Default destination resolution must still fall back to the context-window topicmap when nothing more specific exists")
+    (assert-equal :context-window-default
+                  (hyperdoc::dmx-workspace-annotation-destination-source
+                   destination)
+                  "Default destination resolution must classify the context-window destination as a fallback")
+    (assert-equal "context-window default fallback"
+                  (getf preview :destination-source-label)
+                  "Dry-run preview must expose the destination source label explicitly")
+    (assert-equal *dmx-annotations-smoke-workspace-topicmap-id*
+                  (getf preview :workspace-topicmap-id)
+                  "Dry-run preview must expose the chosen workspace topicmap explicitly")
+    (assert-true
+     (search "context-window collaboration surface"
+             (or (getf preview :destination-rationale) "")
+             :test #'char-equal)
+     "Dry-run preview must explain why the fallback destination was chosen")))
+
+(defun run-dmx-workspace-annotation-destination-persisted-reuse-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9300))
+         (persisted (hyperdoc::persist-dock-annotation-to-workspace
+                     (make-test-dock-annotation :note "Persisted destination")
+                     :workspace-topicmap-id
+                     *dmx-annotations-smoke-workspace-topicmap-id*
+                     :client client
+                     :dry-run nil))
+         (other-client
+           (make-instance 'hyperdoc::http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id 999111))
+         (destination
+           (hyperdoc::resolve-dmx-workspace-annotation-destination
+            persisted
+            :client other-client)))
+    (assert-equal (hyperdoc::workspace-annotation-workspace-id-of persisted)
+                  (hyperdoc::dmx-workspace-annotation-destination-workspace-id
+                   destination)
+                  "Persisted annotation updates must reuse their own workspace destination coherently")
+    (assert-equal (hyperdoc::workspace-annotation-topicmap-id-of persisted)
+                  (hyperdoc::dmx-workspace-annotation-destination-workspace-topicmap-id
+                   destination)
+                  "Persisted annotation updates must reuse their own topicmap destination coherently")
+    (assert-equal :persisted-annotation-destination
+                  (hyperdoc::dmx-workspace-annotation-destination-source
+                   destination)
+                  "Persisted annotation updates must classify destination reuse explicitly")))
+
+(defun run-dmx-workspace-annotation-destination-explicit-override-smoke-test ()
+  (let* ((annotation (make-test-dock-annotation :note "Explicit destination"))
+         (destination
+           (hyperdoc::resolve-dmx-workspace-annotation-destination
+            annotation
+            :workspace-id 999001
+            :workspace-topicmap-id 999002
+            :client (make-instance 'hyperdoc::http-dmx-import-client
+                                   :base-url "https://dmx.ralfbarkow.ch"
+                                   :workspace-id *dmx-annotations-smoke-workspace-id*))))
+    (assert-equal 999001
+                  (hyperdoc::dmx-workspace-annotation-destination-workspace-id
+                   destination)
+                  "Explicit workspace overrides must win over fallback destination resolution")
+    (assert-equal 999002
+                  (hyperdoc::dmx-workspace-annotation-destination-workspace-topicmap-id
+                   destination)
+                  "Explicit topicmap overrides must win over fallback destination resolution")
+    (assert-equal :explicit-user-choice
+                  (hyperdoc::dmx-workspace-annotation-destination-source
+                   destination)
+                  "Explicit workspace/topicmap overrides must classify as explicit user choice")))
 
 (defun run-dmx-workspace-annotation-backend-compatibility-probe-smoke-test ()
   (let* ((client (make-instance 'compatibility-storage-http-dmx-import-client
@@ -1084,7 +1180,13 @@
      "Pending-auth Overview must explain the blocked assignment boundary")
     (assert-true
      (search "Continue with explicit auth" html :test #'char-equal)
-     "Pending-auth Overview must expose the explicit-auth continuation action")))
+     "Pending-auth Overview must expose the explicit-auth continuation action")
+    (assert-true
+     (search "Destination source" html :test #'char-equal)
+     "Pending-auth Overview must expose the resolved destination explicitly")
+    (assert-true
+     (search "not a substitute" html :test #'char-equal)
+     "Pending-auth Overview must keep topicmap placement distinct from workspace assignment")))
 
 (defun run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test ()
   (let* ((topics (make-hash-table :test #'equal))
@@ -1236,6 +1338,9 @@
   (run-dmx-workspace-annotation-debug-report-success-smoke-test)
   (run-dmx-workspace-annotation-debug-report-failure-smoke-test)
   (run-dmx-workspace-annotation-unicode-transport-diagnostics-smoke-test)
+  (run-dmx-workspace-annotation-destination-default-resolution-smoke-test)
+  (run-dmx-workspace-annotation-destination-persisted-reuse-smoke-test)
+  (run-dmx-workspace-annotation-destination-explicit-override-smoke-test)
   (run-dmx-workspace-annotation-backend-compatibility-probe-smoke-test)
   (run-dmx-http-unicode-json-request-smoke-test)
   (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)

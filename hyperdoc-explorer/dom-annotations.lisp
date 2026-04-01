@@ -47,6 +47,45 @@
     (t
      (format nil "~(~A~)" (class-name (class-of client))))))
 
+(defun workspace-annotation-destination-label (destination source-slot)
+  (when destination
+    (workspace-annotation-render-value
+     (dmx-workspace-annotation-destination-source-label
+      (ecase source-slot
+        (:source
+         (dmx-workspace-annotation-destination-source destination))
+        (:workspace-source
+         (dmx-workspace-annotation-destination-workspace-source destination))
+        (:topicmap-source
+         (dmx-workspace-annotation-destination-topicmap-source destination)))))))
+
+(defun render-workspace-annotation-destination-rows
+    (&key workspace-id workspace-topicmap-id destination-source-label
+       workspace-source-label topicmap-source-label destination-rationale)
+  (views:html
+    (:tr (:th "Workspace")
+         (:td (:tt (views:esc
+                    (workspace-annotation-render-value workspace-id)))))
+    (:tr (:th "Workspace topicmap")
+         (:td (:tt (views:esc
+                    (workspace-annotation-render-value workspace-topicmap-id)))))
+    (:tr (:th "Destination source")
+         (:td (:tt (views:esc
+                    (workspace-annotation-render-value
+                     destination-source-label)))))
+    (:tr (:th "Workspace source")
+         (:td (:tt (views:esc
+                    (workspace-annotation-render-value
+                     workspace-source-label)))))
+    (:tr (:th "Topicmap source")
+         (:td (:tt (views:esc
+                    (workspace-annotation-render-value
+                     topicmap-source-label)))))
+    (:tr (:th "Destination rationale")
+         (:td (views:esc
+               (workspace-annotation-render-value
+                destination-rationale))))))
+
 (defun workspace-annotation-persistence-preview-journal-count (preview)
   (let ((events (and preview (getf preview :journal-event-preview))))
     (if events
@@ -77,16 +116,18 @@
                          (:td (:tt (views:esc
                                     (workspace-annotation-render-value
                                      (getf preview :topic-type-uri))))))
-                    (:tr (:th "Workspace topicmap")
-                         (:td (:tt (views:esc
-                                    (format nil "~A"
-                                            (or (getf preview :workspace-topicmap-id)
-                                                "-"))))))
-                    (:tr (:th "Workspace")
-                         (:td (:tt (views:esc
-                                    (format nil "~A"
-                                            (or (getf preview :workspace-id)
-                                                "-"))))))
+                    (render-workspace-annotation-destination-rows
+                     :workspace-id (getf preview :workspace-id)
+                     :workspace-topicmap-id
+                     (getf preview :workspace-topicmap-id)
+                     :destination-source-label
+                     (getf preview :destination-source-label)
+                     :workspace-source-label
+                     (getf preview :workspace-source-label)
+                     :topicmap-source-label
+                     (getf preview :topicmap-source-label)
+                     :destination-rationale
+                     (getf preview :destination-rationale))
                     (:tr (:th "Topic action")
                          (:td (:tt (views:esc (format nil "~A"
                                                       (or (getf preview :topic-action)
@@ -1020,19 +1061,43 @@
 
 (views:defview 👀workspace (annotation dock-annotation)
   (views:html-view :title "Workspace" :priority 4
-    (let ((persisted-p (workspace-dock-annotation-p annotation)))
+    (let* ((persisted-p (workspace-dock-annotation-p annotation))
+           (default-client
+             (resolve-dmx-workspace-annotation-client
+              :dry-run nil
+              :verbose nil))
+           (destination
+             (resolve-dmx-workspace-annotation-destination
+              annotation
+              :client default-client))
+           (workspace-id
+             (dmx-workspace-annotation-destination-workspace-id destination))
+           (workspace-topicmap-id
+             (dmx-workspace-annotation-destination-workspace-topicmap-id
+              destination)))
       (views:html
         (:p (views:esc
-             "Workspace persistence stays typed and dry-run-first. Saving this annotation writes a HyperDoc-owned annotation topic into DMX workspace topicmap 919822 without touching authored repo files."))
+             "Workspace persistence stays typed and dry-run-first. Saving this annotation writes a HyperDoc-owned workspace annotation object with a resolved workspace destination. Workspace assignment remains distinct from topicmap placement; visibility in the shared blackboard is not a substitute for belonging to workspace 919815."))
         (:table :class "inspector-table"
                 (:tr (:th "Workspace state")
                      (:td (:tt (views:esc (if persisted-p
                                               "persisted"
                                               "draft")))))
-                (:tr (:th "Target topicmap")
-                     (:td (:tt (views:esc
-                                (format nil "~D"
-                                        *dmx-context-window-topicmap-id*)))))
+                (render-workspace-annotation-destination-rows
+                 :workspace-id workspace-id
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :destination-source-label
+                 (workspace-annotation-destination-label destination :source)
+                 :workspace-source-label
+                 (workspace-annotation-destination-label
+                  destination
+                  :workspace-source)
+                 :topicmap-source-label
+                 (workspace-annotation-destination-label
+                  destination
+                  :topicmap-source)
+                 :destination-rationale
+                 (dmx-workspace-annotation-destination-rationale destination)))
         (when persisted-p
           (views:html
             (:table :class "inspector-table"
@@ -1065,7 +1130,8 @@
           (views:thunk
             (plan-dmx-workspace-annotation-write-from-object
              annotation
-             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id))
           "Render the typed DMX write plan without mutating DMX."))
         (:p
          (views:eval-button
@@ -1073,7 +1139,9 @@
           (views:thunk
             (debug-dock-annotation-workspace-persistence
              annotation
-             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id
+             :client default-client))
           "Open the exact persist form, a dry-run preview, and a step-through debug surface for the live write path."))
         (:p
          (views:eval-button
@@ -1081,7 +1149,9 @@
           (views:thunk
             (trace-dock-annotation-workspace-persistence-path
              annotation
-             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id
+             :client default-client))
           "Inspect the persistence boundary as a reusable code-path graph before running the live write."))
         (:p
          (views:eval-button
@@ -1089,7 +1159,9 @@
           (views:thunk
             (probe-live-workspace-annotation-type-support
              annotation
-             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id
+             :client default-client))
           "Check whether the live DMX backend exposes raw hyperdoc.annotation and whether the deliberate compatibility carrier is available for the normal persist path."))
         (:p
          (views:eval-button
@@ -1097,7 +1169,9 @@
           (views:thunk
             (probe-live-create-topic-for-dock-annotation
              annotation
-             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id
+             :client default-client))
           "Stop after the raw hyperdoc.annotation create-topic request and inspect the exact request/response boundary without assignment, topicmap placement, or journaling."))
         (:p
          (views:eval-button
@@ -1107,7 +1181,9 @@
           (views:thunk
             (persist-dock-annotation-to-workspace
              annotation
-             :workspace-topicmap-id *dmx-context-window-topicmap-id*
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id
+             :client default-client
              :dry-run nil))
           "Preflight the live backend first. If raw hyperdoc.annotation is unsupported but compatibility storage is available, persist through the deliberate carrier instead of issuing a doomed raw create-topic write."))
         (when persisted-p
@@ -1118,17 +1194,19 @@
               (views:thunk
                 (read-dmx-workspace-annotation
                  :topic-id (workspace-annotation-topic-id-of annotation)
-                 :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :client default-client))
               "Reopen the persisted annotation through its stable DMX topic id."))
             (:p
              (views:eval-button
               "Inspect workspace journal"
               (views:thunk
                 (read-dmx-topic-journal
-                 :workspace-topicmap-id *dmx-context-window-topicmap-id*
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :client default-client
                  :topic-id (workspace-annotation-topic-id-of annotation)
                  :reconcile nil))
-              "Inspect the stored workspace journal stream for this annotation topic.")))))))))
+              "Inspect the stored workspace journal stream for this annotation topic."))))))))
 
 (views:defview 👀overview (debug workspace-annotation-persistence-debug)
   (views:html-view :title "Overview" :priority 1
@@ -1152,17 +1230,30 @@
                                 (or (workspace-annotation-persistence-debug-runtime-relation-id-of
                                      debug)
                                     "-")))))
-                (:tr (:th "Workspace topicmap")
-                     (:td (:tt (views:esc
-                                (format nil "~D"
-                                        (workspace-annotation-persistence-debug-workspace-topicmap-id-of
-                                         debug))))))
-                (:tr (:th "Workspace override")
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (or (workspace-annotation-persistence-debug-workspace-id-of
-                                             debug)
-                                            "-"))))))
+                (render-workspace-annotation-destination-rows
+                 :workspace-id
+                 (workspace-annotation-persistence-debug-workspace-id-of debug)
+                 :workspace-topicmap-id
+                 (workspace-annotation-persistence-debug-workspace-topicmap-id-of
+                  debug)
+                 :destination-source-label
+                 (workspace-annotation-destination-label
+                  (workspace-annotation-persistence-debug-destination-of debug)
+                  :source)
+                 :workspace-source-label
+                 (workspace-annotation-destination-label
+                  (workspace-annotation-persistence-debug-destination-of debug)
+                  :workspace-source)
+                 :topicmap-source-label
+                 (workspace-annotation-destination-label
+                  (workspace-annotation-persistence-debug-destination-of debug)
+                  :topicmap-source)
+                 :destination-rationale
+                 (and (workspace-annotation-persistence-debug-destination-of
+                       debug)
+                      (dmx-workspace-annotation-destination-rationale
+                       (workspace-annotation-persistence-debug-destination-of
+                        debug))))
                 (:tr (:th "Execution client")
                      (:td (:tt (views:esc
                                 (workspace-annotation-persistence-client-label
@@ -1279,11 +1370,35 @@
                               (or (workspace-annotation-persistence-report-runtime-relation-id-of
                                    report)
                                   "-")))))
-              (:tr (:th "Workspace topicmap")
-                   (:td (:tt (views:esc
-                              (format nil "~D"
-                                      (workspace-annotation-persistence-report-workspace-topicmap-id-of
-                                       report))))))
+              (render-workspace-annotation-destination-rows
+               :workspace-id
+               (and plan
+                    (dmx-workspace-annotation-write-plan-workspace-id plan))
+               :workspace-topicmap-id
+               (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                report)
+               :destination-source-label
+               (workspace-annotation-render-value
+                (and plan
+                     (dmx-workspace-annotation-destination-source-label
+                      (dmx-workspace-annotation-destination-source
+                       (dmx-workspace-annotation-write-plan-destination plan)))))
+               :workspace-source-label
+               (workspace-annotation-render-value
+                (and plan
+                     (dmx-workspace-annotation-destination-source-label
+                      (dmx-workspace-annotation-destination-workspace-source
+                       (dmx-workspace-annotation-write-plan-destination plan)))))
+               :topicmap-source-label
+               (workspace-annotation-render-value
+                (and plan
+                     (dmx-workspace-annotation-destination-source-label
+                      (dmx-workspace-annotation-destination-topicmap-source
+                       (dmx-workspace-annotation-write-plan-destination plan)))))
+               :destination-rationale
+               (and plan
+                    (dmx-workspace-annotation-destination-rationale
+                     (dmx-workspace-annotation-write-plan-destination plan))))
               (:tr (:th "Persisted topic id")
                    (:td (:tt (views:esc
                               (format nil "~A"
@@ -1344,7 +1459,7 @@
           (views:html
             (:h4 "Workspace assignment pending auth")
             (:p (views:esc
-                 "Create-topic already succeeded for the selected annotation carrier, but the next guarded mutation step requires authenticated workspace assignment. This surface keeps the created topic id, the pending assignment endpoint, the current auth summary, and a one-shot explicit-auth continuation together in one inspectable object."))
+                 "Create-topic already succeeded for the selected annotation carrier, but the next guarded mutation step requires authenticated workspace assignment. Topicmap placement remains a later separate step; visibility in topicmap 919822 is not a substitute for belonging to workspace 919815. This surface keeps the created topic id, the pending assignment endpoint, the current auth summary, and a one-shot explicit-auth continuation together in one inspectable object."))
             (:table :class "inspector-table"
                     (:tr (:th "Created topic id")
                          (:td (:tt (views:esc
@@ -1356,6 +1471,16 @@
                                     (workspace-annotation-render-value
                                      (getf assignment-auth-context
                                            :workspace-id))))))
+                    (:tr (:th "Workspace topicmap")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf assignment-auth-context
+                                           :workspace-topicmap-id))))))
+                    (:tr (:th "Destination source")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf assignment-auth-context
+                                           :destination-source-label))))))
                     (:tr (:th "Assignment endpoint")
                          (:td (:tt (views:esc
                                     (workspace-annotation-render-value
@@ -1392,7 +1517,12 @@
                                               "~{~A~^, ~}"
                                               (mapcar #'workspace-annotation-auth-mode-label
                                                       modes))
-                                      "-"))))))
+                                      "-")))))
+                    (:tr (:th "Destination rationale")
+                         (:td (views:esc
+                               (workspace-annotation-render-value
+                                (getf assignment-auth-context
+                                      :destination-rationale))))))
             (when-let (explicit-condition
                          (getf assignment-auth-context :explicit-auth-condition))
               (views:html
