@@ -521,6 +521,49 @@
       *dmx-workspace-annotation-compatibility-storage-mode*
       *dmx-workspace-annotation-native-storage-mode*))
 
+(defun make-default-workspace-annotation-live-client (&key verbose)
+  (let* ((environment-client
+           (make-http-dmx-import-client-from-environment :verbose verbose))
+         (fallback-base-url
+           (normalize-http-dmx-import-string
+            *dmx-base-url*
+            :base-url 'make-default-workspace-annotation-live-client)))
+    (when fallback-base-url
+      (make-instance
+       'http-dmx-import-client
+       :base-url (or (and environment-client
+                          (dmx-import-base-url-of environment-client))
+                     fallback-base-url)
+       :authorization-header
+       (and environment-client
+            (dmx-import-authorization-header-of environment-client))
+       :session-cookie
+       (and environment-client
+            (dmx-import-session-cookie-of environment-client))
+       :session-login-required-p
+       (and environment-client
+            (dmx-import-session-login-required-p-of environment-client))
+       :workspace-id
+       (and environment-client
+            (dmx-import-workspace-id-of environment-client))
+       :topic-type-uri
+       (or (and environment-client
+                (dmx-import-topic-type-uri-of environment-client))
+           *dmx-fedwiki-page-type-uri*)
+       :verbose verbose))))
+
+(defun resolve-dmx-workspace-annotation-client
+    (&key client (dry-run t) verbose)
+  (let ((resolved-client
+          (or client
+              (make-default-dmx-import-client :dry-run dry-run
+                                              :verbose verbose))))
+    (if (or dry-run
+            (not (typep resolved-client 'null-dmx-import-client)))
+        resolved-client
+        (or (make-default-workspace-annotation-live-client :verbose verbose)
+            resolved-client))))
+
 (defun dmx-workspace-annotation-compatibility-envelope-from-string
     (json-string)
   (when (dmx-non-empty-string-p json-string)
@@ -713,8 +756,12 @@
 
 (defun workspace-annotation-backend-compatibility-blocked-p (report)
   (member (workspace-annotation-backend-compatibility-report-status-of report)
-          '(:unsupported :error)
+          '(:not-live :unsupported :error)
           :test #'eq))
+
+(defun workspace-annotation-live-compatibility-preflight-required-p (client)
+  (or (typep client 'http-dmx-import-client)
+      (typep client 'null-dmx-import-client)))
 
 (defun workspace-annotation-live-type-support-result
     (type-uri kind topic evidence)
@@ -978,8 +1025,10 @@
   (let* ((resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run nil :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run nil
+            :verbose nil))
          (preview nil)
          (plan nil)
          (payload-json nil)
@@ -1993,8 +2042,10 @@
     (&key client workspace-topicmap-id workspace-id annotation-key uri topic-id
        title runtime-relation-id supersedes-topic-id storage-mode)
   (let* ((resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run t
+            :verbose nil))
          (resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-workspace-id
@@ -2192,8 +2243,10 @@
             'plan-dmx-workspace-annotation-write
             :required? t))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run t
+            :verbose nil))
          (resolution
            (resolve-dmx-workspace-annotation
             :client resolved-client
@@ -2335,8 +2388,10 @@
        storage-mode
        (dry-run t))
   (let* ((resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run dry-run
+            :verbose nil))
          (plan
            (plan-dmx-workspace-annotation-write
             :title title
@@ -2486,8 +2541,10 @@
          (persisted-annotation nil)
          (raw-result nil)
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run nil :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run nil
+            :verbose nil))
          (resolved-topicmap-id
            (workspace-annotation-persistence-debug-workspace-topicmap-id-of debug))
          (subject-key nil)
@@ -2927,8 +2984,10 @@
   (let* ((resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run nil :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run nil
+            :verbose nil))
          (preview
            (workspace-annotation-persistence-preview
             annotation
@@ -3115,8 +3174,10 @@
             'read-dmx-workspace-annotation
             :required? t))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run t
+            :verbose nil))
          (resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (topic (dmx-import-read-topic resolved-client resolved-topic-id)))
@@ -3232,10 +3293,14 @@
        storage-mode
        (dry-run t))
   (let* ((resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run dry-run
+            :verbose nil))
          (compatibility-report
            (and (not dry-run)
+                (workspace-annotation-live-compatibility-preflight-required-p
+                 resolved-client)
                 (probe-live-workspace-annotation-type-support
                  annotation
                  :workspace-topicmap-id workspace-topicmap-id

@@ -918,6 +918,93 @@
               "Rendered create-topic probe Overview must preserve the response body")))
       (setf (symbol-function 'drakma:http-request) original))))
 
+(defun run-dmx-workspace-annotation-default-live-client-resolution-smoke-test ()
+  (let ((original
+          (symbol-function
+           'hyperdoc::make-http-dmx-import-client-from-environment)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function
+                  'hyperdoc::make-http-dmx-import-client-from-environment)
+                 (lambda (&key verbose)
+                   (declare (ignore verbose))
+                   nil))
+           (let ((client
+                   (hyperdoc::resolve-dmx-workspace-annotation-client
+                    :dry-run nil
+                    :verbose nil)))
+             (assert-true
+              (typep client 'hyperdoc::http-dmx-import-client)
+              "Live workspace annotation client resolution must fall back to an HTTP client when no environment DMX client is configured")
+             (assert-true
+              (not (typep client 'hyperdoc::null-dmx-import-client))
+              "Live workspace annotation client resolution must not leave non-dry-run persistence on the null client")
+             (assert-equal hyperdoc::*dmx-base-url*
+                           (hyperdoc::dmx-import-base-url-of client)
+                           "Live workspace annotation client resolution must fall back to HyperDoc's known DMX base URL")
+             (assert-equal nil
+                           (hyperdoc::dmx-import-authorization-header-of client)
+                           "Fallback live client resolution must keep anonymous create-topic possible when no auth is configured")))
+      (setf (symbol-function
+             'hyperdoc::make-http-dmx-import-client-from-environment)
+            original))))
+
+(defun run-dmx-workspace-annotation-no-client-pending-auth-smoke-test ()
+  (let* ((resolved-client
+           (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :next-topic-id 9300))
+         (annotation (make-test-dock-annotation
+                      :note "Pending auth without explicit client"))
+         (original
+           (symbol-function 'hyperdoc::resolve-dmx-workspace-annotation-client)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::resolve-dmx-workspace-annotation-client)
+                 (lambda (&key client dry-run verbose)
+                   (declare (ignore client dry-run verbose))
+                   resolved-client))
+           (let* ((result (hyperdoc::persist-dock-annotation-to-workspace
+                           annotation
+                           :workspace-topicmap-id
+                           *dmx-annotations-smoke-workspace-topicmap-id*
+                           :dry-run nil))
+                  (topic-stage
+                    (hyperdoc::workspace-annotation-persistence-stage-result
+                     result
+                     :topic-upsert)))
+             (assert-true
+              (typep result 'hyperdoc::workspace-annotation-persistence-report)
+              "Non-dry-run workspace annotation persist without an explicit client must still return the inspectable persistence report")
+             (assert-equal :pending-auth
+                           (hyperdoc::workspace-annotation-persistence-report-status-of
+                            result)
+                           "No-client live persist must advance past topic create and stop later at the pending-auth assignment boundary")
+             (assert-equal :workspace-assignment
+                           (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                            result)
+                           "No-client live persist must preserve workspace assignment as the first failing guarded step")
+             (assert-true
+              (eq resolved-client
+                  (hyperdoc::workspace-annotation-persistence-report-client-of
+                   result))
+              "No-client live persist must thread the resolved live client through the persistence report")
+             (assert-true
+              (not (typep (hyperdoc::workspace-annotation-persistence-report-client-of
+                           result)
+                          'hyperdoc::null-dmx-import-client))
+              "No-client live persist must not fall back to the null DMX import client at topic-upsert time")
+             (assert-true
+              (hyperdoc::workspace-annotation-persistence-report-persisted-topic-id-of
+               result)
+              "No-client live persist must preserve the created topic id before the later auth boundary")
+             (assert-equal :completed
+                           (getf topic-stage :status)
+                           "No-client live persist must complete topic-upsert before reaching pending-auth")))
+      (setf (symbol-function 'hyperdoc::resolve-dmx-workspace-annotation-client)
+            original))))
+
 (defun run-dmx-workspace-annotation-pending-auth-smoke-test ()
   (let* ((client (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
                                 :base-url "https://dmx.ralfbarkow.ch"
@@ -1153,6 +1240,8 @@
   (run-dmx-http-unicode-json-request-smoke-test)
   (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)
   (run-dmx-workspace-annotation-create-topic-probe-render-smoke-test)
+  (run-dmx-workspace-annotation-default-live-client-resolution-smoke-test)
+  (run-dmx-workspace-annotation-no-client-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-render-smoke-test)
   (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
