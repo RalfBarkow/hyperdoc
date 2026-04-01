@@ -21,6 +21,56 @@
     (hyperdoc::memory-dmx-import-client)
   ())
 
+(defclass compatibility-storage-http-dmx-import-client
+    (hyperdoc::memory-dmx-import-client
+     hyperdoc::http-dmx-import-client)
+  ((supported-type-uris
+    :reader supported-type-uris-of
+    :initarg :supported-type-uris
+    :initform
+    (list hyperdoc::*dmx-notes-note-type-uri*
+          hyperdoc::*dmx-notes-title-type-uri*
+          hyperdoc::*dmx-notes-text-type-uri*))))
+
+(defclass pending-auth-compatibility-storage-http-dmx-import-client
+    (compatibility-storage-http-dmx-import-client)
+  ((assignment-auth-available-p
+    :accessor assignment-auth-available-p-of
+    :initarg :assignment-auth-available-p
+    :initform nil)))
+
+(defun make-type-support-topic-json (type-uri)
+  (let ((json (make-hash-table :test #'equal)))
+    (setf (gethash "id" json) (+ 970000 (sxhash type-uri))
+          (gethash "uri" json) type-uri
+          (gethash "typeUri" json) "dmx.core.topic_type"
+          (gethash "value" json) type-uri
+          (gethash "children" json) (make-hash-table :test #'equal))
+    json))
+
+(defmethod hyperdoc::dmx-import-find-existing-topic
+    ((client compatibility-storage-http-dmx-import-client) external-key)
+  (or (call-next-method)
+      (let* ((supported-p (member external-key
+                                  (supported-type-uris-of client)
+                                  :test #'string=))
+             (path (hyperdoc::dmx-topic-uri-lookup-path external-key))
+             (evidence
+               (list :method :get
+                     :path path
+                     :auth-mode-summary "Bearer header"
+                     :authorization-scheme "Bearer"
+                     :bootstrap-ran-p nil
+                     :response-status-code (if supported-p 200 404)
+                     :response-reason-phrase (if supported-p "OK" "Not Found")
+                     :response-body (if supported-p
+                                        (format nil "{\"uri\":\"~A\"}" external-key)
+                                        ""))))
+        (setf (hyperdoc::dmx-import-last-http-transaction-evidence-of client)
+              evidence)
+        (when supported-p
+          (make-type-support-topic-json external-key)))))
+
 (defmethod hyperdoc::dmx-import-add-topic-to-topicmap
     ((client failing-topicmap-placement-dmx-import-client)
      topicmap-id
@@ -28,6 +78,21 @@
      view-props)
   (declare (ignore client topicmap-id topic-id view-props))
   (error "Simulated topicmap placement failure"))
+
+(defmethod hyperdoc::dmx-import-assign-topic-to-workspace
+    ((client pending-auth-compatibility-storage-http-dmx-import-client)
+     workspace-id
+     topic-id)
+  (declare (ignore workspace-id topic-id))
+  (if (assignment-auth-available-p-of client)
+      (call-next-method)
+      (error 'hyperdoc::dmx-import-config-error
+             :message
+             "Authenticated DMX operation ASSIGN-TOPIC-TO-WORKSPACE requires HYPERDOC_DMX_IMPORT_AUTH_HEADER, HYPERDOC_DMX_IMPORT_USERNAME/HYPERDOC_DMX_IMPORT_PASSWORD, or HYPERDOC_DMX_IMPORT_AUTH_TOKEN"
+             :missing-keys '("HYPERDOC_DMX_IMPORT_AUTH_HEADER"
+                             "HYPERDOC_DMX_IMPORT_USERNAME"
+                             "HYPERDOC_DMX_IMPORT_PASSWORD"
+                             "HYPERDOC_DMX_IMPORT_AUTH_TOKEN"))))
 
 (defmethod hyperdoc::dmx-import-create-topic
     ((client latin1-failing-topic-create-dmx-import-client)
@@ -138,6 +203,64 @@
                   (hyperdoc::dmx-workspace-annotation-write-plan-workspace-id plan)
                   "Workspace annotation plan must target workspace 919815")))
 
+(defun run-dmx-workspace-annotation-compatibility-plan-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation :note "Compatibility carrier plan"))
+         (plan (hyperdoc::plan-dmx-workspace-annotation-write-from-object
+                annotation
+                :workspace-topicmap-id
+                *dmx-annotations-smoke-workspace-topicmap-id*
+                :client client
+                :storage-mode
+                hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*))
+         (payload (hyperdoc::dmx-workspace-annotation-write-plan-payload plan))
+         (children (getf payload :children))
+         (carrier-text (gethash hyperdoc::*dmx-notes-text-type-uri* children))
+         (envelope (with-input-from-string (stream carrier-text)
+                     (shasht:read-json stream)))
+         (native-payload (gethash "nativePayload" envelope))
+         (native-children (gethash "children" native-payload))
+         (source-binding-json
+           (gethash hyperdoc::*dmx-workspace-annotation-source-binding-type-uri*
+                    native-children))
+         (source-binding
+           (and source-binding-json
+                (with-input-from-string (stream source-binding-json)
+                  (shasht:read-json stream)))))
+    (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                  (hyperdoc::dmx-workspace-annotation-write-plan-storage-mode plan)
+                  "Compatibility-storage plan must declare the explicit compatibility storage mode")
+    (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                  (getf payload :type-uri)
+                  "Compatibility-storage plan must write through the installed dmx.notes.note carrier")
+    (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                  (hyperdoc::dmx-workspace-annotation-write-plan-carrier-type-uri plan)
+                  "Compatibility-storage plan must record the chosen carrier type")
+    (assert-equal "compatibility-note-carrier"
+                  (gethash "storageMode" envelope)
+                  "Compatibility-storage envelope must persist its deliberate storage mode")
+    (assert-equal "hyperdoc.annotation"
+                  (gethash "nativeTypeUri" envelope)
+                  "Compatibility-storage envelope must preserve the native annotation type identity")
+    (assert-equal "hyperdoc.annotation"
+                  (gethash "typeUri" native-payload)
+                  "Compatibility-storage envelope must carry the full native annotation payload")
+    (assert-true
+     (search "\"providerKind\""
+             (or (gethash hyperdoc::*dmx-workspace-annotation-source-anchor-json-type-uri*
+                          native-children)
+                 "")
+             :test #'char-equal)
+     "Compatibility-storage envelope must preserve the source anchor JSON losslessly")
+    (assert-equal "annotation-source-binding"
+                  (and source-binding
+                       (gethash "bindingType" source-binding))
+                  "Compatibility-storage envelope must preserve the typed source binding JSON")
+    (assert-equal (getf payload :value)
+                  (gethash hyperdoc::*dmx-notes-title-type-uri* children)
+                  "Compatibility-storage carrier must still expose the annotation title through dmx.notes.title")))
+
 (defun run-dmx-workspace-annotation-dry-run-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 9300))
@@ -205,6 +328,52 @@
     (assert-equal (hyperdoc::note-of persisted)
                   (hyperdoc::note-of reopened)
                   "Workspace annotations must reopen by topic id with stable persisted text")))
+
+(defun run-dmx-workspace-annotation-compatibility-live-create-and-reopen-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation
+                      :note "Compatibility carrier persisted text"))
+         (persisted (hyperdoc::persist-dock-annotation-to-workspace
+                     annotation
+                     :workspace-topicmap-id
+                     *dmx-annotations-smoke-workspace-topicmap-id*
+                     :client client
+                     :storage-mode
+                     hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                     :dry-run nil))
+         (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
+         (carrier-topic (hyperdoc::dmx-import-read-topic client topic-id))
+         (carrier-text (hyperdoc::dmx-json-child-value
+                        carrier-topic
+                        hyperdoc::*dmx-notes-text-type-uri*))
+         (envelope (with-input-from-string (stream carrier-text)
+                     (shasht:read-json stream)))
+         (reopened (hyperdoc::read-dmx-workspace-annotation
+                    :workspace-topicmap-id
+                    *dmx-annotations-smoke-workspace-topicmap-id*
+                    :client client
+                    :topic-id topic-id)))
+    (assert-true (typep persisted 'hyperdoc::workspace-dock-annotation)
+                 "Compatibility-storage persistence must still reopen as a workspace-dock-annotation")
+    (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                  (hyperdoc::workspace-annotation-storage-mode-of persisted)
+                  "Compatibility-storage reopen must preserve the storage mode on the workspace annotation object")
+    (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                  (hyperdoc::dmx-json-object-value carrier-topic "typeUri")
+                  "Compatibility-storage live writes must create dmx.notes.note carrier topics")
+    (assert-equal "compatibility-note-carrier"
+                  (gethash "storageMode" envelope)
+                  "Compatibility-storage carrier text must preserve the deliberate storage-mode marker")
+    (assert-equal (hyperdoc::note-of persisted)
+                  (hyperdoc::note-of reopened)
+                  "Compatibility-storage topics must reopen with stable annotation text")
+    (assert-equal (hyperdoc::summary-of persisted)
+                  (hyperdoc::summary-of reopened)
+                  "Compatibility-storage topics must reopen with stable annotation summary")
+    (assert-equal (hyperdoc::workspace-annotation-source-object-ref-of persisted)
+                  (hyperdoc::workspace-annotation-source-object-ref-of reopened)
+                  "Compatibility-storage topics must reopen with stable source bindings")))
 
 (defun run-dmx-workspace-annotation-supersede-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
@@ -455,72 +624,71 @@
                   "Transport diagnostics must preserve the Unicode code point")))
 
 (defun run-dmx-workspace-annotation-backend-compatibility-probe-smoke-test ()
-  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+  (let* ((client (make-instance 'compatibility-storage-http-dmx-import-client
                                 :base-url "https://dmx.ralfbarkow.ch"
                                 :authorization-header "Bearer test-token"
                                 :workspace-id *dmx-annotations-smoke-workspace-id*))
          (annotation (make-test-dock-annotation
-                      :note "Backend compatibility probe"))
-         (original (symbol-function 'drakma:http-request)))
-    (unwind-protect
-         (progn
-           (setf (symbol-function 'drakma:http-request)
-                 (lambda (url &key &allow-other-keys)
-                   (if (search "/core/topic/uri/" url)
-                       (values (make-string-input-stream "")
-                               404
-                               '(("Content-Type" . "application/json"))
-                               nil nil "Not Found")
-                       (error "Unexpected backend compatibility HTTP call ~S"
-                              url))))
-           (let* ((report (hyperdoc::probe-live-workspace-annotation-type-support
-                           annotation
-                           :workspace-topicmap-id
-                           *dmx-annotations-smoke-workspace-topicmap-id*
-                           :client client))
-                  (evidence
-                    (hyperdoc::workspace-annotation-backend-compatibility-report-http-evidence-of
-                     report)))
-             (assert-true
-              (typep report 'hyperdoc::workspace-annotation-backend-compatibility-report)
-              "Backend compatibility probe must return an inspectable report")
-             (assert-equal :unsupported
-                           (hyperdoc::workspace-annotation-backend-compatibility-report-status-of
-                            report)
-                           "Missing live annotation types must classify as unsupported")
-             (assert-equal hyperdoc::*dmx-workspace-annotation-type-uri*
-                           (hyperdoc::workspace-annotation-backend-compatibility-report-failing-type-uri-of
-                            report)
-                           "The parent hyperdoc.annotation type must be reported as the failing URI")
-             (assert-equal "/core/topic"
-                           (hyperdoc::workspace-annotation-backend-compatibility-report-endpoint-path-of
-                            report)
-                           "Compatibility report must preserve the create-topic endpoint that would have been used")
-             (assert-equal "/core/topic/uri/hyperdoc.annotation?children=true&assocChildren=true"
-                           (getf evidence :path)
-                           "Compatibility report must preserve the parent type probe path")
-             (assert-equal "Bearer header"
-                           (getf evidence :auth-mode-summary)
-                           "Compatibility report must preserve the outgoing auth mode")
-             (assert-equal nil
-                           (getf evidence :bootstrap-ran-p)
-                           "Compatibility report must show that no bootstrap login happened")
-             (assert-true
-              (search "Topic type \\\"hyperdoc.annotation\\\" not found in DB"
-                      (or (hyperdoc::workspace-annotation-backend-compatibility-report-known-create-topic-response-body-of
-                           report)
-                          "")
-                      :test #'char-equal)
-              "Compatibility report must preserve the known live backend cause when available")
-             (assert-true
-             (find-if (lambda (action)
-                         (search "Register hyperdoc.annotation"
-                                 action
-                                 :test #'char-equal))
-                       (hyperdoc::workspace-annotation-backend-compatibility-report-next-actions-of
-                        report))
-              "Compatibility report must guide the operator toward backend type registration")))
-      (setf (symbol-function 'drakma:http-request) original))))
+                      :note "Backend compatibility probe")))
+    (let* ((report (hyperdoc::probe-live-workspace-annotation-type-support
+                    annotation
+                    :workspace-topicmap-id
+                    *dmx-annotations-smoke-workspace-topicmap-id*
+                    :client client))
+           (evidence
+             (hyperdoc::workspace-annotation-backend-compatibility-report-http-evidence-of
+              report)))
+      (assert-true
+       (typep report 'hyperdoc::workspace-annotation-backend-compatibility-report)
+       "Backend compatibility probe must return an inspectable report")
+      (assert-equal :compatible-via-carrier
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-status-of
+                     report)
+                    "When raw hyperdoc.annotation is unsupported but dmx.notes.note is available, the live path must classify as compatibility-carrier supported")
+      (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-selected-storage-mode-of
+                     report)
+                    "Compatibility report must preserve the selected compatibility storage mode")
+      (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-carrier-type-uri-of
+                     report)
+                    "Compatibility report must make the chosen carrier explicit")
+      (assert-equal hyperdoc::*dmx-workspace-annotation-type-uri*
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-native-failing-type-uri-of
+                     report)
+                    "Compatibility report must preserve the unsupported raw hyperdoc.annotation type")
+      (assert-equal t
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-carrier-supported-p-of
+                     report)
+                    "Compatibility report must record that the installed carrier type family is available")
+      (assert-equal "/core/topic"
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-endpoint-path-of
+                     report)
+                    "Compatibility report must preserve the create-topic endpoint that would be used")
+      (assert-equal "/core/topic/uri/hyperdoc.annotation?children=true&assocChildren=true"
+                    (getf evidence :path)
+                    "Compatibility report must preserve the raw parent type probe path")
+      (assert-equal "Bearer header"
+                    (getf evidence :auth-mode-summary)
+                    "Compatibility report must preserve the outgoing auth mode")
+      (assert-equal nil
+                    (getf evidence :bootstrap-ran-p)
+                    "Compatibility report must show that no bootstrap login happened")
+      (assert-true
+       (search "Topic type \\\"hyperdoc.annotation\\\" not found in DB"
+               (or (hyperdoc::workspace-annotation-backend-compatibility-report-known-create-topic-response-body-of
+                    report)
+                   "")
+               :test #'char-equal)
+       "Compatibility report must preserve the known raw create-topic backend cause when available")
+      (assert-true
+       (find-if (lambda (action)
+                  (search "compatibility storage"
+                          action
+                          :test #'char-equal))
+                (hyperdoc::workspace-annotation-backend-compatibility-report-next-actions-of
+                 report))
+       "Compatibility report must state that the normal live path will use compatibility storage"))))
 
 (defun run-dmx-http-unicode-json-request-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
@@ -622,7 +790,9 @@
                            annotation
                            :workspace-topicmap-id
                            *dmx-annotations-smoke-workspace-topicmap-id*
-                           :client client))
+                           :client client
+                           :storage-mode
+                           hyperdoc::*dmx-workspace-annotation-native-storage-mode*))
                   (report-evidence
                     (hyperdoc::workspace-annotation-persistence-report-topic-upsert-evidence-of
                      report)))
@@ -748,6 +918,181 @@
               "Rendered create-topic probe Overview must preserve the response body")))
       (setf (symbol-function 'drakma:http-request) original))))
 
+(defun run-dmx-workspace-annotation-pending-auth-smoke-test ()
+  (let* ((client (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation
+                      :note "Pending auth after create"))
+         (result (hyperdoc::persist-dock-annotation-to-workspace
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client
+                  :dry-run nil))
+         (pending-context
+           (hyperdoc::workspace-annotation-persistence-report-assignment-auth-context-of
+            result))
+         (topic-id
+           (hyperdoc::workspace-annotation-persistence-report-persisted-topic-id-of
+            result)))
+    (assert-true
+     (typep result 'hyperdoc::workspace-annotation-persistence-report)
+     "Missing workspace-assignment auth must return an inspectable persistence report")
+    (assert-equal :pending-auth
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   result)
+                  "Create succeeded but missing assignment auth must classify as pending-auth")
+    (assert-equal :workspace-assignment
+                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                   result)
+                  "Pending-auth reports must preserve that the blocker is workspace assignment")
+    (assert-true
+     topic-id
+     "Pending-auth reports must preserve the already-created topic id")
+    (assert-equal (format nil "/workspaces/~D/object/~D"
+                          *dmx-annotations-smoke-workspace-id*
+                          topic-id)
+                  (getf pending-context :assignment-endpoint-path)
+                  "Pending-auth reports must preserve the guarded assignment endpoint")
+    (assert-equal nil
+                  (getf pending-context :environment-auth-present-p)
+                  "Pending-auth reports must state that no env auth is currently present")
+    (assert-equal "anonymous"
+                  (getf pending-context :environment-auth-mode-summary)
+                  "Pending-auth reports must preserve the current anonymous auth summary")
+    (assert-true
+     (member "HYPERDOC_DMX_IMPORT_AUTH_HEADER"
+             (getf pending-context :auth-missing-keys)
+             :test #'string=)
+     "Pending-auth reports must preserve the missing authenticated mutation config keys")))
+
+(defun run-dmx-workspace-annotation-pending-auth-render-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation
+                      :note "Pending auth render"))
+         (report (hyperdoc::persist-dock-annotation-to-workspace
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client
+                  :dry-run nil))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object report))
+         (overview (dmx-annotation-smoke-find-view-by-title views "Overview"))
+         (html (and overview
+                    (html-inspector-views:view-html overview))))
+    (assert-true
+     overview
+     "Pending-auth persistence reports must expose an Overview view")
+    (assert-true
+     (stringp html)
+     "Pending-auth persistence report Overview must render to HTML")
+    (assert-true
+     (search "Workspace assignment pending auth" html :test #'char-equal)
+     "Pending-auth Overview must explain the blocked assignment boundary")
+    (assert-true
+     (search "Continue with explicit auth" html :test #'char-equal)
+     "Pending-auth Overview must expose the explicit-auth continuation action")))
+
+(defun run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test ()
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (pending-client
+           (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9300))
+         (auth-client
+           (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :authorization-header "Bearer explicit-test-token"
+                          :assignment-auth-available-p t
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9301))
+         (annotation (make-test-dock-annotation
+                      :note "Continue after explicit auth"))
+         (pending (hyperdoc::persist-dock-annotation-to-workspace
+                   annotation
+                   :workspace-topicmap-id
+                   *dmx-annotations-smoke-workspace-topicmap-id*
+                   :client pending-client
+                   :dry-run nil))
+         (continued (hyperdoc::continue-workspace-annotation-persistence-with-explicit-auth
+                     pending
+                     :client auth-client))
+         (topic-id
+           (hyperdoc::workspace-annotation-persistence-report-persisted-topic-id-of
+            continued))
+         (persisted
+           (hyperdoc::workspace-annotation-persistence-report-persisted-annotation-of
+            continued)))
+    (assert-equal :persisted
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   continued)
+                  "Explicit-auth continuation must finish the remaining guarded live write")
+    (assert-true
+     (typep persisted 'hyperdoc::workspace-dock-annotation)
+     "Explicit-auth continuation must reopen the created carrier topic as a workspace annotation")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (gethash topic-id workspace-assignments)
+                  "Explicit-auth continuation must assign the already-created topic to workspace 919815")
+    (assert-true
+     (hyperdoc::dmx-import-topic-in-topicmap-p
+      auth-client
+      *dmx-annotations-smoke-workspace-topicmap-id*
+      topic-id)
+     "Explicit-auth continuation must finish topicmap placement for the already-created topic")
+    (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                  (hyperdoc::workspace-annotation-storage-mode-of persisted)
+                  "Explicit-auth continuation must preserve compatibility-storage reopen semantics")))
+
+(defun run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test ()
+  (let* ((client (make-instance 'compatibility-storage-http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer test-token"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation
+                      :note "Persist via compatibility carrier"))
+         (result (hyperdoc::persist-dock-annotation-to-workspace
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client
+                  :dry-run nil))
+         (topic-id (hyperdoc::workspace-annotation-topic-id-of result))
+         (carrier-topic (hyperdoc::dmx-import-read-topic client topic-id))
+         (carrier-text (hyperdoc::dmx-json-child-value
+                        carrier-topic
+                        hyperdoc::*dmx-notes-text-type-uri*)))
+    (assert-true
+     (typep result 'hyperdoc::workspace-dock-annotation)
+     "When compatibility storage is available, the normal live persist path must return the reopened workspace annotation instead of a blocked-state report")
+    (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                  (hyperdoc::workspace-annotation-storage-mode-of result)
+                  "Compatibility-carrier live persist must reopen with the compatibility storage mode")
+    (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                  (hyperdoc::dmx-json-object-value carrier-topic "typeUri")
+                  "Compatibility-carrier live persist must write a dmx.notes.note topic")
+    (assert-true
+     (search "\"nativePayload\"" carrier-text :test #'char-equal)
+     "Compatibility-carrier live persist must preserve the native annotation payload inside the note carrier text")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (hyperdoc::workspace-annotation-workspace-id-of result)
+                  "Compatibility-carrier live persist must still assign the topic to workspace 919815")))
+
 (defun run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
                                 :base-url "https://dmx.ralfbarkow.ch"
@@ -782,11 +1127,11 @@
                           :dry-run nil)))
              (assert-true
               (typep result 'hyperdoc::workspace-annotation-backend-compatibility-report)
-              "Preflighted live persist must return the blocked-state compatibility report when the backend is unsupported")
+             "Preflighted live persist must return the blocked-state compatibility report when the backend is unsupported")
              (assert-equal :unsupported
                            (hyperdoc::workspace-annotation-backend-compatibility-report-status-of
                             result)
-                           "Unsupported live backends must block the normal persist path")
+                           "Live backends must still block the normal persist path when both raw and compatibility carrier type support are unavailable")
              (assert-equal 0
                            post-count
                            "Unsupported live backends must be blocked before POST /core/topic is attempted")))
@@ -794,8 +1139,10 @@
 
 (defun run-dmx-annotations-smoke-tests ()
   (run-dmx-workspace-annotation-plan-smoke-test)
+  (run-dmx-workspace-annotation-compatibility-plan-smoke-test)
   (run-dmx-workspace-annotation-dry-run-smoke-test)
   (run-dmx-workspace-annotation-live-create-and-reopen-smoke-test)
+  (run-dmx-workspace-annotation-compatibility-live-create-and-reopen-smoke-test)
   (run-dmx-workspace-annotation-supersede-smoke-test)
   (run-dmx-workspace-annotation-restore-smoke-test)
   (run-dmx-workspace-annotation-debug-surface-smoke-test)
@@ -806,6 +1153,10 @@
   (run-dmx-http-unicode-json-request-smoke-test)
   (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)
   (run-dmx-workspace-annotation-create-topic-probe-render-smoke-test)
+  (run-dmx-workspace-annotation-pending-auth-smoke-test)
+  (run-dmx-workspace-annotation-pending-auth-render-smoke-test)
+  (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
+  (run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)

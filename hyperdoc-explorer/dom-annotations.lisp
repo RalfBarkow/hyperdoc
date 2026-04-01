@@ -65,6 +65,18 @@
                     (:tr (:th "Annotation key")
                          (:td (:tt (views:esc (or (getf preview :annotation-key)
                                                   "-")))))
+                    (:tr (:th "Storage mode")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-storage-mode-label
+                                     (getf preview :storage-mode))))))
+                    (:tr (:th "Carrier type")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf preview :carrier-type-uri))))))
+                    (:tr (:th "Topic type")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf preview :topic-type-uri))))))
                     (:tr (:th "Workspace topicmap")
                          (:td (:tt (views:esc
                                     (format nil "~A"
@@ -144,6 +156,14 @@
      value)
     (t
      (format nil "~A" value))))
+
+(defun workspace-annotation-auth-mode-label (mode)
+  (case (hyperdoc::normalize-http-dmx-import-auth-mode
+         mode
+         'workspace-annotation-auth-mode-label)
+    (:basic "username/password")
+    (:header "authorization header")
+    (:token "bearer token")))
 
 (defun render-workspace-annotation-http-evidence-table
     (evidence &key payload-json planned-topic-action planned-workspace-action
@@ -671,10 +691,9 @@
 (defmethod views:text-representation
     ((report workspace-annotation-persistence-report))
   (format nil "Workspace persistence ~A (~A)"
-          (if (eq (workspace-annotation-persistence-report-status-of report)
-                  :persisted)
-              "report"
-              "failure")
+          (string-downcase
+           (format nil "~A"
+                   (workspace-annotation-persistence-report-status-of report)))
           (or (workspace-annotation-persistence-report-annotation-key-of report)
               (workspace-annotation-persistence-report-runtime-relation-id-of
                report)
@@ -1026,6 +1045,16 @@
                          (:td (:tt (views:esc
                                     (workspace-annotation-topic-uri-of
                                      annotation)))))
+                    (:tr (:th "Storage mode")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-storage-mode-label
+                                     (workspace-annotation-storage-mode-of
+                                      annotation))))))
+                    (:tr (:th "Carrier type")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (workspace-annotation-carrier-type-uri-of
+                                      annotation))))))
                     (:tr (:th "Workspace status")
                          (:td (:tt (views:esc
                                     (or (workspace-annotation-status-of annotation)
@@ -1061,7 +1090,7 @@
             (probe-live-workspace-annotation-type-support
              annotation
              :workspace-topicmap-id *dmx-context-window-topicmap-id*))
-          "Check whether the live DMX backend exposes hyperdoc.annotation and its child type family before any create-topic write is attempted."))
+          "Check whether the live DMX backend exposes raw hyperdoc.annotation and whether the deliberate compatibility carrier is available for the normal persist path."))
         (:p
          (views:eval-button
           "Probe live create-topic"
@@ -1069,7 +1098,7 @@
             (probe-live-create-topic-for-dock-annotation
              annotation
              :workspace-topicmap-id *dmx-context-window-topicmap-id*))
-          "Stop after the live DMX create-topic request and inspect the exact request/response boundary without assignment, topicmap placement, or journaling."))
+          "Stop after the raw hyperdoc.annotation create-topic request and inspect the exact request/response boundary without assignment, topicmap placement, or journaling."))
         (:p
          (views:eval-button
           (if persisted-p
@@ -1080,7 +1109,7 @@
              annotation
              :workspace-topicmap-id *dmx-context-window-topicmap-id*
              :dry-run nil))
-          "Preflight live backend support first. If hyperdoc.annotation is unsupported, return a blocked-state report instead of issuing a doomed create-topic write."))
+          "Preflight the live backend first. If raw hyperdoc.annotation is unsupported but compatibility storage is available, persist through the deliberate carrier instead of issuing a doomed raw create-topic write."))
         (when persisted-p
           (views:html
             (:p
@@ -1202,15 +1231,38 @@
 
 (views:defview 👀overview (report workspace-annotation-persistence-report)
   (views:html-view :title "Overview" :priority 1
-    (views:html
+    (let ((plan (workspace-annotation-persistence-report-plan-of report))
+          (assignment-auth-context
+            (workspace-annotation-persistence-report-assignment-auth-context-of
+             report)))
+      (views:html
       (:p (views:esc
-           "Live workspace persistence report with exact form, dry-run preview, and explicit stage classification. This surfaces whether failure happened during topic upsert, workspace assignment, topicmap placement, journal recording, or reopen."))
+           "Live workspace persistence report with exact form, dry-run preview, and explicit stage classification. This surfaces whether failure happened during topic upsert, workspace assignment, topicmap placement, journal recording, or reopen, and whether live persistence used native typing or the compatibility carrier."))
       (:table :class "inspector-table"
               (:tr (:th "Status")
                    (:td (:tt (views:esc
                               (format nil "~A"
                                       (workspace-annotation-persistence-report-status-of
                                        report))))))
+              (:tr (:th "Storage mode")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-storage-mode-label
+                               (and plan
+                                    (dmx-workspace-annotation-write-plan-storage-mode
+                                     plan)))))))
+              (:tr (:th "Carrier type")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-render-value
+                               (and plan
+                                    (dmx-workspace-annotation-write-plan-carrier-type-uri
+                                     plan)))))))
+              (:tr (:th "Planned topic type")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-render-value
+                               (and plan
+                                    (getf (dmx-workspace-annotation-write-plan-payload
+                                           plan)
+                                          :type-uri)))))))
               (:tr (:th "Failure stage")
                    (:td (:tt (views:esc
                               (format nil "~A"
@@ -1287,6 +1339,106 @@
            :planned-topic-action (getf evidence :planned-topic-action)
            :planned-workspace-action (getf evidence :planned-workspace-action)
            :planned-topicmap-action (getf evidence :planned-topicmap-action))))
+      (when (workspace-annotation-pending-auth-p report)
+        (let (mode-cell username-cell password-cell header-cell token-cell)
+          (views:html
+            (:h4 "Workspace assignment pending auth")
+            (:p (views:esc
+                 "Create-topic already succeeded for the selected annotation carrier, but the next guarded mutation step requires authenticated workspace assignment. This surface keeps the created topic id, the pending assignment endpoint, the current auth summary, and a one-shot explicit-auth continuation together in one inspectable object."))
+            (:table :class "inspector-table"
+                    (:tr (:th "Created topic id")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf assignment-auth-context
+                                           :created-topic-id))))))
+                    (:tr (:th "Workspace id")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf assignment-auth-context
+                                           :workspace-id))))))
+                    (:tr (:th "Assignment endpoint")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf assignment-auth-context
+                                           :assignment-endpoint-path))))))
+                    (:tr (:th "Env auth present")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (getf assignment-auth-context
+                                                  :environment-auth-present-p))))))
+                    (:tr (:th "Env auth summary")
+                         (:td (:tt (views:esc
+                                    (workspace-annotation-render-value
+                                     (getf assignment-auth-context
+                                           :environment-auth-mode-summary))))))
+                    (:tr (:th "Bootstrap/login needed")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (getf assignment-auth-context
+                                                  :session-login-required-p))))))
+                    (:tr (:th "Missing auth keys")
+                         (:td (:tt (views:esc
+                                    (if-let (missing
+                                             (getf assignment-auth-context
+                                                   :auth-missing-keys))
+                                      (format nil "~{~A~^, ~}" missing)
+                                      "-")))))
+                    (:tr (:th "Available auth modes")
+                         (:td (:tt (views:esc
+                                    (if-let (modes
+                                             (getf assignment-auth-context
+                                                   :available-auth-modes))
+                                      (format nil
+                                              "~{~A~^, ~}"
+                                              (mapcar #'workspace-annotation-auth-mode-label
+                                                      modes))
+                                      "-"))))))
+            (when-let (explicit-condition
+                         (getf assignment-auth-context :explicit-auth-condition))
+              (views:html
+                (:h4 "Explicit auth input problem")
+                (:pre :style "white-space: pre-wrap"
+                      (views:esc explicit-condition))))
+            (:h4 "Continue with explicit auth")
+            (setf mode-cell
+                  (hvr:select '(("Username + password" . "basic")
+                                ("Authorization header" . "header")
+                                ("Bearer token" . "token"))
+                              :label "Credential mode: "))
+            (:br)
+            (setf username-cell
+                  (hvr:input :label "Username: " :initial-value "" :size "24"))
+            (:br)
+            (setf password-cell
+                  (hvr:input :label "Password: "
+                             :initial-value ""
+                             :size "24"
+                             :type :password))
+            (:br)
+            (setf header-cell
+                  (hvr:input :label "Authorization header: "
+                             :initial-value ""
+                             :size "64"))
+            (:br)
+            (setf token-cell
+                  (hvr:input :label "Bearer token: "
+                             :initial-value ""
+                             :size "48"
+                             :type :password))
+            (:p (views:esc
+                 "Only the fields required by the active credential mode are used for the next action. This continuation reuses the already-created topic and only performs the remaining guarded assignment, topicmap placement, journal, and reopen steps."))
+            (views:action-button
+             "Continue with explicit auth"
+             (views:thunk
+               (continue-workspace-annotation-persistence-with-explicit-auth
+                report
+                :auth-mode (lwcells:cell-ref mode-cell)
+                :username (lwcells:cell-ref username-cell)
+                :password (lwcells:cell-ref password-cell)
+                :authorization-header (lwcells:cell-ref header-cell)
+                :auth-token (lwcells:cell-ref token-cell))
+               t)
+             "Continue the remaining guarded live write with one-shot explicit credentials."))))
       (:p
        (views:eval-button
         "Open persistence stepper"
@@ -1304,7 +1456,7 @@
       (:h4 "Dry-run preview")
       (render-workspace-annotation-persistence-preview
        (workspace-annotation-persistence-report-dry-run-preview-of report)
-       nil))))
+       nil)))))
 
 (views:defview 👀stages (report workspace-annotation-persistence-report)
   (views:html-view :title "Stages" :priority 2
@@ -1328,13 +1480,26 @@
           (evidence (workspace-annotation-create-topic-probe-http-evidence-of report)))
       (views:html
         (:p (views:esc
-             "Live DMX create-topic probe for the current Dock annotation. This stops after the topic upsert boundary and exposes the exact request and response evidence without workspace assignment, topicmap placement, or journal recording."))
+             "Live DMX create-topic probe for the current Dock annotation. This is the explicit raw hyperdoc.annotation diagnostic, not the compatibility carrier path used by normal live persistence."))
         (:table :class "inspector-table"
                 (:tr (:th "Status")
                      (:td (:tt (views:esc
                                 (format nil "~A"
                                         (workspace-annotation-create-topic-probe-status-of
                                          report))))))
+                (:tr (:th "Storage mode")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-storage-mode-label
+                                 (and plan
+                                      (dmx-workspace-annotation-write-plan-storage-mode
+                                       plan)))))))
+                (:tr (:th "Planned topic type")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (and plan
+                                      (getf (dmx-workspace-annotation-write-plan-payload
+                                             plan)
+                                            :type-uri)))))))
                 (:tr (:th "Workspace topicmap")
                      (:td (:tt (views:esc
                                 (format nil "~D"
@@ -1398,12 +1563,32 @@
              report)))
       (views:html
         (:p (views:esc
-             "Live backend compatibility preflight for workspace annotations. The normal Persist to workspace action uses this check to block honestly before POST /core/topic when hyperdoc.annotation is not installed on the backend."))
+             "Live backend compatibility preflight for workspace annotations. The normal Persist to workspace action uses this check to choose deliberate compatibility storage when raw hyperdoc.annotation is missing, and to block only when neither the native type family nor the chosen carrier path is available."))
         (:table :class "inspector-table"
                 (:tr (:th "Status")
                      (:td (:tt (views:esc
                                 (format nil "~A"
                                         (workspace-annotation-backend-compatibility-report-status-of
+                                         report))))))
+                (:tr (:th "Selected storage mode")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-storage-mode-label
+                                 (workspace-annotation-backend-compatibility-report-selected-storage-mode-of
+                                  report))))))
+                (:tr (:th "Compatibility carrier")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-backend-compatibility-report-carrier-type-uri-of
+                                  report))))))
+                (:tr (:th "Native type supported")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (workspace-annotation-backend-compatibility-report-native-supported-p-of
+                                         report))))))
+                (:tr (:th "Carrier supported")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (workspace-annotation-backend-compatibility-report-carrier-supported-p-of
                                          report))))))
                 (:tr (:th "Workspace topicmap")
                      (:td (:tt (views:esc
@@ -1418,6 +1603,11 @@
                 (:tr (:th "Failing type URI")
                      (:td (:tt (views:esc
                                 (or (workspace-annotation-backend-compatibility-report-failing-type-uri-of
+                                     report)
+                                    "-")))))
+                (:tr (:th "Native missing type URI")
+                     (:td (:tt (views:esc
+                                (or (workspace-annotation-backend-compatibility-report-native-failing-type-uri-of
                                      report)
                                     "-")))))
                 (:tr (:th "Planned topic action")
@@ -1492,7 +1682,7 @@
   (views:html-view :title "Type results" :priority 2
     (views:html
       (:p (views:esc
-           "URI-based probe results for the parent annotation type and any checked child types."))
+           "URI-based probe results for the raw annotation type family and, when selected, the compatibility carrier type family."))
       (render-workspace-annotation-backend-support-results
        (workspace-annotation-backend-compatibility-report-type-results-of
         report)))))

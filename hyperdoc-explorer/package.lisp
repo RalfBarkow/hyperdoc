@@ -29,3 +29,6 @@
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views/standard :html-inspector-views/standard :hyperdoc)
+
+(trivial-package-local-nicknames:add-package-local-nickname
+ :hvr :html-inspector-views/reactive :hyperdoc)
