@@ -102,6 +102,7 @@
   :serial t
   :depends-on (#:hyperdoc
                #:hyperbook/fedwiki
+               #:babel
                #:cl-ppcre
                #:drakma
                #:shasht

@@ -37,7 +37,10 @@
 (define-condition dmx-import-http-error (fedwiki-dmx-import-error)
   ((url :reader dmx-import-http-url-of :initarg :url)
    (status-code :reader dmx-import-http-status-code-of :initarg :status-code)
-   (response-body :reader dmx-import-http-response-body-of :initarg :response-body))
+   (response-body :reader dmx-import-http-response-body-of :initarg :response-body)
+   (evidence :reader dmx-import-http-evidence-of
+             :initarg :evidence
+             :initform nil))
   (:report (lambda (condition stream)
              (format stream "DMX import HTTP failure ~A for ~A"
                      (dmx-import-http-status-code-of condition)
@@ -149,6 +152,10 @@
    (debug-events
     :accessor dmx-import-debug-events-of
     :initarg :debug-events
+    :initform nil)
+   (last-http-transaction-evidence
+    :accessor dmx-import-last-http-transaction-evidence-of
+    :initarg :last-http-transaction-evidence
     :initform nil)
    (workspace-id
     :reader dmx-import-workspace-id-of
@@ -970,6 +977,10 @@
     (with-output-to-string (stream)
       (funcall encoder object stream))))
 
+(defun encode-http-json-request-body (object)
+  (babel:string-to-octets (encode-json-string object)
+                          :encoding :utf-8))
+
 (defun dmx-import-children-json-object (children)
   (when children
     (let ((json (make-hash-table :test #'equal)))
@@ -1055,6 +1066,27 @@
                         (string name)
                         (symbol (symbol-name name))))))))
 
+(defun octet-vector-p (value)
+  (and (vectorp value)
+       (not (stringp value))
+       (every (lambda (item)
+                (and (integerp item)
+                     (<= 0 item 255)))
+              value)))
+
+(defun http-request-content-string (content)
+  (cond
+    ((null content)
+     nil)
+    ((stringp content)
+     content)
+    ((octet-vector-p content)
+     (or (ignore-errors
+           (babel:octets-to-string content :encoding :utf-8))
+         (format nil "#<~D octets>" (length content))))
+    (t
+     (format nil "~S" content))))
+
 (defun http-request-relative-path (client normalized-url)
   (let ((base-url (dmx-import-base-url-of client)))
     (if (and base-url
@@ -1113,6 +1145,101 @@
           (append (dmx-import-debug-events-of client)
                   (list (append (list :state state) fields)))))
   client)
+
+(defun http-dmx-import-debug-event (client state)
+  (when (typep client 'http-dmx-import-client)
+    (find state
+          (dmx-import-debug-events-of client)
+          :from-end t
+          :test #'eq
+          :key (lambda (event) (getf event :state)))))
+
+(defun summarize-http-request-auth-mode (authorization-header cookie-header)
+  (let ((authorization-scheme
+          (summarize-http-authorization-scheme authorization-header))
+        (cookie-shape
+          (summarize-http-cookie-shape cookie-header))
+        (jsessionid-cookie-p
+          (and (cookie-contains-token-p cookie-header "JSESSIONID=") t))
+        (workspace-cookie-p
+          (and (cookie-contains-token-p cookie-header "dmx_workspace_id=") t)))
+    (cond
+      ((and jsessionid-cookie-p (null authorization-scheme))
+       "session-only")
+      ((and jsessionid-cookie-p authorization-scheme)
+       (format nil "~A + session cookie" authorization-scheme))
+      (authorization-scheme
+       (format nil "~A header" authorization-scheme))
+      (workspace-cookie-p
+       (format nil "workspace cookie only (~A)" cookie-shape))
+      (t
+       "anonymous"))))
+
+(defun http-dmx-import-response-header-evidence (headers)
+  (remove nil
+          (list
+           (when-let (value (http-response-header-value headers "Content-Type"))
+             (cons "Content-Type" value))
+           (when-let (value (http-response-header-value headers "Content-Length"))
+             (cons "Content-Length" value))
+           (when-let (value (http-response-header-value headers "WWW-Authenticate"))
+             (cons "WWW-Authenticate" value))
+           (when-let (value (http-response-header-value headers "Location"))
+             (cons "Location" value))
+           (when-let (value (http-response-header-value headers "Set-Cookie"))
+             (cons "Set-Cookie-Shape"
+                   (summarize-http-cookie-shape value))))))
+
+(defun dmx-import-bootstrap-evidence (client)
+  (let ((request (http-dmx-import-debug-event client :s5-bootstrap-request-sent))
+        (response (http-dmx-import-debug-event client :s6-bootstrap-response-received))
+        (session (http-dmx-import-debug-event client :s7-session-material-extracted)))
+    (list :bootstrap-ran-p (and (or request response session) t)
+          :bootstrap-authorization-scheme
+          (or (and request (getf request :authorization-scheme))
+              nil)
+          :bootstrap-status-code
+          (and response (getf response :status-code))
+          :bootstrap-set-cookie-jsessionid-p
+          (and response (getf response :set-cookie-jsessionid-p))
+          :session-cookie-captured-p
+          (and session (getf session :session-cookie-captured-p)))))
+
+(defun dmx-import-http-transaction-evidence
+    (client method normalized-url relative-path headers actual-content-type
+     actual-content-length request-content response-status-code reason-phrase
+     response-headers response-body)
+  (let* ((authorization-header (http-response-header-value headers "Authorization"))
+         (cookie-header (http-response-header-value headers "Cookie"))
+         (authorization-scheme
+           (summarize-http-authorization-scheme authorization-header))
+         (cookie-shape
+           (summarize-http-cookie-shape cookie-header)))
+    (append
+     (list :method method
+           :url normalized-url
+           :path relative-path
+           :request-content-type actual-content-type
+           :request-content-length actual-content-length
+           :request-body (http-request-content-string request-content)
+           :accept-header (http-response-header-value headers "Accept")
+           :authorization-scheme authorization-scheme
+           :auth-mode-summary
+           (summarize-http-request-auth-mode authorization-header cookie-header)
+           :session-login-required-p
+           (and (typep client 'http-dmx-import-client)
+                (dmx-import-session-login-required-p-of client))
+           :cookie-shape cookie-shape
+           :jsessionid-cookie-p
+           (and (cookie-contains-token-p cookie-header "JSESSIONID=") t)
+           :workspace-cookie-p
+           (and (cookie-contains-token-p cookie-header "dmx_workspace_id=") t)
+           :response-status-code response-status-code
+           :response-reason-phrase reason-phrase
+           :response-body response-body
+           :response-headers
+           (http-dmx-import-response-header-evidence response-headers))
+     (dmx-import-bootstrap-evidence client))))
 
 (defun classify-http-dmx-debug-request (method relative-path)
   (cond
@@ -1176,6 +1303,22 @@
       (declare (ignore response-uri must-close))
       (unwind-protect
            (let ((body (http-response-body-string stream)))
+             (when (typep client 'http-dmx-import-client)
+               (setf (dmx-import-last-http-transaction-evidence-of client)
+                     (dmx-import-http-transaction-evidence
+                      client
+                      :post
+                      normalized-url
+                      (http-request-relative-path client normalized-url)
+                      (when authorization-header
+                        (list (cons "Authorization" authorization-header)))
+                      nil
+                      0
+                      ""
+                      status-code
+                      reason-phrase
+                      response-headers
+                      body)))
              (append-http-dmx-import-debug-event
               client
               :s6-bootstrap-response-received
@@ -1198,7 +1341,10 @@
                             :message "DMX login succeeded without a JSESSIONID cookie"
                             :url normalized-url
                             :status-code status-code
-                            :response-body body))
+                            :response-body body
+                            :evidence
+                            (dmx-import-last-http-transaction-evidence-of
+                             client)))
                    (setf (dmx-import-session-cookie-of client) session-cookie)
                    (append-http-dmx-import-debug-event
                     client
@@ -1211,7 +1357,10 @@
                                      "DMX login request failed")
                         :url normalized-url
                         :status-code status-code
-                        :response-body body)))
+                        :response-body body
+                        :evidence
+                        (dmx-import-last-http-transaction-evidence-of
+                         client))))
         (when stream
           (ignore-errors (close stream)))))))
 
@@ -1235,6 +1384,11 @@
        (content-length nil content-length-provided-p))
   (let* ((normalized-url (normalize-http-client-url client url))
          (relative-path (http-request-relative-path client normalized-url))
+         (json-content
+           (and (or payload body-object)
+                (encode-http-json-request-body
+                 (or body-object
+                     (dmx-import-json-object payload)))))
          (authorization-header
            (effective-http-dmx-import-authorization-header client))
          (cookie-values
@@ -1250,6 +1404,21 @@
                             (list (cons "Cookie"
                                         (format nil "~{~A~^; ~}" cookie-values))))
                           extra-headers))
+         (actual-request-content
+           (cond
+             (json-content json-content)
+             (raw-content-provided-p raw-content)
+             (t nil)))
+         (actual-request-content-type
+           (cond
+             (json-content "application/json; charset=utf-8")
+             (content-type-provided-p content-type)
+             (t nil)))
+         (actual-request-content-length
+           (cond
+             (json-content (length json-content))
+             (content-length-provided-p content-length)
+             (t nil)))
          (request-kind
            (classify-http-dmx-debug-request method relative-path))
          (request-args
@@ -1258,17 +1427,16 @@
                          :want-stream t
                          :additional-headers headers)
                    (cond
-                     ((or payload body-object)
-                      (list :content (encode-json-string
-                                      (or body-object
-                                          (dmx-import-json-object payload)))
-                            :content-type "application/json"))
+                     (json-content
+                      (list :content actual-request-content
+                            :content-type actual-request-content-type
+                            :content-length actual-request-content-length))
                      (raw-content-provided-p
-                      (append (list :content raw-content)
+                      (append (list :content actual-request-content)
                               (when content-type-provided-p
-                                (list :content-type content-type))
+                                (list :content-type actual-request-content-type))
                               (when content-length-provided-p
-                                (list :content-length content-length))))))))
+                                (list :content-length actual-request-content-length))))))))
     (when (eql request-kind :workspace-assignment)
       (append-http-dmx-import-debug-event
        client
@@ -1292,15 +1460,14 @@
              "dmx_workspace_id=")
             t)
        :accept-header (http-response-header-value headers "Accept")
-       :content-type content-type
-       :content-length content-length
+       :content-type actual-request-content-type
+       :content-length actual-request-content-length
        :empty-body-p
        (cond
-         (payload t)
-         (body-object t)
+         (json-content nil)
          (raw-content-provided-p
-          (and (stringp raw-content)
-               (zerop (length raw-content))))
+          (and (stringp actual-request-content)
+               (zerop (length actual-request-content))))
          (t
           nil))))
     (multiple-value-bind (stream status-code response-headers response-uri must-close reason-phrase)
@@ -1308,6 +1475,21 @@
       (declare (ignore response-uri must-close))
       (unwind-protect
            (let ((body (http-response-body-string stream)))
+             (when (typep client 'http-dmx-import-client)
+               (setf (dmx-import-last-http-transaction-evidence-of client)
+                     (dmx-import-http-transaction-evidence
+                      client
+                      method
+                      normalized-url
+                      relative-path
+                      headers
+                      actual-request-content-type
+                      actual-request-content-length
+                      actual-request-content
+                      status-code
+                      reason-phrase
+                      response-headers
+                      body)))
              (when request-kind
                (append-http-dmx-import-debug-event
                 client
@@ -1331,14 +1513,18 @@
                     (= status-code 205))
                 nil)
                ((http-success-status-p status-code)
-                (parse-http-response-body-json body))
+               (parse-http-response-body-json body))
                (t
                 (error 'dmx-import-http-error
                        :message (or reason-phrase
                                     "DMX import request failed")
                        :url normalized-url
                        :status-code status-code
-                       :response-body body))))
+                       :response-body body
+                       :evidence
+                       (and (typep client 'http-dmx-import-client)
+                            (dmx-import-last-http-transaction-evidence-of
+                             client))))))
         (when stream
           (ignore-errors (close stream)))))))
 

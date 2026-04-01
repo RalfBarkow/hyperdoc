@@ -122,6 +122,131 @@
                     (:td (views:esc (or (getf entry :summary) "")))
                     (:td (views:esc (or (getf entry :detail) "")))))))))))
 
+(defun render-workspace-annotation-http-response-headers (headers)
+  (if headers
+      (views:html
+        (:table :class "inspector-table"
+                (dolist (entry headers)
+                  (views:html
+                    (:tr (:th (views:esc (car entry)))
+                         (:td (:tt (views:esc (or (cdr entry) "-")))))))))
+      (views:html
+        (:p (:tt "-")))))
+
+(defun render-workspace-annotation-http-evidence-table
+    (evidence &key payload-json planned-topic-action planned-workspace-action
+      planned-topicmap-action)
+  (views:html
+    (:table :class "inspector-table"
+            (:tr (:th "Method")
+                 (:td (:tt (views:esc (format nil "~A"
+                                              (or (getf evidence :method) "-"))))))
+            (:tr (:th "Path")
+                 (:td (:tt (views:esc (or (getf evidence :path)
+                                          (getf evidence :url)
+                                          "-")))))
+            (:tr (:th "Auth mode")
+                 (:td (:tt (views:esc (or (getf evidence :auth-mode-summary)
+                                          "-")))))
+            (:tr (:th "Authorization scheme")
+                 (:td (:tt (views:esc (or (getf evidence :authorization-scheme)
+                                          "-")))))
+            (:tr (:th "Bootstrap/login happened")
+                 (:td (:tt (views:esc (format nil "~A"
+                                              (or (getf evidence :bootstrap-ran-p)
+                                                  nil))))))
+            (:tr (:th "Bootstrap status")
+                 (:td (:tt (views:esc (format nil "~A"
+                                              (or (getf evidence :bootstrap-status-code)
+                                                  "-"))))))
+            (:tr (:th "Session cookie captured")
+                 (:td (:tt (views:esc (format nil "~A"
+                                              (or (getf evidence :session-cookie-captured-p)
+                                                  nil))))))
+            (:tr (:th "Cookie shape")
+                 (:td (:tt (views:esc (or (getf evidence :cookie-shape)
+                                          "-")))))
+            (:tr (:th "Request content type")
+                 (:td (:tt (views:esc (or (getf evidence :request-content-type)
+                                          "-")))))
+            (:tr (:th "Request content length")
+                 (:td (:tt (views:esc (format nil "~A"
+                                              (or (getf evidence :request-content-length)
+                                                  "-"))))))
+            (when planned-topic-action
+              (views:html
+                (:tr (:th "Planned topic action")
+                     (:td (:tt (views:esc (format nil "~A" planned-topic-action)))))))
+            (when planned-workspace-action
+              (views:html
+                (:tr (:th "Planned workspace action")
+                     (:td (:tt (views:esc (format nil "~A" planned-workspace-action)))))))
+            (when planned-topicmap-action
+              (views:html
+                (:tr (:th "Planned topicmap action")
+                     (:td (:tt (views:esc (format nil "~A" planned-topicmap-action)))))))
+            (:tr (:th "Response status")
+                 (:td (:tt (views:esc (format nil "~A"
+                                              (or (getf evidence :response-status-code)
+                                                  "-"))))))
+            (:tr (:th "Response reason")
+                 (:td (:tt (views:esc (or (getf evidence :response-reason-phrase)
+                                          "-"))))))
+    (when payload-json
+      (views:html
+        (:h4 "Request payload JSON")
+        (:pre :style "white-space: pre-wrap"
+              (views:esc payload-json))))
+    (when-let (request-body (getf evidence :request-body))
+      (views:html
+        (:h4 "Request body sent")
+        (:pre :style "white-space: pre-wrap"
+              (views:esc request-body))))
+    (when-let (response-body (getf evidence :response-body))
+      (views:html
+        (:h4 "Response body")
+        (:pre :style "white-space: pre-wrap"
+              (views:esc response-body))))
+    (:h4 "Relevant response headers")
+    (render-workspace-annotation-http-response-headers
+     (getf evidence :response-headers))))
+
+(defun render-workspace-annotation-backend-support-results (results)
+  (if results
+      (views:html
+        (:table :class "inspector-table"
+                (:thead
+                 (:tr (:th "Type URI")
+                      (:th "Kind")
+                      (:th "Supported")
+                      (:th "Topic id")
+                      (:th "Probe status")
+                      (:th "Probe path")))
+                (:tbody
+                 (dolist (entry results)
+                   (let* ((evidence (getf entry :http-evidence))
+                          (status-code (and evidence
+                                            (getf evidence :response-status-code))))
+                     (views:html
+                       (:tr
+                        (:td (:tt (views:esc (or (getf entry :type-uri) "-"))))
+                        (:td (:tt (views:esc (format nil "~A"
+                                                     (or (getf entry :kind)
+                                                         "-")))))
+                        (:td (:tt (views:esc (format nil "~A"
+                                                     (or (getf entry :supported-p)
+                                                         nil)))))
+                        (:td (:tt (views:esc (format nil "~A"
+                                                     (or (getf entry :topic-id)
+                                                         "-")))))
+                        (:td (:tt (views:esc (format nil "~A"
+                                                     (or status-code "-")))))
+                        (:td (:tt (views:esc (or (and evidence
+                                                      (getf evidence :path))
+                                                 "-")))))))))))
+      (views:html
+        (:p (:tt "-")))))
+
 (defun include-dom-annotation-connect-assets ()
   (views:add-asset-path "/hyperdoc/"
                         (asdf:system-relative-pathname
@@ -534,6 +659,31 @@
                report)
               "annotation")))
 
+(defmethod views:text-representation
+    ((report workspace-annotation-create-topic-probe-report))
+  (format nil "Create-topic probe ~A (~A)"
+          (string-downcase
+           (format nil "~A"
+                   (workspace-annotation-create-topic-probe-status-of report)))
+          (or (and (workspace-annotation-create-topic-probe-plan-of report)
+                   (hyperdoc::dmx-workspace-annotation-write-plan-annotation-key
+                    (workspace-annotation-create-topic-probe-plan-of report)))
+              "annotation")))
+
+(defmethod views:text-representation
+    ((report workspace-annotation-backend-compatibility-report))
+  (format nil "Annotation backend compatibility ~A (~A)"
+          (string-downcase
+           (format nil "~A"
+                   (workspace-annotation-backend-compatibility-report-status-of
+                    report)))
+          (or (and (workspace-annotation-backend-compatibility-report-plan-of
+                    report)
+                   (hyperdoc::dmx-workspace-annotation-write-plan-annotation-key
+                    (workspace-annotation-backend-compatibility-report-plan-of
+                     report)))
+              "annotation")))
+
 (defmethod views:text-representation ((snapshot dom-connect-pane-state-snapshot))
   (format nil "~A (~A / ~A)"
           (or (pane-id-of snapshot) "pane")
@@ -885,6 +1035,22 @@
           "Inspect the persistence boundary as a reusable code-path graph before running the live write."))
         (:p
          (views:eval-button
+          "Probe live annotation type support"
+          (views:thunk
+            (probe-live-workspace-annotation-type-support
+             annotation
+             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+          "Check whether the live DMX backend exposes hyperdoc.annotation and its child type family before any create-topic write is attempted."))
+        (:p
+         (views:eval-button
+          "Probe live create-topic"
+          (views:thunk
+            (probe-live-create-topic-for-dock-annotation
+             annotation
+             :workspace-topicmap-id *dmx-context-window-topicmap-id*))
+          "Stop after the live DMX create-topic request and inspect the exact request/response boundary without assignment, topicmap placement, or journaling."))
+        (:p
+         (views:eval-button
           (if persisted-p
               "Update workspace topic"
               "Persist to workspace")
@@ -893,7 +1059,7 @@
              annotation
              :workspace-topicmap-id *dmx-context-window-topicmap-id*
              :dry-run nil))
-          "Create or update the typed HyperDoc annotation topic in the shared workspace."))
+          "Preflight live backend support first. If hyperdoc.annotation is unsupported, return a blocked-state report instead of issuing a doomed create-topic write."))
         (when persisted-p
           (views:html
             (:p
@@ -1062,6 +1228,44 @@
           (:h4 "Condition")
           (:pre :style "white-space: pre-wrap"
                 (views:esc (format nil "~A" condition)))))
+      (when-let (diagnostics
+                   (workspace-annotation-persistence-report-transport-diagnostics-of
+                    report))
+        (views:html
+          (:h4 "Transport diagnostics")
+          (:table :class "inspector-table"
+                  (:tr (:th "Transport stage")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf diagnostics :transport-stage))))))
+                  (:tr (:th "Failing field")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf diagnostics :field))))))
+                  (:tr (:th "Character")
+                       (:td (:tt (views:esc
+                                  (or (getf diagnostics :character) "-")))))
+                  (:tr (:th "Code point")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (or (getf diagnostics :code-point)
+                                              "-"))))))
+                  (:tr (:th "Position")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (or (getf diagnostics :position)
+                                              "-")))))))))
+      (when-let (evidence
+                   (workspace-annotation-persistence-report-topic-upsert-evidence-of
+                    report))
+        (views:html
+          (:h4 "Topic upsert failure evidence")
+          (render-workspace-annotation-http-evidence-table
+           evidence
+           :payload-json (getf evidence :payload-json)
+           :planned-topic-action (getf evidence :planned-topic-action)
+           :planned-workspace-action (getf evidence :planned-workspace-action)
+           :planned-topicmap-action (getf evidence :planned-topicmap-action))))
       (:p
        (views:eval-button
         "Open persistence stepper"
@@ -1096,6 +1300,196 @@
       (:pre :style "white-space: pre-wrap"
             (views:esc
              (workspace-annotation-persistence-report-stepper-source-of report))))))        
+
+(views:defview 👀overview (report workspace-annotation-create-topic-probe-report)
+  (views:html-view :title "Overview" :priority 1
+    (let ((plan (workspace-annotation-create-topic-probe-plan-of report))
+          (evidence (workspace-annotation-create-topic-probe-http-evidence-of report)))
+      (views:html
+        (:p (views:esc
+             "Live DMX create-topic probe for the current Dock annotation. This stops after the topic upsert boundary and exposes the exact request and response evidence without workspace assignment, topicmap placement, or journal recording."))
+        (:table :class "inspector-table"
+                (:tr (:th "Status")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (workspace-annotation-create-topic-probe-status-of
+                                         report))))))
+                (:tr (:th "Workspace topicmap")
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        (workspace-annotation-create-topic-probe-workspace-topicmap-id-of
+                                         report))))))
+                (:tr (:th "Planned topic action")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (and plan
+                                             (dmx-workspace-annotation-write-plan-topic-action
+                                              plan)))))))
+                (:tr (:th "Created topic id")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (or (workspace-annotation-create-topic-probe-created-topic-id-of
+                                             report)
+                                            "-")))))))
+        (when-let (condition
+                     (workspace-annotation-create-topic-probe-condition-of report))
+          (views:html
+            (:h4 "Condition")
+            (:pre :style "white-space: pre-wrap"
+                  (views:esc (format nil "~A" condition)))))
+        (when evidence
+          (render-workspace-annotation-http-evidence-table
+           evidence
+           :payload-json
+           (workspace-annotation-create-topic-probe-payload-json-of report)
+           :planned-topic-action
+           (and plan
+                (dmx-workspace-annotation-write-plan-topic-action plan))
+           :planned-workspace-action
+           (and plan
+                (dmx-workspace-annotation-write-plan-workspace-action plan))
+           :planned-topicmap-action
+           (and plan
+                (dmx-workspace-annotation-write-plan-topicmap-action plan))))
+        (:h4 "Dry-run preview")
+        (render-workspace-annotation-persistence-preview
+         (workspace-annotation-create-topic-probe-dry-run-preview-of report)
+         nil)))))
+
+(views:defview 👀form (report workspace-annotation-create-topic-probe-report)
+  (views:html-view :title "Form" :priority 2
+    (views:html
+      (:h4 "Exact create-topic probe form")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (workspace-annotation-create-topic-probe-exact-form-of report)))
+      (:h4 "Planned payload JSON")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (or (workspace-annotation-create-topic-probe-payload-json-of report)
+                 ""))))))
+
+(views:defview 👀overview (report workspace-annotation-backend-compatibility-report)
+  (views:html-view :title "Overview" :priority 1
+    (let ((plan (workspace-annotation-backend-compatibility-report-plan-of report))
+          (evidence
+            (workspace-annotation-backend-compatibility-report-http-evidence-of
+             report)))
+      (views:html
+        (:p (views:esc
+             "Live backend compatibility preflight for workspace annotations. The normal Persist to workspace action uses this check to block honestly before POST /core/topic when hyperdoc.annotation is not installed on the backend."))
+        (:table :class "inspector-table"
+                (:tr (:th "Status")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (workspace-annotation-backend-compatibility-report-status-of
+                                         report))))))
+                (:tr (:th "Workspace topicmap")
+                     (:td (:tt (views:esc
+                                (format nil "~D"
+                                        (workspace-annotation-backend-compatibility-report-workspace-topicmap-id-of
+                                         report))))))
+                (:tr (:th "Create endpoint")
+                     (:td (:tt (views:esc
+                                (or (workspace-annotation-backend-compatibility-report-endpoint-path-of
+                                     report)
+                                    "-")))))
+                (:tr (:th "Failing type URI")
+                     (:td (:tt (views:esc
+                                (or (workspace-annotation-backend-compatibility-report-failing-type-uri-of
+                                     report)
+                                    "-")))))
+                (:tr (:th "Planned topic action")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (and plan
+                                             (dmx-workspace-annotation-write-plan-topic-action
+                                              plan))))))))
+        (when-let (condition
+                     (workspace-annotation-backend-compatibility-report-condition-of
+                      report))
+          (views:html
+            (:h4 "Condition")
+            (:pre :style "white-space: pre-wrap"
+                  (views:esc (format nil "~A" condition)))))
+        (when evidence
+          (views:html
+            (:h4 "Type support probe evidence")
+            (render-workspace-annotation-http-evidence-table
+             evidence
+             :payload-json
+             (workspace-annotation-backend-compatibility-report-payload-json-of
+              report)
+             :planned-topic-action
+             (and plan
+                  (dmx-workspace-annotation-write-plan-topic-action plan))
+             :planned-workspace-action
+             (and plan
+                  (dmx-workspace-annotation-write-plan-workspace-action plan))
+             :planned-topicmap-action
+             (and plan
+                  (dmx-workspace-annotation-write-plan-topicmap-action plan)))))
+        (when-let (known-body
+                     (workspace-annotation-backend-compatibility-report-known-create-topic-response-body-of
+                      report))
+          (views:html
+            (:h4 "Known live create-topic response")
+            (:p (views:esc
+                 "Previously observed direct create-topic probe result for this backend/type combination."))
+            (:pre :style "white-space: pre-wrap"
+                  (views:esc known-body))))
+        (when-let (actions
+                     (workspace-annotation-backend-compatibility-report-next-actions-of
+                      report))
+          (views:html
+            (:h4 "Next actions")
+            (:ul
+             (dolist (action actions)
+               (views:html
+                 (:li (views:esc action)))))))
+        (:p
+         (views:eval-button
+          "Probe live create-topic"
+          (views:thunk
+            (probe-live-create-topic-for-dock-annotation
+             (workspace-annotation-backend-compatibility-report-annotation-of
+              report)
+             :workspace-topicmap-id
+             (workspace-annotation-backend-compatibility-report-workspace-topicmap-id-of
+              report)
+             :client
+             (workspace-annotation-backend-compatibility-report-client-of
+              report)))
+          "Run the explicit create-topic diagnostic anyway and inspect the exact POST /core/topic failure boundary."))
+        (:h4 "Dry-run preview")
+        (render-workspace-annotation-persistence-preview
+         (workspace-annotation-backend-compatibility-report-dry-run-preview-of
+          report)
+         nil)))))
+
+(views:defview 👀type-results (report workspace-annotation-backend-compatibility-report)
+  (views:html-view :title "Type results" :priority 2
+    (views:html
+      (:p (views:esc
+           "URI-based probe results for the parent annotation type and any checked child types."))
+      (render-workspace-annotation-backend-support-results
+       (workspace-annotation-backend-compatibility-report-type-results-of
+        report)))))
+
+(views:defview 👀form (report workspace-annotation-backend-compatibility-report)
+  (views:html-view :title "Form" :priority 3
+    (views:html
+      (:h4 "Exact compatibility probe form")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (workspace-annotation-backend-compatibility-report-exact-form-of
+              report)))
+      (:h4 "Planned payload JSON")
+      (:pre :style "white-space: pre-wrap"
+            (views:esc
+             (or (workspace-annotation-backend-compatibility-report-payload-json-of
+                  report)
+                 ""))))))
 
 (views:defview 👀bindings (annotation workspace-dock-annotation)
   (views:html-view :title "Bindings" :priority 5

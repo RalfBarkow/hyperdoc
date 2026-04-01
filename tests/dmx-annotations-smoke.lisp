@@ -17,6 +17,10 @@
     (hyperdoc::memory-dmx-import-client)
   ())
 
+(defclass latin1-failing-topic-create-dmx-import-client
+    (hyperdoc::memory-dmx-import-client)
+  ())
+
 (defmethod hyperdoc::dmx-import-add-topic-to-topicmap
     ((client failing-topicmap-placement-dmx-import-client)
      topicmap-id
@@ -24,6 +28,12 @@
      view-props)
   (declare (ignore client topicmap-id topic-id view-props))
   (error "Simulated topicmap placement failure"))
+
+(defmethod hyperdoc::dmx-import-create-topic
+    ((client latin1-failing-topic-create-dmx-import-client)
+     payload)
+  (declare (ignore client payload))
+  (error "#\\HORIZONTAL_ELLIPSIS (code 8230) is not a LATIN-1 character."))
 
 (defun annotation-journal-event-types (events)
   (mapcar (lambda (event) (gethash "eventType" event))
@@ -302,6 +312,12 @@
      (search "Trace workspace persistence path" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the Trace workspace persistence path action")
     (assert-true
+     (search "Probe live annotation type support" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the live annotation type support probe")
+    (assert-true
+     (search "Probe live create-topic" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the Probe live create-topic action")
+    (assert-true
      (getf (hyperdoc::workspace-annotation-persistence-debug-dry-run-preview-of
             debug)
            :dry-run)
@@ -404,6 +420,311 @@
              :test #'char-equal)
      "The report must preserve the exact persist form that was attempted")))
 
+(defun run-dmx-workspace-annotation-unicode-transport-diagnostics-smoke-test ()
+  (let* ((client (make-instance 'latin1-failing-topic-create-dmx-import-client
+                                :next-topic-id 9300))
+         (annotation (make-test-dock-annotation
+                      :note "Unicode ellipsis … in workspace note"))
+         (report (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client))
+         (diagnostics
+           (hyperdoc::workspace-annotation-persistence-report-transport-diagnostics-of
+            report)))
+    (assert-equal :failed
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   report)
+                  "Unicode transport failures must still return a failed inspectable report")
+    (assert-equal :topic-upsert
+                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                   report)
+                  "Unicode transport failures must classify at the topic-upsert stage")
+    (assert-equal :topic-upsert
+                  (getf diagnostics :transport-stage)
+                  "Transport diagnostics must preserve the stage that reached the Latin-1 boundary")
+    (assert-equal :text
+                  (getf diagnostics :field)
+                  "Transport diagnostics must identify the first failing string field")
+    (assert-equal "…"
+                  (getf diagnostics :character)
+                  "Transport diagnostics must preserve the exact failing Unicode character")
+    (assert-equal 8230
+                  (getf diagnostics :code-point)
+                  "Transport diagnostics must preserve the Unicode code point")))
+
+(defun run-dmx-workspace-annotation-backend-compatibility-probe-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer test-token"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*))
+         (annotation (make-test-dock-annotation
+                      :note "Backend compatibility probe"))
+         (original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key &allow-other-keys)
+                   (if (search "/core/topic/uri/" url)
+                       (values (make-string-input-stream "")
+                               404
+                               '(("Content-Type" . "application/json"))
+                               nil nil "Not Found")
+                       (error "Unexpected backend compatibility HTTP call ~S"
+                              url))))
+           (let* ((report (hyperdoc::probe-live-workspace-annotation-type-support
+                           annotation
+                           :workspace-topicmap-id
+                           *dmx-annotations-smoke-workspace-topicmap-id*
+                           :client client))
+                  (evidence
+                    (hyperdoc::workspace-annotation-backend-compatibility-report-http-evidence-of
+                     report)))
+             (assert-true
+              (typep report 'hyperdoc::workspace-annotation-backend-compatibility-report)
+              "Backend compatibility probe must return an inspectable report")
+             (assert-equal :unsupported
+                           (hyperdoc::workspace-annotation-backend-compatibility-report-status-of
+                            report)
+                           "Missing live annotation types must classify as unsupported")
+             (assert-equal hyperdoc::*dmx-workspace-annotation-type-uri*
+                           (hyperdoc::workspace-annotation-backend-compatibility-report-failing-type-uri-of
+                            report)
+                           "The parent hyperdoc.annotation type must be reported as the failing URI")
+             (assert-equal "/core/topic"
+                           (hyperdoc::workspace-annotation-backend-compatibility-report-endpoint-path-of
+                            report)
+                           "Compatibility report must preserve the create-topic endpoint that would have been used")
+             (assert-equal "/core/topic/uri/hyperdoc.annotation?children=true&assocChildren=true"
+                           (getf evidence :path)
+                           "Compatibility report must preserve the parent type probe path")
+             (assert-equal "Bearer header"
+                           (getf evidence :auth-mode-summary)
+                           "Compatibility report must preserve the outgoing auth mode")
+             (assert-equal nil
+                           (getf evidence :bootstrap-ran-p)
+                           "Compatibility report must show that no bootstrap login happened")
+             (assert-true
+              (search "Topic type \\\"hyperdoc.annotation\\\" not found in DB"
+                      (or (hyperdoc::workspace-annotation-backend-compatibility-report-known-create-topic-response-body-of
+                           report)
+                          "")
+                      :test #'char-equal)
+              "Compatibility report must preserve the known live backend cause when available")
+             (assert-true
+             (find-if (lambda (action)
+                         (search "Register hyperdoc.annotation"
+                                 action
+                                 :test #'char-equal))
+                       (hyperdoc::workspace-annotation-backend-compatibility-report-next-actions-of
+                        report))
+              "Compatibility report must guide the operator toward backend type registration")))
+      (setf (symbol-function 'drakma:http-request) original))))
+
+(defun run-dmx-http-unicode-json-request-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"))
+         (payload (list :type-uri "hyperdoc.annotation"
+                        :uri "hyperdoc:mcp/workspace-annotation/unicode-smoke"
+                        :value "Unicode … probe"
+                        :children
+                        (let ((children (make-hash-table :test #'equal)))
+                          (setf (gethash hyperdoc::*dmx-workspace-annotation-text-type-uri*
+                                         children)
+                                "Body with ellipsis … here")
+                          children)))
+         (captured-args nil)
+         (original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (&rest args)
+                   (setf captured-args args)
+                   (values (make-string-input-stream "{\"id\":9300}")
+                           200
+                           nil
+                           nil
+                           nil
+                           nil)))
+           (hyperdoc::dmx-import-create-topic client payload))
+      (setf (symbol-function 'drakma:http-request) original))
+    (let ((content (getf (cdr captured-args) :content))
+          (content-type (getf (cdr captured-args) :content-type))
+          (content-length (getf (cdr captured-args) :content-length)))
+      (assert-true
+       (vectorp content)
+       "Live DMX JSON writes must encode request content as octets before reaching Drakma")
+      (assert-equal "application/json; charset=utf-8"
+                    content-type
+                    "Live DMX JSON writes must declare UTF-8 explicitly")
+      (assert-equal (length content)
+                    content-length
+                    "Live DMX JSON writes must use the encoded octet length")
+      (assert-true
+       (search "Unicode … probe"
+               (babel:octets-to-string content :encoding :utf-8)
+               :test #'char-equal)
+       "Live DMX JSON writes must preserve Unicode ellipsis content through UTF-8 encoding"))))
+
+(defun run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer test-token"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*))
+         (annotation (make-test-dock-annotation :note "Probe live create-topic"))
+         (original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method want-stream content-type content
+                             content-length additional-headers
+                             &allow-other-keys)
+                   (declare (ignore want-stream content-length))
+                   (cond
+                     ((search "/core/topic/uri/" url)
+                      (values (make-string-input-stream "")
+                              404
+                              '(("Content-Type" . "application/json"))
+                              nil nil "Not Found"))
+                     ((search "/core/topic" url)
+                      (assert-equal :post method
+                                    "Create-topic probe must POST the DMX topic create endpoint")
+                      (assert-equal "application/json; charset=utf-8"
+                                    content-type
+                                    "Create-topic probe must declare UTF-8 JSON writes")
+                      (assert-equal "Bearer test-token"
+                                    (cdr (assoc "Authorization"
+                                                additional-headers
+                                                :test #'string-equal))
+                                    "Create-topic probe must preserve the configured auth header")
+                      (assert-true
+                       (search "\"typeUri\": \"hyperdoc.annotation\""
+                               (babel:octets-to-string content :encoding :utf-8)
+                               :test #'char-equal)
+                       "Create-topic probe must send the typed hyperdoc.annotation payload")
+                      (values (make-string-input-stream "{\"error\":\"validation failed\",\"field\":\"children\"}")
+                              500
+                              '(("Content-Type" . "application/json")
+                                ("WWW-Authenticate" . "Bearer realm=dmx"))
+                              nil nil "Internal Server Error"))
+                     (t
+                      (error "Unexpected create-topic probe HTTP call ~S" url)))))
+           (let* ((probe (hyperdoc::probe-live-create-topic-for-dock-annotation
+                          annotation
+                          :workspace-topicmap-id
+                          *dmx-annotations-smoke-workspace-topicmap-id*
+                          :client client))
+                  (probe-evidence
+                    (hyperdoc::workspace-annotation-create-topic-probe-http-evidence-of
+                     probe))
+                  (report (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                           annotation
+                           :workspace-topicmap-id
+                           *dmx-annotations-smoke-workspace-topicmap-id*
+                           :client client))
+                  (report-evidence
+                    (hyperdoc::workspace-annotation-persistence-report-topic-upsert-evidence-of
+                     report)))
+             (assert-true
+              (typep probe 'hyperdoc::workspace-annotation-create-topic-probe-report)
+              "Create-topic probe must return an inspectable probe report")
+             (assert-equal :failed
+                           (hyperdoc::workspace-annotation-create-topic-probe-status-of
+                            probe)
+                           "Create-topic probe must classify a 500 as failed")
+             (assert-equal "/core/topic"
+                           (getf probe-evidence :path)
+                           "Create-topic probe evidence must preserve the normalized endpoint path")
+             (assert-equal "Bearer header"
+                           (getf probe-evidence :auth-mode-summary)
+                           "Create-topic probe evidence must classify the outgoing auth mode")
+             (assert-equal nil
+                           (getf probe-evidence :bootstrap-ran-p)
+                           "Create-topic probe must show that no bootstrap login happened")
+             (assert-equal 500
+                           (getf probe-evidence :response-status-code)
+                           "Create-topic probe evidence must preserve the failing response status")
+             (assert-equal "Internal Server Error"
+                           (getf probe-evidence :response-reason-phrase)
+                           "Create-topic probe evidence must preserve the reason phrase")
+             (assert-true
+              (search "\"validation failed\""
+                      (or (getf probe-evidence :response-body) "")
+                      :test #'char-equal)
+              "Create-topic probe evidence must preserve the response body")
+             (assert-true
+              (search "\"hyperdoc.annotation.text\""
+                      (or (hyperdoc::workspace-annotation-create-topic-probe-payload-json-of
+                           probe)
+                          "")
+                      :test #'char-equal)
+              "Create-topic probe must preserve the exact outgoing payload JSON")
+             (assert-equal :failed
+                           (hyperdoc::workspace-annotation-persistence-report-status-of
+                            report)
+                           "Full persistence debug must still fail when create-topic fails")
+             (assert-equal :topic-upsert
+                           (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                            report)
+                           "Full persistence debug must classify the live 500 at topic-upsert")
+             (assert-equal "/core/topic"
+                           (getf report-evidence :path)
+                           "Persistence report must thread the same create-topic evidence")
+             (assert-equal 500
+                           (getf report-evidence :response-status-code)
+                           "Persistence report must preserve the failing create-topic status")
+             (assert-true
+              (search "\"field\":\"children\""
+                      (or (getf report-evidence :response-body) "")
+                      :test #'char-equal)
+              "Persistence report must preserve the backend response body for topic-upsert failures"))))
+      (setf (symbol-function 'drakma:http-request) original)))
+
+(defun run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer test-token"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*))
+         (annotation (make-test-dock-annotation
+                      :note "Blocked before create-topic"))
+         (post-count 0)
+         (original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method &allow-other-keys)
+                   (declare (ignore method))
+                   (cond
+                     ((search "/core/topic/uri/" url)
+                      (values (make-string-input-stream "")
+                              404
+                              '(("Content-Type" . "application/json"))
+                              nil nil "Not Found"))
+                     ((search "/core/topic" url)
+                      (incf post-count)
+                      (error "Persist preflight must not reach create-topic when support is missing"))
+                     (t
+                      (error "Unexpected preflighted persist HTTP call ~S"
+                             url)))))
+           (let ((result (hyperdoc::persist-dock-annotation-to-workspace
+                          annotation
+                          :workspace-topicmap-id
+                          *dmx-annotations-smoke-workspace-topicmap-id*
+                          :client client
+                          :dry-run nil)))
+             (assert-true
+              (typep result 'hyperdoc::workspace-annotation-backend-compatibility-report)
+              "Preflighted live persist must return the blocked-state compatibility report when the backend is unsupported")
+             (assert-equal :unsupported
+                           (hyperdoc::workspace-annotation-backend-compatibility-report-status-of
+                            result)
+                           "Unsupported live backends must block the normal persist path")
+             (assert-equal 0
+                           post-count
+                           "Unsupported live backends must be blocked before POST /core/topic is attempted")))
+      (setf (symbol-function 'drakma:http-request) original))))
+
 (defun run-dmx-annotations-smoke-tests ()
   (run-dmx-workspace-annotation-plan-smoke-test)
   (run-dmx-workspace-annotation-dry-run-smoke-test)
@@ -413,5 +734,10 @@
   (run-dmx-workspace-annotation-debug-surface-smoke-test)
   (run-dmx-workspace-annotation-debug-report-success-smoke-test)
   (run-dmx-workspace-annotation-debug-report-failure-smoke-test)
+  (run-dmx-workspace-annotation-unicode-transport-diagnostics-smoke-test)
+  (run-dmx-workspace-annotation-backend-compatibility-probe-smoke-test)
+  (run-dmx-http-unicode-json-request-smoke-test)
+  (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)
+  (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)
