@@ -97,15 +97,24 @@
              always (and (keywordp key)
                          (or value* t)))))
 
+(defun dmx-mcp-dotted-pair-p (value)
+  (and (consp value)
+       (not (null (cdr value)))
+       (not (listp (cdr value)))))
+
 (defun dmx-mcp-normalize-json-value (value)
   (cond
     ((hash-table-p value)
      (let ((json (make-hash-table :test #'equal)))
        (maphash (lambda (key nested-value)
                   (setf (gethash (princ-to-string key) json)
-                        (dmx-mcp-normalize-json-value nested-value)))
+                       (dmx-mcp-normalize-json-value nested-value)))
                 value)
        json))
+    ((dmx-mcp-dotted-pair-p value)
+     (dmx-mcp-json-object
+      "key" (dmx-mcp-normalize-json-value (car value))
+      "value" (dmx-mcp-normalize-json-value (cdr value))))
     ((dmx-mcp-plist-p value)
      (let ((json (make-hash-table :test #'equal)))
        (loop for (key nested-value) on value by #'cddr

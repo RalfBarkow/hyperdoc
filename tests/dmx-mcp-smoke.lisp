@@ -56,6 +56,34 @@
 (defun mcp-last-json-array-element (value)
   (car (last (hyperdoc::json-array-elements value))))
 
+(defun mcp-json-array-find-keyed-object (value key)
+  (find key
+        (hyperdoc::json-array-elements value)
+        :key (lambda (object) (gethash "key" object))
+        :test #'string=))
+
+(defun mcp-signal-journal-preflight-http-401-with-header-evidence (topic-id)
+  (let ((path (hyperdoc::dmx-topic-update-path topic-id))
+        (url (format nil "https://dmx.ralfbarkow.ch/core/topic/~D" topic-id)))
+    (error 'hyperdoc::dmx-import-http-error
+           :message (format nil "DMX import HTTP failure 401 for ~A" url)
+           :url url
+           :status-code 401
+           :response-body "{\"error\":\"journal-preflight-unauthorized\"}"
+           :evidence
+           (list :method :put
+                 :path path
+                 :auth-mode-summary "anonymous"
+                 :authorization-scheme nil
+                 :bootstrap-ran-p nil
+                 :request-content-type "application/json; charset=utf-8"
+                 :response-status-code 401
+                 :response-reason-phrase "Unauthorized"
+                 :response-body "{\"error\":\"journal-preflight-unauthorized\"}"
+                 :response-headers
+                 (list (cons "Content-Type" "application/json; charset=utf-8")
+                       (cons "WWW-Authenticate" "Bearer realm=\"dmx\""))))))
+
 (defun run-dmx-workspace-note-http-single-content-type-smoke-test ()
   (let ((original (symbol-function 'drakma:http-request))
         (create-call nil)
@@ -311,9 +339,57 @@
       :bearer-token nil
       :allowed-origins nil
       :live-writes-enabled-p t
+     :sessions (make-hash-table :test #'equal)
+     :log-stream nil)
+     topic-id)))
+
+(defun make-dmx-mcp-annotation-auth-blocked-server ()
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (create-client
+           (make-instance 'compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 931100))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Saved annotation for MCP auth-blocked continuation smoke")
+            :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :client create-client
+            :dry-run nil))
+         (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
+         (journal-summary
+           (workspace-annotation-smoke-journal-summary create-client persisted))
+         (journal-topic-id (getf journal-summary :existing-topic-id))
+         (blocked-client
+           (make-instance
+            'journal-preflight-auth-blocked-compatibility-storage-http-dmx-import-client
+            :base-url "https://dmx.ralfbarkow.ch"
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :topics-by-external-key topics
+            :topicmap-memberships topicmap-memberships
+            :workspace-assignments workspace-assignments
+            :next-topic-id 931101)))
+    (values
+     (hyperdoc::make-dmx-mcp-server
+      :read-client blocked-client
+      :write-client blocked-client
+      :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
+      :known-topic-ids (list topic-id)
+      :bearer-token nil
+      :allowed-origins nil
+      :live-writes-enabled-p t
       :sessions (make-hash-table :test #'equal)
       :log-stream nil)
-     topic-id)))
+     topic-id
+     journal-topic-id)))
 
 (defun make-dmx-mcp-live-server ()
   (let ((client (or (hyperdoc::make-http-dmx-import-client-from-environment
@@ -2071,6 +2147,103 @@
         (hyperdoc::stop-dmx-mcp-server)))
     t))
 
+(defun run-dmx-mcp-workspace-annotation-continuation-auth-blocked-smoke-test ()
+  (multiple-value-bind (server topic-id journal-topic-id)
+      (make-dmx-mcp-annotation-auth-blocked-server)
+    (let* ((port (mcp-test-port))
+           (url (format nil "http://127.0.0.1:~D/mcp" port))
+           (original
+             (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)))
+      (unwind-protect
+           (progn
+             (hyperdoc::serve-dmx-mcp-server
+              :port port
+              :address "127.0.0.1"
+              :server server)
+             (sleep 0.2)
+             (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
+                   (lambda (client subject-key lookup-kind lookup-value
+                            workspace-topicmap-id
+                            &rest args
+                            &key subject-uri subject-kind ownership-class
+                              note-key note-kind
+                            &allow-other-keys)
+                     (declare (ignore client subject-key lookup-kind lookup-value
+                                      workspace-topicmap-id args subject-uri
+                                      subject-kind ownership-class note-key
+                                      note-kind))
+                     (mcp-signal-journal-preflight-http-401-with-header-evidence
+                      journal-topic-id)))
+             (let ((session-id (mcp-test-open-session url :id 451)))
+               (multiple-value-bind (blocked-body blocked-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    452
+                    "continue_workspace_annotation"
+                    (mcp-test-json-object
+                     "topicId" topic-id
+                     "workspaceId" *dmx-annotations-smoke-workspace-id*
+                     "workspaceTopicmapId"
+                     *dmx-annotations-smoke-workspace-topicmap-id*
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200
+                                   blocked-status
+                                   "continue_workspace_annotation auth-blocked status")
+                 (let* ((tool-result (gethash "result" blocked-body))
+                        (structured (gethash "structuredContent" tool-result))
+                        (saved-annotation
+                          (gethash "savedAnnotationObject" structured))
+                        (saved-carrier-topic
+                          (gethash "savedCarrierTopic" structured))
+                        (journal-topic
+                          (gethash "journalCompanionTopic" structured))
+                        (journal-auth-context
+                          (gethash "journalPreflightAuthContext" structured))
+                        (http-evidence
+                          (and journal-auth-context
+                               (gethash "http-evidence" journal-auth-context)))
+                        (response-headers
+                          (and http-evidence
+                               (gethash "response-headers" http-evidence)))
+                        (content-type-header
+                          (and response-headers
+                               (mcp-json-array-find-keyed-object
+                                response-headers
+                                "Content-Type"))))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "continue_workspace_annotation auth-blocked reports must stay in structured content")
+                   (mcp-assert-equal "workspace_annotation_persistence_report"
+                                     (gethash "resultKind" structured)
+                                     "Annotation continuation auth-blocked result kind")
+                   (mcp-assert-equal "failed"
+                                     (gethash "reportStatus" structured)
+                                     "Annotation continuation auth-blocked reports must stay failed")
+                   (mcp-assert-equal "prepare-transition"
+                                     (gethash "failureStage" structured)
+                                     "Annotation continuation auth-blocked reports must stay at journal preflight")
+                   (mcp-assert-equal "workspace-dock-annotation"
+                                     (gethash "kind" saved-annotation)
+                                     "Annotation continuation auth-blocked reports must still expose the semantic annotation object")
+                   (mcp-assert-equal topic-id
+                                     (gethash "topicId" saved-carrier-topic)
+                                     "Annotation continuation auth-blocked reports must expose the saved carrier topic")
+                   (mcp-assert-equal journal-topic-id
+                                     (gethash "topicId" journal-topic)
+                                     "Annotation continuation auth-blocked reports must expose the journal companion topic")
+                   (mcp-assert-true
+                    response-headers
+                    "Annotation continuation auth-blocked reports must preserve HTTP response header evidence")
+                   (mcp-assert-equal "application/json; charset=utf-8"
+                                     (gethash "value" content-type-header)
+                                     "Annotation continuation auth-blocked reports must normalize dotted-pair response headers")))))
+        (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
+              original)
+        (hyperdoc::stop-dmx-mcp-server)))
+    t))
+
 (defun run-dmx-mcp-smoke-tests ()
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-import-delete-and-remove-contract-smoke-test)
@@ -2078,6 +2251,7 @@
   (run-dmx-import-explicit-basic-login-bootstrap-smoke-test)
   (run-dmx-mcp-smoke-test)
   (run-dmx-mcp-workspace-annotation-continuation-smoke-test)
+  (run-dmx-mcp-workspace-annotation-continuation-auth-blocked-smoke-test)
   (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
   (run-dmx-mcp-workspace-journal-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
