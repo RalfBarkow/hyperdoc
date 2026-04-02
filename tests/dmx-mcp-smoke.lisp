@@ -287,6 +287,34 @@
      :sessions (make-hash-table :test #'equal)
      :log-stream nil)))
 
+(defun make-dmx-mcp-annotation-smoke-server ()
+  (let* ((client (make-instance 'compatibility-storage-http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*
+                                :next-topic-id 931000))
+         (annotation (make-test-dock-annotation
+                      :note "Saved annotation for MCP continuation smoke"))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            annotation
+            :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :client client
+            :dry-run nil))
+         (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted)))
+    (values
+     (hyperdoc::make-dmx-mcp-server
+      :read-client client
+      :write-client client
+      :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
+      :known-topic-ids (list topic-id)
+      :bearer-token nil
+      :allowed-origins nil
+      :live-writes-enabled-p t
+      :sessions (make-hash-table :test #'equal)
+      :log-stream nil)
+     topic-id)))
+
 (defun make-dmx-mcp-live-server ()
   (let ((client (or (hyperdoc::make-http-dmx-import-client-from-environment
                      :verbose nil)
@@ -496,6 +524,7 @@
                                         "list_workspace_topic_revisions"
                                         "append_workspace_note"
                                         "update_workspace_note"
+                                        "continue_workspace_annotation"
                                         "upsert_workspace_topicmap_context"
                                         "remove_workspace_topic_from_topicmap"
                                         "repair_workspace_topic_assignment"
@@ -1952,12 +1981,103 @@
       (hyperdoc::stop-dmx-mcp-server))
   t))
 
+(defun run-dmx-mcp-workspace-annotation-continuation-smoke-test ()
+  (multiple-value-bind (server topic-id)
+      (make-dmx-mcp-annotation-smoke-server)
+    (let* ((port (mcp-test-port))
+           (url (format nil "http://127.0.0.1:~D/mcp" port)))
+      (unwind-protect
+           (progn
+             (hyperdoc::serve-dmx-mcp-server
+              :port port
+              :address "127.0.0.1"
+              :server server)
+             (sleep 0.2)
+             (let ((session-id (mcp-test-open-session url :id 401)))
+               (multiple-value-bind (dry-run-body dry-run-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    402
+                    "continue_workspace_annotation"
+                    (mcp-test-json-object
+                     "topicId" topic-id
+                     "dryRun" t))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200
+                                   dry-run-status
+                                   "continue_workspace_annotation dry-run status")
+                 (let* ((tool-result (gethash "result" dry-run-body))
+                        (structured (gethash "structuredContent" tool-result))
+                        (plan (gethash "plan" structured))
+                        (saved-annotation
+                          (gethash "savedAnnotationObject" structured)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "continue_workspace_annotation dry-run must not be flagged as error")
+                   (mcp-assert-equal "workspace_annotation_dry_run"
+                                     (gethash "resultKind" structured)
+                                     "Annotation continuation dry-run result kind")
+                   (mcp-assert-equal "update"
+                                     (gethash "topicAction" plan)
+                                     "Saved annotation continuation dry-run must plan an update")
+                   (mcp-assert-equal "compatibility note carrier"
+                                     (gethash "storageModeLabel" plan)
+                                     "Saved annotation continuation dry-run must stay on compatibility storage")
+                   (mcp-assert-equal "workspace-dock-annotation"
+                                     (gethash "kind" saved-annotation)
+                                     "Saved annotation continuation dry-run must expose the semantic annotation object")))
+               (multiple-value-bind (live-body live-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    403
+                    "continue_workspace_annotation"
+                    (mcp-test-json-object
+                     "topicId" topic-id
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200
+                                   live-status
+                                   "continue_workspace_annotation live status")
+                 (let* ((tool-result (gethash "result" live-body))
+                        (structured (gethash "structuredContent" tool-result))
+                        (annotation (gethash "annotation" structured))
+                        (saved-carrier-topic
+                          (gethash "savedCarrierTopic" structured))
+                        (journal-topic
+                          (gethash "journalCompanionTopic" structured)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "continue_workspace_annotation live must not be flagged as error")
+                   (mcp-assert-equal "workspace_annotation"
+                                     (gethash "resultKind" structured)
+                                     "Annotation continuation live result kind")
+                   (mcp-assert-equal topic-id
+                                     (gethash "workspaceTopicId" annotation)
+                                     "Annotation continuation live must preserve the saved topic id")
+                   (mcp-assert-equal "compatibility note carrier"
+                                     (gethash "storageModeLabel" annotation)
+                                     "Annotation continuation live must preserve compatibility storage")
+                   (mcp-assert-equal topic-id
+                                     (gethash "topicId" saved-carrier-topic)
+                                     "Annotation continuation live must expose the saved carrier topic")
+                   (mcp-assert-true
+                    (integerp (gethash "topicId" journal-topic))
+                    "Annotation continuation live must expose the journal companion topic")
+                   (mcp-assert-true
+                    (/= (gethash "topicId" journal-topic) topic-id)
+                    "Journal companion topic must remain distinct from the saved annotation carrier topic")))))
+        (hyperdoc::stop-dmx-mcp-server)))
+    t))
+
 (defun run-dmx-mcp-smoke-tests ()
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-import-delete-and-remove-contract-smoke-test)
   (run-dmx-import-workspace-assignment-contract-smoke-test)
   (run-dmx-import-explicit-basic-login-bootstrap-smoke-test)
   (run-dmx-mcp-smoke-test)
+  (run-dmx-mcp-workspace-annotation-continuation-smoke-test)
   (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
   (run-dmx-mcp-workspace-journal-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
