@@ -5,6 +5,10 @@
 
 (in-package :hyperdoc)
 
+;; Declared here so repair helpers compile with the same dynamic suppression
+;; contract as the journal implementation file that defines the variable.
+(defvar *dmx-workspace-journal-suppressed-p* nil)
+
 (define-condition dmx-workspace-topic-validation-error (fedwiki-dmx-import-error)
   ((boundary :reader dmx-workspace-topic-validation-boundary-of :initarg :boundary)
    (payload :reader dmx-workspace-topic-validation-payload-of :initarg :payload)
@@ -838,6 +842,10 @@
             current-topic
             (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
                 *dmx-context-window-topicmap-id*)))
+         (suppress-journal-maintenance-p
+           (eql (dmx-workspace-topic-ownership-class
+                 (dmx-workspace-topic-workspace-assignment-plan-ownership plan))
+                :hyperdoc-workspace-journal))
          (subject-key (gethash "subjectKey" current-state))
          (lookup (gethash "subjectLookup" current-state))
          (next-preview
@@ -846,24 +854,32 @@
                    (dmx-workspace-topic-workspace-assignment-plan-workspace-id plan))
              snapshot))
          (journal-preview
-           (dmx-workspace-journal-transition-preview
-            current-state
-            next-preview)))
+           (unless suppress-journal-maintenance-p
+             (dmx-workspace-journal-transition-preview
+              current-state
+              next-preview))))
     (unless dry-run
-      (let ((previous-state
-              (dmx-workspace-journal-prepare-transition
-               resolved-client
-               subject-key
-               (gethash "kind" lookup)
-               (gethash "value" lookup)
-               (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
-                   *dmx-context-window-topicmap-id*)
-               :subject-uri (gethash "subjectUri" current-state)
-               :subject-kind (gethash "subjectKind" current-state)
-               :ownership-class (gethash "ownershipClass" current-state)
-               :note-key (gethash "noteKey" current-state)
-               :note-kind (gethash "noteKind" current-state))))
-        (when (eql (dmx-workspace-topic-workspace-assignment-plan-workspace-action plan)
+      (let* ((*dmx-workspace-journal-suppressed-p*
+               (or *dmx-workspace-journal-suppressed-p*
+                   suppress-journal-maintenance-p))
+             (previous-state
+               (unless suppress-journal-maintenance-p
+                 (dmx-workspace-journal-prepare-transition
+                  resolved-client
+                  subject-key
+                  (gethash "kind" lookup)
+                  (gethash "value" lookup)
+                  (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id
+                       plan)
+                      *dmx-context-window-topicmap-id*)
+                  :subject-uri (gethash "subjectUri" current-state)
+                  :subject-kind (gethash "subjectKind" current-state)
+                  :ownership-class (gethash "ownershipClass" current-state)
+                  :note-key (gethash "noteKey" current-state)
+                  :note-kind (gethash "noteKind" current-state)))))
+        (declare (special *dmx-workspace-journal-suppressed-p*))
+        (when (eql (dmx-workspace-topic-workspace-assignment-plan-workspace-action
+                    plan)
                    :assign)
           (dmx-import-assign-topic-to-workspace
            resolved-client
@@ -878,12 +894,14 @@
                  (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id
                       plan)
                      *dmx-context-window-topicmap-id*))))
-          (dmx-workspace-journal-record-transition
-           resolved-client
-           previous-state
-           after-state
-           (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id plan)
-               *dmx-context-window-topicmap-id*)))))
+          (unless suppress-journal-maintenance-p
+            (dmx-workspace-journal-record-transition
+             resolved-client
+             previous-state
+             after-state
+             (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id
+                  plan)
+                 *dmx-context-window-topicmap-id*))))))
     (let* ((result-workspace
              (dmx-import-read-topic-workspace
               resolved-client

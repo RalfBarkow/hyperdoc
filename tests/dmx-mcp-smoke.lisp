@@ -2057,6 +2057,46 @@
       (hyperdoc::stop-dmx-mcp-server))
   t))
 
+(defun run-dmx-workspace-journal-assignment-repair-nonrecursive-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 942000))
+         (workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*)
+         (subject-key "hyperdoc:mcp/workspace-annotation/nonrecursive-repair-smoke")
+         (journal-uri (hyperdoc::dmx-workspace-journal-note-uri subject-key))
+         (nested-uri (hyperdoc::dmx-workspace-journal-note-uri journal-uri))
+         (journal-topic
+           (hyperdoc::dmx-import-create-topic
+            client
+            (hyperdoc::dmx-workspace-note-payload
+             "Workspace journal repair smoke"
+             "{\"journalOwner\":\"hyperdoc\",\"schemaVersion\":1}"
+             journal-uri)))
+         (journal-topic-id (hyperdoc::dmx-import-object-id journal-topic))
+         (topic-count-before
+           (hash-table-count (hyperdoc::topics-by-external-key-of client)))
+         (result
+           (hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair
+            journal-topic-id
+            :workspace-id 919815
+            :workspace-topicmap-id workspace-topicmap-id
+            :client client
+            :dry-run nil))
+         (topic-count-after
+           (hash-table-count (hyperdoc::topics-by-external-key-of client))))
+    (mcp-assert-equal 919815
+                      (getf result :result-workspace-id)
+                      "Workspace-journal assignment repair must assign the target workspace")
+    (mcp-assert-true
+     (null (getf result :journal-event-preview))
+     "Workspace-journal assignment repair must suppress recursive journal previews")
+    (mcp-assert-equal topic-count-before
+                      topic-count-after
+                      "Workspace-journal assignment repair must not create nested companion topics")
+    (mcp-assert-true
+     (null (hyperdoc::dmx-import-find-existing-topic client nested-uri))
+     "Workspace-journal assignment repair must not create a nested workspace-journal companion")
+    t))
+
 (defun run-dmx-mcp-workspace-annotation-continuation-smoke-test ()
   (multiple-value-bind (server topic-id)
       (make-dmx-mcp-annotation-smoke-server)
@@ -2257,6 +2297,7 @@
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
   (run-dmx-workspace-journal-foreign-restore-guardrail-smoke-test)
   (run-dmx-mcp-workspace-assignment-repair-smoke-test)
+  (run-dmx-workspace-journal-assignment-repair-nonrecursive-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
 
