@@ -303,6 +303,11 @@
     :initarg :journal-preflight-summary
     :initform nil
     :reader workspace-annotation-persistence-report-journal-preflight-summary-of)
+   (journal-preflight-auth-context
+    :initarg :journal-preflight-auth-context
+    :initform nil
+    :reader
+    workspace-annotation-persistence-report-journal-preflight-auth-context-of)
    (assignment-auth-context
     :initarg :assignment-auth-context
     :initform nil
@@ -1041,6 +1046,16 @@
   (and (typep condition 'dmx-import-config-error)
        (dmx-import-missing-keys-of condition)))
 
+(defun workspace-annotation-http-auth-blocked-p (condition)
+  (and (typep condition 'dmx-import-http-error)
+       (member (dmx-import-http-status-code-of condition)
+               '(401 403)
+               :test #'eql)))
+
+(defun workspace-annotation-auth-blocked-condition-p (condition)
+  (or (typep condition 'dmx-import-config-error)
+      (workspace-annotation-http-auth-blocked-p condition)))
+
 (defun workspace-annotation-assignment-auth-context
     (plan client topic-id condition)
   (let ((client-auth-context
@@ -1093,9 +1108,97 @@
            (workspace-annotation-auth-missing-keys condition))
      client-auth-context)))
 
+(defun workspace-annotation-journal-endpoint-path (summary condition)
+  (or (and (dmx-import-http-evidence condition)
+           (or (getf (dmx-import-http-evidence condition) :path)
+               (getf (dmx-import-http-evidence condition) :url)))
+      (and summary
+           (getf summary :existing-topic-id)
+           (dmx-topic-update-path (getf summary :existing-topic-id)))))
+
+(defun workspace-annotation-journal-preflight-auth-context
+    (plan client summary condition)
+  (let ((client-auth-context
+          (workspace-annotation-client-auth-context client))
+        (destination
+          (and plan
+               (dmx-workspace-annotation-write-plan-destination plan)))
+        (http-evidence (dmx-import-http-evidence condition)))
+    (append
+     (list :workspace-id
+           (and plan
+                (dmx-workspace-annotation-write-plan-workspace-id plan))
+           :workspace-topicmap-id
+           (and plan
+                (dmx-workspace-annotation-write-plan-workspace-topicmap-id
+                 plan))
+           :journal-companion-label
+           (workspace-annotation-journal-preflight-label summary)
+           :journal-topic-id
+           (and summary
+                (getf summary :existing-topic-id))
+           :journal-endpoint-path
+           (workspace-annotation-journal-endpoint-path summary condition)
+           :journal-note-key
+           (and summary
+                (getf summary :note-key))
+           :journal-note-uri
+           (and summary
+                (getf summary :note-uri))
+           :journal-current-revision
+           (and summary
+                (getf summary :current-revision))
+           :journal-subject-key
+           (and summary
+                (getf summary :subject-key))
+           :journal-subject-lookup-kind
+           (and summary
+                (getf summary :subject-lookup-kind))
+           :journal-subject-lookup-value
+           (and summary
+                (getf summary :subject-lookup-value))
+           :destination-source
+           (and destination
+                (dmx-workspace-annotation-destination-source destination))
+           :destination-source-label
+           (and destination
+                (dmx-workspace-annotation-destination-source-label
+                 (dmx-workspace-annotation-destination-source destination)))
+           :workspace-source
+           (and destination
+                (dmx-workspace-annotation-destination-workspace-source
+                 destination))
+           :workspace-source-label
+           (and destination
+                (dmx-workspace-annotation-destination-source-label
+                 (dmx-workspace-annotation-destination-workspace-source
+                  destination)))
+           :topicmap-source
+           (and destination
+                (dmx-workspace-annotation-destination-topicmap-source
+                 destination))
+           :topicmap-source-label
+           (and destination
+                (dmx-workspace-annotation-destination-source-label
+                 (dmx-workspace-annotation-destination-topicmap-source
+                  destination)))
+           :destination-rationale
+           (and destination
+                (dmx-workspace-annotation-destination-rationale destination))
+           :auth-missing-keys
+           (workspace-annotation-auth-missing-keys condition)
+           :http-evidence http-evidence)
+     client-auth-context)))
+
 (defun workspace-annotation-pending-auth-p (report)
   (eq (workspace-annotation-persistence-report-status-of report)
       :pending-auth))
+
+(defun workspace-annotation-journal-preflight-auth-blocked-p (report)
+  (and (eq (workspace-annotation-persistence-report-failure-stage-of report)
+           :prepare-transition)
+       (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+        report)))
 
 (defun workspace-annotation-persistence-report-journal-topic-id-of (report)
   (getf (workspace-annotation-persistence-report-journal-preflight-summary-of
@@ -1127,6 +1230,15 @@
         (getf summary :note-key)
         "the workspace journal companion")))
 
+(defun workspace-annotation-journal-preflight-blocked-cause (condition)
+  (cond
+    ((typep condition 'dmx-import-config-error)
+     "DMX auth is missing")
+    ((workspace-annotation-http-auth-blocked-p condition)
+     "DMX auth is missing or unauthorized for the journal companion topic")
+    (t
+     (format nil "~A" condition))))
+
 (defun workspace-annotation-journal-preflight-blocked-detail
     (summary workspace-label topicmap-label condition)
   (format nil
@@ -1134,7 +1246,7 @@
           (workspace-annotation-journal-preflight-label summary)
           (or workspace-label "the selected workspace")
           (or topicmap-label "the selected topicmap")
-          condition))
+          (workspace-annotation-journal-preflight-blocked-cause condition)))
 
 (defun workspace-annotation-persistence-report-saved-topic-id-of (report)
   (or (workspace-annotation-persistence-report-persisted-topic-id-of report)
@@ -1293,6 +1405,9 @@
         (workspace-annotation-persistence-report-previous-state-of report)
         :journal-preflight-summary
         (workspace-annotation-persistence-report-journal-preflight-summary-of
+         report)
+        :journal-preflight-auth-context
+        (workspace-annotation-persistence-report-journal-preflight-auth-context-of
          report)
         :assignment-auth-context
         (workspace-annotation-persistence-report-assignment-auth-context-of
@@ -3265,7 +3380,11 @@
                      :client resolved-client)))))
         (error (condition)
           (setf failure-condition (or failure-condition condition))))
-      (let* ((pending-auth-p
+      (let* ((journal-preflight-auth-blocked-p
+               (and (eq failure-stage :prepare-transition)
+                    (workspace-annotation-auth-blocked-condition-p
+                     failure-condition)))
+             (pending-auth-p
                (and (eq failure-stage :workspace-assignment)
                     persisted-topic-id
                     (typep failure-condition 'dmx-import-config-error)))
@@ -3315,6 +3434,13 @@
                 :subject-key subject-key
                 :previous-state previous-state
                 :journal-preflight-summary journal-preflight-summary
+                :journal-preflight-auth-context
+                (and journal-preflight-auth-blocked-p
+                     (workspace-annotation-journal-preflight-auth-context
+                      plan
+                      resolved-client
+                      journal-preflight-summary
+                      failure-condition))
                 :assignment-auth-context
                 (and pending-auth-p
                      (workspace-annotation-assignment-auth-context
@@ -3518,6 +3644,70 @@
                     report)
                    '())
                (list :explicit-auth-condition (format nil "~A" condition)))))))
+
+(defun continue-workspace-annotation-journal-preflight-with-client
+    (report client)
+  (unless (workspace-annotation-journal-preflight-auth-blocked-p report)
+    (error 'fedwiki-dmx-import-error
+           :message "Workspace annotation journal continuation requires a journal-preflight auth-blocked report"))
+  (let* ((plan (workspace-annotation-persistence-report-plan-of report))
+         (annotation (workspace-annotation-persistence-report-annotation-of
+                      report)))
+    (run-dock-annotation-workspace-persistence-debug
+     annotation
+     :workspace-topicmap-id
+     (workspace-annotation-persistence-report-workspace-topicmap-id-of report)
+     :workspace-id
+     (or (and plan
+              (dmx-workspace-annotation-write-plan-workspace-id plan))
+         (workspace-annotation-persistence-report-workspace-id-of report))
+     :client client
+     :view-props
+     (and plan
+          (dmx-workspace-annotation-write-plan-view-props plan))
+     :status
+     (and plan
+          (dmx-workspace-annotation-write-plan-status plan))
+     :supersedes-topic-id
+     (and plan
+          (dmx-workspace-annotation-write-plan-supersedes-topic-id plan))
+     :annotation-key
+     (workspace-annotation-persistence-report-annotation-key-of report)
+     :provenance-json
+     (and plan
+          (dmx-workspace-annotation-write-plan-provenance-json plan))
+     :storage-mode
+     (and plan
+          (dmx-workspace-annotation-write-plan-storage-mode plan)))))
+
+(defun continue-workspace-annotation-journal-preflight-with-explicit-auth
+    (report &key client auth-mode username password authorization-header
+       auth-token)
+  (handler-case
+      (continue-workspace-annotation-journal-preflight-with-client
+       report
+       (or client
+           (make-explicit-workspace-annotation-continuation-client
+            report
+            :auth-mode auth-mode
+            :username username
+            :password password
+            :authorization-header authorization-header
+            :auth-token auth-token)))
+    (error (condition)
+      (make-workspace-annotation-persistence-report-like
+       report
+       :condition condition
+       :report-status
+       (workspace-annotation-persistence-report-status-of report)
+       :failure-stage
+       (workspace-annotation-persistence-report-failure-stage-of report)
+       :journal-preflight-auth-context
+       (append
+        (or (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+             report)
+            '())
+        (list :explicit-auth-condition (format nil "~A" condition)))))))
 
 (defun probe-live-create-topic-for-dock-annotation
     (annotation &key workspace-topicmap-id workspace-id client view-props

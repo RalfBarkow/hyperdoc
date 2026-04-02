@@ -39,6 +39,13 @@
     :initarg :assignment-auth-available-p
     :initform nil)))
 
+(defclass journal-preflight-auth-blocked-compatibility-storage-http-dmx-import-client
+    (compatibility-storage-http-dmx-import-client)
+  ((journal-preflight-auth-available-p
+    :accessor journal-preflight-auth-available-p-of
+    :initarg :journal-preflight-auth-available-p
+    :initform nil)))
+
 (defclass failing-topic-update-dmx-import-client
     (compatibility-storage-http-dmx-import-client)
   ())
@@ -127,6 +134,37 @@
                              :object object)))
     (clog-moldable-inspector::load-views pane)
     (slot-value pane 'clog-moldable-inspector::views)))
+
+(defun workspace-annotation-smoke-journal-summary (client annotation)
+  (let ((subject-key (hyperdoc::workspace-annotation-topic-uri-of annotation)))
+    (hyperdoc::dmx-workspace-journal-preflight-summary
+     client
+     subject-key
+     "uri"
+     subject-key
+     *dmx-annotations-smoke-workspace-topicmap-id*
+     :subject-uri subject-key
+     :subject-kind "workspace-annotation"
+     :ownership-class "hyperdoc-workspace-annotation")))
+
+(defun signal-journal-preflight-http-401 (topic-id)
+  (let ((path (hyperdoc::dmx-topic-update-path topic-id))
+        (url (format nil "https://dmx.ralfbarkow.ch/core/topic/~D" topic-id)))
+    (error 'hyperdoc::dmx-import-http-error
+           :message (format nil "DMX import HTTP failure 401 for ~A" url)
+           :url url
+           :status-code 401
+           :response-body "{\"error\":\"journal-preflight-unauthorized\"}"
+           :evidence
+           (list :method :put
+                 :path path
+                 :auth-mode-summary "anonymous"
+                 :authorization-scheme nil
+                 :bootstrap-ran-p nil
+                 :request-content-type "application/json; charset=utf-8"
+                 :response-status-code 401
+                 :response-reason-phrase "Unauthorized"
+                 :response-body "{\"error\":\"journal-preflight-unauthorized\"}"))))
 
 (defun make-test-dock-annotation (&key note
                                        (context-view-title "Main page")
@@ -1342,6 +1380,9 @@
             :client client
             :dry-run nil))
          (saved-topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
+         (journal-summary-before
+           (workspace-annotation-smoke-journal-summary client persisted))
+         (journal-topic-id (getf journal-summary-before :existing-topic-id))
          (original
            (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)))
     (unwind-protect
@@ -1356,8 +1397,7 @@
                                    workspace-topicmap-id args subject-uri
                                    subject-kind ownership-class note-key
                                    note-kind))
-                  (error "DMX import HTTP failure 401 for https://dmx.ralfbarkow.ch/core/topic/~D"
-                         saved-topic-id)))
+                  (signal-journal-preflight-http-401 journal-topic-id)))
           (let* ((report
                    (hyperdoc::run-dock-annotation-workspace-persistence-debug
                     persisted
@@ -1374,6 +1414,9 @@
                     :topic-upsert))
                  (journal-summary
                    (hyperdoc::workspace-annotation-persistence-report-journal-preflight-summary-of
+                    report))
+                 (journal-auth-context
+                   (hyperdoc::workspace-annotation-persistence-report-journal-preflight-auth-context-of
                     report))
                  (journal-topic-proxy
                    (hyperdoc::workspace-annotation-persistence-report-journal-topic-proxy-of
@@ -1415,9 +1458,23 @@
              journal-summary
              "Prepare-transition failure reports must preserve the journal preflight summary")
             (assert-true
+             journal-auth-context
+             "Prepare-transition auth failures must preserve a dedicated journal auth context")
+            (assert-true
+             (hyperdoc::workspace-annotation-journal-preflight-auth-blocked-p
+              report)
+             "Prepare-transition auth failures must classify as a continuable journal auth-blocked boundary")
+            (assert-true
              (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
               report)
              "Prepare-transition failure reports must expose the journal companion topic id when known")
+            (assert-equal journal-topic-id
+                          (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
+                           report)
+                          "Prepare-transition failure reports must preserve the actual journal companion topic id")
+            (assert-true
+             (not (eql saved-topic-id journal-topic-id))
+             "The journal companion topic must remain distinct from the saved annotation carrier topic")
             (assert-true
              (typep journal-topic-proxy 'hyperdoc::dmx-topic-proxy)
              "Prepare-transition failure reports must expose the journal companion topic as an inspectable proxy")
@@ -1447,6 +1504,17 @@
              (search "Journal companion topic" html :test #'char-equal)
              "The Overview must expose the journal-side topic distinctly")
             (assert-true
+             (search "Journal companion auth blocked" html
+                     :test #'char-equal)
+             "The Overview must expose the journal auth-blocked subsection explicitly")
+            (assert-true
+             (search "Continue journal preflight with explicit auth" html
+                     :test #'char-equal)
+             "The Overview must expose an explicit-auth continuation path for the journal boundary")
+            (assert-true
+             (search "different objects" html :test #'char-equal)
+             "The Overview must explain that the saved annotation carrier topic and the journal companion topic are different objects")
+            (assert-true
              (search "context-window workspace (919815)" html
                      :test #'char-equal)
              "The Overview must show the workspace destination with a human-readable label")
@@ -1459,6 +1527,123 @@
                            html
                            :test #'char-equal))
              "The Overview must not reuse the old journal success wording on failure")))
+      (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
+            original))))
+
+(defun run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test ()
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (create-client
+           (make-instance 'compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9460))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Journal preflight continuation smoke")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client create-client
+            :dry-run nil))
+         (saved-topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
+         (journal-summary-before
+           (workspace-annotation-smoke-journal-summary create-client persisted))
+         (journal-topic-id (getf journal-summary-before :existing-topic-id))
+         (blocked-client
+           (make-instance
+            'journal-preflight-auth-blocked-compatibility-storage-http-dmx-import-client
+            :base-url "https://dmx.ralfbarkow.ch"
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :topics-by-external-key topics
+            :topicmap-memberships topicmap-memberships
+            :workspace-assignments workspace-assignments
+            :next-topic-id 9461))
+         (auth-client
+           (make-instance
+            'journal-preflight-auth-blocked-compatibility-storage-http-dmx-import-client
+            :base-url "https://dmx.ralfbarkow.ch"
+            :authorization-header "Bearer explicit-test-token"
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :journal-preflight-auth-available-p t
+            :topics-by-external-key topics
+            :topicmap-memberships topicmap-memberships
+            :workspace-assignments workspace-assignments
+            :next-topic-id 9462))
+         (original
+           (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)))
+    (unwind-protect
+        (progn
+          (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
+                (lambda (client subject-key lookup-kind lookup-value
+                         workspace-topicmap-id
+                         &rest args
+                         &key subject-uri subject-kind ownership-class
+                           note-key note-kind
+                         &allow-other-keys)
+                  (declare (ignore subject-uri subject-kind ownership-class
+                                   note-key note-kind))
+                  (if (and (typep client
+                                  'journal-preflight-auth-blocked-compatibility-storage-http-dmx-import-client)
+                           (not (journal-preflight-auth-available-p-of client)))
+                      (signal-journal-preflight-http-401 journal-topic-id)
+                      (apply original
+                             client
+                             subject-key
+                             lookup-kind
+                             lookup-value
+                             workspace-topicmap-id
+                             args))))
+          (let* ((blocked
+                   (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                    persisted
+                    :workspace-topicmap-id
+                    *dmx-annotations-smoke-workspace-topicmap-id*
+                    :client blocked-client))
+                 (continued
+                   (hyperdoc::continue-workspace-annotation-journal-preflight-with-explicit-auth
+                    blocked
+                    :client auth-client))
+                 (prepare-transition
+                   (hyperdoc::workspace-annotation-persistence-stage-result
+                    continued
+                    :prepare-transition))
+                 (topic-upsert
+                   (hyperdoc::workspace-annotation-persistence-stage-result
+                    continued
+                    :topic-upsert))
+                 (reopened
+                   (hyperdoc::workspace-annotation-persistence-report-persisted-annotation-of
+                    continued)))
+            (assert-true
+             (hyperdoc::workspace-annotation-journal-preflight-auth-blocked-p
+              blocked)
+             "The continuation smoke must start from a journal-preflight auth-blocked report")
+            (assert-equal :persisted
+                          (hyperdoc::workspace-annotation-persistence-report-status-of
+                           continued)
+                          "Explicit-auth journal continuation must rerun the staged persist successfully")
+            (assert-true
+             (null (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                    continued))
+             "Successful journal continuation must clear the failure stage")
+            (assert-equal :completed
+                          (getf prepare-transition :status)
+                          "Successful journal continuation must complete the prepare-transition stage")
+            (assert-equal :completed
+                          (getf topic-upsert :status)
+                          "Successful journal continuation must advance through topic-upsert after the journal boundary clears")
+            (assert-true
+             (typep reopened 'hyperdoc::workspace-dock-annotation)
+             "Successful journal continuation must reopen a workspace annotation object")
+            (assert-equal saved-topic-id
+                          (hyperdoc::workspace-annotation-topic-id-of reopened)
+                          "Successful journal continuation must keep updating the existing saved carrier topic instead of creating a new one")))
       (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
             original))))
 
@@ -1625,6 +1810,7 @@
   (run-dmx-workspace-annotation-pending-auth-render-smoke-test)
   (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
+  (run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)
