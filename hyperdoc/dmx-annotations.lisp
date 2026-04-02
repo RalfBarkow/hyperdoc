@@ -299,6 +299,10 @@
     :initarg :previous-state
     :initform nil
     :reader workspace-annotation-persistence-report-previous-state-of)
+   (journal-preflight-summary
+    :initarg :journal-preflight-summary
+    :initform nil
+    :reader workspace-annotation-persistence-report-journal-preflight-summary-of)
    (assignment-auth-context
     :initarg :assignment-auth-context
     :initform nil
@@ -776,7 +780,7 @@
     (:normalize-annotation "Normalize annotation")
     (:build-write-plan "Build write plan")
     (:validate-payload "Validate payload and view props")
-    (:prepare-transition "Prepare workspace journal transition")
+    (:prepare-transition "Prepare workspace journal preflight")
     (:topic-upsert "Execute topic upsert")
     (:workspace-assignment "Assign topic to workspace")
     (:topicmap-placement "Add topic to workspace topicmap")
@@ -1093,6 +1097,45 @@
   (eq (workspace-annotation-persistence-report-status-of report)
       :pending-auth))
 
+(defun workspace-annotation-persistence-report-journal-topic-id-of (report)
+  (getf (workspace-annotation-persistence-report-journal-preflight-summary-of
+         report)
+        :existing-topic-id))
+
+(defun workspace-annotation-persistence-report-journal-topic-proxy-of (report)
+  (let ((journal-topic-id
+          (workspace-annotation-persistence-report-journal-topic-id-of report))
+        (workspace-topicmap-id
+          (workspace-annotation-persistence-report-workspace-topicmap-id-of
+           report))
+        (client (workspace-annotation-persistence-report-client-of report)))
+    (and journal-topic-id
+         workspace-topicmap-id
+         (ignore-errors
+           (make-dmx-topic-proxy
+            :topic-id journal-topic-id
+            :topicmap-id workspace-topicmap-id
+            :base-url
+            (or (and (typep client 'http-dmx-import-client)
+                     (dmx-import-base-url-of client))
+                *dmx-base-url*))))))
+
+(defun workspace-annotation-journal-preflight-label (summary)
+  (when summary
+    (or (getf summary :note-title)
+        (getf summary :note-uri)
+        (getf summary :note-key)
+        "the workspace journal companion")))
+
+(defun workspace-annotation-journal-preflight-blocked-detail
+    (summary workspace-label topicmap-label condition)
+  (format nil
+          "Before annotation topic upsert could start, HyperDoc could not reconcile ~A for ~A in ~A because ~A. This is the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+          (workspace-annotation-journal-preflight-label summary)
+          (or workspace-label "the selected workspace")
+          (or topicmap-label "the selected topicmap")
+          condition))
+
 (defun workspace-annotation-persistence-report-saved-topic-id-of (report)
   (or (workspace-annotation-persistence-report-persisted-topic-id-of report)
       (let ((plan (workspace-annotation-persistence-report-plan-of report)))
@@ -1248,6 +1291,9 @@
         (workspace-annotation-persistence-report-subject-key-of report)
         :previous-state
         (workspace-annotation-persistence-report-previous-state-of report)
+        :journal-preflight-summary
+        (workspace-annotation-persistence-report-journal-preflight-summary-of
+         report)
         :assignment-auth-context
         (workspace-annotation-persistence-report-assignment-auth-context-of
          report)))
@@ -2989,6 +3035,7 @@
            (workspace-annotation-persistence-debug-workspace-topicmap-id-of debug))
          (subject-key nil)
          (previous-state nil)
+         (journal-preflight-summary nil)
          (plan nil))
     (labels ((record-stage (stage status summary &key detail)
                (push (workspace-annotation-persistence-stage-entry
@@ -3064,10 +3111,20 @@
                   (dmx-topicmap-view-props-json-string
                    (dmx-workspace-annotation-write-plan-view-props plan))))
             (setf subject-key (dmx-workspace-annotation-write-plan-uri plan))
+            (setf journal-preflight-summary
+                  (dmx-workspace-journal-preflight-summary
+                   resolved-client
+                   subject-key
+                   "uri"
+                   subject-key
+                   resolved-topicmap-id
+                   :subject-uri subject-key
+                   :subject-kind "workspace-annotation"
+                   :ownership-class "hyperdoc-workspace-annotation"))
             (setf previous-state
                   (run-stage
                    :prepare-transition
-                   "Loaded the previous workspace-journal state for this annotation subject."
+                   "Prepared the workspace-journal preflight state for this annotation subject."
                    (lambda ()
                      (dmx-workspace-journal-prepare-transition
                       resolved-client
@@ -3077,7 +3134,18 @@
                       resolved-topicmap-id
                       :subject-uri subject-key
                       :subject-kind "workspace-annotation"
-                      :ownership-class "hyperdoc-workspace-annotation"))))
+                      :ownership-class "hyperdoc-workspace-annotation"))
+                   :error-summary
+                   "Workspace journal preflight blocked"
+                   :error-detail
+                   (lambda (condition)
+                     (workspace-annotation-journal-preflight-blocked-detail
+                      journal-preflight-summary
+                      (dmx-workspace-annotation-workspace-label
+                       (dmx-workspace-annotation-write-plan-workspace-id plan))
+                      (dmx-workspace-annotation-topicmap-label
+                       resolved-topicmap-id)
+                      condition))))
             (setf topic
                   (run-stage
                    :topic-upsert
@@ -3246,6 +3314,7 @@
                 :persisted-annotation persisted-annotation
                 :subject-key subject-key
                 :previous-state previous-state
+                :journal-preflight-summary journal-preflight-summary
                 :assignment-auth-context
                 (and pending-auth-p
                      (workspace-annotation-assignment-auth-context

@@ -253,6 +253,117 @@
                  saved-carrier-topic
                  :display "Saved carrier topic"))))))))
 
+(defun render-workspace-annotation-journal-preflight-surface (report)
+  (let* ((summary
+           (workspace-annotation-persistence-report-journal-preflight-summary-of
+            report))
+         (failure-stage
+           (workspace-annotation-persistence-report-failure-stage-of report))
+         (plan (workspace-annotation-persistence-report-plan-of report))
+         (destination (and plan
+                           (dmx-workspace-annotation-write-plan-destination
+                            plan)))
+         (heading
+           (if (eq failure-stage :prepare-transition)
+               "Workspace journal preflight blocked"
+               "Workspace journal preflight"))
+         (description
+           (if (eq failure-stage :prepare-transition)
+               "Before annotation topic upsert could start, HyperDoc could not reconcile the companion workspace journal for this annotation subject. This is the journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+               "HyperDoc inspected the companion workspace journal for this annotation subject before topic upsert."))
+         (journal-topic-id
+           (workspace-annotation-persistence-report-journal-topic-id-of report))
+         (journal-topic
+           (workspace-annotation-persistence-report-journal-topic-proxy-of
+            report)))
+    (when summary
+      (views:html
+        (:h4 (views:esc heading))
+        (:p (views:esc description))
+        (:table :class "inspector-table"
+                (render-workspace-annotation-destination-rows
+                 :workspace-id
+                 (and plan
+                      (dmx-workspace-annotation-write-plan-workspace-id plan))
+                 :workspace-topicmap-id
+                 (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                  report)
+                 :workspace-label
+                 (and destination
+                      (dmx-workspace-annotation-workspace-label
+                       (dmx-workspace-annotation-destination-workspace-id
+                        destination)))
+                 :workspace-topicmap-label
+                 (and destination
+                      (dmx-workspace-annotation-topicmap-label
+                       (dmx-workspace-annotation-destination-workspace-topicmap-id
+                        destination)))
+                 :destination-source-label
+                 (workspace-annotation-render-value
+                  (and destination
+                       (dmx-workspace-annotation-destination-source-label
+                        (dmx-workspace-annotation-destination-source
+                         destination))))
+                 :workspace-source-label
+                 (workspace-annotation-render-value
+                  (and destination
+                       (dmx-workspace-annotation-destination-source-label
+                        (dmx-workspace-annotation-destination-workspace-source
+                         destination))))
+                 :topicmap-source-label
+                 (workspace-annotation-render-value
+                  (and destination
+                       (dmx-workspace-annotation-destination-source-label
+                        (dmx-workspace-annotation-destination-topicmap-source
+                         destination))))
+                 :destination-rationale
+                 (and destination
+                      (dmx-workspace-annotation-destination-rationale
+                       destination)))
+                (:tr (:th "Journal companion")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-journal-preflight-label
+                                  summary))))))
+                (:tr (:th "Journal topic id")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 journal-topic-id)))))
+                (:tr (:th "Journal note key")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf summary :note-key))))))
+                (:tr (:th "Journal note uri")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf summary :note-uri))))))
+                (:tr (:th "Journal revision")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf summary :current-revision))))))
+                (:tr (:th "Subject key")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf summary :subject-key))))))
+                (:tr (:th "Subject lookup")
+                     (:td (:tt (views:esc
+                                (format nil "~A: ~A"
+                                        (workspace-annotation-render-value
+                                         (getf summary :subject-lookup-kind))
+                                        (workspace-annotation-render-value
+                                         (getf summary :subject-lookup-value)))))))
+                (when-let (lookup-condition (getf summary :lookup-condition))
+                  (views:html
+                    (:tr (:th "Journal lookup detail")
+                         (:td (views:esc
+                               (workspace-annotation-render-value
+                                lookup-condition)))))))
+        (when journal-topic
+          (views:html
+            (:p (views:object-ref
+                 journal-topic
+                 :display "Journal companion topic"))))))))
+
 (defun render-workspace-annotation-persistence-stage-table (report)
   (let ((stages (workspace-annotation-persistence-report-stage-results-of report)))
     (views:html
@@ -1514,6 +1625,12 @@
               (:p (views:object-ref
                    persisted
                    :display "Persisted workspace annotation")))))
+      (when (or (eq (workspace-annotation-persistence-report-failure-stage-of
+                     report)
+                    :prepare-transition)
+                (workspace-annotation-persistence-report-journal-topic-id-of
+                 report))
+        (render-workspace-annotation-journal-preflight-surface report))
       (when-let (condition
                    (workspace-annotation-persistence-report-condition-of report))
         (views:html

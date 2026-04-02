@@ -748,6 +748,61 @@
            :note-kind note-kind)
         current-live-state)))
 
+(defun dmx-workspace-journal-preflight-summary
+    (client subject-key lookup-kind lookup-value workspace-topicmap-id
+     &key subject-uri subject-kind ownership-class note-key note-kind)
+  (let* ((fallback-stream
+           (dmx-workspace-journal-make-base-stream
+            subject-key
+            lookup-kind
+            lookup-value
+            workspace-topicmap-id
+            :subject-uri subject-uri
+            :subject-kind subject-kind
+            :ownership-class ownership-class
+            :note-key note-key
+            :note-kind note-kind))
+         (stream fallback-stream)
+         (existing-topic nil)
+         (lookup-condition nil))
+    (handler-case
+        (multiple-value-setq (stream existing-topic)
+          (dmx-workspace-journal-read-stream
+           client
+           subject-key
+           lookup-kind
+           lookup-value
+           workspace-topicmap-id
+           :subject-uri subject-uri
+           :subject-kind subject-kind
+           :ownership-class ownership-class
+           :note-key note-key
+           :note-kind note-kind))
+      (error (condition)
+        (setf lookup-condition condition)))
+    (let ((resolved-stream (or stream fallback-stream))
+          (journal-uri (dmx-workspace-journal-note-uri subject-key)))
+      (list :subject-key (gethash "subjectKey" resolved-stream)
+            :subject-uri (gethash "subjectUri" resolved-stream)
+            :subject-kind (gethash "subjectKind" resolved-stream)
+            :subject-lookup-kind
+            (dmx-workspace-journal-stream-subject-lookup-kind resolved-stream)
+            :subject-lookup-value
+            (dmx-workspace-journal-stream-subject-lookup-value resolved-stream)
+            :ownership-class (gethash "ownershipClass" resolved-stream)
+            :workspace-topicmap-id (gethash "workspaceTopicmapId" resolved-stream)
+            :note-key (gethash "noteKey" resolved-stream)
+            :note-kind (gethash "noteKind" resolved-stream)
+            :note-uri journal-uri
+            :note-title (dmx-workspace-journal-visible-title resolved-stream)
+            :current-revision (gethash "currentRevision" resolved-stream)
+            :existing-topic-id
+            (and existing-topic
+                 (dmx-import-object-id existing-topic))
+            :lookup-condition
+            (and lookup-condition
+                 (format nil "~A" lookup-condition))))))
+
 (defun dmx-workspace-journal-record-transition
     (client previous-state next-state workspace-topicmap-id)
   (unless *dmx-workspace-journal-suppressed-p*

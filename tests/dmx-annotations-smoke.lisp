@@ -1319,6 +1319,149 @@
      (search "dmx.notes.note" html :test #'char-equal)
      "The Overview must keep the physical carrier type explicit")))
 
+(defun run-dmx-workspace-annotation-journal-preflight-failure-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (client
+           (make-instance 'compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9450))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Journal preflight failure smoke")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client client
+            :dry-run nil))
+         (saved-topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
+         (original
+           (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)))
+    (unwind-protect
+        (progn
+          (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
+                (lambda (client subject-key lookup-kind lookup-value workspace-topicmap-id
+                         &rest args
+                         &key subject-uri subject-kind ownership-class
+                           note-key note-kind
+                         &allow-other-keys)
+                  (declare (ignore client subject-key lookup-kind lookup-value
+                                   workspace-topicmap-id args subject-uri
+                                   subject-kind ownership-class note-key
+                                   note-kind))
+                  (error "DMX import HTTP failure 401 for https://dmx.ralfbarkow.ch/core/topic/~D"
+                         saved-topic-id)))
+          (let* ((report
+                   (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                    persisted
+                    :workspace-topicmap-id
+                    *dmx-annotations-smoke-workspace-topicmap-id*
+                    :client client))
+                 (prepare-transition
+                   (hyperdoc::workspace-annotation-persistence-stage-result
+                    report
+                    :prepare-transition))
+                 (topic-upsert
+                   (hyperdoc::workspace-annotation-persistence-stage-result
+                    report
+                    :topic-upsert))
+                 (journal-summary
+                   (hyperdoc::workspace-annotation-persistence-report-journal-preflight-summary-of
+                    report))
+                 (journal-topic-proxy
+                   (hyperdoc::workspace-annotation-persistence-report-journal-topic-proxy-of
+                    report))
+                 (views (dmx-annotation-smoke-load-inspector-views-for-object
+                         report))
+                 (overview (dmx-annotation-smoke-find-view-by-title views
+                                                                    "Overview"))
+                 (html (and overview
+                            (html-inspector-views:view-html overview))))
+            (assert-true
+             (typep report 'hyperdoc::workspace-annotation-persistence-report)
+             "Prepare-transition failures must still return an inspectable persistence report")
+            (assert-equal :failed
+                          (hyperdoc::workspace-annotation-persistence-report-status-of
+                           report)
+                          "Prepare-transition failures must classify the persistence report as failed")
+            (assert-equal :prepare-transition
+                          (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                           report)
+                          "Prepare-transition failures must stay classified at the journal preflight boundary")
+            (assert-equal :error
+                          (getf prepare-transition :status)
+                          "The prepare-transition stage must be marked as error")
+            (assert-true
+             (search "Workspace journal preflight blocked"
+                     (getf prepare-transition :summary)
+                     :test #'char-equal)
+             "Prepare-transition failures must use explicit blocked wording instead of a reused success summary")
+            (assert-true
+             (null (search "Loaded the previous workspace-journal state"
+                           (getf prepare-transition :summary)
+                           :test #'char-equal))
+             "Prepare-transition failures must not reuse the old success wording")
+            (assert-true
+             (null topic-upsert)
+             "Journal-preflight failures must stop before topic-upsert starts")
+            (assert-true
+             journal-summary
+             "Prepare-transition failure reports must preserve the journal preflight summary")
+            (assert-true
+             (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
+              report)
+             "Prepare-transition failure reports must expose the journal companion topic id when known")
+            (assert-true
+             (typep journal-topic-proxy 'hyperdoc::dmx-topic-proxy)
+             "Prepare-transition failure reports must expose the journal companion topic as an inspectable proxy")
+            (assert-true
+             overview
+             "Prepare-transition failure reports must expose an Overview view")
+            (assert-true
+             (stringp html)
+             "Prepare-transition failure reports must render an Overview HTML surface")
+            (assert-true
+             (search "Workspace journal preflight" html :test #'char-equal)
+             "The Overview must expose the journal-preflight section explicitly")
+            (assert-true
+             (search "Workspace journal preflight blocked" html
+                     :test #'char-equal)
+             "The Overview must use blocked wording for journal preflight failures")
+            (assert-true
+             (search "before annotation topic upsert" html :test #'char-equal)
+             "The Overview must explain that the journal boundary happens before topic-upsert")
+            (assert-true
+             (search "Saved annotation object" html :test #'char-equal)
+             "The Overview must still expose the semantic saved annotation object")
+            (assert-true
+             (search "Saved carrier topic" html :test #'char-equal)
+             "The Overview must still expose the physical saved carrier topic")
+            (assert-true
+             (search "Journal companion topic" html :test #'char-equal)
+             "The Overview must expose the journal-side topic distinctly")
+            (assert-true
+             (search "context-window workspace (919815)" html
+                     :test #'char-equal)
+             "The Overview must show the workspace destination with a human-readable label")
+            (assert-true
+             (search "context-window topicmap (919822)" html
+                     :test #'char-equal)
+             "The Overview must show the topicmap destination with a human-readable label")
+            (assert-true
+             (null (search "Loaded the previous workspace-journal state"
+                           html
+                           :test #'char-equal))
+             "The Overview must not reuse the old journal success wording on failure")))
+      (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
+            original))))
+
 (defun run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test ()
   (let* ((topics (make-hash-table :test #'equal))
          (topicmap-memberships (make-hash-table :test #'equal))
@@ -1481,6 +1624,7 @@
   (run-dmx-workspace-annotation-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-render-smoke-test)
   (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
+  (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
   (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)
