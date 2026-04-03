@@ -1885,6 +1885,578 @@
       (t
        (make-instance 'null-dmx-import-client)))))
 
+(defparameter *dmx-auth-crosswalk-default-workspace-id* 919815)
+(defparameter *dmx-auth-crosswalk-default-topic-id* 922464)
+(defparameter *dmx-auth-crosswalk-default-username* "alice")
+(defparameter *dmx-auth-crosswalk-default-password* "example-password")
+(defparameter *dmx-auth-crosswalk-default-basic-header*
+  "Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA==")
+(defparameter *dmx-auth-crosswalk-default-bearer-token*
+  "eyJhbGciOi...example")
+
+(defclass dmx-auth-path-example ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary)
+   (input-mode :reader dmx-auth-path-example-input-mode-of
+               :reader dmx-auth-mode-example-chosen-mode-of
+               :initarg :input-mode)
+   (raw-input :reader dmx-auth-path-example-raw-input-of
+              :reader dmx-auth-mode-example-raw-fields-of
+              :initarg :raw-input
+              :initform nil)
+   (normalized-mode :reader dmx-auth-path-example-normalized-mode-of
+                    :reader dmx-auth-mode-example-normalized-mode-of
+                    :initarg :normalized-mode)
+   (derived-request-shape
+    :reader dmx-auth-path-example-derived-request-shape-of
+    :initarg :derived-request-shape
+    :initform nil)
+   (dmx-credentials-shape
+    :reader dmx-auth-path-example-dmx-credentials-shape-of
+    :reader dmx-auth-mode-example-derived-credentials-of
+    :initarg :dmx-credentials-shape
+    :initform nil)
+   (authorization-method-name
+    :reader dmx-auth-path-example-authorization-method-name-of
+    :initarg :authorization-method-name
+    :initform nil)
+   (bootstrap-required-p
+    :reader dmx-auth-path-example-bootstrap-required-p-of
+    :reader dmx-auth-mode-example-bootstrap-capable-p-of
+    :initarg :bootstrap-required-p
+    :initform nil)
+   (session-transition
+    :reader dmx-auth-path-example-session-transition-of
+    :initarg :session-transition
+    :initform nil)
+   (post-login-request-shape
+    :reader dmx-auth-path-example-post-login-request-shape-of
+    :reader dmx-auth-mode-example-post-bootstrap-request-shape-of
+    :initarg :post-login-request-shape
+    :initform nil)
+   (state-trace
+    :reader dmx-auth-path-example-state-trace-of
+    :reader dmx-auth-mode-example-state-machine-steps-of
+    :initarg :state-trace
+    :initform nil)
+   (source-evidence
+    :reader dmx-auth-path-example-source-evidence-of
+    :reader dmx-auth-mode-example-source-evidence-of
+    :initarg :source-evidence
+    :initform nil)
+   (installation-dependencies
+    :reader dmx-auth-path-example-installation-dependencies-of
+    :initarg :installation-dependencies
+    :initform nil)
+   (notes
+    :reader dmx-auth-path-example-notes-of
+    :reader dmx-auth-mode-example-contract-notes-of
+    :initarg :notes
+    :initform nil)
+   (detected-authorization-scheme
+    :reader dmx-auth-mode-example-detected-authorization-scheme-of
+    :initarg :detected-authorization-scheme
+    :initform nil)
+   (derived-authorization-header
+    :reader dmx-auth-mode-example-derived-authorization-header-of
+    :initarg :derived-authorization-header
+    :initform nil)
+   (bootstrap-request-shape
+    :reader dmx-auth-mode-example-bootstrap-request-shape-of
+    :initarg :bootstrap-request-shape
+    :initform nil)
+   (expected-cookie-shape
+    :reader dmx-auth-mode-example-expected-cookie-shape-of
+    :initarg :expected-cookie-shape
+    :initform "none")
+   (summarized-request-auth-mode
+    :reader dmx-auth-mode-example-summarized-request-auth-mode-of
+    :initarg :summarized-request-auth-mode
+    :initform "anonymous")
+   (workspace-id
+    :reader dmx-auth-mode-example-workspace-id-of
+    :initarg :workspace-id
+    :initform *dmx-auth-crosswalk-default-workspace-id*)
+   (topic-id
+    :reader dmx-auth-mode-example-topic-id-of
+    :initarg :topic-id
+    :initform *dmx-auth-crosswalk-default-topic-id*)))
+
+(defclass dmx-auth-crosswalk ()
+  ((id :reader id-of
+       :initarg :id
+       :initform "dmx-auth-crosswalk/three-mode")
+   (title :reader title-of
+          :initarg :title
+          :initform "HyperDoc three-mode DMX auth crosswalk")
+   (summary :reader summary-of
+            :initarg :summary
+            :initform
+            "Inspectable learning object that keeps the three HyperDoc DMX auth input modes, the DMX-side Authorization to Credentials path, and the JSESSIONID aftermath visible without changing guarded live behavior.")
+   (examples :reader dmx-auth-crosswalk-examples-of
+             :initarg :examples
+             :initform nil)))
+
+(defmethod print-object ((object dmx-auth-path-example) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object dmx-auth-crosswalk) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defun dmx-auth-mode-label (mode)
+  (case (normalize-http-dmx-import-auth-mode mode 'dmx-auth-mode-label)
+    (:basic "username/password")
+    (:header "authorization header")
+    (:token "bearer token")))
+
+(defun base64-character-value (char)
+  (let ((position (position char *base64-alphabet* :test #'char=)))
+    (cond
+      (position position)
+      ((char= char #\=) nil)
+      (t
+       (error 'dmx-import-config-error
+              :message (format nil
+                               "Invalid Base64 character ~S while decoding Authorization header example"
+                               char))))))
+
+(defun decode-base64-string-to-octets (encoded)
+  (let* ((clean (remove-if (lambda (char)
+                             (find char '(#\Space #\Tab #\Newline #\Return)))
+                           encoded))
+         (length (length clean)))
+    (unless (zerop (mod length 4))
+      (error 'dmx-import-config-error
+             :message (format nil
+                              "Invalid Base64 length ~D while decoding Authorization header example"
+                              length)))
+    (let ((octets (make-array 0
+                              :element-type '(unsigned-byte 8)
+                              :adjustable t
+                              :fill-pointer 0)))
+      (loop for index from 0 below length by 4
+            for c1 = (char clean index)
+            for c2 = (char clean (1+ index))
+            for c3 = (char clean (+ index 2))
+            for c4 = (char clean (+ index 3))
+            for v1 = (base64-character-value c1)
+            for v2 = (base64-character-value c2)
+            for v3 = (base64-character-value c3)
+            for v4 = (base64-character-value c4)
+            do (unless (and (integerp v1) (integerp v2))
+                 (error 'dmx-import-config-error
+                        :message "Invalid Base64 quartet while decoding Authorization header example"))
+               (let ((triple (logior (ash v1 18)
+                                     (ash v2 12)
+                                     (ash (or v3 0) 6)
+                                     (or v4 0))))
+                 (vector-push-extend (ldb (byte 8 16) triple) octets)
+                 (unless (null v3)
+                   (vector-push-extend (ldb (byte 8 8) triple) octets))
+                 (unless (null v4)
+                   (vector-push-extend (ldb (byte 8 0) triple) octets))))
+      octets)))
+
+(defun latin1-octets-to-string (octets)
+  (with-output-to-string (stream)
+    (loop for octet across octets
+          do (write-char (or (code-char octet) #\?) stream))))
+
+(defun split-http-authorization-header (authorization-header)
+  (let* ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return)
+                               (or authorization-header "")))
+         (separator
+           (position-if (lambda (char)
+                          (find char '(#\Space #\Tab)))
+                        trimmed)))
+    (if separator
+        (list (subseq trimmed 0 separator)
+              (string-trim '(#\Space #\Tab)
+                           (subseq trimmed separator)))
+        (list trimmed ""))))
+
+(defun decode-basic-authorization-header-for-display (authorization-header)
+  (destructuring-bind (method token)
+      (split-http-authorization-header authorization-header)
+    (when (and (plusp (length token))
+               (string-equal method "Basic"))
+      (let* ((decoded
+               (latin1-octets-to-string
+                (decode-base64-string-to-octets token)))
+             (separator (position #\: decoded))
+             (username (if separator
+                           (subseq decoded 0 separator)
+                           decoded))
+             (password (if separator
+                           (subseq decoded (1+ separator))
+                           "")))
+        (list (cons "username" username)
+              (cons "password" password)
+              (cons "methodName" method))))))
+
+(defun dmx-auth-path-example-state-trace (mode)
+  (let ((resolved-mode
+          (normalize-http-dmx-import-auth-mode
+           mode
+           'dmx-auth-path-example-state-trace)))
+    (append
+     (list
+      (list :label "S1 credentials captured in UI"
+            :detail "The chosen mode now has enough raw input to derive an outgoing request shape."
+            :classification "HyperDoc-derived")
+      (list :label "S2 auth mode selected"
+            :detail (format nil
+                            "The active mode is ~A."
+                            (dmx-auth-mode-label resolved-mode))
+            :classification "HyperDoc-derived")
+      (list :label "S3 explicit auth client built"
+            :detail "HyperDoc normalizes the selected mode and derives the outgoing Authorization/session behavior without storing credentials durably."
+            :classification "HyperDoc-derived"))
+     (when (eq resolved-mode :basic)
+       (list
+        (list :label "S4 bootstrap request prepared"
+              :detail "Username/password mode turns into a Basic Authorization header for POST /access-control/login."
+              :classification "HyperDoc-derived")
+        (list :label "S5 bootstrap request sent"
+              :detail "DMX sees an Authorization header and constructs Credentials from it."
+              :classification "DMX-core-native")
+        (list :label "S6 bootstrap response received"
+              :detail "Success is expected to return Set-Cookie: JSESSIONID=..."
+              :classification "DMX-core-native")
+        (list :label "S7 session material extracted"
+              :detail "HyperDoc keeps JSESSIONID ephemerally and switches later guarded requests to session-backed auth."
+              :classification "HyperDoc-derived")))
+     (list
+      (list :label "S8 guarded request prepared"
+            :detail "The guarded repair/action request is shaped with either a carried Authorization header or the session cookie aftermath."
+            :classification "HyperDoc-derived")
+      (list :label "S9 guarded request sent"
+            :detail "DMX evaluates object/workspace ACL at the actual mutation endpoint."
+            :classification "DMX-core-native")
+      (list :label "S10 guarded response received"
+            :detail "The first real blocking boundary appears here if ACL, workspace assignment, or installation-specific auth support is missing."
+            :classification "Shared boundary")))))
+
+(defun dmx-auth-mode-example-state-machine-steps (mode)
+  (dmx-auth-path-example-state-trace mode))
+
+(defun dmx-auth-path-example-source-evidence (mode)
+  (let ((resolved-mode
+          (normalize-http-dmx-import-auth-mode
+           mode
+           'dmx-auth-path-example-source-evidence)))
+    (append
+     (list
+      (list :layer "HyperDoc"
+            :reference "hyperdoc/dmx-import.lisp :: normalize-http-dmx-import-auth-mode"
+            :detail "Normalizes username/password, authorization header, and bearer token into the three explicit input modes.")
+      (list :layer "HyperDoc"
+            :reference "hyperdoc/dmx-import.lisp :: explicit-http-dmx-import-authorization-header"
+            :detail "Builds the outgoing Authorization header for the selected input mode.")
+      (list :layer "HyperDoc"
+            :reference "hyperdoc/dmx-import.lisp :: make-http-dmx-import-client-from-explicit-auth"
+            :detail "Marks username/password mode as session-login-required and preserves direct-header modes as direct-header only.")
+      (list :layer "HyperDoc"
+            :reference "hyperdoc/dmx-import.lisp :: summarize-http-authorization-scheme / summarize-http-cookie-shape / summarize-http-request-auth-mode"
+            :detail "Produces the same auth and cookie summaries already used in the repair-console traces.")
+      (list :layer "DMX platform"
+            :reference "systems.dmx.accesscontrol.AccessControlPlugin.checkAuthorization"
+            :detail "Reads Authorization, builds Credentials, resolves AuthorizationMethod for non-Basic method names, or falls back to AnonymousAccessFilter.")
+      (list :layer "DMX platform"
+            :reference "systems.dmx.core.service.accesscontrol.Credentials(String authHeader)"
+            :detail "Parses the Authorization header into username/password/methodName for the DMX-side credential check path.")
+      (list :layer "DMX platform"
+            :reference "systems.dmx.accesscontrol.AccessControlPlugin.tryLogin / _login"
+            :detail "Checks credentials and, on success, attaches username to the servlet session."))
+     (when (eq resolved-mode :token)
+       (list
+        (list :layer "DMX platform"
+              :reference "systems.dmx.accesscontrol.AuthorizationMethod"
+              :detail "Bearer-like support depends on a registered non-Basic AuthorizationMethod or a compatible installation-specific gateway boundary.")))
+     (list
+      (list :layer "DMX platform"
+            :reference "systems.dmx.accesscontrol.AnonymousAccessFilter"
+            :detail "Anonymous access is a fallback filter for request prefixes and is not the primary repair-console input mode.")))))
+
+(defun dmx-auth-mode-example-source-evidence (mode)
+  (dmx-auth-path-example-source-evidence mode))
+
+(defun dmx-auth-path-example-notes (mode)
+  (let ((resolved-mode
+          (normalize-http-dmx-import-auth-mode
+           mode
+           'dmx-auth-path-example-notes)))
+    (case resolved-mode
+      (:basic
+       (list
+        (list :label "Username/password input"
+              :classification "HyperDoc-derived"
+              :detail "This is a repair-console operator input mode, not a separate DMX wire format. HyperDoc derives an equivalent Basic Authorization header for the bootstrap request.")
+        (list :label "Credentials path"
+              :classification "DMX-core-native"
+              :detail "DMX reads the Authorization header, constructs Credentials, checks them, and then attaches username to the servlet session.")
+        (list :label "JSESSIONID aftermath"
+              :classification "HyperDoc-derived"
+              :detail "JSESSIONID is the later session-backed request shape after a successful bootstrap. It is not a primary credential entry mode.")))
+      (:header
+       (list
+        (list :label "Authorization header input"
+              :classification "HyperDoc-derived"
+              :detail "HyperDoc preserves the supplied Authorization header exactly and does not synthesize a separate login bootstrap in this mode.")
+        (list :label "Basic header decoding"
+              :classification "DMX-core-native"
+              :detail "If the supplied header is Basic, DMX-core-native Credentials parsing can be displayed safely as username/password/methodName for learning purposes.")
+        (list :label "Session aftermath"
+              :classification "HyperDoc-derived"
+              :detail "Direct-header mode remains direct-header only in HyperDoc. JSESSIONID is not assumed unless the installation creates one separately.")))
+      (:token
+       (list
+        (list :label "Bearer token input"
+              :classification "HyperDoc-derived"
+              :detail "HyperDoc synthesizes Authorization: Bearer <token> from the entered token.")
+        (list :label "Backend contract"
+              :classification "Installation-dependent"
+              :detail "Bearer support is not universally native to DMX core. It depends on a registered non-Basic AuthorizationMethod or a compatible proxy/gateway in front of DMX.")
+        (list :label "Anonymous fallback"
+              :classification "DMX-core-native"
+              :detail "AnonymousAccessFilter may still allow read paths, but guarded repair/mutation must not rely on anonymous fallback."))))))
+
+(defun dmx-auth-mode-example-contract-notes (mode)
+  (dmx-auth-path-example-notes mode))
+
+(defun dmx-auth-path-example-installation-dependencies (mode &key detected-scheme)
+  (let ((resolved-mode
+          (normalize-http-dmx-import-auth-mode
+           mode
+           'dmx-auth-path-example-installation-dependencies)))
+    (case resolved-mode
+      (:basic
+       (list
+        (list :label "DMX core path"
+              :classification "DMX-core-native"
+              :detail "Basic Authorization parsing into Credentials and session bootstrap through /access-control/login are native DMX paths.")))
+      (:header
+       (if (or (null detected-scheme)
+               (string= detected-scheme "Basic"))
+           (list
+            (list :label "Direct Basic header"
+                  :classification "DMX-core-native"
+                  :detail "A Basic Authorization header is directly interpretable by DMX Credentials without installation-specific extensions."))
+           (list
+            (list :label "Custom non-Basic scheme"
+                  :classification "Installation-dependent"
+                  :detail "A non-Basic Authorization header needs a matching AuthorizationMethod inside DMX or a compatible proxy/gateway that translates it before DMX checks credentials."))))
+      (:token
+       (list
+        (list :label "Bearer support"
+              :classification "Installation-dependent"
+              :detail "Bearer token examples depend on a registered non-Basic AuthorizationMethod or a compatible proxy/gateway. HyperDoc does not claim bearer is universally native to DMX core."))))))
+
+(defun make-dmx-auth-path-example
+    (&key auth-mode username password authorization-header auth-token
+       (workspace-id *dmx-auth-crosswalk-default-workspace-id*)
+       (topic-id *dmx-auth-crosswalk-default-topic-id*))
+  (let* ((resolved-mode
+           (normalize-http-dmx-import-auth-mode
+            auth-mode
+            'make-dmx-auth-path-example))
+         (raw-fields
+           (case resolved-mode
+             (:basic
+              (list (cons "Username" (or username ""))
+                    (cons "Password" (or password ""))))
+             (:header
+              (list (cons "Authorization header" (or authorization-header ""))))
+             (:token
+              (list (cons "Bearer token" (or auth-token ""))))))
+         (derived-authorization-header
+           (explicit-http-dmx-import-authorization-header
+            :auth-mode resolved-mode
+            :authorization-header authorization-header
+           :auth-token auth-token
+           :username username
+           :password password
+           :boundary 'make-dmx-auth-path-example))
+         (detected-scheme
+           (summarize-http-authorization-scheme
+            derived-authorization-header))
+         (authorization-method-name
+           (case resolved-mode
+             (:basic "Basic")
+             (:header detected-scheme)
+             (:token "Bearer")))
+         (derived-credentials
+           (case resolved-mode
+             (:basic
+              (list (cons "username" (or username ""))
+                    (cons "password" (or password ""))
+                    (cons "methodName" "Basic")))
+             (:header
+              (or (ignore-errors
+                    (decode-basic-authorization-header-for-display
+                     derived-authorization-header))
+                  (list (cons "note"
+                              "No DMX-core-native Credentials summary available for this header."))))
+             (:token
+              (list (cons "note"
+                          "No DMX-core-native Credentials summary is assumed for an arbitrary bearer token example.")))))
+         (bootstrap-request-shape
+           (if (eq resolved-mode :basic)
+               (list (cons "Method" "POST")
+                     (cons "Path" (dmx-access-control-login-path))
+                     (cons "Authorization header" derived-authorization-header)
+                     (cons "Cookie" "-")
+                     (cons "Cookie shape" "none")
+                     (cons "Accept" "-")
+                     (cons "Content-Length" "0")
+                     (cons "Content-Type" "-")
+                     (cons "Summarized request auth mode"
+                           (summarize-http-request-auth-mode
+                            derived-authorization-header
+                            nil)))
+               (list (cons "Status" "not used")
+                     (cons "Reason"
+                           "This mode is direct-header only in HyperDoc and does not synthesize a separate login bootstrap request."))))
+         (post-cookie-header
+           (case resolved-mode
+             (:basic
+              (format nil "JSESSIONID=<session-id>; dmx_workspace_id=~D"
+                      workspace-id))
+             (otherwise
+              (format nil "dmx_workspace_id=~D" workspace-id))))
+         (post-authorization-header
+           (if (eq resolved-mode :basic)
+               nil
+               derived-authorization-header))
+         (post-bootstrap-request-shape
+           (list (cons "Method" "PUT")
+                 (cons "Path"
+                       (dmx-workspace-assign-object-path workspace-id topic-id))
+                 (cons "Authorization header"
+                       (or post-authorization-header "-"))
+                 (cons "Cookie" post-cookie-header)
+                 (cons "Cookie shape"
+                       (summarize-http-cookie-shape post-cookie-header))
+                 (cons "Accept" "application/json")
+                 (cons "Content-Length" "0")
+                 (cons "Content-Type" "-")
+                 (cons "Summarized request auth mode"
+                       (summarize-http-request-auth-mode
+                        post-authorization-header
+                        post-cookie-header))))
+         (derived-request-shape
+           (list (cons "Detected Authorization scheme"
+                       (or detected-scheme "-"))
+                 (cons "AuthorizationMethod name"
+                       (or authorization-method-name "-"))
+                 (cons "Bootstrap request path"
+                       (if (eq resolved-mode :basic)
+                           (dmx-access-control-login-path)
+                           "not used"))
+                 (cons "Guarded request path"
+                       (dmx-workspace-assign-object-path workspace-id topic-id))
+                 (cons "Guarded request auth mode"
+                       (summarize-http-request-auth-mode
+                        post-authorization-header
+                        post-cookie-header))
+                 (cons "Expected cookie shape"
+                       (summarize-http-cookie-shape post-cookie-header))))
+         (session-transition
+           (case resolved-mode
+             (:basic
+              (list (cons "Bootstrap request"
+                          (format nil
+                                  "POST ~A with Authorization: ~A"
+                                  (dmx-access-control-login-path)
+                                  derived-authorization-header))
+                    (cons "Expected bootstrap outcome"
+                          "204 No Content + Set-Cookie: JSESSIONID=...")
+                    (cons "Session aftermath"
+                          (format nil
+                                  "JSESSIONID is captured ephemerally, then later guarded requests use Cookie: JSESSIONID=<session-id>; dmx_workspace_id=~D"
+                                  workspace-id))
+                    (cons "Bootstrap-capable"
+                          "yes")))
+             (otherwise
+              (list (cons "Bootstrap request" "not used")
+                    (cons "Expected bootstrap outcome"
+                          "Direct-header mode stays on the original Authorization header unless the installation produces a session separately.")
+                    (cons "Session aftermath"
+                          "JSESSIONID is not treated as a primary input mode here.")
+                    (cons "Bootstrap-capable"
+                          "no")))))
+         (mode-label (dmx-auth-mode-label resolved-mode)))
+    (make-instance 'dmx-auth-path-example
+                   :id (format nil "dmx-auth-path-example/~A"
+                               (string-downcase (symbol-name resolved-mode)))
+                   :title (format nil "DMX auth path example: ~A" mode-label)
+                   :summary
+                   (format nil
+                           "Inspectable dmx-auth-path-example for ~A that shows raw input, normalized request shaping, DMX Credentials interpretation, AuthorizationMethod dependence, and the later request/cookie form without performing any live login."
+                           mode-label)
+                   :input-mode auth-mode
+                   :raw-input raw-fields
+                   :normalized-mode resolved-mode
+                   :derived-request-shape derived-request-shape
+                   :dmx-credentials-shape derived-credentials
+                   :authorization-method-name authorization-method-name
+                   :bootstrap-required-p (eq resolved-mode :basic)
+                   :session-transition session-transition
+                   :post-login-request-shape post-bootstrap-request-shape
+                   :state-trace
+                   (dmx-auth-path-example-state-trace resolved-mode)
+                   :source-evidence
+                   (dmx-auth-path-example-source-evidence resolved-mode)
+                   :installation-dependencies
+                   (dmx-auth-path-example-installation-dependencies
+                    resolved-mode
+                    :detected-scheme detected-scheme)
+                   :notes
+                   (dmx-auth-path-example-notes resolved-mode)
+                   :detected-authorization-scheme detected-scheme
+                   :derived-authorization-header derived-authorization-header
+                   :bootstrap-request-shape bootstrap-request-shape
+                   :expected-cookie-shape
+                   (summarize-http-cookie-shape post-cookie-header)
+                   :summarized-request-auth-mode
+                   (summarize-http-request-auth-mode
+                    post-authorization-header
+                    post-cookie-header)
+                   :workspace-id workspace-id
+                   :topic-id topic-id)))
+
+(defun make-dmx-auth-mode-example (&rest args &key &allow-other-keys)
+  (apply #'make-dmx-auth-path-example args))
+
+(defun dmx-auth-crosswalk-username-password-example ()
+  (make-dmx-auth-path-example
+   :auth-mode :basic
+   :username *dmx-auth-crosswalk-default-username*
+   :password *dmx-auth-crosswalk-default-password*))
+
+(defun dmx-auth-crosswalk-authorization-header-example ()
+  (make-dmx-auth-path-example
+   :auth-mode :header
+   :authorization-header *dmx-auth-crosswalk-default-basic-header*))
+
+(defun dmx-auth-crosswalk-bearer-token-example ()
+  (make-dmx-auth-path-example
+   :auth-mode :token
+   :auth-token *dmx-auth-crosswalk-default-bearer-token*))
+
+(defun make-dmx-auth-crosswalk ()
+  (make-instance 'dmx-auth-crosswalk
+                 :examples
+                 (list (dmx-auth-crosswalk-username-password-example)
+                       (dmx-auth-crosswalk-authorization-header-example)
+                       (dmx-auth-crosswalk-bearer-token-example))))
+
 (defun import-fedwiki-site-to-dmx (&key
                                      domain
                                      (dry-run t)

@@ -1,0 +1,55 @@
+<h1>DMX AnonymousAccessFilter</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX AnonymousAccessFilter"><tt>DMX AnonymousAccessFilter</tt></a>
+  is the DMX-core-native fallback filter that decides whether a request prefix
+  may be served anonymously for reads or writes.
+  It is important for learning because it explains why some DMX reads still
+  work without credentials, but it must not be confused with the guarded
+  mutation contract used by the repair console or workspace annotations.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX AnonymousAccessFilter"><tt>DMX AnonymousAccessFilter</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Authorization header to Credentials path"><tt>DMX Authorization header to Credentials path</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a></li>
+  <li><a expr="(dmx-auth-crosswalk-bearer-token-example)" view="DMX backend contract"><tt>(dmx-auth-crosswalk-bearer-token-example)</tt> DMX backend contract</a></li>
+</ul>
+
+<h2>Platform contract</h2>
+
+<p>
+  <tt>systems.dmx.accesscontrol.AnonymousAccessFilter</tt> keeps separate
+  read-prefix and write-prefix settings.
+  Its method <tt>isAnonymousAccessAllowed(HttpServletRequest request)</tt>
+  checks the request method and then matches the request URI against the
+  configured prefix lists.
+</p>
+
+<p>
+  This means anonymous access is a fallback outcome after DMX has either not
+  seen usable credentials or not required them for a configured prefix.
+  It is not one of HyperDoc's three primary operator input modes.
+</p>
+
+<h2>Boundary clarification</h2>
+
+<ul>
+  <li>Anonymous fallback can explain why some DMX reads work without login.</li>
+  <li>It does <b>not</b> mean guarded repair or annotation continuation can rely on anonymous mutation.</li>
+  <li>It does <b>not</b> replace object-level ACL, workspace assignment, or topic update permission.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX Authorization header to Credentials path">DMX Authorization header to Credentials path</a></li>
+  <li><a page="HyperDoc three-mode DMX auth crosswalk">HyperDoc three-mode DMX auth crosswalk</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic">Operational definition: chunk, chunk note, manifest note, content topic</a></li>
+</ul>

@@ -43,6 +43,19 @@
                :test #'char=)
        (format nil "~A must contain ~S" page-label needle)))))
 
+(defun dmx-shared-workspace-docs-find-view-by-title (views title)
+  (find title
+        views
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun dmx-shared-workspace-docs-load-inspector-views-for-object (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
+
 (defun run-dmx-shared-workspace-documentation-pages-smoke-test ()
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
@@ -203,7 +216,11 @@
      "922980"
      "reminder note"
      "922464"
-     "919822"))
+     "919822"
+     "HyperDoc three-mode DMX auth crosswalk"
+     "DMX Credentials"
+     "DMX AuthorizationMethod"
+     "DMX session bootstrap and JSESSIONID"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/Diagnosing DMX workspace assignment and topicmap placement.html")
@@ -252,6 +269,8 @@
      "authorization header"
      "bearer token"
      "ephemeral"
+     "HyperDoc three-mode DMX auth crosswalk"
+     "DMX session bootstrap and JSESSIONID"
      "919815"
      "919822"
      "922464"
@@ -265,6 +284,7 @@
     "hyperdoc/Inspectable authentication-path traces for repair console.html")
    "Inspectable authentication-path traces for repair console"
    '("Authentication state machine"
+     "dmx-auth-path-example"
      "make-operational-definition-note-proxy"
      "POST /access-control/login"
      "JSESSIONID"
@@ -278,7 +298,79 @@
      "http://127.0.0.1:8080/boot.html"
      "401"
      "same credentials succeed anywhere else"
+     "HyperDoc three-mode DMX auth crosswalk"
+     "DMX Credentials"
+     "DMX AuthorizationMethod"
+     "DMX AnonymousAccessFilter"
+     "DMX Authorization header to Credentials path"
+     "DMX session bootstrap and JSESSIONID"
      "DMX webclient login trace"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX Credentials.html")
+   "DMX Credentials"
+   '("Credentials(String authHeader)"
+     "dmx-auth-path-example"
+     "username"
+     "password"
+     "methodName"
+     "Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA=="
+     "HyperDoc three-mode DMX auth crosswalk"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX AuthorizationMethod.html")
+   "DMX AuthorizationMethod"
+   '("checkCredentials(Credentials cred)"
+     "non-Basic"
+     "installation-dependent"
+     "bearer token"
+     "DMX backend contract"
+     "HyperDoc three-mode DMX auth crosswalk"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX AnonymousAccessFilter.html")
+   "DMX AnonymousAccessFilter"
+   '("isAnonymousAccessAllowed(HttpServletRequest request)"
+     "read-prefix and write-prefix settings"
+     "guarded repair"
+     "anonymous"
+     "HyperDoc three-mode DMX auth crosswalk"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX Authorization header to Credentials path.html")
+   "DMX Authorization header to Credentials path"
+   '("Credentials(authHeader)"
+     "AuthorizationMethod"
+     "AnonymousAccessFilter"
+     "attaches the username to the servlet session"
+     "HyperDoc three-mode DMX auth crosswalk"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/DMX session bootstrap and JSESSIONID.html")
+   "DMX session bootstrap and JSESSIONID"
+   '("POST /access-control/login"
+     "dmx-auth-path-example"
+     "JSESSIONID"
+     "Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815"
+     "not a fourth input mode"
+     "HyperDoc three-mode DMX auth crosswalk"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/HyperDoc three-mode DMX auth crosswalk.html")
+   "HyperDoc three-mode DMX auth crosswalk"
+   '("username/password"
+     "authorization header"
+     "bearer token"
+     "dmx-auth-path-example"
+     "alice"
+     "example-password"
+     "Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA=="
+     "eyJhbGciOi...example"
+     "Operational definition: chunk, chunk note, manifest note, content topic"
+     "Using authenticated workspace assignment repair console"
+     "Inspectable authentication-path traces for repair console"
+     "DMX MCP server for shared workspace"
+     "Workspace-native annotations in a DMX workspace"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/HyperDoc DMX architectural implications.html")
@@ -295,7 +387,7 @@
 
 (defun run-dmx-shared-workspace-topic-availability-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
-  (dolist (entry '((hyperdoc::dmx-mcp-server-for-shared-workspace-topic
+   (dolist (entry '((hyperdoc::dmx-mcp-server-for-shared-workspace-topic
                     "DMX MCP server for shared workspace")
                    (hyperdoc::context-window-workspace-as-shared-blackboard-topic
                     "Context window workspace as shared blackboard")
@@ -317,6 +409,18 @@
                     "Using authenticated workspace assignment repair console")
                    (hyperdoc::operational-definition-chunk-chunk-note-manifest-note-content-topic
                     "Operational definition: chunk, chunk note, manifest note, content topic")
+                   (hyperdoc::dmx-credentials-topic
+                    "DMX Credentials")
+                   (hyperdoc::dmx-authorizationmethod-topic
+                    "DMX AuthorizationMethod")
+                   (hyperdoc::dmx-anonymousaccessfilter-topic
+                    "DMX AnonymousAccessFilter")
+                   (hyperdoc::dmx-authorization-header-to-credentials-path-topic
+                    "DMX Authorization header to Credentials path")
+                   (hyperdoc::dmx-session-bootstrap-and-jsessionid-topic
+                    "DMX session bootstrap and JSESSIONID")
+                   (hyperdoc::hyperdoc-three-mode-dmx-auth-crosswalk-topic
+                    "HyperDoc three-mode DMX auth crosswalk")
                    (hyperdoc::inspectable-authentication-path-traces-for-repair-console-topic
                     "Inspectable authentication-path traces for repair console")))
     (destructuring-bind (symbol title) entry
@@ -340,13 +444,121 @@
                         "Diagnosing DMX workspace repair triage"
                         "Using authenticated workspace assignment repair console"
                         "Operational definition: chunk, chunk note, manifest note, content topic"
+                        "DMX Credentials"
+                        "DMX AuthorizationMethod"
+                        "DMX AnonymousAccessFilter"
+                        "DMX Authorization header to Credentials path"
+                        "DMX session bootstrap and JSESSIONID"
+                        "HyperDoc three-mode DMX auth crosswalk"
                         "Inspectable authentication-path traces for repair console"))
     (assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))
 
+(defun run-dmx-auth-crosswalk-render-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((crosswalk (hyperdoc::make-dmx-auth-crosswalk))
+         (basic (hyperdoc::dmx-auth-crosswalk-username-password-example))
+         (header (hyperdoc::dmx-auth-crosswalk-authorization-header-example))
+         (token (hyperdoc::dmx-auth-crosswalk-bearer-token-example))
+         (crosswalk-views
+           (dmx-shared-workspace-docs-load-inspector-views-for-object crosswalk))
+         (basic-views
+           (dmx-shared-workspace-docs-load-inspector-views-for-object basic))
+         (header-views
+           (dmx-shared-workspace-docs-load-inspector-views-for-object header))
+         (token-views
+           (dmx-shared-workspace-docs-load-inspector-views-for-object token))
+         (crosswalk-overview
+           (dmx-shared-workspace-docs-find-view-by-title crosswalk-views "Overview"))
+         (crosswalk-credentials
+           (dmx-shared-workspace-docs-find-view-by-title
+            crosswalk-views
+            "Credentials crosswalk"))
+         (basic-overview
+           (dmx-shared-workspace-docs-find-view-by-title basic-views "Overview"))
+         (basic-state-machine
+           (dmx-shared-workspace-docs-find-view-by-title
+            basic-views
+            "State machine"))
+         (basic-derived
+           (dmx-shared-workspace-docs-find-view-by-title
+            basic-views
+            "Derived request shapes"))
+         (basic-credentials
+           (dmx-shared-workspace-docs-find-view-by-title
+            basic-views
+            "Credentials crosswalk"))
+         (basic-contract-notes
+           (dmx-shared-workspace-docs-find-view-by-title
+            basic-views
+            "DMX backend contract"))
+         (basic-source
+           (dmx-shared-workspace-docs-find-view-by-title
+            basic-views
+            "Source evidence / code path"))
+         (header-overview
+           (dmx-shared-workspace-docs-find-view-by-title header-views "Overview"))
+         (token-contract-notes
+           (dmx-shared-workspace-docs-find-view-by-title
+            token-views
+            "DMX backend contract")))
+    (assert-type 'hyperdoc::dmx-auth-path-example
+                 basic
+                 "Username/password example must now be a first-class dmx-auth-path-example")
+    (assert-type 'hyperdoc::dmx-auth-path-example
+                 header
+                 "Authorization-header example must now be a first-class dmx-auth-path-example")
+    (assert-type 'hyperdoc::dmx-auth-path-example
+                 token
+                 "Bearer-token example must now be a first-class dmx-auth-path-example")
+    (dolist (view (list crosswalk-overview
+                        crosswalk-credentials
+                        basic-overview
+                        basic-state-machine
+                        basic-derived
+                        basic-credentials
+                        basic-contract-notes
+                        basic-source
+                        header-overview
+                        token-contract-notes))
+      (assert-true view "DMX auth crosswalk render smoke must expose all expected views"))
+    (assert-shared-workspace-page-contains-all
+     (html-inspector-views:view-html crosswalk-overview)
+     "DMX auth crosswalk overview view"
+     '("username/password"
+       "authorization header"
+       "bearer token"))
+    (assert-shared-workspace-page-contains-all
+     (html-inspector-views:view-html basic-credentials)
+     "DMX username/password example credentials crosswalk"
+     '("Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA=="
+       "alice"
+       "example-password"))
+    (assert-shared-workspace-page-contains-all
+     (html-inspector-views:view-html basic-derived)
+     "DMX username/password example derived request shapes"
+     '("JSESSIONID"
+       "dmx_workspace_id=919815"))
+    (assert-shared-workspace-page-contains-all
+     (html-inspector-views:view-html basic-overview)
+     "DMX username/password example overview"
+     '("Basic"
+       "username/password"))
+    (assert-shared-workspace-page-contains-all
+     (html-inspector-views:view-html header-overview)
+     "DMX authorization-header example overview"
+     '("Basic"
+       "authorization header"))
+    (assert-shared-workspace-page-contains-all
+     (html-inspector-views:view-html token-contract-notes)
+     "DMX bearer-token example backend contract notes"
+     '("Installation-dependent"
+       "registered non-Basic AuthorizationMethod"))))
+
 (defun run-dmx-shared-workspace-docs-smoke-tests ()
   (run-dmx-shared-workspace-documentation-pages-smoke-test)
   (run-dmx-shared-workspace-topic-availability-smoke-test)
+  (run-dmx-auth-crosswalk-render-smoke-test)
   (format t "~&DMX shared-workspace docs smoke tests passed.~%")
   t)

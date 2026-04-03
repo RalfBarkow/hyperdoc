@@ -3406,13 +3406,88 @@
   (make-topic
    :id "inspectable-authentication-path-traces-for-repair-console"
    :title "Inspectable authentication-path traces for repair console"
-   :summary "Step-by-step auth-state-machine guide for the HyperDoc repair console, including username/password session bootstrap, direct header/token request shapes, result readback evidence, and a 922464-focused 401 debugging checklist."
+   :summary "Step-by-step auth-state-machine guide for the HyperDoc repair console, including dmx-auth-path-example learning objects, username/password session bootstrap, direct header/token request shapes, result readback evidence, and a 922464-focused 401 debugging checklist."
    :references '("Inspectable authentication-path traces for repair console"
                  "Using authenticated workspace assignment repair console"
                  "Diagnosing DMX workspace assignment and topicmap placement"
                  "Diagnosing DMX workspace repair triage"
                  "DMX note read/write boundary"
                  "Context window workspace as shared blackboard")))
+
+(defun dmx-credentials-topic ()
+  (make-topic
+   :id "dmx-credentials"
+   :title "DMX Credentials"
+   :summary "DMX Credentials are the parsed username/password/methodName structure behind Authorization header handling, not a separate HyperDoc-invented credential store."
+   :references '("DMX Credentials"
+                 "DMX Authorization header to Credentials path"
+                 "DMX AuthorizationMethod"
+                 "DMX session bootstrap and JSESSIONID"
+                 "HyperDoc three-mode DMX auth crosswalk"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun dmx-authorizationmethod-topic ()
+  (make-topic
+   :id "dmx-authorizationmethod"
+   :title "DMX AuthorizationMethod"
+   :summary "AuthorizationMethod is the DMX extension point for non-Basic Authorization schemes, which makes bearer-style support installation-dependent rather than universally native."
+   :references '("DMX AuthorizationMethod"
+                 "DMX Credentials"
+                 "DMX Authorization header to Credentials path"
+                 "HyperDoc three-mode DMX auth crosswalk"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun dmx-anonymousaccessfilter-topic ()
+  (make-topic
+   :id "dmx-anonymousaccessfilter"
+   :title "DMX AnonymousAccessFilter"
+   :summary "AnonymousAccessFilter is DMX's request-prefix fallback for anonymous read or write allowances, not a primary guarded repair credential mode."
+   :references '("DMX AnonymousAccessFilter"
+                 "DMX Authorization header to Credentials path"
+                 "HyperDoc three-mode DMX auth crosswalk"
+                 "Using authenticated workspace assignment repair console"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun dmx-authorization-header-to-credentials-path-topic ()
+  (make-topic
+   :id "dmx-authorization-header-to-credentials-path"
+   :title "DMX Authorization header to Credentials path"
+   :summary "DMX reads Authorization, constructs Credentials, resolves AuthorizationMethod for non-Basic methods, checks credentials, and on success attaches username to the servlet session."
+   :references '("DMX Authorization header to Credentials path"
+                 "DMX Credentials"
+                 "DMX AuthorizationMethod"
+                 "DMX AnonymousAccessFilter"
+                 "DMX session bootstrap and JSESSIONID"
+                 "HyperDoc three-mode DMX auth crosswalk"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun dmx-session-bootstrap-and-jsessionid-topic ()
+  (make-topic
+   :id "dmx-session-bootstrap-and-jsessionid"
+   :title "DMX session bootstrap and JSESSIONID"
+   :summary "HyperDoc's username/password input mode derives a Basic login bootstrap and later guarded requests carry the JSESSIONID aftermath plus workspace cookie rather than treating cookies as a primary operator input mode."
+   :references '("DMX session bootstrap and JSESSIONID"
+                 "Using authenticated workspace assignment repair console"
+                 "Inspectable authentication-path traces for repair console"
+                 "DMX Authorization header to Credentials path"
+                 "HyperDoc three-mode DMX auth crosswalk")))
+
+(defun hyperdoc-three-mode-dmx-auth-crosswalk-topic ()
+  (make-topic
+   :id "hyperdoc-three-mode-dmx-auth-crosswalk"
+   :title "HyperDoc three-mode DMX auth crosswalk"
+   :summary "Inspectable learning surface built from dmx-auth-path-example objects that keeps username/password, full Authorization header, and bearer token input modes aligned with DMX Credentials parsing, AuthorizationMethod resolution, AnonymousAccessFilter fallback, and the later JSESSIONID/session-cookie aftermath."
+   :references '("HyperDoc three-mode DMX auth crosswalk"
+                 "DMX Credentials"
+                 "DMX AuthorizationMethod"
+                 "DMX AnonymousAccessFilter"
+                 "DMX Authorization header to Credentials path"
+                 "DMX session bootstrap and JSESSIONID"
+                 "Using authenticated workspace assignment repair console"
+                 "Inspectable authentication-path traces for repair console"
+                 "Operational definition: chunk, chunk note, manifest note, content topic"
+                 "DMX MCP server for shared workspace"
+                 "Workspace-native annotations in a DMX workspace")))
 
 (defun exchange-artifact-topic ()
   (make-topic

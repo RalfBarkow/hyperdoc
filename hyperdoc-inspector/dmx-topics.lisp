@@ -981,6 +981,159 @@
               (render-dmx-repair-debug-summary debug-report)
               (render-dmx-repair-debug-state-table debug-report))))))))
 
+(defun dmx-auth-example-display-value (value &key (fallback "n/a"))
+  (cond
+    ((null value)
+     (views:html (:span :style "opacity: 0.55;" (views:esc fallback))))
+    ((or (stringp value)
+         (numberp value)
+         (keywordp value)
+         (symbolp value))
+     (views:html (:code (views:esc (format nil "~A" value)))))
+    (t
+     (views:html (:code (views:esc (princ-to-string value)))))))
+
+(defun render-dmx-auth-key-value-rows (rows)
+  (dolist (row rows)
+    (views:html
+      (:tr (:th (views:esc (car row)))
+           (:td (dmx-auth-example-display-value (cdr row)))))))
+
+(defun render-dmx-auth-key-value-table (rows &key empty-label)
+  (if rows
+      (views:html
+        (:table :class "inspector-table"
+                (render-dmx-auth-key-value-rows rows)))
+      (views:html
+        (:p (:span :style "opacity: 0.55;"
+                   (views:esc (or empty-label "n/a")))))))
+
+(defun render-dmx-auth-state-machine-table (steps)
+  (if steps
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th "Step")
+                     (:th "Classification")
+                     (:th "Detail"))
+                (dolist (step steps)
+                  (views:html
+                    (:tr (:td (:code (views:esc (or (getf step :label) "-"))))
+                         (:td (:code (views:esc
+                                      (or (getf step :classification) "-"))))
+                         (:td (views:esc (or (getf step :detail) "-"))))))))
+      (views:html
+        (:p (:span :style "opacity: 0.55;" "No state-machine steps.")))))
+
+(defun render-dmx-auth-contract-notes-table (notes)
+  (if notes
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th "Note")
+                     (:th "Classification")
+                     (:th "Detail"))
+                (dolist (note notes)
+                  (views:html
+                    (:tr (:td (:code (views:esc (or (getf note :label) "-"))))
+                         (:td (:code (views:esc
+                                      (or (getf note :classification) "-"))))
+                         (:td (views:esc (or (getf note :detail) "-"))))))))
+      (views:html
+        (:p (:span :style "opacity: 0.55;" "No backend contract notes.")))))
+
+(defun render-dmx-auth-source-evidence-table (entries)
+  (if entries
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th "Layer")
+                     (:th "Reference")
+                     (:th "Detail"))
+                (dolist (entry entries)
+                  (views:html
+                    (:tr (:td (:code (views:esc (or (getf entry :layer) "-"))))
+                         (:td (:code (views:esc
+                                      (or (getf entry :reference) "-"))))
+                         (:td (views:esc (or (getf entry :detail) "-"))))))))
+      (views:html
+        (:p (:span :style "opacity: 0.55;" "No source evidence.")))))
+
+(defun dmx-auth-bootstrap-path-label (example)
+  (if (hyperdoc::dmx-auth-path-example-bootstrap-required-p-of example)
+      "bootstrap-capable"
+      "direct-header only"))
+
+(defun dmx-auth-example-backend-note (example)
+  (let* ((notes (hyperdoc::dmx-auth-path-example-notes-of example))
+         (backend-note
+           (find "Backend contract"
+                 notes
+                 :test #'string=
+                 :key (lambda (note) (getf note :label)))))
+    (or (and backend-note (getf backend-note :detail))
+        (let ((first-note (first notes)))
+          (and first-note
+               (getf first-note :detail)))
+        "-")))
+
+(defun render-dmx-auth-crosswalk-example-rows (examples)
+  (dolist (example examples)
+    (views:html
+      (:tr (:td (views:object-ref example))
+           (:td (:code (views:esc
+                        (hyperdoc::dmx-auth-mode-label
+                         (hyperdoc::dmx-auth-path-example-normalized-mode-of
+                          example)))))
+           (:td (:code (views:esc
+                        (or (hyperdoc::dmx-auth-mode-example-detected-authorization-scheme-of
+                             example)
+                            "-"))))
+           (:td (:code (views:esc
+                        (or (hyperdoc::dmx-auth-mode-example-derived-authorization-header-of
+                             example)
+                            "-"))))
+           (:td (:code (views:esc
+                        (hyperdoc::dmx-auth-mode-example-summarized-request-auth-mode-of
+                         example))))
+           (:td (:code (views:esc
+                        (dmx-auth-bootstrap-path-label example))))
+           (:td (views:esc (dmx-auth-example-backend-note example)))))))
+
+(defun render-dmx-auth-crosswalk-overview-table (crosswalk)
+  (let ((examples (hyperdoc::dmx-auth-crosswalk-examples-of crosswalk)))
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:th "Example")
+                   (:th "Normalized mode")
+                   (:th "Detected scheme")
+                   (:th "Derived Authorization header")
+                   (:th "Summarized request auth mode")
+                   (:th "Path shape")
+                   (:th "Backend note"))
+              (render-dmx-auth-crosswalk-example-rows examples)))))
+
+(defun render-dmx-auth-crosswalk-credentials-table (crosswalk)
+  (let ((examples (hyperdoc::dmx-auth-crosswalk-examples-of crosswalk)))
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:th "Example")
+                   (:th "Raw fields")
+                   (:th "Derived Credentials-like structure")
+                   (:th "Expected cookie shape"))
+              (dolist (example examples)
+                (views:html
+                  (:tr (:td (views:object-ref example))
+                       (:td (render-dmx-auth-key-value-table
+                             (hyperdoc::dmx-auth-path-example-raw-input-of
+                              example)
+                             :empty-label "No raw fields."))
+                       (:td (render-dmx-auth-key-value-table
+                             (hyperdoc::dmx-auth-path-example-dmx-credentials-shape-of
+                              example)
+                             :empty-label
+                             "No Credentials-like structure for this mode."))
+                       (:td (:code (views:esc
+                                    (hyperdoc::dmx-auth-mode-example-expected-cookie-shape-of
+                                     example)))))))))))
+
 (defmethod views:text-representation ((page hyperdoc::dmx-topic-proxy))
   (format nil "DMX topic ~D (topicmap ~D)"
           (hyperdoc::dmx-topic-id-of page)
@@ -995,6 +1148,160 @@
   (format nil "DMX workspace journal reconcile call graph (topicmap ~D)"
           (hyperdoc::dmx-workspace-journal-reconcile-call-graph-workspace-topicmap-id
            graph)))
+
+(defmethod views:text-representation ((example hyperdoc::dmx-auth-path-example))
+  (format nil "~A"
+          (hyperdoc::title-of example)))
+
+(defmethod views:text-representation ((crosswalk hyperdoc::dmx-auth-crosswalk))
+  (format nil "~A"
+          (hyperdoc::title-of crosswalk)))
+
+(views:defview 👀overview (crosswalk hyperdoc::dmx-auth-crosswalk)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc (hyperdoc::summary-of crosswalk)))
+      (:p (views:esc
+           "This learning surface keeps the three HyperDoc DMX auth input modes explicit without widening the guarded write boundary or claiming live service auth."))
+      (render-dmx-auth-crosswalk-overview-table crosswalk))))
+
+(views:defview 👀credentials-crosswalk (crosswalk hyperdoc::dmx-auth-crosswalk)
+  (views:html-view :title "Credentials crosswalk" :priority 2
+    (views:html
+      (:p (views:esc
+           "The three-mode crosswalk keeps raw user-entered fields, derived Authorization headers, decoded Credentials-like summaries where safe, and the later cookie shape visible side by side."))
+      (render-dmx-auth-crosswalk-credentials-table crosswalk))))
+
+(views:defview 👀overview (example hyperdoc::dmx-auth-path-example)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc (hyperdoc::summary-of example)))
+      (:table :class "inspector-table"
+              (:tr (:th "Input mode")
+                   (:td (:code (views:esc
+                                (format nil "~A"
+                                        (hyperdoc::dmx-auth-path-example-input-mode-of
+                                         example))))))
+              (:tr (:th "Normalized mode")
+                   (:td (:code (views:esc
+                                (hyperdoc::dmx-auth-mode-label
+                                 (hyperdoc::dmx-auth-path-example-normalized-mode-of
+                                  example))))))
+              (:tr (:th "Detected Authorization scheme")
+                   (:td (:code (views:esc
+                                (or (hyperdoc::dmx-auth-mode-example-detected-authorization-scheme-of
+                                     example)
+                                    "-")))))
+              (:tr (:th "AuthorizationMethod name")
+                   (:td (:code (views:esc
+                                (or (hyperdoc::dmx-auth-path-example-authorization-method-name-of
+                                     example)
+                                    "-")))))
+              (:tr (:th "Bootstrap path")
+                   (:td (:code (views:esc
+                                (dmx-auth-bootstrap-path-label example)))))
+              (:tr (:th "Derived Authorization header")
+                   (:td (:code (views:esc
+                                (or (hyperdoc::dmx-auth-mode-example-derived-authorization-header-of
+                                     example)
+                                    "-")))))
+              (:tr (:th "Expected cookie shape")
+                   (:td (:code (views:esc
+                                (hyperdoc::dmx-auth-mode-example-expected-cookie-shape-of
+                                 example)))))
+              (:tr (:th "Summarized request auth mode")
+                   (:td (:code (views:esc
+                                (hyperdoc::dmx-auth-mode-example-summarized-request-auth-mode-of
+                                 example)))))
+              (:tr (:th "Workspace id")
+                   (:td (:code (views:esc
+                                (format nil "~A"
+                                        (hyperdoc::dmx-auth-mode-example-workspace-id-of
+                                         example))))))
+              (:tr (:th "Topic id")
+                   (:td (:code (views:esc
+                                (format nil "~A"
+                                        (hyperdoc::dmx-auth-mode-example-topic-id-of
+                                         example)))))))
+      (:h4 "Raw user-entered fields")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-path-example-raw-input-of example)
+       :empty-label "No raw fields."))))
+
+(views:defview 👀state-machine (example hyperdoc::dmx-auth-path-example)
+  (views:html-view :title "State machine" :priority 2
+    (views:html
+      (:p (views:esc
+           "These steps keep UI capture, derived request shaping, DMX-core-native credential/session handling, and the later guarded request boundary separate."))
+      (render-dmx-auth-state-machine-table
+       (hyperdoc::dmx-auth-path-example-state-trace-of example)))))
+
+(views:defview 👀derived-request-shapes (example hyperdoc::dmx-auth-path-example)
+  (views:html-view :title "Derived request shapes" :priority 3
+    (views:html
+      (:h4 "Derived request summary")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-path-example-derived-request-shape-of example)
+       :empty-label "No derived request summary.")
+      (:h4 "Bootstrap request shape")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-mode-example-bootstrap-request-shape-of example)
+       :empty-label "No bootstrap request for this mode.")
+      (:h4 "Session transition")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-path-example-session-transition-of example)
+       :empty-label "No session transition for this mode.")
+      (:h4 "Post-bootstrap or guarded request shape")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-path-example-post-login-request-shape-of example)
+       :empty-label "No guarded request shape.")
+      (:p (views:esc
+           "JSESSIONID is shown only as the later session-backed aftermath of username/password bootstrap. It is not a primary input mode.")))))
+
+(views:defview 👀credentials-crosswalk (example hyperdoc::dmx-auth-path-example)
+  (views:html-view :title "Credentials crosswalk" :priority 4
+    (views:html
+      (:h4 "Raw user-entered fields")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-path-example-raw-input-of example)
+       :empty-label "No raw fields.")
+      (:h4 "Derived Authorization header")
+      (render-dmx-auth-key-value-table
+       (list (cons "Authorization header"
+                   (or (hyperdoc::dmx-auth-mode-example-derived-authorization-header-of
+                        example)
+                       "-"))
+             (cons "Detected scheme"
+                   (or (hyperdoc::dmx-auth-mode-example-detected-authorization-scheme-of
+                        example)
+                       "-"))
+             (cons "Path shape"
+                   (dmx-auth-bootstrap-path-label example))))
+      (:h4 "Derived Credentials-like structure")
+      (render-dmx-auth-key-value-table
+       (hyperdoc::dmx-auth-path-example-dmx-credentials-shape-of example)
+       :empty-label
+       "No DMX-core-native Credentials-like structure is assumed for this mode."))))
+
+(views:defview 👀backend-contract-notes (example hyperdoc::dmx-auth-path-example)
+  (views:html-view :title "DMX backend contract" :priority 5
+    (views:html
+      (:p (views:esc
+           "These notes keep DMX-core-native behavior, HyperDoc-derived operator inputs, and installation-dependent backend assumptions separate."))
+      (:h4 "Contract notes")
+      (render-dmx-auth-contract-notes-table
+       (hyperdoc::dmx-auth-path-example-notes-of example))
+      (:h4 "Installation dependencies")
+      (render-dmx-auth-contract-notes-table
+       (hyperdoc::dmx-auth-path-example-installation-dependencies-of example)))))
+
+(views:defview 👀source-evidence-code-path (example hyperdoc::dmx-auth-path-example)
+  (views:html-view :title "Source evidence / code path" :priority 6
+    (views:html
+      (:p (views:esc
+           "The crosswalk is grounded in the current HyperDoc auth normalizers and the DMX platform Credentials, AuthorizationMethod, and AnonymousAccessFilter path."))
+      (render-dmx-auth-source-evidence-table
+       (hyperdoc::dmx-auth-path-example-source-evidence-of example)))))
 
 (defmethod views:title-bar-action-buttons ((page hyperdoc::dmx-topic-proxy))
   (views:html

@@ -1,0 +1,82 @@
+<h1>HyperDoc three-mode DMX auth crosswalk</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a>
+  is the durable learning surface for the three repair-console input modes:
+  <tt>username/password</tt>, <tt>authorization header</tt>, and
+  <tt>bearer token</tt>.
+  Each concrete example is a first-class <tt>dmx-auth-path-example</tt>.
+  It keeps the chosen mode, normalized mode, derived Authorization header,
+  Credentials-like backend shape, bootstrap request shape, later
+  session-backed request shape, and source evidence inspectable without
+  changing the guarded execution boundary.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Credentials"><tt>DMX Credentials</tt></a></li>
+  <li><a hyperbook="topics" page="DMX AuthorizationMethod"><tt>DMX AuthorizationMethod</tt></a></li>
+  <li><a hyperbook="topics" page="DMX AnonymousAccessFilter"><tt>DMX AnonymousAccessFilter</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Authorization header to Credentials path"><tt>DMX Authorization header to Credentials path</tt></a></li>
+  <li><a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a></li>
+  <li><a expr="(make-dmx-auth-crosswalk)" view="Overview"><tt>(make-dmx-auth-crosswalk)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-auth-crosswalk)" view="Credentials crosswalk"><tt>(make-dmx-auth-crosswalk)</tt> Credentials crosswalk</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Overview"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Overview</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="State machine"><tt>(dmx-auth-crosswalk-username-password-example)</tt> State machine</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Derived request shapes"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Derived request shapes</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Credentials crosswalk"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Credentials crosswalk</a></li>
+  <li><a expr="(dmx-auth-crosswalk-authorization-header-example)" view="Overview"><tt>(dmx-auth-crosswalk-authorization-header-example)</tt> Overview</a></li>
+  <li><a expr="(dmx-auth-crosswalk-authorization-header-example)" view="Credentials crosswalk"><tt>(dmx-auth-crosswalk-authorization-header-example)</tt> Credentials crosswalk</a></li>
+  <li><a expr="(dmx-auth-crosswalk-bearer-token-example)" view="Overview"><tt>(dmx-auth-crosswalk-bearer-token-example)</tt> Overview</a></li>
+  <li><a expr="(dmx-auth-crosswalk-bearer-token-example)" view="DMX backend contract"><tt>(dmx-auth-crosswalk-bearer-token-example)</tt> DMX backend contract</a></li>
+  <li><a expr="(dmx-auth-crosswalk-bearer-token-example)" view="Source evidence / code path"><tt>(dmx-auth-crosswalk-bearer-token-example)</tt> Source evidence / code path</a></li>
+</ul>
+
+<h2>The three modes</h2>
+
+<ul>
+  <li><tt>username/password</tt>: operator enters username plus password, HyperDoc derives the equivalent Basic Authorization header, and a later <tt>JSESSIONID</tt> session-cookie aftermath becomes inspectable</li>
+  <li><tt>authorization header</tt>: operator enters the full header directly; HyperDoc preserves it and can safely decode a Basic example into a Credentials-like structure for display</li>
+  <li><tt>bearer token</tt>: operator enters a token, HyperDoc derives <tt>Authorization: Bearer ...</tt>, and the backend note stays <tt>Installation-dependent</tt> unless a matching non-Basic AuthorizationMethod or compatible proxy is present</li>
+</ul>
+
+<h2>Safe dummy examples</h2>
+
+<ul>
+  <li>username: <tt>alice</tt></li>
+  <li>password: <tt>example-password</tt></li>
+  <li>authorization header: <tt>Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA==</tt></li>
+  <li>bearer token: <tt>eyJhbGciOi...example</tt></li>
+</ul>
+
+<p>
+  These are dummy examples for learning and object inspection only.
+  They are not live secrets and they are not copied operator credentials.
+</p>
+
+<h2>DMX-core-native, HyperDoc-derived, and installation-dependent layers</h2>
+
+<ul>
+  <li><b>DMX-core-native:</b> Authorization header parsing into Credentials, AuthorizationMethod resolution for non-Basic schemes, servlet-session username attachment, and AnonymousAccessFilter fallback</li>
+  <li><b>HyperDoc-derived:</b> the three operator-facing input modes, the derived Basic header from username/password input, the learning-state machine labels, and the explicit session-cookie aftermath display</li>
+  <li><b>Installation-dependent:</b> bearer-token success beyond the local UI and whether the running deployment has a matching non-Basic AuthorizationMethod or compatible proxy/gateway boundary</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic">Operational definition: chunk, chunk note, manifest note, content topic</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Workspace-native annotations in a DMX workspace">Workspace-native annotations in a DMX workspace</a></li>
+  <li><a page="DMX Credentials">DMX Credentials</a></li>
+  <li><a page="DMX AuthorizationMethod">DMX AuthorizationMethod</a></li>
+  <li><a page="DMX AnonymousAccessFilter">DMX AnonymousAccessFilter</a></li>
+  <li><a page="DMX Authorization header to Credentials path">DMX Authorization header to Credentials path</a></li>
+  <li><a page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a></li>
+</ul>

@@ -1,0 +1,78 @@
+<h1>DMX session bootstrap and JSESSIONID</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a>
+  explains the specific aftermath that follows HyperDoc's
+  <tt>username/password</tt> input mode.
+  The concrete learning object is a <tt>dmx-auth-path-example</tt>.
+  Username and password are the primary operator inputs.
+  <tt>JSESSIONID</tt> is the later session-backed request shape after a
+  successful bootstrap request.
+  It is not a fourth input mode and this page does not add cookie-entry login.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Authorization header to Credentials path"><tt>DMX Authorization header to Credentials path</tt></a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Derived request shapes"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Derived request shapes</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="State machine"><tt>(dmx-auth-crosswalk-username-password-example)</tt> State machine</a></li>
+</ul>
+
+<h2>Bootstrap path</h2>
+
+<p>
+  For the learning example, HyperDoc turns username <tt>alice</tt> plus
+  password <tt>example-password</tt> into the equivalent header
+  <tt>Authorization: Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA==</tt>.
+</p>
+
+<pre>
+POST /access-control/login HTTP/1.1
+Authorization: Basic YWxpY2U6ZXhhbXBsZS1wYXNzd29yZA==
+Content-Length: 0
+</pre>
+
+<p>
+  A successful backend reply is expected to return a
+  <tt>Set-Cookie: JSESSIONID=...</tt> header.
+</p>
+
+<h2>Later guarded request shape</h2>
+
+<p>
+  After bootstrap, HyperDoc's later request shape becomes session-backed.
+  For the current learning example this means a cookie shape like:
+</p>
+
+<pre>
+Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
+</pre>
+
+<p>
+  The workspace cookie remains optional transport context for the selected
+  workspace.
+  It does not replace authenticated session state.
+</p>
+
+<h2>Boundary notes</h2>
+
+<ul>
+  <li>Cookie aftermath is specific to <tt>username/password</tt> bootstrap.</li>
+  <li><tt>authorization header</tt> and <tt>bearer token</tt> remain direct-header modes in HyperDoc's current learning model.</li>
+  <li>This page does not claim that <tt>hyperdoc-mcp.service</tt> already has live auth configured.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="HyperDoc three-mode DMX auth crosswalk">HyperDoc three-mode DMX auth crosswalk</a></li>
+  <li><a page="DMX Authorization header to Credentials path">DMX Authorization header to Credentials path</a></li>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic">Operational definition: chunk, chunk note, manifest note, content topic</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>

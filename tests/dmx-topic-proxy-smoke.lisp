@@ -711,7 +711,14 @@
          (book (hyperbook:hyperbook-of single-proxy))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
          (original-drakma (symbol-function 'drakma:http-request)))
-    (labels ((make-membership (topicmap-id assoc-id &optional (value "context-window"))
+    (labels ((make-view-props (x y)
+               (let ((json (make-hash-table :test #'equal)))
+                 (setf (gethash "dmx.topicmaps.x" json) x
+                       (gethash "dmx.topicmaps.y" json) y
+                       (gethash "dmx.topicmaps.visibility" json) t
+                       (gethash "dmx.topicmaps.pinned" json) nil)
+                 json))
+             (make-membership (topicmap-id assoc-id &optional (value "context-window"))
                (let ((membership (make-hash-table :test #'equal))
                      (assoc (make-hash-table :test #'equal)))
                  (setf (gethash "id" membership) topicmap-id
@@ -719,7 +726,7 @@
                        (gethash "assoc" membership) assoc
                        (gethash "id" assoc) assoc-id)
                  membership))
-             (make-topic-json (id uri type-uri value)
+             (make-topic-json (id uri type-uri value &optional children-alist)
                (let ((json (make-hash-table :test #'equal))
                      (children (make-hash-table :test #'equal)))
                  (setf (gethash "id" json) id
@@ -727,12 +734,101 @@
                        (gethash "typeUri" json) type-uri
                        (gethash "value" json) value
                        (gethash "children" json) children)
+                 (dolist (entry children-alist)
+                   (let ((child (make-hash-table :test #'equal)))
+                     (setf (gethash "value" child) (cdr entry)
+                           (gethash (car entry) children) child)))
                  json))
+             (canary-topic-json ()
+               (make-topic-json
+                922464
+                "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"
+                "dmx.notes.note"
+                "Operational definition: chunk, chunk note, manifest note, content topic"))
              (topicmap-core-json ()
                (make-topic-json 919822 "" "dmx.topicmaps.topicmap" "context-window"))
+             (topicmap-projection-json ()
+               (let ((json (make-hash-table :test #'equal))
+                     (topics (make-hash-table :test #'equal))
+                     (topic-entry (make-hash-table :test #'equal)))
+                 (setf (gethash "id" topic-entry) 922464
+                       (gethash "value" topic-entry)
+                       "Operational definition: chunk, chunk note, manifest note, content topic"
+                       (gethash "viewProps" topic-entry)
+                       (make-view-props 24 44)
+                       (gethash "topics" json) (vector topic-entry))
+                 json))
              (topicmap-memberships-json (topic-id)
                (declare (ignore topic-id))
                (vector (make-membership 919822 922471)))
+             (journal-companion-topic-json ()
+               (let* ((topic (canary-topic-json))
+                      (metadata
+                        (hyperdoc::dmx-workspace-journal-subject-metadata-from-topic
+                         topic))
+                      (subject-key (gethash "subjectKey" metadata))
+                      (lookup (gethash "subjectLookup" metadata))
+                      (lookup-kind (gethash "kind" lookup))
+                      (lookup-value (gethash "value" lookup))
+                      (payload
+                        (hyperdoc::dmx-workspace-journal-payload-json-from-topic
+                         topic))
+                      (view-props (make-view-props 24 44))
+                      (current-state
+                        (hyperdoc::dmx-workspace-journal-snapshot-from-payload
+                         subject-key
+                         lookup-kind
+                         lookup-value
+                         919822
+                         payload
+                         :subject-uri (gethash "subjectUri" metadata)
+                         :subject-kind (gethash "subjectKind" metadata)
+                         :ownership-class (gethash "ownershipClass" metadata)
+                         :note-key (gethash "noteKey" metadata)
+                         :note-kind (gethash "noteKind" metadata)
+                         :topic-id 922464
+                         :in-topicmap t
+                         :view-props view-props
+                         :workspace-id nil
+                         :workspace-title nil))
+                      (previous-state
+                        (hyperdoc::dmx-workspace-journal-absent-snapshot
+                         subject-key
+                         lookup-kind
+                         lookup-value
+                         919822
+                         :subject-uri (gethash "subjectUri" metadata)
+                         :subject-kind (gethash "subjectKind" metadata)
+                         :ownership-class (gethash "ownershipClass" metadata)
+                         :note-key (gethash "noteKey" metadata)
+                         :note-kind (gethash "noteKind" metadata)))
+                      (stream
+                        (hyperdoc::dmx-workspace-journal-make-base-stream
+                         subject-key
+                         lookup-kind
+                         lookup-value
+                         919822
+                         :subject-uri (gethash "subjectUri" metadata)
+                         :subject-kind (gethash "subjectKind" metadata)
+                         :ownership-class (gethash "ownershipClass" metadata)
+                         :note-key (gethash "noteKey" metadata)
+                         :note-kind (gethash "noteKind" metadata)))
+                      (events
+                        (hyperdoc::dmx-workspace-journal-transition-events
+                         previous-state
+                         current-state
+                         hyperdoc::*dmx-workspace-journal-diff-observation-kind*
+                         hyperdoc::*dmx-workspace-journal-diff-actor*)))
+                 (hyperdoc::dmx-workspace-journal-apply-events-to-stream
+                  stream
+                  events)
+                 (make-topic-json
+                  930001
+                  (hyperdoc::dmx-workspace-journal-note-uri subject-key)
+                  "dmx.notes.note"
+                  (hyperdoc::dmx-workspace-journal-visible-title stream)
+                  (list (cons hyperdoc::*dmx-notes-text-type-uri*
+                              (hyperdoc::encode-json-string stream))))))
              (json-stream (object)
                (make-string-input-stream (hyperdoc::encode-json-string object))))
       (clrhash (hyperdoc::dmx-cache-of book))
@@ -753,13 +849,9 @@
                      (declare (ignore book parameters accept))
                      (cond
                        ((string= endpoint "/core/topic/922464")
-                        (values
+                       (values
                          (hyperdoc::encode-json-string
-                          (make-topic-json
-                           922464
-                           "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"
-                           "dmx.notes.note"
-                           "Operational definition: chunk, chunk note, manifest note, content topic"))
+                          (canary-topic-json))
                          200
                          (expected-dmx-core-topic-url 922464)
                          "OK"))
@@ -779,20 +871,38 @@
                          (expected-dmx-topicmap-memberships-url 922464)
                          "OK"))
                        (t
-                        (error "Unexpected DMX repair-console fetch ~S" endpoint)))))
+                       (error "Unexpected DMX repair-console fetch ~S" endpoint)))))
              (setf (symbol-function 'drakma:http-request)
                    (lambda (url &key method additional-headers content-type content
                                content-length want-stream &allow-other-keys)
                      (declare (ignore want-stream))
                      (cond
+                       ((search (hyperdoc::dmx-topic-uri-lookup-path
+                                 "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic")
+                                url)
+                        (values
+                         (json-stream (canary-topic-json))
+                         200
+                         nil
+                         nil nil "OK"))
+                       ((search (hyperdoc::dmx-topic-uri-lookup-path
+                                 (hyperdoc::dmx-workspace-journal-note-uri
+                                  "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"))
+                                url)
+                        (values
+                         (json-stream (journal-companion-topic-json))
+                         200
+                         nil
+                         nil nil "OK"))
+                       ((search "/topicmaps/919822?children=true" url)
+                        (values
+                         (json-stream (topicmap-projection-json))
+                         200
+                         nil
+                         nil nil "OK"))
                        ((search "/core/topic/922464" url)
                         (values
-                         (json-stream
-                          (make-topic-json
-                           922464
-                           "hyperdoc:mcp/workspace-note/operational-definition-chunk-chunk-note-manifest-note-content-topic"
-                           "dmx.notes.note"
-                           "Operational definition: chunk, chunk note, manifest note, content topic"))
+                         (json-stream (canary-topic-json))
                          200
                          nil
                          nil nil "OK"))

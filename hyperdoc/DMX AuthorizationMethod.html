@@ -1,0 +1,59 @@
+<h1>DMX AuthorizationMethod</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="DMX AuthorizationMethod"><tt>DMX AuthorizationMethod</tt></a>
+  is the DMX platform extension point for non-Basic Authorization schemes.
+  It explains why bearer token mode in HyperDoc is an installation-dependent
+  learning example rather than a universal DMX-core promise.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="DMX AuthorizationMethod"><tt>DMX AuthorizationMethod</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Credentials"><tt>DMX Credentials</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Authorization header to Credentials path"><tt>DMX Authorization header to Credentials path</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a></li>
+  <li><a expr="(dmx-auth-crosswalk-bearer-token-example)" view="DMX backend contract"><tt>(dmx-auth-crosswalk-bearer-token-example)</tt> DMX backend contract</a></li>
+</ul>
+
+<h2>Platform contract</h2>
+
+<p>
+  In <tt>dmx-platform</tt>, the interface
+  <tt>systems.dmx.accesscontrol.AuthorizationMethod</tt> defines
+  <tt>checkCredentials(Credentials cred)</tt>.
+  For non-Basic method names, DMX resolves an <tt>AuthorizationMethod</tt>
+  implementation and asks it whether the supplied credentials are valid.
+</p>
+
+<p>
+  That means bearer-style support depends on one of two things:
+</p>
+
+<ul>
+  <li>a registered non-Basic <tt>AuthorizationMethod</tt> inside DMX itself</li>
+  <li>or an installation-specific proxy or gateway that turns a bearer token into a DMX-compatible backend session/header before the request reaches DMX</li>
+</ul>
+
+<h2>Why the crosswalk keeps this explicit</h2>
+
+<p>
+  HyperDoc's repair console still normalizes <tt>bearer token</tt> as a valid
+  operator input mode for learning and UI purposes, but the backend contract
+  note must remain <tt>Installation-dependent</tt>.
+  This page is the durable reason why.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX Credentials">DMX Credentials</a></li>
+  <li><a page="DMX Authorization header to Credentials path">DMX Authorization header to Credentials path</a></li>
+  <li><a page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a></li>
+  <li><a page="HyperDoc three-mode DMX auth crosswalk">HyperDoc three-mode DMX auth crosswalk</a></li>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic">Operational definition: chunk, chunk note, manifest note, content topic</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>
