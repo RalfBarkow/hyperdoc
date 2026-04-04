@@ -28,6 +28,7 @@
                              (:file "localhost-fedwiki-page-promotion-plans")
                              (:file "code-path-graphs")
                              (:file "topics")
+                             (:file "state-machines")
                              (:file "links-in-code")
                              (:file "defining")
                              (:file "check-runner")
@@ -150,6 +151,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "code-path-graphs")
+                             (:file "state-machines")
                              (:file "dmx-topics")
                              (:file "bibliography-subcollections")
                              (:file "topic-enrichment")
@@ -263,6 +265,7 @@
                 :serial t
                 :components ((:file "dmx-topic-proxy-smoke")
                              (:file "code-path-graphs-smoke")
+                             (:file "state-machine-smoke")
                              (:file "relation-topic-proposals-smoke")
                              (:file "dock-presentation-smoke")
                              (:file "dock-annotation-smoke")

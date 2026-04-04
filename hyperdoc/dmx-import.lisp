@@ -1894,14 +1894,8 @@
 (defparameter *dmx-auth-crosswalk-default-bearer-token*
   "eyJhbGciOi...example")
 
-(defclass dmx-auth-path-example ()
-  ((id :reader id-of
-       :initarg :id)
-   (title :reader title-of
-          :initarg :title)
-   (summary :reader summary-of
-            :initarg :summary)
-   (input-mode :reader dmx-auth-path-example-input-mode-of
+(defclass dmx-auth-path-example (state-machine-run)
+  ((input-mode :reader dmx-auth-path-example-input-mode-of
                :reader dmx-auth-mode-example-chosen-mode-of
                :initarg :input-mode)
    (raw-input :reader dmx-auth-path-example-raw-input-of
@@ -1952,11 +1946,6 @@
     :reader dmx-auth-path-example-installation-dependencies-of
     :initarg :installation-dependencies
     :initform nil)
-   (notes
-    :reader dmx-auth-path-example-notes-of
-    :reader dmx-auth-mode-example-contract-notes-of
-    :initarg :notes
-    :initform nil)
    (detected-authorization-scheme
     :reader dmx-auth-mode-example-detected-authorization-scheme-of
     :initarg :detected-authorization-scheme
@@ -1985,6 +1974,17 @@
     :reader dmx-auth-mode-example-topic-id-of
     :initarg :topic-id
     :initform *dmx-auth-crosswalk-default-topic-id*)))
+
+(defgeneric dmx-auth-path-example-notes-of (example))
+
+(defmethod dmx-auth-path-example-notes-of ((example dmx-auth-path-example))
+  (state-machine-run-notes-of example))
+
+(defgeneric dmx-auth-mode-example-contract-notes-of (example))
+
+(defmethod dmx-auth-mode-example-contract-notes-of
+    ((example dmx-auth-path-example))
+  (state-machine-run-notes-of example))
 
 (defclass dmx-auth-crosswalk ()
   ((id :reader id-of
@@ -2253,10 +2253,361 @@
                   :classification "Installation-dependent"
                   :detail "A non-Basic Authorization header needs a matching AuthorizationMethod inside DMX or a compatible proxy/gateway that translates it before DMX checks credentials."))))
       (:token
-       (list
-        (list :label "Bearer support"
+        (list
+         (list :label "Bearer support"
               :classification "Installation-dependent"
               :detail "Bearer token examples depend on a registered non-Basic AuthorizationMethod or a compatible proxy/gateway. HyperDoc does not claim bearer is universally native to DMX core."))))))
+
+(defun dmx-auth-state-machine-source-evidence ()
+  (list
+   (list :layer "HyperDoc page"
+         :reference "State machine"
+         :detail "Generic reusable machine abstraction page for definition objects, run objects, and derived visualization.")
+   (list :layer "HyperDoc page"
+         :reference "Operational definition: state machine, state, transition, guard, run trace"
+         :detail "Durable operational definition for the definition/run split used by this auth example.")
+   (list :layer "HyperDoc page"
+         :reference "Inspectable authentication-path traces for repair console"
+         :detail "DMX auth remains one worked example instance of the generic machine model.")
+   (list :layer "HyperDoc page"
+         :reference "HyperDoc three-mode DMX auth crosswalk"
+         :detail "Worked example crosswalk built from dmx-auth-path-example runtime objects.")
+   (list :layer "Lisp source"
+         :reference "hyperdoc/state-machines.lisp"
+         :detail "Generic machine-definition and run runtime objects.")
+   (list :layer "Lisp source"
+         :reference "hyperdoc/dmx-import.lisp"
+         :detail "DMX auth example specialization and request-shape derivation.")
+   (list :layer "Test"
+         :reference "tests/state-machine-smoke.lisp"
+         :detail "Smoke coverage for the generic machine abstraction and the DMX auth example instance.")))
+
+(defun make-dmx-auth-state-machine-definition ()
+  (make-state-machine-definition
+   :id "state-machine-definition/dmx-auth-path"
+   :title "DMX auth path state machine"
+   :summary
+   "Generic state-machine-definition describing how HyperDoc auth inputs become request shapes, DMX-side credential interpretation, optional AuthorizationMethod resolution, session aftermath, and the later guarded request form."
+   :states
+   (list
+    (make-state-machine-state
+     :id "input-captured"
+     :title "Input captured"
+     :summary "One concrete operator input bundle is present."
+     :role :initial
+     :entry-condition "User has supplied one bounded auth example input."
+     :exit-condition "Mode normalization begins")
+    (make-state-machine-state
+     :id "mode-normalized"
+     :title "Mode normalized"
+     :summary "HyperDoc has resolved the input into one supported auth mode."
+     :entry-condition "normalize-http-dmx-import-auth-mode returned a stable mode"
+     :exit-condition "Outgoing request shape is derived")
+    (make-state-machine-state
+     :id "request-shaped"
+     :title "Request shaped"
+     :summary "Authorization header and bootstrap/direct-header consequences are derived."
+     :entry-condition "Derived Authorization/session shape is inspectable"
+     :exit-condition "DMX-side interpretation path is identified")
+    (make-state-machine-state
+     :id "credentials-interpreted"
+     :title "Credentials interpreted"
+     :summary "DMX-core-native Credentials parsing is applicable to the request."
+     :entry-condition "Basic or directly decodable Basic header is present"
+     :exit-condition "Either bootstrap or direct-header carry path is chosen")
+    (make-state-machine-state
+     :id "authorization-method-resolved"
+     :title "AuthorizationMethod resolved"
+     :summary "A non-Basic scheme depends on a named AuthorizationMethod or compatible gateway."
+     :entry-condition "Non-Basic header or bearer path is in play"
+     :exit-condition "Either guarded request can be shaped or failure boundary is explicit")
+    (make-state-machine-state
+     :id "session-established"
+     :title "Session established"
+     :summary "Bootstrap succeeded and JSESSIONID exists as session aftermath."
+     :entry-condition "POST /access-control/login succeeded"
+     :exit-condition "Later guarded request uses session-backed cookie state")
+    (make-state-machine-state
+     :id "guarded-request-shaped"
+     :title "Guarded request shaped"
+     :summary "The later guarded request shape is inspectable."
+     :role :terminal
+     :entry-condition "Auth path has produced the later request shape"
+     :notes "Terminal teaching state for the bounded example object.")
+    (make-state-machine-state
+     :id "failure-boundary"
+     :title "Failure boundary"
+     :summary "The auth path reached an explicit unmet-contract or denied branch."
+     :role :failure
+     :entry-condition "Required backend contract or support condition is missing"
+     :notes "Explicit failure state for missing AuthorizationMethod or denied auth paths."))
+   :transitions
+   (list
+    (make-state-machine-transition
+     :id "capture->normalize"
+     :from-state "input-captured"
+     :to-state "mode-normalized"
+     :trigger "normalize-mode"
+     :guard "supported-input-mode"
+     :emitted-evidence "normalized-mode"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "normalize->shape"
+     :from-state "mode-normalized"
+     :to-state "request-shaped"
+     :trigger "derive-request-shape"
+     :guard "supported-mode"
+     :emitted-evidence "authorization-header-and-cookie-shape"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "shape->credentials"
+     :from-state "request-shaped"
+     :to-state "credentials-interpreted"
+     :trigger "parse-basic-credentials"
+     :guard "basic-or-basic-header"
+     :emitted-evidence "dmx-credentials-shape"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "shape->authorization-method"
+     :from-state "request-shaped"
+     :to-state "authorization-method-resolved"
+     :trigger "resolve-authorization-method"
+     :guard "non-basic-header-or-token"
+     :emitted-evidence "authorization-method-name"
+     :side-effects "installation-dependent lookup"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "credentials->session"
+     :from-state "credentials-interpreted"
+     :to-state "session-established"
+     :trigger "bootstrap-session"
+     :guard "bootstrap-required"
+     :emitted-evidence "jsessionid-aftermath"
+     :side-effects "session becomes request-carried state"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "credentials->guarded-request"
+     :from-state "credentials-interpreted"
+     :to-state "guarded-request-shaped"
+     :trigger "carry-direct-basic-header"
+     :guard "direct-header-mode"
+     :emitted-evidence "guarded-request-shape"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "authorization-method->guarded-request"
+     :from-state "authorization-method-resolved"
+     :to-state "guarded-request-shaped"
+     :trigger "carry-direct-header"
+     :guard "authorization-method-available-or-proxy-compatible"
+     :emitted-evidence "guarded-request-shape"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "authorization-method->failure"
+     :from-state "authorization-method-resolved"
+     :to-state "failure-boundary"
+     :trigger "resolve-authorization-method"
+     :guard "authorization-method-missing"
+     :emitted-evidence "installation-dependent-failure-note"
+     :side-effects "no authenticated session"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "session->guarded-request"
+     :from-state "session-established"
+     :to-state "guarded-request-shaped"
+     :trigger "prepare-guarded-request"
+     :guard "session-cookie-present"
+     :emitted-evidence "guarded-request-shape"
+     :side-effects "later request now carries JSESSIONID aftermath"
+     :reversible-p nil))
+   :initial-state "input-captured"
+   :terminal-states '("guarded-request-shaped")
+   :guards '("supported-input-mode"
+             "supported-mode"
+             "basic-or-basic-header"
+             "non-basic-header-or-token"
+             "bootstrap-required"
+             "direct-header-mode"
+             "authorization-method-available-or-proxy-compatible"
+             "authorization-method-missing"
+             "session-cookie-present")
+   :events '("normalize-mode"
+             "derive-request-shape"
+             "parse-basic-credentials"
+             "resolve-authorization-method"
+             "bootstrap-session"
+             "carry-direct-basic-header"
+             "carry-direct-header"
+             "prepare-guarded-request")
+   :invariants
+   (list
+    (list :label "One normalized mode"
+          :detail "Each concrete auth example resolves to exactly one supported input mode.")
+    (list :label "Derived request before backend interpretation"
+          :detail "The outgoing request shape is derived before DMX-side Credentials interpretation or AuthorizationMethod lookup is discussed.")
+    (list :label "JSESSIONID is aftermath"
+          :detail "Session cookie state is modeled as a later consequence of bootstrap, never as a primary operator input mode.")
+    (list :label "Failure is explicit"
+          :detail "Installation-dependent non-Basic support failures terminate at an explicit failure boundary rather than being silently treated as anonymous success."))
+   :failure-states '("failure-boundary")
+   :source-evidence (dmx-auth-state-machine-source-evidence)
+   :notes
+   (list
+    (list :label "Worked example"
+          :detail "This is a DMX-auth-specific instance of the generic state-machine abstraction, not the abstraction itself."))
+   :multi-initial-p nil
+   :multi-current-p nil
+   :allow-terminal-outgoing-p nil
+   :acyclic-p t))
+
+(defun dmx-auth-path-example-visited-states (mode &key detected-scheme)
+  (let ((resolved-mode
+          (normalize-http-dmx-import-auth-mode
+           mode
+           'dmx-auth-path-example-visited-states)))
+    (case resolved-mode
+      (:basic
+       '("input-captured"
+         "mode-normalized"
+         "request-shaped"
+         "credentials-interpreted"
+         "session-established"
+         "guarded-request-shaped"))
+      (:header
+       (if (or (null detected-scheme)
+               (string= detected-scheme "Basic"))
+           '("input-captured"
+             "mode-normalized"
+             "request-shaped"
+             "credentials-interpreted"
+             "guarded-request-shaped")
+           '("input-captured"
+             "mode-normalized"
+             "request-shaped"
+             "authorization-method-resolved"
+             "guarded-request-shaped")))
+      (:token
+       '("input-captured"
+         "mode-normalized"
+         "request-shaped"
+         "authorization-method-resolved"
+         "guarded-request-shaped")))))
+
+(defun dmx-auth-path-example-transition-trace (visited-states)
+  (loop for from-state in visited-states
+        for to-state in (rest visited-states)
+        for timestamp from 1
+        collect
+        (list :timestamp timestamp
+              :kind :transition
+              :transition-id
+              (cond
+                ((and (equal from-state "input-captured")
+                      (equal to-state "mode-normalized"))
+                 "capture->normalize")
+                ((and (equal from-state "mode-normalized")
+                      (equal to-state "request-shaped"))
+                 "normalize->shape")
+                ((and (equal from-state "request-shaped")
+                      (equal to-state "credentials-interpreted"))
+                 "shape->credentials")
+                ((and (equal from-state "request-shaped")
+                      (equal to-state "authorization-method-resolved"))
+                 "shape->authorization-method")
+                ((and (equal from-state "credentials-interpreted")
+                      (equal to-state "session-established"))
+                 "credentials->session")
+                ((and (equal from-state "credentials-interpreted")
+                      (equal to-state "guarded-request-shaped"))
+                 "credentials->guarded-request")
+                ((and (equal from-state "authorization-method-resolved")
+                      (equal to-state "guarded-request-shaped"))
+                 "authorization-method->guarded-request")
+                ((and (equal from-state "authorization-method-resolved")
+                      (equal to-state "failure-boundary"))
+                 "authorization-method->failure")
+                ((and (equal from-state "session-established")
+                      (equal to-state "guarded-request-shaped"))
+                 "session->guarded-request")
+                (t
+                 (format nil "~A->~A" from-state to-state)))
+              :from-state from-state
+              :to-state to-state
+              :detail
+              (format nil "Auth path progressed from ~A to ~A."
+                      from-state
+                      to-state))))
+
+(defun dmx-auth-path-example-evidence-trace
+    (mode
+     derived-authorization-header
+     derived-credentials
+     detected-scheme
+     session-transition
+     post-bootstrap-request-shape
+     &key detected-authorization-method)
+  (let ((resolved-mode
+          (normalize-http-dmx-import-auth-mode
+           mode
+           'dmx-auth-path-example-evidence-trace)))
+    (append
+     (list
+      (list :timestamp 0
+            :kind :state-entry
+            :state-id "input-captured"
+            :evidence "A bounded auth example input bundle is present.")
+      (list :timestamp 1
+            :kind :transition
+            :transition-id "capture->normalize"
+            :evidence
+            (format nil "Normalized mode: ~A."
+                    (dmx-auth-mode-label resolved-mode)))
+      (list :timestamp 2
+            :kind :state-entry
+            :state-id "request-shaped"
+            :evidence
+            (format nil "Derived Authorization header: ~A."
+                    (or derived-authorization-header "-"))))
+     (if (eq resolved-mode :token)
+         (list
+          (list :timestamp 3
+                :kind :state-entry
+                :state-id "authorization-method-resolved"
+                :evidence
+                (format nil
+                        "Non-Basic path requires AuthorizationMethod or compatible gateway: ~A."
+                        (or detected-authorization-method
+                            detected-scheme
+                            "Bearer"))))
+         (list
+          (list :timestamp 3
+                :kind :state-entry
+                :state-id "credentials-interpreted"
+                :evidence
+                (format nil "DMX Credentials-like summary: ~A."
+                        derived-credentials))))
+     (when (eq resolved-mode :basic)
+       (list
+        (list :timestamp 4
+              :kind :state-entry
+              :state-id "session-established"
+              :evidence
+              (format nil "Expected session aftermath: ~A."
+                      (or (cdr (assoc "Session aftermath"
+                                      session-transition
+                                      :test #'equal))
+                          "JSESSIONID=<session-id>")))))
+     (list
+      (list :timestamp 5
+            :kind :state-entry
+            :state-id "guarded-request-shaped"
+            :evidence
+            (format nil "Later guarded request shape: ~A."
+                    post-bootstrap-request-shape))))))
 
 (defun make-dmx-auth-path-example
     (&key auth-mode username password authorization-header auth-token
@@ -2279,10 +2630,10 @@
            (explicit-http-dmx-import-authorization-header
             :auth-mode resolved-mode
             :authorization-header authorization-header
-           :auth-token auth-token
-           :username username
-           :password password
-           :boundary 'make-dmx-auth-path-example))
+            :auth-token auth-token
+            :username username
+            :password password
+            :boundary 'make-dmx-auth-path-example))
          (detected-scheme
            (summarize-http-authorization-scheme
             derived-authorization-header))
@@ -2400,6 +2751,35 @@
                    (format nil
                            "Inspectable dmx-auth-path-example for ~A that shows raw input, normalized request shaping, DMX Credentials interpretation, AuthorizationMethod dependence, and the later request/cookie form without performing any live login."
                            mode-label)
+                   :machine (make-dmx-auth-state-machine-definition)
+                   :input raw-fields
+                   :current-state "guarded-request-shaped"
+                   :visited-states
+                   (dmx-auth-path-example-visited-states
+                    resolved-mode
+                    :detected-scheme detected-scheme)
+                   :transition-trace
+                   (dmx-auth-path-example-transition-trace
+                    (dmx-auth-path-example-visited-states
+                     resolved-mode
+                     :detected-scheme detected-scheme))
+                   :evidence-trace
+                   (dmx-auth-path-example-evidence-trace
+                    resolved-mode
+                    derived-authorization-header
+                    derived-credentials
+                    detected-scheme
+                    session-transition
+                    post-bootstrap-request-shape
+                    :detected-authorization-method authorization-method-name)
+                   :start-time 0
+                   :end-time 5
+                   :status (if (eq resolved-mode :token)
+                               :installation-dependent
+                               :prepared)
+                   :failure-classification
+                   (when (eq resolved-mode :token)
+                     "AuthorizationMethod resolution is installation-dependent for bearer-token examples.")
                    :input-mode auth-mode
                    :raw-input raw-fields
                    :normalized-mode resolved-mode

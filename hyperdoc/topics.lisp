@@ -5398,6 +5398,133 @@
                  "HyperDoc Runtime Model"
                  "Authoring Documentation in HyperDoc")))
 
+(defun path-topic ()
+  (make-topic
+   :id "path"
+   :title "Path"
+   :summary "A path is a bounded inspectable transformation chain whose intermediate states and evidence are rendered from runtime object data rather than left as prose only."
+   :references '("Path"
+                 "State machine"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun state-machine-topic ()
+  (make-topic
+   :id "state-machine"
+   :title "State machine"
+   :summary "A state machine is a reusable bounded transition object plus derived views for states, transitions, constraints, and one concrete run."
+   :references '("State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "A framework for maintaining the coherence of a running Lisp"
+                 "McDermott Running Image Coherence Crosswalk"
+                 "Path"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun state-topic ()
+  (make-topic
+   :id "state"
+   :title "State"
+   :summary "A state is a named point in a bounded machine whose role, entry condition, exit condition, and evidence can be inspected directly."
+   :references '("State"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "Path")))
+
+(defun transition-topic ()
+  (make-topic
+   :id "transition"
+   :title "Transition"
+   :summary "A transition is an admissible move between named states, carrying trigger, guard, evidence, and side-effect information."
+   :references '("Transition"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "Path")))
+
+(defun guard-topic ()
+  (make-topic
+   :id "guard"
+   :title "Guard"
+   :summary "A guard is the explicit condition or support predicate that must hold for a transition to be taken."
+   :references '("Guard"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "A framework for maintaining the coherence of a running Lisp")))
+
+(defun event-topic ()
+  (make-topic
+   :id "event"
+   :title "Event"
+   :summary "An event is the named trigger or observed occurrence that drives a permitted transition through a state machine."
+   :references '("Event"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "Path")))
+
+(defun terminal-state-topic ()
+  (make-topic
+   :id "terminal-state"
+   :title "Terminal state"
+   :summary "A terminal state is an explicitly typed machine state where the bounded traversal is considered complete."
+   :references '("Terminal state"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace")))
+
+(defun failure-state-topic ()
+  (make-topic
+   :id "failure-state"
+   :title "Failure state"
+   :summary "A failure state is an explicitly typed terminal branch recording unmet guards, violated constraints, or other named failure classifications."
+   :references '("Failure state"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "McDermott Running Image Coherence Crosswalk")))
+
+(defun state-machine-run-topic ()
+  (make-topic
+   :id "state-machine-run"
+   :title "State-machine run"
+   :summary "A concrete traversal of one reusable machine, keeping input, visited states, transition trace, evidence trace, and current status inspectable."
+   :references '("State-machine run"
+                 "State machine"
+                 "Operational definition: state machine, state, transition, guard, run trace"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "Inspectable authentication-path traces for repair console")))
+
+(defun state-machine-trace-topic ()
+  (make-topic
+   :id "state-machine-trace"
+   :title "State-machine trace"
+   :summary "An ordered evidence-bearing account of one run, including visited states, taken or skipped transitions, timestamps, and failure boundaries."
+   :references '("State-machine trace"
+                 "State-machine run"
+                 "State machine"
+                 "Inspectable authentication-path traces for repair console"
+                 "HyperDoc three-mode DMX auth crosswalk")))
+
+(defun state-machine-visualization-topic ()
+  (make-topic
+   :id "state-machine-visualization"
+   :title "State-machine visualization"
+   :summary "Derived graph, timeline, and transition-matrix views that render a machine definition or one run from the underlying object data."
+   :references '("State-machine visualization"
+                 "State machine"
+                 "State-machine trace"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "Path")))
+
+(defun operational-definition-state-machine-state-transition-guard-run-trace-topic ()
+  (make-topic
+   :id "operational-definition-state-machine-state-transition-guard-run-trace"
+   :title "Operational definition: state machine, state, transition, guard, run trace"
+   :summary "Operational definition page that fixes the reusable definition/run split, typed state and transition roles, and evidence-bearing traversal model for HyperDoc state machines."
+   :references '("Operational definition: state machine, state, transition, guard, run trace"
+                 "State machine"
+                 "Path"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "A framework for maintaining the coherence of a running Lisp"
+                 "McDermott Running Image Coherence Crosswalk")))
+
 (defun vom-antisemitismus-der-keiner-sein-will-topic ()
   (make-topic
    :id "vom-antisemitismus-der-keiner-sein-will"

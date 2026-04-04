@@ -1,0 +1,68 @@
+<h1>State machine</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="State machine"><tt>State machine</tt></a> is a
+  first-class HyperDoc runtime abstraction: a reusable definition object plus
+  one or more concrete run objects. Pages explain the abstraction, topics give
+  it stable semantic handles, and runtime objects provide the inspectable data
+  from which visualizations are derived.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="State machine"><tt>State machine</tt></a></li>
+  <li><a hyperbook="topics" page="State"><tt>State</tt></a></li>
+  <li><a hyperbook="topics" page="Transition"><tt>Transition</tt></a></li>
+  <li><a hyperbook="topics" page="Guard"><tt>Guard</tt></a></li>
+  <li><a hyperbook="topics" page="Event"><tt>Event</tt></a></li>
+  <li><a hyperbook="topics" page="Terminal state"><tt>Terminal state</tt></a></li>
+  <li><a hyperbook="topics" page="Failure state"><tt>Failure state</tt></a></li>
+  <li><a hyperbook="topics" page="State-machine run"><tt>State-machine run</tt></a></li>
+  <li><a hyperbook="topics" page="State-machine trace"><tt>State-machine trace</tt></a></li>
+  <li><a hyperbook="topics" page="State-machine visualization"><tt>State-machine visualization</tt></a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Overview"><tt>(make-example-state-machine-definition)</tt> Overview</a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="State machine"><tt>(make-example-state-machine-definition)</tt> State machine</a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Directed graph"><tt>(make-example-state-machine-definition)</tt> Directed graph</a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Transition matrix"><tt>(make-example-state-machine-definition)</tt> Transition matrix</a></li>
+  <li><a expr="(make-example-state-machine-run)" view="Trace"><tt>(make-example-state-machine-run)</tt> Trace</a></li>
+  <li><a expr="(make-dmx-auth-state-machine-definition)" view="State machine"><tt>(make-dmx-auth-state-machine-definition)</tt> State machine</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Trace"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Trace</a></li>
+</ul>
+
+<h2>Definition and run</h2>
+
+<p>
+  In HyperDoc, a state machine must exist at two levels:
+</p>
+
+<ol>
+  <li>a reusable <tt>state-machine-definition</tt> object</li>
+  <li>a concrete <tt>state-machine-run</tt> object</li>
+</ol>
+
+<p>
+  This keeps durable machine structure separate from one particular traversal,
+  while still allowing both to be inspected through generic views.
+</p>
+
+<h2>Worked example boundary</h2>
+
+<p>
+  DMX auth is now one worked example instance of the generic machine model. The
+  auth pages keep their specialized teaching views, but they no longer define
+  what a state machine is.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Operational definition: state machine, state, transition, guard, run trace">Operational definition: state machine, state, transition, guard, run trace</a></li>
+  <li><a page="Path">Path</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>

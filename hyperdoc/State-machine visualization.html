@@ -1,0 +1,37 @@
+<h1>State-machine visualization</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="State-machine visualization"><tt>State-machine visualization</tt></a>
+  names the derived graph, timeline, and matrix renderings that come from the
+  machine object itself. The page does not hard-code one prose diagram; it
+  points to runtime objects whose views produce the visualization from data.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="State-machine visualization"><tt>State-machine visualization</tt></a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Directed graph"><tt>(make-example-state-machine-definition)</tt> Directed graph</a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Transition matrix"><tt>(make-example-state-machine-definition)</tt> Transition matrix</a></li>
+  <li><a expr="(make-example-state-machine-run)" view="Timeline"><tt>(make-example-state-machine-run)</tt> Timeline</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Timeline"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Timeline</a></li>
+</ul>
+
+<h2>Visualization kinds</h2>
+
+<ul>
+  <li><b>Directed graph:</b> nodes are states and edges are transitions labeled by event / guard.</li>
+  <li><b>Timeline:</b> emphasizes what happened in one concrete run.</li>
+  <li><b>Transition matrix:</b> shows permitted, forbidden, and guarded source-to-destination pairs.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="State machine">State machine</a></li>
+  <li><a page="State-machine run">State-machine run</a></li>
+  <li><a page="State-machine trace">State-machine trace</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+</ul>

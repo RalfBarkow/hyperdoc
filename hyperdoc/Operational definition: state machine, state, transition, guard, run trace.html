@@ -1,0 +1,68 @@
+<h1>Operational definition: state machine, state, transition, guard, run trace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A state machine is a bounded transition object that defines a finite set of
+  named states, the admissible transitions among them, the events or predicates
+  that trigger those transitions, and the evidence-bearing trace of any
+  concrete traversal through the machine.
+</p>
+
+<p>
+  In HyperDoc, a state machine must exist at two levels:
+</p>
+
+<ol>
+  <li>a reusable definition object</li>
+  <li>a concrete run object</li>
+</ol>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Operational definition: state machine, state, transition, guard, run trace"><tt>Operational definition: state machine, state, transition, guard, run trace</tt></a></li>
+  <li><a hyperbook="topics" page="State machine"><tt>State machine</tt></a></li>
+  <li><a hyperbook="topics" page="State-machine run"><tt>State-machine run</tt></a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Overview"><tt>(make-example-state-machine-definition)</tt> Overview</a></li>
+  <li><a expr="(make-example-state-machine-run)" view="Trace"><tt>(make-example-state-machine-run)</tt> Trace</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Trace"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Trace</a></li>
+</ul>
+
+<h2>Required object split</h2>
+
+<ul>
+  <li><b><tt>state-machine-definition</tt>:</b> id, title, summary, states, transitions, initial state, terminal states, guards, events, invariants, failure states, source evidence, notes</li>
+  <li><b><tt>state-machine-run</tt>:</b> machine, input, current state, visited states, transition trace, evidence trace, start time, end time, status, failure classification, notes</li>
+</ul>
+
+<h2>Rules</h2>
+
+<ul>
+  <li>Distinguish definition objects from run objects.</li>
+  <li>Every transition must reference known states.</li>
+  <li>Initial state must be exactly one unless the machine explicitly allows multi-initial behavior.</li>
+  <li>Terminal and failure states must be typed explicitly.</li>
+  <li>Evidence must be attachable at state-entry and transition points.</li>
+  <li>Visualization must be derived from the object, not hard-coded page prose.</li>
+</ul>
+
+<h2>Worked example boundary</h2>
+
+<p>
+  The DMX auth crosswalk is a worked example instance of this abstraction. It
+  remains a bounded auth-path teaching object, but it no longer defines the
+  machine model itself.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="State machine">State machine</a></li>
+  <li><a page="Path">Path</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Operational definition: chunk, chunk note, manifest note, content topic">Operational definition: chunk, chunk note, manifest note, content topic</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>

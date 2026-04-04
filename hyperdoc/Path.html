@@ -1,0 +1,46 @@
+<h1>Path</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Path"><tt>Path</tt></a> is a bounded,
+  inspectable transformation chain with named intermediate states, explicit
+  evidence, and a visible boundary where the chain either reaches its intended
+  outcome or stops. In HyperDoc, a path should exist as a runtime object whose
+  stages can be inspected, not only as page prose.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Path"><tt>Path</tt></a></li>
+  <li><a hyperbook="topics" page="State machine"><tt>State machine</tt></a></li>
+  <li><a hyperbook="topics" page="State-machine run"><tt>State-machine run</tt></a></li>
+  <li><a hyperbook="topics" page="State-machine trace"><tt>State-machine trace</tt></a></li>
+  <li><a expr="(make-example-state-machine-run)" view="Trace"><tt>(make-example-state-machine-run)</tt> Trace</a></li>
+  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Trace"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Trace</a></li>
+</ul>
+
+<h2>Path as object, not only prose</h2>
+
+<p>
+  HyperDoc's evaluation model already separates value production from view
+  rendering. A page expression produces a value object; the inspector then
+  renders views for that object. A path therefore belongs in the runtime layer
+  as an inspectable object with state, evidence, and boundaries.
+</p>
+
+<p>
+  The generic <a page="State machine">State machine</a> abstraction is the
+  reusable way to express such a path. DMX auth remains one worked example of
+  that pattern rather than the model itself.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="State machine">State machine</a></li>
+  <li><a page="Operational definition: state machine, state, transition, guard, run trace">Operational definition: state machine, state, transition, guard, run trace</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+</ul>
