@@ -1,0 +1,53 @@
+<h1>Read-write boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Read-write boundary"><tt>Read-write boundary</tt></a>
+  is a contract boundary that distinguishes what may be read, what may be
+  written, and which object or representation is the stable mutation target.
+  It is not enough to know that a thing can be read; the boundary must state
+  what write target is actually authoritative.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Read-write boundary"><tt>Read-write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Contract boundary"><tt>Contract boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a expr="(make-dmx-note-read-write-boundary-definition)" view="Overview"><tt>(make-dmx-note-read-write-boundary-definition)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-note-read-write-boundary-definition)" view="Permitted and blocked operations"><tt>(make-dmx-note-read-write-boundary-definition)</tt> Permitted and blocked operations</a></li>
+</ul>
+
+<h2>Worked DMX example</h2>
+
+<p>
+  The repo’s current worked example is
+  <a page="DMX note read/write boundary">DMX note read/write boundary</a>.
+  HyperDoc may read the full parent-note projection and inspect the child text
+  projection, but the stable write target is the parent
+  <tt>dmx.notes.note</tt>.
+</p>
+
+<p>
+  That is why the boundary must record:
+</p>
+
+<ul>
+  <li>the canonical read path</li>
+  <li>the canonical write target</li>
+  <li>the verification reread required after mutation</li>
+  <li>the blocked operations that should not be mistaken for a stable write contract</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Contract boundary">Contract boundary</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+</ul>

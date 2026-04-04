@@ -1,0 +1,60 @@
+<h1>Boundary report</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a>
+  is a reporting object that summarizes what an execution or workflow could not
+  resolve, represent, or complete cleanly at its authoritative seam. It is
+  related to a boundary, but it is not the same thing as a
+  <a page="Boundary">boundary definition or boundary instance</a>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-blocked-boundary-instance)" view="Evidence"><tt>(make-dmx-workspace-journal-preflight-blocked-boundary-instance)</tt> Evidence</a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-blocked-boundary-instance)" view="Failure analysis"><tt>(make-dmx-workspace-journal-preflight-blocked-boundary-instance)</tt> Failure analysis</a></li>
+</ul>
+
+<h2>How it differs from a boundary</h2>
+
+<ul>
+  <li><b>Boundary definition:</b> states the sides, crossing condition, allowed operations, evidence, and failure classes.</li>
+  <li><b>Boundary instance:</b> records one concrete crossing or block.</li>
+  <li><b>Boundary report:</b> summarizes unresolved, blocked, or lossy outcomes at or around those boundaries.</li>
+</ul>
+
+<p>
+  That is why a report belongs beside
+  <a page="Runtime Dispatch Seams in HyperDoc">runtime dispatch seams</a>,
+  <a hyperbook="topics" page="Execution evidence object"><tt>execution evidence objects</tt></a>,
+  and <a hyperbook="topics" page="Runtime provenance"><tt>runtime provenance</tt></a>.
+  It is part of the evidence and explanation layer, not the crossing contract
+  itself.
+</p>
+
+<h2>DMX relation</h2>
+
+<p>
+  The current DMX workspace-journal incident is a good example of the
+  distinction. The blocked preflight is a boundary instance. A boundary report
+  would summarize that the last reached stage was <tt>prepare-transition</tt>,
+  the attempted mutation was <tt>PUT /core/topic/927568</tt>, and the failure
+  classification was <tt>auth-blocked</tt>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+  <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+</ul>

@@ -30,6 +30,7 @@
                              (:file "topics")
                              (:file "state-machines")
                              (:file "surfaces")
+                             (:file "boundaries")
                              (:file "links-in-code")
                              (:file "defining")
                              (:file "check-runner")
@@ -148,12 +149,13 @@
                #:html-inspector-views/reactive
                #:clog-moldable-inspector
                #:trivial-package-local-nicknames)
-  :components ((:module "hyperdoc-inspector"
+                :components ((:module "hyperdoc-inspector"
                 :serial t
                 :components ((:file "package")
                              (:file "code-path-graphs")
                              (:file "state-machines")
                              (:file "surfaces")
+                             (:file "boundaries")
                              (:file "dmx-topics")
                              (:file "bibliography-subcollections")
                              (:file "topic-enrichment")
@@ -269,6 +271,7 @@
                              (:file "code-path-graphs-smoke")
                              (:file "state-machine-smoke")
                              (:file "surface-smoke")
+                             (:file "boundary-smoke")
                              (:file "relation-topic-proposals-smoke")
                              (:file "dock-presentation-smoke")
                              (:file "dock-annotation-smoke")

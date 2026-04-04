@@ -1,0 +1,101 @@
+<h1>Boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a> is a bounded
+  transition or contract edge where one mode of access, representation,
+  authority, or execution gives way to another. In HyperDoc, a boundary is not
+  mere policy prose: it should exist as an inspectable runtime object whose
+  sides, crossing condition, evidence, and failure classifications can be
+  inspected directly.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Contract boundary"><tt>Contract boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Transition boundary"><tt>Transition boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Authentication boundary"><tt>Authentication boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Read-write boundary"><tt>Read-write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a></li>
+  <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
+  <li><a hyperbook="topics" page="Runtime provenance"><tt>Runtime provenance</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc surface boundaries"><tt>HyperDoc surface boundaries</tt></a></li>
+  <li><a expr="(make-example-boundary-definition)" view="Overview"><tt>(make-example-boundary-definition)</tt> Overview</a></li>
+  <li><a expr="(make-example-boundary-instance)" view="Boundary state"><tt>(make-example-boundary-instance)</tt> Boundary state</a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-blocked-boundary-instance)" view="Failure analysis"><tt>(make-dmx-workspace-journal-preflight-blocked-boundary-instance)</tt> Failure analysis</a></li>
+</ul>
+
+<h2>Boundary as object, not only prose</h2>
+
+<p>
+  HyperDoc already distinguishes durable pages, inspectable topic handles,
+  runtime objects, and parallel documentation surfaces. A boundary belongs in
+  that same operational model. The page explains the concept, but the runtime
+  object carries the sides, crossing condition, evidence, and blocked or
+  successful crossing state.
+</p>
+
+<h2>Static and dynamic boundaries</h2>
+
+<p>
+  Some boundaries are static contracts. They define what counts as a valid
+  representation, read path, mutation target, or authority edge.
+  Others are dynamic stage crossings inside one run, such as the moment a
+  guarded preflight must succeed before later mutation stages may proceed.
+</p>
+
+<ul>
+  <li><b>Contract boundary:</b> stable access or representation rule.</li>
+  <li><b>Transition boundary:</b> concrete stage crossing during one run.</li>
+  <li><b>Authentication boundary:</b> explicit authority crossing before guarded mutation.</li>
+  <li><b>Read-write boundary:</b> contract boundary that distinguishes stable read and write targets.</li>
+</ul>
+
+<h2>Boundary is not seam, report, or surface</h2>
+
+<p>
+  A boundary is broader than the existing
+  <a page="Runtime Dispatch Seams in HyperDoc">runtime dispatch seam</a>
+  vocabulary. A seam is one especially important execution boundary, but not
+  every boundary is a seam.
+</p>
+
+<p>
+  A boundary is also not the same as a
+  <a hyperbook="topics" page="Boundary report"><tt>boundary report</tt></a>.
+  A report summarizes unresolved or blocked crossings. The boundary itself is
+  the contract or stage edge being crossed or blocked.
+</p>
+
+<p>
+  Nor is a boundary identical with a documentation or diagnostic surface.
+  The existing
+  <a page="Documentation Surfaces in HyperDoc">documentation surfaces</a> and
+  <a hyperbook="topics" page="HyperDoc surface boundaries"><tt>HyperDoc surface boundaries</tt></a>
+  vocabulary describes where explanation or action appears. A boundary
+  describes the crossing or contract edge that those surfaces expose.
+</p>
+
+<h2>Worked examples in this repo</h2>
+
+<ul>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a> as a stable contract and read-write boundary.</li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a> as a guarded transition-boundary area.</li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a> as an explicit authentication-boundary crossing requirement.</li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a> as the adjacent read-only diagnostic surface for the same blocked repair class.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Contract boundary">Contract boundary</a></li>
+  <li><a page="Transition boundary">Transition boundary</a></li>
+  <li><a page="Authentication boundary">Authentication boundary</a></li>
+  <li><a page="Read-write boundary">Read-write boundary</a></li>
+  <li><a page="Boundary report">Boundary report</a></li>
+  <li><a page="Operational definition: boundary, contract boundary, transition boundary, boundary report">Operational definition: boundary, contract boundary, transition boundary, boundary report</a></li>
+</ul>

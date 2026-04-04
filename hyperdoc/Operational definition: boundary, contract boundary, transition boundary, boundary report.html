@@ -1,0 +1,83 @@
+<h1>Operational definition: boundary, contract boundary, transition boundary, boundary report</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A boundary is a bounded transition or contract edge where one mode of access,
+  representation, authority, or execution gives way to another.
+</p>
+
+<p>
+  A HyperDoc boundary is defined not only by what it separates, but by:
+</p>
+
+<ul>
+  <li>the two sides it relates</li>
+  <li>the condition for crossing it</li>
+  <li>the operations allowed before and after it</li>
+  <li>the evidence emitted at the crossing</li>
+  <li>the failure classifications that can block it</li>
+  <li>the adjacent surfaces or stages that it connects</li>
+</ul>
+
+<p>
+  A boundary may be static or dynamic:
+</p>
+
+<ul>
+  <li><b>contract boundary:</b> describes what counts as valid access or representation</li>
+  <li><b>transition boundary:</b> describes a stage crossing during a concrete run</li>
+</ul>
+
+<p>
+  In HyperDoc, a boundary must exist at two levels:
+</p>
+
+<ol>
+  <li>a reusable definition object</li>
+  <li>a concrete boundary instance</li>
+</ol>
+
+<p>
+  A boundary report is related but narrower: it summarizes unresolved or
+  blocked outcomes at or around one authoritative boundary without replacing
+  the boundary object itself.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Contract boundary"><tt>Contract boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Transition boundary"><tt>Transition boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Authentication boundary"><tt>Authentication boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Read-write boundary"><tt>Read-write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a></li>
+  <li><a expr="(make-example-boundary-definition)" view="Overview"><tt>(make-example-boundary-definition)</tt> Overview</a></li>
+  <li><a expr="(make-example-boundary-instance)" view="Crossing attempt"><tt>(make-example-boundary-instance)</tt> Crossing attempt</a></li>
+  <li><a expr="(make-dmx-note-read-write-boundary-definition)" view="Sides and crossing condition"><tt>(make-dmx-note-read-write-boundary-definition)</tt> Sides and crossing condition</a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-boundary-definition)" view="Overview"><tt>(make-dmx-workspace-journal-preflight-boundary-definition)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-blocked-boundary-instance)" view="Failure analysis"><tt>(make-dmx-workspace-journal-preflight-blocked-boundary-instance)</tt> Failure analysis</a></li>
+  <li><a expr="(make-dmx-repair-console-authentication-boundary-definition)" view="Overview"><tt>(make-dmx-repair-console-authentication-boundary-definition)</tt> Overview</a></li>
+</ul>
+
+<h2>Worked examples to preserve</h2>
+
+<ul>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a> as a contract and read-write boundary.</li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a> as the guarded transition-boundary context.</li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a> as an authentication-boundary crossing requirement.</li>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a> as a narrower execution-boundary concept rather than a replacement for boundary in general.</li>
+  <li><a hyperbook="topics" page="Boundary report"><tt>Boundary report</tt></a> as a reporting object adjacent to a boundary rather than the boundary itself.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Contract boundary">Contract boundary</a></li>
+  <li><a page="Transition boundary">Transition boundary</a></li>
+  <li><a page="Authentication boundary">Authentication boundary</a></li>
+  <li><a page="Read-write boundary">Read-write boundary</a></li>
+  <li><a page="Boundary report">Boundary report</a></li>
+</ul>

@@ -3253,6 +3253,8 @@
    :summary "HyperDoc-owned replayable journal layer for shared-workspace notes, topics, and topicmap membership in DMX topicmap 919822, with explicit restore and diff-based out-of-band reconciliation."
    :references '("Surface"
                  "Surface boundary"
+                 "Boundary"
+                 "Transition boundary"
                  "DMX workspace journal model"
                  "DMX workspace journal reconcile call graph"
                  "Context window workspace as shared blackboard"
@@ -3314,7 +3316,10 @@
    :id "dmx-note-read-write-boundary"
    :title "DMX note read/write boundary"
    :summary "Read DMX notes through the full parent-note topic projection, write them only by updating the parent dmx.notes.note payload, and treat append_workspace_note as noteKey-idempotent only when the read client can resolve the existing parent note."
-   :references '("DMX note read/write boundary"
+   :references '("Boundary"
+                 "Contract boundary"
+                 "Read-write boundary"
+                 "DMX note read/write boundary"
                  "DMX machine-readable read paths"
                  "DMX FedWiki Write Model"
                  "DMX MCP server for shared workspace"
@@ -3390,6 +3395,8 @@
    :references '("Surface"
                  "Diagnostic surface"
                  "Failure surface"
+                 "Boundary"
+                 "Transition boundary"
                  "Diagnosing DMX workspace repair triage"
                  "Diagnosing DMX workspace assignment and topicmap placement"
                  "Using guarded workspace topic lifecycle tools"
@@ -3405,6 +3412,9 @@
    :references '("Surface"
                  "Mutation surface"
                  "Failure surface"
+                 "Boundary"
+                 "Authentication boundary"
+                 "Transition boundary"
                  "Using authenticated workspace assignment repair console"
                  "Diagnosing DMX workspace assignment and topicmap placement"
                  "Diagnosing DMX workspace repair triage"
@@ -4417,7 +4427,9 @@
    :id "runtime-dispatch-seam"
    :title "Runtime dispatch seam"
    :summary "A compact execution boundary where authored syntax has been normalized enough for action and explanation to attach to the same event."
-   :references '("Runtime Dispatch Seams in HyperDoc"
+   :references '("Boundary"
+                 "Transition boundary"
+                 "Runtime Dispatch Seams in HyperDoc"
                  "Smalltalk Browser Frame and Scene in HyperDoc"
                  "Mech Execution Context and Emit Protocol")))
 
@@ -4561,16 +4573,88 @@
    :id "execution-evidence-object"
    :title "Execution evidence object"
    :summary "An inspectable record emitted at execution time that preserves what operation ran, in what context, with what outputs, limits, or failures."
-   :references '("HyperDoc Evaluation and Inspection Model"
+   :references '("Boundary"
+                 "Boundary report"
+                 "HyperDoc Evaluation and Inspection Model"
                  "Inspectable Mech Runs"
                  "Mech Credible Maintenance Story")))
+
+(defun boundary-topic ()
+  (make-topic
+   :id "boundary"
+   :title "Boundary"
+   :summary "A bounded transition or contract edge where one mode of access, representation, authority, or execution gives way to another."
+   :references '("Boundary"
+                 "Contract boundary"
+                 "Transition boundary"
+                 "Authentication boundary"
+                 "Read-write boundary"
+                 "Boundary report"
+                 "Operational definition: boundary, contract boundary, transition boundary, boundary report"
+                 "Runtime Dispatch Seams in HyperDoc"
+                 "DMX note read/write boundary"
+                 "DMX workspace journal model")) )
+
+(defun contract-boundary-topic ()
+  (make-topic
+   :id "contract-boundary"
+   :title "Contract boundary"
+   :summary "A boundary definition that states what counts as valid access, representation, or mutation across a stable contract edge."
+   :references '("Contract boundary"
+                 "Boundary"
+                 "Read-write boundary"
+                 "DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "Operational definition: boundary, contract boundary, transition boundary, boundary report")))
+
+(defun transition-boundary-topic ()
+  (make-topic
+   :id "transition-boundary"
+   :title "Transition boundary"
+   :summary "A boundary definition for a stage crossing inside one concrete run, where later stages depend on crossing an earlier guarded step."
+   :references '("Transition boundary"
+                 "Boundary"
+                 "DMX workspace journal model"
+                 "Diagnosing DMX workspace repair triage"
+                 "Using authenticated workspace assignment repair console"
+                 "Runtime Dispatch Seams in HyperDoc"
+                 "Operational definition: boundary, contract boundary, transition boundary, boundary report")))
+
+(defun authentication-boundary-topic ()
+  (make-topic
+   :id "authentication-boundary"
+   :title "Authentication boundary"
+   :summary "A boundary where read-only or unauthenticated access gives way to explicit-auth guarded mutation or session-backed access."
+   :references '("Authentication boundary"
+                 "Boundary"
+                 "Using authenticated workspace assignment repair console"
+                 "Inspectable authentication-path traces for repair console"
+                 "DMX Credentials"
+                 "DMX session bootstrap and JSESSIONID"
+                 "Operational definition: boundary, contract boundary, transition boundary, boundary report")))
+
+(defun read-write-boundary-topic ()
+  (make-topic
+   :id "read-write-boundary"
+   :title "Read-write boundary"
+   :summary "A contract boundary that distinguishes what may be read, what may be written, and which object or representation is the stable mutation target."
+   :references '("Read-write boundary"
+                 "Boundary"
+                 "Contract boundary"
+                 "DMX note read/write boundary"
+                 "DMX machine-readable read paths"
+                 "DMX workspace journal model"
+                 "Operational definition: boundary, contract boundary, transition boundary, boundary report")))
 
 (defun boundary-report-topic ()
   (make-topic
    :id "boundary-report"
    :title "Boundary report"
    :summary "A report of what an execution could not resolve, represent, or complete cleanly at its authoritative seam."
-   :references '("Mech Credible Maintenance Story"
+   :references '("Boundary report"
+                 "Boundary"
+                 "Operational definition: boundary, contract boundary, transition boundary, boundary report"
+                 "Mech Credible Maintenance Story"
                  "Mech Plugin Progress March 2026"
                  "Inspectable Mech Runs")))
 

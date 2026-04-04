@@ -1,0 +1,68 @@
+<h1>Transition boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Transition boundary"><tt>Transition boundary</tt></a>
+  is a stage crossing during one concrete run. It records what stage was last
+  reached, what condition had to be satisfied for the crossing, what evidence
+  was emitted, and how failure was classified if the run stopped there.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Transition boundary"><tt>Transition boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Authentication boundary"><tt>Authentication boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-boundary-definition)" view="Overview"><tt>(make-dmx-workspace-journal-preflight-boundary-definition)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-blocked-boundary-instance)" view="Crossing attempt"><tt>(make-dmx-workspace-journal-preflight-blocked-boundary-instance)</tt> Crossing attempt</a></li>
+  <li><a expr="(make-dmx-workspace-journal-preflight-blocked-boundary-instance)" view="Failure analysis"><tt>(make-dmx-workspace-journal-preflight-blocked-boundary-instance)</tt> Failure analysis</a></li>
+</ul>
+
+<h2>What makes a transition boundary different</h2>
+
+<p>
+  A contract boundary can exist even when no run is active. A transition
+  boundary exists in motion: it is the stage edge where a concrete run crosses,
+  pauses, or blocks.
+</p>
+
+<ul>
+  <li>It must record the last reached stage.</li>
+  <li>It must record whether the crossing was attempted.</li>
+  <li>It must record whether the crossing succeeded.</li>
+  <li>It must attach evidence and failure classification at the blocked or crossed point.</li>
+</ul>
+
+<h2>Worked DMX example</h2>
+
+<p>
+  The DMX workspace-journal preflight is the current worked example. It is a
+  transition boundary between a planned continuation and the later mutation
+  stages that depend on a successfully prepared journal companion.
+</p>
+
+<p>
+  The blocked instance captures the current incident shape directly:
+</p>
+
+<ul>
+  <li>last reached stage: <tt>prepare-transition</tt></li>
+  <li>crossing attempted: yes</li>
+  <li>crossing succeeded: no</li>
+  <li>failure classification: <tt>auth-blocked</tt></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Authentication boundary">Authentication boundary</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+</ul>

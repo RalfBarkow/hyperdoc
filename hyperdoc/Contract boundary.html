@@ -1,0 +1,60 @@
+<h1>Contract boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Contract boundary"><tt>Contract boundary</tt></a>
+  defines what counts as valid access, representation, or mutation across a
+  stable edge. It is not only a stage in one run; it is the reusable rule that
+  says what may be treated as authoritative on either side.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Contract boundary"><tt>Contract boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Read-write boundary"><tt>Read-write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a expr="(make-example-boundary-definition)" view="Sides and crossing condition"><tt>(make-example-boundary-definition)</tt> Sides and crossing condition</a></li>
+  <li><a expr="(make-dmx-note-read-write-boundary-definition)" view="Permitted and blocked operations"><tt>(make-dmx-note-read-write-boundary-definition)</tt> Permitted and blocked operations</a></li>
+</ul>
+
+<h2>What a contract boundary must say</h2>
+
+<ul>
+  <li>what lies on the left side</li>
+  <li>what lies on the right side</li>
+  <li>what condition must be satisfied before the crossing counts as valid</li>
+  <li>what operations are permitted and blocked on either side</li>
+  <li>what evidence proves the contract was respected or violated</li>
+</ul>
+
+<h2>Worked DMX example</h2>
+
+<p>
+  The page <a page="DMX note read/write boundary">DMX note read/write boundary</a>
+  is a concrete contract-boundary example. It keeps three things distinct:
+</p>
+
+<ul>
+  <li>the canonical machine-readable parent-note read path</li>
+  <li>the stable parent-note mutation target</li>
+  <li>the post-write verification reread that proves the write result</li>
+</ul>
+
+<p>
+  That makes it broader than a single tool call and narrower than a whole DMX
+  workflow. It is a reusable contract edge.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Read-write boundary">Read-write boundary</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="Operational definition: boundary, contract boundary, transition boundary, boundary report">Operational definition: boundary, contract boundary, transition boundary, boundary report</a></li>
+</ul>

@@ -1,0 +1,54 @@
+<h1>Authentication boundary</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  An <a hyperbook="topics" page="Authentication boundary"><tt>Authentication boundary</tt></a>
+  is a boundary where read-only or unauthenticated access gives way to
+  explicit-auth guarded mutation or session-backed access. In HyperDoc it is
+  important that this boundary stays explicit rather than being hidden inside a
+  larger mutation surface.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Authentication boundary"><tt>Authentication boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
+  <li><a hyperbook="topics" page="Inspectable authentication-path traces for repair console"><tt>Inspectable authentication-path traces for repair console</tt></a></li>
+  <li><a hyperbook="topics" page="DMX Credentials"><tt>DMX Credentials</tt></a></li>
+  <li><a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a></li>
+  <li><a expr="(make-dmx-repair-console-authentication-boundary-definition)" view="Sides and crossing condition"><tt>(make-dmx-repair-console-authentication-boundary-definition)</tt> Sides and crossing condition</a></li>
+  <li><a expr="(make-dmx-repair-console-authentication-boundary-instance)" view="Crossing attempt"><tt>(make-dmx-repair-console-authentication-boundary-instance)</tt> Crossing attempt</a></li>
+</ul>
+
+<h2>Worked DMX example</h2>
+
+<p>
+  The repair console is the current worked example. It keeps diagnosis on the
+  left side and guarded mutation on the right side. The crossing condition is
+  explicit: the operator must provide valid credentials for the current action.
+</p>
+
+<ul>
+  <li>username/password</li>
+  <li>authorization header</li>
+  <li>bearer token</li>
+</ul>
+
+<p>
+  This boundary should not be blurred with long-lived service config or with a
+  general DMX login system. The repair console keeps credentials ephemeral and
+  reuses the same guarded executor after the crossing.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Transition boundary">Transition boundary</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+  <li><a page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a></li>
+</ul>
