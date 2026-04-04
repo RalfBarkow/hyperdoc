@@ -1,0 +1,51 @@
+<h1>Failure surface</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Failure surface"><tt>Failure surface</tt></a>
+  is a first-class blocked or lossy surface that preserves failure evidence,
+  classification, and adjacent next-step surfaces rather than burying them in
+  prose or transient logs.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Surface"><tt>Surface</tt></a></li>
+  <li><a hyperbook="topics" page="Failure surface"><tt>Failure surface</tt></a></li>
+  <li><a expr="(make-dmx-workspace-journal-observed-failure-surface-definition)" view="Overview"><tt>(make-dmx-workspace-journal-observed-failure-surface-definition)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-workspace-journal-observed-failure-surface-instance)" view="Evidence"><tt>(make-dmx-workspace-journal-observed-failure-surface-instance)</tt> Evidence</a></li>
+  <li><a expr="(make-dmx-workspace-journal-observed-failure-surface-instance)" view="Failure surfaces"><tt>(make-dmx-workspace-journal-observed-failure-surface-instance)</tt> Failure surfaces</a></li>
+</ul>
+
+<h2>DMX worked example</h2>
+
+<p>
+  The current worked example is the observed blocked workspace-journal case
+  around carrier <tt>927558</tt> and companion <tt>927568</tt>.
+  The failure surface keeps the last reached stage
+  <tt>prepare-transition</tt>, the failing mutation
+  <tt>PUT /core/topic/927568</tt>, the <tt>401</tt> auth evidence, and the
+  adjacent diagnostic/mutation surfaces together without pretending that the
+  failure surface itself performs repair.
+</p>
+
+<h2>Why failure surface matters</h2>
+
+<ul>
+  <li>It makes blocked state inspectable as data.</li>
+  <li>It keeps adjacent next-step surfaces explicit.</li>
+  <li>It preserves the current guarded behavior instead of widening permissions in order to hide the failure.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Surface">Surface</a></li>
+  <li><a page="Diagnostic surface">Diagnostic surface</a></li>
+  <li><a page="Mutation surface">Mutation surface</a></li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="DMX workspace journal reconcile call graph">DMX workspace journal reconcile call graph</a></li>
+</ul>

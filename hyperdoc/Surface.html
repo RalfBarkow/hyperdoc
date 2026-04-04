@@ -1,0 +1,94 @@
+<h1>Surface</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <a hyperbook="topics" page="Surface"><tt>Surface</tt></a> is a bounded
+  operational interface through which a user or robot can inspect, diagnose,
+  act on, or publish some aspect of a HyperDoc-managed system.
+  A surface is not mere UI chrome: it is defined by its scope, permitted
+  operations, evidence forms, boundary conditions, and relation to adjacent
+  surfaces.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Surface"><tt>Surface</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnostic surface"><tt>Diagnostic surface</tt></a></li>
+  <li><a hyperbook="topics" page="Mutation surface"><tt>Mutation surface</tt></a></li>
+  <li><a hyperbook="topics" page="Failure surface"><tt>Failure surface</tt></a></li>
+  <li><a hyperbook="topics" page="Surface boundary"><tt>Surface boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Surface Answer"><tt>Surface Answer</tt></a></li>
+  <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc surface boundaries"><tt>HyperDoc surface boundaries</tt></a></li>
+  <li><a expr="(make-example-surface-definition)" view="Overview"><tt>(make-example-surface-definition)</tt> Overview</a></li>
+  <li><a expr="(make-example-surface-instance)" view="Boundary state"><tt>(make-example-surface-instance)</tt> Boundary state</a></li>
+  <li><a expr="(make-dmx-workspace-repair-diagnostic-surface-instance)" view="Overview"><tt>(make-dmx-workspace-repair-diagnostic-surface-instance)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-repair-console-mutation-surface-instance)" view="Overview"><tt>(make-dmx-repair-console-mutation-surface-instance)</tt> Overview</a></li>
+  <li><a expr="(make-dmx-workspace-journal-observed-failure-surface-instance)" view="Failure surfaces"><tt>(make-dmx-workspace-journal-observed-failure-surface-instance)</tt> Failure surfaces</a></li>
+</ul>
+
+<h2>Surface as object, not only prose</h2>
+
+<p>
+  HyperDoc already distinguishes durable pages, topic objects, inspectable
+  runtime handles, and FedWiki twins. A surface belongs in that same
+  operational model. The page explains the concept, but the runtime object
+  carries the scope, capabilities, outputs, boundary rules, and adjacent
+  surfaces directly.
+</p>
+
+<h2>Surface classes in this repo</h2>
+
+<ul>
+  <li><b>Authored/durable surface:</b> stable HyperDoc or FedWiki publication surface.</li>
+  <li><b>Inspectable/runtime surface:</b> one concrete opened page, tab, or runtime object.</li>
+  <li><b>Diagnostic surface:</b> read-only diagnosis and evidence inspection.</li>
+  <li><b>Mutation surface:</b> bounded action-bearing surface with explicit authority requirements.</li>
+  <li><b>Failure surface:</b> blocked or lossy outcome kept as a first-class inspectable surface.</li>
+</ul>
+
+<h2>Surface is broader than Surface Answer</h2>
+
+<p>
+  The existing <a page="Surface Answer">Surface Answer</a> remains one narrower
+  answer-surface concept inside a broader generic surface vocabulary.
+  It is not replaced here. Generic <a page="Surface">surface</a> now sits above
+  answer surfaces, documentation surfaces, and DMX runtime surfaces while
+  keeping those layers distinct.
+</p>
+
+<h2>Worked DMX example set</h2>
+
+<ul>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a> as the read-only diagnostic surface.</li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a> as the explicit-auth mutation surface.</li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a> as the guarded runtime surface cluster those two surfaces operate within.</li>
+  <li><a page="DMX workspace journal reconcile call graph">DMX workspace journal reconcile call graph</a> as a live inspectable diagnostic surface around reconcile-time read/write-capable edges.</li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a> plus the blocked auth case around carrier <tt>927558</tt> and companion <tt>927568</tt> as the worked failure-surface vocabulary.</li>
+</ul>
+
+<h2>Related existing surfaces and models</h2>
+
+<ul>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Surface Answer">Surface Answer</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="DMX workspace journal reconcile call graph">DMX workspace journal reconcile call graph</a></li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Diagnostic surface">Diagnostic surface</a></li>
+  <li><a page="Mutation surface">Mutation surface</a></li>
+  <li><a page="Failure surface">Failure surface</a></li>
+  <li><a page="Surface boundary">Surface boundary</a></li>
+  <li><a page="Operational definition: surface, diagnostic surface, mutation surface, failure surface">Operational definition: surface, diagnostic surface, mutation surface, failure surface</a></li>
+</ul>

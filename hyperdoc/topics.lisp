@@ -3251,7 +3251,9 @@
    :id "dmx-workspace-journal-model"
    :title "DMX workspace journal model"
    :summary "HyperDoc-owned replayable journal layer for shared-workspace notes, topics, and topicmap membership in DMX topicmap 919822, with explicit restore and diff-based out-of-band reconciliation."
-   :references '("DMX workspace journal model"
+   :references '("Surface"
+                 "Surface boundary"
+                 "DMX workspace journal model"
                  "DMX workspace journal reconcile call graph"
                  "Context window workspace as shared blackboard"
                  "Shared-workspace collaboration model"
@@ -3282,7 +3284,9 @@
    :id "dmx-workspace-journal-reconcile-call-graph"
    :title "DMX workspace journal reconcile call graph"
    :summary "Inspectable call graph for reconcile-on-read in topicmap 919822, showing why companion journal note 924694 must stay on an in-memory-only diff path while explicit write flows still use the append/persist edge."
-   :references '("DMX workspace journal reconcile call graph"
+   :references '("Surface"
+                 "Failure surface"
+                 "DMX workspace journal reconcile call graph"
                  "Code path graphs in HyperDoc"
                  "DMX workspace journal model"
                  "DMX topicmap 919822 repair runbook"
@@ -3383,7 +3387,10 @@
    :id "diagnosing-dmx-workspace-repair-triage"
    :title "Diagnosing DMX workspace repair triage"
    :summary "Read-only batch inspector for HyperDoc-owned objects in topicmap 919822 that are still visible in the shared blackboard but remain missing workspace assignment."
-   :references '("Diagnosing DMX workspace repair triage"
+   :references '("Surface"
+                 "Diagnostic surface"
+                 "Failure surface"
+                 "Diagnosing DMX workspace repair triage"
                  "Diagnosing DMX workspace assignment and topicmap placement"
                  "Using guarded workspace topic lifecycle tools"
                  "Context window workspace as shared blackboard"
@@ -3395,7 +3402,10 @@
    :id "using-authenticated-workspace-assignment-repair-console"
    :title "Using authenticated workspace assignment repair console"
    :summary "HyperDoc-side repair console that keeps diagnosis read-only, accepts explicit ephemeral DMX credentials at action time, and reuses the guarded workspace-assignment repair executor for one object or the current backlog."
-   :references '("Using authenticated workspace assignment repair console"
+   :references '("Surface"
+                 "Mutation surface"
+                 "Failure surface"
+                 "Using authenticated workspace assignment repair console"
                  "Diagnosing DMX workspace assignment and topicmap placement"
                  "Diagnosing DMX workspace repair triage"
                  "Using guarded workspace topic lifecycle tools"
@@ -3850,13 +3860,68 @@
    :references '("Konrad Feedback on Communication Pages"
                  "Concepts, DMX Topics, and Topic Maps")))
 
+;; Topic objects for the generic surface abstraction.
+(defun surface-topic ()
+  (make-topic
+   :id "surface"
+   :title "Surface"
+   :summary "A bounded operational interface through which a user or robot can inspect, diagnose, act on, or publish some aspect of a HyperDoc-managed system."
+   :references '("Surface"
+                 "Documentation Surfaces in HyperDoc"
+                 "Communication Surfaces Policy"
+                 "Surface and Artifact Answers"
+                 "Surface Answer"
+                 "HyperDoc Evaluation and Inspection Model")))
+
+(defun diagnostic-surface-topic ()
+  (make-topic
+   :id "diagnostic-surface"
+   :title "Diagnostic surface"
+   :summary "A read-only surface that preserves inspection, triage, and evidence without widening into mutation."
+   :references '("Diagnostic surface"
+                 "Surface"
+                 "Diagnosing DMX workspace repair triage"
+                 "DMX workspace journal model")))
+
+(defun mutation-surface-topic ()
+  (make-topic
+   :id "mutation-surface"
+   :title "Mutation surface"
+   :summary "An action-bearing surface that performs bounded mutation while keeping its inputs, auth requirements, and adjacent diagnostic surfaces explicit."
+   :references '("Mutation surface"
+                 "Surface"
+                 "Using authenticated workspace assignment repair console"
+                 "Surface boundary")))
+
+(defun failure-surface-topic ()
+  (make-topic
+   :id "failure-surface"
+   :title "Failure surface"
+   :summary "A first-class blocked or failure-oriented surface that preserves evidence, classification, and adjacent next-step surfaces instead of burying failure in prose."
+   :references '("Failure surface"
+                 "Surface"
+                 "Diagnosing DMX workspace repair triage"
+                 "DMX workspace journal reconcile call graph")))
+
+(defun surface-boundary-topic ()
+  (make-topic
+   :id "surface-boundary"
+   :title "Surface boundary"
+   :summary "The explicit boundary rules that govern what one surface allows, what it forbids, and how it connects to adjacent surfaces without collapsing them together."
+   :references '("Surface boundary"
+                 "Surface"
+                 "Documentation Surfaces in HyperDoc"
+                 "Communication Surfaces Policy"
+                 "Using authenticated workspace assignment repair console")))
+
 ;; Topic objects for answer-surface distinction.
 (defun surface-answer-topic ()
   (make-topic
    :id "surface-answer"
    :title "Surface Answer"
    :summary "Immediate terminal/Codex response that states the current result and decisions in the active session."
-   :references '("Surface and Artifact Answers"
+   :references '("Surface"
+                 "Surface and Artifact Answers"
                  "Communication Surfaces Policy")))
 
 (defun artifact-answer-topic ()
@@ -5211,7 +5276,9 @@
    :id "documentation-surfaces-in-hyperdoc"
    :title "Documentation Surfaces in HyperDoc"
    :summary "Defines durable pages, topic objects, inspectable object handles, and FedWiki twins as distinct documentation surfaces with explicit correspondence rules."
-   :references '("Documentation Surfaces in HyperDoc"
+   :references '("Surface"
+                 "Surface boundary"
+                 "Documentation Surfaces in HyperDoc"
                  "Reference Systems in HyperDoc"
                  "Communication Surfaces Policy")))
 
@@ -5232,7 +5299,9 @@
    :id "hyperdoc-surface-boundaries"
    :title "HyperDoc surface boundaries"
    :summary "Boundary rules separating narrative pages, inspectable topic objects, embedded object handles, and parallel FedWiki artifacts."
-   :references '("Documentation Surfaces in HyperDoc"
+   :references '("Surface"
+                 "Surface boundary"
+                 "Documentation Surfaces in HyperDoc"
                  "Communication Surfaces Policy"
                  "Reference Systems in HyperDoc")))
 
