@@ -1,0 +1,117 @@
+<h1>Chunk notes and manifest notes in a DMX workspace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Chunk note"><tt>Chunk note</tt></a>,
+  <a hyperbook="topics" page="Manifest note"><tt>Manifest note</tt></a>,
+  <a hyperbook="topics" page="Exchange artifact"><tt>Exchange artifact</tt></a>,
+  and <a hyperbook="topics" page="Content topic"><tt>Content topic</tt></a>
+  define the transport vocabulary for large workspace readouts in DMX
+  topicmap <tt>919822</tt>, <tt>context-window</tt>. This page keeps that
+  transport vocabulary separate from HyperDoc's existing
+  <a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a> concept, which already
+  means McDermott's inspectable unit of running-image coherence.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Chunk note"><tt>Chunk note</tt></a></li>
+  <li><a hyperbook="topics" page="Manifest note"><tt>Manifest note</tt></a></li>
+  <li><a hyperbook="topics" page="Exchange artifact"><tt>Exchange artifact</tt></a></li>
+  <li><a hyperbook="topics" page="Content topic"><tt>Content topic</tt></a></li>
+  <li><a hyperbook="topics" page="Chunk"><tt>Chunk</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a page="Declarative chunk wiring for page-lookup issues and first real Topics chunk"><tt>Declarative chunk wiring for page-lookup issues and first real Topics chunk</tt></a></li>
+</ul>
+
+<h2>Expectation preserved</h2>
+
+<ul>
+  <li>Expectation: the twelve note topics carrying the exhaustive workspace readout made it reasonable to talk about each part as a <tt>chunk</tt> and to import ChatGPT's transport definition directly.</li>
+  <li>Observed reality: HyperDoc already reserves bare <tt>Chunk</tt> for the running-image coherence model, while the workspace transport objects are note topics that carry parts of an exchange artifact.</li>
+  <li>Why the expectation was plausible: the live manifest and note keys really do partition one larger artifact into <tt>part-01</tt> through <tt>part-12</tt>.</li>
+  <li>Classification: disappointed expectation at the workspace naming boundary, not at the running-image coherence model.</li>
+  <li>Resolution: keep <tt>Chunk</tt> for coherence semantics and do not use bare <tt>chunk</tt> for transport in this repository.</li>
+</ul>
+
+<h2>Difference from ChatGPT's chunk wording</h2>
+
+<ul>
+  <li>ChatGPT used <tt>chunk</tt> to mean a bounded, lossless partition of a larger payload.</li>
+  <li>HyperDoc already uses <tt>Chunk</tt> to mean an inspectable unit whose freshness can be maintained relative to a basis and update basis.</li>
+  <li>Those two meanings are both operationally useful, but they are not the same kind of object.</li>
+  <li>In this repository, do not use bare <tt>chunk</tt> for transport; use <tt>chunk note</tt> for the topicmap transport object and <tt>exchange artifact</tt> for the transported whole.</li>
+  <li>A chunk note may carry one partition of a larger payload, but that does not make the note itself a HyperDoc <tt>Chunk</tt> unless it is separately modeled in the coherence system.</li>
+</ul>
+
+<h2>Operational roles</h2>
+
+<ul>
+  <li><b>Exchange artifact</b>: a larger transport object that must be exchanged through the topicmap as multiple notes.</li>
+  <li><b>Manifest note</b>: the authoritative index note for one exchange artifact; it says what the whole artifact is, how many parts it has, what each part covers, and whether the partition is lossless.</li>
+  <li><b>Chunk note</b>: a <tt>dmx.notes.note</tt> topic used as a transport container for exactly one declared part of an exchange artifact. It is infrastructure, not primary subject matter.</li>
+  <li><b>Content topic</b>: a normal workspace topic whose purpose is substantive knowledge. If a chunk note contains a readout of topic <tt>907120</tt>, authority for that subject still remains topic <tt>907120</tt>.</li>
+</ul>
+
+<p>
+  The current exhaustive workspace readout for topicmap <tt>919822</tt> is one
+  exchange artifact with one manifest note and twelve chunk notes. The
+  transport notes preserve a large readout without turning those transport
+  notes into the authoritative subject matter. Topics such as <tt>907120</tt>
+  and <tt>921464</tt> remain the content topics.
+</p>
+
+<h2>Rules for the workspace transport layer</h2>
+
+<ol>
+  <li>Do not use bare <tt>chunk</tt> for transport in this repository. Use <tt>chunk note</tt> for the topicmap transport object.</li>
+  <li>Every exchange artifact has exactly one manifest note. The manifest is the entrypoint.</li>
+  <li>Every chunk note must declare coverage. At minimum it identifies the artifact, the part number and total count, and what it covers, such as topic ids or ranges.</li>
+  <li>Chunk notes are transport-layer topics. They are durable enough for replay and audit, but they are not automatically conceptual notes.</li>
+  <li>Content topics remain authoritative. Chunk notes preserve exchanged representations; they do not replace the source topics.</li>
+  <li>Promotion is explicit. If chunk exchange yields durable semantic conclusions, promote them into a normal content topic rather than leaving them only inside chunk notes.</li>
+</ol>
+
+<h2>Operational definition</h2>
+
+<p>
+  A <b>chunk note</b> is a topicmap-native transport note that stores one
+  declared part of a larger exchange artifact, indexed by a manifest note,
+  while <b>content topics</b> remain the authoritative semantic objects.
+</p>
+
+<h2>Handling model</h2>
+
+<ul>
+  <li><b>Content topics</b>: the ideas.</li>
+  <li><b>Exchange artifact</b>: the transported whole.</li>
+  <li><b>Manifest note</b>: the index.</li>
+  <li><b>Chunk notes</b>: the parts.</li>
+  <li><b>Derived summaries and audits</b>: new content topics only if promoted.</li>
+</ul>
+
+<h2>FedWiki twins</h2>
+
+<p>
+  Localhost FedWiki counterparts:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="chunk-notes-and-manifest-notes-in-a-dmx-workspace">Chunk notes and manifest notes in a DMX workspace</a>,
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="exchange-artifact">Exchange artifact</a>,
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="manifest-note">Manifest note</a>,
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="chunk-note">Chunk note</a>,
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="content-topic">Content topic</a>.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Declarative chunk wiring for page-lookup issues and first real Topics chunk">Declarative chunk wiring for page-lookup issues and first real Topics chunk</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+</ul>
