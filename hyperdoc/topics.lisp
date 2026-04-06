@@ -3761,7 +3761,7 @@
   (make-topic
    :id "code-path-graphs-in-hyperdoc"
    :title "Code path graphs in HyperDoc"
-   :summary "Reusable inspectable graph abstraction for curated architectural call graphs and traced runtime code paths, with multiple views and Graphviz DOT export."
+   :summary "Reusable inspectable graph abstraction for curated architectural call graphs and traced runtime code paths, with multiple views, browser-rendered Graphviz, and derived Graphviz DOT export."
    :references '("Code path graphs in HyperDoc"
                  "DMX workspace journal reconcile call graph"
                  "Diagramming Debugger Surface"
@@ -5659,7 +5659,7 @@
   (make-topic
    :id "state-machine-visualization"
    :title "State-machine visualization"
-   :summary "Derived graph, timeline, and transition-matrix views that render a machine definition or one run from the underlying object data."
+   :summary "Derived Graphviz, directed-graph, timeline, and transition-matrix views that render a machine definition or one run from the underlying object data."
    :references '("State-machine visualization"
                  "State machine"
                  "State-machine trace"

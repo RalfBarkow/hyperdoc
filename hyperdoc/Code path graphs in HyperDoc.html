@@ -18,6 +18,7 @@
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Overview"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Overview</a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Nodes"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Nodes</a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Focused paths"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Focused paths</a></li>
+  <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="Graphviz"><tt>dmx-workspace-journal-reconcile-call-graph</tt> Graphviz</a></li>
   <li><a expr="(dmx-workspace-journal-reconcile-call-graph)" view="DOT export"><tt>dmx-workspace-journal-reconcile-call-graph</tt> DOT export</a></li>
   <li><a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX workspace journal reconcile call graph</tt></a></li>
   <li><a hyperbook="topics" page="Diagramming Debugger Surface"><tt>Diagramming Debugger Surface</tt></a></li>
@@ -30,7 +31,7 @@
 <ul>
   <li>Start from inspectable objects, not from an exhaustive static Lisp call-graph extractor.</li>
   <li>Keep nodes and edges typed and inspectable so one graph can support several views.</li>
-  <li>Allow curated graphs and traced graphs to share the same rendering and export path.</li>
+  <li>Allow curated graphs and traced graphs to share the same rendered Graphviz and raw DOT export path.</li>
   <li>Keep Graphviz DOT export derived from the graph object rather than making DOT the only representation.</li>
 </ul>
 
@@ -67,6 +68,7 @@
   <li><b>Edges</b>: typed transitions with status and write-capable flags</li>
   <li><b>Focused paths</b>: curated or traced subpaths through the graph</li>
   <li><b>Source references</b>: concrete source anchors for the live graph nodes</li>
+  <li><b>Graphviz</b>: browser-rendered SVG view derived from the current graph object</li>
   <li><b>DOT export</b>: Graphviz DOT text derived from the current graph object</li>
 </ul>
 

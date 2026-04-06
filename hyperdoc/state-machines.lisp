@@ -256,6 +256,63 @@
               (state-machine-transition-from-state-of transition)
               (state-machine-transition-to-state-of transition))))
 
+(defun state-machine-dot-escape (string)
+  (with-output-to-string (stream)
+    (loop for char across (or string "")
+          do (case char
+               (#\\ (write-string "\\\\" stream))
+               (#\" (write-string "\\\"" stream))
+               (#\Newline (write-string "\\n" stream))
+               (otherwise (write-char char stream))))))
+
+(defun state-machine-dot-quoted (string)
+  (format nil "\"~A\"" (state-machine-dot-escape string)))
+
+(defun state-machine-dot-role-label (role)
+  (string-capitalize
+   (cond
+     ((null role) "state")
+     ((keywordp role) (string-downcase (string role)))
+     ((symbolp role) (string-downcase (string role)))
+     (t (format nil "~A" role)))))
+
+(defun state-machine-definition-dot-state-shape (machine state-id)
+  (cond
+    ((member state-id
+             (state-machine-definition-failure-states-of machine)
+             :test #'equal)
+     "octagon")
+    ((member state-id
+             (state-machine-definition-terminal-states-of machine)
+             :test #'equal)
+     "doublecircle")
+    (t
+     "ellipse")))
+
+(defun state-machine-definition-dot-state-label (machine state)
+  (let* ((role (state-machine-state-role machine state))
+         (role-label (unless (eq role :intermediate)
+                       (state-machine-dot-role-label role))))
+    (format nil "~A~@[\\n(~A)~]"
+            (or (title-of state)
+                (id-of state))
+            role-label)))
+
+(defun state-machine-transition-dot-label (transition)
+  (let* ((trigger (state-machine-transition-trigger-of transition))
+         (guard (state-machine-transition-guard-of transition))
+         (parts
+           (remove nil
+                   (list (and trigger (format nil "~A" trigger))
+                         (and guard (format nil "~A" guard))))))
+    (cond
+      (parts
+       (format nil "~{~A~^ / ~}" parts))
+      ((title-of transition)
+       (title-of transition))
+      (t
+       nil))))
+
 (defun state-machine-state-role (machine state)
   (let ((state-id (if (typep state 'state-machine-state)
                       (id-of state)
@@ -282,6 +339,65 @@
                    (equal (state-machine-transition-from-state-of transition)
                           state-id))
                  (state-machine-definition-transitions-of machine)))
+
+(defun state-machine-definition-dot-text (machine &key (rankdir "LR"))
+  (with-output-to-string (stream)
+    (format stream "digraph ~A {~%"
+            (state-machine-dot-quoted
+             (or (id-of machine)
+                 (title-of machine)
+                 "StateMachine")))
+    (format stream "  rankdir=~A;~%" rankdir)
+    (format stream "  node [fontname=\"Helvetica\"];~%")
+    (format stream "  edge [fontname=\"Helvetica\"];~%")
+    (when (state-machine-definition-initial-state-of machine)
+      (format stream "  __start__ [label=\"\", shape=point];~%"))
+    (dolist (state (state-machine-definition-states-of machine))
+      (let* ((state-id (id-of state))
+             (attributes
+               (list
+                (format nil "label=~A"
+                        (state-machine-dot-quoted
+                         (state-machine-definition-dot-state-label
+                          machine
+                          state)))
+                (format nil "shape=~A"
+                        (state-machine-definition-dot-state-shape
+                         machine
+                         state-id)))))
+        (when (equal state-id
+                     (state-machine-definition-initial-state-of machine))
+          (push "style=bold" attributes))
+        (when (member state-id
+                      (state-machine-definition-failure-states-of machine)
+                      :test #'equal)
+          (push "color=\"firebrick\"" attributes))
+        (format stream "  ~A [~{~A~^, ~}];~%"
+                (state-machine-dot-quoted state-id)
+                (nreverse attributes))))
+    (when (state-machine-definition-initial-state-of machine)
+      (format stream "  __start__ -> ~A;~%"
+              (state-machine-dot-quoted
+               (state-machine-definition-initial-state-of machine))))
+    (when (or (state-machine-definition-states-of machine)
+              (state-machine-definition-transitions-of machine))
+      (terpri stream))
+    (dolist (transition (state-machine-definition-transitions-of machine))
+      (format stream "  ~A -> ~A"
+              (state-machine-dot-quoted
+               (state-machine-transition-from-state-of transition))
+              (state-machine-dot-quoted
+               (state-machine-transition-to-state-of transition)))
+      (let ((attributes '()))
+        (when-let (label (state-machine-transition-dot-label transition))
+          (push (format nil "label=~A" (state-machine-dot-quoted label))
+                attributes))
+        (when (state-machine-transition-reversible-p-of transition)
+          (push "style=dashed" attributes))
+        (when attributes
+          (format stream " [~{~A~^, ~}]" (nreverse attributes))))
+      (format stream ";~%"))
+    (format stream "}~%")))
 
 (defun state-machine-known-guard-p (machine guard)
   (or (null guard)

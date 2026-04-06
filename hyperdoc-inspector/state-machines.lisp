@@ -380,8 +380,17 @@
       (state-machine-preformatted-view
        (state-machine-definition-graph-lines machine)))))
 
+(views:defview 👀graphviz (machine hyperdoc::state-machine-definition)
+  (views:html-view :title "Graphviz" :priority 8
+    (include-graphviz-assets)
+    (views:html
+      (:p (views:esc
+           "Browser-rendered Graphviz view derived from the machine definition. The machine object remains the source of truth; DOT is a derived rendering format, while Directed graph remains the teaching-oriented text view."))
+      (render-graphviz-dot
+       (hyperdoc::state-machine-definition-dot-text machine)))))
+
 (views:defview 👀transition-matrix (machine hyperdoc::state-machine-definition)
-  (views:html-view :title "Transition matrix" :priority 8
+  (views:html-view :title "Transition matrix" :priority 9
     (state-machine-preformatted-view
      (state-machine-transition-matrix-lines machine))))
 

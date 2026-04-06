@@ -109,6 +109,7 @@
                      "Invariants / constraints"
                      "Source evidence / code path"
                      "Directed graph"
+                     "Graphviz"
                      "Transition matrix"))
       (state-machine-assert-true
        (state-machine-smoke-find-view-by-title machine-views title)
@@ -155,6 +156,39 @@
      "DMX auth example Evidence"
      '("JSESSIONID"
        "Later guarded request shape"))))
+
+(defun run-state-machine-graphviz-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((machine (hyperdoc::make-example-state-machine-definition))
+         (dot (hyperdoc::state-machine-definition-dot-text machine))
+         (views (state-machine-smoke-load-inspector-views-for-object machine))
+         (graphviz-view
+           (state-machine-smoke-find-view-by-title views "Graphviz"))
+         (directed-graph-view
+           (state-machine-smoke-find-view-by-title views "Directed graph")))
+    (state-machine-assert-contains "digraph \"state-machine-definition/example\""
+                                   dot
+                                   "State-machine DOT export must use the machine id")
+    (state-machine-assert-contains "__start__ -> \"captured\""
+                                   dot
+                                   "State-machine DOT export must include the initial-state arrow")
+    (state-machine-assert-contains "Captured\\\\n(Initial)"
+                                   dot
+                                   "State-machine DOT export must label the initial state")
+    (state-machine-assert-contains "validate / support-available"
+                                   dot
+                                   "State-machine DOT export must label transition event/guard pairs")
+    (state-machine-assert-true graphviz-view
+                               "Machine definition must expose a Graphviz view")
+    (state-machine-assert-true directed-graph-view
+                               "Machine definition must keep the Directed graph view")
+    (assert-state-machine-page-contains-all
+     (html-inspector-views:view-html graphviz-view)
+     "State-machine Graphviz view"
+     '("Browser-rendered Graphviz view"
+       "data-hyperdoc-graphviz"
+       "Directed graph remains the teaching-oriented text view"
+       "Derived DOT source"))))
 
 (defun run-state-machine-documentation-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -206,8 +240,16 @@
      "A framework for maintaining the coherence of a running Lisp"
      "McDermott Running Image Coherence Crosswalk"
      "(make-example-state-machine-definition)"
+     "view=\"Graphviz\""
      "(make-example-state-machine-run)"
      "(make-dmx-auth-state-machine-definition)"))
+  (assert-state-machine-page-contains-all
+   (read-state-machine-page "hyperdoc/State-machine visualization.html")
+   "State-machine visualization"
+   '("view=\"Graphviz\""
+     "Directed graph"
+     "Transition matrix"
+     "machine definition as the canonical source"))
   (assert-state-machine-page-contains-all
    (read-state-machine-page
     "hyperdoc/Operational definition: state machine, state, transition, guard, run trace.html")
@@ -232,6 +274,7 @@
 
 (defun run-state-machine-smoke-tests ()
   (run-state-machine-runtime-smoke-test)
+  (run-state-machine-graphviz-smoke-test)
   (run-state-machine-documentation-smoke-test)
   (format t "~&State-machine smoke tests passed.~%")
   t)

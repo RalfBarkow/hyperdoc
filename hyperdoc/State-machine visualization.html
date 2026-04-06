@@ -9,23 +9,37 @@
   points to runtime objects whose views produce the visualization from data.
 </p>
 
+<p>
+  The rendered Graphviz view is derived from DOT computed from the machine
+  object. HyperDoc keeps the machine definition as the canonical source and
+  keeps the older Directed graph text view as a teaching-oriented companion.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
   <li><a hyperbook="topics" page="State-machine visualization"><tt>State-machine visualization</tt></a></li>
+  <li><a expr="(make-example-state-machine-definition)" view="Graphviz"><tt>(make-example-state-machine-definition)</tt> Graphviz</a></li>
   <li><a expr="(make-example-state-machine-definition)" view="Directed graph"><tt>(make-example-state-machine-definition)</tt> Directed graph</a></li>
   <li><a expr="(make-example-state-machine-definition)" view="Transition matrix"><tt>(make-example-state-machine-definition)</tt> Transition matrix</a></li>
   <li><a expr="(make-example-state-machine-run)" view="Timeline"><tt>(make-example-state-machine-run)</tt> Timeline</a></li>
-  <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Timeline"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Timeline</a></li>
 </ul>
 
 <h2>Visualization kinds</h2>
 
 <ul>
-  <li><b>Directed graph:</b> nodes are states and edges are transitions labeled by event / guard.</li>
+  <li><b>Graphviz:</b> browser-rendered SVG derived from DOT computed from the machine definition.</li>
+  <li><b>Directed graph:</b> preformatted teaching view of ordered states and outgoing transitions.</li>
   <li><b>Timeline:</b> emphasizes what happened in one concrete run.</li>
   <li><b>Transition matrix:</b> shows permitted, forbidden, and guarded source-to-destination pairs.</li>
 </ul>
+
+<h2>FedWiki twin</h2>
+
+<p>
+  Localhost FedWiki counterpart:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="state-machine-visualization">State-machine visualization</a>.
+</p>
 
 <h2>Related</h2>
 

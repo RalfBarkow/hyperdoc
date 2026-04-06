@@ -23,6 +23,10 @@
   (unless (search substring string)
     (error "~A -- missing substring: ~S" message substring)))
 
+(defun code-path-assert-not-contains (substring string message)
+  (when (search substring string)
+    (error "~A -- unexpected substring: ~S" message substring)))
+
 (defun code-path-graphs-relative-path (relative-path)
   (asdf:system-relative-pathname :hyperdoc relative-path))
 
@@ -55,51 +59,89 @@
                :test #'char=)
        (format nil "~A must contain ~S" page-label needle)))))
 
+(defun make-code-path-graph-smoke-graph ()
+  (hyperdoc::make-code-path-graph
+   :id "example-code-path"
+   :title "Example code path"
+   :summary "Example graph for DOT export regression coverage."
+   :entrypoints
+   (list (list :id "entry"
+               :label "example-entry"
+               :summary "Starts the example graph."))
+   :nodes
+   (list
+    (list :id "entry"
+          :label "entry"
+          :role :read-entry
+          :source-file "hyperdoc/example.lisp"
+          :source-function "example-entry"
+          :summary "Entry node.")
+    (list :id "apply"
+          :label "apply"
+          :role :safe-read-edge
+          :summary "In-memory apply helper.")
+    (list :id "persist"
+          :label "persist"
+          :role :write-helper
+          :summary "Explicit persistence helper."))
+   :edges
+   (list
+    (list :from "entry"
+          :to "apply"
+          :kind :safe-read
+          :status :active
+          :summary "Stay in memory.")
+    (list :from "apply"
+          :to "persist"
+          :kind :suppressed-write
+          :status :suppressed
+          :write-capable-p t
+          :summary "Suppressed on read."))
+   :focus-paths
+   (list
+    (list :id "main-path"
+          :label "Main path"
+          :summary "Simple focused path."
+          :node-ids '("entry" "apply" "persist")))))
+
+(defun make-code-path-graph-entity-transport-smoke-graph ()
+  (hyperdoc::make-code-path-graph
+   :id "entity-transport-graph"
+   :title "Entity transport graph"
+   :summary "Regression graph for quote/ampersand-safe Graphviz transport."
+   :nodes
+   (list
+    (list :id "source"
+          :label "Source \"quoted\" & routed"
+          :role :read-entry
+          :summary "Produces DOT with quotes and ampersands.")
+    (list :id "target"
+          :label "Target"
+          :role :write-helper
+          :summary "Terminal target."))
+   :edges
+   (list
+    (list :from "source"
+          :to "target"
+          :kind :safe-read
+          :status :active
+          :summary "Carries \"quoted\" & joined text."))))
+
+(defun code-path-graph-smoke-find-view-by-title (views title)
+  (find title
+        views
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun code-path-graph-smoke-load-inspector-views-for-object (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
+
 (defun run-code-path-graph-dot-export-smoke-test ()
-  (let* ((graph
-           (hyperdoc::make-code-path-graph
-            :id "example-code-path"
-            :title "Example code path"
-            :summary "Example graph for DOT export regression coverage."
-            :entrypoints
-            (list (list :id "entry"
-                        :label "example-entry"
-                        :summary "Starts the example graph."))
-            :nodes
-            (list
-             (list :id "entry"
-                   :label "entry"
-                   :role :read-entry
-                   :source-file "hyperdoc/example.lisp"
-                   :source-function "example-entry"
-                   :summary "Entry node.")
-             (list :id "apply"
-                   :label "apply"
-                   :role :safe-read-edge
-                   :summary "In-memory apply helper.")
-             (list :id "persist"
-                   :label "persist"
-                   :role :write-helper
-                   :summary "Explicit persistence helper."))
-            :edges
-            (list
-             (list :from "entry"
-                   :to "apply"
-                   :kind :safe-read
-                   :status :active
-                   :summary "Stay in memory.")
-             (list :from "apply"
-                   :to "persist"
-                   :kind :suppressed-write
-                   :status :suppressed
-                   :write-capable-p t
-                   :summary "Suppressed on read."))
-            :focus-paths
-            (list
-             (list :id "main-path"
-                   :label "Main path"
-                   :summary "Simple focused path."
-                   :node-ids '("entry" "apply" "persist")))))
+  (let* ((graph (make-code-path-graph-smoke-graph))
          (dot (hyperdoc::code-path-graph-dot-text graph)))
     (code-path-assert-contains "digraph \"example-code-path\"" dot
                                "DOT export must use the graph id")
@@ -113,6 +155,51 @@
                                "DOT export must distinguish suppressed edges")
     (code-path-assert-contains "color=\"firebrick\"" dot
                                "DOT export must mark write-capable edges")))
+
+(defun run-code-path-graph-rendered-view-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((graph (make-code-path-graph-smoke-graph))
+         (views (code-path-graph-smoke-load-inspector-views-for-object graph))
+         (graphviz-view
+           (code-path-graph-smoke-find-view-by-title views "Graphviz"))
+         (dot-view
+           (code-path-graph-smoke-find-view-by-title views "DOT export")))
+    (code-path-assert-true graphviz-view
+                           "Code-path graph must expose a Graphviz view")
+    (code-path-assert-true dot-view
+                           "Code-path graph must keep the DOT export view")
+    (assert-code-path-graph-page-contains-all
+     (html-inspector-views:view-html graphviz-view)
+     "Code-path graph Graphviz view"
+     '("Browser-rendered Graphviz view"
+       "data-hyperdoc-graphviz"
+       "data-hyperdoc-graphviz-dot"
+       "Derived DOT source"))
+    (assert-code-path-graph-page-contains-all
+     (html-inspector-views:view-html dot-view)
+     "Code-path graph DOT export view"
+     '("Graphviz DOT export for the current graph object"
+       "example-code-path"))))
+
+(defun run-graphviz-transport-entity-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((graph (make-code-path-graph-entity-transport-smoke-graph))
+         (dot (hyperdoc::code-path-graph-dot-text graph))
+         (views (code-path-graph-smoke-load-inspector-views-for-object graph))
+         (graphviz-view
+           (code-path-graph-smoke-find-view-by-title views "Graphviz"))
+         (graphviz-html (html-inspector-views:view-html graphviz-view)))
+    (code-path-assert-contains "\\\"quoted\\\" & routed" dot
+                               "Regression DOT must include quote and ampersand text")
+    (code-path-assert-contains "data-hyperdoc-graphviz-dot="
+                               graphviz-html
+                               "Graphviz helper must transport DOT through a decoded-safe data attribute")
+    (code-path-assert-not-contains "script class=\"hyperdoc-graphviz-dot\""
+                                   graphviz-html
+                                   "Graphviz helper must not serialize DOT through the raw-text script carrier")
+    (code-path-assert-contains "Derived DOT source"
+                               graphviz-html
+                               "Graphviz helper must keep the raw DOT fallback visible")))
 
 (defun run-dmx-journal-code-path-graph-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -165,6 +252,7 @@
      "DMX workspace journal reconcile call graph"
      "Diagramming Debugger Surface"
      "playground-stepper-code-path-graph"
+     "view=\"Graphviz\""
      "Graphviz DOT export"
      "does not introduce a generic raw graph persistence layer"))
   (code-path-assert-true
@@ -187,6 +275,8 @@
 
 (defun run-code-path-graphs-smoke-tests ()
   (run-code-path-graph-dot-export-smoke-test)
+  (run-code-path-graph-rendered-view-smoke-test)
+  (run-graphviz-transport-entity-smoke-test)
   (run-dmx-journal-code-path-graph-smoke-test)
   (run-playground-stepper-code-path-graph-smoke-test)
   (run-code-path-graphs-documentation-smoke-test)
