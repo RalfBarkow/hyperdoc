@@ -186,7 +186,7 @@
      (html-inspector-views:view-html graphviz-view)
      "State-machine Graphviz view"
      '("Browser-rendered Graphviz view"
-       "data-hyperdoc-graphviz"
+       "data-inspector-graphviz"
        "Directed graph remains the teaching-oriented text view"
        "Derived DOT source"))))
 

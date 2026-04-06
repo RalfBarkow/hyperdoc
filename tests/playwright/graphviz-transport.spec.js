@@ -16,7 +16,7 @@ async function readGraphvizPaneState(page, paneIndex) {
   return page.evaluate((index) => {
     const paneNode = document.querySelectorAll(".inspector-pane")[index];
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
-    const graphviz = activeView?.querySelector(".hyperdoc-graphviz");
+    const graphviz = activeView?.querySelector(".inspector-graphviz");
     return {
       title:
         (paneNode?.querySelector(".inspector-title-bar-object") ||
@@ -25,11 +25,11 @@ async function readGraphvizPaneState(page, paneIndex) {
       activeTab:
         paneNode?.querySelector(".inspector-tabs button.active")?.textContent?.trim() ||
         null,
-      graphvizState: graphviz?.getAttribute("data-hyperdoc-graphviz-state") || null,
+      graphvizState: graphviz?.getAttribute("data-inspector-graphviz-state") || null,
       svgCount: graphviz?.querySelectorAll("svg").length || 0,
-      errorText: graphviz?.querySelector(".hyperdoc-graphviz-error")?.textContent || null,
+      errorText: graphviz?.querySelector(".inspector-graphviz-error")?.textContent || null,
       fallbackText:
-        graphviz?.querySelector(".hyperdoc-graphviz-dot-fallback pre")?.textContent || null,
+        graphviz?.querySelector(".inspector-graphviz-dot-fallback pre")?.textContent || null,
       outerHtml: graphviz?.outerHTML?.slice(0, 4000) || null,
     };
   }, paneIndex);
@@ -47,7 +47,7 @@ async function findGraphvizPaneState(page, titleFragment) {
       const activeTab =
         paneNode.querySelector(".inspector-tabs button.active")?.textContent?.trim() || null;
       const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
-      const graphviz = activeView?.querySelector(".hyperdoc-graphviz");
+      const graphviz = activeView?.querySelector(".inspector-graphviz");
 
       if (!title || !title.includes(expectedTitle)) {
         continue;
@@ -57,12 +57,12 @@ async function findGraphvizPaneState(page, titleFragment) {
         index,
         title,
         activeTab,
-        graphvizState: graphviz?.getAttribute("data-hyperdoc-graphviz-state") || null,
+        graphvizState: graphviz?.getAttribute("data-inspector-graphviz-state") || null,
         svgCount: graphviz?.querySelectorAll("svg").length || 0,
         errorText:
-          graphviz?.querySelector(".hyperdoc-graphviz-error")?.textContent || null,
+          graphviz?.querySelector(".inspector-graphviz-error")?.textContent || null,
         fallbackText:
-          graphviz?.querySelector(".hyperdoc-graphviz-dot-fallback pre")?.textContent || null,
+          graphviz?.querySelector(".inspector-graphviz-dot-fallback pre")?.textContent || null,
       };
     }
     return null;
@@ -141,14 +141,14 @@ test("Shared Graphviz transport renders live and entity-sensitive DOT", async ({
     const encodedDot = encodeHtml(dot);
     const host = document.createElement("div");
     host.innerHTML =
-      '<div class="hyperdoc-graphviz" ' +
-      'data-hyperdoc-graphviz="true" ' +
-      'data-hyperdoc-graphviz-state="pending" ' +
-      `data-hyperdoc-graphviz-dot="${encodedDot}">` +
-      '<div class="hyperdoc-graphviz-canvas">' +
-      '<p class="hyperdoc-graphviz-pending">Rendering Graphviz diagram...</p>' +
+      '<div class="inspector-graphviz" ' +
+      'data-inspector-graphviz="true" ' +
+      'data-inspector-graphviz-state="pending" ' +
+      `data-inspector-graphviz-dot="${encodedDot}">` +
+      '<div class="inspector-graphviz-canvas">' +
+      '<p class="inspector-graphviz-pending">Rendering Graphviz diagram...</p>' +
       "</div>" +
-      '<details class="hyperdoc-graphviz-dot-fallback">' +
+      '<details class="inspector-graphviz-dot-fallback">' +
       "<summary>Derived DOT source</summary>" +
       `<pre>${encodedDot}</pre>` +
       "</details>" +
@@ -156,15 +156,15 @@ test("Shared Graphviz transport renders live and entity-sensitive DOT", async ({
 
     const placeholder = host.firstElementChild;
     activeView.appendChild(placeholder);
-    await window.hyperdocGraphviz.renderPlaceholder(placeholder);
+    await window.inspectorGraphviz.renderPlaceholder(placeholder);
 
     return {
       originalDot: dot,
-      transportedDot: placeholder.getAttribute("data-hyperdoc-graphviz-dot"),
+      transportedDot: placeholder.getAttribute("data-inspector-graphviz-dot"),
       fallbackDot:
-        placeholder.querySelector(".hyperdoc-graphviz-dot-fallback pre")?.textContent || null,
-      graphvizState: placeholder.getAttribute("data-hyperdoc-graphviz-state"),
-      errorText: placeholder.querySelector(".hyperdoc-graphviz-error")?.textContent || null,
+        placeholder.querySelector(".inspector-graphviz-dot-fallback pre")?.textContent || null,
+      graphvizState: placeholder.getAttribute("data-inspector-graphviz-state"),
+      errorText: placeholder.querySelector(".inspector-graphviz-error")?.textContent || null,
       svgCount: placeholder.querySelectorAll("svg").length,
       svgText: Array.from(placeholder.querySelectorAll("svg text")).map((node) =>
         node.textContent || ""

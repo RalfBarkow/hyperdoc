@@ -172,8 +172,8 @@
      (html-inspector-views:view-html graphviz-view)
      "Code-path graph Graphviz view"
      '("Browser-rendered Graphviz view"
-       "data-hyperdoc-graphviz"
-       "data-hyperdoc-graphviz-dot"
+       "data-inspector-graphviz"
+       "data-inspector-graphviz-dot"
        "Derived DOT source"))
     (assert-code-path-graph-page-contains-all
      (html-inspector-views:view-html dot-view)
@@ -191,12 +191,12 @@
          (graphviz-html (html-inspector-views:view-html graphviz-view)))
     (code-path-assert-contains "\\\"quoted\\\" & routed" dot
                                "Regression DOT must include quote and ampersand text")
-    (code-path-assert-contains "data-hyperdoc-graphviz-dot="
+    (code-path-assert-contains "data-inspector-graphviz-dot="
                                graphviz-html
                                "Graphviz helper must transport DOT through a decoded-safe data attribute")
-    (code-path-assert-not-contains "script class=\"hyperdoc-graphviz-dot\""
+    (code-path-assert-not-contains "<graphviz-element"
                                    graphviz-html
-                                   "Graphviz helper must not serialize DOT through the raw-text script carrier")
+                                   "Graphviz helper must no longer use the legacy graphviz-element transport")
     (code-path-assert-contains "Derived DOT source"
                                graphviz-html
                                "Graphviz helper must keep the raw DOT fallback visible")))

@@ -306,11 +306,10 @@
 
 (views:defview 👀graphviz (graph hyperdoc::code-path-graph)
   (views:html-view :title "Graphviz" :priority 8
-    (include-graphviz-assets)
     (views:html
       (:p (views:esc
            "Browser-rendered Graphviz view for the current graph object. The graph remains the source of truth; DOT is a derived rendering format for SVG rendering and inspection."))
-      (render-graphviz-dot
+      (views:graphviz-snippet
        (hyperdoc::code-path-graph-dot-text graph)))))
 
 (views:defview 👀dot-export (graph hyperdoc::code-path-graph)

@@ -382,11 +382,10 @@
 
 (views:defview 👀graphviz (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Graphviz" :priority 8
-    (include-graphviz-assets)
     (views:html
       (:p (views:esc
            "Browser-rendered Graphviz view derived from the machine definition. The machine object remains the source of truth; DOT is a derived rendering format, while Directed graph remains the teaching-oriented text view."))
-      (render-graphviz-dot
+      (views:graphviz-snippet
        (hyperdoc::state-machine-definition-dot-text machine)))))
 
 (views:defview 👀transition-matrix (machine hyperdoc::state-machine-definition)

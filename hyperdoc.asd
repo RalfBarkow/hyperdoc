@@ -152,7 +152,6 @@
                 :components ((:module "hyperdoc-inspector"
                 :serial t
                 :components ((:file "package")
-                             (:file "graphviz")
                              (:file "code-path-graphs")
                              (:file "state-machines")
                              (:file "surfaces")

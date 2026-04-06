@@ -324,7 +324,14 @@ PY
           '';
         };
         clogMoldableInspectorSrc = clog-moldable-inspector-src;
-        htmlInspectorViewsSrc = html-inspector-views-src;
+        htmlInspectorViewsSrcPatched = pkgs.applyPatches {
+          name = "html-inspector-views-src-patched";
+          src = html-inspector-views-src;
+          patches = [
+            ./nix/patches/html-inspector-views-graphviz-unification.patch
+          ];
+        };
+        htmlInspectorViewsSrc = htmlInspectorViewsSrcPatched;
         plumpInspectorViewsSrc = plump-inspector-views-src;
         lwcellsSrc = lwcells-src;
         clMarkupSrc = pkgs.sbclPackages."cl-markup".src;
