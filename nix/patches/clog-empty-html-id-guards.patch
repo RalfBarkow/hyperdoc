@@ -1,0 +1,132 @@
+--- a/source/clog-element.lisp	2026-04-05 22:22:11
++++ b/source/clog-element.lisp	2026-04-05 22:25:00
+@@ -34,6 +34,20 @@
+       (setf (connection-data-item obj html-id) obj))
+     obj))
+ 
++(defun empty-or-missing-html-id-p (html-id)
++  (or (null html-id)
++      (and (stringp html-id)
++           (let ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return)
++                                       html-id)))
++             (or (string= trimmed "")
++                 (string-equal trimmed "undefined")
++                 (string-equal trimmed "null"))))))
++
++(defun normalize-html-id-for-attach (html-id)
++  (if (empty-or-missing-html-id-p html-id)
++      "undefined"
++      html-id))
++
+ ;;;;;;;;;;;;;;;;;;;;;;
+ ;; create-with-html ;;
+ ;;;;;;;;;;;;;;;;;;;;;;
+@@ -62,9 +76,13 @@
+ (defun attach (connection-id html-id)
+   "Create a new CLOG-OBJ and attach an existing element with HTML-ID on
+ CONNECTION-ID to it and then return it. The HTML-ID must be unique. (private)"
+-  (cached-execute connection-id
+-              (format nil "clog['~A']=$('#~A').get(0)" html-id html-id))
+-  (make-clog-element connection-id html-id))
++  (let ((normalized-id (normalize-html-id-for-attach html-id)))
++    (unless (string= normalized-id "undefined")
++      (cached-execute connection-id
++                      (format nil "clog['~A']=$('#~A').get(0)"
++                              normalized-id
++                              normalized-id)))
++    (make-clog-element connection-id normalized-id)))
+ 
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;; Low Level - clog-element
+@@ -146,14 +164,16 @@
+ (defmethod attach-as-child ((obj clog-obj) html-id
+                             &key (clog-type 'clog-element)
+                               (new-id nil))
+-  (if new-id
+-      (let ((id (format nil "CLOG~A" (generate-id))))
+-        (js-execute obj
+-                    (format nil "$('#~A').attr('id','~A');clog['~A']=$('#~A').get(0)"
+-                            html-id id id id))
+-        (setf html-id id))
+-      (js-execute obj (format nil "clog['~A']=$('#~A').get(0)"
+-                              html-id html-id)))
++  (setf html-id (normalize-html-id-for-attach html-id))
++  (unless (string= html-id "undefined")
++    (if new-id
++        (let ((id (format nil "CLOG~A" (generate-id))))
++          (js-execute obj
++                      (format nil "$('#~A').attr('id','~A');clog['~A']=$('#~A').get(0)"
++                              html-id id id id))
++          (setf html-id id))
++        (js-execute obj (format nil "clog['~A']=$('#~A').get(0)"
++                                html-id html-id))))
+   (let ((child (make-clog-element (connection-id obj) html-id :clog-type clog-type)))
+     (setf (parent child) obj)
+     child))
+@@ -2479,7 +2499,9 @@
+ used for DOM tree walking or other throw away purposes."))
+ 
+ (defmethod parent-element ((obj clog-element))
+-  (attach-as-child obj (jquery-query obj (format nil "parent().prop('id')"))))
++  (attach-as-child obj
++                   (normalize-html-id-for-attach
++                    (jquery-query obj "parent().prop('id')"))))
+ 
+ ;;;;;;;;;;;;;;;;;;;;;;
+ ;; list-of-children ;;
+@@ -2505,8 +2527,11 @@
+                                                         (jquery obj))))))
+     (labels ((tr (item)
+                (if no-attach
+-                   (make-clog-element (connection-id obj) item :clog-type 'clog-element)
+-                   (attach-as-child obj item)))
++                   (make-clog-element (connection-id obj)
++                                      (normalize-html-id-for-attach item)
++                                      :clog-type 'clog-element)
++                   (attach-as-child obj
++                                    (normalize-html-id-for-attach item))))
+              (ll (lst)
+                  (mapcar (lambda (l)
+                            (if (listp l)
+@@ -2525,10 +2550,11 @@
+ to no actual HTML element."))
+ 
+ (defmethod first-child ((obj clog-element) &key no-attach)
+-  (let ((id (jquery-query obj "children().first().prop('id')")))
++  (let ((id (normalize-html-id-for-attach
++             (jquery-query obj "children().first().prop('id')"))))
+     (if (or no-attach (equalp id "undefined"))
+-        (make-clog-element (connection-id obj) id :clog-type 'clog-element))
+-    (attach-as-child obj id)))
++        (make-clog-element (connection-id obj) id :clog-type 'clog-element)
++        (attach-as-child obj id))))
+ 
+ ;;;;;;;;;;;;;;;;;;
+ ;; next-sibling ;;
+@@ -2540,10 +2566,11 @@
+ to no actual HTML element."))
+ 
+ (defmethod next-sibling ((obj clog-element) &key no-attach)
+-  (let ((id (jquery-query obj "next().prop('id')")))
++  (let ((id (normalize-html-id-for-attach
++             (jquery-query obj "next().prop('id')"))))
+     (if (or no-attach (equalp id "undefined"))
+-        (make-clog-element (connection-id obj) id :clog-type 'clog-element))
+-    (attach-as-child obj id)))
++        (make-clog-element (connection-id obj) id :clog-type 'clog-element)
++        (attach-as-child obj id))))
+ 
+ ;;;;;;;;;;;;;;;;;;;;;;
+ ;; previous-sibling ;;
+@@ -2555,7 +2582,8 @@
+ undefined and therefore attached to no actual HTML elemen."))
+ 
+ (defmethod previous-sibling ((obj clog-element) &key no-attach)
+-  (let ((id (jquery-query obj "previous().prop('id')")))
++  (let ((id (normalize-html-id-for-attach
++             (jquery-query obj "previous().prop('id')"))))
+     (if (or no-attach (equalp id "undefined"))
+-        (make-clog-element (connection-id obj) id :clog-type 'clog-element))
+-    (attach-as-child obj id)))
++        (make-clog-element (connection-id obj) id :clog-type 'clog-element)
++        (attach-as-child obj id))))

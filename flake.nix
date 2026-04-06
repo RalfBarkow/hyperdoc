@@ -43,6 +43,9 @@
         clogSrcPatched = pkgs.applyPatches {
           name = "clog-src-patched";
           src = pkgs.sbclPackages.clog.src;
+          patches = [
+            ./nix/patches/clog-empty-html-id-guards.patch
+          ];
           nativeBuildInputs = [ pkgs.python3 ];
           postPatch = ''
             python3 - <<'PY'

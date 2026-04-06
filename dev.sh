@@ -107,14 +107,29 @@ nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(require :asdf)' \
   --eval '(let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
                  (flake-deps (uiop:ensure-directory-pathname
-                              (merge-pathnames ".flake-deps/" root))))
-            ;; Keep project trees first, but inherit Nix/ASDF defaults so packaged
-            ;; systems (e.g. alexandria) remain discoverable at runtime.
+                              (merge-pathnames ".flake-deps/" root)))
+                 (extra-env (remove nil
+                                    (list (uiop:getenv "CL_SOURCE_REGISTRY")
+                                          (uiop:getenv "HYPERDOC_ASDF_TREES"))))
+                 (extra-paths
+                  (remove-duplicates
+                   (loop for entry in extra-env append
+                     (loop for s in (uiop:split-string entry :separator ":")
+                           for p = (and (> (length s) 0)
+                                        (ignore-errors
+                                          (uiop:ensure-directory-pathname s)))
+                           when p collect p))
+                   :test (function equal))))
+            ;; Keep the flake-injected source trees authoritative so patched CLOG Lisp
+            ;; and static assets come from the same source, while still inheriting the
+            ;; packaged dependency trees through CL_SOURCE_REGISTRY/HYPERDOC_ASDF_TREES.
+            ;; The project ASDs are loaded explicitly below so we do not recurse through
+            ;; the whole repo tree here (which can drag .direnv inputs into ASDF scans).
             (asdf:initialize-source-registry
-             (list :source-registry
-                   (list :directory root)
-                   (list :tree flake-deps)
-                   :inherit-configuration)))' \
+             (append (list :source-registry
+                           (list :tree flake-deps))
+                     (mapcar (lambda (p) (list :tree p)) extra-paths)
+                     (list :ignore-inherited-configuration))))' \
   --eval '(sb-sys:enable-interrupt
             sb-unix:sigint
             (lambda (signal code scp)
@@ -130,6 +145,7 @@ nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(setf *print-circle* t)' \
   --eval '(format t "~&ASDF ready.~%")' \
   --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
+  --eval '(asdf:load-asd (truename "hyperdoc.asd"))' \
   --eval '(asdf:load-system "swank")' \
   --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
   --eval '(format t "~&Swank listening.~%")' \
