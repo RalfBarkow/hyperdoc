@@ -153,6 +153,17 @@
     :journal-transition
     :reopen-persisted-annotation))
 
+(defparameter *dmx-workspace-annotation-path-diff-stage-order*
+  '(:normalize-annotation
+    :build-write-plan
+    :validate-payload
+    :backend-compatibility-preflight
+    :topic-upsert
+    :workspace-assignment
+    :topicmap-placement
+    :journal-transition
+    :reopen-persisted-annotation))
+
 (defclass workspace-annotation-persistence-debug ()
   ((annotation
     :initarg :annotation
@@ -312,6 +323,149 @@
     :initarg :assignment-auth-context
     :initform nil
     :reader workspace-annotation-persistence-report-assignment-auth-context-of)))
+
+(defclass workspace-annotation-path-diff ()
+  ((annotation
+    :initarg :annotation
+    :reader workspace-annotation-path-diff-annotation-of)
+   (workspace-topicmap-id
+    :initarg :workspace-topicmap-id
+    :reader workspace-annotation-path-diff-workspace-topicmap-id-of)
+   (workspace-id
+    :initarg :workspace-id
+    :initform nil
+    :reader workspace-annotation-path-diff-workspace-id-of)
+   (client
+    :initarg :client
+    :initform nil
+    :reader workspace-annotation-path-diff-client-of)
+   (destination
+    :initarg :destination
+    :initform nil
+    :reader workspace-annotation-path-diff-destination-of)
+   (plan
+    :initarg :plan
+    :initform nil
+    :reader workspace-annotation-path-diff-plan-of)
+   (raw-report
+    :initarg :raw-report
+    :initform nil
+    :reader workspace-annotation-path-diff-raw-report-of)
+   (continuation-topic-id
+    :initarg :continuation-topic-id
+    :initform nil
+    :reader workspace-annotation-path-diff-continuation-topic-id-of)
+   (guarded-assignment-summary
+    :initarg :guarded-assignment-summary
+    :initform nil
+    :reader workspace-annotation-path-diff-guarded-assignment-summary-of)
+   (guarded-assignment-condition
+    :initarg :guarded-assignment-condition
+    :initform nil
+    :reader workspace-annotation-path-diff-guarded-assignment-condition-of)
+   (guarded-topicmap-summary
+    :initarg :guarded-topicmap-summary
+    :initform nil
+    :reader workspace-annotation-path-diff-guarded-topicmap-summary-of)
+   (guarded-topicmap-condition
+    :initarg :guarded-topicmap-condition
+    :initform nil
+    :reader workspace-annotation-path-diff-guarded-topicmap-condition-of)
+   (state-snapshot
+    :initarg :state-snapshot
+    :initform nil
+    :reader workspace-annotation-path-diff-state-snapshot-of)
+   (consequences
+    :initarg :consequences
+    :initform nil
+    :reader workspace-annotation-path-diff-consequences-of)))
+
+(defclass workspace-annotation-path-next-step-target ()
+  ((id
+    :reader id-of
+    :initarg :id)
+   (title
+    :reader title-of
+    :initarg :title)
+   (summary
+    :reader summary-of
+    :initarg :summary
+    :initform nil)
+   (kind
+    :reader workspace-annotation-path-next-step-target-kind-of
+    :initarg :kind
+    :initform :tool)
+   (label
+    :reader workspace-annotation-path-next-step-target-label-of
+    :initarg :label)
+   (executor-or-surface-name
+    :reader workspace-annotation-path-next-step-target-executor-or-surface-name-of
+    :initarg :executor-or-surface-name)
+   (mode
+    :reader workspace-annotation-path-next-step-target-mode-of
+    :initarg :mode
+    :initform :inspect)
+   (auth-required-p
+    :reader workspace-annotation-path-next-step-target-auth-required-p-of
+    :initarg :auth-required-p
+    :initform nil)
+   (stage-scope
+    :reader workspace-annotation-path-next-step-target-stage-scope-of
+    :initarg :stage-scope
+    :initform nil)
+   (target-object
+    :reader workspace-annotation-path-next-step-target-object-of
+    :initarg :target-object
+    :initform nil)
+   (target-select
+    :reader workspace-annotation-path-next-step-target-select-of
+    :initarg :target-select
+    :initform nil)))
+
+(defclass workspace-annotation-path-consequence ()
+  ((id
+    :reader id-of
+    :initarg :id)
+   (title
+    :reader title-of
+    :initarg :title)
+   (summary
+    :reader summary-of
+    :initarg :summary)
+   (kind
+    :reader workspace-annotation-path-consequence-kind-of
+    :initarg :kind
+    :initform :review-divergence)
+   (triggering-stages
+    :reader workspace-annotation-path-consequence-triggering-stages-of
+    :initarg :triggering-stages
+    :initform nil)
+   (triggering-evidence
+    :reader workspace-annotation-path-consequence-triggering-evidence-of
+    :initarg :triggering-evidence
+    :initform nil)
+   (actionability
+    :reader workspace-annotation-path-consequence-actionability-of
+    :initarg :actionability
+    :initform :review-needed)
+   (auth-required-p
+    :reader workspace-annotation-path-consequence-auth-required-p-of
+    :initarg :auth-required-p
+    :initform nil)
+   (next-step-targets
+    :reader workspace-annotation-path-consequence-next-step-targets-of
+    :initarg :next-step-targets
+    :initform nil)))
+
+(defmethod print-object ((object workspace-annotation-path-next-step-target)
+                         stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A"
+            (workspace-annotation-path-next-step-target-label-of object))))
+
+(defmethod print-object ((object workspace-annotation-path-consequence) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
 
 (defclass workspace-annotation-create-topic-probe-report ()
   ((annotation
@@ -785,6 +939,7 @@
     (:normalize-annotation "Normalize annotation")
     (:build-write-plan "Build write plan")
     (:validate-payload "Validate payload and view props")
+    (:backend-compatibility-preflight "Backend compatibility preflight")
     (:prepare-transition "Prepare workspace journal preflight")
     (:topic-upsert "Execute topic upsert")
     (:workspace-assignment "Assign topic to workspace")
@@ -1104,6 +1259,9 @@
            :destination-rationale
            (and destination
                 (dmx-workspace-annotation-destination-rationale destination))
+           :http-evidence
+           (and (typep condition 'dmx-import-http-error)
+                (dmx-import-http-evidence condition))
            :auth-missing-keys
            (workspace-annotation-auth-missing-keys condition))
      client-auth-context)))
@@ -3468,11 +3626,193 @@
      :auth-token auth-token
      :verbose nil)))
 
+(defun workspace-annotation-continuation-ready-p (report)
+  (and (typep report 'workspace-annotation-persistence-report)
+       (workspace-annotation-persistence-report-plan-of report)
+       (workspace-annotation-persistence-report-saved-topic-id-of report)))
+
+(defun workspace-annotation-continuation-stage-results
+    (annotation plan topic-id workspace-topicmap-id)
+  (declare (ignore workspace-topicmap-id))
+  (list
+   (workspace-annotation-persistence-stage-entry
+    :normalize-annotation
+    :completed
+    "Reopened the saved annotation as the typed continuation input.")
+   (workspace-annotation-persistence-stage-entry
+    :build-write-plan
+    :completed
+    "Rebuilt the typed write plan for the saved annotation before guarded continuation.")
+   (workspace-annotation-persistence-stage-entry
+    :validate-payload
+    :completed
+    (format nil
+            "Payload validation is ~A; topic action ~A, workspace action ~A, topicmap action ~A."
+            (dmx-workspace-annotation-write-plan-payload-validation-status plan)
+            (dmx-workspace-annotation-write-plan-topic-action plan)
+            (dmx-workspace-annotation-write-plan-workspace-action plan)
+            (dmx-workspace-annotation-write-plan-topicmap-action plan))
+    :detail
+    (and (dmx-workspace-annotation-write-plan-view-props plan)
+         (dmx-topicmap-view-props-json-string
+          (dmx-workspace-annotation-write-plan-view-props plan))))
+   (workspace-annotation-persistence-stage-entry
+    :backend-compatibility-preflight
+    :completed
+    "Backend compatibility was already established at the typed annotation entrypoint; continuation resumes from the preserved topic id.")
+   (workspace-annotation-persistence-stage-entry
+    :topic-upsert
+    :completed
+    (format nil
+            "Saved annotation topic ~D already exists; guarded continuation starts after topic upsert."
+            topic-id)
+    :detail
+    (format nil
+            "Reopened ~A in ~A with storage mode ~A. Workspace assignment and topicmap placement remain later separate stages."
+            (or (title-of annotation) "saved workspace annotation")
+            (dmx-workspace-annotation-topicmap-label
+             (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan))
+            (workspace-annotation-storage-mode-label
+             (dmx-workspace-annotation-write-plan-storage-mode plan))))))
+
+(defun make-workspace-annotation-continuation-report
+    (annotation plan topic-id workspace-topicmap-id client)
+  (let* ((subject-key (dmx-workspace-annotation-write-plan-uri plan))
+         (journal-preflight-summary
+           (ignore-errors
+             (dmx-workspace-journal-preflight-summary
+              client
+              subject-key
+              "uri"
+              subject-key
+              workspace-topicmap-id
+              :subject-uri subject-key
+              :subject-kind "workspace-annotation"
+              :ownership-class "hyperdoc-workspace-annotation"))))
+    (make-instance
+     'workspace-annotation-persistence-report
+     :annotation annotation
+     :workspace-topicmap-id workspace-topicmap-id
+     :workspace-id (dmx-workspace-annotation-write-plan-workspace-id plan)
+     :client client
+     :exact-form
+     (workspace-annotation-persistence-stepper-display-form
+      workspace-topicmap-id
+      :workspace-id (dmx-workspace-annotation-write-plan-workspace-id plan)
+      :storage-mode (dmx-workspace-annotation-write-plan-storage-mode plan))
+     :stepper-source
+     (workspace-annotation-persistence-stepper-source
+      workspace-topicmap-id
+      :workspace-id (dmx-workspace-annotation-write-plan-workspace-id plan)
+      :storage-mode (dmx-workspace-annotation-write-plan-storage-mode plan))
+     :annotation-key (dmx-workspace-annotation-write-plan-annotation-key plan)
+     :runtime-relation-id
+     (and (typep annotation 'workspace-dock-annotation)
+          (workspace-annotation-runtime-relation-id-of annotation))
+     :plan plan
+     :stage-results
+     (workspace-annotation-continuation-stage-results
+      annotation
+      plan
+      topic-id
+      workspace-topicmap-id)
+     :report-status :continuation-ready
+     :failure-stage nil
+     :condition nil
+     :transport-diagnostics nil
+     :topic-upsert-evidence nil
+     :raw-result
+     (append (dmx-workspace-annotation-plan-summary plan)
+             (list :dry-run nil
+                   :topic-id topic-id
+                   :journal-subject-key subject-key
+                   :continuation-source :saved-topic))
+     :persisted-topic-id topic-id
+     :persisted-annotation annotation
+     :subject-key subject-key
+     :previous-state nil
+     :journal-preflight-summary journal-preflight-summary
+     :journal-preflight-auth-context nil
+     :assignment-auth-context nil)))
+
+(defun continue-workspace-annotation-with-guarded-assignment
+    (plan client topic-id workspace-topicmap-id &key (dry-run nil))
+  (execute-dmx-workspace-topic-workspace-assignment-repair
+   topic-id
+   :workspace-id (dmx-workspace-annotation-write-plan-workspace-id plan)
+   :workspace-topicmap-id workspace-topicmap-id
+   :client client
+   :dry-run dry-run))
+
+(defun continue-workspace-annotation-with-guarded-topicmap-placement
+    (plan client topic-id workspace-topicmap-id &key (dry-run nil))
+  (execute-dmx-workspace-topicmap-context-upsert
+   topic-id
+   :workspace-topicmap-id workspace-topicmap-id
+   :client client
+   :view-props (dmx-workspace-annotation-write-plan-view-props plan)
+   :dry-run dry-run))
+
+(defun guarded-workspace-assignment-stage-summary (summary)
+  (case (getf summary :workspace-action)
+    (:assign
+     (format nil
+             "Guarded workspace-assignment repair assigned topic ~D to workspace ~D."
+             (getf summary :topic-id)
+             (getf summary :workspace-id)))
+    (:already-assigned
+     (format nil
+             "Guarded workspace-assignment repair confirmed topic ~D already belonged to workspace ~D."
+             (getf summary :topic-id)
+             (getf summary :workspace-id)))
+    (otherwise
+     "Guarded workspace-assignment repair finished.")))
+
+(defun guarded-workspace-assignment-stage-detail (summary)
+  (format nil
+          "Executor repair_workspace_topic_assignment kept workspace assignment distinct from topicmap placement. Result workspace: ~A. Topicmap preserved separately: ~A."
+          (or (getf summary :result-workspace-id) "-")
+          (if (getf summary :result-in-topicmap-p) "true" "false")))
+
+(defun guarded-topicmap-placement-stage-summary (summary)
+  (case (getf summary :topicmap-action)
+    (:add
+     (format nil
+             "Guarded topicmap placement added topic ~D to workspace topicmap ~D."
+             (getf summary :topic-id)
+             (getf summary :topicmap-id)))
+    (:set-view-props
+     (format nil
+             "Guarded topicmap placement refreshed validated view props for topic ~D in workspace topicmap ~D."
+             (getf summary :topic-id)
+             (getf summary :topicmap-id)))
+    (otherwise
+     "Guarded topicmap placement finished.")))
+
+(defun guarded-topicmap-placement-stage-detail (summary)
+  (declare (ignore summary))
+  (format nil
+          "Executor upsert_workspace_topicmap_context only changes topicmap membership/view props. Workspace ownership still has to be proven separately."))
+
+(defun guarded-journal-transition-stage-summary
+    (assignment-summary topicmap-summary)
+  (let ((covered-stages
+          (remove nil
+                  (list (when assignment-summary "workspace-assignment")
+                        (when topicmap-summary "topicmap-placement")))))
+    (if covered-stages
+        (format nil
+                "Guarded continuation recorded journal transitions inside the shared-workspace executors for ~{~A~^ and ~}."
+                covered-stages)
+        "Guarded continuation had no remaining guarded journal transition to record.")))
+
 (defun continue-workspace-annotation-persistence-with-client
     (report client)
-  (unless (workspace-annotation-pending-auth-p report)
+  (unless (or (workspace-annotation-pending-auth-p report)
+              (workspace-annotation-continuation-ready-p report))
     (error 'fedwiki-dmx-import-error
-           :message "Workspace annotation persistence continuation requires a pending-auth report"))
+           :message
+           "Workspace annotation persistence continuation requires a pending-auth report or a saved-topic continuation report"))
   (let* ((plan (workspace-annotation-persistence-report-plan-of report))
          (topic-id (workspace-annotation-persistence-report-persisted-topic-id-of
                     report))
@@ -3488,6 +3828,8 @@
             (workspace-annotation-persistence-report-stage-results-of report)))
          (failure-stage nil)
          (failure-condition nil)
+         (guarded-assignment-summary nil)
+         (guarded-topicmap-summary nil)
          (persisted-annotation nil)
          (raw-result
            (or (workspace-annotation-persistence-report-raw-result-of report)
@@ -3504,10 +3846,19 @@
                        status
                        summary
                        :detail detail))))
+             (materialize-stage-detail (detail &optional condition)
+               (typecase detail
+                 (function
+                  (funcall detail condition))
+                 (t
+                  detail)))
              (run-stage (stage summary thunk &key detail)
                (handler-case
                    (let ((value (funcall thunk)))
-                     (record-stage stage :completed summary :detail detail)
+                     (record-stage stage
+                                   :completed
+                                   summary
+                                   :detail (materialize-stage-detail detail))
                      value)
                  (error (condition)
                    (setf failure-stage stage
@@ -3515,67 +3866,91 @@
                    (record-stage stage
                                  :error
                                  summary
-                                 :detail (or detail
+                                 :detail (or (materialize-stage-detail
+                                              detail
+                                              condition)
                                              (format nil "~A" condition)))
                    (error condition)))))
       (handler-case
-          (let ((after-topic nil)
-                (after-state nil)
-                (journal-events nil))
+          (progn
             (if (eql (dmx-workspace-annotation-write-plan-workspace-action plan)
                      :assign)
-                (run-stage
-                 :workspace-assignment
-                 (format nil
-                         "Assigned topic ~D to workspace ~D."
-                         topic-id
-                         (dmx-workspace-annotation-write-plan-workspace-id plan))
-                 (lambda ()
-                   (dmx-import-assign-topic-to-workspace
-                    client
-                    (dmx-workspace-annotation-write-plan-workspace-id plan)
-                    topic-id)))
+                (setf guarded-assignment-summary
+                      (run-stage
+                       :workspace-assignment
+                       "Guarded workspace-assignment repair finished."
+                       (lambda ()
+                         (continue-workspace-annotation-with-guarded-assignment
+                          plan
+                          client
+                          topic-id
+                          workspace-topicmap-id))
+                       :detail
+                       (lambda (condition)
+                         (declare (ignore condition))
+                         (guarded-workspace-assignment-stage-detail
+                          guarded-assignment-summary))))
                 (record-stage
                  :workspace-assignment
                  :skipped
-                 "Workspace assignment was already current; no additional write was needed."))
+                 "Workspace assignment was already current; no guarded repair was needed."
+                 :detail
+                 "Workspace assignment stays distinct from topicmap placement even when no repair is needed."))
+            (when guarded-assignment-summary
+              (record-stage
+               :workspace-assignment
+               :completed
+               (guarded-workspace-assignment-stage-summary
+                guarded-assignment-summary)
+               :detail
+               (guarded-workspace-assignment-stage-detail
+                guarded-assignment-summary)))
             (if (eql (dmx-workspace-annotation-write-plan-topicmap-action plan)
                      :add)
-                (run-stage
-                 :topicmap-placement
-                 (format nil
-                         "Added topic ~D to workspace topicmap ~D."
-                         topic-id
-                         workspace-topicmap-id)
-                 (lambda ()
-                   (dmx-import-add-topic-to-topicmap
-                    client
-                    workspace-topicmap-id
-                    topic-id
-                    (dmx-workspace-annotation-write-plan-view-props plan))))
+                (setf guarded-topicmap-summary
+                      (run-stage
+                       :topicmap-placement
+                       "Guarded topicmap placement finished."
+                       (lambda ()
+                         (continue-workspace-annotation-with-guarded-topicmap-placement
+                          plan
+                          client
+                          topic-id
+                          workspace-topicmap-id))
+                       :detail
+                       (lambda (condition)
+                         (declare (ignore condition))
+                         (guarded-topicmap-placement-stage-detail
+                          guarded-topicmap-summary))))
                 (record-stage
                  :topicmap-placement
                  :skipped
-                 "Topicmap placement was already present; no add-to-topicmap write was needed."))
-            (setf after-topic (dmx-import-read-topic client topic-id)
-                  after-state
-                  (dmx-workspace-journal-live-snapshot
-                   client
-                   after-topic
-                   workspace-topicmap-id))
-            (setf journal-events
-                  (run-stage
-                   :journal-transition
-                   "Recorded the workspace journal transition for the live annotation write."
-                   (lambda ()
-                     (dmx-workspace-journal-record-transition
-                      client
-                      previous-state
-                      after-state
-                      workspace-topicmap-id))))
+                 "Topicmap placement was already present; no guarded topicmap upsert was needed."
+                 :detail
+                 "Topicmap visibility remains separate from workspace assignment."))
+            (when guarded-topicmap-summary
+              (record-stage
+               :topicmap-placement
+               :completed
+               (guarded-topicmap-placement-stage-summary
+                guarded-topicmap-summary)
+               :detail
+               (guarded-topicmap-placement-stage-detail
+                guarded-topicmap-summary)))
+            (record-stage
+             :journal-transition
+             :completed
+             (guarded-journal-transition-stage-summary
+              guarded-assignment-summary
+              guarded-topicmap-summary)
+             :detail
+             "The shared-workspace repair and topicmap executors emit their own guarded journal transitions. Topicmap success there still does not imply workspace ownership.")
             (setf raw-result
                   (append raw-result
-                          (list :journal-event-count (length journal-events))))
+                          (list :guarded-workspace-assignment
+                                guarded-assignment-summary
+                                :guarded-topicmap-placement
+                                guarded-topicmap-summary)))
             (setf persisted-annotation
                   (run-stage
                    :reopen-persisted-annotation
@@ -3611,12 +3986,1282 @@
        :persisted-annotation persisted-annotation
        :assignment-auth-context
        (and (eq failure-stage :workspace-assignment)
-            (typep failure-condition 'dmx-import-config-error)
+            (workspace-annotation-auth-blocked-condition-p failure-condition)
             (workspace-annotation-assignment-auth-context
              plan
              client
              topic-id
              failure-condition))))))
+
+(defun workspace-annotation-path-diff-guarded-assignment-preview
+    (plan client topic-id workspace-topicmap-id)
+  (when (and plan topic-id workspace-topicmap-id)
+    (handler-case
+        (values
+         (continue-workspace-annotation-with-guarded-assignment
+          plan
+          client
+          topic-id
+          workspace-topicmap-id
+          :dry-run t)
+         nil)
+      (error (condition)
+        (values nil condition)))))
+
+(defun workspace-annotation-path-diff-guarded-topicmap-preview
+    (plan client topic-id workspace-topicmap-id)
+  (when (and plan topic-id workspace-topicmap-id)
+    (handler-case
+        (values
+         (continue-workspace-annotation-with-guarded-topicmap-placement
+          plan
+          client
+          topic-id
+          workspace-topicmap-id
+          :dry-run t)
+         nil)
+      (error (condition)
+        (values nil condition)))))
+
+(defun workspace-annotation-path-diff-status-label (status)
+  (when status
+    (string-downcase (format nil "~A" status))))
+
+(defun workspace-annotation-path-diff-raw-stage-status (comparison stage)
+  (let ((report (workspace-annotation-path-diff-raw-report-of comparison)))
+    (cond
+      ((null report)
+       :pending)
+      ((typep report 'workspace-annotation-persistence-report)
+       (if (eq stage :backend-compatibility-preflight)
+           :completed
+           (or (getf (workspace-annotation-persistence-stage-result report stage)
+                     :status)
+               :pending)))
+      ((and (eq stage :backend-compatibility-preflight)
+            (typep report 'workspace-annotation-backend-compatibility-report))
+       (case (workspace-annotation-backend-compatibility-report-status-of report)
+         (:available :completed)
+         (:fallback-available :completed)
+         (:blocked :error)
+         (otherwise :pending)))
+      (t
+       :pending))))
+
+(defun workspace-annotation-path-diff-guarded-stage-status (comparison stage)
+  (let ((assignment-summary
+          (workspace-annotation-path-diff-guarded-assignment-summary-of
+           comparison))
+        (assignment-condition
+          (workspace-annotation-path-diff-guarded-assignment-condition-of
+           comparison))
+        (topicmap-summary
+          (workspace-annotation-path-diff-guarded-topicmap-summary-of
+           comparison))
+        (topicmap-condition
+          (workspace-annotation-path-diff-guarded-topicmap-condition-of
+           comparison)))
+    (case stage
+      (:workspace-assignment
+       (cond
+         (assignment-condition :error)
+         (assignment-summary
+          (if (getf assignment-summary :dry-run) :active :completed))
+         (t :pending)))
+      (:topicmap-placement
+       (cond
+         (topicmap-condition :error)
+         (topicmap-summary
+          (if (getf topicmap-summary :dry-run) :active :completed))
+         (t :pending)))
+      (:journal-transition
+       (cond
+         ((or assignment-condition topicmap-condition) :error)
+         ((or assignment-summary topicmap-summary)
+          (if (or (getf assignment-summary :dry-run)
+                  (getf topicmap-summary :dry-run))
+              :active
+              :completed))
+         (t :pending)))
+      (:reopen-persisted-annotation
+       :pending)
+      (otherwise
+       :pending))))
+
+(defun workspace-annotation-path-diff-stage-status (comparison stage)
+  (let ((raw (workspace-annotation-path-diff-raw-stage-status comparison stage))
+        (guarded (workspace-annotation-path-diff-guarded-stage-status
+                  comparison
+                  stage)))
+    (if (and raw
+             (not (eq raw :pending)))
+        raw
+        guarded)))
+
+(defun workspace-annotation-path-diff-raw-live-label (comparison stage)
+  (let ((report (workspace-annotation-path-diff-raw-report-of comparison)))
+    (cond
+      ((null report)
+       nil)
+      ((and (typep report 'workspace-annotation-persistence-report)
+            (eq stage :workspace-assignment)
+            (workspace-annotation-pending-auth-p report))
+       "error (pending-auth)")
+      (t
+       (workspace-annotation-path-diff-status-label
+        (workspace-annotation-path-diff-raw-stage-status comparison stage))))))
+
+(defun workspace-annotation-path-diff-guarded-live-label (comparison stage)
+  (let ((assignment-summary
+          (workspace-annotation-path-diff-guarded-assignment-summary-of
+           comparison))
+        (assignment-condition
+          (workspace-annotation-path-diff-guarded-assignment-condition-of
+           comparison))
+        (topicmap-summary
+          (workspace-annotation-path-diff-guarded-topicmap-summary-of
+           comparison))
+        (topicmap-condition
+          (workspace-annotation-path-diff-guarded-topicmap-condition-of
+           comparison))
+        (topic-id
+          (workspace-annotation-path-diff-continuation-topic-id-of comparison)))
+    (case stage
+      (:topic-upsert
+       (and topic-id "preserved topic id"))
+      (:workspace-assignment
+       (cond
+         (assignment-condition "error")
+         (assignment-summary
+          (if (getf assignment-summary :dry-run)
+              (format nil "dry-run (~A)"
+                      (workspace-annotation-render-value
+                       (getf assignment-summary :workspace-action)))
+              "completed"))
+         (t nil)))
+      (:topicmap-placement
+       (cond
+         (topicmap-condition "error")
+         (topicmap-summary
+          (if (getf topicmap-summary :dry-run)
+              (format nil "dry-run (~A)"
+                      (workspace-annotation-render-value
+                       (getf topicmap-summary :topicmap-action)))
+              "completed"))
+         (t nil)))
+      (:journal-transition
+       (cond
+         ((or assignment-condition topicmap-condition) "blocked upstream")
+         ((or (and assignment-summary (getf assignment-summary :dry-run))
+              (and topicmap-summary (getf topicmap-summary :dry-run)))
+          "dry-run preview")
+         ((or assignment-summary topicmap-summary)
+          "covered by guarded executors")
+         (t nil)))
+      (:reopen-persisted-annotation
+       (and topic-id "not run"))
+      (otherwise
+       nil))))
+
+(defun workspace-annotation-path-diff-stage-live-status (comparison stage)
+  (let ((raw (workspace-annotation-path-diff-raw-live-label comparison stage))
+        (guarded (workspace-annotation-path-diff-guarded-live-label
+                  comparison
+                  stage)))
+    (cond
+      ((and raw guarded)
+       (format nil "raw: ~A; guarded: ~A" raw guarded))
+      (raw
+       (format nil "raw: ~A" raw))
+      (guarded
+       (format nil "guarded: ~A" guarded))
+      (t
+       nil))))
+
+(defun workspace-annotation-path-next-step-mode-label (mode)
+  (case mode
+    (:inspect "read-only inspection")
+    (:continue "guarded continuation")
+    (:repair "explicit-auth repair")
+    (:review "diagnostic review")
+    (:none "no further action")
+    (otherwise
+     (format nil "~(~A~)" mode))))
+
+(defun workspace-annotation-path-consequence-actionability-label (value)
+  (case value
+    (:no-change-yet "no change yet")
+    (:review-needed "review needed")
+    (:repair-needed "repair needed")
+    (:ready-to-continue "ready to continue")
+    (:no-further-action "no further action")
+    (otherwise
+     (format nil "~(~A~)" value))))
+
+(defun workspace-annotation-path-consequence-kind-label (value)
+  (case value
+    (:no-change "no-change")
+    (:continue-with-guarded-boundary "continue-with-guarded-boundary")
+    (:repair-workspace-assignment "repair-workspace-assignment")
+    (:inspect-state-before-mutation "inspect-state-before-mutation")
+    (:review-divergence "review-divergence")
+    (:persisted-success "persisted-success")
+    (otherwise
+     (format nil "~(~A~)" value))))
+
+(defun make-workspace-annotation-path-next-step-target
+    (id label executor-or-surface-name mode auth-required-p stage-scope
+     &key (kind :tool) summary target-object target-select)
+  (make-instance 'workspace-annotation-path-next-step-target
+                 :id id
+                 :title label
+                 :summary summary
+                 :kind kind
+                 :label label
+                 :executor-or-surface-name executor-or-surface-name
+                 :mode mode
+                 :auth-required-p auth-required-p
+                 :stage-scope stage-scope
+                 :target-object target-object
+                 :target-select target-select))
+
+(defun make-workspace-annotation-path-consequence
+    (kind summary triggering-stages triggering-evidence actionability
+     auth-required-p next-step-targets)
+  (make-instance 'workspace-annotation-path-consequence
+                 :id (format nil "workspace-annotation-consequence/~(~A~)"
+                             kind)
+                 :title (workspace-annotation-path-consequence-kind-label kind)
+                 :summary summary
+                 :kind kind
+                 :triggering-stages triggering-stages
+                 :triggering-evidence triggering-evidence
+                 :actionability actionability
+                 :auth-required-p auth-required-p
+                 :next-step-targets next-step-targets))
+
+(defun workspace-annotation-path-target-workspace-id (comparison)
+  (or (and (workspace-annotation-path-diff-plan-of comparison)
+           (dmx-workspace-annotation-write-plan-workspace-id
+            (workspace-annotation-path-diff-plan-of comparison)))
+      (workspace-annotation-path-diff-workspace-id-of comparison)))
+
+(defun workspace-annotation-path-live-http-client-p (comparison)
+  (typep (workspace-annotation-path-diff-client-of comparison)
+         'http-dmx-import-client))
+
+(defun inspect-workspace-annotation-path-state
+    (client topic-id workspace-topicmap-id)
+  (if (null topic-id)
+      (list :status :not-applicable
+            :topic-id nil
+            :workspace-id nil
+            :workspace-read-p nil
+            :in-topicmap-p nil
+            :topicmap-read-p nil
+            :evidence
+            (list (list :kind :continuation-topic-id
+                        :value nil)))
+      (let ((workspace-read-p nil)
+            (topicmap-read-p nil)
+            (workspace-id nil)
+            (in-topicmap-p nil)
+            (workspace-condition nil)
+            (topicmap-condition nil))
+        (handler-case
+            (let ((workspace (dmx-import-read-topic-workspace client topic-id)))
+              (setf workspace-id (and workspace
+                                      (dmx-import-object-id workspace))
+                    workspace-read-p t))
+          (error (condition)
+            (setf workspace-condition condition)))
+        (handler-case
+            (setf in-topicmap-p
+                  (and workspace-topicmap-id
+                       (dmx-import-topic-in-topicmap-p
+                        client
+                        workspace-topicmap-id
+                        topic-id))
+                  topicmap-read-p t)
+          (error (condition)
+            (setf topicmap-condition condition)))
+        (list :status (cond
+                        ((and workspace-read-p topicmap-read-p) :available)
+                        ((or workspace-read-p topicmap-read-p) :partial)
+                        (t :blocked))
+              :topic-id topic-id
+              :workspace-id workspace-id
+              :workspace-read-p workspace-read-p
+              :in-topicmap-p in-topicmap-p
+              :topicmap-read-p topicmap-read-p
+              :workspace-condition workspace-condition
+              :topicmap-condition topicmap-condition
+              :evidence
+              (remove nil
+                      (list
+                       (list :kind :topic-id
+                             :value topic-id)
+                       (list :kind :workspace-read-p
+                             :value workspace-read-p)
+                       (list :kind :current-workspace-id
+                             :value workspace-id)
+                       (list :kind :topicmap-read-p
+                             :value topicmap-read-p)
+                       (list :kind :topicmap-visible-p
+                             :value in-topicmap-p)
+                       (and workspace-condition
+                            (list :kind :workspace-read-condition
+                                  :value (format nil "~A"
+                                                 workspace-condition)))
+                       (and topicmap-condition
+                            (list :kind :topicmap-read-condition
+                                  :value (format nil "~A"
+                                                 topicmap-condition)))))))))
+
+(defun workspace-annotation-path-diff-divergent-stages (comparison)
+  (loop for stage in *dmx-workspace-annotation-path-diff-stage-order*
+        for raw = (workspace-annotation-path-diff-raw-live-label
+                   comparison
+                   stage)
+        for guarded = (workspace-annotation-path-diff-guarded-live-label
+                       comparison
+                       stage)
+        when (or (eq stage :topic-upsert)
+                 (and (or raw guarded)
+                      (not (equal raw guarded))))
+          collect stage))
+
+(defun workspace-annotation-path-state-repair-needed-p (comparison)
+  (let* ((state (workspace-annotation-path-diff-state-snapshot-of comparison))
+         (target-workspace-id
+           (workspace-annotation-path-target-workspace-id comparison)))
+    (and state
+         (getf state :workspace-read-p)
+         (getf state :topicmap-read-p)
+         (getf state :in-topicmap-p)
+         target-workspace-id
+         (not (eql (getf state :workspace-id)
+                   target-workspace-id)))))
+
+(defun workspace-annotation-path-state-current-p (comparison)
+  (let* ((state (workspace-annotation-path-diff-state-snapshot-of comparison))
+         (plan (workspace-annotation-path-diff-plan-of comparison))
+         (target-workspace-id
+           (workspace-annotation-path-target-workspace-id comparison)))
+    (and state
+         (getf state :workspace-read-p)
+         (getf state :topicmap-read-p)
+         (eql (getf state :workspace-id) target-workspace-id)
+         (getf state :in-topicmap-p)
+         (or (null plan)
+             (not (eql (dmx-workspace-annotation-write-plan-workspace-action
+                        plan)
+                       :assign)))
+         (or (null plan)
+             (not (eql (dmx-workspace-annotation-write-plan-topicmap-action
+                        plan)
+                       :add))))))
+
+(defun workspace-annotation-path-reopen-success-proved-p (comparison)
+  (let ((annotation (workspace-annotation-path-diff-annotation-of comparison))
+        (topic-id
+          (workspace-annotation-path-diff-continuation-topic-id-of comparison)))
+    (and (typep annotation 'workspace-dock-annotation)
+         topic-id
+         (eql (workspace-annotation-topic-id-of annotation)
+              topic-id))))
+
+(defun workspace-annotation-path-consequences-for-stages
+    (comparison stages)
+  (let ((stage-list (if (listp stages) stages (list stages))))
+    (remove-if-not
+     (lambda (consequence)
+       (intersection stage-list
+                     (workspace-annotation-path-consequence-triggering-stages-of
+                      consequence)
+                     :test #'eq))
+     (workspace-annotation-path-diff-consequences-of comparison))))
+
+(defun workspace-annotation-path-consequence-summary-for-stages
+    (comparison stages)
+  (let ((consequences
+          (workspace-annotation-path-consequences-for-stages comparison stages)))
+    (when consequences
+      (format nil
+              "Consequence: ~{~A~^; ~}"
+              (mapcar #'title-of consequences)))))
+
+(defun make-workspace-annotation-path-persisted-success-consequence
+    (topic-id evidence)
+  (make-workspace-annotation-path-consequence
+   :persisted-success
+   (format nil
+           "The raw persist path reached reopen successfully for topic ~D. No further operational mutation is required."
+           topic-id)
+   '(:reopen-persisted-annotation)
+   evidence
+   :no-further-action
+   nil
+   (list
+    (make-workspace-annotation-path-next-step-target
+     "no-further-action"
+     "No mutation required"
+     "workspace_annotation result"
+     :none
+     nil
+     '(:reopen-persisted-annotation)
+     :kind :surface
+     :summary
+     "The persisted annotation is already reopened and inspectable."))))
+
+(defun derive-workspace-annotation-path-consequences (comparison)
+  (let* ((report (workspace-annotation-path-diff-raw-report-of comparison))
+         (state (workspace-annotation-path-diff-state-snapshot-of comparison))
+         (topic-id
+           (workspace-annotation-path-diff-continuation-topic-id-of comparison))
+         (live-http-p (workspace-annotation-path-live-http-client-p comparison))
+         (target-workspace-id
+           (workspace-annotation-path-target-workspace-id comparison))
+         (divergent-stages
+           (workspace-annotation-path-diff-divergent-stages comparison))
+         (rows '()))
+    (flet ((add (row)
+             (push row rows)))
+      (when (and (typep report 'workspace-annotation-persistence-report)
+                 (workspace-annotation-pending-auth-p report)
+                 topic-id)
+        (add
+         (make-workspace-annotation-path-consequence
+          :continue-with-guarded-boundary
+          (format nil
+                  "Raw persist stopped at workspace assignment after topic upsert and preserved topic ~D. The operational next step is the guarded continuation boundary."
+                  topic-id)
+          '(:topic-upsert :workspace-assignment)
+          (remove nil
+                  (append
+                   (list (list :kind :report-status
+                               :value
+                               (workspace-annotation-persistence-report-status-of
+                                report))
+                         (list :kind :failure-stage
+                               :value
+                               (workspace-annotation-persistence-report-failure-stage-of
+                                report))
+                         (list :kind :persisted-topic-id
+                               :value topic-id))
+                   (and state
+                        (getf state :evidence))))
+          :ready-to-continue
+          live-http-p
+          (list
+           (make-workspace-annotation-path-next-step-target
+            "continue-workspace-annotation"
+            "continue_workspace_annotation"
+            "continue_workspace_annotation"
+            :continue
+            live-http-p
+            '(:workspace-assignment :topicmap-placement
+              :journal-transition :reopen-persisted-annotation)
+            :summary
+            "Resume from the preserved topic id through the guarded post-upsert stages.")
+           (make-workspace-annotation-path-next-step-target
+            "raw-persistence-report"
+            "Open preserved raw persistence report"
+            "workspace-annotation-persistence-report"
+            :review
+            nil
+            '(:workspace-assignment)
+            :kind :surface
+             :summary
+             "Review the preserved raw report and its evidence before continuing."
+             :target-object report
+             :target-select "Overview")))))
+      (when (workspace-annotation-path-state-repair-needed-p comparison)
+        (add
+         (make-workspace-annotation-path-consequence
+          :repair-workspace-assignment
+          (format nil
+                  "Topic ~D is visible in workspace topicmap ~A but the workspace assignment fact is missing or differs from target workspace ~A. Topicmap visibility does not solve ownership."
+                  topic-id
+                  (workspace-annotation-render-value
+                   (workspace-annotation-path-diff-workspace-topicmap-id-of
+                    comparison))
+                  (workspace-annotation-render-value target-workspace-id))
+          '(:workspace-assignment :topicmap-placement)
+          (remove nil
+                  (append
+                   (list (list :kind :target-workspace-id
+                               :value target-workspace-id))
+                   (and state
+                        (getf state :evidence))))
+          :repair-needed
+          live-http-p
+          (list
+           (make-workspace-annotation-path-next-step-target
+            "repair-workspace-topic-assignment"
+            "repair_workspace_topic_assignment"
+            "repair_workspace_topic_assignment"
+            :repair
+            live-http-p
+            '(:workspace-assignment)
+            :summary
+            "Repair or confirm workspace ownership without treating topicmap placement as ownership.")
+           (make-workspace-annotation-path-next-step-target
+            "read-topic-before-repair"
+            "read_dmx_topic"
+            "read_dmx_topic"
+            :inspect
+             nil
+             '(:workspace-assignment :topicmap-placement)
+             :summary
+             "Inspect the persisted topic state before running the guarded repair.")))))
+      (when (and state
+                 (member (getf state :status) '(:blocked :partial) :test #'eq)
+                 topic-id
+                 (null rows))
+        (add
+         (make-workspace-annotation-path-consequence
+          :inspect-state-before-mutation
+          (format nil
+                  "State inspection is incomplete for topic ~D. Inspect the persisted topic and topicmap state before acting."
+                  topic-id)
+          '(:workspace-assignment :topicmap-placement)
+          (getf state :evidence)
+          :review-needed
+          nil
+          (list
+           (make-workspace-annotation-path-next-step-target
+            "read-dmx-topic"
+            "read_dmx_topic"
+            "read_dmx_topic"
+            :inspect
+            nil
+            '(:workspace-assignment :topicmap-placement)
+            :summary
+            "Inspect the persisted topic object and current workspace assignment fact.")
+           (make-workspace-annotation-path-next-step-target
+            "read-dmx-topicmap"
+            "read_dmx_topicmap"
+            "read_dmx_topicmap"
+            :inspect
+             nil
+             '(:topicmap-placement)
+             :summary
+             "Inspect the topicmap projection separately from workspace ownership.")))))
+      (when (and (typep report 'workspace-annotation-persistence-report)
+                 (eq (workspace-annotation-persistence-report-status-of report)
+                     :persisted))
+        (add
+         (make-workspace-annotation-path-persisted-success-consequence
+          (workspace-annotation-persistence-report-saved-topic-id-of report)
+          (list
+           (list :kind :report-status
+                 :value
+                 (workspace-annotation-persistence-report-status-of report))
+           (list :kind :persisted-topic-id
+                 :value
+                 (workspace-annotation-persistence-report-saved-topic-id-of
+                  report))))))
+      (when (and (null report)
+                 (workspace-annotation-path-state-current-p comparison)
+                 (workspace-annotation-path-reopen-success-proved-p comparison))
+        (add
+         (make-workspace-annotation-path-persisted-success-consequence
+          topic-id
+          (append
+           (list (list :kind :persisted-annotation-topic-id
+                       :value topic-id))
+           (and state
+                (getf state :evidence))))))
+      (when (and (null report)
+                 (workspace-annotation-path-state-current-p comparison)
+                 (not (workspace-annotation-path-reopen-success-proved-p
+                       comparison)))
+        (add
+         (make-workspace-annotation-path-consequence
+          :no-change
+          "Compared paths do not imply a different operational next step yet, but this comparison does not by itself prove successful completion through reopen."
+          '(:workspace-assignment :topicmap-placement)
+          (append
+           (list (list :kind :target-workspace-id
+                       :value target-workspace-id))
+           (and state
+                (getf state :evidence)))
+          :no-change-yet
+          nil
+          (list
+           (make-workspace-annotation-path-next-step-target
+            "no-change"
+            "No change yet"
+            "current compare state"
+            :none
+            nil
+             '(:workspace-assignment :topicmap-placement)
+             :kind :surface
+             :summary
+             "The compare surface shows no additional guarded mutation requirement.")))))
+      (when (and (null rows)
+                 (or (and (typep report 'workspace-annotation-persistence-report)
+                          (eq (workspace-annotation-persistence-report-status-of
+                               report)
+                              :failed))
+                     (workspace-annotation-path-diff-guarded-assignment-condition-of
+                      comparison)
+                     (workspace-annotation-path-diff-guarded-topicmap-condition-of
+                      comparison)
+                     divergent-stages))
+        (add
+         (make-workspace-annotation-path-consequence
+          :review-divergence
+          "The compared paths diverge in stage ownership or executor provenance without a narrower automatic mutation recommendation. Review the boundary before acting."
+          (or divergent-stages
+              '(:topic-upsert :workspace-assignment))
+          (remove nil
+                  (append
+                   (and report
+                        (list (list :kind :report-status
+                                    :value
+                                    (workspace-annotation-persistence-report-status-of
+                                     report))
+                              (list :kind :failure-stage
+                                    :value
+                                    (workspace-annotation-persistence-report-failure-stage-of
+                                     report))))
+                   (and (workspace-annotation-path-diff-guarded-assignment-condition-of
+                         comparison)
+                        (list
+                         (list :kind :guarded-assignment-condition
+                               :value
+                               (format nil "~A"
+                                       (workspace-annotation-path-diff-guarded-assignment-condition-of
+                                        comparison)))))
+                   (and (workspace-annotation-path-diff-guarded-topicmap-condition-of
+                         comparison)
+                        (list
+                         (list :kind :guarded-topicmap-condition
+                               :value
+                               (format nil "~A"
+                                       (workspace-annotation-path-diff-guarded-topicmap-condition-of
+                                        comparison)))))))
+          :review-needed
+          nil
+          (list
+           (make-workspace-annotation-path-next-step-target
+            "compare-surface"
+            "Compare with guarded workspace path"
+            "workspace-annotation-path-diff"
+            :review
+            nil
+            divergent-stages
+            :kind :surface
+            :summary
+            "Inspect the shared stage vocabulary and boundary ownership directly.")
+           (make-workspace-annotation-path-next-step-target
+            "read-dmx-topic-for-review"
+            "read_dmx_topic"
+            "read_dmx_topic"
+            :inspect
+            nil
+            divergent-stages
+            :summary
+            "Inspect the persisted topic facts before choosing a mutation surface."))))))
+    (nreverse rows)))
+
+(defun workspace-annotation-path-diff-comparison-label (stage)
+  (case stage
+    ((:normalize-annotation
+      :build-write-plan
+      :validate-payload
+      :backend-compatibility-preflight)
+     "shared entrypoint")
+    (:topic-upsert
+     "divergent boundary")
+    (otherwise
+     "shared logical stage")))
+
+(defun workspace-annotation-path-diff-auth-expectation (stage)
+  (case stage
+    ((:normalize-annotation :build-write-plan :validate-payload)
+     "none")
+    (:backend-compatibility-preflight
+     "capability probe only")
+    (:topic-upsert
+     "carrier write auth only")
+    (:workspace-assignment
+     "guarded authenticated workspace mutation on live HTTP clients")
+    (:topicmap-placement
+     "guarded authenticated topicmap mutation; distinct from ownership")
+    (:journal-transition
+     "inherited from the guarded mutation executor")
+    (:reopen-persisted-annotation
+     "none")
+    (otherwise
+     "none")))
+
+(defun workspace-annotation-path-diff-executor-name (stage)
+  (case stage
+    (:normalize-annotation
+     "raw: dmx-workspace-annotation-from-object; guarded: reuse typed entrypoint result")
+    (:build-write-plan
+     "raw: plan-dmx-workspace-annotation-write-from-object; guarded: reuse typed write plan")
+    (:validate-payload
+     "raw: plan-dmx-workspace-annotation-write; guarded: reuse validated payload/view props")
+    (:backend-compatibility-preflight
+     "raw: probe-live-workspace-annotation-type-support; guarded: reuse prior preflight outcome")
+    (:topic-upsert
+     "raw: persist-dock-annotation-to-workspace / execute-dmx-workspace-annotation-write; guarded: preserved created topic id")
+    (:workspace-assignment
+     "raw: dmx-import-assign-topic-to-workspace; guarded: repair_workspace_topic_assignment / continue_workspace_annotation")
+    (:topicmap-placement
+     "raw: dmx-import-add-topic-to-topicmap; guarded: upsert_workspace_topicmap_context / continue_workspace_annotation")
+    (:journal-transition
+     "raw: dmx-workspace-journal-record-transition; guarded: continue_workspace_annotation via guarded shared-workspace executors")
+    (:reopen-persisted-annotation
+     "raw: read-dmx-workspace-annotation; guarded: continue_workspace_annotation")
+    (otherwise
+     "-")))
+
+(defun workspace-annotation-path-diff-raw-behavior (comparison stage)
+  (declare (ignore comparison))
+  (case stage
+    (:normalize-annotation
+     "Typed entrypoint normalizes the Dock annotation into the workspace-annotation payload fields.")
+    (:build-write-plan
+     "Typed entrypoint builds one write plan that classifies topic, workspace, and topicmap actions together.")
+    (:validate-payload
+     "Typed entrypoint validates the payload and normalized topicmap view props before any live mutation.")
+    (:backend-compatibility-preflight
+     "Live persist probes raw hyperdoc.annotation support and the compatibility carrier before create-topic.")
+    (:topic-upsert
+     "Raw persist creates or updates the carrier topic before the workspace-assignment auth boundary.")
+    (:workspace-assignment
+     "Raw persist calls workspace assignment directly after topic upsert and stops here on pending-auth while preserving the created topic id.")
+    (:topicmap-placement
+     "Raw persist places the topic into the workspace topicmap only after workspace assignment. Topicmap membership is still not workspace ownership.")
+    (:journal-transition
+     "Raw persist records the workspace journal transition after the live mutation path succeeds.")
+    (:reopen-persisted-annotation
+     "Raw persist reopens the saved topic as a workspace-dock-annotation object.")
+    (otherwise
+     "-")))
+
+(defun workspace-annotation-path-diff-guarded-behavior (comparison stage)
+  (declare (ignore comparison))
+  (case stage
+    (:normalize-annotation
+     "Guarded continuation reuses the same typed normalization result from the annotation persist entrypoint instead of inventing a second normalization path.")
+    (:build-write-plan
+     "Guarded continuation reuses the same typed write-plan semantics to decide which guarded post-upsert stages remain.")
+    (:validate-payload
+     "Guarded continuation relies on the already validated payload and view-props contract from the typed plan.")
+    (:backend-compatibility-preflight
+     "Guarded continuation assumes carrier compatibility was already resolved before the workspace-assignment auth boundary.")
+    (:topic-upsert
+     "Guarded continuation does not upsert the carrier topic again. It resumes from the preserved topic id after topic upsert.")
+    (:workspace-assignment
+     "repair_workspace_topic_assignment or continue_workspace_annotation covers only the workspace-assignment stage and keeps it distinct from topicmap placement.")
+    (:topicmap-placement
+     "upsert_workspace_topicmap_context or continue_workspace_annotation covers only topicmap placement. Topicmap success does not prove workspace ownership.")
+    (:journal-transition
+     "Guarded shared-workspace executors record their own journal transitions around assignment and topicmap writes without collapsing ownership into visibility.")
+    (:reopen-persisted-annotation
+     "continue_workspace_annotation reopens the persisted annotation after the guarded stages; the narrower repair/upsert tools stop earlier.")
+    (otherwise
+     "-")))
+
+(defun workspace-annotation-path-diff-stage-rows (comparison)
+  (loop for stage in *dmx-workspace-annotation-path-diff-stage-order*
+        collect (list :stage stage
+                      :label (workspace-annotation-persistence-stage-label stage)
+                      :annotation-persist-path
+                      (workspace-annotation-path-diff-raw-behavior
+                       comparison
+                       stage)
+                      :guarded-path
+                      (workspace-annotation-path-diff-guarded-behavior
+                       comparison
+                       stage)
+                      :shared-vs-divergent
+                      (workspace-annotation-path-diff-comparison-label stage)
+                      :auth-expectation
+                      (workspace-annotation-path-diff-auth-expectation stage)
+                      :executor-or-tool
+                      (workspace-annotation-path-diff-executor-name stage)
+                      :live-status
+                      (workspace-annotation-path-diff-stage-live-status
+                       comparison
+                       stage))))
+
+(defun make-workspace-annotation-path-diff
+    (annotation workspace-topicmap-id &key workspace-id client report
+       view-props status supersedes-topic-id annotation-key provenance-json
+       storage-mode)
+  (let* ((report-plan
+           (and (typep report 'workspace-annotation-persistence-report)
+                (workspace-annotation-persistence-report-plan-of report)))
+         (resolved-client
+           (or client
+               (and (typep report 'workspace-annotation-persistence-report)
+                    (workspace-annotation-persistence-report-client-of report))
+               (resolve-dmx-workspace-annotation-client
+                :client client
+                :dry-run t
+                :verbose nil)))
+         (destination
+           (or (and report-plan
+                    (dmx-workspace-annotation-write-plan-destination
+                     report-plan))
+               (resolve-dmx-workspace-annotation-destination
+                annotation
+                :workspace-topicmap-id workspace-topicmap-id
+                :workspace-id workspace-id
+                :client resolved-client)))
+         (resolved-topicmap-id
+           (or (and (typep report 'workspace-annotation-persistence-report)
+                    (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                     report))
+               (and destination
+                    (dmx-workspace-annotation-destination-workspace-topicmap-id
+                     destination))
+               workspace-topicmap-id))
+         (resolved-workspace-id
+           (or (and report-plan
+                    (dmx-workspace-annotation-write-plan-workspace-id
+                     report-plan))
+               (and (typep report 'workspace-annotation-persistence-report)
+                    (workspace-annotation-persistence-report-workspace-id-of
+                     report))
+               (and destination
+                    (dmx-workspace-annotation-destination-workspace-id
+                     destination))
+               workspace-id))
+         (plan
+           (or report-plan
+               (plan-dmx-workspace-annotation-write-from-object
+                annotation
+                :workspace-topicmap-id resolved-topicmap-id
+                :workspace-id resolved-workspace-id
+                :client resolved-client
+                :view-props view-props
+                :status status
+                :supersedes-topic-id supersedes-topic-id
+                :annotation-key annotation-key
+                :provenance-json provenance-json
+                :storage-mode storage-mode)))
+         (continuation-topic-id
+           (or (and (typep report 'workspace-annotation-persistence-report)
+                    (workspace-annotation-persistence-report-saved-topic-id-of
+                     report))
+               (and (typep annotation 'workspace-dock-annotation)
+                    (workspace-annotation-topic-id-of annotation))
+               (and plan
+                    (dmx-workspace-annotation-write-plan-existing-topic-id
+                     plan))))
+         (state-snapshot
+           (inspect-workspace-annotation-path-state
+            resolved-client
+            continuation-topic-id
+            resolved-topicmap-id))
+         (guarded-assignment-summary nil)
+         (guarded-assignment-condition nil)
+         (guarded-topicmap-summary nil)
+         (guarded-topicmap-condition nil)
+         (comparison nil))
+    (when (and plan continuation-topic-id resolved-topicmap-id)
+      (multiple-value-setq (guarded-assignment-summary
+                            guarded-assignment-condition)
+        (workspace-annotation-path-diff-guarded-assignment-preview
+         plan
+         resolved-client
+         continuation-topic-id
+         resolved-topicmap-id))
+      (multiple-value-setq (guarded-topicmap-summary
+                            guarded-topicmap-condition)
+        (workspace-annotation-path-diff-guarded-topicmap-preview
+         plan
+         resolved-client
+         continuation-topic-id
+         resolved-topicmap-id)))
+    (setf comparison
+          (make-instance 'workspace-annotation-path-diff
+                         :annotation annotation
+                         :workspace-topicmap-id resolved-topicmap-id
+                         :workspace-id resolved-workspace-id
+                         :client resolved-client
+                         :destination destination
+                         :plan plan
+                         :raw-report report
+                         :continuation-topic-id continuation-topic-id
+                         :guarded-assignment-summary guarded-assignment-summary
+                         :guarded-assignment-condition guarded-assignment-condition
+                         :guarded-topicmap-summary guarded-topicmap-summary
+                         :guarded-topicmap-condition guarded-topicmap-condition
+                         :state-snapshot state-snapshot))
+    (setf (slot-value comparison 'consequences)
+          (derive-workspace-annotation-path-consequences comparison))
+    comparison))
+
+(defun compare-dock-annotation-with-guarded-workspace-path
+    (annotation &key workspace-topicmap-id workspace-id client report
+       view-props status supersedes-topic-id annotation-key provenance-json
+       storage-mode)
+  (make-workspace-annotation-path-diff
+   annotation
+   workspace-topicmap-id
+   :workspace-id workspace-id
+   :client client
+   :report report
+   :view-props view-props
+   :status status
+   :supersedes-topic-id supersedes-topic-id
+   :annotation-key annotation-key
+   :provenance-json provenance-json
+   :storage-mode storage-mode))
+
+(defun workspace-annotation-path-diff-graph (comparison)
+  (let* ((annotation (workspace-annotation-path-diff-annotation-of comparison))
+         (plan (workspace-annotation-path-diff-plan-of comparison))
+         (topic-id (workspace-annotation-path-diff-continuation-topic-id-of
+                    comparison))
+         (workspace-topicmap-id
+           (workspace-annotation-path-diff-workspace-topicmap-id-of comparison))
+         (divergence-consequence
+           (workspace-annotation-path-consequence-summary-for-stages
+            comparison
+            '(:topic-upsert :workspace-assignment)))
+         (assignment-consequence
+           (workspace-annotation-path-consequence-summary-for-stages
+            comparison
+            :workspace-assignment))
+         (topicmap-consequence
+           (workspace-annotation-path-consequence-summary-for-stages
+            comparison
+            :topicmap-placement))
+         (journal-consequence
+           (workspace-annotation-path-consequence-summary-for-stages
+            comparison
+            :journal-transition))
+         (result-consequence
+           (workspace-annotation-path-consequence-summary-for-stages
+            comparison
+            :reopen-persisted-annotation)))
+    (make-code-path-graph
+     :id "workspace-annotation-path-diff"
+     :title "Workspace annotation path diff"
+     :summary
+     (format nil
+             "Compares the main annotation persist path with the guarded continuation / MCP path for workspace topicmap ~D. Workspace assignment and topicmap placement stay separate facts, and guarded topicmap success still does not prove workspace ownership."
+             workspace-topicmap-id)
+     :entrypoints
+     (list
+      (list :id "persist-entry"
+            :label "persist-dock-annotation-to-workspace"
+            :summary
+            "Typed annotation planning and staging entrypoint for the main persist path.")
+      (list :id "guarded-entry"
+            :label "continue_workspace_annotation"
+            :summary
+            "Guarded continuation / MCP entrypoint after topic upsert has already produced or preserved a topic id."))
+     :nodes
+     (list
+      (list :id "annotation"
+            :label "Dock annotation"
+            :role :runtime-input
+            :object annotation
+            :summary "Current annotation object under comparison.")
+      (list :id "normalize"
+            :label (workspace-annotation-persistence-stage-label
+                    :normalize-annotation)
+            :role :read-helper
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "dmx-workspace-annotation-from-object"
+            :summary
+            "Typed persist entrypoint normalizes the annotation payload once.")
+      (list :id "plan"
+            :label (workspace-annotation-persistence-stage-label
+                    :build-write-plan)
+            :role :read-helper
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "plan-dmx-workspace-annotation-write-from-object"
+            :summary
+            "Typed persist entrypoint builds the shared write plan.")
+      (list :id "validate"
+            :label (workspace-annotation-persistence-stage-label
+                    :validate-payload)
+            :role :diff-engine
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "plan-dmx-workspace-annotation-write"
+            :summary
+            "Payload and view props are validated before any live mutation.")
+      (list :id "backend-compatibility-preflight"
+            :label (workspace-annotation-persistence-stage-label
+                    :backend-compatibility-preflight)
+            :role :write-preflight
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "probe-live-workspace-annotation-type-support"
+            :summary
+            "Live persist resolves carrier compatibility before create-topic.")
+      (list :id "topic-upsert"
+            :label (workspace-annotation-persistence-stage-label :topic-upsert)
+            :role :write-entry
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "execute-dmx-workspace-annotation-write"
+            :summary
+            (if topic-id
+                (format nil
+                        "Topic upsert completed before the guarded boundary and preserved topic ~D."
+                        topic-id)
+                "Topic upsert creates or updates the carrier topic before the guarded boundary."))
+      (list :id "workspace-assignment-auth-boundary"
+            :label "workspace-assignment auth boundary"
+            :role :write-preflight
+            :summary
+            (format nil
+                    "This is the divergence point: raw persist can stop with pending-auth here, while guarded continuation resumes explicitly from the preserved topic id.~@[ ~A~]"
+                    divergence-consequence))
+      (list :id "raw-pending-auth-stop"
+            :label "raw pending-auth stop"
+            :role :runtime-terminal
+            :summary
+            (format nil
+                    "Raw persist preserves the created topic id and report semantics but stops before workspace assignment starts.~@[ ~A~]"
+                    divergence-consequence))
+      (list :id "guarded-explicit-auth-continuation"
+            :label "guarded explicit-auth continuation"
+            :role :write-entry
+            :summary
+            (format nil
+                    "Guarded continuation resumes the remaining authenticated stages without redoing topic upsert.~@[ ~A~]"
+                    divergence-consequence))
+      (list :id "workspace-assignment"
+            :label (workspace-annotation-persistence-stage-label
+                    :workspace-assignment)
+            :role :write-helper
+            :source-file "hyperdoc/dmx-workspace-topics.lisp"
+            :source-function
+            "execute-dmx-workspace-topic-workspace-assignment-repair"
+            :summary
+            (format nil
+                    "Workspace assignment remains distinct from topicmap placement on both paths.~@[ ~A~]"
+                    assignment-consequence))
+      (list :id "topicmap-placement"
+            :label (workspace-annotation-persistence-stage-label
+                    :topicmap-placement)
+            :role :write-helper
+            :source-file "hyperdoc/dmx-workspace-topics.lisp"
+            :source-function "execute-dmx-workspace-topicmap-context-upsert"
+            :summary
+            (format nil
+                    "Topicmap placement only affects topicmap context and does not prove workspace ownership.~@[ ~A~]"
+                    topicmap-consequence))
+      (list :id "journal-transition"
+            :label (workspace-annotation-persistence-stage-label
+                    :journal-transition)
+            :role :write-entry
+            :source-file "hyperdoc/dmx-workspace-journal.lisp"
+            :source-function "dmx-workspace-journal-record-transition"
+            :summary
+            (format nil
+                    "Journal transitions stay explicit on both paths.~@[ ~A~]"
+                    journal-consequence))
+      (list :id "reopen"
+            :label (workspace-annotation-persistence-stage-label
+                    :reopen-persisted-annotation)
+            :role :read-entry
+            :source-file "hyperdoc/dmx-annotations.lisp"
+            :source-function "read-dmx-workspace-annotation"
+            :summary
+            (format nil
+                    "Reopen the persisted topic as a workspace annotation object.~@[ ~A~]"
+                    result-consequence))
+      (list :id "result"
+            :label
+            (if topic-id
+                (format nil "Workspace annotation ~D" topic-id)
+                "Workspace annotation result")
+            :role :runtime-value
+            :object (and topic-id
+                         (typep annotation 'workspace-dock-annotation)
+                         annotation)
+            :summary
+            (if plan
+                (format nil
+                        "Comparison uses the shared typed write plan for annotation key ~A."
+                        (or (dmx-workspace-annotation-write-plan-annotation-key
+                             plan)
+                            "-"))
+                "Comparison reuses the shared typed write-plan vocabulary.")))
+     :edges
+     (list
+      (list :from "annotation"
+            :to "normalize"
+            :kind :read
+            :status (workspace-annotation-path-diff-raw-stage-status
+                     comparison
+                     :normalize-annotation)
+            :summary "Typed normalization.")
+      (list :from "normalize"
+            :to "plan"
+            :kind :read
+            :status (workspace-annotation-path-diff-raw-stage-status
+                     comparison
+                     :build-write-plan)
+            :summary "Typed write-plan construction.")
+      (list :from "plan"
+            :to "validate"
+            :kind :read-diff
+            :status (workspace-annotation-path-diff-raw-stage-status
+                     comparison
+                     :validate-payload)
+            :summary "Payload and view-props validation.")
+      (list :from "validate"
+            :to "backend-compatibility-preflight"
+            :kind :write-preflight
+            :status (workspace-annotation-path-diff-raw-stage-status
+                     comparison
+                     :backend-compatibility-preflight)
+            :summary "Carrier compatibility preflight.")
+      (list :from "backend-compatibility-preflight"
+            :to "topic-upsert"
+            :kind :write
+            :status (workspace-annotation-path-diff-raw-stage-status
+                     comparison
+                     :topic-upsert)
+            :write-capable-p t
+            :summary "Carrier topic upsert before the guarded boundary.")
+      (list :from "topic-upsert"
+            :to "workspace-assignment-auth-boundary"
+            :kind :write-preflight
+            :status :active
+            :summary
+            (format nil
+                    "Created topic reaches the workspace-assignment auth boundary.~@[ ~A~]"
+                    divergence-consequence))
+      (list :from "workspace-assignment-auth-boundary"
+            :to "raw-pending-auth-stop"
+            :kind :write
+            :status (if (and (typep (workspace-annotation-path-diff-raw-report-of
+                                     comparison)
+                                    'workspace-annotation-persistence-report)
+                             (workspace-annotation-pending-auth-p
+                              (workspace-annotation-path-diff-raw-report-of
+                               comparison)))
+                        :error
+                        :suppressed)
+            :write-capable-p t
+            :summary
+            (format nil
+                    "Raw pending-auth stop preserves the topic id and report instead of silently continuing.~@[ ~A~]"
+                    divergence-consequence))
+      (list :from "workspace-assignment-auth-boundary"
+            :to "workspace-assignment"
+            :kind :write
+            :status (workspace-annotation-path-diff-raw-stage-status
+                     comparison
+                     :workspace-assignment)
+            :write-capable-p t
+            :summary "Raw persist continues directly into workspace assignment when auth is already available.")
+      (list :from "workspace-assignment-auth-boundary"
+            :to "guarded-explicit-auth-continuation"
+            :kind :write
+            :status (if topic-id :active :pending)
+            :write-capable-p t
+            :summary
+            (format nil
+                    "Guarded continuation resumes from the preserved topic id with explicit auth and shared-workspace executors.~@[ ~A~]"
+                    divergence-consequence))
+      (list :from "guarded-explicit-auth-continuation"
+            :to "workspace-assignment"
+            :kind :write
+            :status (workspace-annotation-path-diff-guarded-stage-status
+                     comparison
+                     :workspace-assignment)
+            :write-capable-p t
+            :summary
+            (format nil
+                    "repair_workspace_topic_assignment / continue_workspace_annotation cover only workspace assignment.~@[ ~A~]"
+                    assignment-consequence))
+      (list :from "workspace-assignment"
+            :to "topicmap-placement"
+            :kind :write
+            :status (workspace-annotation-path-diff-stage-status
+                     comparison
+                     :topicmap-placement)
+            :write-capable-p t
+            :summary
+            (format nil
+                    "Topicmap placement stays separate from workspace ownership on both paths.~@[ ~A~]"
+                    topicmap-consequence))
+      (list :from "topicmap-placement"
+            :to "journal-transition"
+            :kind :write
+            :status (workspace-annotation-path-diff-stage-status
+                     comparison
+                     :journal-transition)
+            :write-capable-p t
+            :summary
+            (format nil
+                    "Guarded executors emit journal transitions without collapsing ownership into topicmap visibility.~@[ ~A~]"
+                    journal-consequence))
+      (list :from "journal-transition"
+            :to "reopen"
+            :kind :read
+            :status (workspace-annotation-path-diff-stage-status
+                     comparison
+                     :reopen-persisted-annotation)
+            :summary
+            (format nil
+                    "Reopen after the remaining guarded stages.~@[ ~A~]"
+                    result-consequence))
+      (list :from "reopen"
+            :to "result"
+            :kind :result
+            :status :pending
+            :summary "Yield the reopened workspace annotation object."))
+     :focus-paths
+     (list
+      (list :id "main-annotation-persist-path"
+            :label "Main annotation persist path"
+            :summary
+            "Typed annotation planning and staging through topic upsert and the direct raw post-upsert path."
+            :node-ids
+            '("annotation"
+              "normalize"
+              "plan"
+              "validate"
+              "backend-compatibility-preflight"
+              "topic-upsert"
+              "workspace-assignment-auth-boundary"
+              "workspace-assignment"
+              "topicmap-placement"
+              "journal-transition"
+              "reopen"
+              "result"))
+      (list :id "guarded-continuation-path"
+            :label "Guarded continuation path"
+            :summary
+            "Continuation from the preserved topic id through guarded assignment, topicmap placement, journal, and reopen."
+            :node-ids
+            '("workspace-assignment-auth-boundary"
+              "guarded-explicit-auth-continuation"
+              "workspace-assignment"
+              "topicmap-placement"
+              "journal-transition"
+              "reopen"
+              "result"))
+      (list :id "raw-pending-auth-stop-path"
+            :label "Raw pending-auth stop"
+            :summary
+            "Contrast path that stops at the auth boundary while preserving the created topic id."
+            :node-ids
+            '("annotation"
+              "normalize"
+              "plan"
+              "validate"
+              "backend-compatibility-preflight"
+              "topic-upsert"
+              "workspace-assignment-auth-boundary"
+              "raw-pending-auth-stop"))))))
 
 (defun continue-workspace-annotation-persistence-with-explicit-auth
     (report &key client auth-mode username password authorization-header

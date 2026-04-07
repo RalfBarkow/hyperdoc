@@ -563,6 +563,22 @@
            (workspace-annotation-persistence-report-assignment-auth-context-of
             report))))))
 
+(defun dmx-mcp-merge-journal-event-previews (&rest previews)
+  (let ((events '()))
+    (dolist (preview previews)
+      (let ((journal-preview (and preview
+                                  (getf preview :journal-event-preview))))
+        (when journal-preview
+          (cond
+            ((vectorp journal-preview)
+             (loop for event across journal-preview
+                   do (push event events)))
+            ((listp journal-preview)
+             (dolist (event journal-preview)
+               (push event events)))))))
+    (and events
+         (coerce (nreverse events) 'vector))))
+
 (defun dmx-mcp-workspace-annotation-dry-run-object (plan dry-run-result annotation)
   (dmx-mcp-json-object
    "resultKind" "workspace_annotation_dry_run"
@@ -570,6 +586,14 @@
    "journalEventPreview"
    (dmx-mcp-normalize-json-value
     (getf dry-run-result :journal-event-preview))
+   "workspaceAssignmentPreview"
+   (and (getf dry-run-result :guarded-workspace-assignment)
+        (dmx-mcp-normalize-json-value
+         (getf dry-run-result :guarded-workspace-assignment)))
+   "topicmapPlacementPreview"
+   (and (getf dry-run-result :guarded-topicmap-placement)
+        (dmx-mcp-normalize-json-value
+         (getf dry-run-result :guarded-topicmap-placement)))
    "savedAnnotationObject"
    (dmx-mcp-workspace-annotation-object annotation)))
 
@@ -592,81 +616,103 @@
            (read-dmx-workspace-annotation
             :topic-id topic-id
             :workspace-topicmap-id workspace-topicmap-id
-            :client read-client)))
+            :client read-client))
+         (plan
+           (plan-dmx-workspace-annotation-write-from-object
+            annotation
+            :workspace-topicmap-id workspace-topicmap-id
+            :workspace-id workspace-id
+            :client write-client))
+         (continuation-report
+           (make-workspace-annotation-continuation-report
+            annotation
+            plan
+            topic-id
+            workspace-topicmap-id
+            write-client)))
     (if dry-run
-        (let* ((plan
-                 (plan-dmx-workspace-annotation-write-from-object
-                  annotation
-                  :workspace-topicmap-id workspace-topicmap-id
-                  :workspace-id workspace-id
-                  :client write-client))
+        (let* ((guarded-assignment
+                 (and (eql (dmx-workspace-annotation-write-plan-workspace-action
+                            plan)
+                           :assign)
+                      (continue-workspace-annotation-with-guarded-assignment
+                       plan
+                       write-client
+                       topic-id
+                       workspace-topicmap-id
+                       :dry-run t)))
+               (guarded-topicmap
+                 (and (eql (dmx-workspace-annotation-write-plan-topicmap-action
+                            plan)
+                           :add)
+                      (continue-workspace-annotation-with-guarded-topicmap-placement
+                       plan
+                       write-client
+                       topic-id
+                       workspace-topicmap-id
+                       :dry-run t)))
                (dry-run-result
-                 (persist-dock-annotation-to-workspace
-                  annotation
-                  :workspace-topicmap-id workspace-topicmap-id
-                  :workspace-id workspace-id
-                  :client write-client
-                  :dry-run t)))
+                 (list :journal-event-preview
+                       (dmx-mcp-merge-journal-event-previews
+                        guarded-assignment
+                        guarded-topicmap)
+                       :guarded-workspace-assignment guarded-assignment
+                       :guarded-topicmap-placement guarded-topicmap)))
           (dmx-mcp-workspace-annotation-dry-run-object
            plan
            dry-run-result
            annotation))
-        (let ((result
-                (persist-dock-annotation-to-workspace
-                 annotation
-                 :workspace-topicmap-id workspace-topicmap-id
-                 :workspace-id workspace-id
-                 :client write-client
-                 :dry-run nil)))
-          (typecase result
-            (workspace-dock-annotation
-             (dmx-mcp-json-object
-              "resultKind" "workspace_annotation"
-              "annotation"
-              (dmx-mcp-workspace-annotation-object result)
-              "savedCarrierTopic"
-              (dmx-mcp-topic-ref-object
-               (workspace-annotation-topic-id-of result)
-               :label
-               (format nil
-                       "saved annotation carrier topic ~D (~A)"
-                       (workspace-annotation-topic-id-of result)
-                       (or (workspace-annotation-carrier-type-uri-of result)
-                           "native hyperdoc.annotation")))
-              "journalCompanionTopic"
-              (let* ((summary
-                       (dmx-workspace-journal-preflight-summary
-                        write-client
-                        (workspace-annotation-topic-uri-of result)
-                        "uri"
-                        (workspace-annotation-topic-uri-of result)
-                        (workspace-annotation-topicmap-id-of result)
-                        :subject-uri (workspace-annotation-topic-uri-of result)
-                        :subject-kind "workspace-annotation"
-                        :ownership-class "hyperdoc-workspace-annotation"))
-                     (journal-topic-id (getf summary :existing-topic-id)))
-                (dmx-mcp-topic-ref-object
-                 journal-topic-id
-                 :label
-                 (and journal-topic-id
-                      (format nil
-                              "workspace journal companion topic ~D"
-                              journal-topic-id))))
-              "journalPreflightSummary"
-              (dmx-mcp-normalize-json-value
-               (dmx-workspace-journal-preflight-summary
-                write-client
-                (workspace-annotation-topic-uri-of result)
-                "uri"
-                (workspace-annotation-topic-uri-of result)
-                (workspace-annotation-topicmap-id-of result)
-                :subject-uri (workspace-annotation-topic-uri-of result)
-                :subject-kind "workspace-annotation"
-                :ownership-class "hyperdoc-workspace-annotation"))))
-            (workspace-annotation-persistence-report
-             (dmx-mcp-workspace-annotation-report-object result))
-            (t
-             (dmx-mcp-normalize-json-value result)))))))
+        (let* ((result
+                 (continue-workspace-annotation-persistence-with-client
+                  continuation-report
+                  write-client))
+               (status (workspace-annotation-persistence-report-status-of result))
+               (saved-annotation
+                 (workspace-annotation-persistence-report-saved-annotation-of
+                  result))
+               (journal-summary
+                 (or (workspace-annotation-persistence-report-journal-preflight-summary-of
+                      result)
+                     (and saved-annotation
+                          (dmx-workspace-journal-preflight-summary
+                           write-client
+                           (workspace-annotation-topic-uri-of saved-annotation)
+                           "uri"
+                           (workspace-annotation-topic-uri-of saved-annotation)
+                           (workspace-annotation-topicmap-id-of saved-annotation)
+                           :subject-uri
+                           (workspace-annotation-topic-uri-of saved-annotation)
+                           :subject-kind "workspace-annotation"
+                           :ownership-class "hyperdoc-workspace-annotation")))))
+          (if (and (eq status :persisted)
+                   saved-annotation)
+              (dmx-mcp-json-object
+               "resultKind" "workspace_annotation"
+               "annotation"
+               (dmx-mcp-workspace-annotation-object saved-annotation)
+               "savedCarrierTopic"
+               (dmx-mcp-topic-ref-object
+                (workspace-annotation-topic-id-of saved-annotation)
+                :label
+                (format nil
+                        "saved annotation carrier topic ~D (~A)"
+                        (workspace-annotation-topic-id-of saved-annotation)
+                        (or (workspace-annotation-carrier-type-uri-of saved-annotation)
+                            "native hyperdoc.annotation")))
+               "journalCompanionTopic"
+               (let ((journal-topic-id (and journal-summary
+                                            (getf journal-summary :existing-topic-id))))
+                 (dmx-mcp-topic-ref-object
+                  journal-topic-id
+                  :label
+                  (and journal-topic-id
+                       (format nil
+                               "workspace journal companion topic ~D"
+                               journal-topic-id))))
+               "journalPreflightSummary"
+               (and journal-summary
+                    (dmx-mcp-normalize-json-value journal-summary)))
+              (dmx-mcp-workspace-annotation-report-object result))))))
 
 (defun dmx-mcp-topicmap-projection (topicmap-json)
   (let* ((topicmap-topic (gethash "topic" topicmap-json))

@@ -135,6 +135,11 @@
     (clog-moldable-inspector::load-views pane)
     (slot-value pane 'clog-moldable-inspector::views)))
 
+(defun workspace-annotation-consequence-kinds (comparison)
+  (mapcar #'hyperdoc::workspace-annotation-path-consequence-kind-of
+          (hyperdoc::workspace-annotation-path-diff-consequences-of
+           comparison)))
+
 (defun workspace-annotation-smoke-journal-summary (client annotation)
   (let ((subject-key (hyperdoc::workspace-annotation-topic-uri-of annotation)))
     (hyperdoc::dmx-workspace-journal-preflight-summary
@@ -530,6 +535,10 @@
      (search "Trace workspace persistence path" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the Trace workspace persistence path action")
     (assert-true
+     (search "Compare with guarded workspace path" workspace-html
+             :test #'char-equal)
+     "Workspace annotation inspector must expose the Compare with guarded workspace path action")
+    (assert-true
      (search "Probe live annotation type support" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the live annotation type support probe")
     (assert-true
@@ -566,6 +575,100 @@
     (assert-true
      (hyperdoc::code-path-graph-node graph "topicmap-placement")
      "Workspace persistence graph must expose the topicmap placement stage explicitly")))
+
+(defun run-dmx-workspace-annotation-compare-surface-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9310))
+         (annotation (make-test-dock-annotation
+                      :note "Compare surface smoke"))
+         (comparison
+           (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+            annotation
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client client))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object
+                 comparison))
+         (path-diff (dmx-annotation-smoke-find-view-by-title views "Path diff"))
+         (consequences-view
+           (dmx-annotation-smoke-find-view-by-title views "Consequences"))
+         (graph-view (dmx-annotation-smoke-find-view-by-title views "Graph"))
+         (path-diff-html (and path-diff
+                              (html-inspector-views:view-html path-diff)))
+         (consequences-html (and consequences-view
+                                 (html-inspector-views:view-html
+                                  consequences-view)))
+         (graph-html (and graph-view
+                          (html-inspector-views:view-html graph-view))))
+    (assert-true
+     (typep comparison 'hyperdoc::workspace-annotation-path-diff)
+     "Compare action must construct a workspace-annotation-path-diff object")
+    (assert-true
+     path-diff
+     "Workspace annotation path diff must expose a Path diff view")
+    (assert-true
+     graph-view
+     "Workspace annotation path diff must expose a Graph view")
+    (assert-true
+     consequences-view
+     "Workspace annotation path diff must expose a Consequences view")
+    (assert-true
+     (stringp path-diff-html)
+     "Workspace annotation path diff must render Path diff HTML")
+    (assert-true
+     (stringp consequences-html)
+     "Workspace annotation path diff must render Consequences HTML")
+    (assert-true
+     (stringp graph-html)
+     "Workspace annotation path diff must render Graph HTML")
+    (assert-true
+     (search "Stage label" path-diff-html :test #'char-equal)
+     "Path diff view must render the comparison table header")
+    (assert-true
+     (search "continue_workspace_annotation" path-diff-html :test #'char-equal)
+     "Path diff view must name the guarded continuation tool")
+    (assert-true
+     (search "repair_workspace_topic_assignment" path-diff-html
+             :test #'char-equal)
+     "Path diff view must name the guarded assignment tool")
+    (assert-true
+     (search "upsert_workspace_topicmap_context" path-diff-html
+             :test #'char-equal)
+     "Path diff view must name the guarded topicmap tool")
+    (assert-true
+     (search "Workspace assignment and topicmap placement are separate facts"
+             path-diff-html
+             :test #'char-equal)
+     "Path diff view must keep workspace assignment and topicmap placement separate in UI text")
+    (assert-true
+     (search "Guarded topicmap success does not prove workspace ownership"
+             path-diff-html
+             :test #'char-equal)
+     "Path diff view must not let guarded topicmap success imply workspace ownership")
+    (assert-true
+     (search "Next steps" path-diff-html :test #'char-equal)
+     "Path diff view must expose a next-step consequence section")
+    (assert-true
+     (search "Consequence kind" consequences-html :test #'char-equal)
+     "Consequences view must render the structured consequence table header")
+    (assert-true
+     (member :review-divergence
+             (workspace-annotation-consequence-kinds comparison))
+     "Unsaved compare surfaces must still classify the executor divergence explicitly")
+    (assert-true
+     (search "Main annotation persist path" graph-html :test #'char-equal)
+     "Graph view must expose the main annotation persist focused path")
+    (assert-true
+     (search "Guarded continuation path" graph-html :test #'char-equal)
+     "Graph view must expose the guarded continuation focused path")
+    (assert-true
+     (search "workspace-assignment auth boundary" graph-html
+             :test #'char-equal)
+     "Graph view must expose the explicit workspace-assignment auth divergence node")
+    (assert-true
+     (search "review-divergence" graph-html :test #'char-equal)
+     "Graph view must render divergence consequences from the shared consequence rows")))
 
 (defun run-dmx-workspace-annotation-debug-report-success-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
@@ -1231,6 +1334,12 @@
      (search "Continue with explicit auth" html :test #'char-equal)
      "Pending-auth Overview must expose the explicit-auth continuation action")
     (assert-true
+     (search "Operational consequences" html :test #'char-equal)
+     "Pending-auth Overview must expose typed operational consequences")
+    (assert-true
+     (search "continue-with-guarded-boundary" html :test #'char-equal)
+     "Pending-auth Overview must classify the blocked boundary as continue-with-guarded-boundary")
+    (assert-true
      (search "Destination source" html :test #'char-equal)
      "Pending-auth Overview must expose the resolved destination explicitly")
     (assert-true
@@ -1256,6 +1365,209 @@
     (assert-true
      (null (search "Assigned topic" html :test #'char-equal))
      "Pending-auth Overview must not falsely claim that workspace assignment already happened")))
+
+(defun run-dmx-workspace-annotation-pending-auth-compare-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*
+                                :next-topic-id 9302))
+         (annotation (make-test-dock-annotation
+                      :note "Pending auth compare"))
+         (report (hyperdoc::persist-dock-annotation-to-workspace
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client
+                  :dry-run nil))
+         (topic-id
+           (hyperdoc::workspace-annotation-persistence-report-persisted-topic-id-of
+            report))
+         (comparison
+           (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+            annotation
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :client client
+            :report report))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object
+                 comparison))
+         (path-diff (dmx-annotation-smoke-find-view-by-title views "Path diff"))
+         (consequences-view
+           (dmx-annotation-smoke-find-view-by-title views "Consequences"))
+         (overview (dmx-annotation-smoke-find-view-by-title views "Overview"))
+         (graph-view (dmx-annotation-smoke-find-view-by-title views "Graph"))
+         (path-diff-html (and path-diff
+                              (html-inspector-views:view-html path-diff)))
+         (consequences-html (and consequences-view
+                                 (html-inspector-views:view-html
+                                  consequences-view)))
+         (graph-html (and graph-view
+                          (html-inspector-views:view-html graph-view)))
+         (overview-html (and overview
+                             (html-inspector-views:view-html overview))))
+    (assert-equal topic-id
+                  (hyperdoc::workspace-annotation-path-diff-continuation-topic-id-of
+                   comparison)
+                  "Pending-auth compare objects must preserve the created topic id from the raw report")
+    (assert-true
+     (hyperdoc::workspace-annotation-path-diff-guarded-assignment-summary-of
+      comparison)
+     "Pending-auth compare objects must attach a guarded assignment preview from the preserved topic id")
+    (assert-true
+     (hyperdoc::workspace-annotation-path-diff-guarded-topicmap-summary-of
+      comparison)
+     "Pending-auth compare objects must attach a guarded topicmap preview from the preserved topic id")
+    (assert-true
+     (member :continue-with-guarded-boundary
+             (workspace-annotation-consequence-kinds comparison))
+     "Pending-auth compare objects must yield a continue-with-guarded-boundary consequence")
+    (assert-true
+     (search "raw: error (pending-auth); guarded: dry-run" path-diff-html
+             :test #'char-equal)
+     "Pending-auth Path diff must show the raw stop and guarded dry-run continuation on the same row")
+    (assert-true
+     (search "continue-with-guarded-boundary" consequences-html
+             :test #'char-equal)
+     "Pending-auth Consequences view must surface continue-with-guarded-boundary explicitly")
+    (assert-true
+     (search "continue_workspace_annotation" path-diff-html
+             :test #'char-equal)
+     "Pending-auth Path diff next steps must name continue_workspace_annotation")
+    (assert-true
+     (search "Open preserved raw persistence report" path-diff-html
+             :test #'char-equal)
+     "Pending-auth Path diff must link back to the preserved raw persistence report")
+    (assert-true
+     (search "Open preserved persistence report" overview-html
+             :test #'char-equal)
+     "Pending-auth compare Overview must keep the preserved report reachable")
+    (assert-true
+     (search "Topicmap visibility is not workspace ownership" overview-html
+             :test #'char-equal)
+     "Pending-auth compare Overview must keep assignment/topicmap separation explicit")
+    (assert-true
+     (search "continue-with-guarded-boundary" graph-html
+             :test #'char-equal)
+     "Pending-auth Graph view must attach the guarded-boundary consequence to the divergence surface")))
+
+(defun run-dmx-workspace-annotation-assignment-topicmap-split-consequence-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (client
+           (make-instance 'compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9390))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Assignment/topicmap split consequence")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :client client
+            :dry-run nil))
+         (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted)))
+    (remhash topic-id workspace-assignments)
+    (let* ((comparison
+             (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+              persisted
+              :workspace-topicmap-id
+              *dmx-annotations-smoke-workspace-topicmap-id*
+              :workspace-id *dmx-annotations-smoke-workspace-id*
+              :client client))
+           (views (dmx-annotation-smoke-load-inspector-views-for-object
+                   comparison))
+           (path-diff (dmx-annotation-smoke-find-view-by-title views "Path diff"))
+           (consequences-view
+             (dmx-annotation-smoke-find-view-by-title views "Consequences"))
+           (graph-view (dmx-annotation-smoke-find-view-by-title views "Graph"))
+           (path-diff-html (and path-diff
+                                (html-inspector-views:view-html path-diff)))
+           (consequences-html (and consequences-view
+                                   (html-inspector-views:view-html
+                                    consequences-view)))
+           (graph-html (and graph-view
+                            (html-inspector-views:view-html graph-view))))
+      (assert-true
+       (member :repair-workspace-assignment
+               (workspace-annotation-consequence-kinds comparison))
+       "Topicmap-visible but assignment-missing compare objects must yield repair-workspace-assignment")
+      (assert-true
+       (search "repair_workspace_topic_assignment" consequences-html
+               :test #'char-equal)
+       "The repair consequence must point to repair_workspace_topic_assignment")
+      (assert-true
+       (search "Topicmap visibility does not solve ownership" consequences-html
+               :test #'char-equal)
+       "The repair consequence must keep topicmap visibility separate from workspace ownership")
+      (assert-true
+       (search "repair-workspace-assignment" path-diff-html
+               :test #'char-equal)
+       "Path diff next steps must surface the ownership-repair consequence")
+      (assert-true
+       (search "repair-workspace-assignment" graph-html
+               :test #'char-equal)
+       "Graph view must render the ownership-repair consequence from the shared consequence rows"))))
+
+(defun run-dmx-workspace-annotation-no-change-consequence-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9395))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "No-change consequence")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :client client
+            :dry-run nil))
+         (comparison
+           (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+            persisted
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :client client))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object
+                 comparison))
+         (path-diff (dmx-annotation-smoke-find-view-by-title views "Path diff"))
+         (consequences-view
+           (dmx-annotation-smoke-find-view-by-title views "Consequences"))
+         (graph-view (dmx-annotation-smoke-find-view-by-title views "Graph"))
+         (path-diff-html (and path-diff
+                              (html-inspector-views:view-html path-diff)))
+         (consequences-html (and consequences-view
+                                 (html-inspector-views:view-html
+                                  consequences-view)))
+         (graph-html (and graph-view
+                          (html-inspector-views:view-html graph-view))))
+    (assert-true
+     (member :persisted-success
+             (workspace-annotation-consequence-kinds comparison))
+     "Reopened persisted annotation compare objects must yield persisted-success")
+    (assert-true
+     (not (member :no-change
+                  (workspace-annotation-consequence-kinds comparison)))
+     "Reopened persisted annotation compare objects must no longer collapse terminal success into no-change")
+    (assert-true
+     (search "persisted-success" consequences-html :test #'char-equal)
+     "Consequences view must label terminal reopen success as persisted-success")
+    (assert-true
+     (search "No mutation required" path-diff-html :test #'char-equal)
+     "Path diff next steps must render the no-mutation target for terminal reopen success")
+    (assert-true
+     (search "persisted-success" graph-html :test #'char-equal)
+     "Graph consequence surfaces must label terminal reopen success as persisted-success")))
 
 (defun run-dmx-workspace-annotation-saved-topic-surface-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -1794,6 +2106,7 @@
   (run-dmx-workspace-annotation-supersede-smoke-test)
   (run-dmx-workspace-annotation-restore-smoke-test)
   (run-dmx-workspace-annotation-debug-surface-smoke-test)
+  (run-dmx-workspace-annotation-compare-surface-smoke-test)
   (run-dmx-workspace-annotation-debug-report-success-smoke-test)
   (run-dmx-workspace-annotation-debug-report-failure-smoke-test)
   (run-dmx-workspace-annotation-unicode-transport-diagnostics-smoke-test)
@@ -1808,6 +2121,9 @@
   (run-dmx-workspace-annotation-no-client-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-render-smoke-test)
+  (run-dmx-workspace-annotation-pending-auth-compare-smoke-test)
+  (run-dmx-workspace-annotation-assignment-topicmap-split-consequence-smoke-test)
+  (run-dmx-workspace-annotation-no-change-consequence-smoke-test)
   (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test)

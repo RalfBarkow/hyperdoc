@@ -494,6 +494,166 @@
                     (:td (views:esc (or (getf entry :summary) "")))
                     (:td (views:esc (or (getf entry :detail) "")))))))))))
 
+(defun render-workspace-annotation-path-diff-table (comparison)
+  (let ((rows (workspace-annotation-path-diff-stage-rows comparison))
+        (raw-report (workspace-annotation-path-diff-raw-report-of comparison))
+        (consequences (workspace-annotation-path-diff-consequences-of
+                       comparison)))
+    (views:html
+      (:p (views:esc
+           "This compare surface keeps the raw annotation persist path and the guarded continuation / MCP path on one stage vocabulary. The guarded path maps continue_workspace_annotation onto workspace-assignment, topicmap-placement, journal-transition, and reopen; repair_workspace_topic_assignment only covers workspace-assignment; upsert_workspace_topicmap_context only covers topicmap placement."))
+      (:p (views:esc
+           "Workspace assignment and topicmap placement are separate facts. Guarded topicmap success does not prove workspace ownership."))
+      (when raw-report
+        (views:html
+          (:p
+           (views:object-ref raw-report
+                             :display "Open preserved raw persistence report"
+                             :select "Overview"))))
+      (:table :class "inspector-table"
+              (:thead
+               (:tr (:th "Stage label")
+                    (:th "Annotation persist path behavior")
+                    (:th "Guarded continuation / MCP path behavior")
+                    (:th "Shared vs divergent")
+                    (:th "Auth expectation")
+                    (:th "Executor / tool name")
+                    (:th "Live status")))
+              (:tbody
+               (dolist (row rows)
+                 (views:html
+                   (:tr
+                    (:td (:tt (views:esc
+                               (workspace-annotation-render-value
+                                (getf row :label)))))
+                    (:td (views:esc
+                          (workspace-annotation-render-value
+                           (getf row :annotation-persist-path)
+                           :default "")))
+                    (:td (views:esc
+                          (workspace-annotation-render-value
+                           (getf row :guarded-path)
+                           :default "")))
+                    (:td (:tt (views:esc
+                               (workspace-annotation-render-value
+                                (getf row :shared-vs-divergent)))))
+                    (:td (:tt (views:esc
+                               (workspace-annotation-render-value
+                                (getf row :auth-expectation)))))
+                    (:td (:tt (views:esc
+                               (workspace-annotation-render-value
+                                (getf row :executor-or-tool)))))
+                    (:td (:tt (views:esc
+                               (workspace-annotation-render-value
+                                (getf row :live-status)))))))))))
+      (render-workspace-annotation-path-consequence-table
+       consequences
+       :heading "Next steps")))
+
+(defun render-workspace-annotation-path-next-step-target (target)
+  (let ((object (workspace-annotation-path-next-step-target-object-of target))
+        (label (workspace-annotation-path-next-step-target-label-of target))
+        (select (workspace-annotation-path-next-step-target-select-of target)))
+    (if object
+        (views:html
+          (views:object-ref object
+                            :display label
+                            :select select))
+        (views:html
+          (:tt (views:esc label))))))
+
+(defun render-workspace-annotation-path-next-step-targets (targets)
+  (if targets
+      (views:html
+        (:ul
+         (dolist (target targets)
+           (views:html
+             (:li
+              (render-workspace-annotation-path-next-step-target target)
+              (views:esc
+               (format nil
+                       " -> ~A; mode ~A; auth required: ~A; stage scope: ~{~A~^, ~}"
+                       (workspace-annotation-path-next-step-target-executor-or-surface-name-of
+                        target)
+                       (workspace-annotation-path-next-step-mode-label
+                        (workspace-annotation-path-next-step-target-mode-of
+                         target))
+                       (if (workspace-annotation-path-next-step-target-auth-required-p-of
+                            target)
+                           "yes"
+                           "no")
+                       (mapcar #'workspace-annotation-persistence-stage-label
+                               (workspace-annotation-path-next-step-target-stage-scope-of
+                                target)))))))))
+      (views:html (:tt "-"))))
+
+(defun render-workspace-annotation-path-consequence-triggering-data
+    (consequence)
+  (let ((stages
+          (workspace-annotation-path-consequence-triggering-stages-of
+           consequence))
+        (evidence
+          (workspace-annotation-path-consequence-triggering-evidence-of
+           consequence)))
+    (views:html
+      (:ul
+       (when stages
+         (views:html
+           (:li
+            (views:esc
+             (format nil
+                     "stages: ~{~A~^, ~}"
+                     (mapcar #'workspace-annotation-persistence-stage-label
+                             stages))))))
+       (dolist (entry evidence)
+         (views:html
+           (:li
+            (:tt (views:esc
+                  (workspace-annotation-render-value
+                   (getf entry :kind))))
+            (views:esc
+             (format nil ": ~A"
+                     (workspace-annotation-render-value
+                      (getf entry :value)))))))))))
+
+(defun render-workspace-annotation-path-consequence-table
+    (consequences &key (heading "Consequences"))
+  (views:html
+    (:h4 (views:esc heading))
+    (:table :class "inspector-table"
+            (:thead
+             (:tr (:th "Consequence kind")
+                  (:th "Summary")
+                  (:th "Triggering stages / evidence")
+                  (:th "Next-step surface or tool")
+                  (:th "Actionability")
+                  (:th "Auth required")))
+            (:tbody
+             (dolist (consequence consequences)
+               (views:html
+                 (:tr
+                  (:td (:tt (views:esc
+                             (workspace-annotation-path-consequence-kind-label
+                              (workspace-annotation-path-consequence-kind-of
+                               consequence)))))
+                  (:td (views:esc (summary-of consequence)))
+                  (:td
+                   (render-workspace-annotation-path-consequence-triggering-data
+                    consequence))
+                  (:td
+                   (render-workspace-annotation-path-next-step-targets
+                    (workspace-annotation-path-consequence-next-step-targets-of
+                     consequence)))
+                  (:td (:tt (views:esc
+                             (workspace-annotation-path-consequence-actionability-label
+                              (workspace-annotation-path-consequence-actionability-of
+                               consequence)))))
+                  (:td (:tt (views:esc
+                             (if (workspace-annotation-path-consequence-auth-required-p-of
+                                  consequence)
+                                 "yes"
+                                 "no")))))))))))
+
 (defun render-workspace-annotation-http-response-headers (headers)
   (if headers
       (views:html
@@ -1084,6 +1244,17 @@
                      report)))
               "annotation")))
 
+(defmethod views:text-representation
+    ((comparison workspace-annotation-path-diff))
+  (format nil "Workspace path diff (~A)"
+          (or (and (workspace-annotation-path-diff-plan-of comparison)
+                   (dmx-workspace-annotation-write-plan-annotation-key
+                    (workspace-annotation-path-diff-plan-of comparison)))
+              (and (workspace-annotation-path-diff-annotation-of comparison)
+                   (id-of (workspace-annotation-path-diff-annotation-of
+                           comparison)))
+              "annotation")))
+
 (defmethod views:text-representation ((snapshot dom-connect-pane-state-snapshot))
   (format nil "~A (~A / ~A)"
           (or (pane-id-of snapshot) "pane")
@@ -1474,6 +1645,16 @@
           "Inspect the persistence boundary as a reusable code-path graph before running the live write."))
         (:p
          (views:eval-button
+          "Compare with guarded workspace path"
+          (views:thunk
+            (compare-dock-annotation-with-guarded-workspace-path
+             annotation
+             :workspace-topicmap-id workspace-topicmap-id
+             :workspace-id workspace-id
+             :client default-client))
+          "Compare the raw annotation persist path against the guarded continuation / MCP path while keeping workspace assignment distinct from topicmap placement."))
+        (:p
+         (views:eval-button
           "Probe live annotation type support"
           (views:thunk
             (probe-live-workspace-annotation-type-support
@@ -1641,7 +1822,40 @@
 
 (views:defview 👀overview (report workspace-annotation-persistence-report)
   (views:html-view :title "Overview" :priority 1
-    (let ((plan (workspace-annotation-persistence-report-plan-of report))
+    (let* ((plan (workspace-annotation-persistence-report-plan-of report))
+           (comparison
+             (compare-dock-annotation-with-guarded-workspace-path
+              (workspace-annotation-persistence-report-annotation-of report)
+              :workspace-topicmap-id
+              (workspace-annotation-persistence-report-workspace-topicmap-id-of
+               report)
+              :workspace-id
+              (or (and plan
+                       (dmx-workspace-annotation-write-plan-workspace-id plan))
+                  (workspace-annotation-persistence-report-workspace-id-of
+                   report))
+              :client (workspace-annotation-persistence-report-client-of report)
+              :report report
+              :view-props (and plan
+                               (dmx-workspace-annotation-write-plan-view-props
+                                plan))
+              :status (and plan
+                           (dmx-workspace-annotation-write-plan-status plan))
+              :supersedes-topic-id
+              (and plan
+                   (dmx-workspace-annotation-write-plan-supersedes-topic-id
+                    plan))
+              :annotation-key
+              (workspace-annotation-persistence-report-annotation-key-of report)
+              :provenance-json
+              (and plan
+                   (dmx-workspace-annotation-write-plan-provenance-json plan))
+              :storage-mode
+              (and plan
+                   (dmx-workspace-annotation-write-plan-storage-mode plan))))
+           (consequences
+             (and comparison
+                  (workspace-annotation-path-diff-consequences-of comparison)))
           (assignment-auth-context
             (workspace-annotation-persistence-report-assignment-auth-context-of
              report)))
@@ -1724,6 +1938,10 @@
                                       (or (workspace-annotation-persistence-report-saved-topic-id-of
                                            report)
                                           "-")))))))
+      (when consequences
+        (render-workspace-annotation-path-consequence-table
+         consequences
+         :heading "Operational consequences"))
       (if (workspace-annotation-persistence-report-existing-saved-topic-p
            report)
           (render-workspace-annotation-saved-topic-surface report)
@@ -1897,6 +2115,40 @@
              "Continue the remaining guarded live write with one-shot explicit credentials."))))
       (:p
        (views:eval-button
+        "Compare with guarded workspace path"
+        (views:thunk
+          (compare-dock-annotation-with-guarded-workspace-path
+           (workspace-annotation-persistence-report-annotation-of report)
+           :workspace-topicmap-id
+           (workspace-annotation-persistence-report-workspace-topicmap-id-of
+            report)
+           :workspace-id
+           (or (and plan
+                    (dmx-workspace-annotation-write-plan-workspace-id plan))
+               (workspace-annotation-persistence-report-workspace-id-of
+                report))
+           :client (workspace-annotation-persistence-report-client-of report)
+           :report report
+           :view-props (and plan
+                            (dmx-workspace-annotation-write-plan-view-props
+                             plan))
+           :status (and plan
+                        (dmx-workspace-annotation-write-plan-status plan))
+           :supersedes-topic-id
+           (and plan
+                (dmx-workspace-annotation-write-plan-supersedes-topic-id
+                 plan))
+           :annotation-key
+           (workspace-annotation-persistence-report-annotation-key-of report)
+           :provenance-json
+           (and plan
+                (dmx-workspace-annotation-write-plan-provenance-json plan))
+           :storage-mode
+           (and plan
+                (dmx-workspace-annotation-write-plan-storage-mode plan))))
+        "Compare the raw annotation persist path against the guarded continuation / MCP path using the preserved report and topic id when available."))
+      (:p
+       (views:eval-button
         "Open persistence stepper"
         (views:thunk
           (clog-moldable-inspector::make-playground-stepper
@@ -1929,6 +2181,139 @@
       (:pre :style "white-space: pre-wrap"
             (views:esc
              (workspace-annotation-persistence-report-stepper-source-of report))))))        
+
+(views:defview 👀overview (comparison workspace-annotation-path-diff)
+  (views:html-view :title "Overview" :priority 1
+    (let* ((annotation (workspace-annotation-path-diff-annotation-of comparison))
+           (plan (workspace-annotation-path-diff-plan-of comparison))
+           (destination (workspace-annotation-path-diff-destination-of comparison))
+           (raw-report (workspace-annotation-path-diff-raw-report-of comparison))
+           (graph (workspace-annotation-path-diff-graph comparison)))
+      (views:html
+        (:p (views:esc
+             "Inspectable comparison between the raw annotation persist path and the guarded continuation / MCP path. The goal is to keep typed planning and staging as the entrypoint while making the workspace-assignment auth divergence explicit."))
+        (:p (views:esc
+             "Workspace assignment and topicmap placement remain separate facts throughout this comparison. Topicmap visibility is not workspace ownership."))
+        (:table :class "inspector-table"
+                (:tr (:th "Annotation")
+                     (:td (views:object-ref annotation)))
+                (render-workspace-annotation-destination-rows
+                 :workspace-id
+                 (or (and plan
+                          (dmx-workspace-annotation-write-plan-workspace-id
+                           plan))
+                     (workspace-annotation-path-diff-workspace-id-of
+                      comparison))
+                 :workspace-topicmap-id
+                 (workspace-annotation-path-diff-workspace-topicmap-id-of
+                  comparison)
+                 :destination-source-label
+                 (workspace-annotation-destination-label destination :source)
+                 :workspace-source-label
+                 (workspace-annotation-destination-label
+                  destination
+                  :workspace-source)
+                 :topicmap-source-label
+                 (workspace-annotation-destination-label
+                  destination
+                  :topicmap-source)
+                 :destination-rationale
+                 (and destination
+                      (dmx-workspace-annotation-destination-rationale
+                       destination)))
+                (:tr (:th "Continuation topic id")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-path-diff-continuation-topic-id-of
+                                  comparison))))))
+                (:tr (:th "Typed storage mode")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-storage-mode-label
+                                 (and plan
+                                      (dmx-workspace-annotation-write-plan-storage-mode
+                                       plan)))))))
+                (:tr (:th "Typed carrier type")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (and plan
+                                      (dmx-workspace-annotation-write-plan-carrier-type-uri
+                                       plan))))))))
+        (when raw-report
+          (views:html
+            (:p
+             (views:object-ref raw-report
+                               :display "Open preserved persistence report"
+                               :select "Overview"))))
+        (:ul
+         (:li
+          (views:object-ref comparison
+                            :display "Open consequences"
+                            :select "Consequences"))
+         (:li
+          (views:object-ref graph
+                            :display "Open graph overview"
+                            :select "Overview"))
+         (:li
+          (views:object-ref graph
+                            :display "Open Graphviz"
+                            :select "Graphviz"))
+         (:li
+          (views:object-ref graph
+                            :display "Open focused paths"
+                            :select "Focused paths")))))))
+
+(views:defview 👀path-diff (comparison workspace-annotation-path-diff)
+  (views:html-view :title "Path diff" :priority 2
+    (render-workspace-annotation-path-diff-table comparison)))
+
+(views:defview 👀consequences (comparison workspace-annotation-path-diff)
+  (views:html-view :title "Consequences" :priority 3
+    (render-workspace-annotation-path-consequence-table
+     (workspace-annotation-path-diff-consequences-of comparison)
+     :heading "Consequences")))
+
+(views:defview 👀graph (comparison workspace-annotation-path-diff)
+  (views:html-view :title "Graph" :priority 4
+    (let ((graph (workspace-annotation-path-diff-graph comparison))
+          (consequences
+            (workspace-annotation-path-diff-consequences-of comparison)))
+      (views:html
+        (:p (views:esc
+             "Reusable code-path graph for the compared raw and guarded paths. The divergence point is the workspace-assignment auth boundary."))
+        (:table :class "inspector-table"
+                (:tr (:th "Focused path")
+                     (:td (views:esc "Main annotation persist path")))
+                (:tr (:th "Focused path")
+                     (:td (views:esc "Guarded continuation path")))
+                (:tr (:th "Contrast branch")
+                     (:td (views:esc "Raw pending-auth stop")))
+                (:tr (:th "Divergence node")
+                     (:td (:tt (views:esc
+                                "workspace-assignment auth boundary"))))
+                (:tr (:th "Consequence label")
+                     (:td (views:esc
+                           (or (workspace-annotation-path-consequence-summary-for-stages
+                                comparison
+                                '(:topic-upsert :workspace-assignment))
+                               "No extra divergence consequence")))))
+        (:p (views:esc
+             "Workspace assignment and topicmap placement stay separate here too. Guarded topicmap success must not be read as proof of workspace ownership."))
+        (render-workspace-annotation-path-consequence-table
+         consequences
+         :heading "Divergence consequences")
+        (:ul
+         (:li
+          (views:object-ref graph
+                            :display "Open graph overview"
+                            :select "Overview"))
+         (:li
+          (views:object-ref graph
+                            :display "Open Graphviz"
+                            :select "Graphviz"))
+         (:li
+          (views:object-ref graph
+                            :display "Open focused paths"
+                            :select "Focused paths")))))))
 
 (views:defview 👀overview (report workspace-annotation-create-topic-probe-report)
   (views:html-view :title "Overview" :priority 1

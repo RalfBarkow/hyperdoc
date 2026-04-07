@@ -28,6 +28,8 @@
 <h2>Supported create, update, and upsert paths</h2>
 
 <ul>
+  <li><tt>continue_workspace_annotation</tt>: continue a saved workspace annotation from the preserved topic id through guarded workspace assignment, topicmap placement, guarded journal transitions, and reopen.</li>
+  <li><tt>repair_workspace_topic_assignment</tt>: backfill or confirm workspace assignment only; it does not place the topic into the topicmap.</li>
   <li><tt>append_workspace_note</tt>: create or update a typed workspace note on the parent-note boundary.</li>
   <li><tt>update_workspace_note</tt>: update an existing workspace note by concrete <tt>topicId</tt>.</li>
   <li><tt>upsert_workspace_topic_factory_snippet</tt>: create or update a HyperDoc-owned topic-factory snippet twin and place it into topicmap <tt>919822</tt>.</li>
@@ -35,10 +37,16 @@
 </ul>
 
 <p>
+  Use <tt>continue_workspace_annotation</tt> when annotation topic upsert has
+  already succeeded and you need the remaining guarded continuation path. Use
+  <tt>repair_workspace_topic_assignment</tt> when only workspace ownership is
+  missing. Use <tt>upsert_workspace_topicmap_context</tt> when the topic already
+  exists and you only need typed placement or validated repositioning.
+</p>
+
+<p>
   Use <tt>upsert_workspace_topic_factory_snippet</tt> when you need a
-  HyperDoc-owned topic to exist in the workspace. Use
-  <tt>upsert_workspace_topicmap_context</tt> when the topic already exists and
-  you only need typed placement or validated repositioning.
+  HyperDoc-owned topic to exist in the workspace.
 </p>
 
 <h2>Unlink versus hard delete</h2>

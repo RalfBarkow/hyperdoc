@@ -2,6 +2,9 @@
 
 (in-package :hyperdoc/tests)
 
+(export (list (intern "RUN-DMX-MCP-SMOKE-TESTS" :hyperdoc/tests))
+        :hyperdoc/tests)
+
 (defparameter *dmx-mcp-smoke-workspace-topicmap-id* 919822)
 (defparameter *dmx-mcp-smoke-primary-topic-id* 907120)
 (defparameter *dmx-mcp-smoke-secondary-topic-id* 921494)
@@ -377,6 +380,7 @@
             :topicmap-memberships topicmap-memberships
             :workspace-assignments workspace-assignments
             :next-topic-id 931101)))
+    (remhash topic-id workspace-assignments)
     (values
      (hyperdoc::make-dmx-mcp-server
       :read-client blocked-client
@@ -2239,11 +2243,11 @@
                           (gethash "savedCarrierTopic" structured))
                         (journal-topic
                           (gethash "journalCompanionTopic" structured))
-                        (journal-auth-context
-                          (gethash "journalPreflightAuthContext" structured))
+                        (assignment-auth-context
+                          (gethash "assignmentAuthContext" structured))
                         (http-evidence
-                          (and journal-auth-context
-                               (gethash "http-evidence" journal-auth-context)))
+                          (and assignment-auth-context
+                               (gethash "http-evidence" assignment-auth-context)))
                         (response-headers
                           (and http-evidence
                                (gethash "response-headers" http-evidence)))
@@ -2255,15 +2259,15 @@
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "continue_workspace_annotation auth-blocked reports must stay in structured content")
-                   (mcp-assert-equal "workspace_annotation_persistence_report"
+                  (mcp-assert-equal "workspace_annotation_persistence_report"
                                      (gethash "resultKind" structured)
                                      "Annotation continuation auth-blocked result kind")
                    (mcp-assert-equal "failed"
                                      (gethash "reportStatus" structured)
                                      "Annotation continuation auth-blocked reports must stay failed")
-                   (mcp-assert-equal "prepare-transition"
+                   (mcp-assert-equal "workspace-assignment"
                                      (gethash "failureStage" structured)
-                                     "Annotation continuation auth-blocked reports must stay at journal preflight")
+                                     "Annotation continuation auth-blocked reports must fail at the guarded workspace-assignment stage")
                    (mcp-assert-equal "workspace-dock-annotation"
                                      (gethash "kind" saved-annotation)
                                      "Annotation continuation auth-blocked reports must still expose the semantic annotation object")
@@ -2275,7 +2279,7 @@
                                      "Annotation continuation auth-blocked reports must expose the journal companion topic")
                    (mcp-assert-true
                     response-headers
-                    "Annotation continuation auth-blocked reports must preserve HTTP response header evidence")
+                    "Annotation continuation auth-blocked reports must preserve guarded-assignment HTTP response header evidence")
                    (mcp-assert-equal "application/json; charset=utf-8"
                                      (gethash "value" content-type-header)
                                      "Annotation continuation auth-blocked reports must normalize dotted-pair response headers")))))

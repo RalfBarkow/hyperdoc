@@ -194,7 +194,9 @@
    (read-dmx-shared-workspace-page
     "hyperdoc/Using guarded workspace topic lifecycle tools.html")
    "Using guarded workspace topic lifecycle tools"
-   '("upsert_workspace_topic_factory_snippet"
+   '("continue_workspace_annotation"
+     "repair_workspace_topic_assignment"
+     "upsert_workspace_topic_factory_snippet"
      "Diagnosing DMX workspace assignment and topicmap placement"
      "upsert_workspace_topicmap_context"
      "remove_workspace_topic_from_topicmap"
@@ -206,6 +208,14 @@
      "dry-run-first"
      "HyperDoc-owned workspace notes, handovers, and topic-factory snippet twins"
      "topicmapId = 919822"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/Workspace-native annotations in a DMX workspace.html")
+   "Workspace-native annotations in a DMX workspace"
+   '("Compare with guarded workspace path"
+     "workspace assignment"
+     "topicmap placement"
+     "workspace-dock-annotation"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/Operational definition: chunk, chunk note, manifest note, content topic.html")

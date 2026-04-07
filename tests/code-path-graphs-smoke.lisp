@@ -34,6 +34,36 @@
   (uiop:read-file-string
    (code-path-graphs-relative-path namestring)))
 
+(defparameter *code-path-graphs-smoke-workspace-topicmap-id* 919822)
+
+(defun make-code-path-graph-test-dock-annotation (&key note
+                                                       (context-view-title
+                                                         "Main page")
+                                                       (source-label
+                                                         "Text pages")
+                                                       (source-value
+                                                         "list-item:main-page/text-pages"))
+  (let* ((hyperdoc-page (hyperdoc::find-page hyperdoc::*hyperdoc*
+                                             "HyperDoc"
+                                             :signal-error? t))
+         (annotation-from-connect
+           (hyperdoc::make-association-annotation-from-json
+            :context-object hyperdoc-page
+            :context-view-title context-view-title
+            :source-json (dock-annotation-source-json "HYPERDOC"
+                                                      source-label
+                                                      source-value)
+            :target-json (dock-annotation-target-json "HYPERDOC"))))
+    (hyperdoc::make-dock-annotation
+     :context-object hyperdoc-page
+     :context-view-title context-view-title
+     :source-anchor (hyperdoc::source-anchor-of annotation-from-connect)
+     :source-object (hyperdoc::source-object-of annotation-from-connect)
+     :target-anchor (hyperdoc::target-anchor-of annotation-from-connect)
+     :relation-kind (hyperdoc::relation-kind-of annotation-from-connect)
+     :note (or note
+               (hyperdoc::note-of annotation-from-connect)))))
+
 (defun normalize-code-path-graphs-smoke-whitespace (string)
   (with-output-to-string (stream)
     (loop with pending-space = nil
@@ -215,6 +245,39 @@
     (code-path-assert-contains "dmx-workspace-journal-append-events" dot
                                "DMX journal graph DOT export must include the explicit append helper")))
 
+(defun run-workspace-annotation-path-diff-graph-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 9520))
+         (annotation (make-code-path-graph-test-dock-annotation
+                      :note "Path diff graph smoke"))
+         (comparison
+           (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+            annotation
+            :workspace-topicmap-id
+            *code-path-graphs-smoke-workspace-topicmap-id*
+            :client client))
+         (graph (hyperdoc::workspace-annotation-path-diff-graph comparison))
+         (dot (hyperdoc::code-path-graph-dot-text graph))
+         (focus-paths (hyperdoc::code-path-graph-focus-path-seq graph))
+         (focus-labels (mapcar #'hyperdoc::code-path-graph-focus-path-label
+                               focus-paths)))
+    (code-path-assert-true
+     (typep graph 'hyperdoc::code-path-graph)
+     "Workspace annotation path diff graph must reuse the generic code-path graph object")
+    (code-path-assert-true
+     (member "Main annotation persist path" focus-labels :test #'string=)
+     "Workspace annotation path diff graph must expose the main annotation persist focused path")
+    (code-path-assert-true
+     (member "Guarded continuation path" focus-labels :test #'string=)
+     "Workspace annotation path diff graph must expose the guarded continuation focused path")
+    (code-path-assert-contains "workspace-assignment auth boundary" dot
+                               "Workspace annotation path diff DOT must expose the explicit auth-boundary divergence node")
+    (code-path-assert-contains "raw pending-auth stop" dot
+                               "Workspace annotation path diff DOT must expose the raw pending-auth stop branch")
+    (code-path-assert-contains "guarded explicit-auth continuation" dot
+                               "Workspace annotation path diff DOT must expose the guarded explicit-auth continuation branch")))
+
 (defun run-playground-stepper-code-path-graph-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((stepper
@@ -278,6 +341,7 @@
   (run-code-path-graph-rendered-view-smoke-test)
   (run-graphviz-transport-entity-smoke-test)
   (run-dmx-journal-code-path-graph-smoke-test)
+  (run-workspace-annotation-path-diff-graph-smoke-test)
   (run-playground-stepper-code-path-graph-smoke-test)
   (run-code-path-graphs-documentation-smoke-test)
   (format t "~&Code path graph smoke tests passed.~%")
