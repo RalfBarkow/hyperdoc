@@ -25,6 +25,16 @@
   are now preserved as the pre-execution record that drove the completed merge.
 </p>
 
+<p>
+  Verification status on 2026-04-07: current <tt>hauptsache</tt> tip
+  <tt>b1e8d4041ab5f584886dfa12e5952b0a6bb6173c</tt> still contains source commit
+  <tt>823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e</tt> through existing merge commit
+  <tt>ccf06a2de86d7075cb08e7a8ce57f8fa88022449</tt>. Running
+  <tt>nix develop --command git merge --no-ff --no-edit 823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e</tt>
+  at that tip returns <tt>Already up to date.</tt>, so the current branch state
+  needs verification reporting, not a second merge execution.
+</p>
+
 <h2>Concrete merge intent</h2>
 
 <ul>
