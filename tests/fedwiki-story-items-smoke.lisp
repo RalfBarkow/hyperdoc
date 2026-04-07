@@ -43,6 +43,27 @@
               (make-instance 'html-inspector-views::view-accumulator)))
         (hyperbook/fedwiki::render-story-item type item page)))))
 
+(defun render-story-item-to-string-and-assets (type text)
+  (let* ((page (make-story-items-smoke-page))
+         (item (make-story-items-smoke-item type text))
+         (accumulator (make-instance 'html-inspector-views::view-accumulator)))
+    (values
+     (with-output-to-string (stream)
+       (let ((html-inspector-views::*html-stream* stream)
+             (html-inspector-views::*view-accumulator* accumulator))
+         (hyperbook/fedwiki::render-story-item type item page)))
+     (html-inspector-views::accumulator-assets accumulator))))
+
+(defun asset-urls-of-type (assets type)
+  (loop for asset in assets
+        when (eq (car asset) type)
+          collect (cdr asset)))
+
+(defun asset-script-present-p (assets fragment)
+  (loop for asset in assets
+        thereis (and (eq (car asset) :script)
+                     (search fragment (cdr asset)))))
+
 (defun run-fedwiki-story-item-link-extraction-smoke-test ()
   (let* ((page (make-story-items-smoke-page))
          (text (format nil "See ~A and [https://example.org Example] and [[Wiki Link]]"
@@ -93,6 +114,36 @@
     (assert-true (search "markdown" html)
                  "Markdown render must preserve the markdown item label")))
 
+(defun run-fedwiki-story-item-graphviz-render-smoke-test ()
+  (multiple-value-bind (html assets)
+      (render-story-item-to-string-and-assets
+       :graphviz
+       "digraph { a -> b }")
+    (assert-true (search "data-inspector-graphviz=" html)
+                 "Graphviz story items must render through the shared Graphviz placeholder")
+    (assert-true (search "data-inspector-graphviz-dot=" html)
+                 "Graphviz story items must carry DOT through the shared transport attribute")
+    (assert-true (search "Raw DOT source" html)
+                 "Graphviz story items must keep the shared raw DOT fallback")
+    (assert-true (search "digraph { a -&gt; b }" html)
+                 "Graphviz story item fallback must preserve the DOT text")
+    (assert-true (not (search "background-color: #eee;" html))
+                 "Graphviz story items must not fall through to the generic raw-text fallback")
+    (assert-true (member "/html-inspector-views/js/viz-standalone.js"
+                         (asset-urls-of-type assets :js)
+                         :test #'equal)
+                 "Graphviz story items must include the shared Viz.js runtime")
+    (assert-true (member "/html-inspector-views/js/graphviz.js"
+                         (asset-urls-of-type assets :js)
+                         :test #'equal)
+                 "Graphviz story items must include the shared Graphviz runtime")
+    (assert-true (member "/html-inspector-views/css/graphviz.css"
+                         (asset-urls-of-type assets :css)
+                         :test #'equal)
+                 "Graphviz story items must include the shared Graphviz CSS")
+    (assert-true (asset-script-present-p assets "window.inspectorGraphviz.initCurrentView")
+                 "Graphviz story items must include the shared init script")))
+
 (defun run-fedwiki-story-item-short-hash-negative-test ()
   (let* ((page (make-story-items-smoke-page))
          (links (meaningful-links
@@ -131,6 +182,7 @@
   (run-fedwiki-story-item-link-extraction-smoke-test)
   (run-fedwiki-story-item-paragraph-render-smoke-test)
   (run-fedwiki-story-item-markdown-render-smoke-test)
+  (run-fedwiki-story-item-graphviz-render-smoke-test)
   (run-fedwiki-story-item-short-hash-negative-test)
   (run-fedwiki-story-item-non-hex-negative-test)
   (run-fedwiki-story-item-explicit-link-boundary-test)

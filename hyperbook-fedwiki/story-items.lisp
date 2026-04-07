@@ -274,6 +274,17 @@
           (:span :style "color: gray;"
                  (views:esc (text-of item))))))
 
+;; Graphviz
+
+(defmethod render-story-item ((type (eql :graphviz)) item page)
+  (declare (ignore type page))
+  (views:graphviz-snippet
+   (text-of item)
+   :engine (or (and (data-of item)
+                    (gethash "engine" (data-of item)))
+               "dot")
+   :fallback-title "Raw DOT source"))
+
 ;; Images
 
 (defmethod render-story-item ((type (eql :image)) item page)

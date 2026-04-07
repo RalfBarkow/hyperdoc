@@ -4,11 +4,10 @@
 
 <p>
   This page explains one concrete localhost FedWiki page example for a
-  hypothetical FedWiki <tt>graphviz</tt> story item and traces how HyperDoc
+  FedWiki <tt>graphviz</tt> story item and traces how HyperDoc
   handles it today versus how it would flow through the shared Graphviz
-  renderer if a typed story-item adapter existed. The example is explanatory
-  only. It does not mean that the current repo already implements a dedicated
-  FedWiki <tt>:graphviz</tt> renderer.
+  renderer. The example is explanatory, but it now reflects the current typed
+  adapter path rather than a merely hypothetical one.
 </p>
 
 <h2>Localhost page example</h2>
@@ -22,7 +21,7 @@
 
 <p>
   This page is now a real writable localhost FedWiki page example with replayable
-  journal history. Its story contains one hypothetical <tt>graphviz</tt> item,
+  journal history. Its story contains one typed <tt>graphviz</tt> item,
   and its journal contains the minimal valid page history for that story:
   one <tt>create</tt> action followed by one <tt>add</tt> action.
 </p>
@@ -58,12 +57,13 @@
 </pre>
 
 <p>
-  The item type is still hypothetical in the renderer layer. The point of the
-  example is to show the adapter boundary against a realistic writable page
-  artifact, not against an empty-journal stub.
+  The page artifact is real and writable. The story-item type is now implemented
+  as a thin typed adapter in the renderer layer, while DOT-to-SVG behavior still
+  belongs to the shared lower Graphviz seam rather than to a FedWiki-specific
+  browser stack.
 </p>
 
-<h2>Current behavior</h2>
+<h2>Current implemented behavior</h2>
 
 <ol>
   <li>
@@ -82,48 +82,48 @@
     story-item id <tt>677664656d6f3031</tt> in both story and journal.
   </li>
   <li>
-    The FedWiki page story view in <tt>hyperbook-fedwiki/pages.lisp</tt> loops
-    over <tt>(story-of page)</tt> and dispatches each item through
-    <tt>render-story-item</tt>.
+    In HyperDoc's right-side FedWiki Story tab, the view in
+    <tt>hyperdoc-explorer/dom-annotations.lisp</tt> loops over
+    <tt>(story-of page)</tt>, wraps each story item as a connectable anchor,
+    and dispatches content rendering through <tt>render-story-item</tt>.
   </li>
   <li>
-    In the current repo there is no
-    <tt>(defmethod render-story-item ((type (eql :graphviz)) ...))</tt> in
-    <tt>hyperbook-fedwiki/story-items.lisp</tt>.
+    The current repo now includes
+    <tt>(defmethod render-story-item ((type (eql :graphviz)) item page) ...)</tt>
+    in <tt>hyperbook-fedwiki/story-items.lisp</tt>.
   </li>
   <li>
-    Dispatch therefore falls through to the generic fallback method in
-    <tt>hyperbook-fedwiki/story-items.lisp</tt>.
+    That method is intentionally thin. It does not embed custom browser
+    JavaScript. It calls the shared lower-layer helper
+    <tt>views:graphviz-snippet</tt> with the story item's DOT text.
   </li>
   <li>
-    The fallback method renders a small type label plus a gray
-    <tt>&lt;pre&gt;</tt> block containing the raw text
-    <tt>digraph { a -&gt; b }</tt>.
+    <tt>views:graphviz-snippet</tt> emits the shared placeholder HTML carrying
+    entity-safe DOT transport, pending state, and the raw DOT fallback block.
   </li>
   <li>
-    Result today: raw text / fallback rendering, not SVG. The shared Graphviz
-    browser runtime is not reached from a FedWiki <tt>graphviz</tt> story item
-    because no dedicated typed adapter method exists yet, even though the page
-    itself is now a realistic journaled localhost FedWiki example.
+    Result today: the FedWiki Story view can reach the shared Graphviz browser
+    runtime and render the item as SVG, while still preserving the shared raw
+    DOT fallback and error handling.
   </li>
 </ol>
 
-<h2>Intended future behavior</h2>
+<h2>Shared render path</h2>
 
 <ol>
   <li>
-    A future FedWiki story-item adapter in
-    <tt>hyperbook-fedwiki/story-items.lisp</tt> could add a method like
-    <tt>(defmethod render-story-item ((type (eql :graphviz)) item page) ...)</tt>.
+    The typed FedWiki story-item adapter lives in
+    <tt>hyperbook-fedwiki/story-items.lisp</tt> and stops at the call to the
+    shared helper.
   </li>
   <li>
-    That future method would treat <tt>(text-of item)</tt> as derived DOT input
-    and would call the shared lower-layer Graphviz helper
-    <tt>views:graphviz-snippet</tt>.
+    From there, the lower-layer helper carried locally by
+    <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt>
+    takes over.
   </li>
   <li>
-    The shared helper comes from the lower reusable layer carried locally by
-    <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt>.
+    It injects the shared Graphviz assets, retrying init script, and the
+    placeholder HTML contract.
   </li>
   <li>
     That helper emits placeholder HTML carrying
@@ -132,8 +132,7 @@
     fallback block.
   </li>
   <li>
-    The same lower-layer helper includes the shared browser assets and retrying
-    init hook so the current inspector view calls
+    The shared browser init hook then calls
     <tt>window.inspectorGraphviz.initCurrentView(...)</tt>.
   </li>
   <li>
@@ -147,12 +146,10 @@
     visible and inspectable.
   </li>
   <li>
-    Result in that future path: the FedWiki story item renderer would stay thin,
+    Result in the current path: the FedWiki story item renderer stays thin,
     while DOT-to-SVG transport, pending state, error handling, and raw DOT
-    fallback would all come from the shared Graphviz layer rather than from a
-    FedWiki-specific duplicate implementation. The localhost page would then
-    become a realistic end-to-end example instead of only a parser/dispatch
-    example.
+    fallback all come from the shared Graphviz layer rather than from a
+    FedWiki-specific duplicate implementation.
   </li>
 </ol>
 
@@ -167,9 +164,9 @@
 </p>
 
 <p>
-  That matters because a future FedWiki <tt>:graphviz</tt> story-item adapter
-  should not invent a second browser Graphviz stack. The lower-layer patch
-  already provides the reusable contract: entity-safe DOT transport, shared
+  That matters because the now-implemented FedWiki <tt>:graphviz</tt> story-item
+  adapter does not need to invent a second browser Graphviz stack. The lower-layer
+  patch already provides the reusable contract: entity-safe DOT transport, shared
   browser init, pending/error state, and raw DOT fallback.
 </p>
 
@@ -177,10 +174,10 @@
 
 <p>
   FedWiki JSON -&gt; typed story item -&gt; story-item renderer -&gt; shared Graphviz
-  snippet/runtime -&gt; browser SVG. Today the hypothetical <tt>graphviz</tt>
-  path stops at the generic story-item fallback before it reaches the shared
-  Graphviz snippet because the typed adapter method does not exist yet, even
-  though the example page is now a real journaled localhost FedWiki page.
+  snippet/runtime -&gt; browser SVG. The important ownership boundary is that the
+  FedWiki adapter stops at the typed renderer method, and the shared lower layer
+  still owns DOT transport, pending/error/fallback behavior, and Viz.js runtime
+  use.
 </p>
 
 <h2>Related</h2>
