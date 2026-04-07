@@ -1,0 +1,195 @@
+<h1>FedWiki Graphviz story item render trace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page explains one concrete localhost FedWiki page example for a
+  hypothetical FedWiki <tt>graphviz</tt> story item and traces how HyperDoc
+  handles it today versus how it would flow through the shared Graphviz
+  renderer if a typed story-item adapter existed. The example is explanatory
+  only. It does not mean that the current repo already implements a dedicated
+  FedWiki <tt>:graphviz</tt> renderer.
+</p>
+
+<h2>Localhost page example</h2>
+
+<p>
+  Real localhost FedWiki page example:
+  <tt>Graphviz Demo</tt>,
+  slug <tt>graphviz-demo</tt>,
+  path <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/graphviz-demo</tt>.
+</p>
+
+<p>
+  This page is now a real writable localhost FedWiki page example with replayable
+  journal history. Its story contains one hypothetical <tt>graphviz</tt> item,
+  and its journal contains the minimal valid page history for that story:
+  one <tt>create</tt> action followed by one <tt>add</tt> action.
+</p>
+
+<pre>
+{
+  "title": "Graphviz Demo",
+  "story": [
+    {
+      "id": "677664656d6f3031",
+      "type": "graphviz",
+      "text": "digraph { a -&gt; b }"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": { "title": "Graphviz Demo", "story": [] },
+      "date": ...
+    },
+    {
+      "type": "add",
+      "id": "677664656d6f3031",
+      "item": {
+        "id": "677664656d6f3031",
+        "type": "graphviz",
+        "text": "digraph { a -&gt; b }"
+      },
+      "date": ...
+    }
+  ]
+}
+</pre>
+
+<p>
+  The item type is still hypothetical in the renderer layer. The point of the
+  example is to show the adapter boundary against a realistic writable page
+  artifact, not against an empty-journal stub.
+</p>
+
+<h2>Current behavior</h2>
+
+<ol>
+  <li>
+    The page JSON would be read by <tt>hyperbook/fedwiki::fetch-page-json</tt>
+    in <tt>hyperbook-fedwiki/utilities.lisp</tt>.
+  </li>
+  <li>
+    <tt>hyperbook/fedwiki::reload-page</tt> in
+    <tt>hyperbook-fedwiki/pages.lisp</tt> would call
+    <tt>hyperbook/fedwiki::set-page-data</tt>.
+  </li>
+  <li>
+    <tt>set-page-data</tt> would call <tt>make-story</tt>, which calls
+    <tt>make-story-item</tt>. The JSON string <tt>"graphviz"</tt> becomes the
+    keyword <tt>:GRAPHVIZ</tt>, and the real localhost page keeps the stable
+    story-item id <tt>677664656d6f3031</tt> in both story and journal.
+  </li>
+  <li>
+    The FedWiki page story view in <tt>hyperbook-fedwiki/pages.lisp</tt> loops
+    over <tt>(story-of page)</tt> and dispatches each item through
+    <tt>render-story-item</tt>.
+  </li>
+  <li>
+    In the current repo there is no
+    <tt>(defmethod render-story-item ((type (eql :graphviz)) ...))</tt> in
+    <tt>hyperbook-fedwiki/story-items.lisp</tt>.
+  </li>
+  <li>
+    Dispatch therefore falls through to the generic fallback method in
+    <tt>hyperbook-fedwiki/story-items.lisp</tt>.
+  </li>
+  <li>
+    The fallback method renders a small type label plus a gray
+    <tt>&lt;pre&gt;</tt> block containing the raw text
+    <tt>digraph { a -&gt; b }</tt>.
+  </li>
+  <li>
+    Result today: raw text / fallback rendering, not SVG. The shared Graphviz
+    browser runtime is not reached from a FedWiki <tt>graphviz</tt> story item
+    because no dedicated typed adapter method exists yet, even though the page
+    itself is now a realistic journaled localhost FedWiki example.
+  </li>
+</ol>
+
+<h2>Intended future behavior</h2>
+
+<ol>
+  <li>
+    A future FedWiki story-item adapter in
+    <tt>hyperbook-fedwiki/story-items.lisp</tt> could add a method like
+    <tt>(defmethod render-story-item ((type (eql :graphviz)) item page) ...)</tt>.
+  </li>
+  <li>
+    That future method would treat <tt>(text-of item)</tt> as derived DOT input
+    and would call the shared lower-layer Graphviz helper
+    <tt>views:graphviz-snippet</tt>.
+  </li>
+  <li>
+    The shared helper comes from the lower reusable layer carried locally by
+    <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt>.
+  </li>
+  <li>
+    That helper emits placeholder HTML carrying
+    <tt>data-inspector-graphviz="true"</tt>,
+    <tt>data-inspector-graphviz-dot="..."</tt>, pending state, and a raw DOT
+    fallback block.
+  </li>
+  <li>
+    The same lower-layer helper includes the shared browser assets and retrying
+    init hook so the current inspector view calls
+    <tt>window.inspectorGraphviz.initCurrentView(...)</tt>.
+  </li>
+  <li>
+    The browser runtime reads the DOT from the shared placeholder, asks the
+    vendored Viz.js runtime to run <tt>renderSVGElement(dot)</tt>, and inserts
+    the resulting SVG into the placeholder canvas.
+  </li>
+  <li>
+    If rendering succeeds, the state becomes <tt>rendered</tt>. If rendering
+    fails, the shared error block appears and the raw DOT fallback remains
+    visible and inspectable.
+  </li>
+  <li>
+    Result in that future path: the FedWiki story item renderer would stay thin,
+    while DOT-to-SVG transport, pending state, error handling, and raw DOT
+    fallback would all come from the shared Graphviz layer rather than from a
+    FedWiki-specific duplicate implementation. The localhost page would then
+    become a realistic end-to-end example instead of only a parser/dispatch
+    example.
+  </li>
+</ol>
+
+<h2>Why commit 325d6ecb6b314de736b20b6abcf55932bc52c4d4 mattered</h2>
+
+<p>
+  The commit did not add a FedWiki <tt>:graphviz</tt> story-item renderer.
+  It changed no files in <tt>hyperbook-fedwiki/</tt>. Instead, it unified the
+  lower shared DOT-to-SVG seam through
+  <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt> so
+  higher layers can reuse one Graphviz renderer contract.
+</p>
+
+<p>
+  That matters because a future FedWiki <tt>:graphviz</tt> story-item adapter
+  should not invent a second browser Graphviz stack. The lower-layer patch
+  already provides the reusable contract: entity-safe DOT transport, shared
+  browser init, pending/error state, and raw DOT fallback.
+</p>
+
+<h2>Mental model</h2>
+
+<p>
+  FedWiki JSON -&gt; typed story item -&gt; story-item renderer -&gt; shared Graphviz
+  snippet/runtime -&gt; browser SVG. Today the hypothetical <tt>graphviz</tt>
+  path stops at the generic story-item fallback before it reaches the shared
+  Graphviz snippet because the typed adapter method does not exist yet, even
+  though the example page is now a real journaled localhost FedWiki page.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="graphviz-demo">Graphviz Demo</a></li>
+  <li><a page="FedWiki Video Snippet Plugin for HyperDoc">FedWiki Video Snippet Plugin for HyperDoc</a></li>
+  <li><a page="Code path graphs in HyperDoc">Code path graphs in HyperDoc</a></li>
+  <li><a page="State-machine visualization">State-machine visualization</a></li>
+  <li><a page="s-graphviz Dependency Boundary">s-graphviz Dependency Boundary</a></li>
+  <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+</ul>
