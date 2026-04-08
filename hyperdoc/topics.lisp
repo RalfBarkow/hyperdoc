@@ -2801,6 +2801,16 @@
                  "Annotation"
                  "Touch-Fahrplan view for Zotero topic enrichment")))
 
+(defun source-pane-layout-evidence-topic ()
+  (make-topic
+   :id "source-pane-layout-evidence"
+   :title "Source pane layout evidence"
+   :summary "Inspectable evidence cluster for the current html/markdown Source path: inherited Source dispatch, pane-slot shell, source-pane wrapper, shared line rendering, layout CSS, browser-side pane-slot handshake, and representative Source-pane runtime state."
+   :references '("Source pane layout evidence"
+                 "Workspace-native annotations in a DMX workspace"
+                 "A DOM-annotation connect gesture"
+                 "Dock capabilities in HyperDoc")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic

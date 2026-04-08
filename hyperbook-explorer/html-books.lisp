@@ -73,7 +73,7 @@
 
 (defun render-source-surface-lines (pathname render-line
                                     &key
-                                      (wrapper-class "hyperdoc-source-pane"))
+                                      (wrapper-class "hyperdoc-source-pane-view"))
   (views:html
     (:div :class wrapper-class
           (loop for line-text in (uiop:read-file-lines pathname)
@@ -82,7 +82,9 @@
 
 (defun render-file-source-surface (pathname)
   (include-source-surface-assets)
-  (render-source-surface-lines pathname #'render-source-surface-line))
+  (views:html
+    (:div :class "hyperdoc-source-pane"
+          (render-source-surface-lines pathname #'render-source-surface-line))))
 
 (views:defview views:👀source (page html-page)
   (views:html-view :title "Source" :priority 10

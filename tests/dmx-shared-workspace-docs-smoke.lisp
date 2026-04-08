@@ -595,7 +595,7 @@
      '("Installation-dependent"
        "registered non-Basic AuthorizationMethod"))))
 
-(defun assert-plain-page-source-view (page-title expected-source-snippet)
+(defun assert-connectable-page-source-view (page-title expected-source-snippet)
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
@@ -606,46 +606,137 @@
                            (html-inspector-views:view-html source-view))))
     (assert-true source-view
                  (format nil "~A must expose a Source view" page-title))
+    (assert (search "hyperdoc-dom-connect-surface" source-html :test #'char=)
+            ()
+            (format nil "~A Source must render the connectable surface shell"
+                    page-title))
+    (assert (search "hyperdoc-connect-provider-surface" source-html :test #'char=)
+            ()
+            (format nil "~A Source must expose the connect-provider surface"
+                    page-title))
     (assert (search "hyperdoc-source-pane" source-html :test #'char=)
             ()
-            (format nil "~A Source must use the plain source-pane wrapper"
+            (format nil "~A Source must render the source-pane body wrapper"
                     page-title))
-    (assert (search "hyperdoc-source-pane-line-number" source-html :test #'char=)
+    (assert (search "hyperdoc-source-connect-view" source-html :test #'char=)
             ()
-            (format nil "~A Source must render line numbers" page-title))
+            (format nil "~A Source must render the source-connect view"
+                    page-title))
+    (assert (search "hyperdoc-source-connect-line-number" source-html :test #'char=)
+            ()
+            (format nil "~A Source must render source line numbers"
+                    page-title))
+    (assert (search "data-hyperdoc-connect-source-anchor"
+                    source-html
+                    :test #'char=)
+            ()
+            (format nil "~A Source must render source anchor lines"
+                    page-title))
     (assert (search expected-source-snippet source-html :test #'char=)
             ()
             (format nil "~A Source must render escaped source text"
                     page-title))
-    (assert (not (search "hyperdoc-source-connect-view" source-html :test #'char=))
+    (assert (search "data-hyperdoc-connect-provider-kind='source-v1'"
+                    source-html
+                    :test #'char=)
             ()
-            (format nil "~A Source must not use the connect-view wrapper"
-                    page-title))
-    (assert (not (search "hyperdoc-source-connect-line" source-html :test #'char=))
-            ()
-            (format nil "~A Source must not use connect-line anchors"
-                    page-title))
-    (assert (not (search "hyperdoc-connect-provider-surface" source-html :test #'char=))
-            ()
-            (format nil "~A Source must not render connect chrome"
-                    page-title))
-    (assert (not (search "hyperdoc-dom-connect-surface" source-html :test #'char=))
-            ()
-            (format nil "~A Source must not render the connectable surface shell"
+            (format nil "~A Source must keep source-v1 provider metadata"
                     page-title))))
 
 (defun run-dmx-shared-workspace-source-view-smoke-test ()
-  (assert-plain-page-source-view
+  (assert-connectable-page-source-view
    "Workspace-native annotations in a DMX workspace"
    "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
-  (assert-plain-page-source-view
+  (assert-connectable-page-source-view
    "A DOM-annotation connect gesture"
    "# A DOM-annotation connect gesture"))
+
+(defun run-source-pane-layout-evidence-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    "Source pane layout evidence"
+                                    :signal-error? t))
+         (model (hyperdoc::chunk-source-pane-layout-evidence))
+         (views (dmx-shared-workspace-docs-load-inspector-views-for-object model))
+         (overview (dmx-shared-workspace-docs-find-view-by-title views "Overview"))
+         (evidence-view (dmx-shared-workspace-docs-find-view-by-title views "Evidence"))
+         (dispatch-view (dmx-shared-workspace-docs-find-view-by-title views "Dispatch"))
+         (runtime-view (dmx-shared-workspace-docs-find-view-by-title views "Runtime"))
+         (evidence-html (and evidence-view
+                             (html-inspector-views:view-html evidence-view)))
+         (dispatch-html (and dispatch-view
+                             (html-inspector-views:view-html dispatch-view)))
+         (runtime-html (and runtime-view
+                            (html-inspector-views:view-html runtime-view))))
+    (assert-type 'hyperdoc::html-page
+                 page
+                 "Source pane layout evidence page must materialize as a HyperDoc page")
+    (assert-type 'hyperdoc::source-pane-layout-model
+                 model
+                 "Source pane layout entrypoint must materialize a first-class evidence model")
+    (dolist (view (list overview evidence-view dispatch-view runtime-view))
+      (assert-true view
+                   "Source pane layout evidence model must expose overview, evidence, dispatch, and runtime views"))
+    (assert-shared-workspace-page-contains-all
+     (read-dmx-shared-workspace-page
+      "hyperdoc/Source pane layout evidence.html")
+     "Source pane layout evidence page"
+     '("(chunk-source-pane-layout-evidence)"
+       "Workspace-native annotations in a DMX workspace"
+       "A DOM-annotation connect gesture"))
+    (assert-shared-workspace-page-contains-all
+     evidence-html
+     "Source pane layout evidence table"
+     '("HTML/Markdown Source dispatch"
+       "Pane chrome and slot shell"
+       "Server-side source/connect composition"
+       "Shared and plain file-source rendering"
+       "Source-pane layout CSS"
+       "Pane-slot and source-surface runtime handshake"
+       "hyperdoc-explorer/html-pages.lisp"
+       "hyperdoc-explorer/dom-annotations.lisp"
+       "hyperbook-explorer/html-books.lisp"
+       "hyperbook-server/inspector-dom-association.lisp"
+       "assets/hyperdoc/css/dom-annotation-connect.css"
+       "assets/hyperdoc/js/dom-annotation-connect.js"
+       "Representative Source-pane state"))
+    (assert-shared-workspace-page-contains-all
+     dispatch-html
+     "Source pane layout dispatch view"
+     '("html-page"
+       "markdown-page"
+       "text-page"
+       "render-source-connect-surface"
+       "hyperdoc-explorer/explorer.lisp"
+       "hyperbook-explorer/html-books.lisp"))
+    (assert-shared-workspace-page-contains-all
+     runtime-html
+     "Source pane layout runtime view"
+     '("source-v1"
+       "Source"
+       "latent"
+       "Connect"
+       "Annotation"
+       "Guide"))
+    (dolist (relative-path '("assets/hyperdoc/css/dom-annotation-connect.css"
+                             "assets/hyperdoc/js/dom-annotation-connect.js"))
+      (let* ((target (hyperdoc::source-pane-layout-source-target relative-path))
+             (target-views
+               (dmx-shared-workspace-docs-load-inspector-views-for-object target))
+             (source-view
+               (dmx-shared-workspace-docs-find-view-by-title target-views "Source")))
+        (assert-true target
+                     (format nil "Evidence path ~A must resolve to an inspectable target"
+                             relative-path))
+        (assert-true source-view
+                     (format nil "Evidence target ~A must expose a Source view"
+                             relative-path))))))
 
 (defun run-dmx-shared-workspace-docs-smoke-tests ()
   (run-dmx-shared-workspace-documentation-pages-smoke-test)
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
+  (run-source-pane-layout-evidence-smoke-test)
   (format t "~&DMX shared-workspace docs smoke tests passed.~%")
   t)

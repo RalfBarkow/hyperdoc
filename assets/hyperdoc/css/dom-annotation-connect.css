@@ -1,5 +1,10 @@
 .hyperdoc-dom-connect-surface {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 .hyperdoc-dom-connect-pane-chrome {
@@ -302,15 +307,37 @@
 
 .hyperdoc-dom-connect-root {
   position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
-.hyperdoc-source-pane,
+.hyperdoc-source-pane {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.hyperdoc-source-pane-view,
 .hyperdoc-source-connect-view {
   display: block;
-  border: 1px solid rgba(107, 79, 47, 0.18);
-  border-radius: 0.8rem;
-  background: rgba(255, 252, 247, 0.98);
-  overflow: auto;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
 }
 
 .hyperdoc-source-navigation-view {
@@ -360,8 +387,7 @@
 }
 
 .hyperdoc-source-navigation-view .hyperdoc-source-connect-view {
-  border-color: rgba(107, 79, 47, 0.12);
-  background: rgba(255, 253, 249, 0.99);
+  min-height: 0;
 }
 
 .hyperdoc-source-navigation-view .hyperdoc-source-connect-line {
@@ -373,6 +399,7 @@
   display: grid;
   grid-template-columns: minmax(3.5rem, auto) 1fr;
   gap: 0.9rem;
+  box-sizing: border-box;
   width: 100%;
   border: 0;
   border-bottom: 1px solid rgba(107, 79, 47, 0.08);
@@ -398,8 +425,10 @@
 
 .hyperdoc-source-pane-line-text,
 .hyperdoc-source-connect-line-text {
+  display: block;
+  min-width: 0;
   white-space: pre;
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
 .hyperdoc-source-connect-line.hyperdoc-dom-connect-hover {

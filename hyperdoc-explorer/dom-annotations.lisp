@@ -918,11 +918,13 @@
                       (views:esc line-text))))))
 
 (defmethod render-anchor-provider-body ((provider source-view-anchor-provider))
-  (hb:render-source-surface-lines
-   (anchor-provider-pathname-of provider)
-   #'(lambda (line-number line-text)
-       (render-source-anchor-line provider line-number line-text))
-   :wrapper-class "hyperdoc-source-connect-view"))
+  (views:html
+    (:div :class "hyperdoc-source-pane"
+          (hb:render-source-surface-lines
+           (anchor-provider-pathname-of provider)
+           #'(lambda (line-number line-text)
+               (render-source-anchor-line provider line-number line-text))
+           :wrapper-class "hyperdoc-source-connect-view"))))
 
 (defun render-anchor-provider-surface (provider context-object view-title)
   (let* ((source-cell (lwcells:cell ""))

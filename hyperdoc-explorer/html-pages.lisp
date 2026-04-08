@@ -41,15 +41,6 @@
       (setf links (hb:extract-links page))))
   page)
 
-;;
-;; HTML and Markdown source tabs should be plain readable file panes, not the
-;; connectable source-anchor surface used for code/system sources.
-;;
-
-(views:defview 👀source (page html-page)
-  (views:html-view :title "Source" :priority 10
-    (hb:render-file-source-surface (file-of page))))
-
 (defun set-title (page)
   (with-slots (parse-tree id) page
     (setf id (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
