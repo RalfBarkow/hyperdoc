@@ -65,15 +65,17 @@
 
 (defun render-source-surface-line (line-number line-text)
   (views:html
-    (:div :class "hyperdoc-source-connect-line"
-          (:span :class "hyperdoc-source-connect-line-number"
+    (:div :class "hyperdoc-source-pane-line"
+          (:span :class "hyperdoc-source-pane-line-number"
                  (views:esc (format nil "~D" line-number)))
-          (:span :class "hyperdoc-source-connect-line-text"
+          (:span :class "hyperdoc-source-pane-line-text"
                  (views:esc line-text)))))
 
-(defun render-source-surface-lines (pathname render-line)
+(defun render-source-surface-lines (pathname render-line
+                                    &key
+                                      (wrapper-class "hyperdoc-source-pane"))
   (views:html
-    (:div :class "hyperdoc-source-connect-view"
+    (:div :class wrapper-class
           (loop for line-text in (uiop:read-file-lines pathname)
                 for line-number from 1
                 do (funcall render-line line-number line-text)))))

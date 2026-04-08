@@ -921,7 +921,8 @@
   (hb:render-source-surface-lines
    (anchor-provider-pathname-of provider)
    #'(lambda (line-number line-text)
-       (render-source-anchor-line provider line-number line-text))))
+       (render-source-anchor-line provider line-number line-text))
+   :wrapper-class "hyperdoc-source-connect-view"))
 
 (defun render-anchor-provider-surface (provider context-object view-title)
   (let* ((source-cell (lwcells:cell ""))

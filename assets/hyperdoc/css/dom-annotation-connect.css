@@ -304,6 +304,7 @@
   position: relative;
 }
 
+.hyperdoc-source-pane,
 .hyperdoc-source-connect-view {
   display: block;
   border: 1px solid rgba(107, 79, 47, 0.18);
@@ -367,6 +368,7 @@
   padding: 0.18rem 0.7rem;
 }
 
+.hyperdoc-source-pane-line,
 .hyperdoc-source-connect-line {
   display: grid;
   grid-template-columns: minmax(3.5rem, auto) 1fr;
@@ -383,15 +385,18 @@
   font-size: 0.9rem;
 }
 
+.hyperdoc-source-pane-line:last-child,
 .hyperdoc-source-connect-line:last-child {
   border-bottom: 0;
 }
 
+.hyperdoc-source-pane-line-number,
 .hyperdoc-source-connect-line-number {
   color: rgba(84, 64, 42, 0.6);
   user-select: none;
 }
 
+.hyperdoc-source-pane-line-text,
 .hyperdoc-source-connect-line-text {
   white-space: pre;
   overflow-x: auto;
