@@ -27,10 +27,138 @@
         (format nil "~A..." (subseq source 0 limit))
         source)))
 
+(defun code-path-graph-current-hyperdoc ()
+  (when (and (boundp 'hyperbook::*current-page*)
+             hyperbook::*current-page*)
+    (let ((hyperbook (hyperbook:hyperbook-of hyperbook::*current-page*)))
+      (when (typep hyperbook 'hyperdoc::hyperdoc)
+        hyperbook))))
+
+(defun code-path-graph-normalized-pathname (path-designator)
+  (when path-designator
+    (let ((pathname (pathname path-designator)))
+      (or (ignore-errors (truename pathname))
+          pathname))))
+
+(defun code-path-graph-canonical-path-string (path-designator)
+  (when-let (pathname (code-path-graph-normalized-pathname path-designator))
+    (string-downcase
+     (substitute #\/ #\\ (namestring pathname)))))
+
+(defun code-path-graph-source-page-path-strings (hyperdoc page)
+  (let* ((source-path
+           (code-path-graph-normalized-pathname
+            (asdf:component-pathname (hyperdoc:file-of page))))
+         (system-root
+           (code-path-graph-normalized-pathname
+            (ignore-errors
+              (asdf:system-source-directory
+               (hyperdoc:asdf-system-of hyperdoc)))))
+         (hyperdoc-root
+           (code-path-graph-normalized-pathname
+            (hyperdoc:directory-of hyperdoc))))
+    (remove nil
+            (remove-duplicates
+             (list (code-path-graph-canonical-path-string source-path)
+                   (and source-path
+                        system-root
+                        (code-path-graph-canonical-path-string
+                         (enough-namestring source-path system-root)))
+                   (and source-path
+                        hyperdoc-root
+                        (code-path-graph-canonical-path-string
+                         (enough-namestring source-path hyperdoc-root))))
+             :test #'string=))))
+
+(defun code-path-graph-node-source-path-strings (node)
+  (when-let (source-file (getf node :source-file))
+    (remove nil
+            (remove-duplicates
+             (list (code-path-graph-canonical-path-string source-file)
+                   (when-let (pathname
+                                (code-path-graph-normalized-pathname
+                                 source-file))
+                     (code-path-graph-canonical-path-string pathname)))
+             :test #'string=))))
+
+(defun code-path-graph-source-page-in-hyperdoc (hyperdoc node)
+  (when-let (source-paths (code-path-graph-node-source-path-strings node))
+    (loop for page being the hash-values of (hyperdoc:pages-of hyperdoc)
+          when (and (typep page 'hyperdoc::code-page)
+                    (intersection source-paths
+                                  (code-path-graph-source-page-path-strings
+                                   hyperdoc
+                                   page)
+                                  :test #'string=))
+            do (return page))))
+
+(defun code-path-graph-find-source-component-in-tree (component source-paths)
+  (or (and (typep component 'asdf:source-file)
+           (when-let (component-path
+                        (code-path-graph-canonical-path-string
+                         (ignore-errors
+                           (asdf:component-pathname component))))
+             (and (member component-path source-paths :test #'string=)
+                  component)))
+      (loop for child in (ignore-errors (asdf:component-children component))
+            for match = (code-path-graph-find-source-component-in-tree
+                         child
+                         source-paths)
+            when match
+              do (return match))))
+
+(defun code-path-graph-source-component (node)
+  (when-let (source-paths (code-path-graph-node-source-path-strings node))
+    (loop for system-name in (sort (copy-list (asdf:registered-systems))
+                                   #'string<)
+          for system = (ignore-errors (asdf:find-system system-name))
+          when system
+            do (when-let (component
+                           (code-path-graph-find-source-component-in-tree
+                            system
+                            source-paths))
+                 (return component)))))
+
+(defun code-path-graph-default-source-page-hyperdoc ()
+  (or (code-path-graph-current-hyperdoc)
+      (and (boundp 'hyperdoc::*hyperdoc*)
+           (typep hyperdoc::*hyperdoc* 'hyperdoc::hyperdoc)
+           hyperdoc::*hyperdoc*)
+      (loop for hyperbook in (hyperbook:hyperbooks-of hyperbook:*catalog*)
+            when (typep hyperbook 'hyperdoc::hyperdoc)
+              do (return hyperbook))))
+
+(defun code-path-graph-source-page (node)
+  (let ((current-hyperdoc (code-path-graph-current-hyperdoc)))
+    (or (and current-hyperdoc
+             (code-path-graph-source-page-in-hyperdoc current-hyperdoc node))
+        (loop for hyperbook in (hyperbook:hyperbooks-of hyperbook:*catalog*)
+              unless (or (eq hyperbook current-hyperdoc)
+                         (not (typep hyperbook 'hyperdoc::hyperdoc)))
+                do (when-let (page
+                               (code-path-graph-source-page-in-hyperdoc
+                                hyperbook
+                                node))
+                     (return page)))
+        (when-let (component (code-path-graph-source-component node))
+          (when-let (hyperdoc (code-path-graph-default-source-page-hyperdoc))
+            (hyperdoc::make-code-page hyperdoc component))))))
+
+(defun code-path-graph-source-target (node)
+  (when-let (page (code-path-graph-source-page node))
+    (if-let (source-function (getf node :source-function))
+      (hyperdoc::make-code-page-source-navigation page source-function)
+      page)))
+
 (defun render-code-path-graph-source (node)
   (if-let (label (hyperdoc::code-path-graph-source-label node))
-    (views:html
-      (:code (views:esc label)))
+    (if-let (target (code-path-graph-source-target node))
+      (views:html
+        (:code (views:object-ref target
+                                 :display label
+                                 :select "Source")))
+      (views:html
+        (:code (views:esc label))))
     (views:html
       (:span :style "opacity: 0.55;" "runtime target"))))
 

@@ -157,6 +157,33 @@
           :status :active
           :summary "Carries \"quoted\" & joined text."))))
 
+(defun make-source-linked-code-path-graph-smoke-graph ()
+  (hyperdoc::make-code-path-graph
+   :id "source-linked-graph"
+   :title "Source-linked graph"
+   :summary "Regression graph for clickable source-backed references."
+   :nodes
+   (list
+    (list :id "workspace-read"
+          :label "workspace read"
+          :role :read-entry
+          :source-file "hyperdoc/dmx-workspace-journal.lisp"
+          :source-function "read-dmx-workspace-journal"
+          :summary "Reads the workspace journal."))))
+
+(defun make-source-file-only-code-path-graph-smoke-graph ()
+  (hyperdoc::make-code-path-graph
+   :id "source-file-only-graph"
+   :title "Source file-only graph"
+   :summary "Regression graph for clickable source references without function landing context."
+   :nodes
+   (list
+    (list :id "workspace-file"
+          :label "workspace file"
+          :role :read-entry
+          :source-file "hyperdoc/dmx-workspace-journal.lisp"
+          :summary "Reads the workspace journal file."))))
+
 (defun code-path-graph-smoke-find-view-by-title (views title)
   (find title
         views
@@ -210,6 +237,108 @@
      "Code-path graph DOT export view"
      '("Graphviz DOT export for the current graph object"
        "example-code-path"))))
+
+(defun run-code-path-graph-source-reference-link-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((graph (make-source-linked-code-path-graph-smoke-graph))
+         (node (first (hyperdoc::code-path-graph-node-seq graph)))
+         (expected-source-label
+           "hyperdoc/dmx-workspace-journal.lisp :: read-dmx-workspace-journal")
+         (page (hyperdoc/inspector::code-path-graph-source-page node))
+         (target (hyperdoc/inspector::code-path-graph-source-target node))
+         (views (code-path-graph-smoke-load-inspector-views-for-object graph))
+         (source-view
+           (code-path-graph-smoke-find-view-by-title views "Source references"))
+         (source-html (html-inspector-views:view-html source-view))
+         (target-views
+           (code-path-graph-smoke-load-inspector-views-for-object target))
+         (target-source-view
+           (code-path-graph-smoke-find-view-by-title target-views "Source"))
+         (target-source-html (html-inspector-views:view-html target-source-view)))
+    (code-path-assert-true page
+                           "Source-backed graph node must resolve to a source page")
+    (code-path-assert-true (typep page 'hyperdoc::code-page)
+                           "Resolved source target must be a code page")
+    (code-path-assert-true target
+                           "Source-backed graph node must resolve to an inspectable source target")
+    (code-path-assert-true
+     (typep target 'hyperdoc::code-page-source-navigation)
+     "Source-backed graph node with :source-function must wrap the code page with source navigation context")
+    (code-path-assert-contains "dmx-workspace-journal.lisp"
+                               (namestring (asdf:component-pathname
+                                            (hyperdoc:file-of page)))
+                               "Resolved source page must point at the DMX journal file")
+    (code-path-assert-contains expected-source-label
+                               source-html
+                               "Source references view must keep the source label visible")
+    (code-path-assert-contains "inspector-inspect"
+                               source-html
+                               "Source references view must render the source label as an inspectable object reference")
+    (code-path-assert-not-contains
+     (format nil "~A&lt;/code&gt;" expected-source-label)
+     source-html
+     "Source references view must not leak an escaped closing code tag into the visible source label")
+    (code-path-assert-not-contains
+     (format nil "~A</code>" expected-source-label)
+     source-html
+     "Source references view must not concatenate a raw closing code tag into the source label text")
+    (code-path-assert-contains "hyperdoc-source-navigation-view"
+                               target-source-html
+                               "Navigation-aware source pages must render the dedicated source-layout wrapper")
+    (code-path-assert-contains "hyperdoc-source-navigation-source"
+                               target-source-html
+                               "Navigation-aware source pages must keep the source surface inside the dedicated primary wrapper")
+    (code-path-assert-contains "hyperdoc-source-navigation-context"
+                               target-source-html
+                               "Navigation-aware source pages must keep the requested-function context visible")
+    (code-path-assert-contains "Requested function"
+                               target-source-html
+                               "Source view must surface the requested function as navigation context")
+    (code-path-assert-contains "read-dmx-workspace-journal"
+                               target-source-html
+                               "Source view must keep the requested function name visible")
+    (code-path-assert-contains "data-hyperdoc-source-focus"
+                               target-source-html
+                               "Source view must mark the focused source lines for best-effort landing")
+    (code-path-assert-contains "hyperdoc-source-connect-line-focus"
+                               target-source-html
+                               "Source view must highlight the best-effort landing lines when a function match is found")))
+
+(defun run-code-path-graph-source-reference-file-only-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((graph (make-source-file-only-code-path-graph-smoke-graph))
+         (node (first (hyperdoc::code-path-graph-node-seq graph)))
+         (expected-source-label "hyperdoc/dmx-workspace-journal.lisp")
+         (target (hyperdoc/inspector::code-path-graph-source-target node))
+         (source-target-views
+           (code-path-graph-smoke-load-inspector-views-for-object target))
+         (target-source-view
+           (code-path-graph-smoke-find-view-by-title source-target-views "Source"))
+         (target-source-html (html-inspector-views:view-html target-source-view))
+         (graph-views (code-path-graph-smoke-load-inspector-views-for-object graph))
+         (source-view
+           (code-path-graph-smoke-find-view-by-title graph-views "Source references"))
+         (source-html (html-inspector-views:view-html source-view)))
+    (code-path-assert-true target
+                           "File-backed graph node must still resolve to an inspectable source target")
+    (code-path-assert-true (typep target 'hyperdoc::code-page)
+                           "File-backed graph node without :source-function must still resolve to a code page")
+    (code-path-assert-true (not (typep target 'hyperdoc::code-page-source-navigation))
+                           "File-backed graph node without :source-function must not add navigation wrapper state")
+    (code-path-assert-contains expected-source-label
+                               source-html
+                               "File-backed source references must remain clickable and visible without a function name")
+    (code-path-assert-not-contains
+     (format nil "~A&lt;/code&gt;" expected-source-label)
+     source-html
+     "File-backed source references must not leak escaped closing code-tag text")
+    (code-path-assert-not-contains
+     (format nil "~A</code>" expected-source-label)
+     source-html
+     "File-backed source references must not leak raw closing code-tag text into the label")
+    (code-path-assert-not-contains "Requested function:"
+                                   target-source-html
+                                   "Plain file-backed source pages must keep the existing Source view without navigation caption")))
 
 (defun run-graphviz-transport-entity-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
@@ -339,6 +468,8 @@
 (defun run-code-path-graphs-smoke-tests ()
   (run-code-path-graph-dot-export-smoke-test)
   (run-code-path-graph-rendered-view-smoke-test)
+  (run-code-path-graph-source-reference-link-smoke-test)
+  (run-code-path-graph-source-reference-file-only-smoke-test)
   (run-graphviz-transport-entity-smoke-test)
   (run-dmx-journal-code-path-graph-smoke-test)
   (run-workspace-annotation-path-diff-graph-smoke-test)

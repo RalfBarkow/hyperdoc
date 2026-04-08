@@ -851,7 +851,13 @@
 (defclass source-view-anchor-provider (view-anchor-provider)
   ((pathname :initarg :pathname :reader anchor-provider-pathname-of)
    (context-object :initarg :context-object
-                   :reader anchor-provider-context-object-of)))
+                   :reader anchor-provider-context-object-of)
+   (focus-start-line :initarg :focus-start-line
+                     :initform nil
+                     :reader anchor-provider-focus-start-line-of)
+   (focus-end-line :initarg :focus-end-line
+                   :initform nil
+                   :reader anchor-provider-focus-end-line-of)))
 
 (defclass fedwiki-view-anchor-provider (view-anchor-provider)
   ((page :initarg :page :reader anchor-provider-page-of)))
@@ -882,11 +888,20 @@
 (defun render-source-anchor-line (provider line-number line-text)
   (let* ((pathname (namestring (anchor-provider-pathname-of provider)))
          (column-end (+ 1 (length line-text)))
-         (value (format nil "~A#L~D" pathname line-number)))
+         (value (format nil "~A#L~D" pathname line-number))
+         (focus-start-line (anchor-provider-focus-start-line-of provider))
+         (focus-end-line (or (anchor-provider-focus-end-line-of provider)
+                             focus-start-line))
+         (focused?
+           (and focus-start-line
+                (<= focus-start-line line-number focus-end-line))))
     (views:html
       (:button :type "button"
-               :class "hyperdoc-source-connect-line"
+               :class (if focused?
+                          "hyperdoc-source-connect-line hyperdoc-source-connect-line-focus"
+                          "hyperdoc-source-connect-line")
                :data-hyperdoc-connect-source-anchor "true"
+               :data-hyperdoc-source-focus (if focused? "true" "false")
                :data-hyperdoc-source-path pathname
                :data-hyperdoc-source-start-line line-number
                :data-hyperdoc-source-end-line line-number
@@ -1096,7 +1111,9 @@
    context-object
    view-title))
 
-(defun render-source-connect-surface (context-object view-title pathname)
+(defun render-source-connect-surface
+    (context-object view-title pathname
+     &key focus-start-line focus-end-line)
   (render-anchor-provider-surface
    (make-instance 'source-view-anchor-provider
                   :kind "source-v1"
@@ -1106,6 +1123,8 @@
                   :help-detail
                   "Connect stores file path plus line and column range. These anchors stay useful for the same file revision, but line numbers can drift when the source changes."
                   :pathname pathname
+                  :focus-start-line focus-start-line
+                  :focus-end-line focus-end-line
                   :context-object context-object)
    context-object
    view-title))

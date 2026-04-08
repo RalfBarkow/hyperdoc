@@ -14,6 +14,150 @@
                                    "Source"
                                    (source-code-pathname page))))
 
+(defclass code-page-source-navigation (code-page)
+  ((requested-source-function
+    :reader requested-source-function-of
+    :initarg :requested-source-function
+    :initform nil)))
+
+(defun make-code-page-source-navigation (page requested-source-function)
+  (if-let (requested-function
+           (and requested-source-function
+                (let ((text
+                        (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                     (format nil "~A"
+                                             requested-source-function))))
+                  (unless (string= text "")
+                    text))))
+    (make-instance 'code-page-source-navigation
+                   :hyperbook (hyperbook-of page)
+                   :id (id-of page)
+                   :file (file-of page)
+                   :requested-source-function requested-function)
+    page))
+
+(defun normalize-code-page-source-function-name (name)
+  (when name
+    (let* ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                 (format nil "~A" name)))
+           (simple
+             (if-let (separator (position #\: trimmed :from-end t))
+               (subseq trimmed (1+ separator))
+               trimmed)))
+      (unless (string= simple "")
+        (string-downcase simple)))))
+
+(defun code-page-definition-name-string (raw-name)
+  (cond
+    ((symbolp raw-name)
+     (string-downcase (symbol-name raw-name)))
+    ((and (consp raw-name)
+          (eq (first raw-name) 'setf)
+          (symbolp (second raw-name)))
+     (format nil "(setf ~A)"
+             (string-downcase (symbol-name (second raw-name)))))
+    (t
+     nil)))
+
+(defun code-page-toplevel-definition-name (toplevel-form)
+  (let ((cst (views/standard:cst-of toplevel-form)))
+    (when (cst:consp cst)
+      (let* ((head (ignore-errors (cst:raw (cst:first cst))))
+             (raw-name
+               (and (member head '(defun
+                                   defmacro
+                                   defgeneric
+                                   defmethod
+                                   define-compiler-macro
+                                   define-setf-expander
+                                   define-modify-macro
+                                   defclass
+                                   define-condition
+                                   defstruct)
+                            :test #'eq)
+                    (ignore-errors (cst:raw (cst:second cst))))))
+        (or (code-page-definition-name-string raw-name)
+            (and (eq head 'defstruct)
+                 (consp raw-name)
+                 (code-page-definition-name-string (first raw-name))))))))
+
+(defun source-offset-line-number (source offset &key end-position?)
+  (let* ((length (length source))
+         (raw-offset (or offset 0))
+         (effective-offset
+           (if end-position?
+               (max 0 (1- raw-offset))
+               raw-offset))
+         (clamped-offset (max 0 (min effective-offset length))))
+    (+ 1 (count #\Newline source :end clamped-offset))))
+
+(defun code-page-source-navigation-focus-spec (page)
+  (when-let (requested-source-function (requested-source-function-of page))
+    (let ((normalized-request
+            (normalize-code-page-source-function-name
+             requested-source-function)))
+      (when normalized-request
+        (let ((focus-spec
+                (ignore-errors
+                  (let ((source (uiop:read-file-string
+                                 (source-code-pathname page))))
+                    (loop for toplevel-form in (parsed-toplevel-forms page)
+                          for cst = (views/standard:cst-of toplevel-form)
+                          for definition-name =
+                          (code-page-toplevel-definition-name toplevel-form)
+                          when (and definition-name
+                                    (string= definition-name normalized-request))
+                            do (when-let (source-range (cst:source cst))
+                                 (let ((start-line
+                                         (source-offset-line-number
+                                          source
+                                          (car source-range)))
+                                       (end-line
+                                         (source-offset-line-number
+                                          source
+                                          (cdr source-range)
+                                          :end-position? t)))
+                                   (return
+                                     (list :requested-source-function
+                                           requested-source-function
+                                           :start-line start-line
+                                           :end-line (max start-line end-line)
+                                           :match-p t)))))))))
+          (or focus-spec
+              (list :requested-source-function requested-source-function
+                    :match-p nil)))))))
+
+(defun render-code-page-source-navigation-context (focus-spec)
+  (when-let (requested-source-function
+             (getf focus-spec :requested-source-function))
+    (views:html
+      (:div :class "hyperdoc-source-navigation-context"
+            (:div :class "hyperdoc-source-navigation-context-main"
+                  (:span :class "hyperdoc-source-navigation-context-label"
+                         "Requested function")
+                  (:code :class "hyperdoc-source-navigation-context-function"
+                         (views:esc requested-source-function)))
+            (:div :class "hyperdoc-source-navigation-context-note"
+                  (views:esc
+                   (if (getf focus-spec :match-p)
+                       "Best-effort landing highlighted in the source surface below."
+                       "Best-effort landing unavailable in this file; showing the full source surface.")))))))
+
+(views:defview views:👀source (page code-page-source-navigation)
+  (let* ((focus-spec (code-page-source-navigation-focus-spec page))
+         (focus-start-line (getf focus-spec :start-line))
+         (focus-end-line (getf focus-spec :end-line)))
+    (views:html-view :title "Source" :priority 1
+      (views:html
+        (:div :class "hyperdoc-source-navigation-view"
+              (render-code-page-source-navigation-context focus-spec)
+              (:div :class "hyperdoc-source-navigation-source"
+                    (render-source-connect-surface page
+                                                   "Source"
+                                                   (source-code-pathname page)
+                                                   :focus-start-line focus-start-line
+                                                   :focus-end-line focus-end-line)))))))
+
 ;;
 ;; HTML parse tree
 ;;

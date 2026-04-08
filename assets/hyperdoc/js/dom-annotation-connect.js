@@ -2483,6 +2483,17 @@
       }, true);
     }
     schedulePaneSurfaceSync(state);
+    if (surface.dataset.hyperdocSourceFocusApplied !== "true") {
+      surface.dataset.hyperdocSourceFocusApplied = "true";
+      var focusLine = surface.querySelector(
+        ".hyperdoc-source-connect-line[data-hyperdoc-source-focus='true']"
+      );
+      if (focusLine && typeof focusLine.scrollIntoView === "function") {
+        window.setTimeout(function () {
+          focusLine.scrollIntoView({ block: "center", inline: "nearest" });
+        }, 0);
+      }
+    }
   }
 
   window.hyperdocDomConnect = {
