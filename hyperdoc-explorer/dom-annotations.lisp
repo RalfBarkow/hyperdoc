@@ -918,13 +918,10 @@
                       (views:esc line-text))))))
 
 (defmethod render-anchor-provider-body ((provider source-view-anchor-provider))
-  (let ((lines (uiop:read-file-lines (anchor-provider-pathname-of provider))))
-    (views:html
-      (:div :class "hyperdoc-source-connect-view"
-            (loop for line-text in lines
-                  for line-number from 1
-                  do (render-source-anchor-line
-                      provider line-number line-text))))))
+  (hb:render-source-surface-lines
+   (anchor-provider-pathname-of provider)
+   #'(lambda (line-number line-text)
+       (render-source-anchor-line provider line-number line-text))))
 
 (defun render-anchor-provider-surface (provider context-object view-title)
   (let* ((source-cell (lwcells:cell ""))

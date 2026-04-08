@@ -44,6 +44,8 @@
           replace-by-hyperbook-link
           register-link-target-rewriter
           render-hyperbook-or-page-link
+          render-source-surface-lines
+          render-file-source-surface
           👀links
           👀backlinks
           👀lookup-issues

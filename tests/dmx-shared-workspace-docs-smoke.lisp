@@ -595,9 +595,33 @@
      '("Installation-dependent"
        "registered non-Basic AuthorizationMethod"))))
 
+(defun run-dmx-shared-workspace-source-view-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    "Workspace-native annotations in a DMX workspace"
+                                    :signal-error? t))
+         (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
+         (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
+         (source-html (and source-view
+                           (html-inspector-views:view-html source-view))))
+    (assert-true source-view
+                 "Workspace-native annotations page must expose a Source view")
+    (assert (search "hyperdoc-source-connect-view" source-html :test #'char=)
+            ()
+            "HTML-page Source must use the shared source-surface wrapper")
+    (assert (search "hyperdoc-source-connect-line-number" source-html :test #'char=)
+            ()
+            "HTML-page Source must render line numbers")
+    (assert (search "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;"
+                    source-html
+                    :test #'char=)
+            ()
+            "HTML-page Source must render escaped source lines inside the shared source surface")))
+
 (defun run-dmx-shared-workspace-docs-smoke-tests ()
   (run-dmx-shared-workspace-documentation-pages-smoke-test)
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
+  (run-dmx-shared-workspace-source-view-smoke-test)
   (format t "~&DMX shared-workspace docs smoke tests passed.~%")
   t)

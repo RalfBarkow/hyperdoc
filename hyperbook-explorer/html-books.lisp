@@ -53,11 +53,38 @@
       views:👀items
       (views:rename :title "Pages" :priority 3)))
 
+(defun include-source-surface-assets ()
+  ;; The shared line-numbered source pane uses HyperDoc's source-surface CSS
+  ;; when those assets are available in the current runtime.
+  (ignore-errors
+    (views:add-asset-path "/hyperdoc/"
+                          (asdf:system-relative-pathname
+                           :hyperdoc
+                           "assets/hyperdoc/"))
+    (views:include-css "/hyperdoc/css/dom-annotation-connect.css")))
+
+(defun render-source-surface-line (line-number line-text)
+  (views:html
+    (:div :class "hyperdoc-source-connect-line"
+          (:span :class "hyperdoc-source-connect-line-number"
+                 (views:esc (format nil "~D" line-number)))
+          (:span :class "hyperdoc-source-connect-line-text"
+                 (views:esc line-text)))))
+
+(defun render-source-surface-lines (pathname render-line)
+  (views:html
+    (:div :class "hyperdoc-source-connect-view"
+          (loop for line-text in (uiop:read-file-lines pathname)
+                for line-number from 1
+                do (funcall render-line line-number line-text)))))
+
+(defun render-file-source-surface (pathname)
+  (include-source-surface-assets)
+  (render-source-surface-lines pathname #'render-source-surface-line))
+
 (views:defview views:👀source (page html-page)
-  (-> page
-      file-of
-      views:👀content
-      (views:rename :title "Source" :priority 10)))
+  (views:html-view :title "Source" :priority 10
+    (render-file-source-surface (file-of page))))
 
 (defmethod find-link-sources ((hb html-hyperbook) hyperbook-id page-id)
   (load-pages hb)
