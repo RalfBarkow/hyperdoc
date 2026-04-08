@@ -97,9 +97,32 @@
      "context-window"
      "me, ChatGPT, and Codex"
      "DMX workspace journal model"
+     "How to work safely in topicmap context-window (919822)"
      "restore_workspace_note_revision"
      "synthesized-from-diff"
      "raw transcript archive"))
+  (assert-shared-workspace-page-contains-all
+   (read-dmx-shared-workspace-page
+    "hyperdoc/How to work safely in topicmap context-window (919822).html")
+   "How to work safely in topicmap context-window (919822)"
+   '("topicmap 919822"
+     "context-window"
+     "shared blackboard"
+     "not a generic DMX mutation playground"
+     "guarded shared-workspace boundary"
+     "workspace assignment"
+     "topicmap placement"
+     "dry-run-first"
+     "Do not treat topicmap visibility as ownership."
+     "Do not treat the workspace as a raw transcript archive"
+     "continue_workspace_annotation"
+     "repair_workspace_topic_assignment"
+     "922464"
+     "922586"
+     "922451"
+     "DMX MCP server for shared workspace"
+     "Using guarded workspace topic lifecycle tools"
+     "Using authenticated workspace assignment repair console"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/DMX note read-write boundary.html")
@@ -198,6 +221,7 @@
      "repair_workspace_topic_assignment"
      "upsert_workspace_topic_factory_snippet"
      "Diagnosing DMX workspace assignment and topicmap placement"
+     "How to work safely in topicmap context-window (919822)"
      "upsert_workspace_topicmap_context"
      "remove_workspace_topic_from_topicmap"
      "delete_workspace_note"
@@ -213,6 +237,7 @@
     "hyperdoc/Workspace-native annotations in a DMX workspace.html")
    "Workspace-native annotations in a DMX workspace"
    '("Compare with guarded workspace path"
+     "How to work safely in topicmap context-window (919822)"
      "workspace assignment"
      "topicmap placement"
      "workspace-dock-annotation"))
@@ -273,6 +298,7 @@
     "hyperdoc/Using authenticated workspace assignment repair console.html")
    "Using authenticated workspace assignment repair console"
    '("Repair console"
+     "How to work safely in topicmap context-window (919822)"
      "Operational definition: chunk, chunk note, manifest note, content topic"
      "make-operational-definition-note-proxy"
      "username/password"
@@ -401,6 +427,8 @@
                     "DMX MCP server for shared workspace")
                    (hyperdoc::context-window-workspace-as-shared-blackboard-topic
                     "Context window workspace as shared blackboard")
+                   (hyperdoc::how-to-work-safely-in-topicmap-context-window-919822-topic
+                    "How to work safely in topicmap context-window (919822)")
                    (hyperdoc::dmx-workspace-journal-model-topic
                     "DMX workspace journal model")
                    (hyperdoc::dmx-note-read-write-boundary-topic
@@ -445,6 +473,7 @@
          (format nil "Missing Topics HyperBook page ~A" title)))))
   (dolist (page-title '("DMX MCP server for shared workspace"
                         "Context window workspace as shared blackboard"
+                        "How to work safely in topicmap context-window (919822)"
                         "DMX workspace journal model"
                         "DMX note read/write boundary"
                         "DMX machine-readable read paths"

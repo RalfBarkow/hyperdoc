@@ -3353,6 +3353,22 @@
                  "HyperDoc DMX architectural implications"
                  "Localhost FedWiki page promotion workflow")))
 
+(defun how-to-work-safely-in-topicmap-context-window-919822-topic ()
+  (make-topic
+   :id "how-to-work-safely-in-topicmap-context-window-919822"
+   :title "How to work safely in topicmap context-window (919822)"
+   :summary "Short operator-facing entrypoint for DMX topicmap 919822 that routes reads, guarded notes, annotation continuation, diagnosis, and explicit-auth repair without confusing visibility with ownership or widening HyperDoc into generic DMX mutation."
+   :references '("How to work safely in topicmap context-window (919822)"
+                 "Context window workspace as shared blackboard"
+                 "DMX MCP server for shared workspace"
+                 "DMX machine-readable read paths"
+                 "Using guarded workspace topic lifecycle tools"
+                 "Workspace-native annotations in a DMX workspace"
+                 "Diagnosing DMX workspace assignment and topicmap placement"
+                 "Diagnosing DMX workspace repair triage"
+                 "Using authenticated workspace assignment repair console"
+                 "HyperDoc three-mode DMX auth crosswalk")))
+
 (defun using-guarded-workspace-topic-lifecycle-tools-topic ()
   (make-topic
    :id "using-guarded-workspace-topic-lifecycle-tools"

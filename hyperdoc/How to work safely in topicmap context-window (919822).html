@@ -1,0 +1,100 @@
+<h1>How to work safely in topicmap context-window (919822)</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="How to work safely in topicmap context-window (919822)"><tt>How
+  to work safely in topicmap context-window (919822)</tt></a> is the short
+  operator-facing entrypoint for DMX topicmap 919822, the
+  <tt>context-window</tt> shared blackboard. Use it to choose the safe path
+  for reading, notes, annotation continuation, diagnosis, and explicit-auth
+  repair without treating the workspace as a generic DMX mutation playground
+  or a raw transcript archive.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="How to work safely in topicmap context-window (919822)"><tt>How to work safely in topicmap context-window (919822)</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a hyperbook="topics" page="Workspace-native annotations in a DMX workspace"><tt>Workspace-native annotations in a DMX workspace</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a hyperbook="topics" page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a></li>
+  <li><a hyperbook="topics" page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a></li>
+</ul>
+
+<h2>What 919822 is for</h2>
+
+<p>
+  Topicmap 919822 is the visible <tt>context-window</tt> shared
+  blackboard for shared work. It is where operators and tools inspect current
+  shared state, post guarded notes and handovers, continue saved workspace
+  annotations, and route the next action. It is not a generic DMX mutation
+  playground.
+</p>
+
+<h2>Stable rules</h2>
+
+<ul>
+  <li>Keep writes on the guarded shared-workspace boundary documented in <a page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a>.</li>
+  <li>Keep workspace assignment distinct from topicmap placement, as documented in <a page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a>.</li>
+  <li>Keep <tt>dry-run-first</tt> behavior wherever the live mutation contract is still uncertain.</li>
+  <li>Do not treat topicmap visibility as ownership.</li>
+  <li>Do not treat the workspace as a raw transcript archive; durable explanation belongs in HyperDoc pages.</li>
+</ul>
+
+<h2>Safe operating loop</h2>
+
+<ol>
+  <li>Read the current shared state first through <a page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a> or the canonical routes in <a page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a>.</li>
+  <li>Choose the narrow path for the actual task instead of improvising a raw DMX write.</li>
+  <li>After any live step, reread the topic or topicmap and keep durable conclusions in HyperDoc rather than only in the shared blackboard.</li>
+</ol>
+
+<h2>Which path to use</h2>
+
+<ul>
+  <li>Read or inspect current shared state: use <a page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a> and <a page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a>.</li>
+  <li>Add or update guarded workspace notes or handovers: use <a page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a>.</li>
+  <li>Continue a saved annotation after pending-auth: use <tt>continue_workspace_annotation</tt> from <a page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a>; for storage and reopen semantics, see <a page="Workspace-native annotations in a DMX workspace"><tt>Workspace-native annotations in a DMX workspace</tt></a>.</li>
+  <li>Inspect one suspicious object: use <a page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a>.</li>
+  <li>Inspect the current repair set: use <a page="Diagnosing DMX workspace repair triage"><tt>Diagnosing DMX workspace repair triage</tt></a>.</li>
+  <li>Backfill missing workspace assignment with explicit auth: use <a page="Using authenticated workspace assignment repair console"><tt>Using authenticated workspace assignment repair console</tt></a> or the guarded <tt>repair_workspace_topic_assignment</tt> path it documents.</li>
+  <li>Understand annotation storage and compatibility behavior: use <a page="Workspace-native annotations in a DMX workspace"><tt>Workspace-native annotations in a DMX workspace</tt></a>.</li>
+  <li>Understand auth modes and what they do not promise: use <a page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a>.</li>
+</ul>
+
+<h2>Do not confuse these</h2>
+
+<ul>
+  <li><b>Topicmap placement</b> vs <b>workspace assignment</b>: placement in <tt>919822</tt> is shared-blackboard visibility, while assignment to <tt>919815</tt> is workspace ownership.</li>
+  <li><b>Diagnosis</b> vs <b>mutation</b>: diagnosis stays read-only; repair is the separate explicit-auth mutation path and not a general DMX login system.</li>
+  <li><b>Native annotation semantics</b> vs <b>current compatibility-carrier persistence</b>: the save and reopen contract stays annotation-native even though current live persistence normally uses a <tt>dmx.notes.note</tt> compatibility carrier.</li>
+  <li><b>Shared blackboard</b> vs <b>durable HyperDoc documentation</b>: topicmap <tt>919822</tt> routes current shared work, while stable explanations stay in HyperDoc pages.</li>
+</ul>
+
+<h2>Acceptance examples</h2>
+
+<ul>
+  <li><tt>922464</tt> is the HyperDoc-owned canary repair candidate: it is visible in topicmap <tt>919822</tt>, missing workspace assignment, and should route from read-only diagnosis to guarded repair instead of direct ad hoc mutation.</li>
+  <li><tt>922586</tt> is the already-correct control: workspace assignment <tt>919815</tt> is already present, so it should be read as a control and not repaired.</li>
+  <li><tt>922451</tt> is the foreign object visible in topicmap <tt>919822</tt>: inspect it if needed, but do not repair it as HyperDoc-owned.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="Workspace-native annotations in a DMX workspace">Workspace-native annotations in a DMX workspace</a></li>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="Diagnosing DMX workspace repair triage">Diagnosing DMX workspace repair triage</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="HyperDoc three-mode DMX auth crosswalk">HyperDoc three-mode DMX auth crosswalk</a></li>
+</ul>
