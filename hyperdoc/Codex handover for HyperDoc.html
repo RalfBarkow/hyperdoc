@@ -68,6 +68,7 @@
   <li>Keep <tt>AGENTS.md</tt> authoritative for repo-wide execution, validation, and environment-triage rules; do not restate long host-vs-repo-shell guidance in slice prompts.</li>
   <li>When present, read <tt>repomix-output-hyperdoc.md</tt> first and treat it as the authoritative packed snapshot of the repo.</li>
   <li>Prefer named validation surfaces and smoke checks over ad hoc success claims.</li>
+  <li>When authoritative repo-shell validation uses <tt>sbcl --eval</tt>, require ASDF before any <tt>asdf:load-system</tt> form: use <tt>--eval '(require :asdf)'</tt> first instead of making bare <tt>asdf:</tt> the first package read.</li>
   <li>Prefer <tt>nix develop --command git ...</tt> when a prompt asks Codex to show repo diff or status.</li>
   <li>Prefer fewer authored HyperDoc guidance files over preserving prompt iteration history as durable pages.</li>
   <li>Keep adjacent documentation edits tightly coupled to the slice that justified them.</li>
@@ -150,7 +151,10 @@ Implementation rules
 
 Validation
 - Authoritative repo-shell validation:
-  nix develop --command [exact command]
+  - if the check is an SBCL `--eval` recipe, use:
+    nix develop --command sbcl --noinform --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :&lt;system&gt;)' [exact additional load/eval/test forms]
+  - otherwise:
+    nix develop --command [exact command]
 - Repo diff or status, if needed:
   nix develop --command git [diff|status] -- [exact files]
 
