@@ -2121,6 +2121,19 @@
                  "FedWiki Site to DMX Import"
                  "Concepts, DMX Topics, and Topic Maps")))
 
+(defun py4dmx-topic ()
+  (make-topic
+   :id "py4dmx"
+   :title "Py4dmx"
+   :summary "External Python CLI/source cluster for scripting DMX REST operations such as session bootstrap, workspace and topicmap lookup, topic and assoc creation, topicmap reveal, plugin GET/POST, vCard import, and generic delete helpers, useful as comparison evidence for HyperDoc's narrower DMX boundary."
+   :references '("Py4dmx"
+                 "DMX machine-readable read paths"
+                 "DMX session bootstrap and JSESSIONID"
+                 "Using guarded workspace topic lifecycle tools"
+                 "HyperDoc DMX architectural implications"
+                 "https://forum.dmx.berlin/t/py4dmx-a-python-project-to-play-with-dmxs-rest-api/45"
+                 "https://github.com/junes/py4dmx")))
+
 (defun dmx-twins-topic ()
   (make-topic
    :id "dmx-twins"
@@ -3229,6 +3242,7 @@
    :title "HyperDoc DMX architectural implications"
    :summary "Architectural consequences of the DMX topicmap 919822 incident: HyperDoc keeps DMX writes narrow, typed, dry-run-first, and fail-soft because generic DMX persistence boundaries cannot be assumed safe by default."
    :references '("HyperDoc DMX architectural implications"
+                 "Py4dmx"
                  "DMX MCP server for shared workspace"
                  "Context window workspace as shared blackboard"
                  "DMX topicmap 919822 repair runbook"
@@ -3343,6 +3357,7 @@
    :title "DMX machine-readable read paths"
    :summary "Canonical machine-readable DMX reads use explicit core/topic and topicmaps endpoints with children included, while webclient hash routes remain browser navigation surfaces rather than tool-facing contracts."
    :references '("DMX machine-readable read paths"
+                 "Py4dmx"
                  "DMX topicmap 919822 repair runbook"
                  "DMX note read/write boundary"
                  "DMX MCP server for shared workspace"
@@ -3513,6 +3528,7 @@
    :title "DMX session bootstrap and JSESSIONID"
    :summary "HyperDoc's username/password input mode derives a Basic login bootstrap and later guarded requests carry the JSESSIONID aftermath plus workspace cookie rather than treating cookies as a primary operator input mode."
    :references '("DMX session bootstrap and JSESSIONID"
+                 "Py4dmx"
                  "Using authenticated workspace assignment repair console"
                  "Inspectable authentication-path traces for repair console"
                  "DMX Authorization header to Credentials path"

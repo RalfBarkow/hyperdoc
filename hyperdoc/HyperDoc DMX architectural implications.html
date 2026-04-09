@@ -15,6 +15,7 @@
 
 <ul>
   <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
+  <li><a hyperbook="topics" page="Py4dmx"><tt>Py4dmx</tt></a></li>
   <li><a hyperbook="topics" page="DMX topicmap 919822 repair runbook"><tt>DMX topicmap 919822 repair runbook</tt></a></li>
   <li><a hyperbook="topics" page="DMX FedWiki Write Model"><tt>DMX FedWiki Write Model</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
@@ -35,6 +36,23 @@
   <li>HyperDoc should keep bounded issue objects and fail-soft degradation when a source or write boundary fails.</li>
   <li>HyperDoc should maintain a small DMX hygiene toolkit rather than a broad migration framework.</li>
 </ul>
+
+<h2>Why Py4dmx stays external</h2>
+
+<p>
+  <a page="Py4dmx"><tt>Py4dmx</tt></a> is useful precisely because it is
+  broader than HyperDoc should become in-repo. The script combines host/config
+  resolution, session bootstrap, generic topic and assoc creation, workspace
+  creation and membership, topicmap reveal, raw plugin GET/POST, vCard import,
+  and hard delete helpers in one CLI.
+</p>
+
+<p>
+  HyperDoc should learn from that inventory but not absorb it wholesale. The
+  in-repo boundary stays narrow: canonical JSON reads, guarded shared-workspace
+  note/topic lifecycle tools, and dry-run-first typed writes. Generic DMX
+  scripting remains external evidence rather than a runtime expansion target.
+</p>
 
 <h2>Shared workspace implication</h2>
 
@@ -93,6 +111,7 @@
 
 <ul>
   <li><a page="DMX topicmap 919822 repair runbook">DMX topicmap 919822 repair runbook</a></li>
+  <li><a page="Py4dmx">Py4dmx</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
   <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>

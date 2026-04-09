@@ -15,6 +15,7 @@
 <ul>
   <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
   <li><a hyperbook="topics" page="Read-write boundary"><tt>Read-write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Py4dmx"><tt>Py4dmx</tt></a></li>
   <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
   <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
   <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
@@ -64,6 +65,23 @@
   boundary for tools or proof-oriented diagnostics.
 </p>
 
+<h2>External source evidence: Py4dmx</h2>
+
+<p>
+  <a page="Py4dmx"><tt>Py4dmx</tt></a> is compact outside-the-repo evidence
+  that DMX automation prefers JSON read routes over webclient URLs. Its
+  workspace and topicmap lookup helpers resolve ids through
+  <tt>core/topics/query</tt> plus <tt>related-topics</tt>, its topic fetcher
+  reads <tt>/core/topic/&lt;id&gt;?children=true</tt>, and its generic data
+  reader uses <tt>/core/&lt;datapath&gt;?children=true</tt>.
+</p>
+
+<p>
+  That makes py4dmx useful support for this page's machine-readable emphasis,
+  but it does not define HyperDoc's write boundary, ownership rules, or
+  guarded shared-workspace contract.
+</p>
+
 <h2>MCP projection</h2>
 
 <p>
@@ -78,6 +96,7 @@
 
 <ul>
   <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Py4dmx">Py4dmx</a></li>
   <li><a page="Read-write boundary">Read-write boundary</a></li>
   <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
   <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>

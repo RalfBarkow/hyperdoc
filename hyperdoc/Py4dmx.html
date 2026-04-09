@@ -1,0 +1,98 @@
+<h1>Py4dmx</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Py4dmx"><tt>Py4dmx</tt></a> is a narrow external
+  software/source cluster: Juergen Neumann's Python CLI for working against the
+  DMX REST API. In HyperDoc it is direct source evidence for DMX client
+  behavior and comparison material for what should remain external instead of
+  being absorbed into HyperDoc runtime code.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Py4dmx"><tt>Py4dmx</tt></a></li>
+  <li><a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a></li>
+  <li><a hyperbook="topics" page="DMX machine-readable read paths"><tt>DMX machine-readable read paths</tt></a></li>
+  <li><a hyperbook="topics" page="DMX note read/write boundary"><tt>DMX note read/write boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Using guarded workspace topic lifecycle tools"><tt>Using guarded workspace topic lifecycle tools</tt></a></li>
+  <li><a hyperbook="topics" page="DMX plugin extension boundary"><tt>DMX plugin extension boundary</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
+  <li><a hyperbook="topics" page="Concepts, DMX Topics, and Topic Maps"><tt>Concepts, DMX Topics, and Topic Maps</tt></a></li>
+</ul>
+
+<h2>Source cluster</h2>
+
+<p>
+  This page was learned directly from the forum thread plus the checked-out
+  source under <tt>~/workspace/py4dmx</tt>, especially <tt>README.md</tt>,
+  <tt>dmx.py</tt>, <tt>dmx.cfg.example</tt>, <tt>note_example.json</tt>,
+  <tt>person_example.json</tt>, <tt>person_example.vcf</tt>, and
+  <tt>test_dmx-py.sh</tt>.
+</p>
+
+<ul>
+  <li>Forum thread: <a href="https://forum.dmx.berlin/t/py4dmx-a-python-project-to-play-with-dmxs-rest-api/45">Py4dmx - A Python Project to play with DMX's REST API</a></li>
+  <li>GitHub mirror: <a href="https://github.com/junes/py4dmx">junes/py4dmx</a></li>
+</ul>
+
+<h2>Canonical identity</h2>
+
+<p>
+  HyperDoc keeps the stable topic id <tt>py4dmx</tt> and the canonical title
+  <tt>Py4dmx</tt>. The title matches the repo-native page/title surface while
+  the prose keeps the upstream lowercase project name explicit.
+</p>
+
+<h2>Compact inventory</h2>
+
+<ul>
+  <li><b>auth/session bootstrap</b>: <tt>get_session_id()</tt> sends <tt>GET /core/topic/0</tt> with Basic auth, captures <tt>JSESSIONID</tt> from a cookie jar, and later <tt>get_response()</tt> adds <tt>dmx_workspace_id</tt> for workspace-scoped non-GET requests. HyperDoc landing: <a page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a> as external comparison evidence, not as a new in-repo login surface.</li>
+  <li><b>host/config resolution</b>: <tt>create_default_config()</tt>, <tt>read_default_config_file()</tt>, <tt>read_dmx_config_properties_file()</tt>, <tt>set_host_url()</tt>, and <tt>get_host_url()</tt> resolve protocol, host, port, path, credentials, and default workspace. HyperDoc landing: keep this on the py4dmx page; HyperDoc does not need a generic cloned host-config layer.</li>
+  <li><b>workspace lookup</b>: <tt>get_ws_id()</tt> queries <tt>core/topics/query/"&lt;workspace&gt;"?topicTypeUri=dmx.workspaces.workspace_name</tt> and then follows <tt>related-topics</tt> to the parent workspace topic. HyperDoc landing: <a page="DMX machine-readable read paths">DMX machine-readable read paths</a>.</li>
+  <li><b>topicmap lookup</b>: <tt>get_topicmap_id()</tt> uses the same query-plus-<tt>related-topics</tt> pattern for <tt>dmx.topicmaps.topicmap_name</tt>. HyperDoc landing: <a page="DMX machine-readable read paths">DMX machine-readable read paths</a> and <a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a>.</li>
+  <li><b>topic and assoc creation</b>: <tt>send_data()</tt>, <tt>create_note()</tt>, <tt>create_topicmap()</tt>, and <tt>create_assoc()</tt> expose raw create paths for <tt>/core/topic/</tt>, <tt>/core/assoc/</tt>, and <tt>/topicmaps?name=...</tt>. HyperDoc landing: <a page="DMX note read/write boundary">DMX note read/write boundary</a> and <a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a>; the generic raw create surface stays external.</li>
+  <li><b>note creation</b>: <tt>note_example.json</tt> and the <tt>-N</tt>/<tt>-B</tt> CLI path both create a parent <tt>dmx.notes.note</tt> payload with <tt>dmx.notes.title</tt> and <tt>dmx.notes.text</tt>. HyperDoc landing: <a page="DMX note read/write boundary">DMX note read/write boundary</a>.</li>
+  <li><b>workspace creation and membership</b>: <tt>create_ws()</tt> and <tt>create_member()</tt> call the generic workspace and access-control endpoints. HyperDoc landing: <a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a>; HyperDoc keeps only the guarded shared-workspace subset in-repo.</li>
+  <li><b>reveal-on-topicmap</b>: <tt>reveal_topic()</tt> and <tt>reveal_assoc()</tt> POST view props to <tt>/topicmaps/&lt;map&gt;/topic/&lt;topic&gt;</tt> and <tt>/topicmaps/&lt;map&gt;/assoc/&lt;assoc&gt;</tt>. HyperDoc landing: <a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a> and <a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a>; this is comparison material for guarded topicmap-context operations, not a reason to add raw reveal helpers.</li>
+  <li><b>plugin GET/POST</b>: <tt>send_get()</tt> and <tt>send_post()</tt> send direct requests to plugin endpoints. HyperDoc landing: <a hyperbook="topics" page="DMX plugin extension boundary">DMX plugin extension boundary</a>; raw plugin endpoint access remains external.</li>
+  <li><b>vCard import</b>: <tt>import_vcard()</tt> plus <tt>person_example.vcf</tt> and <tt>person_example.json</tt> show payload shaping into <tt>dmx.contacts.person</tt> with addresses, phones, emails, birthday, and note fields. HyperDoc landing: keep this as py4dmx-specific evidence rather than minting a new generic HyperDoc topic.</li>
+  <li><b>topic/data fetch and delete helpers</b>: <tt>get_topic()</tt>, <tt>get_data()</tt>, <tt>get_items()</tt>, <tt>get_related()</tt>, <tt>get_creator()</tt>, <tt>get_modifier()</tt>, <tt>get_topic_ws()</tt>, <tt>get_ws_owner()</tt>, and <tt>delete_topic()</tt> expose a generic scripting surface for DMX JSON reads and hard delete. HyperDoc landing: reads reinforce <a page="DMX machine-readable read paths">DMX machine-readable read paths</a>; generic delete stays external.</li>
+</ul>
+
+<h2>What HyperDoc should absorb</h2>
+
+<ul>
+  <li>Py4dmx is useful evidence that DMX automation uses machine-readable JSON routes rather than browser hash routes.</li>
+  <li>Py4dmx is useful comparison material for session-cookie aftermath and workspace-cookie transport context.</li>
+  <li>Py4dmx is useful as a compact external inventory of operations HyperDoc deliberately narrows into typed guarded surfaces.</li>
+</ul>
+
+<h2>What should remain external</h2>
+
+<ul>
+  <li>Generic host/config parsing for arbitrary DMX installations.</li>
+  <li>A raw login/session CLI or cookie-entry surface.</li>
+  <li>Unbounded topic, assoc, workspace, plugin, and delete helpers.</li>
+  <li>vCard import as a generic HyperDoc runtime feature.</li>
+</ul>
+
+<p>
+  The merge rule for this slice is therefore conservative: treat py4dmx as an
+  external reference implementation and source-evidence cluster, then connect it
+  to the existing HyperDoc DMX pages that already own auth, read-path, note,
+  and guarded-write concepts.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Concepts, DMX Topics, and Topic Maps">Concepts, DMX Topics, and Topic Maps</a></li>
+</ul>

@@ -17,6 +17,7 @@
 
 <ul>
   <li><a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a></li>
+  <li><a hyperbook="topics" page="Py4dmx"><tt>Py4dmx</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a></li>
   <li><a hyperbook="topics" page="DMX Authorization header to Credentials path"><tt>DMX Authorization header to Credentials path</tt></a></li>
   <li><a expr="(dmx-auth-crosswalk-username-password-example)" view="Derived request shapes"><tt>(dmx-auth-crosswalk-username-password-example)</tt> Derived request shapes</a></li>
@@ -59,6 +60,23 @@ Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
   It does not replace authenticated session state.
 </p>
 
+<h2>External reference variant: Py4dmx</h2>
+
+<p>
+  The external <a page="Py4dmx"><tt>Py4dmx</tt></a> source cluster shows a
+  different client-side session bootstrap. Its <tt>get_session_id()</tt>
+  helper sends <tt>GET /core/topic/0</tt> with Basic auth, captures
+  <tt>JSESSIONID</tt> from a cookie jar, and later mutating requests add
+  <tt>dmx_workspace_id</tt>.
+</p>
+
+<p>
+  That is useful source evidence that a generic REST client can harvest DMX
+  session cookies, but it does not change HyperDoc's current in-repo contract.
+  HyperDoc's guarded auth teaching surfaces still model
+  <tt>POST /access-control/login</tt> as the current bootstrap path.
+</p>
+
 <h2>Boundary notes</h2>
 
 <ul>
@@ -70,6 +88,7 @@ Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
 <h2>Related</h2>
 
 <ul>
+  <li><a page="Py4dmx">Py4dmx</a></li>
   <li><a page="HyperDoc three-mode DMX auth crosswalk">HyperDoc three-mode DMX auth crosswalk</a></li>
   <li><a page="DMX Authorization header to Credentials path">DMX Authorization header to Credentials path</a></li>
   <li><a page="Operational definition: chunk, chunk note, manifest note, content topic">Operational definition: chunk, chunk note, manifest note, content topic</a></li>
