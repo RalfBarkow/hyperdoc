@@ -712,7 +712,19 @@
                "journalPreflightSummary"
                (and journal-summary
                     (dmx-mcp-normalize-json-value journal-summary)))
-              (dmx-mcp-workspace-annotation-report-object result))))))
+	              (dmx-mcp-workspace-annotation-report-object result))))))
+
+(defun dmx-mcp-repair-workspace-journal-companion-tool (server arguments)
+  (execute-dmx-workspace-journal-companion-repair
+   :journal-topic-id (dmx-mcp-argument arguments "journalTopicId")
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :subject-uri (dmx-mcp-argument arguments "subjectUri")
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :workspace-id (dmx-mcp-argument arguments "workspaceId")
+   :client (dmx-mcp-server-write-client server)
+   :dry-run (dmx-mcp-argument arguments "dryRun" t)))
 
 (defun dmx-mcp-topicmap-projection (topicmap-json)
   (let* ((topicmap-topic (gethash "topic" topicmap-json))
@@ -1266,6 +1278,13 @@
               (dmx-mcp-continue-workspace-annotation-tool
                server
                arguments)))
+            ((equal tool-name "repair_workspace_journal_companion")
+             (ensure-live-write-available)
+             (multiple-value-bind (result-object is-error)
+                 (dmx-mcp-repair-workspace-journal-companion-tool
+                  server
+                  arguments)
+               (dmx-mcp-tool-result result-object :is-error is-error)))
             ((equal tool-name "upsert_workspace_topicmap_context")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -1426,8 +1445,8 @@
      "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "title" "text")
      "additionalProperties" t))
-   (dmx-mcp-json-object
-    "name" "continue_workspace_annotation"
+	   (dmx-mcp-json-object
+	    "name" "continue_workspace_annotation"
     "description"
     "Continue a saved workspace annotation by topic id through journal preflight and the remaining guarded persistence steps through the authenticated shared-workspace adapter."
     "inputSchema"
@@ -1439,10 +1458,27 @@
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "workspaceId" (dmx-mcp-json-object "type" "integer")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
-     "required" (dmx-mcp-json-array "topicId")
-     "additionalProperties" t))
-   (dmx-mcp-json-object
-    "name" "upsert_workspace_topicmap_context"
+	     "required" (dmx-mcp-json-array "topicId")
+	     "additionalProperties" t))
+	   (dmx-mcp-json-object
+	    "name" "repair_workspace_journal_companion"
+	    "description"
+	    "Repair a stale HyperDoc-owned workspace-journal companion topic by delete-and-recreate when the existing companion is unassigned and repairable under the current writable workspace context."
+	    "inputSchema"
+	    (dmx-mcp-json-object
+	     "type" "object"
+	     "properties"
+	     (dmx-mcp-json-object
+	      "journalTopicId" (dmx-mcp-json-object "type" "integer")
+	      "subjectKey" (dmx-mcp-json-object "type" "string")
+	      "subjectUri" (dmx-mcp-json-object "type" "string")
+	      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+	      "workspaceId" (dmx-mcp-json-object "type" "integer")
+	      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+	     "required" (dmx-mcp-json-array)
+	     "additionalProperties" t))
+	   (dmx-mcp-json-object
+	    "name" "upsert_workspace_topicmap_context"
     "description"
     "Ensure a typed topicmap-context placement for an existing topic by adding it to a workspace topicmap or updating its validated long-form view props."
     "inputSchema"
