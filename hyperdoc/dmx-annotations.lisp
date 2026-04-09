@@ -18,6 +18,8 @@
   "compatibility-note-carrier")
 (defparameter *dmx-workspace-annotation-compatibility-envelope-version*
   1)
+(defparameter *workspace-annotation-explicit-auth-retry-evidence-version*
+  1)
 (defparameter *dmx-workspace-annotation-compatibility-carrier-type-uri*
   *dmx-notes-note-type-uri*)
 (defparameter *dmx-workspace-annotation-title-type-uri*
@@ -319,6 +321,47 @@
     :initform nil
     :reader
     workspace-annotation-persistence-report-journal-preflight-auth-context-of)
+   (explicit-auth-attempt-context
+    :initarg :explicit-auth-attempt-context
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-attempt-context-of)
+   (explicit-auth-retry-invoked-p
+    :initarg :explicit-auth-retry-invoked-p
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-invoked-p)
+   (explicit-auth-retry-request-id
+    :initarg :explicit-auth-retry-request-id
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-request-id-of)
+   (explicit-auth-retry-executed-at
+    :initarg :explicit-auth-retry-executed-at
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-executed-at-of)
+   (explicit-auth-retry-executed-at-label
+    :initarg :explicit-auth-retry-executed-at-label
+    :initform nil
+    :reader
+    workspace-annotation-persistence-report-explicit-auth-retry-executed-at-label-of)
+   (explicit-auth-retry-mode
+    :initarg :explicit-auth-retry-mode
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-mode-of)
+   (explicit-auth-retry-mode-label
+    :initarg :explicit-auth-retry-mode-label
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-mode-label-of)
+   (explicit-auth-retry-source
+    :initarg :explicit-auth-retry-source
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-source-of)
+   (explicit-auth-retry-source-label
+    :initarg :explicit-auth-retry-source-label
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-source-label-of)
+   (explicit-auth-retry-evidence-version
+    :initarg :explicit-auth-retry-evidence-version
+    :initform nil
+    :reader workspace-annotation-persistence-report-explicit-auth-retry-evidence-version-of)
    (assignment-auth-context
     :initarg :assignment-auth-context
     :initform nil
@@ -1380,6 +1423,82 @@
        (workspace-annotation-persistence-report-journal-preflight-auth-context-of
         report)))
 
+(defun workspace-annotation-journal-preflight-assigned-workspace-label
+    (summary)
+  (let ((assigned-workspace-id
+          (and summary
+               (getf summary :assigned-workspace-id)))
+        (assigned-workspace-title
+          (and summary
+               (getf summary :assigned-workspace-title)))
+        (assigned-workspace-status
+          (and summary
+               (getf summary :assigned-workspace-status))))
+    (cond
+      (assigned-workspace-id
+       (or (dmx-workspace-annotation-workspace-label assigned-workspace-id)
+           assigned-workspace-title
+           (format nil "workspace (~D)" assigned-workspace-id)))
+      ((eq assigned-workspace-status :none)
+       "none")
+      ((and (dmx-non-empty-string-p assigned-workspace-title)
+            (not (eq assigned-workspace-status :lookup-error)))
+       assigned-workspace-title)
+      (t
+       nil))))
+
+(defun workspace-annotation-journal-preflight-unassigned-companion-topic-p
+    (report)
+  (and (typep report 'workspace-annotation-persistence-report)
+       (eq (workspace-annotation-persistence-report-failure-stage-of report)
+           :prepare-transition)
+       (typep (workspace-annotation-persistence-report-condition-of report)
+              'dmx-workspace-journal-unassigned-companion-topic-error)))
+
+(defun workspace-annotation-journal-preflight-unassigned-companion-summary
+    (report)
+  (when (workspace-annotation-journal-preflight-unassigned-companion-topic-p
+         report)
+    (let* ((summary
+             (workspace-annotation-persistence-report-journal-preflight-summary-of
+              report))
+           (journal-topic-id
+             (workspace-annotation-persistence-report-journal-topic-id-of
+              report))
+           (workspace-id
+             (or (workspace-annotation-persistence-report-workspace-id-of report)
+                 (and (workspace-annotation-persistence-report-plan-of report)
+                      (dmx-workspace-annotation-write-plan-workspace-id
+                       (workspace-annotation-persistence-report-plan-of
+                        report)))))
+           (workspace-label
+             (and workspace-id
+                  (dmx-workspace-annotation-workspace-label workspace-id)))
+           (direct-put-endpoint
+             (and journal-topic-id
+                  (dmx-topic-update-path journal-topic-id))))
+      (list :retry-outcome-classification :unassigned-companion-topic
+            :retry-outcome-classification-label "unassigned-companion-topic"
+            :assigned-workspace-id
+            (getf summary :assigned-workspace-id)
+            :assigned-workspace-label
+            (or (workspace-annotation-journal-preflight-assigned-workspace-label
+                 summary)
+                "none")
+            :blocked-endpoint-path direct-put-endpoint
+            :direct-put-failure-detail
+            (if direct-put-endpoint
+                (format nil
+                        "Direct PUT ~A will fail because DMX derives existing-topic WRITE from the journal companion topic's assigned workspace, and this existing companion is unassigned."
+                        direct-put-endpoint)
+                "Direct journal companion update will fail because DMX derives existing-topic WRITE from the companion topic's assigned workspace, and this existing companion is unassigned.")
+            :common-workspace-insufficiency-detail
+            (if workspace-label
+                (format nil
+                        "~A is not sufficient unless the journal companion topic is actually assigned there."
+                        workspace-label)
+                "A Common/shared workspace is not sufficient unless the journal companion topic is actually assigned there.")))))
+
 (defun workspace-annotation-auth-awaiting-p (report)
   (or (workspace-annotation-guarded-boundary-auth-awaiting-p report)
       (workspace-annotation-journal-preflight-auth-blocked-p report)))
@@ -1425,6 +1544,8 @@
 
 (defun workspace-annotation-journal-preflight-blocked-cause (condition)
   (cond
+    ((typep condition 'dmx-workspace-journal-unassigned-companion-topic-error)
+     "the existing journal companion topic is not assigned to any workspace")
     ((typep condition 'dmx-import-config-error)
      "DMX auth is missing")
     ((workspace-annotation-http-auth-blocked-p condition)
@@ -1434,12 +1555,632 @@
 
 (defun workspace-annotation-journal-preflight-blocked-detail
     (summary workspace-label topicmap-label condition)
-  (format nil
-          "Before annotation topic upsert could start, HyperDoc could not reconcile ~A for ~A in ~A because ~A. This is the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
-          (workspace-annotation-journal-preflight-label summary)
-          (or workspace-label "the selected workspace")
-          (or topicmap-label "the selected topicmap")
-          (workspace-annotation-journal-preflight-blocked-cause condition)))
+  (if (typep condition 'dmx-workspace-journal-unassigned-companion-topic-error)
+      (format nil
+              "Before annotation topic upsert could start, HyperDoc found that ~A for ~A in ~A is an existing journal companion topic with no assigned workspace. Direct PUT /core/topic/~D will fail because DMX derives existing-topic WRITE from the companion topic's assigned workspace. ~A This is the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+              (workspace-annotation-journal-preflight-label summary)
+              (or workspace-label "the selected workspace")
+              (or topicmap-label "the selected topicmap")
+              (dmx-workspace-journal-unassigned-companion-topic-id-of condition)
+              (if workspace-label
+                  (format nil
+                          "~A is not sufficient unless the journal companion topic is actually assigned there."
+                          workspace-label)
+                  "A Common/shared workspace is not sufficient unless the journal companion topic is actually assigned there."))
+      (format nil
+              "Before annotation topic upsert could start, HyperDoc could not reconcile ~A for ~A in ~A because ~A. This is the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+              (workspace-annotation-journal-preflight-label summary)
+              (or workspace-label "the selected workspace")
+              (or topicmap-label "the selected topicmap")
+              (workspace-annotation-journal-preflight-blocked-cause condition))))
+
+(defun workspace-annotation-json-field-value (json key)
+  (cond
+    ((hash-table-p json)
+     (or (gethash key json)
+         (gethash (string-downcase key) json)
+         (gethash (string-upcase key) json)))
+    ((listp json)
+     (or (cdr (assoc key json :test #'string-equal))
+         (getf json (intern (string-upcase key) :keyword))))
+    (t
+     nil)))
+
+(defun workspace-annotation-http-evidence-response-cause (http-evidence)
+  (when http-evidence
+    (let* ((parsed
+             (parse-http-response-body-json
+              (getf http-evidence :response-body)))
+           (cause
+             (or (workspace-annotation-json-field-value parsed "cause")
+                 (workspace-annotation-json-field-value parsed "message")
+                 (and (stringp parsed) parsed))))
+      (and (dmx-non-empty-string-p cause)
+           cause))))
+
+(defun workspace-annotation-extract-quoted-fragment-after
+    (text marker quote-char)
+  (when (and (dmx-non-empty-string-p text)
+             (dmx-non-empty-string-p marker))
+    (when-let (start (search marker text :test #'char-equal))
+      (let ((content-start (+ start (length marker))))
+        (when-let (content-end
+                    (position quote-char
+                              text
+                              :start content-start))
+          (subseq text content-start content-end))))))
+
+(defun workspace-annotation-extract-token-after (text marker)
+  (when (and (dmx-non-empty-string-p text)
+             (dmx-non-empty-string-p marker))
+    (when-let (start (search marker text :test #'char-equal))
+      (let* ((token-start (+ start (length marker)))
+             (token-end
+               (or (position-if
+                    (lambda (char)
+                      (or (member char '(#\Space #\Tab #\Newline
+                                         #\Return #\: #\, #\. #\;)
+                                  :test #'char=)
+                          (char= char #\))))
+                    text
+                    :start token-start)
+                   (length text))))
+        (when (< token-start token-end)
+          (subseq text token-start token-end))))))
+
+(defun workspace-annotation-extract-between-markers
+    (text start-marker end-marker)
+  (when (and (dmx-non-empty-string-p text)
+             (dmx-non-empty-string-p start-marker)
+             (dmx-non-empty-string-p end-marker))
+    (when-let (start (search start-marker text :test #'char-equal))
+      (let ((content-start (+ start (length start-marker))))
+        (when-let (content-end
+                    (search end-marker
+                            text
+                            :start2 content-start
+                            :test #'char-equal))
+          (string-trim '(#\Space #\Tab #\Newline #\Return)
+                       (subseq text content-start content-end)))))))
+
+(defun workspace-annotation-extract-integer-after-marker (text marker)
+  (when (and (dmx-non-empty-string-p text)
+             (dmx-non-empty-string-p marker))
+    (when-let (start (search marker text :test #'char-equal))
+      (let* ((digits-start (+ start (length marker)))
+             (digits-end
+               (or (position-if-not #'digit-char-p
+                                    text
+                                    :start digits-start)
+                   (length text))))
+        (and (< digits-start digits-end)
+             (parse-positive-integer
+              (subseq text digits-start digits-end)))))))
+
+(defun workspace-annotation-topic-id-from-core-topic-path (path)
+  (or (workspace-annotation-extract-integer-after-marker
+       path
+       "/core/topic/")
+      (workspace-annotation-extract-integer-after-marker
+       path
+       "/core/assoc/")))
+
+(defun workspace-annotation-authorization-denial-details
+    (cause &key blocked-endpoint-path fallback-object-topic-id)
+  (when (dmx-non-empty-string-p cause)
+    (let* ((principal
+             (or (workspace-annotation-extract-quoted-fragment-after
+                  cause
+                  "user \""
+                  #\")
+                 (workspace-annotation-extract-quoted-fragment-after
+                  cause
+                  "user '"
+                  #\')
+                 (workspace-annotation-extract-quoted-fragment-after
+                  cause
+                  "principal \""
+                  #\")
+                 (workspace-annotation-extract-quoted-fragment-after
+                  cause
+                  "principal '"
+                  #\')
+                 (workspace-annotation-extract-token-after cause "user ")
+                 (workspace-annotation-extract-token-after cause "principal ")))
+           (required-permission
+             (workspace-annotation-extract-between-markers
+              cause
+              " has no "
+              " permission"))
+           (blocked-object-topic-id
+             (or (workspace-annotation-extract-integer-after-marker
+                  cause
+                  " object ")
+                 (workspace-annotation-extract-integer-after-marker
+                  cause
+                  " topic ")
+                 (workspace-annotation-topic-id-from-core-topic-path
+                  blocked-endpoint-path)
+                 fallback-object-topic-id)))
+      (when (and (dmx-non-empty-string-p principal)
+                 (not (string-equal principal "anonymous")))
+        (list :authenticated-principal principal
+              :required-permission required-permission
+              :blocked-object-topic-id blocked-object-topic-id
+              :response-cause cause)))))
+
+(defun workspace-annotation-journal-preflight-authorization-summary-data
+    (report context)
+  (when (and (typep report 'workspace-annotation-persistence-report)
+             context)
+    (let* ((blocked-endpoint-path
+             (or (getf context :guarded-request-endpoint-path)
+                 (getf context :final-failing-endpoint-path)))
+           (response-cause
+             (or (getf context :response-cause)
+                 (workspace-annotation-http-evidence-response-cause
+                  (getf context :http-evidence))))
+           (denial-details
+             (workspace-annotation-authorization-denial-details
+              response-cause
+              :blocked-endpoint-path blocked-endpoint-path
+              :fallback-object-topic-id
+              (workspace-annotation-persistence-report-journal-topic-id-of
+               report))))
+      (when (and (or (workspace-annotation-persistence-report-explicit-auth-retry-invoked-p
+                      report)
+                     (getf context :continuation-invoked-p))
+                 (eq (workspace-annotation-persistence-report-failure-stage-of
+                      report)
+                     :prepare-transition)
+                 (getf context :bootstrap-attempted-p)
+                 (getf context :bootstrap-succeeded-p)
+                 (getf context :guarded-request-retried-p)
+                 (member (getf context :final-failing-status-code)
+                         '(401 403))
+                 (not (string-equal
+                       (or (getf context :guarded-request-auth-mode-summary) "")
+                       "anonymous"))
+                 denial-details)
+        (append
+         (list :retry-outcome-classification :authorization-failed
+               :retry-outcome-classification-label "authorization-failed"
+               :authentication-succeeded-p t
+               :authentication-status-label "succeeded"
+               :authorization-failed-p t
+               :authorization-status-label "failed"
+               :blocked-endpoint-path blocked-endpoint-path)
+         denial-details)))))
+
+(defun workspace-annotation-journal-preflight-authorization-summary (report)
+  (let ((context
+          (and (typep report 'workspace-annotation-persistence-report)
+               (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
+                report))))
+    (or (and context
+             (getf context :authorization-failed-p)
+             (list :retry-outcome-classification
+                   (getf context :retry-outcome-classification)
+                   :retry-outcome-classification-label
+                   (getf context :retry-outcome-classification-label)
+                   :authentication-succeeded-p
+                   (getf context :authentication-succeeded-p)
+                   :authentication-status-label
+                   (getf context :authentication-status-label)
+                   :authorization-failed-p
+                   (getf context :authorization-failed-p)
+                   :authorization-status-label
+                   (getf context :authorization-status-label)
+                   :authenticated-principal
+                   (getf context :authenticated-principal)
+                   :required-permission
+                   (getf context :required-permission)
+                   :blocked-object-topic-id
+                   (getf context :blocked-object-topic-id)
+                   :blocked-endpoint-path
+                   (getf context :blocked-endpoint-path)
+                   :response-cause
+                   (getf context :response-cause)))
+        (workspace-annotation-journal-preflight-authorization-summary-data
+         report
+         context))))
+
+(defun workspace-annotation-journal-preflight-authorization-blocked-p (report)
+  (and (workspace-annotation-journal-preflight-authorization-summary report)
+       t))
+
+(defun workspace-annotation-explicit-auth-mode-or-nil (value)
+  (and value
+       (handler-case
+           (normalize-http-dmx-import-auth-mode
+            value
+            'workspace-annotation-explicit-auth-mode-or-nil)
+         (error ()
+           nil))))
+
+(defun workspace-annotation-explicit-auth-client-mode (client)
+  (let* ((built-event
+           (and (typep client 'http-dmx-import-client)
+                (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
+         (authorization-header
+           (and (typep client 'http-dmx-import-client)
+                (dmx-import-authorization-header-of client)))
+         (authorization-scheme
+           (and authorization-header
+                (summarize-http-authorization-scheme authorization-header))))
+    (or (and built-event
+             (getf built-event :auth-mode))
+        (and (typep client 'http-dmx-import-client)
+             (dmx-import-session-login-required-p-of client)
+             :basic)
+        (and authorization-scheme
+             (string= authorization-scheme "Bearer")
+             :token)
+        (and authorization-header
+             :header))))
+
+(defun workspace-annotation-explicit-auth-input-flags
+    (client requested-auth-mode username password authorization-header auth-token)
+  (let* ((built-event
+           (and (typep client 'http-dmx-import-client)
+                (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
+         (client-header
+           (and (typep client 'http-dmx-import-client)
+                (dmx-import-authorization-header-of client)))
+         (client-scheme
+           (and client-header
+                (summarize-http-authorization-scheme client-header)))
+         (basic-header-p (and client-scheme
+                              (string= client-scheme "Basic")))
+         (bearer-header-p (and client-scheme
+                               (string= client-scheme "Bearer"))))
+    (flet ((flag (direct event inferred)
+             (cond
+               ((not (null direct)) (and direct t))
+               ((not (null event)) (and event t))
+               (t (and inferred t)))))
+      (let* ((username-present-p
+               (flag (and (dmx-non-empty-string-p username) t)
+                     (and built-event (getf built-event :username-present-p))
+                     (and (eq requested-auth-mode :basic)
+                          basic-header-p)))
+             (password-present-p
+               (flag (and (dmx-non-empty-string-p password) t)
+                     (and built-event (getf built-event :password-present-p))
+                     (and (eq requested-auth-mode :basic)
+                          basic-header-p)))
+             (authorization-header-present-p
+               (flag (and (dmx-non-empty-string-p authorization-header) t)
+                     (and built-event
+                          (getf built-event :authorization-header-present-p))
+                     (and (eq requested-auth-mode :header)
+                          client-header)))
+             (auth-token-present-p
+               (flag (and (dmx-non-empty-string-p auth-token) t)
+                     (and built-event (getf built-event :auth-token-present-p))
+                     (and (eq requested-auth-mode :token)
+                          bearer-header-p)))
+             (selected-mode-credentials-present-p
+               (case requested-auth-mode
+                 (:basic
+                  (and username-present-p password-present-p))
+                 (:header
+                  authorization-header-present-p)
+                 (:token
+                  auth-token-present-p)
+                 (otherwise
+                  nil))))
+        (list :username-present-p username-present-p
+              :password-present-p password-present-p
+              :authorization-header-present-p authorization-header-present-p
+              :auth-token-present-p auth-token-present-p
+              :selected-mode-credentials-present-p
+              (and selected-mode-credentials-present-p t))))))
+
+(defun workspace-annotation-explicit-auth-attempt-diagnosis
+    (requested-auth-mode flags bootstrap-required-p bootstrap-attempted-p
+     bootstrap-succeeded-p guarded-request-retried-p
+     guarded-request-remained-anonymous-p local-failure-p
+     authorization-failed-p)
+  (let ((username-present-p (getf flags :username-present-p))
+        (password-present-p (getf flags :password-present-p))
+        (selected-mode-credentials-present-p
+          (getf flags :selected-mode-credentials-present-p)))
+    (cond
+      (local-failure-p
+       (if (and (eq requested-auth-mode :basic)
+                (or username-present-p password-present-p))
+           "Credentials captured but no bootstrap attempted."
+           "Local continuation/build failure before network I/O."))
+      ((and (eq requested-auth-mode :basic)
+            bootstrap-required-p
+            (not bootstrap-attempted-p)
+            selected-mode-credentials-present-p)
+       "Credentials captured but no bootstrap attempted.")
+      ((and bootstrap-attempted-p
+            (not bootstrap-succeeded-p))
+       "Bootstrap attempted and failed.")
+      ((and bootstrap-succeeded-p
+            guarded-request-retried-p
+            guarded-request-remained-anonymous-p)
+       "Bootstrap succeeded, but the guarded journal PUT remained anonymous unexpectedly.")
+      ((and bootstrap-succeeded-p
+            guarded-request-retried-p
+            authorization-failed-p)
+       "Authentication succeeded, but the authenticated principal is not authorized to write the journal companion topic.")
+      ((and bootstrap-succeeded-p
+            guarded-request-retried-p)
+       "Bootstrap succeeded, but the guarded journal PUT still failed.")
+      (guarded-request-retried-p
+       "Explicit-auth retry reached the guarded journal PUT and still failed.")
+      (bootstrap-attempted-p
+       "Explicit-auth retry failed during bootstrap.")
+      (t
+       "Explicit-auth retry failed before network I/O."))))
+
+(defun workspace-annotation-format-explicit-auth-retry-time (universal-time)
+  (when universal-time
+    (multiple-value-bind (second minute hour day month year)
+        (decode-universal-time universal-time)
+      (format nil "~4,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+              year month day hour minute second))))
+
+(defun workspace-annotation-explicit-auth-retry-request-id
+    (&optional (prefix "journal-preflight-explicit-auth-retry"))
+  (format nil "~A-~D-~D"
+          prefix
+          (get-universal-time)
+          (mod (get-internal-real-time) 1000000)))
+
+(defun workspace-annotation-explicit-auth-retry-source-label (source)
+  (case source
+    (:journal-preflight-explicit-auth
+     "Journal-preflight explicit-auth continuation")
+    (otherwise
+     (and source
+          (format nil "~A" source)))))
+
+(defun workspace-annotation-explicit-auth-attempt-context
+    (report client condition &key auth-mode username password
+       authorization-header auth-token local-failure-stage
+       continuation-request-id continuation-executed-at continuation-source)
+  (let* ((requested-auth-mode
+           (or (workspace-annotation-explicit-auth-mode-or-nil auth-mode)
+               (workspace-annotation-explicit-auth-client-mode client)))
+         (flags
+           (workspace-annotation-explicit-auth-input-flags
+            client
+            requested-auth-mode
+            username
+            password
+            authorization-header
+            auth-token))
+         (journal-auth-context
+           (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+            report))
+         (final-http-evidence
+           (or (dmx-import-http-evidence condition)
+               (and (typep client 'http-dmx-import-client)
+                    (dmx-import-last-http-transaction-evidence-of client))))
+         (bootstrap-request
+           (and (typep client 'http-dmx-import-client)
+                (http-dmx-import-debug-event client :s5-bootstrap-request-sent)))
+         (bootstrap-response
+           (and (typep client 'http-dmx-import-client)
+                (http-dmx-import-debug-event client :s6-bootstrap-response-received)))
+         (session-event
+           (and (typep client 'http-dmx-import-client)
+                (http-dmx-import-debug-event client :s7-session-material-extracted)))
+         (bootstrap-required-p
+           (and (or (eq requested-auth-mode :basic)
+                    (and (typep client 'http-dmx-import-client)
+                         (dmx-import-session-login-required-p-of client)))
+                t))
+         (bootstrap-endpoint-path
+           (or (and bootstrap-request (getf bootstrap-request :path))
+               (and bootstrap-response (getf bootstrap-response :path))
+               (and final-http-evidence
+                    (let ((path (or (getf final-http-evidence :path)
+                                    (getf final-http-evidence :url))))
+                      (and path
+                           (search "/access-control/login"
+                                   path
+                                   :test #'char-equal)
+                           path)))))
+         (bootstrap-attempted-p
+           (and (or bootstrap-request
+                    bootstrap-response
+                    bootstrap-endpoint-path)
+                t))
+         (bootstrap-request-auth-mode-summary
+           (or (and bootstrap-request
+                    (getf bootstrap-request :auth-mode-summary))
+               (and bootstrap-attempted-p
+                    final-http-evidence
+                    (equal (or (getf final-http-evidence :path)
+                               (getf final-http-evidence :url))
+                           bootstrap-endpoint-path)
+                    (getf final-http-evidence :auth-mode-summary))))
+         (bootstrap-request-authorization-scheme
+           (or (and bootstrap-request
+                    (getf bootstrap-request :authorization-scheme))
+               (and bootstrap-attempted-p
+                    final-http-evidence
+                    (equal (or (getf final-http-evidence :path)
+                               (getf final-http-evidence :url))
+                           bootstrap-endpoint-path)
+                    (getf final-http-evidence :authorization-scheme))))
+         (bootstrap-response-status-code
+           (or (and bootstrap-response
+                    (getf bootstrap-response :status-code))
+               (and bootstrap-attempted-p
+                    final-http-evidence
+                    (equal (or (getf final-http-evidence :path)
+                               (getf final-http-evidence :url))
+                           bootstrap-endpoint-path)
+                    (getf final-http-evidence :response-status-code))))
+         (bootstrap-response-reason-phrase
+           (or (and bootstrap-response
+                    (getf bootstrap-response :reason-phrase))
+               (and bootstrap-attempted-p
+                    final-http-evidence
+                    (equal (or (getf final-http-evidence :path)
+                               (getf final-http-evidence :url))
+                           bootstrap-endpoint-path)
+                    (getf final-http-evidence :response-reason-phrase))))
+         (bootstrap-set-cookie-jsessionid-p
+           (or (and bootstrap-response
+                    (getf bootstrap-response :set-cookie-jsessionid-p))
+               (and final-http-evidence
+                    (getf final-http-evidence :bootstrap-set-cookie-jsessionid-p))))
+         (session-cookie-captured-p
+           (or (and session-event
+                    (getf session-event :session-cookie-captured-p))
+               (and (typep client 'http-dmx-import-client)
+                    (dmx-import-session-cookie-of client)
+                    t)
+               (and final-http-evidence
+                    (getf final-http-evidence :session-cookie-captured-p))))
+         (bootstrap-succeeded-p
+           (and bootstrap-attempted-p
+                bootstrap-response-status-code
+                (http-success-status-p bootstrap-response-status-code)
+                session-cookie-captured-p))
+         (journal-endpoint-path
+           (or (and journal-auth-context
+                    (getf journal-auth-context :journal-endpoint-path))
+               (and (workspace-annotation-persistence-report-journal-topic-id-of
+                     report)
+                    (dmx-topic-update-path
+                     (workspace-annotation-persistence-report-journal-topic-id-of
+                      report)))))
+         (final-failing-endpoint-path
+           (or (and final-http-evidence
+                    (or (getf final-http-evidence :path)
+                        (getf final-http-evidence :url)))
+               (and (typep condition 'dmx-import-http-error)
+                    (dmx-import-http-url-of condition))))
+         (final-failing-status-code
+           (or (and final-http-evidence
+                    (getf final-http-evidence :response-status-code))
+               (and (typep condition 'dmx-import-http-error)
+                    (dmx-import-http-status-code-of condition))))
+         (final-failing-reason-phrase
+           (or (and final-http-evidence
+                    (getf final-http-evidence :response-reason-phrase))
+               nil))
+         (guarded-request-retried-p
+           (and journal-endpoint-path
+                final-failing-endpoint-path
+                (string-equal journal-endpoint-path
+                              final-failing-endpoint-path)
+                t))
+         (guarded-request-auth-mode-summary
+           (and guarded-request-retried-p
+                final-http-evidence
+                (getf final-http-evidence :auth-mode-summary)))
+         (guarded-request-authorization-scheme
+           (and guarded-request-retried-p
+                final-http-evidence
+                (getf final-http-evidence :authorization-scheme)))
+         (guarded-request-cookie-shape
+           (and guarded-request-retried-p
+                final-http-evidence
+                (getf final-http-evidence :cookie-shape)))
+         (guarded-request-remained-anonymous-p
+           (and guarded-request-retried-p
+                (string-equal (or guarded-request-auth-mode-summary "")
+                              "anonymous")
+                t))
+         (response-cause
+           (or (workspace-annotation-http-evidence-response-cause
+                final-http-evidence)
+               (and condition
+                    (format nil "~A" condition))))
+         (local-failure-p
+           (and (null final-http-evidence)
+                (not bootstrap-attempted-p)
+                (not guarded-request-retried-p)
+                t))
+         (base-context
+           (append
+            (list :requested-auth-mode requested-auth-mode
+                  :requested-auth-mode-label
+                  (and requested-auth-mode
+                       (workspace-annotation-auth-mode-label requested-auth-mode))
+                  :continuation-invoked-p t
+                  :retry-request-id continuation-request-id
+                  :retry-executed-at continuation-executed-at
+                  :retry-executed-at-label
+                  (workspace-annotation-format-explicit-auth-retry-time
+                   continuation-executed-at)
+                  :retry-mode-used requested-auth-mode
+                  :retry-mode-used-label
+                  (and requested-auth-mode
+                       (workspace-annotation-auth-mode-label requested-auth-mode))
+                  :retry-source continuation-source
+                  :retry-source-label
+                  (workspace-annotation-explicit-auth-retry-source-label
+                   continuation-source)
+                  :retry-evidence-version
+                  *workspace-annotation-explicit-auth-retry-evidence-version*
+                  :bootstrap-required-p bootstrap-required-p
+                  :bootstrap-attempted-p bootstrap-attempted-p
+                  :bootstrap-endpoint-path bootstrap-endpoint-path
+                  :bootstrap-request-auth-mode-summary
+                  bootstrap-request-auth-mode-summary
+                  :bootstrap-request-authorization-scheme
+                  bootstrap-request-authorization-scheme
+                  :bootstrap-response-status-code bootstrap-response-status-code
+                  :bootstrap-response-reason-phrase
+                  bootstrap-response-reason-phrase
+                  :bootstrap-set-cookie-jsessionid-p
+                  (and bootstrap-set-cookie-jsessionid-p t)
+                  :session-cookie-captured-p
+                  (and session-cookie-captured-p t)
+                  :bootstrap-succeeded-p
+                  (and bootstrap-succeeded-p t)
+                  :guarded-request-retried-p
+                  guarded-request-retried-p
+                  :guarded-request-endpoint-path
+                  (and guarded-request-retried-p final-failing-endpoint-path)
+                  :guarded-request-auth-mode-summary
+                  guarded-request-auth-mode-summary
+                  :guarded-request-authorization-scheme
+                  guarded-request-authorization-scheme
+                  :guarded-request-cookie-shape guarded-request-cookie-shape
+                  :guarded-request-remained-anonymous-p
+                  guarded-request-remained-anonymous-p
+                  :final-failing-endpoint-path final-failing-endpoint-path
+                  :final-failing-status-code final-failing-status-code
+                  :final-failing-reason-phrase final-failing-reason-phrase
+                  :response-cause response-cause
+                  :local-failure-p local-failure-p
+                  :local-failure-stage local-failure-stage
+                  :condition-text
+                  (and condition
+                       (format nil "~A" condition))
+                  :http-evidence final-http-evidence)
+            flags))
+         (authorization-summary
+           (workspace-annotation-journal-preflight-authorization-summary-data
+            report
+            base-context)))
+    (append
+     base-context
+     authorization-summary
+     (list :attempt-diagnosis
+           (workspace-annotation-explicit-auth-attempt-diagnosis
+            requested-auth-mode
+            flags
+            bootstrap-required-p
+            bootstrap-attempted-p
+            bootstrap-succeeded-p
+            guarded-request-retried-p
+            guarded-request-remained-anonymous-p
+            local-failure-p
+            (and authorization-summary
+                 (getf authorization-summary :authorization-failed-p)))))))
 
 (defun workspace-annotation-persistence-report-saved-topic-id-of (report)
   (or (workspace-annotation-persistence-report-persisted-topic-id-of report)
@@ -1601,6 +2342,36 @@
          report)
         :journal-preflight-auth-context
         (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+         report)
+        :explicit-auth-attempt-context
+        (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
+         report)
+        :explicit-auth-retry-invoked-p
+        (workspace-annotation-persistence-report-explicit-auth-retry-invoked-p
+         report)
+        :explicit-auth-retry-request-id
+        (workspace-annotation-persistence-report-explicit-auth-retry-request-id-of
+         report)
+        :explicit-auth-retry-executed-at
+        (workspace-annotation-persistence-report-explicit-auth-retry-executed-at-of
+         report)
+        :explicit-auth-retry-executed-at-label
+        (workspace-annotation-persistence-report-explicit-auth-retry-executed-at-label-of
+         report)
+        :explicit-auth-retry-mode
+        (workspace-annotation-persistence-report-explicit-auth-retry-mode-of
+         report)
+        :explicit-auth-retry-mode-label
+        (workspace-annotation-persistence-report-explicit-auth-retry-mode-label-of
+         report)
+        :explicit-auth-retry-source
+        (workspace-annotation-persistence-report-explicit-auth-retry-source-of
+         report)
+        :explicit-auth-retry-source-label
+        (workspace-annotation-persistence-report-explicit-auth-retry-source-label-of
+         report)
+        :explicit-auth-retry-evidence-version
+        (workspace-annotation-persistence-report-explicit-auth-retry-evidence-version-of
          report)
         :assignment-auth-context
         (workspace-annotation-persistence-report-assignment-auth-context-of
@@ -5382,31 +6153,119 @@
 (defun continue-workspace-annotation-journal-preflight-with-explicit-auth
     (report &key client auth-mode username password authorization-header
        auth-token)
-  (handler-case
-      (continue-workspace-annotation-journal-preflight-with-client
-       report
-       (or client
-           (make-explicit-workspace-annotation-continuation-client
+  (let ((attempt-client nil)
+        (retry-executed-at (get-universal-time))
+        (retry-request-id
+          (workspace-annotation-explicit-auth-retry-request-id)))
+    (labels ((requested-auth-mode ()
+             (or (workspace-annotation-explicit-auth-mode-or-nil auth-mode)
+                 (workspace-annotation-explicit-auth-client-mode
+                  attempt-client)))
+           (retry-marker-overrides ()
+             (list :explicit-auth-retry-invoked-p t
+                   :explicit-auth-retry-request-id retry-request-id
+                   :explicit-auth-retry-executed-at retry-executed-at
+                   :explicit-auth-retry-executed-at-label
+                   (workspace-annotation-format-explicit-auth-retry-time
+                    retry-executed-at)
+                   :explicit-auth-retry-mode (requested-auth-mode)
+                   :explicit-auth-retry-mode-label
+                   (and (requested-auth-mode)
+                        (workspace-annotation-auth-mode-label
+                         (requested-auth-mode)))
+                   :explicit-auth-retry-source
+                   :journal-preflight-explicit-auth
+                   :explicit-auth-retry-source-label
+                   (workspace-annotation-explicit-auth-retry-source-label
+                    :journal-preflight-explicit-auth)
+                   :explicit-auth-retry-evidence-version
+                   *workspace-annotation-explicit-auth-retry-evidence-version*))
+           (attempt-context (failure &key local-failure-stage)
+             (workspace-annotation-explicit-auth-attempt-context
+              report
+              attempt-client
+              failure
+              :auth-mode auth-mode
+              :username username
+              :password password
+              :authorization-header authorization-header
+              :auth-token auth-token
+              :local-failure-stage local-failure-stage
+              :continuation-request-id retry-request-id
+              :continuation-executed-at retry-executed-at
+              :continuation-source :journal-preflight-explicit-auth))
+           (decorate-report (result &key failure include-attempt-context-p)
+             (if (typep result 'workspace-annotation-persistence-report)
+                 (apply #'make-workspace-annotation-persistence-report-like
+                        result
+                        (append
+                         (list :journal-preflight-auth-context
+                               (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+                                report))
+                         (when include-attempt-context-p
+                           (list :explicit-auth-attempt-context
+                                 (attempt-context failure)))
+                         (retry-marker-overrides)))
+                 result)))
+      (handler-case
+          (setf attempt-client
+                (or client
+                    (make-explicit-workspace-annotation-continuation-client
+                     report
+                     :auth-mode auth-mode
+                     :username username
+                     :password password
+                     :authorization-header authorization-header
+                     :auth-token auth-token)))
+        (error (failure)
+          (return-from continue-workspace-annotation-journal-preflight-with-explicit-auth
+            (apply #'make-workspace-annotation-persistence-report-like
+                   report
+                   (append
+                    (list :condition failure
+                          :report-status
+                          (workspace-annotation-persistence-report-status-of report)
+                          :failure-stage
+                          (workspace-annotation-persistence-report-failure-stage-of
+                           report)
+                          :explicit-auth-attempt-context
+                          (attempt-context
+                           failure
+                           :local-failure-stage :build-explicit-auth-client))
+                    (retry-marker-overrides))))))
+      (reset-http-dmx-import-debug-evidence attempt-client)
+      (handler-case
+          (let ((continued
+                  (progn
+                    (ensure-http-dmx-import-authenticated-operation
+                     attempt-client
+                     :journal-preflight-continuation)
+                    (continue-workspace-annotation-journal-preflight-with-client
+                     report
+                     attempt-client))))
+            (decorate-report
+             continued
+             :failure
+             (and (typep continued 'workspace-annotation-persistence-report)
+                  (workspace-annotation-persistence-report-condition-of
+                   continued))
+             :include-attempt-context-p
+             (and (typep continued 'workspace-annotation-persistence-report)
+                  (not (eq (workspace-annotation-persistence-report-status-of
+                            continued)
+                           :persisted)))))
+        (error (failure)
+          (decorate-report
+           (make-workspace-annotation-persistence-report-like
             report
-            :auth-mode auth-mode
-            :username username
-            :password password
-            :authorization-header authorization-header
-            :auth-token auth-token)))
-    (error (condition)
-      (make-workspace-annotation-persistence-report-like
-       report
-       :condition condition
-       :report-status
-       (workspace-annotation-persistence-report-status-of report)
-       :failure-stage
-       (workspace-annotation-persistence-report-failure-stage-of report)
-       :journal-preflight-auth-context
-       (append
-        (or (workspace-annotation-persistence-report-journal-preflight-auth-context-of
-             report)
-            '())
-        (list :explicit-auth-condition (format nil "~A" condition)))))))
+            :client attempt-client
+            :condition failure
+           :report-status
+            (workspace-annotation-persistence-report-status-of report)
+           :failure-stage
+            (workspace-annotation-persistence-report-failure-stage-of report))
+           :failure failure
+           :include-attempt-context-p t))))))
 
 (defun probe-live-create-topic-for-dock-annotation
     (annotation &key workspace-topicmap-id workspace-id client view-props

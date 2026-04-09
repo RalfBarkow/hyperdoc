@@ -253,6 +253,347 @@
                  saved-carrier-topic
                  :display "Saved carrier topic"))))))))
 
+(defun render-workspace-annotation-explicit-auth-attempt-surface (context)
+  (when context
+    (let ((http-evidence (getf context :http-evidence)))
+      (views:html
+        (:h4 "Explicit auth continuation attempt")
+        (:p (views:esc
+             "This subsection records the explicit-auth retry separately from the original anonymous block. It shows which credential mode was selected, whether bootstrap/login ran, and whether the guarded journal PUT was retried."))
+        (:table :class "inspector-table"
+                (:tr (:th "Requested auth mode")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :requested-auth-mode-label))))))
+                (:tr (:th "Selected-mode credentials present")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context
+                                              :selected-mode-credentials-present-p))))))
+                (:tr (:th "Username present")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :username-present-p))))))
+                (:tr (:th "Password present")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :password-present-p))))))
+                (:tr (:th "Authorization header present")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context
+                                              :authorization-header-present-p))))))
+                (:tr (:th "Bearer token present")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :auth-token-present-p))))))
+                (:tr (:th "Bootstrap/login required")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :bootstrap-required-p))))))
+                (:tr (:th "Bootstrap/login attempted")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :bootstrap-attempted-p))))))
+                (:tr (:th "Bootstrap endpoint")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :bootstrap-endpoint-path))))))
+                (:tr (:th "Bootstrap request auth")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context
+                                       :bootstrap-request-auth-mode-summary))))))
+                (:tr (:th "Bootstrap request scheme")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context
+                                       :bootstrap-request-authorization-scheme))))))
+                (:tr (:th "Bootstrap response status")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context
+                                       :bootstrap-response-status-code))))))
+                (:tr (:th "Bootstrap response reason")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context
+                                       :bootstrap-response-reason-phrase))))))
+                (:tr (:th "JSESSIONID in Set-Cookie")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context
+                                              :bootstrap-set-cookie-jsessionid-p))))))
+                (:tr (:th "JSESSIONID captured")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :session-cookie-captured-p))))))
+                (:tr (:th "Guarded journal PUT retried")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :guarded-request-retried-p))))))
+                (:tr (:th "Guarded journal PUT endpoint")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :guarded-request-endpoint-path))))))
+                (:tr (:th "Guarded request auth")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :guarded-request-auth-mode-summary))))))
+                (:tr (:th "Guarded request scheme")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context
+                                       :guarded-request-authorization-scheme))))))
+                (:tr (:th "Guarded request cookie shape")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :guarded-request-cookie-shape))))))
+                (:tr (:th "Guarded PUT remained anonymous")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context
+                                              :guarded-request-remained-anonymous-p))))))
+                (:tr (:th "Final failing endpoint")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :final-failing-endpoint-path))))))
+                (:tr (:th "Final failing status")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :final-failing-status-code))))))
+                (:tr (:th "Final failing reason")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :final-failing-reason-phrase))))))
+                (:tr (:th "Local continuation/build failure")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf context :local-failure-p))))))
+                (:tr (:th "Local failure stage")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf context :local-failure-stage))))))
+                (:tr (:th "Attempt diagnosis")
+                     (:td (views:esc
+                           (workspace-annotation-render-value
+                            (getf context :attempt-diagnosis))))))
+        (when http-evidence
+          (views:html
+            (:h4 "Explicit-auth retry HTTP evidence")
+            (render-workspace-annotation-http-evidence-table
+             http-evidence)))
+        (when-let (condition-text (getf context :condition-text))
+          (views:html
+            (:h4 "Explicit-auth retry condition")
+            (:pre :style "white-space: pre-wrap"
+                  (views:esc condition-text))))))))
+
+(defun render-workspace-annotation-explicit-auth-retry-marker-surface (report)
+  (when (workspace-annotation-persistence-report-explicit-auth-retry-invoked-p
+         report)
+    (let ((authorization-summary
+            (workspace-annotation-journal-preflight-authorization-summary
+             report)))
+      (views:html
+        (:h4 "Explicit-auth retry result")
+        (:p (views:esc
+             "This report was returned by the explicit-auth continuation action, not by the original anonymous block. If this marker is absent, the running load set does not include the retry-result UI patch."))
+        (:table :class "inspector-table"
+                (:tr (:th "Continuation invoked")
+                     (:td (:tt "yes")))
+                (:tr (:th "Retry executed at")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-report-explicit-auth-retry-executed-at-label-of
+                                  report))))))
+                (:tr (:th "Retry request id")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-report-explicit-auth-retry-request-id-of
+                                  report))))))
+                (:tr (:th "Retry mode used")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-report-explicit-auth-retry-mode-label-of
+                                  report))))))
+                (:tr (:th "Retry source")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-report-explicit-auth-retry-source-label-of
+                                  report))))))
+                (:tr (:th "Retry evidence version")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-report-explicit-auth-retry-evidence-version-of
+                                  report))))))))
+      (when authorization-summary
+        (views:html
+          (:p (views:esc
+               "The explicit-auth retry authenticated successfully, but the guarded journal companion write was denied at the object permission boundary."))
+          (:table :class "inspector-table"
+                  (:tr (:th "Retry outcome classification")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :retry-outcome-classification-label))))))
+                  (:tr (:th "Authentication")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :authentication-status-label))))))
+                  (:tr (:th "Authorization")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :authorization-status-label))))))
+                  (:tr (:th "Authenticated principal")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :authenticated-principal))))))
+                  (:tr (:th "Required permission")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :required-permission))))))
+                  (:tr (:th "Blocked object/topic id")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :blocked-object-topic-id))))))
+                  (:tr (:th "Blocked endpoint")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf authorization-summary
+                                         :blocked-endpoint-path))))))
+                  (:tr (:th "Response cause")
+                       (:td (views:esc
+                             (workspace-annotation-render-value
+                              (getf authorization-summary
+                                    :response-cause)))))))))))
+
+(defun render-workspace-annotation-journal-auth-blocked-surface
+    (report journal-auth-context original-blocking-attempt-p
+     explicit-auth-attempt-context failure-stage)
+  (when journal-auth-context
+    (let ((http-evidence (getf journal-auth-context :http-evidence))
+          mode-cell username-cell password-cell header-cell token-cell)
+      (views:html
+        (:h4 (views:esc
+              (if original-blocking-attempt-p
+                  "Original blocking attempt: Journal companion auth blocked"
+                  "Journal companion auth blocked")))
+        (:p (views:esc
+             (if original-blocking-attempt-p
+                 "This was the original anonymous blocking attempt at the journal companion topic write/auth boundary. The saved annotation carrier topic and the journal companion topic are different objects. Because this preflight failed before annotation topic upsert, explicit-auth continuation reruns the same staged persist from the start, beginning with workspace journal preflight."
+                 "The current blocker is the journal companion topic write/auth boundary. The saved annotation carrier topic and the journal companion topic are different objects. Because this preflight failed before annotation topic upsert, explicit-auth continuation reruns the same staged persist from the start, beginning with workspace journal preflight.")))
+        (:table :class "inspector-table"
+                (:tr (:th "Journal companion")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf journal-auth-context
+                                       :journal-companion-label))))))
+                (:tr (:th "Journal endpoint")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf journal-auth-context
+                                       :journal-endpoint-path))))))
+                (:tr (:th "Env auth present")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf journal-auth-context
+                                              :environment-auth-present-p))))))
+                (:tr (:th "Env auth summary")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (getf journal-auth-context
+                                       :environment-auth-mode-summary))))))
+                (:tr (:th "Bootstrap/login needed")
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (getf journal-auth-context
+                                              :session-login-required-p))))))
+                (:tr (:th "Missing auth keys")
+                     (:td (:tt (views:esc
+                                (if-let (missing
+                                         (getf journal-auth-context
+                                               :auth-missing-keys))
+                                  (format nil "~{~A~^, ~}" missing)
+                                  "-")))))
+                (:tr (:th "Available auth modes")
+                     (:td (:tt (views:esc
+                                (if-let (modes
+                                         (getf journal-auth-context
+                                               :available-auth-modes))
+                                  (format nil
+                                          "~{~A~^, ~}"
+                                          (mapcar #'workspace-annotation-auth-mode-label
+                                                  modes))
+                                  "-")))))
+                (:tr (:th "Journal preflight boundary")
+                     (:td (views:esc
+                           "This boundary happens before annotation topic upsert. Workspace assignment and topicmap placement are later separate guarded steps."))))
+      (when-let (explicit-condition
+                  (getf journal-auth-context :explicit-auth-condition))
+        (views:html
+          (:h4 "Explicit auth input problem")
+          (:pre :style "white-space: pre-wrap"
+                (views:esc explicit-condition))))
+      (when http-evidence
+        (views:html
+          (:h4 "Journal preflight HTTP evidence")
+          (render-workspace-annotation-http-evidence-table
+           http-evidence)))
+      (render-workspace-annotation-explicit-auth-attempt-surface
+       explicit-auth-attempt-context)
+      (if (eq failure-stage :prepare-transition)
+          (views:html
+            (:h4 "Continue journal preflight with explicit auth")
+            (setf mode-cell
+                  (hvr:select '(("Username + password" . "basic")
+                                ("Authorization header" . "header")
+                                ("Bearer token" . "token"))
+                              :label "Credential mode: "))
+            (:br)
+            (setf username-cell
+                  (hvr:input :label "Username (Username + password mode): "
+                             :initial-value ""
+                             :size "24"))
+            (:br)
+            (setf password-cell
+                  (hvr:input :label "Password (Username + password mode): "
+                             :initial-value ""
+                             :size "24"
+                             :type :password))
+            (:br)
+            (setf header-cell
+                  (hvr:input :label "Authorization header (Header mode only): "
+                             :initial-value ""
+                             :size "64"))
+            (:br)
+            (setf token-cell
+                  (hvr:input :label "Bearer token (Token mode only): "
+                             :initial-value ""
+                             :size "48"
+                             :type :password))
+            (:p (views:esc
+                 "The active credential mode starts at Username + password. Only the fields for the selected mode are used for the next action. HyperDoc opens the returned retry report in a new pane. The returned report should show an Explicit-auth retry result marker, and failed retries also show an Explicit auth continuation attempt section."))
+            (views:eval-button
+             "Continue journal preflight with explicit auth"
+             (views:thunk
+               (continue-workspace-annotation-journal-preflight-with-explicit-auth
+                report
+                :auth-mode (lwcells:cell-ref mode-cell)
+                :username (lwcells:cell-ref username-cell)
+                :password (lwcells:cell-ref password-cell)
+                :authorization-header (lwcells:cell-ref header-cell)
+                :auth-token (lwcells:cell-ref token-cell)))
+             "Retry the journal companion preflight and remaining guarded live write with one-shot explicit credentials."))
+          (views:html
+            (:p (views:esc
+                 "This successful continuation report preserves the original anonymous journal-preflight block as comparison evidence. See the Explicit-auth retry result marker above for the executed retry."))))))))
+
 (defun render-workspace-annotation-journal-preflight-surface (report)
   (let* ((summary
            (workspace-annotation-persistence-report-journal-preflight-summary-of
@@ -266,6 +607,19 @@
          (journal-auth-context
            (workspace-annotation-persistence-report-journal-preflight-auth-context-of
             report))
+         (unassigned-companion-summary
+           (workspace-annotation-journal-preflight-unassigned-companion-summary
+            report))
+         (retry-invoked-p
+           (workspace-annotation-persistence-report-explicit-auth-retry-invoked-p
+            report))
+         (explicit-auth-attempt-context
+           (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
+            report))
+         (original-blocking-attempt-p
+           (and journal-auth-context
+                (or explicit-auth-attempt-context
+                    retry-invoked-p)))
          (heading
            (if (eq failure-stage :prepare-transition)
                "Workspace journal preflight blocked"
@@ -332,6 +686,12 @@
                      (:td (:tt (views:esc
                                 (workspace-annotation-render-value
                                  journal-topic-id)))))
+                (:tr (:th "Journal companion assigned workspace")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-journal-preflight-assigned-workspace-label
+                                  summary)
+                                 :default "-")))))
                 (:tr (:th "Journal note key")
                      (:td (:tt (views:esc
                                 (workspace-annotation-render-value
@@ -360,118 +720,45 @@
                     (:tr (:th "Journal lookup detail")
                          (:td (views:esc
                                (workspace-annotation-render-value
-                                lookup-condition)))))))
-        (when journal-topic
-          (views:html
-            (:p (views:object-ref
-                 journal-topic
-                 :display "Journal companion topic"))))
-        (when journal-auth-context
-          (let ((http-evidence (getf journal-auth-context :http-evidence))
-                mode-cell username-cell password-cell header-cell token-cell)
-            (views:html
-              (:h4 "Journal companion auth blocked")
-              (:p (views:esc
-                   "The current blocker is the journal companion topic write/auth boundary. The saved annotation carrier topic and the journal companion topic are different objects. Because this preflight failed before annotation topic upsert, explicit-auth continuation reruns the same staged persist from the start, beginning with workspace journal preflight."))
-              (:table :class "inspector-table"
-                      (:tr (:th "Journal companion")
-                           (:td (:tt (views:esc
-                                      (workspace-annotation-render-value
-                                       (getf journal-auth-context
-                                             :journal-companion-label))))))
-                      (:tr (:th "Journal endpoint")
-                           (:td (:tt (views:esc
-                                      (workspace-annotation-render-value
-                                       (getf journal-auth-context
-                                             :journal-endpoint-path))))))
-                      (:tr (:th "Env auth present")
-                           (:td (:tt (views:esc
-                                      (format nil "~A"
-                                              (getf journal-auth-context
-                                                    :environment-auth-present-p))))))
-                      (:tr (:th "Env auth summary")
-                           (:td (:tt (views:esc
-                                      (workspace-annotation-render-value
-                                       (getf journal-auth-context
-                                             :environment-auth-mode-summary))))))
-                      (:tr (:th "Bootstrap/login needed")
-                           (:td (:tt (views:esc
-                                      (format nil "~A"
-                                              (getf journal-auth-context
-                                                    :session-login-required-p))))))
-                      (:tr (:th "Missing auth keys")
-                           (:td (:tt (views:esc
-                                      (if-let (missing
-                                               (getf journal-auth-context
-                                                     :auth-missing-keys))
-                                        (format nil "~{~A~^, ~}" missing)
-                                        "-")))))
-                      (:tr (:th "Available auth modes")
-                           (:td (:tt (views:esc
-                                      (if-let (modes
-                                               (getf journal-auth-context
-                                                     :available-auth-modes))
-                                        (format nil
-                                                "~{~A~^, ~}"
-                                                (mapcar #'workspace-annotation-auth-mode-label
-                                                        modes))
-                                        "-")))))
-                      (:tr (:th "Journal preflight boundary")
-                           (:td (views:esc
-                                 "This boundary happens before annotation topic upsert. Workspace assignment and topicmap placement are later separate guarded steps."))))
-              (when-let (explicit-condition
-                           (getf journal-auth-context :explicit-auth-condition))
-                (views:html
-                  (:h4 "Explicit auth input problem")
-                  (:pre :style "white-space: pre-wrap"
-                        (views:esc explicit-condition))))
-              (when http-evidence
-                (views:html
-                  (:h4 "Journal preflight HTTP evidence")
-                  (render-workspace-annotation-http-evidence-table
-                   http-evidence)))
-              (:h4 "Continue journal preflight with explicit auth")
-              (setf mode-cell
-                    (hvr:select '(("Username + password" . "basic")
-                                  ("Authorization header" . "header")
-                                  ("Bearer token" . "token"))
-                                :label "Credential mode: "))
-              (:br)
-              (setf username-cell
-                    (hvr:input :label "Username: "
-                               :initial-value ""
-                               :size "24"))
-              (:br)
-              (setf password-cell
-                    (hvr:input :label "Password: "
-                               :initial-value ""
-                               :size "24"
-                               :type :password))
-              (:br)
-              (setf header-cell
-                    (hvr:input :label "Authorization header: "
-                               :initial-value ""
-                               :size "64"))
-              (:br)
-              (setf token-cell
-                    (hvr:input :label "Bearer token: "
-                               :initial-value ""
-                               :size "48"
-                               :type :password))
-              (:p (views:esc
-                   "Only the fields required by the active credential mode are used for the next action. This continuation reruns the same staged persist from the start, beginning with workspace journal preflight and then proceeding to topic upsert, workspace assignment, topicmap placement, journal transition, and reopen."))
-              (views:action-button
-               "Continue journal preflight with explicit auth"
-               (views:thunk
-                 (continue-workspace-annotation-journal-preflight-with-explicit-auth
-                  report
-                  :auth-mode (lwcells:cell-ref mode-cell)
-                  :username (lwcells:cell-ref username-cell)
-                  :password (lwcells:cell-ref password-cell)
-                  :authorization-header (lwcells:cell-ref header-cell)
-                  :auth-token (lwcells:cell-ref token-cell))
-                 t)
-               "Retry the journal companion preflight and remaining guarded live write with one-shot explicit credentials."))))))))
+                                lookup-condition))))))))
+      (when journal-topic
+        (views:html
+          (:p (views:object-ref
+               journal-topic
+               :display "Journal companion topic"))))
+      (when unassigned-companion-summary
+        (views:html
+          (:h4 (views:esc "Unassigned journal companion topic"))
+          (:p (views:esc
+               "HyperDoc found an existing journal companion topic, but it is not assigned to any workspace. Direct journal-topic update is therefore doomed before annotation topic upsert can begin."))
+          (:table :class "inspector-table"
+                  (:tr (:th "Retry outcome classification")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf unassigned-companion-summary
+                                         :retry-outcome-classification-label))))))
+                  (:tr (:th "Journal companion assigned workspace")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf unassigned-companion-summary
+                                         :assigned-workspace-label)
+                                   :default "none")))))
+                  (:tr (:th "Blocked endpoint")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf unassigned-companion-summary
+                                         :blocked-endpoint-path))))))
+                  (:tr (:th "Why direct PUT will fail")
+                       (:td (views:esc
+                             (workspace-annotation-render-value
+                              (getf unassigned-companion-summary
+                                    :direct-put-failure-detail)))))
+                  (:tr (:th "Why Common workspace is not sufficient")
+                       (:td (views:esc
+                             (workspace-annotation-render-value
+                              (getf unassigned-companion-summary
+                                    :common-workspace-insufficiency-detail)))))))))
+      ))
 
 (defun render-workspace-annotation-persistence-stage-table (report)
   (let ((stages (workspace-annotation-persistence-report-stage-results-of report)))
@@ -1878,10 +2165,12 @@
           (assignment-auth-context
             (workspace-annotation-persistence-report-assignment-auth-context-of
              report)))
-      (views:html
-      (:p (views:esc
-           "Live workspace persistence report with exact form, dry-run preview, and explicit stage classification. This surfaces whether failure happened during topic upsert, workspace assignment, topicmap placement, journal recording, or reopen, and whether live persistence used native typing or the compatibility carrier."))
-      (:table :class "inspector-table"
+	      (views:html
+	      (:p (views:esc
+	           "Live workspace persistence report with exact form, dry-run preview, and explicit stage classification. This surfaces whether failure happened during topic upsert, workspace assignment, topicmap placement, journal recording, or reopen, and whether live persistence used native typing or the compatibility carrier."))
+          (render-workspace-annotation-explicit-auth-retry-marker-surface
+           report)
+	      (:table :class "inspector-table"
               (:tr (:th "Status")
                    (:td (:tt (views:esc
                               (format nil "~A"
@@ -1977,6 +2266,22 @@
                 (workspace-annotation-persistence-report-journal-topic-id-of
                  report))
         (render-workspace-annotation-journal-preflight-surface report))
+      (when-let (journal-auth-context
+                  (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+                   report))
+        (unless (workspace-annotation-journal-preflight-unassigned-companion-topic-p
+                 report)
+          (render-workspace-annotation-journal-auth-blocked-surface
+           report
+           journal-auth-context
+           (or (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
+                report)
+               (workspace-annotation-persistence-report-explicit-auth-retry-invoked-p
+                report))
+           (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
+            report)
+           (workspace-annotation-persistence-report-failure-stage-of
+            report))))
       (when-let (condition
                    (workspace-annotation-persistence-report-condition-of report))
         (views:html

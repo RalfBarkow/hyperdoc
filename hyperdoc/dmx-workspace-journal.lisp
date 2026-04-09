@@ -21,6 +21,20 @@
 (defparameter *dmx-unix-epoch-universal-time-offset* 2208988800)
 (defvar *dmx-workspace-journal-suppressed-p* nil)
 
+(define-condition dmx-workspace-journal-unassigned-companion-topic-error
+    (fedwiki-dmx-import-error)
+  ((topic-id
+    :reader dmx-workspace-journal-unassigned-companion-topic-id-of
+    :initarg :topic-id)
+   (journal-uri
+    :reader dmx-workspace-journal-unassigned-companion-topic-uri-of
+    :initarg :journal-uri
+    :initform nil)
+   (workspace-topicmap-id
+    :reader dmx-workspace-journal-unassigned-companion-workspace-topicmap-id-of
+    :initarg :workspace-topicmap-id
+    :initform nil)))
+
 (defun dmx-workspace-journal-json-object (&rest key-values)
   (let ((json (make-hash-table :test #'equal)))
     (loop for (key value) on key-values by #'cddr
@@ -58,6 +72,50 @@
   (format nil "~A~A"
           *hyperdoc-workspace-journal-uri-prefix*
           (dmx-workspace-journal-subject-key->note-key subject-key)))
+
+(defun dmx-workspace-journal-existing-topic-workspace-summary
+    (client existing-topic)
+  (let ((topic-id (and existing-topic
+                       (dmx-import-object-id existing-topic))))
+    (cond
+      ((null topic-id)
+       (list :assigned-workspace-id nil
+             :assigned-workspace-title nil
+             :assigned-workspace-status :not-applicable))
+      (t
+       (let* ((workspace (dmx-import-read-topic-workspace client topic-id))
+              (workspace-id (and workspace
+                                 (dmx-import-object-id workspace))))
+         (list :assigned-workspace-id workspace-id
+               :assigned-workspace-title
+               (and workspace
+                    (or (dmx-json-object-value workspace "value")
+                        (dmx-json-object-value workspace "uri")))
+               :assigned-workspace-status
+               (if workspace-id :assigned :none)))))))
+
+(defun dmx-workspace-journal-assert-existing-topic-assigned
+    (client existing-topic journal-uri workspace-topicmap-id)
+  (let* ((topic-id (and existing-topic
+                        (dmx-import-object-id existing-topic)))
+         (assignment
+           (and topic-id
+                (typep client 'http-dmx-import-client)
+                (dmx-workspace-journal-existing-topic-workspace-summary
+                 client
+                 existing-topic))))
+    (when (and topic-id
+               (typep client 'http-dmx-import-client)
+               (null (getf assignment :assigned-workspace-id)))
+      (error 'dmx-workspace-journal-unassigned-companion-topic-error
+             :message
+             (format nil
+                     "Existing workspace journal companion topic ~D is not assigned to any workspace; direct PUT /core/topic/~D will fail until the topic is assigned to a writable workspace"
+                     topic-id
+                     topic-id)
+             :topic-id topic-id
+             :journal-uri journal-uri
+             :workspace-topicmap-id workspace-topicmap-id))))
 
 (defun dmx-workspace-journal-topic-p (topic)
   (dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix*
@@ -369,25 +427,36 @@
     (client stream existing-topic workspace-topicmap-id)
   (let* ((*dmx-workspace-journal-suppressed-p* t)
          (subject-key (gethash "subjectKey" stream))
-         (journal-uri (dmx-workspace-journal-note-uri subject-key))
-         (payload
-           (dmx-workspace-note-payload
-            (dmx-workspace-journal-visible-title stream)
-            (encode-json-string stream)
-            journal-uri))
-         (journal-topic
-           (if existing-topic
-               (dmx-import-update-topic client existing-topic payload)
-               (dmx-import-create-topic client payload)))
-         (journal-topic-id (dmx-import-object-id journal-topic)))
-    (unless (dmx-import-topic-in-topicmap-p client
-                                           workspace-topicmap-id
-                                           journal-topic-id)
-      (dmx-import-add-topic-to-topicmap client
-                                       workspace-topicmap-id
-                                       journal-topic-id
-                                       (dmx-workspace-journal-hidden-view-props)))
-    journal-topic))
+         (journal-topic-id (and existing-topic
+                                (dmx-import-object-id existing-topic)))
+         (journal-uri (dmx-workspace-journal-note-uri subject-key)))
+    (when (and existing-topic
+               (typep client 'http-dmx-import-client)
+               (dmx-import-object-id existing-topic))
+      (dmx-workspace-journal-assert-existing-topic-assigned
+       client
+       existing-topic
+       journal-uri
+       workspace-topicmap-id))
+    (let* ((payload
+             (dmx-workspace-note-payload
+              (dmx-workspace-journal-visible-title stream)
+              (encode-json-string stream)
+              journal-uri))
+           (journal-topic
+             (if existing-topic
+                 (dmx-import-update-topic client existing-topic payload)
+                 (dmx-import-create-topic client payload)))
+           (resolved-journal-topic-id
+             (dmx-import-object-id journal-topic)))
+      (unless (dmx-import-topic-in-topicmap-p client
+                                             workspace-topicmap-id
+                                             resolved-journal-topic-id)
+        (dmx-import-add-topic-to-topicmap client
+                                         workspace-topicmap-id
+                                         resolved-journal-topic-id
+                                         (dmx-workspace-journal-hidden-view-props)))
+      journal-topic)))
 
 (defun dmx-workspace-journal-json-equal-p (left right)
   (cond
@@ -764,7 +833,12 @@
             :note-kind note-kind))
          (stream fallback-stream)
          (existing-topic nil)
-         (lookup-condition nil))
+         (lookup-condition nil)
+         (assignment-summary
+           (list :assigned-workspace-id nil
+                 :assigned-workspace-title nil
+                 :assigned-workspace-status :not-applicable))
+         (assignment-lookup-condition nil))
     (handler-case
         (multiple-value-setq (stream existing-topic)
           (dmx-workspace-journal-read-stream
@@ -780,6 +854,18 @@
            :note-kind note-kind))
       (error (condition)
         (setf lookup-condition condition)))
+    (when existing-topic
+      (handler-case
+          (setf assignment-summary
+                (dmx-workspace-journal-existing-topic-workspace-summary
+                 client
+                 existing-topic))
+        (error (condition)
+          (setf assignment-lookup-condition condition
+                assignment-summary
+                (list :assigned-workspace-id nil
+                      :assigned-workspace-title nil
+                      :assigned-workspace-status :lookup-error)))))
     (let ((resolved-stream (or stream fallback-stream))
           (journal-uri (dmx-workspace-journal-note-uri subject-key)))
       (list :subject-key (gethash "subjectKey" resolved-stream)
@@ -799,6 +885,15 @@
             :existing-topic-id
             (and existing-topic
                  (dmx-import-object-id existing-topic))
+            :assigned-workspace-id
+            (getf assignment-summary :assigned-workspace-id)
+            :assigned-workspace-title
+            (getf assignment-summary :assigned-workspace-title)
+            :assigned-workspace-status
+            (getf assignment-summary :assigned-workspace-status)
+            :assigned-workspace-lookup-condition
+            (and assignment-lookup-condition
+                 (format nil "~A" assignment-lookup-condition))
             :lookup-condition
             (and lookup-condition
                  (format nil "~A" lookup-condition))))))
