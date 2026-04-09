@@ -1363,15 +1363,35 @@
            :http-evidence http-evidence)
      client-auth-context)))
 
+(defun workspace-annotation-guarded-boundary-auth-awaiting-p (report)
+  (and (typep report 'workspace-annotation-persistence-report)
+       (eq (workspace-annotation-persistence-report-status-of report)
+           :pending-auth)
+       (member (workspace-annotation-persistence-report-failure-stage-of report)
+               '(:workspace-assignment :topicmap-placement)
+               :test #'eq)))
+
 (defun workspace-annotation-pending-auth-p (report)
-  (eq (workspace-annotation-persistence-report-status-of report)
-      :pending-auth))
+  (workspace-annotation-guarded-boundary-auth-awaiting-p report))
 
 (defun workspace-annotation-journal-preflight-auth-blocked-p (report)
   (and (eq (workspace-annotation-persistence-report-failure-stage-of report)
            :prepare-transition)
        (workspace-annotation-persistence-report-journal-preflight-auth-context-of
         report)))
+
+(defun workspace-annotation-auth-awaiting-p (report)
+  (or (workspace-annotation-guarded-boundary-auth-awaiting-p report)
+      (workspace-annotation-journal-preflight-auth-blocked-p report)))
+
+(defun workspace-annotation-auth-awaiting-stage-p
+    (failure-stage failure-condition
+     &key persisted-topic-id journal-preflight-auth-blocked-p)
+  (or journal-preflight-auth-blocked-p
+      (and persisted-topic-id
+           (member failure-stage '(:workspace-assignment :topicmap-placement)
+                   :test #'eq)
+           (typep failure-condition 'dmx-import-config-error))))
 
 (defun workspace-annotation-persistence-report-journal-topic-id-of (report)
   (getf (workspace-annotation-persistence-report-journal-preflight-summary-of
@@ -3566,9 +3586,17 @@
                     (workspace-annotation-auth-blocked-condition-p
                      failure-condition)))
              (pending-auth-p
-               (and (eq failure-stage :workspace-assignment)
-                    persisted-topic-id
-                    (typep failure-condition 'dmx-import-config-error)))
+               (workspace-annotation-auth-awaiting-stage-p
+                failure-stage
+                failure-condition
+                :persisted-topic-id persisted-topic-id))
+             (auth-awaiting-p
+               (workspace-annotation-auth-awaiting-stage-p
+                failure-stage
+                failure-condition
+                :persisted-topic-id persisted-topic-id
+                :journal-preflight-auth-blocked-p
+                journal-preflight-auth-blocked-p))
              (report
                (make-instance
                 'workspace-annotation-persistence-report
@@ -3594,7 +3622,7 @@
                 :plan plan
                 :stage-results (nreverse stage-results)
                 :report-status (cond
-                                 (pending-auth-p :pending-auth)
+                                 (auth-awaiting-p :pending-auth)
                                  (failure-stage :failed)
                                  (t :persisted))
                 :failure-stage failure-stage
@@ -3992,9 +4020,10 @@
        :client client
        :stage-results stage-results
        :report-status (cond
-                        ((and (eq failure-stage :workspace-assignment)
-                              (typep failure-condition
-                                     'dmx-import-config-error))
+                        ((workspace-annotation-auth-awaiting-stage-p
+                          failure-stage
+                          failure-condition
+                          :persisted-topic-id topic-id)
                          :pending-auth)
                         (failure-stage :failed)
                         (t :persisted))
@@ -4127,8 +4156,10 @@
       ((null report)
        nil)
       ((and (typep report 'workspace-annotation-persistence-report)
-            (eq stage :workspace-assignment)
-            (workspace-annotation-pending-auth-p report))
+            (eq stage
+                (workspace-annotation-persistence-report-failure-stage-of
+                 report))
+            (workspace-annotation-auth-awaiting-p report))
        "error (pending-auth)")
       (t
        (workspace-annotation-path-diff-status-label

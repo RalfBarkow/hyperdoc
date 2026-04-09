@@ -1962,6 +1962,14 @@
                  (journal-topic-proxy
                    (hyperdoc::workspace-annotation-persistence-report-journal-topic-proxy-of
                     report))
+                 (comparison
+                   (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+                    persisted
+                    :workspace-topicmap-id
+                    *dmx-annotations-smoke-workspace-topicmap-id*
+                    :workspace-id *dmx-annotations-smoke-workspace-id*
+                    :client client
+                    :report report))
                  (views (dmx-annotation-smoke-load-inspector-views-for-object
                          report))
                  (overview (dmx-annotation-smoke-find-view-by-title views
@@ -1971,10 +1979,10 @@
             (assert-true
              (typep report 'hyperdoc::workspace-annotation-persistence-report)
              "Prepare-transition failures must still return an inspectable persistence report")
-            (assert-equal :failed
+            (assert-equal :pending-auth
                           (hyperdoc::workspace-annotation-persistence-report-status-of
                            report)
-                          "Prepare-transition failures must classify the persistence report as failed")
+                          "Journal-preflight auth-blocked reports must classify the persistence report as pending-auth")
             (assert-equal :prepare-transition
                           (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
                            report)
@@ -2005,6 +2013,17 @@
              (hyperdoc::workspace-annotation-journal-preflight-auth-blocked-p
               report)
              "Prepare-transition auth failures must classify as a continuable journal auth-blocked boundary")
+            (assert-true
+             (hyperdoc::workspace-annotation-auth-awaiting-p report)
+             "Prepare-transition auth failures must classify as auth-awaiting at the top-level report status")
+            (assert-true
+             (not (hyperdoc::workspace-annotation-pending-auth-p report))
+             "Prepare-transition auth failures must not masquerade as the post-topic-upsert guarded-boundary pending-auth case")
+            (assert-equal "error (pending-auth)"
+                          (hyperdoc::workspace-annotation-path-diff-raw-live-label
+                           comparison
+                           :prepare-transition)
+                          "Path-diff raw live labels must surface journal-preflight auth-awaiting as error (pending-auth) on the prepare-transition stage")
             (assert-true
              (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
               report)
@@ -2165,6 +2184,16 @@
              (hyperdoc::workspace-annotation-journal-preflight-auth-blocked-p
               blocked)
              "The continuation smoke must start from a journal-preflight auth-blocked report")
+            (assert-equal :pending-auth
+                          (hyperdoc::workspace-annotation-persistence-report-status-of
+                           blocked)
+                          "Journal-preflight auth-blocked reports must remain pending-auth before explicit continuation")
+            (assert-true
+             (hyperdoc::workspace-annotation-auth-awaiting-p blocked)
+             "Journal-preflight auth-blocked reports must classify as auth-awaiting before explicit continuation")
+            (assert-true
+             (not (hyperdoc::workspace-annotation-pending-auth-p blocked))
+             "Journal-preflight auth-blocked reports must stay separate from the post-topic-upsert guarded-boundary pending-auth continuation")
             (assert-equal :persisted
                           (hyperdoc::workspace-annotation-persistence-report-status-of
                            continued)
