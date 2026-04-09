@@ -12,7 +12,14 @@ The boundary remains narrow on purpose:
 - topic placement goes through `upsert_workspace_topicmap_context`
 - HyperDoc-owned topic creation/update goes through `upsert_workspace_topic_factory_snippet`
 - hard delete goes through `delete_workspace_note` or `delete_workspace_topic`
+- stale HyperDoc workspace-journal companions go through `repair_workspace_journal_companion`
 - topicmap unlink stays typed, but live HTTP execution is still intentionally unsupported
+
+For the specific stale journal companion defect class, do not chain raw
+`delete_workspace_note` plus manual recreate/placement steps. Use
+`repair_workspace_journal_companion` so the runtime can keep delete-and-recreate,
+hidden/off-canvas placement, and identity-history reporting on one typed repair
+boundary.
 
 ## Preconditions
 
@@ -189,6 +196,61 @@ The boundary remains narrow on purpose:
 {
   "topicId": 922123,
   "workspaceTopicmapId": 919822,
+  "dryRun": false
+}
+```
+
+### `repair_workspace_journal_companion`
+
+- Purpose: repair a stale HyperDoc-owned workspace-journal companion topic when the existing companion is present but unassigned.
+- Live support: yes.
+- Mutation kind: typed journal-specific repair only; this is not a generic delete or generic note repair surface.
+- Ownership restriction: only HyperDoc-owned workspace-journal companions in the stale/unassigned repair class. Non-journal topics and already-assigned companions are rejected explicitly.
+- Default topicmap: omitting `workspaceTopicmapId` uses the server workspace topicmap, currently `919822`.
+- Required fields:
+  - at least one of `journalTopicId`, `subjectKey`, or `subjectUri` is required semantically
+- Optional fields:
+  - `journalTopicId` integer
+  - `subjectKey` string
+  - `subjectUri` string
+  - `workspaceTopicmapId` integer
+  - `workspaceId` integer
+  - `dryRun` boolean
+- Success and typed-failure result shape:
+  - `operation`
+  - `dry-run`
+  - `repairable-p`
+  - `repair-completed-p`
+  - `repair-reason`
+  - `subject-key`
+  - `subject-uri`
+  - `journal-topic-id`
+  - `stale-topic-id`
+  - `replacement-topic-id`
+  - `current-topic-id`
+  - `repair-strategy`
+  - `repair-status`
+  - `repair-step`
+  - `repair-action-taken`
+  - `assigned-workspace-id-after`
+  - `hidden-placement-enforced-p`
+  - `hidden-view-props-restored-p`
+  - `ownership-class`
+  - `hyperdoc-owned-p`
+  - `in-topicmap-before`
+  - `in-topicmap-after`
+  - `writable-workspace-context-used-p`
+  - partial-progress fields such as `stale-delete-attempted-p`, `stale-delete-succeeded-p`, `replacement-create-attempted-p`, `replacement-create-succeeded-p`, `hidden-placement-attempted-p`, and `hidden-placement-succeeded-p`
+- Operator guidance:
+  - use this tool when the report shows an existing journal companion with assigned workspace `none`
+  - do not use `delete_workspace_note` as the operator story for this defect class
+- Example `arguments`:
+
+```json
+{
+  "journalTopicId": 928689,
+  "workspaceTopicmapId": 919822,
+  "workspaceId": 919815,
   "dryRun": false
 }
 ```
