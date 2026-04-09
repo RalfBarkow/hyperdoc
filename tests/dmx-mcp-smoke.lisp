@@ -479,12 +479,13 @@
 	     :log-stream nil)))
 
 (defun make-dmx-mcp-journal-companion-repair-server
-    (&key (fail-hidden-placement-p nil))
+    (&key (fail-hidden-placement-p nil)
+          (authorization-header "Bearer smoke-token"))
   (ensure-dmx-mcp-smoke-runtime-loaded)
   (let ((client
           (make-instance 'mcp-journal-repair-observing-http-dmx-import-client
                          :base-url "https://dmx.ralfbarkow.ch"
-                         :authorization-header "Bearer smoke-token"
+                         :authorization-header authorization-header
                          :workspace-id *dmx-mcp-smoke-workspace-id*
                          :next-topic-id 933000
                          :fail-journal-hidden-placement-p
@@ -2625,6 +2626,104 @@
                (mcp-assert-true
                 (null (mcp-journal-update-topic-ids-of client))
                 "Repair failure must not fall back to a broader journal direct-update path")))
+        (hyperdoc::stop-dmx-mcp-server))
+    t))
+
+(defun run-dmx-mcp-workspace-journal-companion-repair-missing-auth-config-smoke-test ()
+  (multiple-value-bind (server client)
+      (make-dmx-mcp-journal-companion-repair-server
+       :authorization-header nil)
+    (let* ((port (mcp-test-port))
+           (url (format nil "http://127.0.0.1:~D/mcp" port))
+           (stale-topic-id 921684)
+           (stale-subject-key
+             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-missing-auth"))
+      (mcp-test-seed-journal-companion
+       client
+       stale-topic-id
+       stale-subject-key
+       :view-props (mcp-test-view-props :x 120 :y 110 :visibility nil :pinned nil))
+      (mcp-clear-journal-repair-observations client)
+      (unwind-protect
+           (progn
+             (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+             (sleep 0.2)
+             (let ((session-id
+                     (mcp-test-open-session
+                      url
+                      :id 561
+                      :client-name "hyperdoc-journal-companion-repair-missing-auth")))
+               (multiple-value-bind (blocked-body blocked-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    562
+                    "repair_workspace_journal_companion"
+                    (mcp-test-json-object
+                     "journalTopicId" stale-topic-id
+                     "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                     "workspaceId" *dmx-mcp-smoke-workspace-id*
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 blocked-status
+                                   "Journal companion repair missing-auth status")
+                 (let* ((tool-result (gethash "result" blocked-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (gethash "isError" tool-result)
+                    "Missing server-side DMX auth config must stay a typed repair error")
+                   (mcp-assert-equal "blocked"
+                                     (gethash "repair-status" structured)
+                                     "Missing server-side DMX auth config must surface BLOCKED status")
+                   (mcp-assert-equal "missing-server-side-dmx-auth-config"
+                                     (gethash "repair-reason" structured)
+                                     "Missing server-side DMX auth config must surface a precise repair reason")
+                   (mcp-assert-equal "preflight"
+                                     (gethash "repair-step" structured)
+                                     "Missing server-side DMX auth config must stay at preflight")
+                   (mcp-assert-equal stale-topic-id
+                                     (gethash "stale-topic-id" structured)
+                                     "Blocked repair must preserve stale topic identity")
+                   (mcp-assert-equal stale-topic-id
+                                     (gethash "current-topic-id" structured)
+                                     "Blocked repair must keep current topic on the stale identity")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "replacement-topic-id" structured))
+                    "Blocked repair must not fabricate a replacement topic id")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "assigned-workspace-id-after" structured))
+                    "Blocked repair must not claim post-recreate workspace assignment")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "hidden-placement-enforced-p" structured))
+                    "Blocked repair must not claim hidden placement enforcement")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "stale-delete-attempted-p" structured))
+                    "Blocked repair must report stale delete not attempted")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "replacement-create-attempted-p" structured))
+                    "Blocked repair must report replacement create not attempted")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "hidden-placement-attempted-p" structured))
+                    "Blocked repair must report hidden placement not attempted")
+                   (mcp-assert-true
+                    (search "HYPERDOC_DMX_IMPORT_AUTH_HEADER"
+                            (or (gethash "repair-failure-message" structured) ""))
+                    "Blocked repair must keep the missing server-side auth evidence visible"))))
+               (mcp-assert-true
+                (null (mcp-journal-delete-topic-ids-of client))
+                "Blocked repair must not delete the stale companion")
+               (mcp-assert-true
+                (null (mcp-journal-create-observations-of client))
+                "Blocked repair must not create a replacement companion")
+               (mcp-assert-true
+                (null (mcp-journal-placement-observations-of client))
+                "Blocked repair must not attempt hidden placement")))
         (hyperdoc::stop-dmx-mcp-server))
     t))
 

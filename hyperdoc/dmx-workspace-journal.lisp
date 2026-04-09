@@ -46,6 +46,12 @@
     :initarg :cause
     :initform nil)))
 
+(defparameter *dmx-workspace-journal-auth-config-missing-keys*
+  '("HYPERDOC_DMX_IMPORT_AUTH_HEADER"
+    "HYPERDOC_DMX_IMPORT_USERNAME"
+    "HYPERDOC_DMX_IMPORT_PASSWORD"
+    "HYPERDOC_DMX_IMPORT_AUTH_TOKEN"))
+
 (defun dmx-workspace-journal-json-object (&rest key-values)
   (let ((json (make-hash-table :test #'equal)))
     (loop for (key value) on key-values by #'cddr
@@ -261,6 +267,14 @@
      nil)
     (t
      (getf summary :existing-topic-id))))
+
+(defun dmx-workspace-journal-missing-auth-config-error-p (condition)
+  (and (typep condition 'dmx-import-config-error)
+       (let ((missing (dmx-import-missing-keys-of condition)))
+         (and missing
+              (subsetp missing
+                       *dmx-workspace-journal-auth-config-missing-keys*
+                       :test #'string=)))))
 
 (defun dmx-workspace-journal-companion-repair-result
     (summary ownership &key dry-run repairable-p repair-completed-p repair-reason
@@ -567,20 +581,24 @@
                 nil))
            (dmx-workspace-journal-companion-repair-failed-error
                (condition)
+             (let ((repair-summary
+                     (dmx-workspace-journal-companion-repair-summary-of condition)))
              (values
               (dmx-workspace-journal-companion-repair-result
-               (dmx-workspace-journal-companion-repair-summary-of condition)
+               repair-summary
                ownership
                :dry-run nil
                :repairable-p t
                :repair-completed-p nil
-               :repair-reason :repair-failed
+               :repair-reason
+               (or (getf repair-summary :repair-reason)
+                   :repair-failed)
                :subject-key (or resolved-subject-key
                                 (and resolved-stream
                                      (gethash "subjectKey" resolved-stream)))
                :subject-uri resolved-subject-uri
                :journal-topic-id resolved-journal-topic-id)
-              t))))))))
+              t)))))))))
 
 (defun dmx-workspace-journal-repair-unassigned-companion-topic
     (client stream existing-topic workspace-topicmap-id &key workspace-id)
@@ -758,9 +776,33 @@
             (values
              replacement-topic
              repair-summary)))
+      (dmx-import-config-error (condition)
+        (if (dmx-workspace-journal-missing-auth-config-error-p condition)
+            (remember :repair-status :blocked
+                      :repair-status-label "blocked"
+                      :repair-step :preflight
+                      :repair-step-label "preflight"
+                      :repair-reason :missing-server-side-dmx-auth-config
+                      :repair-action-taken
+                      "Blocked journal companion repair because the MCP server has no usable DMX write-auth configuration for the delete-and-recreate path."
+                      :repair-failure-message
+                      (format nil "~A" condition))
+            (remember :repair-status :failed
+                      :repair-status-label "failed"
+                      :repair-reason :repair-failed
+                      :repair-failure-message
+                      (format nil "~A" condition)))
+        (error 'dmx-workspace-journal-companion-repair-failed-error
+               :message
+               (format nil
+                       "Workspace journal companion repair failed for stale unassigned topic ~D"
+                       existing-topic-id)
+               :repair-summary repair-summary
+               :cause condition))
       (error (condition)
         (remember :repair-status :failed
                   :repair-status-label "failed"
+                  :repair-reason :repair-failed
                   :repair-failure-message
                   (format nil "~A" condition))
         (error 'dmx-workspace-journal-companion-repair-failed-error
