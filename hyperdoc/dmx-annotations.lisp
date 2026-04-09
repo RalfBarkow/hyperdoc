@@ -672,6 +672,21 @@
     :initform nil
     :reader workspace-annotation-supersedes-topic-id-of)))
 
+(defun workspace-annotation-replay-subject (object)
+  (typecase object
+    (workspace-annotation-backend-compatibility-report
+     (workspace-annotation-backend-compatibility-report-annotation-of object))
+    (workspace-annotation-create-topic-probe-report
+     (workspace-annotation-create-topic-probe-annotation-of object))
+    (workspace-annotation-persistence-debug
+     (workspace-annotation-persistence-debug-annotation-of object))
+    (workspace-annotation-persistence-report
+     (workspace-annotation-persistence-report-annotation-of object))
+    (t object)))
+
+(defun workspace-annotation-probe-subject (object)
+  (workspace-annotation-replay-subject object))
+
 (defun workspace-dock-annotation-p (object)
   (typep object 'workspace-dock-annotation))
 
@@ -1023,7 +1038,7 @@
     (let ((*package* (find-package :hyperdoc)))
       (prin1-to-string
        `(probe-live-workspace-annotation-type-support
-         *
+         (workspace-annotation-backend-compatibility-report-annotation-of *)
          :workspace-topicmap-id ,workspace-topicmap-id
          ,@(when workspace-id
              `(:workspace-id ,workspace-id)))))))
@@ -1134,7 +1149,7 @@
     (let ((*package* (find-package :hyperdoc)))
       (prin1-to-string
        `(probe-live-create-topic-for-dock-annotation
-         *
+         (workspace-annotation-create-topic-probe-annotation-of *)
          :workspace-topicmap-id ,workspace-topicmap-id
          ,@(when workspace-id
              `(:workspace-id ,workspace-id))
@@ -1585,7 +1600,7 @@
     (let ((*package* (find-package :hyperdoc)))
       (prin1-to-string
        `(persist-dock-annotation-to-workspace
-         *
+         (workspace-annotation-replay-subject *)
          :workspace-topicmap-id ,workspace-topicmap-id
          ,@(when workspace-id
              `(:workspace-id ,workspace-id))
@@ -1595,21 +1610,26 @@
 
 (defun workspace-annotation-persistence-stepper-source
     (workspace-topicmap-id &key workspace-id storage-mode)
-  (if storage-mode
-      (format nil
-              "(hyperdoc::plan-dmx-workspace-annotation-write-from-object * :workspace-topicmap-id ~D~@[ :workspace-id ~D~] :storage-mode ~S)~%~%(hyperdoc::persist-dock-annotation-to-workspace * :workspace-topicmap-id ~D~@[ :workspace-id ~D~] :storage-mode ~S :dry-run nil)"
-              workspace-topicmap-id
-              workspace-id
-              storage-mode
-              workspace-topicmap-id
-              workspace-id
-              storage-mode)
-      (format nil
-              "(hyperdoc::plan-dmx-workspace-annotation-write-from-object * :workspace-topicmap-id ~D~@[ :workspace-id ~D~])~%~%(hyperdoc::persist-dock-annotation-to-workspace * :workspace-topicmap-id ~D~@[ :workspace-id ~D~] :dry-run nil)"
-              workspace-topicmap-id
-              workspace-id
-              workspace-topicmap-id
-              workspace-id)))
+  (let ((subject-form "(hyperdoc::workspace-annotation-replay-subject *)"))
+    (if storage-mode
+        (format nil
+                "(hyperdoc::plan-dmx-workspace-annotation-write-from-object ~A :workspace-topicmap-id ~D~@[ :workspace-id ~D~] :storage-mode ~S)~%~%(hyperdoc::persist-dock-annotation-to-workspace ~A :workspace-topicmap-id ~D~@[ :workspace-id ~D~] :storage-mode ~S :dry-run nil)"
+                subject-form
+                workspace-topicmap-id
+                workspace-id
+                storage-mode
+                subject-form
+                workspace-topicmap-id
+                workspace-id
+                storage-mode)
+        (format nil
+                "(hyperdoc::plan-dmx-workspace-annotation-write-from-object ~A :workspace-topicmap-id ~D~@[ :workspace-id ~D~])~%~%(hyperdoc::persist-dock-annotation-to-workspace ~A :workspace-topicmap-id ~D~@[ :workspace-id ~D~] :dry-run nil)"
+                subject-form
+                workspace-topicmap-id
+                workspace-id
+                subject-form
+                workspace-topicmap-id
+                workspace-id))))
 
 (defun workspace-annotation-persistence-runtime-relation-id (annotation)
   (or (and (workspace-dock-annotation-p annotation)
@@ -1636,7 +1656,8 @@
 (defun probe-live-workspace-annotation-type-support
     (annotation &key workspace-topicmap-id workspace-id client view-props
        status supersedes-topic-id annotation-key provenance-json storage-mode)
-  (let* ((resolved-client
+  (let* ((annotation (workspace-annotation-replay-subject annotation))
+         (resolved-client
            (resolve-dmx-workspace-annotation-client
             :client client
             :dry-run nil
@@ -5360,7 +5381,8 @@
     (annotation &key workspace-topicmap-id workspace-id client view-props
        status supersedes-topic-id annotation-key provenance-json
        (storage-mode *dmx-workspace-annotation-native-storage-mode*))
-  (let* ((resolved-client
+  (let* ((annotation (workspace-annotation-replay-subject annotation))
+         (resolved-client
            (resolve-dmx-workspace-annotation-client
             :client client
             :dry-run nil
@@ -5688,7 +5710,8 @@
        status supersedes-topic-id annotation-key provenance-json
        storage-mode
        (dry-run t))
-  (let* ((resolved-client
+  (let* ((annotation (workspace-annotation-replay-subject annotation))
+         (resolved-client
            (resolve-dmx-workspace-annotation-client
             :client client
             :dry-run dry-run

@@ -519,15 +519,37 @@
                  :workspace-topicmap-id
                  *dmx-annotations-smoke-workspace-topicmap-id*
                  :client client))
+         (exact-form
+           (hyperdoc::workspace-annotation-persistence-debug-exact-form-of
+            debug))
+         (stepper-source
+           (hyperdoc::workspace-annotation-persistence-debug-stepper-source-of
+            debug))
+         (replayed
+           (hyperdoc::persist-dock-annotation-to-workspace
+            debug
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client client
+            :dry-run nil))
          (stepper
            (clog-moldable-inspector::make-playground-stepper
             annotation
-            (hyperdoc::workspace-annotation-persistence-debug-stepper-source-of
-             debug)))
+            stepper-source))
          (graph (hyperdoc::workspace-annotation-persistence-debug-graph debug)))
     (assert-true
      (typep debug 'hyperdoc::workspace-annotation-persistence-debug)
      "Debug workspace persistence must return an inspectable debug object")
+    (assert-true
+     (eq annotation
+         (hyperdoc::workspace-annotation-replay-subject debug))
+     "Replay subject helper must unwrap persistence debug objects to the underlying annotation")
+    (assert-true
+     (typep replayed 'hyperdoc::workspace-dock-annotation)
+     "Replaying persistence from the debug wrapper must still persist the underlying annotation")
+    (assert-equal (hyperdoc::note-of annotation)
+                  (hyperdoc::note-of replayed)
+                  "Persistence replay from the debug wrapper must preserve the underlying annotation text")
     (assert-true
      (search "Debug workspace persistence" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the Debug workspace persistence action")
@@ -557,15 +579,28 @@
      "Debug workspace persistence must preload the dry-run preview")
     (assert-true
      (search "persist-dock-annotation-to-workspace"
-             (hyperdoc::workspace-annotation-persistence-debug-exact-form-of
-              debug)
+             exact-form
              :test #'char-equal)
      "Debug workspace persistence must expose the exact persist form")
     (assert-true
+     (search "workspace-annotation-replay-subject"
+             exact-form
+             :test #'char-equal)
+     "Debug persistence exact form must unwrap the annotation from a wrapper object explicitly")
+    (assert-true
+     (null (search "(persist-dock-annotation-to-workspace *"
+                   exact-form
+                   :test #'char-equal))
+     "Debug persistence exact form must not rely on bare * as the annotation subject")
+    (assert-true
      (search "plan-dmx-workspace-annotation-write-from-object"
-             (hyperdoc::workspace-annotation-persistence-debug-stepper-source-of
-              debug))
+             stepper-source)
      "Debug workspace persistence stepper source must stage the plan form first")
+    (assert-true
+     (search "workspace-annotation-replay-subject"
+             stepper-source
+             :test #'char-equal)
+     "Debug workspace persistence stepper source must unwrap wrapper subjects before plan or persist replay")
     (assert-true
      (typep stepper 'clog-moldable-inspector::playground-stepper)
      "Debug workspace persistence must be step-throughable through the Playground stepper")
@@ -678,10 +713,24 @@
                   annotation
                   :workspace-topicmap-id
                   *dmx-annotations-smoke-workspace-topicmap-id*
-                  :client client)))
+                  :client client))
+         (exact-form
+           (hyperdoc::workspace-annotation-persistence-report-exact-form-of
+            report))
+         (replayed
+           (hyperdoc::persist-dock-annotation-to-workspace
+            report
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client client
+            :dry-run nil)))
     (assert-true
      (typep report 'hyperdoc::workspace-annotation-persistence-report)
      "Live workspace persistence debug must return an inspectable report")
+    (assert-true
+     (eq annotation
+         (hyperdoc::workspace-annotation-replay-subject report))
+     "Replay subject helper must unwrap persistence report objects to the underlying annotation")
     (assert-equal :persisted
                   (hyperdoc::workspace-annotation-persistence-report-status-of
                    report)
@@ -695,6 +744,22 @@
              report)
             'hyperdoc::workspace-dock-annotation)
      "Successful live workspace persistence debug must reopen the persisted annotation")
+    (assert-true
+     (typep replayed 'hyperdoc::workspace-dock-annotation)
+     "Replaying persistence from the report wrapper must still persist the underlying annotation")
+    (assert-equal (hyperdoc::note-of annotation)
+                  (hyperdoc::note-of replayed)
+                  "Persistence replay from the report wrapper must preserve the underlying annotation text")
+    (assert-true
+     (search "workspace-annotation-replay-subject"
+             exact-form
+             :test #'char-equal)
+     "Persistence report exact form must unwrap the annotation from a wrapper object explicitly")
+    (assert-true
+     (null (search "(persist-dock-annotation-to-workspace *"
+                   exact-form
+                   :test #'char-equal))
+     "Persistence report exact form must not rely on bare * as the annotation subject")
     (assert-true
      (getf (hyperdoc::workspace-annotation-persistence-report-raw-result-of
             report)
@@ -883,16 +948,39 @@
                     :workspace-topicmap-id
                     *dmx-annotations-smoke-workspace-topicmap-id*
                     :client client))
+           (exact-form
+             (hyperdoc::workspace-annotation-backend-compatibility-report-exact-form-of
+              report))
            (evidence
              (hyperdoc::workspace-annotation-backend-compatibility-report-http-evidence-of
-              report)))
+              report))
+           (replayed-report
+             (hyperdoc::probe-live-workspace-annotation-type-support
+              report
+              :workspace-topicmap-id
+              *dmx-annotations-smoke-workspace-topicmap-id*
+              :client client)))
       (assert-true
        (typep report 'hyperdoc::workspace-annotation-backend-compatibility-report)
        "Backend compatibility probe must return an inspectable report")
+      (assert-true
+       (eq annotation
+           (hyperdoc::workspace-annotation-backend-compatibility-report-annotation-of
+            report))
+       "Direct backend compatibility probes must preserve the underlying dock annotation")
       (assert-equal :compatible-via-carrier
                     (hyperdoc::workspace-annotation-backend-compatibility-report-status-of
                      report)
                     "When raw hyperdoc.annotation is unsupported but dmx.notes.note is available, the live path must classify as compatibility-carrier supported")
+      (assert-true
+       (typep replayed-report
+              'hyperdoc::workspace-annotation-backend-compatibility-report)
+       "Replaying the backend compatibility probe from its report object must still return an inspectable report")
+      (assert-true
+       (eq annotation
+           (hyperdoc::workspace-annotation-backend-compatibility-report-annotation-of
+            replayed-report))
+       "Backend compatibility probe replay must unwrap the underlying annotation instead of probing the report object itself")
       (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
                     (hyperdoc::workspace-annotation-backend-compatibility-report-selected-storage-mode-of
                      report)
@@ -936,7 +1024,17 @@
                           :test #'char-equal))
                 (hyperdoc::workspace-annotation-backend-compatibility-report-next-actions-of
                  report))
-       "Compatibility report must state that the normal live path will use compatibility storage"))))
+       "Compatibility report must state that the normal live path will use compatibility storage")
+      (assert-true
+       (search "workspace-annotation-backend-compatibility-report-annotation-of"
+               exact-form
+               :test #'char-equal)
+       "Backend compatibility probe exact form must unwrap the annotation from the report object explicitly")
+      (assert-true
+       (null (search "(probe-live-workspace-annotation-type-support *"
+                     exact-form
+                     :test #'char-equal))
+       "Backend compatibility probe exact form must not rely on bare * as the probe subject"))))
 
 (defun run-dmx-http-unicode-json-request-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
@@ -1031,9 +1129,18 @@
                           :workspace-topicmap-id
                           *dmx-annotations-smoke-workspace-topicmap-id*
                           :client client))
+                  (exact-form
+                    (hyperdoc::workspace-annotation-create-topic-probe-exact-form-of
+                     probe))
                   (probe-evidence
                     (hyperdoc::workspace-annotation-create-topic-probe-http-evidence-of
                      probe))
+                  (replayed-probe
+                    (hyperdoc::probe-live-create-topic-for-dock-annotation
+                     probe
+                     :workspace-topicmap-id
+                     *dmx-annotations-smoke-workspace-topicmap-id*
+                     :client client))
                   (report (hyperdoc::run-dock-annotation-workspace-persistence-debug
                            annotation
                            :workspace-topicmap-id
@@ -1047,10 +1154,24 @@
              (assert-true
               (typep probe 'hyperdoc::workspace-annotation-create-topic-probe-report)
               "Create-topic probe must return an inspectable probe report")
+             (assert-true
+              (eq annotation
+                  (hyperdoc::workspace-annotation-create-topic-probe-annotation-of
+                   probe))
+              "Direct create-topic probes must preserve the underlying dock annotation")
              (assert-equal :failed
                            (hyperdoc::workspace-annotation-create-topic-probe-status-of
                             probe)
                            "Create-topic probe must classify a 500 as failed")
+             (assert-true
+              (typep replayed-probe
+                     'hyperdoc::workspace-annotation-create-topic-probe-report)
+              "Replaying the create-topic probe from its report object must still return an inspectable probe report")
+             (assert-true
+              (eq annotation
+                  (hyperdoc::workspace-annotation-create-topic-probe-annotation-of
+                   replayed-probe))
+              "Create-topic probe replay must unwrap the underlying annotation instead of probing the report object itself")
              (assert-equal "/core/topic"
                            (getf probe-evidence :path)
                            "Create-topic probe evidence must preserve the normalized endpoint path")
@@ -1078,6 +1199,16 @@
                           "")
                       :test #'char-equal)
               "Create-topic probe must preserve the exact outgoing payload JSON")
+             (assert-true
+              (search "workspace-annotation-create-topic-probe-annotation-of"
+                      exact-form
+                      :test #'char-equal)
+              "Create-topic probe exact form must unwrap the annotation from the report object explicitly")
+             (assert-true
+              (null (search "(probe-live-create-topic-for-dock-annotation *"
+                            exact-form
+                            :test #'char-equal))
+              "Create-topic probe exact form must not rely on bare * as the probe subject")
              (assert-equal :failed
                            (hyperdoc::workspace-annotation-persistence-report-status-of
                             report)
