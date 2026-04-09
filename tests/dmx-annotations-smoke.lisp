@@ -57,6 +57,54 @@
     :initarg :topic-update-count
     :initform 0)))
 
+(defclass journal-repair-observing-compatibility-storage-http-dmx-import-client
+    (counting-topic-update-compatibility-storage-http-dmx-import-client)
+  ((journal-create-observations
+    :accessor journal-create-observations-of
+    :initarg :journal-create-observations
+    :initform '())
+   (journal-update-topic-ids
+    :accessor journal-update-topic-ids-of
+    :initarg :journal-update-topic-ids
+    :initform '())
+   (journal-delete-topic-ids
+    :accessor journal-delete-topic-ids-of
+    :initarg :journal-delete-topic-ids
+    :initform '())
+   (journal-placement-observations
+    :accessor journal-placement-observations-of
+    :initarg :journal-placement-observations
+    :initform '())
+   (fail-journal-hidden-placement-p
+    :accessor fail-journal-hidden-placement-p-of
+    :initarg :fail-journal-hidden-placement-p
+    :initform nil)))
+
+(defun workspace-annotation-smoke-journal-uri-p (value)
+  (and (stringp value)
+       (hyperdoc::dmx-string-prefix-p
+        hyperdoc::*hyperdoc-workspace-journal-uri-prefix*
+        value)))
+
+(defun workspace-annotation-smoke-journal-topic-object-p (topic)
+  (workspace-annotation-smoke-journal-uri-p
+   (or (hyperdoc::dmx-json-object-value topic "uri")
+       (getf topic :external-key)
+       (getf topic :uri))))
+
+(defun workspace-annotation-smoke-topic-external-key-by-id (client topic-id)
+  (loop for external-key being the hash-keys of (hyperdoc::topics-by-external-key-of client)
+          using (hash-value topic)
+        when (eql topic-id (hyperdoc::dmx-import-object-id topic))
+          do (return external-key)))
+
+(defun workspace-annotation-smoke-journal-topic-id-p (client topic-id)
+  (workspace-annotation-smoke-journal-uri-p
+   (workspace-annotation-smoke-topic-external-key-by-id client topic-id)))
+
+(defun workspace-annotation-smoke-hidden-view-props-p (view-props)
+  (hyperdoc::dmx-workspace-journal-hidden-view-props-p view-props))
+
 (defun make-type-support-topic-json (type-uri)
   (let ((json (make-hash-table :test #'equal)))
     (setf (gethash "id" json) (+ 970000 (sxhash type-uri))
@@ -124,6 +172,67 @@
      existing-topic
      payload)
   (incf (topic-update-count-of client))
+  (call-next-method))
+
+(defmethod hyperdoc::dmx-import-create-topic
+    ((client journal-repair-observing-compatibility-storage-http-dmx-import-client)
+     payload)
+  (let* ((external-key (or (getf payload :external-key)
+                           (getf payload :uri)))
+         (journal-p (workspace-annotation-smoke-journal-uri-p external-key))
+         (workspace-id (hyperdoc::effective-http-dmx-import-workspace-id client))
+         (topic (call-next-method)))
+    (when journal-p
+      (push (list :topic-id (hyperdoc::dmx-import-object-id topic)
+                  :external-key external-key
+                  :workspace-id workspace-id)
+            (journal-create-observations-of client)))
+    topic))
+
+(defmethod hyperdoc::dmx-import-update-topic
+    ((client journal-repair-observing-compatibility-storage-http-dmx-import-client)
+     existing-topic
+     payload)
+  (when (workspace-annotation-smoke-journal-topic-object-p existing-topic)
+    (push (hyperdoc::dmx-import-object-id existing-topic)
+          (journal-update-topic-ids-of client)))
+  (call-next-method))
+
+(defmethod hyperdoc::dmx-import-delete-topic
+    ((client journal-repair-observing-compatibility-storage-http-dmx-import-client)
+     topic-id)
+  (when (workspace-annotation-smoke-journal-topic-id-p client topic-id)
+    (push topic-id (journal-delete-topic-ids-of client)))
+  (call-next-method))
+
+(defmethod hyperdoc::dmx-import-add-topic-to-topicmap
+    ((client journal-repair-observing-compatibility-storage-http-dmx-import-client)
+     topicmap-id
+     topic-id
+     view-props)
+  (when (workspace-annotation-smoke-journal-topic-id-p client topic-id)
+    (push (list :action :add-to-topicmap
+                :topicmap-id topicmap-id
+                :topic-id topic-id
+                :view-props view-props)
+          (journal-placement-observations-of client))
+    (when (fail-journal-hidden-placement-p-of client)
+      (error "Simulated journal hidden placement failure")))
+  (call-next-method))
+
+(defmethod hyperdoc::dmx-import-set-topic-view-props
+    ((client journal-repair-observing-compatibility-storage-http-dmx-import-client)
+     topicmap-id
+     topic-id
+     view-props)
+  (when (workspace-annotation-smoke-journal-topic-id-p client topic-id)
+    (push (list :action :set-view-props
+                :topicmap-id topicmap-id
+                :topic-id topic-id
+                :view-props view-props)
+          (journal-placement-observations-of client))
+    (when (fail-journal-hidden-placement-p-of client)
+      (error "Simulated journal hidden placement failure")))
   (call-next-method))
 
 (defmethod hyperdoc::dmx-import-create-topic
@@ -2207,7 +2316,7 @@
          (topicmap-memberships (make-hash-table :test #'equal))
          (workspace-assignments (make-hash-table :test #'eql))
          (create-client
-           (make-instance 'compatibility-storage-http-dmx-import-client
+           (make-instance 'journal-repair-observing-compatibility-storage-http-dmx-import-client
                           :base-url "https://dmx.ralfbarkow.ch"
                           :authorization-header "Bearer test-token"
                           :workspace-id *dmx-annotations-smoke-workspace-id*
@@ -2225,12 +2334,12 @@
             :dry-run nil))
          (stale-summary
            (workspace-annotation-smoke-reset-journal-stream-to-base
-            create-client
-            persisted))
+           create-client
+           persisted))
          (journal-topic-id (getf stale-summary :existing-topic-id))
          (guard-client
            (make-instance
-            'counting-topic-update-compatibility-storage-http-dmx-import-client
+            'journal-repair-observing-compatibility-storage-http-dmx-import-client
             :base-url "https://dmx.ralfbarkow.ch"
             :authorization-header "Bearer test-token"
             :workspace-id *dmx-annotations-smoke-workspace-id*
@@ -2255,6 +2364,18 @@
          (summary
            (hyperdoc::workspace-annotation-persistence-report-journal-preflight-summary-of
             report))
+         (repair-summary
+           (hyperdoc::workspace-annotation-journal-preflight-repair-summary
+            report))
+         (replacement-topic-id (getf repair-summary :replacement-topic-id))
+         (current-journal-topic-id
+           (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
+            report))
+         (replacement-membership
+           (and replacement-topic-id
+                (gethash (list *dmx-annotations-smoke-workspace-topicmap-id*
+                               replacement-topic-id)
+                         topicmap-memberships)))
          (views
            (dmx-annotation-smoke-load-inspector-views-for-object report))
          (overview
@@ -2262,6 +2383,12 @@
          (html
            (and overview
                 (html-inspector-views:view-html overview))))
+    (assert-equal 0
+                  (length (journal-delete-topic-ids-of create-client))
+                  "No-existing-companion persistence must keep using the normal journal create path without deleting any prior companion topic")
+    (assert-true
+     (= 1 (length (journal-create-observations-of create-client)))
+     "No-existing-companion persistence must create exactly one initial journal companion topic")
     (assert-true
      journal-topic-id
      "The unassigned-companion smoke must start from an existing journal companion topic")
@@ -2271,92 +2398,145 @@
     (assert-equal :none
                   (getf stale-summary :assigned-workspace-status)
                   "The stale journal companion topic must classify as assigned-workspace none before the guarded write")
-    (assert-equal :failed
+    (assert-equal :persisted
                   (hyperdoc::workspace-annotation-persistence-report-status-of
                    report)
-                  "Unassigned existing journal companions must fail the report at prepare-transition instead of classifying as pending-auth")
-    (assert-equal :prepare-transition
-                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
-                   report)
-                  "Unassigned existing journal companions must stay classified at the journal preflight boundary")
+                  "Existing unassigned journal companions must repair and continue instead of stopping at prepare-transition")
     (assert-true
-     (typep (hyperdoc::workspace-annotation-persistence-report-condition-of
-             report)
-            'hyperdoc::dmx-workspace-journal-unassigned-companion-topic-error)
-     "The prepare-transition failure must preserve a dedicated unassigned-companion condition")
+     (null (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+            report))
+     "Successful delete-and-recreate repair must clear the prepare-transition failure boundary")
     (assert-true
-     (hyperdoc::workspace-annotation-journal-preflight-unassigned-companion-topic-p
-      report)
-     "Unassigned existing journal companions must classify explicitly instead of forcing operators to infer the DMX object-write rule")
+     repair-summary
+     "The repaired run must preserve structured journal companion repair evidence on the returned report")
     (assert-true
      (not (hyperdoc::workspace-annotation-journal-preflight-auth-blocked-p
            report))
-     "Unassigned companion topics must not masquerade as journal auth-blocked reports")
+     "Delete-and-recreate repair must not masquerade as journal auth-blocked failure")
     (assert-true
      (not (hyperdoc::workspace-annotation-auth-awaiting-p report))
-     "Unassigned companion topics must not classify as auth-awaiting")
-    (assert-equal :error
+     "Successful unassigned-companion repair must not classify as auth-awaiting")
+    (assert-equal :completed
                   (getf prepare-transition :status)
-                  "The prepare-transition stage must still record the unassigned companion topic as an error")
-    (assert-true
-     (search "Direct PUT /core/topic/"
-             (getf prepare-transition :detail)
-             :test #'char-equal)
-     "The prepare-transition detail must explain that the doomed direct journal PUT was avoided")
-    (assert-true
-     (search "not sufficient unless the journal companion topic is actually assigned there"
-             (getf prepare-transition :detail)
-             :test #'char-equal)
-     "The prepare-transition detail must explain why the Common destination workspace is not enough on its own")
-    (assert-true
-     (null topic-upsert)
-     "Unassigned existing journal companions must stop the staged persist before topic-upsert starts")
-    (assert-equal 0
-                  (topic-update-count-of guard-client)
-                  "Unassigned existing journal companions must not attempt any direct topic update before reporting the doomed path")
+                  "Repairing the stale unassigned companion must still complete the prepare-transition stage")
+    (assert-equal :completed
+                  (getf topic-upsert :status)
+                  "After repair, the staged persist must continue beyond PREPARE-TRANSITION into topic-upsert")
     (assert-equal journal-topic-id
                   (getf summary :existing-topic-id)
-                  "The report must preserve the existing journal companion topic id")
-    (assert-equal nil
-                  (getf summary :assigned-workspace-id)
-                  "The report must surface that the journal companion has no assigned workspace")
-    (assert-equal :none
-                  (getf summary :assigned-workspace-status)
-                  "The report must classify the existing journal companion assignment as none")
+                  "The report must preserve the stale journal companion topic id as repair history")
+    (assert-equal "delete-and-recreate"
+                  (getf repair-summary :repair-strategy-label)
+                  "Repair evidence must identify delete-and-recreate as the chosen strategy")
+    (assert-equal journal-topic-id
+                  (getf repair-summary :stale-topic-id)
+                  "Repair evidence must preserve the stale journal companion topic id explicitly")
+    (assert-true
+     (not (eql current-journal-topic-id journal-topic-id))
+     "The current journal topic id must flip away from the stale companion id after successful recreate")
+    (assert-equal replacement-topic-id
+                  current-journal-topic-id
+                  "The current journal topic id must equal the replacement companion id after successful recreate")
+    (assert-true
+     replacement-topic-id
+     "Successful repair must preserve the replacement journal companion topic id")
+    (assert-true
+     (getf repair-summary :writable-workspace-context-used-p)
+     "Delete-and-recreate repair must record that the resolved writable workspace context was used")
+    (assert-true
+     (getf repair-summary :stale-delete-attempted-p)
+     "Delete-and-recreate repair must record that stale delete was attempted")
+    (assert-true
+     (getf repair-summary :stale-delete-succeeded-p)
+     "Delete-and-recreate repair must record that stale delete succeeded")
+    (assert-true
+     (getf repair-summary :replacement-create-attempted-p)
+     "Delete-and-recreate repair must record that replacement create was attempted")
+    (assert-true
+     (getf repair-summary :replacement-create-succeeded-p)
+     "Delete-and-recreate repair must record that replacement create succeeded")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (getf repair-summary :assigned-workspace-id-after)
+                  "Replacement companion topics must end up assigned to the intended workspace")
+    (assert-true
+     (getf repair-summary :hidden-placement-attempted-p)
+     "Delete-and-recreate repair must record that hidden placement was attempted")
+    (assert-true
+     (getf repair-summary :hidden-placement-succeeded-p)
+     "Delete-and-recreate repair must record that hidden placement succeeded")
+    (assert-true
+     (getf repair-summary :hidden-placement-enforced-p)
+     "Delete-and-recreate repair must record that hidden/off-canvas placement was enforced")
+    (assert-equal "yes"
+                  (getf repair-summary :resumed-past-prepare-transition-label)
+                  "Successful repair must record that the run resumed beyond PREPARE-TRANSITION")
+    (assert-true
+     (member journal-topic-id
+             (journal-delete-topic-ids-of guard-client)
+             :test #'eql)
+     "The stale journal companion topic must be deleted before replacement create continues")
+    (assert-true
+     (= 1 (length (journal-create-observations-of guard-client)))
+     "Delete-and-recreate repair must create exactly one replacement journal companion topic during prepare-transition")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (getf (first (journal-create-observations-of guard-client))
+                        :workspace-id)
+                  "Replacement companion create must run under the resolved workspace request context")
+    (assert-equal replacement-topic-id
+                  (getf (first (journal-create-observations-of guard-client))
+                        :topic-id)
+                  "The create observation must preserve the replacement companion topic id")
+    (assert-true
+     (not (member journal-topic-id
+                  (journal-update-topic-ids-of guard-client)
+                  :test #'eql))
+     "The old doomed direct update path against the stale companion id must not be attempted")
+    (assert-equal replacement-topic-id
+                  (or (first (journal-update-topic-ids-of guard-client))
+                      replacement-topic-id)
+                  "Any follow-on journal companion update after repair must target the replacement companion id rather than the stale id")
+    (assert-true
+     (<= (length (journal-update-topic-ids-of guard-client)) 1)
+     "Successful repair must not perform a redundant direct update of the replacement companion before any later journal-transition update")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (gethash replacement-topic-id workspace-assignments)
+                  "The replacement companion topic must be assigned to the intended workspace in live client state")
+    (assert-true
+     (workspace-annotation-smoke-hidden-view-props-p replacement-membership)
+     "The replacement companion topic must be placed with the hidden/off-canvas journal view-props invariant")
     (assert-true
      overview
-     "Unassigned companion reports must still render an Overview view")
+     "Repaired journal companion reports must still render an Overview view")
     (assert-true
      (stringp html)
-     "Unassigned companion reports must render Overview HTML")
+     "Repaired journal companion reports must render Overview HTML")
     (assert-true
-     (search "Journal companion assigned workspace" html :test #'char-equal)
-     "The Overview must surface the journal companion assigned-workspace row explicitly")
+     (search "Journal companion repair" html :test #'char-equal)
+     "The Overview must render a dedicated journal companion repair section")
     (assert-true
-     (search "unassigned-companion-topic" html :test #'char-equal)
-     "The Overview must render the unassigned companion classification near the top")
+     (search "delete-and-recreate" html :test #'char-equal)
+     "The Overview must show delete-and-recreate as the repair strategy")
     (assert-true
-     (search "Direct PUT /core/topic/" html :test #'char-equal)
-     "The Overview must explain why the doomed direct journal PUT would fail")
+     (search (format nil "~D" journal-topic-id) html :test #'char-equal)
+     "The Overview must keep the stale companion id visible as repair history")
     (assert-true
-     (search "context-window workspace (919815) is not sufficient unless the journal companion topic is actually assigned there"
-             html
-             :test #'char-equal)
-     "The Overview must explain why the Common destination workspace does not authorize direct journal-topic write on an unassigned object")
+     (search (format nil "~D" replacement-topic-id) html :test #'char-equal)
+     "The Overview must show the replacement companion id after successful recreate")
     (assert-true
-     (null (search "Continue journal preflight with explicit auth"
-                   html
-                   :test #'char-equal))
-     "The Overview must not offer explicit-auth continuation for an unassigned companion topic")
-    (workspace-annotation-smoke-assign-journal-topic-to-workspace
-     create-client
-     persisted)
+     (search "Current journal companion topic id" html :test #'char-equal)
+     "The Overview must distinguish the current journal companion id from the stale id history")
+    (assert-true
+     (search "Resumed beyond PREPARE-TRANSITION" html :test #'char-equal)
+     "The Overview must render the report-level continuation outcome field explicitly")
+    (assert-true
+     (search ">yes<" html :test #'char-equal)
+     "The repaired report must render resumed beyond PREPARE-TRANSITION = yes")
     (workspace-annotation-smoke-reset-journal-stream-to-base
      create-client
      persisted)
     (let* ((assigned-client
              (make-instance
-              'counting-topic-update-compatibility-storage-http-dmx-import-client
+              'journal-repair-observing-compatibility-storage-http-dmx-import-client
               :base-url "https://dmx.ralfbarkow.ch"
               :authorization-header "Bearer test-token"
               :workspace-id *dmx-annotations-smoke-workspace-id*
@@ -2372,10 +2552,13 @@
               :client assigned-client))
            (assigned-prepare-transition
              (hyperdoc::workspace-annotation-persistence-stage-result
-              assigned-report
-              :prepare-transition))
+             assigned-report
+             :prepare-transition))
            (assigned-summary
              (hyperdoc::workspace-annotation-persistence-report-journal-preflight-summary-of
+              assigned-report))
+           (assigned-repair-summary
+             (hyperdoc::workspace-annotation-journal-preflight-repair-summary
               assigned-report)))
       (assert-equal *dmx-annotations-smoke-workspace-id*
                     (getf assigned-summary :assigned-workspace-id)
@@ -2384,23 +2567,189 @@
                     (getf assigned-summary :assigned-workspace-status)
                     "Already-assigned journal companions must classify as assigned")
       (assert-equal :persisted
-                    (hyperdoc::workspace-annotation-persistence-report-status-of
+       (hyperdoc::workspace-annotation-persistence-report-status-of
                      assigned-report)
                     "Already-assigned journal companions must keep using the normal guarded update path")
       (assert-true
        (null (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
               assigned-report))
        "Already-assigned journal companions must clear the prepare-transition failure once the workspace assignment exists")
+      (assert-true
+       (null assigned-repair-summary)
+       "Already-assigned journal companions must keep using the old guarded update path unchanged instead of triggering delete-and-recreate repair")
       (assert-equal :completed
                     (getf assigned-prepare-transition :status)
                     "Already-assigned journal companions must complete the journal preflight stage")
       (assert-true
-       (> (topic-update-count-of assigned-client) 0)
+       (member replacement-topic-id
+               (journal-update-topic-ids-of assigned-client)
+               :test #'eql)
        "Already-assigned journal companions must be able to proceed through the existing topic update path after the assignment exists")
       (assert-true
        (not (hyperdoc::workspace-annotation-journal-preflight-unassigned-companion-topic-p
              assigned-report))
        "Assigned companion reports must not retain the unassigned classification"))))
+
+(defun run-dmx-workspace-annotation-journal-preflight-repair-failure-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (create-client
+           (make-instance 'journal-repair-observing-compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9755))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Journal repair failure smoke")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client create-client
+            :dry-run nil))
+         (stale-summary
+           (workspace-annotation-smoke-reset-journal-stream-to-base
+            create-client
+            persisted))
+         (journal-topic-id (getf stale-summary :existing-topic-id))
+         (failing-client
+           (make-instance
+            'journal-repair-observing-compatibility-storage-http-dmx-import-client
+            :base-url "https://dmx.ralfbarkow.ch"
+            :authorization-header "Bearer test-token"
+            :workspace-id *dmx-annotations-smoke-workspace-id*
+            :fail-journal-hidden-placement-p t
+            :topics-by-external-key topics
+            :topicmap-memberships topicmap-memberships
+            :workspace-assignments workspace-assignments
+            :next-topic-id 9855))
+         (report
+           (hyperdoc::run-dock-annotation-workspace-persistence-debug
+            persisted
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client failing-client))
+         (prepare-transition
+           (hyperdoc::workspace-annotation-persistence-stage-result
+            report
+            :prepare-transition))
+         (repair-summary
+           (hyperdoc::workspace-annotation-journal-preflight-repair-summary
+            report))
+         (replacement-topic-id (getf repair-summary :replacement-topic-id))
+         (current-journal-topic-id
+           (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
+            report))
+         (views
+           (dmx-annotation-smoke-load-inspector-views-for-object report))
+         (overview
+           (dmx-annotation-smoke-find-view-by-title views "Overview"))
+         (html
+           (and overview
+                (html-inspector-views:view-html overview))))
+    (assert-true
+     journal-topic-id
+     "The repair-failure smoke must start from an existing stale journal companion topic")
+    (assert-equal :failed
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   report)
+                  "Placement failure during delete-and-recreate repair must surface as a failed persistence report")
+    (assert-equal :prepare-transition
+                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                   report)
+                  "Repair failure must stay classified at PREPARE-TRANSITION")
+    (assert-true
+     (hyperdoc::workspace-annotation-journal-preflight-repair-failed-p report)
+     "Placement failure after stale delete must classify as a journal companion repair failure")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-condition-of report)
+            'hyperdoc::dmx-workspace-journal-companion-repair-failed-error)
+     "Repair failure reports must preserve the dedicated journal companion repair condition")
+    (assert-true
+     repair-summary
+     "Repair failure reports must preserve structured repair history")
+    (assert-equal "delete-and-recreate"
+                  (getf repair-summary :repair-strategy-label)
+                  "Repair failure reports must preserve the chosen delete-and-recreate strategy")
+    (assert-equal journal-topic-id
+                  (getf repair-summary :stale-topic-id)
+                  "Repair failure reports must preserve the stale companion topic id")
+    (assert-true
+     (getf repair-summary :stale-delete-attempted-p)
+     "Repair failure reports must preserve that stale delete was attempted")
+    (assert-true
+     (getf repair-summary :stale-delete-succeeded-p)
+     "Repair failure reports must preserve that stale delete succeeded")
+    (assert-true
+     (getf repair-summary :replacement-create-attempted-p)
+     "Repair failure reports must preserve that replacement create was attempted")
+    (assert-true
+     (getf repair-summary :replacement-create-succeeded-p)
+     "Repair failure reports must preserve that replacement create succeeded before placement failed")
+    (assert-true
+     (getf repair-summary :hidden-placement-attempted-p)
+     "Repair failure reports must preserve that hidden placement was attempted")
+    (assert-true
+     (not (getf repair-summary :hidden-placement-succeeded-p))
+     "Repair failure reports must preserve that hidden placement did not succeed")
+    (assert-equal replacement-topic-id
+                  current-journal-topic-id
+                  "On repair failure after recreate, the current journal companion id must reflect the last valid post-repair identity state")
+    (assert-equal "no"
+                  (getf repair-summary :resumed-past-prepare-transition-label)
+                  "Repair failure reports must render resumed beyond PREPARE-TRANSITION = no")
+    (assert-equal :error
+                  (getf prepare-transition :status)
+                  "Repair failure must leave the PREPARE-TRANSITION stage in error")
+    (assert-true
+     (member journal-topic-id
+             (journal-delete-topic-ids-of failing-client)
+             :test #'eql)
+     "Repair failure history must preserve that stale delete happened")
+    (assert-equal 1
+                  (length (journal-create-observations-of failing-client))
+                  "Repair failure after recreate must still preserve the created replacement topic observation")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (getf (first (journal-create-observations-of failing-client))
+                        :workspace-id)
+                  "Repair failure history must preserve the writable workspace context used for replacement create")
+    (assert-true
+     (not (member journal-topic-id
+                  (journal-update-topic-ids-of failing-client)
+                  :test #'eql))
+     "Repair failure must still avoid the old doomed direct update path against the stale companion id")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (getf repair-summary :assigned-workspace-id-after)
+                  "Repair failure after recreate must preserve the replacement companion workspace assignment when it was already established before failure")
+    (assert-true
+     overview
+     "Repair failure reports must still render an Overview")
+    (assert-true
+     (stringp html)
+     "Repair failure reports must render Overview HTML")
+    (assert-true
+     (search "Journal companion repair failed" html :test #'char-equal)
+     "The Overview must render a dedicated repair failure section")
+    (assert-true
+     (search (format nil "~D" journal-topic-id) html :test #'char-equal)
+     "The Overview must keep the stale companion id visible on repair failure")
+    (assert-true
+     (search (format nil "~D" replacement-topic-id) html :test #'char-equal)
+     "The Overview must preserve the replacement companion id reached before placement failure")
+    (assert-true
+     (search "Resumed beyond PREPARE-TRANSITION" html :test #'char-equal)
+     "Repair failure reports must still render the continuation outcome field")
+    (assert-true
+     (search ">no<" html :test #'char-equal)
+     "Repair failure reports must render resumed beyond PREPARE-TRANSITION = no")
+    (assert-true
+     (null (search "Journal companion auth blocked" html :test #'char-equal))
+     "Repair failure must not be rendered as a generic journal auth-blocked report")))
 
 (defun run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test ()
   (let* ((topics (make-hash-table :test #'equal))
@@ -3800,6 +4149,7 @@
   (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-unassigned-companion-smoke-test)
+  (run-dmx-workspace-annotation-journal-preflight-repair-failure-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-explicit-auth-bootstrap-failure-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-explicit-auth-failure-evidence-smoke-test)

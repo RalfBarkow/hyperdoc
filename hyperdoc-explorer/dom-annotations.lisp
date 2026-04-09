@@ -598,6 +598,8 @@
   (let* ((summary
            (workspace-annotation-persistence-report-journal-preflight-summary-of
             report))
+         (repair-summary
+           (workspace-annotation-journal-preflight-repair-summary report))
          (failure-stage
            (workspace-annotation-persistence-report-failure-stage-of report))
          (plan (workspace-annotation-persistence-report-plan-of report))
@@ -628,6 +630,9 @@
            (if (eq failure-stage :prepare-transition)
                "Before annotation topic upsert could start, HyperDoc could not reconcile the companion workspace journal for this annotation subject. This is the journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
                "HyperDoc inspected the companion workspace journal for this annotation subject before topic upsert."))
+         (stale-journal-topic-id
+           (workspace-annotation-persistence-report-journal-preflight-existing-topic-id-of
+            report))
          (journal-topic-id
            (workspace-annotation-persistence-report-journal-topic-id-of report))
          (journal-topic
@@ -682,11 +687,11 @@
                                 (workspace-annotation-render-value
                                  (workspace-annotation-journal-preflight-label
                                   summary))))))
-                (:tr (:th "Journal topic id")
+                (:tr (:th "Current journal topic id")
                      (:td (:tt (views:esc
                                 (workspace-annotation-render-value
                                  journal-topic-id)))))
-                (:tr (:th "Journal companion assigned workspace")
+                (:tr (:th "Journal companion assigned workspace at preflight")
                      (:td (:tt (views:esc
                                 (workspace-annotation-render-value
                                  (workspace-annotation-journal-preflight-assigned-workspace-label
@@ -726,6 +731,112 @@
           (:p (views:object-ref
                journal-topic
                :display "Journal companion topic"))))
+      (when repair-summary
+        (views:html
+          (:h4 (views:esc
+                (if (workspace-annotation-journal-preflight-repair-failed-p
+                     report)
+                    "Journal companion repair failed"
+                    "Journal companion repair")))
+          (:p (views:esc
+               "HyperDoc treated the stale unassigned journal companion as a first-class repair transition before annotation topic upsert. The stale companion remains visible as history, while the current companion id reflects the replacement once recreate succeeded.")))
+        (views:html
+          (:table :class "inspector-table"
+                  (:tr (:th "Repair strategy")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary
+                                         :repair-strategy-label))))))
+                  (:tr (:th "Stale journal companion topic id")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   stale-journal-topic-id)))))
+                  (:tr (:th "Current journal companion topic id")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary :current-topic-id))))))
+                  (:tr (:th "Replacement journal companion topic id")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary
+                                         :replacement-topic-id)
+                                   :default "-")))))
+                  (:tr (:th "Writable workspace context used")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :writable-workspace-context-used-p))))))
+                  (:tr (:th "Requested workspace id")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary
+                                         :requested-workspace-id)
+                                   :default "-")))))
+                  (:tr (:th "Stale delete attempted")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :stale-delete-attempted-p))))))
+                  (:tr (:th "Stale delete succeeded")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :stale-delete-succeeded-p))))))
+                  (:tr (:th "Replacement create attempted")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :replacement-create-attempted-p))))))
+                  (:tr (:th "Replacement create succeeded")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :replacement-create-succeeded-p))))))
+                  (:tr (:th "Assigned workspace after recreate")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary
+                                         :assigned-workspace-label-after)
+                                   :default "-")))))
+                  (:tr (:th "Hidden placement attempted")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :hidden-placement-attempted-p))))))
+                  (:tr (:th "Hidden placement succeeded")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :hidden-placement-succeeded-p))))))
+                  (:tr (:th "Hidden/off-canvas placement enforced")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :hidden-placement-enforced-p))))))
+                  (:tr (:th "Resumed beyond PREPARE-TRANSITION")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary
+                                         :resumed-past-prepare-transition-label))))))
+                  (:tr (:th "Repair step")
+                       (:td (:tt (views:esc
+                                  (workspace-annotation-render-value
+                                   (getf repair-summary
+                                         :repair-step-label)
+                                   :default "-")))))
+                  (:tr (:th "Repair action taken")
+                       (:td (views:esc
+                             (workspace-annotation-render-value
+                              (getf repair-summary
+                                    :repair-action-taken)
+                              :default "-"))))
+                  (when-let (failure-message
+                              (getf repair-summary :repair-failure-message))
+                    (views:html
+                      (:tr (:th "Repair failure detail")
+                           (:td (views:esc
+                                 (workspace-annotation-render-value
+                                  failure-message)))))))))
       (when unassigned-companion-summary
         (views:html
           (:h4 (views:esc "Unassigned journal companion topic"))

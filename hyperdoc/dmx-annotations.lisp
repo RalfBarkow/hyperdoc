@@ -316,6 +316,11 @@
     :initarg :journal-preflight-summary
     :initform nil
     :reader workspace-annotation-persistence-report-journal-preflight-summary-of)
+   (journal-preflight-repair-summary
+    :initarg :journal-preflight-repair-summary
+    :initform nil
+    :reader
+    workspace-annotation-persistence-report-journal-preflight-repair-summary-of)
    (journal-preflight-auth-context
     :initarg :journal-preflight-auth-context
     :initform nil
@@ -1455,6 +1460,57 @@
        (typep (workspace-annotation-persistence-report-condition-of report)
               'dmx-workspace-journal-unassigned-companion-topic-error)))
 
+(defun workspace-annotation-journal-preflight-repair-failed-p (report)
+  (and (typep report 'workspace-annotation-persistence-report)
+       (eq (workspace-annotation-persistence-report-failure-stage-of report)
+           :prepare-transition)
+       (typep (workspace-annotation-persistence-report-condition-of report)
+              'dmx-workspace-journal-companion-repair-failed-error)))
+
+(defun workspace-annotation-persistence-report-resumed-past-prepare-transition-p
+    (report)
+  (and (typep report 'workspace-annotation-persistence-report)
+       (not (eq (workspace-annotation-persistence-report-failure-stage-of report)
+                :prepare-transition))
+       (let ((prepare-transition
+               (workspace-annotation-persistence-stage-result
+                report
+                :prepare-transition)))
+         (or (null prepare-transition)
+             (eq (getf prepare-transition :status) :completed)))))
+
+(defun workspace-annotation-journal-preflight-repair-summary (report)
+  (let* ((stored-summary
+           (and (typep report 'workspace-annotation-persistence-report)
+                (workspace-annotation-persistence-report-journal-preflight-repair-summary-of
+                 report)))
+         (failure-summary
+           (and (workspace-annotation-journal-preflight-repair-failed-p report)
+                (dmx-workspace-journal-companion-repair-summary-of
+                 (workspace-annotation-persistence-report-condition-of report))))
+         (summary (or stored-summary failure-summary)))
+    (when summary
+      (let ((copy (copy-list summary)))
+        (setf (getf copy :writable-workspace-context-used-p)
+              (and (getf copy :requested-workspace-id) t)
+              (getf copy :stale-topic-id)
+              (or (getf copy :existing-topic-id)
+                  (workspace-annotation-persistence-report-journal-preflight-existing-topic-id-of
+                   report))
+              (getf copy :current-topic-id)
+              (or (getf copy :replacement-topic-id)
+                  (workspace-annotation-persistence-report-journal-preflight-existing-topic-id-of
+                   report))
+              (getf copy :resumed-past-prepare-transition-p)
+              (workspace-annotation-persistence-report-resumed-past-prepare-transition-p
+               report)
+              (getf copy :resumed-past-prepare-transition-label)
+              (if (workspace-annotation-persistence-report-resumed-past-prepare-transition-p
+                   report)
+                  "yes"
+                  "no"))
+        copy))))
+
 (defun workspace-annotation-journal-preflight-unassigned-companion-summary
     (report)
   (when (workspace-annotation-journal-preflight-unassigned-companion-topic-p
@@ -1512,10 +1568,17 @@
                    :test #'eq)
            (typep failure-condition 'dmx-import-config-error))))
 
-(defun workspace-annotation-persistence-report-journal-topic-id-of (report)
+(defun workspace-annotation-persistence-report-journal-preflight-existing-topic-id-of
+    (report)
   (getf (workspace-annotation-persistence-report-journal-preflight-summary-of
          report)
         :existing-topic-id))
+
+(defun workspace-annotation-persistence-report-journal-topic-id-of (report)
+  (or (getf (workspace-annotation-journal-preflight-repair-summary report)
+            :replacement-topic-id)
+      (workspace-annotation-persistence-report-journal-preflight-existing-topic-id-of
+       report)))
 
 (defun workspace-annotation-persistence-report-journal-topic-proxy-of (report)
   (let ((journal-topic-id
@@ -1546,6 +1609,8 @@
   (cond
     ((typep condition 'dmx-workspace-journal-unassigned-companion-topic-error)
      "the existing journal companion topic is not assigned to any workspace")
+    ((typep condition 'dmx-workspace-journal-companion-repair-failed-error)
+     "repairing the existing unassigned journal companion topic failed")
     ((typep condition 'dmx-import-config-error)
      "DMX auth is missing")
     ((workspace-annotation-http-auth-blocked-p condition)
@@ -1567,12 +1632,34 @@
                           "~A is not sufficient unless the journal companion topic is actually assigned there."
                           workspace-label)
                   "A Common/shared workspace is not sufficient unless the journal companion topic is actually assigned there."))
-      (format nil
-              "Before annotation topic upsert could start, HyperDoc could not reconcile ~A for ~A in ~A because ~A. This is the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
-              (workspace-annotation-journal-preflight-label summary)
-              (or workspace-label "the selected workspace")
-              (or topicmap-label "the selected topicmap")
-              (workspace-annotation-journal-preflight-blocked-cause condition))))
+      (if (typep condition 'dmx-workspace-journal-companion-repair-failed-error)
+          (let* ((repair-summary
+                   (dmx-workspace-journal-companion-repair-summary-of condition))
+                 (stale-topic-id (getf repair-summary :existing-topic-id))
+                 (replacement-topic-id
+                   (getf repair-summary :replacement-topic-id))
+                 (repair-step-label
+                   (or (getf repair-summary :repair-step-label)
+                       (workspace-annotation-render-value
+                        (getf repair-summary :repair-step))))
+                 (failure-message
+                   (or (getf repair-summary :repair-failure-message)
+                       (format nil "~A" condition))))
+            (format nil
+                    "Before annotation topic upsert could start, HyperDoc detected that ~A for ~A in ~A is an existing unassigned journal companion topic and selected the delete-and-recreate repair path. The repair failed~@[ after replacement topic ~D was created~]~@[ at ~A~] for stale companion topic ~D because ~A. This remains the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+                    (workspace-annotation-journal-preflight-label summary)
+                    (or workspace-label "the selected workspace")
+                    (or topicmap-label "the selected topicmap")
+                    replacement-topic-id
+                    repair-step-label
+                    stale-topic-id
+                    failure-message))
+          (format nil
+                  "Before annotation topic upsert could start, HyperDoc could not reconcile ~A for ~A in ~A because ~A. This is the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+                  (workspace-annotation-journal-preflight-label summary)
+                  (or workspace-label "the selected workspace")
+                  (or topicmap-label "the selected topicmap")
+                  (workspace-annotation-journal-preflight-blocked-cause condition)))))
 
 (defun workspace-annotation-json-field-value (json key)
   (cond
@@ -2339,6 +2426,9 @@
         (workspace-annotation-persistence-report-previous-state-of report)
         :journal-preflight-summary
         (workspace-annotation-persistence-report-journal-preflight-summary-of
+         report)
+        :journal-preflight-repair-summary
+        (workspace-annotation-persistence-report-journal-preflight-repair-summary-of
          report)
         :journal-preflight-auth-context
         (workspace-annotation-persistence-report-journal-preflight-auth-context-of
@@ -4028,7 +4118,9 @@
                    plan)
                   :subject-uri subject-key
                   :subject-kind "workspace-annotation"
-                  :ownership-class "hyperdoc-workspace-annotation"))
+                  :ownership-class "hyperdoc-workspace-annotation"
+                  :workspace-id
+                  (dmx-workspace-annotation-write-plan-workspace-id plan)))
                (topic
                  (ecase (dmx-workspace-annotation-write-plan-topic-action plan)
                    (:create
@@ -4123,6 +4215,7 @@
          (subject-key nil)
          (previous-state nil)
          (journal-preflight-summary nil)
+         (journal-preflight-repair-summary nil)
          (plan nil))
     (labels ((record-stage (stage status summary &key detail)
                (push (workspace-annotation-persistence-stage-entry
@@ -4213,15 +4306,23 @@
                    :prepare-transition
                    "Prepared the workspace-journal preflight state for this annotation subject."
                    (lambda ()
-                     (dmx-workspace-journal-prepare-transition
-                      resolved-client
-                      subject-key
-                      "uri"
-                      subject-key
-                      resolved-topicmap-id
-                      :subject-uri subject-key
-                      :subject-kind "workspace-annotation"
-                      :ownership-class "hyperdoc-workspace-annotation"))
+                     (multiple-value-setq
+                         (previous-state
+                          journal-preflight-repair-summary)
+                       (dmx-workspace-journal-prepare-transition
+                        resolved-client
+                        subject-key
+                        "uri"
+                        subject-key
+                        resolved-topicmap-id
+                        :subject-uri subject-key
+                        :subject-kind "workspace-annotation"
+                        :ownership-class "hyperdoc-workspace-annotation"
+                        :workspace-id
+                        (and plan
+                             (dmx-workspace-annotation-write-plan-workspace-id
+                              plan))))
+                     previous-state)
                    :error-summary
                    "Workspace journal preflight blocked"
                    :error-detail
@@ -4414,6 +4515,12 @@
                 :subject-key subject-key
                 :previous-state previous-state
                 :journal-preflight-summary journal-preflight-summary
+                :journal-preflight-repair-summary
+                (or journal-preflight-repair-summary
+                    (and (typep failure-condition
+                                'dmx-workspace-journal-companion-repair-failed-error)
+                         (dmx-workspace-journal-companion-repair-summary-of
+                          failure-condition)))
                 :journal-preflight-auth-context
                 (and journal-preflight-auth-blocked-p
                      (workspace-annotation-journal-preflight-auth-context
