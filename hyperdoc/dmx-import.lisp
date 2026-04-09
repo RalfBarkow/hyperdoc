@@ -1177,6 +1177,16 @@
                   (list (append (list :state state) fields)))))
   client)
 
+(defun reset-http-dmx-import-debug-evidence (client)
+  (when (typep client 'http-dmx-import-client)
+    (let ((build-event
+            (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
+      (setf (dmx-import-debug-events-of client)
+            (and build-event
+                 (list build-event))
+            (dmx-import-last-http-transaction-evidence-of client) nil)))
+  client)
+
 (defun http-dmx-import-debug-event (client state)
   (when (typep client 'http-dmx-import-client)
     (find state
@@ -1226,11 +1236,20 @@
         (response (http-dmx-import-debug-event client :s6-bootstrap-response-received))
         (session (http-dmx-import-debug-event client :s7-session-material-extracted)))
     (list :bootstrap-ran-p (and (or request response session) t)
+          :bootstrap-endpoint-path
+          (or (and request (getf request :path))
+              (and response (getf response :path))
+              nil)
+          :bootstrap-request-auth-mode-summary
+          (or (and request (getf request :auth-mode-summary))
+              nil)
           :bootstrap-authorization-scheme
           (or (and request (getf request :authorization-scheme))
               nil)
           :bootstrap-status-code
           (and response (getf response :status-code))
+          :bootstrap-response-reason-phrase
+          (and response (getf response :reason-phrase))
           :bootstrap-set-cookie-jsessionid-p
           (and response (getf response :set-cookie-jsessionid-p))
           :session-cookie-captured-p
@@ -1313,6 +1332,8 @@
      :s5-bootstrap-request-sent
      :method :post
      :path (http-request-relative-path client normalized-url)
+     :auth-mode-summary
+     (summarize-http-request-auth-mode authorization-header nil)
      :authorization-scheme
      (summarize-http-authorization-scheme
       authorization-header)
@@ -1351,13 +1372,14 @@
                       response-headers
                       body)))
              (append-http-dmx-import-debug-event
-              client
-              :s6-bootstrap-response-received
-              :method :post
-              :path (http-request-relative-path client normalized-url)
-              :status-code status-code
-              :set-cookie-jsessionid-p
-              (and (http-response-header-value response-headers "Set-Cookie")
+             client
+             :s6-bootstrap-response-received
+             :method :post
+             :path (http-request-relative-path client normalized-url)
+             :status-code status-code
+             :reason-phrase reason-phrase
+             :set-cookie-jsessionid-p
+             (and (http-response-header-value response-headers "Set-Cookie")
                    (parse-set-cookie-cookie-pair
                     (http-response-header-value response-headers "Set-Cookie")
                     :cookie-name "JSESSIONID")
@@ -1869,6 +1891,14 @@
        :auth-mode resolved-auth-mode
        :authorization-scheme
        (summarize-http-authorization-scheme resolved-auth-header)
+       :username-present-p
+       (and (dmx-non-empty-string-p username) t)
+       :password-present-p
+       (and (dmx-non-empty-string-p password) t)
+       :authorization-header-present-p
+       (and (dmx-non-empty-string-p authorization-header) t)
+       :auth-token-present-p
+       (and (dmx-non-empty-string-p auth-token) t)
        :session-login-required-p
        (and (eq resolved-auth-mode :basic) t)
        :workspace-id resolved-workspace-id)

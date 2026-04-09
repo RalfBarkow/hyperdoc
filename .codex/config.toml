@@ -1,5 +1,4 @@
 # URL-only MCP servers are not self-launched from this config.
-# Start the local listener first:
-#   ./tools/start-dmx-mcp-server.sh
+# Repo-local default points at the deployed HTTPS endpoint.
 [mcp_servers.dmx-context-window]
-url = "http://127.0.0.1:8787/mcp"
+url = "https://mcp.dreyeck.ch/mcp"
