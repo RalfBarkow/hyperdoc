@@ -1197,6 +1197,104 @@
              'hyperdoc::make-http-dmx-import-client-from-environment)
             original))))
 
+(defun run-dmx-http-workspace-assignment-cookie-context-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer explicit-test-token"))
+         (assignment-cookie nil)
+         (assignment-auth-header nil)
+         (original (symbol-function 'drakma:http-request)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &key method want-stream content-type content
+                             content-length additional-headers
+                             &allow-other-keys)
+                   (declare (ignore want-stream content-type content
+                                    content-length))
+                   (cond
+                     ((search "/workspaces/919815/object/9300" url)
+                      (assert-equal :put method
+                                    "Workspace assignment must PUT the guarded workspace endpoint")
+                      (setf assignment-cookie
+                            (cdr (assoc "Cookie"
+                                        additional-headers
+                                        :test #'string-equal))
+                            assignment-auth-header
+                            (cdr (assoc "Authorization"
+                                        additional-headers
+                                        :test #'string-equal)))
+                      (values (make-string-input-stream "")
+                              204
+                              '(("Content-Type" . "application/json"))
+                              nil nil "No Content"))
+                     (t
+                      (error "Unexpected workspace-assignment HTTP call ~S"
+                             url)))))
+           (assert-equal nil
+                         (hyperdoc::dmx-import-assign-topic-to-workspace
+                          client
+                          *dmx-annotations-smoke-workspace-id*
+                          9300)
+                         "A mocked 204 workspace assignment must round-trip as NIL")
+           (assert-equal "dmx_workspace_id=919815"
+                         assignment-cookie
+                         "Workspace assignment must carry dmx_workspace_id from the explicit request workspace even when the live HTTP client itself has no workspace-id")
+           (assert-equal "Bearer explicit-test-token"
+                         assignment-auth-header
+                         "Header-mode assignment must preserve the original Authorization header while adding the request-time workspace cookie"))
+      (setf (symbol-function 'drakma:http-request) original))))
+
+(defun run-dmx-http-topicmap-mutation-workspace-cookie-context-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"))
+         (topicmap-cookie nil)
+         (original (symbol-function 'drakma:http-request)))
+    (labels ((make-view-props ()
+               (let ((json (make-hash-table :test #'equal)))
+                 (setf (gethash "dmx.topicmaps.x" json) 24
+                       (gethash "dmx.topicmaps.y" json) 44
+                       (gethash "dmx.topicmaps.visibility" json) t
+                       (gethash "dmx.topicmaps.pinned" json) nil)
+                 json)))
+      (unwind-protect
+           (progn
+             (setf (symbol-function 'drakma:http-request)
+                   (lambda (url &key method want-stream additional-headers
+                               content-type content content-length
+                               &allow-other-keys)
+                     (declare (ignore want-stream content-type content
+                                      content-length))
+                     (cond
+                       ((search (hyperdoc::dmx-topicmap-add-topic-path
+                                 *dmx-annotations-smoke-workspace-topicmap-id*
+                                 9300)
+                                url)
+                        (assert-equal :post method
+                                      "Topicmap add must POST the topicmap membership endpoint")
+                        (setf topicmap-cookie
+                              (cdr (assoc "Cookie"
+                                          additional-headers
+                                          :test #'string-equal)))
+                        (values (make-string-input-stream "{\"dmx.topicmaps.x\":24}")
+                                200
+                                '(("Content-Type" . "application/json"))
+                                nil nil "OK"))
+                       (t
+                        (error "Unexpected topicmap-mutation HTTP call ~S"
+                               url)))))
+             (hyperdoc::with-http-dmx-import-request-workspace-id
+                 (*dmx-annotations-smoke-workspace-id*)
+               (hyperdoc::dmx-import-add-topic-to-topicmap
+                client
+                *dmx-annotations-smoke-workspace-topicmap-id*
+                9300
+                (make-view-props)))
+             (assert-equal "dmx_workspace_id=919815"
+                           topicmap-cookie
+                           "Workspace-scoped topicmap mutation must carry dmx_workspace_id from the request-time workspace context"))
+        (setf (symbol-function 'drakma:http-request) original)))))
+
 (defun run-dmx-workspace-annotation-no-client-pending-auth-smoke-test ()
   (let* ((resolved-client
            (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
@@ -2118,6 +2216,8 @@
   (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)
   (run-dmx-workspace-annotation-create-topic-probe-render-smoke-test)
   (run-dmx-workspace-annotation-default-live-client-resolution-smoke-test)
+  (run-dmx-http-workspace-assignment-cookie-context-smoke-test)
+  (run-dmx-http-topicmap-mutation-workspace-cookie-context-smoke-test)
   (run-dmx-workspace-annotation-no-client-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-smoke-test)
   (run-dmx-workspace-annotation-pending-auth-render-smoke-test)

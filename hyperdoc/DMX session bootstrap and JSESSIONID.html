@@ -56,7 +56,9 @@ Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
 
 <p>
   The workspace cookie remains optional transport context for the selected
-  workspace.
+  workspace. On guarded workspace-scoped mutation boundaries, HyperDoc resolves
+  that workspace at request time and emits <tt>dmx_workspace_id=&lt;workspace-id&gt;</tt>
+  for the concrete request.
   It does not replace authenticated session state.
 </p>
 

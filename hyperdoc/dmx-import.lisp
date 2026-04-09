@@ -1139,6 +1139,37 @@
     (t
      "other")))
 
+(defvar *http-dmx-import-request-workspace-id* nil)
+
+(defmacro with-http-dmx-import-request-workspace-id ((workspace-id) &body body)
+  `(let ((*http-dmx-import-request-workspace-id* ,workspace-id))
+     ,@body))
+
+(defun effective-http-dmx-import-workspace-id (client &key workspace-id)
+  (or (and (integerp workspace-id)
+           (plusp workspace-id)
+           workspace-id)
+      (parse-positive-integer workspace-id)
+      (and (integerp *http-dmx-import-request-workspace-id*)
+           (plusp *http-dmx-import-request-workspace-id*)
+           *http-dmx-import-request-workspace-id*)
+      (parse-positive-integer *http-dmx-import-request-workspace-id*)
+      (and (typep client 'http-dmx-import-client)
+           (integerp (dmx-import-workspace-id-of client))
+           (plusp (dmx-import-workspace-id-of client))
+           (dmx-import-workspace-id-of client))
+      (and (typep client 'http-dmx-import-client)
+           (parse-positive-integer (dmx-import-workspace-id-of client)))))
+
+(defun http-dmx-import-request-cookie-values (client &key workspace-id)
+  (append (when (dmx-import-session-cookie-of client)
+            (list (dmx-import-session-cookie-of client)))
+          (when-let (resolved-workspace-id
+                     (effective-http-dmx-import-workspace-id
+                      client
+                      :workspace-id workspace-id))
+            (list (format nil "dmx_workspace_id=~D" resolved-workspace-id)))))
+
 (defun append-http-dmx-import-debug-event (client state &rest fields)
   (when (typep client 'http-dmx-import-client)
     (setf (dmx-import-debug-events-of client)
@@ -1378,7 +1409,7 @@
 
 (defun http-request-json
     (client method url
-     &key payload body-object allow-404? extra-headers
+     &key payload body-object allow-404? extra-headers workspace-id
        ((:raw-content raw-content) nil raw-content-provided-p)
        (content-type nil content-type-provided-p)
        (content-length nil content-length-provided-p))
@@ -1392,11 +1423,9 @@
          (authorization-header
            (effective-http-dmx-import-authorization-header client))
          (cookie-values
-           (append (when (dmx-import-session-cookie-of client)
-                     (list (dmx-import-session-cookie-of client)))
-                   (when (dmx-import-workspace-id-of client)
-                     (list (format nil "dmx_workspace_id=~D"
-                                   (dmx-import-workspace-id-of client))))))
+           (http-dmx-import-request-cookie-values
+            client
+            :workspace-id workspace-id))
          (headers (append (when authorization-header
                             (list (cons "Authorization"
                                         authorization-header)))
@@ -1620,36 +1649,39 @@
   ;; application/x-www-form-urlencoded request. The live DMX workspace
   ;; assignment route accepts PUT, but rejects that implicit form media
   ;; type with HTTP 415. Force an explicit zero-length body instead.
-  (append-http-dmx-import-debug-event
-   client
-   :s8-guarded-repair-request-prepared
-   :method :put
-   :path (dmx-workspace-assign-object-path workspace-id topic-id)
-   :authorization-scheme
-   (summarize-http-authorization-scheme
-    (effective-http-dmx-import-authorization-header client))
-   :cookie-shape
-   (summarize-http-cookie-shape
-    (format nil
-            "~{~A~^; ~}"
-            (append (when (dmx-import-session-cookie-of client)
-                      (list (dmx-import-session-cookie-of client)))
-                    (when (dmx-import-workspace-id-of client)
-                      (list (format nil
-                                    "dmx_workspace_id=~D"
-                                    (dmx-import-workspace-id-of client)))))))
-   :jsessionid-cookie-p
-   (and (dmx-import-session-cookie-of client) t)
-   :workspace-cookie-p
-   (and (dmx-import-workspace-id-of client) t)
-   :accept-header "application/json"
-   :content-type nil
-   :content-length 0
-   :empty-body-p t)
+  (let* ((cookie-values
+           (http-dmx-import-request-cookie-values
+            client
+            :workspace-id workspace-id))
+         (cookie-header
+           (and cookie-values
+                (format nil "~{~A~^; ~}" cookie-values))))
+    (append-http-dmx-import-debug-event
+     client
+     :s8-guarded-repair-request-prepared
+     :method :put
+     :path (dmx-workspace-assign-object-path workspace-id topic-id)
+     :authorization-scheme
+     (summarize-http-authorization-scheme
+      (effective-http-dmx-import-authorization-header client))
+     :cookie-shape
+     (summarize-http-cookie-shape cookie-header)
+     :jsessionid-cookie-p
+     (and (dmx-import-session-cookie-of client) t)
+     :workspace-cookie-p
+     (and (effective-http-dmx-import-workspace-id
+           client
+           :workspace-id workspace-id)
+          t)
+     :accept-header "application/json"
+     :content-type nil
+     :content-length 0
+     :empty-body-p t))
   (http-request-json client
                      :put
                      (dmx-workspace-assign-object-path workspace-id topic-id)
                      :extra-headers '(("Accept" . "application/json"))
+                     :workspace-id workspace-id
                      :raw-content ""
                      :content-type nil
                      :content-length 0))

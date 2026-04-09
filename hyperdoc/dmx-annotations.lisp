@@ -3091,19 +3091,21 @@
 
 (defun continue-dmx-workspace-annotation-write-after-topic-upsert
     (client plan previous-state topic-id)
-  (when (eql (dmx-workspace-annotation-write-plan-workspace-action plan)
-             :assign)
-    (dmx-import-assign-topic-to-workspace
-     client
-     (dmx-workspace-annotation-write-plan-workspace-id plan)
-     topic-id))
-  (when (eql (dmx-workspace-annotation-write-plan-topicmap-action plan)
-             :add)
-    (dmx-import-add-topic-to-topicmap
-     client
-     (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
-     topic-id
-     (dmx-workspace-annotation-write-plan-view-props plan)))
+  (with-http-dmx-import-request-workspace-id
+      ((dmx-workspace-annotation-write-plan-workspace-id plan))
+    (when (eql (dmx-workspace-annotation-write-plan-workspace-action plan)
+               :assign)
+      (dmx-import-assign-topic-to-workspace
+       client
+       (dmx-workspace-annotation-write-plan-workspace-id plan)
+       topic-id))
+    (when (eql (dmx-workspace-annotation-write-plan-topicmap-action plan)
+               :add)
+      (dmx-import-add-topic-to-topicmap
+       client
+       (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
+       topic-id
+       (dmx-workspace-annotation-write-plan-view-props plan))))
   (let* ((after-topic (dmx-import-read-topic client topic-id))
          (after-state
            (dmx-workspace-journal-live-snapshot
