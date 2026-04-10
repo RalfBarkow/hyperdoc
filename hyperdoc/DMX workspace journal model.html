@@ -4,12 +4,21 @@
 
 <p>
   <a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace
-  journal model</tt></a> defines the HyperDoc-owned revision layer for the
-  DMX common workspace topicmap <tt>919822</tt>. It is deliberately narrower
-  than a generic DMX mutation framework: HyperDoc keeps journal ownership,
-  replay, restore, and out-of-band detection inside its guarded boundary
-  instead of assuming DMX already provides a native FedWiki-style revision
-  store.
+  journal model</tt></a> defines the current HyperDoc-owned journal
+  projection layer for the DMX common workspace topicmap <tt>919822</tt>. It
+  is deliberately narrower than a generic DMX mutation framework: HyperDoc
+  keeps journal ownership, replay, restore, and out-of-band detection inside
+  its guarded boundary instead of assuming DMX already provides a native
+  FedWiki-style revision store.
+</p>
+
+<p>
+  The stronger durable model is explicit about authority. The authoritative
+  append-only journal belongs to each HyperDoc instance. The DMX workspace
+  companion note is the current projection, replica, and repair surface for
+  that journaled state. The Common workspace is the shared projection that can
+  be rebuilt from authoritative journals when the boundary conditions are
+  satisfied.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -43,10 +52,42 @@
 </p>
 
 <p>
+  That implemented storage model still matters today for replay, restore, and
+  repair. It should not, however, be misread as the ultimate authority model.
+  In the target architecture, the companion note is the DMX-side projected
+  shadow of journaled state that is owned first by the HyperDoc instance.
+</p>
+
+<p>
   Journal ownership attaches to the stable HyperDoc-managed subject key. When
   a preserved URI exists, that URI becomes the subject key. Otherwise HyperDoc
   falls back to a stable synthetic key such as <tt>dmx:topic/&lt;id&gt;</tt>.
 </p>
+
+<h2>Authority versus projection</h2>
+
+<ul>
+  <li><b>Authoritative journal:</b> the append-only local journal owned by one HyperDoc instance.</li>
+  <li><b>DMX projection journal:</b> today's hidden companion workspace note, used as a projected replica and repair surface.</li>
+  <li><b>Shared collaboration projection:</b> the Common workspace in topicmap <tt>919822</tt>, treated as a rebuildable shared view rather than the only durable source of truth.</li>
+</ul>
+
+<p>
+  This page therefore describes two truths at once: the current runtime still
+  persists and replays companion notes in DMX, and the durable architectural
+  direction is that those notes are projections of instance-authoritative
+  journals rather than the final journal authority themselves.
+</p>
+
+<h2>Architecture invariants</h2>
+
+<ul>
+  <li>Every owned subject needs a stable immutable subject key.</li>
+  <li>Every authoritative mutation must be represented first as a local journal event on that stable key.</li>
+  <li>DMX state is derived by replay or materialization from journaled state rather than outranking it.</li>
+  <li>DMX-only drift is foreign or synthesized history and is not promoted to primary truth merely because it is visible in the backend.</li>
+  <li>Rebuild of the Common workspace is trustworthy only for journaled boundaries whose replay order and conflict policy are explicit.</li>
+</ul>
 
 <h2>Journal scope</h2>
 
@@ -121,7 +162,8 @@
   For that reason, out-of-band detection for topicmap <tt>919822</tt> falls
   back to periodic snapshot reconciliation. Inferred events are marked
   <tt>synthesized-from-diff</tt> rather than being overclaimed as directly
-  observed backend history.
+  observed backend history. In the stronger authority model, those inferred
+  entries are DMX-side drift records, not the primary journal truth.
 </p>
 
 <h2>Reconcile-on-read boundary</h2>
@@ -154,6 +196,14 @@
   into generic mutation middleware. It only journals the guarded HyperDoc
   write surface plus bounded snapshot-diff reconciliation for topicmap
   <tt>919822</tt>.
+</p>
+
+<p>
+  The next architectural layer is federation, but it is not implemented here.
+  Rebuilding a shared Common workspace from multiple instance journals is only
+  trustworthy when replay order, stable subject identity, and conflict policy
+  are all explicit. This page documents the current projection boundary and the
+  direction of travel, not a finished multi-instance merge engine.
 </p>
 
 <p>
@@ -192,4 +242,6 @@
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="FedWiki Journal Tools in HyperDoc">FedWiki Journal Tools in HyperDoc</a></li>
   <li><a page="Journalmatic Revision Replay">Journalmatic Revision Replay</a></li>
+  <li><a page="Authoritative Journal-Backed Page Store">Authoritative Journal-Backed Page Store</a></li>
+  <li><a page="Topic factory and DMX reincarnation">Topic factory and DMX reincarnation</a></li>
 </ul>

@@ -13,6 +13,15 @@
 </p>
 
 <p>
+  In the stronger journal architecture, this Common workspace is a rebuildable
+  shared projection. The authoritative append-only journals live with the
+  participating HyperDoc instances. Today's hidden DMX companion notes still
+  matter for replay, restore, and repair, but the workspace itself should stop
+  being read as the final authority merely because it is the visible shared
+  surface.
+</p>
+
+<p>
   For the short operator-facing front door across this shared-workspace
   cluster, start with
   <a page="How to work safely in topicmap context-window (919822)"><tt>How to
@@ -65,6 +74,14 @@
   <li>The sole authoritative copy of architecture or workflow decisions.</li>
 </ul>
 
+<h2>Authority versus projection</h2>
+
+<ul>
+  <li><b>Authority:</b> each HyperDoc instance keeps its own append-only journal as the causal record for owned subjects.</li>
+  <li><b>Projection:</b> the context-window workspace exposes a shared current-state view, plus DMX companion notes that replay and repair the projected state.</li>
+  <li><b>Recovery target:</b> deleting the Common workspace should be recoverable by replaying journaled boundaries into a fresh shared projection rather than mourning the workspace as the only durable record.</li>
+</ul>
+
 <h2>Exchange artifacts</h2>
 
 <p>
@@ -99,7 +116,9 @@
   place an existing topic into the workspace or update its long-form view
   props. Every guarded write also emits a HyperDoc-owned journal event, and
   restore stays explicit through typed restore tools instead of hidden editor
-  undo. Generic raw topicmap mutations remain out of scope.
+  undo. Generic raw topicmap mutations remain out of scope. In the stronger
+  architecture, those writes are projections of authoritative local journal
+  events rather than the only durable copy of collaboration state.
 </p>
 
 <h2>Workspace model</h2>
@@ -133,7 +152,19 @@
   out-of-band changes are reconciled by snapshot diff and marked
   <tt>synthesized-from-diff</tt>. The workspace therefore offers bounded
   replayable history without claiming that DMX already provides a native
-  revision feed.
+  revision feed. The implemented hidden companion notes remain important for
+  today's replay, restore, and repair behavior, but they are better understood
+  as projection journals than as the ultimate journal authority.
+</p>
+
+<h2>Rebuild boundary</h2>
+
+<p>
+  The target design is that the Common workspace can be rebuilt. That claim is
+  trustworthy only where boundaries are actually journaled, subject identity is
+  stable, and replay order plus conflict policy are explicit. DMX-only drift
+  discovered later through snapshot diff remains synthesized or foreign history
+  until some authoritative journal boundary claims it.
 </p>
 
 <h2>Why this stays narrow</h2>
@@ -204,4 +235,6 @@
   <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
   <li><a page="Localhost FedWiki page promotion workflow">Localhost FedWiki page promotion workflow</a></li>
+  <li><a page="Authoritative Journal-Backed Page Store">Authoritative Journal-Backed Page Store</a></li>
+  <li><a page="Topic factory and DMX reincarnation">Topic factory and DMX reincarnation</a></li>
 </ul>

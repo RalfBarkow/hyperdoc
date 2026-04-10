@@ -6,9 +6,10 @@
   <a hyperbook="topics" page="Shared-workspace collaboration model"><tt>Shared-workspace
   collaboration model</tt></a> states the operating model between me,
   ChatGPT, and Codex. HyperDoc remains the durable reference and inspection
-  side, the <tt>context-window</tt> workspace becomes the curated shared
-  blackboard, and the MCP server is the typed machine-facing boundary that
-  keeps both reads and writes narrow enough to trust.
+  side, each HyperDoc instance keeps the authoritative append-only journal for
+  its owned subjects, the <tt>context-window</tt> workspace becomes the curated
+  rebuildable shared projection, and the MCP server is the typed machine-facing
+  boundary that keeps both reads and writes narrow enough to trust.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -25,16 +26,26 @@
 <h2>Role split</h2>
 
 <ul>
-  <li><b>HyperDoc</b>: durable pages, inspectable topics, diagnostics, and design conclusions.</li>
-  <li><b>Context window workspace</b>: current shared state, curated mirrors, handovers, and short collaboration memory.</li>
+  <li><b>HyperDoc instance</b>: durable pages, inspectable topics, diagnostics, design conclusions, and the authoritative append-only journal for owned subjects.</li>
+  <li><b>Context window workspace</b>: current shared state, curated mirrors, handovers, short collaboration memory, and the rebuildable shared projection.</li>
   <li><b>MCP server</b>: typed shared entry point that exposes the same resources and guarded tools to multiple agents, including validated topic placement and ownership-limited delete.</li>
+</ul>
+
+<h2>Authority model</h2>
+
+<ul>
+  <li>Stable subject identity must be preserved by an immutable subject key.</li>
+  <li>Authoritative state transitions must be represented first as journal actions on that key.</li>
+  <li>DMX state and DMX companion notes are materialized projections of those journaled transitions.</li>
+  <li>DMX-only drift is synthesized or foreign history until an authoritative journal boundary claims it explicitly.</li>
 </ul>
 
 <h2>Operating loop</h2>
 
 <ol>
+  <li>Emit the authoritative mutation first as a local journal event on a stable subject key.</li>
   <li>Capture stable conclusions in durable HyperDoc pages and topics.</li>
-  <li>Mirror the high-value current state into the shared workspace as curated notes or existing DMX workflow topics.</li>
+  <li>Mirror the high-value current state into the shared workspace as curated notes, projected journal companions, or existing DMX workflow topics.</li>
   <li>Let Codex, ChatGPT, and the operator read the same machine-facing workspace state through MCP or direct machine-readable DMX reads.</li>
   <li>Use the same MCP boundary for live note writes, HyperDoc-owned topic upsert, ownership-limited delete, and explicit restore only when the client is attached to the same guarded server with live writes enabled.</li>
   <li>Push clarified conclusions back into HyperDoc instead of treating DMX as the sole authority.</li>
@@ -50,6 +61,24 @@
   can be discovered only through bounded snapshot diff today, so those entries
   are marked <tt>synthesized-from-diff</tt> instead of being advertised as a
   native DMX event stream.
+</p>
+
+<p>
+  That means the current DMX companion-note model is still real and still
+  useful, but it should be read as today's projection journal behavior rather
+  than as the final authority model. Deleting the Common workspace should be
+  recoverable in the target design because the authoritative journal basis
+  lives outside that projection.
+</p>
+
+<h2>Rebuild and federation horizon</h2>
+
+<p>
+  The next architectural layer is replaying one or more instance journals into
+  a fresh Common workspace projection. That future layer requires explicit
+  replay order and conflict policy across instances. This page records that as
+  the intended horizon; it does not claim that multi-instance federation is
+  already implemented.
 </p>
 
 <h2>Boundaries</h2>
@@ -82,4 +111,6 @@
   <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+  <li><a page="Authoritative Journal-Backed Page Store">Authoritative Journal-Backed Page Store</a></li>
+  <li><a page="Topic factory and DMX reincarnation">Topic factory and DMX reincarnation</a></li>
 </ul>

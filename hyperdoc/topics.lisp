@@ -3274,7 +3274,7 @@
   (make-topic
    :id "dmx-workspace-journal-model"
    :title "DMX workspace journal model"
-   :summary "HyperDoc-owned replayable journal layer for shared-workspace notes, topics, and topicmap membership in DMX topicmap 919822, with explicit restore and diff-based out-of-band reconciliation."
+   :summary "HyperDoc-owned DMX projection journal layer for shared-workspace notes, topics, and topicmap membership in topicmap 919822, used today for replay, restore, and diff-based reconciliation without treating DMX as the ultimate journal authority."
    :references '("Surface"
                  "Surface boundary"
                  "Boundary"
@@ -3286,6 +3286,8 @@
                  "DMX MCP server for shared workspace"
                  "DMX note read/write boundary"
                  "DMX FedWiki Write Model"
+                 "Authoritative Journal-Backed Page Store"
+                 "Topic factory and DMX reincarnation"
                  "FedWiki Journal Tools in HyperDoc"
                  "Journalmatic Revision Replay")))
 
@@ -3324,7 +3326,7 @@
   (make-topic
    :id "context-window-workspace-as-shared-blackboard"
    :title "Context window workspace as shared blackboard"
-   :summary "Treat DMX topicmap 919822, context-window, as a small curated shared blackboard between me, ChatGPT, and Codex, populated through durable mirrors and guarded note or handover writes instead of a raw transcript archive."
+   :summary "Treat DMX topicmap 919822, context-window, as a small curated shared blackboard and rebuildable shared projection between me, ChatGPT, and Codex, not as a raw transcript archive or the only durable authority."
    :references '("Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
                  "DMX workspace journal model"
@@ -3332,6 +3334,8 @@
                  "DMX note read/write boundary"
                  "DMX machine-readable read paths"
                  "HyperDoc DMX architectural implications"
+                 "Authoritative Journal-Backed Page Store"
+                 "Topic factory and DMX reincarnation"
                  "Localhost FedWiki page promotion workflow"
                  "DMX topicmap 919822 repair runbook")))
 
@@ -3368,13 +3372,15 @@
   (make-topic
    :id "shared-workspace-collaboration-model"
    :title "Shared-workspace collaboration model"
-   :summary "The collaboration model keeps HyperDoc as the durable design and inspection side, uses the context-window workspace as a curated common blackboard, and lets me, ChatGPT, and Codex converge through the same MCP-facing DMX surfaces."
+   :summary "The collaboration model keeps each HyperDoc instance as the durable journal and inspection side, uses the context-window workspace as a rebuildable shared projection, and lets me, ChatGPT, and Codex converge through the same MCP-facing DMX surfaces."
    :references '("Shared-workspace collaboration model"
                  "Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
                  "DMX workspace journal model"
                  "DMX note read/write boundary"
                  "DMX machine-readable read paths"
+                 "Authoritative Journal-Backed Page Store"
+                 "Topic factory and DMX reincarnation"
                  "HyperDoc DMX architectural implications"
                  "Localhost FedWiki page promotion workflow")))
 
