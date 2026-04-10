@@ -126,6 +126,8 @@
 
 (defun run-workspace-diagnostics-regression-test ()
   (let* ((missing-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 922464))
+         (annotation-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 928648))
+         (journal-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 928674))
          (fixed-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 922586))
          (foreign-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 922451))
          (book (hyperbook:hyperbook-of missing-proxy))
@@ -158,7 +160,11 @@
                  json)))
       (clrhash (hyperdoc::dmx-cache-of book))
       (setf (hyperdoc::dmx-cache-order-of book) nil)
-      (dolist (proxy (list missing-proxy fixed-proxy foreign-proxy))
+      (dolist (proxy (list missing-proxy
+                           annotation-proxy
+                           journal-proxy
+                           fixed-proxy
+                           foreign-proxy))
         (setf (hyperdoc::dmx-topic-data-of proxy) nil
               (hyperdoc::dmx-workspace-data-of proxy) nil
               (hyperdoc::dmx-workspace-owner-of proxy) nil
@@ -196,6 +202,28 @@
                          200
                          (expected-dmx-core-topic-url 922586)
                          "OK"))
+                       ((string= endpoint "/core/topic/928648")
+                        (values
+                         (hyperdoc::encode-json-string
+                          (make-topic-json
+                           928648
+                           "hyperdoc:mcp/workspace-annotation/test-workspace-annotation"
+                           "dmx.notes.note"
+                           "Workspace annotation compatibility carrier"))
+                         200
+                         (expected-dmx-core-topic-url 928648)
+                         "OK"))
+                       ((string= endpoint "/core/topic/928674")
+                        (values
+                         (hyperdoc::encode-json-string
+                          (make-topic-json
+                           928674
+                           "hyperdoc:mcp/workspace-journal/test-workspace-journal"
+                           "dmx.notes.note"
+                           "Workspace journal companion"))
+                         200
+                         (expected-dmx-core-topic-url 928674)
+                         "OK"))
                        ((string= endpoint "/core/topic/922451")
                         (values
                          (hyperdoc::encode-json-string
@@ -213,8 +241,18 @@
                          200
                          (expected-dmx-core-topic-url 919822)
                          "OK"))
-                       ((string= endpoint "/workspaces/object/922464")
-                        (values "" 204 (expected-dmx-workspace-object-url 922464) "No Content"))
+                       ((member endpoint '("/workspaces/object/922464"
+                                          "/workspaces/object/928648"
+                                          "/workspaces/object/928674")
+                                :test #'string=)
+                        (values
+                         ""
+                         204
+                         (expected-dmx-workspace-object-url
+                          (parse-integer
+                           (subseq endpoint
+                                   (length "/workspaces/object/"))))
+                         "No Content"))
                        ((string= endpoint "/workspaces/object/922586")
                         (values
                          (hyperdoc::encode-json-string
@@ -226,12 +264,23 @@
                         (values "" 204 (expected-dmx-workspace-object-url 922451) "No Content"))
                        ((string= endpoint "/access-control/workspace/919815/owner")
                         (values "rgb" 200 (expected-dmx-workspace-owner-url 919815) "OK"))
-                       ((string= endpoint "/topicmaps/object/922464")
-                        (values
+                       ((member endpoint '("/topicmaps/object/922464"
+                                          "/topicmaps/object/928648"
+                                          "/topicmaps/object/928674")
+                                :test #'string=)
+                       (values
                          (hyperdoc::encode-json-string
-                          (vector (make-membership 919822 922471)))
+                          (vector (make-membership
+                                   919822
+                                   (+ 7
+                                      (parse-integer
+                                       (subseq endpoint
+                                               (length "/topicmaps/object/")))))))
                          200
-                         (expected-dmx-topicmap-memberships-url 922464)
+                         (expected-dmx-topicmap-memberships-url
+                          (parse-integer
+                           (subseq endpoint
+                                   (length "/topicmaps/object/"))))
                          "OK"))
                        ((string= endpoint "/topicmaps/object/922586")
                         (values
@@ -250,9 +299,13 @@
                        (t
                         (error "Unexpected DMX diagnostics fetch ~S" endpoint)))))
              (hyperdoc::ensure-dmx-topic-diagnostics missing-proxy :force? t)
+             (hyperdoc::ensure-dmx-topic-diagnostics annotation-proxy :force? t)
+             (hyperdoc::ensure-dmx-topic-diagnostics journal-proxy :force? t)
              (hyperdoc::ensure-dmx-topic-diagnostics fixed-proxy :force? t)
              (hyperdoc::ensure-dmx-topic-diagnostics foreign-proxy :force? t)
              (let ((missing (hyperdoc::dmx-diagnostics-of missing-proxy))
+                   (annotation (hyperdoc::dmx-diagnostics-of annotation-proxy))
+                   (journal (hyperdoc::dmx-diagnostics-of journal-proxy))
                    (fixed (hyperdoc::dmx-diagnostics-of fixed-proxy))
                    (foreign (hyperdoc::dmx-diagnostics-of foreign-proxy)))
                (assert-equal :in-topicmap-but-unassigned
@@ -267,6 +320,26 @@
                (assert-equal "operational-definition-chunk-chunk-note-manifest-note-content-topic"
                              (hyperdoc::dmx-topic-diagnostics-note-key missing)
                              "Workspace-note URI must expose the note key")
+               (assert-equal :hyperdoc-workspace-annotation
+                             (hyperdoc::dmx-topic-diagnostics-ownership-class
+                              annotation)
+                             "Workspace annotation topic must no longer false-negative as foreign")
+               (assert-true
+                (hyperdoc::dmx-topic-diagnostics-hyperdoc-owned-p annotation)
+                "Workspace annotation topic must remain HyperDoc-owned")
+               (assert-equal :in-topicmap-but-unassigned
+                             (hyperdoc::dmx-topic-diagnostics-status annotation)
+                             "Workspace annotation topic must surface in-topicmap-but-unassigned")
+               (assert-equal :hyperdoc-workspace-journal
+                             (hyperdoc::dmx-topic-diagnostics-ownership-class
+                              journal)
+                             "Workspace journal topic must no longer false-negative as foreign")
+               (assert-true
+                (hyperdoc::dmx-topic-diagnostics-hyperdoc-owned-p journal)
+                "Workspace journal topic must remain HyperDoc-owned")
+               (assert-equal :in-topicmap-but-unassigned
+                             (hyperdoc::dmx-topic-diagnostics-status journal)
+                             "Workspace journal topic must surface in-topicmap-but-unassigned")
                (assert-equal :ok
                              (hyperdoc::dmx-topic-diagnostics-status fixed)
                              "Assigned topic must surface OK")
@@ -286,8 +359,20 @@
               (member "/workspaces/object/922464" calls :test #'equal)
               "Diagnostics must read the workspace-assignment endpoint")
              (assert-true
+              (member "/workspaces/object/928648" calls :test #'equal)
+              "Diagnostics must read the workspace endpoint for workspace annotations")
+             (assert-true
+              (member "/workspaces/object/928674" calls :test #'equal)
+              "Diagnostics must read the workspace endpoint for workspace journals")
+             (assert-true
               (member "/topicmaps/object/922464" calls :test #'equal)
               "Diagnostics must read the topicmap-memberships endpoint")
+             (assert-true
+              (member "/topicmaps/object/928648" calls :test #'equal)
+              "Diagnostics must read the topicmap-memberships endpoint for workspace annotations")
+             (assert-true
+              (member "/topicmaps/object/928674" calls :test #'equal)
+              "Diagnostics must read the topicmap-memberships endpoint for workspace journals")
              (assert-true
              (member "/access-control/workspace/919815/owner" calls :test #'equal)
               "Diagnostics must read the workspace-owner endpoint when a workspace exists"))
@@ -349,11 +434,11 @@
                      (push endpoint calls)
                      (cond
                        ((string= endpoint "/topicmaps/919822")
-                        (values
+                       (values
                          (hyperdoc::encode-json-string
                           (make-topicmap-projection
                            (list (make-topic-json
-                                  922451
+                                 922451
                                   "hyperdoc:mcp/auth-probe-20260330-1"
                                   "auth probe")
                                  (make-topic-json
@@ -377,9 +462,17 @@
                                   "hyperdoc:mcp/workspace-note/maintenance-note-probe-topic-922451-disposition"
                                   "Maintenance note for probe topic 922451")
                                  (make-topic-json
-                                  922565
-                                  "hyperdoc:mcp/handover/set-default-workspace-and-owner"
-                                  "Set default workspace and owner")
+                                 922565
+                                 "hyperdoc:mcp/handover/set-default-workspace-and-owner"
+                                 "Set default workspace and owner")
+                                 (make-topic-json
+                                  928648
+                                  "hyperdoc:mcp/workspace-annotation/test-workspace-annotation"
+                                  "Workspace annotation compatibility carrier")
+                                 (make-topic-json
+                                  928674
+                                  "hyperdoc:mcp/workspace-journal/test-workspace-journal"
+                                  "Workspace journal companion")
                                  (make-topic-json
                                   922586
                                   "hyperdoc:mcp/workspace-note/guarded-default-workspace-owner-verification-2026-03-30"
@@ -399,6 +492,8 @@
                                           "/workspaces/object/922515"
                                           "/workspaces/object/922532"
                                           "/workspaces/object/922565"
+                                          "/workspaces/object/928648"
+                                          "/workspaces/object/928674"
                                           "/workspaces/object/922451")
                                 :test #'string=)
                         (values "" 204
@@ -422,6 +517,8 @@
                                           "/topicmaps/object/922515"
                                           "/topicmaps/object/922532"
                                           "/topicmaps/object/922565"
+                                          "/topicmaps/object/928648"
+                                          "/topicmaps/object/928674"
                                           "/topicmaps/object/922586")
                                 :test #'string=)
                         (let* ((id-string (subseq endpoint
@@ -438,9 +535,9 @@
              (hyperdoc::ensure-dmx-workspace-repair-triage page :force? t)
              (let* ((repair-proxies (hyperdoc::dmx-repair-topic-proxies-of page))
                     (repair-ids (mapcar #'hyperdoc::dmx-topic-id-of repair-proxies)))
-               (assert-equal '(922464 922479 922500 922515 922532 922565)
+               (assert-equal '(922464 922479 922500 922515 922532 922565 928648 928674)
                              repair-ids
-                             "Repair triage must list only the six HyperDoc-owned pre-fix notes")
+                             "Repair triage must list HyperDoc-owned missing-assignment topics across note, annotation, handover, and journal families")
                (assert-true
                 (not (member 922586 repair-ids))
                 "Assigned note 922586 must not appear in repair triage")
@@ -460,7 +557,19 @@
                    (assert-equal nil
                                  (hyperdoc::dmx-topic-diagnostics-workspace-id
                                   diagnostics)
-                                 "Repair triage rows must have no workspace assignment"))))
+                                 "Repair triage rows must have no workspace assignment")))
+               (let ((annotation-proxy (find 928648 repair-proxies
+                                             :key #'hyperdoc::dmx-topic-id-of))
+                     (journal-proxy (find 928674 repair-proxies
+                                          :key #'hyperdoc::dmx-topic-id-of)))
+                 (assert-equal :hyperdoc-workspace-annotation
+                               (hyperdoc::dmx-topic-diagnostics-ownership-class
+                                (hyperdoc::dmx-diagnostics-of annotation-proxy))
+                               "Repair triage must recognize workspace annotations as HyperDoc-owned")
+                 (assert-equal :hyperdoc-workspace-journal
+                               (hyperdoc::dmx-topic-diagnostics-ownership-class
+                                (hyperdoc::dmx-diagnostics-of journal-proxy))
+                               "Repair triage must recognize workspace journals as HyperDoc-owned")))
              (assert-true
               (member "/topicmaps/919822" calls :test #'equal)
               "Repair triage must read the topicmap projection endpoint")

@@ -589,7 +589,7 @@
        (uiop:string-prefix-p prefix uri)
        (subseq uri (length prefix))))
 
-(defun dmx-topic-ownership-summary (topic-data)
+(defun dmx-topic-ownership-summary-from-uri-prefixes (topic-data)
   (let ((uri (or (dmx-json-object-field topic-data "uri") "")))
     (cond
       ((dmx-uri-suffix-after-prefix uri *dmx-proxy-workspace-note-uri-prefix*)
@@ -620,6 +620,39 @@
              :reason "No HyperDoc-owned URI prefix matched"
              :note-key nil
              :handover-key nil)))))
+
+(defun dmx-guarded-workspace-topic-ownership-value (ownership accessor-symbol)
+  (when (and ownership
+             (fboundp accessor-symbol))
+    (funcall (symbol-function accessor-symbol) ownership)))
+
+(defun dmx-topic-diagnostic-ownership-summary (topic-data)
+  (if (fboundp 'classify-dmx-workspace-topic-ownership)
+      (let* ((ownership (classify-dmx-workspace-topic-ownership topic-data))
+             (class (dmx-guarded-workspace-topic-ownership-value
+                     ownership
+                     'dmx-workspace-topic-ownership-class))
+             (uri (or (dmx-guarded-workspace-topic-ownership-value
+                       ownership
+                       'dmx-workspace-topic-ownership-uri)
+                      (dmx-json-object-field topic-data "uri")
+                      "")))
+        (list :class class
+              :owned-p (dmx-guarded-workspace-topic-ownership-value
+                        ownership
+                        'dmx-workspace-topic-ownership-owned-p)
+              :reason (dmx-guarded-workspace-topic-ownership-value
+                       ownership
+                       'dmx-workspace-topic-ownership-reason)
+              :note-key (when (eq class :hyperdoc-workspace-note)
+                          (dmx-uri-suffix-after-prefix
+                           uri
+                           *dmx-proxy-workspace-note-uri-prefix*))
+              :handover-key (when (eq class :hyperdoc-handover)
+                              (dmx-uri-suffix-after-prefix
+                               uri
+                               *dmx-proxy-handover-uri-prefix*))))
+      (dmx-topic-ownership-summary-from-uri-prefixes topic-data)))
 
 (defun dmx-membership-topicmap-id (membership)
   (dmx-json-object-id membership))
@@ -671,7 +704,7 @@
            (loop for membership in memberships
                  thereis (eql selected-topicmap-id
                               (dmx-membership-topicmap-id membership))))
-         (ownership (dmx-topic-ownership-summary topic-data))
+         (ownership (dmx-topic-diagnostic-ownership-summary topic-data))
          (topic-uri (dmx-json-object-field topic-data "uri"))
          (topic-type-uri (dmx-json-object-field topic-data "typeUri"))
          (topic-title (dmx-topic-title-from-topic-data topic-data))
