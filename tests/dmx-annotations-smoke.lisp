@@ -2405,7 +2405,7 @@
     (assert-true
      (null (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
             report))
-     "Successful delete-and-recreate repair must clear the prepare-transition failure boundary")
+     "Successful create-and-retain-stale repair must clear the prepare-transition failure boundary")
     (assert-true
      repair-summary
      "The repaired run must preserve structured journal companion repair evidence on the returned report")
@@ -2425,9 +2425,9 @@
     (assert-equal journal-topic-id
                   (getf summary :existing-topic-id)
                   "The report must preserve the stale journal companion topic id as repair history")
-    (assert-equal "delete-and-recreate"
+    (assert-equal "create-replacement-and-retain-stale"
                   (getf repair-summary :repair-strategy-label)
-                  "Repair evidence must identify delete-and-recreate as the chosen strategy")
+                  "Repair evidence must identify create-and-retain-stale as the chosen strategy")
     (assert-equal journal-topic-id
                   (getf repair-summary :stale-topic-id)
                   "Repair evidence must preserve the stale journal companion topic id explicitly")
@@ -2442,42 +2442,46 @@
      "Successful repair must preserve the replacement journal companion topic id")
     (assert-true
      (getf repair-summary :writable-workspace-context-used-p)
-     "Delete-and-recreate repair must record that the resolved writable workspace context was used")
+     "Create-and-retain-stale repair must record that the resolved writable workspace context was used")
     (assert-true
-     (getf repair-summary :stale-delete-attempted-p)
-     "Delete-and-recreate repair must record that stale delete was attempted")
+     (getf repair-summary :stale-topic-retained-p)
+     "Successful repair must preserve that the stale companion topic was retained as history")
     (assert-true
-     (getf repair-summary :stale-delete-succeeded-p)
-     "Delete-and-recreate repair must record that stale delete succeeded")
+     (getf repair-summary :stale-topic-superseded-p)
+     "Successful repair must preserve that the stale companion topic was superseded by the replacement")
+    (assert-true
+     (null (getf repair-summary :stale-delete-attempted-p))
+     "Create-and-retain-stale repair must not attempt stale delete")
+    (assert-true
+     (null (getf repair-summary :stale-delete-succeeded-p))
+     "Create-and-retain-stale repair must not claim stale delete success")
     (assert-true
      (getf repair-summary :replacement-create-attempted-p)
-     "Delete-and-recreate repair must record that replacement create was attempted")
+     "Create-and-retain-stale repair must record that replacement create was attempted")
     (assert-true
      (getf repair-summary :replacement-create-succeeded-p)
-     "Delete-and-recreate repair must record that replacement create succeeded")
+     "Create-and-retain-stale repair must record that replacement create succeeded")
     (assert-equal *dmx-annotations-smoke-workspace-id*
                   (getf repair-summary :assigned-workspace-id-after)
                   "Replacement companion topics must end up assigned to the intended workspace")
     (assert-true
      (getf repair-summary :hidden-placement-attempted-p)
-     "Delete-and-recreate repair must record that hidden placement was attempted")
+     "Create-and-retain-stale repair must record that hidden placement was attempted")
     (assert-true
      (getf repair-summary :hidden-placement-succeeded-p)
-     "Delete-and-recreate repair must record that hidden placement succeeded")
+     "Create-and-retain-stale repair must record that hidden placement succeeded")
     (assert-true
      (getf repair-summary :hidden-placement-enforced-p)
-     "Delete-and-recreate repair must record that hidden/off-canvas placement was enforced")
+     "Create-and-retain-stale repair must record that hidden/off-canvas placement was enforced")
     (assert-equal "yes"
                   (getf repair-summary :resumed-past-prepare-transition-label)
                   "Successful repair must record that the run resumed beyond PREPARE-TRANSITION")
     (assert-true
-     (member journal-topic-id
-             (journal-delete-topic-ids-of guard-client)
-             :test #'eql)
-     "The stale journal companion topic must be deleted before replacement create continues")
+     (null (journal-delete-topic-ids-of guard-client))
+     "The stale journal companion topic must be retained as history instead of being deleted")
     (assert-true
      (= 1 (length (journal-create-observations-of guard-client)))
-     "Delete-and-recreate repair must create exactly one replacement journal companion topic during prepare-transition")
+     "Create-and-retain-stale repair must create exactly one replacement journal companion topic during prepare-transition")
     (assert-equal *dmx-annotations-smoke-workspace-id*
                   (getf (first (journal-create-observations-of guard-client))
                         :workspace-id)
@@ -2502,6 +2506,9 @@
                   (gethash replacement-topic-id workspace-assignments)
                   "The replacement companion topic must be assigned to the intended workspace in live client state")
     (assert-true
+     (workspace-annotation-smoke-journal-topic-id-p guard-client journal-topic-id)
+     "The stale journal companion topic must remain present as retained history")
+    (assert-true
      (workspace-annotation-smoke-hidden-view-props-p replacement-membership)
      "The replacement companion topic must be placed with the hidden/off-canvas journal view-props invariant")
     (assert-true
@@ -2514,8 +2521,8 @@
      (search "Journal companion repair" html :test #'char-equal)
      "The Overview must render a dedicated journal companion repair section")
     (assert-true
-     (search "delete-and-recreate" html :test #'char-equal)
-     "The Overview must show delete-and-recreate as the repair strategy")
+     (search "create-replacement-and-retain-stale" html :test #'char-equal)
+     "The Overview must show create-and-retain-stale as the repair strategy")
     (assert-true
      (search (format nil "~D" journal-topic-id) html :test #'char-equal)
      "The Overview must keep the stale companion id visible as repair history")
@@ -2557,6 +2564,9 @@
            (assigned-summary
              (hyperdoc::workspace-annotation-persistence-report-journal-preflight-summary-of
               assigned-report))
+           (assigned-journal-topic-id
+             (hyperdoc::workspace-annotation-persistence-report-journal-topic-id-of
+              assigned-report))
            (assigned-repair-summary
              (hyperdoc::workspace-annotation-journal-preflight-repair-summary
               assigned-report)))
@@ -2576,15 +2586,25 @@
        "Already-assigned journal companions must clear the prepare-transition failure once the workspace assignment exists")
       (assert-true
        (null assigned-repair-summary)
-       "Already-assigned journal companions must keep using the old guarded update path unchanged instead of triggering delete-and-recreate repair")
+       "Already-assigned journal companions must keep using the old guarded update path unchanged instead of triggering create-and-retain-stale repair")
       (assert-equal :completed
                     (getf assigned-prepare-transition :status)
                     "Already-assigned journal companions must complete the journal preflight stage")
+      (assert-equal replacement-topic-id
+                    assigned-journal-topic-id
+                    "Already-assigned journal companions must keep the retained-stale replacement companion as current identity")
       (assert-true
-       (member replacement-topic-id
-               (journal-update-topic-ids-of assigned-client)
-               :test #'eql)
-       "Already-assigned journal companions must be able to proceed through the existing topic update path after the assignment exists")
+       (or (null (journal-update-topic-ids-of assigned-client))
+           (member replacement-topic-id
+                   (journal-update-topic-ids-of assigned-client)
+                   :test #'eql))
+       "Already-assigned journal companions may skip redundant journal companion updates once the replacement is already current, but must never fall back to stale-companion repair")
+      (assert-true
+       (null (journal-create-observations-of assigned-client))
+       "Already-assigned journal companions must not create a second replacement topic")
+      (assert-true
+       (null (journal-delete-topic-ids-of assigned-client))
+       "Already-assigned journal companions must not delete any retained history topic")
       (assert-true
        (not (hyperdoc::workspace-annotation-journal-preflight-unassigned-companion-topic-p
              assigned-report))
@@ -2658,7 +2678,7 @@
     (assert-equal :failed
                   (hyperdoc::workspace-annotation-persistence-report-status-of
                    report)
-                  "Placement failure during delete-and-recreate repair must surface as a failed persistence report")
+                  "Placement failure during create-and-retain-stale repair must surface as a failed persistence report")
     (assert-equal :prepare-transition
                   (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
                    report)
@@ -2673,18 +2693,21 @@
     (assert-true
      repair-summary
      "Repair failure reports must preserve structured repair history")
-    (assert-equal "delete-and-recreate"
+    (assert-equal "create-replacement-and-retain-stale"
                   (getf repair-summary :repair-strategy-label)
-                  "Repair failure reports must preserve the chosen delete-and-recreate strategy")
+                  "Repair failure reports must preserve the chosen create-and-retain-stale strategy")
     (assert-equal journal-topic-id
                   (getf repair-summary :stale-topic-id)
                   "Repair failure reports must preserve the stale companion topic id")
     (assert-true
-     (getf repair-summary :stale-delete-attempted-p)
-     "Repair failure reports must preserve that stale delete was attempted")
+     (getf repair-summary :stale-topic-retained-p)
+     "Repair failure reports must preserve that the stale companion was retained")
     (assert-true
-     (getf repair-summary :stale-delete-succeeded-p)
-     "Repair failure reports must preserve that stale delete succeeded")
+     (getf repair-summary :stale-topic-superseded-p)
+     "Repair failure after replacement create must preserve stale-superseded truth")
+    (assert-true
+     (null (getf repair-summary :stale-delete-attempted-p))
+     "Repair failure reports must preserve that stale delete was not attempted")
     (assert-true
      (getf repair-summary :replacement-create-attempted-p)
      "Repair failure reports must preserve that replacement create was attempted")
@@ -2707,10 +2730,8 @@
                   (getf prepare-transition :status)
                   "Repair failure must leave the PREPARE-TRANSITION stage in error")
     (assert-true
-     (member journal-topic-id
-             (journal-delete-topic-ids-of failing-client)
-             :test #'eql)
-     "Repair failure history must preserve that stale delete happened")
+     (null (journal-delete-topic-ids-of failing-client))
+     "Repair failure history must preserve that stale delete did not happen")
     (assert-equal 1
                   (length (journal-create-observations-of failing-client))
                   "Repair failure after recreate must still preserve the created replacement topic observation")

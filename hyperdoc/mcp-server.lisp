@@ -1463,7 +1463,7 @@
 	   (dmx-mcp-json-object
 	    "name" "repair_workspace_journal_companion"
 	    "description"
-	    "Repair a stale HyperDoc-owned workspace-journal companion topic by delete-and-recreate when the existing companion is unassigned and repairable under the current writable workspace context."
+	    "Repair a stale HyperDoc-owned workspace-journal companion topic by creating a replacement under the current writable workspace context while retaining the stale unassigned companion as history."
 	    "inputSchema"
 	    (dmx-mcp-json-object
 	     "type" "object"

@@ -80,6 +80,12 @@
    :visibility nil
    :pinned nil))
 
+(defun dmx-workspace-journal-topic-uri (topic)
+  (and topic
+       (or (dmx-json-object-value topic "uri")
+           (getf topic :uri)
+           (getf topic :external-key))))
+
 (defun dmx-workspace-journal-subject-key->note-key (subject-key)
   (format nil "workspace-journal-~A"
           (string-downcase
@@ -89,6 +95,13 @@
   (format nil "~A~A"
           *hyperdoc-workspace-journal-uri-prefix*
           (dmx-workspace-journal-subject-key->note-key subject-key)))
+
+(defun dmx-workspace-journal-replacement-note-uri (subject-key stale-topic-id)
+  (format nil "~A~A/replacement-~D-~D"
+          *hyperdoc-workspace-journal-uri-prefix*
+          (dmx-workspace-journal-subject-key->note-key subject-key)
+          stale-topic-id
+          (dmx-workspace-journal-timestamp-millis)))
 
 (defun dmx-workspace-journal-existing-topic-workspace-summary
     (client existing-topic)
@@ -216,8 +229,8 @@
     (list :repair-required-p t
           :repair-status :pending
           :repair-status-label "pending"
-          :repair-strategy :delete-and-recreate
-          :repair-strategy-label "delete-and-recreate"
+          :repair-strategy :create-replacement-and-retain-stale
+          :repair-strategy-label "create-replacement-and-retain-stale"
           :repair-step :preflight
           :repair-step-label "preflight"
           :existing-topic-id existing-topic-id
@@ -236,6 +249,8 @@
           :stale-direct-update-skipped-p t
           :stale-delete-attempted-p nil
           :stale-delete-succeeded-p nil
+          :stale-topic-retained-p nil
+          :stale-topic-superseded-p nil
           :replacement-create-attempted-p nil
           :replacement-create-succeeded-p nil
           :hidden-placement-attempted-p nil
@@ -252,6 +267,71 @@
           :hidden-placement-enforced-p nil
           :hidden-view-props-restored-p nil
           :run-resumed-past-prepare-transition-p nil)))
+
+(defun dmx-workspace-journal-stream-with-retained-stale-metadata
+    (stream stale-topic-id replacement-uri)
+  (let ((copy (dmx-workspace-journal-deep-copy stream)))
+    (setf (gethash "canonicalJournalUri" copy)
+          (dmx-workspace-journal-note-uri (gethash "subjectKey" stream))
+          (gethash "companionUri" copy)
+          replacement-uri
+          (gethash "supersedesCompanionTopicId" copy)
+          stale-topic-id)
+    copy))
+
+(defun dmx-workspace-journal-current-companion-candidate (candidates)
+  (when candidates
+    (let* ((superseded-topic-ids
+             (remove nil
+                     (mapcar (lambda (candidate)
+                               (getf candidate :supersedes-topic-id))
+                             candidates)))
+           (unsuperseded
+             (remove-if (lambda (candidate)
+                          (member (getf candidate :topic-id)
+                                  superseded-topic-ids
+                                  :test #'eql))
+                        candidates))
+           (preferred
+             (or unsuperseded candidates))
+           (assigned
+             (remove-if-not
+              (lambda (candidate)
+                (getf candidate :assigned-workspace-id))
+              preferred))
+           (pool (or assigned preferred)))
+      (car (sort (copy-list pool) #'> :key (lambda (candidate)
+                                             (or (getf candidate :topic-id)
+                                                 0)))))))
+
+(defun dmx-workspace-journal-companion-candidates-for-subject
+    (client workspace-topicmap-id subject-key)
+  (when (and workspace-topicmap-id
+             (dmx-non-empty-string-p subject-key))
+    (let* ((topicmap-json (dmx-import-read-topicmap client workspace-topicmap-id))
+           (candidates '()))
+      (dolist (topic (json-array-elements (gethash "topics" topicmap-json)))
+        (when (dmx-workspace-journal-stream-topic-p topic)
+          (let ((stream (dmx-workspace-journal-companion-stream-from-topic topic)))
+            (when (and stream
+                       (string= subject-key (gethash "subjectKey" stream)))
+              (let* ((assignment
+                       (dmx-workspace-journal-existing-topic-workspace-summary
+                        client
+                        topic))
+                     (topic-id (dmx-import-object-id topic)))
+                (push (list :topic topic
+                            :stream stream
+                            :topic-id topic-id
+                            :topic-uri (dmx-workspace-journal-topic-uri topic)
+                            :assigned-workspace-id
+                            (getf assignment :assigned-workspace-id)
+                            :assigned-workspace-status
+                            (getf assignment :assigned-workspace-status)
+                            :supersedes-topic-id
+                            (gethash "supersedesCompanionTopicId" stream))
+                      candidates))))))
+      (values (nreverse candidates) topicmap-json))))
 
 (defun dmx-workspace-journal-companion-stream-from-topic (topic)
   (let ((text (and topic
@@ -342,9 +422,15 @@
              (resolved-journal-topic-id
               (dmx-import-read-topic resolved-client resolved-journal-topic-id))
              (resolved-subject-key
-              (dmx-import-find-existing-topic
-               resolved-client
-               (dmx-workspace-journal-note-uri resolved-subject-key)))
+              (or (getf (dmx-workspace-journal-current-companion-candidate
+                         (dmx-workspace-journal-companion-candidates-for-subject
+                          resolved-client
+                          resolved-topicmap-id
+                          resolved-subject-key))
+                        :topic)
+                  (dmx-import-find-existing-topic
+                   resolved-client
+                   (dmx-workspace-journal-note-uri resolved-subject-key))))
              (t
               (error 'dmx-workspace-topic-validation-error
                      :message
@@ -400,6 +486,19 @@
                           :hyperdoc-workspace-journal)
                       (dmx-workspace-journal-companion-stream-from-topic
                        existing-topic))))
+           (current-candidate
+             (and resolved-stream
+                  (dmx-workspace-journal-current-companion-candidate
+                   (dmx-workspace-journal-companion-candidates-for-subject
+                    resolved-client
+                    resolved-topicmap-id
+                    (gethash "subjectKey" resolved-stream)))))
+           (already-repaired-current-topic
+             (and current-candidate
+                  (not (eql (getf current-candidate :topic-id)
+                            (dmx-import-object-id existing-topic)))
+                  (eql (getf current-candidate :supersedes-topic-id)
+                       (dmx-import-object-id existing-topic))))
            (base-summary
              (and existing-topic
                   (dmx-workspace-journal-companion-repair-base-summary
@@ -510,6 +609,41 @@
              :subject-uri resolved-subject-uri
              :journal-topic-id resolved-journal-topic-id)
             t)))
+        (already-repaired-current-topic
+         (let* ((replacement-topic-id (getf current-candidate :topic-id))
+                (replacement-assigned-workspace-id
+                  (getf current-candidate :assigned-workspace-id))
+                (not-needed-summary
+                  (append
+                   base-summary
+                   (list :repair-status :not-needed
+                         :repair-status-label "not-needed"
+                         :repair-step :already-replaced
+                         :repair-step-label "already-replaced"
+                         :stale-topic-retained-p t
+                         :stale-topic-superseded-p t
+                         :replacement-topic-id replacement-topic-id
+                         :assigned-workspace-id-after
+                         replacement-assigned-workspace-id
+                         :assigned-workspace-label-after
+                         (and replacement-assigned-workspace-id
+                              (format nil "workspace (~D)"
+                                      replacement-assigned-workspace-id))
+                         :repair-action-taken
+                         "Rejected a second stale-companion repair because a retained-stale replacement companion already exists for this journal stream."))))
+           (values
+            (dmx-workspace-journal-companion-repair-result
+             not-needed-summary
+             ownership
+             :dry-run dry-run
+             :repairable-p nil
+             :repair-completed-p nil
+             :repair-reason :already-replaced-retained-stale
+             :subject-key (or resolved-subject-key
+                              (gethash "subjectKey" resolved-stream))
+             :subject-uri resolved-subject-uri
+             :journal-topic-id resolved-journal-topic-id)
+            t)))
         ((null (getf base-summary :writable-workspace-context-available-p))
          (values
           (dmx-workspace-journal-companion-repair-result
@@ -537,10 +671,10 @@
                   base-summary
                   (list :repair-status :planned
                         :repair-status-label "planned"
-                        :repair-step :planned-delete-and-recreate
-                        :repair-step-label "planned-delete-and-recreate"
+                        :repair-step :planned-create-replacement-and-retain-stale
+                        :repair-step-label "planned-create-replacement-and-retain-stale"
                         :repair-action-taken
-                        "Would delete the stale unassigned journal companion topic and recreate it under the writable workspace context, then restore hidden/off-canvas placement."
+                        "Would create a replacement companion topic under the writable workspace context, retain the stale unassigned companion as history, and restore hidden/off-canvas placement on the replacement."
                         :repair-completed-p nil))))
            (values
             (dmx-workspace-journal-companion-repair-result
@@ -635,7 +769,7 @@
                 :repair-step :preflight
                 :repair-step-label "preflight"
                 :repair-action-taken
-                "Could not replace the stale companion because no writable workspace id was available for the delete-and-recreate path."
+                "Could not replace the stale companion because no writable workspace id was available for the create-and-retain-stale path."
                 :repair-failure-message
                 "No writable workspace id was available for journal companion replacement.")
       (error 'dmx-workspace-journal-companion-repair-failed-error
@@ -649,26 +783,27 @@
           (ensure-http-dmx-import-authenticated-operation
            client
            :repair-workspace-journal-companion)
-          (remember :repair-step :delete-stale
-                    :repair-step-label "delete-stale"
-                    :stale-delete-attempted-p t
-                    :repair-action-taken
-                    "Deleting the stale unassigned companion topic before replacement create.")
-          (dmx-import-delete-topic client existing-topic-id)
-          (remember :deleted-stale-topic-p t
-                    :stale-delete-succeeded-p t)
-          (let* ((payload
+          (let* ((replacement-uri
+                   (dmx-workspace-journal-replacement-note-uri
+                    (gethash "subjectKey" stream)
+                    existing-topic-id))
+                 (replacement-stream
+                   (dmx-workspace-journal-stream-with-retained-stale-metadata
+                    stream
+                    existing-topic-id
+                    replacement-uri))
+                 (payload
                    (dmx-workspace-note-payload
-                    (dmx-workspace-journal-visible-title stream)
-                    (encode-json-string stream)
-                    (dmx-workspace-journal-note-uri
-                     (gethash "subjectKey" stream))))
+                    (dmx-workspace-journal-visible-title replacement-stream)
+                    (encode-json-string replacement-stream)
+                    replacement-uri))
                  (repair-step-recorded
                    (remember :repair-step :create-replacement
                              :repair-step-label "create-replacement"
+                             :stale-topic-retained-p t
                              :replacement-create-attempted-p t
                              :repair-action-taken
-                             "Creating a fresh replacement companion topic under the intended workspace request context."))
+                             "Creating a fresh replacement companion topic under the intended workspace request context while retaining the stale unassigned companion as history."))
                  (replacement-topic
                    (dmx-import-create-topic client payload))
                  (replacement-topic-id
@@ -683,6 +818,7 @@
                         (dmx-import-object-id assigned-workspace)))
                  (replacement-create-recorded
                    (remember :replacement-topic-id replacement-topic-id
+                             :stale-topic-superseded-p t
                              :replacement-create-succeeded-p t))
                  (assignment-action
                    (if assigned-workspace-id
@@ -761,7 +897,7 @@
                       :repair-step :completed
                       :repair-step-label "completed"
                       :repair-action-taken
-                      "Deleted the stale unassigned companion topic and created a fresh replacement under the intended workspace context."
+                      "Created a fresh replacement companion topic under the intended workspace context and retained the stale unassigned companion as history."
                       :replacement-in-topicmap-p
                       (and workspace-topicmap-id
                            (dmx-import-topic-in-topicmap-p
@@ -784,7 +920,7 @@
                       :repair-step-label "preflight"
                       :repair-reason :missing-server-side-dmx-auth-config
                       :repair-action-taken
-                      "Blocked journal companion repair because the MCP server has no usable DMX write-auth configuration for the delete-and-recreate path."
+                      "Blocked journal companion repair because the MCP server has no usable DMX write-auth configuration for the create-and-retain-stale path."
                       :repair-failure-message
                       (format nil "~A" condition))
             (remember :repair-status :failed
@@ -1112,26 +1248,36 @@
 (defun dmx-workspace-journal-read-stream
     (client subject-key lookup-kind lookup-value workspace-topicmap-id
      &key subject-uri subject-kind ownership-class note-key note-kind)
-  (let* ((journal-uri (dmx-workspace-journal-note-uri subject-key))
-         (existing-topic (dmx-import-find-existing-topic client journal-uri))
-         (existing-text
+  (multiple-value-bind (candidates _topicmap-json)
+      (dmx-workspace-journal-companion-candidates-for-subject
+       client
+       workspace-topicmap-id
+       subject-key)
+    (declare (ignore _topicmap-json))
+    (let* ((journal-uri (dmx-workspace-journal-note-uri subject-key))
+           (current-candidate
+             (dmx-workspace-journal-current-companion-candidate candidates))
+           (existing-topic
+             (or (getf current-candidate :topic)
+                 (dmx-import-find-existing-topic client journal-uri)))
+           (existing-text
            (and existing-topic
                 (dmx-json-child-value existing-topic *dmx-notes-text-type-uri*)))
-         (existing-stream
+           (existing-stream
            (and (dmx-non-empty-string-p existing-text)
                 (shasht:read-json existing-text))))
-    (values (or existing-stream
-                (dmx-workspace-journal-make-base-stream
-                 subject-key
-                 lookup-kind
-                 lookup-value
-                 workspace-topicmap-id
-                 :subject-uri subject-uri
-                 :subject-kind subject-kind
-                 :ownership-class ownership-class
-                 :note-key note-key
-                 :note-kind note-kind))
-            existing-topic)))
+      (values (or existing-stream
+                  (dmx-workspace-journal-make-base-stream
+                   subject-key
+                   lookup-kind
+                   lookup-value
+                   workspace-topicmap-id
+                   :subject-uri subject-uri
+                   :subject-kind subject-kind
+                   :ownership-class ownership-class
+                   :note-key note-key
+                   :note-kind note-kind))
+              existing-topic))))
 
 (defun dmx-workspace-journal-visible-title (stream)
   (let ((subject-kind (or (gethash "subjectKind" stream) "workspace-topic"))
@@ -1146,15 +1292,9 @@
     (client stream existing-topic workspace-topicmap-id &key workspace-id)
   (let* ((*dmx-workspace-journal-suppressed-p* t)
          (subject-key (gethash "subjectKey" stream))
-         (journal-uri (dmx-workspace-journal-note-uri subject-key))
          (repair-summary nil)
          (repaired-existing-topic-p nil))
-    (let* ((payload
-             (dmx-workspace-note-payload
-              (dmx-workspace-journal-visible-title stream)
-              (encode-json-string stream)
-              journal-uri))
-           (resolved-existing-topic existing-topic)
+    (let* ((resolved-existing-topic existing-topic)
            (journal-topic
              (progn
                (when (and resolved-existing-topic
@@ -1174,13 +1314,22 @@
                         workspace-topicmap-id
                         :workspace-id workspace-id))
                      (setf repaired-existing-topic-p t))))
-               (cond
-                 (repaired-existing-topic-p
-                  resolved-existing-topic)
-                 (resolved-existing-topic
-                  (dmx-import-update-topic client resolved-existing-topic payload))
-                 (t
-                  (dmx-import-create-topic client payload)))))
+               (let* ((payload-uri
+                        (or (dmx-workspace-journal-topic-uri
+                             resolved-existing-topic)
+                            (dmx-workspace-journal-note-uri subject-key)))
+                      (payload
+                        (dmx-workspace-note-payload
+                         (dmx-workspace-journal-visible-title stream)
+                         (encode-json-string stream)
+                         payload-uri)))
+                 (cond
+                   (repaired-existing-topic-p
+                   resolved-existing-topic)
+                   (resolved-existing-topic
+                    (dmx-import-update-topic client resolved-existing-topic payload))
+                   (t
+                    (dmx-import-create-topic client payload))))))
            (resolved-journal-topic-id
              (dmx-import-object-id journal-topic)))
       (unless repaired-existing-topic-p
@@ -1692,13 +1841,32 @@
 
 (defun dmx-workspace-journal-collect-streams (client workspace-topicmap-id)
   (let* ((topicmap-json (dmx-import-read-topicmap client workspace-topicmap-id))
+         (candidates-by-subject (make-hash-table :test #'equal))
          (streams '()))
     (dolist (topic (json-array-elements (gethash "topics" topicmap-json)))
       (when (dmx-workspace-journal-stream-topic-p topic)
-        (let ((text (dmx-json-child-value topic *dmx-notes-text-type-uri*)))
-          (when (dmx-non-empty-string-p text)
-            (push (shasht:read-json text) streams)))))
-    (values (nreverse streams) topicmap-json)))
+        (let ((stream (dmx-workspace-journal-companion-stream-from-topic topic)))
+          (when stream
+            (push (list :topic topic
+                        :stream stream
+                        :topic-id (dmx-import-object-id topic)
+                        :assigned-workspace-id
+                        (getf (dmx-workspace-journal-existing-topic-workspace-summary
+                               client
+                               topic)
+                              :assigned-workspace-id)
+                        :supersedes-topic-id
+                        (gethash "supersedesCompanionTopicId" stream))
+                  (gethash (gethash "subjectKey" stream)
+                           candidates-by-subject)))))
+    (maphash (lambda (_subject-key subject-candidates)
+               (declare (ignore _subject-key))
+               (when-let (current-candidate
+                           (dmx-workspace-journal-current-companion-candidate
+                            subject-candidates))
+                 (push (getf current-candidate :stream) streams)))
+             candidates-by-subject)
+    (values (nreverse streams) topicmap-json))))
 
 (defun dmx-workspace-journal-live-topic-snapshots (client workspace-topicmap-id topicmap-json)
   (let ((snapshots (make-hash-table :test #'equal)))

@@ -320,12 +320,16 @@
     :initarg :journal-delete-topic-ids
     :initform '())
    (journal-placement-observations
-    :accessor mcp-journal-placement-observations-of
-    :initarg :journal-placement-observations
-    :initform '())
+   :accessor mcp-journal-placement-observations-of
+   :initarg :journal-placement-observations
+   :initform '())
    (fail-journal-hidden-placement-p
     :accessor mcp-fail-journal-hidden-placement-p-of
     :initarg :fail-journal-hidden-placement-p
+    :initform nil)
+   (fail-journal-replacement-create-p
+    :accessor mcp-fail-journal-replacement-create-p-of
+    :initarg :fail-journal-replacement-create-p
     :initform nil)))
 
 (defun mcp-journal-uri-p (value)
@@ -361,7 +365,12 @@
          (journal-p (mcp-journal-uri-p external-key))
          (workspace-id
            (hyperdoc::effective-http-dmx-import-workspace-id client))
+         (_failure
+           (when (and journal-p
+                      (mcp-fail-journal-replacement-create-p-of client))
+             (error "Simulated MCP journal replacement create failure")))
          (topic (call-next-method)))
+    (declare (ignore _failure))
     (when journal-p
       (push (list :topic-id (hyperdoc::dmx-import-object-id topic)
                   :external-key external-key
@@ -480,6 +489,7 @@
 
 (defun make-dmx-mcp-journal-companion-repair-server
     (&key (fail-hidden-placement-p nil)
+          (fail-replacement-create-p nil)
           (authorization-header "Bearer smoke-token"))
   (ensure-dmx-mcp-smoke-runtime-loaded)
   (let ((client
@@ -488,6 +498,8 @@
                          :authorization-header authorization-header
                          :workspace-id *dmx-mcp-smoke-workspace-id*
                          :next-topic-id 933000
+                         :fail-journal-replacement-create-p
+                         fail-replacement-create-p
                          :fail-journal-hidden-placement-p
                          fail-hidden-placement-p)))
     (values
@@ -2399,9 +2411,9 @@
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "Stale journal companion dry-run must remain a normal typed planning result")
-                   (mcp-assert-equal "delete-and-recreate"
+                   (mcp-assert-equal "create-replacement-and-retain-stale"
                                      (gethash "repair-strategy" structured)
-                                     "Journal companion repair dry-run must plan delete-and-recreate only")
+                                     "Journal companion repair dry-run must plan create-and-retain-stale only")
                    (mcp-assert-equal t
                                      (gethash "repairable-p" structured)
                                      "Stale journal companion dry-run must confirm the repairable class")
@@ -2467,9 +2479,9 @@
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "Stale journal companion repair must succeed on the typed repair path")
-                   (mcp-assert-equal "delete-and-recreate"
+                   (mcp-assert-equal "create-replacement-and-retain-stale"
                                      (gethash "repair-strategy" structured)
-                                     "Live repair must keep the runtime delete-and-recreate truth")
+                                     "Live repair must keep the runtime create-and-retain-stale truth")
                    (mcp-assert-equal "completed"
                                      (gethash "repair-status" structured)
                                      "Live repair must report completion")
@@ -2486,6 +2498,12 @@
                    (mcp-assert-equal replacement-topic-id
                                      (gethash "current-topic-id" structured)
                                      "Live repair must flip current identity to the replacement topic")
+                   (mcp-assert-equal t
+                                     (gethash "stale-topic-retained-p" structured)
+                                     "Live repair must preserve that the stale topic was retained as history")
+                   (mcp-assert-equal t
+                                     (gethash "stale-topic-superseded-p" structured)
+                                     "Live repair must preserve that the stale topic was superseded by the replacement")
                    (mcp-assert-equal *dmx-mcp-smoke-workspace-id*
                                      (gethash "assigned-workspace-id-after" structured)
                                      "Live repair must report the replacement workspace assignment")
@@ -2505,10 +2523,8 @@
                     (mcp-hidden-journal-view-props-p replacement-membership)
                     "Live repair must enforce the hidden/off-canvas placement invariant")))
                (mcp-assert-true
-                (member stale-topic-id
-                        (mcp-journal-delete-topic-ids-of client)
-                        :test #'eql)
-                "Live repair must delete the stale unassigned companion topic")
+                (null (mcp-journal-delete-topic-ids-of client))
+                "Live repair must not delete the stale unassigned companion topic")
                (mcp-assert-equal 1
                                  (length (mcp-journal-create-observations-of client))
                                  "Live repair must create exactly one replacement companion")
@@ -2520,10 +2536,10 @@
                 (null (mcp-journal-update-topic-ids-of client))
                 "Live repair must not re-enter the generic direct-update path for journal companions")
                (mcp-assert-true
-                (not (hyperdoc::dmx-import-read-topic client stale-topic-id))
-                "Live repair must remove the stale companion topic after delete-and-recreate"))))
+                (hyperdoc::dmx-import-read-topic client stale-topic-id)
+                "Live repair must retain the stale companion topic as history after replacement create"))))
         (hyperdoc::stop-dmx-mcp-server))
-    t))
+    t)
 
 (defun run-dmx-mcp-workspace-journal-companion-repair-failure-smoke-test ()
   (multiple-value-bind (server client)
@@ -2573,13 +2589,13 @@
                                 replacement-topic-id))))
                    (mcp-assert-true
                     (gethash "isError" tool-result)
-                    "Repair failure after stale delete must stay a typed repair error")
+                    "Repair failure after retained-stale replacement create must stay a typed repair error")
                    (mcp-assert-equal "failed"
                                      (gethash "repair-status" structured)
                                      "Repair failure must preserve FAILED status")
-                   (mcp-assert-equal "delete-and-recreate"
+                   (mcp-assert-equal "create-replacement-and-retain-stale"
                                      (gethash "repair-strategy" structured)
-                                     "Repair failure must preserve the delete-and-recreate strategy")
+                                     "Repair failure must preserve the create-and-retain-stale strategy")
                    (mcp-assert-equal stale-topic-id
                                      (gethash "stale-topic-id" structured)
                                      "Repair failure must preserve the stale companion id")
@@ -2590,11 +2606,19 @@
                                      (gethash "current-topic-id" structured)
                                      "Repair failure must preserve the last valid post-repair identity")
                    (mcp-assert-equal t
-                                     (gethash "stale-delete-attempted-p" structured)
-                                     "Repair failure must preserve stale delete attempt evidence")
+                                     (gethash "stale-topic-retained-p" structured)
+                                     "Repair failure must preserve that the stale topic was retained")
                    (mcp-assert-equal t
-                                     (gethash "stale-delete-succeeded-p" structured)
-                                     "Repair failure must preserve stale delete success evidence")
+                                     (gethash "stale-topic-superseded-p" structured)
+                                     "Repair failure after replacement create must preserve stale-superseded truth")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "stale-delete-attempted-p" structured))
+                    "Repair failure must preserve that stale delete was not attempted")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "stale-delete-succeeded-p" structured))
+                    "Repair failure must preserve that stale delete did not run")
                    (mcp-assert-equal t
                                      (gethash "replacement-create-attempted-p" structured)
                                      "Repair failure must preserve replacement create attempt evidence")
@@ -2611,21 +2635,115 @@
                    (mcp-assert-true
                     (mcp-json-null-p
                      (gethash "repair-completed-p" structured))
-                    "Repair failure must not claim repair completion")
+                                     "Repair failure must not claim repair completion")
                    (mcp-assert-equal *dmx-mcp-smoke-workspace-id*
                                      (hyperdoc::dmx-import-object-id replacement-workspace)
                                      "Repair failure must still preserve the recreated topic's workspace assignment"))))
                (mcp-assert-true
-                (member stale-topic-id
-                        (mcp-journal-delete-topic-ids-of client)
-                        :test #'eql)
-                "Repair failure must still delete the stale companion before recreate")
+                (null (mcp-journal-delete-topic-ids-of client))
+                "Repair failure must retain the stale companion when placement fails")
                (mcp-assert-equal 1
                                  (length (mcp-journal-create-observations-of client))
                                  "Repair failure must still record the replacement create attempt")
                (mcp-assert-true
                 (null (mcp-journal-update-topic-ids-of client))
                 "Repair failure must not fall back to a broader journal direct-update path")))
+        (hyperdoc::stop-dmx-mcp-server))
+    t))
+
+(defun run-dmx-mcp-workspace-journal-companion-replacement-create-failure-smoke-test ()
+  (multiple-value-bind (server client)
+      (make-dmx-mcp-journal-companion-repair-server)
+    (let* ((port (mcp-test-port))
+           (url (format nil "http://127.0.0.1:~D/mcp" port))
+           (stale-topic-id 921685)
+           (stale-subject-key
+             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-create-failure"))
+      (mcp-test-seed-journal-companion
+       client
+       stale-topic-id
+       stale-subject-key
+       :view-props (mcp-test-view-props :x 88 :y 92 :visibility t :pinned nil))
+      (mcp-clear-journal-repair-observations client)
+      (setf (mcp-fail-journal-replacement-create-p-of client) t)
+      (unwind-protect
+           (progn
+             (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+             (sleep 0.2)
+             (let ((session-id
+                     (mcp-test-open-session
+                      url
+                      :id 553
+                      :client-name "hyperdoc-journal-companion-repair-create-failure")))
+               (multiple-value-bind (failure-body failure-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    554
+                    "repair_workspace_journal_companion"
+                    (mcp-test-json-object
+                     "journalTopicId" stale-topic-id
+                     "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                     "workspaceId" *dmx-mcp-smoke-workspace-id*
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 failure-status
+                                   "Journal companion replacement-create failure status")
+                 (let* ((tool-result (gethash "result" failure-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (gethash "isError" tool-result)
+                    "Replacement-create failure must stay a typed repair error")
+                   (mcp-assert-equal "failed"
+                                     (gethash "repair-status" structured)
+                                     "Replacement-create failure must preserve FAILED status")
+                   (mcp-assert-equal "create-replacement-and-retain-stale"
+                                     (gethash "repair-strategy" structured)
+                                     "Replacement-create failure must preserve the create-and-retain-stale strategy")
+                   (mcp-assert-equal "create-replacement"
+                                     (gethash "repair-step" structured)
+                                     "Replacement-create failure must stop at create-replacement")
+                   (mcp-assert-equal stale-topic-id
+                                     (gethash "stale-topic-id" structured)
+                                     "Replacement-create failure must preserve the stale companion id")
+                   (mcp-assert-equal stale-topic-id
+                                     (gethash "current-topic-id" structured)
+                                     "Replacement-create failure must keep current identity on the stale companion")
+                   (mcp-assert-equal t
+                                     (gethash "stale-topic-retained-p" structured)
+                                     "Replacement-create failure must preserve stale-retained truth")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "stale-topic-superseded-p" structured))
+                    "Replacement-create failure must not claim the stale topic was already superseded")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "replacement-topic-id" structured))
+                    "Replacement-create failure must not fabricate a replacement id")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "stale-delete-attempted-p" structured))
+                    "Replacement-create failure must not attempt stale delete")
+                   (mcp-assert-equal t
+                                     (gethash "replacement-create-attempted-p" structured)
+                                     "Replacement-create failure must record the create attempt")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "replacement-create-succeeded-p" structured))
+                    "Replacement-create failure must preserve create failure truth")
+                   (mcp-assert-true
+                    (mcp-json-null-p
+                     (gethash "hidden-placement-attempted-p" structured))
+                    "Replacement-create failure must not attempt hidden placement"))))
+               (mcp-assert-true
+                (null (mcp-journal-delete-topic-ids-of client))
+                "Replacement-create failure must not delete the stale companion")
+               (mcp-assert-true
+                (null (mcp-journal-create-observations-of client))
+                "Replacement-create failure must not record a created replacement topic")
+               (mcp-assert-true
+                (hyperdoc::dmx-import-read-topic client stale-topic-id)
+                "Replacement-create failure must leave the stale companion readable"))))
         (hyperdoc::stop-dmx-mcp-server))
     t))
 
@@ -2926,6 +3044,7 @@
   (run-dmx-mcp-workspace-journal-smoke-test)
   (run-dmx-mcp-workspace-journal-companion-repair-smoke-test)
   (run-dmx-mcp-workspace-journal-companion-repair-failure-smoke-test)
+  (run-dmx-mcp-workspace-journal-companion-replacement-create-failure-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
   (run-dmx-workspace-journal-foreign-restore-guardrail-smoke-test)
   (run-dmx-mcp-workspace-assignment-repair-smoke-test)

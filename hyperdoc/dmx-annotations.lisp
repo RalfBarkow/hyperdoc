@@ -1638,6 +1638,10 @@
                  (stale-topic-id (getf repair-summary :existing-topic-id))
                  (replacement-topic-id
                    (getf repair-summary :replacement-topic-id))
+                 (repair-strategy-label
+                   (or (getf repair-summary :repair-strategy-label)
+                       (workspace-annotation-render-value
+                        (getf repair-summary :repair-strategy))))
                  (repair-step-label
                    (or (getf repair-summary :repair-step-label)
                        (workspace-annotation-render-value
@@ -1646,10 +1650,11 @@
                    (or (getf repair-summary :repair-failure-message)
                        (format nil "~A" condition))))
             (format nil
-                    "Before annotation topic upsert could start, HyperDoc detected that ~A for ~A in ~A is an existing unassigned journal companion topic and selected the delete-and-recreate repair path. The repair failed~@[ after replacement topic ~D was created~]~@[ at ~A~] for stale companion topic ~D because ~A. This remains the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
+                    "Before annotation topic upsert could start, HyperDoc detected that ~A for ~A in ~A is an existing unassigned journal companion topic and selected the ~A repair path. The repair failed~@[ after replacement topic ~D was created while the stale topic was retained as history~]~@[ at ~A~] for stale companion topic ~D because ~A. This remains the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
                     (workspace-annotation-journal-preflight-label summary)
                     (or workspace-label "the selected workspace")
                     (or topicmap-label "the selected topicmap")
+                    repair-strategy-label
                     replacement-topic-id
                     repair-step-label
                     stale-topic-id

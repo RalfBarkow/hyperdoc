@@ -739,7 +739,7 @@
                     "Journal companion repair failed"
                     "Journal companion repair")))
           (:p (views:esc
-               "HyperDoc treated the stale unassigned journal companion as a first-class repair transition before annotation topic upsert. The stale companion remains visible as history, while the current companion id reflects the replacement once recreate succeeded.")))
+               "HyperDoc treated the stale unassigned journal companion as a first-class repair transition before annotation topic upsert. The stale companion remains visible as retained history, while the current companion id reflects the replacement once replacement create succeeded.")))
         (views:html
           (:table :class "inspector-table"
                   (:tr (:th "Repair strategy")
@@ -761,6 +761,16 @@
                                    (getf repair-summary
                                          :replacement-topic-id)
                                    :default "-")))))
+                  (:tr (:th "Stale journal companion retained")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :stale-topic-retained-p))))))
+                  (:tr (:th "Stale journal companion superseded")
+                       (:td (:tt (views:esc
+                                  (format nil "~A"
+                                          (getf repair-summary
+                                                :stale-topic-superseded-p))))))
                   (:tr (:th "Writable workspace context used")
                        (:td (:tt (views:esc
                                   (format nil "~A"
