@@ -362,6 +362,7 @@
   (run-topic-factory-snippet-dmx-smoke-tests)
   (run-dmx-mcp-smoke-tests)
   (run-dmx-shared-workspace-docs-smoke-tests)
+  (run-neo4j-duplicate-username-repair-smoke-tests)
   (run-fedwiki-site-dmx-import-tests)
   (run-fedwiki-story-items-smoke-tests)
   (run-check-runner-smoke-tests)

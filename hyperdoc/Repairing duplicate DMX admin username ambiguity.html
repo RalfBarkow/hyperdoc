@@ -1,0 +1,125 @@
+<h1>Repairing duplicate DMX admin username ambiguity</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Repairing duplicate DMX admin username ambiguity"><tt>Repairing
+  duplicate DMX admin username ambiguity</tt></a> is the concrete workflow page
+  for the failure shape in which two Neo4j topics match
+  <tt>dmx.accesscontrol.username = admin</tt> and DMX login/bootstrap becomes
+  ambiguous. The workflow is inspection first, plan second, guarded repair
+  third, verification fourth.
+</p>
+
+<p>
+  The supported repair for this first slice is intentionally narrow: rename the
+  stale standalone duplicate off <tt>admin</tt> while preserving the canonical
+  account-backed identity. Rename is preferred over delete because it preserves
+  evidence and reduces blast radius on an already damaged store.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Repairing duplicate DMX admin username ambiguity"><tt>Repairing duplicate DMX admin username ambiguity</tt></a></li>
+  <li><a hyperbook="topics" page="Guarded local Neo4j repair boundary in HyperDoc"><tt>Guarded local Neo4j repair boundary in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Guarded datastore repair"><tt>Guarded datastore repair</tt></a></li>
+  <li><a hyperbook="topics" page="Datastore adapter boundary"><tt>Datastore adapter boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Py4dmx"><tt>Py4dmx</tt></a></li>
+  <li><a hyperbook="topics" page="DMX session bootstrap and JSESSIONID"><tt>DMX session bootstrap and JSESSIONID</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc DMX architectural implications"><tt>HyperDoc DMX architectural implications</tt></a></li>
+  <li><a expr="(make-local-admin-username-ambiguity-read-operation)" view="Boundary"><tt>(make-local-admin-username-ambiguity-read-operation)</tt> Boundary</a></li>
+  <li><a expr="(make-example-admin-username-ambiguity-report)" view="Matching topics"><tt>(make-example-admin-username-ambiguity-report)</tt> Matching topics</a></li>
+  <li><a expr="(make-example-admin-duplicate-username-repair-plan)" view="Materialization"><tt>(make-example-admin-duplicate-username-repair-plan)</tt> Materialization</a></li>
+</ul>
+
+<h2>Inspection report</h2>
+
+<p>
+  The read-only report object gathers the exact duplicate-username evidence
+  needed for this case: matching username topics, owning
+  <tt>dmx.accesscontrol.user_account</tt> topics, workspace assignment evidence,
+  and password-topic presence. Classification is decided in Lisp from that
+  structured report data. The view layer only displays the result.
+</p>
+
+<p>
+  The supported shape is:
+</p>
+
+<ul>
+  <li>exactly two matching username topics,</li>
+  <li>exactly one account-backed canonical identity,</li>
+  <li>exactly one standalone stale duplicate,</li>
+  <li>no unresolved ambiguity left after report classification.</li>
+</ul>
+
+<h2>Reviewed repair plan</h2>
+
+<p>
+  A <tt>neo4j-duplicate-username-repair-plan</tt> exists before execution. It
+  already contains the deterministic stale node id, canonical node id, rename
+  target, backup path, and verification operation. Execution does not fill in
+  missing operational details later.
+</p>
+
+<ul>
+  <li>No implicit backup-path generation during execution.</li>
+  <li>No implicit offline assumption.</li>
+  <li>No inferred stale/canonical ids at mutation time.</li>
+  <li>No implicit approval.</li>
+</ul>
+
+<h2>Offline-only preconditions</h2>
+
+<p>
+  The guarded repair verb refuses unless all offline-only preconditions are
+  already satisfied in Lisp:
+</p>
+
+<ul>
+  <li>the local DMX/Neo4j instance is explicitly confirmed stopped,</li>
+  <li>a backup path is present and recorded on the plan,</li>
+  <li>the inspection report still proves the supported duplicate-admin shape,</li>
+  <li>the deterministic rename target remains the reviewed one.</li>
+</ul>
+
+<p>
+  This refusal-first behavior matters because the surrounding store may already
+  be damaged. The duplicate-admin workflow stays available, but broader Lucene
+  or Neo4j recovery remains a separate later boundary.
+</p>
+
+<h2>Refusal behavior</h2>
+
+<p>
+  Unsupported cases remain inspectable refusals rather than auto-falling into a
+  broader maintenance shell. Refusal is the correct outcome when:
+</p>
+
+<ul>
+  <li>approval is missing,</li>
+  <li>offline confirmation is missing,</li>
+  <li>backup evidence is missing,</li>
+  <li>the report is ambiguous or unsupported,</li>
+  <li>the live store no longer matches the reviewed plan.</li>
+</ul>
+
+<h2>Verification after repair</h2>
+
+<p>
+  Verification remains separate from mutation. First the store is reinspected
+  for the username value. Later, after restart, the live HTTP username probe
+  checks that authentication bootstrap moved past the old ambiguity blocker.
+  That post-repair probe is read-only.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Guarded local Neo4j repair boundary in HyperDoc">Guarded local Neo4j repair boundary in HyperDoc</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a></li>
+  <li><a page="Py4dmx">Py4dmx</a></li>
+  <li><a page="HyperDoc DMX architectural implications">HyperDoc DMX architectural implications</a></li>
+</ul>

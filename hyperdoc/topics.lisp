@@ -3514,6 +3514,57 @@
                  "DMX note read/write boundary"
                  "Context window workspace as shared blackboard")))
 
+(defun guarded-local-neo4j-repair-boundary-in-hyperdoc-topic ()
+  (make-topic
+   :id "guarded-local-neo4j-repair-boundary-in-hyperdoc"
+   :title "Guarded local Neo4j repair boundary in HyperDoc"
+   :summary "Local-first repair boundary for one supported Neo4j datastore maintenance case in which HyperDoc keeps inspection, plan, approval, execution, and verification explicit instead of widening into a raw Neo4j console."
+   :references '("Guarded local Neo4j repair boundary in HyperDoc"
+                 "Guarded datastore repair"
+                 "Datastore adapter boundary"
+                 "Inspectable operational targets"
+                 "Materialize a host-aware operation without executing it"
+                 "Surface"
+                 "Mutation surface"
+                 "Boundary"
+                 "Repairing duplicate DMX admin username ambiguity")))
+
+(defun guarded-datastore-repair-topic ()
+  (make-topic
+   :id "guarded-datastore-repair"
+   :title "Guarded datastore repair"
+   :summary "A bounded maintenance surface that models one supported datastore repair as inspectable report, plan, refusal, execution, and verification objects instead of exposing general mutation power."
+   :references '("Guarded local Neo4j repair boundary in HyperDoc"
+                 "Repairing duplicate DMX admin username ambiguity"
+                 "Inspectable operational targets"
+                 "Materialize a host-aware operation without executing it"
+                 "Boundary"
+                 "Mutation surface")))
+
+(defun datastore-adapter-boundary-topic ()
+  (make-topic
+   :id "datastore-adapter-boundary"
+   :title "Datastore adapter boundary"
+   :summary "A narrow host-defined adapter seam in which Lisp owns policy and refusal while a replaceable helper touches only the datastore-specific substrate needed for one supported case."
+   :references '("Guarded local Neo4j repair boundary in HyperDoc"
+                 "Repairing duplicate DMX admin username ambiguity"
+                 "Boundary"
+                 "Implementation Boundary for Capability-scoped Extensions")))
+
+(defun repairing-duplicate-dmx-admin-username-ambiguity-topic ()
+  (make-topic
+   :id "repairing-duplicate-dmx-admin-username-ambiguity"
+   :title "Repairing duplicate DMX admin username ambiguity"
+   :summary "Workflow page for the duplicate-admin Neo4j repair slice: inspect the duplicate username report, classify canonical versus stale in Lisp, build a reviewed rename plan, and verify the result without exposing a generic Neo4j console."
+   :references '("Repairing duplicate DMX admin username ambiguity"
+                 "Guarded local Neo4j repair boundary in HyperDoc"
+                 "Guarded datastore repair"
+                 "Datastore adapter boundary"
+                 "Using authenticated workspace assignment repair console"
+                 "Py4dmx"
+                 "DMX session bootstrap and JSESSIONID"
+                 "HyperDoc DMX architectural implications")))
+
 (defun dmx-credentials-topic ()
   (make-topic
    :id "dmx-credentials"

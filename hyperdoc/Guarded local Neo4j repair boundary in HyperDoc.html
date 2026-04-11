@@ -1,0 +1,116 @@
+<h1>Guarded local Neo4j repair boundary in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Guarded local Neo4j repair boundary in HyperDoc"><tt>Guarded
+  local Neo4j repair boundary in HyperDoc</tt></a> is the narrow local-first
+  repair surface for one known DMX datastore failure class: duplicate username
+  topics that make login ambiguous. It documents the runtime objects already
+  implemented for this slice and keeps the difference explicit between
+  inspection, reviewed repair planning, guarded execution, and post-repair
+  verification.
+</p>
+
+<p>
+  This is <b>not</b> a raw Neo4j console. HyperDoc does not accept arbitrary
+  Cypher, does not expose a generic local shell runner, and does not treat
+  datastore reachability as permission to mutate internal state freely. The
+  supported surface is one bounded workflow with one bounded local repair verb.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Guarded local Neo4j repair boundary in HyperDoc"><tt>Guarded local Neo4j repair boundary in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Guarded datastore repair"><tt>Guarded datastore repair</tt></a></li>
+  <li><a hyperbook="topics" page="Datastore adapter boundary"><tt>Datastore adapter boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Inspectable operational targets"><tt>Inspectable operational targets</tt></a></li>
+  <li><a hyperbook="topics" page="Materialize a host-aware operation without executing it"><tt>Materialize a host-aware operation without executing it</tt></a></li>
+  <li><a hyperbook="topics" page="Boundary"><tt>Boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Mutation surface"><tt>Mutation surface</tt></a></li>
+  <li><a hyperbook="topics" page="Repairing duplicate DMX admin username ambiguity"><tt>Repairing duplicate DMX admin username ambiguity</tt></a></li>
+  <li><a expr="(make-local-neo4j-store-target)" view="Summary"><tt>(make-local-neo4j-store-target)</tt> Summary</a></li>
+  <li><a expr="(make-local-dmx-neo4j-instance-target)" view="Summary"><tt>(make-local-dmx-neo4j-instance-target)</tt> Summary</a></li>
+  <li><a expr="(make-local-admin-username-ambiguity-read-operation)" view="Materialization"><tt>(make-local-admin-username-ambiguity-read-operation)</tt> Materialization</a></li>
+  <li><a expr="(make-example-admin-username-ambiguity-report)" view="Overview"><tt>(make-example-admin-username-ambiguity-report)</tt> Overview</a></li>
+  <li><a expr="(make-example-admin-duplicate-username-repair-plan)" view="Guardrails"><tt>(make-example-admin-duplicate-username-repair-plan)</tt> Guardrails</a></li>
+</ul>
+
+<h2>Narrow surface, not console</h2>
+
+<p>
+  The runtime boundary is intentionally smaller than “run local Neo4j command”.
+  Read-only inspection is modeled as a fixed
+  <tt>neo4j-read-query-operation</tt>. Classification becomes a
+  <tt>neo4j-username-ambiguity-report</tt>. The only supported mutation shape
+  becomes a <tt>neo4j-duplicate-username-repair-plan</tt> and then a
+  <tt>neo4j-repair-operation</tt>. Unsupported or ambiguous cases stay
+  inspectable refusals.
+</p>
+
+<ul>
+  <li>No arbitrary Cypher entry.</li>
+  <li>No generic database administration surface.</li>
+  <li>No hidden mutation path in explorer or inspector views.</li>
+  <li>No repair without an explicit reviewed plan object.</li>
+</ul>
+
+<h2>Adapter boundary</h2>
+
+<p>
+  <a hyperbook="topics" page="Datastore adapter boundary"><tt>Datastore
+  adapter boundary</tt></a> is explicit in this slice. Lisp owns supported-case
+  classification, refusal, approval, offline confirmation, backup preconditions,
+  and post-repair verification. The Java helper exists only because Neo4j
+  1.8.1 store access is native to the Java library stack and HyperDoc needs one
+  narrow old-store touch point for this case.
+</p>
+
+<p>
+  The helper is not the feature center. It reports duplicate-username evidence
+  and performs one rename when Lisp passes fully explicit values. It does not
+  decide which username topic is canonical or stale, does not decide whether
+  repair is allowed, and does not select backups or approvals.
+</p>
+
+<h2>Offline-only guarded repair</h2>
+
+<p>
+  The guarded repair verb remains separate from inspection and is narrower than
+  a generic local execution seam. Execution is allowed only when the plan object
+  is already fully determined.
+</p>
+
+<ul>
+  <li>The local DMX/Neo4j instance must be explicitly confirmed stopped.</li>
+  <li>An explicit backup path must already be present on the plan.</li>
+  <li>The inspection report must prove the supported duplicate-admin shape.</li>
+  <li>The plan must already carry deterministic canonical id, stale id, and rename target.</li>
+</ul>
+
+<p>
+  If any one of those preconditions fails, HyperDoc returns a refusal object.
+  It does not fall back to a broader manual command path from within the same
+  runtime surface.
+</p>
+
+<h2>Plan before execution, verification after repair</h2>
+
+<p>
+  The materialization views render the exact helper-build, backup, rename, and
+  verification commands before execution. Review happens against those rendered
+  commands and against the report object. Verification remains a separate
+  read-only step after the guarded verb returns, including store-side
+  reinspection and the later live HTTP username probe.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Repairing duplicate DMX admin username ambiguity">Repairing duplicate DMX admin username ambiguity</a></li>
+  <li><a page="Inspectable operational targets">Inspectable operational targets</a></li>
+  <li><a page="Materialize a host-aware operation without executing it">Materialize a host-aware operation without executing it</a></li>
+  <li><a page="Using authenticated workspace assignment repair console">Using authenticated workspace assignment repair console</a></li>
+  <li><a page="Implementation Boundary for Capability-scoped Extensions">Implementation Boundary for Capability-scoped Extensions</a></li>
+</ul>

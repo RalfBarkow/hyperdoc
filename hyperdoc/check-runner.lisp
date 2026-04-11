@@ -91,6 +91,12 @@
      :title "Merged documentation slice smoke tests"
      :system "hyperdoc"
      :tags (:kind :smoke :suite "merged-doc-slices"))
+    (:package "HYPERDOC/TESTS"
+     :name "RUN-NEO4J-DUPLICATE-USERNAME-REPAIR-SMOKE-TESTS"
+     :id "test:hyperdoc/tests:run-neo4j-duplicate-username-repair-smoke-tests"
+     :title "Neo4j duplicate-username repair smoke tests"
+     :system "hyperdoc"
+     :tags (:kind :smoke :suite "neo4j-duplicate-username-repair"))
     (:package "HYPERDOC"
      :name "RUN-REPO-DOCUMENTATION-SLICE-VALIDATION-CHECK"
      :id "test:hyperdoc:run-repo-documentation-slice-validation-check"
