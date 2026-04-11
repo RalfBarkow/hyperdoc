@@ -34,9 +34,10 @@ Then reload HyperDoc and verify that <tt>topics/Drew McDermott</tt> resolves.
 <h2>Why the repair currently stops at inspection</h2>
 
 <p>
-Our current repair flow attaches a repair thunk that returns a <tt>hyperdoc-authoring-scaffold-plan</tt>.
-For topic repairs this plan is in <tt>:topic</tt> mode, so it provides a template and metadata,
-but no direct write action. The existing direct write operation only handles <tt>:page</tt> mode.
+Our current topics repair flow is chunk-backed. The lookup issue's repair thunk now returns the
+target <tt>topic-page-availability-chunk</tt>, and the issue-level Repair flow stays inspect-first.
+From there, the chunk inspector shows the target chunk, its basis chunk, the authored/materialized
+freshness evidence, and the runtime-derived repair hint.
 </p>
 
 <h2>Code path to the page-lookup-issue view</h2>
@@ -47,8 +48,8 @@ but no direct write action. The existing direct write operation only handles <tt
   <li>The <tt>html-page</tt> specialization walks page links and evaluates each link thunk.</li>
   <li>When a link evaluation returns a lookup failure, HyperBook wraps it in a <tt>page-lookup-issue</tt>.</li>
   <li><tt>enrich-lookup-issue</tt> sees target HyperBook <tt>topics</tt> and classifies the issue as a missing HyperDoc topic page.</li>
-  <li>The issue gets a repair thunk that calls <tt>plan-hyperdoc-authoring-scaffold</tt>.</li>
-  <li>The issue inspector then shows <b>Overview</b>, <b>Details</b>, <b>Repair</b>, and <b>Condition</b>.</li>
+  <li>The issue gets a repair thunk that returns the target <tt>topic-page-availability-chunk</tt>.</li>
+  <li>The issue inspector then shows <b>Overview</b>, <b>Details</b>, <b>Repair</b>, and <b>Condition</b>, and the chunk inspector exposes <b>Overview</b>, <b>Basis</b>, <b>Freshness</b>, and <b>Repair</b>.</li>
 </ol>
 
 <h2>Flow diagram</h2>

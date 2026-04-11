@@ -21,7 +21,7 @@ This is the case shown in the screenshot for the missing topic page
 <ul>
   <li>Issue state includes <code>Open</code>.</li>
   <li>Failure classification is a missing HyperDoc topic page.</li>
-  <li>Suggested repair is to scaffold a HyperDoc topic.</li>
+  <li>The issue points to a target chunk for the expected Topics page.</li>
 </ul>
 
 <p><b>Prerequisites</b></p>
@@ -34,14 +34,13 @@ This is the case shown in the screenshot for the missing topic page
 <p><b>Steps</b></p>
 <ol>
   <li>Open the lookup issue and confirm the expected page id / slug.</li>
-  <li>Confirm whether the concept is absent entirely or only lacks materialization.</li>
-  <li>If the concept is absent entirely, add a new topic constructor in <code>topics.lisp</code>.</li>
-  <li>Create the corresponding HyperDoc page file with the canonical title.</li>
-  <li>Add minimal explanatory prose so the page is a durable topic anchor, not an empty stub.</li>
-  <li>If your workflow requires it, create or refresh the FedWiki twin counterpart.</li>
-  <li>Reload HyperDoc so the new topic constructor and page become available in the running image.</li>
+  <li>Inspect the target chunk for the expected Topics page.</li>
+  <li>Use chunk state plus the chunk's freshness evidence to distinguish <code>Needs topic</code> from <code>Needs materialization</code>.</li>
+  <li>Repair the issue by ensuring that chunk rather than by following a hand-maintained scaffold hint.</li>
+  <li>If the authored topic factory is missing, ensure the authored-factory basis chunk first.</li>
+  <li>If the authored factory exists but the page still does not resolve, or its per-topic authored signature is newer than the current Topics materialization, materialize the running Topics state by rebuilding topic indexes.</li>
   <li>Re-run lookup or reload the source page containing the broken link.</li>
-  <li>Verify that the issue no longer reports as open.</li>
+  <li>Verify that the target chunk now resolves as <code>Fixed</code>.</li>
   <li>Mark the issue fixed only after link resolution succeeds in the running system.</li>
 </ol>
 
@@ -54,86 +53,40 @@ This is the case shown in the screenshot for the missing topic page
 
 <p><b>Troubleshooting</b></p>
 <ul>
-  <li>If the topic constructor exists but the page does not, treat this as <code>Needs materialization</code> rather than <code>Needs topic</code>.</li>
+  <li>If the authored topic factory exists but the Topics page still does not resolve, or the materialized per-topic signature no longer matches the authored topic factory, treat this as <code>Needs materialization</code> rather than <code>Needs topic</code>.</li>
   <li>If the page exists but lookup still fails, inspect title, page id mapping, and target HyperBook selection.</li>
   <li>If the page resolves only after a cold restart, the running image likely had a load-set mismatch.</li>
 </ul>
 
-<h2>Lisp repair function sketch</h2>
+<h2>Lisp chunk sketch</h2>
 
 <pre>
-(defun repair-missing-topic-from-lookup-issue (issue &key create-fedwiki-twin-p)
-  "Repair a page-lookup issue whose target kind is a missing HyperDoc topic page.
-Returns a plist describing the performed work and verification result."
+(defmethod issue-target-chunk ((issue hyperbook:lookup-issue))
+  (when (string= (hyperbook:lookup-issue-target-hyperbook-id-of issue)
+                 "topics")
+    (make-topic-page-availability-chunk
+     (or (hyperbook:lookup-issue-expected-page-id-of issue)
+         (hyperbook:lookup-issue-link-text-of issue)))))
 
-  (labels ((issue-value (key)
-             (slot-value issue key))
-           (canonical-title ()
-             ;; prefer explicit expected page id / slug, fall back to link text
-             (or (issue-value 'expected-page-id)
-                 (issue-value 'link-text)))
-           (topic-handle-from-title (title)
-             ;; sketch only; adapt to your existing naming convention
-             (string-downcase
-              (substitute #\- #\Space title)))
-           (topic-page-path (title)
-             (merge-pathnames
-              (format nil "hyperdoc/~A.html" title)
-              (uiop:getcwd)))
-           (topic-constructor-present-p (title)
-             ;; replace with your real lookup against topics.lisp registrations
-             (declare (ignore title))
-             nil)
-           (page-present-p (title)
-             (probe-file (topic-page-path title)))
-           (write-topic-page (title)
-             (with-open-file (out (topic-page-path title)
-                                  :direction :output
-                                  :if-exists :supersede
-                                  :if-does-not-exist :create)
-               (format out "&lt;h1&gt;~A&lt;/h1&gt;~%~%&lt;in-package&gt;hyperdoc&lt;/in-package&gt;~%~%&lt;p&gt;Topic anchor.&lt;/p&gt;~%"
-                       title)))
-           (append-topic-constructor (title)
-             ;; sketch only; in the real system, edit topics.lisp structurally
-             (let ((handle (topic-handle-from-title title)))
-               (values handle t)))
-           (reload-hyperdoc ()
-             ;; replace with the exact load/reload operation you use
-             (asdf:load-system :hyperdoc))
-           (verify-repair (title)
-             ;; replace with real issue re-resolution / lookup check
-             (and (topic-constructor-present-p title)
-                  (page-present-p title))))
+(defun topic-page-lookup-chunk-state (chunk)
+  (cond
+    ((not (authored-topic-factory-defined-in-source-p
+           (page-lookup-topic-title-of chunk)))
+     :needs-topic-creation)
+    ((chunk-up-to-date-p chunk)
+     :fixed)
+    (t
+     :needs-local-materialization)))
 
-    (let* ((title (canonical-title))
-           (had-constructor (topic-constructor-present-p title))
-           (had-page (page-present-p title))
-           (created-constructor nil)
-           (created-page nil)
-           (fedwiki-twin-created nil))
-
-      (unless had-constructor
-        (append-topic-constructor title)
-        (setf created-constructor t))
-
-      (unless had-page
-        (write-topic-page title)
-        (setf created-page t))
-
-      (when create-fedwiki-twin-p
-        ;; hook your FedWiki twin generation here
-        (setf fedwiki-twin-created t))
-
-      (reload-hyperdoc)
-
-      (let ((verified (verify-repair title)))
-        (list :title title
-              :created-constructor created-constructor
-              :created-page created-page
-              :created-fedwiki-twin fedwiki-twin-created
-              :verified verified
-              :next-status (if verified :fixed :open))))))
+(defun repair-lookup-issue-via-chunks (issue)
+  (ensure-chunk (issue-target-chunk issue)))
 </pre>
+
+<p>
+In the current runtime, the inspected chunk also exposes a status reason, a repair hint,
+and both authored and materialized per-topic freshness evidence. The issue-level Repair flow
+stays inspect-first: it hands you the target chunk rather than a hand-maintained scaffold plan.
+</p>
 
 <h2>How the labels fit together</h2>
 

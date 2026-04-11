@@ -221,6 +221,10 @@
   (or (ignore-errors (hb:id-of *hyperdoc*))
       "hyperdoc"))
 
+(defun lookup-issue-expected-title (issue)
+  (or (hb:lookup-issue-expected-page-id-of issue)
+      (hb:lookup-issue-link-text-of issue)))
+
 (defun route-hyperdoc-authoring-lookup-issue!
     (issue &key target-kind classification suggested-repair repair-description)
   (let ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue))
@@ -237,13 +241,24 @@
                       page-id)))))
 
 (defun route-hyperdoc-topic-lookup-issue! (issue)
-  (route-hyperdoc-authoring-lookup-issue!
-   issue
-   :target-kind :hyperdoc-topic-page
-   :classification :missing-hyperdoc-topic-page
-   :suggested-repair :scaffold-hyperdoc-topic
-   :repair-description
-   "Scaffold the missing HyperDoc topic constructor and its durable page before adding downstream twins."))
+  (let* ((title (lookup-issue-expected-title issue))
+         (chunk (make-topic-page-availability-chunk title))
+         (status (topic-page-lookup-chunk-state chunk)))
+    (hb::configure-lookup-issue!
+     issue
+     :target-kind :hyperdoc-topic-page
+     :classification :missing-hyperdoc-topic-page
+     :status status
+     :suggested-repair :ensure-target-chunk
+     :repair-description (topic-page-lookup-repair-description chunk)
+     :repair-thunk (lambda ()
+                     (issue-target-chunk issue))
+     :details (list :target-chunk chunk
+                    :derived-status status
+                    :status-reason (topic-page-lookup-status-reason chunk)
+                    :repair-hint (topic-page-lookup-repair-hint chunk)
+                    :freshness-mode (topic-page-lookup-freshness-mode chunk)))
+    issue))
 
 (defun route-hyperdoc-page-authoring-lookup-issue! (issue)
   (route-hyperdoc-authoring-lookup-issue!
@@ -414,3 +429,195 @@
   (views:html-view :title "Template" :priority 2
     (views:html
       (:pre (views:esc (hyperdoc-authoring-scaffold-template-of plan))))))
+
+(defmethod issue-target-chunk ((issue hb:lookup-issue))
+  (when (string= (or (hb:lookup-issue-target-hyperbook-id-of issue) "")
+                 "topics")
+    (make-topic-page-availability-chunk
+     (lookup-issue-expected-title issue))))
+
+(defmethod views:text-representation ((chunk page-lookup-target-chunk))
+  (title-of chunk))
+
+(defmethod views:text-representation ((chunk authored-topic-factory-chunk))
+  (format nil "Authored topic factory ~A (~A)"
+          (page-lookup-topic-title-of chunk)
+          (if (chunk-satisfied-p chunk) "present" "missing")))
+
+(defmethod views:text-representation ((chunk topic-page-availability-chunk))
+  (format nil "Topic page ~A (~A)"
+          (page-lookup-topic-title-of chunk)
+          (hb::issue-label (topic-page-lookup-chunk-state chunk))))
+
+(views:defview 👀overview (chunk authored-topic-factory-chunk)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Chunk"))
+                   (:td (:tt (views:esc "authored-topic-factory"))))
+              (:tr (:td (views:esc "Topic title"))
+                   (:td (:tt (views:esc
+                              (page-lookup-topic-title-of chunk)))))
+              (:tr (:td (views:esc "Satisfied"))
+                   (:td (:tt (views:esc
+                              (if (chunk-satisfied-p chunk) "yes" "no")))))
+              (:tr (:td (views:esc "Source signature token"))
+                   (:td (:tt (views:esc
+                              (format nil "~A"
+                                      (topic-page-authored-signature-token
+                                       (page-lookup-topic-title-of chunk)))))))
+              (:tr (:td (views:esc "Summary"))
+                   (:td (views:esc (summary-of chunk))))))))
+
+(views:defview 👀freshness (chunk authored-topic-factory-chunk)
+  (views:html-view :title "Freshness" :priority 2
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Authored factory in source"))
+                   (:td (:tt (views:esc
+                              (if (authored-topic-factory-defined-in-source-p
+                                   (page-lookup-topic-title-of chunk))
+                                  "yes"
+                                  "no")))))
+              (:tr (:td (views:esc "Source signature token"))
+                   (:td (:tt (views:esc
+                              (format nil "~A"
+                                      (topic-page-authored-signature-token
+                                       (page-lookup-topic-title-of chunk))))))))
+      (if-let (signature
+               (authored-topic-factory-source-signature
+                (page-lookup-topic-title-of chunk)))
+        (views:html
+          (:p (views:esc "Authored topic factory signature"))
+          (:pre (views:esc signature)))
+        (views:html
+          (:p (views:esc
+               "No authored topic factory signature is available yet for this title.")))))))
+
+(views:defview 👀materialization (chunk authored-topic-factory-chunk)
+  (views:html-view :title "Materialization" :priority 3
+    (views:html
+      (:p (views:esc
+           "Ensuring this chunk appends a placeholder topic factory to topics.lisp when no authored factory exists, then loads the updated source into the running image."))
+      (:pre (views:esc
+             (page-lookup-placeholder-topic-form
+              (page-lookup-topic-title-of chunk)))))))
+
+(views:defview 👀overview (chunk topic-page-availability-chunk)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Chunk"))
+                   (:td (:tt (views:esc "topic-page-availability"))))
+              (:tr (:td (views:esc "Topic title"))
+                   (:td (:tt (views:esc
+                              (page-lookup-topic-title-of chunk)))))
+              (:tr (:td (views:esc "Derived issue state"))
+                   (:td (:tt (views:esc
+                              (hb::issue-label
+                               (topic-page-lookup-chunk-state chunk))))))
+              (:tr (:td (views:esc "Status reason"))
+                   (:td (views:esc
+                         (topic-page-lookup-status-reason chunk))))
+              (:tr (:td (views:esc "Repair hint"))
+                   (:td (views:esc
+                         (topic-page-lookup-repair-hint chunk))))
+              (:tr (:td (views:esc "Freshness mode"))
+                   (:td (:tt (views:esc
+                              (hb::issue-label
+                               (topic-page-lookup-freshness-mode chunk))))))
+              (:tr (:td (views:esc "Topic index state"))
+                   (:td (:tt (views:esc
+                              (hb::issue-label *topic-index-state*)))))
+              (:tr (:td (views:esc "Page resolves"))
+                   (:td (:tt (views:esc
+                              (if (topic-page-resolves-p
+                                   (page-lookup-topic-title-of chunk))
+                                  "yes"
+                                  "no")))))
+              (:tr (:td (views:esc "Summary"))
+                   (:td (views:esc (summary-of chunk))))))))
+
+(views:defview 👀basis (chunk topic-page-availability-chunk)
+  (views:html-view :title "Basis" :priority 2
+    (let ((basis (chunk-basis chunk)))
+      (views:html
+        (:table :class "inspector-table"
+                (dolist (basis-chunk basis)
+                  (views:html
+                    (:tr (:td (views:esc "Required chunk"))
+                         (:td (views:object-ref basis-chunk))))))))))
+
+(views:defview 👀freshness (chunk topic-page-availability-chunk)
+  (views:html-view :title "Freshness" :priority 3
+    (let* ((title (page-lookup-topic-title-of chunk))
+           (source-signature (authored-topic-factory-source-signature title))
+           (materialized-signature (topic-page-materialization-signature title)))
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Authored factory in source"))
+                     (:td (:tt (views:esc
+                                (if (authored-topic-factory-defined-in-source-p
+                                     title)
+                                    "yes"
+                                    "no")))))
+                (:tr (:td (views:esc "Freshness mode"))
+                     (:td (:tt (views:esc
+                                (hb::issue-label
+                                 (topic-page-lookup-freshness-mode chunk))))))
+                (:tr (:td (views:esc "Authored signature token"))
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (topic-page-authored-signature-token
+                                         title))))))
+                (:tr (:td (views:esc "Materialization signature token"))
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (topic-page-materialization-signature-token
+                                         title))))))
+                (:tr (:td (views:esc "Per-topic signatures match"))
+                     (:td (:tt (views:esc
+                                (if (topic-page-signatures-match-p title)
+                                    "yes"
+                                    "no")))))
+                (:tr (:td (views:esc "Topics source write date"))
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (page-lookup-topic-source-write-date))))))
+                (:tr (:td (views:esc "Topic index derived at"))
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (or *topic-index-derived-at*
+                                            +no-info-date+)))))))
+        (if source-signature
+            (views:html
+              (:p (views:esc "Authored topic factory signature"))
+              (:pre (views:esc source-signature)))
+            (views:html
+              (:p (views:esc
+                   "No authored topic factory signature is available for this title."))))
+        (if materialized-signature
+            (views:html
+              (:p (views:esc "Materialized topic signature"))
+              (:pre (views:esc materialized-signature)))
+            (views:html
+              (:p (views:esc
+                   "No materialized topic signature is available yet for this title."))))))))
+
+(views:defview 👀repair (chunk topic-page-availability-chunk)
+  (views:html-view :title "Repair" :priority 4
+    (views:html
+      (:p (views:esc
+           (topic-page-lookup-repair-description chunk)))
+      (:p (views:esc
+           "Repair for this issue class delegates to ensure-chunk on the target chunk."))
+      (when (eq (topic-page-lookup-chunk-state chunk)
+                :needs-topic-creation)
+        (views:html
+          (:p (views:esc
+               "This repair path first ensures the authored-topic-factory basis chunk so the missing topic definition is added before the Topics page is rebuilt."))))
+      (when (eq (topic-page-lookup-chunk-state chunk)
+                :needs-local-materialization)
+        (views:html
+          (:p (views:esc
+               "This repair path keeps the authored topic factory and refreshes only the running Topics materialization.")))))))

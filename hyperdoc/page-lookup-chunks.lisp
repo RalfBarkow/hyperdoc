@@ -133,6 +133,14 @@
   (gethash (page-lookup-title->factory-symbol title)
            *topic-index-materialization-signatures*))
 
+(defun topic-page-authored-signature-token (title)
+  (source-signature->freshness-token
+   (authored-topic-factory-source-signature title)))
+
+(defun topic-page-materialization-signature-token (title)
+  (source-signature->freshness-token
+   (topic-page-materialization-signature title)))
+
 (defun source-signature->freshness-token (signature)
   (if signature
       (logand most-positive-fixnum
@@ -160,6 +168,62 @@
     (and (known-chunk-date-p source-date)
          (known-chunk-date-p materialized-date)
          (<= source-date materialized-date))))
+
+(defun topic-page-lookup-freshness-mode (chunk)
+  (let ((title (page-lookup-topic-title-of chunk)))
+    (cond
+      ((topic-page-signature-freshness-known-p title)
+       :per-topic-signature)
+      ((and (known-chunk-date-p (page-lookup-topic-source-write-date))
+            (known-chunk-date-p (or *topic-index-derived-at*
+                                    +no-info-date+)))
+       :fallback-write-date)
+      (t
+       :no-freshness-evidence))))
+
+(defun topic-page-lookup-status-reason (chunk)
+  (let* ((title (page-lookup-topic-title-of chunk))
+         (authored-factory-defined-p
+           (authored-topic-factory-defined-in-source-p title))
+         (page-resolves-p (topic-page-resolves-p title))
+         (signature-freshness-known-p
+           (topic-page-signature-freshness-known-p title))
+         (signatures-match-p
+           (and signature-freshness-known-p
+                (topic-page-signatures-match-p title))))
+    (cond
+      ((not authored-factory-defined-p)
+       "No authored topic factory for this title exists in the bound topics source.")
+      ((not page-resolves-p)
+       "An authored topic factory exists, but the Topics hyperbook does not currently resolve this page title.")
+      ((and signature-freshness-known-p
+            (not signatures-match-p))
+       "The Topics page resolves, but the materialized per-topic signature no longer matches the current authored topic factory.")
+      ((and (not signature-freshness-known-p)
+            (not (fallback-topic-page-up-to-date-p title)))
+       "The Topics page resolves, but fallback freshness evidence says the materialized topic index is older than the authored topics source.")
+      (t
+       "The Topics page resolves and the materialized topic entry is current for this authored topic factory."))))
+
+(defun topic-page-lookup-repair-hint (chunk)
+  (let ((title (page-lookup-topic-title-of chunk)))
+    (declare (ignore title))
+    (case (topic-page-lookup-chunk-state chunk)
+      (:needs-topic-creation
+       "Ensure the authored topic factory basis chunk first. That appends a placeholder topic factory to topics.lisp, reloads the source, and then rebuilds topic indexes through the target chunk.")
+      (:needs-local-materialization
+       (if (topic-page-resolves-p (page-lookup-topic-title-of chunk))
+           "Ensure the target chunk. That reloads topics.lisp and rebuilds topic indexes so the materialized per-topic signature matches the current authored topic factory."
+           "Ensure the target chunk. That reloads topics.lisp and rebuilds topic indexes until the Topics page resolves again."))
+      (:fixed
+       "No repair is needed. Ensuring the target chunk should be a no-op while the authored topic factory and materialized topic entry stay in sync.")
+      (otherwise
+       "Inspect the target chunk before attempting repair."))))
+
+(defun topic-page-lookup-repair-description (chunk)
+  (format nil "~A ~A"
+          (topic-page-lookup-status-reason chunk)
+          (topic-page-lookup-repair-hint chunk)))
 
 (defun page-lookup-placeholder-topic-form (title &key (summary "TODO: add summary."))
   (let ((stable-key (page-lookup-title->stable-key title))

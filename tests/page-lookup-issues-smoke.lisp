@@ -29,6 +29,19 @@
         :test #'string=
         :key #'hyperbook:lookup-issue-expected-page-id-of))
 
+(defun page-lookup-smoke-find-view-by-title (views title)
+  (find title
+        views
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun page-lookup-load-inspector-views-for-object (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
+
 (defun smoke-make-page-lookup-issue (target-hyperbook-id expected-page-id)
   (hyperbook:make-page-lookup-issue
    (make-condition 'simple-error
@@ -176,7 +189,18 @@
            (hyperbook:enrich-lookup-issue
             (smoke-make-page-lookup-issue "topics"
                                           "Synthetic missing topic")))
-         (topic-repair (funcall (hyperbook::lookup-issue-repair-thunk-of topic-issue))))
+         (topic-repair (funcall (hyperbook::lookup-issue-repair-thunk-of topic-issue)))
+         (topic-repair-views
+           (page-lookup-load-inspector-views-for-object topic-repair))
+         (overview-html
+           (html-inspector-views:view-html
+            (page-lookup-smoke-find-view-by-title topic-repair-views "Overview")))
+         (freshness-html
+           (html-inspector-views:view-html
+            (page-lookup-smoke-find-view-by-title topic-repair-views "Freshness")))
+         (repair-html
+           (html-inspector-views:view-html
+            (page-lookup-smoke-find-view-by-title topic-repair-views "Repair"))))
     (assert-equal :hyperdoc-topic-page
                   (hyperbook:lookup-issue-target-kind-of topic-issue)
                   "Topics targets should route to HyperDoc topic-page repair planning")
@@ -196,7 +220,21 @@
                   "Chunk state should diagnose a missing authored topic as Needs topic")
     (assert-true (typep (hyperdoc::issue-target-chunk topic-issue)
                         'hyperdoc::topic-page-availability-chunk)
-                 "Topics lookup issues should compute a target chunk directly"))
+                 "Topics lookup issues should compute a target chunk directly")
+    (assert-true (search "Status reason" overview-html :test #'char=)
+                 "Topic-page chunk overview should expose the runtime-derived status reason")
+    (assert-true (search "No authored topic factory for this title exists in the bound topics source."
+                         overview-html
+                         :test #'char=)
+                 "Topic-page chunk overview should explain the missing-topic status")
+    (assert-true (search "Authored signature token" freshness-html :test #'char=)
+                 "Topic-page chunk freshness view should show authored freshness evidence")
+    (assert-true (search "Materialization signature token" freshness-html :test #'char=)
+                 "Topic-page chunk freshness view should show materialization freshness evidence")
+    (assert-true (search "Ensure the authored topic factory basis chunk first."
+                         repair-html
+                         :test #'char=)
+                 "Topic-page chunk repair view should expose the missing-topic repair hint"))
   (call-with-disposable-topic-source-copy
    "Synthetic missing topic via chunk repair"
    (lambda (symbol temp-topics original-topics)
@@ -244,10 +282,9 @@
        (append-placeholder-topic-factory-to-file title temp-topics)
        (hyperdoc::load-page-lookup-topic-source!)
        (hyperdoc::rebuild-topic-indexes)
-       (let* ((fresh-issue
-                (hyperbook:enrich-lookup-issue
-                 (smoke-make-page-lookup-issue "topics" title)))
-              (fresh-chunk (hyperdoc::issue-target-chunk fresh-issue)))
+       (let ((fresh-issue
+               (hyperbook:enrich-lookup-issue
+                (smoke-make-page-lookup-issue "topics" title))))
          (assert-true (hyperdoc::topic-page-resolves-p title)
                       "Freshness smoke should start from a resolving topics page")
          (assert-equal :fixed
@@ -274,12 +311,38 @@
          (let* ((stale-issue
                   (hyperbook:enrich-lookup-issue
                    (smoke-make-page-lookup-issue "topics" title)))
-                (stale-chunk (hyperdoc::issue-target-chunk stale-issue)))
+                (stale-chunk (hyperdoc::issue-target-chunk stale-issue))
+                (stale-views
+                  (page-lookup-load-inspector-views-for-object stale-chunk))
+                (stale-overview-html
+                  (html-inspector-views:view-html
+                   (page-lookup-smoke-find-view-by-title stale-views "Overview")))
+                (stale-freshness-html
+                  (html-inspector-views:view-html
+                   (page-lookup-smoke-find-view-by-title stale-views "Freshness")))
+                (stale-repair-html
+                  (html-inspector-views:view-html
+                   (page-lookup-smoke-find-view-by-title stale-views "Repair"))))
            (assert-true (hyperdoc::topic-page-resolves-p title)
                         "Freshness smoke should keep the topic page resolving while the authored signature changes")
            (assert-equal :needs-local-materialization
                          (hyperbook:lookup-issue-status-of stale-issue)
                          "Editing that topic's authored definition should classify as Needs materialization")
+           (assert-true
+            (search "materialized per-topic signature no longer matches the current authored topic factory"
+                    stale-overview-html
+                    :test #'char-equal)
+            "Topic-page chunk overview should expose the stale-signature reason")
+           (assert-true
+            (search "Updated summary for freshness smoke."
+                    stale-freshness-html
+                    :test #'char=)
+            "Topic-page chunk freshness view should show the updated authored signature content")
+           (assert-true
+            (search "materialized per-topic signature matches the current authored topic factory"
+                    stale-repair-html
+                    :test #'char-equal)
+            "Topic-page chunk repair view should explain the stale-topic refresh action")
            (assert-true (not (string=
                               (hyperdoc::authored-topic-factory-source-signature title)
                               (hyperdoc::topic-page-materialization-signature title)))
