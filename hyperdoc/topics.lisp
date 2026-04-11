@@ -893,6 +893,9 @@
 (defvar *topics-by-id* (make-hash-table :test #'equal))
 (defvar *topics-by-title* (make-hash-table :test #'equal))
 (defvar *topic-index-state* :stale)
+(defvar *topic-index-derived-at* nil)
+(defvar *topic-index-materialization-signatures* (make-hash-table :test #'eq))
+(defvar *topic-index-materialization-signature-provider* nil)
 (defvar *topic-authoring-factories* (make-hash-table :test #'eq))
 (defparameter *legacy-topic-constructor-symbols*
   '(concept-operational-definition
@@ -1106,14 +1109,25 @@
 (defun rebuild-topic-indexes ()
   (clrhash *topics-by-id*)
   (clrhash *topics-by-title*)
+  (clrhash *topic-index-materialization-signatures*)
   (do-symbols (symbol (find-package :hyperdoc))
     (when (topic-constructor-symbol-p symbol)
       (handler-case
           (let ((topic (funcall (authored-topic-factory symbol))))
             (when (typep topic 'topic)
-              (%register-topic topic)))
+              (%register-topic topic)
+              (when *topic-index-materialization-signature-provider*
+                (let ((signature
+                        (ignore-errors
+                          (funcall *topic-index-materialization-signature-provider*
+                                   symbol
+                                   topic))))
+                  (when signature
+                    (setf (gethash symbol *topic-index-materialization-signatures*)
+                          signature))))))
         (error () nil))))
-  (setf *topic-index-state* :ready))
+  (setf *topic-index-state* :ready
+        *topic-index-derived-at* (get-universal-time)))
 
 (defun ensure-topic-indexes ()
   (unless (eq *topic-index-state* :ready)

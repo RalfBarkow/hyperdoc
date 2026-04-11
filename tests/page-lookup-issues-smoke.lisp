@@ -43,6 +43,86 @@
    :expected-page-id expected-page-id
    :classification :lookup-failure))
 
+(defun page-lookup-smoke-tempdir ()
+  (uiop:ensure-directory-pathname
+   (merge-pathnames
+    (format nil "page-lookup-issues-smoke-~D-~A/"
+            (get-universal-time)
+            (gensym "RUN"))
+    (uiop:temporary-directory))))
+
+(defun page-lookup-copy-file (from to)
+  (uiop:ensure-all-directories-exist (list to))
+  (with-open-file (in from :direction :input :external-format :utf-8)
+    (with-open-file (out to
+                         :direction :output
+                         :if-exists :supersede
+                         :if-does-not-exist :create
+                         :external-format :utf-8)
+      (uiop:copy-stream-to-stream in out)))
+  to)
+
+(defun topic-factory-test-state (symbol)
+  (list :had-definition-p (fboundp symbol)
+        :old-definition (and (fboundp symbol) (symbol-function symbol))
+        :had-authoring-factory-p (nth-value 1
+                                            (gethash symbol
+                                                     hyperdoc::*topic-authoring-factories*))
+        :old-authoring-factory (gethash symbol
+                                        hyperdoc::*topic-authoring-factories*)))
+
+(defun restore-topic-factory-test-state! (symbol state)
+  (if (getf state :had-definition-p)
+      (setf (fdefinition symbol) (getf state :old-definition))
+      (fmakunbound symbol))
+  (if (getf state :had-authoring-factory-p)
+      (setf (gethash symbol hyperdoc::*topic-authoring-factories*)
+            (getf state :old-authoring-factory))
+      (remhash symbol hyperdoc::*topic-authoring-factories*))
+  (hyperdoc::rebuild-topic-indexes))
+
+(defun append-placeholder-topic-factory-to-file (title path)
+  (with-open-file (stream path
+                          :direction :output
+                          :if-exists :append
+                          :if-does-not-exist :error
+                          :external-format :utf-8)
+    (write-string (hyperdoc::page-lookup-placeholder-topic-form title) stream))
+  path)
+
+(defun rewrite-file-substring! (path old-substring new-substring)
+  (let* ((content (uiop:read-file-string path))
+         (position (search old-substring content :test #'char=)))
+    (unless position
+      (error "Substring ~S not found in ~A" old-substring path))
+    (with-open-file (stream path
+                            :direction :output
+                            :if-exists :supersede
+                            :if-does-not-exist :create
+                            :external-format :utf-8)
+      (write-string content stream :end position)
+      (write-string new-substring stream)
+      (write-string content
+                    stream
+                    :start (+ position (length old-substring)))))
+  path)
+
+(defun call-with-disposable-topic-source-copy (title thunk)
+  (let* ((symbol (hyperdoc::page-lookup-title->factory-symbol title))
+         (state (topic-factory-test-state symbol))
+         (root (page-lookup-smoke-tempdir))
+         (temp-topics (merge-pathnames "topics-copy.lisp" root))
+         (original-topics (hyperdoc::page-lookup-topic-source-path)))
+    (page-lookup-copy-file original-topics temp-topics)
+    (unwind-protect
+         (let ((hyperdoc::*page-lookup-topic-source-path* temp-topics))
+           (funcall thunk symbol temp-topics original-topics))
+      (restore-topic-factory-test-state! symbol state)
+      (ignore-errors
+        (uiop:delete-directory-tree root
+                                    :validate t
+                                    :if-does-not-exist :ignore)))))
+
 (defun run-page-lookup-issues-smoke-tests ()
   (let* ((denk-page (smoke-find-hyperdoc-page "Denkpanzer paper 2013"))
          (denk-headings (smoke-heading-texts denk-page))
@@ -103,14 +183,115 @@
     (assert-equal :missing-hyperdoc-topic-page
                   (hyperbook:lookup-issue-classification-of topic-issue)
                   "Topics targets should classify as missing HyperDoc topic pages")
-    (assert-equal :scaffold-hyperdoc-topic
+    (assert-equal :needs-topic-creation
+                  (hyperbook:lookup-issue-status-of topic-issue)
+                  "Missing topics should derive Needs topic from chunk state")
+    (assert-equal :ensure-target-chunk
                   (hyperbook:lookup-issue-suggested-repair-of topic-issue)
-                  "Topics targets should propose topic scaffolding")
-    (assert-true (typep topic-repair 'hyperdoc::hyperdoc-authoring-scaffold-plan)
-                 "Topic repair thunk should yield a HyperDoc authoring scaffold plan")
-    (assert-equal :topic
-                  (hyperdoc::hyperdoc-authoring-scaffold-mode-of topic-repair)
-                  "Missing topic scaffold should stay in topic mode"))
+                  "Topics targets should point to a target chunk repair path")
+    (assert-true (typep topic-repair 'hyperdoc::topic-page-availability-chunk)
+                 "Topic repair thunk should now expose the target chunk itself")
+    (assert-equal :needs-topic-creation
+                  (hyperdoc::topic-page-lookup-chunk-state topic-repair)
+                  "Chunk state should diagnose a missing authored topic as Needs topic")
+    (assert-true (typep (hyperdoc::issue-target-chunk topic-issue)
+                        'hyperdoc::topic-page-availability-chunk)
+                 "Topics lookup issues should compute a target chunk directly"))
+  (call-with-disposable-topic-source-copy
+   "Synthetic missing topic via chunk repair"
+   (lambda (symbol temp-topics original-topics)
+     (let* ((issue
+              (hyperbook:enrich-lookup-issue
+               (smoke-make-page-lookup-issue "topics"
+                                             "Synthetic missing topic via chunk repair")))
+            (chunk (hyperdoc::issue-target-chunk issue))
+            (factory-marker
+              (string-upcase
+               (format nil "(defun ~A"
+                       (symbol-name symbol))))
+            (before (uiop:read-file-string temp-topics))
+            (original-before (uiop:read-file-string original-topics)))
+       (assert-equal :needs-topic-creation
+                     (hyperbook:lookup-issue-status-of issue)
+                     "Disposable-source repair test must begin in Needs topic state")
+       (assert-true (not (search "Synthetic missing topic via chunk repair"
+                                 before
+                                 :test #'char=))
+                    "Disposable topics copy should start without the synthetic topic")
+       (hyperdoc::repair-lookup-issue-via-chunks issue)
+       (let ((after (uiop:read-file-string temp-topics)))
+         (assert-true (search factory-marker
+                              (string-upcase after)
+                              :test #'char=)
+                      "Repair should append a placeholder factory to the disposable topics copy")
+         (assert-equal :fixed
+                       (hyperdoc::topic-page-lookup-chunk-state chunk)
+                       "Repair through the disposable copy should bring the topic-page chunk to fixed")
+         (assert-string=
+          original-before
+          (uiop:read-file-string original-topics)
+          "Repair through the disposable copy must not mutate the authoritative topics source")))))
+  (call-with-disposable-topic-source-copy
+   "Synthetic topic freshness"
+   (lambda (symbol temp-topics original-topics)
+     (declare (ignore symbol original-topics))
+     (let* ((title "Synthetic topic freshness")
+            (fresh-form (hyperdoc::page-lookup-placeholder-topic-form title))
+            (updated-form
+              (hyperdoc::page-lookup-placeholder-topic-form
+               title
+               :summary "Updated summary for freshness smoke.")))
+       (append-placeholder-topic-factory-to-file title temp-topics)
+       (hyperdoc::load-page-lookup-topic-source!)
+       (hyperdoc::rebuild-topic-indexes)
+       (let* ((fresh-issue
+                (hyperbook:enrich-lookup-issue
+                 (smoke-make-page-lookup-issue "topics" title)))
+              (fresh-chunk (hyperdoc::issue-target-chunk fresh-issue)))
+         (assert-true (hyperdoc::topic-page-resolves-p title)
+                      "Freshness smoke should start from a resolving topics page")
+         (assert-equal :fixed
+                       (hyperbook:lookup-issue-status-of fresh-issue)
+                       "Freshly rebuilt authored topics should classify as fixed")
+         (assert-string=
+          (hyperdoc::authored-topic-factory-source-signature title)
+          (hyperdoc::topic-page-materialization-signature title)
+          "Fresh materialization should capture the current per-topic authored signature")
+         (append-placeholder-topic-factory-to-file
+          "Unrelated topic freshness noise"
+          temp-topics)
+         (let* ((unchanged-issue
+                  (hyperbook:enrich-lookup-issue
+                   (smoke-make-page-lookup-issue "topics" title)))
+                (unchanged-chunk (hyperdoc::issue-target-chunk unchanged-issue)))
+           (assert-equal :fixed
+                         (hyperbook:lookup-issue-status-of unchanged-issue)
+                         "An unrelated authored change elsewhere in topics.lisp should not falsely stale an untouched topic")
+           (assert-equal :fixed
+                         (hyperdoc::topic-page-lookup-chunk-state unchanged-chunk)
+                         "Chunk state should remain fixed when the topic-specific authored signature is unchanged"))
+         (rewrite-file-substring! temp-topics fresh-form updated-form)
+         (let* ((stale-issue
+                  (hyperbook:enrich-lookup-issue
+                   (smoke-make-page-lookup-issue "topics" title)))
+                (stale-chunk (hyperdoc::issue-target-chunk stale-issue)))
+           (assert-true (hyperdoc::topic-page-resolves-p title)
+                        "Freshness smoke should keep the topic page resolving while the authored signature changes")
+           (assert-equal :needs-local-materialization
+                         (hyperbook:lookup-issue-status-of stale-issue)
+                         "Editing that topic's authored definition should classify as Needs materialization")
+           (assert-true (not (string=
+                              (hyperdoc::authored-topic-factory-source-signature title)
+                              (hyperdoc::topic-page-materialization-signature title)))
+                        "A stale topic should expose a per-topic signature mismatch before repair")
+           (hyperdoc::repair-lookup-issue-via-chunks stale-issue)
+           (assert-equal :fixed
+                         (hyperdoc::topic-page-lookup-chunk-state stale-chunk)
+                         "Repair should refresh a stale topic-page materialization back to fixed")
+           (assert-string=
+            (hyperdoc::authored-topic-factory-source-signature title)
+            (hyperdoc::topic-page-materialization-signature title)
+            "Repair should refresh the per-topic materialization signature to the updated authored definition"))))))
   (let ((generic-issue
           (hyperbook:enrich-lookup-issue
            (smoke-make-page-lookup-issue "lisp-functions"
