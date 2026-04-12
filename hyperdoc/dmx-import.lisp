@@ -15,6 +15,8 @@
 (defparameter *dmx-topic-fetch-query-string* "children=true&assocChildren=true")
 (defparameter *base64-alphabet*
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+(defparameter *dmx-workspace-assignment-rehearsal-snapshot-kind*
+  "hyperdoc.workspace_assignment_repair_snapshot")
 
 (define-condition fedwiki-dmx-import-error (error)
   ((message :reader fedwiki-dmx-import-message-of :initarg :message))
@@ -622,6 +624,192 @@
       (remhash membership-key (topicmap-memberships-of client)))
     (remhash topic-id (workspace-assignments-of client))
     nil))
+
+(defun dmx-workspace-assignment-rehearsal-required-hash
+    (parent key boundary)
+  (let ((value (and (hash-table-p parent)
+                    (gethash key parent))))
+    (unless (hash-table-p value)
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "DMX workspace-assignment rehearsal snapshot requires ~A at ~A"
+                              key
+                              boundary)))
+    value))
+
+(defun dmx-workspace-assignment-rehearsal-copy-json-object (json)
+  (let ((copy (make-hash-table :test #'equal)))
+    (when (hash-table-p json)
+      (maphash (lambda (key value)
+                 (setf (gethash key copy) value))
+               json))
+    copy))
+
+(defun dmx-workspace-assignment-rehearsal-topic-json->payload (topic-json)
+  (let ((children (make-hash-table :test #'equal))
+        (children-json (and (hash-table-p topic-json)
+                            (gethash "children" topic-json))))
+    (when (hash-table-p children-json)
+      (maphash (lambda (child-type-uri child-json)
+                 (setf (gethash child-type-uri children)
+                       (if (hash-table-p child-json)
+                           (gethash "value" child-json)
+                           child-json)))
+               children-json))
+    (list :id (and (hash-table-p topic-json)
+                   (gethash "id" topic-json))
+          :uri (and (hash-table-p topic-json)
+                    (gethash "uri" topic-json))
+          :type-uri (and (hash-table-p topic-json)
+                         (gethash "typeUri" topic-json))
+          :value (and (hash-table-p topic-json)
+                      (gethash "value" topic-json))
+          :external-key
+          (and (hash-table-p topic-json)
+               (or (gethash "externalKey" topic-json)
+                   (gethash "external-key" topic-json)
+                   (gethash "uri" topic-json)))
+          :children children)))
+
+(defun dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
+    (topicmap-json topic-id)
+  (find topic-id
+        (json-array-elements
+         (and (hash-table-p topicmap-json)
+              (gethash "topics" topicmap-json)))
+        :key #'dmx-import-object-id
+        :test #'eql))
+
+(defun clear-memory-dmx-import-client-state (client)
+  (clrhash (topics-by-external-key-of client))
+  (clrhash (topicmap-memberships-of client))
+  (clrhash (workspace-assignments-of client))
+  client)
+
+(defun read-dmx-workspace-assignment-rehearsal-snapshot (path)
+  (let ((snapshot
+          (with-open-file (stream path :direction :input)
+            (shasht:read-json stream))))
+    (unless (hash-table-p snapshot)
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "DMX workspace-assignment rehearsal snapshot must decode to a JSON object: ~A"
+                              path)))
+    (unless (string= (or (gethash "snapshotKind" snapshot) "")
+                     *dmx-workspace-assignment-rehearsal-snapshot-kind*)
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "Unsupported DMX workspace-assignment rehearsal snapshot kind ~S in ~A"
+                              (gethash "snapshotKind" snapshot)
+                              path)))
+    (unless (eql (or (gethash "schemaVersion" snapshot) 0) 1)
+      (error 'fedwiki-dmx-import-error
+             :message (format nil
+                              "Unsupported DMX workspace-assignment rehearsal snapshot schemaVersion ~S in ~A"
+                              (gethash "schemaVersion" snapshot)
+                              path)))
+    (dmx-workspace-assignment-rehearsal-required-hash
+     snapshot
+     "repairTarget"
+     'read-dmx-workspace-assignment-rehearsal-snapshot)
+    (let ((captures
+            (dmx-workspace-assignment-rehearsal-required-hash
+             snapshot
+             "captures"
+             'read-dmx-workspace-assignment-rehearsal-snapshot)))
+      (dmx-workspace-assignment-rehearsal-required-hash
+       captures
+       "topic"
+       'read-dmx-workspace-assignment-rehearsal-snapshot)
+      (dmx-workspace-assignment-rehearsal-required-hash
+       captures
+       "workspaceTopicmap"
+       'read-dmx-workspace-assignment-rehearsal-snapshot))
+    snapshot))
+
+(defun load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client
+    (snapshot client &key (clear-state-p t))
+  (unless (typep client 'memory-dmx-import-client)
+    (error 'fedwiki-dmx-import-error
+           :message (format nil
+                            "DMX workspace-assignment rehearsal snapshot loader requires a memory-dmx-import-client, got ~S"
+                            (type-of client))))
+  (let* ((repair-target
+           (dmx-workspace-assignment-rehearsal-required-hash
+            snapshot
+            "repairTarget"
+            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+         (captures
+           (dmx-workspace-assignment-rehearsal-required-hash
+            snapshot
+            "captures"
+            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+         (topic-json
+           (dmx-workspace-assignment-rehearsal-required-hash
+            captures
+            "topic"
+            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+         (workspace-assignment (gethash "workspaceAssignment" captures))
+         (topicmap-memberships (gethash "topicmapMemberships" captures))
+         (workspace-topicmap
+           (dmx-workspace-assignment-rehearsal-required-hash
+            captures
+            "workspaceTopicmap"
+            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+         (topic-id
+           (or (dmx-import-object-id topic-json)
+               (parse-positive-integer (gethash "topicId" repair-target))
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "DMX workspace-assignment rehearsal snapshot is missing repairTarget.topicId"))))
+    (when clear-state-p
+      (clear-memory-dmx-import-client-state client))
+    (dmx-import-create-topic
+     client
+     (dmx-workspace-assignment-rehearsal-topic-json->payload topic-json))
+    (when workspace-assignment
+      (when-let (workspace-id (dmx-import-object-id workspace-assignment))
+        (setf (gethash topic-id (workspace-assignments-of client))
+              workspace-id)))
+    (dolist (membership (json-array-elements topicmap-memberships))
+      (let* ((topicmap-id (dmx-import-object-id membership))
+             (topic-entry
+               (and topicmap-id
+                    (eql topicmap-id (dmx-import-object-id workspace-topicmap))
+                    (dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
+                     workspace-topicmap
+                     topic-id))))
+        (when topicmap-id
+          (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
+                         (topicmap-memberships-of client))
+                (dmx-workspace-assignment-rehearsal-copy-json-object
+                 (and topic-entry
+                      (gethash "viewProps" topic-entry)))))))
+    (let* ((workspace-topicmap-id (dmx-import-object-id workspace-topicmap))
+           (membership-key
+             (and workspace-topicmap-id
+                  (memory-topicmap-membership-key workspace-topicmap-id topic-id)))
+           (topic-entry
+             (and workspace-topicmap-id
+                  (dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
+                   workspace-topicmap
+                   topic-id))))
+      (when (and membership-key
+                 topic-entry
+                 (null (gethash membership-key (topicmap-memberships-of client))))
+        (setf (gethash membership-key (topicmap-memberships-of client))
+              (dmx-workspace-assignment-rehearsal-copy-json-object
+               (gethash "viewProps" topic-entry)))))
+    client))
+
+(defun make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot
+    (snapshot &key (next-topic-id 1000))
+  (let ((client (make-instance 'memory-dmx-import-client
+                               :next-topic-id next-topic-id)))
+    (load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client
+     snapshot
+     client)
+    client))
 
 (defun encode-base64-octets (octets)
   (with-output-to-string (stream)

@@ -88,6 +88,25 @@
   would change workspace state.
 </p>
 
+<h2>Localhost-first assignment rehearsal</h2>
+
+<p>
+  For a missing-assignment repair case such as an already-created
+  <tt>workspace-annotation</tt> carrier in topicmap <tt>919822</tt>, rehearse
+  the repair locally from one bounded captured dataset. Load only the captured
+  topic, current workspace-assignment readback, topicmap-membership readback,
+  and the <tt>919822</tt> topicmap projection into the memory-backed DMX client,
+  then rehearse <tt>validated_dmx_write_dry_run</tt> with
+  <tt>workspace_assignment_repair</tt> followed by
+  <tt>repair_workspace_topic_assignment</tt>.
+</p>
+
+<p>
+  This localhost-first slice is intentionally narrower than annotation
+  continuation. It excludes topicmap placement repair, workspace-journal
+  effects, and <tt>User</tt> or <tt>Owner</tt> normalization.
+</p>
+
 <h2>If a topic is already present</h2>
 
 <ul>

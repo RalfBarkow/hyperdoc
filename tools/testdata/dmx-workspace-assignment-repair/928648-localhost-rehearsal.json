@@ -1,0 +1,70 @@
+{
+  "snapshotKind": "hyperdoc.workspace_assignment_repair_snapshot",
+  "schemaVersion": 1,
+  "repairTarget": {
+    "topicId": 928648,
+    "workspaceId": 919815,
+    "workspaceTopicmapId": 919822
+  },
+  "captures": {
+    "topic": {
+      "id": 928648,
+      "uri": "hyperdoc:mcp/workspace-annotation/test-workspace-annotation",
+      "typeUri": "dmx.notes.note",
+      "value": "Workspace annotation compatibility carrier",
+      "children": {
+        "dmx.notes.title": {
+          "id": -1,
+          "uri": "",
+          "typeUri": "dmx.notes.title",
+          "value": "Workspace annotation compatibility carrier",
+          "children": {}
+        },
+        "dmx.notes.text": {
+          "id": -1,
+          "uri": "",
+          "typeUri": "dmx.notes.text",
+          "value": "{\"annotationKey\":\"test-workspace-annotation\",\"status\":\"saved\"}",
+          "children": {}
+        }
+      }
+    },
+    "workspaceAssignment": null,
+    "topicmapMemberships": [
+      {
+        "id": 919822,
+        "value": "context-window",
+        "assoc": {
+          "id": 939001
+        }
+      }
+    ],
+    "workspaceTopicmap": {
+      "topic": {
+        "id": 919822,
+        "uri": "",
+        "typeUri": "dmx.topicmaps.topicmap",
+        "value": "context-window",
+        "children": {}
+      },
+      "viewProps": {},
+      "topics": [
+        {
+          "id": 928648,
+          "uri": "hyperdoc:mcp/workspace-annotation/test-workspace-annotation",
+          "typeUri": "dmx.notes.note",
+          "value": "Workspace annotation compatibility carrier",
+          "children": {},
+          "viewProps": {
+            "dmx.topicmaps.x": 640,
+            "dmx.topicmaps.y": 220,
+            "dmx.topicmaps.visibility": true,
+            "dmx.topicmaps.pinned": false
+          }
+        }
+      ],
+      "assocs": []
+    },
+    "workspaceOwner": null
+  }
+}

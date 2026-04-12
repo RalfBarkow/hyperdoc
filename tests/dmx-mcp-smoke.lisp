@@ -487,6 +487,36 @@
 	     :sessions (make-hash-table :test #'equal)
 	     :log-stream nil)))
 
+(defun dmx-workspace-assignment-rehearsal-fixture-pathname ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "tools/testdata/dmx-workspace-assignment-repair/928648-localhost-rehearsal.json"))
+
+(defun make-dmx-mcp-workspace-assignment-rehearsal-server ()
+  (let* ((snapshot
+           (hyperdoc::read-dmx-workspace-assignment-rehearsal-snapshot
+            (dmx-workspace-assignment-rehearsal-fixture-pathname)))
+         (repair-target (gethash "repairTarget" snapshot))
+         (topic-id (gethash "topicId" repair-target))
+         (workspace-topicmap-id (gethash "workspaceTopicmapId" repair-target))
+         (client
+           (hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot
+            snapshot
+            :next-topic-id 934000)))
+    (values
+     (hyperdoc::make-dmx-mcp-server
+      :read-client client
+      :write-client client
+      :workspace-topicmap-id workspace-topicmap-id
+      :known-topic-ids (list topic-id)
+      :bearer-token nil
+      :allowed-origins nil
+      :live-writes-enabled-p t
+      :sessions (make-hash-table :test #'equal)
+      :log-stream nil)
+     client
+     snapshot)))
+
 (defun make-dmx-mcp-journal-companion-repair-server
     (&key (fail-hidden-placement-p nil)
           (fail-replacement-create-p nil)
@@ -2259,6 +2289,128 @@
       (hyperdoc::stop-dmx-mcp-server))
   t))
 
+(defun run-dmx-mcp-workspace-assignment-localhost-rehearsal-smoke-test ()
+  (let* ((port (mcp-test-port))
+         (url (format nil "http://127.0.0.1:~D/mcp" port))
+         (original-journal-suppressed-p hyperdoc::*dmx-workspace-journal-suppressed-p*))
+    (multiple-value-bind (server client snapshot)
+        (make-dmx-mcp-workspace-assignment-rehearsal-server)
+      (let* ((repair-target (gethash "repairTarget" snapshot))
+             (topic-id (gethash "topicId" repair-target))
+             (workspace-id (gethash "workspaceId" repair-target))
+             (workspace-topicmap-id (gethash "workspaceTopicmapId" repair-target))
+             (before-topicmap
+               (hyperdoc::dmx-import-read-topicmap client workspace-topicmap-id))
+             (before-topic-count
+               (length (hyperdoc::json-array-elements
+                        (gethash "topics" before-topicmap)))))
+        (mcp-assert-true
+         (hyperdoc::dmx-import-read-topic client topic-id)
+         "Localhost rehearsal fixture must load the captured topic")
+        (mcp-assert-true
+         (null (hyperdoc::dmx-import-read-topic-workspace client topic-id))
+         "Localhost rehearsal fixture must start without a workspace assignment")
+        (mcp-assert-equal t
+                          (hyperdoc::dmx-import-topic-in-topicmap-p
+                           client
+                           workspace-topicmap-id
+                           topic-id)
+                          "Localhost rehearsal fixture must keep the captured topicmap membership")
+        (mcp-assert-equal 1
+                          before-topic-count
+                          "Localhost rehearsal fixture must stay bounded to one captured topicmap entry")
+        (unwind-protect
+             (progn
+               ;; Production workspace-assignment repair can reconcile or append
+               ;; workspace-journal state for annotation subjects. This focused
+               ;; localhost rehearsal intentionally suppresses those side
+               ;; effects so it proves workspace_assignment_repair only.
+               (setf hyperdoc::*dmx-workspace-journal-suppressed-p* t)
+               (hyperdoc::serve-dmx-mcp-server
+                :port port
+                :address "127.0.0.1"
+                :server server)
+               (sleep 0.2)
+               (let ((session-id
+                       (mcp-test-open-session
+                        url
+                        :id 451
+                        :client-name "hyperdoc-assignment-localhost-rehearsal")))
+                 (multiple-value-bind (dry-run-body dry-run-status _)
+                     (mcp-test-call-tool
+                      url
+                      session-id
+                      452
+                      "validated_dmx_write_dry_run"
+                      (mcp-test-json-object
+                       "writeKind" "workspace_assignment_repair"
+                       "topicId" topic-id
+                       "workspaceId" workspace-id
+                       "workspaceTopicmapId" workspace-topicmap-id))
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 dry-run-status
+                                     "Localhost rehearsal dry-run status")
+                   (let* ((tool-result (gethash "result" dry-run-body))
+                          (structured (gethash "structuredContent" tool-result))
+                          (summary (gethash "summary" structured)))
+                     (mcp-assert-true
+                      (null (gethash "isError" tool-result))
+                      "Localhost rehearsal dry-run must not be flagged as error")
+                     (mcp-assert-equal "assign"
+                                       (gethash "workspace-action" summary)
+                                       "Localhost rehearsal dry-run must plan ASSIGN")
+                     (mcp-assert-equal workspace-id
+                                       (gethash "workspace-id" summary)
+                                       "Localhost rehearsal dry-run must carry the repair workspace id")
+                     (mcp-assert-true
+                      (mcp-json-null-p (gethash "current-workspace-id" summary))
+                      "Localhost rehearsal dry-run must show the missing current workspace assignment")))
+                 (multiple-value-bind (repair-body repair-status _)
+                     (mcp-test-call-tool
+                      url
+                      session-id
+                      453
+                      "repair_workspace_topic_assignment"
+                      (mcp-test-json-object
+                       "topicId" topic-id
+                       "workspaceId" workspace-id
+                       "workspaceTopicmapId" workspace-topicmap-id
+                       "dryRun" nil))
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 repair-status
+                                     "Localhost rehearsal repair status")
+                   (let* ((tool-result (gethash "result" repair-body))
+                          (structured (gethash "structuredContent" tool-result))
+                          (workspace (hyperdoc::dmx-import-read-topic-workspace
+                                      client
+                                      topic-id))
+                          (after-topicmap
+                            (hyperdoc::dmx-import-read-topicmap
+                             client
+                             workspace-topicmap-id))
+                          (after-topic-count
+                            (length (hyperdoc::json-array-elements
+                                     (gethash "topics" after-topicmap)))))
+                     (mcp-assert-true
+                      (null (gethash "isError" tool-result))
+                      "Localhost rehearsal repair must succeed")
+                     (mcp-assert-equal workspace-id
+                                       (gethash "result-workspace-id" structured)
+                                       "Localhost rehearsal repair must return the repaired workspace id")
+                     (mcp-assert-equal workspace-id
+                                       (hyperdoc::dmx-import-object-id workspace)
+                                       "Localhost rehearsal readback must persist the repaired workspace assignment")
+                     (mcp-assert-equal t
+                                       (gethash "result-in-topicmap-p" structured)
+                                       "Localhost rehearsal repair must keep topicmap presence true")
+                     (mcp-assert-equal before-topic-count
+                                       after-topic-count
+                                       "Localhost rehearsal must not add or remove topicmap memberships")))))
+          (setf hyperdoc::*dmx-workspace-journal-suppressed-p*
+                original-journal-suppressed-p)
+          (hyperdoc::stop-dmx-mcp-server)))))
+  t)
+
 (defun run-dmx-workspace-journal-assignment-repair-nonrecursive-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 942000))
@@ -3047,6 +3199,7 @@
   (run-dmx-mcp-workspace-journal-companion-replacement-create-failure-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
   (run-dmx-workspace-journal-foreign-restore-guardrail-smoke-test)
+  (run-dmx-mcp-workspace-assignment-localhost-rehearsal-smoke-test)
   (run-dmx-mcp-workspace-assignment-repair-smoke-test)
   (run-dmx-workspace-journal-assignment-repair-nonrecursive-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")

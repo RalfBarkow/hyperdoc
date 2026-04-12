@@ -21,6 +21,23 @@ For the specific stale journal companion defect class, do not chain raw
 hidden/off-canvas placement, and identity-history reporting on one typed repair
 boundary.
 
+## Localhost-first assignment rehearsal
+
+For missing workspace ownership on an already-created HyperDoc topic, keep the
+localhost rehearsal slice bounded:
+
+- capture one repair-case dataset with the topic, current workspace assignment
+  readback, topicmap membership readback, and the `919822` topicmap projection
+- load that captured dataset into the memory-backed DMX client with the
+  fixture-scoped rehearsal loader in `hyperdoc/dmx-import.lisp`
+- rehearse `validated_dmx_write_dry_run` with
+  `writeKind=workspace_assignment_repair`, then rehearse
+  `repair_workspace_topic_assignment`
+
+This localhost-first slice intentionally excludes topicmap placement repair,
+annotation continuation, workspace-journal effects, and `User` or `Owner`
+normalization.
+
 ## Preconditions
 
 - The server default workspace topicmap is `919822` on the current shared-workspace deployment.
