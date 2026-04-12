@@ -115,6 +115,8 @@
 (defun lookup-issue-static-details-of (issue)
   (slot-value issue 'details))
 
+;; Supported cross-package hook seam for bounded lookup issues. Keep this
+;; surface narrow and let specializations derive runtime truth on demand.
 (defgeneric bounded-lookup-issue-current-status-of (issue)
   (:method ((issue bounded-lookup-issue))
     nil))

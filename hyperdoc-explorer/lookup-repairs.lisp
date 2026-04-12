@@ -436,24 +436,24 @@
             :repair-hint (topic-page-lookup-repair-hint chunk)
             :freshness-mode (topic-page-lookup-freshness-mode chunk)))))
 
-(defmethod hb::bounded-lookup-issue-current-status-of ((issue hb:page-lookup-issue))
+(defmethod hb:bounded-lookup-issue-current-status-of ((issue hb:page-lookup-issue))
   (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
     (topic-page-lookup-chunk-state chunk)))
 
-(defmethod hb::bounded-lookup-issue-current-suggested-repair-of ((issue hb:page-lookup-issue))
+(defmethod hb:bounded-lookup-issue-current-suggested-repair-of ((issue hb:page-lookup-issue))
   (when (topic-page-lookup-issue-target-chunk issue)
     :ensure-target-chunk))
 
-(defmethod hb::bounded-lookup-issue-current-repair-description-of ((issue hb:page-lookup-issue))
+(defmethod hb:bounded-lookup-issue-current-repair-description-of ((issue hb:page-lookup-issue))
   (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
     (topic-page-lookup-repair-description chunk)))
 
-(defmethod hb::bounded-lookup-issue-current-repair-thunk-of ((issue hb:page-lookup-issue))
+(defmethod hb:bounded-lookup-issue-current-repair-thunk-of ((issue hb:page-lookup-issue))
   (when (topic-page-lookup-issue-target-chunk issue)
     (lambda ()
       (issue-target-chunk issue))))
 
-(defmethod hb::bounded-lookup-issue-current-details-of ((issue hb:page-lookup-issue))
+(defmethod hb:bounded-lookup-issue-current-details-of ((issue hb:page-lookup-issue))
   (topic-page-lookup-issue-runtime-details issue))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))

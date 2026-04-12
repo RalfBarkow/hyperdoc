@@ -40,6 +40,11 @@
           lookup-issue-source-object-of
           lookup-issue-signature
           mark-lookup-issue!
+          bounded-lookup-issue-current-status-of
+          bounded-lookup-issue-current-suggested-repair-of
+          bounded-lookup-issue-current-repair-description-of
+          bounded-lookup-issue-current-repair-thunk-of
+          bounded-lookup-issue-current-details-of
           enrich-lookup-issue
           lookup-issues-of
           replace-by-hyperbook-link
