@@ -72,6 +72,17 @@
   summary
   plans)
 
+(defstruct localhost-fedwiki-page-publication-plan
+  id
+  title
+  summary
+  source-plan-function
+  target-site
+  target-slug
+  target-protocol
+  target-page-reader
+  live-publication-writer)
+
 (defparameter *dmx-topicmap-919822-repair-runbook-topicmap-id* 919822)
 (defparameter *dmx-topicmap-919822-repair-runbook-workspace-name*
   "context-window")
@@ -202,6 +213,11 @@
   (print-unreadable-object (surface stream :type t)
     (format stream "~A"
             (localhost-fedwiki-page-promotion-surface-title surface))))
+
+(defmethod print-object ((plan localhost-fedwiki-page-publication-plan) stream)
+  (print-unreadable-object (plan stream :type t)
+    (format stream "~A"
+            (localhost-fedwiki-page-publication-plan-title plan))))
 
 (defmethod print-object ((runbook dmx-topicmap-repair-runbook) stream)
   (print-unreadable-object (runbook stream :type t)
@@ -2100,3 +2116,500 @@
    "Reusable inspectable workflow surface for localhost FedWiki page promotion plans, their local composed outputs, and their dry-run DMX snippet twins."
    :plans
    (localhost-fedwiki-page-promotion-plans)))
+
+(defun localhost-fedwiki-page-publication-plan-source-plan (plan)
+  (funcall
+   (localhost-fedwiki-page-publication-plan-source-plan-function plan)))
+
+(defun localhost-fedwiki-page-publication-plan-source-page-id (plan)
+  (localhost-fedwiki-page-promotion-plan-source-page-id
+   (localhost-fedwiki-page-publication-plan-source-plan plan)))
+
+(defun localhost-fedwiki-page-publication-plan-source-page-slug (plan)
+  (localhost-fedwiki-page-promotion-plan-source-page-slug
+   (localhost-fedwiki-page-publication-plan-source-plan plan)))
+
+(defun localhost-fedwiki-page-publication-plan-source-page-path (plan)
+  (localhost-fedwiki-page-promotion-plan-source-page-path
+   (localhost-fedwiki-page-publication-plan-source-plan plan)))
+
+(defun localhost-fedwiki-page-publication-plan-source-page-pathname (plan)
+  (localhost-fedwiki-page-pipeline-page-pathname
+   (localhost-fedwiki-page-pipeline-result-spec
+    (localhost-fedwiki-page-promotion-plan-pipeline
+     (localhost-fedwiki-page-publication-plan-source-plan plan)))))
+
+(defun localhost-fedwiki-page-publication-plan-target-page-id (plan)
+  (format nil "fedwiki:~A/~A"
+          (localhost-fedwiki-page-publication-plan-target-site plan)
+          (localhost-fedwiki-page-publication-plan-target-slug plan)))
+
+(defun call-hyperbook-fedwiki-function (name &rest args)
+  (let* ((package (find-package :hyperbook/fedwiki))
+         (symbol (and package (find-symbol name package))))
+    (unless (and symbol (fboundp symbol))
+      (error "Required HyperBook/FedWiki function ~A is unavailable." name))
+    (apply (symbol-function symbol) args)))
+
+(defun localhost-fedwiki-page-publication-plan-target-html-url
+    (plan &key protocol)
+  (call-hyperbook-fedwiki-function
+   "WIKI-URL"
+   (localhost-fedwiki-page-publication-plan-target-site plan)
+   (or protocol
+       (localhost-fedwiki-page-publication-plan-target-protocol plan)
+       "https")
+   (format nil "/view/~A"
+           (localhost-fedwiki-page-publication-plan-target-slug plan))))
+
+(defun localhost-fedwiki-page-publication-plan-target-json-url
+    (plan &key protocol)
+  (call-hyperbook-fedwiki-function
+   "WIKI-URL"
+   (localhost-fedwiki-page-publication-plan-target-site plan)
+   (or protocol
+       (localhost-fedwiki-page-publication-plan-target-protocol plan)
+       "https")
+   (format nil "/~A.json"
+           (localhost-fedwiki-page-publication-plan-target-slug plan))))
+
+(defun normalize-fedwiki-page-publication-page (page)
+  (let ((page
+          (cond
+            ((or (hash-table-p page)
+                 (article-allegation-json-object-p page))
+             (article-allegation-normalize-json page))
+            (t
+             (copy-tree page)))))
+    (list :title (or (getf page :title) "")
+          :story (copy-tree (or (getf page :story) '()))
+          :journal (copy-tree (or (getf page :journal) '())))))
+
+(defun fedwiki-page-publication-page-fingerprint (page)
+  (fnv1a-64-hex-string
+   (serialize-localhost-fedwiki-source-snapshot-object
+    (normalize-fedwiki-page-publication-page page))))
+
+(defun fedwiki-page-publication-page-summary (page)
+  (let ((page (normalize-fedwiki-page-publication-page page)))
+    (format nil
+            "title=~A; story=~D; journal=~D; last-journal=~A"
+            (or (getf page :title) "untitled")
+            (length (or (getf page :story) '()))
+            (length (or (getf page :journal) '()))
+            (let ((last-date (localhost-fedwiki-page-last-journal-date page)))
+              (if (zerop last-date)
+                  "n/a"
+                  (format nil "~D" last-date))))))
+
+(defun localhost-fedwiki-page-publication-plan-divergent-fields
+    (local-page target-page)
+  (let ((local-page (normalize-fedwiki-page-publication-page local-page))
+        (target-page (normalize-fedwiki-page-publication-page target-page)))
+    (remove nil
+            (list
+             (unless (equal (getf local-page :title)
+                            (getf target-page :title))
+               :title)
+             (unless (equal (getf local-page :story)
+                            (getf target-page :story))
+               :story)
+             (unless (equal (getf local-page :journal)
+                            (getf target-page :journal))
+               :journal)))))
+
+(defun localhost-fedwiki-page-publication-plan-local-page-state (plan)
+  (let* ((path (localhost-fedwiki-page-publication-plan-source-page-pathname plan))
+         (source-plan (localhost-fedwiki-page-publication-plan-source-plan plan))
+         (source-issue
+           (localhost-fedwiki-page-promotion-plan-source-issue source-plan)))
+    (cond
+      (source-issue
+       (list :available nil
+             :classification :source-unavailable
+             :path path
+             :json-syntax-valid-p nil
+             :journal-valid-p nil
+             :journal-findings '(:source-unavailable)
+             :message
+             (if (typep source-issue
+                        'localhost-fedwiki-page-promotion-source-unavailable-issue)
+                 (localhost-fedwiki-page-promotion-source-unavailable-reason
+                  source-issue)
+                 (princ-to-string source-issue))
+             :condition source-issue))
+      (t
+       (handler-case
+           (let* ((page
+                    (copy-tree
+                     (localhost-fedwiki-page-pipeline-result-raw-page
+                      (localhost-fedwiki-page-promotion-plan-pipeline
+                       source-plan))))
+                  (normalized-page
+                    (normalize-fedwiki-page-publication-page page))
+                  (findings
+                    (copy-list
+                     (journalmatic-commit-gate-findings normalized-page))))
+             (list :available t
+                   :classification :available
+                   :path path
+                   :page normalized-page
+                   :title (or (getf normalized-page :title) "")
+                   :json-syntax-valid-p t
+                   :journal-valid-p (null findings)
+                   :journal-findings findings
+                   :fingerprint
+                   (fedwiki-page-publication-page-fingerprint normalized-page)
+                   :summary
+                   (fedwiki-page-publication-page-summary normalized-page)))
+         (error (condition)
+           (list :available nil
+                 :classification :invalid-local-json
+                 :path path
+                 :json-syntax-valid-p nil
+                 :journal-valid-p nil
+                 :journal-findings '(:malformed)
+                 :message (princ-to-string condition)
+                 :condition condition)))))))
+
+(defun localhost-fedwiki-page-publication-plan-default-target-page-reader (plan)
+  (let* ((site (localhost-fedwiki-page-publication-plan-target-site plan))
+         (slug (localhost-fedwiki-page-publication-plan-target-slug plan))
+         (fallback-protocol
+           (or (localhost-fedwiki-page-publication-plan-target-protocol plan)
+               "https"))
+         (html-url
+           (localhost-fedwiki-page-publication-plan-target-html-url
+            plan
+            :protocol fallback-protocol))
+         (json-url
+           (localhost-fedwiki-page-publication-plan-target-json-url
+            plan
+            :protocol fallback-protocol)))
+    (handler-case
+        (let* ((wiki (call-hyperbook-fedwiki-function
+                      "GET-FEDWIKI"
+                      site
+                      nil
+                      t))
+               (protocol (or (call-hyperbook-fedwiki-function
+                              "PROTOCOL-OF"
+                              wiki)
+                             fallback-protocol))
+               (sitemap-has-slug-p (not (null (hb:find-page wiki slug))))
+               (page (call-hyperbook-fedwiki-function
+                      "FETCH-PAGE-JSON"
+                      site
+                      protocol
+                      slug)))
+          (list :state :present
+                :protocol protocol
+                :sitemap-has-slug-p sitemap-has-slug-p
+                :target-html-url
+                (localhost-fedwiki-page-publication-plan-target-html-url
+                 plan
+                 :protocol protocol)
+                :target-json-url
+                (localhost-fedwiki-page-publication-plan-target-json-url
+                 plan
+                 :protocol protocol)
+                :page (normalize-fedwiki-page-publication-page page)))
+      (error (condition)
+        (list :state :unreachable
+              :protocol fallback-protocol
+              :sitemap-has-slug-p nil
+              :target-html-url html-url
+              :target-json-url json-url
+              :message (princ-to-string condition)
+              :condition condition)))))
+
+(defun localhost-fedwiki-page-publication-plan-target-page-state (plan)
+  (let* ((reader
+           (or (localhost-fedwiki-page-publication-plan-target-page-reader plan)
+               #'localhost-fedwiki-page-publication-plan-default-target-page-reader))
+         (state (copy-tree (funcall reader plan)))
+         (protocol
+           (or (getf state :protocol)
+               (localhost-fedwiki-page-publication-plan-target-protocol plan)
+               "https")))
+    (setf (getf state :protocol) protocol)
+    (unless (getf state :target-html-url)
+      (setf (getf state :target-html-url)
+            (localhost-fedwiki-page-publication-plan-target-html-url
+             plan
+             :protocol protocol)))
+    (unless (getf state :target-json-url)
+      (setf (getf state :target-json-url)
+            (localhost-fedwiki-page-publication-plan-target-json-url
+             plan
+             :protocol protocol)))
+    (when-let (page (getf state :page))
+      (let* ((normalized-page
+               (normalize-fedwiki-page-publication-page page))
+             (findings (copy-list (journalmatic-commit-gate-findings
+                                   normalized-page))))
+        (setf (getf state :page) normalized-page
+              (getf state :title) (or (getf normalized-page :title) "")
+              (getf state :summary)
+              (fedwiki-page-publication-page-summary normalized-page)
+              (getf state :fingerprint)
+              (fedwiki-page-publication-page-fingerprint normalized-page)
+              (getf state :journal-valid-p) (null findings)
+              (getf state :journal-findings) findings)))
+    state))
+
+(defun localhost-fedwiki-page-publication-plan-status
+    (local-state target-state)
+  (cond
+    ((not (getf local-state :available))
+     (getf local-state :classification))
+    ((not (getf local-state :journal-valid-p))
+     :blocked-local-validation)
+    ((null target-state)
+     :unreachable)
+    ((eql (getf target-state :state) :missing)
+     :missing)
+    ((eql (getf target-state :state) :unreachable)
+     :unreachable)
+    (t
+     (let ((divergent-fields
+             (localhost-fedwiki-page-publication-plan-divergent-fields
+              (getf local-state :page)
+              (getf target-state :page))))
+       (cond
+         ((null divergent-fields)
+          :current)
+         ((member :title divergent-fields)
+          :divergent)
+         (t
+          :stale))))))
+
+(defun localhost-fedwiki-page-publication-plan-planned-write
+    (plan local-state publication-status)
+  (cond
+    ((or (not (getf local-state :available))
+         (not (getf local-state :journal-valid-p)))
+     (list :action :blocked
+           :reason "Local page failed publication preflight."))
+    ((eql publication-status :current)
+     (list :action :none
+           :reason "Target already matches the current local page title, story, and journal."))
+    (t
+     (list :action :publish-fedwiki-page
+           :protocol
+           (or (localhost-fedwiki-page-publication-plan-target-protocol plan)
+               "https")
+           :site (localhost-fedwiki-page-publication-plan-target-site plan)
+           :slug (localhost-fedwiki-page-publication-plan-target-slug plan)
+           :page-id
+           (localhost-fedwiki-page-publication-plan-target-page-id plan)
+           :fields '(:title :story :journal)
+           :page (copy-tree (getf local-state :page))
+           :fingerprint (getf local-state :fingerprint)))))
+
+(defun localhost-fedwiki-page-publication-plan-dry-run-summary (plan)
+  (let* ((source-plan (localhost-fedwiki-page-publication-plan-source-plan plan))
+         (local-state
+           (localhost-fedwiki-page-publication-plan-local-page-state plan))
+         (target-state
+           (when (getf local-state :available)
+             (localhost-fedwiki-page-publication-plan-target-page-state plan)))
+         (publication-status
+           (localhost-fedwiki-page-publication-plan-status
+            local-state
+            target-state))
+         (divergent-fields
+           (when (and target-state
+                      (getf target-state :page)
+                      (getf local-state :page))
+             (localhost-fedwiki-page-publication-plan-divergent-fields
+              (getf local-state :page)
+              (getf target-state :page))))
+         (planned-write
+           (localhost-fedwiki-page-publication-plan-planned-write
+            plan
+            local-state
+            publication-status))
+         (protocol
+           (or (and target-state (getf target-state :protocol))
+               (localhost-fedwiki-page-publication-plan-target-protocol plan)
+               "https")))
+    (list :plan-id (localhost-fedwiki-page-publication-plan-id plan)
+          :source-plan-id
+          (localhost-fedwiki-page-promotion-plan-id source-plan)
+          :source-page-id
+          (localhost-fedwiki-page-publication-plan-source-page-id plan)
+          :source-page-slug
+          (localhost-fedwiki-page-publication-plan-source-page-slug plan)
+          :source-page-path
+          (localhost-fedwiki-page-publication-plan-source-page-path plan)
+          :source-page-title
+          (or (getf local-state :title)
+              (localhost-fedwiki-source-data-fedwiki-title
+               (localhost-fedwiki-page-promotion-plan-source source-plan)))
+          :target-site (localhost-fedwiki-page-publication-plan-target-site plan)
+          :target-slug (localhost-fedwiki-page-publication-plan-target-slug plan)
+          :target-page-id
+          (localhost-fedwiki-page-publication-plan-target-page-id plan)
+          :target-protocol protocol
+          :target-html-url
+          (localhost-fedwiki-page-publication-plan-target-html-url
+           plan
+           :protocol protocol)
+          :target-json-url
+          (localhost-fedwiki-page-publication-plan-target-json-url
+           plan
+           :protocol protocol)
+          :publication-status publication-status
+          :target-state
+          (and target-state (getf target-state :state))
+          :target-exists-p
+          (and target-state
+               (eql (getf target-state :state) :present))
+          :target-exists-status
+          (case (and target-state (getf target-state :state))
+            (:present :yes)
+            (:missing :no)
+            (otherwise :unknown))
+          :sitemap-has-slug-p
+          (and target-state (getf target-state :sitemap-has-slug-p))
+          :local-json-syntax-valid-p
+          (getf local-state :json-syntax-valid-p)
+          :local-journal-valid-p
+          (getf local-state :journal-valid-p)
+          :local-journal-findings
+          (copy-list (getf local-state :journal-findings))
+          :local-preflight-pass-p
+          (and (getf local-state :json-syntax-valid-p)
+               (getf local-state :journal-valid-p))
+          :local-page
+          (and (getf local-state :page)
+               (copy-tree (getf local-state :page)))
+          :local-page-fingerprint
+          (getf local-state :fingerprint)
+          :local-page-summary
+          (getf local-state :summary)
+          :target-page
+          (and target-state
+               (getf target-state :page)
+               (copy-tree (getf target-state :page)))
+          :target-page-fingerprint
+          (and target-state (getf target-state :fingerprint))
+          :target-page-summary
+          (and target-state (getf target-state :summary))
+          :target-journal-valid-p
+          (and target-state (getf target-state :journal-valid-p))
+          :target-journal-findings
+          (and target-state
+               (copy-list (getf target-state :journal-findings)))
+          :divergent-fields
+          (and divergent-fields (copy-list divergent-fields))
+          :planned-write
+          planned-write
+          :live-publication-configured-p
+          (not (null
+                (localhost-fedwiki-page-publication-plan-live-publication-writer
+                 plan)))
+          :live-publication-entrypoint
+          'execute-localhost-fedwiki-page-publication-plan-live
+          :message
+          (or (and target-state (getf target-state :message))
+              (and (not (getf local-state :available))
+                   (getf local-state :message))))))
+
+(defun localhost-fedwiki-page-publication-plan-dry-run-evidence (plan)
+  (let* ((summary
+           (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
+         (planned-write (getf summary :planned-write)))
+    (with-output-to-string (stream)
+      (format stream "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN~%")
+      (format stream "plan-id=~A~%" (getf summary :plan-id))
+      (format stream "source-plan-id=~A~%" (getf summary :source-plan-id))
+      (format stream "source-page-id=~A~%" (getf summary :source-page-id))
+      (format stream "source-page-path=~A~%" (getf summary :source-page-path))
+      (format stream "target-site=~A~%" (getf summary :target-site))
+      (format stream "target-slug=~A~%" (getf summary :target-slug))
+      (format stream "target-page-id=~A~%" (getf summary :target-page-id))
+      (format stream "publication-status=~A~%"
+              (getf summary :publication-status))
+      (format stream "target-exists=~A~%"
+              (getf summary :target-exists-status))
+      (format stream "local-json-syntax=~A~%"
+              (if (getf summary :local-json-syntax-valid-p)
+                  "valid"
+                  "invalid"))
+      (format stream "local-journal-gate=~A~%"
+              (if (getf summary :local-journal-valid-p)
+                  "pass"
+                  "fail"))
+      (format stream "local-journal-findings=~S~%"
+              (getf summary :local-journal-findings))
+      (format stream "local-page-fingerprint=~A~%"
+              (or (getf summary :local-page-fingerprint)
+                  "unavailable"))
+      (format stream "target-page-fingerprint=~A~%"
+              (or (getf summary :target-page-fingerprint)
+                  "unavailable"))
+      (format stream "divergent-fields=~S~%"
+              (or (getf summary :divergent-fields) '()))
+      (format stream "planned-write-action=~A~%"
+              (getf planned-write :action))
+      (format stream "planned-write-fields=~S~%"
+              (or (getf planned-write :fields) '()))
+      (when-let (reason (getf planned-write :reason))
+        (format stream "planned-write-reason=~A~%" reason))
+      (when-let (message (getf summary :message))
+        (format stream "message=~A~%" message))
+      (format stream "live-publication-configured=~A~%"
+              (if (getf summary :live-publication-configured-p)
+                  "yes"
+                  "no"))
+      (format stream "live-publication-entrypoint=~A~%"
+              (getf summary :live-publication-entrypoint)))))
+
+(defgeneric review-localhost-fedwiki-page-publication-plan-dry-run (plan)
+  (:method ((plan localhost-fedwiki-page-publication-plan))
+    (list :summary
+          (localhost-fedwiki-page-publication-plan-dry-run-summary plan)
+          :evidence
+          (localhost-fedwiki-page-publication-plan-dry-run-evidence plan))))
+
+(defgeneric execute-localhost-fedwiki-page-publication-plan-live
+    (plan &key stream)
+  (:method ((plan localhost-fedwiki-page-publication-plan)
+            &key
+              (stream *standard-output*))
+    (declare (ignore stream))
+    (let ((summary
+            (localhost-fedwiki-page-publication-plan-dry-run-summary plan)))
+      (unless (getf summary :local-preflight-pass-p)
+        (error "Refusing live publication for ~A because the local page failed JSON/journal preflight."
+               (localhost-fedwiki-page-publication-plan-id plan)))
+      (if-let (writer
+               (localhost-fedwiki-page-publication-plan-live-publication-writer
+                plan))
+        (funcall writer plan :summary summary)
+        (error "Live publication is not configured for ~A. Inspect the dry-run summary first and attach an explicit page-scoped writer."
+               (localhost-fedwiki-page-publication-plan-id plan))))))
+
+(defun reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
+    (&key target-page-reader live-publication-writer)
+  (make-localhost-fedwiki-page-publication-plan
+   :id "reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan"
+   :title
+   "Reproducible DevEnv as Knowledge Artifact localhost-first publication plan"
+   :summary
+   "Inspectable dry-run-first plan for comparing the current local FedWiki page against wiki.ralfbarkow.ch before any explicit publication write is attempted."
+   :source-plan-function
+   #'reproducible-devenv-as-knowledge-artifact-promotion-plan
+   :target-site *reproducible-devenv-as-knowledge-artifact-fedwiki-site*
+   :target-slug *reproducible-devenv-as-knowledge-artifact-fedwiki-slug*
+   :target-protocol "https"
+   :target-page-reader target-page-reader
+   :live-publication-writer live-publication-writer))
+
+(defun localhost-fedwiki-page-promotion-plan-publication-plan (plan)
+  (when (string=
+         (localhost-fedwiki-page-promotion-plan-id plan)
+         "reproducible-devenv-as-knowledge-artifact-promotion-plan")
+    (reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan)))

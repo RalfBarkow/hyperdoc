@@ -146,6 +146,32 @@
     (:unknown-malformed-envelope "unknown (malformed envelope)")
     (otherwise "unknown (missing envelope)")))
 
+(defun promotion-publication-status-label (status)
+  (case status
+    (:current "current")
+    (:stale "stale")
+    (:divergent "divergent")
+    (:missing "missing")
+    (:unreachable "unreachable")
+    (:source-unavailable "source unavailable")
+    (:invalid-local-json "invalid local JSON")
+    (:blocked-local-validation "blocked by local journal validation")
+    (otherwise (promotion-code-string status))))
+
+(defun promotion-publication-target-exists-label (status)
+  (case status
+    (:yes "yes")
+    (:no "no")
+    (otherwise "unknown")))
+
+(defun promotion-planned-write-label (planned-write)
+  (let ((action (getf planned-write :action)))
+    (case action
+      (:publish-fedwiki-page "publish local title/story/journal")
+      (:none "no write needed")
+      (:blocked "blocked")
+      (otherwise (promotion-code-string action)))))
+
 (defun promotion-source-freshness-affordance-spec (artifact status)
   (let* ((state-key
            (case artifact
@@ -756,6 +782,9 @@
 (defmethod views:text-representation ((plan localhost-fedwiki-page-promotion-plan))
   (localhost-fedwiki-page-promotion-plan-title plan))
 
+(defmethod views:text-representation ((plan localhost-fedwiki-page-publication-plan))
+  (localhost-fedwiki-page-publication-plan-title plan))
+
 (defmethod views:text-representation
     ((issue localhost-fedwiki-page-promotion-source-unavailable-issue))
   (title-of issue))
@@ -1043,7 +1072,9 @@
           (provenance-modes
             (promotion-provenance-modes-present plan))
           (dmx-summary
-            (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan)))
+            (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary plan))
+          (publication-plan
+            (localhost-fedwiki-page-promotion-plan-publication-plan plan)))
       (views:html
         (:h3 (views:esc (localhost-fedwiki-page-promotion-plan-title plan)))
         (:p (views:esc (localhost-fedwiki-page-promotion-plan-summary plan)))
@@ -1124,6 +1155,13 @@
                       (promotion-generated-page-link-html
                        generated-page
                        :display "Review generated page")))
+                (:tr (:td (views:esc "Publication plan"))
+                     (:td
+                      (promotion-object-link-html
+                       publication-plan
+                       :display "Review publication plan"
+                       :select "Overview"
+                       :fallback "none")))
                 (:tr (:td (views:esc "Current source fingerprint"))
                      (:td (:tt (views:esc
                                 (promotion-current-source-fingerprint-label
@@ -1171,6 +1209,13 @@
              (review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
               plan))
            "Run the explicit DMX dry-run review for this promotion plan and inspect the canonical evidence."))
+         (when publication-plan
+           (views:html
+             (:li
+              (promotion-object-link-html
+               publication-plan
+               :display "Review publication dry-run"
+               :select "Dry-run"))))
          (:li
           (views:eval-button
            "Inspect sync status"
@@ -1225,6 +1270,13 @@
                       (promotion-generated-page-link-html
                        generated-page
                        :display "Review generated page")))
+                (:tr (:td (views:esc "Publication plan"))
+                     (:td
+                      (promotion-object-link-html
+                       publication-plan
+                       :display "Review publication plan"
+                       :select "Overview"
+                       :fallback "none")))
                 (:tr (:td (views:esc "Snippet id"))
                      (:td (:tt (views:esc
                                 (snippet-id-of
@@ -1943,3 +1995,237 @@
                             (views:esc evidence)))
                     (views:html
                       (:p (views:esc (getf summary :message))))))))))))
+
+(views:defview 👀overview (plan localhost-fedwiki-page-publication-plan)
+  (views:html-view :title "Overview" :priority 1
+    (let* ((summary
+             (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
+           (source-plan
+             (localhost-fedwiki-page-publication-plan-source-plan plan))
+           (planned-write (getf summary :planned-write)))
+      (views:html
+        (:h3 (views:esc (localhost-fedwiki-page-publication-plan-title plan)))
+        (:p (views:esc (localhost-fedwiki-page-publication-plan-summary plan)))
+        (:p (views:esc
+             "This stays on the localhost-first, dry-run-first publication boundary. It reads the current local page, checks JSON and journal preflight, compares against the configured remote site and slug, and keeps any live publication step explicit and page-scoped."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source promotion plan"))
+                     (:td
+                      (promotion-object-link-html
+                       source-plan
+                       :display
+                       (localhost-fedwiki-page-promotion-plan-title source-plan)
+                       :select "Overview")))
+                (:tr (:td (views:esc "Source page id"))
+                     (:td (:tt (views:esc (getf summary :source-page-id)))))
+                (:tr (:td (views:esc "Source path"))
+                     (:td (:tt (views:esc (getf summary :source-page-path)))))
+                (:tr (:td (views:esc "Target site"))
+                     (:td (:tt (views:esc (getf summary :target-site)))))
+                (:tr (:td (views:esc "Target slug"))
+                     (:td (:tt (views:esc (getf summary :target-slug)))))
+                (:tr (:td (views:esc "Publication status"))
+                     (:td (:tt (views:esc
+                                (promotion-publication-status-label
+                                 (getf summary :publication-status))))))
+                (:tr (:td (views:esc "Target exists"))
+                     (:td (:tt (views:esc
+                                (promotion-publication-target-exists-label
+                                 (getf summary :target-exists-status))))))
+                (:tr (:td (views:esc "Divergent fields"))
+                     (:td (:tt (views:esc
+                                (promotion-list-string
+                                 (getf summary :divergent-fields))))))
+                (:tr (:td (views:esc "Local JSON syntax"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf summary :local-json-syntax-valid-p))))))
+                (:tr (:td (views:esc "Local journal gate"))
+                     (:td (:tt (views:esc
+                                (if (getf summary :local-journal-valid-p)
+                                    "pass"
+                                    "fail")))))
+                (:tr (:td (views:esc "Planned write"))
+                     (:td (:tt (views:esc
+                                (promotion-planned-write-label
+                                 planned-write)))))
+                (:tr (:td (views:esc "Live publication configured"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf summary :live-publication-configured-p)))))))
+        (:ul
+         (:li
+          (promotion-object-link-html
+           source-plan
+           :display "Review source promotion plan"
+           :select "Overview"))
+         (:li
+          (views:eval-button
+           "Review publication dry-run"
+           (views:thunk
+             (review-localhost-fedwiki-page-publication-plan-dry-run plan))
+           "Recompute the current dry-run publication summary and inspect the exact bounded evidence."))
+         (:li
+          (promotion-object-link-html
+           plan
+           :display "Inspect local current page state"
+           :select "Local page"))
+         (:li
+          (promotion-object-link-html
+           plan
+           :display "Inspect target remote state"
+           :select "Target page")))
+        (when-let (message (getf summary :message))
+          (views:html
+            (:p (views:esc message))))))))
+
+(views:defview 👀local-page (plan localhost-fedwiki-page-publication-plan)
+  (views:html-view :title "Local page" :priority 2
+    (let* ((summary
+             (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
+           (local-page (getf summary :local-page)))
+      (views:html
+        (:p (views:esc
+             "This is the current local authored page state that would be considered for publication after JSON syntax and journal replay preflight."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Source page id"))
+                     (:td (:tt (views:esc (getf summary :source-page-id)))))
+                (:tr (:td (views:esc "Source path"))
+                     (:td (:tt (views:esc (getf summary :source-page-path)))))
+                (:tr (:td (views:esc "Title"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :source-page-title)
+                                    "n/a")))))
+                (:tr (:td (views:esc "Fingerprint"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :local-page-fingerprint)
+                                    "unavailable")))))
+                (:tr (:td (views:esc "Summary"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :local-page-summary)
+                                    "unavailable")))))
+                (:tr (:td (views:esc "JSON syntax valid"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf summary :local-json-syntax-valid-p))))))
+                (:tr (:td (views:esc "Journal gate valid"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf summary :local-journal-valid-p))))))
+                (:tr (:td (views:esc "Journal findings"))
+                     (:td (:tt (views:esc
+                                (format nil "~S"
+                                        (or (getf summary :local-journal-findings)
+                                            '())))))))
+        (when local-page
+          (views:html
+            (:h4 (views:esc "Current page payload"))
+            (:pre :style "white-space: pre-wrap;"
+                  (views:esc
+                   (with-standard-io-syntax
+                     (let ((*print-pretty* t))
+                       (prin1-to-string local-page)))))))))))
+
+(views:defview 👀target-page (plan localhost-fedwiki-page-publication-plan)
+  (views:html-view :title "Target page" :priority 3
+    (let* ((summary
+             (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
+           (target-page (getf summary :target-page)))
+      (views:html
+        (:p (views:esc
+             "This is the current remote target observation for the configured site and slug. It stays descriptive; no live publication is executed from this view."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Target site"))
+                     (:td (:tt (views:esc (getf summary :target-site)))))
+                (:tr (:td (views:esc "Target slug"))
+                     (:td (:tt (views:esc (getf summary :target-slug)))))
+                (:tr (:td (views:esc "Target page id"))
+                     (:td (:tt (views:esc (getf summary :target-page-id)))))
+                (:tr (:td (views:esc "Protocol"))
+                     (:td (:tt (views:esc (getf summary :target-protocol)))))
+                (:tr (:td (views:esc "HTML URL"))
+                     (:td (:tt (views:esc (getf summary :target-html-url)))))
+                (:tr (:td (views:esc "JSON URL"))
+                     (:td (:tt (views:esc (getf summary :target-json-url)))))
+                (:tr (:td (views:esc "Target exists"))
+                     (:td (:tt (views:esc
+                                (promotion-publication-target-exists-label
+                                 (getf summary :target-exists-status))))))
+                (:tr (:td (views:esc "Publication status"))
+                     (:td (:tt (views:esc
+                                (promotion-publication-status-label
+                                 (getf summary :publication-status))))))
+                (:tr (:td (views:esc "Fingerprint"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :target-page-fingerprint)
+                                    "unavailable")))))
+                (:tr (:td (views:esc "Summary"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :target-page-summary)
+                                    "unavailable")))))
+                (:tr (:td (views:esc "Journal findings"))
+                     (:td (:tt (views:esc
+                                (format nil "~S"
+                                        (or (getf summary :target-journal-findings)
+                                            '())))))))
+        (when-let (message (getf summary :message))
+          (views:html
+            (:p (views:esc message))))
+        (when target-page
+          (views:html
+            (:h4 (views:esc "Observed target payload"))
+            (:pre :style "white-space: pre-wrap;"
+                  (views:esc
+                   (with-standard-io-syntax
+                     (let ((*print-pretty* t))
+                       (prin1-to-string target-page)))))))))))
+
+(views:defview 👀dry-run (plan localhost-fedwiki-page-publication-plan)
+  (views:html-view :title "Dry-run" :priority 4
+    (let* ((summary
+             (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
+           (planned-write (getf summary :planned-write))
+           (evidence
+             (localhost-fedwiki-page-publication-plan-dry-run-evidence plan)))
+      (views:html
+        (:p (views:esc
+             "This stays on the bounded dry-run publication seam. It reports the exact page-scoped write that would occur, but it does not execute any remote mutation."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Publication status"))
+                     (:td (:tt (views:esc
+                                (promotion-publication-status-label
+                                 (getf summary :publication-status))))))
+                (:tr (:td (views:esc "Target exists"))
+                     (:td (:tt (views:esc
+                                (promotion-publication-target-exists-label
+                                 (getf summary :target-exists-status))))))
+                (:tr (:td (views:esc "Exact write action"))
+                     (:td (:tt (views:esc
+                                (promotion-planned-write-label
+                                 planned-write)))))
+                (:tr (:td (views:esc "Exact write fields"))
+                     (:td (:tt (views:esc
+                                (promotion-list-string
+                                 (getf planned-write :fields))))))
+                (:tr (:td (views:esc "Live publication configured"))
+                     (:td (:tt (views:esc
+                                (promotion-yes/no-label
+                                 (getf summary :live-publication-configured-p))))))
+                (:tr (:td (views:esc "Live entrypoint"))
+                     (:td (:tt (views:esc
+                                (promotion-code-string
+                                 (getf summary :live-publication-entrypoint)))))))
+        (when-let (reason (getf planned-write :reason))
+          (views:html
+            (:p (views:esc reason))))
+        (when-let (payload (getf planned-write :page))
+          (views:html
+            (:h4 (views:esc "Planned page payload"))
+            (:pre :style "white-space: pre-wrap;"
+                  (views:esc
+                   (with-standard-io-syntax
+                     (let ((*print-pretty* t))
+                       (prin1-to-string payload)))))))
+        (:h4 (views:esc "Dry-run evidence"))
+        (:pre :style "white-space: pre-wrap;"
+              (views:esc evidence))))))

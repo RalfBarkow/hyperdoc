@@ -5,7 +5,9 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package :hyperdoc/tests)
     (make-package :hyperdoc/tests :use '(:cl)))
-  (export (list (intern "RUN-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLANS-SMOKE-TESTS"
+  (export (list (intern "RUN-LOCALHOST-FIRST-FEDWIKI-PUBLICATION-PLAN-SMOKE-TEST"
+                        :hyperdoc/tests)
+                (intern "RUN-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLANS-SMOKE-TESTS"
                         :hyperdoc/tests))
           :hyperdoc/tests))
 
@@ -71,6 +73,243 @@
              (null (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
                     plan)))
            (real-localhost-fedwiki-page-promotion-plans)))
+
+(defun publication-plan-test-copy-page (page)
+  (copy-tree page))
+
+(defun publication-plan-test-stale-target-page (page)
+  (let ((page (publication-plan-test-copy-page page)))
+    (setf (getf (second (getf page :story)) :text)
+          "Link environment topics after publication so the remote copy catches up later.")
+    (setf (getf page :journal)
+          (butlast (copy-list (getf page :journal))))
+    page))
+
+(defun publication-plan-test-divergent-target-page (page)
+  (let ((page (publication-plan-test-copy-page page)))
+    (setf (getf page :title)
+          "Reproducible DevEnv as Published Elsewhere")
+    page))
+
+(defun run-localhost-first-fedwiki-publication-plan-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((seed-plan
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
+            :target-page-reader
+            (lambda (plan)
+              (declare (ignore plan))
+              (list :state :missing
+                    :protocol "https"
+                    :message "Seed reader for local-page discovery only."))))
+         (local-state
+           (hyperdoc::localhost-fedwiki-page-publication-plan-local-page-state
+            seed-plan))
+         (local-page (getf local-state :page))
+         (remote-state
+           (list :state :present
+                 :protocol "https"
+                 :page (publication-plan-test-stale-target-page local-page)))
+         (plan
+           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
+            :target-page-reader
+            (lambda (ignored-plan)
+              (declare (ignore ignored-plan))
+              (copy-tree remote-state)))))
+    (assert-true (getf local-state :available)
+                 "The chosen localhost-first publication target must have a readable local page")
+    (assert-true (getf local-state :json-syntax-valid-p)
+                 "The chosen localhost-first publication target must pass local JSON syntax preflight")
+    (assert-true (getf local-state :journal-valid-p)
+                 "The chosen localhost-first publication target must pass the local journal gate before publication is considered")
+    (let* ((summary
+             (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+              plan))
+           (review
+             (hyperdoc::review-localhost-fedwiki-page-publication-plan-dry-run
+              plan))
+           (views (load-inspector-views-for-object plan))
+           (overview-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title views "Overview")))
+           (local-page-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title views "Local page")))
+           (target-page-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title views "Target page")))
+           (dry-run-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title views "Dry-run")))
+           (promotion-plan-overview-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title
+               (load-inspector-views-for-object
+                (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+               "Overview")))
+           (live-error
+             (handler-case
+                 (progn
+                   (hyperdoc::execute-localhost-fedwiki-page-publication-plan-live
+                    plan)
+                   nil)
+               (error (condition)
+                 condition))))
+      (assert-view-titles-present views
+                                  '("Overview"
+                                    "Local page"
+                                    "Target page"
+                                    "Dry-run")
+                                  "Localhost-first publication plan")
+      (assert-equal
+       "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
+       (getf summary :source-page-id)
+       "The localhost-first publication plan must preserve the canonical source page id")
+      (assert-equal
+       "reproducible-devenv-as-knowledge-artifact"
+       (getf summary :source-page-slug)
+       "The localhost-first publication plan must preserve the canonical source slug")
+      (assert-equal
+       "wiki.ralfbarkow.ch"
+       (getf summary :target-site)
+       "The localhost-first publication plan must preserve the explicit target site")
+      (assert-equal
+       "reproducible-devenv-as-knowledge-artifact"
+       (getf summary :target-slug)
+       "The localhost-first publication plan must preserve the explicit target slug")
+      (assert-equal
+       :stale
+       (getf summary :publication-status)
+       "A lagging remote page with the same title but different story/journal must classify as stale")
+      (assert-equal
+       :yes
+       (getf summary :target-exists-status)
+       "A present remote target must classify as existing")
+      (assert-equal
+       '(:story :journal)
+       (getf summary :divergent-fields)
+       "The stale remote state must report story and journal drift without title drift")
+      (assert-true
+       (getf summary :local-json-syntax-valid-p)
+       "The dry-run summary must preserve local JSON syntax preflight")
+      (assert-true
+       (getf summary :local-journal-valid-p)
+       "The dry-run summary must preserve local journal preflight")
+      (assert-equal
+       :publish-fedwiki-page
+       (getf (getf summary :planned-write) :action)
+       "A stale remote page must plan a page-scoped publication write")
+      (assert-true
+       (not (getf summary :live-publication-configured-p))
+       "The localhost-first publication plan must keep live publication disabled by default")
+      (assert-true
+       (search "Review publication plan" promotion-plan-overview-html :test #'char=)
+       "The existing promotion plan overview must expose the localhost-first publication-plan handoff")
+      (dolist (needle
+               '("Publication status"
+                 "stale"
+                 "wiki.ralfbarkow.ch"
+                 "reproducible-devenv-as-knowledge-artifact"
+                 "Review publication dry-run"))
+        (assert-true
+         (search needle overview-html :test #'char-equal)
+         (format nil "Publication-plan overview must expose ~A" needle)))
+      (dolist (needle
+               '("Source page id"
+                 "reproducible-devenv-as-knowledge-artifact"
+                 "JSON syntax valid"
+                 "Journal gate valid"))
+        (assert-true
+         (search needle local-page-html :test #'char-equal)
+         (format nil "Publication-plan local-page view must expose ~A" needle)))
+      (dolist (needle
+               '("Target site"
+                 "wiki.ralfbarkow.ch"
+                 "Publication status"
+                 "stale"))
+        (assert-true
+         (search needle target-page-html :test #'char-equal)
+         (format nil "Publication-plan target-page view must expose ~A" needle)))
+      (dolist (needle
+               '("Exact write action"
+                 "publish local title/story/journal"
+                 "execute-localhost-fedwiki-page-publication-plan-live"
+                 "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN"
+                 "local-journal-gate=pass"))
+        (assert-true
+         (search needle dry-run-html :test #'char-equal)
+         (format nil "Publication-plan dry-run view must expose ~A" needle)))
+      (assert-equal
+       :stale
+       (getf (getf review :summary) :publication-status)
+       "The dry-run review result must preserve the stale publication classification")
+      (assert-true
+       (search "planned-write-action=PUBLISH-FEDWIKI-PAGE"
+               (getf review :evidence)
+               :test #'char-equal)
+       "Dry-run evidence must expose the exact page-scoped publication action")
+      (assert-true live-error
+                   "The explicit live publication entrypoint must remain present and refuse execution when no page-scoped writer is configured")
+      (assert-true
+       (search "Live publication is not configured"
+               (princ-to-string live-error)
+               :test #'char=)
+       "The live publication refusal must explain that the writer boundary is still unconfigured"))
+    (setf remote-state
+          (list :state :present
+                :protocol "https"
+                :page (publication-plan-test-copy-page local-page)))
+    (let* ((summary
+             (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+              plan))
+           (overview-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title
+               (load-inspector-views-for-object plan)
+               "Overview"))))
+      (assert-equal
+       :current
+       (getf summary :publication-status)
+       "The same localhost-first publication plan must refresh to current when the remote target matches the local page")
+      (assert-equal
+       nil
+       (getf summary :divergent-fields)
+       "A current remote target must clear divergent-field reporting")
+      (assert-equal
+       :none
+       (getf (getf summary :planned-write) :action)
+       "A current remote target must suppress publication writes")
+      (assert-true
+       (search "current" overview-html :test #'char-equal)
+       "The refreshed overview must render the current publication state"))
+    (setf remote-state
+          (list :state :present
+                :protocol "https"
+                :page (publication-plan-test-divergent-target-page local-page)))
+    (let ((summary
+            (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+             plan)))
+      (assert-equal
+       :divergent
+       (getf summary :publication-status)
+       "A target title drift on the same slug must classify as divergent rather than merely stale")
+      (assert-true
+       (member :title (getf summary :divergent-fields))
+       "The divergent case must expose title drift explicitly"))
+    (setf remote-state
+          (list :state :missing
+                :protocol "https"
+                :message "Target slug is currently missing on the served site."))
+    (let ((summary
+            (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+             plan)))
+      (assert-equal
+       :missing
+       (getf summary :publication-status)
+       "A missing remote target must classify as missing")
+      (assert-equal
+       :no
+       (getf summary :target-exists-status)
+       "A missing remote target must report non-existence explicitly"))))
 
 (defun run-localhost-fedwiki-page-promotion-plan-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -2468,6 +2707,7 @@
           "Missing-source DMX review must fail softly by returning the bounded issue"))))))
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
+  (run-localhost-first-fedwiki-publication-plan-smoke-test)
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
   (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
   (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
