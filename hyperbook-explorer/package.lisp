@@ -19,8 +19,8 @@
           links web-links-of page-links-of hyperbook-links-of
           no-links?
           extract-links
-          lookup-issue page-lookup-issue target-grouping-issue
-          make-page-lookup-issue make-target-grouping-issue
+          lookup-issue page-lookup-issue function-lookup-issue target-grouping-issue
+          make-page-lookup-issue make-function-lookup-issue make-target-grouping-issue
           lookup-issue-source-page-title-of
           lookup-issue-source-page-id-of
           lookup-issue-source-section-of
@@ -35,6 +35,7 @@
           lookup-issue-repair-description-of
           lookup-issue-details-of
           lookup-issue-underlying-condition-of
+          lookup-issue-underlying-message-of
           lookup-issue-link-of
           lookup-issue-source-object-of
           lookup-issue-signature

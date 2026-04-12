@@ -64,11 +64,17 @@
    (underlying-condition :reader lookup-issue-underlying-condition-of
                          :initarg :underlying-condition
                          :initform nil)
+   (underlying-message :reader lookup-issue-underlying-message-of
+                       :initarg :underlying-message
+                       :initform nil
+                       :type (or null string))
    (link :reader lookup-issue-link-of
          :initarg :link
          :initform nil)))
 
 (defclass page-lookup-issue (lookup-issue) ())
+
+(defclass function-lookup-issue (lookup-issue) ())
 
 (defclass target-grouping-issue (lookup-issue) ())
 
@@ -112,6 +118,39 @@
                  :repair-thunk repair-thunk
                  :details details
                  :underlying-condition condition
+                 :underlying-message nil
+                 :link link))
+
+(defun make-function-lookup-issue
+    (condition
+     &key source-object source-hyperbook source-page-id source-page-title
+       source-section link-text target-hyperbook-id expected-page-id link
+       (target-kind :lisp-function-page)
+       (classification :missing-lisp-function-definition)
+       (status :open)
+       suggested-repair
+       repair-description
+       repair-thunk
+       details)
+  (make-instance 'function-lookup-issue
+                 :source-object source-object
+                 :source-hyperbook source-hyperbook
+                 :source-page-id source-page-id
+                 :source-page-title source-page-title
+                 :source-section source-section
+                 :link-text link-text
+                 :target-hyperbook-id target-hyperbook-id
+                 :target-site (lookup-issue-target-site target-hyperbook-id)
+                 :expected-page-id expected-page-id
+                 :target-kind target-kind
+                 :classification classification
+                 :status status
+                 :suggested-repair suggested-repair
+                 :repair-description repair-description
+                 :repair-thunk repair-thunk
+                 :details details
+                 :underlying-condition condition
+                 :underlying-message (princ-to-string condition)
                  :link link))
 
 (defun make-target-grouping-issue
@@ -406,4 +445,8 @@
     (views:html-view :title "Condition" :priority 4
       (views:html
         (:div :class "hyperbook-page"
+              (when-let (message (lookup-issue-underlying-message-of issue))
+                (views:html
+                  (:p (views:esc "Preserved condition text"))
+                  (:pre (views:esc message))))
               (views:object-ref condition))))))

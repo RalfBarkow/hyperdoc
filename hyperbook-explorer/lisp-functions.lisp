@@ -25,11 +25,32 @@
 (defclass lisp-function-page (page)
   ((function :reader function-of :initarg :function :type function)))
 
+(defun make-lisp-function-lookup-issue (hb page-id symbol condition)
+  (make-function-lookup-issue
+   condition
+   :source-object hb
+   :source-hyperbook (id-of hb)
+   :source-page-title (title-of hb)
+   :link-text page-id
+   :target-hyperbook-id (id-of hb)
+   :expected-page-id page-id
+   :details (list :lookup-stage :symbol-function
+                  :reference-kind :source-of-function
+                  :expected-symbol symbol
+                  :fboundp (fboundp symbol)
+                  :condition-type (type-of condition))))
+
 (defmethod find-page ((hb lisp-functions) page-id &key signal-error?)
-  (make-instance 'lisp-function-page
-                 :hyperbook hb
-                 :id page-id
-                 :function (symbol-function (read-symbol page-id signal-error?))))
+  (let ((symbol (read-symbol page-id signal-error?)))
+    (when symbol
+      (handler-case
+          (make-instance 'lisp-function-page
+                         :hyperbook hb
+                         :id page-id
+                         :function (symbol-function symbol))
+        (undefined-function (condition)
+          (and signal-error?
+               (make-lisp-function-lookup-issue hb page-id symbol condition)))))))
 
 (defun read-symbol (string signal-error?)
   (let ((*package* (find-package "CL")))

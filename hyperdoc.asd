@@ -285,6 +285,7 @@
                              (:file "fedwiki-materialization-smoke")
                              (:file "authored-html-render-safety-smoke")
                              (:file "page-lookup-issues-smoke")
+                             (:file "function-lookup-issues-smoke")
                              (:file "collective-knowledge-slice-smoke")
                              (:file "reproducible-devenv-as-knowledge-artifact-slice-smoke")
                              (:file "localhost-fedwiki-page-pipeline-smoke")
