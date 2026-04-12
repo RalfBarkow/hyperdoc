@@ -1529,6 +1529,335 @@
              'hyperdoc::make-http-dmx-import-client-from-environment)
             original))))
 
+(defun run-dmx-workspace-annotation-environment-basic-service-auth-smoke-test ()
+  (let* ((annotation (make-test-dock-annotation
+                      :note "Environment Basic service auth"))
+         (created-topic-id 9300)
+         (captured-calls '())
+         (created-topic nil)
+         (assigned-workspace-id nil)
+         (added-topicmap-id nil)
+         (added-view-props nil)
+         (env-values
+           (list (cons "HYPERDOC_DMX_IMPORT_BASE_URL"
+                       "https://dmx.ralfbarkow.ch")
+                 (cons "HYPERDOC_DMX_IMPORT_USERNAME" "shared-service-user")
+                 (cons "HYPERDOC_DMX_IMPORT_PASSWORD" "shared-service-password")
+                 (cons "HYPERDOC_DMX_IMPORT_WORKSPACE_ID"
+                       (format nil "~D"
+                               *dmx-annotations-smoke-workspace-id*))))
+         (original-getenv (symbol-function 'hyperdoc::getenv-non-empty))
+         (original-request (symbol-function 'drakma:http-request))
+         (original-journal-suppressed-p
+           hyperdoc::*dmx-workspace-journal-suppressed-p*))
+    (labels ((env-value (name)
+               (cdr (assoc name env-values :test #'string=)))
+             (header-value (headers name)
+               (cdr (find name headers
+                          :test #'string-equal
+                          :key #'car)))
+             (content-string (content)
+               (cond
+                 ((null content) "")
+                 ((stringp content) content)
+                 ((vectorp content)
+                  (babel:octets-to-string content :encoding :utf-8))
+                 (t
+                  (format nil "~A" content))))
+             (content-json (content)
+               (with-input-from-string (stream (content-string content))
+                 (shasht:read-json stream)))
+             (json-object (&rest key-values)
+               (let ((json (make-hash-table :test #'equal)))
+                 (loop for (key value) on key-values by #'cddr
+                       do (setf (gethash key json) value))
+                 json))
+             (json-stream (object)
+               (make-string-input-stream
+                (hyperdoc::encode-json-string object)))
+             (workspace-json ()
+               (json-object "id" *dmx-annotations-smoke-workspace-id*
+                            "uri" ""
+                            "typeUri" "dmx.workspaces.workspace"
+                            "value" "context-window"))
+             (topicmap-memberships-json ()
+               (if (eql added-topicmap-id
+                        *dmx-annotations-smoke-workspace-topicmap-id*)
+                   (vector
+                    (json-object "id"
+                                 *dmx-annotations-smoke-workspace-topicmap-id*
+                                 "value" "context-window"
+                                 "assoc" (json-object "id" 1)))
+                   #()))
+             (topicmap-json ()
+               (json-object
+                "topic" (json-object
+                         "id" *dmx-annotations-smoke-workspace-topicmap-id*
+                         "uri" ""
+                         "typeUri" "dmx.topicmaps.topicmap"
+                         "value" "context-window")
+                "viewProps" (json-object)
+                "topics"
+                (if (and created-topic
+                         (eql added-topicmap-id
+                              *dmx-annotations-smoke-workspace-topicmap-id*))
+                    (vector
+                     (json-object
+                      "id" created-topic-id
+                      "uri" (gethash "uri" created-topic)
+                      "typeUri" (gethash "typeUri" created-topic)
+                      "value" (gethash "value" created-topic)
+                      "viewProps" (or added-view-props (json-object))))
+                    #())
+                "assocs" #())))
+      (unwind-protect
+           (progn
+             ;; The production path may maintain workspace-journal state for
+             ;; annotation subjects. This smoke intentionally proves only that
+             ;; environment-backed Basic service auth now bootstraps correctly
+             ;; for the ordinary shared-workspace assignment path.
+             (setf hyperdoc::*dmx-workspace-journal-suppressed-p* t)
+             (setf (symbol-function 'hyperdoc::getenv-non-empty)
+                   (lambda (name)
+                     (env-value name)))
+             (setf (symbol-function 'drakma:http-request)
+                   (lambda (url &key method additional-headers content content-type
+                               content-length want-stream
+                               &allow-other-keys)
+                     (declare (ignore want-stream content-type content-length))
+                     (push (list :url url
+                                 :method method
+                                 :headers additional-headers
+                                 :content content)
+                           captured-calls)
+                     (cond
+                       ((and (eq method :get)
+                             (search
+                              (hyperdoc::dmx-topic-uri-lookup-path
+                               hyperdoc::*dmx-workspace-annotation-type-uri*)
+                              url
+                              :test #'char-equal))
+                        (values (make-string-input-stream "")
+                                404 nil nil nil "Not Found"))
+                       ((and (eq method :get)
+                             (search
+                              (hyperdoc::dmx-topic-uri-lookup-path
+                               hyperdoc::*dmx-notes-note-type-uri*)
+                              url
+                              :test #'char-equal))
+                        (values (json-stream
+                                 (make-type-support-topic-json
+                                  hyperdoc::*dmx-notes-note-type-uri*))
+                                200 nil nil nil "OK"))
+                       ((and (eq method :get)
+                             (search
+                              (hyperdoc::dmx-topic-uri-lookup-path
+                               hyperdoc::*dmx-notes-title-type-uri*)
+                              url
+                              :test #'char-equal))
+                        (values (json-stream
+                                 (make-type-support-topic-json
+                                  hyperdoc::*dmx-notes-title-type-uri*))
+                                200 nil nil nil "OK"))
+                       ((and (eq method :get)
+                             (search
+                              (hyperdoc::dmx-topic-uri-lookup-path
+                               hyperdoc::*dmx-notes-text-type-uri*)
+                              url
+                              :test #'char-equal))
+                        (values (json-stream
+                                 (make-type-support-topic-json
+                                  hyperdoc::*dmx-notes-text-type-uri*))
+                                200 nil nil nil "OK"))
+                       ((and (eq method :get)
+                             (search "/core/topic/uri/" url :test #'char-equal))
+                        (values (make-string-input-stream "")
+                                404 nil nil nil "Not Found"))
+                       ((and (eq method :post)
+                             (search (hyperdoc::dmx-topic-create-path)
+                                     url
+                                     :test #'char-equal))
+                        (setf created-topic (content-json content)
+                              (gethash "id" created-topic) created-topic-id)
+                        (values (json-stream created-topic)
+                                200 nil nil nil "OK"))
+                       ((and (eq method :post)
+                             (search "/access-control/login"
+                                     url
+                                     :test #'char-equal))
+                        (values nil
+                                204
+                                '(("Set-Cookie"
+                                   . "JSESSIONID=session-123;Path=/;SameSite=Strict"))
+                                nil nil "No Content"))
+                       ((and (eq method :put)
+                             (search
+                              (hyperdoc::dmx-workspace-assign-object-path
+                               *dmx-annotations-smoke-workspace-id*
+                               created-topic-id)
+                              url
+                              :test #'char-equal))
+                        (setf assigned-workspace-id
+                              *dmx-annotations-smoke-workspace-id*)
+                        (values (make-string-input-stream "")
+                                204 nil nil nil "No Content"))
+                       ((and (eq method :post)
+                             (search
+                              (hyperdoc::dmx-topicmap-add-topic-path
+                               *dmx-annotations-smoke-workspace-topicmap-id*
+                               created-topic-id)
+                              url
+                              :test #'char-equal))
+                        (setf added-topicmap-id
+                              *dmx-annotations-smoke-workspace-topicmap-id*
+                              added-view-props
+                              (content-json content))
+                        (values (make-string-input-stream "")
+                                204 nil nil nil "No Content"))
+                       ((and (eq method :get)
+                             (search
+                              (format nil "~A?"
+                                      (hyperdoc::dmx-topic-update-path
+                                       created-topic-id))
+                              url
+                              :test #'char-equal))
+                        (values (json-stream created-topic)
+                                200 nil nil nil "OK"))
+                       ((and (eq method :get)
+                             (search
+                              (hyperdoc::dmx-workspace-object-path
+                               created-topic-id)
+                              url
+                              :test #'char-equal))
+                        (if assigned-workspace-id
+                            (values (json-stream (workspace-json))
+                                    200 nil nil nil "OK")
+                            (values (make-string-input-stream "")
+                                    404 nil nil nil "Not Found")))
+                       ((and (eq method :get)
+                             (search
+                              (hyperdoc::dmx-topicmap-memberships-path
+                               created-topic-id)
+                              url
+                              :test #'char-equal))
+                        (values (json-stream (topicmap-memberships-json))
+                                200 nil nil nil "OK"))
+                       ((and (eq method :get)
+                             (search
+                              (format nil "/topicmaps/~D?children=true"
+                                      *dmx-annotations-smoke-workspace-topicmap-id*)
+                              url
+                              :test #'char-equal))
+                        (values (json-stream (topicmap-json))
+                                200 nil nil nil "OK"))
+                       (t
+                        (error "Unexpected workspace-annotation HTTP call ~S"
+                               url)))))
+             (let* ((report
+                      (hyperdoc::run-dock-annotation-workspace-persistence-debug
+                       annotation
+                       :workspace-topicmap-id
+                       *dmx-annotations-smoke-workspace-topicmap-id*))
+                    (client
+                      (hyperdoc::workspace-annotation-persistence-report-client-of
+                       report))
+                    (persisted
+                      (hyperdoc::workspace-annotation-persistence-report-persisted-annotation-of
+                       report))
+                    (assignment-stage
+                      (hyperdoc::workspace-annotation-persistence-stage-result
+                       report
+                       :workspace-assignment))
+                    (calls (nreverse captured-calls))
+                    (login-position
+                      (position-if
+                       (lambda (call)
+                         (search "/access-control/login"
+                                 (getf call :url)
+                                 :test #'char-equal))
+                       calls))
+                    (assignment-position
+                      (position-if
+                       (lambda (call)
+                         (search
+                          (hyperdoc::dmx-workspace-assign-object-path
+                           *dmx-annotations-smoke-workspace-id*
+                           created-topic-id)
+                          (getf call :url)
+                          :test #'char-equal))
+                       calls))
+                    (login-call
+                      (and login-position
+                           (nth login-position calls)))
+                    (assignment-call
+                      (and assignment-position
+                           (nth assignment-position calls))))
+               (assert-true
+                (typep client 'hyperdoc::http-dmx-import-client)
+                "No-client live writes with environment service auth must resolve to the HTTP DMX client")
+               (assert-equal t
+                             (and (hyperdoc::dmx-import-session-login-required-p-of
+                                   client)
+                                  t)
+                             "Environment-built Basic shared service auth must require the same session bootstrap flag as explicit Basic auth")
+               (assert-true
+                (search "Basic "
+                        (or (hyperdoc::dmx-import-authorization-header-of client)
+                            "")
+                        :test #'char-equal)
+                "Environment-built shared service auth must still carry the Basic Authorization header before bootstrap")
+               (assert-equal :persisted
+                             (hyperdoc::workspace-annotation-persistence-report-status-of
+                              report)
+                             "No-client live writes with environment-backed Basic service auth must persist instead of falling into pending-auth")
+               (assert-true
+                (not (hyperdoc::workspace-annotation-pending-auth-p report))
+                "Environment-backed Basic service auth must keep the ordinary Common-workspace path out of pending-auth")
+               (assert-equal nil
+                             (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                              report)
+                             "Successful environment-backed service-auth writes must not preserve a failing stage")
+               (assert-equal :completed
+                             (getf assignment-stage :status)
+                             "Shared service-auth bootstrap parity must carry the workspace-assignment stage to completion")
+               (assert-true
+                (typep persisted 'hyperdoc::workspace-dock-annotation)
+                "Successful environment-backed service-auth writes must still reopen as a workspace-dock-annotation")
+               (assert-equal *dmx-annotations-smoke-workspace-id*
+                             (hyperdoc::workspace-annotation-workspace-id-of
+                              persisted)
+                             "No per-action user auth should be required once shared service auth bootstraps correctly for the Common workspace")
+               (assert-equal "JSESSIONID=session-123"
+                             (hyperdoc::dmx-import-session-cookie-of client)
+                             "Environment-built Basic service auth must retain the bootstrapped JSESSIONID after login")
+               (assert-true
+                (and login-position
+                     assignment-position
+                     (< login-position assignment-position))
+                "Shared service-auth bootstrap must happen before workspace assignment on the no-client live annotation path")
+               (assert-true
+                (search "Basic "
+                        (or (header-value (getf login-call :headers)
+                                          "Authorization")
+                            "")
+                        :test #'char-equal)
+                "The bootstrap request must use the environment-built Basic service Authorization header")
+               (assert-equal nil
+                             (header-value (getf login-call :headers) "Cookie")
+                             "The bootstrap request must not carry the workspace cookie")
+               (assert-equal nil
+                             (header-value (getf assignment-call :headers)
+                                           "Authorization")
+                             "Workspace assignment must switch to session-only auth after shared service bootstrap")
+               (assert-equal "JSESSIONID=session-123; dmx_workspace_id=919815"
+                             (header-value (getf assignment-call :headers)
+                                           "Cookie")
+                             "Workspace assignment must combine the bootstrapped JSESSIONID with the Common-workspace cookie")))
+        (setf (symbol-function 'drakma:http-request) original-request
+              (symbol-function 'hyperdoc::getenv-non-empty) original-getenv
+              hyperdoc::*dmx-workspace-journal-suppressed-p*
+              original-journal-suppressed-p)))))
+
 (defun run-dmx-http-workspace-assignment-cookie-context-smoke-test ()
   (let* ((client (make-instance 'hyperdoc::http-dmx-import-client
                                 :base-url "https://dmx.ralfbarkow.ch"
@@ -4159,6 +4488,7 @@
   (run-dmx-workspace-annotation-live-create-topic-failure-evidence-smoke-test)
   (run-dmx-workspace-annotation-create-topic-probe-render-smoke-test)
   (run-dmx-workspace-annotation-default-live-client-resolution-smoke-test)
+  (run-dmx-workspace-annotation-environment-basic-service-auth-smoke-test)
   (run-dmx-http-workspace-assignment-cookie-context-smoke-test)
   (run-dmx-http-topicmap-mutation-workspace-cookie-context-smoke-test)
   (run-dmx-workspace-annotation-no-client-pending-auth-smoke-test)

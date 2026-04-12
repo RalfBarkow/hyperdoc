@@ -2105,12 +2105,21 @@
                           (format nil
                                   "Invalid DMX import workspace id ~S in HYPERDOC_DMX_IMPORT_WORKSPACE_ID"
                                   value))))))
+         (configured-auth-header
+           (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_HEADER"))
+         (configured-username
+           (getenv-non-empty "HYPERDOC_DMX_IMPORT_USERNAME"))
+         (configured-password
+           (getenv-non-empty "HYPERDOC_DMX_IMPORT_PASSWORD"))
          (auth-header
-           (or (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_HEADER")
-               (let ((username (getenv-non-empty "HYPERDOC_DMX_IMPORT_USERNAME"))
-                     (password (getenv-non-empty "HYPERDOC_DMX_IMPORT_PASSWORD")))
-                 (when (and username password)
-                   (basic-authorization-header username password)))))
+           (or configured-auth-header
+               (when (and configured-username configured-password)
+                 (basic-authorization-header configured-username
+                                             configured-password))))
+         (session-login-required-p
+           (and auth-header
+                (string= (summarize-http-authorization-scheme auth-header)
+                         "Basic")))
          (legacy-auth-token
            (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
     (when (or base-url topic-type-uri auth-header legacy-auth-token)
@@ -2120,6 +2129,7 @@
                                                (and legacy-auth-token
                                                     (format nil "Bearer ~A"
                                                             legacy-auth-token)))
+                     :session-login-required-p session-login-required-p
                      :workspace-id workspace-id
                      :topic-type-uri (or topic-type-uri
                                          *dmx-fedwiki-page-type-uri*)
