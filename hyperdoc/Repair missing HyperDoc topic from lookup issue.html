@@ -1,104 +1,88 @@
 <h1>Repair missing HyperDoc topic from lookup issue</h1>
 
+<in-package>hyperdoc</in-package>
+
 <p>
-This export explains both requested artifacts:
-a DITA-like task topic and a Lisp repair function sketch for the issue-state facets
-shown in the attached screenshot.
+This page records the current bounded page/topic repair flow for a missing
+Topics target such as <tt>Running image coherence</tt>.
 </p>
 
-<h2>DITA-like task topic</h2>
+<h2>Current architecture boundary</h2>
 
-<h3>Repair a missing HyperDoc topic from a page-lookup issue</h3>
+<ul>
+  <li><b>Shared issue mechanics:</b> the bounded lookup-issue protocol lives in <tt>hyperbook-explorer/lookup-failures.lisp</tt>.</li>
+  <li><b>Separate specializations:</b> <tt>page-lookup-issue</tt> and <tt>function-lookup-issue</tt> share that protocol but keep different runtime truth.</li>
+  <li><b>HyperDoc-specific topic repair:</b> <tt>hyperdoc-explorer/lookup-repairs.lisp</tt> derives the current page/topic status from chunk-backed state in <tt>hyperdoc/page-lookup-chunks.lisp</tt>.</li>
+  <li><b>Generic presentation:</b> the shared <b>Overview</b> and <b>Repair</b> tabs render runtime-owned state; the explorer does not invent policy on its own.</li>
+</ul>
 
-<p><b>Purpose</b></p>
+<h2>When this repair path applies</h2>
+
+<ul>
+  <li>The issue is a <tt>page-lookup-issue</tt> targeting HyperBook <tt>topics</tt>.</li>
+  <li>The issue can compute a <tt>topic-page-availability-chunk</tt> for the expected title.</li>
+  <li>The current chunk state is not <tt>:fixed</tt>.</li>
+</ul>
+
+<h2>Current diagnosis logic</h2>
+
 <p>
-Restore coherence when a page-lookup issue reports that a HyperDoc topic page is missing.
-This is the case shown in the screenshot for the missing topic page
-<code>Running image coherence</code>.
+The diagnosis model stays chunk-first and unchanged:
 </p>
 
-<p><b>When to use this task</b></p>
 <ul>
-  <li>Issue state includes <code>Open</code>.</li>
-  <li>Failure classification is a missing HyperDoc topic page.</li>
-  <li>The issue points to a target chunk for the expected Topics page.</li>
+  <li><b>No authored topic factory:</b> <tt>:needs-topic-creation</tt></li>
+  <li><b>Authored factory exists but the Topics page is unresolved or stale:</b> <tt>:needs-local-materialization</tt></li>
+  <li><b>Topics page resolves:</b> <tt>:fixed</tt></li>
 </ul>
 
-<p><b>Prerequisites</b></p>
-<ul>
-  <li>The missing link text has been inspected.</li>
-  <li>The target HyperBook is known to be <code>topics</code>.</li>
-  <li>You have write access to the HyperDoc source tree.</li>
-</ul>
+<p>
+The chunk also carries the status reason, repair hint, freshness mode, and the
+authored versus materialized signature evidence that supports the current
+diagnosis.
+</p>
 
-<p><b>Steps</b></p>
+<h2>Repair procedure</h2>
+
 <ol>
-  <li>Open the lookup issue and confirm the expected page id / slug.</li>
-  <li>Inspect the target chunk for the expected Topics page.</li>
-  <li>Use chunk state plus the chunk's freshness evidence to distinguish <code>Needs topic</code> from <code>Needs materialization</code>.</li>
-  <li>Repair the issue by ensuring that chunk rather than by following a hand-maintained scaffold hint.</li>
-  <li>If the authored topic factory is missing, ensure the authored-factory basis chunk first.</li>
-  <li>If the authored factory exists but the page still does not resolve, or its per-topic authored signature is newer than the current Topics materialization, materialize the running Topics state by rebuilding topic indexes.</li>
-  <li>Re-run lookup or reload the source page containing the broken link.</li>
-  <li>Verify that the target chunk now resolves as <code>Fixed</code>.</li>
-  <li>Mark the issue fixed only after link resolution succeeds in the running system.</li>
+  <li>Open the <tt>page-lookup-issue</tt> and confirm the expected topic title.</li>
+  <li>Use the issue-level <b>Repair</b> flow to inspect the target chunk rather than following a hand-maintained scaffold string.</li>
+  <li>Inspect the chunk's current state, status reason, and freshness evidence.</li>
+  <li>If the chunk says <tt>:needs-topic-creation</tt>, ensure the authored-topic-factory basis first.</li>
+  <li>If the chunk says <tt>:needs-local-materialization</tt>, keep the authored factory and refresh only the running Topics materialization.</li>
+  <li>If the chunk already resolves as <tt>:fixed</tt>, do not invent extra authoring work.</li>
+  <li>Use <tt>repair-lookup-issue-via-chunks</tt> when you need the bounded mutation helper to ensure the target chunk directly.</li>
+  <li>Re-open the source page or retry the link lookup and confirm that the issue now resolves as <tt>Fixed</tt>.</li>
 </ol>
 
-<p><b>Results</b></p>
-<ul>
-  <li>The previously missing topic page exists.</li>
-  <li>The link resolves in HyperDoc.</li>
-  <li>The issue can move from <code>Open</code> to <code>Fixed</code>.</li>
-</ul>
-
-<p><b>Troubleshooting</b></p>
-<ul>
-  <li>If the authored topic factory exists but the Topics page still does not resolve, or the materialized per-topic signature no longer matches the authored topic factory, treat this as <code>Needs materialization</code> rather than <code>Needs topic</code>.</li>
-  <li>If the page exists but lookup still fails, inspect title, page id mapping, and target HyperBook selection.</li>
-  <li>If the page resolves only after a cold restart, the running image likely had a load-set mismatch.</li>
-</ul>
-
-<h2>Lisp chunk sketch</h2>
-
-<pre>
-(defmethod issue-target-chunk ((issue hyperbook:lookup-issue))
-  (when (string= (hyperbook:lookup-issue-target-hyperbook-id-of issue)
-                 "topics")
-    (make-topic-page-availability-chunk
-     (or (hyperbook:lookup-issue-expected-page-id-of issue)
-         (hyperbook:lookup-issue-link-text-of issue)))))
-
-(defun topic-page-lookup-chunk-state (chunk)
-  (cond
-    ((not (authored-topic-factory-defined-in-source-p
-           (page-lookup-topic-title-of chunk)))
-     :needs-topic-creation)
-    ((chunk-up-to-date-p chunk)
-     :fixed)
-    (t
-     :needs-local-materialization)))
-
-(defun repair-lookup-issue-via-chunks (issue)
-  (ensure-chunk (issue-target-chunk issue)))
-</pre>
-
-<p>
-In the current runtime, the inspected chunk also exposes a status reason, a repair hint,
-and both authored and materialized per-topic freshness evidence. The issue-level Repair flow
-stays inspect-first: it hands you the target chunk rather than a hand-maintained scaffold plan.
-</p>
-
-<h2>How the labels fit together</h2>
+<h2>What gets materialized</h2>
 
 <ul>
-  <li><code>Open</code>: the issue is unresolved.</li>
-  <li><code>Publication</code>: the issue affects reader-facing published material.</li>
-  <li><code>Needs topic</code>: the concept node itself is missing.</li>
-  <li><code>Needs materialization</code>: the concept may exist, but its concrete page artifact is missing.</li>
-  <li><code>Fixed</code>: the link resolves again after repair and reload.</li>
+  <li>If the authored factory is missing, HyperDoc can materialize a placeholder topic factory in <tt>hyperdoc/topics.lisp</tt> for this bounded repair path.</li>
+  <li>If the authored factory already exists, HyperDoc reloads the topic source and rebuilds the runtime topic indexes instead of inventing a new page file.</li>
+  <li>If the Topics page resolves again, the issue is fixed because the running lookup proposition is true again.</li>
 </ul>
 
-<p>
-This matches the screenshot's current diagnosis of a missing topic page for
-<code>Running image coherence</code>.
-</p>
+<h2>What this repair path does not mean</h2>
+
+<ul>
+  <li>It does <b>not</b> mean Topics pages are repaired by creating standalone topic HTML files.</li>
+  <li>It does <b>not</b> mean the generic explorer owns page-repair policy.</li>
+  <li>It does <b>not</b> apply to <tt>function-lookup-issue</tt>; function lookup keeps its own <tt>fboundp</tt>-based correction path.</li>
+</ul>
+
+<h2>How the visible labels fit together</h2>
+
+<ul>
+  <li><code>Open</code>: unresolved lookup issue.</li>
+  <li><code>Needs topic</code>: missing authored topic factory.</li>
+  <li><code>Needs materialization</code>: authored factory exists but runtime Topics materialization is not current enough to resolve the page.</li>
+  <li><code>Fixed</code>: the Topics page resolves again in the running system.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Declarative chunk wiring for page-lookup issues and first real Topics chunk">Declarative chunk wiring for page-lookup issues and first real Topics chunk</a></li>
+  <li><a page="Implement function-lookup-issue from the page-lookup-issue precedent">Implement function-lookup-issue from the page-lookup-issue precedent</a></li>
+</ul>

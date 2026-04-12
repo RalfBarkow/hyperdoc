@@ -3,299 +3,104 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-In this repository, a Topics HyperBook page is not backed by a separate HTML file. Topic pages are derived from authored topic factories discovered in <tt>hyperdoc/topics.lisp</tt>, indexed into <tt>*topics-by-id*</tt> and <tt>*topics-by-title*</tt>, and then resolved by canonical topic title in HyperBook <tt>topics</tt>.
+This page records the current stable lookup-issue layering after the bounded
+lookup-issue extraction. The shared issue protocol now lives in
+<tt>hyperbook-explorer/lookup-failures.lisp</tt>, while HyperDoc keeps the
+topic-specific page repair semantics in <tt>hyperdoc-explorer/lookup-repairs.lisp</tt>
+and the chunk truth in <tt>hyperdoc/page-lookup-chunks.lisp</tt>.
 </p>
 
-<h2>Repository-grounded consequences</h2>
+<h2>Current layering</h2>
 
 <ul>
-  <li>A missing topic-page lookup is not primarily “missing HTML page file”.</li>
-  <li>It is primarily “missing authored topic factory and/or stale topic index”.</li>
-  <li>The running target proposition is: the Topics HyperBook resolves the expected canonical title.</li>
-  <li>Only targets in HyperBook <tt>hyperdoc</tt> or <tt>topics</tt> should route to HyperDoc authoring scaffolds; other HyperBooks stay generic lookup issues.</li>
+  <li><b>Shared issue model:</b> <tt>lookup-issue</tt>, <tt>bounded-lookup-issue</tt>, <tt>page-lookup-issue</tt>, and <tt>function-lookup-issue</tt> live in <tt>hyperbook-explorer/lookup-failures.lisp</tt>.</li>
+  <li><b>Shared bounded hook API:</b> current status, suggested repair, repair description, repair thunk, and details are derived through the bounded-issue hook surface exported from <tt>hyperbook-explorer</tt>.</li>
+  <li><b>Generic presentation:</b> the shared <b>Overview</b>, <b>Details</b>, <b>Repair</b>, and <b>Condition</b> views render whatever the bounded issue reports at runtime. The explorer presents that state; it does not own repair policy.</li>
+  <li><b>HyperDoc page/topic semantics:</b> <tt>hyperdoc-explorer/lookup-repairs.lisp</tt> specializes only the page/topic path that HyperDoc actually owns.</li>
+  <li><b>Chunk truth:</b> <tt>hyperdoc/page-lookup-chunks.lisp</tt> determines whether the missing Topics target needs a new authored factory, a fresh materialization, or no repair at all.</li>
 </ul>
 
-<h2>Part 1: Wire chunks into page-lookup-issue objects</h2>
-
-<pre>
-(defparameter +no-info-date+ -1)
-
-(defclass hd-chunk ()
-  ((id :initarg :id :reader chunk-id)
-   (managed-p :initarg :managed-p :initform t :accessor managed-p)
-   (last-derived-at :initarg :last-derived-at :initform nil :accessor last-derived-at)))
-
-(defgeneric chunk-basis (chunk))
-(defmethod chunk-basis ((chunk hd-chunk)) nil)
-
-(defgeneric chunk-update-basis (chunk))
-(defmethod chunk-update-basis ((chunk hd-chunk)) nil)
-
-(defgeneric derive-chunk (chunk))
-(defgeneric derive-date (chunk))
-(defmethod derive-date ((chunk hd-chunk))
-  (last-derived-at chunk))
-
-(defgeneric chunk-up-to-date-p (chunk))
-(defmethod chunk-up-to-date-p ((chunk hd-chunk))
-  (let ((my-date (derive-date chunk)))
-    (cond
-      ((or (null my-date)
-           (eql my-date +no-info-date+))
-       nil)
-      (t
-       (every (lambda (basis)
-                (let ((basis-date (derive-date basis)))
-                  (and basis-date
-                       (not (eql basis-date +no-info-date+))
-                       (&lt;= basis-date my-date))))
-              (chunk-basis chunk))))))
-
-(defgeneric ensure-chunk (chunk))
-(defmethod ensure-chunk ((chunk hd-chunk))
-  (when (managed-p chunk)
-    (dolist (b (chunk-basis chunk))
-      (ensure-chunk b))
-    (dolist (b (chunk-update-basis chunk))
-      (ensure-chunk b))
-    (unless (chunk-up-to-date-p chunk)
-      (let ((changed-at (derive-chunk chunk)))
-        (when changed-at
-          (setf (last-derived-at chunk) changed-at)))))
-  chunk)
-
-(defun issue-expected-title (issue)
-  (or (hyperbook:lookup-issue-expected-page-id-of issue)
-      (hyperbook:lookup-issue-link-text-of issue)))
-
-(defun issue-target-topic-title-p (issue)
-  (string= (or (hyperbook:lookup-issue-target-hyperbook-id-of issue) "")
-           "topics"))
-
-(defgeneric issue-target-chunk (issue))
-
-(defmethod issue-target-chunk ((issue hyperbook:lookup-issue))
-  (cond
-    ((issue-target-topic-title-p issue)
-     (make-instance 'topic-page-availability-chunk
-                    :id (list :topic-page-availability
-                              (issue-expected-title issue))
-                    :title (issue-expected-title issue)))
-    (t
-     nil)))
-
-(defun repair-lookup-issue-via-chunks (issue)
-  (let ((chunk (issue-target-chunk issue)))
-    (unless chunk
-      (error "No declarative target chunk for ~S" issue))
-    (ensure-chunk chunk)))
-
-(defun chunk-tree (chunk)
-  (list :chunk chunk
-        :basis (mapcar #'chunk-tree (chunk-basis chunk))
-        :update-basis (mapcar #'chunk-tree (chunk-update-basis chunk))))
-
-(defun derive-lookup-issue-repair-hints (issue)
-  (let ((chunk (issue-target-chunk issue)))
-    (cond
-      ((null chunk)
-       '(:no-chunk-model))
-      ((chunk-up-to-date-p chunk)
-       '(:fixed))
-      ((typep chunk 'topic-page-availability-chunk)
-       (let ((title (topic-title chunk)))
-         (append
-          (when (null (find-authored-topic-factory-by-title title))
-            '(:needs-topic-creation))
-          (when (eq *topic-index-state* :stale)
-            '(:needs-local-materialization)))))
-      (t
-       '(:open)))))
-
-(defun maybe-mark-issue-from-chunk-state! (issue)
-  (let ((chunk (issue-target-chunk issue)))
-    (when chunk
-      (setf (hyperbook:lookup-issue-status-of issue)
-            (if (chunk-up-to-date-p chunk)
-                :fixed
-                :open))))
-  issue)
-</pre>
+<h2>Current page/topic diagnosis model</h2>
 
 <p>
-This keeps the existing manual status buttons available, but adds a derived
-coherence path. The issue now points to a target chunk instead of a handwritten
-repair script.
-</p>
-
-<h2>Part 2: First real chunk end-to-end for Topics</h2>
-
-<p>
-The first real chunk should match the actual Topics implementation:
+For a <tt>page-lookup-issue</tt> targeting HyperBook <tt>topics</tt>, HyperDoc
+computes a <tt>topic-page-availability-chunk</tt> from the expected topic title
+and derives the current issue state from that chunk on demand.
 </p>
 
 <ul>
-  <li><b>topic-factory-definition-chunk</b>: an authored factory exists in <tt>hyperdoc/topics.lisp</tt></li>
-  <li><b>topic-index-chunk</b>: the in-image topic indexes reflect authored factories</li>
-  <li><b>topic-page-availability-chunk</b>: HyperBook <tt>topics</tt> resolves the canonical title</li>
+  <li><b>No authored factory in <tt>hyperdoc/topics.lisp</tt>:</b> <tt>:needs-topic-creation</tt></li>
+  <li><b>Authored factory exists but the Topics page is unresolved or the materialized signature is stale:</b> <tt>:needs-local-materialization</tt></li>
+  <li><b>Topics page resolves from the current running image:</b> <tt>:fixed</tt></li>
 </ul>
 
-<pre>
-(defclass topic-factory-definition-chunk (hd-chunk)
-  ((title :initarg :title :reader topic-title)))
-
-(defclass topic-index-chunk (hd-chunk) ())
-
-(defclass topic-page-availability-chunk (hd-chunk)
-  ((title :initarg :title :reader topic-title)))
-
-(defun topics-source-path ()
-  (asdf:system-relative-pathname :hyperdoc "hyperdoc/topics.lisp"))
-
-(defun topics-file-write-date ()
-  (or (ignore-errors (file-write-date (topics-source-path)))
-      +no-info-date+))
-
-(defun title-&gt;stable-key (title)
-  (string-downcase
-   (with-output-to-string (out)
-     (loop for ch across title
-           do (write-char (if (char= ch #\Space) #\- ch) out)))))
-
-(defun title-&gt;factory-symbol (title)
-  (intern (format nil "~A-TOPIC" (string-upcase (title-&gt;stable-key title)))
-          :hyperdoc))
-
-(defun make-placeholder-topic-form (title)
-  (let ((stable-key (title-&gt;stable-key title)))
-    (format nil
-            "~%~%(defun ~A ()~%  (make-topic~%   :id ~S~%   :title ~S~%   :summary ~S~%   :references '()))~%"
-            (symbol-name (title-&gt;factory-symbol title))
-            stable-key
-            title
-            "TODO: add summary.")))
-
-(defun append-placeholder-topic-factory! (title)
-  (with-open-file (out (topics-source-path)
-                       :direction :output
-                       :if-exists :append
-                       :if-does-not-exist :error)
-    (write-string (make-placeholder-topic-form title) out)))
-
-(defun find-authored-topic-factory-by-title (title)
-  (hyperdoc::ensure-topic-indexes)
-  (or (ignore-errors (hyperdoc::find-topic-by-title title))
-      (let ((symbol (title-&gt;factory-symbol title)))
-        (when (and (fboundp symbol)
-                   (ignore-errors
-                     (typep (funcall symbol) 'hyperdoc::topic)))
-          symbol))))
-
-(defmethod derive-date ((chunk topic-factory-definition-chunk))
-  (if (find-authored-topic-factory-by-title (topic-title chunk))
-      (topics-file-write-date)
-      +no-info-date+))
-
-(defmethod derive-chunk ((chunk topic-factory-definition-chunk))
-  (if (find-authored-topic-factory-by-title (topic-title chunk))
-      nil
-      (progn
-        (append-placeholder-topic-factory! (topic-title chunk))
-        (topics-file-write-date))))
-
-(defmethod derive-date ((chunk topic-index-chunk))
-  (if (eq hyperdoc::*topic-index-state* :ready)
-      (or (last-derived-at chunk) +no-info-date+)
-      +no-info-date+))
-
-(defmethod derive-chunk ((chunk topic-index-chunk))
-  (hyperdoc::rebuild-topic-indexes)
-  (get-universal-time))
-
-(defmethod chunk-basis ((chunk topic-page-availability-chunk))
-  (list
-   (make-instance 'topic-factory-definition-chunk
-                  :id (list :topic-factory-definition (topic-title chunk))
-                  :title (topic-title chunk))
-   (make-instance 'topic-index-chunk
-                  :id '(:topic-index))))
-
-(defmethod derive-date ((chunk topic-page-availability-chunk))
-  (handler-case
-      (progn
-        (hyperbook:find-page hyperdoc::*topics* (topic-title chunk) :signal-error? t)
-        (or (derive-date (make-instance 'topic-index-chunk :id '(:topic-index)))
-            +no-info-date+))
-    (error ()
-      +no-info-date+)))
-
-(defmethod derive-chunk ((chunk topic-page-availability-chunk))
-  ;; This chunk should become true once its basis has been ensured.
-  ;; It exists to express the lookup proposition itself.
-  (handler-case
-      (progn
-        (hyperbook:find-page hyperdoc::*topics* (topic-title chunk) :signal-error? t)
-        nil)
-    (error ()
-      ;; Rebuild once more defensively in case the image is stale.
-      (hyperdoc::rebuild-topic-indexes)
-      (hyperbook:find-page hyperdoc::*topics* (topic-title chunk) :signal-error? t)
-      (get-universal-time))))
-</pre>
-
-<h2>How the first real target chunk behaves</h2>
-
 <p>
-For a lookup issue against HyperBook <tt>topics</tt> with expected page id
-<tt>Running image coherence</tt>, the target chunk is:
+That diagnosis stays chunk-first. The issue does not invent a separate page
+repair policy of its own. It asks the current chunk state, status reason,
+repair hint, and freshness evidence whenever the issue is rendered.
 </p>
 
-<pre>
-(make-instance 'topic-page-availability-chunk
-               :id '(:topic-page-availability "Running image coherence")
-               :title "Running image coherence")
-</pre>
+<h2>Current issue-to-chunk flow</h2>
+
+<ol>
+  <li>A page lookup failure first becomes a shared <tt>page-lookup-issue</tt>.</li>
+  <li>HyperDoc enrichment routes only the <tt>topics</tt> target into the topic-page repair path.</li>
+  <li><tt>issue-target-chunk</tt> returns the matching <tt>topic-page-availability-chunk</tt>.</li>
+  <li>The shared bounded hook API asks that chunk for current status, suggested repair, repair description, and runtime details.</li>
+  <li>The issue-level <b>Overview</b> and <b>Repair</b> tabs therefore stay generic while still showing current topic-specific truth.</li>
+  <li>The issue-level repair action remains inspect-first: it hands back the target chunk object.</li>
+  <li>The bounded mutation helper is <tt>repair-lookup-issue-via-chunks</tt>, which ensures the target chunk in code and in the smoke tests.</li>
+</ol>
+
+<h2>What repair means for Topics</h2>
 
 <p>
-Calling <tt>ensure-chunk</tt> on that chunk means:
+Ensuring the target chunk keeps the current topic diagnosis logic unchanged:
 </p>
 
 <ol>
-  <li>ensure the authored topic factory exists, appending a placeholder factory to <tt>hyperdoc/topics.lisp</tt> if needed</li>
-  <li>rebuild the runtime topic indexes</li>
-  <li>verify that HyperBook <tt>topics</tt> now resolves the canonical title</li>
+  <li>If no authored topic factory exists, HyperDoc materializes a placeholder factory safely enough for this bounded repair path.</li>
+  <li>If the authored factory already exists, HyperDoc keeps that authored source and refreshes only the running Topics materialization.</li>
+  <li>If the Topics page already resolves, the issue is already fixed and no extra authoring plan is needed.</li>
 </ol>
 
 <p>
-That is the chunk-based replacement for the old “repair function”.
+This is why a Topics repair is not modeled as writing a separate topic HTML
+file. Topics pages are derived from authored factories plus runtime
+materialization state.
 </p>
 
-<h2>Where this fits the current UI</h2>
+<h2>Presentation boundary</h2>
+
+<p>
+The shared explorer views remain presentation-only. They render:
+</p>
 
 <ul>
-  <li>The existing title-bar buttons still work as editorial/manual status markers.</li>
-  <li>The chunk model provides a derived coherence path underneath them.</li>
-  <li>The Repair tab can show:
-    <ul>
-      <li>target chunk</li>
-      <li>basis tree</li>
-      <li>derived repair hints</li>
-      <li>action button: <tt>Derive target chunk</tt></li>
-    </ul>
-  </li>
+  <li>preserved authored evidence from issue creation,</li>
+  <li>current bounded status from runtime hooks,</li>
+  <li>current repair description and details,</li>
+  <li>and the current repair object or thunk result.</li>
 </ul>
 
-<h2>Most important correction to the earlier model</h2>
-
 <p>
-Do <b>not</b> model a Topics HyperBook repair as writing a separate topic HTML
-page file. In this repository, Topics pages are generated from authored topic
-factories plus rebuilt indexes, not from standalone topic-page HTML files.
+Manual title-bar status buttons still exist as editorial overrides, but the
+runtime-owned topic diagnosis now comes from chunk state rather than from a
+hand-maintained repair string.
 </p>
 
-<p>
-Likewise, do <b>not</b> route every failed page lookup through HyperDoc page
-scaffolding. A failure against another HyperBook such as
-<tt>lisp-functions</tt> should keep a generic HyperBook classification and only
-HyperDoc-owned targets should attach HyperDoc repair plans.
-</p>
+<h2>Most important corrections</h2>
+
+<ul>
+  <li>Do <b>not</b> treat a missing Topics page as a missing standalone HTML file.</li>
+  <li>Do <b>not</b> route non-Topics page failures through HyperDoc topic repair semantics.</li>
+  <li>Do <b>not</b> collapse function lookup into the page/topic chunk model. Both issue classes share the bounded protocol, but each keeps its own runtime truth.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Repair missing HyperDoc topic from lookup issue">Repair missing HyperDoc topic from lookup issue</a></li>
+  <li><a page="Implement function-lookup-issue from the page-lookup-issue precedent">Implement function-lookup-issue from the page-lookup-issue precedent</a></li>
+  <li><a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a></li>
+</ul>
