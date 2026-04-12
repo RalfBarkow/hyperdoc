@@ -285,6 +285,7 @@
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")
                              (:file "authored-html-render-safety-smoke")
+                             (:file "lookup-issue-docs-render-smoke")
                              (:file "page-lookup-issues-smoke")
                              (:file "function-lookup-issues-smoke")
                              (:file "collective-knowledge-slice-smoke")
