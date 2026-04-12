@@ -680,6 +680,74 @@
         :key #'dmx-import-object-id
         :test #'eql))
 
+(defun dmx-workspace-assignment-rehearsal-copy-json-array (value)
+  (cond
+    ((null value)
+     #())
+    ((vectorp value)
+     (copy-seq value))
+    ((listp value)
+     (coerce value 'vector))
+    (t
+     #())))
+
+(defun make-dmx-workspace-assignment-rehearsal-snapshot
+    (&key topic workspace-id workspace-topicmap-id workspace-assignment
+       topicmap-memberships workspace-topicmap workspace-owner)
+  (let* ((resolved-topic-id
+           (or (dmx-import-object-id topic)
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "DMX workspace-assignment rehearsal snapshot requires a captured topic with id")))
+         (resolved-workspace-id
+           (or (parse-positive-integer workspace-id)
+               (and (integerp workspace-id) (plusp workspace-id) workspace-id)
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "DMX workspace-assignment rehearsal snapshot requires a positive target workspace id")))
+         (resolved-topicmap-id
+           (or (parse-positive-integer workspace-topicmap-id)
+               (and (integerp workspace-topicmap-id)
+                    (plusp workspace-topicmap-id)
+                    workspace-topicmap-id)
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "DMX workspace-assignment rehearsal snapshot requires a positive target workspace topicmap id")))
+         (snapshot (make-hash-table :test #'equal))
+         (repair-target (make-hash-table :test #'equal))
+         (captures (make-hash-table :test #'equal)))
+    (unless (hash-table-p topic)
+      (error 'fedwiki-dmx-import-error
+             :message
+             "DMX workspace-assignment rehearsal snapshot requires captured topic JSON"))
+    (unless (hash-table-p workspace-topicmap)
+      (error 'fedwiki-dmx-import-error
+             :message
+             "DMX workspace-assignment rehearsal snapshot requires captured workspace topicmap JSON"))
+    (setf (gethash "snapshotKind" snapshot)
+          *dmx-workspace-assignment-rehearsal-snapshot-kind*
+          (gethash "schemaVersion" snapshot) 1
+          (gethash "repairTarget" snapshot) repair-target
+          (gethash "captures" snapshot) captures
+          (gethash "topicId" repair-target) resolved-topic-id
+          (gethash "workspaceId" repair-target) resolved-workspace-id
+          (gethash "workspaceTopicmapId" repair-target) resolved-topicmap-id
+          (gethash "topic" captures)
+          (dmx-workspace-assignment-rehearsal-copy-json-object topic)
+          (gethash "workspaceAssignment" captures)
+          (and workspace-assignment
+               (dmx-workspace-assignment-rehearsal-copy-json-object
+                workspace-assignment))
+          (gethash "topicmapMemberships" captures)
+          (dmx-workspace-assignment-rehearsal-copy-json-array
+           topicmap-memberships)
+          (gethash "workspaceTopicmap" captures)
+          (dmx-workspace-assignment-rehearsal-copy-json-object
+           workspace-topicmap))
+    (when workspace-owner
+      (setf (gethash "workspaceOwner" captures) workspace-owner))
+    snapshot))
+
 (defun clear-memory-dmx-import-client-state (client)
   (clrhash (topics-by-external-key-of client))
   (clrhash (topicmap-memberships-of client))

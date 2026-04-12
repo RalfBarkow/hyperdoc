@@ -105,12 +105,15 @@
         (views:html (:span :style "opacity: 0.55;" "none"))))))
 
 (defun dmx-repair-console-auth-mode-label (mode)
-  (case (hyperdoc::normalize-http-dmx-import-auth-mode
-         mode
-         'dmx-repair-console-auth-mode-label)
-    (:basic "username/password")
-    (:header "authorization header")
-    (:token "bearer token")))
+  (case mode
+    ((nil :rehearsal) "localhost rehearsal")
+    (otherwise
+     (case (hyperdoc::normalize-http-dmx-import-auth-mode
+            mode
+            'dmx-repair-console-auth-mode-label)
+       (:basic "username/password")
+       (:header "authorization header")
+       (:token "bearer token")))))
 
 (defparameter *dmx-repair-auth-state-specs*
   '((:state :s0
@@ -569,6 +572,12 @@
    :auth-token auth-token
    :verbose nil))
 
+(defun dmx-repair-result-with-overrides (result &rest overrides)
+  (let ((copy (copy-list result)))
+    (loop for (key value) on overrides by #'cddr
+          do (setf (getf copy key) value))
+    copy))
+
 (defun sanitize-dmx-repair-result (topic-id diagnostics result
                                     &key dry-run auth-mode success-p message
                                       debug-report)
@@ -587,9 +596,12 @@
             (and diagnostics
                  (hyperdoc::dmx-topic-diagnostics-ownership-class diagnostics)))
         :auth-mode
-        (hyperdoc::normalize-http-dmx-import-auth-mode
-         auth-mode
-         'sanitize-dmx-repair-result)
+        (if (or (null auth-mode)
+                (eq auth-mode :rehearsal))
+            :rehearsal
+            (hyperdoc::normalize-http-dmx-import-auth-mode
+             auth-mode
+             'sanitize-dmx-repair-result))
         :dry-run (and dry-run t)
         :success-p (and success-p t)
         :workspace-action (getf result :workspace-action)
@@ -599,16 +611,21 @@
         :debug-report debug-report
         :message message))
 
-(defun repair-topic-proxy-with-client (page client &key dry-run auth-mode auth-context)
+(defun repair-topic-proxy-with-client
+    (page client &key dry-run auth-mode auth-context
+       (refresh-page-p t) (record-result-p t))
   (hyperdoc::ensure-dmx-topic-diagnostics page :force? t)
   (let* ((topic-id (hyperdoc::dmx-topic-id-of page))
          (diagnostics (hyperdoc::dmx-diagnostics-of page))
          (normalized-auth-context
            (or auth-context
                (list :auth-mode
-                     (hyperdoc::normalize-http-dmx-import-auth-mode
-                      auth-mode
-                      'repair-topic-proxy-with-client)
+                     (if (or (null auth-mode)
+                             (eq auth-mode :rehearsal))
+                         :rehearsal
+                         (hyperdoc::normalize-http-dmx-import-auth-mode
+                          auth-mode
+                          'repair-topic-proxy-with-client))
                      :credentials-captured-p nil
                      :username-provided-p nil
                      :password-provided-p nil
@@ -683,21 +700,141 @@
                                         :debug-report
                                         (build-dmx-repair-debug-report
                                          client
-                                         normalized-auth-context
-                                         result-payload
-                                         success-p)
+                                        normalized-auth-context
+                                        result-payload
+                                        success-p)
                                         :message message)))
-    (handler-case
-        (ensure-dmx-topic-proxy-readbacks page)
-      (error (condition)
-        (setf result
-              (append result
-                      (list :message
-                            (format nil
-                                    "~A Readback refresh failed: ~A"
-                                    (or (getf result :message) "")
-                                    condition))))))
-    (setf (hyperdoc::dmx-repair-results-of page) (list result))
+    (when refresh-page-p
+      (handler-case
+          (ensure-dmx-topic-proxy-readbacks page)
+        (error (condition)
+          (setf result
+                (dmx-repair-result-with-overrides
+                 result
+                 :message
+                 (format nil
+                         "~A Readback refresh failed: ~A"
+                         (or (getf result :message) "")
+                         condition))))))
+    (when record-result-p
+      (setf (hyperdoc::dmx-repair-results-of page) (list result)))
+    result))
+
+(defun make-repair-triage-topic-localhost-rehearsal-snapshot (page topic-id)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page :force? t)
+  (let ((proxy (or (find-repair-triage-proxy page topic-id)
+                   (error "Topic ~D is not in the current shared-workspace repair backlog"
+                          topic-id))))
+    (hyperdoc::make-dmx-workspace-assignment-rehearsal-snapshot
+     :topic (or (hyperdoc::dmx-topic-data-of proxy)
+                (error "Missing captured topic JSON for rehearsal topic ~D"
+                       topic-id))
+     :workspace-id hyperdoc::*dmx-context-window-workspace-id*
+     :workspace-topicmap-id (hyperdoc::dmx-topicmap-id-of page)
+     :workspace-assignment (hyperdoc::dmx-workspace-data-of proxy)
+     :topicmap-memberships (hyperdoc::dmx-topicmap-memberships-of proxy)
+     :workspace-topicmap (or (hyperdoc::dmx-topicmap-projection-of page)
+                             (error "Missing captured topicmap projection for rehearsal topic ~D"
+                                    topic-id))
+     :workspace-owner (hyperdoc::dmx-workspace-owner-of proxy))))
+
+(defun repair-triage-topic-with-localhost-rehearsal (page topic-id &key dry-run)
+  (let* ((proxy (or (find-repair-triage-proxy page topic-id)
+                    (error "Topic ~D is not in the current shared-workspace repair backlog"
+                           topic-id)))
+         (snapshot
+           (make-repair-triage-topic-localhost-rehearsal-snapshot page topic-id))
+         (client
+           (hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot
+            snapshot
+            :next-topic-id 951000)))
+    (let ((hyperdoc::*dmx-workspace-journal-suppressed-p* t))
+      (declare (special hyperdoc::*dmx-workspace-journal-suppressed-p*))
+      (repair-topic-proxy-with-client proxy
+                                      client
+                                      :dry-run dry-run
+                                      :auth-mode :rehearsal
+                                      :auth-context
+                                      (list :auth-mode :rehearsal
+                                            :credentials-captured-p nil
+                                            :username-provided-p nil
+                                            :password-provided-p nil
+                                            :authorization-header-provided-p nil
+                                            :auth-token-provided-p nil)
+                                      :refresh-page-p nil
+                                      :record-result-p nil))))
+
+(defun repair-workspace-triage-backlog-with-localhost-rehearsal
+    (page &key dry-run)
+  (loop for topic-id in (repair-workspace-triage-topic-ids page)
+        collect (repair-triage-topic-with-localhost-rehearsal page
+                                                              topic-id
+                                                              :dry-run dry-run)))
+
+(defun dmx-repair-result-with-localhost-rehearsal
+    (result rehearsal-result &key remote-attempted-p)
+  (dmx-repair-result-with-overrides
+   result
+   :localhost-rehearsal-ran-p t
+   :localhost-rehearsal-result rehearsal-result
+   :localhost-rehearsal-success-p
+   (and (getf rehearsal-result :success-p) t)
+   :message
+   (if remote-attempted-p
+       (format nil "Localhost rehearsal succeeded. ~A"
+               (or (getf result :message) "n/a"))
+       (format nil
+               "Localhost rehearsal failed; remote repair not attempted. ~A"
+               (or (getf rehearsal-result :message) "n/a")))))
+
+(defun repair-triage-topic-with-explicit-auth
+    (page topic-id &key dry-run auth-mode username password
+       authorization-header auth-token)
+  (let* ((rehearsal-result
+           (repair-triage-topic-with-localhost-rehearsal page
+                                                         topic-id
+                                                         :dry-run dry-run))
+         (result
+           (if (getf rehearsal-result :success-p)
+               (let* ((auth-context
+                        (build-dmx-repair-auth-context
+                         :auth-mode auth-mode
+                         :username username
+                         :password password
+                         :authorization-header authorization-header
+                         :auth-token auth-token))
+                      (client
+                        (make-explicit-dmx-repair-client
+                         page
+                         :auth-mode auth-mode
+                         :username username
+                         :password password
+                         :authorization-header authorization-header
+                         :auth-token auth-token))
+                      (remote-result
+                        (repair-triage-topic-with-client page
+                                                         topic-id
+                                                         client
+                                                         :dry-run dry-run
+                                                         :auth-mode auth-mode
+                                                         :auth-context
+                                                         auth-context)))
+                 (dmx-repair-result-with-localhost-rehearsal
+                  remote-result
+                  rehearsal-result
+                  :remote-attempted-p t))
+               (dmx-repair-result-with-localhost-rehearsal
+                rehearsal-result
+                rehearsal-result
+                :remote-attempted-p nil))))
+    (setf (hyperdoc::dmx-repair-results-of page) (list result)
+          (hyperdoc::dmx-repair-summary-of page)
+          (list :count 1
+                :dry-run (and dry-run t)
+                :success-count (if (getf result :success-p) 1 0)
+                :error-count (if (getf result :success-p) 0 1)
+                :message (getf result :message)))
+    (hyperdoc::ensure-dmx-workspace-repair-triage page :force? t)
     result))
 
 (defun repair-topic-proxy-with-explicit-auth (page &key dry-run auth-mode
@@ -782,25 +919,67 @@
 
 (defun repair-workspace-triage-backlog-with-explicit-auth
     (page &key dry-run auth-mode username password authorization-header auth-token)
-  (let* ((auth-context
-           (build-dmx-repair-auth-context
-            :auth-mode auth-mode
-            :username username
-            :password password
-            :authorization-header authorization-header
-            :auth-token auth-token))
-         (client (make-explicit-dmx-repair-client
-                  page
-                  :auth-mode auth-mode
-                  :username username
-                  :password password
-                  :authorization-header authorization-header
-                  :auth-token auth-token)))
-    (repair-workspace-triage-backlog-with-client page
-                                                 client
-                                                 :dry-run dry-run
-                                                 :auth-mode auth-mode
-                                                 :auth-context auth-context)))
+  (let* ((auth-context nil)
+         (client nil))
+    (let* ((rehearsal-results
+             (repair-workspace-triage-backlog-with-localhost-rehearsal
+              page
+              :dry-run dry-run))
+           (all-rehearsals-succeeded-p
+             (every (lambda (result) (getf result :success-p))
+                    rehearsal-results))
+           (remote-results
+             (and all-rehearsals-succeeded-p
+                  (setf auth-context
+                        (build-dmx-repair-auth-context
+                         :auth-mode auth-mode
+                         :username username
+                         :password password
+                         :authorization-header authorization-header
+                         :auth-token auth-token)
+                        client
+                        (make-explicit-dmx-repair-client
+                         page
+                         :auth-mode auth-mode
+                         :username username
+                         :password password
+                         :authorization-header authorization-header
+                         :auth-token auth-token))
+                  (repair-workspace-triage-backlog-with-client page
+                                                               client
+                                                               :dry-run dry-run
+                                                               :auth-mode auth-mode
+                                                               :auth-context
+                                                               auth-context)))
+           (final-results
+             (if all-rehearsals-succeeded-p
+                 (loop for remote-result in remote-results
+                       for rehearsal-result in rehearsal-results
+                       collect (dmx-repair-result-with-localhost-rehearsal
+                                remote-result
+                                rehearsal-result
+                                :remote-attempted-p t))
+                 (mapcar (lambda (rehearsal-result)
+                           (dmx-repair-result-with-localhost-rehearsal
+                            rehearsal-result
+                            rehearsal-result
+                            :remote-attempted-p nil))
+                         rehearsal-results))))
+      (setf (hyperdoc::dmx-repair-results-of page) final-results
+            (hyperdoc::dmx-repair-summary-of page)
+            (list :count (length final-results)
+                  :dry-run (and dry-run t)
+                  :success-count (count-if (lambda (result)
+                                             (getf result :success-p))
+                                           final-results)
+                  :error-count (count-if-not (lambda (result)
+                                               (getf result :success-p))
+                                             final-results)
+                  :message
+                  (if all-rehearsals-succeeded-p
+                      "Localhost rehearsal succeeded before the remote backlog action."
+                      "Localhost rehearsal failed for at least one backlog item, so remote repair was not attempted.")))
+      final-results)))
 
 (defun render-dmx-repair-results-table (results &key topicmap-id)
   (if results
@@ -1879,71 +2058,31 @@
                 (views:action-button
                  "Dry-run selected topic"
                  (views:thunk
-                   (let* ((auth-context
-                            (build-dmx-repair-auth-context
-                             :auth-mode (lwcells:cell-ref mode-cell)
-                             :username (lwcells:cell-ref username-cell)
-                             :password (lwcells:cell-ref password-cell)
-                             :authorization-header (lwcells:cell-ref header-cell)
-                             :auth-token (lwcells:cell-ref token-cell)))
-                          (client (make-explicit-dmx-repair-client
-                                   page
-                                   :auth-mode (lwcells:cell-ref mode-cell)
-                                   :username (lwcells:cell-ref username-cell)
-                                   :password (lwcells:cell-ref password-cell)
-                                   :authorization-header (lwcells:cell-ref header-cell)
-                                   :auth-token (lwcells:cell-ref token-cell))))
-                     (let ((result (repair-triage-topic-with-client
-                                    page
-                                    (parse-integer (lwcells:cell-ref selected-topic-cell))
-                                    client
-                                    :dry-run t
-                                    :auth-mode (lwcells:cell-ref mode-cell)
-                                    :auth-context auth-context)))
-                       (setf (hyperdoc::dmx-repair-results-of page)
-                             (list result)
-                             (hyperdoc::dmx-repair-summary-of page)
-                             (list :count 1
-                                   :dry-run t
-                                   :success-count (if (getf result :success-p) 1 0)
-                                   :error-count (if (getf result :success-p) 0 1))))
-                     (hyperdoc::ensure-dmx-workspace-repair-triage page :force? t)
-                     t))
+                   (repair-triage-topic-with-explicit-auth
+                    page
+                    (parse-integer (lwcells:cell-ref selected-topic-cell))
+                    :dry-run t
+                    :auth-mode (lwcells:cell-ref mode-cell)
+                    :username (lwcells:cell-ref username-cell)
+                    :password (lwcells:cell-ref password-cell)
+                    :authorization-header (lwcells:cell-ref header-cell)
+                    :auth-token (lwcells:cell-ref token-cell))
+                   t)
                  "Run the guarded repair path for the selected backlog topic without mutating DMX")
                 " "
                 (views:action-button
                  "Repair selected topic"
                  (views:thunk
-                   (let* ((auth-context
-                            (build-dmx-repair-auth-context
-                             :auth-mode (lwcells:cell-ref mode-cell)
-                             :username (lwcells:cell-ref username-cell)
-                             :password (lwcells:cell-ref password-cell)
-                             :authorization-header (lwcells:cell-ref header-cell)
-                             :auth-token (lwcells:cell-ref token-cell)))
-                          (client (make-explicit-dmx-repair-client
-                                   page
-                                   :auth-mode (lwcells:cell-ref mode-cell)
-                                   :username (lwcells:cell-ref username-cell)
-                                   :password (lwcells:cell-ref password-cell)
-                                   :authorization-header (lwcells:cell-ref header-cell)
-                                   :auth-token (lwcells:cell-ref token-cell))))
-                     (let ((result (repair-triage-topic-with-client
-                                    page
-                                    (parse-integer (lwcells:cell-ref selected-topic-cell))
-                                    client
-                                    :dry-run nil
-                                    :auth-mode (lwcells:cell-ref mode-cell)
-                                    :auth-context auth-context)))
-                       (setf (hyperdoc::dmx-repair-results-of page)
-                             (list result)
-                             (hyperdoc::dmx-repair-summary-of page)
-                             (list :count 1
-                                   :dry-run nil
-                                   :success-count (if (getf result :success-p) 1 0)
-                                   :error-count (if (getf result :success-p) 0 1))))
-                     (hyperdoc::ensure-dmx-workspace-repair-triage page :force? t)
-                     t))
+                   (repair-triage-topic-with-explicit-auth
+                    page
+                    (parse-integer (lwcells:cell-ref selected-topic-cell))
+                    :dry-run nil
+                    :auth-mode (lwcells:cell-ref mode-cell)
+                    :username (lwcells:cell-ref username-cell)
+                    :password (lwcells:cell-ref password-cell)
+                    :authorization-header (lwcells:cell-ref header-cell)
+                    :auth-token (lwcells:cell-ref token-cell))
+                   t)
                  "Repair only the selected backlog topic")
                 " "
                 (views:action-button

@@ -815,6 +815,243 @@
                            "Foreign control must remain excluded from repair"))
         (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http)))))
 
+(defun run-repair-console-localhost-rehearsal-bridge-smoke-test ()
+  (let* ((remote-client (make-instance 'hyperdoc::memory-dmx-import-client))
+         (triage-page (hyperdoc::make-dmx-shared-workspace-repair-triage))
+         (book (hyperbook:hyperbook-of triage-page))
+         (events nil)
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
+         (original-explicit-client
+           (symbol-function 'hyperdoc/inspector::make-explicit-dmx-repair-client))
+         (original-rehearsal-builder
+           (symbol-function
+            'hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot))
+         (original-execute
+           (symbol-function
+            'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair))
+         (original-journal-suppressed-p
+           hyperdoc::*dmx-workspace-journal-suppressed-p*))
+    (labels ((make-view-props (x y)
+               (let ((json (make-hash-table :test #'equal)))
+                 (setf (gethash "dmx.topicmaps.x" json) x
+                       (gethash "dmx.topicmaps.y" json) y
+                       (gethash "dmx.topicmaps.visibility" json) t
+                       (gethash "dmx.topicmaps.pinned" json) nil)
+                 json))
+             (seed-topic (id uri value)
+               (hyperdoc::dmx-import-create-topic
+                remote-client
+                (list :id id
+                      :uri uri
+                      :external-key uri
+                      :type-uri "dmx.notes.note"
+                      :value value
+                      :children nil)))
+             (topicmap-memberships-json (topic-id)
+               (let ((memberships '()))
+                 (maphash
+                  (lambda (membership-key view-props)
+                    (declare (ignore view-props))
+                    (destructuring-bind (topicmap-id member-topic-id) membership-key
+                      (when (eql member-topic-id topic-id)
+                        (let ((membership (make-hash-table :test #'equal))
+                              (assoc (make-hash-table :test #'equal)))
+                          (setf (gethash "id" membership) topicmap-id
+                                (gethash "value" membership) "context-window"
+                                (gethash "assoc" membership) assoc
+                                (gethash "id" assoc) (+ 1000 topic-id))
+                          (push membership memberships)))))
+                  (hyperdoc::topicmap-memberships-of remote-client))
+                 (coerce (nreverse memberships) 'vector)))
+             (topicmap-core-json ()
+               (let ((json (make-hash-table :test #'equal)))
+                 (setf (gethash "id" json) 919822
+                       (gethash "uri" json) ""
+                       (gethash "typeUri" json) "dmx.topicmaps.topicmap"
+                       (gethash "value" json) "context-window"
+                       (gethash "children" json) (make-hash-table :test #'equal))
+                 json))
+             (memory-body-for-topic (topic-id)
+               (let ((topic (hyperdoc::dmx-import-read-topic remote-client topic-id)))
+                 (if topic
+                     (values (hyperdoc::encode-json-string topic)
+                             200
+                             (expected-dmx-core-topic-url topic-id)
+                             "OK")
+                     (values "" 404 (expected-dmx-core-topic-url topic-id) "Not Found")))))
+      (declare (ignore book))
+      (seed-topic 922451
+                  "hyperdoc:mcp/auth-probe-20260330-1"
+                  "auth probe")
+      (seed-topic 922500
+                  "hyperdoc:mcp/handover/handover-codex-remediate-probe-topic-922451"
+                  "Remediate probe topic 922451 outside topicmap 919822")
+      (seed-topic 922586
+                  "hyperdoc:mcp/workspace-note/guarded-default-workspace-owner-verification-2026-03-30"
+                  "Guarded workspace default verification note")
+      (dolist (topic-id '(922451 922500 922586))
+        (hyperdoc::dmx-import-add-topic-to-topicmap
+         remote-client
+         919822
+         topic-id
+         (make-view-props (+ 10 (mod topic-id 50))
+                          (+ 20 (mod topic-id 40)))))
+      (hyperdoc::dmx-import-assign-topic-to-workspace remote-client 919815 922586)
+      (clrhash (hyperdoc::dmx-cache-of (hyperbook:hyperbook-of triage-page)))
+      (setf (hyperdoc::dmx-cache-order-of (hyperbook:hyperbook-of triage-page)) nil
+            (hyperdoc::dmx-topicmap-projection-of triage-page) nil
+            (hyperdoc::dmx-triage-topic-proxies-of triage-page) nil
+            (hyperdoc::dmx-repair-topic-proxies-of triage-page) nil
+            (hyperdoc::dmx-load-error-of triage-page) nil)
+      (unwind-protect
+           (progn
+             (setf (symbol-function 'hyperdoc::dmx-http-request-body)
+                   (lambda (book endpoint &key parameters accept)
+                     (declare (ignore book parameters accept))
+                     (cond
+                       ((string= endpoint "/topicmaps/919822")
+                        (values
+                         (hyperdoc::encode-json-string
+                          (hyperdoc::dmx-import-read-topicmap remote-client 919822))
+                         200
+                         (expected-dmx-topicmap-projection-url 919822)
+                         "OK"))
+                       ((string= endpoint "/core/topic/919822")
+                        (values
+                         (hyperdoc::encode-json-string (topicmap-core-json))
+                         200
+                         (expected-dmx-core-topic-url 919822)
+                         "OK"))
+                       ((search "/core/topic/" endpoint)
+                        (memory-body-for-topic
+                         (parse-integer (subseq endpoint (length "/core/topic/")))))
+                       ((search "/workspaces/object/" endpoint)
+                        (let* ((topic-id (parse-integer
+                                          (subseq endpoint
+                                                  (length "/workspaces/object/"))))
+                               (workspace (hyperdoc::dmx-import-read-topic-workspace
+                                           remote-client
+                                           topic-id)))
+                          (if workspace
+                              (values (hyperdoc::encode-json-string workspace)
+                                      200
+                                      (expected-dmx-workspace-object-url topic-id)
+                                      "OK")
+                              (values ""
+                                      204
+                                      (expected-dmx-workspace-object-url topic-id)
+                                      "No Content"))))
+                       ((search "/topicmaps/object/" endpoint)
+                        (let ((topic-id (parse-integer
+                                         (subseq endpoint
+                                                 (length "/topicmaps/object/")))))
+                          (values
+                           (hyperdoc::encode-json-string
+                            (topicmap-memberships-json topic-id))
+                           200
+                           (expected-dmx-topicmap-memberships-url topic-id)
+                           "OK")))
+                       ((string= endpoint "/access-control/workspace/919815/owner")
+                        (values "rgb" 200 (expected-dmx-workspace-owner-url 919815) "OK"))
+                       (t
+                        (error "Unexpected DMX repair-console rehearsal fetch ~S"
+                               endpoint)))))
+             (setf (symbol-function 'hyperdoc/inspector::make-explicit-dmx-repair-client)
+                   (lambda (&rest args)
+                     (declare (ignore args))
+                     remote-client))
+             (setf (symbol-function
+                    'hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot)
+                   (lambda (snapshot &rest args)
+                     (let* ((repair-target (gethash "repairTarget" snapshot))
+                            (captures (gethash "captures" snapshot))
+                            (topic-id (gethash "topicId" repair-target))
+                            (workspace-assignment
+                              (gethash "workspaceAssignment" captures))
+                            (topicmap-memberships
+                              (gethash "topicmapMemberships" captures)))
+                       (push (list :snapshot
+                                   topic-id
+                                   (length (hyperdoc::json-array-elements
+                                            topicmap-memberships))
+                                   (and workspace-assignment t))
+                             events))
+                     (apply original-rehearsal-builder snapshot args)))
+             (setf (symbol-function
+                    'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)
+                   (lambda (topic-id &rest args &key client dry-run &allow-other-keys)
+                     (push (list (if (eq client remote-client)
+                                     :remote
+                                     :localhost-rehearsal)
+                                 topic-id
+                                 (and dry-run t)
+                                 (and hyperdoc::*dmx-workspace-journal-suppressed-p* t))
+                           events)
+                     (apply original-execute topic-id args)))
+             (hyperdoc::ensure-dmx-workspace-repair-triage triage-page :force? t)
+             (assert-equal '(922500)
+                           (mapcar #'hyperdoc::dmx-topic-id-of
+                                   (hyperdoc::dmx-repair-topic-proxies-of triage-page))
+                           "Backlog rehearsal bridge must start from the filtered triage backlog")
+             (let ((results
+                     (hyperdoc/inspector::repair-workspace-triage-backlog-with-explicit-auth
+                      triage-page
+                      :dry-run nil
+                      :auth-mode :header
+                      :authorization-header "Bearer smoke-token")))
+               (assert-equal 1
+                             (length results)
+                             "Backlog rehearsal bridge must return one repaired backlog item")
+               (let ((result (first results)))
+                 (assert-equal 922500
+                               (getf result :topic-id)
+                               "Backlog rehearsal bridge must target the selected backlog topic")
+                 (assert-true
+                  (getf result :localhost-rehearsal-ran-p)
+                  "Backlog repair must record that localhost rehearsal ran first")
+                 (assert-true
+                  (getf result :localhost-rehearsal-success-p)
+                  "Backlog repair must require a successful localhost rehearsal before remote mutation")
+                 (assert-true
+                  (getf result :success-p)
+                  "Backlog repair must still succeed remotely after rehearsal")
+                 (assert-equal 919815
+                               (getf result :result-workspace-id)
+                               "Backlog repair must read back workspace 919815 after remote mutation")
+                 (assert-true
+                  (getf result :result-in-topicmap-p)
+                  "Backlog repair must keep topicmap placement intact")))
+             (assert-equal
+              '((:snapshot 922500 1 nil)
+                (:localhost-rehearsal 922500 nil t)
+                (:remote 922500 nil nil))
+              (nreverse events)
+              "Backlog repair must build a bounded rehearsal snapshot, execute localhost rehearsal first, then execute remote repair")
+             (assert-equal 919815
+                           (hyperdoc::dmx-import-object-id
+                            (hyperdoc::dmx-import-read-topic-workspace remote-client
+                                                                       922500))
+                           "Remote client must receive the final workspace assignment after rehearsal succeeds")
+             (assert-true
+              (hyperdoc::dmx-import-topic-in-topicmap-p remote-client 919822 922500)
+              "Remote repair must not change topicmap placement")
+             (assert-equal nil
+                           (mapcar #'hyperdoc::dmx-topic-id-of
+                                   (hyperdoc::dmx-repair-topic-proxies-of triage-page))
+                           "Backlog triage must empty after the remote repair completes")
+             (assert-equal original-journal-suppressed-p
+                           hyperdoc::*dmx-workspace-journal-suppressed-p*
+                           "Localhost rehearsal must restore workspace-journal suppression after the bridge completes"))
+        (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http
+              (symbol-function 'hyperdoc/inspector::make-explicit-dmx-repair-client)
+              original-explicit-client
+              (symbol-function
+               'hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot)
+              original-rehearsal-builder
+              (symbol-function
+               'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)
+              original-execute)))))
+
 (defun run-repair-console-debug-trace-regression-test ()
   (let* ((single-proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 922464))
          (book (hyperbook:hyperbook-of single-proxy))
@@ -1245,8 +1482,9 @@
   (run-workspace-repair-triage-regression-test)
   (run-explicit-dmx-repair-client-builder-test)
   (run-repair-console-helper-regression-test)
+  (run-repair-console-localhost-rehearsal-bridge-smoke-test)
   (run-repair-console-debug-trace-regression-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console debug trace regression + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)
