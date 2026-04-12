@@ -70,6 +70,23 @@
      :label "FUNCTION-LOOKUP-ISSUE-SMOKE-MISSING"
      :source-tag "source-of-function")))
 
+(defun with-temporary-symbol-function (symbol thunk)
+  (let ((had-definition (fboundp symbol))
+        (original-function (and (fboundp symbol)
+                                (symbol-function symbol))))
+    (unwind-protect
+         (progn
+           (setf (symbol-function symbol)
+                 (lambda (&rest args)
+                   (declare (ignore args))
+                   :function-lookup-issue-smoke))
+           (funcall thunk))
+      (cond
+        (had-definition
+         (setf (symbol-function symbol) original-function))
+        ((fboundp symbol)
+         (fmakunbound symbol))))))
+
 (defun run-authored-function-lookup-issue-smoke-test ()
   (let* ((symbol (intern "FUNCTION-LOOKUP-ISSUE-SMOKE-MISSING" :hyperdoc/tests))
          (expected-page-id (format nil "~A::~A"
@@ -90,6 +107,10 @@
               (condition (hyperbook:lookup-issue-underlying-condition-of issue))
               (message (hyperbook:lookup-issue-underlying-message-of issue))
               (details (hyperbook:lookup-issue-details-of issue))
+              (repair-thunk (hyperbook::lookup-issue-repair-thunk-of issue))
+              (repair-description
+                (hyperbook:lookup-issue-repair-description-of issue))
+              (missing-correction (funcall repair-thunk))
               (issue-views (load-inspector-views-for-object issue))
               (overview-html
                 (html-inspector-views:view-html
@@ -147,17 +168,70 @@
          (assert-equal symbol
                        (getf details :expected-symbol)
                        "Authored function lookup details must preserve the expected symbol object")
+         (assert-equal :needs-runtime-load
+                       (hyperbook:lookup-issue-status-of issue)
+                       "A missing authored source-of-function must classify as needing runtime load")
+         (assert-equal :load-or-reload-definition
+                       (hyperbook:lookup-issue-suggested-repair-of issue)
+                       "A missing authored source-of-function must suggest load/reload guidance")
+         (assert-true (search "Load or reload" repair-description :test #'char-equal)
+                      "A missing authored source-of-function must explain the load/reload correction path")
+         (assert-equal :missing
+                       (getf details :runtime-load-state)
+                       "Lookup issue details must expose that the expected symbol is still missing at inspection time")
+         (assert-equal nil
+                       (getf details :current-fboundp)
+                       "Lookup issue details must expose the current missing load state")
+         (assert-equal :load-or-reload-definition
+                       (getf details :correction-mode)
+                       "Lookup issue details must expose the derived correction mode")
+         (assert-true (typep missing-correction 'hyperbook::function-lookup-correction)
+                      "The repair thunk for a still-missing function must expose a bounded correction object")
          (assert-true (search "Source page id / slug" overview-html :test #'char-equal)
                       "Lookup issue overview must expose source page id for authored function lookups")
          (assert-true (search page-id overview-html :test #'char-equal)
                       "Lookup issue overview must show the authored source page id")
+         (assert-true (search "needs runtime load" overview-html :test #'char-equal)
+                      "Lookup issue overview must surface the runtime-derived status for missing functions")
+         (assert-true (search "load or reload definition" overview-html
+                              :test #'char-equal)
+                      "Lookup issue overview must surface the runtime-derived suggested repair")
          (assert-true (search "source-of-function" details-html :test #'char-equal)
                       "Lookup issue details must expose the authored reference seam")
+         (assert-true (search "runtime-load-state" details-html :test #'char-equal)
+                      "Lookup issue details must expose runtime load-state evidence")
          (assert-true (search "Preserved condition text" condition-html
                               :test #'char-equal)
                       "Lookup issue Condition view must surface preserved condition text")
          (assert-true (search "is undefined" condition-html :test #'char-equal)
-                      "Lookup issue Condition view must include the preserved undefined-function message"))))))
+                      "Lookup issue Condition view must include the preserved undefined-function message")
+         (with-temporary-symbol-function
+             symbol
+           (lambda ()
+             (let ((refreshed-details (hyperbook:lookup-issue-details-of issue))
+                   (reopen-target
+                     (funcall (hyperbook::lookup-issue-repair-thunk-of issue))))
+               (assert-equal :fixed
+                             (hyperbook:lookup-issue-status-of issue)
+                             "Once the expected symbol becomes fboundp, the issue must classify as fixed")
+               (assert-equal :reopen-lisp-function-page
+                             (hyperbook:lookup-issue-suggested-repair-of issue)
+                             "Once the expected symbol becomes fboundp, the suggested repair must become reopen/retry")
+               (assert-true
+                (search "now fbound" (hyperbook:lookup-issue-repair-description-of issue)
+                        :test #'char-equal)
+                "Once the expected symbol becomes fboundp, the repair description must explain the retry path")
+               (assert-equal :fbound
+                             (getf refreshed-details :runtime-load-state)
+                             "Lookup issue details must refresh when the expected symbol becomes fboundp")
+               (assert-equal t
+                             (getf refreshed-details :current-fboundp)
+                             "Lookup issue details must expose the refreshed fboundp evidence")
+               (assert-true (typep reopen-target 'hyperbook::lisp-function-page)
+                            "The repair thunk must reopen the Lisp Functions page once the symbol is available")
+               (assert-equal expected-page-id
+                             (hyperbook:id-of reopen-target)
+                             "The reopened Lisp Functions page must target the expected page id")))))))))
 
 (defun run-function-lookup-issues-smoke-tests ()
   (run-raw-function-lookup-issue-smoke-test)
