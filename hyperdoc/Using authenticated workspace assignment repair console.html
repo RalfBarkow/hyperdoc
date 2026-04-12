@@ -15,6 +15,15 @@
 </p>
 
 <p>
+  For the specific defect class
+  <tt>in-topicmap-but-unassigned</tt>, this console is the primary live repair
+  boundary.
+  Server-side MCP auth may still exist for deployment automation, but it is not
+  the default operator retry path once the first guarded workspace-assignment
+  write returns <tt>401</tt>.
+</p>
+
+<p>
   In the broader surface vocabulary, the repair console is the worked
   <a page="Mutation surface">mutation surface</a>.
   In the broader boundary vocabulary, it is also a worked
@@ -168,6 +177,27 @@
   Live repair still depends on the user supplying valid DMX credentials in the
   console at action time.
 </p>
+
+<h2>Operator rule after the first 401</h2>
+
+<p>
+  If a server-side MCP repair attempt already hit
+  <tt>401</tt> on
+  <tt>PUT /workspaces/&lt;workspace&gt;/object/&lt;topic&gt;</tt>,
+  do not keep retrying the same service-auth path as though the object were
+  still ambiguous.
+  Mark the object as <tt>credentials-pending</tt>, enter one explicit
+  action-time credential mode here, and re-run the same guarded executor from
+  this console.
+</p>
+
+<h2>Repair outcomes to expect</h2>
+
+<ul>
+  <li><tt>repair-succeeded</tt>: workspace readback becomes <tt>919815</tt> and topicmap placement remains intact</li>
+  <li><tt>repair-failed-non-auth</tt>: explicit auth crossed the boundary, but another guarded step failed later</li>
+  <li><tt>credentials-pending</tt>: no valid explicit credential was supplied yet, or the supplied credential still failed at the auth boundary</li>
+</ul>
 
 <h2>Related</h2>
 

@@ -21,6 +21,16 @@
   the DMX auth pages keep the specialized teaching crosswalk only.
 </p>
 
+<p>
+  In the shared-workspace repair workflow, this page sits after read-only
+  diagnosis and before the explicit-auth repair action.
+  When a HyperDoc-owned object is confirmed as
+  <tt>in-topicmap-but-unassigned</tt> and a first server-side repair attempt
+  returns <tt>401</tt>, the object should be classified as
+  <tt>credentials-pending</tt> and the next live attempt should use one of the
+  three explicit action-time modes documented here.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
@@ -49,6 +59,15 @@
   <li><tt>username/password</tt>: operator enters username plus password, HyperDoc derives the equivalent Basic Authorization header, and a later <tt>JSESSIONID</tt> session-cookie aftermath becomes inspectable</li>
   <li><tt>authorization header</tt>: operator enters the full header directly; HyperDoc preserves it and can safely decode a Basic example into a Credentials-like structure for display</li>
   <li><tt>bearer token</tt>: operator enters a token, HyperDoc derives <tt>Authorization: Bearer ...</tt>, and the backend note stays <tt>Installation-dependent</tt> unless a matching non-Basic AuthorizationMethod or compatible proxy is present</li>
+</ul>
+
+<h2>What this crosswalk is for operationally</h2>
+
+<ul>
+  <li>read-only diagnosis decides whether the object is <tt>healthy</tt>, <tt>foreign-no-action</tt>, or <tt>in-topicmap-but-unassigned</tt></li>
+  <li>the first <tt>401</tt> on guarded workspace assignment reclassifies the object as <tt>credentials-pending</tt></li>
+  <li>this crosswalk then helps the operator choose a valid explicit credential mode for the repair console</li>
+  <li>it does not turn the shared-workspace service account into the default retry surface for credentials-pending repairs</li>
 </ul>
 
 <h2>Safe dummy examples</h2>

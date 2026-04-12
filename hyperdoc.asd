@@ -28,6 +28,7 @@
                              (:file "localhost-fedwiki-page-promotion-plans")
                              (:file "code-path-graphs")
                              (:file "topics")
+                             (:file "page-lookup-chunks")
                              (:file "state-machines")
                              (:file "surfaces")
                              (:file "boundaries")

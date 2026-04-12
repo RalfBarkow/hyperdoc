@@ -74,6 +74,15 @@
 </ul>
 
 <p>
+  The ownership boundary for this tab must treat both
+  <tt>hyperdoc:mcp/workspace-annotation/</tt> and
+  <tt>hyperdoc:mcp/workspace-journal/</tt> URI families as HyperDoc-owned.
+  If an older summary path reports one of those families as foreign, treat that
+  as a classifier false negative and confirm ownership through the guarded
+  workspace-topic classifier before deciding that no action is needed.
+</p>
+
+<p>
   This is intentionally read-only.
   Diagnosis remains read-only and needs no login because this inspector only
   reads machine-readable DMX endpoints.
@@ -149,6 +158,17 @@
   topicmap <tt>919822</tt> while still lacking workspace assignment.
 </p>
 
+<h2>Canonical single-object statuses</h2>
+
+<ul>
+  <li><tt>healthy</tt>: workspace readback is <tt>919815</tt> and selected topicmap presence is true</li>
+  <li><tt>foreign-no-action</tt>: the object is not HyperDoc-owned for this guarded repair boundary</li>
+  <li><tt>in-topicmap-but-unassigned</tt>: workspace read succeeds, assignment is missing, and selected topicmap presence is true</li>
+  <li><tt>credentials-pending</tt>: the object is confirmed repairable, but the first live assignment write hit the authentication boundary</li>
+  <li><tt>repair-succeeded</tt>: the guarded assignment repair completed and read back as assigned</li>
+  <li><tt>repair-failed-non-auth</tt>: auth was crossed, but the repair failed later for another reason</li>
+</ul>
+
 <h2>Follow-up boundary</h2>
 
 <p>
@@ -160,6 +180,14 @@
   <tt>Repair console</tt> tab, which threads explicit ephemeral credentials
   into the same guarded repair executor without collapsing workspace assignment
   into topicmap placement.
+</p>
+
+<p>
+  If the first live assignment attempt returns <tt>401</tt> on the guarded
+  workspace-assignment endpoint, stop retrying the same server-side service-auth
+  path for that object.
+  Reclassify it as <tt>credentials-pending</tt> and continue only through the
+  explicit-auth repair console.
 </p>
 
 <p>

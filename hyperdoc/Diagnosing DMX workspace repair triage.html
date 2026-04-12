@@ -85,6 +85,31 @@
   authentication and mutation separate from the diagnosis view.
 </p>
 
+<h2>Canonical status vocabulary</h2>
+
+<p>
+  Treat the shared-workspace backlog as a narrow state vocabulary, not as one
+  generic list of broken topics.
+  The canonical statuses for this workflow are:
+</p>
+
+<ul>
+  <li><tt>healthy</tt>: HyperDoc-owned, assignment present as <tt>919815</tt>, and topicmap presence intact</li>
+  <li><tt>foreign-no-action</tt>: visible in the shared topicmap but not HyperDoc-owned for this guarded repair boundary</li>
+  <li><tt>in-topicmap-but-unassigned</tt>: HyperDoc-owned, visible in <tt>919822</tt>, and missing workspace assignment</li>
+  <li><tt>credentials-pending</tt>: the object still needs guarded assignment repair, but the first live write attempt hit the authentication boundary</li>
+  <li><tt>repair-succeeded</tt>: guarded assignment repair completed and read back cleanly</li>
+  <li><tt>repair-failed-non-auth</tt>: guarded repair crossed auth but failed later for another reason</li>
+</ul>
+
+<p>
+  The ownership filter for this backlog must recognize both
+  <tt>hyperdoc:mcp/workspace-annotation/</tt> and
+  <tt>hyperdoc:mcp/workspace-journal/</tt> as HyperDoc-owned families.
+  A classifier that misses those URI prefixes creates a false
+  <tt>foreign-no-action</tt> result.
+</p>
+
 <h2>Acceptance set for the current repair defect</h2>
 
 <p>
@@ -130,6 +155,19 @@
   That is why the filter is intentionally narrow.
   It is not a general list of all unassigned objects, and it does not mix
   repair actions into the read-only triage table.
+</p>
+
+<h2>Operator rule after the first 401</h2>
+
+<p>
+  If the first live workspace-assignment repair attempt returns
+  <tt>401</tt> on the guarded <tt>PUT /workspaces/&lt;workspace&gt;/object/&lt;topic&gt;</tt>
+  boundary, stop retrying the same server-side service-auth path for that
+  object.
+  Reclassify the object as <tt>credentials-pending</tt> and move to the
+  explicit-auth
+  <a page="Using authenticated workspace assignment repair console">Repair console</a>
+  boundary for the next live attempt.
 </p>
 
 <h2>Related</h2>
