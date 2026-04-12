@@ -59,6 +59,11 @@
 (defun local-fedwiki-pages-directory ()
   (article-allegation-default-fedwiki-pages-directory))
 
+(defun local-fedwiki-repo-root ()
+  (uiop:pathname-parent-directory-pathname
+   (uiop:ensure-directory-pathname
+    (local-fedwiki-pages-directory))))
+
 (defun local-fedwiki-domain-name ()
   (let ((directory-components
           (pathname-directory
@@ -81,7 +86,8 @@
   (let* ((local-path (and (string= (string-downcase domain)
                                    (local-fedwiki-domain-name))
                           (local-fedwiki-path-for-slug slug)))
-         (local-exists-p (and local-path (uiop:file-exists-p local-path)))
+         (local-exists-p (and local-path
+                              (not (null (uiop:file-exists-p local-path)))))
          (wiki (hyperbook/fedwiki::get-fedwiki domain nil t))
          (sitemap-has-slug-p (not (null (hb:find-page wiki slug))))
          (protocol (hyperbook/fedwiki::protocol-of wiki))
@@ -259,17 +265,21 @@
   (let* ((target-hyperbook-id (hb:lookup-issue-target-hyperbook-id-of issue))
          (slug (hb:lookup-issue-expected-page-id-of issue))
          (domain (subseq target-hyperbook-id (length "fedwiki:")))
+         (pages-directory (local-fedwiki-pages-directory))
+         (repo-root (local-fedwiki-repo-root))
          (local-domain-p (string= (string-downcase domain)
                                   (local-fedwiki-domain-name)))
          (local-path (and local-domain-p
                           (local-fedwiki-path-for-slug slug)))
          (local-page-exists-p (and local-path
-                                   (uiop:file-exists-p local-path)))
+                                   (not (null (uiop:file-exists-p local-path)))))
          (materialization-plan
            (and local-domain-p
                 (ignore-errors
                   (plan-fedwiki-page-materialization
                    slug
+                   :fedwiki-pages-directory pages-directory
+                   :fedwiki-repo-root repo-root
                    :expected-fedwiki-branch nil))))
          (probe (make-fedwiki-publication-probe domain slug)))
     (hb::append-lookup-issue-details!
@@ -301,15 +311,14 @@
       ((and local-domain-p
             (not local-page-exists-p)
             materialization-plan)
+       (hb::append-lookup-issue-details!
+        issue
+        (list :fedwiki-pages-directory pages-directory
+              :fedwiki-repo-root repo-root))
        (hb::configure-lookup-issue!
         issue
         :target-kind :local-fedwiki-twin
-        :classification :missing-local-fedwiki-twin
-        :suggested-repair :materialize-local-fedwiki-twin
-        :repair-description
-        "Materialize the missing FedWiki twin into the localhost pages repo through the existing materialization helper."
-        :repair-thunk (lambda ()
-                        (plan-fedwiki-page-materialization slug))))
+        :classification :missing-local-fedwiki-twin))
       ((eq (fedwiki-publication-probe-classification-of probe)
            :remote-page-missing)
        (hb::configure-lookup-issue!
@@ -427,6 +436,70 @@
                  "topics")
     (issue-target-chunk issue)))
 
+(defun missing-local-fedwiki-twin-lookup-issue-p (issue)
+  (and (eq (hb:lookup-issue-target-kind-of issue)
+           :local-fedwiki-twin)
+       (eq (hb:lookup-issue-classification-of issue)
+           :missing-local-fedwiki-twin)))
+
+(defun missing-local-fedwiki-twin-lookup-issue-pages-directory (issue)
+  (uiop:ensure-directory-pathname
+   (or (getf (hb::lookup-issue-static-details-of issue)
+             :fedwiki-pages-directory)
+       (local-fedwiki-pages-directory))))
+
+(defun missing-local-fedwiki-twin-lookup-issue-repo-root (issue)
+  (uiop:ensure-directory-pathname
+   (or (getf (hb::lookup-issue-static-details-of issue)
+             :fedwiki-repo-root)
+       (local-fedwiki-repo-root))))
+
+(defun missing-local-fedwiki-twin-lookup-issue-runtime-state (issue)
+  (when (missing-local-fedwiki-twin-lookup-issue-p issue)
+    (let* ((slug (hb:lookup-issue-expected-page-id-of issue))
+           (pages-directory
+             (missing-local-fedwiki-twin-lookup-issue-pages-directory issue))
+           (repo-root
+             (missing-local-fedwiki-twin-lookup-issue-repo-root issue))
+           (local-path (and slug
+                            (merge-pathnames slug pages-directory)))
+           (local-page-exists-p (and local-path
+                                     (not (null (uiop:file-exists-p local-path)))))
+           (materialization-plan
+             (and slug
+                  (not local-page-exists-p)
+                  (ignore-errors
+                    (plan-fedwiki-page-materialization
+                     slug
+                     :fedwiki-pages-directory pages-directory
+                     :fedwiki-repo-root repo-root
+                     :expected-fedwiki-branch nil))))
+           (entry (and materialization-plan
+                       (first
+                        (fedwiki-materialization-entries-of
+                         materialization-plan)))))
+      (list :slug slug
+            :pages-directory pages-directory
+            :repo-root repo-root
+            :local-path local-path
+            :local-page-exists-p local-page-exists-p
+            :materialization-plan materialization-plan
+            :materialization-action
+            (and entry
+                 (fedwiki-materialization-entry-action-of entry))))))
+
+(defun missing-local-fedwiki-twin-repair-description (issue)
+  (let ((state (missing-local-fedwiki-twin-lookup-issue-runtime-state issue)))
+    (cond
+      ((null state)
+       nil)
+      ((getf state :local-page-exists-p)
+       "No repair is needed. The local FedWiki twin now exists in the current pages directory.")
+      ((getf state :materialization-plan)
+       "Materialize the missing FedWiki twin into the localhost pages repo through the existing materialization helper.")
+      (t
+       "The local FedWiki twin is still missing, but HyperDoc could not derive a current materialization plan from the current runtime context."))))
+
 (defun topic-page-lookup-issue-runtime-details (issue)
   (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
     (let ((status (topic-page-lookup-chunk-state chunk)))
@@ -437,24 +510,49 @@
             :freshness-mode (topic-page-lookup-freshness-mode chunk)))))
 
 (defmethod hb:bounded-lookup-issue-current-status-of ((issue hb:page-lookup-issue))
-  (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
-    (topic-page-lookup-chunk-state chunk)))
+  (or (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
+        (topic-page-lookup-chunk-state chunk))
+      (when-let (state (missing-local-fedwiki-twin-lookup-issue-runtime-state issue))
+        (when (getf state :local-page-exists-p)
+          :fixed))))
 
 (defmethod hb:bounded-lookup-issue-current-suggested-repair-of ((issue hb:page-lookup-issue))
-  (when (topic-page-lookup-issue-target-chunk issue)
-    :ensure-target-chunk))
+  (or (when (topic-page-lookup-issue-target-chunk issue)
+        :ensure-target-chunk)
+      (when-let (state (missing-local-fedwiki-twin-lookup-issue-runtime-state issue))
+        (when (getf state :materialization-plan)
+          :materialize-local-fedwiki-twin))))
 
 (defmethod hb:bounded-lookup-issue-current-repair-description-of ((issue hb:page-lookup-issue))
-  (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
-    (topic-page-lookup-repair-description chunk)))
+  (or (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
+        (topic-page-lookup-repair-description chunk))
+      (missing-local-fedwiki-twin-repair-description issue)))
 
 (defmethod hb:bounded-lookup-issue-current-repair-thunk-of ((issue hb:page-lookup-issue))
-  (when (topic-page-lookup-issue-target-chunk issue)
-    (lambda ()
-      (issue-target-chunk issue))))
+  (or (when (topic-page-lookup-issue-target-chunk issue)
+        (lambda ()
+          (issue-target-chunk issue)))
+      (when-let (state (missing-local-fedwiki-twin-lookup-issue-runtime-state issue))
+        (when (getf state :materialization-plan)
+          (lambda ()
+            (or (getf (missing-local-fedwiki-twin-lookup-issue-runtime-state issue)
+                      :materialization-plan)
+                (error "No current FedWiki materialization plan is available for ~A."
+                       (hb:lookup-issue-expected-page-id-of issue))))))))
 
 (defmethod hb:bounded-lookup-issue-current-details-of ((issue hb:page-lookup-issue))
-  (topic-page-lookup-issue-runtime-details issue))
+  (or (topic-page-lookup-issue-runtime-details issue)
+      (when-let (state (missing-local-fedwiki-twin-lookup-issue-runtime-state issue))
+        (list :current-fedwiki-pages-directory
+              (getf state :pages-directory)
+              :current-fedwiki-repo-root
+              (getf state :repo-root)
+              :current-local-path
+              (getf state :local-path)
+              :current-local-page-exists-p
+              (getf state :local-page-exists-p)
+              :current-materialization-action
+              (getf state :materialization-action)))))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))
   (title-of chunk))

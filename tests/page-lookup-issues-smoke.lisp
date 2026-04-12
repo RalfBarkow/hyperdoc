@@ -5,7 +5,10 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package :hyperdoc/tests)
     (make-package :hyperdoc/tests :use '(:cl)))
-  (export (list (intern "RUN-PAGE-LOOKUP-ISSUES-SMOKE-TESTS" :hyperdoc/tests))
+  (export (list (intern "RUN-MISSING-LOCAL-FEDWIKI-TWIN-LOOKUP-ISSUE-SMOKE-TEST"
+                        :hyperdoc/tests)
+                (intern "RUN-PAGE-LOOKUP-ISSUES-SMOKE-TESTS"
+                        :hyperdoc/tests))
           :hyperdoc/tests))
 
 (in-package :hyperdoc/tests)
@@ -131,6 +134,145 @@
          (let ((hyperdoc::*page-lookup-topic-source-path* temp-topics))
            (funcall thunk symbol temp-topics original-topics))
       (restore-topic-factory-test-state! symbol state)
+      (ignore-errors
+        (uiop:delete-directory-tree root
+                                    :validate t
+                                    :if-does-not-exist :ignore)))))
+
+(defun smoke-make-missing-local-fedwiki-twin-issue (slug pages-directory repo-root)
+  (let* ((pages-directory (uiop:ensure-directory-pathname pages-directory))
+         (repo-root (uiop:ensure-directory-pathname repo-root))
+         (issue (smoke-make-page-lookup-issue "fedwiki:wiki.ralfbarkow.ch" slug)))
+    (hyperbook::append-lookup-issue-details!
+     issue
+     (list :target-domain "wiki.ralfbarkow.ch"
+           :local-domain-p t
+           :local-path (merge-pathnames slug pages-directory)
+           :local-page-exists-p nil
+           :sitemap-has-slug-p nil
+           :fetch-status :error
+           :publication-classification :remote-page-missing
+           :fedwiki-pages-directory pages-directory
+           :fedwiki-repo-root repo-root))
+    (hyperbook::configure-lookup-issue!
+     issue
+     :target-kind :local-fedwiki-twin
+     :classification :missing-local-fedwiki-twin)
+    issue))
+
+(defun run-missing-local-fedwiki-twin-lookup-issue-smoke-test ()
+  (let* ((root (page-lookup-smoke-tempdir))
+         (pages-directory (merge-pathnames "pages/" root))
+         (slug "civilian-casualty-mitigation"))
+    (unwind-protect
+         (let* ((issue
+                  (smoke-make-missing-local-fedwiki-twin-issue
+                   slug
+                   pages-directory
+                   root))
+                (views (page-lookup-load-inspector-views-for-object issue))
+                (overview-html
+                  (html-inspector-views:view-html
+                   (page-lookup-smoke-find-view-by-title views "Overview")))
+                (repair-html
+                  (html-inspector-views:view-html
+                   (page-lookup-smoke-find-view-by-title views "Repair")))
+                (repair-thunk
+                  (hyperbook::lookup-issue-repair-thunk-of issue))
+                (details (hyperbook:lookup-issue-details-of issue)))
+           (assert-equal :local-fedwiki-twin
+                         (hyperbook:lookup-issue-target-kind-of issue)
+                         "The synthetic FedWiki issue must keep the local twin target kind")
+           (assert-equal :missing-local-fedwiki-twin
+                         (hyperbook:lookup-issue-classification-of issue)
+                         "The synthetic FedWiki issue must keep the missing-local-twin classification")
+           (assert-equal :open
+                         (hyperbook:lookup-issue-status-of issue)
+                         "Missing local FedWiki twins should preserve the visible open status until the twin exists")
+           (assert-equal :materialize-local-fedwiki-twin
+                         (hyperbook:lookup-issue-suggested-repair-of issue)
+                         "Missing local FedWiki twins should derive their current repair action through bounded hooks")
+           (assert-true repair-thunk
+                        "Missing local FedWiki twins should expose a repair thunk while the local twin is absent")
+           (assert-true
+            (search "Materialize the missing FedWiki twin"
+                    (hyperbook:lookup-issue-repair-description-of issue)
+                    :test #'char=)
+            "Missing local FedWiki twins should expose the materialization guidance from runtime state")
+           (assert-equal nil
+                         (getf details :current-local-page-exists-p)
+                         "Runtime details should report that the local FedWiki twin is initially absent")
+           (assert-equal :create
+                         (getf details :current-materialization-action)
+                         "Runtime details should expose the current materialization action")
+           (assert-true
+            (search "open" overview-html :test #'char-equal)
+            "Generic issue overview should continue to render the current open status")
+           (assert-true
+            (search "Materialize the missing FedWiki twin" repair-html :test #'char=)
+            "Generic repair view should render the current FedWiki twin guidance")
+           (let* ((plan (funcall repair-thunk))
+                  (entry (first (hyperdoc::fedwiki-materialization-entries-of plan)))
+                  (target (merge-pathnames slug pages-directory)))
+             (assert-true (typep plan 'hyperdoc::fedwiki-materialization-plan)
+                          "FedWiki twin repair should yield a fresh FedWiki materialization plan")
+             (assert-equal pages-directory
+                           (hyperdoc::fedwiki-materialization-fedwiki-pages-directory-of
+                            plan)
+                           "FedWiki twin repair should honor the preserved disposable pages directory")
+             (assert-equal root
+                           (hyperdoc::fedwiki-materialization-fedwiki-repo-root-of
+                            plan)
+                           "FedWiki twin repair should honor the preserved disposable repo root")
+             (assert-true
+              (uiop:string-prefix-p
+               (namestring pages-directory)
+               (namestring (hyperdoc::fedwiki-materialization-entry-target-path-of entry)))
+              "FedWiki twin repair should target only the disposable pages directory")
+             (hyperdoc::materialize-fedwiki-materialization-plan plan)
+             (assert-true (uiop:file-exists-p target)
+                          "FedWiki twin repair should materialize the missing page into the disposable pages directory")
+             (assert-string=
+              "Civilian casualty mitigation in targeting operations"
+              (getf (hyperdoc::article-allegation-read-json-file target) :title)
+              "FedWiki twin repair should materialize the expected topic-derived page")
+             (let* ((refreshed-views
+                      (page-lookup-load-inspector-views-for-object issue))
+                    (refreshed-overview-html
+                      (html-inspector-views:view-html
+                       (page-lookup-smoke-find-view-by-title refreshed-views
+                                                             "Overview")))
+                    (refreshed-repair-html
+                      (html-inspector-views:view-html
+                       (page-lookup-smoke-find-view-by-title refreshed-views
+                                                             "Repair")))
+                    (refreshed-details
+                      (hyperbook:lookup-issue-details-of issue)))
+               (assert-equal :fixed
+                             (hyperbook:lookup-issue-status-of issue)
+                             "The same FedWiki twin lookup issue should refresh to fixed once the local page exists")
+               (assert-equal nil
+                             (hyperbook:lookup-issue-suggested-repair-of issue)
+                             "The same FedWiki twin lookup issue should clear its suggested repair after materialization")
+               (assert-true
+                (null (hyperbook::lookup-issue-repair-thunk-of issue))
+                "The same FedWiki twin lookup issue should clear its repair thunk after materialization")
+               (assert-true
+                (search "No repair is needed."
+                        (hyperbook:lookup-issue-repair-description-of issue)
+                        :test #'char-equal)
+                "The same FedWiki twin lookup issue should refresh its repair description after materialization")
+               (assert-equal t
+                             (getf refreshed-details :current-local-page-exists-p)
+                             "Runtime details should refresh once the local FedWiki twin exists")
+               (assert-true
+                (search "fixed" refreshed-overview-html :test #'char-equal)
+                "Generic issue overview should refresh to fixed once the local twin exists")
+               (assert-true
+                (search "No repair is needed."
+                        refreshed-repair-html
+                        :test #'char-equal)
+                "Generic repair view should refresh once the local twin exists"))))
       (ignore-errors
         (uiop:delete-directory-tree root
                                     :validate t
@@ -386,5 +528,6 @@
                   "Non-HyperDoc targets should suggest inspecting the target HyperBook")
     (assert-true (null (hyperbook::lookup-issue-repair-thunk-of generic-issue))
                  "Generic HyperBook lookup issues should not attach a HyperDoc scaffold thunk"))
+  (run-missing-local-fedwiki-twin-lookup-issue-smoke-test)
   (format t "~&Page lookup issue smoke tests passed.~%")
   t)
