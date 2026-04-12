@@ -241,24 +241,10 @@
                       page-id)))))
 
 (defun route-hyperdoc-topic-lookup-issue! (issue)
-  (let* ((title (lookup-issue-expected-title issue))
-         (chunk (make-topic-page-availability-chunk title))
-         (status (topic-page-lookup-chunk-state chunk)))
-    (hb::configure-lookup-issue!
-     issue
-     :target-kind :hyperdoc-topic-page
-     :classification :missing-hyperdoc-topic-page
-     :status status
-     :suggested-repair :ensure-target-chunk
-     :repair-description (topic-page-lookup-repair-description chunk)
-     :repair-thunk (lambda ()
-                     (issue-target-chunk issue))
-     :details (list :target-chunk chunk
-                    :derived-status status
-                    :status-reason (topic-page-lookup-status-reason chunk)
-                    :repair-hint (topic-page-lookup-repair-hint chunk)
-                    :freshness-mode (topic-page-lookup-freshness-mode chunk)))
-    issue))
+  (hb::configure-lookup-issue!
+   issue
+   :target-kind :hyperdoc-topic-page
+   :classification :missing-hyperdoc-topic-page))
 
 (defun route-hyperdoc-page-authoring-lookup-issue! (issue)
   (route-hyperdoc-authoring-lookup-issue!
@@ -435,6 +421,40 @@
                  "topics")
     (make-topic-page-availability-chunk
      (lookup-issue-expected-title issue))))
+
+(defun topic-page-lookup-issue-target-chunk (issue)
+  (when (string= (or (hb:lookup-issue-target-hyperbook-id-of issue) "")
+                 "topics")
+    (issue-target-chunk issue)))
+
+(defun topic-page-lookup-issue-runtime-details (issue)
+  (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
+    (let ((status (topic-page-lookup-chunk-state chunk)))
+      (list :target-chunk chunk
+            :derived-status status
+            :status-reason (topic-page-lookup-status-reason chunk)
+            :repair-hint (topic-page-lookup-repair-hint chunk)
+            :freshness-mode (topic-page-lookup-freshness-mode chunk)))))
+
+(defmethod hb::bounded-lookup-issue-current-status-of ((issue hb:page-lookup-issue))
+  (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
+    (topic-page-lookup-chunk-state chunk)))
+
+(defmethod hb::bounded-lookup-issue-current-suggested-repair-of ((issue hb:page-lookup-issue))
+  (when (topic-page-lookup-issue-target-chunk issue)
+    :ensure-target-chunk))
+
+(defmethod hb::bounded-lookup-issue-current-repair-description-of ((issue hb:page-lookup-issue))
+  (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
+    (topic-page-lookup-repair-description chunk)))
+
+(defmethod hb::bounded-lookup-issue-current-repair-thunk-of ((issue hb:page-lookup-issue))
+  (when (topic-page-lookup-issue-target-chunk issue)
+    (lambda ()
+      (issue-target-chunk issue))))
+
+(defmethod hb::bounded-lookup-issue-current-details-of ((issue hb:page-lookup-issue))
+  (topic-page-lookup-issue-runtime-details issue))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))
   (title-of chunk))

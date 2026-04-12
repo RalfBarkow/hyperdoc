@@ -74,9 +74,11 @@
          :initarg :link
          :initform nil)))
 
-(defclass page-lookup-issue (lookup-issue) ())
+(defclass bounded-lookup-issue (lookup-issue) ())
 
-(defclass function-lookup-issue (lookup-issue) ())
+(defclass page-lookup-issue (bounded-lookup-issue) ())
+
+(defclass function-lookup-issue (bounded-lookup-issue) ())
 
 (defclass function-lookup-correction ()
   ((mode :reader function-lookup-correction-mode-of
@@ -112,6 +114,38 @@
 
 (defun lookup-issue-static-details-of (issue)
   (slot-value issue 'details))
+
+(defgeneric bounded-lookup-issue-current-status-of (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-current-suggested-repair-of (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-current-repair-description-of (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-current-repair-thunk-of (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-current-details-of (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-overview-extra-rows (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-repair-button-label-of (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
+
+(defgeneric bounded-lookup-issue-repair-extra-content (issue)
+  (:method ((issue bounded-lookup-issue))
+    nil))
 
 (defun lookup-issue-detail-value (issue key)
   (getf (lookup-issue-static-details-of issue) key))
@@ -339,15 +373,34 @@
         (lookup-issue-expected-page-id-of issue)
         (lookup-issue-classification-of issue)))
 
-(defun lookup-issue-status-of (issue)
-  (or (gethash (lookup-issue-signature issue)
-               *lookup-issue-status-overrides*)
-      (if (typep issue 'function-lookup-issue)
-          (case (function-lookup-issue-runtime-load-state issue)
-            (:fbound :fixed)
-            (:missing :needs-runtime-load)
-            (t (lookup-issue-default-status-of issue)))
-          (lookup-issue-default-status-of issue))))
+(defun lookup-issue-overridden-status-of (issue)
+  (gethash (lookup-issue-signature issue)
+           *lookup-issue-status-overrides*))
+
+(defgeneric lookup-issue-status-of (issue)
+  (:method ((issue lookup-issue))
+    (or (lookup-issue-overridden-status-of issue)
+        (lookup-issue-default-status-of issue)))
+  (:method ((issue bounded-lookup-issue))
+    (or (lookup-issue-overridden-status-of issue)
+        (bounded-lookup-issue-current-status-of issue)
+        (lookup-issue-default-status-of issue))))
+
+(defmethod lookup-issue-suggested-repair-of ((issue bounded-lookup-issue))
+  (or (bounded-lookup-issue-current-suggested-repair-of issue)
+      (call-next-method)))
+
+(defmethod lookup-issue-repair-description-of ((issue bounded-lookup-issue))
+  (or (bounded-lookup-issue-current-repair-description-of issue)
+      (call-next-method)))
+
+(defmethod lookup-issue-repair-thunk-of ((issue bounded-lookup-issue))
+  (or (bounded-lookup-issue-current-repair-thunk-of issue)
+      (call-next-method)))
+
+(defmethod lookup-issue-details-of ((issue bounded-lookup-issue))
+  (append (call-next-method)
+          (bounded-lookup-issue-current-details-of issue)))
 
 (defun mark-lookup-issue! (issue status)
   (setf (gethash (lookup-issue-signature issue)
@@ -358,7 +411,7 @@
 (defun append-lookup-issue-details! (issue details)
   (when details
     (setf (lookup-issue-details-of issue)
-          (append (lookup-issue-details-of issue)
+          (append (lookup-issue-static-details-of issue)
                   details)))
   issue)
 
@@ -401,25 +454,30 @@
   (:method ((issue lookup-issue))
     issue))
 
-(defmethod lookup-issue-suggested-repair-of ((issue function-lookup-issue))
+(defmethod bounded-lookup-issue-current-status-of ((issue function-lookup-issue))
+  (case (function-lookup-issue-runtime-load-state issue)
+    (:fbound :fixed)
+    (:missing :needs-runtime-load)
+    (t nil)))
+
+(defmethod bounded-lookup-issue-current-suggested-repair-of ((issue function-lookup-issue))
   (case (function-lookup-issue-runtime-load-state issue)
     (:fbound
      :reopen-lisp-function-page)
     (:missing
      :load-or-reload-definition)
     (t
-     (call-next-method))))
+     nil)))
 
-(defmethod lookup-issue-repair-description-of ((issue function-lookup-issue))
+(defmethod bounded-lookup-issue-current-repair-description-of ((issue function-lookup-issue))
   (function-lookup-issue-guidance issue))
 
-(defmethod lookup-issue-repair-thunk-of ((issue function-lookup-issue))
+(defmethod bounded-lookup-issue-current-repair-thunk-of ((issue function-lookup-issue))
   (lambda ()
     (function-lookup-issue-repair-operation issue)))
 
-(defmethod lookup-issue-details-of ((issue function-lookup-issue))
-  (append (call-next-method)
-          (function-lookup-issue-runtime-details issue)))
+(defmethod bounded-lookup-issue-current-details-of ((issue function-lookup-issue))
+  (function-lookup-issue-runtime-details issue))
 
 (defgeneric lookup-issues-of (page)
   (:method ((page page))
@@ -519,55 +577,54 @@
 (defgeneric render-lookup-issue-overview-extra-rows (issue)
   (:method ((issue lookup-issue))
     nil)
-  (:method ((issue function-lookup-issue))
-    (views:html
-      (:tr (:td (views:esc "Current runtime load state"))
-           (:td (:tt (views:esc
-                      (issue-label
-                       (function-lookup-issue-runtime-load-state issue))))))
-      (:tr (:td (views:esc "Current-state reason"))
-           (:td (views:esc
-                 (function-lookup-issue-status-reason issue))))
-      (:tr (:td (views:esc "Repair path on click"))
-           (:td (views:esc
-                 (function-lookup-issue-repair-target-label issue))))
-      (:tr (:td (views:esc "Retry available now"))
-           (:td (:tt (views:esc
-                      (if (function-lookup-issue-retry-available-p issue)
-                          "yes"
-                          "no"))))))))
+  (:method ((issue bounded-lookup-issue))
+    (bounded-lookup-issue-overview-extra-rows issue)))
+
+(defun render-function-lookup-issue-runtime-summary-rows (issue)
+  (views:html
+    (:tr (:td (views:esc "Current runtime load state"))
+         (:td (:tt (views:esc
+                    (issue-label
+                     (function-lookup-issue-runtime-load-state issue))))))
+    (:tr (:td (views:esc "Current-state reason"))
+         (:td (views:esc
+               (function-lookup-issue-status-reason issue))))
+    (:tr (:td (views:esc "Repair path on click"))
+         (:td (views:esc
+               (function-lookup-issue-repair-target-label issue))))
+    (:tr (:td (views:esc "Retry available now"))
+         (:td (:tt (views:esc
+                    (if (function-lookup-issue-retry-available-p issue)
+                        "yes"
+                        "no")))))))
+
+(defmethod bounded-lookup-issue-overview-extra-rows ((issue function-lookup-issue))
+  (render-function-lookup-issue-runtime-summary-rows issue))
 
 (defgeneric lookup-issue-repair-button-label-of (issue)
   (:method ((issue lookup-issue))
     "Inspect repair operation")
-  (:method ((issue function-lookup-issue))
-    (if (function-lookup-issue-retry-available-p issue)
-        "Retry Lisp Functions lookup"
-        "Inspect load or reload guidance")))
+  (:method ((issue bounded-lookup-issue))
+    (or (bounded-lookup-issue-repair-button-label-of issue)
+        (call-next-method))))
+
+(defmethod bounded-lookup-issue-repair-button-label-of ((issue function-lookup-issue))
+  (if (function-lookup-issue-retry-available-p issue)
+      "Retry Lisp Functions lookup"
+      "Inspect load or reload guidance"))
 
 (defgeneric render-lookup-issue-repair-extra-content (issue)
   (:method ((issue lookup-issue))
     nil)
-  (:method ((issue function-lookup-issue))
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Current runtime load state"))
-                   (:td (:tt (views:esc
-                              (issue-label
-                               (function-lookup-issue-runtime-load-state issue))))))
-              (:tr (:td (views:esc "Current-state reason"))
-                   (:td (views:esc
-                         (function-lookup-issue-status-reason issue))))
-              (:tr (:td (views:esc "Repair path on click"))
-                   (:td (views:esc
-                         (function-lookup-issue-repair-target-label issue))))
-              (:tr (:td (views:esc "Retry available now"))
-                   (:td (:tt (views:esc
-                              (if (function-lookup-issue-retry-available-p issue)
-                                  "yes"
-                                  "no"))))))
-      (:p (views:esc
-           "Overview preserves authored provenance for this failure, and Condition preserves the original undefined-function evidence.")))))
+  (:method ((issue bounded-lookup-issue))
+    (bounded-lookup-issue-repair-extra-content issue)))
+
+(defmethod bounded-lookup-issue-repair-extra-content ((issue function-lookup-issue))
+  (views:html
+    (:table :class "inspector-table"
+            (render-function-lookup-issue-runtime-summary-rows issue))
+    (:p (views:esc
+         "Overview preserves authored provenance for this failure, and Condition preserves the original undefined-function evidence."))))
 
 (defmethod views:html-representation ((issue lookup-issue) &optional id)
   (views:html

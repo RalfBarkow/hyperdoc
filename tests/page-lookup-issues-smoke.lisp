@@ -263,6 +263,14 @@
                               :test #'char=)
                       "Repair should append a placeholder factory to the disposable topics copy")
          (assert-equal :fixed
+                       (hyperbook:lookup-issue-status-of issue)
+                       "The same topic lookup issue should refresh to fixed once chunk repair materializes the topic")
+         (assert-true
+          (search "No repair is needed."
+                  (hyperbook:lookup-issue-repair-description-of issue)
+                  :test #'char-equal)
+          "The same topic lookup issue should refresh its repair description after chunk repair succeeds")
+         (assert-equal :fixed
                        (hyperdoc::topic-page-lookup-chunk-state chunk)
                        "Repair through the disposable copy should bring the topic-page chunk to fixed")
          (assert-string=
@@ -348,6 +356,14 @@
                               (hyperdoc::topic-page-materialization-signature title)))
                         "A stale topic should expose a per-topic signature mismatch before repair")
            (hyperdoc::repair-lookup-issue-via-chunks stale-issue)
+           (assert-equal :fixed
+                         (hyperbook:lookup-issue-status-of stale-issue)
+                         "The same stale topic lookup issue should refresh to fixed after materialization repair")
+           (assert-true
+            (search "No repair is needed."
+                    (hyperbook:lookup-issue-repair-description-of stale-issue)
+                    :test #'char-equal)
+            "The same stale topic lookup issue should refresh its repair description after repair")
            (assert-equal :fixed
                          (hyperdoc::topic-page-lookup-chunk-state stale-chunk)
                          "Repair should refresh a stale topic-page materialization back to fixed")
