@@ -118,6 +118,9 @@
               (details-html
                 (html-inspector-views:view-html
                  (smoke-find-view-by-title issue-views "Details")))
+              (repair-html
+                (html-inspector-views:view-html
+                 (smoke-find-view-by-title issue-views "Repair")))
               (condition-html
                 (html-inspector-views:view-html
                  (smoke-find-view-by-title issue-views "Condition"))))
@@ -196,10 +199,29 @@
          (assert-true (search "load or reload definition" overview-html
                               :test #'char-equal)
                       "Lookup issue overview must surface the runtime-derived suggested repair")
+         (assert-true (search "Current runtime load state" overview-html :test #'char-equal)
+                      "Lookup issue overview must expose the current runtime load-state row")
+         (assert-true (search "Current-state reason" overview-html :test #'char-equal)
+                      "Lookup issue overview must expose the current-state reason row")
+         (assert-true (search "still not fbound" overview-html :test #'char-equal)
+                      "Lookup issue overview must explain why the current state still requires load/reload")
+         (assert-true (search "Retry available now" overview-html :test #'char-equal)
+                      "Lookup issue overview must expose whether retry is currently available")
          (assert-true (search "source-of-function" details-html :test #'char-equal)
                       "Lookup issue details must expose the authored reference seam")
          (assert-true (search "runtime-load-state" details-html :test #'char-equal)
                       "Lookup issue details must expose runtime load-state evidence")
+         (assert-true (search "Inspect load or reload guidance" repair-html
+                              :test #'char-equal)
+                      "Lookup issue Repair view must expose the bounded guidance path while the symbol is still missing")
+         (assert-true (search "Repair path on click" repair-html :test #'char-equal)
+                      "Lookup issue Repair view must expose what clicking the repair path will inspect")
+         (assert-true (search "inspectable load or reload guidance" repair-html
+                              :test #'char-equal)
+                      "Lookup issue Repair view must describe the current repair target while the symbol is missing")
+         (assert-true (search "preserves the original undefined-function evidence"
+                              repair-html :test #'char-equal)
+                      "Lookup issue Repair view must point back to preserved provenance and condition evidence")
          (assert-true (search "Preserved condition text" condition-html
                               :test #'char-equal)
                       "Lookup issue Condition view must surface preserved condition text")
@@ -208,7 +230,14 @@
          (with-temporary-symbol-function
              symbol
            (lambda ()
-             (let ((refreshed-details (hyperbook:lookup-issue-details-of issue))
+             (let* ((refreshed-details (hyperbook:lookup-issue-details-of issue))
+                    (refreshed-issue-views (load-inspector-views-for-object issue))
+                    (refreshed-overview-html
+                      (html-inspector-views:view-html
+                       (smoke-find-view-by-title refreshed-issue-views "Overview")))
+                    (refreshed-repair-html
+                      (html-inspector-views:view-html
+                       (smoke-find-view-by-title refreshed-issue-views "Repair")))
                    (reopen-target
                      (funcall (hyperbook::lookup-issue-repair-thunk-of issue))))
                (assert-equal :fixed
@@ -227,6 +256,16 @@
                (assert-equal t
                              (getf refreshed-details :current-fboundp)
                              "Lookup issue details must expose the refreshed fboundp evidence")
+               (assert-true (search "fixed" refreshed-overview-html :test #'char-equal)
+                            "Lookup issue overview must refresh to the fixed state after the symbol becomes fboundp")
+               (assert-true (search "now fbound" refreshed-overview-html :test #'char-equal)
+                            "Lookup issue overview must explain why retry is now available")
+               (assert-true (search "Retry Lisp Functions lookup"
+                                    refreshed-repair-html :test #'char-equal)
+                            "Lookup issue Repair view must expose the retry path once the symbol is available")
+               (assert-true (search "real Lisp Functions page"
+                                    refreshed-repair-html :test #'char-equal)
+                            "Lookup issue Repair view must describe the real page retry target once the symbol is available")
                (assert-true (typep reopen-target 'hyperbook::lisp-function-page)
                             "The repair thunk must reopen the Lisp Functions page once the symbol is available")
                (assert-equal expected-page-id

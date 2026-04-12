@@ -207,6 +207,28 @@
             (t
              "No concrete expected symbol was available for a direct fboundp check.")))))
 
+(defun function-lookup-issue-status-reason (issue)
+  (case (function-lookup-issue-runtime-load-state issue)
+    (:fbound
+     "The expected symbol is currently fbound in the running image, so HyperDoc can retry the real Lisp Functions lookup now.")
+    (:missing
+     "The expected symbol is still not fbound in the running image, so HyperDoc can only offer load or reload guidance until the definition is available.")
+    (t
+     "HyperDoc could not confirm a concrete expected symbol binding in the current image.")))
+
+(defun function-lookup-issue-repair-target-label (issue)
+  (case (function-lookup-issue-runtime-load-state issue)
+    (:fbound
+     "real Lisp Functions page")
+    (:missing
+     "inspectable load or reload guidance")
+    (t
+     "inspectable correction guidance")))
+
+(defun function-lookup-issue-retry-available-p (issue)
+  (eq (function-lookup-issue-runtime-load-state issue)
+      :fbound))
+
 (defun lookup-issue-target-site (target-hyperbook-id)
   (cond
     ((null target-hyperbook-id)
@@ -494,6 +516,59 @@
           (issue-label
            (function-lookup-correction-mode-of correction))))
 
+(defgeneric render-lookup-issue-overview-extra-rows (issue)
+  (:method ((issue lookup-issue))
+    nil)
+  (:method ((issue function-lookup-issue))
+    (views:html
+      (:tr (:td (views:esc "Current runtime load state"))
+           (:td (:tt (views:esc
+                      (issue-label
+                       (function-lookup-issue-runtime-load-state issue))))))
+      (:tr (:td (views:esc "Current-state reason"))
+           (:td (views:esc
+                 (function-lookup-issue-status-reason issue))))
+      (:tr (:td (views:esc "Repair path on click"))
+           (:td (views:esc
+                 (function-lookup-issue-repair-target-label issue))))
+      (:tr (:td (views:esc "Retry available now"))
+           (:td (:tt (views:esc
+                      (if (function-lookup-issue-retry-available-p issue)
+                          "yes"
+                          "no"))))))))
+
+(defgeneric lookup-issue-repair-button-label-of (issue)
+  (:method ((issue lookup-issue))
+    "Inspect repair operation")
+  (:method ((issue function-lookup-issue))
+    (if (function-lookup-issue-retry-available-p issue)
+        "Retry Lisp Functions lookup"
+        "Inspect load or reload guidance")))
+
+(defgeneric render-lookup-issue-repair-extra-content (issue)
+  (:method ((issue lookup-issue))
+    nil)
+  (:method ((issue function-lookup-issue))
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Current runtime load state"))
+                   (:td (:tt (views:esc
+                              (issue-label
+                               (function-lookup-issue-runtime-load-state issue))))))
+              (:tr (:td (views:esc "Current-state reason"))
+                   (:td (views:esc
+                         (function-lookup-issue-status-reason issue))))
+              (:tr (:td (views:esc "Repair path on click"))
+                   (:td (views:esc
+                         (function-lookup-issue-repair-target-label issue))))
+              (:tr (:td (views:esc "Retry available now"))
+                   (:td (:tt (views:esc
+                              (if (function-lookup-issue-retry-available-p issue)
+                                  "yes"
+                                  "no"))))))
+      (:p (views:esc
+           "Overview preserves authored provenance for this failure, and Condition preserves the original undefined-function evidence.")))))
+
 (defmethod views:html-representation ((issue lookup-issue) &optional id)
   (views:html
     (:span :id id :class "inspector-error"
@@ -573,7 +648,8 @@
                                   "")))))
               (:tr (:td (views:esc "Repair description"))
                    (:td (views:esc (or (lookup-issue-repair-description-of issue)
-                                       ""))))))))
+                                       ""))))
+              (render-lookup-issue-overview-extra-rows issue)))))
 
 (views:defview 👀details (issue lookup-issue)
   (views:html-view :title "Details" :priority 2
@@ -594,10 +670,11 @@
       (:p (views:esc
            (or (lookup-issue-repair-description-of issue)
                "No repair operation has been attached to this lookup issue yet.")))
+      (render-lookup-issue-repair-extra-content issue)
       (when (lookup-issue-repair-thunk-of issue)
         (views:html
           (:p (views:eval-button
-               "Inspect repair operation"
+               (lookup-issue-repair-button-label-of issue)
                (views:thunk
                  (funcall (lookup-issue-repair-thunk-of issue))))))))))
 
