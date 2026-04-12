@@ -7,6 +7,8 @@
     (make-package :hyperdoc/tests :use '(:cl)))
   (export (list (intern "RUN-LOCALHOST-FIRST-FEDWIKI-PUBLICATION-PLAN-SMOKE-TEST"
                         :hyperdoc/tests)
+                (intern "RUN-LOCALHOST-FIRST-FEDWIKI-LIVE-PUBLICATION-SMOKE-TEST"
+                        :hyperdoc/tests)
                 (intern "RUN-LOCALHOST-FEDWIKI-PAGE-PROMOTION-PLANS-SMOKE-TESTS"
                         :hyperdoc/tests))
           :hyperdoc/tests))
@@ -91,6 +93,12 @@
           "Reproducible DevEnv as Published Elsewhere")
     page))
 
+(defun localhost-fedwiki-live-publication-smoke-root ()
+  (uiop:ensure-directory-pathname
+   (merge-pathnames
+    "localhost-fedwiki-live-publication-smoke/"
+    (uiop:temporary-directory))))
+
 (defun run-localhost-first-fedwiki-publication-plan-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((seed-plan
@@ -111,6 +119,7 @@
                  :page (publication-plan-test-stale-target-page local-page)))
          (plan
            (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
+            :live-publication-writer nil
             :target-page-reader
             (lambda (ignored-plan)
               (declare (ignore ignored-plan))
@@ -310,6 +319,176 @@
        :no
        (getf summary :target-exists-status)
        "A missing remote target must report non-existence explicitly"))))
+
+(defun run-localhost-first-fedwiki-live-publication-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((root (localhost-fedwiki-live-publication-smoke-root))
+         (pages-dir (merge-pathnames "pages/" root))
+         (target-path
+           (merge-pathnames
+            "reproducible-devenv-as-knowledge-artifact"
+            pages-dir)))
+    (when (uiop:directory-exists-p root)
+      (uiop:delete-directory-tree root
+                                  :validate t
+                                  :if-does-not-exist :ignore))
+    (ensure-directories-exist pages-dir)
+    (let ((hyperdoc::*localhost-fedwiki-page-publication-target-pages-directory-overrides*
+            (list (cons "wiki.ralfbarkow.ch" pages-dir))))
+      (let* ((plan
+               (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan))
+             (summary-before
+               (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+                plan))
+             (views-before (load-inspector-views-for-object plan))
+             (overview-before-html
+               (html-inspector-views:view-html
+                (smoke-find-view-by-title views-before "Overview")))
+             (dry-run-before-html
+               (html-inspector-views:view-html
+                (smoke-find-view-by-title views-before "Dry-run")))
+             (report
+               (hyperdoc::execute-localhost-fedwiki-page-publication-plan-live
+                plan))
+             (written-page
+               (hyperdoc::article-allegation-read-json-file target-path))
+             (summary-after
+               (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+                plan))
+             (views-after (load-inspector-views-for-object plan))
+             (overview-after-html
+               (html-inspector-views:view-html
+                (smoke-find-view-by-title views-after "Overview")))
+             (target-page-html
+               (html-inspector-views:view-html
+                (smoke-find-view-by-title views-after "Target page")))
+             (dry-run-after-html
+               (html-inspector-views:view-html
+                (smoke-find-view-by-title views-after "Dry-run"))))
+        (assert-view-titles-present views-before
+                                    '("Overview"
+                                      "Local page"
+                                      "Target page"
+                                      "Dry-run")
+                                    "Live publication plan")
+        (assert-equal
+         :missing
+         (getf summary-before :publication-status)
+         "An empty disposable target page store must classify as missing before live publication")
+        (assert-equal
+         :no
+         (getf summary-before :target-exists-status)
+         "The disposable target page store must report no existing page before live publication")
+        (assert-true
+         (getf summary-before :live-publication-configured-p)
+         "The single-page publication plan must attach an explicit live writer by default")
+        (assert-equal
+         (namestring target-path)
+         (getf summary-before :target-page-path)
+         "The dry-run summary must expose the exact page-store target path")
+        (assert-equal
+         :publish-fedwiki-page
+         (getf (getf summary-before :planned-write) :action)
+         "A missing disposable target must still plan a page-scoped publish action")
+        (assert-equal
+         (namestring target-path)
+         (getf (getf summary-before :planned-write) :target-path)
+         "The planned write must preserve the exact target file path")
+        (dolist (needle
+                 '("Execute live publication"
+                   "Target page path"
+                   "publish local title/story/journal"))
+          (assert-true
+           (search needle overview-before-html :test #'char-equal)
+           (format nil "Live publication overview must expose ~A" needle)))
+        (dolist (needle
+                 '("Execute live publication"
+                   "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN"
+                   "target-page-path="))
+          (assert-true
+           (search needle dry-run-before-html :test #'char-equal)
+           (format nil "Live publication dry-run must expose ~A" needle)))
+        (assert-equal
+         :publish-fedwiki-page
+         (getf report :action)
+         "The live writer must report a page-scoped publication action")
+        (assert-true
+         (not (getf report :target-existed-before-p))
+         "The disposable target page must start absent before the live write")
+        (assert-true
+         (getf report :write-succeeded-p)
+         "The live writer must report a successful page-scoped write")
+        (assert-equal
+         '(:title :story :journal)
+         (getf report :fields-written)
+         "The live writer must report the exact fields it wrote")
+        (assert-true
+         (getf report :post-write-json-syntax-valid-p)
+         "The written disposable target must pass JSON syntax validation")
+        (assert-true
+         (getf report :post-write-journal-valid-p)
+         "The written disposable target must pass the journal gate")
+        (assert-equal
+         :current
+         (getf report :post-write-publication-status)
+         "The same publication plan object must refresh to current after the live write")
+        (assert-true
+         (eq report
+             (hyperdoc::localhost-fedwiki-page-publication-plan-last-live-publication-report
+              plan))
+         "The plan must retain the exact last live publication report for later inspection")
+        (assert-true
+         (uiop:file-exists-p target-path)
+         "The live writer must create the exact target page file in the disposable page store")
+        (assert-string=
+         "Reproducible DevEnv as Knowledge Artifact"
+         (getf written-page :title)
+         "The published disposable target must carry the local page title")
+        (assert-true
+         (hyperdoc::journalmatic-commit-gate-pass-p written-page)
+         "The published disposable target must satisfy the journal gate")
+        (assert-equal
+         :current
+         (getf summary-after :publication-status)
+         "The same publication plan object must refresh to current after the write")
+        (assert-equal
+         :yes
+         (getf summary-after :target-exists-status)
+         "The disposable target page must report existence after the live write")
+        (assert-equal
+         nil
+         (getf summary-after :divergent-fields)
+         "The refreshed publication plan must clear drift reporting after the live write")
+        (assert-equal
+         :none
+         (getf (getf summary-after :planned-write) :action)
+         "Once the target matches, the same plan must suppress further writes")
+        (assert-equal
+         (getf summary-after :local-page-fingerprint)
+         (getf summary-after :target-page-fingerprint)
+         "The refreshed target fingerprint must match the local page fingerprint")
+        (dolist (needle
+                 '("current"
+                   "success (current)"
+                   "Target page path"))
+          (assert-true
+           (search needle overview-after-html :test #'char-equal)
+           (format nil "Post-write overview must expose ~A" needle)))
+        (dolist (needle
+                 '("Target page path"
+                   "current"))
+          (assert-true
+           (search needle target-page-html :test #'char-equal)
+           (format nil "Post-write target-page view must expose ~A" needle)))
+        (dolist (needle
+                 '("Execute live publication"
+                   "no write needed"))
+          (assert-true
+           (search needle dry-run-after-html :test #'char-equal)
+           (format nil "Post-write dry-run must expose ~A" needle)))))
+    (format t "~&Localhost-first live publication smoke test passed. target=~A~%"
+            (namestring target-path))
+    t))
 
 (defun run-localhost-fedwiki-page-promotion-plan-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -2708,6 +2887,7 @@
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (run-localhost-first-fedwiki-publication-plan-smoke-test)
+  (run-localhost-first-fedwiki-live-publication-smoke-test)
   (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
   (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
   (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)

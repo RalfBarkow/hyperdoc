@@ -81,7 +81,11 @@
   target-slug
   target-protocol
   target-page-reader
-  live-publication-writer)
+  live-publication-writer
+  last-live-publication-report)
+
+(defparameter *localhost-fedwiki-page-publication-target-pages-directory-overrides*
+  nil)
 
 (defparameter *dmx-topicmap-919822-repair-runbook-topicmap-id* 919822)
 (defparameter *dmx-topicmap-919822-repair-runbook-workspace-name*
@@ -2139,10 +2143,28 @@
     (localhost-fedwiki-page-promotion-plan-pipeline
      (localhost-fedwiki-page-publication-plan-source-plan plan)))))
 
+(defun localhost-fedwiki-page-publication-target-pages-directory (plan)
+  (let* ((site (localhost-fedwiki-page-publication-plan-target-site plan))
+         (override
+           (cdr (assoc site
+                       *localhost-fedwiki-page-publication-target-pages-directory-overrides*
+                       :test #'string=))))
+    (or override
+        (and (string= site
+                      *reproducible-devenv-as-knowledge-artifact-fedwiki-site*)
+             (article-allegation-default-fedwiki-pages-directory))
+        (error "No page-store target directory is configured for FedWiki site ~S."
+               site))))
+
 (defun localhost-fedwiki-page-publication-plan-target-page-id (plan)
   (format nil "fedwiki:~A/~A"
           (localhost-fedwiki-page-publication-plan-target-site plan)
           (localhost-fedwiki-page-publication-plan-target-slug plan)))
+
+(defun localhost-fedwiki-page-publication-plan-target-page-pathname (plan)
+  (merge-pathnames
+   (localhost-fedwiki-page-publication-plan-target-slug plan)
+   (localhost-fedwiki-page-publication-target-pages-directory plan)))
 
 (defun call-hyperbook-fedwiki-function (name &rest args)
   (let* ((package (find-package :hyperbook/fedwiki))
@@ -2201,6 +2223,32 @@
               (if (zerop last-date)
                   "n/a"
                   (format nil "~D" last-date))))))
+
+(defun localhost-fedwiki-page-publication-validated-page-state-from-path (path)
+  (handler-case
+      (let* ((page (article-allegation-read-json-file path))
+             (normalized-page (normalize-fedwiki-page-publication-page page))
+             (findings (copy-list
+                        (journalmatic-commit-gate-findings normalized-page))))
+        (list :available t
+              :path path
+              :page normalized-page
+              :title (or (getf normalized-page :title) "")
+              :json-syntax-valid-p t
+              :journal-valid-p (null findings)
+              :journal-findings findings
+              :fingerprint
+              (fedwiki-page-publication-page-fingerprint normalized-page)
+              :summary
+              (fedwiki-page-publication-page-summary normalized-page)))
+    (error (condition)
+      (list :available nil
+            :path path
+            :json-syntax-valid-p nil
+            :journal-valid-p nil
+            :journal-findings '(:malformed)
+            :message (princ-to-string condition)
+            :condition condition))))
 
 (defun localhost-fedwiki-page-publication-plan-divergent-fields
     (local-page target-page)
@@ -2273,8 +2321,7 @@
                  :condition condition)))))))
 
 (defun localhost-fedwiki-page-publication-plan-default-target-page-reader (plan)
-  (let* ((site (localhost-fedwiki-page-publication-plan-target-site plan))
-         (slug (localhost-fedwiki-page-publication-plan-target-slug plan))
+  (let* ((path (localhost-fedwiki-page-publication-plan-target-page-pathname plan))
          (fallback-protocol
            (or (localhost-fedwiki-page-publication-plan-target-protocol plan)
                "https"))
@@ -2285,43 +2332,38 @@
          (json-url
            (localhost-fedwiki-page-publication-plan-target-json-url
             plan
-            :protocol fallback-protocol)))
-    (handler-case
-        (let* ((wiki (call-hyperbook-fedwiki-function
-                      "GET-FEDWIKI"
-                      site
-                      nil
-                      t))
-               (protocol (or (call-hyperbook-fedwiki-function
-                              "PROTOCOL-OF"
-                              wiki)
-                             fallback-protocol))
-               (sitemap-has-slug-p (not (null (hb:find-page wiki slug))))
-               (page (call-hyperbook-fedwiki-function
-                      "FETCH-PAGE-JSON"
-                      site
-                      protocol
-                      slug)))
-          (list :state :present
-                :protocol protocol
-                :sitemap-has-slug-p sitemap-has-slug-p
-                :target-html-url
-                (localhost-fedwiki-page-publication-plan-target-html-url
-                 plan
-                 :protocol protocol)
-                :target-json-url
-                (localhost-fedwiki-page-publication-plan-target-json-url
-                 plan
-                 :protocol protocol)
-                :page (normalize-fedwiki-page-publication-page page)))
-      (error (condition)
-        (list :state :unreachable
-              :protocol fallback-protocol
-              :sitemap-has-slug-p nil
-              :target-html-url html-url
-              :target-json-url json-url
-              :message (princ-to-string condition)
-              :condition condition)))))
+            :protocol fallback-protocol))
+         (target-path (namestring path)))
+    (cond
+      ((not (uiop:file-exists-p path))
+       (list :state :missing
+             :protocol fallback-protocol
+             :sitemap-has-slug-p nil
+             :target-path target-path
+             :target-html-url html-url
+             :target-json-url json-url
+             :message
+             (format nil "No published target page file at ~A." target-path)))
+      (t
+       (let ((validated
+               (localhost-fedwiki-page-publication-validated-page-state-from-path
+                path)))
+         (if (getf validated :available)
+             (list :state :present
+                   :protocol fallback-protocol
+                   :sitemap-has-slug-p t
+                   :target-path target-path
+                   :target-html-url html-url
+                   :target-json-url json-url
+                   :page (copy-tree (getf validated :page)))
+             (list :state :unreachable
+                   :protocol fallback-protocol
+                   :sitemap-has-slug-p t
+                   :target-path target-path
+                   :target-html-url html-url
+                   :target-json-url json-url
+                   :message (getf validated :message)
+                   :condition (getf validated :condition))))))))
 
 (defun localhost-fedwiki-page-publication-plan-target-page-state (plan)
   (let* ((reader
@@ -2343,6 +2385,11 @@
             (localhost-fedwiki-page-publication-plan-target-json-url
              plan
              :protocol protocol)))
+    (unless (getf state :target-path)
+      (setf (getf state :target-path)
+            (namestring
+             (localhost-fedwiki-page-publication-plan-target-page-pathname
+              plan))))
     (when-let (page (getf state :page))
       (let* ((normalized-page
                (normalize-fedwiki-page-publication-page page))
@@ -2403,6 +2450,10 @@
            :slug (localhost-fedwiki-page-publication-plan-target-slug plan)
            :page-id
            (localhost-fedwiki-page-publication-plan-target-page-id plan)
+           :target-path
+           (namestring
+            (localhost-fedwiki-page-publication-plan-target-page-pathname
+             plan))
            :fields '(:title :story :journal)
            :page (copy-tree (getf local-state :page))
            :fingerprint (getf local-state :fingerprint)))))
@@ -2460,6 +2511,8 @@
           (localhost-fedwiki-page-publication-plan-target-json-url
            plan
            :protocol protocol)
+          :target-page-path
+          (and target-state (getf target-state :target-path))
           :publication-status publication-status
           :target-state
           (and target-state (getf target-state :state))
@@ -2530,6 +2583,9 @@
       (format stream "target-site=~A~%" (getf summary :target-site))
       (format stream "target-slug=~A~%" (getf summary :target-slug))
       (format stream "target-page-id=~A~%" (getf summary :target-page-id))
+      (format stream "target-page-path=~A~%"
+              (or (getf summary :target-page-path)
+                  "unavailable"))
       (format stream "publication-status=~A~%"
               (getf summary :publication-status))
       (format stream "target-exists=~A~%"
@@ -2567,6 +2623,108 @@
       (format stream "live-publication-entrypoint=~A~%"
               (getf summary :live-publication-entrypoint)))))
 
+(defun localhost-fedwiki-page-publication-plan-page-store-live-writer
+    (plan &key summary)
+  (let* ((summary (or summary
+                      (localhost-fedwiki-page-publication-plan-dry-run-summary
+                       plan)))
+         (planned-write (getf summary :planned-write))
+         (action (getf planned-write :action))
+         (target-pathname
+           (or (and (getf planned-write :target-path)
+                    (pathname (getf planned-write :target-path)))
+               (localhost-fedwiki-page-publication-plan-target-page-pathname
+                plan)))
+         (target-path (namestring target-pathname))
+         (target-existed-before-p
+           (not (null (uiop:file-exists-p target-pathname)))))
+    (labels ((remember-report (report)
+               (setf (localhost-fedwiki-page-publication-plan-last-live-publication-report
+                      plan)
+                     report)
+               report))
+      (case action
+        (:none
+         (remember-report
+          (list :plan-id (getf summary :plan-id)
+                :action :none
+                :source-page-id (getf summary :source-page-id)
+                :target-site (getf summary :target-site)
+                :target-slug (getf summary :target-slug)
+                :target-path target-path
+                :target-existed-before-p target-existed-before-p
+                :fields-written '()
+                :write-skipped-p t
+                :write-succeeded-p nil
+                :reason (or (getf planned-write :reason)
+                            "No live write was needed.")
+                :post-write-json-syntax-valid-p
+                (eql (getf summary :target-state) :present)
+                :post-write-journal-valid-p
+                (getf summary :target-journal-valid-p)
+                :post-write-journal-findings
+                (copy-list (or (getf summary :target-journal-findings) '()))
+                :post-write-publication-status
+                (getf summary :publication-status))))
+        (:publish-fedwiki-page
+         (article-allegation-write-json-file
+          target-pathname
+          (getf planned-write :page))
+         (let* ((validated
+                  (localhost-fedwiki-page-publication-validated-page-state-from-path
+                   target-pathname))
+                (post-summary
+                  (localhost-fedwiki-page-publication-plan-dry-run-summary
+                   plan)))
+           (unless (and (getf validated :available)
+                        (getf validated :json-syntax-valid-p))
+             (error "Published page ~A is not valid JSON: ~A"
+                    target-path
+                    (or (getf validated :message)
+                        "unknown parse failure")))
+           (unless (getf validated :journal-valid-p)
+             (error "Published page ~A failed the journal gate with findings ~S"
+                    target-path
+                    (getf validated :journal-findings)))
+           (remember-report
+            (list :plan-id (getf summary :plan-id)
+                  :action :publish-fedwiki-page
+                  :source-page-id (getf summary :source-page-id)
+                  :target-site (getf summary :target-site)
+                  :target-slug (getf summary :target-slug)
+                  :target-path target-path
+                  :target-existed-before-p target-existed-before-p
+                  :fields-written
+                  (copy-list (or (getf planned-write :fields) '()))
+                  :write-skipped-p nil
+                  :write-succeeded-p t
+                  :pre-write-local-json-syntax-valid-p
+                  (getf summary :local-json-syntax-valid-p)
+                  :pre-write-local-journal-valid-p
+                  (getf summary :local-journal-valid-p)
+                  :pre-write-local-journal-findings
+                  (copy-list (or (getf summary :local-journal-findings) '()))
+                  :pre-write-target-exists-status
+                  (getf summary :target-exists-status)
+                  :pre-write-publication-status
+                  (getf summary :publication-status)
+                  :post-write-json-syntax-valid-p
+                  (getf validated :json-syntax-valid-p)
+                  :post-write-journal-valid-p
+                  (getf validated :journal-valid-p)
+                  :post-write-journal-findings
+                  (copy-list (or (getf validated :journal-findings) '()))
+                  :post-write-publication-status
+                  (getf post-summary :publication-status)
+                  :post-write-target-page-fingerprint
+                  (getf post-summary :target-page-fingerprint)
+                  :post-write-target-page-summary
+                  (getf post-summary :target-page-summary)))))
+        (otherwise
+         (error "Unsupported live publication action ~S for ~A."
+                action
+                (localhost-fedwiki-page-publication-plan-id plan)))))))
+
 (defgeneric review-localhost-fedwiki-page-publication-plan-dry-run (plan)
   (:method ((plan localhost-fedwiki-page-publication-plan))
     (list :summary
@@ -2593,7 +2751,7 @@
                (localhost-fedwiki-page-publication-plan-id plan))))))
 
 (defun reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
-    (&key target-page-reader live-publication-writer)
+    (&key target-page-reader (live-publication-writer :default))
   (make-localhost-fedwiki-page-publication-plan
    :id "reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan"
    :title
@@ -2606,7 +2764,11 @@
    :target-slug *reproducible-devenv-as-knowledge-artifact-fedwiki-slug*
    :target-protocol "https"
    :target-page-reader target-page-reader
-   :live-publication-writer live-publication-writer))
+   :live-publication-writer
+   (if (eq live-publication-writer :default)
+       #'localhost-fedwiki-page-publication-plan-page-store-live-writer
+       live-publication-writer)
+   :last-live-publication-report nil))
 
 (defun localhost-fedwiki-page-promotion-plan-publication-plan (plan)
   (when (string=

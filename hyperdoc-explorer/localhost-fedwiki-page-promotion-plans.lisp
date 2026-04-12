@@ -172,6 +172,21 @@
       (:blocked "blocked")
       (otherwise (promotion-code-string action)))))
 
+(defun promotion-live-publication-report-label (report)
+  (cond
+    ((null report)
+     "none")
+    ((getf report :write-succeeded-p)
+     (format nil "success (~A)"
+             (promotion-publication-status-label
+              (getf report :post-write-publication-status))))
+    ((getf report :write-skipped-p)
+     (format nil "skipped (~A)"
+             (promotion-publication-status-label
+              (getf report :post-write-publication-status))))
+    (t
+     "attempted")))
+
 (defun promotion-source-freshness-affordance-spec (artifact status)
   (let* ((state-key
            (case artifact
@@ -2002,12 +2017,15 @@
              (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
            (source-plan
              (localhost-fedwiki-page-publication-plan-source-plan plan))
-           (planned-write (getf summary :planned-write)))
+           (planned-write (getf summary :planned-write))
+           (last-report
+             (localhost-fedwiki-page-publication-plan-last-live-publication-report
+              plan)))
       (views:html
         (:h3 (views:esc (localhost-fedwiki-page-publication-plan-title plan)))
         (:p (views:esc (localhost-fedwiki-page-publication-plan-summary plan)))
         (:p (views:esc
-             "This stays on the localhost-first, dry-run-first publication boundary. It reads the current local page, checks JSON and journal preflight, compares against the configured remote site and slug, and keeps any live publication step explicit and page-scoped."))
+             "This stays on the localhost-first, dry-run-first publication boundary. It reads the current local page, checks JSON and journal preflight, compares against the configured target site and slug, and keeps any live publication step explicit and page-scoped."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Source promotion plan"))
                      (:td
@@ -2024,6 +2042,10 @@
                      (:td (:tt (views:esc (getf summary :target-site)))))
                 (:tr (:td (views:esc "Target slug"))
                      (:td (:tt (views:esc (getf summary :target-slug)))))
+                (:tr (:td (views:esc "Target page path"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :target-page-path)
+                                    "n/a")))))
                 (:tr (:td (views:esc "Publication status"))
                      (:td (:tt (views:esc
                                 (promotion-publication-status-label
@@ -2052,7 +2074,11 @@
                 (:tr (:td (views:esc "Live publication configured"))
                      (:td (:tt (views:esc
                                 (promotion-yes/no-label
-                                 (getf summary :live-publication-configured-p)))))))
+                                 (getf summary :live-publication-configured-p))))))
+                (:tr (:td (views:esc "Last live publication"))
+                     (:td (:tt (views:esc
+                                (promotion-live-publication-report-label
+                                 last-report))))))
         (:ul
          (:li
           (promotion-object-link-html
@@ -2073,8 +2099,16 @@
          (:li
           (promotion-object-link-html
            plan
-           :display "Inspect target remote state"
-           :select "Target page")))
+           :display "Inspect target current state"
+           :select "Target page"))
+         (when (getf summary :live-publication-configured-p)
+           (views:html
+             (:li
+              (views:eval-button
+               "Execute live publication"
+               (views:thunk
+                 (execute-localhost-fedwiki-page-publication-plan-live plan))
+               "Run the explicit page-scoped publication writer for this one site/slug and inspect the execution report.")))))
         (when-let (message (getf summary :message))
           (views:html
             (:p (views:esc message))))))))
@@ -2133,7 +2167,7 @@
            (target-page (getf summary :target-page)))
       (views:html
         (:p (views:esc
-             "This is the current remote target observation for the configured site and slug. It stays descriptive; no live publication is executed from this view."))
+             "This is the current target observation for the configured site and slug. It stays descriptive; no live publication is executed from this view."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Target site"))
                      (:td (:tt (views:esc (getf summary :target-site)))))
@@ -2141,6 +2175,10 @@
                      (:td (:tt (views:esc (getf summary :target-slug)))))
                 (:tr (:td (views:esc "Target page id"))
                      (:td (:tt (views:esc (getf summary :target-page-id)))))
+                (:tr (:td (views:esc "Target page path"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :target-page-path)
+                                    "n/a")))))
                 (:tr (:td (views:esc "Protocol"))
                      (:td (:tt (views:esc (getf summary :target-protocol)))))
                 (:tr (:td (views:esc "HTML URL"))
@@ -2189,7 +2227,7 @@
              (localhost-fedwiki-page-publication-plan-dry-run-evidence plan)))
       (views:html
         (:p (views:esc
-             "This stays on the bounded dry-run publication seam. It reports the exact page-scoped write that would occur, but it does not execute any remote mutation."))
+             "This stays on the bounded dry-run publication seam. It reports the exact page-scoped write that would occur, but it does not execute the live writer from this view."))
         (:table :class "inspector-table"
                 (:tr (:td (views:esc "Publication status"))
                      (:td (:tt (views:esc
@@ -2199,6 +2237,10 @@
                      (:td (:tt (views:esc
                                 (promotion-publication-target-exists-label
                                  (getf summary :target-exists-status))))))
+                (:tr (:td (views:esc "Target page path"))
+                     (:td (:tt (views:esc
+                                (or (getf summary :target-page-path)
+                                    "n/a")))))
                 (:tr (:td (views:esc "Exact write action"))
                      (:td (:tt (views:esc
                                 (promotion-planned-write-label
@@ -2215,6 +2257,14 @@
                      (:td (:tt (views:esc
                                 (promotion-code-string
                                  (getf summary :live-publication-entrypoint)))))))
+        (when (getf summary :live-publication-configured-p)
+          (views:html
+            (:p
+             (views:eval-button
+              "Execute live publication"
+              (views:thunk
+                (execute-localhost-fedwiki-page-publication-plan-live plan))
+              "Run the explicit page-scoped publication writer for this one site/slug and inspect the execution report."))))
         (when-let (reason (getf planned-write :reason))
           (views:html
             (:p (views:esc reason))))
