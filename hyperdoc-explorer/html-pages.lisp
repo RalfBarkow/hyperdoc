@@ -245,6 +245,9 @@
    (label :reader authored-expression-label-of
           :initarg :label
           :initform nil)
+   (source-hyperbook-id :reader authored-expression-source-hyperbook-id-of
+                        :initarg :source-hyperbook-id
+                        :initform nil)
    (source-page-id :reader authored-expression-source-page-id-of
                    :initarg :source-page-id
                    :initform nil)
@@ -309,6 +312,10 @@
   (when-let (page (current-authored-page))
     (title-of page)))
 
+(defun current-authored-hyperbook-id ()
+  (when-let (page (current-authored-page))
+    (-> page hb:hyperbook-of hb:id-of)))
+
 (defun normalize-authored-reference-label (label fallback)
   (let ((trimmed (and label
                       (string-trim '(#\Space #\Tab #\Newline #\Return)
@@ -326,6 +333,7 @@
                  :view-title view-title
                  :label label
                  :package-name (current-authored-package-name)
+                 :source-hyperbook-id (current-authored-hyperbook-id)
                  :source-page-id (current-authored-page-id)
                  :source-page-title (current-authored-page-title)
                  :source-tag source-tag))
@@ -363,6 +371,47 @@
                   :reference-kind (authored-expression-kind-of reference)
                   :expected-description expected-description
                   :actual-value actual-value))
+
+(defun authored-source-of-function-expected-symbol (reference)
+  (let ((*package* (authored-expression-package reference)))
+    (let ((form (parse (authored-expression-expression-of reference))))
+      (and (consp form)
+           (eq (first form) 'function)
+           (symbolp (second form))
+           (second form)))))
+
+(defun authored-source-of-function-page-id (reference)
+  (or (when-let (symbol (authored-source-of-function-expected-symbol reference))
+        (if-let (package (symbol-package symbol))
+          (format nil "~A::~A"
+                  (package-name package)
+                  (symbol-name symbol))
+          (symbol-name symbol)))
+      (authored-expression-raw-source-of reference)
+      (authored-expression-expression-of reference)))
+
+(defun make-authored-source-of-function-lookup-issue (reference condition)
+  (let ((symbol (authored-source-of-function-expected-symbol reference)))
+    (hb:make-function-lookup-issue
+     condition
+     :source-object reference
+     :source-hyperbook (authored-expression-source-hyperbook-id-of reference)
+     :source-page-id (authored-expression-source-page-id-of reference)
+     :source-page-title (authored-expression-source-page-title-of reference)
+     :link-text (or (authored-expression-label-of reference)
+                    (authored-expression-raw-source-of reference))
+     :target-hyperbook-id (hb:id-of hb::*lisp-functions*)
+     :expected-page-id (authored-source-of-function-page-id reference)
+     :classification :missing-lisp-function-definition
+     :details (list :lookup-stage :source-of-function
+                    :reference-kind :source-of-function
+                    :package-name (authored-expression-package-name-of reference)
+                    :expected-symbol symbol
+                    :raw-source (authored-expression-raw-source-of reference)
+                    :source-tag (authored-expression-source-tag-of reference)
+                    :fboundp (and symbol (fboundp symbol))
+                    :condition-type (type-of condition)
+                    :source-reference reference))))
 
 (defun force-view-or-issue (reference value)
   (cond
@@ -454,11 +503,15 @@
               (views/standard:source-code-view class)))))
       (:source-of-function
        (let ((fn (parse-and-eval (authored-expression-expression-of reference))))
-         (if (typep fn 'condition)
-             (make-authored-expression-issue reference fn :phase :evaluation)
-             (force-view-or-issue
-              reference
-              (views/standard:source-code-view fn)))))
+         (cond
+           ((typep fn 'undefined-function)
+            (make-authored-source-of-function-lookup-issue reference fn))
+           ((typep fn 'condition)
+            (make-authored-expression-issue reference fn :phase :evaluation))
+           (t
+            (force-view-or-issue
+             reference
+             (views/standard:source-code-view fn))))))
       (t
        (make-authored-expression-issue
         reference

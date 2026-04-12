@@ -376,6 +376,10 @@
       (:table :class "inspector-table"
               (:tr (:td (views:esc "Source page"))
                    (:td (views:esc (lookup-issue-source-page-title-of issue))))
+              (:tr (:td (views:esc "Source page id / slug"))
+                   (:td (:tt (views:esc
+                              (or (lookup-issue-source-page-id-of issue)
+                                  "")))))
               (:tr (:td (views:esc "Source HyperBook"))
                    (:td (views:esc (source-hyperbook-of issue))))
               (:tr (:td (views:esc "Source section"))
