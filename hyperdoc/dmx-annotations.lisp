@@ -166,6 +166,13 @@
     :journal-transition
     :reopen-persisted-annotation))
 
+(defparameter *dmx-workspace-annotation-live-report-stage-order*
+  '(:topic-upsert
+    :workspace-assignment
+    :topicmap-placement
+    :journal-transition
+    :reopen-persisted-annotation))
+
 (defclass workspace-annotation-persistence-debug ()
   ((annotation
     :initarg :annotation
@@ -372,6 +379,175 @@
     :initform nil
     :reader workspace-annotation-persistence-report-assignment-auth-context-of)))
 
+(defclass workspace-annotation-persistence-success-readback ()
+  ((id
+    :reader id-of
+    :initarg :id)
+   (title
+    :reader title-of
+    :initarg :title)
+   (summary
+    :reader summary-of
+    :initarg :summary)
+   (topic-proxy
+    :reader workspace-annotation-persistence-success-readback-topic-proxy-of
+    :initarg :topic-proxy
+    :initform nil)
+   (workspace-proxy
+    :reader workspace-annotation-persistence-success-readback-workspace-proxy-of
+    :initarg :workspace-proxy
+    :initform nil)
+   (topicmap-proxy
+    :reader workspace-annotation-persistence-success-readback-topicmap-proxy-of
+    :initarg :topicmap-proxy
+    :initform nil)
+   (journal-expectation
+    :reader
+    workspace-annotation-persistence-success-readback-journal-expectation-of
+    :initarg :journal-expectation
+    :initform nil)
+   (reopen-expectation
+    :reader
+    workspace-annotation-persistence-success-readback-reopen-expectation-of
+    :initarg :reopen-expectation
+    :initform nil)))
+
+(defclass workspace-annotation-persistence-resolution ()
+  ((id
+    :reader id-of
+    :initarg :id)
+   (title
+    :reader title-of
+    :initarg :title)
+   (summary
+    :reader summary-of
+    :initarg :summary)
+   (report
+    :reader workspace-annotation-persistence-resolution-report-of
+    :initarg :report)
+   (stage
+    :reader workspace-annotation-persistence-resolution-stage-of
+    :initarg :stage)
+   (stage-label
+    :reader workspace-annotation-persistence-resolution-stage-label-of
+    :initarg :stage-label)
+   (blocking-condition
+    :reader workspace-annotation-persistence-resolution-blocking-condition-of
+    :initarg :blocking-condition
+    :initform nil)
+   (required-next-action
+    :reader workspace-annotation-persistence-resolution-required-next-action-of
+    :initarg :required-next-action
+    :initform nil)
+   (required-auth-mode
+    :reader workspace-annotation-persistence-resolution-required-auth-mode-of
+    :initarg :required-auth-mode
+    :initform nil)
+   (recommended-tool-path
+    :reader workspace-annotation-persistence-resolution-recommended-tool-path-of
+    :initarg :recommended-tool-path
+    :initform nil)
+   (success-readback
+    :reader workspace-annotation-persistence-resolution-success-readback-of
+    :initarg :success-readback
+    :initform nil)
+   (do-not-do
+    :reader workspace-annotation-persistence-resolution-do-not-do-of
+    :initarg :do-not-do
+    :initform nil)))
+
+(defclass workspace-annotation-persistence-stage-operation ()
+  ((id
+    :reader id-of
+    :initarg :id)
+   (title
+    :reader title-of
+    :initarg :title)
+   (summary
+    :reader summary-of
+    :initarg :summary)
+   (report
+    :reader workspace-annotation-persistence-stage-operation-report-of
+    :initarg :report)
+   (stage
+    :reader workspace-annotation-persistence-stage-operation-stage-of
+    :initarg :stage)
+   (stage-label
+    :reader workspace-annotation-persistence-stage-operation-stage-label-of
+    :initarg :stage-label)
+   (status
+    :reader workspace-annotation-persistence-stage-operation-status-of
+    :initarg :status)
+   (boundary-or-endpoint
+    :reader
+    workspace-annotation-persistence-stage-operation-boundary-or-endpoint-of
+    :initarg :boundary-or-endpoint
+    :initform nil)
+   (entry
+    :reader workspace-annotation-persistence-stage-operation-entry-of
+    :initarg :entry
+    :initform nil)
+   (evidence
+    :reader workspace-annotation-persistence-stage-operation-evidence-of
+    :initarg :evidence
+    :initform nil)
+   (result-object
+    :reader workspace-annotation-persistence-stage-operation-result-object-of
+    :initarg :result-object
+    :initform nil)
+   (next-step-targets
+    :reader workspace-annotation-persistence-stage-operation-next-step-targets-of
+    :initarg :next-step-targets
+    :initform nil)
+   (resolution
+    :reader workspace-annotation-persistence-stage-operation-resolution-of
+    :initarg :resolution
+    :initform nil)))
+
+(defclass workspace-annotation-persistence-stage-absence ()
+  ((id
+    :reader id-of
+    :initarg :id)
+   (title
+    :reader title-of
+    :initarg :title)
+   (summary
+    :reader summary-of
+    :initarg :summary)
+   (kind
+    :reader workspace-annotation-persistence-stage-absence-kind-of
+    :initarg :kind)
+   (stage
+    :reader workspace-annotation-persistence-stage-absence-stage-of
+    :initarg :stage)
+   (stage-label
+    :reader workspace-annotation-persistence-stage-absence-stage-label-of
+    :initarg :stage-label)
+   (status
+    :reader workspace-annotation-persistence-stage-absence-status-of
+    :initarg :status
+    :initform :not-reached)
+   (boundary-or-endpoint
+    :reader workspace-annotation-persistence-stage-absence-boundary-or-endpoint-of
+    :initarg :boundary-or-endpoint
+    :initform nil)
+   (reason
+    :reader workspace-annotation-persistence-stage-absence-reason-of
+    :initarg :reason
+    :initform nil)
+   (blocking-stage
+    :reader workspace-annotation-persistence-stage-absence-blocking-stage-of
+    :initarg :blocking-stage
+    :initform nil)
+   (next-step-targets
+    :reader workspace-annotation-persistence-stage-absence-next-step-targets-of
+    :initarg :next-step-targets
+    :initform nil)
+   (success-readback
+    :reader workspace-annotation-persistence-stage-absence-success-readback-of
+    :initarg :success-readback
+    :initform nil)))
+
 (defclass workspace-annotation-path-diff ()
   ((annotation
     :initarg :annotation
@@ -512,6 +688,26 @@
             (workspace-annotation-path-next-step-target-label-of object))))
 
 (defmethod print-object ((object workspace-annotation-path-consequence) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object
+    ((object workspace-annotation-persistence-success-readback) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object workspace-annotation-persistence-resolution)
+                         stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object
+    ((object workspace-annotation-persistence-stage-operation) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object
+    ((object workspace-annotation-persistence-stage-absence) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -2368,6 +2564,593 @@
             (or (and (typep client 'http-dmx-import-client)
                      (dmx-import-base-url-of client))
                 *dmx-base-url*))))))
+
+(defun workspace-annotation-persistence-live-stage-label (stage)
+  (case stage
+    (:topic-upsert "TOPIC-UPSERT")
+    (:workspace-assignment "WORKSPACE-ASSIGNMENT")
+    (:topicmap-placement "TOPICMAP-PLACEMENT")
+    (:journal-transition "JOURNAL-RECORDING")
+    (:reopen-persisted-annotation "REOPEN")
+    (otherwise
+     (workspace-annotation-persistence-stage-label stage))))
+
+(defun workspace-annotation-persistence-stage-absence-kind-label (kind)
+  (case kind
+    (:not-reached-because-prior-stage-failed
+     "not-reached-because-prior-stage-failed")
+    (:not-applicable-in-this-mode
+     "not-applicable-in-this-mode")
+    (:credentials-pending
+     "credentials-pending")
+    (:unavailable-without-live-auth
+     "unavailable-without-live-auth")
+    (otherwise
+     (format nil "~(~A~)" kind))))
+
+(defun workspace-annotation-persistence-live-stage-position (stage)
+  (position stage
+            *dmx-workspace-annotation-live-report-stage-order*
+            :test #'eq))
+
+(defun workspace-annotation-persistence-live-stage-before-p
+    (left-stage right-stage)
+  (let ((left (workspace-annotation-persistence-live-stage-position left-stage))
+        (right (workspace-annotation-persistence-live-stage-position
+                right-stage)))
+    (and left right (< left right))))
+
+(defun workspace-annotation-persistence-report-base-url (report)
+  (let ((client (workspace-annotation-persistence-report-client-of report)))
+    (or (and (typep client 'http-dmx-import-client)
+             (dmx-import-base-url-of client))
+        *dmx-base-url*)))
+
+(defun workspace-annotation-persistence-report-topic-proxy
+    (report topic-id &key topicmap-id)
+  (let ((resolved-topicmap-id
+          (or topicmap-id
+              (workspace-annotation-persistence-report-workspace-topicmap-id-of
+               report))))
+    (and topic-id
+         resolved-topicmap-id
+         (ignore-errors
+           (make-dmx-topic-proxy
+            :topic-id topic-id
+            :topicmap-id resolved-topicmap-id
+            :base-url
+            (workspace-annotation-persistence-report-base-url report))))))
+
+(defun workspace-annotation-persistence-report-workspace-proxy-of (report)
+  (let ((workspace-id
+          (workspace-annotation-persistence-report-workspace-id-of report)))
+    (and workspace-id
+         (workspace-annotation-persistence-report-topic-proxy
+          report
+          workspace-id))))
+
+(defun workspace-annotation-persistence-report-topicmap-proxy-of (report)
+  (let ((topicmap-id
+          (workspace-annotation-persistence-report-workspace-topicmap-id-of
+           report)))
+    (and topicmap-id
+         (ignore-errors
+           (make-dmx-topicmap-proxy
+            topicmap-id
+            :base-url
+            (workspace-annotation-persistence-report-base-url report))))))
+
+(defun workspace-annotation-persistence-report-saved-topic-proxy-of (report)
+  (workspace-annotation-persistence-report-topic-proxy
+   report
+   (workspace-annotation-persistence-report-saved-topic-id-of report)))
+
+(defun workspace-annotation-persistence-report-topic-upsert-auth-blocked-p
+    (report)
+  (and (typep report 'workspace-annotation-persistence-report)
+       (eq (workspace-annotation-persistence-report-failure-stage-of report)
+           :topic-upsert)
+       (workspace-annotation-http-auth-blocked-p
+        (workspace-annotation-persistence-report-condition-of report))
+       (workspace-annotation-persistence-report-saved-topic-id-of report)))
+
+(defun workspace-annotation-persistence-report-topic-upsert-evidence-path
+    (report)
+  (let ((evidence
+          (workspace-annotation-persistence-report-topic-upsert-evidence-of
+           report))
+        (topic-id
+          (workspace-annotation-persistence-report-saved-topic-id-of report)))
+    (or (getf evidence :path)
+        (and topic-id
+             (dmx-topic-update-path topic-id))
+        "/core/topic")))
+
+(defun workspace-annotation-persistence-report-topic-upsert-endpoint-label
+    (report)
+  (let* ((evidence
+           (workspace-annotation-persistence-report-topic-upsert-evidence-of
+            report))
+         (method (or (getf evidence :method)
+                     (if (eq (and (workspace-annotation-persistence-report-plan-of
+                                   report)
+                                  (dmx-workspace-annotation-write-plan-topic-action
+                                   (workspace-annotation-persistence-report-plan-of
+                                    report)))
+                             :update)
+                         :put
+                         :post)))
+         (path
+           (workspace-annotation-persistence-report-topic-upsert-evidence-path
+            report)))
+    (and path
+         (format nil "~:@(~A~) ~A" method path))))
+
+(defun workspace-annotation-persistence-stage-boundary-or-endpoint
+    (report stage)
+  (let* ((topic-id
+           (workspace-annotation-persistence-report-saved-topic-id-of report))
+         (workspace-id
+           (workspace-annotation-persistence-report-workspace-id-of report))
+         (topicmap-id
+           (workspace-annotation-persistence-report-workspace-topicmap-id-of
+            report)))
+    (case stage
+      (:topic-upsert
+       (workspace-annotation-persistence-report-topic-upsert-endpoint-label
+        report))
+      (:workspace-assignment
+       (and workspace-id
+            topic-id
+            (format nil
+                    "PUT ~A"
+                    (workspace-annotation-assignment-endpoint-path
+                     workspace-id
+                     topic-id))))
+      (:topicmap-placement
+       (and topicmap-id
+            topic-id
+            (format nil
+                    "POST ~A"
+                    (dmx-topicmap-add-topic-path topicmap-id topic-id))))
+      (:journal-transition
+       (if-let (journal-topic-id
+                (workspace-annotation-persistence-report-journal-topic-id-of
+                 report))
+         (format nil
+                 "dmx-workspace-journal-record-transition -> companion topic ~D"
+                 journal-topic-id)
+         "dmx-workspace-journal-record-transition"))
+      (:reopen-persisted-annotation
+       (and topicmap-id
+            topic-id
+            (format nil
+                    "read-dmx-workspace-annotation topic ~D in topicmap ~D"
+                    topic-id
+                    topicmap-id)))
+      (otherwise
+       nil))))
+
+(defun workspace-annotation-persistence-topic-upsert-resolution-summary
+    (report)
+  (let* ((topic-id
+           (workspace-annotation-persistence-report-saved-topic-id-of report))
+         (evidence
+           (workspace-annotation-persistence-report-topic-upsert-evidence-of
+            report))
+         (status-code (or (getf evidence :response-status-code) 401)))
+    (format nil
+            "FAILED because TOPIC-UPSERT attempted an anonymous write to existing topic ~D and DMX returned ~D. This is an authentication-boundary failure before workspace assignment, topicmap placement, journal recording, and reopen."
+            topic-id
+            status-code)))
+
+(defun workspace-annotation-persistence-topic-upsert-blocking-condition
+    (report)
+  (let* ((evidence
+           (workspace-annotation-persistence-report-topic-upsert-evidence-of
+            report))
+         (auth-mode (or (getf evidence :auth-mode-summary)
+                        "anonymous"))
+         (status-code (or (getf evidence :response-status-code) 401)))
+    (format nil
+            "~A ~A returned ~D"
+            auth-mode
+            (workspace-annotation-persistence-report-topic-upsert-endpoint-label
+             report)
+            status-code)))
+
+(defun workspace-annotation-persistence-report-continue-target (report)
+  (let ((topic-id
+          (workspace-annotation-persistence-report-saved-topic-id-of report)))
+    (make-workspace-annotation-path-next-step-target
+     "continue-workspace-annotation"
+     "continue_workspace_annotation"
+     "continue_workspace_annotation"
+     :continue
+     t
+     '(:workspace-assignment :topicmap-placement
+       :journal-transition :reopen-persisted-annotation)
+     :summary
+     (format nil
+             "Bootstrap authenticated DMX session, then rerun the guarded annotation continuation from preserved topic ~D instead of retrying a raw anonymous topic PUT."
+             topic-id))))
+
+(defun workspace-annotation-persistence-report-repair-target (report)
+  (declare (ignore report))
+  (make-workspace-annotation-path-next-step-target
+   "repair-workspace-topic-assignment"
+   "repair_workspace_topic_assignment"
+   "repair_workspace_topic_assignment"
+   :repair
+   t
+   '(:workspace-assignment)
+   :summary
+   "Repair workspace assignment only. This keeps workspace ownership separate from topicmap placement."))
+
+(defun workspace-annotation-persistence-report-recommended-next-step-targets
+    (report stage)
+  (cond
+    ((and (workspace-annotation-persistence-report-saved-topic-id-of report)
+          (or (workspace-annotation-persistence-report-topic-upsert-auth-blocked-p
+               report)
+              (workspace-annotation-pending-auth-p report)
+              (workspace-annotation-journal-preflight-auth-blocked-p report)))
+     (list (workspace-annotation-persistence-report-continue-target report)))
+    ((and (eq stage :workspace-assignment)
+          (not (workspace-annotation-persistence-report-saved-topic-id-of report)))
+     (list (workspace-annotation-persistence-report-repair-target report)))
+    (t
+     nil)))
+
+(defun workspace-annotation-persistence-report-success-readback-of (report)
+  (let* ((topic-id
+           (workspace-annotation-persistence-report-saved-topic-id-of report))
+         (topic-proxy
+           (workspace-annotation-persistence-report-saved-topic-proxy-of report))
+         (workspace-proxy
+           (workspace-annotation-persistence-report-workspace-proxy-of report))
+         (topicmap-proxy
+           (workspace-annotation-persistence-report-topicmap-proxy-of report)))
+    (when topic-id
+      (make-instance
+       'workspace-annotation-persistence-success-readback
+       :id (format nil
+                   "workspace-annotation-success-readback/~D"
+                   topic-id)
+       :title (format nil
+                      "Success readback for topic ~D"
+                      topic-id)
+       :summary
+       (format nil
+               "Success means topic ~D updates successfully, then reads back assigned to workspace 919815, present in topicmap 919822, journaled, and reopenable as workspace-dock-annotation."
+               topic-id)
+       :topic-proxy topic-proxy
+       :workspace-proxy workspace-proxy
+       :topicmap-proxy topicmap-proxy
+       :journal-expectation
+       "JOURNAL-RECORDING completes on the guarded workspace journal path."
+       :reopen-expectation
+       "REOPEN returns a workspace-dock-annotation for the saved topic."))))
+
+(defun workspace-annotation-persistence-report-resolution-of (report)
+  (when (workspace-annotation-persistence-report-topic-upsert-auth-blocked-p
+         report)
+    (make-instance
+     'workspace-annotation-persistence-resolution
+     :id (format nil
+                 "workspace-annotation-resolution/~D/~(~A~)"
+                 (workspace-annotation-persistence-report-saved-topic-id-of
+                  report)
+                 (workspace-annotation-persistence-report-failure-stage-of
+                  report))
+     :title "Resolution"
+     :summary
+     (workspace-annotation-persistence-topic-upsert-resolution-summary
+      report)
+     :report report
+     :stage :topic-upsert
+     :stage-label
+     (workspace-annotation-persistence-live-stage-label :topic-upsert)
+     :blocking-condition
+     (workspace-annotation-persistence-topic-upsert-blocking-condition
+      report)
+     :required-next-action
+     (format nil
+             "Do not retry anonymously. Authenticate explicitly using the existing explicit-auth path. If username/password mode is used, bootstrap the DMX session first with POST /access-control/login and obtain JSESSIONID. Then rerun the guarded continue_workspace_annotation path from preserved topic ~D."
+             (workspace-annotation-persistence-report-saved-topic-id-of report))
+     :required-auth-mode
+     "Explicit action-time credentials; if username/password is chosen, obtain JSESSIONID first via login bootstrap."
+     :recommended-tool-path
+     (workspace-annotation-persistence-report-continue-target report)
+     :success-readback
+     (workspace-annotation-persistence-report-success-readback-of report)
+     :do-not-do
+     "Do not keep retrying the same anonymous/service-auth path as though the 401 were ambiguous.")))
+
+(defun workspace-annotation-persistence-matrix-stage-status (report stage)
+  (let ((entry (workspace-annotation-persistence-stage-result report stage)))
+    (cond
+      ((and entry (eq (getf entry :status) :completed))
+       :completed)
+      ((and entry (eq (getf entry :status) :error))
+       :failed)
+      ((and entry (eq (getf entry :status) :skipped))
+       :not-applicable)
+      ((and (workspace-annotation-persistence-report-failure-stage-of report)
+            (workspace-annotation-persistence-live-stage-before-p
+             (workspace-annotation-persistence-report-failure-stage-of report)
+             stage))
+       :not-reached)
+      (t
+       :pending))))
+
+(defun workspace-annotation-persistence-stage-evidence (report stage)
+  (case stage
+    (:topic-upsert
+     (workspace-annotation-persistence-report-topic-upsert-evidence-of report))
+    (:workspace-assignment
+     (and (eq (workspace-annotation-persistence-report-failure-stage-of report)
+              :workspace-assignment)
+          (workspace-annotation-persistence-report-assignment-auth-context-of
+           report)))
+    (:journal-transition
+     (and (eq (workspace-annotation-persistence-report-failure-stage-of report)
+              :prepare-transition)
+          (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+           report)))
+    (otherwise
+     nil)))
+
+(defun workspace-annotation-persistence-stage-absence-of (report stage)
+  (let* ((entry (workspace-annotation-persistence-stage-result report stage))
+         (failure-stage
+           (workspace-annotation-persistence-report-failure-stage-of report))
+         (resolution
+           (workspace-annotation-persistence-report-resolution-of report))
+         (next-step-targets
+           (or (and resolution
+                    (list
+                     (workspace-annotation-persistence-resolution-recommended-tool-path-of
+                      resolution)))
+               (workspace-annotation-persistence-report-recommended-next-step-targets
+                report
+                stage)))
+         (success-readback
+           (or (and resolution
+                    (workspace-annotation-persistence-resolution-success-readback-of
+                     resolution))
+               (workspace-annotation-persistence-report-success-readback-of
+                report))))
+    (cond
+      ((and entry
+            (eq (getf entry :status) :skipped))
+       (make-instance
+        'workspace-annotation-persistence-stage-absence
+        :id (format nil
+                    "workspace-annotation-stage-absence/~(~A~)/not-applicable"
+                    stage)
+        :title (format nil
+                       "~A absence"
+                       (workspace-annotation-persistence-live-stage-label
+                        stage))
+        :summary
+        (or (getf entry :summary)
+            "No write was needed at this stage.")
+        :kind :not-applicable-in-this-mode
+        :stage stage
+        :stage-label
+        (workspace-annotation-persistence-live-stage-label stage)
+        :status :not-applicable
+        :boundary-or-endpoint
+        (workspace-annotation-persistence-stage-boundary-or-endpoint
+         report
+         stage)
+        :reason
+        (or (getf entry :detail)
+            (getf entry :summary))
+        :next-step-targets next-step-targets
+        :success-readback success-readback))
+      ((and (eq stage failure-stage)
+            (or (workspace-annotation-persistence-report-topic-upsert-auth-blocked-p
+                 report)
+                (workspace-annotation-pending-auth-p report)
+                (workspace-annotation-journal-preflight-auth-blocked-p report)))
+       (make-instance
+        'workspace-annotation-persistence-stage-absence
+        :id (format nil
+                    "workspace-annotation-stage-absence/~(~A~)/credentials-pending"
+                    stage)
+        :title (format nil
+                       "~A absence"
+                       (workspace-annotation-persistence-live-stage-label
+                        stage))
+        :summary
+        (or (and resolution
+                 (summary-of resolution))
+            (or (getf entry :detail)
+                (getf entry :summary)))
+        :kind :credentials-pending
+        :stage stage
+        :stage-label
+        (workspace-annotation-persistence-live-stage-label stage)
+        :status :failed
+        :boundary-or-endpoint
+        (workspace-annotation-persistence-stage-boundary-or-endpoint
+         report
+         stage)
+        :reason
+        (or (and resolution
+                 (workspace-annotation-persistence-resolution-blocking-condition-of
+                  resolution))
+            (getf entry :detail)
+            (and (workspace-annotation-persistence-report-condition-of report)
+                 (format nil
+                         "~A"
+                         (workspace-annotation-persistence-report-condition-of
+                          report))))
+        :next-step-targets next-step-targets
+        :success-readback success-readback))
+      ((and failure-stage
+            (workspace-annotation-persistence-live-stage-before-p
+             failure-stage
+             stage))
+       (make-instance
+        'workspace-annotation-persistence-stage-absence
+        :id (format nil
+                    "workspace-annotation-stage-absence/~(~A~)/not-reached"
+                    stage)
+        :title (format nil
+                       "~A absence"
+                       (workspace-annotation-persistence-live-stage-label
+                        stage))
+        :summary
+        (format nil
+                "~A was not reached because ~A failed earlier."
+                (workspace-annotation-persistence-live-stage-label stage)
+                (workspace-annotation-persistence-live-stage-label
+                 failure-stage))
+        :kind :not-reached-because-prior-stage-failed
+        :stage stage
+        :stage-label
+        (workspace-annotation-persistence-live-stage-label stage)
+        :status :not-reached
+        :boundary-or-endpoint
+        (workspace-annotation-persistence-stage-boundary-or-endpoint
+         report
+         stage)
+        :reason
+        (format nil
+                "~A did not run because ~A failed earlier. Downstream stages are not independently broken."
+                (workspace-annotation-persistence-live-stage-label stage)
+                (workspace-annotation-persistence-live-stage-label
+                 failure-stage))
+        :blocking-stage
+        (workspace-annotation-persistence-live-stage-label failure-stage)
+        :next-step-targets next-step-targets
+        :success-readback success-readback))
+      ((and (member stage '(:workspace-assignment :topicmap-placement
+                            :journal-transition)
+                    :test #'eq)
+            (not (typep (workspace-annotation-persistence-report-client-of
+                         report)
+                        'http-dmx-import-client)))
+       (make-instance
+        'workspace-annotation-persistence-stage-absence
+        :id (format nil
+                    "workspace-annotation-stage-absence/~(~A~)/live-auth-required"
+                    stage)
+        :title (format nil
+                       "~A absence"
+                       (workspace-annotation-persistence-live-stage-label
+                        stage))
+        :summary
+        "This stage requires a live HTTP client with usable auth."
+        :kind :unavailable-without-live-auth
+        :stage stage
+        :stage-label
+        (workspace-annotation-persistence-live-stage-label stage)
+        :status :pending
+        :boundary-or-endpoint
+        (workspace-annotation-persistence-stage-boundary-or-endpoint
+         report
+         stage)
+        :reason
+        "The current report does not carry a live HTTP client that can execute this stage."
+        :next-step-targets next-step-targets
+        :success-readback success-readback))
+      (t
+       nil))))
+
+(defun workspace-annotation-persistence-stage-result-or-absence-of
+    (report stage)
+  (let ((entry (workspace-annotation-persistence-stage-result report stage)))
+    (cond
+      ((and entry
+            (eq (getf entry :status) :completed)
+            (eq stage :topic-upsert))
+       (workspace-annotation-persistence-report-saved-topic-proxy-of report))
+      ((and entry
+            (eq (getf entry :status) :completed)
+            (eq stage :workspace-assignment))
+       (workspace-annotation-persistence-report-workspace-proxy-of report))
+      ((and entry
+            (eq (getf entry :status) :completed)
+            (eq stage :topicmap-placement))
+       (workspace-annotation-persistence-report-topicmap-proxy-of report))
+      ((and entry
+            (eq (getf entry :status) :completed)
+            (eq stage :journal-transition))
+       (or (workspace-annotation-persistence-report-journal-topic-proxy-of
+            report)
+           (workspace-annotation-persistence-report-success-readback-of
+            report)))
+      ((and entry
+            (eq (getf entry :status) :completed)
+            (eq stage :reopen-persisted-annotation))
+       (workspace-annotation-persistence-report-persisted-annotation-of report))
+      (t
+       (workspace-annotation-persistence-stage-absence-of report stage)))))
+
+(defun workspace-annotation-persistence-stage-operation-of (report stage)
+  (let* ((entry (workspace-annotation-persistence-stage-result report stage))
+         (resolution
+           (workspace-annotation-persistence-report-resolution-of report)))
+    (make-instance
+     'workspace-annotation-persistence-stage-operation
+     :id (format nil
+                 "workspace-annotation-stage-operation/~(~A~)"
+                 stage)
+     :title (format nil
+                    "~A operation"
+                    (workspace-annotation-persistence-live-stage-label stage))
+     :summary
+     (or (and entry (getf entry :summary))
+         (format nil
+                 "~A stage for the live workspace persistence path."
+                 (workspace-annotation-persistence-live-stage-label stage)))
+     :report report
+     :stage stage
+     :stage-label
+     (workspace-annotation-persistence-live-stage-label stage)
+     :status (workspace-annotation-persistence-matrix-stage-status report stage)
+     :boundary-or-endpoint
+     (workspace-annotation-persistence-stage-boundary-or-endpoint report stage)
+     :entry entry
+     :evidence
+     (workspace-annotation-persistence-stage-evidence report stage)
+     :result-object
+     (workspace-annotation-persistence-stage-result-or-absence-of report stage)
+     :next-step-targets
+     (workspace-annotation-persistence-report-recommended-next-step-targets
+      report
+      stage)
+     :resolution
+     (and (eq stage (workspace-annotation-persistence-report-failure-stage-of
+                     report))
+          resolution))))
+
+(defun workspace-annotation-persistence-stage-matrix-rows (report)
+  (loop for stage in *dmx-workspace-annotation-live-report-stage-order*
+        collect
+        (list :stage stage
+              :stage-label
+              (workspace-annotation-persistence-live-stage-label stage)
+              :status
+              (workspace-annotation-persistence-matrix-stage-status report stage)
+              :boundary-or-endpoint
+              (workspace-annotation-persistence-stage-boundary-or-endpoint
+               report
+               stage)
+              :operation
+              (workspace-annotation-persistence-stage-operation-of report stage)
+              :result-or-absence
+              (workspace-annotation-persistence-stage-result-or-absence-of
+               report
+               stage)
+              :next-step-targets
+              (workspace-annotation-persistence-report-recommended-next-step-targets
+               report
+               stage))))
 
 (defun workspace-annotation-stage-results-with-entry (stage-results entry)
   (let ((replaced-p nil)

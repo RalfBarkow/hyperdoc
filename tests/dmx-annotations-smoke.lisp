@@ -50,6 +50,10 @@
     (compatibility-storage-http-dmx-import-client)
   ())
 
+(defclass auth-blocked-topic-update-dmx-import-client
+    (compatibility-storage-http-dmx-import-client)
+  ())
+
 (defclass counting-topic-update-compatibility-storage-http-dmx-import-client
     (compatibility-storage-http-dmx-import-client)
   ((topic-update-count
@@ -166,6 +170,32 @@
      payload)
   (declare (ignore client existing-topic payload))
   (error "Simulated topic update failure"))
+
+(defmethod hyperdoc::dmx-import-update-topic
+    ((client auth-blocked-topic-update-dmx-import-client)
+     existing-topic
+     payload)
+  (declare (ignore payload))
+  (let* ((topic-id (hyperdoc::dmx-import-object-id existing-topic))
+         (path (hyperdoc::dmx-topic-update-path topic-id))
+         (url (format nil "~A~A"
+                      (hyperdoc::dmx-import-base-url-of client)
+                      path)))
+    (error 'hyperdoc::dmx-import-http-error
+           :message (format nil "DMX import HTTP failure 401 for ~A" url)
+           :url url
+           :status-code 401
+           :response-body "{\"error\":\"annotation-update-unauthorized\"}"
+           :evidence
+           (list :method :put
+                 :path path
+                 :auth-mode-summary "anonymous"
+                 :authorization-scheme nil
+                 :bootstrap-ran-p nil
+                 :request-content-type "application/json; charset=utf-8"
+                 :response-status-code 401
+                 :response-reason-phrase "Unauthorized"
+                 :response-body "{\"error\":\"annotation-update-unauthorized\"}"))))
 
 (defmethod hyperdoc::dmx-import-update-topic
     ((client counting-topic-update-compatibility-storage-http-dmx-import-client)
@@ -2428,6 +2458,237 @@
      (search "dmx.notes.note" html :test #'char-equal)
      "The Overview must keep the physical carrier type explicit")))
 
+(defun run-dmx-workspace-annotation-auth-blocked-saved-topic-resolution-smoke-test
+    ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (create-client
+           (make-instance 'compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :authorization-header "Bearer test-token"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 928840))
+         (persisted
+           (hyperdoc::persist-dock-annotation-to-workspace
+            (make-test-dock-annotation
+             :note "Saved topic auth-boundary resolution smoke")
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client create-client
+            :dry-run nil))
+         (update-client
+           (make-instance 'auth-blocked-topic-update-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 928841))
+         (report
+           (hyperdoc::run-dock-annotation-workspace-persistence-debug
+            persisted
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client update-client))
+         (resolution
+           (hyperdoc::workspace-annotation-persistence-report-resolution-of
+            report))
+         (topic-upsert-operation
+           (hyperdoc::workspace-annotation-persistence-stage-operation-of
+            report
+            :topic-upsert))
+         (workspace-assignment-absence
+           (hyperdoc::workspace-annotation-persistence-stage-result-or-absence-of
+            report
+            :workspace-assignment))
+         (topicmap-placement-absence
+           (hyperdoc::workspace-annotation-persistence-stage-result-or-absence-of
+            report
+            :topicmap-placement))
+         (report-views
+           (dmx-annotation-smoke-load-inspector-views-for-object report))
+         (overview
+           (dmx-annotation-smoke-find-view-by-title report-views "Overview"))
+         (stages
+           (dmx-annotation-smoke-find-view-by-title report-views "Stages"))
+         (overview-html (and overview
+                             (html-inspector-views:view-html overview)))
+         (stages-html (and stages
+                           (html-inspector-views:view-html stages)))
+         (operation-views
+           (dmx-annotation-smoke-load-inspector-views-for-object
+            topic-upsert-operation))
+         (operation-overview
+           (dmx-annotation-smoke-find-view-by-title operation-views "Overview"))
+         (operation-html
+           (and operation-overview
+                (html-inspector-views:view-html operation-overview)))
+         (absence-views
+           (dmx-annotation-smoke-load-inspector-views-for-object
+            workspace-assignment-absence))
+         (absence-overview
+           (dmx-annotation-smoke-find-view-by-title absence-views "Overview"))
+         (absence-html
+           (and absence-overview
+                (html-inspector-views:view-html absence-overview))))
+    (assert-true
+     (typep report 'hyperdoc::workspace-annotation-persistence-report)
+     "Saved-topic auth-boundary failures must still return an inspectable persistence report")
+    (assert-equal :failed
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   report)
+                  "Anonymous existing-topic PUT 401 must keep the raw persistence report in failed status")
+    (assert-equal :topic-upsert
+                  (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                   report)
+                  "The auth-boundary saved-topic smoke must fail at TOPIC-UPSERT")
+    (assert-equal 928840
+                  (hyperdoc::workspace-annotation-persistence-report-saved-topic-id-of
+                   report)
+                  "The auth-boundary saved-topic smoke must preserve saved topic 928840")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-workspace-proxy-of
+             report)
+            'hyperdoc::dmx-topic-proxy)
+     "The report must expose workspace 919815 as an inspectable DMX proxy")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-topicmap-proxy-of
+             report)
+            'hyperdoc::dmx-topic-proxy)
+     "The report must expose topicmap 919822 as an inspectable DMX proxy")
+    (assert-true
+     (typep (hyperdoc::workspace-annotation-persistence-report-saved-topic-proxy-of
+             report)
+            'hyperdoc::dmx-topic-proxy)
+     "The report must expose the saved annotation topic as an inspectable DMX proxy")
+    (assert-true
+     (typep resolution 'hyperdoc::workspace-annotation-persistence-resolution)
+     "Auth-boundary topic-upsert failures must derive an inspectable Resolution object")
+    (assert-true
+     (typep topic-upsert-operation
+            'hyperdoc::workspace-annotation-persistence-stage-operation)
+     "The failed TOPIC-UPSERT row must expose an inspectable operation object")
+    (assert-true
+     (typep workspace-assignment-absence
+            'hyperdoc::workspace-annotation-persistence-stage-absence)
+     "Blocked downstream stages must expose inspectable absence objects")
+    (assert-equal :not-reached-because-prior-stage-failed
+                  (hyperdoc::workspace-annotation-persistence-stage-absence-kind-of
+                   workspace-assignment-absence)
+                  "WORKSPACE-ASSIGNMENT must be modeled as not reached because TOPIC-UPSERT failed")
+    (assert-equal :not-reached-because-prior-stage-failed
+                  (hyperdoc::workspace-annotation-persistence-stage-absence-kind-of
+                   topicmap-placement-absence)
+                  "TOPICMAP-PLACEMENT must be modeled as not reached because TOPIC-UPSERT failed")
+    (assert-true
+     (search "Resolution" overview-html :test #'char-equal)
+     "Overview must render a top-level Resolution section")
+    (assert-true
+     (search "anonymous PUT /core/topic/928840 returned 401"
+             overview-html
+             :test #'char-equal)
+     "Overview Resolution must preserve the exact blocking condition")
+    (assert-true
+     (search "Do not retry anonymously."
+             overview-html
+             :test #'char-equal)
+     "Overview Resolution must tell the operator not to retry anonymously")
+    (assert-true
+     (search "POST /access-control/login"
+             overview-html
+             :test #'char-equal)
+     "Overview Resolution must name the login bootstrap step for username/password mode")
+    (assert-true
+     (search "JSESSIONID"
+             overview-html
+             :test #'char-equal)
+     "Overview Resolution must name the session bootstrap artifact explicitly")
+    (assert-true
+     (search "continue_workspace_annotation"
+             overview-html
+             :test #'char-equal)
+     "Overview Resolution must point to continue_workspace_annotation for the saved-topic auth-boundary case")
+    (assert-true
+     (search "Saved annotation topic 928840"
+             overview-html
+             :test #'char-equal)
+     "Overview must render the saved annotation topic as an inspectable object ref")
+    (assert-true
+     (search "context-window workspace (919815)"
+             overview-html
+             :test #'char-equal)
+     "Overview must render the destination workspace as an inspectable object ref label")
+    (assert-true
+     (search "context-window topicmap (919822)"
+             overview-html
+             :test #'char-equal)
+     "Overview must render the destination topicmap as an inspectable object ref label")
+    (assert-true
+     (search "TOPIC-UPSERT"
+             stages-html
+             :test #'char-equal)
+     "Stages view must use the explicit TOPIC-UPSERT stage label")
+    (assert-true
+     (search "WORKSPACE-ASSIGNMENT"
+             stages-html
+             :test #'char-equal)
+     "Stages view must use the explicit WORKSPACE-ASSIGNMENT stage label")
+    (assert-true
+     (search "TOPICMAP-PLACEMENT"
+             stages-html
+             :test #'char-equal)
+     "Stages view must use the explicit TOPICMAP-PLACEMENT stage label")
+    (assert-true
+     (search "JOURNAL-RECORDING"
+             stages-html
+             :test #'char-equal)
+     "Stages view must use the explicit JOURNAL-RECORDING stage label")
+    (assert-true
+     (search "REOPEN"
+             stages-html
+             :test #'char-equal)
+     "Stages view must use the explicit REOPEN stage label")
+    (assert-true
+     (search "credentials-pending"
+             stages-html
+             :test #'char-equal)
+     "Stages view must expose the failed TOPIC-UPSERT result as credentials-pending")
+    (assert-true
+     (search "not-reached-because-prior-stage-failed"
+             stages-html
+             :test #'char-equal)
+     "Stages view must expose downstream stages as not reached because the prior stage failed")
+    (assert-true
+     (search "What must the operator do next?"
+             operation-html
+             :test #'char-equal)
+     "The failed stage object must explicitly answer what the operator must do next")
+    (assert-true
+     (search "What readback will prove success?"
+             operation-html
+             :test #'char-equal)
+     "The failed stage object must explicitly answer what readback proves success")
+    (assert-true
+     (search "Failure evidence"
+             operation-html
+             :test #'char-equal)
+     "The failed stage object must surface inspectable failure evidence")
+    (assert-true
+     (search "Why did this not run?"
+             absence-html
+             :test #'char-equal)
+     "Downstream absence objects must explain why the stage did not run")
+    (assert-true
+     (search "What readback will prove success?"
+             absence-html
+             :test #'char-equal)
+     "Downstream absence objects must point to the success readback criteria")))
+
 (defun run-dmx-workspace-annotation-journal-preflight-failure-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((topics (make-hash-table :test #'equal))
@@ -4498,6 +4759,7 @@
   (run-dmx-workspace-annotation-assignment-topicmap-split-consequence-smoke-test)
   (run-dmx-workspace-annotation-no-change-consequence-smoke-test)
   (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
+  (run-dmx-workspace-annotation-auth-blocked-saved-topic-resolution-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-unassigned-companion-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-repair-failure-smoke-test)

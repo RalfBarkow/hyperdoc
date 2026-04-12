@@ -16,6 +16,121 @@
     (t
      (views:object-ref value))))
 
+(defun render-workspace-annotation-object-ref
+    (object &key display (fallback "-"))
+  (if object
+      (views:html
+        (views:object-ref object
+                          :display display))
+      (views:html
+        (:tt (views:esc fallback)))))
+
+(defun workspace-annotation-destination-proxy-base-url (client)
+  (or (and (typep client 'http-dmx-import-client)
+           (dmx-import-base-url-of client))
+      *dmx-base-url*))
+
+(defun workspace-annotation-destination-workspace-proxy
+    (workspace-id workspace-topicmap-id &key client)
+  (and workspace-id
+       workspace-topicmap-id
+       (ignore-errors
+         (make-dmx-topic-proxy
+          :topic-id workspace-id
+          :topicmap-id workspace-topicmap-id
+          :base-url
+          (workspace-annotation-destination-proxy-base-url client)))))
+
+(defun workspace-annotation-destination-topicmap-proxy
+    (workspace-topicmap-id &key client)
+  (and workspace-topicmap-id
+       (ignore-errors
+         (make-dmx-topicmap-proxy
+          workspace-topicmap-id
+          :base-url
+          (workspace-annotation-destination-proxy-base-url client)))))
+
+(defun render-workspace-annotation-inspectable-targets (targets)
+  (if targets
+      (views:html
+        (:ul
+         (dolist (target targets)
+           (views:html
+             (:li
+              (views:object-ref
+               target
+               :display
+               (workspace-annotation-path-next-step-target-label-of target))
+              (views:esc
+               (format nil
+                       " -> ~A; mode ~A; auth required: ~A; stage scope: ~{~A~^, ~}"
+                       (workspace-annotation-path-next-step-target-executor-or-surface-name-of
+                        target)
+                       (workspace-annotation-path-next-step-mode-label
+                        (workspace-annotation-path-next-step-target-mode-of
+                         target))
+                       (if (workspace-annotation-path-next-step-target-auth-required-p-of
+                            target)
+                           "yes"
+                           "no")
+                       (mapcar #'workspace-annotation-persistence-live-stage-label
+                               (workspace-annotation-path-next-step-target-stage-scope-of
+                                target)))))))))
+      (views:html (:tt "-"))))
+
+(defun workspace-annotation-persistence-stage-status-label (status)
+  (case status
+    (:completed "completed")
+    (:failed "failed")
+    (:not-reached "not reached")
+    (:not-applicable "not applicable")
+    (:pending "pending")
+    (otherwise
+     (format nil "~(~A~)" status))))
+
+(defun render-workspace-annotation-success-readback-ref (object)
+  (render-workspace-annotation-object-ref
+   object
+   :display
+   (and object (title-of object))))
+
+(defun render-workspace-annotation-persistence-resolution-table (resolution)
+  (when resolution
+    (views:html
+      (:h4 "Resolution")
+      (:p (views:esc (summary-of resolution)))
+      (:table :class "inspector-table"
+              (:tr (:th "Blocking condition")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-persistence-resolution-blocking-condition-of
+                               resolution)))))
+              (:tr (:th "Required next action")
+                   (:td (views:esc
+                         (workspace-annotation-persistence-resolution-required-next-action-of
+                          resolution))))
+              (:tr (:th "Required auth mode")
+                   (:td (views:esc
+                         (workspace-annotation-persistence-resolution-required-auth-mode-of
+                          resolution))))
+              (:tr (:th "Recommended tool path")
+                   (:td (render-workspace-annotation-object-ref
+                         (workspace-annotation-persistence-resolution-recommended-tool-path-of
+                          resolution)
+                         :display
+                         (and (workspace-annotation-persistence-resolution-recommended-tool-path-of
+                               resolution)
+                              (workspace-annotation-path-next-step-target-label-of
+                               (workspace-annotation-persistence-resolution-recommended-tool-path-of
+                                resolution))))))
+              (:tr (:th "Success readback")
+                   (:td (render-workspace-annotation-success-readback-ref
+                         (workspace-annotation-persistence-resolution-success-readback-of
+                          resolution))))
+              (:tr (:th "Do not do")
+                   (:td (views:esc
+                         (workspace-annotation-persistence-resolution-do-not-do-of
+                          resolution))))))))
+
 (defun render-workspace-annotation-binding-player-row (binding player-key)
   (let ((player (and binding (gethash player-key binding))))
     (when player
@@ -62,30 +177,58 @@
 (defun render-workspace-annotation-destination-rows
     (&key workspace-id workspace-topicmap-id workspace-label
        workspace-topicmap-label destination-source-label
-       workspace-source-label topicmap-source-label destination-rationale)
+       workspace-source-label topicmap-source-label destination-rationale
+       client)
   (let ((resolved-workspace-label
           (or workspace-label
               (dmx-workspace-annotation-workspace-label workspace-id)))
         (resolved-topicmap-label
           (or workspace-topicmap-label
               (dmx-workspace-annotation-topicmap-label
-               workspace-topicmap-id))))
+               workspace-topicmap-id)))
+        (workspace-proxy
+          (workspace-annotation-destination-workspace-proxy
+           workspace-id
+           workspace-topicmap-id
+           :client client))
+        (topicmap-proxy
+          (workspace-annotation-destination-topicmap-proxy
+           workspace-topicmap-id
+           :client client)))
     (views:html
       (:tr (:th "Workspace")
-           (:td (:tt (views:esc
-                      (workspace-annotation-render-value
-                       resolved-workspace-label)))))
+           (:td (render-workspace-annotation-object-ref
+                 workspace-proxy
+                 :display
+                 (workspace-annotation-render-value
+                  resolved-workspace-label)
+                 :fallback
+                 (workspace-annotation-render-value
+                  resolved-workspace-label))))
       (:tr (:th "Topicmap")
-           (:td (:tt (views:esc
-                      (workspace-annotation-render-value
-                       resolved-topicmap-label)))))
+           (:td (render-workspace-annotation-object-ref
+                 topicmap-proxy
+                 :display
+                 (workspace-annotation-render-value
+                  resolved-topicmap-label)
+                 :fallback
+                 (workspace-annotation-render-value
+                  resolved-topicmap-label))))
       (:tr (:th "Workspace id")
-           (:td (:tt (views:esc
-                      (workspace-annotation-render-value workspace-id)))))
+           (:td (render-workspace-annotation-object-ref
+                 workspace-proxy
+                 :display
+                 (workspace-annotation-render-value workspace-id)
+                 :fallback
+                 (workspace-annotation-render-value workspace-id))))
       (:tr (:th "Topicmap id")
-           (:td (:tt (views:esc
-                      (workspace-annotation-render-value
-                       workspace-topicmap-id)))))
+           (:td (render-workspace-annotation-object-ref
+                 topicmap-proxy
+                 :display
+                 (workspace-annotation-render-value workspace-topicmap-id)
+                 :fallback
+                 (workspace-annotation-render-value
+                  workspace-topicmap-id))))
       (:tr (:th "Destination source")
            (:td (:tt (views:esc
                       (workspace-annotation-render-value
@@ -137,6 +280,7 @@
                      :workspace-id (getf preview :workspace-id)
                      :workspace-topicmap-id
                      (getf preview :workspace-topicmap-id)
+                     :client nil
                      :destination-source-label
                      (getf preview :destination-source-label)
                      :workspace-source-label
@@ -185,15 +329,21 @@
                            (dmx-workspace-annotation-write-plan-destination
                             plan))))
     (when saved-topic-id
-      (views:html
-        (:h4 "Saved annotation topic")
-        (:p (views:esc
+        (views:html
+          (:h4 "Saved annotation topic")
+          (:p (views:esc
              "This annotation was already saved before the current live update attempt. The saved carrier topic is the physical DMX object; reopening the same topic id reconstructs the semantic workspace annotation object."))
         (:table :class "inspector-table"
-                (:tr (:th "Saved workspace topic id")
-                     (:td (:tt (views:esc
-                                (workspace-annotation-render-value
-                                 saved-topic-id)))))
+                (:tr (:th "Saved annotation topic")
+                     (:td (render-workspace-annotation-object-ref
+                           saved-carrier-topic
+                           :display
+                           (format nil
+                                   "Saved annotation topic ~D"
+                                   saved-topic-id)
+                           :fallback
+                           (workspace-annotation-render-value
+                            saved-topic-id))))
                 (render-workspace-annotation-destination-rows
                  :workspace-id
                  (and plan
@@ -231,7 +381,9 @@
                  :destination-rationale
                  (and destination
                       (dmx-workspace-annotation-destination-rationale
-                       destination)))
+                       destination))
+                 :client
+                 (workspace-annotation-persistence-report-client-of report))
                 (:tr (:th "Storage mode")
                      (:td (:tt (views:esc
                                 (workspace-annotation-storage-mode-label
@@ -882,25 +1034,87 @@
       ))
 
 (defun render-workspace-annotation-persistence-stage-table (report)
-  (let ((stages (workspace-annotation-persistence-report-stage-results-of report)))
+  (let ((rows (workspace-annotation-persistence-stage-matrix-rows report)))
     (views:html
       (:table :class "inspector-table"
               (:thead
                (:tr (:th "Stage")
                     (:th "Status")
-                    (:th "Summary")
-                    (:th "Detail")))
+                    (:th "Boundary / endpoint")
+                    (:th "Operation / report object")
+                    (:th "Result / absence")
+                    (:th "Next surface / tool")))
               (:tbody
-               (dolist (entry stages)
-                 (views:html
-                   (:tr
-                    (:td (:tt (views:esc (or (getf entry :label)
-                                             (format nil "~A" (getf entry :stage))))))
-                    (:td (:tt (views:esc (format nil "~A"
-                                                 (or (getf entry :status)
-                                                     "-")))))
-                    (:td (views:esc (or (getf entry :summary) "")))
-                    (:td (views:esc (or (getf entry :detail) "")))))))))))
+               (dolist (row rows)
+                 (let ((stage (getf row :stage))
+                       (stage-label (getf row :stage-label))
+                       (status (getf row :status))
+                       (boundary (getf row :boundary-or-endpoint))
+                       (operation (getf row :operation))
+                       (result (getf row :result-or-absence))
+                       (next-targets (getf row :next-step-targets)))
+                   (views:html
+                     (:tr
+                      (:td (:tt (views:esc stage-label)))
+                      (:td (:tt (views:esc
+                                 (workspace-annotation-persistence-stage-status-label
+                                  status))))
+                      (:td (:tt (views:esc
+                                 (workspace-annotation-render-value boundary))))
+                      (:td (render-workspace-annotation-object-ref
+                            operation
+                            :display
+                            (format nil "~A operation/report" stage-label)))
+                      (:td
+                       (cond
+                         ((typep result
+                                 'workspace-annotation-persistence-stage-absence)
+                          (render-workspace-annotation-object-ref
+                           result
+                           :display
+                           (workspace-annotation-persistence-stage-absence-kind-label
+                            (workspace-annotation-persistence-stage-absence-kind-of
+                             result))))
+                         ((and (eq stage :topic-upsert)
+                               (typep result 'dmx-topic-proxy))
+                          (render-workspace-annotation-object-ref
+                           result
+                           :display
+                           (format nil
+                                   "Saved annotation topic ~A"
+                                   (workspace-annotation-render-value
+                                    (workspace-annotation-persistence-report-saved-topic-id-of
+                                     report)))))
+                         ((and (eq stage :workspace-assignment)
+                               result)
+                          (render-workspace-annotation-object-ref
+                           result
+                           :display
+                           (format nil
+                                   "Workspace ~A"
+                                   (workspace-annotation-render-value
+                                    (dmx-workspace-annotation-workspace-label
+                                     (workspace-annotation-persistence-report-workspace-id-of
+                                      report))))))
+                         ((and (eq stage :topicmap-placement)
+                               result)
+                          (render-workspace-annotation-object-ref
+                           result
+                           :display
+                           (format nil
+                                   "Topicmap ~A"
+                                   (workspace-annotation-render-value
+                                    (dmx-workspace-annotation-topicmap-label
+                                     (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                                      report))))))
+                         (t
+                          (render-workspace-annotation-object-ref
+                           result
+                           :display
+                           (and result (title-of result))))))
+                      (:td
+                       (render-workspace-annotation-inspectable-targets
+                        next-targets)))))))))))
 
 (defun render-workspace-annotation-path-diff-table (comparison)
   (let ((rows (workspace-annotation-path-diff-stage-rows comparison))
@@ -1658,6 +1872,35 @@
               "annotation")))
 
 (defmethod views:text-representation
+    ((object workspace-annotation-persistence-success-readback))
+  (title-of object))
+
+(defmethod views:text-representation
+    ((object workspace-annotation-persistence-resolution))
+  (title-of object))
+
+(defmethod views:text-representation
+    ((object workspace-annotation-persistence-stage-operation))
+  (format nil "~A (~A)"
+          (workspace-annotation-persistence-stage-operation-stage-label-of
+           object)
+          (workspace-annotation-persistence-stage-status-label
+           (workspace-annotation-persistence-stage-operation-status-of
+            object))))
+
+(defmethod views:text-representation
+    ((object workspace-annotation-persistence-stage-absence))
+  (format nil "~A (~A)"
+          (workspace-annotation-persistence-stage-absence-kind-label
+           (workspace-annotation-persistence-stage-absence-kind-of object))
+          (workspace-annotation-persistence-stage-absence-stage-label-of
+           object)))
+
+(defmethod views:text-representation
+    ((target workspace-annotation-path-next-step-target))
+  (workspace-annotation-path-next-step-target-label-of target))
+
+(defmethod views:text-representation
     ((report workspace-annotation-backend-compatibility-report))
   (format nil "Annotation backend compatibility ~A (~A)"
           (string-downcase
@@ -2250,6 +2493,8 @@
 (views:defview 👀overview (report workspace-annotation-persistence-report)
   (views:html-view :title "Overview" :priority 1
     (let* ((plan (workspace-annotation-persistence-report-plan-of report))
+           (resolution
+             (workspace-annotation-persistence-report-resolution-of report))
            (comparison
              (compare-dock-annotation-with-guarded-workspace-path
               (workspace-annotation-persistence-report-annotation-of report)
@@ -2289,6 +2534,8 @@
 	      (views:html
 	      (:p (views:esc
 	           "Live workspace persistence report with exact form, dry-run preview, and explicit stage classification. This surfaces whether failure happened during topic upsert, workspace assignment, topicmap placement, journal recording, or reopen, and whether live persistence used native typing or the compatibility carrier."))
+          (render-workspace-annotation-persistence-resolution-table
+           resolution)
           (render-workspace-annotation-explicit-auth-retry-marker-surface
            report)
 	      (:table :class "inspector-table"
@@ -2339,6 +2586,8 @@
                :workspace-topicmap-id
                (workspace-annotation-persistence-report-workspace-topicmap-id-of
                 report)
+               :client
+               (workspace-annotation-persistence-report-client-of report)
                :destination-source-label
                (workspace-annotation-render-value
                 (and plan
@@ -2359,14 +2608,24 @@
                        (dmx-workspace-annotation-write-plan-destination plan)))))
                :destination-rationale
                (and plan
-                    (dmx-workspace-annotation-destination-rationale
-                     (dmx-workspace-annotation-write-plan-destination plan))))
-              (:tr (:th "Workspace topic id")
-                   (:td (:tt (views:esc
-                              (format nil "~A"
-                                      (or (workspace-annotation-persistence-report-saved-topic-id-of
-                                           report)
-                                          "-")))))))
+                     (dmx-workspace-annotation-destination-rationale
+                      (dmx-workspace-annotation-write-plan-destination plan))))
+              (:tr (:th "Saved annotation topic")
+                   (:td (render-workspace-annotation-object-ref
+                         (workspace-annotation-persistence-report-saved-topic-proxy-of
+                          report)
+                         :display
+                         (if-let (saved-topic-id
+                                  (workspace-annotation-persistence-report-saved-topic-id-of
+                                   report))
+                           (format nil
+                                   "Saved annotation topic ~D"
+                                   saved-topic-id)
+                           "-")
+                         :fallback
+                         (workspace-annotation-render-value
+                          (workspace-annotation-persistence-report-saved-topic-id-of
+                           report))))))
       (when consequences
         (render-workspace-annotation-path-consequence-table
          consequences
@@ -2626,6 +2885,210 @@
       (:pre :style "white-space: pre-wrap"
             (views:esc
              (workspace-annotation-persistence-report-stepper-source-of report))))))        
+
+(views:defview 👀overview (object workspace-annotation-persistence-success-readback)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc (summary-of object)))
+      (:table :class "inspector-table"
+              (:tr (:th "Saved annotation topic")
+                   (:td (render-workspace-annotation-object-ref
+                         (workspace-annotation-persistence-success-readback-topic-proxy-of
+                          object)
+                         :display
+                         (and (workspace-annotation-persistence-success-readback-topic-proxy-of
+                               object)
+                              (title-of object)))))
+              (:tr (:th "Workspace readback")
+                   (:td (render-workspace-annotation-object-ref
+                         (workspace-annotation-persistence-success-readback-workspace-proxy-of
+                          object)
+                         :display
+                         "Workspace context-window workspace (919815)")))
+              (:tr (:th "Topicmap readback")
+                   (:td (render-workspace-annotation-object-ref
+                         (workspace-annotation-persistence-success-readback-topicmap-proxy-of
+                          object)
+                         :display
+                         "Topicmap context-window topicmap (919822)")))
+              (:tr (:th "Journal recording")
+                   (:td (views:esc
+                         (workspace-annotation-persistence-success-readback-journal-expectation-of
+                          object))))
+              (:tr (:th "Reopen")
+                   (:td (views:esc
+                         (workspace-annotation-persistence-success-readback-reopen-expectation-of
+                          object))))))))
+
+(views:defview 👀overview (target workspace-annotation-path-next-step-target)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc (or (summary-of target) "")))
+      (:table :class "inspector-table"
+              (:tr (:th "Label")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-path-next-step-target-label-of
+                               target)))))
+              (:tr (:th "Executor / surface")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-path-next-step-target-executor-or-surface-name-of
+                               target)))))
+              (:tr (:th "Mode")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-path-next-step-mode-label
+                               (workspace-annotation-path-next-step-target-mode-of
+                                target))))))
+              (:tr (:th "Auth required")
+                   (:td (:tt (views:esc
+                              (if (workspace-annotation-path-next-step-target-auth-required-p-of
+                                   target)
+                                  "yes"
+                                  "no")))))
+              (:tr (:th "Stage scope")
+                   (:td (:tt (views:esc
+                              (format nil "~{~A~^, ~}"
+                                      (mapcar #'workspace-annotation-persistence-live-stage-label
+                                              (workspace-annotation-path-next-step-target-stage-scope-of
+                                               target))))))))
+      (when-let (object
+                  (workspace-annotation-path-next-step-target-object-of target))
+        (views:html
+          (:p (views:object-ref
+               object
+               :display
+               (workspace-annotation-path-next-step-target-label-of target)
+               :select
+               (workspace-annotation-path-next-step-target-select-of
+                target))))))))
+
+(views:defview 👀overview (resolution workspace-annotation-persistence-resolution)
+  (views:html-view :title "Overview" :priority 1
+    (render-workspace-annotation-persistence-resolution-table resolution)))
+
+(views:defview 👀overview (object workspace-annotation-persistence-stage-absence)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc (summary-of object)))
+      (:table :class "inspector-table"
+              (:tr (:th "Absence kind")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-persistence-stage-absence-kind-label
+                               (workspace-annotation-persistence-stage-absence-kind-of
+                                object))))))
+              (:tr (:th "Stage")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-persistence-stage-absence-stage-label-of
+                               object)))))
+              (:tr (:th "Status")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-persistence-stage-status-label
+                               (workspace-annotation-persistence-stage-absence-status-of
+                                object))))))
+              (:tr (:th "Boundary / endpoint")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-render-value
+                               (workspace-annotation-persistence-stage-absence-boundary-or-endpoint-of
+                                object))))))
+              (:tr (:th "Why did this not run?")
+                   (:td (views:esc
+                         (workspace-annotation-persistence-stage-absence-reason-of
+                          object))))
+              (:tr (:th "Blocking stage")
+                   (:td (:tt (views:esc
+                              (workspace-annotation-render-value
+                               (workspace-annotation-persistence-stage-absence-blocking-stage-of
+                                object))))))
+              (:tr (:th "What must the operator do next?")
+                   (:td (render-workspace-annotation-inspectable-targets
+                         (workspace-annotation-persistence-stage-absence-next-step-targets-of
+                          object))))
+              (:tr (:th "What readback will prove success?")
+                   (:td (render-workspace-annotation-success-readback-ref
+                         (workspace-annotation-persistence-stage-absence-success-readback-of
+                          object))))))))
+
+(views:defview 👀overview (object workspace-annotation-persistence-stage-operation)
+  (views:html-view :title "Overview" :priority 1
+    (let ((entry (workspace-annotation-persistence-stage-operation-entry-of
+                  object))
+          (result (workspace-annotation-persistence-stage-operation-result-object-of
+                   object))
+          (resolution (workspace-annotation-persistence-stage-operation-resolution-of
+                       object))
+          (evidence (workspace-annotation-persistence-stage-operation-evidence-of
+                     object)))
+      (views:html
+        (:p (views:esc (summary-of object)))
+        (:table :class "inspector-table"
+                (:tr (:th "Stage")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-persistence-stage-operation-stage-label-of
+                                 object)))))
+                (:tr (:th "Status")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-persistence-stage-status-label
+                                 (workspace-annotation-persistence-stage-operation-status-of
+                                  object))))))
+                (:tr (:th "Boundary / endpoint")
+                     (:td (:tt (views:esc
+                                (workspace-annotation-render-value
+                                 (workspace-annotation-persistence-stage-operation-boundary-or-endpoint-of
+                                  object))))))
+                (:tr (:th "Report")
+                     (:td (views:object-ref
+                           (workspace-annotation-persistence-stage-operation-report-of
+                            object)
+                           :display "Open preserved persistence report"
+                           :select "Overview")))
+                (:tr (:th "Result / absence")
+                     (:td
+                      (cond
+                        ((typep result
+                                'workspace-annotation-persistence-stage-absence)
+                         (render-workspace-annotation-object-ref
+                          result
+                          :display
+                          (workspace-annotation-persistence-stage-absence-kind-label
+                           (workspace-annotation-persistence-stage-absence-kind-of
+                            result))))
+                        (t
+                         (render-workspace-annotation-object-ref
+                          result
+                          :display
+                          (and result
+                               (or (ignore-errors (title-of result))
+                                   (views:text-representation result)))))))
+                (:tr (:th "Why did this fail or block?")
+                     (:td (views:esc
+                           (or (and resolution
+                                    (workspace-annotation-persistence-resolution-blocking-condition-of
+                                     resolution))
+                               (and entry (getf entry :detail))
+                               (and entry (getf entry :summary))
+                               "-"))))
+                (:tr (:th "What must the operator do next?")
+                     (:td (render-workspace-annotation-inspectable-targets
+                           (workspace-annotation-persistence-stage-operation-next-step-targets-of
+                            object))))
+                (:tr (:th "What readback will prove success?")
+                     (:td (render-workspace-annotation-success-readback-ref
+                           (and resolution
+                                (workspace-annotation-persistence-resolution-success-readback-of
+                                 resolution))))))
+        (render-workspace-annotation-persistence-resolution-table
+         resolution)
+        (when (and evidence
+                   (eq (workspace-annotation-persistence-stage-operation-stage-of
+                        object)
+                       :topic-upsert))
+          (views:html
+            (:h4 "Failure evidence")
+            (render-workspace-annotation-http-evidence-table
+             evidence
+             :payload-json (getf evidence :payload-json)
+             :planned-topic-action (getf evidence :planned-topic-action)
+             :planned-workspace-action (getf evidence :planned-workspace-action)
+             :planned-topicmap-action (getf evidence :planned-topicmap-action)))))))))
 
 (views:defview 👀overview (comparison workspace-annotation-path-diff)
   (views:html-view :title "Overview" :priority 1

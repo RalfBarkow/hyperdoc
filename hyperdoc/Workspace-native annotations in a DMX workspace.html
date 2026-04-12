@@ -135,6 +135,7 @@
   <li>Dry run and live execution follow the same typed workspace-annotation write plan and surface the chosen destination plus storage mode.</li>
   <li>On current live HTTP backends, the normal save path preflights raw <tt>hyperdoc.annotation</tt> support and then uses compatibility storage via <tt>dmx.notes.note</tt> when native create-topic is unsupported.</li>
   <li>The Workspace inspector now exposes <tt>Compare with guarded workspace path</tt> so the raw persist path and the guarded continuation / MCP path can be inspected on one stage vocabulary without collapsing workspace assignment into topicmap placement.</li>
+  <li>The live persistence report renders destination workspace/topicmap refs, saved annotation topics, failed stage operations, and operational absences as inspectable objects with a dedicated Resolution section, instead of leaving later-stage blockers as dead scalar <tt>n/a</tt>.</li>
   <li>Live save emits journal events through the workspace journal layer rather than bypassing it.</li>
   <li>When the write path needs credentials, it still follows the same three-mode auth learning boundary documented in <a page="HyperDoc three-mode DMX auth crosswalk"><tt>HyperDoc three-mode DMX auth crosswalk</tt></a>; that page does not widen live behavior or claim service auth is already present.</li>
   <li>Reopen by topic id yields a stable <tt>workspace-dock-annotation</tt> object for later inspection and revision.</li>

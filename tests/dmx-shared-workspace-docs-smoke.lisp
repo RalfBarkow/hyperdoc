@@ -240,6 +240,8 @@
      "How to work safely in topicmap context-window (919822)"
      "workspace assignment"
      "topicmap placement"
+     "Resolution section"
+     "operational absences"
      "workspace-dock-annotation"))
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
