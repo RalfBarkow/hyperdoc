@@ -264,15 +264,17 @@
 
 (defsystem #:hyperdoc/tests
   :description "Smoke tests for HyperDoc"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
-  :license  "BSD"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
+  :license "BSD"
   :version "0.0.1"
   :serial t
   :depends-on (#:hyperdoc/mcp
                #:hyperdoc/explorer)
-                :components ((:module "tests"
+  :components ((:module "tests"
                 :serial t
-                :components ((:file "dmx-topic-proxy-smoke")
+                :components ((:file "package")
+                             (:file "compile-order-smoke")
+                             (:file "dmx-topic-proxy-smoke")
                              (:file "code-path-graphs-smoke")
                              (:file "state-machine-smoke")
                              (:file "surface-smoke")
@@ -301,7 +303,8 @@
                              (:file "check-runner-smoke")
                              (:file "fedwiki-story-items-smoke")
                              (:file "inspector-performance-smoke")
-                             (:file "merged-doc-slices-smoke"))))
+                             (:file "merged-doc-slices-smoke")
+                             (:file "test-runner"))))
   :perform (test-op (op c)
              (declare (ignore op c))
              (uiop:symbol-call :hyperdoc/tests
@@ -309,7 +312,7 @@
 
 (defsystem #:hyperdoc/tests/zotero
   :description "Zotero-backed smoke tests for HyperDoc"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
   :license  "BSD"
   :version "0.0.1"
   :serial t

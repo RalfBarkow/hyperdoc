@@ -1,0 +1,38 @@
+(defpackage :hyperdoc/tests
+  (:use :cl)
+  (:export
+   :run-hyperdoc-tests
+
+   :run-compile-order-smoke-tests
+   :run-fresh-inspector-compile-smoke-test
+
+   :run-dmx-topic-proxy-smoke-tests
+   :run-code-path-graphs-smoke-tests
+   :run-state-machine-smoke-tests
+   :run-surface-smoke-tests
+   :run-boundary-smoke-tests
+   :run-relation-topic-proposals-smoke-tests
+   :run-dock-presentation-smoke-tests
+   :run-dock-annotation-smoke-tests
+   :run-dmx-annotations-smoke-tests
+   :run-zotero-optional-smoke-tests
+   :run-article-allegation-slice-smoke-tests
+   :run-fedwiki-materialization-smoke-tests
+   :run-authored-html-render-safety-smoke-tests
+   :run-lookup-issue-docs-render-smoke-tests
+   :run-page-lookup-issues-smoke-tests
+   :run-function-lookup-issues-smoke-tests
+   :run-collective-knowledge-slice-smoke-tests
+   :run-reproducible-devenv-as-knowledge-artifact-slice-smoke-tests
+   :run-localhost-fedwiki-page-pipeline-smoke-tests
+   :run-localhost-fedwiki-page-promotion-plans-smoke-tests
+   :run-topic-factory-snippet-dmx-smoke-tests
+   :run-dmx-mcp-smoke-tests
+   :run-dmx-incident-arc-smoke-tests
+   :run-dmx-shared-workspace-docs-smoke-tests
+   :run-neo4j-duplicate-username-repair-smoke-tests
+   :run-fedwiki-site-dmx-import-tests
+   :run-check-runner-smoke-tests
+   :run-fedwiki-story-items-smoke-tests
+   :run-inspector-performance-smoke-tests
+   :run-merged-doc-slices-smoke-tests))
