@@ -2458,6 +2458,74 @@
      (search "dmx.notes.note" html :test #'char-equal)
      "The Overview must keep the physical carrier type explicit")))
 
+(defun run-dmx-workspace-annotation-simple-success-readback-example-smoke-test
+    ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page
+           (hyperbook:find-page hyperdoc::*hyperdoc*
+                                "Simple example: topic saved to context-window"
+                                :signal-error? t))
+         (object (hyperdoc::simple-context-window-saved-topic-success-readback))
+         (topic-proxy
+           (hyperdoc::workspace-annotation-persistence-success-readback-topic-proxy-of
+            object))
+         (workspace-proxy
+           (hyperdoc::workspace-annotation-persistence-success-readback-workspace-proxy-of
+            object))
+         (topicmap-proxy
+           (hyperdoc::workspace-annotation-persistence-success-readback-topicmap-proxy-of
+            object))
+         (views (dmx-annotation-smoke-load-inspector-views-for-object object))
+         (overview (dmx-annotation-smoke-find-view-by-title views "Overview"))
+         (html (and overview
+                    (html-inspector-views:view-html overview))))
+    (assert-true
+     page
+     "The simple example page must resolve through HyperDoc page lookup")
+    (assert-true
+     (typep object 'hyperdoc::workspace-annotation-persistence-success-readback)
+     "The simple example must reuse workspace-annotation-persistence-success-readback")
+    (assert-true
+     (typep topic-proxy 'hyperdoc::dmx-topic-proxy)
+     "The simple example must expose a saved-topic proxy")
+    (assert-equal 922586
+                  (hyperdoc::dmx-topic-id-of topic-proxy)
+                  "The simple example must point to the fixed saved topic 922586")
+    (assert-true
+     (typep workspace-proxy 'hyperdoc::dmx-topic-proxy)
+     "The simple example must expose a workspace proxy")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (hyperdoc::dmx-topic-id-of workspace-proxy)
+                  "The simple example must point to workspace 919815")
+    (assert-true
+     (typep topicmap-proxy 'hyperdoc::dmx-topic-proxy)
+     "The simple example must expose a topicmap proxy")
+    (assert-equal *dmx-annotations-smoke-workspace-topicmap-id*
+                  (hyperdoc::dmx-topic-id-of topicmap-proxy)
+                  "The simple example must point to topicmap 919822")
+    (assert-true
+     overview
+     "The simple example must expose an Overview view")
+    (assert-true
+     (stringp html)
+     "The simple example Overview must render to HTML")
+    (assert-true
+     (search "Saved annotation topic" html :test #'char-equal)
+     "The simple example Overview must keep the saved-topic row")
+    (assert-true
+     (search "922586" html :test #'char-equal)
+     "The simple example Overview must show the fixed saved topic id")
+    (assert-true
+     (search "Workspace context-window workspace (919815)"
+             html
+             :test #'char-equal)
+     "The simple example Overview must show the exact workspace label")
+    (assert-true
+     (search "Topicmap context-window topicmap (919822)"
+             html
+             :test #'char-equal)
+     "The simple example Overview must show the exact topicmap label")))
+
 (defun run-dmx-workspace-annotation-auth-blocked-saved-topic-resolution-smoke-test
     ()
   (asdf:load-system :hyperdoc/explorer)
@@ -4759,6 +4827,7 @@
   (run-dmx-workspace-annotation-assignment-topicmap-split-consequence-smoke-test)
   (run-dmx-workspace-annotation-no-change-consequence-smoke-test)
   (run-dmx-workspace-annotation-saved-topic-surface-smoke-test)
+  (run-dmx-workspace-annotation-simple-success-readback-example-smoke-test)
   (run-dmx-workspace-annotation-auth-blocked-saved-topic-resolution-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
   (run-dmx-workspace-annotation-journal-preflight-unassigned-companion-smoke-test)

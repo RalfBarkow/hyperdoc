@@ -1,10 +1,5 @@
 ;;;; Smoke tests for DMX topic proxy wrapper mapping
 
-(defpackage :hyperdoc/tests
-  (:use :cl)
-  (:export :run-dmx-topic-proxy-smoke-tests
-           :run-check-runner-smoke-tests))
-
 (in-package :hyperdoc/tests)
 
 (defparameter *dmx-wrapper-smoke-specs*
@@ -13,10 +8,10 @@
     (hyperdoc::prepare-aarch64-image-topic 912384 912102)
     (hyperdoc::dmx-topic-912384 912384 912102)))
 
-(defun expected-dmx-topicmap-url (topicmap-id)
+(defun expected-dmx-webclient-url (topicmap-id topic-id)
   (format nil "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/~D/topic/~D"
           topicmap-id
-          topicmap-id))
+          topic-id))
 
 (defun expected-dmx-core-topic-url (id)
   (format nil "https://dmx.ralfbarkow.ch/core/topic/~D?children=true&assocChildren=true"
@@ -47,6 +42,19 @@
   (unless (eq expected-type (type-of object))
     (error "~A -- expected type: ~S actual type: ~S" message expected-type (type-of object))))
 
+(defun dmx-topic-proxy-smoke-find-view-by-title (views title)
+  (find title
+        views
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun dmx-topic-proxy-smoke-load-inspector-views-for-object (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
+
 (defun run-one-wrapper-smoke-test (spec)
   (destructuring-bind (wrapper topic-id topicmap-id) spec
     (let ((proxy (funcall (symbol-function wrapper))))
@@ -59,7 +67,7 @@
       (assert-equal topicmap-id
                     (hyperdoc::dmx-topicmap-id-of proxy)
                     (format nil "Wrapper ~S topicmap-id" wrapper))
-      (assert-equal (expected-dmx-topicmap-url topicmap-id)
+      (assert-equal (expected-dmx-webclient-url topicmap-id topic-id)
                     (hyperdoc::dmx-webclient-url proxy)
                     (format nil "Wrapper ~S URL" wrapper)))))
 
@@ -67,6 +75,50 @@
   (let ((table (make-hash-table :test #'equal)))
     (setf (gethash "value" table) label)
     table))
+
+(defun make-smoke-topicmap-projection (topics)
+  (let ((projection (make-hash-table :test #'equal))
+        (topicmap (make-hash-table :test #'equal)))
+    (setf (gethash "id" topicmap) 919822
+          (gethash "typeUri" topicmap) "dmx.topicmaps.topicmap"
+          (gethash "value" topicmap) "context-window"
+          (gethash "children" topicmap) (make-hash-table :test #'equal)
+          (gethash "topic" projection) topicmap
+          (gethash "viewProps" projection) (make-hash-table :test #'equal)
+          (gethash "topics" projection) (coerce topics 'vector)
+          (gethash "assocs" projection) #())
+    projection))
+
+(defun make-smoke-topicmap-projection-topic (id value)
+  (let ((topic (make-hash-table :test #'equal)))
+    (setf (gethash "id" topic) id
+          (gethash "typeUri" topic) "dmx.notes.note"
+          (gethash "value" topic) value
+          (gethash "viewProps" topic) (make-hash-table :test #'equal))
+    topic))
+
+(defun make-smoke-diagnostics-proxy
+    (topic-id title &key workspace-id
+       (ownership-class :hyperdoc-workspace-note)
+       (hyperdoc-owned-p t)
+       (status :ok)
+       (repair-needed-p nil))
+  (let ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy topic-id)))
+    (setf (hyperdoc::dmx-diagnostics-of proxy)
+          (hyperdoc::make-dmx-topic-diagnostics
+           :topic-id topic-id
+           :topicmap-id 919822
+           :topic-title title
+           :workspace-id workspace-id
+           :workspace-title (and workspace-id "context-window")
+           :selected-topicmap-membership-p t
+           :ownership-class ownership-class
+           :ownership-reason "smoke"
+           :hyperdoc-owned-p hyperdoc-owned-p
+           :status status
+           :status-reason "smoke"
+           :repair-needed-p repair-needed-p))
+    proxy))
 
 (defun run-topicmap-endpoint-regression-test ()
   (let* ((proxy (hyperdoc::make-dmx-topic-proxy :topic-id 912384
@@ -1448,6 +1500,167 @@
     (unless raised
       (error "Bad topicmap helper input must signal HYPERDOC::UNKNOWN-DMX-TOPIC-IDENTIFIER"))))
 
+(defun run-shared-workspace-inspectable-object-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((healthy-proxy
+           (make-smoke-diagnostics-proxy
+            922586
+            "Guarded workspace default verification note"
+            :workspace-id 919815
+            :status :ok))
+         (missing-proxy
+           (make-smoke-diagnostics-proxy
+            922464
+            "Operational definition: chunk, chunk note, manifest note, content topic"
+            :workspace-id nil
+            :status :in-topicmap-but-unassigned
+            :repair-needed-p t))
+         (foreign-proxy
+           (make-smoke-diagnostics-proxy
+            922451
+            "auth probe"
+            :workspace-id nil
+            :ownership-class :foreign
+            :hyperdoc-owned-p nil
+            :status :foreign-object))
+         (projection
+           (make-smoke-topicmap-projection
+            (list (make-smoke-topicmap-projection-topic
+                   922451
+                   "auth probe")
+                  (make-smoke-topicmap-projection-topic
+                   922464
+                   "Operational definition: chunk, chunk note, manifest note, content topic")
+                  (make-smoke-topicmap-projection-topic
+                   922586
+                   "Guarded workspace default verification note"))))
+         (topic-proxies (list healthy-proxy missing-proxy foreign-proxy))
+         (repair-proxies (list missing-proxy))
+         (workspace (hyperdoc::make-dmx-shared-workspace-object))
+         (topicmap (hyperdoc::make-dmx-shared-topicmap-object))
+         (original-ensure
+           (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page))
+           (dolist (page (list workspace topicmap))
+             (setf (hyperdoc::dmx-topicmap-projection-of page) projection
+                   (hyperdoc::dmx-triage-topic-proxies-of page) topic-proxies
+                   (hyperdoc::dmx-repair-topic-proxies-of page) repair-proxies
+                   (hyperdoc::dmx-repair-results-of page) nil
+                   (hyperdoc::dmx-repair-summary-of page) nil
+                   (hyperdoc::dmx-load-error-of page) nil))
+           (assert-type 'hyperdoc::dmx-shared-workspace-object
+                        workspace
+                        "Shared workspace helper must return a first-class workspace object")
+           (assert-type 'hyperdoc::dmx-shared-topicmap-object
+                        topicmap
+                        "Shared topicmap helper must return a first-class topicmap object")
+           (assert-equal 919815
+                         (hyperdoc::dmx-workspace-id-of workspace)
+                         "Workspace object must keep workspace 919815")
+           (assert-equal 919822
+                         (hyperdoc::dmx-topicmap-id-of topicmap)
+                         "Topicmap object must keep topicmap 919822")
+           (assert-equal '(922464)
+                         (hyperdoc/inspector::repair-workspace-triage-topic-ids workspace)
+                         "Workspace object must reuse the existing narrow repair backlog helper")
+           (assert-equal '(922464)
+                         (hyperdoc/inspector::repair-workspace-triage-topic-ids topicmap)
+                         "Topicmap object must reuse the existing narrow repair backlog helper")
+           (let* ((workspace-views
+                    (dmx-topic-proxy-smoke-load-inspector-views-for-object workspace))
+                  (topicmap-views
+                    (dmx-topic-proxy-smoke-load-inspector-views-for-object topicmap))
+                  (workspace-overview
+                    (dmx-topic-proxy-smoke-find-view-by-title workspace-views "Overview"))
+                  (workspace-missing
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     workspace-views
+                     "Topics missing workspace assignment"))
+                  (workspace-assigned
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     workspace-views
+                     "Assigned topics"))
+                  (workspace-repair
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     workspace-views
+                     "Repair console"))
+                  (topicmap-overview
+                    (dmx-topic-proxy-smoke-find-view-by-title topicmap-views "Overview"))
+                  (topicmap-visible
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     topicmap-views
+                     "Visible topics"))
+                  (topicmap-unassigned
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     topicmap-views
+                     "Visible but unassigned"))
+                  (topicmap-repair
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     topicmap-views
+                     "Repair console")))
+             (dolist (view (list workspace-overview
+                                 workspace-missing
+                                 workspace-assigned
+                                 workspace-repair
+                                 topicmap-overview
+                                 topicmap-visible
+                                 topicmap-unassigned
+                                 topicmap-repair))
+               (assert-true view
+                            "Inspectable workspace/topicmap smoke must expose all expected views"))
+             (assert-true
+              (search "Workspace context-window workspace (919815)"
+                      (html-inspector-views:view-html workspace-overview)
+                      :test #'char=)
+              "Workspace overview must expose the inspectable workspace anchor")
+             (assert-true
+              (search "Topicmap context-window topicmap (919822)"
+                      (html-inspector-views:view-html workspace-overview)
+                      :test #'char=)
+              "Workspace overview must expose the inspectable topicmap anchor")
+             (assert-true
+              (search "in-topicmap-but-unassigned"
+                      (html-inspector-views:view-html workspace-missing)
+                      :test #'char=)
+              "Workspace missing-assignment view must expose the canonical defect state")
+             (assert-true
+              (search "foreign-no-action"
+                      (html-inspector-views:view-html workspace-missing)
+                      :test #'char=)
+              "Workspace missing-assignment view must keep foreign rows read-only")
+             (assert-true
+              (search "healthy"
+                      (html-inspector-views:view-html workspace-assigned)
+                      :test #'char=)
+              "Workspace assigned-topics view must expose healthy rows")
+             (assert-true
+              (search "Workspace diagnostics"
+                      (html-inspector-views:view-html topicmap-unassigned)
+                      :test #'char=)
+              "Topicmap unassigned view must link rows to the existing single-topic diagnostics surface")
+             (assert-true
+              (search "repair_workspace_topic_assignment"
+                      (html-inspector-views:view-html topicmap-repair)
+                      :test #'char=)
+              "Topicmap repair console must name the existing narrow repair operation")
+             (assert-true
+              (search "Repair all missing workspace assignments"
+                      (html-inspector-views:view-html topicmap-repair)
+                      :test #'char=)
+              "Topicmap repair console must expose only the guarded batch wrapper label")
+             (assert-true
+              (search "healthy"
+                      (html-inspector-views:view-html topicmap-visible)
+                      :test #'char=)
+              "Topicmap visible-topics view must classify assigned rows as healthy")))
+      (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
+            original-ensure))))
+
 (defun run-operational-definition-launcher-helper-test ()
   (let ((proxy (hyperdoc::make-operational-definition-note-proxy)))
     (assert-type 'hyperdoc::dmx-topic-proxy
@@ -1459,9 +1672,9 @@
     (assert-equal 919822
                   (hyperdoc::dmx-topicmap-id-of proxy)
                   "Operational-definition launcher topicmap-id")
-    (assert-equal (expected-dmx-topicmap-url 919822)
+    (assert-equal (expected-dmx-webclient-url 919822 922464)
                   (hyperdoc::dmx-webclient-url proxy)
-                  "Operational-definition launcher must keep the shared workspace topicmap URL")))
+                  "Operational-definition launcher must keep the selected topic URL inside the shared workspace topicmap")))
 
 (defun run-unknown-wrapper-smoke-test ()
   (let ((raised nil))
@@ -1484,7 +1697,8 @@
   (run-repair-console-helper-regression-test)
   (run-repair-console-localhost-rehearsal-bridge-smoke-test)
   (run-repair-console-debug-trace-regression-test)
+  (run-shared-workspace-inspectable-object-smoke-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace inspectable-object smoke + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)

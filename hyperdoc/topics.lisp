@@ -73,6 +73,21 @@
    (repair-summary :accessor dmx-repair-summary-of :initform nil)
    (load-error :accessor dmx-load-error-of :initform nil)))
 
+(defgeneric dmx-workspace-id-of (page))
+
+(defmethod dmx-workspace-id-of ((page dmx-workspace-repair-triage))
+  *dmx-context-window-workspace-id*)
+
+(defclass dmx-shared-workspace-object (dmx-workspace-repair-triage)
+  ((workspace-id :reader dmx-workspace-id-of
+                 :type integer
+                 :initarg :workspace-id)))
+
+(defclass dmx-shared-topicmap-object (dmx-workspace-repair-triage)
+  ((workspace-id :reader dmx-workspace-id-of
+                 :type integer
+                 :initarg :workspace-id)))
+
 (defstruct dmx-topic-diagnostics
   topic-id
   topicmap-id
@@ -110,7 +125,42 @@
   (format nil "workspace-repair-triage-~D"
           (dmx-topicmap-id-of page)))
 
+(defun dmx-workspace-display-label (workspace-id)
+  (if (eql workspace-id *dmx-context-window-workspace-id*)
+      (format nil "Workspace context-window workspace (~D)"
+              workspace-id)
+      (format nil "Workspace ~D" workspace-id)))
+
+(defun dmx-topicmap-display-label (topicmap-id)
+  (if (eql topicmap-id *dmx-context-window-topicmap-id*)
+      (format nil "Topicmap context-window topicmap (~D)"
+              topicmap-id)
+      (format nil "Topicmap ~D" topicmap-id)))
+
+(defmethod hb:title-of ((page dmx-shared-workspace-object))
+  (dmx-workspace-display-label (dmx-workspace-id-of page)))
+
+(defmethod hb:path-item-of ((page dmx-shared-workspace-object))
+  (format nil "shared-workspace-~D-in-topicmap-~D"
+          (dmx-workspace-id-of page)
+          (dmx-topicmap-id-of page)))
+
+(defmethod hb:title-of ((page dmx-shared-topicmap-object))
+  (dmx-topicmap-display-label (dmx-topicmap-id-of page)))
+
+(defmethod hb:path-item-of ((page dmx-shared-topicmap-object))
+  (format nil "shared-topicmap-~D-for-workspace-~D"
+          (dmx-topicmap-id-of page)
+          (dmx-workspace-id-of page)))
+
 (defvar *dmx-hyperbooks* (make-hash-table :test #'equal))
+
+(defun dmx-topic-webclient-url (page)
+  (let ((book (hb:hyperbook-of page)))
+    (format nil "~A/systems.dmx.webclient/#/topicmap/~D/topic/~D"
+            (dmx-base-url-of book)
+            (dmx-topicmap-id-of page)
+            (dmx-topic-id-of page))))
 
 (defun dmx-topicmap-webclient-url (page)
   (let ((book (hb:hyperbook-of page)))
@@ -120,7 +170,11 @@
             (dmx-topicmap-id-of page))))
 
 (defun dmx-webclient-url (page)
-  (dmx-topicmap-webclient-url page))
+  (typecase page
+    (dmx-topic-proxy
+     (dmx-topic-webclient-url page))
+    (t
+     (dmx-topicmap-webclient-url page))))
 
 (defun dmx-core-topic-endpoint (id)
   (format nil "/core/topic/~D" id))
@@ -823,6 +877,28 @@
         (setf (dmx-load-error-of page) condition))))
   page)
 
+(defun dmx-visible-topic-proxies (page &key force?)
+  (ensure-dmx-workspace-repair-triage page :force? force?)
+  (or (dmx-triage-topic-proxies-of page) '()))
+
+(defun dmx-visible-assigned-topic-proxies (page &key force?)
+  (let ((workspace-id (dmx-workspace-id-of page)))
+    (loop for proxy in (dmx-visible-topic-proxies page :force? force?)
+          for diagnostics = (dmx-diagnostics-of proxy)
+          when (and diagnostics
+                    (eql (dmx-topic-diagnostics-workspace-id diagnostics)
+                         workspace-id))
+            collect proxy)))
+
+(defun dmx-visible-but-unassigned-topic-proxies (page &key force?)
+  (loop for proxy in (dmx-visible-topic-proxies page :force? force?)
+        for diagnostics = (dmx-diagnostics-of proxy)
+        when (and diagnostics
+                  (dmx-topic-diagnostics-selected-topicmap-membership-p
+                   diagnostics)
+                  (null (dmx-topic-diagnostics-workspace-id diagnostics)))
+          collect proxy))
+
 (defun make-dmx-topic-proxy (&key topic-id topicmap-id
                                    (base-url *dmx-base-url*))
   (let ((resolved-topic-id (or (parse-positive-integer topic-id)
@@ -874,6 +950,32 @@
        (base-url *dmx-base-url*))
   (make-dmx-workspace-repair-triage :topicmap-id topicmap-id
                                     :base-url base-url))
+
+(defun make-dmx-shared-workspace-object
+    (&key (workspace-id *dmx-context-window-workspace-id*)
+       (topicmap-id *dmx-context-window-topicmap-id*)
+       (base-url *dmx-base-url*))
+  (make-instance 'dmx-shared-workspace-object
+                 :hyperbook (ensure-dmx-hyperbook :base-url base-url
+                                                  :topicmap-id topicmap-id)
+                 :id (format nil "shared-workspace-~D-in-topicmap-~D"
+                             workspace-id
+                             topicmap-id)
+                 :workspace-id workspace-id
+                 :topicmap-id topicmap-id))
+
+(defun make-dmx-shared-topicmap-object
+    (&key (topicmap-id *dmx-context-window-topicmap-id*)
+       (workspace-id *dmx-context-window-workspace-id*)
+       (base-url *dmx-base-url*))
+  (make-instance 'dmx-shared-topicmap-object
+                 :hyperbook (ensure-dmx-hyperbook :base-url base-url
+                                                  :topicmap-id topicmap-id)
+                 :id (format nil "shared-topicmap-~D-for-workspace-~D"
+                             topicmap-id
+                             workspace-id)
+                 :workspace-id workspace-id
+                 :topicmap-id topicmap-id))
 
 ;; Inspectable topic objects used by expr links and the Topics hyperbook.
 (defclass topic ()

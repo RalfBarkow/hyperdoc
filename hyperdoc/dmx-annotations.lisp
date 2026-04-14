@@ -2832,6 +2832,24 @@
        :reopen-expectation
        "REOPEN returns a workspace-dock-annotation for the saved topic."))))
 
+(defun simple-context-window-saved-topic-success-readback ()
+  (make-instance
+   'workspace-annotation-persistence-success-readback
+   :id "simple-context-window-saved-topic-success-readback/922586"
+   :title "Saved topic 922586 in context-window"
+   :summary
+   "This example shows one already-saved topic read back through workspace 919815 and topicmap 919822."
+   :topic-proxy
+   (make-dmx-shared-workspace-topic-proxy 922586)
+   :workspace-proxy
+   (make-dmx-shared-workspace-topic-proxy *dmx-context-window-workspace-id*)
+   :topicmap-proxy
+   (make-dmx-topicmap-proxy *dmx-context-window-topicmap-id*)
+   :journal-expectation
+   "JOURNAL-RECORDING is part of the represented saved-state contract for this already-saved topic."
+   :reopen-expectation
+   "REOPEN stays an expectation on this example surface; the page demonstrates saved-state readback, not a live save from this shell."))
+
 (defun workspace-annotation-persistence-report-resolution-of (report)
   (when (workspace-annotation-persistence-report-topic-upsert-auth-blocked-p
          report)

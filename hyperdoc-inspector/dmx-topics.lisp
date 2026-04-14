@@ -101,8 +101,178 @@
                              (:td (:tt (views:esc
                                         (yes/no-label
                                          (eql topicmap-id
-                                              selected-topicmap-id))))))))))
+                                             selected-topicmap-id))))))))))
         (views:html (:span :style "opacity: 0.55;" "none"))))))
+
+(defun find-dmx-repair-result-for-topic (page topic-id)
+  (find topic-id
+        (hyperdoc::dmx-repair-results-of page)
+        :key (lambda (result) (getf result :topic-id))
+        :test #'eql))
+
+(defun dmx-repair-result-auth-boundary-failed-p (result)
+  (let ((debug-report (getf result :debug-report)))
+    (or (member (getf debug-report :bootstrap-status-code) '(401 403))
+        (member (getf debug-report :guarded-put-status-code) '(401 403)))))
+
+(defun dmx-repair-result-operational-state-label (result)
+  (cond
+    ((null result)
+     nil)
+    ((and (getf result :success-p)
+          (not (getf result :dry-run))
+          (or (eql (getf result :workspace-action) :already-assigned)
+              (and (eql (getf result :result-workspace-id)
+                        hyperdoc::*dmx-context-window-workspace-id*)
+                   (getf result :result-in-topicmap-p))))
+     (if (eql (getf result :workspace-action) :already-assigned)
+         "healthy"
+         "repair-succeeded"))
+    ((and (not (getf result :success-p))
+          (dmx-repair-result-auth-boundary-failed-p result))
+     "credentials-pending")
+    ((not (getf result :success-p))
+     "repair-failed-non-auth")
+    (t
+     "in-topicmap-but-unassigned")))
+
+(defun dmx-topic-proxy-operational-status-label (page proxy)
+  (let* ((result
+           (find-dmx-repair-result-for-topic page
+                                            (hyperdoc::dmx-topic-id-of proxy)))
+         (result-label (dmx-repair-result-operational-state-label result))
+         (diagnostics (hyperdoc::dmx-diagnostics-of proxy)))
+    (or result-label
+        (cond
+          ((null diagnostics)
+           "n/a")
+          ((not (hyperdoc::dmx-topic-diagnostics-hyperdoc-owned-p diagnostics))
+           "foreign-no-action")
+          ((and (eql (hyperdoc::dmx-topic-diagnostics-workspace-id diagnostics)
+                     (hyperdoc::dmx-workspace-id-of page))
+                (hyperdoc::dmx-topic-diagnostics-selected-topicmap-membership-p
+                 diagnostics))
+           "healthy")
+          ((and (hyperdoc::dmx-topic-diagnostics-selected-topicmap-membership-p
+                 diagnostics)
+                (null (hyperdoc::dmx-topic-diagnostics-workspace-id diagnostics)))
+           "in-topicmap-but-unassigned")
+          (t
+           (dmx-diagnostic-status-label
+            (hyperdoc::dmx-topic-diagnostics-status diagnostics)))))))
+
+(defun dmx-operational-status-count (page proxies status-label)
+  (count status-label
+         proxies
+         :key (lambda (proxy)
+                (dmx-topic-proxy-operational-status-label page proxy))
+         :test #'string=))
+
+(defun render-dmx-operational-topic-proxy-table
+    (page proxies &key empty-message)
+  (if proxies
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th (views:esc "Topic"))
+                     (:th (views:esc "Title/value"))
+                     (:th (views:esc "Workspace assignment"))
+                     (:th (views:esc "Ownership"))
+                     (:th (views:esc "Operational state")))
+                (dolist (proxy proxies)
+                  (let ((diagnostics (hyperdoc::dmx-diagnostics-of proxy)))
+                    (views:html
+                      (:tr
+                       (:td (views:object-ref
+                             proxy
+                             :display (format nil "~D"
+                                              (hyperdoc::dmx-topic-id-of proxy))
+                             :select "Workspace diagnostics"))
+                       (:td (views:esc
+                             (or (and diagnostics
+                                      (hyperdoc::dmx-topic-diagnostics-topic-title
+                                       diagnostics))
+                                 "n/a")))
+                       (:td (if diagnostics
+                                (render-workspace-reference page diagnostics)
+                                (render-maybe-code nil)))
+                       (:td (:tt (views:esc
+                                  (if diagnostics
+                                      (dmx-diagnostic-ownership-label diagnostics)
+                                      "n/a"))))
+                       (:td (:tt (views:esc
+                                  (dmx-topic-proxy-operational-status-label
+                                   page
+                                   proxy))))))))))
+      (views:html
+        (:p (views:esc (or empty-message
+                           "No topics match the current filter."))))))
+
+(defun render-dmx-shared-workspace-context-summary-table (page)
+  (let* ((visible-proxies (hyperdoc::dmx-visible-topic-proxies page))
+         (assigned-proxies (hyperdoc::dmx-visible-assigned-topic-proxies page))
+         (missing-proxies
+           (hyperdoc::dmx-visible-but-unassigned-topic-proxies page))
+         (repair-proxies (hyperdoc::dmx-repair-topic-proxies-of page))
+         (workspace-id (hyperdoc::dmx-workspace-id-of page))
+         (topicmap-id (hyperdoc::dmx-topicmap-id-of page)))
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Workspace"))
+                   (:td (views:object-ref
+                         (hyperdoc::make-dmx-shared-workspace-topic-proxy
+                          workspace-id
+                          :topicmap-id topicmap-id)
+                         :display (hyperdoc::dmx-workspace-display-label
+                                   workspace-id))))
+              (:tr (:td (views:esc "Topicmap"))
+                   (:td (views:object-ref
+                         (hyperdoc::make-dmx-topicmap-proxy topicmap-id)
+                         :display (hyperdoc::dmx-topicmap-display-label
+                                   topicmap-id))))
+              (:tr (:td (views:esc "Visible topics"))
+                   (:td (render-maybe-code (length visible-proxies))))
+              (:tr (:td (views:esc "Assigned topics"))
+                   (:td (render-maybe-code (length assigned-proxies))))
+              (:tr (:td (views:esc "Visible but unassigned"))
+                   (:td (render-maybe-code (length missing-proxies))))
+              (:tr (:td (views:esc "Actionable repair candidates"))
+                   (:td (render-maybe-code (length repair-proxies))))
+              (:tr (:td (:tt (views:esc "healthy")))
+                   (:td (render-maybe-code
+                         (dmx-operational-status-count
+                          page
+                          visible-proxies
+                          "healthy"))))
+              (:tr (:td (:tt (views:esc "foreign-no-action")))
+                   (:td (render-maybe-code
+                         (dmx-operational-status-count
+                          page
+                          visible-proxies
+                          "foreign-no-action"))))
+              (:tr (:td (:tt (views:esc "in-topicmap-but-unassigned")))
+                   (:td (render-maybe-code
+                         (dmx-operational-status-count
+                          page
+                          visible-proxies
+                          "in-topicmap-but-unassigned"))))
+              (:tr (:td (:tt (views:esc "credentials-pending")))
+                   (:td (render-maybe-code
+                         (dmx-operational-status-count
+                          page
+                          visible-proxies
+                          "credentials-pending"))))
+              (:tr (:td (:tt (views:esc "repair-succeeded")))
+                   (:td (render-maybe-code
+                         (dmx-operational-status-count
+                          page
+                          visible-proxies
+                          "repair-succeeded"))))
+              (:tr (:td (:tt (views:esc "repair-failed-non-auth")))
+                   (:td (render-maybe-code
+                         (dmx-operational-status-count
+                          page
+                          visible-proxies
+                          "repair-failed-non-auth"))))))))
 
 (defun dmx-repair-console-auth-mode-label (mode)
   (case mode
@@ -187,6 +357,268 @@
 (defun dmx-repair-auth-state-label (state)
   (or (getf (dmx-repair-auth-state-spec state) :label)
       (string-downcase (format nil "~A" state))))
+
+
+(defun dmx-repair-auth-source-evidence ()
+  (mapcar
+   (lambda (spec)
+     (list :label (getf spec :label)
+           :detail
+           (format nil "~A :: ~{~A~^, ~}"
+                   (or (getf spec :file) "unknown-file")
+                   (or (getf spec :functions) '()))))
+   *dmx-repair-auth-state-specs*))
+
+(defun dmx-repair-auth-state-object (spec)
+  (hyperdoc::make-state-machine-state
+   :id (getf spec :state)
+   :title (getf spec :label)
+   :summary (getf spec :label)
+   :role (cond
+           ((eq (getf spec :state) :s12) :terminal)
+           ((eq (getf spec :state) :s13) :failure)
+           (t :intermediate))
+   :notes
+   (remove nil
+           (list
+            (when (getf spec :file)
+              (format nil "Source file: ~A" (getf spec :file)))
+            (when (getf spec :functions)
+              (format nil "Functions: ~{~A~^, ~}" (getf spec :functions)))))))
+
+(defun dmx-repair-auth-transition-objects ()
+  (list
+   (hyperdoc::make-state-machine-transition
+    :id "s0->s1" :title "Credentials captured"
+    :from-state :s0 :to-state :s1
+    :trigger "credentials entered"
+    :guard "selected credential material present")
+   (hyperdoc::make-state-machine-transition
+    :id "s1->s2" :title "Auth mode selected"
+    :from-state :s1 :to-state :s2
+    :trigger "select auth mode"
+    :guard "auth mode normalized")
+   (hyperdoc::make-state-machine-transition
+    :id "s2->s3" :title "Explicit auth client built"
+    :from-state :s2 :to-state :s3
+    :trigger "build client"
+    :guard "credentials sufficient for selected mode")
+   (hyperdoc::make-state-machine-transition
+    :id "s3->s4" :title "Bootstrap prepared"
+    :from-state :s3 :to-state :s4
+    :trigger "prepare bootstrap"
+    :guard "bootstrap requested or required")
+   (hyperdoc::make-state-machine-transition
+    :id "s4->s5" :title "Bootstrap request sent"
+    :from-state :s4 :to-state :s5
+    :trigger "send login bootstrap"
+    :guard "bootstrap path active")
+   (hyperdoc::make-state-machine-transition
+    :id "s5->s6" :title "Bootstrap response received"
+    :from-state :s5 :to-state :s6
+    :trigger "receive bootstrap response"
+    :guard "HTTP response returned")
+   (hyperdoc::make-state-machine-transition
+    :id "s6->s7" :title "Session material extracted"
+    :from-state :s6 :to-state :s7
+    :trigger "extract JSESSIONID"
+    :guard "Set-Cookie contains JSESSIONID")
+   (hyperdoc::make-state-machine-transition
+    :id "s7->s8" :title "Guarded repair request prepared"
+    :from-state :s7 :to-state :s8
+    :trigger "prepare guarded request"
+    :guard "workspace assignment request formed")
+   (hyperdoc::make-state-machine-transition
+    :id "s8->s9" :title "Guarded repair request sent"
+    :from-state :s8 :to-state :s9
+    :trigger "send guarded request"
+    :guard "HTTP request emitted")
+   (hyperdoc::make-state-machine-transition
+    :id "s9->s10" :title "Guarded repair response received"
+    :from-state :s9 :to-state :s10
+    :trigger "receive guarded response"
+    :guard "HTTP response returned")
+   (hyperdoc::make-state-machine-transition
+    :id "s10->s11" :title "Readback refreshed"
+    :from-state :s10 :to-state :s11
+    :trigger "refresh readbacks"
+    :guard "workspace/topicmap readbacks completed")
+   (hyperdoc::make-state-machine-transition
+    :id "s11->s12" :title "Terminal success"
+    :from-state :s11 :to-state :s12
+    :trigger "classify success"
+    :guard "verified success")
+   (hyperdoc::make-state-machine-transition
+    :id "s4->s13" :title "Terminal failure before bootstrap"
+    :from-state :s4 :to-state :s13
+    :trigger "bootstrap unavailable"
+    :guard "bootstrap never ran or failed")
+   (hyperdoc::make-state-machine-transition
+    :id "s5->s13" :title "Terminal failure on bootstrap"
+    :from-state :s5 :to-state :s13
+    :trigger "bootstrap failed"
+    :guard "non-success login response")
+   (hyperdoc::make-state-machine-transition
+    :id "s6->s13" :title "Terminal failure without session"
+    :from-state :s6 :to-state :s13
+    :trigger "session extraction failed"
+    :guard "no usable JSESSIONID")
+   (hyperdoc::make-state-machine-transition
+    :id "s8->s13" :title "Terminal failure before guarded send"
+    :from-state :s8 :to-state :s13
+    :trigger "guarded request blocked"
+    :guard "request could not be sent")
+   (hyperdoc::make-state-machine-transition
+    :id "s9->s13" :title "Terminal failure on guarded response"
+    :from-state :s9 :to-state :s13
+    :trigger "guarded request failed"
+    :guard "non-success guarded response")
+   (hyperdoc::make-state-machine-transition
+    :id "s10->s13" :title "Terminal failure after guarded response"
+    :from-state :s10 :to-state :s13
+    :trigger "classify failure"
+    :guard "terminal failure")
+   (hyperdoc::make-state-machine-transition
+    :id "s11->s13" :title "Terminal failure after readback"
+    :from-state :s11 :to-state :s13
+    :trigger "readback contradiction"
+    :guard "readback indicates failure")))
+
+(defun make-dmx-repair-auth-state-machine-definition ()
+  (hyperdoc::make-state-machine-definition
+   :id "state-machine-definition/dmx-repair-auth"
+   :title "DMX repair-console authentication path"
+   :summary "Reusable definition for the repair-console auth/bootstrap/session flow."
+   :states (mapcar #'dmx-repair-auth-state-object
+                   *dmx-repair-auth-state-specs*)
+   :transitions (dmx-repair-auth-transition-objects)
+   :initial-state :s0
+   :terminal-states '(:s12)
+   :failure-states '(:s13)
+   :source-evidence (dmx-repair-auth-source-evidence)
+   :multi-initial-p nil
+   :multi-current-p nil
+   :allow-terminal-outgoing-p nil
+   :acyclic-p t))
+
+(defun repair-auth-debug-event->transition-trace-entry (event)
+  (case (getf event :event)
+    (:s5-bootstrap-request-sent
+     (list :timestamp (getf event :timestamp)
+           :kind :transition
+           :transition-id "s4->s5"
+           :from-state :s4
+           :to-state :s5
+           :detail (format nil "~A ~A"
+                           (or (getf event :method) :post)
+                           (or (getf event :path) "n/a"))))
+    (:s6-bootstrap-response-received
+     (list :timestamp (getf event :timestamp)
+           :kind :transition
+           :transition-id "s5->s6"
+           :from-state :s5
+           :to-state :s6
+           :detail (format nil "status=~A reason=~A"
+                           (or (getf event :status-code) "n/a")
+                           (or (getf event :reason-phrase) "n/a"))))
+    (:s7-session-material-extracted
+     (list :timestamp (getf event :timestamp)
+           :kind :transition
+           :transition-id "s6->s7"
+           :from-state :s6
+           :to-state :s7
+           :detail (format nil "cookie-shape=~A"
+                           (or (getf event :cookie-shape) "n/a"))))
+    (otherwise nil)))
+
+(defun repair-auth-debug-event->evidence-trace-entry (event)
+  (case (getf event :event)
+    (:s5-bootstrap-request-sent
+     (list :timestamp (getf event :timestamp)
+           :kind :evidence
+           :transition-id "s4->s5"
+           :from-state :s4
+           :to-state :s5
+           :evidence
+           (format nil "auth=~A scheme=~A content-type=~A length=~A empty-body=~A"
+                   (or (getf event :auth-mode-summary) "n/a")
+                   (or (getf event :authorization-scheme) "n/a")
+                   (or (getf event :content-type) "n/a")
+                   (or (getf event :content-length) "n/a")
+                   (or (getf event :empty-body-p) "n/a"))))
+    (:s6-bootstrap-response-received
+     (list :timestamp (getf event :timestamp)
+           :kind :evidence
+           :transition-id "s5->s6"
+           :from-state :s5
+           :to-state :s6
+           :evidence
+           (format nil "status=~A jsessionid-set-cookie=~A"
+                   (or (getf event :status-code) "n/a")
+                   (or (getf event :set-cookie-jsessionid-p) "n/a"))))
+    (:s7-session-material-extracted
+     (list :timestamp (getf event :timestamp)
+           :kind :evidence
+           :transition-id "s6->s7"
+           :from-state :s6
+           :to-state :s7
+           :evidence
+           (format nil "session-cookie-captured=~A cookie-shape=~A"
+                   (or (getf event :session-cookie-captured-p) "n/a")
+                   (or (getf event :cookie-shape) "n/a"))))
+    (otherwise nil)))
+
+(defun make-dmx-repair-auth-state-machine-run
+    (&key result auth-context client debug-events)
+  (let* ((machine (make-dmx-repair-auth-state-machine-definition))
+         (events (or debug-events
+                     (and client
+                          (typep client 'hyperdoc::http-dmx-import-client)
+                          (copy-list (hyperdoc::dmx-import-debug-events-of client)))
+                     '()))
+         (transition-trace
+           (remove nil (mapcar #'repair-auth-debug-event->transition-trace-entry
+                               events)))
+         (evidence-trace
+           (remove nil (mapcar #'repair-auth-debug-event->evidence-trace-entry
+                               events)))
+         (visited-states
+           (remove-duplicates
+            (remove nil
+                    (append (mapcar (lambda (e) (getf e :from-state)) transition-trace)
+                            (mapcar (lambda (e) (getf e :to-state)) transition-trace)
+                            (mapcar (lambda (e) (getf e :to-state)) evidence-trace)))
+            :test #'equal))
+         (current-state
+           (or (getf result :trace-state)
+               (getf result :state)
+               (car (last visited-states))
+               :s0)))
+    (hyperdoc::make-state-machine-run
+     :id "state-machine-run/dmx-repair-auth"
+     :title "DMX repair-console authentication run"
+     :summary "Concrete repair-console auth/bootstrap/session traversal."
+     :machine machine
+     :input auth-context
+     :current-state current-state
+     :visited-states visited-states
+     :transition-trace transition-trace
+     :evidence-trace evidence-trace
+     :status (if (eq current-state :s13) :failed :finished)
+     :failure-classification
+     (and (eq current-state :s13)
+          (or (getf result :outcome) :repair-failed))
+     :notes
+     (remove nil
+             (list
+              (when auth-context
+                (list :label "Auth mode"
+                      :detail (getf auth-context :auth-mode)))
+              (when result
+                (list :label "Outcome"
+                      :detail (or (getf result :message)
+                                  (getf result :outcome)))))))))
+
 
 (defun dmx-repair-nonblank-string-p (value)
   (let ((string (and value
@@ -981,12 +1413,167 @@
                       "Localhost rehearsal failed for at least one backlog item, so remote repair was not attempted.")))
       final-results)))
 
+(defun render-dmx-shared-workspace-repair-console-body (page)
+  (let ((repair-proxies (hyperdoc::dmx-repair-topic-proxies-of page)))
+    (views:html
+      (:p (views:esc
+           "Diagnosis stays read-only in the other views. This console is the separate authenticated mutation surface for repair_workspace_topic_assignment, and the batch affordance is only a guarded wrapper over repeated repair_workspace_topic_assignment calls."))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Target workspace assignment"))
+                   (:td (render-maybe-code
+                         (hyperdoc::dmx-workspace-id-of page))))
+              (:tr (:td (views:esc "Selected topicmap placement"))
+                   (:td (render-maybe-code
+                         (hyperdoc::dmx-topicmap-id-of page))))
+              (:tr (:td (views:esc "Selected row operation"))
+                   (:td (:tt (views:esc "repair_workspace_topic_assignment"))))
+              (:tr (:td (views:esc "Guarded batch wrapper"))
+                   (:td (:tt (views:esc
+                              "repair all missing workspace assignments"))))
+              (:tr (:td (views:esc "Current actionable missing assignments"))
+                   (:td (render-maybe-code (length repair-proxies)))))
+      (if repair-proxies
+          (let (mode-cell username-cell password-cell header-cell token-cell
+                selected-topic-cell)
+            (views:html (:h4 "Authentication"))
+            (setf mode-cell
+                  (hvr:select '(("Username + password" . "basic")
+                                ("Authorization header" . "header")
+                                ("Bearer token" . "token"))
+                              :label "Credential mode: "))
+            (views:html (:br))
+            (setf username-cell
+                  (hvr:input :label "Username: " :initial-value "" :size "24"))
+            (views:html (:br))
+            (setf password-cell
+                  (hvr:input :label "Password: "
+                             :initial-value ""
+                             :size "24"
+                             :type :password))
+            (views:html (:br))
+            (setf header-cell
+                  (hvr:input :label "Authorization header: "
+                             :initial-value ""
+                             :size "64"))
+            (views:html (:br))
+            (setf token-cell
+                  (hvr:input :label "Bearer token: "
+                             :initial-value ""
+                             :size "48"
+                             :type :password))
+            (views:html (:h4 "Repair scope"))
+            (setf selected-topic-cell
+                  (hvr:select
+                   (mapcar (lambda (proxy)
+                             (cons (format nil "~D (~A)"
+                                           (hyperdoc::dmx-topic-id-of proxy)
+                                           (or (hyperdoc::dmx-topic-diagnostics-topic-title
+                                                (hyperdoc::dmx-diagnostics-of proxy))
+                                               "n/a"))
+                                   (format nil "~D"
+                                           (hyperdoc::dmx-topic-id-of proxy))))
+                           repair-proxies)
+                   :label "Selected topic: "))
+            (views:html
+              (:p (views:esc
+                   "Only the fields required by the active credential mode are used for the current action. Foreign objects stay excluded from this console, and already-correct objects stay out of the actionable missing-assignment set."))
+              (:table :class "inspector-table"
+                      (:tr (:td (views:esc "Active mode"))
+                           (:td (:tt (views:esc
+                                      (dmx-repair-console-auth-mode-label
+                                       (lwcells:cell-ref mode-cell))))))
+                      (:tr (:td (views:esc "Selected topic for one-object repair"))
+                           (:td (render-maybe-code
+                                 (lwcells:cell-ref selected-topic-cell)))))
+              (views:action-button
+               "Dry-run selected topic"
+               (views:thunk
+                 (repair-triage-topic-with-explicit-auth
+                  page
+                  (parse-integer (lwcells:cell-ref selected-topic-cell))
+                  :dry-run t
+                  :auth-mode (lwcells:cell-ref mode-cell)
+                  :username (lwcells:cell-ref username-cell)
+                  :password (lwcells:cell-ref password-cell)
+                  :authorization-header (lwcells:cell-ref header-cell)
+                  :auth-token (lwcells:cell-ref token-cell))
+                 t)
+               "Run repair_workspace_topic_assignment for the selected topic without mutating DMX")
+              " "
+              (views:action-button
+               "Repair selected topic"
+               (views:thunk
+                 (repair-triage-topic-with-explicit-auth
+                  page
+                  (parse-integer (lwcells:cell-ref selected-topic-cell))
+                  :dry-run nil
+                  :auth-mode (lwcells:cell-ref mode-cell)
+                  :username (lwcells:cell-ref username-cell)
+                  :password (lwcells:cell-ref password-cell)
+                  :authorization-header (lwcells:cell-ref header-cell)
+                  :auth-token (lwcells:cell-ref token-cell))
+                 t)
+               "Run repair_workspace_topic_assignment for the selected topic")
+              " "
+              (views:action-button
+               "Dry-run all missing workspace assignments"
+               (views:thunk
+                 (repair-workspace-triage-backlog-with-explicit-auth
+                  page
+                  :dry-run t
+                  :auth-mode (lwcells:cell-ref mode-cell)
+                  :username (lwcells:cell-ref username-cell)
+                  :password (lwcells:cell-ref password-cell)
+                  :authorization-header (lwcells:cell-ref header-cell)
+                  :auth-token (lwcells:cell-ref token-cell))
+                 t)
+               "Run the guarded batch wrapper without mutating DMX")
+              " "
+              (views:action-button
+               "Repair all missing workspace assignments"
+               (views:thunk
+                 (repair-workspace-triage-backlog-with-explicit-auth
+                  page
+                  :dry-run nil
+                  :auth-mode (lwcells:cell-ref mode-cell)
+                  :username (lwcells:cell-ref username-cell)
+                  :password (lwcells:cell-ref password-cell)
+                  :authorization-header (lwcells:cell-ref header-cell)
+                  :auth-token (lwcells:cell-ref token-cell))
+                 t)
+               "Repair the actionable missing-assignment set via repeated repair_workspace_topic_assignment")))
+          (views:html
+            (:p (views:esc
+                 "There are currently no actionable missing assignments, so the repair console has nothing to mutate."))))
+      (:h4 "Per-topic live result readback")
+      (when-let (summary (hyperdoc::dmx-repair-summary-of page))
+        (views:html
+          (:table :class "inspector-table"
+                  (:tr (:td (views:esc "Recorded result count"))
+                       (:td (render-maybe-code (getf summary :count))))
+                  (:tr (:td (views:esc "Dry-run"))
+                       (:td (:tt (views:esc
+                                  (yes/no-label (getf summary :dry-run))))))
+                  (:tr (:td (views:esc "Successful results"))
+                       (:td (render-maybe-code (getf summary :success-count))))
+                  (:tr (:td (views:esc "Error results"))
+                       (:td (render-maybe-code (getf summary :error-count))))
+                  (when-let (message (getf summary :message))
+                    (views:html
+                      (:tr (:td (views:esc "Summary"))
+                           (:td (views:esc message))))))))
+      (render-dmx-repair-results-table (hyperdoc::dmx-repair-results-of page)
+                                       :topicmap-id (hyperdoc::dmx-topicmap-id-of page))
+      (render-dmx-repair-debug-traces
+       (hyperdoc::dmx-repair-results-of page)))))
+
 (defun render-dmx-repair-results-table (results &key topicmap-id)
   (if results
       (views:html
         (:table :class "inspector-table"
                 (:tr (:th (views:esc "Topic"))
                      (:th (views:esc "Title/value"))
+                     (:th (views:esc "Operational state"))
                      (:th (views:esc "Auth mode"))
                      (:th (views:esc "Dry-run"))
                      (:th (views:esc "Workspace readback"))
@@ -1011,6 +1598,10 @@
                                     :display (format nil "~D" topic-id))
                                    (render-maybe-code nil)))
                               (:td (views:esc (or (getf result :topic-title) "n/a")))
+                              (:td (:tt (views:esc
+                                         (or (dmx-repair-result-operational-state-label
+                                              result)
+                                             "n/a"))))
                               (:td (:tt (views:esc
                                          (dmx-repair-console-auth-mode-label
                                           (getf result :auth-mode)))))
@@ -1497,10 +2088,10 @@
     (views:action-button html-inspector-views/standard:*icon-open-external*
                          (views:thunk
                            (clog:open-browser
-                            :url (hyperdoc::dmx-topicmap-webclient-url page)))
+                            :url (hyperdoc::dmx-webclient-url page)))
                          nil)))
 
-(defmethod views:title-bar-action-buttons ((page hyperdoc::dmx-workspace-repair-triage))
+(defun render-dmx-topicmap-backed-title-bar-buttons (page)
   (views:html
     (views:action-button "Reload"
                          (views:thunk
@@ -1514,6 +2105,17 @@
                            (clog:open-browser
                             :url (hyperdoc::dmx-topicmap-webclient-url page)))
                          nil)))
+
+(defmethod views:title-bar-action-buttons ((page hyperdoc::dmx-workspace-repair-triage))
+  (render-dmx-topicmap-backed-title-bar-buttons page))
+
+(defmethod views:title-bar-action-buttons
+    ((page hyperdoc::dmx-shared-workspace-object))
+  (render-dmx-topicmap-backed-title-bar-buttons page))
+
+(defmethod views:title-bar-action-buttons
+    ((page hyperdoc::dmx-shared-topicmap-object))
+  (render-dmx-topicmap-backed-title-bar-buttons page))
 
 (views:defview 👀overview (page hyperdoc::dmx-topic-proxy)
   (hyperdoc::ensure-dmx-topic-diagnostics page)
@@ -1531,9 +2133,9 @@
                 (:tr (:td (views:esc "Topic ID"))
                      (:td (views:object-ref (hyperdoc::dmx-topic-id-of page))))
                 (:tr (:td (views:esc "DMX webclient"))
-                     (:td (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
+                     (:td (:a :href (hyperdoc::dmx-webclient-url page)
                               :target "_blank"
-                              (views:esc (hyperdoc::dmx-topicmap-webclient-url page)))))
+                              (views:esc (hyperdoc::dmx-webclient-url page)))))
                 (when-let (topic-data (hyperdoc::dmx-topic-data-of page))
                   (views:html
                     (:tr (:td (views:esc "Type URI"))
@@ -1772,9 +2374,9 @@
 (views:defview 👀external (page hyperdoc::dmx-topic-proxy)
   (views:html-view :title "External" :priority 7
     (views:html
-      (:a :href (hyperdoc::dmx-topicmap-webclient-url page)
+      (:a :href (hyperdoc::dmx-webclient-url page)
           :target "_blank"
-          (views:esc "Open topicmap entry in DMX webclient")))))
+          (views:esc "Open selected topic in DMX webclient")))))
 
 (views:defview 👀repair-console (page hyperdoc::dmx-topic-proxy)
   (hyperdoc::ensure-dmx-topic-diagnostics page)
@@ -1989,153 +2591,82 @@
 (views:defview 👀repair-console (page hyperdoc::dmx-workspace-repair-triage)
   (hyperdoc::ensure-dmx-workspace-repair-triage page)
   (views:html-view :title "Repair console" :priority 3
-    (let ((repair-proxies (hyperdoc::dmx-repair-topic-proxies-of page)))
-      (views:html
-        (:p (views:esc
-             "This repair console reuses the same guarded workspace-assignment repair executor as the MCP tool, but it builds an authenticated DMX client from explicit credentials entered here for the current action only. Diagnosis remains read-only above; mutation stays deliberate here."))
-        (:table :class "inspector-table"
-                (:tr (:td (views:esc "Target workspace assignment"))
-                     (:td (render-maybe-code
-                           hyperdoc::*dmx-context-window-workspace-id*)))
-                (:tr (:td (views:esc "Selected topicmap placement"))
-                     (:td (render-maybe-code
-                           hyperdoc::*dmx-context-window-topicmap-id*)))
-                (:tr (:td (views:esc "Current backlog size"))
-                     (:td (render-maybe-code (length repair-proxies)))))
-        (if repair-proxies
-            (let (mode-cell username-cell password-cell header-cell token-cell
-                  selected-topic-cell)
-              (views:html (:h4 "Authentication"))
-              (setf mode-cell
-                    (hvr:select '(("Username + password" . "basic")
-                                  ("Authorization header" . "header")
-                                  ("Bearer token" . "token"))
-                                :label "Credential mode: "))
-              (views:html (:br))
-              (setf username-cell
-                    (hvr:input :label "Username: " :initial-value "" :size "24"))
-              (views:html (:br))
-              (setf password-cell
-                    (hvr:input :label "Password: "
-                               :initial-value ""
-                               :size "24"
-                               :type :password))
-              (views:html (:br))
-              (setf header-cell
-                    (hvr:input :label "Authorization header: "
-                               :initial-value ""
-                               :size "64"))
-              (views:html (:br))
-              (setf token-cell
-                    (hvr:input :label "Bearer token: "
-                               :initial-value ""
-                               :size "48"
-                               :type :password))
-              (views:html (:h4 "Repair scope"))
-              (setf selected-topic-cell
-                    (hvr:select
-                     (mapcar (lambda (proxy)
-                               (cons (format nil "~D (~A)"
-                                             (hyperdoc::dmx-topic-id-of proxy)
-                                             (or (hyperdoc::dmx-topic-diagnostics-topic-title
-                                                  (hyperdoc::dmx-diagnostics-of proxy))
-                                                 "n/a"))
-                                     (format nil "~D"
-                                             (hyperdoc::dmx-topic-id-of proxy))))
-                             repair-proxies)
-                     :label "Selected topic: "))
-              (views:html
-                (:p (views:esc
-                     "Only the fields required by the active credential mode are used for the current action. The current backlog already excludes foreign objects such as 922451 and already-correct objects such as 922586."))
-                (:table :class "inspector-table"
-                        (:tr (:td (views:esc "Active mode"))
-                             (:td (:tt (views:esc
-                                        (dmx-repair-console-auth-mode-label
-                                         (lwcells:cell-ref mode-cell))))))
-                        (:tr (:td (views:esc "Selected topic for one-object repair"))
-                             (:td (render-maybe-code
-                                   (lwcells:cell-ref selected-topic-cell)))))
-                (views:action-button
-                 "Dry-run selected topic"
-                 (views:thunk
-                   (repair-triage-topic-with-explicit-auth
-                    page
-                    (parse-integer (lwcells:cell-ref selected-topic-cell))
-                    :dry-run t
-                    :auth-mode (lwcells:cell-ref mode-cell)
-                    :username (lwcells:cell-ref username-cell)
-                    :password (lwcells:cell-ref password-cell)
-                    :authorization-header (lwcells:cell-ref header-cell)
-                    :auth-token (lwcells:cell-ref token-cell))
-                   t)
-                 "Run the guarded repair path for the selected backlog topic without mutating DMX")
-                " "
-                (views:action-button
-                 "Repair selected topic"
-                 (views:thunk
-                   (repair-triage-topic-with-explicit-auth
-                    page
-                    (parse-integer (lwcells:cell-ref selected-topic-cell))
-                    :dry-run nil
-                    :auth-mode (lwcells:cell-ref mode-cell)
-                    :username (lwcells:cell-ref username-cell)
-                    :password (lwcells:cell-ref password-cell)
-                    :authorization-header (lwcells:cell-ref header-cell)
-                    :auth-token (lwcells:cell-ref token-cell))
-                   t)
-                 "Repair only the selected backlog topic")
-                " "
-                (views:action-button
-                 "Dry-run backlog"
-                 (views:thunk
-                   (repair-workspace-triage-backlog-with-explicit-auth
-                    page
-                    :dry-run t
-                    :auth-mode (lwcells:cell-ref mode-cell)
-                    :username (lwcells:cell-ref username-cell)
-                    :password (lwcells:cell-ref password-cell)
-                    :authorization-header (lwcells:cell-ref header-cell)
-                    :auth-token (lwcells:cell-ref token-cell))
-                   t)
-                 "Run the guarded repair path for the whole backlog without mutating DMX")
-                " "
-                (views:action-button
-                 "Repair backlog"
-                 (views:thunk
-                   (repair-workspace-triage-backlog-with-explicit-auth
-                    page
-                    :dry-run nil
-                    :auth-mode (lwcells:cell-ref mode-cell)
-                    :username (lwcells:cell-ref username-cell)
-                    :password (lwcells:cell-ref password-cell)
-                    :authorization-header (lwcells:cell-ref header-cell)
-                    :auth-token (lwcells:cell-ref token-cell))
-                   t)
-                 "Repair the current triage backlog in place")))
-            (views:html
-              (:p (views:esc
-                   "There are currently no actionable backlog items, so the repair console has nothing to mutate."))))
-        (:h4 "Per-topic live result readback")
-        (when-let (summary (hyperdoc::dmx-repair-summary-of page))
-          (views:html
-            (:table :class "inspector-table"
-                    (:tr (:td (views:esc "Recorded result count"))
-                         (:td (render-maybe-code (getf summary :count))))
-                    (:tr (:td (views:esc "Dry-run"))
-                         (:td (:tt (views:esc
-                                    (yes/no-label (getf summary :dry-run))))))
-                    (:tr (:td (views:esc "Success count"))
-                         (:td (render-maybe-code (getf summary :success-count))))
-                    (:tr (:td (views:esc "Error count"))
-                         (:td (render-maybe-code (getf summary :error-count))))
-                    (when-let (message (getf summary :message))
-                      (views:html
-                        (:tr (:td (views:esc "Summary note"))
-                             (:td (views:esc message))))))))
-        (render-dmx-repair-results-table (hyperdoc::dmx-repair-results-of page)
-                                         :topicmap-id (hyperdoc::dmx-topicmap-id-of page))
-        (render-dmx-repair-debug-traces
-         (hyperdoc::dmx-repair-results-of page))))))
+    (render-dmx-shared-workspace-repair-console-body page)))
+
+(views:defview 👀overview (page hyperdoc::dmx-shared-workspace-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc
+           "This first-class workspace object keeps workspace assignment distinct from topicmap placement while centering the visible context-window blackboard in topicmap 919822."))
+      (render-dmx-shared-workspace-context-summary-table page))))
+
+(views:defview 👀topics-missing-workspace-assignment
+    (page hyperdoc::dmx-shared-workspace-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Topics missing workspace assignment" :priority 2
+    (views:html
+      (:p (views:esc
+           "These topics are visible in topicmap 919822 but still lack workspace assignment for workspace 919815. Foreign rows stay read-only as foreign-no-action; HyperDoc-owned rows stay read-only here as in-topicmap-but-unassigned until you move to Repair console."))
+      (render-dmx-operational-topic-proxy-table
+       page
+       (hyperdoc::dmx-visible-but-unassigned-topic-proxies page)
+       :empty-message
+       "Every visible topic currently has workspace assignment or is outside the selected topicmap context."))))
+
+(views:defview 👀assigned-topics (page hyperdoc::dmx-shared-workspace-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Assigned topics" :priority 3
+    (views:html
+      (:p (views:esc
+           "These topics are visible in topicmap 919822 and currently assigned to workspace 919815."))
+      (render-dmx-operational-topic-proxy-table
+       page
+       (hyperdoc::dmx-visible-assigned-topic-proxies page)
+       :empty-message
+       "No visible topics currently read back as assigned to workspace 919815."))))
+
+(views:defview 👀repair-console (page hyperdoc::dmx-shared-workspace-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Repair console" :priority 4
+    (render-dmx-shared-workspace-repair-console-body page)))
+
+(views:defview 👀overview (page hyperdoc::dmx-shared-topicmap-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Overview" :priority 1
+    (views:html
+      (:p (views:esc
+           "This first-class topicmap object models topicmap 919822 as the visible context-window shared blackboard while keeping workspace assignment diagnosis separate from topicmap placement."))
+      (render-dmx-shared-workspace-context-summary-table page))))
+
+(views:defview 👀visible-but-unassigned (page hyperdoc::dmx-shared-topicmap-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Visible but unassigned" :priority 2
+    (views:html
+      (:p (views:esc
+           "This is the key triage view for topicmap 919822: visible topics that still lack workspace assignment for workspace 919815. Each row opens the existing single-topic Workspace diagnostics surface."))
+      (render-dmx-operational-topic-proxy-table
+       page
+       (hyperdoc::dmx-visible-but-unassigned-topic-proxies page)
+       :empty-message
+       "No visible topics are currently missing workspace assignment."))))
+
+(views:defview 👀visible-topics (page hyperdoc::dmx-shared-topicmap-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Visible topics" :priority 3
+    (views:html
+      (:p (views:esc
+           "All currently visible topics in topicmap 919822, classified with the shared read-only operational vocabulary."))
+      (render-dmx-operational-topic-proxy-table
+       page
+       (hyperdoc::dmx-visible-topic-proxies page)
+       :empty-message
+       "No visible topics are currently available from the selected topicmap projection."))))
+
+(views:defview 👀repair-console (page hyperdoc::dmx-shared-topicmap-object)
+  (hyperdoc::ensure-dmx-workspace-repair-triage page)
+  (views:html-view :title "Repair console" :priority 4
+    (render-dmx-shared-workspace-repair-console-body page)))
 
 (defmethod code-path-graph-overview-extra-html
     ((graph hyperdoc::dmx-workspace-journal-reconcile-call-graph))
