@@ -199,3 +199,58 @@
           (:div :style "width: 80%; margin: 0 auto;"
                 (:img :src (gethash "url" (data-of item)))
                 (:p (render-wiki-text (text-of item) page))))))
+
+;; Missing story item types (with reference to examples)
+
+;; assets
+;; wiki.ralfbarkow.ch/reflections-on-graphviz-plugin
+
+;; code
+;; wiki.ralfbarkow.ch/0000000010
+
+;; frame
+;; fed.wiki/dorkbotpdx-may-2023
+;; fed.wiki/breakfast-on-the-bridge
+
+;; graphviz
+;; wiki.ralfbarkow.ch/reflections-on-graphviz-plugin
+;; wiki.ralfbarkow.ch/15-ps
+;; growing.bay.wiki.org/neighborhood-patterns
+
+;; grep
+;; wiki.dbbs.co/welcome-visitors
+
+;; html
+;; fed.wiki/dorkbotpdx-may-2023
+;; wiki.ralfbarkow.ch/0000000010
+
+;; line
+;; fed.wiki/dorkbotpdx-may-2023
+
+;; map
+;; fed.wiki/breakfast-on-the-bridge
+
+;; markdown
+;; fed.wiki/breakfast-on-the-bridge
+;; fed.wiki.org/digest-2014-06-25
+;; wiki.ralfbarkow.ch/0000000010
+
+;; roster
+;; fed.wiki/watch-everything
+
+;; video
+;; wiki.ralfbarkow.ch/a-beautiful-wiki-page
+
+;; find examples
+(defun find-examples-for-story-item-types ()
+  (let ((m (make-hash-table)))
+    (loop for site being the hash-values of *neighborhood*
+          append (loop for page being the hash-values of (pages-of site)
+                       for story = (story-of page)
+                       when story
+                         append (loop for item across story
+                                      for type = (item-type-of item)
+                                      unless (member type '(:paragraph :pagefold :image :reference))
+                                        do (pushnew page (gethash type m)))))
+    m))
+
