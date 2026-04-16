@@ -200,6 +200,13 @@
                 (:img :src (gethash "url" (data-of item)))
                 (:p (render-wiki-text (text-of item) page))))))
 
+;; Graphviz dot language
+
+(defmethod render-story-item ((type (eql :graphviz)) item page)
+  (let ((dot (or (some->> item data-of (gethash "dot"))
+                 (text-of item))))
+    (views:transclusion (views:graphviz-view dot))))
+
 ;; Missing story item types (with reference to examples)
 
 ;; assets
@@ -211,11 +218,6 @@
 ;; frame
 ;; fed.wiki/dorkbotpdx-may-2023
 ;; fed.wiki/breakfast-on-the-bridge
-
-;; graphviz
-;; wiki.ralfbarkow.ch/reflections-on-graphviz-plugin
-;; wiki.ralfbarkow.ch/15-ps
-;; growing.bay.wiki.org/neighborhood-patterns
 
 ;; grep
 ;; wiki.dbbs.co/welcome-visitors
