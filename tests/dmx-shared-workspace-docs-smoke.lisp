@@ -626,10 +626,18 @@
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
                                     :signal-error? t))
+         (strategy (hyperdoc::source-surface-strategy-for page))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
          (source-html (and source-view
                            (html-inspector-views:view-html source-view))))
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 strategy
+                 (format nil "~A must keep the connect Source strategy"
+                         page-title))
+    (assert-true (hyperdoc::source-surface-connect-capable-p strategy)
+                 (format nil "~A Source strategy must stay connect-capable"
+                         page-title))
     (assert-true source-view
                  (format nil "~A must expose a Source view" page-title))
     (assert (search "hyperdoc-dom-connect-surface" source-html :test #'char=)

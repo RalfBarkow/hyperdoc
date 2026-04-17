@@ -576,8 +576,52 @@ PAGE-LOOKUP-FAILURE."
 ;; Source code view for text pages
 ;;
 
+(defclass source-surface-strategy ()
+  ((id :reader source-surface-strategy-id
+       :initarg :id)
+   (connect-capable-p :reader source-surface-connect-capable-p
+                       :initarg :connect-capable-p)))
+
+(defclass connect-source-surface-strategy (source-surface-strategy) ())
+
+(defclass plain-source-surface-strategy (source-surface-strategy) ())
+
+(defparameter *connect-source-surface-strategy*
+  (make-instance 'connect-source-surface-strategy
+                 :id :connect
+                 :connect-capable-p t))
+
+(defparameter *plain-source-surface-strategy*
+  (make-instance 'plain-source-surface-strategy
+                 :id :plain
+                 :connect-capable-p nil))
+
+(defgeneric source-surface-strategy-for (page))
+
+(defmethod source-surface-strategy-for ((page text-page))
+  *connect-source-surface-strategy*)
+
+(defgeneric render-source-surface-with-strategy
+    (strategy page &key title priority))
+
+(defmethod render-source-surface-with-strategy
+    ((strategy connect-source-surface-strategy) (page text-page)
+     &key (title "Source") (priority 10))
+  (views:html-view :title title :priority priority
+    (render-source-connect-surface page title (file-of page))))
+
+(defmethod render-source-surface-with-strategy
+    ((strategy plain-source-surface-strategy) (page text-page)
+     &key (title "Source") (priority 10))
+  (views:html-view :title title :priority priority
+    (hb:render-file-source-surface (file-of page))))
+
+(defun render-source-surface-for-page (page &key (title "Source") (priority 10))
+  (render-source-surface-with-strategy
+   (source-surface-strategy-for page)
+   page
+   :title title
+   :priority priority))
+
 (views:defview 👀source (page text-page)
-  (views:html-view :title "Source" :priority 10
-    (render-source-connect-surface page
-                                   "Source"
-                                   (file-of page))))
+  (render-source-surface-for-page page :title "Source" :priority 10))
