@@ -1,0 +1,178 @@
+<h1>Focused semantic source stations</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Focused semantic source stations"><tt>Focused
+  semantic source stations</tt></a> is the durable source-oriented review
+  surface: a way to name semantically meaningful source stations, inspect them
+  in the Source pane, and attach first-class route judgments before any code
+  removal patch lands. The tactical first use case was the journal-projection
+  contract cleanup around <tt>dmx-mcp-workspace-summary</tt> and
+  <tt>dmx-mcp-topicmap-projection</tt>. That first slice is now complete, but
+  the journal-specific station list is not the lasting essence of the concept.
+</p>
+
+<p>
+  The first tactical slice has now removed <tt>journalTopicCount</tt> and
+  <tt>journalTopics</tt> from the public workspace/topicmap projections in DMX
+  MCP. The durable review surface remains useful because it preserved those
+  leakage sites as routeable source judgments rather than reducing the change
+  to an inline source edit. The broader HyperDoc-owned journal migration,
+  replay-parity proof, and later companion deletion remain deferred.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Focused semantic source stations"><tt>Focused semantic source stations</tt></a></li>
+  <li><a hyperbook="topics" page="DMX MCP server for shared workspace"><tt>DMX MCP server for shared workspace</tt></a></li>
+  <li><a hyperbook="topics" page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a hyperbook="topics" page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a hyperbook="topics" page="Authoritative Journal-Backed Page Store"><tt>Authoritative Journal-Backed Page Store</tt></a></li>
+  <li><a hyperbook="topics" page="Annotation"><tt>Annotation</tt></a></li>
+  <li><a page="A DOM-annotation connect gesture"><tt>A DOM-annotation connect gesture</tt></a></li>
+  <li><a expr="(fdefinition 'dmx-mcp-workspace-summary)"><tt>dmx-mcp-workspace-summary</tt></a></li>
+  <li><a expr="(fdefinition 'dmx-mcp-topicmap-projection)"><tt>dmx-mcp-topicmap-projection</tt></a></li>
+</ul>
+
+<h2>Durable concept</h2>
+
+<p>
+  The durable idea is a general source-review view, not a permanent list of
+  journal-specific locals. Earlier alternatives such as <b>Function path
+  stations</b> are too implementation-shaped. The preferred durable label is
+  <b>Focused semantic source stations</b> because the station names should stay
+  legible at the review level even when the implementation underneath them is
+  later rewritten.
+</p>
+
+<p>
+  A focused source-station slice can therefore be curated narrowly for one
+  review question without pretending that its current station vocabulary is the
+  whole long-term ontology of source review.
+</p>
+
+<h2>Completed first tactical slice</h2>
+
+<p>
+  The first tactical slice was the journal-projection contract cleanup around
+  <tt>dmx-mcp-workspace-summary</tt> and
+  <tt>dmx-mcp-topicmap-projection</tt>. Before the cleanup, both functions
+  computed <tt>journal-summaries</tt> and emitted <tt>journalTopicCount</tt>
+  plus <tt>journalTopics</tt> into public topicmap/workspace payloads. That
+  contract-removal patch is now complete in DMX MCP, while current journal
+  inspection and repair tooling remains in place for operations that still
+  depend on companion state.
+</p>
+
+<p>
+  The review target is therefore stronger than merely hiding two fields. The
+  architectural move is to shift journal authority first, then let the public
+  topicmap/workspace projection describe visible shared state only, and only
+  then delete the obsolete DMX companion machinery after replay parity is
+  proven.
+</p>
+
+<h2>Initial curated station slice</h2>
+
+<p>
+  For that first completed slice only, the source stations were grouped into
+  two kinds:
+</p>
+
+<ul>
+  <li><b>Pipeline stations</b>: <tt>topic-summaries</tt>, <tt>journal-summaries</tt>, <tt>visible-topic-summaries</tt>, and <tt>note-summaries</tt>.</li>
+  <li><b>Emitted output stations</b>: <tt>journalTopicCount</tt> and <tt>journalTopics</tt>, now removed from the public projection contract.</li>
+</ul>
+
+<p>
+  This station set is intentionally volatile: as the journal-projection
+  refactor lands, these stations are expected to change, shrink, or disappear,
+  while the source-station review view itself remains the durable concept.
+</p>
+
+<h2>Source-station workflow</h2>
+
+<p>
+  The intended workflow is:
+  <tt>source station -&gt; Lay route -&gt; Annotation -&gt; note "Remove"</tt>.
+</p>
+
+<p>
+  The user's judgment is a first-class route object, not an inline source
+  mutation. A reviewer selects a source station such as
+  <tt>journal-summaries</tt> or <tt>journalTopics</tt>, uses <b>Lay route</b>
+  to target <a hyperbook="topics" page="Annotation"><tt>Annotation</tt></a>,
+  and records a note such as <tt>Remove</tt>, <tt>Demote to projection
+  backend</tt>, or <tt>Keep temporarily until parity is proven</tt>. That
+  keeps the judgment reopenable and inspectable even while the source changes.
+</p>
+
+<h2>Architectural target</h2>
+
+<p>
+  The documented target model is:
+</p>
+
+<p>
+  <tt>HyperDoc journal -&gt; shared workspace projection</tt>
+</p>
+
+<p>
+  The current implementation still passes through DMX journal companions for
+  replay, restore, and repair, so today's practical review model is:
+</p>
+
+<p>
+  <tt>HyperDoc page -&gt; authoritative local journal -&gt; optional DMX projection journal companion -&gt; shared DMX workspace/topicmap projection</tt>
+</p>
+
+<p>
+  The end state should not be long-term coexistence. Once replay parity is
+  proven, deleting the obsolete DMX journal companions is a migration
+  milestone, not merely a future aspiration.
+</p>
+
+<h2>Practical cut line</h2>
+
+<ul>
+  <li>Completed first slice: public <tt>dmx-mcp-topicmap-projection</tt> and <tt>dmx-mcp-workspace-summary</tt> no longer emit <tt>journalTopicCount</tt> or <tt>journalTopics</tt>.</li>
+  <li>Keep <tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, restore, and repair tools for now because current operations still depend on them.</li>
+  <li>Recenter journal authority on stable HyperDoc-managed page or subject identity in a later migration.</li>
+  <li>After replay parity is verified, run an explicit cleanup step that deletes obsolete companion topics instead of preserving them as shadow baggage.</li>
+</ul>
+
+<h2>Deferred follow-on</h2>
+
+<p>
+  The broader HyperDoc-owned journal migration remains deferred here. This
+  review surface does not yet introduce new HyperDoc journal resources keyed by
+  stable page or subject identity, and it does not yet prove replay parity or
+  delete the remaining DMX journal companions.
+</p>
+
+<h2>Boundary</h2>
+
+<p>
+  This page does not itself broaden into the full journal migration, and it
+  does not redesign datastore repair. Existing guarded Neo4j/datastore repair
+  pages remain the bounded maintenance lane when the substrate itself is wrong.
+</p>
+
+<h2>First-slice source references</h2>
+
+<source-of-function>dmx-mcp-workspace-summary</source-of-function>
+<source-of-function>dmx-mcp-topicmap-projection</source-of-function>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="Authoritative Journal-Backed Page Store">Authoritative Journal-Backed Page Store</a></li>
+  <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
+  <li><a page="Touch-Fahrplan view for Zotero topic enrichment">Touch-Fahrplan view for Zotero topic enrichment</a></li>
+  <li><a page="Guarded local Neo4j repair boundary in HyperDoc">Guarded local Neo4j repair boundary in HyperDoc</a></li>
+</ul>

@@ -2973,6 +2973,19 @@
                  "A DOM-annotation connect gesture"
                  "Dock capabilities in HyperDoc")))
 
+(defun focused-semantic-source-stations-topic ()
+  (make-topic
+   :id "focused-semantic-source-stations"
+   :title "Focused semantic source stations"
+   :summary "Durable source-review surface that names semantically meaningful source stations, keeps the completed DMX MCP journal-projection cleanup as a first tactical slice, and leaves the broader HyperDoc-owned journal migration deferred."
+   :references '("Focused semantic source stations"
+                 "DMX MCP server for shared workspace"
+                 "Context window workspace as shared blackboard"
+                 "DMX workspace journal model"
+                 "Authoritative Journal-Backed Page Store"
+                 "Annotation"
+                 "A DOM-annotation connect gesture")))
+
 ;; ASDF workflow topics for runtime loading and undefined-function triage.
 (defun asdf-topic ()
   (make-topic
