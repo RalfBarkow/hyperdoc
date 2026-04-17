@@ -627,6 +627,8 @@
                                     page-title
                                     :signal-error? t))
          (strategy (hyperdoc::source-surface-strategy-for page))
+         (effective-strategy
+           (hyperdoc::effective-source-surface-strategy-for page))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
          (source-html (and source-view
@@ -635,8 +637,15 @@
                  strategy
                  (format nil "~A must keep the connect Source strategy"
                          page-title))
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 effective-strategy
+                 (format nil "~A effective Source strategy must stay connect"
+                         page-title))
     (assert-true (hyperdoc::source-surface-connect-capable-p strategy)
                  (format nil "~A Source strategy must stay connect-capable"
+                         page-title))
+    (assert-true (hyperdoc::source-surface-connect-capable-p effective-strategy)
+                 (format nil "~A effective Source strategy must stay connect-capable"
                          page-title))
     (assert-true source-view
                  (format nil "~A must expose a Source view" page-title))
@@ -684,6 +693,59 @@
   (assert-connectable-page-source-view
    "A DOM-annotation connect gesture"
    "# A DOM-annotation connect gesture"))
+
+(defun run-source-surface-strategy-override-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (expected-source-snippet
+           "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (default-strategy
+           (hyperdoc::effective-source-surface-strategy-for page)))
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 default-strategy
+                 (format nil "~A default effective strategy must stay connect"
+                         page-title))
+    (assert-true (hyperdoc::source-surface-connect-capable-p default-strategy)
+                 (format nil "~A default effective strategy must stay connect-capable"
+                         page-title))
+    (hyperdoc::with-source-surface-strategy-override (:plain)
+      (let* ((override-strategy
+               (hyperdoc::effective-source-surface-strategy-for page))
+             (source-view (hyperdoc::render-source-surface-for-page page))
+             (source-html (html-inspector-views:view-html source-view)))
+        (assert-type 'hyperdoc::plain-source-surface-strategy
+                     override-strategy
+                     (format nil "~A override must select the plain strategy"
+                             page-title))
+        (assert-true (not (hyperdoc::source-surface-connect-capable-p
+                           override-strategy))
+                     (format nil "~A plain override must not be connect-capable"
+                             page-title))
+        (assert-true (search "hyperdoc-source-pane" source-html :test #'char=)
+                     (format nil "~A plain override must still render the source pane"
+                             page-title))
+        (assert-true (search "hyperdoc-source-pane-line-number"
+                             source-html
+                             :test #'char=)
+                     (format nil "~A plain override must render numbered source lines"
+                             page-title))
+        (assert-true (search expected-source-snippet source-html :test #'char=)
+                     (format nil "~A plain override must still render escaped source text"
+                             page-title))
+        (assert-true (null (search "hyperdoc-connect-provider-surface"
+                                   source-html
+                                   :test #'char=))
+                     (format nil "~A plain override must suppress the connect-provider surface"
+                             page-title))
+        (assert-true
+         (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
+                       source-html
+                       :test #'char=))
+         (format nil "~A plain override must suppress source-v1 provider metadata"
+                 page-title))))))
 
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -771,6 +833,7 @@
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
+  (run-source-surface-strategy-override-smoke-test)
   (run-source-pane-layout-evidence-smoke-test)
   (format t "~&DMX shared-workspace docs smoke tests passed.~%")
   t)

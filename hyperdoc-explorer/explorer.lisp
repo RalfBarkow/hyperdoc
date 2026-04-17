@@ -596,10 +596,29 @@ PAGE-LOOKUP-FAILURE."
                  :id :plain
                  :connect-capable-p nil))
 
+(defparameter *source-surface-strategy-override* nil
+  "Dynamic-extent override for Source surface strategy selection.")
+
 (defgeneric source-surface-strategy-for (page))
 
 (defmethod source-surface-strategy-for ((page text-page))
   *connect-source-surface-strategy*)
+
+(defun source-surface-strategy-from-designator (designator)
+  (etypecase designator
+    (null nil)
+    (source-surface-strategy designator)
+    ((eql :connect) *connect-source-surface-strategy*)
+    ((eql :plain) *plain-source-surface-strategy*)))
+
+(defun effective-source-surface-strategy-for (page)
+  (or (source-surface-strategy-from-designator
+       *source-surface-strategy-override*)
+      (source-surface-strategy-for page)))
+
+(defmacro with-source-surface-strategy-override ((strategy-designator) &body body)
+  `(let ((*source-surface-strategy-override* ,strategy-designator))
+     ,@body))
 
 (defgeneric render-source-surface-with-strategy
     (strategy page &key title priority))
@@ -618,7 +637,7 @@ PAGE-LOOKUP-FAILURE."
 
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
   (render-source-surface-with-strategy
-   (source-surface-strategy-for page)
+   (effective-source-surface-strategy-for page)
    page
    :title title
    :priority priority))
