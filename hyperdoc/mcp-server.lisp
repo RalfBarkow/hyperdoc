@@ -301,10 +301,6 @@
           (not (dmx-workspace-journal-note-summary-p summary))))
    topic-summaries))
 
-(defun dmx-mcp-journal-topic-summaries (topic-summaries)
-  (remove-if-not #'dmx-workspace-journal-note-summary-p
-                 topic-summaries))
-
 (defun dmx-mcp-topicmap-topic-summaries (topicmap-json)
   (sort
    (loop for topic in (or (and topicmap-json
@@ -324,7 +320,6 @@
          (topicmap-topic (and topicmap-json (gethash "topic" topicmap-json)))
          (topic-summaries (and topicmap-json
                                (dmx-mcp-topicmap-topic-summaries topicmap-json)))
-         (journal-summaries (dmx-mcp-journal-topic-summaries topic-summaries))
          (visible-topic-summaries
            (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
          (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
@@ -339,10 +334,8 @@
                                        (dmx-mcp-topic-title topicmap-topic)))
      "topicCount" (length visible-topic-summaries)
      "noteCount" (length note-summaries)
-     "journalTopicCount" (length journal-summaries)
      "topics" (coerce visible-topic-summaries 'vector)
      "notes" (coerce note-summaries 'vector)
-     "journalTopics" (coerce journal-summaries 'vector)
      "source" (dmx-mcp-json-object
                "readPath" "/topicmaps/<id>?children=true"
                "topicReadPath" "/core/topic/<id>?children=true&assocChildren=true"))))
@@ -729,7 +722,6 @@
 (defun dmx-mcp-topicmap-projection (topicmap-json)
   (let* ((topicmap-topic (gethash "topic" topicmap-json))
          (topic-summaries (dmx-mcp-topicmap-topic-summaries topicmap-json))
-         (journal-summaries (dmx-mcp-journal-topic-summaries topic-summaries))
          (visible-topic-summaries
            (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
          (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
@@ -742,8 +734,6 @@
      "topics" (coerce visible-topic-summaries 'vector)
      "noteCount" (length note-summaries)
      "notes" (coerce note-summaries 'vector)
-     "journalTopicCount" (length journal-summaries)
-     "journalTopics" (coerce journal-summaries 'vector)
      "assocsCount"
      (length (json-array-elements (gethash "assocs" topicmap-json)))
      "viewProps" (gethash "viewProps" topicmap-json))))

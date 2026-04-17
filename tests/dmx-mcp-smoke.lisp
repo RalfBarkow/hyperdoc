@@ -21,6 +21,11 @@
   (unless (equal expected actual)
     (error "~A -- expected ~S but got ~S" message expected actual)))
 
+(defun mcp-assert-missing-key (json key message)
+  (multiple-value-bind (_ present-p) (gethash key json)
+    (declare (ignore _))
+    (mcp-assert-true (null present-p) message)))
+
 (defun mcp-json-null-p (value)
   (or (null value)
       (and (hash-table-p value)
@@ -784,9 +789,52 @@
                                      (gethash "topicmapId"
                                               (gethash "workspace" workspace-json))
                                      "workspace summary topicmap id")
+                   (mcp-assert-missing-key
+                    workspace-json
+                    "journalTopicCount"
+                    "workspace summary must not expose journalTopicCount")
+                   (mcp-assert-missing-key
+                    workspace-json
+                    "journalTopics"
+                    "workspace summary must not expose journalTopics")
                    (mcp-assert-equal 2
                                      (gethash "noteCount" workspace-json)
                                      "workspace summary note count")))
+               (multiple-value-bind (topicmap-resource-body topicmap-resource-status _)
+                   (mcp-test-call url
+                                  (mcp-test-json-object
+                                   "jsonrpc" "2.0"
+                                   "id" 31
+                                   "method" "resources/read"
+                                   "params"
+                                   (mcp-test-json-object
+                                    "uri"
+                                    (format nil
+                                            "dmx://topicmap/~D"
+                                            *dmx-mcp-smoke-workspace-topicmap-id*)))
+                                  :session-id session-id)
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 topicmap-resource-status
+                                   "topicmap resource read status")
+                 (let* ((contents (hyperdoc::json-array-elements
+                                   (gethash "contents"
+                                            (gethash "result" topicmap-resource-body))))
+                        (topicmap-json (shasht:read-json
+                                        (gethash "text" (first contents)))))
+                   (mcp-assert-equal *dmx-mcp-smoke-workspace-topicmap-id*
+                                     (gethash "id" topicmap-json)
+                                     "topicmap resource id")
+                   (mcp-assert-missing-key
+                    topicmap-json
+                    "journalTopicCount"
+                    "topicmap resource must not expose journalTopicCount")
+                   (mcp-assert-missing-key
+                    topicmap-json
+                    "journalTopics"
+                    "topicmap resource must not expose journalTopics")
+                   (mcp-assert-equal 2
+                                     (gethash "noteCount" topicmap-json)
+                                     "topicmap resource note count")))
                (dolist (resource-uri '("dmx://topic/907120" "dmx://topic/921494"))
                  (multiple-value-bind (topic-body topic-status _)
                      (mcp-test-call url
@@ -870,6 +918,14 @@
                    (mcp-assert-equal *dmx-mcp-smoke-workspace-topicmap-id*
                                      (gethash "topicmapId" structured)
                                      "read_dmx_topicmap topicmap id")
+                   (mcp-assert-missing-key
+                    projection
+                    "journalTopicCount"
+                    "read_dmx_topicmap projection must not expose journalTopicCount")
+                   (mcp-assert-missing-key
+                    projection
+                    "journalTopics"
+                    "read_dmx_topicmap projection must not expose journalTopics")
                    (mcp-assert-equal 2
                                      (gethash "noteCount" projection)
                                      "read_dmx_topicmap note count")
