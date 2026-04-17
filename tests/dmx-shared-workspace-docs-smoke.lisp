@@ -56,7 +56,7 @@
     (clog-moldable-inspector::load-views pane)
     (slot-value pane 'clog-moldable-inspector::views)))
 
-(defun run-dmx-shared-workspace-documentation-pages-smoke-test ()
+(defun run-dmx-mcp-server-shared-workspace-doc-smoke-test ()
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/DMX MCP server for shared workspace.html")
@@ -80,7 +80,7 @@
      "topicmap_context_upsert"
      "topicmap_context_remove"
      "Hard delete is limited by ownership checks"
-     "journalTopicCount"
+     "public workspace/topicmap projection shape"
      "journal-event-preview"
      "synthesized-from-diff"
      "live HTTP unlink remains intentionally unsupported"
@@ -88,7 +88,10 @@
      "developer mode"
      "publish or refresh a custom app/connector"
      "create_handover"
-     "generic raw DMX JSON write"))
+     "generic raw DMX JSON write")))
+
+(defun run-dmx-shared-workspace-documentation-pages-smoke-test ()
+  (run-dmx-mcp-server-shared-workspace-doc-smoke-test)
   (assert-shared-workspace-page-contains-all
    (read-dmx-shared-workspace-page
     "hyperdoc/Context window workspace as shared blackboard.html")
