@@ -747,6 +747,38 @@
          (format nil "~A plain override must suppress source-v1 provider metadata"
                  page-title))))))
 
+(defun run-source-surface-strategy-class-policy-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (default-strategy
+           (hyperdoc::effective-source-surface-strategy-for page)))
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 default-strategy
+                 (format nil "~A default effective strategy must stay connect"
+                         page-title))
+    (hyperdoc::with-source-surface-strategy-class-policy
+        ('hyperdoc::text-page :plain)
+      (let ((policy-strategy
+              (hyperdoc::effective-source-surface-strategy-for page)))
+        (assert-type 'hyperdoc::plain-source-surface-strategy
+                     policy-strategy
+                     (format nil "~A class policy must select the plain strategy"
+                             page-title))
+        (hyperdoc::with-source-surface-strategy-override (:connect)
+          (let ((override-strategy
+                  (hyperdoc::effective-source-surface-strategy-for page)))
+            (assert-type 'hyperdoc::connect-source-surface-strategy
+                         override-strategy
+                         (format nil "~A dynamic override must win over class policy"
+                                 page-title))
+            (assert-true
+             (hyperdoc::source-surface-connect-capable-p override-strategy)
+             (format nil "~A connect override must remain connect-capable"
+                     page-title))))))))
+
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
@@ -833,6 +865,7 @@
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
+  (run-source-surface-strategy-class-policy-smoke-test)
   (run-source-surface-strategy-override-smoke-test)
   (run-source-pane-layout-evidence-smoke-test)
   (format t "~&DMX shared-workspace docs smoke tests passed.~%")
