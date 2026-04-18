@@ -112,6 +112,16 @@
                 (source-surface-strategy-label strategy))
         "none")))
 
+(defun source-surface-strategy-catalog ()
+  (mapcar (lambda (strategy)
+            (list :id (source-surface-strategy-id strategy)
+                  :label (source-surface-strategy-label strategy)
+                  :connect-capable-p
+                  (source-surface-connect-capable-p strategy)
+                  :designator (source-surface-strategy-id strategy)))
+          (list *connect-source-surface-strategy*
+                *plain-source-surface-strategy*)))
+
 (defun source-surface-resolution-report-for (page)
   (multiple-value-bind (class-policy-strategy class-policy-class)
       (source-surface-strategy-policy-match-for page)
@@ -263,6 +273,30 @@
 (views:defview 👀source-surface (page text-page)
   (views:html-view :title "Source surface" :priority 11
     (render-source-surface-resolution-report page)))
+
+(defun render-source-surface-strategy-catalog ()
+  (views:html
+    (:table :class "inspector-table"
+            (:tr (:th (views:esc "Strategy id"))
+                 (:th (views:esc "Label"))
+                 (:th (views:esc "Connect-capable"))
+                 (:th (views:esc "Designator")))
+            (dolist (entry (source-surface-strategy-catalog))
+              (views:html
+                (:tr (:td (:tt (views:esc
+                                (source-surface-resolution-report-display-value
+                                 (getf entry :id)))))
+                     (:td (:tt (views:esc (getf entry :label))))
+                     (:td (:tt (views:esc
+                                (source-surface-resolution-report-display-value
+                                 (getf entry :connect-capable-p)))))
+                     (:td (:tt (views:esc
+                                (source-surface-resolution-report-display-value
+                                 (getf entry :designator)))))))))))
+
+(views:defview 👀source-strategies (page text-page)
+  (views:html-view :title "Source strategies" :priority 14
+    (render-source-surface-strategy-catalog)))
 
 (defun render-plain-source-surface-for-page
     (page &key (title "Plain source") (priority 12))

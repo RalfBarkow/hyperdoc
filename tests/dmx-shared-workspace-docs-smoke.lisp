@@ -923,6 +923,60 @@
                           (format nil "~A override report must expose the connect effective label"
                                   page-title))))))))
 
+(defun run-source-surface-strategy-catalog-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((catalog (hyperdoc::source-surface-strategy-catalog))
+         (connect-entry
+           (find :connect catalog :key (lambda (entry) (getf entry :id))))
+         (plain-entry
+           (find :plain catalog :key (lambda (entry) (getf entry :id))))
+         (page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
+         (catalog-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Source strategies"))
+         (catalog-html (and catalog-view
+                            (html-inspector-views:view-html catalog-view))))
+    (assert-true connect-entry
+                 "Source strategy catalog must include the connect strategy")
+    (assert-true plain-entry
+                 "Source strategy catalog must include the plain strategy")
+    (assert-equal "Connect source"
+                  (getf connect-entry :label)
+                  "Source strategy catalog must expose the connect label")
+    (assert-equal t
+                  (getf connect-entry :connect-capable-p)
+                  "Source strategy catalog must expose connect as connect-capable")
+    (assert-equal :connect
+                  (getf connect-entry :designator)
+                  "Source strategy catalog must expose the connect designator")
+    (assert-equal "Plain source"
+                  (getf plain-entry :label)
+                  "Source strategy catalog must expose the plain label")
+    (assert-equal nil
+                  (getf plain-entry :connect-capable-p)
+                  "Source strategy catalog must expose plain as non-connect-capable")
+    (assert-equal :plain
+                  (getf plain-entry :designator)
+                  "Source strategy catalog must expose the plain designator")
+    (assert-true catalog-view
+                 (format nil "~A must expose a Source strategies view" page-title))
+    (assert-shared-workspace-page-contains-all
+     catalog-html
+     (format nil "~A Source strategies view" page-title)
+     '("Strategy id"
+       "Label"
+       "Connect-capable"
+       "Designator"
+       "connect"
+       "plain"
+       "Connect source"
+       "Plain source"
+       "yes"
+       "no"))))
+
 (defun run-source-surface-resolution-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-title "Workspace-native annotations in a DMX workspace")
@@ -1085,6 +1139,7 @@
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
   (run-plain-source-view-smoke-test)
+  (run-source-surface-strategy-catalog-smoke-test)
   (run-source-surface-strategy-identity-smoke-test)
   (run-source-surface-resolution-view-smoke-test)
   (run-source-surface-resolution-report-smoke-test)
