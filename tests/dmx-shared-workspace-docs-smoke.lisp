@@ -779,6 +779,78 @@
              (format nil "~A connect override must remain connect-capable"
                      page-title))))))))
 
+(defun run-source-surface-resolution-report-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (default-report
+           (hyperdoc::source-surface-resolution-report-for page)))
+    (assert-true (eq (getf default-report :target-class)
+                     (class-name (class-of page)))
+                 (format nil "~A report must expose the target class"
+                         page-title))
+    (assert-true (eq (getf default-report :winner) :default)
+                 (format nil "~A default report must resolve through :default"
+                         page-title))
+    (assert-true (not (getf default-report :override-present-p))
+                 (format nil "~A default report must not expose an override"
+                         page-title))
+    (assert-true (not (getf default-report :class-policy-matched-p))
+                 (format nil "~A default report must not expose a class policy"
+                         page-title))
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 (getf default-report :default-strategy)
+                 (format nil "~A default report must expose the connect default"
+                         page-title))
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 (getf default-report :effective-strategy)
+                 (format nil "~A default report must expose the connect effective strategy"
+                         page-title))
+    (hyperdoc::with-source-surface-strategy-class-policy
+        ('hyperdoc::text-page :plain)
+      (let ((policy-report
+              (hyperdoc::source-surface-resolution-report-for page)))
+        (assert-true (eq (getf policy-report :winner) :class-policy)
+                     (format nil "~A class policy report must resolve through :class-policy"
+                             page-title))
+        (assert-true (getf policy-report :class-policy-matched-p)
+                     (format nil "~A class policy report must expose the class match"
+                             page-title))
+        (assert-true (eq (getf policy-report :class-policy-class)
+                         'hyperdoc::text-page)
+                     (format nil "~A class policy report must expose the matched class"
+                             page-title))
+        (assert-type 'hyperdoc::plain-source-surface-strategy
+                     (getf policy-report :class-policy-strategy)
+                     (format nil "~A class policy report must expose the plain strategy"
+                             page-title))
+        (assert-type 'hyperdoc::plain-source-surface-strategy
+                     (getf policy-report :effective-strategy)
+                     (format nil "~A class policy report must expose the plain effective strategy"
+                             page-title))
+        (hyperdoc::with-source-surface-strategy-override (:connect)
+          (let ((override-report
+                  (hyperdoc::source-surface-resolution-report-for page)))
+            (assert-true (eq (getf override-report :winner) :override)
+                         (format nil "~A override report must resolve through :override"
+                                 page-title))
+            (assert-true (getf override-report :override-present-p)
+                         (format nil "~A override report must expose override presence"
+                                 page-title))
+            (assert-true (getf override-report :class-policy-matched-p)
+                         (format nil "~A override report must still expose the matched class policy"
+                                 page-title))
+            (assert-type 'hyperdoc::connect-source-surface-strategy
+                         (getf override-report :override-strategy)
+                         (format nil "~A override report must expose the connect override"
+                                 page-title))
+            (assert-type 'hyperdoc::connect-source-surface-strategy
+                         (getf override-report :effective-strategy)
+                         (format nil "~A override report must expose the connect effective strategy"
+                                 page-title))))))))
+
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
@@ -865,6 +937,7 @@
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
+  (run-source-surface-resolution-report-smoke-test)
   (run-source-surface-strategy-class-policy-smoke-test)
   (run-source-surface-strategy-override-smoke-test)
   (run-source-pane-layout-evidence-smoke-test)

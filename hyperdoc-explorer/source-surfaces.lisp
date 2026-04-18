@@ -72,18 +72,46 @@
   (remhash (source-surface-policy-class-from-designator class-designator)
            *source-surface-strategy-class-policies*))
 
-(defun source-surface-strategy-policy-for (page)
+(defun source-surface-strategy-policy-match-for (page)
   (loop for class in (c2mop:class-precedence-list (class-of page))
         for strategy = (gethash class
                                 *source-surface-strategy-class-policies*)
         when strategy
-          return strategy))
+          return (values strategy class)))
+
+(defun source-surface-strategy-policy-for (page)
+  (nth-value 0 (source-surface-strategy-policy-match-for page)))
+
+(defun source-surface-resolution-report-for (page)
+  (multiple-value-bind (class-policy-strategy class-policy-class)
+      (source-surface-strategy-policy-match-for page)
+    (let* ((override-strategy
+             (source-surface-strategy-from-designator
+              *source-surface-strategy-override*))
+           (default-strategy (source-surface-strategy-for page))
+           (winner (cond (override-strategy :override)
+                         (class-policy-strategy :class-policy)
+                         (t :default)))
+           (effective-strategy
+             (ecase winner
+               (:override override-strategy)
+               (:class-policy class-policy-strategy)
+               (:default default-strategy))))
+      (list :target page
+            :target-class (class-name (class-of page))
+            :override-present-p (not (null override-strategy))
+            :override-strategy override-strategy
+            :class-policy-matched-p (not (null class-policy-strategy))
+            :class-policy-class (and class-policy-class
+                                     (class-name class-policy-class))
+            :class-policy-strategy class-policy-strategy
+            :default-strategy default-strategy
+            :effective-strategy effective-strategy
+            :winner winner))))
 
 (defun effective-source-surface-strategy-for (page)
-  (or (source-surface-strategy-from-designator
-       *source-surface-strategy-override*)
-      (source-surface-strategy-policy-for page)
-      (source-surface-strategy-for page)))
+  (getf (source-surface-resolution-report-for page)
+        :effective-strategy))
 
 (defmacro with-source-surface-strategy-override ((strategy-designator) &body body)
   `(let ((*source-surface-strategy-override* ,strategy-designator))
