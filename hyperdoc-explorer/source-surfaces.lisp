@@ -122,6 +122,17 @@
           (list *connect-source-surface-strategy*
                 *plain-source-surface-strategy*)))
 
+(defun source-surface-designator-supported-p (designator)
+  (not (null (find designator
+                   (source-surface-strategy-catalog)
+                   :key (lambda (entry) (getf entry :designator))
+                   :test #'eq))))
+
+(defun source-surface-strategy-for-stable-designator (designator)
+  (unless (source-surface-designator-supported-p designator)
+    (error "Unsupported Source surface designator: ~S" designator))
+  (source-surface-strategy-from-designator designator))
+
 (defun source-surface-resolution-report-for (page)
   (multiple-value-bind (class-policy-strategy class-policy-class)
       (source-surface-strategy-policy-match-for page)
@@ -298,11 +309,19 @@
   (views:html-view :title "Source strategies" :priority 14
     (render-source-surface-strategy-catalog)))
 
+(defun render-source-surface-for-page-with-designator
+    (page designator &key (title "Source") (priority 10))
+  (render-source-surface-with-strategy
+   (source-surface-strategy-for-stable-designator designator)
+   page
+   :title title
+   :priority priority))
+
 (defun render-plain-source-surface-for-page
     (page &key (title "Plain source") (priority 12))
-  (render-source-surface-with-strategy
-   *plain-source-surface-strategy*
+  (render-source-surface-for-page-with-designator
    page
+   :plain
    :title title
    :priority priority))
 
@@ -310,8 +329,9 @@
   (render-plain-source-surface-for-page page))
 
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
-  (render-source-surface-with-strategy
-   (effective-source-surface-strategy-for page)
+  (render-source-surface-for-page-with-designator
    page
+   (source-surface-strategy-id
+    (effective-source-surface-strategy-for page))
    :title title
    :priority priority))

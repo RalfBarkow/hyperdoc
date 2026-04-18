@@ -977,6 +977,61 @@
        "yes"
        "no"))))
 
+(defun run-source-surface-designator-rendering-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (connect-strategy
+           (hyperdoc::source-surface-strategy-for-stable-designator :connect))
+         (plain-strategy
+           (hyperdoc::source-surface-strategy-for-stable-designator :plain))
+         (connect-view
+           (hyperdoc::render-source-surface-for-page-with-designator
+            page
+            :connect))
+         (plain-view
+           (hyperdoc::render-source-surface-for-page-with-designator
+            page
+            :plain))
+         (connect-html (html-inspector-views:view-html connect-view))
+         (plain-html (html-inspector-views:view-html plain-view)))
+    (assert-true
+     (hyperdoc::source-surface-designator-supported-p :connect)
+     "Connect designator must be supported.")
+    (assert-true
+     (hyperdoc::source-surface-designator-supported-p :plain)
+     "Plain designator must be supported.")
+    (assert-true
+     (null (hyperdoc::source-surface-designator-supported-p :bogus))
+     "Unknown Source designator must not be treated as supported.")
+    (assert-type 'hyperdoc::connect-source-surface-strategy
+                 connect-strategy
+                 "Connect designator must resolve to the connect strategy.")
+    (assert-type 'hyperdoc::plain-source-surface-strategy
+                 plain-strategy
+                 "Plain designator must resolve to the plain strategy.")
+    (handler-case
+        (progn
+          (hyperdoc::source-surface-strategy-for-stable-designator :bogus)
+          (error "Unknown Source designator must signal an error."))
+      (error (condition)
+        (assert-true
+         (search "Unsupported Source surface designator"
+                 (princ-to-string condition)
+                 :test #'char=)
+         "Unknown Source designator error must be explicit.")))
+    (assert-true
+     (search "source-v1" connect-html :test #'char=)
+     "Connect designator rendering must use the connect path.")
+    (assert-true
+     (null (search "source-provider" plain-html :test #'char=))
+     "Plain designator rendering must not expose connect provider metadata.")
+    (assert-true
+     (null (search "source-v1" plain-html :test #'char=))
+     "Plain designator rendering must not expose the connect runtime contract.")))
+
 (defun run-source-surface-resolution-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-title "Workspace-native annotations in a DMX workspace")
@@ -1140,6 +1195,7 @@
   (run-dmx-shared-workspace-source-view-smoke-test)
   (run-plain-source-view-smoke-test)
   (run-source-surface-strategy-catalog-smoke-test)
+  (run-source-surface-designator-rendering-smoke-test)
   (run-source-surface-strategy-identity-smoke-test)
   (run-source-surface-resolution-view-smoke-test)
   (run-source-surface-resolution-report-smoke-test)
