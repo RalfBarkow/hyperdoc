@@ -141,6 +141,60 @@
   (views:html-view :title title :priority priority
     (hb:render-file-source-surface (file-of page))))
 
+(defun source-surface-resolution-report-display-value (value)
+  (typecase value
+    (null "none")
+    (boolean (if value "yes" "no"))
+    (source-surface-strategy
+     (string-downcase
+      (symbol-name (source-surface-strategy-id value))))
+    (symbol (string-downcase (symbol-name value)))
+    (t (format nil "~A" value))))
+
+(defun render-source-surface-resolution-report (page)
+  (let* ((report (source-surface-resolution-report-for page))
+         (rows
+           `(("Target class"
+              ,(source-surface-resolution-report-display-value
+                (getf report :target-class)))
+             ("Winner"
+              ,(source-surface-resolution-report-display-value
+                (getf report :winner)))
+             ("Effective strategy"
+              ,(source-surface-resolution-report-display-value
+                (getf report :effective-strategy)))
+             ("Default strategy"
+              ,(source-surface-resolution-report-display-value
+                (getf report :default-strategy)))
+             ("Override present"
+              ,(source-surface-resolution-report-display-value
+                (getf report :override-present-p)))
+             ("Override strategy"
+              ,(source-surface-resolution-report-display-value
+                (getf report :override-strategy)))
+             ("Class policy matched"
+              ,(source-surface-resolution-report-display-value
+                (getf report :class-policy-matched-p)))
+             ("Matched class"
+              ,(source-surface-resolution-report-display-value
+                (getf report :class-policy-class)))
+             ("Class policy strategy"
+              ,(source-surface-resolution-report-display-value
+                (getf report :class-policy-strategy))))))
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:th (views:esc "Field"))
+                   (:th (views:esc "Value")))
+              (dolist (row rows)
+                (destructuring-bind (label value) row
+                  (views:html
+                    (:tr (:td (:tt (views:esc label)))
+                         (:td (:tt (views:esc value)))))))))))
+
+(views:defview 👀source-surface (page text-page)
+  (views:html-view :title "Source surface" :priority 11
+    (render-source-surface-resolution-report page)))
+
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
   (render-source-surface-with-strategy
    (effective-source-surface-strategy-for page)

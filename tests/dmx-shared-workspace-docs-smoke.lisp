@@ -851,6 +851,32 @@
                          (format nil "~A override report must expose the connect effective strategy"
                                  page-title))))))))
 
+(defun run-source-surface-resolution-view-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
+         (resolution-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Source surface"))
+         (resolution-html (and resolution-view
+                               (html-inspector-views:view-html resolution-view))))
+    (assert-true resolution-view
+                 (format nil "~A must expose a Source surface diagnostic view"
+                         page-title))
+    (assert-shared-workspace-page-contains-all
+     resolution-html
+     (format nil "~A Source surface diagnostic view" page-title)
+     '("Target class"
+       "Winner"
+       "Effective strategy"
+       "Default strategy"
+       "Override present"
+       "Class policy matched"
+       "default"
+       "connect"))))
+
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
@@ -937,6 +963,7 @@
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
+  (run-source-surface-resolution-view-smoke-test)
   (run-source-surface-resolution-report-smoke-test)
   (run-source-surface-strategy-class-policy-smoke-test)
   (run-source-surface-strategy-override-smoke-test)
