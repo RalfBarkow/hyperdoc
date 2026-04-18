@@ -16,6 +16,12 @@
 (defparameter +static-route-observability-proof-shared-base+
   "d6ff2f4881533dbc26510d47bd085bb4c9a4b1bc")
 
+(defparameter +static-route-observability-superseding-local-commit-hash+
+  "1f8f2857baf99c623940af7e7acec0393d0ebc83")
+
+(defparameter +upstream-commit-assimilation-source-page-id+
+  "Check upstream commit assimilation equivalence")
+
 (defclass git-commit-equivalence-check ()
   ((id :reader id-of :initarg :id :type string)
    (title :reader title-of :initarg :title :type string)
@@ -79,6 +85,96 @@
    (summary :reader summary-of :initarg :summary :type string)
    (checks :reader checks-of :initarg :checks :initform nil)
    (notes :reader notes-of :initarg :notes :initform nil)))
+
+(defclass git-upstream-commit-assimilation-check ()
+  ((id :reader id-of :initarg :id :type string)
+   (title :reader title-of :initarg :title :type string)
+   (summary :reader summary-of :initarg :summary :type string)
+   (equivalence-check :reader equivalence-check-of
+                      :initarg :equivalence-check
+                      :type git-commit-equivalence-check)
+   (payload-paths :reader payload-paths-of
+                  :initarg :payload-paths
+                  :initform nil)
+   (payload-command :reader payload-command-of
+                    :initarg :payload-command
+                    :type string)
+   (corpus-evidence-status :reader corpus-evidence-status-of
+                           :initarg :corpus-evidence-status
+                           :initform :unavailable)
+   (corpus-page-evidence :reader corpus-page-evidence-of
+                         :initarg :corpus-page-evidence
+                         :initform nil)
+   (semantic-evidence-availability :reader semantic-evidence-availability-of
+                                   :initarg :semantic-evidence-availability
+                                   :initform :unavailable)
+   (superseding-local-commit :reader superseding-local-commit-of
+                             :initarg :superseding-local-commit
+                             :initform nil)
+   (semantic-effect-status :reader semantic-effect-status-of
+                           :initarg :semantic-effect-status
+                           :initform :unknown)
+   (semantic-compatibility-status :reader semantic-compatibility-status-of
+                                  :initarg :semantic-compatibility-status
+                                  :initform :unknown)
+   (semantic-compatibility-summary :reader semantic-compatibility-summary-of
+                                   :initarg :semantic-compatibility-summary
+                                   :type string)
+   (semantic-compatibility-notes :reader semantic-compatibility-notes-of
+                                 :initarg :semantic-compatibility-notes
+                                 :initform nil)
+   (validation-status :reader validation-status-of
+                      :initarg :validation-status
+                      :initform :unknown)
+   (validation-summary :reader validation-summary-of
+                       :initarg :validation-summary
+                       :type string)
+   (validation-notes :reader validation-notes-of
+                     :initarg :validation-notes
+                     :initform nil)
+   (final-decision :reader final-decision-of
+                   :initarg :final-decision
+                   :initform :inconclusive)
+   (final-interpretation :reader final-interpretation-of
+                         :initarg :final-interpretation
+                         :type string)))
+
+(defclass git-upstream-commit-assimilation-surface ()
+  ((id :reader id-of :initarg :id :type string)
+   (title :reader title-of :initarg :title :type string)
+   (summary :reader summary-of :initarg :summary :type string)
+   (checks :reader checks-of :initarg :checks :initform nil)
+   (notes :reader notes-of :initarg :notes :initform nil)))
+
+(defmethod system-of ((check git-upstream-commit-assimilation-check))
+  (system-of (equivalence-check-of check)))
+
+(defmethod repo-root-of ((check git-upstream-commit-assimilation-check))
+  (repo-root-of (equivalence-check-of check)))
+
+(defmethod repository-root-source-of ((check git-upstream-commit-assimilation-check))
+  (repository-root-source-of (equivalence-check-of check)))
+
+(defmethod source-commit-of ((check git-upstream-commit-assimilation-check))
+  (source-commit-of (equivalence-check-of check)))
+
+(defmethod source-branch-of ((check git-upstream-commit-assimilation-check))
+  (source-branch-of (equivalence-check-of check)))
+
+(defmethod target-branch-of ((check git-upstream-commit-assimilation-check))
+  (target-branch-of (equivalence-check-of check)))
+
+(defmethod shared-base-of ((check git-upstream-commit-assimilation-check))
+  (shared-base-of (equivalence-check-of check)))
+
+(defmethod ancestry-present-p ((check git-upstream-commit-assimilation-check))
+  (ancestry-present-p (equivalence-check-of check)))
+
+(defmethod patch-equivalent-p ((check git-upstream-commit-assimilation-check))
+  (patch-equivalent-p (equivalence-check-of check)))
+
+(defmethod replayed-equivalent-commit-of ((check git-upstream-commit-assimilation-check))
+  (replayed-equivalent-commit-of (equivalence-check-of check)))
 
 (defun non-empty-output-lines (string)
   (remove-if #'uiop:emptyp
@@ -278,6 +374,552 @@
              source-commit-hash
              target-branch))))
 
+(defun git-commit-payload-paths (repo-root repository-root-source source-commit-hash)
+  (multiple-value-bind (output exit-code command)
+      (git-command-result*
+       repo-root
+       (list "show" "--format=" "--name-only" source-commit-hash)
+       :operation "git show --name-only"
+       :repository-root-source repository-root-source)
+    (declare (ignore exit-code))
+    (values (non-empty-output-lines output)
+            command)))
+
+(defun semantic-effect-status-label (status)
+  (ecase status
+    (:present "present")
+    (:absent "absent")
+    (:unknown "unknown")))
+
+(defun semantic-compatibility-status-label (status)
+  (ecase status
+    (:compatible "compatible")
+    (:diverged "diverged")
+    (:unknown "unknown")))
+
+(defun validation-status-label (status)
+  (ecase status
+    (:passed "passed")
+    (:failed "failed")
+    (:unknown "unknown")))
+
+(defun corpus-evidence-status-label (status)
+  (ecase status
+    (:resolved "resolved")
+    (:lookup-issue "lookup issue")
+    (:unavailable "unavailable")))
+
+(defun semantic-evidence-availability-label (status)
+  (ecase status
+    (:complete "complete")
+    (:partial "partial")
+    (:unavailable "unavailable")))
+
+(defun upstream-commit-assimilation-decision-label (decision)
+  (ecase decision
+    (:needs-cherry-pick ":needs-cherry-pick")
+    (:needs-manual-assimilation ":needs-manual-assimilation")
+    (:already-assimilated ":already-assimilated")
+    (:inconclusive ":inconclusive")))
+
+(defun classify-upstream-commit-assimilation-decision (&key ancestry-present-p
+                                                            patch-equivalent-p
+                                                            superseding-local-commit
+                                                            semantic-effect-status
+                                                            semantic-compatibility-status
+                                                            validation-status)
+  (let ((graph-or-local-evidence-p
+          (or ancestry-present-p
+              patch-equivalent-p
+              superseding-local-commit)))
+    (cond
+      ((and graph-or-local-evidence-p
+            (eq semantic-effect-status :present)
+            (eq validation-status :passed))
+       :already-assimilated)
+      ((and (eq semantic-effect-status :absent)
+            (eq semantic-compatibility-status :compatible)
+            (eq validation-status :passed))
+       :needs-cherry-pick)
+      ((and (eq semantic-effect-status :absent)
+            (eq semantic-compatibility-status :diverged))
+       :needs-manual-assimilation)
+      (t
+       :inconclusive))))
+
+(defun upstream-commit-assimilation-interpretation (source-commit-hash source-branch
+                                                     target-branch final-decision
+                                                     &key ancestry-present-p
+                                                       replayed-equivalent-commit
+                                                       superseding-local-commit)
+  (ecase final-decision
+    (:already-assimilated
+     (cond
+       (ancestry-present-p
+        (format nil "The original ~A is directly reachable from ~A, and focused semantic validation confirms that its live effect is still present. Treat it as already assimilated."
+                source-commit-hash
+                target-branch))
+       ((and replayed-equivalent-commit
+             superseding-local-commit)
+        (format nil "The original ~A remains on ~A, while ~A on ~A proves replay-equivalent history and later local ~A preserves the same live effect under the current ownership boundary. Treat it as already assimilated."
+                source-commit-hash
+                source-branch
+                (commit-hash-of replayed-equivalent-commit)
+                target-branch
+                (commit-hash-of superseding-local-commit)))
+       (replayed-equivalent-commit
+        (format nil "The original ~A remains on ~A, while ~A on ~A plus the focused semantic proof show that the payload is already present in effect. Treat it as already assimilated."
+                source-commit-hash
+                source-branch
+                (commit-hash-of replayed-equivalent-commit)
+                target-branch))
+       (superseding-local-commit
+        (format nil "No replay-equivalent hash was required: ~A on ~A plus the focused semantic proof show that the payload is already present in effect. Treat it as already assimilated."
+                (commit-hash-of superseding-local-commit)
+                target-branch))
+       (t
+        (format nil "Focused graph/history and semantic evidence show that ~A is already present in effect on ~A."
+                source-commit-hash
+                target-branch))))
+    (:needs-cherry-pick
+     (format nil "No replay-equivalent or superseding local commit was proven for ~A on ~A, and the focused compatibility checks say the payload remains directly applicable. The narrow action is to cherry-pick from ~A."
+             source-commit-hash
+             target-branch
+             source-branch))
+    (:needs-manual-assimilation
+     (format nil "The payload for ~A is not already present in effect on ~A, and the focused compatibility checks show target-boundary drift. Manual assimilation is required instead of a straight cherry-pick from ~A."
+             source-commit-hash
+             target-branch
+             source-branch))
+    (:inconclusive
+     (format nil "The current graph/history and semantic evidence are insufficient to classify ~A safely for ~A."
+             source-commit-hash
+             target-branch))))
+
+(defun payload-paths-present-in-system-source-p (system-designator payload-paths)
+  (every (lambda (path)
+           (ignore-errors
+             (probe-file
+              (asdf:system-relative-pathname system-designator path))))
+         payload-paths))
+
+(defun assimilation-source-page-title ()
+  +upstream-commit-assimilation-source-page-id+)
+
+(defun call-optional-hyperbook-function (name &rest args)
+  (multiple-value-bind (symbol status)
+      (find-symbol name :hyperbook)
+    (when (and (eq status :external)
+               (fboundp symbol))
+      (apply (symbol-function symbol) args))))
+
+(defun make-assimilation-page-lookup-issue (condition book page-id
+                                           &key
+                                             (source-page-id
+                                              +upstream-commit-assimilation-source-page-id+)
+                                             (source-page-title
+                                            (assimilation-source-page-title))
+                                             (source-section "Corpus evidence"))
+  (let* ((target-hyperbook-id
+           (ignore-errors
+             (id-of book)))
+         (issue
+           (call-optional-hyperbook-function
+            "MAKE-PAGE-LOOKUP-ISSUE"
+            condition
+            :source-hyperbook "hyperdoc"
+            :source-page-id source-page-id
+            :source-page-title source-page-title
+            :source-section source-section
+            :link-text page-id
+            :target-hyperbook-id target-hyperbook-id
+            :expected-page-id page-id
+            :classification :lookup-failure
+            :details (list :lookup-stage :assimilation-corpus
+                           :target-hyperbook-id target-hyperbook-id
+                           :expected-page-id page-id
+                           :condition-type (type-of condition)))))
+    (when issue
+      (or (ignore-errors
+            (call-optional-hyperbook-function
+             "ENRICH-LOOKUP-ISSUE"
+             issue))
+          issue))))
+
+(defun safe-assimilation-page-evidence (book page-id
+                                        &key
+                                          (source-page-id
+                                           +upstream-commit-assimilation-source-page-id+)
+                                          (source-page-title
+                                           (assimilation-source-page-title))
+                                          (source-section "Corpus evidence"))
+  (cond
+    ((null book)
+     (list :status :unavailable
+           :page-id page-id
+           :reason "Corpus/page lookup not available in the current loaded image."))
+    (t
+     (handler-case
+         (list :status :resolved
+               :page-id page-id
+               :page (find-page book page-id :signal-error? t))
+       (page-lookup-failure (condition)
+         (if-let (issue
+                  (make-assimilation-page-lookup-issue
+                   condition
+                   book
+                   page-id
+                   :source-page-id source-page-id
+                   :source-page-title source-page-title
+                   :source-section source-section))
+           (list :status :lookup-issue
+                 :page-id page-id
+                 :issue issue)
+           (list :status :unavailable
+                 :page-id page-id
+                 :condition condition
+                 :reason
+                 "Page lookup failed, but structured lookup-issue construction is not available in the current loaded image.")))
+       (hyperbook-lookup-failure (condition)
+         (if-let (issue
+                  (make-assimilation-page-lookup-issue
+                   condition
+                   book
+                   page-id
+                   :source-page-id source-page-id
+                   :source-page-title source-page-title
+                   :source-section source-section))
+           (list :status :lookup-issue
+                 :page-id page-id
+                 :issue issue)
+           (list :status :unavailable
+                 :page-id page-id
+                 :condition condition
+                 :reason
+                 "Page lookup failed, but structured lookup-issue construction is not available in the current loaded image.")))
+       (error (condition)
+         (list :status :unavailable
+               :page-id page-id
+               :condition condition
+               :reason
+               "Corpus/page lookup not available in the current loaded image."))))))
+
+(defun page-evidence-status (page-evidence)
+  (getf page-evidence :status :unavailable))
+
+(defun corpus-evidence-status (page-evidence)
+  (cond
+    ((and page-evidence
+          (every (lambda (evidence)
+                   (eq (page-evidence-status evidence) :resolved))
+                 page-evidence))
+     :resolved)
+    ((some (lambda (evidence)
+             (eq (page-evidence-status evidence) :lookup-issue))
+           page-evidence)
+     :lookup-issue)
+    (t
+     :unavailable)))
+
+(defun semantic-evidence-availability (runtime-shape corpus-evidence-status)
+  (cond
+    ((and (recognized-static-route-observability-runtime-shape-p runtime-shape)
+          (eq corpus-evidence-status :resolved))
+     :complete)
+    ((or (recognized-static-route-observability-runtime-shape-p runtime-shape)
+         (eq corpus-evidence-status :resolved)
+         (eq corpus-evidence-status :lookup-issue))
+     :partial)
+    (t
+     :unavailable)))
+
+(defun call-reader-if-supported (reader-name object)
+  (when (fboundp reader-name)
+    (handler-case
+        (values (funcall (fdefinition reader-name) object)
+                t)
+      (error ()
+        (values nil nil)))))
+
+(defun recognized-static-route-observability-runtime-shape-p (shape)
+  (member shape '(:static-route-observability :operational-targets)))
+
+(defun static-route-observability-runtime-shape-label (shape)
+  (ecase shape
+    (:static-route-observability
+     "original static-route-observability surface")
+    (:operational-targets
+     "operational-targets-backed static asset resolution surface")
+    (:unknown
+     "unknown runtime shape")))
+
+(defun normalize-static-route-observability-owner (owner)
+  (case owner
+    ((:clog-static-root :default-clog-static-root)
+     :clog-static-root)
+    ((:views-asset-mount :hyperbook-server-plugin-mount)
+     :hyperbook-server-asset-mount)
+    (otherwise
+     owner)))
+
+(defun static-route-observability-owner-label (owner)
+  (ecase owner
+    (:clog-static-root
+     "CLOG static root")
+    (:hyperbook-server-asset-mount
+     "hyperbook-server asset mount")))
+
+(defun expected-static-route-observability-runtime-contracts ()
+  (sort
+   (copy-tree
+    '(("/boot.html" :clog-static-root)
+      ("/js/boot.js" :clog-static-root)
+      ("/js/jquery.min.js" :clog-static-root)
+      ("/hyperbook-server/js/url.js" :hyperbook-server-asset-mount)))
+   #'string<
+   :key #'first))
+
+(defun expected-static-route-observability-request-paths ()
+  (mapcar #'first
+          (expected-static-route-observability-runtime-contracts)))
+
+(defun static-route-observability-runtime-boundary-constructor-symbols (shape)
+  (ecase shape
+    (:static-route-observability
+     '(hyperdoc-static-asset-resolution-surface
+       hyperdoc-boot-html-static-asset-resolution
+       hyperdoc-boot-js-static-asset-resolution
+       hyperdoc-jquery-min-js-static-asset-resolution
+       hyperbook-server-url-js-static-asset-resolution))
+    (:operational-targets
+     '(hyperdoc-static-asset-resolution-surface
+       hyperdoc-boot-html-static-asset-path-resolution
+       hyperdoc-boot-js-static-asset-path-resolution
+       hyperdoc-jquery-min-js-static-asset-path-resolution
+       hyperdoc-url-helper-static-asset-path-resolution))))
+
+(defun static-route-observability-runtime-entry-owner (entry)
+  (multiple-value-bind (owner-layer supported-p)
+      (call-reader-if-supported 'owner-layer-of entry)
+    (cond
+      (supported-p
+       (normalize-static-route-observability-owner owner-layer))
+      (t
+       (multiple-value-bind (owner-kind supported-p)
+           (call-reader-if-supported 'owner-kind-of entry)
+         (when supported-p
+           (normalize-static-route-observability-owner owner-kind)))))))
+
+(defun static-route-observability-runtime-contracts (entries)
+  (sort
+   (loop for entry in entries
+         collect (list (request-path-of entry)
+                       (static-route-observability-runtime-entry-owner entry)))
+   #'string<
+   :key #'first))
+
+(defun static-route-observability-runtime-contract-line (contract)
+  (destructuring-bind (request-path owner) contract
+    (format nil "~A -> ~A"
+            request-path
+            (static-route-observability-owner-label owner))))
+
+(defun collect-static-route-observability-runtime-shape ()
+  (let* ((surface (hyperdoc-static-asset-resolution-surface))
+         (entries nil)
+         (shape :unknown))
+    (multiple-value-bind (value supported-p)
+        (call-reader-if-supported 'entries-of surface)
+      (when supported-p
+        (setf entries value
+              shape :operational-targets)))
+    (when (eq shape :unknown)
+      (multiple-value-bind (value supported-p)
+          (call-reader-if-supported 'resolutions-of surface)
+        (when supported-p
+          (setf entries value
+                shape :static-route-observability))))
+    (let* ((contracts (and entries
+                           (static-route-observability-runtime-contracts entries)))
+           (expected-contracts
+             (expected-static-route-observability-runtime-contracts)))
+      (list :status :constructed
+            :surface surface
+            :shape shape
+            :entries entries
+            :contracts contracts
+            :expected-contracts expected-contracts
+            :matches-expected-p (equal contracts expected-contracts)))))
+
+(defun inspect-static-route-observability-runtime-shape ()
+  (handler-case
+      (collect-static-route-observability-runtime-shape)
+    (error (condition)
+      (list :status :unavailable
+            :condition (princ-to-string condition)))))
+
+(defun static-route-observability-assimilation-semantic-evidence (equivalence-check
+                                                                  payload-paths)
+  (declare (ignore equivalence-check))
+  (let* ((hyperdoc-book
+           (and (boundp '*hyperdoc*)
+                (symbol-value '*hyperdoc*)))
+         (topics-book
+           (and (boundp '*topics*)
+                (symbol-value '*topics*)))
+         (page-evidence
+           (list
+            (safe-assimilation-page-evidence
+             hyperdoc-book
+             "Static route observability")
+            (safe-assimilation-page-evidence
+             hyperdoc-book
+             "Diagnose static asset route ownership")
+            (safe-assimilation-page-evidence
+             hyperdoc-book
+             "Static Asset Path Resolution")
+            (safe-assimilation-page-evidence
+             topics-book
+             "Static route observability")
+            (safe-assimilation-page-evidence
+             topics-book
+             "Static asset path resolution")))
+         (corpus-evidence-status
+           (corpus-evidence-status page-evidence))
+         (runtime-shape-info
+           (inspect-static-route-observability-runtime-shape))
+         (runtime-shape
+           (getf runtime-shape-info :shape :unknown))
+         (runtime-status
+           (getf runtime-shape-info :status :unavailable))
+         (runtime-contracts
+           (getf runtime-shape-info :contracts))
+         (runtime-matches-expected-p
+           (getf runtime-shape-info :matches-expected-p))
+         (semantic-evidence-availability
+           (semantic-evidence-availability
+            runtime-shape
+            corpus-evidence-status))
+         (constructor-symbols
+           (and (recognized-static-route-observability-runtime-shape-p
+                 runtime-shape)
+                (static-route-observability-runtime-boundary-constructor-symbols
+                 runtime-shape)))
+         (constructors-present-p
+           (and constructor-symbols
+                (every #'fboundp constructor-symbols)))
+         (payload-paths-present-p
+           (payload-paths-present-in-system-source-p :hyperdoc payload-paths))
+         (semantic-effect-status
+           (if (and (recognized-static-route-observability-runtime-shape-p
+                     runtime-shape)
+                    constructors-present-p
+                    payload-paths-present-p)
+               :present
+               :absent))
+         (semantic-compatibility-status
+           (cond
+             (runtime-matches-expected-p
+              :compatible)
+             ((eq runtime-status :constructed)
+              :diverged)
+             (t
+              :unknown)))
+         (superseding-local-commit-hash
+           (and (eq runtime-shape :operational-targets)
+                runtime-matches-expected-p
+                +static-route-observability-superseding-local-commit-hash+)))
+    (list :semantic-effect-status semantic-effect-status
+          :semantic-compatibility-status semantic-compatibility-status
+          :corpus-evidence-status corpus-evidence-status
+          :corpus-page-evidence page-evidence
+          :semantic-evidence-availability semantic-evidence-availability
+          :superseding-local-commit-hash superseding-local-commit-hash
+          :summary
+          (cond
+            ((and (eq semantic-effect-status :present)
+                  superseding-local-commit-hash)
+             "The static-route-observability payload is already present in effect: the original authored slice remains in the corpus, and later local commit 1f8f2857 preserves the same four-route behavior under the operational-targets-backed surface.")
+            ((eq semantic-effect-status :present)
+             "The static-route-observability payload is already present in effect: the constructor layer, HyperDoc corpus, and topic surface still match the upstream skill slice.")
+            ((eq semantic-compatibility-status :diverged)
+             "The current target still constructs a related runtime surface, but its ownership contracts no longer match the upstream static-route-observability payload.")
+            (t
+             "The static-route-observability payload is not fully present in effect on the current target shape."))
+          :notes
+          (list
+           (format nil "Payload scope stays on the same authored ownership boundary: ~{~A~^, ~}."
+                   payload-paths)
+           (format nil "Corpus evidence status: ~A."
+                   (corpus-evidence-status-label corpus-evidence-status))
+           (format nil "Semantic evidence availability: ~A."
+                   (semantic-evidence-availability-label
+                    semantic-evidence-availability))
+           (format nil "Runtime shape: ~A."
+                   (static-route-observability-runtime-shape-label runtime-shape))
+           (format nil "Constructor layer for the current runtime shape: ~:[missing~;present~] for ~{~A~^, ~}."
+                   constructors-present-p
+                   constructor-symbols)
+           (format nil "Payload paths still exist in the current system source tree: ~:[no~;yes~]."
+                   payload-paths-present-p)
+           (if runtime-contracts
+               (format nil "Observed runtime contracts: ~{~A~^; ~}."
+                       (mapcar #'static-route-observability-runtime-contract-line
+                               runtime-contracts))
+               (format nil "Runtime inspection status: ~A."
+                       (or (getf runtime-shape-info :condition)
+                           "no contracts recorded")))
+           (if superseding-local-commit-hash
+               (format nil "Superseding local commit: ~A introduced the operational-targets-backed static asset resolution surface that now carries the live effect."
+                       superseding-local-commit-hash)
+               "No superseding local commit was needed for the current runtime shape.")))))
+
+(defun static-route-observability-assimilation-validation (equivalence-check
+                                                           payload-paths
+                                                           semantic-evidence)
+  (declare (ignore equivalence-check payload-paths semantic-evidence))
+  (let* ((runtime-shape-info
+           (inspect-static-route-observability-runtime-shape))
+         (runtime-status
+           (getf runtime-shape-info :status :unavailable))
+         (runtime-shape
+           (getf runtime-shape-info :shape :unknown))
+         (observed-contracts
+           (getf runtime-shape-info :contracts))
+         (expected-contracts
+           (getf runtime-shape-info
+                 :expected-contracts
+                 (expected-static-route-observability-runtime-contracts)))
+         (shape-passed-p
+           (getf runtime-shape-info :matches-expected-p)))
+    (cond
+      ((eq runtime-status :constructed)
+       (list :validation-status (if shape-passed-p :passed :failed)
+             :summary
+             (if shape-passed-p
+                 (format nil "Focused validation passed: the current ~A materializes the expected four request-path ownership contracts."
+                         (static-route-observability-runtime-shape-label
+                          runtime-shape))
+                 (format nil "Focused validation failed: the current ~A no longer matches the expected four request-path ownership contracts."
+                         (static-route-observability-runtime-shape-label
+                          runtime-shape)))
+             :notes
+             (list
+              (format nil "Expected contracts: ~{~A~^; ~}."
+                      (mapcar #'static-route-observability-runtime-contract-line
+                              expected-contracts))
+              (format nil "Observed contracts: ~{~A~^; ~}."
+                      (mapcar #'static-route-observability-runtime-contract-line
+                              observed-contracts)))))
+      (t
+       (list :validation-status :unknown
+             :summary
+             "Focused validation could not construct the current static-route-observability runtime shape."
+             :notes
+             (list (format nil "Validation condition: ~A"
+                           (or (getf runtime-shape-info :condition)
+                               "unknown runtime shape"))))))))
+
 (defun %system-git-commit-equivalence-check (system-designator source-commit-hash
                                               &key source-branch target-branch
                                                 shared-base-hash id title summary)
@@ -405,6 +1047,139 @@
       :title title
       :summary summary))))
 
+(defun %system-git-upstream-commit-assimilation-check
+    (system-designator source-commit-hash
+     &key source-branch target-branch shared-base-hash
+       id title summary
+       semantic-evidence-function
+       focused-validation-function)
+  (let* ((equivalence-check
+           (%system-git-commit-equivalence-check
+            system-designator
+            source-commit-hash
+            :source-branch source-branch
+            :target-branch target-branch
+            :shared-base-hash shared-base-hash
+            :id (or id "git-commit-equivalence-check")
+            :title (or title
+                       (format nil "Commit equivalence proof for ~A"
+                               (short-git-commit-hash source-commit-hash)))
+            :summary
+            "Read-only graph/history proof that distinguishes original commit ancestry from replay-equivalent content on a target branch."))
+         (repo-root (repo-root-of equivalence-check))
+         (repository-root-source
+           (repository-root-source-of equivalence-check))
+         (payload-paths nil)
+         (payload-command nil))
+    (multiple-value-setq (payload-paths payload-command)
+      (git-commit-payload-paths repo-root repository-root-source
+                                source-commit-hash))
+    (let* ((semantic-evidence
+             (if semantic-evidence-function
+                 (funcall semantic-evidence-function
+                          equivalence-check
+                          payload-paths)
+                 nil))
+           (superseding-local-commit-hash
+             (getf semantic-evidence :superseding-local-commit-hash))
+           (superseding-local-commit
+             (and superseding-local-commit-hash
+                  (%system-git-commit-target
+                   (system-of equivalence-check)
+                   superseding-local-commit-hash)))
+           (validation-evidence
+             (if focused-validation-function
+                 (funcall focused-validation-function
+                          equivalence-check
+                          payload-paths
+                          semantic-evidence)
+                 nil))
+           (semantic-effect-status
+             (getf semantic-evidence :semantic-effect-status :unknown))
+           (semantic-compatibility-status
+             (getf semantic-evidence :semantic-compatibility-status :unknown))
+           (corpus-evidence-status
+             (getf semantic-evidence :corpus-evidence-status :unavailable))
+           (corpus-page-evidence
+             (getf semantic-evidence :corpus-page-evidence))
+           (semantic-evidence-availability
+             (getf semantic-evidence
+                   :semantic-evidence-availability
+                   :unavailable))
+           (semantic-compatibility-summary
+             (or (getf semantic-evidence :summary)
+                 "No semantic compatibility summary recorded."))
+           (semantic-compatibility-notes
+             (getf semantic-evidence :notes))
+           (validation-status
+             (getf validation-evidence :validation-status :unknown))
+           (validation-summary
+             (or (getf validation-evidence :summary)
+                 "No focused validation summary recorded."))
+           (validation-notes
+             (getf validation-evidence :notes))
+           (final-decision
+             (classify-upstream-commit-assimilation-decision
+              :ancestry-present-p (ancestry-present-p equivalence-check)
+              :patch-equivalent-p (patch-equivalent-p equivalence-check)
+              :superseding-local-commit superseding-local-commit
+              :semantic-effect-status semantic-effect-status
+              :semantic-compatibility-status semantic-compatibility-status
+              :validation-status validation-status)))
+      (make-instance
+       'git-upstream-commit-assimilation-check
+       :id (or id "git-upstream-commit-assimilation-check")
+       :title (or title
+                  (format nil "Upstream commit assimilation check for ~A"
+                          (short-git-commit-hash source-commit-hash)))
+       :summary (or summary
+                    "Read-only assimilation check that combines graph/history proof with payload scope, semantic compatibility, and focused validation before classifying the next action for an upstream commit.")
+       :equivalence-check equivalence-check
+       :payload-paths payload-paths
+       :payload-command payload-command
+       :corpus-evidence-status corpus-evidence-status
+       :corpus-page-evidence corpus-page-evidence
+       :semantic-evidence-availability semantic-evidence-availability
+       :superseding-local-commit superseding-local-commit
+       :semantic-effect-status semantic-effect-status
+       :semantic-compatibility-status semantic-compatibility-status
+       :semantic-compatibility-summary semantic-compatibility-summary
+       :semantic-compatibility-notes semantic-compatibility-notes
+       :validation-status validation-status
+       :validation-summary validation-summary
+       :validation-notes validation-notes
+       :final-decision final-decision
+       :final-interpretation
+       (upstream-commit-assimilation-interpretation
+        source-commit-hash
+        source-branch
+        target-branch
+        final-decision
+        :ancestry-present-p (ancestry-present-p equivalence-check)
+        :replayed-equivalent-commit
+        (replayed-equivalent-commit-of equivalence-check)
+        :superseding-local-commit superseding-local-commit)))))
+
+(defun system-git-upstream-commit-assimilation-check
+    (system-designator source-commit-hash
+     &key source-branch target-branch shared-base-hash
+       id title summary
+       semantic-evidence-function
+       focused-validation-function)
+  (call-with-git-runtime-boundary
+   (lambda ()
+     (%system-git-upstream-commit-assimilation-check
+      system-designator
+      source-commit-hash
+      :source-branch source-branch
+      :target-branch target-branch
+      :shared-base-hash shared-base-hash
+      :id id
+      :title title
+      :summary summary
+      :semantic-evidence-function semantic-evidence-function
+      :focused-validation-function focused-validation-function))))
+
 (defun %hyperdoc-static-route-observability-commit-equivalence-check ()
   (%system-git-commit-equivalence-check
    :hyperdoc
@@ -421,6 +1196,26 @@
    (lambda ()
      (%hyperdoc-static-route-observability-commit-equivalence-check))))
 
+(defun %hyperdoc-static-route-observability-commit-assimilation-check ()
+  (%system-git-upstream-commit-assimilation-check
+   :hyperdoc
+   +static-route-observability-original-commit-hash+
+   :source-branch +static-route-observability-proof-source-branch+
+   :target-branch +static-route-observability-proof-target-branch+
+   :shared-base-hash +static-route-observability-proof-shared-base+
+   :id "static-route-observability-commit-assimilation-check"
+   :title "Upstream commit assimilation check for the static-route-observability skill commit"
+   :summary "Worked example classifying the static-route-observability upstream skill commit as already assimilated by combining replay-equivalence proof with constructor/corpus/runtime checks."
+   :semantic-evidence-function
+   #'static-route-observability-assimilation-semantic-evidence
+   :focused-validation-function
+   #'static-route-observability-assimilation-validation))
+
+(defun hyperdoc-static-route-observability-commit-assimilation-check ()
+  (call-with-git-runtime-boundary
+   (lambda ()
+     (%hyperdoc-static-route-observability-commit-assimilation-check))))
+
 (defun %hyperdoc-commit-equivalence-proof-surface ()
   (make-instance
    'git-commit-equivalence-surface
@@ -436,3 +1231,19 @@
   (call-with-git-runtime-boundary
    (lambda ()
      (%hyperdoc-commit-equivalence-proof-surface))))
+
+(defun %hyperdoc-upstream-commit-assimilation-surface ()
+  (make-instance
+   'git-upstream-commit-assimilation-surface
+   :id "hyperdoc-upstream-commit-assimilation-surface"
+   :title "Upstream commit assimilation surface"
+   :summary "Inspect read-only assimilation checks that combine graph/history proof with payload scope, semantic compatibility, and focused validation before deciding whether an upstream commit should be cherry-picked, manually assimilated, or treated as already present in effect."
+   :checks (list (%hyperdoc-static-route-observability-commit-assimilation-check))
+   :notes '("Graph/history proof remains necessary but not sufficient: replay equivalence and ancestry are kept distinct from semantic assimilation proof."
+            "Payload scope is made explicit from the source commit before semantic notes are interpreted."
+            "This skill stays read-only by default; it classifies assimilation state but does not mutate refs or execute merges.")))
+
+(defun hyperdoc-upstream-commit-assimilation-surface ()
+  (call-with-git-runtime-boundary
+   (lambda ()
+     (%hyperdoc-upstream-commit-assimilation-surface))))

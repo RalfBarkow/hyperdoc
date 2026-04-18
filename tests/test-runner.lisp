@@ -32,6 +32,7 @@
   (run-fedwiki-story-items-smoke-tests)
   (run-inspector-performance-smoke-tests)
   (run-merged-doc-slices-smoke-tests)
+  (run-git-commit-assimilation-smoke-tests)
   t)
 
 (export '(run-hyperdoc-tests))

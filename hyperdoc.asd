@@ -305,6 +305,7 @@
                              (:file "fedwiki-story-items-smoke")
                              (:file "inspector-performance-smoke")
                              (:file "merged-doc-slices-smoke")
+                             (:file "git-commit-assimilation-smoke")
                              (:file "py4dmx-cluster-smoke")
                              (:file "test-runner"))))
   :perform (test-op (op c)

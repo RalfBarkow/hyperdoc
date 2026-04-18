@@ -1631,6 +1631,7 @@
    :title "Prove commit equivalence from graph/history"
    :summary "Read-only skill for distinguishing direct ancestry from replay-equivalent content by combining merge-base, cherry, left/right history, and range-diff with an explicit shared base."
    :references '("Prove commit equivalence from graph/history"
+                 "Check upstream commit assimilation equivalence"
                  "Check whether a preserved commit was replayed equivalently"
                  "Why a commit hash can stay outside the target branch even when its content is integrated")))
 
@@ -1640,7 +1641,18 @@
    :title "Check whether a preserved commit was replayed equivalently"
    :summary "Task skill for proving whether a preserved source commit is absent from target ancestry only as an original hash while an equivalent replay exists on the target branch."
    :references '("Check whether a preserved commit was replayed equivalently"
+                 "Check upstream commit assimilation equivalence"
                  "Prove commit equivalence from graph/history"
+                 "Why a commit hash can stay outside the target branch even when its content is integrated")))
+
+(defun check-upstream-commit-assimilation-equivalence-topic ()
+  (make-topic
+   :id "check-upstream-commit-assimilation-equivalence"
+   :title "Check upstream commit assimilation equivalence"
+   :summary "Task skill for deciding whether an upstream commit should be cherry-picked, manually assimilated, or treated as already present in effect on the target branch by layering semantic proof and focused validation on top of commit-equivalence proof."
+   :references '("Check upstream commit assimilation equivalence"
+                 "Prove commit equivalence from graph/history"
+                 "Check whether a preserved commit was replayed equivalently"
                  "Why a commit hash can stay outside the target branch even when its content is integrated")))
 
 (defun commit-equivalence-vs-ancestry-topic ()
@@ -1649,6 +1661,7 @@
    :title "Commit equivalence vs ancestry"
    :summary "Concept boundary between original commit identity and content equivalence, where a target branch can integrate a patch under a replayed hash without containing the original commit object."
    :references '("Why a commit hash can stay outside the target branch even when its content is integrated"
+                 "Check upstream commit assimilation equivalence"
                  "Prove commit equivalence from graph/history"
                  "Check whether a preserved commit was replayed equivalently")))
 

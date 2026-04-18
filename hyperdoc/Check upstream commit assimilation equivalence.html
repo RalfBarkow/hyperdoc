@@ -1,0 +1,92 @@
+<h1>Check upstream commit assimilation equivalence</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Check upstream commit assimilation equivalence"><tt>Check
+  upstream commit assimilation equivalence</tt></a> is the higher-layer task
+  skill for a narrower operational question than graph/history proof alone:
+</p>
+
+<ul>
+  <li>Should this upstream commit be cherry-picked?</li>
+  <li>Does the target already need manual assimilation instead of a straight cherry-pick?</li>
+  <li>Is the upstream payload already present in effect on the target branch?</li>
+</ul>
+
+<p>
+  This skill wraps the existing read-only commit-equivalence proof object. It
+  keeps the object graph explicit instead of flattening everything into one
+  report:
+</p>
+
+<ol>
+  <li>graph/history proof,</li>
+  <li>payload scope,</li>
+  <li>semantic evidence,</li>
+  <li>focused validation,</li>
+  <li>final decision rationale.</li>
+</ol>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Check upstream commit assimilation equivalence"><tt>Check upstream commit assimilation equivalence</tt></a></li>
+  <li><a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove commit equivalence from graph/history</tt></a></li>
+  <li><a hyperbook="topics" page="Check whether a preserved commit was replayed equivalently"><tt>Check whether a preserved commit was replayed equivalently</tt></a></li>
+  <li><a hyperbook="topics" page="Commit equivalence vs ancestry"><tt>Commit equivalence vs ancestry</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-commit-assimilation-surface)"><tt>hyperdoc-upstream-commit-assimilation-surface</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Summary"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Graph/History proof"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Payload scope"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Semantic evidence"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Validation"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Decision rationale"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+</ul>
+
+<h2>Boundary rule</h2>
+
+<p>
+  The final decision view may summarize the result, but the object graph must
+  still let a reader inspect the graph/history proof without passing through
+  semantic claims, and inspect the semantic claims without pretending they came
+  from <tt>git cherry</tt> or <tt>git range-diff</tt>.
+</p>
+
+<p>
+  Corpus/page evidence is optional and bounded. A page lookup can resolve to a
+  live page object, degrade to a structured lookup issue when the target is
+  missing, or report that the current image cannot support that lookup seam at
+  all. The assimilation object stays inspectable in each case.
+</p>
+
+<h2>Procedure</h2>
+
+<ol>
+  <li>Open <tt>Graph/History proof</tt> first and inspect ancestry, patch equivalence, and any replayed equivalent commit.</li>
+  <li>Open <tt>Payload scope</tt> to make the exact upstream file scope explicit.</li>
+  <li>Open <tt>Semantic evidence</tt> to inspect constructor, corpus, runtime-shape notes, and any candidate superseding local commit.</li>
+  <li>Open <tt>Validation</tt> to see the narrowest focused check that backed the classification.</li>
+  <li>Read <tt>Decision rationale</tt> only after those earlier surfaces.</li>
+</ol>
+
+<h2>Worked example</h2>
+
+<p>
+  The current worked example uses the static-route-observability skill commit.
+  The original <tt>4fd5e78...</tt> remains on the preserved source branch, the
+  preserved pre-merge target branch already contains replay-equivalent
+  <tt>f7dd554...</tt>, and later local <tt>1f8f285...</tt> preserves the same
+  live effect under the current operational-targets-backed static asset
+  resolution surface. The higher-layer semantic evidence plus focused
+  validation therefore classify the payload as <tt>:already-assimilated</tt>
+  rather than something that still needs a cherry-pick.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
+  <li><a page="Check whether a preserved commit was replayed equivalently">Check whether a preserved commit was replayed equivalently</a></li>
+  <li><a page="Why a commit hash can stay outside the target branch even when its content is integrated">Why a commit hash can stay outside the target branch even when its content is integrated</a></li>
+</ul>
