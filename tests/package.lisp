@@ -35,4 +35,5 @@
    :run-check-runner-smoke-tests
    :run-fedwiki-story-items-smoke-tests
    :run-inspector-performance-smoke-tests
-   :run-merged-doc-slices-smoke-tests))
+   :run-merged-doc-slices-smoke-tests
+   :run-py4dmx-cluster-smoke-tests))
