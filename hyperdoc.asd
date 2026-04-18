@@ -255,7 +255,9 @@
 (defsystem #:hyperdoc/server
   :depends-on (#:hyperbook/server
                #:hyperbook/explorer
+               #:hyperdoc/examples
                #:hyperdoc/explorer
+               #:hyperdoc/explorer/examples/ops
                #:html-inspector-views/standard)
   :components ((:module "hyperdoc"
                 :serial t
