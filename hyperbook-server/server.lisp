@@ -70,6 +70,25 @@ Enable web debugger only when that extension is loaded."
             "Static root must be a pathname, got ~S" root)
     root))
 
+(defun required-static-asset-pathnames (&optional (root (static-root-pathname)))
+  (list (merge-pathnames #P"boot.html" root)
+        (merge-pathnames #P"js/boot.js" root)
+        (merge-pathnames #P"js/jquery.min.js" root)))
+
+(defun validate-static-root-pathname (&optional (root (static-root-pathname)))
+  (dolist (path (required-static-asset-pathnames root))
+    (unless (probe-file path)
+      (error
+       (format nil
+               "Missing required CLOG static asset ~A.~%~
+                Active static root: ~A~%~
+                CLOG_SRC: ~S~%~
+                Start HyperDoc via the repo-managed environment so the patched CLOG static-files tree is active."
+               path
+               root
+               (uiop:getenv "CLOG_SRC")))))
+  root)
+
 (defun register-runtime-asset-paths ()
   (clog-connection:add-plugin-path
    "^/hyperbook-server/"
@@ -79,109 +98,111 @@ Enable web debugger only when that extension is loaded."
 
 (defun register-known-hyperbooks ()
   (multiple-value-bind (entries exists? path candidates load-error)
-        (load-known-wikis)
-      (format t "~&[HYPERBOOK] known-wikis candidate paths: ~S~%" candidates)
-      (format t "~&[HYPERBOOK] known-wikis path: ~A~%" path)
-      (format t "~&[HYPERBOOK] known-wikis exists: ~S~%" exists?)
-      (when load-error
-        (format t "~&[HYPERBOOK] failed to read known-wikis from ~A: ~A~%"
-                path
-                load-error)
-        (return-from register-known-hyperbooks nil))
-      (unless exists?
-        (format t "~&[HYPERBOOK] no known-wikis config found at ~A~%" path)
-        (return-from register-known-hyperbooks nil))
-      (unless (listp entries)
-        (format t "~&[HYPERBOOK] malformed known-wikis root form in ~A: expected a list, got ~S~%"
-                path
-                entries)
-        (return-from register-known-hyperbooks nil))
-      (format t "~&[HYPERBOOK] known-wikis entry count: ~D~%" (length entries))
-      (format t "~&[HYPERBOOK] loaded known-wikis entries: ~S~%" entries)
+      (load-known-wikis)
+    (format t "~&[HYPERBOOK] known-wikis candidate paths: ~S~%" candidates)
+    (format t "~&[HYPERBOOK] known-wikis path: ~A~%" path)
+    (format t "~&[HYPERBOOK] known-wikis exists: ~S~%" exists?)
+    (when load-error
+      (format t "~&[HYPERBOOK] failed to read known-wikis from ~A: ~A~%"
+              path
+              load-error)
+      (return-from register-known-hyperbooks nil))
+    (unless exists?
+      (format t "~&[HYPERBOOK] no known-wikis config found at ~A~%" path)
+      (return-from register-known-hyperbooks nil))
+    (unless (listp entries)
+      (format t "~&[HYPERBOOK] malformed known-wikis root form in ~A: expected a list, got ~S~%"
+              path
+              entries)
+      (return-from register-known-hyperbooks nil))
+    (format t "~&[HYPERBOOK] known-wikis entry count: ~D~%" (length entries))
+    (format t "~&[HYPERBOOK] loaded known-wikis entries: ~S~%" entries)
 
-      (labels
-          ((ensure-fedwiki-system-loaded ()
-             (asdf:load-system :hyperbook/fedwiki))
+    (labels
+        ((ensure-fedwiki-system-loaded ()
+           (asdf:load-system :hyperbook/fedwiki))
 
-           (id-like-string-p (string)
-             (and (stringp string)
-                  (find #\: string)))
+         (id-like-string-p (string)
+           (and (stringp string)
+                (find #\: string)))
 
-           (fedwiki-constructor ()
-             (or (find-symbol "GET-FEDWIKI" :hyperbook/fedwiki)
-                 (error "GET-FEDWIKI not found after loading :hyperbook/fedwiki")))
+         (fedwiki-constructor ()
+           (or (find-symbol "GET-FEDWIKI" :hyperbook/fedwiki)
+               (error "GET-FEDWIKI not found after loading :hyperbook/fedwiki")))
 
-           (entry->registration (entry)
-             (cond
-               ((stringp entry)
-                (if (str:starts-with? "fedwiki:" entry)
-                    (list :kind :fedwiki
-                          :id entry
-                          :domain (str:substring (length "fedwiki:") nil entry))
-                    (list :kind :raw-id
-                         :id entry)))
-               ((and (consp entry)
-                     (null (rest entry))
-                     (stringp (first entry))
-                     (id-like-string-p (first entry)))
-                (entry->registration (first entry)))
-               ((and (consp entry) (stringp (first entry)))
-                (destructuring-bind (host &key https &allow-other-keys) entry
+         (entry->registration (entry)
+           (cond
+             ((stringp entry)
+              (if (str:starts-with? "fedwiki:" entry)
                   (list :kind :fedwiki
-                        :id (format nil "fedwiki:~A" host)
-                        :domain host
-                        :https https)))
-               ((and (consp entry) (keywordp (first entry)))
-                (destructuring-bind (kind host &key plugmatic https &allow-other-keys) entry
-                  (when plugmatic
-                    (format t "~&[HYPERBOOK] note: ignoring :plugmatic in ~S (use id-only entry)~%"
-                            entry))
-                  (case kind
-                    (:fedwiki (list :kind :fedwiki
-                                    :id (format nil "fedwiki:~A" host)
-                                    :domain host
-                                    :https https))
-                    (otherwise
-                     (format t "~&[HYPERBOOK] ignoring unsupported known wiki entry ~S~%"
-                             entry)
-                     nil))))
-               (t
-                (format t "~&[HYPERBOOK] ignoring malformed known wiki entry ~S~%" entry)
-                nil)))
+                        :id entry
+                        :domain (str:substring (length "fedwiki:") nil entry))
+                  (list :kind :raw-id
+                        :id entry)))
+             ((and (consp entry)
+                   (null (rest entry))
+                   (stringp (first entry))
+                   (id-like-string-p (first entry)))
+              (entry->registration (first entry)))
+             ((and (consp entry) (stringp (first entry)))
+              (destructuring-bind (host &key https &allow-other-keys) entry
+                (list :kind :fedwiki
+                      :id (format nil "fedwiki:~A" host)
+                      :domain host
+                      :https https)))
+             ((and (consp entry) (keywordp (first entry)))
+              (destructuring-bind (kind host &key plugmatic https &allow-other-keys) entry
+                (when plugmatic
+                  (format t "~&[HYPERBOOK] note: ignoring :plugmatic in ~S (use id-only entry)~%"
+                          entry))
+                (case kind
+                  (:fedwiki (list :kind :fedwiki
+                                  :id (format nil "fedwiki:~A" host)
+                                  :domain host
+                                  :https https))
+                  (otherwise
+                   (format t "~&[HYPERBOOK] ignoring unsupported known wiki entry ~S~%"
+                           entry)
+                   nil))))
+             (t
+              (format t "~&[HYPERBOOK] ignoring malformed known wiki entry ~S~%" entry)
+              nil)))
 
-           (register-entry (registration)
-             (destructuring-bind (&key kind id domain https &allow-other-keys) registration
-              (case kind
-                 (:fedwiki
-                  (ensure-fedwiki-system-loaded)
-                  (format t "~&[HYPERBOOK] registering normalized id ~A~%" id)
-                  (let ((hb (funcall (fedwiki-constructor)
-                                     domain
-                                     nil
-                                     nil
-                                     :https https)))
-                    (hyperbook:register hb)
-                    (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%" (hyperbook:id-of hb))
-                    hb))
-                 (:raw-id
-                  (format t "~&[HYPERBOOK] registering normalized id ~A~%" id)
-                  (let ((hb (hyperbook:find-hyperbook id)))
-                    (unless hb
-                      (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
-                              id))
-                    (when hb
-                      (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%" (hyperbook:id-of hb)))
-                    hb))
-                 (otherwise nil)))))
+         (register-entry (registration)
+           (destructuring-bind (&key kind id domain https &allow-other-keys) registration
+             (case kind
+               (:fedwiki
+                (ensure-fedwiki-system-loaded)
+                (format t "~&[HYPERBOOK] registering normalized id ~A~%" id)
+                (let ((hb (funcall (fedwiki-constructor)
+                                   domain
+                                   nil
+                                   nil
+                                   :https https)))
+                  (hyperbook:register hb)
+                  (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%"
+                          (hyperbook:id-of hb))
+                  hb))
+               (:raw-id
+                (format t "~&[HYPERBOOK] registering normalized id ~A~%" id)
+                (let ((hb (hyperbook:find-hyperbook id)))
+                  (unless hb
+                    (format t "~&[HYPERBOOK] failed to resolve ~A (find-hyperbook returned NIL)~%"
+                            id))
+                  (when hb
+                    (format t "~&[HYPERBOOK] registered HyperBook ID: ~A~%"
+                            (hyperbook:id-of hb)))
+                  hb))
+               (otherwise nil)))))
 
-        (dolist (entry entries)
-          (handler-case
-              (when-let (registration (entry->registration entry))
-                (format t "~&[HYPERBOOK] processing known wiki entry ~S~%" entry)
-                (format t "~&[HYPERBOOK] normalized registration: ~S~%" registration)
-                (register-entry registration))
-            (error (c)
-              (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c)))))))
+      (dolist (entry entries)
+        (handler-case
+            (when-let (registration (entry->registration entry))
+              (format t "~&[HYPERBOOK] processing known wiki entry ~S~%" entry)
+              (format t "~&[HYPERBOOK] normalized registration: ~S~%" registration)
+              (register-entry registration))
+          (error (c)
+            (format t "~&[HYPERBOOK] failed to process ~S: ~A~%" entry c)))))))
 
 (defun ensure-startup-hyperbooks ()
   (let ((ids '("hyperdoc/explorer"
@@ -218,9 +239,11 @@ recommended on public servers because it allows the execution of
   (let ((development* (if (eq development :auto)
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
                           development))
-        (static-root (static-root-pathname)))
+        (static-root (validate-static-root-pathname)))
+    (format t "~&[HYPERBOOK] static root: ~A~%" static-root)
     (when development*
       (ignore-errors (maybe-enable-web-debugger)))
+    (register-runtime-asset-paths)
     (clog:initialize
      #'(lambda (body)
          (clog-moldable-inspector:on-new-inspector body
@@ -243,7 +266,7 @@ recommended on public servers because it allows the execution of
      #'(lambda (body)
          (let* ((full-path (clog:property (clog:location body) "pathname"))
                 (_ (assert (str:starts-with? path full-path)))
-                (suffix (str:substring (length path)  nil full-path))
+                (suffix (str:substring (length path) nil full-path))
                 (rel-path (mapcar #'tbnl:url-decode (rest (str:split "/" suffix))))
                 (object (or (and (or (equal '() rel-path)
                                      (equal '("") rel-path))
@@ -288,7 +311,6 @@ public servers because it allows the execution of arbitrary Lisp code."
   (let ((development* (if (eq development :auto)
                           (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)
                           development)))
-    (register-runtime-asset-paths)
     (register-known-hyperbooks)
     (ensure-startup-hyperbooks)
     (run-server-startup-hooks)
@@ -322,11 +344,11 @@ removal of characters that are not allowed in URLs."
 
 (defun canonical-route-origin ()
   (if-let (public-base-url (uiop:getenv "HYPERDOC_PUBLIC_BASE_URL"))
-    (trim-trailing-slash public-base-url)
-    (format nil "http://~A:~A"
-            (local-route-host)
-            (or (uiop:getenv "HYPERDOC_PORT")
-                "8080"))))
+      (trim-trailing-slash public-base-url)
+      (format nil "http://~A:~A"
+              (local-route-host)
+              (or (uiop:getenv "HYPERDOC_PORT")
+                  "8080"))))
 
 (defun canonical-inspector-path (object)
   (typecase object
