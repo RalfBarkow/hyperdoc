@@ -877,6 +877,54 @@
        "default"
        "connect"))))
 
+(defun run-plain-source-view-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (expected-source-snippet
+           "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
+         (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
+         (plain-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Plain source"))
+         (source-html (and source-view
+                           (html-inspector-views:view-html source-view)))
+         (plain-html (and plain-view
+                          (html-inspector-views:view-html plain-view))))
+    (assert-true plain-view
+                 (format nil "~A must expose a Plain source view" page-title))
+    (assert-true source-view
+                 (format nil "~A must still expose the Source view" page-title))
+    (assert-true (search "data-hyperdoc-connect-provider-kind='source-v1'"
+                         source-html
+                         :test #'char=)
+                 (format nil "~A Source view must remain connect-enabled"
+                         page-title))
+    (assert-true (search "hyperdoc-source-pane" plain-html :test #'char=)
+                 (format nil "~A Plain source view must render the source pane"
+                         page-title))
+    (assert-true (search "hyperdoc-source-pane-line-number"
+                         plain-html
+                         :test #'char=)
+                 (format nil "~A Plain source view must render numbered lines"
+                         page-title))
+    (assert-true (search expected-source-snippet plain-html :test #'char=)
+                 (format nil "~A Plain source view must render escaped source text"
+                         page-title))
+    (assert-true (null (search "hyperdoc-connect-provider-surface"
+                               plain-html
+                               :test #'char=))
+                 (format nil "~A Plain source view must suppress the connect-provider surface"
+                         page-title))
+    (assert-true
+     (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
+                   plain-html
+                   :test #'char=))
+     (format nil "~A Plain source view must suppress source-v1 provider metadata"
+             page-title))))
+
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
@@ -963,6 +1011,7 @@
   (run-dmx-shared-workspace-topic-availability-smoke-test)
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
+  (run-plain-source-view-smoke-test)
   (run-source-surface-resolution-view-smoke-test)
   (run-source-surface-resolution-report-smoke-test)
   (run-source-surface-strategy-class-policy-smoke-test)

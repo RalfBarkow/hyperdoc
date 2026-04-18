@@ -195,6 +195,17 @@
   (views:html-view :title "Source surface" :priority 11
     (render-source-surface-resolution-report page)))
 
+(defun render-plain-source-surface-for-page
+    (page &key (title "Plain source") (priority 12))
+  (render-source-surface-with-strategy
+   *plain-source-surface-strategy*
+   page
+   :title title
+   :priority priority))
+
+(views:defview 👀plain-source (page text-page)
+  (render-plain-source-surface-for-page page))
+
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
   (render-source-surface-with-strategy
    (effective-source-surface-strategy-for page)
