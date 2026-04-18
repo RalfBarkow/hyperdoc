@@ -340,6 +340,18 @@
    :title title
    :priority priority))
 
+(defun source-surface-swap-preview-candidates-for-page (page)
+  (let* ((report (source-surface-resolution-report-for page))
+         (current-designator (getf report :effective-strategy-id)))
+    (loop for entry in (source-surface-strategy-catalog)
+          for designator = (getf entry :designator)
+          unless (eq current-designator designator)
+            collect (list :designator designator
+                          :label (getf entry :label)
+                          :connect-capable-p (getf entry :connect-capable-p)
+                          :preview
+                          (make-source-surface-swap-preview page designator)))))
+
 (defclass source-surface-swap-preview ()
   ((page :reader source-surface-swap-preview-page-of
          :initarg :page)
@@ -521,3 +533,52 @@
                                 preview))))))
                   (:tr (:td (views:esc "Alternate supported"))
                        (:td (:tt (views:esc "no")))))))))
+
+(defun render-source-surface-swap-operations-for-page (page)
+  (let* ((report (source-surface-resolution-report-for page))
+         (candidates (source-surface-swap-preview-candidates-for-page page)))
+    (views:html
+      (:p
+       (views:esc
+        "This page-level operation surface keeps the current Source path unchanged and exposes inspectable swap previews for supported alternate Source designators."))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Current winner"))
+                   (:td (:tt
+                         (views:esc
+                          (source-surface-resolution-report-display-value
+                           (getf report :winner))))))
+              (:tr (:td (views:esc "Current Source path"))
+                   (:td (:tt
+                         (views:esc
+                          (source-surface-resolution-report-strategy-display
+                           report
+                           :effective-strategy-id
+                           :effective-strategy-label))))))
+      (if candidates
+          (views:html
+            (:table :class "inspector-table"
+                    (:tr (:th (views:esc "Alternate designator"))
+                         (:th (views:esc "Label"))
+                         (:th (views:esc "Connect-capable"))
+                         (:th (views:esc "Preview")))
+                    (dolist (candidate candidates)
+                      (views:html
+                        (:tr
+                         (:td (:tt
+                               (views:esc
+                                (source-surface-swap-preview-designator-display-value
+                                 (getf candidate :designator)))))
+                         (:td (:tt (views:esc (getf candidate :label))))
+                         (:td (:tt
+                               (views:esc
+                                (source-surface-resolution-report-display-value
+                                 (getf candidate :connect-capable-p)))))
+                         (:td (views:object-ref (getf candidate :preview))))))))
+          (views:html
+            (:p :style "opacity: 0.7;"
+                (views:esc
+                 "No alternate Source swap previews are available for this page.")))))))
+
+(views:defview 👀source-swap-operations (page text-page)
+  (views:html-view :title "Source swap operations" :priority 15
+    (render-source-surface-swap-operations-for-page page)))
