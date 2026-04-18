@@ -412,26 +412,33 @@
 
 (views:defview 👀worked-example (surface git-upstream-commit-assimilation-surface)
   (views:html-view :title "Worked example" :priority 3
-    (let ((check (first (checks-of surface))))
-      (views:html
-        (:p "This surface includes the static-route-observability assimilation example, where the original upstream skill commit stays on the preserved source branch while the preserved pre-merge target branch already carries the logical effect in a replayed equivalent.")
-        (when check
-          (views:html
-            (:ul
-             (:li "Check: " (views:object-ref check))
-             (:li "Open graph/history proof: "
-                  (views:object-ref check
-                                    :display "Graph/History proof"
-                                    :select "Graph/History proof"))
-             (:li "Open semantic proof: "
-                  (views:object-ref check
-                                    :display "Semantic evidence"
-                                    :select "Semantic evidence"))
-             (:li "Open validation: "
-                  (views:object-ref check
-                                    :display "Validation"
-                                    :select "Validation"))
-             (:li "Open final decision: "
-                  (views:object-ref check
-                                    :display "Decision rationale"
-                                    :select "Decision rationale")))))))))
+    (views:html
+      (:p "This surface keeps named worked examples at the higher assimilation layer. Each one reuses the graph/history proof object underneath, but the operator can still inspect semantic evidence and focused validation separately before trusting the final decision.")
+      (:ul
+       (loop for check in (checks-of surface)
+             do (views:html
+                  (:li
+                   (views:object-ref check)
+                   " — "
+                   (views:esc (summary-of check))
+                   (:ul
+                    (:li "Open summary: "
+                         (views:object-ref check
+                                           :display "Summary"
+                                           :select "Summary"))
+                    (:li "Open graph/history proof: "
+                         (views:object-ref check
+                                           :display "Graph/History proof"
+                                           :select "Graph/History proof"))
+                    (:li "Open semantic evidence: "
+                         (views:object-ref check
+                                           :display "Semantic evidence"
+                                           :select "Semantic evidence"))
+                    (:li "Open validation: "
+                         (views:object-ref check
+                                           :display "Validation"
+                                           :select "Validation"))
+                    (:li "Open final decision: "
+                         (views:object-ref check
+                                           :display "Decision rationale"
+                                           :select "Decision rationale"))))))))))

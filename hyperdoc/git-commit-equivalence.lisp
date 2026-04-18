@@ -19,6 +19,27 @@
 (defparameter +static-route-observability-superseding-local-commit-hash+
   "1f8f2857baf99c623940af7e7acec0393d0ebc83")
 
+(defparameter +graphviz-story-item-original-commit-hash+
+  "ceae9d2739c181ce566103e5773e1e08bfdc859b")
+
+(defparameter +graphviz-story-item-proof-source-branch+
+  "upstream/main")
+
+(defparameter +graphviz-story-item-proof-target-branch+
+  "hauptsache")
+
+(defparameter +graphviz-story-item-proof-shared-base+
+  "823bdc2de0f05a549b8a2f7e81c8dcf74db4c32e")
+
+(defparameter +graphviz-story-item-superseding-local-commit-hash+
+  "b1e8d4041ab5f584886dfa12e5952b0a6bb6173c")
+
+(defparameter +graphviz-story-item-assimilation-source-page-id+
+  "Graphviz story item upstream assimilation example")
+
+(defparameter +graphviz-story-item-corpus-page-id+
+  "FedWiki Graphviz story item render trace")
+
 (defparameter +upstream-commit-assimilation-source-page-id+
   "Check upstream commit assimilation equivalence")
 
@@ -633,6 +654,250 @@
     (t
      :unavailable)))
 
+(defun find-package-symbol-if-present (package-designator symbol-name)
+  (let* ((package (find-package package-designator)))
+    (when package
+      (multiple-value-bind (symbol status)
+          (find-symbol symbol-name package)
+        (when status
+          symbol)))))
+
+(defun package-function-if-present (package-designator symbol-name)
+  (when-let (symbol (find-package-symbol-if-present package-designator
+                                                    symbol-name))
+    (when (fboundp symbol)
+      (symbol-function symbol))))
+
+(defun package-class-if-present (package-designator symbol-name)
+  (when-let (symbol (find-package-symbol-if-present package-designator
+                                                    symbol-name))
+    (find-class symbol nil)))
+
+(defun package-variable-symbol-if-present (package-designator symbol-name)
+  (when-let (symbol (find-package-symbol-if-present package-designator
+                                                    symbol-name))
+    (when (boundp symbol)
+      symbol)))
+
+(defun hyperdoc-book-if-available ()
+  (when-let (symbol (find-package-symbol-if-present :hyperdoc "*HYPERDOC*"))
+    (when (boundp symbol)
+      (symbol-value symbol))))
+
+(defun source-snippet-between-markers (pathname start-marker &optional end-marker)
+  (when-let (resolved (probe-file pathname))
+    (let* ((source (uiop:read-file-string resolved))
+           (start (search start-marker source)))
+      (when start
+        (let ((end (if end-marker
+                       (or (search end-marker source :start2 start)
+                           (length source))
+                       (length source))))
+          (subseq source start end))))))
+
+(defun graphviz-story-item-renderer-source-pathname ()
+  (asdf:system-relative-pathname :hyperdoc
+                                 "hyperbook-fedwiki/story-items.lisp"))
+
+(defun graphviz-story-item-corpus-page-pathname ()
+  (asdf:system-relative-pathname :hyperdoc
+                                 "hyperdoc/FedWiki Graphviz story item render trace.html"))
+
+(defun inspect-graphviz-story-item-renderer-source-shape ()
+  (let* ((pathname (graphviz-story-item-renderer-source-pathname))
+         (snippet
+           (source-snippet-between-markers
+            pathname
+            "(defmethod render-story-item ((type (eql :graphviz)) item page)"
+            ";; Images")))
+    (cond
+      ((null (probe-file pathname))
+       (list :status :unavailable
+             :path (namestring pathname)
+             :reason "The current hyperbook-fedwiki/story-items.lisp source file is unavailable."))
+      ((null snippet)
+       (list :status :unavailable
+             :path (namestring pathname)
+             :reason "The current image could not locate the :graphviz render-story-item method in hyperbook-fedwiki/story-items.lisp."))
+      (t
+       (let* ((dot-from-text-p
+                (not (null (search "(text-of item)" snippet))))
+              (dot-from-data-p
+                (not (null (search "(gethash \"dot\"" snippet))))
+              (engine-from-data-p
+                (not (null (search "(gethash \"engine\"" snippet))))
+              (fallback-title-present-p
+                (not (null (search ":fallback-title \"Raw DOT source\""
+                                   snippet))))
+              (recognized-text-backed-shape-p
+                (and dot-from-text-p
+                     (not dot-from-data-p)
+                     engine-from-data-p
+                     fallback-title-present-p)))
+         (list :status (if recognized-text-backed-shape-p
+                           :resolved
+                           :partial)
+               :path (namestring pathname)
+               :snippet snippet
+               :dot-from-text-p dot-from-text-p
+               :dot-from-data-p dot-from-data-p
+               :engine-from-data-p engine-from-data-p
+               :fallback-title-present-p fallback-title-present-p
+               :recognized-text-backed-shape-p
+               recognized-text-backed-shape-p))))))
+
+(defun graphviz-story-item-renderer-shape-label (shape-info)
+  (cond
+    ((getf shape-info :recognized-text-backed-shape-p)
+     "text-backed graphviz renderer using the shared graphviz seam")
+    ((eq (getf shape-info :status) :partial)
+     "graphviz renderer present, but the current source shape diverges from the text-backed canonical path")
+    (t
+     "graphviz renderer source shape unavailable")))
+
+(defun inspect-graphviz-story-item-corpus-shape ()
+  (let* ((pathname (graphviz-story-item-corpus-page-pathname))
+         (resolved (probe-file pathname)))
+    (cond
+      ((null resolved)
+       (list :status :unavailable
+             :path (namestring pathname)
+             :reason "The FedWiki Graphviz story item render trace page is unavailable in the current checkout."))
+      (t
+       (let* ((source (uiop:read-file-string resolved))
+              (type-present-p
+                (not (null (search "\"type\": \"graphviz\"" source))))
+              (text-present-p
+                (or (search "\"text\": \"digraph { a -&gt; b }\"" source)
+                    (search "\"text\": \"digraph { a -> b }\"" source)))
+              (shared-helper-present-p
+                (not (null (search "views:graphviz-snippet" source))))
+              (text-backed-explanation-present-p
+                (not (null (search "story item's DOT text" source))))
+              (recognized-text-backed-corpus-p
+                (and type-present-p
+                     text-present-p
+                     shared-helper-present-p
+                     text-backed-explanation-present-p)))
+         (list :status (if recognized-text-backed-corpus-p
+                           :resolved
+                           :partial)
+               :path (namestring resolved)
+               :type-present-p type-present-p
+               :text-present-p text-present-p
+               :shared-helper-present-p shared-helper-present-p
+               :text-backed-explanation-present-p
+               text-backed-explanation-present-p
+               :recognized-text-backed-corpus-p
+               recognized-text-backed-corpus-p))))))
+
+(defun graphviz-story-item-semantic-evidence-availability (renderer-shape-info
+                                                           corpus-evidence-status
+                                                           corpus-shape-info)
+  (let ((renderer-resolved-p
+          (getf renderer-shape-info :recognized-text-backed-shape-p))
+        (corpus-shape-resolved-p
+          (getf corpus-shape-info :recognized-text-backed-corpus-p)))
+    (cond
+      ((and renderer-resolved-p
+            corpus-shape-resolved-p
+            (eq corpus-evidence-status :resolved))
+       :complete)
+      ((or renderer-resolved-p
+           corpus-shape-resolved-p
+           (eq corpus-evidence-status :resolved)
+           (eq corpus-evidence-status :lookup-issue))
+       :partial)
+      (t
+       :unavailable))))
+
+(defun inspect-graphviz-story-item-render-validation ()
+  (handler-case
+      (progn
+        (asdf:load-system :hyperbook/fedwiki)
+        (let* ((wiki-class
+                 (package-class-if-present :hyperbook/fedwiki "FEDWIKI"))
+               (page-maker
+                 (package-function-if-present :hyperbook/fedwiki
+                                              "MAKE-FEDWIKI-PAGE"))
+               (story-item-class
+                 (package-class-if-present :hyperbook/fedwiki "STORY-ITEM"))
+               (render-story-item
+                 (package-function-if-present :hyperbook/fedwiki
+                                              "RENDER-STORY-ITEM"))
+               (accumulator-class
+                 (package-class-if-present :html-inspector-views
+                                           "VIEW-ACCUMULATOR"))
+               (accumulator-assets
+                 (package-function-if-present :html-inspector-views
+                                              "ACCUMULATOR-ASSETS"))
+               (html-stream-symbol
+                 (or (package-variable-symbol-if-present :html-inspector-views
+                                                         "*HTML-STREAM*")
+                     (find-package-symbol-if-present :html-inspector-views
+                                                    "*HTML-STREAM*")))
+               (view-accumulator-symbol
+                 (or (package-variable-symbol-if-present :html-inspector-views
+                                                         "*VIEW-ACCUMULATOR*")
+                     (find-package-symbol-if-present :html-inspector-views
+                                                    "*VIEW-ACCUMULATOR*"))))
+          (unless (and wiki-class
+                       page-maker
+                       story-item-class
+                       render-story-item
+                       accumulator-class
+                       accumulator-assets
+                       html-stream-symbol
+                       view-accumulator-symbol)
+            (error "Graphviz validation helpers are unavailable in the current image."))
+          (let* ((wiki (make-instance wiki-class
+                                      :id "fedwiki:graphviz-assimilation.example"))
+                 (page (funcall page-maker
+                                wiki
+                                "graphviz-assimilation-example"
+                                "Graphviz Assimilation Example"))
+                 (item (make-instance story-item-class
+                                      :item-type :graphviz
+                                      :id "graphviz-item-1"
+                                      :text "digraph { a -> b }"
+                                      :data nil))
+                 (accumulator (make-instance accumulator-class))
+                 (html
+                   (with-output-to-string (stream)
+                     (progv (list html-stream-symbol
+                                  view-accumulator-symbol)
+                            (list stream accumulator)
+                       (funcall render-story-item :graphviz item page))))
+                 (assets (funcall accumulator-assets accumulator))
+                 (placeholder-present-p
+                   (not (null (search "data-inspector-graphviz=" html))))
+                 (dot-transport-present-p
+                   (not (null (search "data-inspector-graphviz-dot=" html))))
+                 (raw-dot-fallback-present-p
+                   (not (null (search "Raw DOT source" html))))
+                 (dot-text-present-p
+                   (not (null (search "digraph { a -&gt; b }" html))))
+                 (generic-raw-text-fallback-present-p
+                   (not (null (search "background-color: #eee;" html))))
+                 (passed-p
+                   (and placeholder-present-p
+                        dot-transport-present-p
+                        raw-dot-fallback-present-p
+                        dot-text-present-p
+                        (not generic-raw-text-fallback-present-p))))
+            (list :status (if passed-p :passed :failed)
+                  :html html
+                  :assets assets
+                  :placeholder-present-p placeholder-present-p
+                  :dot-transport-present-p dot-transport-present-p
+                  :raw-dot-fallback-present-p raw-dot-fallback-present-p
+                  :dot-text-present-p dot-text-present-p
+                  :generic-raw-text-fallback-present-p
+                  generic-raw-text-fallback-present-p))))
+    (error (condition)
+      (list :status :unavailable
+            :condition (princ-to-string condition)))))
+
 (defun call-reader-if-supported (reader-name object)
   (when (fboundp reader-name)
     (handler-case
@@ -919,6 +1184,134 @@
              (list (format nil "Validation condition: ~A"
                            (or (getf runtime-shape-info :condition)
                                "unknown runtime shape"))))))))
+
+(defun graphviz-story-item-assimilation-semantic-evidence (equivalence-check
+                                                           payload-paths)
+  (declare (ignore equivalence-check))
+  (let* ((page-evidence
+           (list
+            (safe-assimilation-page-evidence
+             (hyperdoc-book-if-available)
+             +graphviz-story-item-corpus-page-id+
+             :source-page-id +graphviz-story-item-assimilation-source-page-id+
+             :source-page-title +graphviz-story-item-assimilation-source-page-id+
+             :source-section "Corpus evidence")))
+         (corpus-evidence-status
+           (corpus-evidence-status page-evidence))
+         (renderer-shape-info
+           (inspect-graphviz-story-item-renderer-source-shape))
+         (corpus-shape-info
+           (inspect-graphviz-story-item-corpus-shape))
+         (payload-paths-present-p
+           (payload-paths-present-in-system-source-p :hyperdoc payload-paths))
+         (renderer-recognized-p
+           (getf renderer-shape-info :recognized-text-backed-shape-p))
+         (corpus-recognized-p
+           (getf corpus-shape-info :recognized-text-backed-corpus-p))
+         (semantic-effect-status
+           (if (and payload-paths-present-p
+                    renderer-recognized-p
+                    corpus-recognized-p)
+               :present
+               :unknown))
+         (semantic-compatibility-status
+           (cond
+             ((and renderer-recognized-p
+                   corpus-recognized-p)
+              :compatible)
+             ((or (eq (getf renderer-shape-info :status) :partial)
+                  (eq (getf corpus-shape-info :status) :partial))
+              :diverged)
+             (t
+              :unknown)))
+         (semantic-evidence-availability
+           (graphviz-story-item-semantic-evidence-availability
+            renderer-shape-info
+            corpus-evidence-status
+            corpus-shape-info))
+         (superseding-local-commit-hash
+           (and (eq semantic-effect-status :present)
+                (eq semantic-compatibility-status :compatible)
+                +graphviz-story-item-superseding-local-commit-hash+)))
+    (list
+     :semantic-effect-status semantic-effect-status
+     :semantic-compatibility-status semantic-compatibility-status
+     :corpus-evidence-status corpus-evidence-status
+     :corpus-page-evidence page-evidence
+     :semantic-evidence-availability semantic-evidence-availability
+     :superseding-local-commit-hash superseding-local-commit-hash
+     :summary
+     (cond
+       ((and (eq semantic-effect-status :present)
+             superseding-local-commit-hash)
+       "The graphviz story-item payload is already present in effect: upstream touched only the FedWiki renderer slice, but hauptsache already carries earlier local commit b1e8d404 through the shared graphviz seam, and the current constructor plus corpus still use text-backed graphviz items so no data[\"dot\"] compatibility patch is needed.")
+       ((eq semantic-compatibility-status :diverged)
+        "The current graphviz story-item slice still looks related, but the constructor or corpus no longer match the text-backed canonical shape used in this repo snapshot.")
+       (t
+        "The current graphviz story-item constructor and corpus evidence are insufficient to prove the upstream payload already present in effect."))
+     :notes
+     (list
+      (format nil "Payload scope from the upstream commit is limited to ~{~A~^, ~}."
+              payload-paths)
+      (format nil "Corpus evidence status: ~A."
+              (corpus-evidence-status-label corpus-evidence-status))
+      (format nil "Semantic evidence availability: ~A."
+              (semantic-evidence-availability-label
+               semantic-evidence-availability))
+      (format nil "Current renderer source shape: ~A."
+              (graphviz-story-item-renderer-shape-label
+               renderer-shape-info))
+      (format nil "Renderer source reads DOT from text-of item: ~:[no~;yes~]."
+              (getf renderer-shape-info :dot-from-text-p))
+      (format nil "Renderer source reads DOT from data[\"dot\"]: ~:[no~;yes~]."
+              (getf renderer-shape-info :dot-from-data-p))
+      (format nil "Renderer source keeps engine lookup in item data: ~:[no~;yes~]."
+              (getf renderer-shape-info :engine-from-data-p))
+      (format nil "Corpus trace still records a real localhost graphviz story item as text-backed DOT plus the shared graphviz helper path: ~:[no~;yes~]."
+              (getf corpus-shape-info :recognized-text-backed-corpus-p))
+      (format nil "The earlier local commit ~A already introduced the shared graphviz seam on hauptsache."
+              +graphviz-story-item-superseding-local-commit-hash+)))))
+
+(defun graphviz-story-item-assimilation-validation (equivalence-check
+                                                    payload-paths
+                                                    semantic-evidence)
+  (declare (ignore equivalence-check payload-paths semantic-evidence))
+  (let ((validation-info
+          (inspect-graphviz-story-item-render-validation)))
+    (case (getf validation-info :status :unknown)
+      (:passed
+       (list :validation-status :passed
+             :summary
+             "Focused validation passed: a text-backed :graphviz story item with nil data still renders through the shared graphviz placeholder, DOT transport attribute, and raw DOT fallback."
+             :notes
+             (list
+              "The focused runtime check constructs a FedWiki :graphviz story item with text \"digraph { a -> b }\" and data NIL."
+              "The rendered HTML still contains the shared graphviz placeholder and DOT transport attribute."
+              "The shared raw DOT fallback remains present, which shows no data[\"dot\"] compatibility patch is needed for the current canonical shape.")))
+      (:failed
+       (list :validation-status :failed
+             :summary
+             "Focused validation failed: the current graphviz story-item path no longer renders the shared placeholder from a text-backed item."
+             :notes
+             (list
+              (format nil "Placeholder present: ~:[no~;yes~]."
+                      (getf validation-info :placeholder-present-p))
+              (format nil "DOT transport present: ~:[no~;yes~]."
+                      (getf validation-info :dot-transport-present-p))
+              (format nil "Raw DOT fallback present: ~:[no~;yes~]."
+                      (getf validation-info :raw-dot-fallback-present-p))
+              (format nil "DOT text preserved: ~:[no~;yes~]."
+                      (getf validation-info :dot-text-present-p))
+              (format nil "Generic raw-text fallback leaked through: ~:[no~;yes~]."
+                      (getf validation-info :generic-raw-text-fallback-present-p)))))
+      (otherwise
+       (list :validation-status :unknown
+             :summary
+             "Focused validation could not run the current text-backed graphviz story-item check."
+             :notes
+             (list (format nil "Validation condition: ~A"
+                           (or (getf validation-info :condition)
+                               "graphviz validation helpers unavailable"))))))))
 
 (defun %system-git-commit-equivalence-check (system-designator source-commit-hash
                                               &key source-branch target-branch
@@ -1216,6 +1609,38 @@
    (lambda ()
      (%hyperdoc-static-route-observability-commit-assimilation-check))))
 
+(defun %hyperdoc-graphviz-story-item-commit-assimilation-check ()
+  (%system-git-upstream-commit-assimilation-check
+   :hyperdoc
+   +graphviz-story-item-original-commit-hash+
+   :source-branch +graphviz-story-item-proof-source-branch+
+   :target-branch +graphviz-story-item-proof-target-branch+
+   :shared-base-hash +graphviz-story-item-proof-shared-base+
+   :id "graphviz-story-item-commit-assimilation-check"
+   :title "Upstream commit assimilation check for the graphviz story-item renderer commit"
+   :summary "Worked example classifying upstream graphviz story-item commit ceae9d as already assimilated in effect even though graph/history proof alone does not show a replay-equivalent commit on hauptsache."
+   :semantic-evidence-function
+   #'graphviz-story-item-assimilation-semantic-evidence
+   :focused-validation-function
+   #'graphviz-story-item-assimilation-validation))
+
+(defun hyperdoc-graphviz-story-item-commit-assimilation-check ()
+  (call-with-git-runtime-boundary
+   (lambda ()
+     (%hyperdoc-graphviz-story-item-commit-assimilation-check))))
+
+(defexample graphviz-story-item-upstream-assimilation-example
+  "Run the ceae9d graphviz upstream assimilation check and return the inspectable result."
+  (let ((check (hyperdoc-graphviz-story-item-commit-assimilation-check)))
+    (-> check
+        (assert-equal +graphviz-story-item-original-commit-hash+
+                      :key (lambda (object)
+                             (commit-hash-of (source-commit-of object))))
+        (assert-equal +graphviz-story-item-proof-target-branch+
+                      :key #'target-branch-of)
+        (assert-eql :already-assimilated
+                    :key #'final-decision-of))))
+
 (defun %hyperdoc-commit-equivalence-proof-surface ()
   (make-instance
    'git-commit-equivalence-surface
@@ -1238,7 +1663,8 @@
    :id "hyperdoc-upstream-commit-assimilation-surface"
    :title "Upstream commit assimilation surface"
    :summary "Inspect read-only assimilation checks that combine graph/history proof with payload scope, semantic compatibility, and focused validation before deciding whether an upstream commit should be cherry-picked, manually assimilated, or treated as already present in effect."
-   :checks (list (%hyperdoc-static-route-observability-commit-assimilation-check))
+   :checks (list (%hyperdoc-static-route-observability-commit-assimilation-check)
+                 (%hyperdoc-graphviz-story-item-commit-assimilation-check))
    :notes '("Graph/history proof remains necessary but not sufficient: replay equivalence and ancestry are kept distinct from semantic assimilation proof."
             "Payload scope is made explicit from the source commit before semantic notes are interpreted."
             "This skill stays read-only by default; it classifies assimilation state but does not mutate refs or execute merges.")))
