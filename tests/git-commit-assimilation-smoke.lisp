@@ -292,14 +292,23 @@
 
 (defun run-upstream-commit-assimilation-documentation-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
-  (let ((topic (hyperdoc::check-upstream-commit-assimilation-equivalence-topic)))
+  (let ((topic (hyperdoc::check-upstream-commit-assimilation-equivalence-topic))
+        (example-topic
+          (hyperdoc::graphviz-story-item-upstream-assimilation-example-topic)))
     (assimilation-assert-true
      (fboundp 'hyperdoc::check-upstream-commit-assimilation-equivalence-topic)
      "Assimilation topic function must be present")
+    (assimilation-assert-true
+     (fboundp 'hyperdoc::graphviz-story-item-upstream-assimilation-example-topic)
+     "Graphviz assimilation example topic function must be present")
     (assimilation-assert-equal
      "Check upstream commit assimilation equivalence"
      (hyperbook:title-of topic)
      "Assimilation topic title")
+    (assimilation-assert-equal
+     "Graphviz story item upstream assimilation example"
+     (hyperbook:title-of example-topic)
+     "Graphviz assimilation example topic title")
     (assimilation-assert-true
      (hyperbook:find-page hyperdoc::*topics*
                           "Check upstream commit assimilation equivalence"
@@ -309,7 +318,17 @@
      (hyperbook:find-page hyperdoc::*hyperdoc*
                           "Check upstream commit assimilation equivalence"
                           :signal-error? t)
-     "Assimilation HyperDoc page must exist")))
+     "Assimilation HyperDoc page must exist")
+    (assimilation-assert-true
+     (hyperbook:find-page hyperdoc::*topics*
+                          "Graphviz story item upstream assimilation example"
+                          :signal-error? t)
+     "Graphviz assimilation example topic page must exist")
+    (assimilation-assert-true
+     (hyperbook:find-page hyperdoc::*hyperdoc*
+                          "Graphviz story item upstream assimilation example"
+                          :signal-error? t)
+     "Graphviz assimilation example HyperDoc page must exist")))
 
 (defun run-git-commit-assimilation-smoke-tests ()
   (run-upstream-commit-assimilation-classification-smoke-test)

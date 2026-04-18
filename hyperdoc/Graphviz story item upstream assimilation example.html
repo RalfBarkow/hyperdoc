@@ -1,0 +1,161 @@
+<h1>Graphviz story item upstream assimilation example</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Graphviz story item upstream assimilation example"><tt>Graphviz
+  story item upstream assimilation example</tt></a> is the first durable
+  worked example for the newer upstream assimilation skill where the final
+  answer is not just replay-equivalent graph/history proof.
+</p>
+
+<p>
+  It answers the narrower operational question:
+</p>
+
+<ul>
+  <li>Should upstream commit <tt>ceae9d2739c181ce566103e5773e1e08bfdc859b</tt> be cherry-picked onto <tt>hauptsache</tt>?</li>
+  <li>Or is its live effect already present in this repo snapshot, so the correct action is to treat it as <tt>:already-assimilated</tt>?</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Graphviz story item upstream assimilation example"><tt>Graphviz story item upstream assimilation example</tt></a></li>
+  <li><a hyperbook="topics" page="Check upstream commit assimilation equivalence"><tt>Check upstream commit assimilation equivalence</tt></a></li>
+  <li><a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove commit equivalence from graph/history</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-commit-assimilation-surface)"><tt>hyperdoc-upstream-commit-assimilation-surface</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Summary"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Graph/History proof"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Semantic evidence"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Validation"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Decision rationale"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)">default inspector selection for the worked example object</a></li>
+</ul>
+
+<h2>Runnable example</h2>
+
+<p>
+  The top-level runnable example is a real <tt>defexample</tt>. HyperDoc adds
+  the <tt>►</tt> button to the transcluded source below, and clicking it runs
+  the example and opens the assimilation object in a new pane.
+</p>
+
+<source-of-function>graphviz-story-item-upstream-assimilation-example</source-of-function>
+
+<h2>Case summary</h2>
+
+<p>
+  Upstream commit <tt>ceae9d2739c181ce566103e5773e1e08bfdc859b</tt>,
+  summary <tt>Handle story item type "graphviz"</tt>, touched only
+  <tt>hyperbook-fedwiki/story-items.lisp</tt>.
+  The target branch is <tt>hauptsache</tt>.
+  The earlier local commit carrying the live effect is
+  <tt>b1e8d4041ab5f584886dfa12e5952b0a6bb6173c</tt>,
+  summary <tt>feat(fedwiki): render graphviz story items via shared graphviz seam</tt>.
+</p>
+
+<p>
+  The final classification is therefore <tt>:already-assimilated</tt>, but
+  that answer depends on semantic evidence in addition to the reused
+  graph/history proof.
+</p>
+
+<h2>Graph/history evidence</h2>
+
+<p>
+  The embedded graph/history proof deliberately stays separate.
+  It does <b>not</b> prove replay-equivalent content on the target branch:
+</p>
+
+<ul>
+  <li><tt>ceae9d...</tt> is not in <tt>hauptsache</tt> ancestry.</li>
+  <li>The reused proof object does not expose a replayed-equivalent target commit.</li>
+  <li>So graph/history proof alone is not the full answer for this case.</li>
+</ul>
+
+<p>
+  That is precisely why this example belongs at the assimilation layer rather
+  than being folded back into the older graph/history-only framing.
+</p>
+
+<h2>Semantic evidence</h2>
+
+<p>
+  The semantic edge under review was upstream's extra
+  <tt>data["dot"]</tt> fallback versus the current repo's text-backed
+  canonical graphviz item shape.
+</p>
+
+<ul>
+  <li>Earlier local commit <tt>b1e8d40...</tt> already introduced the live shared-graphviz renderer path on <tt>hauptsache</tt>.</li>
+  <li>The current constructor shape in <tt>hyperbook-fedwiki/story-items.lisp</tt> still reads DOT from <tt>(text-of item)</tt>.</li>
+  <li>The current constructor only reads <tt>"engine"</tt> from item data, so the live path does not depend on <tt>data["dot"]</tt>.</li>
+  <li>The semantic conclusion is that the upstream payload effect is already present in this repo snapshot.</li>
+</ul>
+
+<h2>Corpus and constructor evidence</h2>
+
+<p>
+  The durable corpus trace is
+  <a page="FedWiki Graphviz story item render trace">FedWiki Graphviz story item render trace</a>.
+  That page records a real localhost graphviz story item with:
+</p>
+
+<ul>
+  <li><tt>"type": "graphviz"</tt></li>
+  <li><tt>"text": "digraph { a -&gt; b }"</tt></li>
+  <li>an explanation that the current renderer calls <tt>views:graphviz-snippet</tt> with the story item's DOT text</li>
+</ul>
+
+<p>
+  So the corpus and constructor layers agree on the same ownership boundary:
+  graphviz DOT is text-backed here, and no compatibility patch for
+  <tt>data["dot"]</tt> was needed in this slice.
+</p>
+
+<h2>Validation</h2>
+
+<p>
+  The focused validation stays narrow.
+  It constructs a text-backed FedWiki <tt>:graphviz</tt> story item with
+  <tt>data NIL</tt> and checks that current rendering still produces the shared
+  graphviz placeholder, DOT transport attribute, and raw DOT fallback.
+</p>
+
+<p>
+  That validation is enough for this example because the question is not
+  whether every historical graphviz shape still exists; it is whether the
+  upstream payload needs to be reapplied to preserve the live behavior in the
+  current ownership boundary.
+</p>
+
+<h2>Final decision</h2>
+
+<p>
+  The correct result for this repo snapshot is:
+</p>
+
+<ul>
+  <li>no cherry-pick</li>
+  <li>no source edit</li>
+  <li>no compatibility patch in this slice</li>
+  <li>final decision <tt>:already-assimilated</tt></li>
+</ul>
+
+<p>
+  The reason is concrete:
+  the upstream commit touched only the FedWiki graphviz renderer slice,
+  hauptsache already had the live effect earlier via <tt>b1e8d40...</tt>,
+  and constructor/corpus/runtime evidence all still point to the text-backed
+  graphviz shape as the canonical path in this checkout.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Check upstream commit assimilation equivalence">Check upstream commit assimilation equivalence</a></li>
+  <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
+  <li><a page="FedWiki Graphviz story item render trace">FedWiki Graphviz story item render trace</a></li>
+  <li><a page="Check whether a preserved commit was replayed equivalently">Check whether a preserved commit was replayed equivalently</a></li>
+</ul>

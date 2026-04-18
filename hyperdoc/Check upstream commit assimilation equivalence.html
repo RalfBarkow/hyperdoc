@@ -32,6 +32,7 @@
 
 <ul>
   <li><a hyperbook="topics" page="Check upstream commit assimilation equivalence"><tt>Check upstream commit assimilation equivalence</tt></a></li>
+  <li><a hyperbook="topics" page="Graphviz story item upstream assimilation example"><tt>Graphviz story item upstream assimilation example</tt></a></li>
   <li><a hyperbook="topics" page="Prove commit equivalence from graph/history"><tt>Prove commit equivalence from graph/history</tt></a></li>
   <li><a hyperbook="topics" page="Check whether a preserved commit was replayed equivalently"><tt>Check whether a preserved commit was replayed equivalently</tt></a></li>
   <li><a hyperbook="topics" page="Commit equivalence vs ancestry"><tt>Commit equivalence vs ancestry</tt></a></li>
@@ -42,6 +43,13 @@
   <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Semantic evidence"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
   <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Validation"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
   <li><a expr="(hyperdoc-static-route-observability-commit-assimilation-check)" view="Decision rationale"><tt>hyperdoc-static-route-observability-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Summary"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Graph/History proof"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Payload scope"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Semantic evidence"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Validation"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a expr="(hyperdoc-graphviz-story-item-commit-assimilation-check)" view="Decision rationale"><tt>hyperdoc-graphviz-story-item-commit-assimilation-check</tt></a></li>
+  <li><a page="Graphviz story item upstream assimilation example">worked example page for the ceae9d graphviz no-op assimilation case</a></li>
 </ul>
 
 <h2>Boundary rule</h2>
@@ -73,19 +81,24 @@
 <h2>Worked example</h2>
 
 <p>
-  The current worked example uses the static-route-observability skill commit.
-  The original <tt>4fd5e78...</tt> remains on the preserved source branch, the
-  preserved pre-merge target branch already contains replay-equivalent
-  <tt>f7dd554...</tt>, and later local <tt>1f8f285...</tt> preserves the same
-  live effect under the current operational-targets-backed static asset
-  resolution surface. The higher-layer semantic evidence plus focused
-  validation therefore classify the payload as <tt>:already-assimilated</tt>
-  rather than something that still needs a cherry-pick.
+  This skill now has two concrete worked examples with different proof shapes.
+</p>
+
+<ul>
+  <li>The static-route-observability case is the replay-equivalent-content example: graph/history proof already exposes <tt>f7dd554...</tt> on the preserved target branch, and semantic evidence confirms the live effect is still present.</li>
+  <li>The <a page="Graphviz story item upstream assimilation example">graphviz story item upstream assimilation example</a> is the stronger semantic-assimilation contrast case: graph/history proof stays negative on replay-equivalence for <tt>ceae9d...</tt>, but earlier local <tt>b1e8d40...</tt>, the current text-backed constructor path, the corpus trace, and focused validation still justify <tt>:already-assimilated</tt>.</li>
+</ul>
+
+<p>
+  That second example exists to show the important boundary explicitly:
+  graph/history proof alone was not enough there, and the final answer depended
+  on constructor shape, corpus shape, and focused runtime validation.
 </p>
 
 <h2>Related pages</h2>
 
 <ul>
+  <li><a page="Graphviz story item upstream assimilation example">Graphviz story item upstream assimilation example</a></li>
   <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
   <li><a page="Check whether a preserved commit was replayed equivalently">Check whether a preserved commit was replayed equivalently</a></li>
   <li><a page="Why a commit hash can stay outside the target branch even when its content is integrated">Why a commit hash can stay outside the target branch even when its content is integrated</a></li>
