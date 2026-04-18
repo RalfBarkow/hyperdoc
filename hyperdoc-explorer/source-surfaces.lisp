@@ -122,11 +122,15 @@
           (list *connect-source-surface-strategy*
                 *plain-source-surface-strategy*)))
 
+(defun source-surface-strategy-catalog-entry-for-designator (designator)
+  (find designator
+        (source-surface-strategy-catalog)
+        :key (lambda (entry) (getf entry :designator))
+        :test #'eq))
+
 (defun source-surface-designator-supported-p (designator)
-  (not (null (find designator
-                   (source-surface-strategy-catalog)
-                   :key (lambda (entry) (getf entry :designator))
-                   :test #'eq))))
+  (not (null (source-surface-strategy-catalog-entry-for-designator
+              designator))))
 
 (defun source-surface-strategy-for-stable-designator (designator)
   (unless (source-surface-designator-supported-p designator)
@@ -335,3 +339,185 @@
     (effective-source-surface-strategy-for page))
    :title title
    :priority priority))
+
+(defclass source-surface-swap-preview ()
+  ((page :reader source-surface-swap-preview-page-of
+         :initarg :page)
+   (current-report :reader source-surface-swap-preview-current-report-of
+                   :initarg :current-report)
+   (current-designator :reader source-surface-swap-preview-current-designator-of
+                       :initarg :current-designator)
+   (alternate-designator
+    :reader source-surface-swap-preview-alternate-designator-of
+    :initarg :alternate-designator)
+   (alternate-supported-p
+    :reader source-surface-swap-preview-alternate-supported-p
+    :initarg :alternate-supported-p)))
+
+(defun make-source-surface-swap-preview (page alternate-designator)
+  (let* ((current-report (source-surface-resolution-report-for page))
+         (current-designator (getf current-report :effective-strategy-id)))
+    (make-instance 'source-surface-swap-preview
+                   :page page
+                   :current-report current-report
+                   :current-designator current-designator
+                   :alternate-designator alternate-designator
+                   :alternate-supported-p
+                   (source-surface-designator-supported-p
+                    alternate-designator))))
+
+(defun source-surface-swap-preview-alternate-entry (preview)
+  (source-surface-strategy-catalog-entry-for-designator
+   (source-surface-swap-preview-alternate-designator-of preview)))
+
+(defun source-surface-swap-preview-designator-display-value (designator)
+  (typecase designator
+    (symbol (string-downcase (symbol-name designator)))
+    (t (format nil "~A" designator))))
+
+(defun source-surface-swap-preview-current-display-value (preview)
+  (source-surface-resolution-report-strategy-display
+   (source-surface-swap-preview-current-report-of preview)
+   :effective-strategy-id
+   :effective-strategy-label))
+
+(defun source-surface-swap-preview-alternate-display-value (preview)
+  (let ((entry (source-surface-swap-preview-alternate-entry preview))
+        (designator (source-surface-swap-preview-alternate-designator-of preview)))
+    (if entry
+        (format nil "~(~A~) (~A)"
+                (getf entry :id)
+                (getf entry :label))
+        (format nil "~A (unsupported)"
+                (source-surface-swap-preview-designator-display-value
+                 designator)))))
+
+(defun source-surface-swap-preview-current-connect-capable-p (preview)
+  (source-surface-connect-capable-p
+   (getf (source-surface-swap-preview-current-report-of preview)
+         :effective-strategy)))
+
+(defun source-surface-swap-preview-alternate-connect-capable-p (preview)
+  (let ((entry (source-surface-swap-preview-alternate-entry preview)))
+    (and entry
+         (getf entry :connect-capable-p))))
+
+(defun source-surface-swap-preview-same-designator-p (preview)
+  (eq (source-surface-swap-preview-current-designator-of preview)
+      (source-surface-swap-preview-alternate-designator-of preview)))
+
+(defmethod views:text-representation ((preview source-surface-swap-preview))
+  (format nil "Source swap preview ~A -> ~A"
+          (source-surface-swap-preview-designator-display-value
+           (source-surface-swap-preview-current-designator-of preview))
+          (source-surface-swap-preview-designator-display-value
+           (source-surface-swap-preview-alternate-designator-of preview))))
+
+(views:defview 👀overview (preview source-surface-swap-preview)
+  (let ((report (source-surface-swap-preview-current-report-of preview)))
+    (views:html-view :title "Overview" :priority 1
+      (views:html
+        (:p
+         (views:esc
+          "This preview keeps the current Source path intact and renders the alternate path through the public designator-based Source rendering API."))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Page"))
+                     (:td (views:object-ref
+                           (source-surface-swap-preview-page-of preview))))
+                (:tr (:td (views:esc "Current winner"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-resolution-report-display-value
+                             (getf report :winner))))))
+                (:tr (:td (views:esc "Current Source path"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-swap-preview-current-display-value
+                             preview)))))
+                (:tr (:td (views:esc "Requested alternate"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-swap-preview-alternate-display-value
+                             preview)))))
+                (:tr (:td (views:esc "Alternate supported"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-resolution-report-display-value
+                             (source-surface-swap-preview-alternate-supported-p
+                              preview))))))
+                (:tr (:td (views:esc "Same path"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-resolution-report-display-value
+                             (source-surface-swap-preview-same-designator-p
+                              preview)))))))))))
+
+(views:defview 👀compare (preview source-surface-swap-preview)
+  (let ((report (source-surface-swap-preview-current-report-of preview))
+        (alternate-entry (source-surface-swap-preview-alternate-entry preview)))
+    (views:html-view :title "Compare" :priority 2
+      (views:html
+        (:table :class "inspector-table"
+                (:tr (:th (views:esc "Path"))
+                     (:th (views:esc "Designator"))
+                     (:th (views:esc "Label"))
+                     (:th (views:esc "Connect-capable")))
+                (:tr (:td (views:esc "Current"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-swap-preview-designator-display-value
+                             (source-surface-swap-preview-current-designator-of
+                              preview)))))
+                     (:td (:tt
+                           (views:esc
+                            (getf report :effective-strategy-label))))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-resolution-report-display-value
+                             (source-surface-swap-preview-current-connect-capable-p
+                              preview))))))
+                (:tr (:td (views:esc "Alternate"))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-swap-preview-designator-display-value
+                             (source-surface-swap-preview-alternate-designator-of
+                              preview)))))
+                     (:td (:tt
+                           (views:esc
+                            (or (and alternate-entry
+                                     (getf alternate-entry :label))
+                                "unsupported"))))
+                     (:td (:tt
+                           (views:esc
+                            (source-surface-resolution-report-display-value
+                             (source-surface-swap-preview-alternate-connect-capable-p
+                              preview)))))))))))
+
+(views:defview 👀current-source (preview source-surface-swap-preview)
+  (render-source-surface-for-page-with-designator
+   (source-surface-swap-preview-page-of preview)
+   (source-surface-swap-preview-current-designator-of preview)
+   :title "Current Source"
+   :priority 3))
+
+(views:defview 👀alternate-source (preview source-surface-swap-preview)
+  (if (source-surface-swap-preview-alternate-supported-p preview)
+      (render-source-surface-for-page-with-designator
+       (source-surface-swap-preview-page-of preview)
+       (source-surface-swap-preview-alternate-designator-of preview)
+       :title "Alternate Source"
+       :priority 4)
+      (views:html-view :title "Alternate Source" :priority 4
+        (views:html
+          (:p
+           (views:esc
+            "Unsupported Source designator. No alternate rendering is available for this preview."))
+          (:table :class "inspector-table"
+                  (:tr (:td (views:esc "Requested alternate"))
+                       (:td (:tt
+                             (views:esc
+                              (source-surface-swap-preview-designator-display-value
+                               (source-surface-swap-preview-alternate-designator-of
+                                preview))))))
+                  (:tr (:td (views:esc "Alternate supported"))
+                       (:td (:tt (views:esc "no")))))))))

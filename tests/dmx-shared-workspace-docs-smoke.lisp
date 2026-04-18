@@ -1032,6 +1032,102 @@
      (null (search "source-v1" plain-html :test #'char=))
      "Plain designator rendering must not expose the connect runtime contract.")))
 
+(defun run-source-surface-swap-preview-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (preview (hyperdoc::make-source-surface-swap-preview page :plain))
+         (unsupported-preview
+           (hyperdoc::make-source-surface-swap-preview page :bogus))
+         (views (dmx-shared-workspace-docs-load-inspector-views-for-object preview))
+         (overview-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Overview"))
+         (compare-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Compare"))
+         (current-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Current Source"))
+         (alternate-view
+           (dmx-shared-workspace-docs-find-view-by-title views "Alternate Source"))
+         (overview-html (and overview-view
+                             (html-inspector-views:view-html overview-view)))
+         (compare-html (and compare-view
+                            (html-inspector-views:view-html compare-view)))
+         (current-html (and current-view
+                            (html-inspector-views:view-html current-view)))
+         (alternate-html (and alternate-view
+                              (html-inspector-views:view-html alternate-view))))
+    (assert-type 'hyperdoc::source-surface-swap-preview
+                 preview
+                 "Swap preview must materialize as an inspectable object.")
+    (assert-equal :connect
+                  (hyperdoc::source-surface-swap-preview-current-designator-of
+                   preview)
+                  "Swap preview must snapshot the current connect designator.")
+    (assert-equal :default
+                  (getf (hyperdoc::source-surface-swap-preview-current-report-of
+                         preview)
+                        :winner)
+                  "Swap preview must preserve the current default-resolution winner.")
+    (assert-equal :plain
+                  (hyperdoc::source-surface-swap-preview-alternate-designator-of
+                   preview)
+                  "Swap preview must retain the requested alternate designator.")
+    (assert-true
+     (hyperdoc::source-surface-swap-preview-alternate-supported-p preview)
+     "Plain alternate designator must be supported for swap preview.")
+    (assert-true
+     (not (hyperdoc::source-surface-swap-preview-alternate-supported-p
+           unsupported-preview))
+     "Unsupported alternate designators must remain explicit on swap preview objects.")
+    (dolist (view (list overview-view compare-view current-view alternate-view))
+      (assert-true view
+                   "Swap preview must expose overview, compare, current, and alternate views."))
+    (assert-shared-workspace-page-contains-all
+     overview-html
+     (format nil "~A swap preview overview" page-title)
+     '("Current winner"
+       "Current Source path"
+       "Requested alternate"
+       "Alternate supported"
+       "connect"
+       "plain"
+       "yes"))
+    (assert-shared-workspace-page-contains-all
+     compare-html
+     (format nil "~A swap preview comparison" page-title)
+     '("Path"
+       "Current"
+       "Alternate"
+       "Connect source"
+       "Plain source"
+       "yes"
+       "no"))
+    (assert-true
+     (search "data-hyperdoc-connect-provider-kind='source-v1'"
+             current-html
+             :test #'char=)
+     "Swap preview current Source must keep the connect runtime contract.")
+    (assert-true
+     (search "hyperdoc-source-pane" alternate-html :test #'char=)
+     "Swap preview alternate Source must render the plain source pane.")
+    (assert-true
+     (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
+                   alternate-html
+                   :test #'char=))
+     "Swap preview alternate Source must suppress the connect runtime contract.")
+    (handler-case
+        (progn
+          (hyperdoc::render-source-surface-for-page-with-designator page :bogus)
+          (error "Unsupported swap designator must signal explicitly."))
+      (error (condition)
+        (assert-true
+         (search "Unsupported Source surface designator"
+                 (princ-to-string condition)
+                 :test #'char=)
+         "Unsupported swap designator error must be explicit.")))))
+
 (defun run-source-surface-resolution-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-title "Workspace-native annotations in a DMX workspace")
@@ -1196,6 +1292,7 @@
   (run-plain-source-view-smoke-test)
   (run-source-surface-strategy-catalog-smoke-test)
   (run-source-surface-designator-rendering-smoke-test)
+  (run-source-surface-swap-preview-smoke-test)
   (run-source-surface-strategy-identity-smoke-test)
   (run-source-surface-resolution-view-smoke-test)
   (run-source-surface-resolution-report-smoke-test)
