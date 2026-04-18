@@ -34,6 +34,23 @@
   (make-source-surface-strategy-class-policy-table)
   "Class-based Source surface strategy policies keyed by class object.")
 
+(defgeneric source-surface-strategy-label (strategy))
+
+(defmethod source-surface-strategy-label
+    ((strategy connect-source-surface-strategy))
+  "Connect source")
+
+(defmethod source-surface-strategy-label
+    ((strategy plain-source-surface-strategy))
+  "Plain source")
+
+(defmethod source-surface-strategy-label ((strategy source-surface-strategy))
+  (string-capitalize
+   (substitute #\Space
+               #\-
+               (string-downcase
+                (symbol-name (source-surface-strategy-id strategy))))))
+
 (defgeneric source-surface-strategy-for (page))
 
 (defmethod source-surface-strategy-for ((page text-page))
@@ -82,6 +99,19 @@
 (defun source-surface-strategy-policy-for (page)
   (nth-value 0 (source-surface-strategy-policy-match-for page)))
 
+(defun source-surface-strategy-stable-id (strategy-designator)
+  (let ((strategy (source-surface-strategy-from-designator strategy-designator)))
+    (and strategy
+         (source-surface-strategy-id strategy))))
+
+(defun source-surface-strategy-display-value (strategy-designator)
+  (let ((strategy (source-surface-strategy-from-designator strategy-designator)))
+    (if strategy
+        (format nil "~(~A~) (~A)"
+                (source-surface-strategy-id strategy)
+                (source-surface-strategy-label strategy))
+        "none")))
+
 (defun source-surface-resolution-report-for (page)
   (multiple-value-bind (class-policy-strategy class-policy-class)
       (source-surface-strategy-policy-match-for page)
@@ -101,12 +131,30 @@
             :target-class (class-name (class-of page))
             :override-present-p (not (null override-strategy))
             :override-strategy override-strategy
+            :override-strategy-id
+            (source-surface-strategy-stable-id override-strategy)
+            :override-strategy-label
+            (and override-strategy
+                 (source-surface-strategy-label override-strategy))
             :class-policy-matched-p (not (null class-policy-strategy))
             :class-policy-class (and class-policy-class
                                      (class-name class-policy-class))
             :class-policy-strategy class-policy-strategy
+            :class-policy-strategy-id
+            (source-surface-strategy-stable-id class-policy-strategy)
+            :class-policy-strategy-label
+            (and class-policy-strategy
+                 (source-surface-strategy-label class-policy-strategy))
             :default-strategy default-strategy
+            :default-strategy-id
+            (source-surface-strategy-stable-id default-strategy)
+            :default-strategy-label
+            (source-surface-strategy-label default-strategy)
             :effective-strategy effective-strategy
+            :effective-strategy-id
+            (source-surface-strategy-stable-id effective-strategy)
+            :effective-strategy-label
+            (source-surface-strategy-label effective-strategy)
             :winner winner))))
 
 (defun effective-source-surface-strategy-for (page)
@@ -145,11 +193,24 @@
   (typecase value
     (null "none")
     (boolean (if value "yes" "no"))
-    (source-surface-strategy
-     (string-downcase
-      (symbol-name (source-surface-strategy-id value))))
+    (source-surface-strategy (source-surface-strategy-display-value value))
     (symbol (string-downcase (symbol-name value)))
     (t (format nil "~A" value))))
+
+(defun source-surface-resolution-report-strategy-display
+    (report strategy-id-key strategy-label-key)
+  (let ((strategy-id (getf report strategy-id-key))
+        (strategy-label (getf report strategy-label-key)))
+    (cond ((and strategy-id strategy-label)
+           (format nil "~(~A~) (~A)"
+                   strategy-id
+                   strategy-label))
+          (strategy-id
+           (string-downcase (symbol-name strategy-id)))
+          (strategy-label
+           strategy-label)
+          (t
+           "none"))))
 
 (defun render-source-surface-resolution-report (page)
   (let* ((report (source-surface-resolution-report-for page))
@@ -161,17 +222,23 @@
               ,(source-surface-resolution-report-display-value
                 (getf report :winner)))
              ("Effective strategy"
-              ,(source-surface-resolution-report-display-value
-                (getf report :effective-strategy)))
+              ,(source-surface-resolution-report-strategy-display
+                report
+                :effective-strategy-id
+                :effective-strategy-label))
              ("Default strategy"
-              ,(source-surface-resolution-report-display-value
-                (getf report :default-strategy)))
+              ,(source-surface-resolution-report-strategy-display
+                report
+                :default-strategy-id
+                :default-strategy-label))
              ("Override present"
               ,(source-surface-resolution-report-display-value
                 (getf report :override-present-p)))
              ("Override strategy"
-              ,(source-surface-resolution-report-display-value
-                (getf report :override-strategy)))
+              ,(source-surface-resolution-report-strategy-display
+                report
+                :override-strategy-id
+                :override-strategy-label))
              ("Class policy matched"
               ,(source-surface-resolution-report-display-value
                 (getf report :class-policy-matched-p)))
@@ -179,8 +246,10 @@
               ,(source-surface-resolution-report-display-value
                 (getf report :class-policy-class)))
              ("Class policy strategy"
-              ,(source-surface-resolution-report-display-value
-                (getf report :class-policy-strategy))))))
+              ,(source-surface-resolution-report-strategy-display
+                report
+                :class-policy-strategy-id
+                :class-policy-strategy-label)))))
     (views:html
       (:table :class "inspector-table"
               (:tr (:th (views:esc "Field"))

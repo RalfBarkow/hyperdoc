@@ -851,6 +851,78 @@
                          (format nil "~A override report must expose the connect effective strategy"
                                  page-title))))))))
 
+(defun run-source-surface-strategy-identity-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page-title "Workspace-native annotations in a DMX workspace")
+         (page (hyperbook:find-page hyperdoc::*hyperdoc*
+                                    page-title
+                                    :signal-error? t))
+         (default-report
+           (hyperdoc::source-surface-resolution-report-for page)))
+    (assert-equal :connect
+                  (getf default-report :default-strategy-id)
+                  (format nil "~A default report must expose the connect default id"
+                          page-title))
+    (assert-equal "Connect source"
+                  (getf default-report :default-strategy-label)
+                  (format nil "~A default report must expose the connect default label"
+                          page-title))
+    (assert-equal :connect
+                  (getf default-report :effective-strategy-id)
+                  (format nil "~A default report must expose the connect effective id"
+                          page-title))
+    (assert-equal "Connect source"
+                  (getf default-report :effective-strategy-label)
+                  (format nil "~A default report must expose the connect effective label"
+                          page-title))
+    (hyperdoc::with-source-surface-strategy-class-policy
+        ('hyperdoc::text-page :plain)
+      (let ((policy-report
+              (hyperdoc::source-surface-resolution-report-for page)))
+        (assert-equal :plain
+                      (getf policy-report :class-policy-strategy-id)
+                      (format nil "~A class policy report must expose the plain strategy id"
+                              page-title))
+        (assert-equal "Plain source"
+                      (getf policy-report :class-policy-strategy-label)
+                      (format nil "~A class policy report must expose the plain strategy label"
+                              page-title))
+        (assert-equal :plain
+                      (getf policy-report :effective-strategy-id)
+                      (format nil "~A class policy report must expose the plain effective id"
+                              page-title))
+        (assert-equal "Plain source"
+                      (getf policy-report :effective-strategy-label)
+                      (format nil "~A class policy report must expose the plain effective label"
+                              page-title))
+        (hyperdoc::with-source-surface-strategy-override (:connect)
+          (let ((override-report
+                  (hyperdoc::source-surface-resolution-report-for page)))
+            (assert-equal :connect
+                          (getf override-report :override-strategy-id)
+                          (format nil "~A override report must expose the connect override id"
+                                  page-title))
+            (assert-equal "Connect source"
+                          (getf override-report :override-strategy-label)
+                          (format nil "~A override report must expose the connect override label"
+                                  page-title))
+            (assert-equal :plain
+                          (getf override-report :class-policy-strategy-id)
+                          (format nil "~A override report must still expose the plain class policy id"
+                                  page-title))
+            (assert-equal "Plain source"
+                          (getf override-report :class-policy-strategy-label)
+                          (format nil "~A override report must still expose the plain class policy label"
+                                  page-title))
+            (assert-equal :connect
+                          (getf override-report :effective-strategy-id)
+                          (format nil "~A override report must expose the connect effective id"
+                                  page-title))
+            (assert-equal "Connect source"
+                          (getf override-report :effective-strategy-label)
+                          (format nil "~A override report must expose the connect effective label"
+                                  page-title))))))))
+
 (defun run-source-surface-resolution-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-title "Workspace-native annotations in a DMX workspace")
@@ -874,6 +946,7 @@
        "Default strategy"
        "Override present"
        "Class policy matched"
+       "Connect source"
        "default"
        "connect"))))
 
@@ -1012,6 +1085,7 @@
   (run-dmx-auth-crosswalk-render-smoke-test)
   (run-dmx-shared-workspace-source-view-smoke-test)
   (run-plain-source-view-smoke-test)
+  (run-source-surface-strategy-identity-smoke-test)
   (run-source-surface-resolution-view-smoke-test)
   (run-source-surface-resolution-report-smoke-test)
   (run-source-surface-strategy-class-policy-smoke-test)
