@@ -211,6 +211,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "links")
+                             (:file "source-surfaces")
                              (:file "explorer")
                              (:file "static-route-observability")
                              (:file "operational-targets")
@@ -254,9 +255,7 @@
 (defsystem #:hyperdoc/server
   :depends-on (#:hyperbook/server
                #:hyperbook/explorer
-               #:hyperdoc/examples
                #:hyperdoc/explorer
-               #:hyperdoc/explorer/examples/ops
                #:html-inspector-views/standard)
   :components ((:module "hyperdoc"
                 :serial t
