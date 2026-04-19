@@ -458,6 +458,12 @@
 
 (defun resolve-inline-source-view (target)
   (or (ignore-errors
+        (typecase target
+          ((or function class)
+           (views/standard:source-code-view target :in-file? nil))
+          (t
+           nil)))
+      (ignore-errors
         (views:👀source target))
       (ignore-errors
         (find-inline-source-view target))))

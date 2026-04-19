@@ -318,6 +318,11 @@
      "Inline-rendered defexample source must expose the runnable play-button affordance")
     (assimilation-assert-equal
      nil
+     (search "%hyperdoc-graphviz-story-item-commit-assimilation-check"
+             content-html :test #'char-equal)
+     "Graphviz assimilation example page must inline only the top-level defexample form, not preceding helper definitions from the source file")
+    (assimilation-assert-equal
+     nil
      (search "source-of-function" content-html :test #'char-equal)
      "Graphviz assimilation example page must show rendered source, not a source-of-function placeholder label")))
 
