@@ -1,0 +1,140 @@
+<h1>Dreyeck Git readiness for upstream-backed inspection</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  <a hyperbook="topics" page="Dreyeck Git readiness for upstream-backed inspection"><tt>Dreyeck
+  Git readiness for upstream-backed inspection</tt></a> is the operator-facing
+  readiness layer for a narrow question:
+</p>
+
+<ul>
+  <li>Can this dreyeck runtime actually inspect Konrad's <tt>upstream/main</tt> history locally?</li>
+  <li>If not, which bounded state explains the gap?</li>
+  <li>Which explicit preparation objects should the operator inspect next?</li>
+</ul>
+
+<p>
+  This model sits beside the read-only proof and example surfaces. It does not
+  mutate remotes or fetch history as a side effect of opening a page or
+  clicking <tt>►</tt> / <tt>Run example</tt>.
+</p>
+
+<h2>What this readiness model answers</h2>
+
+<p>
+  The graphviz upstream assimilation example can reach a Git-backed path.
+  When the runtime cannot resolve Git state safely, HyperDoc now returns
+  <tt>git-runtime-unavailable</tt> as a bounded result instead of crashing.
+  This readiness model explains what is missing and points to the explicit
+  preparation seam.
+</p>
+
+<ul>
+  <li><tt>git-runtime-unavailable</tt> is a bounded result, not a hidden no-op.</li>
+  <li>Proof and example surfaces remain read-only.</li>
+  <li>Readiness is inspected separately from repair.</li>
+  <li>Repair stays explicit through inspectable add-remote and fetch objects.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Dreyeck Git readiness for upstream-backed inspection"><tt>Dreyeck Git readiness for upstream-backed inspection</tt></a></li>
+  <li><a hyperbook="topics" page="Check upstream commit assimilation equivalence"><tt>Check upstream commit assimilation equivalence</tt></a></li>
+  <li><a hyperbook="topics" page="Graphviz story item upstream assimilation example"><tt>Graphviz story item upstream assimilation example</tt></a></li>
+  <li><a expr="(make-dreyeck-git-readiness-state-machine-run)" view="Summary"><tt>make-dreyeck-git-readiness-state-machine-run</tt></a></li>
+  <li><a expr="(make-dreyeck-git-readiness-state-machine-run)" view="Operational path"><tt>make-dreyeck-git-readiness-state-machine-run</tt></a></li>
+  <li><a expr="(make-dreyeck-git-readiness-state-machine-run)" view="Trace"><tt>make-dreyeck-git-readiness-state-machine-run</tt></a></li>
+  <li><a expr="(make-dreyeck-git-readiness-state-machine-run)" view="Failure analysis"><tt>make-dreyeck-git-readiness-state-machine-run</tt></a></li>
+  <li><a expr="(dreyeck-ch-add-konrad-upstream-remote-operation)" view="Summary"><tt>dreyeck-ch-add-konrad-upstream-remote-operation</tt></a></li>
+  <li><a expr="(dreyeck-ch-add-konrad-upstream-remote-operation)" view="Materialization"><tt>dreyeck-ch-add-konrad-upstream-remote-operation</tt></a></li>
+  <li><a expr="(dreyeck-ch-fetch-upstream-main-operation)" view="Summary"><tt>dreyeck-ch-fetch-upstream-main-operation</tt></a></li>
+  <li><a expr="(dreyeck-ch-fetch-upstream-main-operation)" view="Materialization"><tt>dreyeck-ch-fetch-upstream-main-operation</tt></a></li>
+  <li><a expr="(hyperdoc-upstream-commit-assimilation-surface)"><tt>hyperdoc-upstream-commit-assimilation-surface</tt></a></li>
+</ul>
+
+<h2>Typical failure path from ► / Run example</h2>
+
+<ol>
+  <li>Open <a page="Graphviz story item upstream assimilation example">Graphviz story item upstream assimilation example</a> and click <tt>►</tt> / <tt>Run example</tt>.</li>
+  <li>If the current runtime cannot inspect the local Git repository safely, the result degrades to <tt>git-runtime-unavailable</tt>.</li>
+  <li>That bounded result now points to the dreyeck readiness run plus the explicit add-remote and fetch objects.</li>
+  <li>Inspect readiness first, then inspect the operation materializations if the state shows missing remote or missing fetched history.</li>
+  <li>Only after readiness reaches <tt>ready-for-git-backed-inspection</tt> should the operator rerun the assimilation example.</li>
+</ol>
+
+<p>
+  HyperDoc does not silently add <tt>upstream</tt> or fetch
+  <tt>upstream/main</tt> from the example path. The repair seam is explicit so
+  the operator can inspect exactly what would run on dreyeck before doing it.
+</p>
+
+<h2>Readiness states</h2>
+
+<ul>
+  <li><tt>packaged-source-no-repo</tt>: the runtime points at packaged source rather than a live checkout, so Git-backed inspection cannot inspect local branch state.</li>
+  <li><tt>repository-metadata-unavailable</tt>: a checkout root exists, but the runtime cannot see usable <tt>.git</tt> metadata there.</li>
+  <li><tt>live-checkout-no-upstream-remote</tt>: the runtime sees a live checkout, but Konrad's <tt>upstream</tt> remote is missing.</li>
+  <li><tt>upstream-remote-present-not-fetched</tt>: the remote exists, but the local checkout still lacks fetched <tt>upstream/main</tt> history.</li>
+  <li><tt>ready-for-git-backed-inspection</tt>: the runtime can inspect the local checkout and the upstream history needed by Git-backed proof/example surfaces.</li>
+</ul>
+
+<p>
+  The full state machine also records earlier inspection phases and bounded
+  failure states such as <tt>no-git-executable</tt> and
+  <tt>git-command-failed</tt>. The run object keeps those details inspectable
+  in <tt>Summary</tt>, <tt>Trace</tt>, and <tt>Failure analysis</tt>.
+</p>
+
+<h2>Explicit preparation/repair operations</h2>
+
+<p>
+  The readiness run exposes the operational seam as inspectable objects:
+</p>
+
+<ul>
+  <li><a expr="(make-dreyeck-git-readiness-state-machine-run)" view="Summary">dreyeck Git readiness</a></li>
+  <li><a expr="(dreyeck-ch-add-konrad-upstream-remote-operation)" view="Materialization">Add upstream remote</a></li>
+  <li><a expr="(dreyeck-ch-fetch-upstream-main-operation)" view="Materialization">Fetch upstream/main</a></li>
+</ul>
+
+<p>
+  Those operation objects render the exact host-aware shell materialization,
+  but they do not execute it from inside HyperDoc. That keeps the boundary
+  explicit: readiness inspection is read-only, preparation remains separately
+  invokable.
+</p>
+
+<h2>Worked example on dreyeck</h2>
+
+<p>
+  The motivating case is the
+  <a page="Graphviz story item upstream assimilation example">graphviz upstream assimilation example</a>.
+  Its happy path is a real assimilation check ending in
+  <tt>:already-assimilated</tt>.
+  Its bounded unhappy path is <tt>git-runtime-unavailable</tt>, followed by:
+</p>
+
+<ol>
+  <li><a expr="(make-dreyeck-git-readiness-state-machine-run)" view="Summary">inspect readiness</a>,</li>
+  <li><a expr="(dreyeck-ch-add-konrad-upstream-remote-operation)" view="Materialization">materialize add-upstream-remote</a> if the remote is missing,</li>
+  <li><a expr="(dreyeck-ch-fetch-upstream-main-operation)" view="Materialization">materialize fetch-upstream-main</a> if history is not fetched,</li>
+  <li>rerun the example after the repository is ready.</li>
+</ol>
+
+<p>
+  That keeps the semantic boundary intact. The assimilation skill still answers
+  whether the upstream payload is already present in effect. The readiness
+  layer answers whether the current runtime can even ask that Git-backed
+  question locally.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Check upstream commit assimilation equivalence">Check upstream commit assimilation equivalence</a></li>
+  <li><a page="Graphviz story item upstream assimilation example">Graphviz story item upstream assimilation example</a></li>
+  <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
+  <li><a page="Operational Target Objects for dreyeck.ch">Operational Target Objects for dreyeck.ch</a></li>
+</ul>

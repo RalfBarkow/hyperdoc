@@ -41,6 +41,15 @@
   the example and opens the assimilation object in a new pane.
 </p>
 
+<p>
+  If the dreyeck runtime is not locally ready for Git-backed inspection, the
+  same click can end in bounded <tt>git-runtime-unavailable</tt> instead of the
+  final assimilation object. That is the expected operator-facing fallback; the
+  next step is
+  <a page="Dreyeck Git readiness for upstream-backed inspection">Dreyeck Git readiness for upstream-backed inspection</a>,
+  not hidden Git mutation from the example path.
+</p>
+
 <source-of-function>graphviz-story-item-upstream-assimilation-example</source-of-function>
 
 <h2>Case summary</h2>
@@ -154,6 +163,7 @@
 <h2>Related pages</h2>
 
 <ul>
+  <li><a page="Dreyeck Git readiness for upstream-backed inspection">Dreyeck Git readiness for upstream-backed inspection</a></li>
   <li><a page="Check upstream commit assimilation equivalence">Check upstream commit assimilation equivalence</a></li>
   <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
   <li><a page="FedWiki Graphviz story item render trace">FedWiki Graphviz story item render trace</a></li>

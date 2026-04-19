@@ -1625,6 +1625,17 @@
                  "Materialize a host-aware operation without executing it"
                  "Operational Target Objects for dreyeck.ch")))
 
+(defun dreyeck-git-readiness-topic ()
+  (make-topic
+   :id "dreyeck-git-readiness"
+   :title "Dreyeck Git readiness for upstream-backed inspection"
+   :summary "Operator-facing readiness model for deciding whether the current dreyeck runtime can inspect Konrad's upstream/main history locally, and for exposing explicit add-remote and fetch operations when it cannot."
+   :references '("Dreyeck Git readiness for upstream-backed inspection"
+                 "Operational Target Objects for dreyeck.ch"
+                 "Check upstream commit assimilation equivalence"
+                 "Graphviz story item upstream assimilation example"
+                 "Prove commit equivalence from graph/history")))
+
 (defun prove-commit-equivalence-from-graph-history-topic ()
   (make-topic
    :id "prove-commit-equivalence-from-graph-history"
@@ -1652,6 +1663,7 @@
    :title "Check upstream commit assimilation equivalence"
    :summary "Task skill for deciding whether an upstream commit should be cherry-picked, manually assimilated, or treated as already present in effect on the target branch by layering semantic proof and focused validation on top of commit-equivalence proof."
    :references '("Check upstream commit assimilation equivalence"
+                 "Dreyeck Git readiness for upstream-backed inspection"
                  "Graphviz story item upstream assimilation example"
                  "Prove commit equivalence from graph/history"
                  "Check whether a preserved commit was replayed equivalently"
@@ -1663,6 +1675,7 @@
    :title "Graphviz story item upstream assimilation example"
    :summary "Worked example for the upstream commit assimilation skill showing that upstream graphviz commit ceae9d is already assimilated in effect on hauptsache because earlier local commit b1e8d404, the current text-backed constructor path, the corpus trace, and focused rendering validation already carry the live behavior."
    :references '("Graphviz story item upstream assimilation example"
+                 "Dreyeck Git readiness for upstream-backed inspection"
                  "Check upstream commit assimilation equivalence"
                  "Prove commit equivalence from graph/history"
                  "FedWiki Graphviz story item render trace")))

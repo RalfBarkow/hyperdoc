@@ -95,9 +95,19 @@
   on constructor shape, corpus shape, and focused runtime validation.
 </p>
 
+<p>
+  On dreyeck, the same worked example can first degrade to a bounded
+  <tt>git-runtime-unavailable</tt> result if the local checkout is not ready for
+  Git-backed inspection. In that case, use
+  <a page="Dreyeck Git readiness for upstream-backed inspection">Dreyeck Git readiness for upstream-backed inspection</a>
+  to inspect the readiness state and the explicit add-remote / fetch follow-up
+  objects before rerunning the example.
+</p>
+
 <h2>Related pages</h2>
 
 <ul>
+  <li><a page="Dreyeck Git readiness for upstream-backed inspection">Dreyeck Git readiness for upstream-backed inspection</a></li>
   <li><a page="Graphviz story item upstream assimilation example">Graphviz story item upstream assimilation example</a></li>
   <li><a page="Prove commit equivalence from graph/history">Prove commit equivalence from graph/history</a></li>
   <li><a page="Check whether a preserved commit was replayed equivalently">Check whether a preserved commit was replayed equivalently</a></li>
