@@ -197,6 +197,9 @@
 (defmethod replayed-equivalent-commit-of ((check git-upstream-commit-assimilation-check))
   (replayed-equivalent-commit-of (equivalence-check-of check)))
 
+(defun git-upstream-commit-assimilation-check-result-p (object)
+  (typep object 'git-upstream-commit-assimilation-check))
+
 (defun non-empty-output-lines (string)
   (remove-if #'uiop:emptyp
              (uiop:split-string (or string "")
@@ -1632,14 +1635,20 @@
 (defexample graphviz-story-item-upstream-assimilation-example
   "Run the ceae9d graphviz upstream assimilation check and return the inspectable result."
   (let ((check (hyperdoc-graphviz-story-item-commit-assimilation-check)))
-    (-> check
-        (assert-equal +graphviz-story-item-original-commit-hash+
-                      :key (lambda (object)
-                             (commit-hash-of (source-commit-of object))))
-        (assert-equal +graphviz-story-item-proof-target-branch+
-                      :key #'target-branch-of)
-        (assert-eql :already-assimilated
-                    :key #'final-decision-of))))
+    (typecase check
+      (git-upstream-commit-assimilation-check
+       (-> check
+           (assert-equal +graphviz-story-item-original-commit-hash+
+                         :key (lambda (object)
+                                (commit-hash-of (source-commit-of object))))
+           (assert-equal +graphviz-story-item-proof-target-branch+
+                         :key #'target-branch-of)
+           (assert-eql :already-assimilated
+                       :key #'final-decision-of)))
+      (git-runtime-unavailable
+       check)
+      (t
+       (error "Unexpected graphviz assimilation example result: ~S" check)))))
 
 (defun %hyperdoc-commit-equivalence-proof-surface ()
   (make-instance
@@ -1663,8 +1672,8 @@
    :id "hyperdoc-upstream-commit-assimilation-surface"
    :title "Upstream commit assimilation surface"
    :summary "Inspect read-only assimilation checks that combine graph/history proof with payload scope, semantic compatibility, and focused validation before deciding whether an upstream commit should be cherry-picked, manually assimilated, or treated as already present in effect."
-   :checks (list (%hyperdoc-static-route-observability-commit-assimilation-check)
-                 (%hyperdoc-graphviz-story-item-commit-assimilation-check))
+   :checks (list (hyperdoc-static-route-observability-commit-assimilation-check)
+                 (hyperdoc-graphviz-story-item-commit-assimilation-check))
    :notes '("Graph/history proof remains necessary but not sufficient: replay equivalence and ancestry are kept distinct from semantic assimilation proof."
             "Payload scope is made explicit from the source commit before semantic notes are interpreted."
             "This skill stays read-only by default; it classifies assimilation state but does not mutate refs or execute merges.")))

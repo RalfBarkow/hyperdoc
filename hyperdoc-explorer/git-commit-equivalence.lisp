@@ -58,6 +58,100 @@
                  "No corpus lookup path available."))
             ")")))))))
 
+(defun render-unavailable-table-cell (&optional (text "n/a"))
+  (views:html
+    (:tt :style "opacity: 0.65;" (views:esc text))))
+
+(defun render-upstream-assimilation-comparison-row (check)
+  (typecase check
+    (git-upstream-commit-assimilation-check
+     (views:html
+       (:tr
+        (:td (views:object-ref check))
+        (:td (:tt (views:esc
+                   (short-git-commit-hash
+                    (commit-hash-of (source-commit-of check))))))
+        (:td (:tt (views:esc (target-branch-of check))))
+        (:td (:tt (views:esc
+                   (upstream-commit-assimilation-decision-label
+                    (final-decision-of check)))))
+        (:td (:tt (views:esc
+                   (yes-no-label (ancestry-present-p check)))))
+        (:td (:tt (views:esc
+                   (yes-no-label (patch-equivalent-p check)))))
+        (:td (:tt (views:esc
+                   (semantic-effect-status-label
+                    (semantic-effect-status-of check)))))
+        (:td (:tt (views:esc
+                   (validation-status-label
+                    (validation-status-of check))))))))
+    (git-runtime-unavailable
+     (views:html
+       (:tr
+        (:td (views:object-ref check))
+        (:td (render-unavailable-table-cell "unavailable"))
+        (:td (render-unavailable-table-cell "n/a"))
+        (:td (render-unavailable-table-cell "unavailable"))
+        (:td (render-unavailable-table-cell "n/a"))
+        (:td (render-unavailable-table-cell "n/a"))
+        (:td (render-unavailable-table-cell "unavailable"))
+        (:td (views:object-ref check :display "Runtime issue")))))
+    (t
+     (views:html
+       (:tr
+        (:td (views:object-ref check))
+        (:td (render-unavailable-table-cell))
+        (:td (render-unavailable-table-cell))
+        (:td (render-unavailable-table-cell "inconclusive"))
+        (:td (render-unavailable-table-cell))
+        (:td (render-unavailable-table-cell))
+        (:td (render-unavailable-table-cell))
+        (:td (render-unavailable-table-cell "unexpected result")))))))
+
+(defun render-upstream-assimilation-worked-example-entry (check)
+  (typecase check
+    (git-upstream-commit-assimilation-check
+     (views:html
+       (:li
+        (views:object-ref check)
+        " — "
+        (views:esc (summary-of check))
+        (:ul
+         (:li "Open summary: "
+              (views:object-ref check
+                                :display "Summary"
+                                :select "Summary"))
+         (:li "Open graph/history proof: "
+              (views:object-ref check
+                                :display "Graph/History proof"
+                                :select "Graph/History proof"))
+         (:li "Open semantic evidence: "
+              (views:object-ref check
+                                :display "Semantic evidence"
+                                :select "Semantic evidence"))
+         (:li "Open validation: "
+              (views:object-ref check
+                                :display "Validation"
+                                :select "Validation"))
+         (:li "Open final decision: "
+              (views:object-ref check
+                                :display "Decision rationale"
+                                :select "Decision rationale"))))))
+    (git-runtime-unavailable
+     (views:html
+       (:li
+        (views:object-ref check)
+        " — "
+        (views:esc (summary-of check))
+        (:ul
+         (:li "Open runtime summary: "
+              (views:object-ref check :display "Summary" :select "Summary"))))))
+    (t
+     (views:html
+       (:li
+        (views:object-ref check)
+        " — unexpected assimilation result type.")))))
+
 (defmethod views:text-representation ((check git-commit-equivalence-check))
   (format nil "~A -> ~A"
           (short-git-commit-hash (commit-hash-of (source-commit-of check)))
@@ -388,26 +482,7 @@
                    (:th (views:esc "Semantic effect"))
                    (:th (views:esc "Validation")))
               (loop for check in (checks-of surface)
-                    do (views:html
-                         (:tr
-                          (:td (views:object-ref check))
-                          (:td (:tt (views:esc
-                                     (short-git-commit-hash
-                                      (commit-hash-of (source-commit-of check))))))
-                          (:td (:tt (views:esc (target-branch-of check))))
-                          (:td (:tt (views:esc
-                                     (upstream-commit-assimilation-decision-label
-                                      (final-decision-of check)))))
-                          (:td (:tt (views:esc
-                                     (yes-no-label (ancestry-present-p check)))))
-                          (:td (:tt (views:esc
-                                     (yes-no-label (patch-equivalent-p check)))))
-                          (:td (:tt (views:esc
-                                     (semantic-effect-status-label
-                                      (semantic-effect-status-of check)))))
-                          (:td (:tt (views:esc
-                                     (validation-status-label
-                                      (validation-status-of check)))))))))
+                    do (render-upstream-assimilation-comparison-row check)))
       (:p "This surface keeps the higher-layer classification visibly downstream of the reused graph/history proof."))))
 
 (views:defview 👀worked-example (surface git-upstream-commit-assimilation-surface)
@@ -416,29 +491,4 @@
       (:p "This surface keeps named worked examples at the higher assimilation layer. Each one reuses the graph/history proof object underneath, but the operator can still inspect semantic evidence and focused validation separately before trusting the final decision.")
       (:ul
        (loop for check in (checks-of surface)
-             do (views:html
-                  (:li
-                   (views:object-ref check)
-                   " — "
-                   (views:esc (summary-of check))
-                   (:ul
-                    (:li "Open summary: "
-                         (views:object-ref check
-                                           :display "Summary"
-                                           :select "Summary"))
-                    (:li "Open graph/history proof: "
-                         (views:object-ref check
-                                           :display "Graph/History proof"
-                                           :select "Graph/History proof"))
-                    (:li "Open semantic evidence: "
-                         (views:object-ref check
-                                           :display "Semantic evidence"
-                                           :select "Semantic evidence"))
-                    (:li "Open validation: "
-                         (views:object-ref check
-                                           :display "Validation"
-                                           :select "Validation"))
-                    (:li "Open final decision: "
-                         (views:object-ref check
-                                           :display "Decision rationale"
-                                           :select "Decision rationale"))))))))))
+             do (render-upstream-assimilation-worked-example-entry check))))))

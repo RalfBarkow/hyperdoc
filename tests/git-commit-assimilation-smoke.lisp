@@ -116,6 +116,49 @@
      (getf unavailable :status)
      "A missing corpus lookup path must surface as :unavailable")))
 
+(defun run-upstream-commit-assimilation-git-unavailable-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((hyperdoc::*git-program* "/definitely/missing/hyperdoc-git")
+         (result
+           (hyperdoc::graphviz-story-item-upstream-assimilation-example))
+         (surface
+           (make-instance 'hyperdoc::git-upstream-commit-assimilation-surface
+                          :id "git-unavailable-assimilation-surface-smoke"
+                          :title "Git-unavailable assimilation surface smoke"
+                          :summary "Regression surface for bounded git-runtime-unavailable rows."
+                          :checks (list result)))
+         (surface-views
+           (assimilation-load-inspector-views-for-object surface))
+         (comparison-view
+           (assimilation-find-view-by-title surface-views "Comparison"))
+         (worked-example-view
+           (assimilation-find-view-by-title surface-views "Worked example"))
+         (comparison-html
+           (and comparison-view
+                (html-inspector-views:view-html comparison-view)))
+         (worked-example-html
+           (and worked-example-view
+                (html-inspector-views:view-html worked-example-view))))
+    (assimilation-assert-typep
+     'hyperdoc::git-runtime-unavailable
+     result
+     "Graphviz defexample must degrade to a bounded git-runtime-unavailable object when Git cannot be resolved")
+    (assimilation-assert-true
+     comparison-view
+     "Assimilation surface must still expose a Comparison view when a check degrades to git-runtime-unavailable")
+    (assimilation-assert-true
+     worked-example-view
+     "Assimilation surface must still expose a Worked example view when a check degrades to git-runtime-unavailable")
+    (assimilation-assert-true
+     (search "Runtime issue" comparison-html :test #'char-equal)
+     "Comparison view must render a bounded runtime-issue cell for git-runtime-unavailable entries")
+    (assimilation-assert-true
+     (search "unavailable" comparison-html :test #'char-equal)
+     "Comparison view must render readable unavailable/n-a cells for git-runtime-unavailable entries")
+    (assimilation-assert-true
+     (search "runtime summary" worked-example-html :test #'char-equal)
+     "Worked example view must degrade to a bounded runtime-summary link instead of assuming assimilation accessors")))
+
 (defun run-upstream-commit-assimilation-worked-example-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((check
@@ -369,6 +412,7 @@
 (defun run-git-commit-assimilation-smoke-tests ()
   (run-upstream-commit-assimilation-classification-smoke-test)
   (run-upstream-commit-assimilation-page-evidence-smoke-test)
+  (run-upstream-commit-assimilation-git-unavailable-smoke-test)
   (run-upstream-commit-assimilation-worked-example-smoke-test)
   (run-upstream-commit-assimilation-page-render-smoke-test)
   (run-upstream-commit-assimilation-documentation-smoke-test)

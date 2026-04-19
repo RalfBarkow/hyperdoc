@@ -1,0 +1,164 @@
+"use strict";
+
+const { test, expect } = require("@playwright/test");
+const {
+  attachJson,
+  openHyperDoc,
+  openTextPageFromHyperDoc,
+  settleInspectorBindings,
+} = require("./hyperdoc-inspector");
+
+async function installPendingPaneTrace(page) {
+  await page.evaluate(() => {
+    const inspector = document.querySelector(".inspector");
+    const snapshots = [];
+
+    function titleForPane(paneNode) {
+      const titleNode =
+        paneNode?.querySelector(".inspector-title-bar-object") ||
+        paneNode?.querySelector(".inspector-title-bar-class");
+      return titleNode?.textContent?.replace(/\s+/g, " ").trim() || null;
+    }
+
+    function bodyForPane(paneNode) {
+      const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
+      return activeView?.innerText?.replace(/\s+/g, " ").trim().slice(0, 400) || "";
+    }
+
+    function capture() {
+      const panes = Array.from(document.querySelectorAll(".inspector-pane"));
+      const pendingNodes = Array.from(
+        document.querySelectorAll(".hyperdoc-evaluation-pending")
+      );
+      const lastPane = panes[panes.length - 1] || null;
+      snapshots.push({
+        at: Date.now(),
+        paneCount: panes.length,
+        pendingPaneCount: pendingNodes.length,
+        pendingPhases: pendingNodes.map(
+          (node) => node.getAttribute("data-hyperdoc-pending-phase") || null
+        ),
+        pendingStatuses: pendingNodes.map(
+          (node) =>
+            node
+              .querySelector(".hyperdoc-evaluation-pending-status")
+              ?.textContent?.replace(/\s+/g, " ")
+              .trim() || null
+        ),
+        lastPaneTitle: titleForPane(lastPane),
+        lastPaneBody: bodyForPane(lastPane),
+      });
+    }
+
+    window.__hyperdocPendingPaneTrace = snapshots;
+    window.__hyperdocPendingPaneObserver?.disconnect?.();
+    const observer = new MutationObserver(capture);
+    observer.observe(inspector, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      characterData: true,
+      attributeFilter: ["class", "hidden", "data-hyperdoc-pending-phase"],
+    });
+    window.__hyperdocPendingPaneObserver = observer;
+    capture();
+  });
+}
+
+async function readPendingPaneTrace(page) {
+  return page.evaluate(() => {
+    window.__hyperdocPendingPaneObserver?.disconnect?.();
+    return window.__hyperdocPendingPaneTrace || [];
+  });
+}
+
+async function readLastPaneState(page) {
+  return page.evaluate(() => {
+    const panes = Array.from(document.querySelectorAll(".inspector-pane"));
+    const lastPane = panes[panes.length - 1] || null;
+    const titleNode =
+      lastPane?.querySelector(".inspector-title-bar-object") ||
+      lastPane?.querySelector(".inspector-title-bar-class");
+    const activeView = lastPane?.querySelector(".inspector-view:not([hidden])");
+    const pending = activeView?.querySelector(".hyperdoc-evaluation-pending");
+    return {
+      paneCount: panes.length,
+      title: titleNode?.textContent?.replace(/\s+/g, " ").trim() || null,
+      body: activeView?.innerText?.replace(/\s+/g, " ").trim() || "",
+      pendingVisible: !!pending,
+      pendingPhase: pending?.getAttribute("data-hyperdoc-pending-phase") || null,
+    };
+  });
+}
+
+test("Run example opens a visible pending pane and then replaces it in place", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, "Graphviz story item upstream assimilation example");
+  await settleInspectorBindings(page, 1000);
+
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  const examplePane = page.locator(".inspector-pane").nth(2);
+  const runButton = examplePane
+    .locator("button.inspector-action[title='Run example']")
+    .first();
+
+  await expect(runButton).toBeVisible({ timeout: 20_000 });
+  await installPendingPaneTrace(page);
+  await runButton.click();
+
+  await expect
+    .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+    .toBe(paneCountBefore + 1);
+
+  await page.waitForFunction(
+    () =>
+      (window.__hyperdocPendingPaneTrace || []).some(
+        (snapshot) =>
+          snapshot.pendingPaneCount > 0 &&
+          snapshot.pendingStatuses.some((status) =>
+            /Running example|Evaluating/.test(status || "")
+          )
+      ),
+    { timeout: 20_000 }
+  );
+
+  await expect
+    .poll(async () => {
+      const state = await readLastPaneState(page);
+      return (
+        state.paneCount === paneCountBefore + 1 &&
+        !state.pendingVisible &&
+        state.body.length > 0
+      );
+    }, { timeout: 30_000 })
+    .toBe(true);
+
+  const trace = await readPendingPaneTrace(page);
+  const finalState = await readLastPaneState(page);
+
+  await attachJson(testInfo, "run-example-pending-pane-trace.json", {
+    paneCountBefore,
+    trace,
+    finalState,
+  });
+
+  expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
+  expect(
+    trace.some((snapshot) =>
+      snapshot.pendingStatuses.some((status) =>
+        /Running example|Evaluating|Waiting for Git/.test(status || "")
+      )
+    )
+  ).toBe(true);
+  expect(finalState.paneCount).toBe(paneCountBefore + 1);
+  expect(finalState.pendingVisible).toBe(false);
+  expect(finalState.body).not.toContain("Running example...");
+  expect(finalState.body).not.toContain("Evaluating...");
+  expect(
+    /already assimilated|Git executable unavailable|Repository metadata unavailable|Git unavailable/i.test(
+      finalState.body
+    )
+  ).toBe(true);
+});

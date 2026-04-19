@@ -695,94 +695,99 @@
           (progn
             (unless (getf event :shift-key)
               (close-panes-after inspector pane))
-            (if (getf event :alt-key)
-                (progn
-                  (maybe-log-inspector-performance
-                   :dom-association/pane-open-requested
-                   :mode :alt-target)
-                  (create-pane inspector target)
-                  (maybe-log-inspector-performance
-                   :dom-association/pane-open-succeeded
-                   :mode :alt-target
-                   :ms (maybe-elapsed-millis click-start))
-                  (notify-dom-association-browser
-                   obj request-id "pane-open-succeeded"
-                   :message (dom-association-success-message submit-payload)))
-                (cond
-                  ((dom-connect-request-evidence-submit-payload-p submit-payload)
-                   (let* ((evidence-request-id
-                            (getf submit-payload :evidence-request-id))
-                          (evidence (or (find-dom-connect-request-evidence
-                                         evidence-request-id)
-                                        (ensure-dom-connect-request-evidence-from-submit-payload
-                                         pane submit-payload evidence-request-id))))
-                     (when evidence-request-id
-                       (record-dom-connect-request-evidence-browser-failure
-                        evidence-request-id submit-payload))
-                     (maybe-log-inspector-performance
-                      :dom-association/object-created
-                      :object (maybe-summarize-object-for-log evidence))
-                     (maybe-log-inspector-performance
-                      :dom-association/pane-open-requested
-                      :mode :connect-request-evidence)
-                     (open-dom-connect-request-evidence-pane
-                      inspector evidence-request-id evidence)
-                     (maybe-log-inspector-performance
-                      :dom-association/pane-open-succeeded
-                      :mode :connect-request-evidence
-                      :object (maybe-summarize-object-for-log evidence)
-                      :ms (maybe-elapsed-millis click-start))
-                     (notify-dom-association-browser
-                      obj request-id "pane-open-succeeded"
-                      :message (dom-association-success-message
-                                submit-payload))))
-                  (t
-                   (let ((association
-                           (cond
-                             (request-id
-                              (make-dom-association-from-submit-payload
-                               pane submit-payload))
-                             (t
-                              (eval-thunk-with-active-button
-                               clog-obj obj target)))))
-                     (maybe-log-inspector-performance
-                      :dom-association/object-created
-                      :object (maybe-summarize-object-for-log association))
-                     (when association-request-p
-                       (record-dom-connect-request-evidence-server-status
-                        request-id "object-created"))
-                     (maybe-log-inspector-performance
-                      :dom-association/pane-open-requested
-                      :mode :evaluated-object)
-                     (cond
-                       ((dom-connect-snapshot-object-p association)
-                        (open-dom-connect-snapshot-pane
-                         inspector submit-payload association))
-                       ((dom-connect-request-evidence-object-request-id
-                         association)
-                       (open-dom-connect-request-evidence-pane
-                        inspector
-                        (dom-connect-request-evidence-object-request-id
-                          association)
-                        association))
-                       ((dock-annotation-object-p association)
-                        (open-dock-annotation-pane inspector association))
-                       (t
-                        (open-hyperdoc-object-pane inspector association)))
-                     (maybe-log-inspector-performance
-                      :dom-association/pane-open-succeeded
-                      :mode :evaluated-object
-                      :object (maybe-summarize-object-for-log association)
-                      :ms (maybe-elapsed-millis click-start))
-                     (when association-request-p
-                       (record-dom-connect-request-evidence-server-status
-                        request-id "pane-open-succeeded"
-                        :message (dom-association-success-message submit-payload)
-                        :acknowledged-p t))
-                     (notify-dom-association-browser
-                      obj request-id "pane-open-succeeded"
-                      :message (dom-association-success-message
-                                submit-payload)))))))
+            (cond
+              ((getf event :alt-key)
+               (maybe-log-inspector-performance
+                :dom-association/pane-open-requested
+                :mode :alt-target)
+               (create-pane inspector target)
+               (maybe-log-inspector-performance
+                :dom-association/pane-open-succeeded
+                :mode :alt-target
+                :ms (maybe-elapsed-millis click-start))
+               (notify-dom-association-browser
+                obj request-id "pane-open-succeeded"
+                :message (dom-association-success-message submit-payload)))
+              ((dom-connect-request-evidence-submit-payload-p submit-payload)
+               (let* ((evidence-request-id
+                        (getf submit-payload :evidence-request-id))
+                      (evidence (or (find-dom-connect-request-evidence
+                                     evidence-request-id)
+                                    (ensure-dom-connect-request-evidence-from-submit-payload
+                                     pane submit-payload evidence-request-id))))
+                 (when evidence-request-id
+                   (record-dom-connect-request-evidence-browser-failure
+                    evidence-request-id submit-payload))
+                 (maybe-log-inspector-performance
+                  :dom-association/object-created
+                  :object (maybe-summarize-object-for-log evidence))
+                 (maybe-log-inspector-performance
+                  :dom-association/pane-open-requested
+                  :mode :connect-request-evidence)
+                 (open-dom-connect-request-evidence-pane
+                  inspector evidence-request-id evidence)
+                 (maybe-log-inspector-performance
+                  :dom-association/pane-open-succeeded
+                  :mode :connect-request-evidence
+                  :object (maybe-summarize-object-for-log evidence)
+                  :ms (maybe-elapsed-millis click-start))
+                 (notify-dom-association-browser
+                  obj request-id "pane-open-succeeded"
+                  :message (dom-association-success-message
+                            submit-payload))))
+              (request-id
+               (let ((association
+                       (make-dom-association-from-submit-payload
+                        pane submit-payload)))
+                 (maybe-log-inspector-performance
+                  :dom-association/object-created
+                  :object (maybe-summarize-object-for-log association))
+                 (when association-request-p
+                   (record-dom-connect-request-evidence-server-status
+                    request-id "object-created"))
+                 (maybe-log-inspector-performance
+                  :dom-association/pane-open-requested
+                  :mode :evaluated-object)
+                 (cond
+                   ((dom-connect-snapshot-object-p association)
+                    (open-dom-connect-snapshot-pane
+                     inspector submit-payload association))
+                   ((dom-connect-request-evidence-object-request-id
+                     association)
+                    (open-dom-connect-request-evidence-pane
+                     inspector
+                     (dom-connect-request-evidence-object-request-id association)
+                     association))
+                   ((dock-annotation-object-p association)
+                    (open-dock-annotation-pane inspector association))
+                   (t
+                    (open-hyperdoc-object-pane inspector association)))
+                 (maybe-log-inspector-performance
+                  :dom-association/pane-open-succeeded
+                  :mode :evaluated-object
+                  :object (maybe-summarize-object-for-log association)
+                  :ms (maybe-elapsed-millis click-start))
+                 (when association-request-p
+                   (record-dom-connect-request-evidence-server-status
+                    request-id "pane-open-succeeded"
+                    :message (dom-association-success-message submit-payload)
+                    :acknowledged-p t))
+                 (notify-dom-association-browser
+                  obj request-id "pane-open-succeeded"
+                  :message (dom-association-success-message
+                            submit-payload))))
+              (t
+               (maybe-log-inspector-performance
+                :dom-association/pane-open-requested
+                :mode :pending-evaluated-object)
+               (let ((pending-pane
+                       (start-pending-evaluation pane obj target)))
+                 (maybe-log-inspector-performance
+                  :dom-association/pane-open-succeeded
+                  :mode :pending-evaluated-object
+                  :object (maybe-summarize-object-for-log
+                           (pane-object pending-pane))
+                  :ms (maybe-elapsed-millis click-start))))))
         (error (c)
           (let ((detail (princ-to-string c)))
             (maybe-log-inspector-performance
