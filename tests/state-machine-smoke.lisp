@@ -190,6 +190,112 @@
        "Directed graph remains the teaching-oriented text view"
        "Derived DOT source"))))
 
+(defun run-dreyeck-git-readiness-state-machine-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (flet ((make-run (&rest probe-args)
+           (apply #'hyperdoc::make-dreyeck-git-readiness-state-machine-run
+                  :probe
+                  (apply #'hyperdoc::make-dreyeck-git-readiness-probe
+                         probe-args)
+                  nil)))
+    (let* ((packaged-run
+             (make-run
+              :git-executable-available-p t
+              :runtime-origin :packaged-source
+              :git-metadata-present-p nil
+              :requested-program "git"
+              :resolved-program "git"))
+           (missing-remote-run
+             (make-run
+              :git-executable-available-p t
+              :runtime-origin :live-checkout
+              :effective-repository-root #p"/tmp/hyperdoc/"
+              :repository-root-source :process-working-directory
+              :git-metadata-present-p t
+              :upstream-remote-present-p nil
+              :requested-program "git"
+              :resolved-program "git"))
+           (not-fetched-run
+             (make-run
+              :git-executable-available-p t
+              :runtime-origin :live-checkout
+              :effective-repository-root #p"/tmp/hyperdoc/"
+              :repository-root-source :process-working-directory
+              :git-metadata-present-p t
+              :upstream-remote-present-p t
+              :upstream-remote-url "https://codeberg.org/khinsen/hyperdoc.git"
+              :upstream-main-fetched-p nil
+              :requested-program "git"
+              :resolved-program "git"))
+           (ready-run
+             (make-run
+              :git-executable-available-p t
+              :runtime-origin :live-checkout
+              :effective-repository-root #p"/tmp/hyperdoc/"
+              :repository-root-source :process-working-directory
+              :git-metadata-present-p t
+              :upstream-remote-present-p t
+              :upstream-remote-url "https://codeberg.org/khinsen/hyperdoc.git"
+              :upstream-main-fetched-p t
+              :requested-program "git"
+              :resolved-program "git"))
+           (ready-views
+             (state-machine-smoke-load-inspector-views-for-object ready-run))
+           (ready-summary-view
+             (state-machine-smoke-find-view-by-title ready-views "Summary"))
+           (ready-operational-path-view
+             (state-machine-smoke-find-view-by-title ready-views
+                                                     "Operational path"))
+           (machine (hyperdoc::state-machine-run-machine-of ready-run)))
+      (state-machine-assert-typep
+       'hyperdoc::dreyeck-git-readiness-state-machine-run
+       ready-run
+       "Readiness entry point must materialize a specialized state-machine run")
+      (state-machine-assert-typep
+       'hyperdoc::state-machine-definition
+       machine
+       "Readiness run must point to a reusable machine definition")
+      (state-machine-assert-equal
+       "packaged-source-no-repo"
+       (hyperdoc::state-machine-run-current-state-of packaged-run)
+       "Packaged-source probe must classify as packaged-source-no-repo")
+      (state-machine-assert-equal
+       "live-checkout-no-upstream-remote"
+       (hyperdoc::state-machine-run-current-state-of missing-remote-run)
+       "Live checkout without upstream remote must classify correctly")
+      (state-machine-assert-equal
+       "upstream-remote-present-not-fetched"
+       (hyperdoc::state-machine-run-current-state-of not-fetched-run)
+       "Present upstream remote without upstream/main must classify correctly")
+      (state-machine-assert-equal
+       "ready-for-git-backed-inspection"
+       (hyperdoc::state-machine-run-current-state-of ready-run)
+       "Ready probe must classify as ready-for-git-backed-inspection")
+      (dolist (title '("Summary"
+                       "Operational path"
+                       "Overview"
+                       "Trace"
+                       "Timeline"
+                       "Evidence"
+                       "Failure analysis"
+                       "Source evidence / code path"))
+        (state-machine-assert-true
+         (state-machine-smoke-find-view-by-title ready-views title)
+         (format nil "Readiness run must expose view ~A" title)))
+      (assert-state-machine-page-contains-all
+       (html-inspector-views:view-html ready-summary-view)
+       "dreyeck Git readiness Summary"
+       '("Current readiness state"
+         "ready-for-git-backed-inspection"
+         "Add upstream remote"
+         "Fetch upstream/main"))
+      (assert-state-machine-page-contains-all
+       (html-inspector-views:view-html ready-operational-path-view)
+       "dreyeck Git readiness Operational path"
+       '("HyperDoc does not execute add-remote or fetch"
+         "Materialization"
+         "No repair operation is required")))))
+
 (defun run-state-machine-documentation-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (dolist (spec '((hyperdoc::path-topic . "Path")
@@ -275,6 +381,7 @@
 (defun run-state-machine-smoke-tests ()
   (run-state-machine-runtime-smoke-test)
   (run-state-machine-graphviz-smoke-test)
+  (run-dreyeck-git-readiness-state-machine-smoke-test)
   (run-state-machine-documentation-smoke-test)
   (format t "~&State-machine smoke tests passed.~%")
   t)

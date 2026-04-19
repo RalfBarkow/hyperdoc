@@ -53,6 +53,57 @@
    (computation-mode :reader computation-mode-of
                      :initarg :computation-mode)))
 
+(defclass dreyeck-git-readiness-state-machine-run (state-machine-run)
+  ((host-target :reader dreyeck-git-readiness-host-target-of
+                :initarg :host-target
+                :type nixos-host-target)
+   (effective-repository-root :reader dreyeck-git-readiness-effective-repository-root-of
+                              :initarg :effective-repository-root
+                              :initform nil)
+   (repository-root-source :reader dreyeck-git-readiness-repository-root-source-of
+                           :initarg :repository-root-source
+                           :initform nil)
+   (runtime-origin :reader dreyeck-git-readiness-runtime-origin-of
+                   :initarg :runtime-origin
+                   :initform :unknown)
+   (git-executable-available-p
+    :reader dreyeck-git-readiness-git-executable-available-p-of
+    :initarg :git-executable-available-p
+    :initform nil)
+   (requested-program :reader dreyeck-git-readiness-requested-program-of
+                      :initarg :requested-program
+                      :initform nil)
+   (resolved-program :reader dreyeck-git-readiness-resolved-program-of
+                     :initarg :resolved-program
+                     :initform nil)
+   (git-metadata-path :reader dreyeck-git-readiness-git-metadata-path-of
+                      :initarg :git-metadata-path
+                      :initform nil)
+   (git-metadata-present-p :reader dreyeck-git-readiness-git-metadata-present-p-of
+                           :initarg :git-metadata-present-p
+                           :initform nil)
+   (upstream-remote-present-p
+    :reader dreyeck-git-readiness-upstream-remote-present-p-of
+    :initarg :upstream-remote-present-p
+    :initform nil)
+   (upstream-remote-url :reader dreyeck-git-readiness-upstream-remote-url-of
+                        :initarg :upstream-remote-url
+                        :initform nil)
+   (upstream-main-fetched-p :reader dreyeck-git-readiness-upstream-main-fetched-p-of
+                            :initarg :upstream-main-fetched-p
+                            :initform nil)
+   (blocking-condition :reader dreyeck-git-readiness-blocking-condition-of
+                       :initarg :blocking-condition
+                       :initform nil)
+   (add-upstream-remote-operation
+    :reader dreyeck-git-readiness-add-upstream-remote-operation-of
+    :initarg :add-upstream-remote-operation
+    :type git-remote-operation)
+   (fetch-upstream-main-operation
+    :reader dreyeck-git-readiness-fetch-upstream-main-operation-of
+    :initarg :fetch-upstream-main-operation
+    :type git-remote-operation)))
+
 (defgeneric materialization-shell-block (object)
   (:documentation "Render a shell block that materializes OBJECT operationally."))
 
@@ -139,6 +190,25 @@
   (ecase computation-mode
     (:static-computation
      "static computation from current server wiring")))
+
+(defun dreyeck-git-readiness-runtime-origin-label (origin)
+  (ecase origin
+    (:packaged-source "packaged source / release image")
+    (:live-checkout "live checkout")
+    (:unknown "unknown runtime origin")))
+
+(defun dreyeck-git-readiness-state-label (state)
+  (ecase state
+    (:inspect-runtime "inspect runtime")
+    (:inspect-repo-root "inspect repo root")
+    (:no-git-executable "no-git-executable")
+    (:packaged-source-no-repo "packaged-source-no-repo")
+    (:repository-metadata-unavailable "repository-metadata-unavailable")
+    (:live-checkout-no-upstream-remote "live-checkout-no-upstream-remote")
+    (:upstream-remote-present-not-fetched "upstream-remote-present-not-fetched")
+    (:upstream-main-fetched "upstream-main-fetched")
+    (:ready-for-git-backed-inspection "ready-for-git-backed-inspection")
+    (:git-command-failed "git-command-failed")))
 
 (defun static-asset-request-paths ()
   '("/boot.html"
@@ -306,3 +376,623 @@
                  :remote-url "https://codeberg.org/khinsen/hyperdoc.git"
                  :branch "main"
                  :operation-kind :fetch-branch))
+
+(defun git-metadata-pathname (repository-root)
+  (when repository-root
+    (merge-pathnames #P".git/"
+                     (uiop:ensure-directory-pathname repository-root))))
+
+(defun git-metadata-present-p (repository-root)
+  (not (null (and repository-root
+                  (probe-file (git-metadata-pathname repository-root))))))
+
+(defun dreyeck-git-readiness-runtime-origin (&key repository-root
+                                                repository-root-source
+                                                system)
+  (let ((source-file (ignore-errors (asdf:system-source-file system))))
+    (cond
+      ((git-explicit-repository-root-source-p repository-root-source)
+       :live-checkout)
+      ((eq repository-root-source :process-working-directory)
+       :live-checkout)
+      ((nix-store-pathname-p repository-root)
+       :packaged-source)
+      ((and repository-root
+            (probe-file repository-root))
+       :live-checkout)
+      ((nix-store-pathname-p source-file)
+       :packaged-source)
+      (source-file
+       :live-checkout)
+      (t
+       :unknown))))
+
+(defun git-output-indicates-missing-remote-p (output remote-name)
+  (and output
+       (or (search (format nil "No such remote '~A'" remote-name)
+                   output
+                   :test #'char-equal)
+           (search (format nil "No such remote: '~A'" remote-name)
+                   output
+                   :test #'char-equal))))
+
+(defun git-show-ref-output-present-p (output)
+  (and (stringp output)
+       (plusp (length (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                   output)))))
+
+(defun dreyeck-git-readiness-source-evidence ()
+  (list
+   (list :layer "Lisp source"
+         :reference "hyperdoc/state-machines.lisp"
+         :detail "Generic reusable state-machine-definition and state-machine-run objects.")
+   (list :layer "Lisp source"
+         :reference "hyperdoc/operational-targets.lisp"
+         :detail "Read-only readiness probe and explicit dreyeck add-remote/fetch operational targets.")
+   (list :layer "Lisp source"
+         :reference "hyperdoc-explorer/operational-targets.lisp"
+         :detail "Inspector views that expose readiness, repair path, and follow-up links.")
+   (list :layer "Test"
+         :reference "tests/state-machine-smoke.lisp"
+         :detail "Focused readiness classification smoke coverage.")
+   (list :layer "Test"
+         :reference "tests/git-commit-assimilation-smoke.lisp"
+         :detail "Git-unavailable follow-up coverage from the upstream assimilation path.")))
+
+(defun make-dreyeck-git-readiness-state-machine-definition ()
+  (make-state-machine-definition
+   :id "state-machine-definition/dreyeck-git-readiness"
+   :title "dreyeck Git readiness state machine"
+   :summary
+   "Read-only operational state machine for determining whether the current runtime is ready to inspect Konrad's upstream/main history without hiding remote-add or fetch work behind example clicks."
+   :states
+   (list
+    (make-state-machine-state
+     :id "inspect-runtime"
+     :title "Inspect runtime"
+     :summary "Resolve Git executable availability and the current runtime origin."
+     :role :initial
+     :entry-condition "A Git-backed inspection request wants explicit readiness evidence."
+     :exit-condition "Either Git is unavailable or repo-root inspection can continue.")
+    (make-state-machine-state
+     :id "inspect-repo-root"
+     :title "Inspect repo root"
+     :summary "Resolve effective repository root, runtime origin, and .git metadata."
+     :entry-condition "A usable Git executable is available."
+     :exit-condition "Either readiness is blocked or upstream remote history can be checked.")
+    (make-state-machine-state
+     :id "no-git-executable"
+     :title "No Git executable"
+     :summary "The runtime cannot launch a usable Git executable."
+     :role :failure)
+    (make-state-machine-state
+     :id "packaged-source-no-repo"
+     :title "Packaged source, no repo metadata"
+     :summary "The runtime points at packaged source or a release image without usable Git repository metadata."
+     :role :failure)
+    (make-state-machine-state
+     :id "repository-metadata-unavailable"
+     :title "Repository metadata unavailable"
+     :summary "The runtime can launch Git, but no usable repository root/.git metadata is available for this checkout."
+     :role :failure)
+    (make-state-machine-state
+     :id "live-checkout-no-upstream-remote"
+     :title "Live checkout, no upstream remote"
+     :summary "The runtime sees a live checkout but Konrad's upstream remote is not configured."
+     :role :terminal)
+    (make-state-machine-state
+     :id "upstream-remote-present-not-fetched"
+     :title "Upstream remote present, not fetched"
+     :summary "The upstream remote exists but upstream/main is not yet present locally."
+     :role :terminal)
+    (make-state-machine-state
+     :id "upstream-main-fetched"
+     :title "Upstream/main fetched"
+     :summary "The runtime can resolve upstream/main locally."
+     :role :intermediate)
+    (make-state-machine-state
+     :id "ready-for-git-backed-inspection"
+     :title "Ready for Git-backed inspection"
+     :summary "Git executable, repository metadata, upstream remote, and upstream/main are all available."
+     :role :terminal)
+    (make-state-machine-state
+     :id "git-command-failed"
+     :title "Git command failed"
+     :summary "A Git probe failed for a reason outside the expected executable/repository readiness classes."
+     :role :failure))
+   :transitions
+   (list
+    (make-state-machine-transition
+     :id "inspect-runtime->no-git-executable"
+     :from-state "inspect-runtime"
+     :to-state "no-git-executable"
+     :trigger "inspect runtime"
+     :guard "git executable unavailable"
+     :emitted-evidence "git-runtime-unavailable classification"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-runtime->inspect-repo-root"
+     :from-state "inspect-runtime"
+     :to-state "inspect-repo-root"
+     :trigger "inspect runtime"
+     :guard "git executable available"
+     :emitted-evidence "effective repository root probe"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-repo-root->packaged-source-no-repo"
+     :from-state "inspect-repo-root"
+     :to-state "packaged-source-no-repo"
+     :trigger "inspect repo root"
+     :guard "packaged-source-and-no-git-metadata"
+     :emitted-evidence "runtime origin and missing repository metadata"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-repo-root->repository-metadata-unavailable"
+     :from-state "inspect-repo-root"
+     :to-state "repository-metadata-unavailable"
+     :trigger "inspect repo root"
+     :guard "live-runtime-but-no-repository-metadata"
+     :emitted-evidence "missing repository root or .git metadata"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-repo-root->live-checkout-no-upstream-remote"
+     :from-state "inspect-repo-root"
+     :to-state "live-checkout-no-upstream-remote"
+     :trigger "inspect repo root"
+     :guard "live-checkout-and-upstream-remote-missing"
+     :emitted-evidence "remote lookup result"
+     :side-effects "none; explicit add-remote operation remains separate"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-repo-root->upstream-remote-present-not-fetched"
+     :from-state "inspect-repo-root"
+     :to-state "upstream-remote-present-not-fetched"
+     :trigger "inspect repo root"
+     :guard "upstream-remote-present-but-upstream-main-missing"
+     :emitted-evidence "remote branch lookup result"
+     :side-effects "none; explicit fetch operation remains separate"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-repo-root->upstream-main-fetched"
+     :from-state "inspect-repo-root"
+     :to-state "upstream-main-fetched"
+     :trigger "inspect repo root"
+     :guard "upstream-main-present"
+     :emitted-evidence "refs/remotes/upstream/main"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "inspect-repo-root->git-command-failed"
+     :from-state "inspect-repo-root"
+     :to-state "git-command-failed"
+     :trigger "inspect repo root"
+     :guard "unexpected git command failure"
+     :emitted-evidence "git-runtime-unavailable classification"
+     :side-effects "none"
+     :reversible-p nil)
+    (make-state-machine-transition
+     :id "upstream-main-fetched->ready"
+     :from-state "upstream-main-fetched"
+     :to-state "ready-for-git-backed-inspection"
+     :trigger "verify readiness"
+     :guard "all readiness prerequisites satisfied"
+     :emitted-evidence "ready-for-git-backed-inspection"
+     :side-effects "none"
+     :reversible-p nil))
+   :initial-state "inspect-runtime"
+   :terminal-states '("live-checkout-no-upstream-remote"
+                      "upstream-remote-present-not-fetched"
+                      "ready-for-git-backed-inspection")
+   :failure-states '("no-git-executable"
+                     "packaged-source-no-repo"
+                     "repository-metadata-unavailable"
+                     "git-command-failed")
+   :guards '("git executable unavailable"
+             "git executable available"
+             "packaged-source-and-no-git-metadata"
+             "live-runtime-but-no-repository-metadata"
+             "live-checkout-and-upstream-remote-missing"
+             "upstream-remote-present-but-upstream-main-missing"
+             "upstream-main-present"
+             "unexpected git command failure"
+             "all readiness prerequisites satisfied")
+   :events '("inspect runtime"
+             "inspect repo root"
+             "verify readiness")
+   :invariants
+   (list
+    (list :label "Read-only classification"
+          :detail "The readiness machine never mutates remotes or fetches history; it only classifies the current runtime and points at explicit operations.")
+    (list :label "Operational repair stays explicit"
+          :detail "Add-remote and fetch remain separate host-aware operational-target objects, not side effects of example clicks or proof surfaces.")
+    (list :label "Ready means upstream/main is local"
+          :detail "The runtime is only ready when a usable Git executable, repository metadata, upstream remote, and upstream/main are all available."))
+   :source-evidence (dreyeck-git-readiness-source-evidence)
+   :notes
+   (list
+    (list :label "Operational seam"
+          :detail "This machine reuses the existing dreyeck host target plus the add-upstream-remote and fetch-upstream-main operational-target objects as explicit next steps."))
+   :multi-initial-p nil
+   :multi-current-p nil
+   :allow-terminal-outgoing-p nil
+   :acyclic-p t))
+
+(defun dreyeck-git-readiness-transition-entry
+    (timestamp transition-id from-state to-state detail)
+  (list :timestamp timestamp
+        :kind :transition
+        :transition-id transition-id
+        :from-state from-state
+        :to-state to-state
+        :detail detail))
+
+(defun dreyeck-git-readiness-evidence-entry (timestamp to-state detail)
+  (list :timestamp timestamp
+        :kind :evidence
+        :to-state to-state
+        :detail detail))
+
+(defun make-dreyeck-git-readiness-probe
+    (&key git-executable-available-p requested-program resolved-program
+       effective-repository-root repository-root-source runtime-origin
+       git-metadata-present-p upstream-remote-present-p upstream-remote-url
+       upstream-main-fetched-p blocking-condition)
+  (list :git-executable-available-p git-executable-available-p
+        :requested-program requested-program
+        :resolved-program resolved-program
+        :effective-repository-root effective-repository-root
+        :repository-root-source repository-root-source
+        :runtime-origin runtime-origin
+        :git-metadata-present-p git-metadata-present-p
+        :upstream-remote-present-p upstream-remote-present-p
+        :upstream-remote-url upstream-remote-url
+        :upstream-main-fetched-p upstream-main-fetched-p
+        :blocking-condition blocking-condition))
+
+(defun classify-dreyeck-git-readiness-probe (probe)
+  (let ((blocking-condition (getf probe :blocking-condition)))
+    (cond
+      ((or (eq (getf probe :git-executable-available-p) nil)
+           (and (typep blocking-condition 'git-runtime-unavailable)
+                (eq (classification-of blocking-condition)
+                    :git-executable-unavailable)))
+       (values "no-git-executable"
+               :failed
+               "git-executable-unavailable"
+               (list "inspect-runtime"
+                     "no-git-executable")
+               (list
+                (dreyeck-git-readiness-transition-entry
+                 1
+                 "inspect-runtime->no-git-executable"
+                 "inspect-runtime"
+                 "no-git-executable"
+                 "Git executable availability probe failed."))
+               (list
+                (dreyeck-git-readiness-evidence-entry
+                 2
+                 "no-git-executable"
+                 "No usable Git executable is available in this runtime."))))
+      ((or (typep blocking-condition 'git-runtime-unavailable)
+           (null (getf probe :effective-repository-root))
+           (eq (getf probe :git-metadata-present-p) nil))
+       (let* ((runtime-origin (or (getf probe :runtime-origin) :unknown))
+              (packaged-p (eq runtime-origin :packaged-source))
+              (state (if packaged-p
+                         "packaged-source-no-repo"
+                         "repository-metadata-unavailable"))
+              (classification (if packaged-p
+                                  "packaged-source-no-repo"
+                                  "repository-metadata-unavailable"))
+              (detail (if packaged-p
+                          "The runtime points at packaged source without usable repository metadata."
+                          "The runtime does not currently expose a usable repository root and .git metadata.")))
+         (values state
+                 :failed
+                 classification
+                 (list "inspect-runtime"
+                       "inspect-repo-root"
+                       state)
+                 (list
+                  (dreyeck-git-readiness-transition-entry
+                   1
+                   "inspect-runtime->inspect-repo-root"
+                   "inspect-runtime"
+                   "inspect-repo-root"
+                   "Git executable is available, so repository inspection continued.")
+                  (dreyeck-git-readiness-transition-entry
+                   2
+                   (if packaged-p
+                       "inspect-repo-root->packaged-source-no-repo"
+                       "inspect-repo-root->repository-metadata-unavailable")
+                   "inspect-repo-root"
+                   state
+                   detail))
+                 (list
+                  (dreyeck-git-readiness-evidence-entry
+                   3
+                   state
+                   detail)))))
+      ((not (getf probe :upstream-remote-present-p))
+       (values "live-checkout-no-upstream-remote"
+               :finished
+               "upstream-remote-missing"
+               (list "inspect-runtime"
+                     "inspect-repo-root"
+                     "live-checkout-no-upstream-remote")
+               (list
+                (dreyeck-git-readiness-transition-entry
+                 1
+                 "inspect-runtime->inspect-repo-root"
+                 "inspect-runtime"
+                 "inspect-repo-root"
+                 "Git executable is available and the checkout is inspectable.")
+                (dreyeck-git-readiness-transition-entry
+                 2
+                 "inspect-repo-root->live-checkout-no-upstream-remote"
+                 "inspect-repo-root"
+                 "live-checkout-no-upstream-remote"
+                 "The live checkout does not currently expose the upstream remote."))
+               (list
+                (dreyeck-git-readiness-evidence-entry
+                 3
+                 "live-checkout-no-upstream-remote"
+                 "Upstream remote lookup returned no configured remote."))))
+      ((not (getf probe :upstream-main-fetched-p))
+       (values "upstream-remote-present-not-fetched"
+               :finished
+               "upstream-main-not-fetched"
+               (list "inspect-runtime"
+                     "inspect-repo-root"
+                     "upstream-remote-present-not-fetched")
+               (list
+                (dreyeck-git-readiness-transition-entry
+                 1
+                 "inspect-runtime->inspect-repo-root"
+                 "inspect-runtime"
+                 "inspect-repo-root"
+                 "Git executable is available and the checkout is inspectable.")
+                (dreyeck-git-readiness-transition-entry
+                 2
+                 "inspect-repo-root->upstream-remote-present-not-fetched"
+                 "inspect-repo-root"
+                 "upstream-remote-present-not-fetched"
+                 "The upstream remote exists, but upstream/main is not present locally."))
+               (list
+                (dreyeck-git-readiness-evidence-entry
+                 3
+                 "upstream-remote-present-not-fetched"
+                 "refs/remotes/upstream/main is not currently present."))))
+      (t
+       (values "ready-for-git-backed-inspection"
+               :finished
+               nil
+               (list "inspect-runtime"
+                     "inspect-repo-root"
+                     "upstream-main-fetched"
+                     "ready-for-git-backed-inspection")
+               (list
+                (dreyeck-git-readiness-transition-entry
+                 1
+                 "inspect-runtime->inspect-repo-root"
+                 "inspect-runtime"
+                 "inspect-repo-root"
+                 "Git executable is available and the checkout is inspectable.")
+                (dreyeck-git-readiness-transition-entry
+                 2
+                 "inspect-repo-root->upstream-main-fetched"
+                 "inspect-repo-root"
+                 "upstream-main-fetched"
+                 "The upstream remote and upstream/main are available locally.")
+                (dreyeck-git-readiness-transition-entry
+                 3
+                 "upstream-main-fetched->ready"
+                 "upstream-main-fetched"
+                 "ready-for-git-backed-inspection"
+                 "All readiness prerequisites are satisfied."))
+               (list
+                (dreyeck-git-readiness-evidence-entry
+                 4
+                 "ready-for-git-backed-inspection"
+                 "Git-backed inspection can proceed without hidden operational repair.")))))))
+
+(defun make-dreyeck-git-readiness-run-notes (probe)
+  (remove nil
+          (list
+           (list :label "Read-only contract"
+                 :detail "This readiness object does not add remotes or fetch history. It only classifies current runtime readiness and points to explicit operations.")
+           (and (getf probe :effective-repository-root)
+                (list :label "Effective repository root"
+                      :detail (namestring (getf probe :effective-repository-root))))
+           (and (getf probe :upstream-remote-url)
+                (list :label "Observed upstream URL"
+                      :detail (getf probe :upstream-remote-url))))))
+
+(defun make-dreyeck-git-readiness-run-from-probe (probe)
+  (multiple-value-bind (current-state status failure-classification
+                        visited-states transition-trace evidence-trace)
+      (classify-dreyeck-git-readiness-probe probe)
+    (let* ((host-target (dreyeck-ch-nixos-host-target))
+           (add-operation (dreyeck-ch-add-konrad-upstream-remote-operation))
+           (fetch-operation (dreyeck-ch-fetch-upstream-main-operation))
+           (repository-root (getf probe :effective-repository-root)))
+      (make-instance 'dreyeck-git-readiness-state-machine-run
+                     :id "dreyeck-git-readiness-state-machine-run"
+                     :title "dreyeck Git readiness"
+                     :summary
+                     "Concrete read-only readiness classification for whether the current runtime can inspect Konrad's upstream/main history without hidden mutation."
+                     :machine (make-dreyeck-git-readiness-state-machine-definition)
+                     :input (list :target-host "dreyeck.ch"
+                                  :remote-name "upstream"
+                                  :branch "main")
+                     :current-state current-state
+                     :visited-states visited-states
+                     :transition-trace transition-trace
+                     :evidence-trace evidence-trace
+                     :status status
+                     :failure-classification failure-classification
+                     :notes (make-dreyeck-git-readiness-run-notes probe)
+                     :host-target host-target
+                     :effective-repository-root repository-root
+                     :repository-root-source (getf probe :repository-root-source)
+                     :runtime-origin (or (getf probe :runtime-origin) :unknown)
+                     :git-executable-available-p
+                     (getf probe :git-executable-available-p)
+                     :requested-program (getf probe :requested-program)
+                     :resolved-program (getf probe :resolved-program)
+                     :git-metadata-path (git-metadata-pathname repository-root)
+                     :git-metadata-present-p (getf probe :git-metadata-present-p)
+                     :upstream-remote-present-p
+                     (getf probe :upstream-remote-present-p)
+                     :upstream-remote-url (getf probe :upstream-remote-url)
+                     :upstream-main-fetched-p
+                     (getf probe :upstream-main-fetched-p)
+                     :blocking-condition (getf probe :blocking-condition)
+                     :add-upstream-remote-operation add-operation
+                     :fetch-upstream-main-operation fetch-operation))))
+
+(defun runtime-probe-directory ()
+  (or (current-process-working-directory)
+      (uiop:ensure-directory-pathname (uiop:temporary-directory))))
+
+(defun resolve-dreyeck-live-git-readiness-probe (&key (system-designator :hyperdoc))
+  (let* ((system (etypecase system-designator
+                   (asdf:system system-designator)
+                   ((or string symbol)
+                    (asdf:find-system system-designator))))
+         (git-version-result
+           (call-with-git-runtime-boundary
+            (lambda ()
+              (git-command-output*
+               (runtime-probe-directory)
+               '("--version")
+               :operation "git --version")))))
+    (multiple-value-bind (resolved-program requested-program _configuration-source)
+        (resolve-git-program)
+      (declare (ignore _configuration-source))
+      (cond
+        ((typep git-version-result 'git-runtime-unavailable)
+         (make-dreyeck-git-readiness-probe
+          :git-executable-available-p nil
+          :requested-program requested-program
+          :resolved-program resolved-program
+          :runtime-origin
+          (dreyeck-git-readiness-runtime-origin :system system)
+          :blocking-condition git-version-result))
+        (t
+         (let ((root-result
+                 (call-with-git-runtime-boundary
+                  (lambda ()
+                    (multiple-value-list
+                     (system-repository-root-info system))))))
+           (cond
+             ((typep root-result 'git-runtime-unavailable)
+              (let* ((repository-root (repository-root-of root-result))
+                     (repository-root-source
+                       (repository-root-source-of root-result))
+                     (runtime-origin
+                       (dreyeck-git-readiness-runtime-origin
+                        :repository-root repository-root
+                        :repository-root-source repository-root-source
+                        :system system)))
+                (make-dreyeck-git-readiness-probe
+                 :git-executable-available-p t
+                 :requested-program requested-program
+                 :resolved-program resolved-program
+                 :effective-repository-root repository-root
+                 :repository-root-source repository-root-source
+                 :runtime-origin runtime-origin
+                 :git-metadata-present-p
+                 (and repository-root
+                      (git-metadata-present-p repository-root))
+                 :blocking-condition root-result)))
+             (t
+              (destructuring-bind (repository-root repository-root-source)
+                  root-result
+                (let* ((runtime-origin
+                         (dreyeck-git-readiness-runtime-origin
+                          :repository-root repository-root
+                          :repository-root-source repository-root-source
+                          :system system))
+                       (metadata-present-p
+                         (git-metadata-present-p repository-root))
+                       (remote-output
+                         (call-with-git-runtime-boundary
+                          (lambda ()
+                            (git-command-output*
+                             repository-root
+                             '("remote" "get-url" "upstream")
+                             :ignore-error-status t
+                             :operation "git remote get-url upstream"
+                             :repository-root-source repository-root-source)))))
+                  (cond
+                    ((typep remote-output 'git-runtime-unavailable)
+                     (make-dreyeck-git-readiness-probe
+                      :git-executable-available-p t
+                      :requested-program requested-program
+                      :resolved-program resolved-program
+                      :effective-repository-root repository-root
+                      :repository-root-source repository-root-source
+                      :runtime-origin runtime-origin
+                      :git-metadata-present-p metadata-present-p
+                      :blocking-condition remote-output))
+                    ((git-output-indicates-missing-remote-p remote-output "upstream")
+                     (make-dreyeck-git-readiness-probe
+                      :git-executable-available-p t
+                      :requested-program requested-program
+                      :resolved-program resolved-program
+                      :effective-repository-root repository-root
+                      :repository-root-source repository-root-source
+                      :runtime-origin runtime-origin
+                      :git-metadata-present-p metadata-present-p
+                      :upstream-remote-present-p nil))
+                    (t
+                     (let ((upstream-main-output
+                             (call-with-git-runtime-boundary
+                              (lambda ()
+                                (git-command-output*
+                                 repository-root
+                                 '("show-ref" "--verify" "refs/remotes/upstream/main")
+                                 :ignore-error-status t
+                                 :operation
+                                 "git show-ref --verify refs/remotes/upstream/main"
+                                 :repository-root-source repository-root-source)))))
+                       (if (typep upstream-main-output 'git-runtime-unavailable)
+                           (make-dreyeck-git-readiness-probe
+                            :git-executable-available-p t
+                            :requested-program requested-program
+                            :resolved-program resolved-program
+                            :effective-repository-root repository-root
+                            :repository-root-source repository-root-source
+                            :runtime-origin runtime-origin
+                            :git-metadata-present-p metadata-present-p
+                            :upstream-remote-present-p t
+                            :upstream-remote-url remote-output
+                            :blocking-condition upstream-main-output)
+                           (make-dreyeck-git-readiness-probe
+                            :git-executable-available-p t
+                            :requested-program requested-program
+                            :resolved-program resolved-program
+                            :effective-repository-root repository-root
+                            :repository-root-source repository-root-source
+                            :runtime-origin runtime-origin
+                            :git-metadata-present-p metadata-present-p
+                            :upstream-remote-present-p t
+                            :upstream-remote-url remote-output
+                            :upstream-main-fetched-p
+                            (git-show-ref-output-present-p upstream-main-output))))))))))))))))
+
+(defun make-dreyeck-git-readiness-state-machine-run (&key probe)
+  (make-dreyeck-git-readiness-run-from-probe
+   (or probe
+       (resolve-dreyeck-live-git-readiness-probe))))
+
+(defun git-runtime-followup-objects (&optional condition)
+  (declare (ignore condition))
+  (list (make-dreyeck-git-readiness-state-machine-run)
+        (dreyeck-ch-add-konrad-upstream-remote-operation)
+        (dreyeck-ch-fetch-upstream-main-operation)))

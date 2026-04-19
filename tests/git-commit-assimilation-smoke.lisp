@@ -121,6 +121,10 @@
   (let* ((hyperdoc::*git-program* "/definitely/missing/hyperdoc-git")
          (result
            (hyperdoc::graphviz-story-item-upstream-assimilation-example))
+         (result-views
+           (assimilation-load-inspector-views-for-object result))
+         (result-summary-view
+           (assimilation-find-view-by-title result-views "Summary"))
          (surface
            (make-instance 'hyperdoc::git-upstream-commit-assimilation-surface
                           :id "git-unavailable-assimilation-surface-smoke"
@@ -136,13 +140,19 @@
          (comparison-html
            (and comparison-view
                 (html-inspector-views:view-html comparison-view)))
+         (result-summary-html
+           (and result-summary-view
+                (html-inspector-views:view-html result-summary-view)))
          (worked-example-html
            (and worked-example-view
                 (html-inspector-views:view-html worked-example-view))))
     (assimilation-assert-typep
      'hyperdoc::git-runtime-unavailable
-     result
+    result
      "Graphviz defexample must degrade to a bounded git-runtime-unavailable object when Git cannot be resolved")
+    (assimilation-assert-true
+     result-summary-view
+     "Git-unavailable result itself must still expose a Summary view")
     (assimilation-assert-true
      comparison-view
      "Assimilation surface must still expose a Comparison view when a check degrades to git-runtime-unavailable")
@@ -155,6 +165,15 @@
     (assimilation-assert-true
      (search "unavailable" comparison-html :test #'char-equal)
      "Comparison view must render readable unavailable/n-a cells for git-runtime-unavailable entries")
+    (assimilation-assert-true
+     (search "dreyeck Git readiness" result-summary-html :test #'char-equal)
+     "Git-unavailable summary must point to the dreyeck Git readiness follow-up surface")
+    (assimilation-assert-true
+     (search "Add upstream remote" result-summary-html :test #'char-equal)
+     "Git-unavailable summary must point to the explicit add-remote operation")
+    (assimilation-assert-true
+     (search "Fetch upstream/main" result-summary-html :test #'char-equal)
+     "Git-unavailable summary must point to the explicit fetch operation")
     (assimilation-assert-true
      (search "runtime summary" worked-example-html :test #'char-equal)
      "Worked example view must degrade to a bounded runtime-summary link instead of assuming assimilation accessors")))

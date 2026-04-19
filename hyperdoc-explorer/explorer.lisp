@@ -193,71 +193,85 @@ PAGE-LOOKUP-FAILURE."
 
 (views:defview 👀summary (condition git-runtime-unavailable)
   (views:html-view :title "Summary" :priority 1
-    (views:html
-      (:h3 (views:esc (title-of condition)))
-      (:p (views:esc (summary-of condition)))
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Interpreted classification"))
-                   (:td (:tt (views:esc
-                              (git-runtime-classification-label
-                               (classification-of condition))))))
-              (:tr (:td (views:esc "Operation"))
-                   (:td (:tt (views:esc (operation-of condition)))))
-              (:tr (:td (views:esc "Command"))
-                   (:td (:tt (views:esc
-                              (or (command-of condition)
+    (let ((followups (git-runtime-followup-objects condition)))
+      (views:html
+        (:h3 (views:esc (title-of condition)))
+        (:p (views:esc (summary-of condition)))
+        (:table :class "inspector-table"
+                (:tr (:td (views:esc "Interpreted classification"))
+                     (:td (:tt (views:esc
+                                (git-runtime-classification-label
+                                 (classification-of condition))))))
+                (:tr (:td (views:esc "Operation"))
+                     (:td (:tt (views:esc (operation-of condition)))))
+                (:tr (:td (views:esc "Command"))
+                     (:td (:tt (views:esc
+                                (or (command-of condition)
+                                    "n/a")))))
+                (:tr (:td (views:esc "Process exit code"))
+                     (:td (:tt (views:esc
+                                (if-let (exit-code (exit-code-of condition))
+                                  (format nil "~A" exit-code)
                                   "n/a")))))
-              (:tr (:td (views:esc "Process exit code"))
-                   (:td (:tt (views:esc
-                              (if-let (exit-code (exit-code-of condition))
-                                (format nil "~A" exit-code)
-                                "n/a")))))
-              (:tr (:td (views:esc "Working directory"))
-                   (:td (:tt (views:esc
-                              (or (and (working-directory-of condition)
-                                       (namestring (working-directory-of condition)))
-                                  "n/a")))))
-              (:tr (:td (views:esc "Effective repository root"))
-                   (:td (:tt (views:esc
-                              (or (and (repository-root-of condition)
-                                       (namestring (repository-root-of condition)))
-                                  "n/a")))))
-              (:tr (:td (views:esc "Repository root source"))
-                   (:td (:tt (views:esc
-                              (git-repository-root-source-label
-                               (repository-root-source-of condition))))))
-              (:tr (:td (views:esc "Repository root mode"))
-                   (:td (:tt (views:esc
-                              (git-repository-root-origin-label
-                               (repository-root-of condition)
-                               (repository-root-source-of condition))))))
-              (:tr (:td (views:esc "Requested program"))
-                   (:td (:tt (views:esc
-                              (or (requested-program-of condition)
-                                  "n/a")))))
-              (:tr (:td (views:esc "Resolved program"))
-                   (:td (:tt (views:esc
-                              (or (resolved-program-of condition)
-                                  "n/a")))))
-              (:tr (:td (views:esc "Configuration source"))
-                   (:td (:tt (views:esc
-                              (format nil "~A"
-                                      (configuration-source-of condition))))))
-              (:tr (:td (views:esc "Reason"))
-                   (:td (views:esc (reason-of condition))))
-              (:tr (:td (views:esc "Detail"))
-                   (:td (views:esc (or (detail-of condition) "n/a")))))
-      (:h4 "Runtime policy")
-      (:p (views:esc (runtime-policy-of condition)))
-      (:h4 "Guidance")
-      (if-let (guidance (guidance-of condition))
-        (views:html
-          (:ul
-           (loop for item in guidance
-                 do (views:html
-                      (:li (views:esc item))))))
-        (views:html
-          (:p "No additional guidance recorded."))))))
+                (:tr (:td (views:esc "Working directory"))
+                     (:td (:tt (views:esc
+                                (or (and (working-directory-of condition)
+                                         (namestring (working-directory-of condition)))
+                                    "n/a")))))
+                (:tr (:td (views:esc "Effective repository root"))
+                     (:td (:tt (views:esc
+                                (or (and (repository-root-of condition)
+                                         (namestring (repository-root-of condition)))
+                                    "n/a")))))
+                (:tr (:td (views:esc "Repository root source"))
+                     (:td (:tt (views:esc
+                                (git-repository-root-source-label
+                                 (repository-root-source-of condition))))))
+                (:tr (:td (views:esc "Repository root mode"))
+                     (:td (:tt (views:esc
+                                (git-repository-root-origin-label
+                                 (repository-root-of condition)
+                                 (repository-root-source-of condition))))))
+                (:tr (:td (views:esc "Requested program"))
+                     (:td (:tt (views:esc
+                                (or (requested-program-of condition)
+                                    "n/a")))))
+                (:tr (:td (views:esc "Resolved program"))
+                     (:td (:tt (views:esc
+                                (or (resolved-program-of condition)
+                                    "n/a")))))
+                (:tr (:td (views:esc "Configuration source"))
+                     (:td (:tt (views:esc
+                                (format nil "~A"
+                                        (configuration-source-of condition))))))
+                (:tr (:td (views:esc "Reason"))
+                     (:td (views:esc (reason-of condition))))
+                (:tr (:td (views:esc "Detail"))
+                     (:td (views:esc (or (detail-of condition) "n/a")))))
+        (:h4 "Runtime policy")
+        (:p (views:esc (runtime-policy-of condition)))
+        (:h4 "Operational follow-up")
+        (:p (views:esc
+             "This failure is bounded and inspectable. Use the readiness run and explicit host-aware operations below instead of hiding remote-add or fetch work behind the failed example click."))
+        (:ul
+         (loop for object in followups
+               for display in '("dreyeck Git readiness"
+                                "Add upstream remote"
+                                "Fetch upstream/main")
+               for select in '("Summary" "Summary" "Summary")
+               do (views:html
+                    (:li (views:object-ref object
+                                           :display display
+                                           :select select)))))
+        (:h4 "Guidance")
+        (if-let (guidance (guidance-of condition))
+          (views:html
+            (:ul
+             (loop for item in guidance
+                   do (views:html
+                        (:li (views:esc item))))))
+          (views:html
+            (:p "No additional guidance recorded.")))))))
 
 (defun render-canonical-url-cell (url)
   (if url
