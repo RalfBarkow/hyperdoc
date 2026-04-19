@@ -290,6 +290,37 @@
      (length (hyperdoc::checks-of surface))
      "Assimilation surface must now expose both the static-route and graphviz worked examples")))
 
+(defun run-upstream-commit-assimilation-page-render-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page
+           (hyperbook:find-page hyperdoc::*hyperdoc*
+                                "Graphviz story item upstream assimilation example"
+                                :signal-error? t))
+         (views
+           (assimilation-load-inspector-views-for-object page))
+         (content-view
+           (assimilation-find-view-by-title views "Content"))
+         (content-html
+           (and content-view
+                (html-inspector-views:view-html content-view))))
+    (assimilation-assert-true
+     content-view
+     "Graphviz assimilation example page must expose a Content view")
+    (assimilation-assert-true
+     (search "defexample" content-html :test #'char-equal)
+     "Graphviz assimilation example page must inline-render the top-level defexample form")
+    (assimilation-assert-true
+     (search "graphviz-story-item-upstream-assimilation-example"
+             content-html :test #'char-equal)
+     "Graphviz assimilation example page must inline-render the worked-example defexample source")
+    (assimilation-assert-true
+     (search "Run example" content-html :test #'char-equal)
+     "Inline-rendered defexample source must expose the runnable play-button affordance")
+    (assimilation-assert-equal
+     nil
+     (search "source-of-function" content-html :test #'char-equal)
+     "Graphviz assimilation example page must show rendered source, not a source-of-function placeholder label")))
+
 (defun run-upstream-commit-assimilation-documentation-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let ((topic (hyperdoc::check-upstream-commit-assimilation-equivalence-topic))
@@ -334,5 +365,6 @@
   (run-upstream-commit-assimilation-classification-smoke-test)
   (run-upstream-commit-assimilation-page-evidence-smoke-test)
   (run-upstream-commit-assimilation-worked-example-smoke-test)
+  (run-upstream-commit-assimilation-page-render-smoke-test)
   (run-upstream-commit-assimilation-documentation-smoke-test)
   t)

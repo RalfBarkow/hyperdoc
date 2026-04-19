@@ -330,7 +330,10 @@
                  :kind kind
                  :expression expression
                  :raw-source raw-source
-                 :view-title view-title
+                 :view-title (or view-title
+                                 (and (member kind '(:source-of-class
+                                                     :source-of-function))
+                                      "Source code"))
                  :label label
                  :package-name (current-authored-package-name)
                  :source-hyperbook-id (current-authored-hyperbook-id)
@@ -412,6 +415,75 @@
                     :fboundp (and symbol (fboundp symbol))
                     :condition-type (type-of condition)
                     :source-reference reference))))
+
+(defun resolve-authored-source-of-class (reference)
+  (let ((class (parse-and-eval (authored-expression-expression-of reference))))
+    (if (typep class 'condition)
+        (make-authored-expression-issue reference class :phase :evaluation)
+        class)))
+
+(defun resolve-authored-source-of-function (reference)
+  (let ((fn (parse-and-eval (authored-expression-expression-of reference))))
+    (cond
+      ((typep fn 'undefined-function)
+       (make-authored-source-of-function-lookup-issue reference fn))
+      ((typep fn 'condition)
+       (make-authored-expression-issue reference fn :phase :evaluation))
+      (t
+       fn))))
+
+(defun merge-inline-html-view-into-current-render (view)
+  (let ((html (views:view-html view))
+        (references (copy-list (views:view-references view)))
+        (assets (copy-list (views:view-assets view))))
+    (setf (views:accumulator-references views:*view-accumulator*)
+          (nconc references
+                 (views:accumulator-references views:*view-accumulator*)))
+    (dolist (asset assets)
+      (views::add-asset asset))
+    (write-string html views::*html-stream*))
+  view)
+
+(defun find-inline-source-view (object &key (title "Source code"))
+  (let* ((pane (make-instance 'clog-moldable-inspector::pane
+                              :inspector nil
+                              :object object))
+         (views nil))
+    (clog-moldable-inspector::load-views pane)
+    (setf views (slot-value pane 'clog-moldable-inspector::views))
+    (find title
+          views
+          :key #'views:view-title
+          :test #'string=)))
+
+(defun resolve-inline-source-view (target)
+  (or (ignore-errors
+        (views:👀source target))
+      (ignore-errors
+        (find-inline-source-view target))))
+
+(defun render-authored-inline-source-target (reference target)
+  (handler-case
+      (typecase target
+        (views:view
+         (merge-inline-html-view-into-current-render target))
+        ((or function class)
+         (if-let (view (resolve-inline-source-view target))
+           (merge-inline-html-view-into-current-render view)
+           (views:object-ref target
+                             :display (or (authored-expression-label-of reference)
+                                          (authored-expression-raw-source-of reference))
+                             :select "Source code")))
+        (t
+         (views:object-ref target
+                           :display (or (authored-expression-label-of reference)
+                                        (authored-expression-raw-source-of reference)))))
+    (error (condition)
+      (views:object-ref
+       (make-authored-expression-issue
+        reference condition :phase :view-materialization)
+       :display (or (authored-expression-label-of reference)
+                    (authored-expression-raw-source-of reference))))))
 
 (defun force-view-or-issue (reference value)
   (cond
@@ -495,23 +567,9 @@
         reference
         (parse-and-eval (authored-expression-expression-of reference))))
       (:source-of-class
-       (let ((class (parse-and-eval (authored-expression-expression-of reference))))
-         (if (typep class 'condition)
-             (make-authored-expression-issue reference class :phase :evaluation)
-             (force-view-or-issue
-              reference
-              (views/standard:source-code-view class)))))
+       (resolve-authored-source-of-class reference))
       (:source-of-function
-       (let ((fn (parse-and-eval (authored-expression-expression-of reference))))
-         (cond
-           ((typep fn 'undefined-function)
-            (make-authored-source-of-function-lookup-issue reference fn))
-           ((typep fn 'condition)
-            (make-authored-expression-issue reference fn :phase :evaluation))
-           (t
-            (force-view-or-issue
-             reference
-             (views/standard:source-code-view fn))))))
+       (resolve-authored-source-of-function reference))
       (t
        (make-authored-expression-issue
         reference
@@ -788,7 +846,7 @@
      :classes "hyperbook-reference hyperdoc-deferred-reference"))
   t)
 
-;; source-of-class: preserve the lookup as a deferred source reference
+;; source-of-class: inline-transclude the source view eagerly
 
 (plump:define-tag-dispatcher (source-of-class *hyperdoc-tags*) (name)
   (string-equal name "source-of-class"))
@@ -803,18 +861,12 @@
             :raw-source name
             :label (normalize-authored-reference-label name "source of class")
             :source-tag "source-of-class")))
-    (render-authored-expression-reference
+    (render-authored-inline-source-target
      reference
-     #'(lambda ()
-         (views:html
-           (:span :class "hyperdoc-executable-tag"
-                  (views:esc (authored-expression-tag-label "source-of-class")))
-           " "
-           (:tt (views:esc name))))
-     :classes "hyperbook-reference hyperdoc-deferred-reference"))
+     (evaluate-authored-expression-reference reference)))
   t)
 
-;; source-of-function: preserve the lookup as a deferred source reference
+;; source-of-function: inline-transclude the source view eagerly
 
 (plump:define-tag-dispatcher (source-of-function *hyperdoc-tags*) (name)
   (string-equal name "source-of-function"))
@@ -829,15 +881,9 @@
             :raw-source name
             :label (normalize-authored-reference-label name "source of function")
             :source-tag "source-of-function")))
-    (render-authored-expression-reference
+    (render-authored-inline-source-target
      reference
-     #'(lambda ()
-         (views:html
-           (:span :class "hyperdoc-executable-tag"
-                  (views:esc (authored-expression-tag-label "source-of-function")))
-           " "
-           (:tt (views:esc name))))
-     :classes "hyperbook-reference hyperdoc-deferred-reference"))
+     (evaluate-authored-expression-reference reference)))
   t)
 
 ;; lisp-code: parse text as Lisp, render with syntax highlighting

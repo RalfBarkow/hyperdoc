@@ -97,7 +97,7 @@
     (with-authored-function-lookup-surface
      (lambda (book page)
        (declare (ignore book))
-       (let* ((page-id (hyperbook:id-of page))
+      (let* ((page-id (hyperbook:id-of page))
               (views (load-inspector-views-for-object page))
               (content-view (smoke-find-view-by-title views "Content"))
               (content-html (and content-view
@@ -126,21 +126,17 @@
                  (smoke-find-view-by-title issue-views "Condition"))))
          (assert-true content-view
                       "Authored function lookup smoke page must expose a Content view")
-         (assert-true (and (search "data-hyperdoc-expression-kind"
-                                   content-html :test #'char-equal)
-                           (search "source-of-function"
-                                   content-html :test #'char-equal))
-                      "Content render must preserve the authored source-of-function tag as a deferred reference")
-         (assert-true (and (search "data-hyperdoc-expression-package"
-                                   content-html :test #'char-equal)
-                           (search "HYPERDOC/TESTS"
-                                   content-html :test #'char-equal))
-                      "Content render must preserve the authored package context for source-of-function")
-         (assert-true (and (search "data-hyperdoc-expression-source-page"
-                                   content-html :test #'char-equal)
-                           (search "Authored function lookup issue smoke"
-                                   content-html :test #'char-equal))
-                      "Content render must preserve the authored source page title for source-of-function")
+         (assert-true (search "FUNCTION-LOOKUP-ISSUE-SMOKE-MISSING"
+                              content-html :test #'char-equal)
+                      "Content render must still expose the missing function label when inline source transclusion cannot resolve")
+         (assert-equal nil
+                       (search "data-hyperdoc-deferred-expression"
+                               content-html :test #'char-equal)
+                       "Content render must no longer preserve source-of-function as a deferred authored-expression reference")
+         (assert-equal nil
+                       (search "data-hyperdoc-expression-kind"
+                               content-html :test #'char-equal)
+                       "Inline source-of-function rendering must not leave deferred authored-expression metadata in page content")
          (assert-true (typep issue 'hyperbook:function-lookup-issue)
                       "Evaluating a broken authored source-of-function reference must yield a primary function-lookup-issue")
          (assert-true (typep condition 'undefined-function)
@@ -265,15 +261,48 @@
                             "Lookup issue Repair view must expose the retry path once the symbol is available")
                (assert-true (search "real Lisp Functions page"
                                     refreshed-repair-html :test #'char-equal)
-                            "Lookup issue Repair view must describe the real page retry target once the symbol is available")
+                             "Lookup issue Repair view must describe the real page retry target once the symbol is available")
                (assert-true (typep reopen-target 'hyperbook::lisp-function-page)
                             "The repair thunk must reopen the Lisp Functions page once the symbol is available")
                (assert-equal expected-page-id
                              (hyperbook:id-of reopen-target)
                              "The reopened Lisp Functions page must target the expected page id")))))))))
 
+(defun run-authored-source-reference-open-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (let* ((page
+           (hyperbook:find-page hyperdoc::*hyperdoc*
+                                "Graphviz story item upstream assimilation example"
+                                :signal-error? t))
+         (reference
+           (let ((hyperbook::*current-page* page)
+                 (hyperdoc::*current-package* (find-package "HYPERDOC")))
+             (hyperdoc::make-authored-expression-reference
+              :kind :source-of-function
+              :expression "(function graphviz-story-item-upstream-assimilation-example)"
+              :raw-source "graphviz-story-item-upstream-assimilation-example"
+              :label "graphviz-story-item-upstream-assimilation-example"
+              :source-tag "source-of-function")))
+         (result (html-inspector-views:eval-thunk reference))
+         (views (load-inspector-views-for-object result))
+         (source-view (smoke-find-view-by-title views "Source code"))
+         (source-html (and source-view
+                           (html-inspector-views:view-html source-view))))
+    (assert-true (typep result 'function)
+                 "Deferred source-of-function evaluation must return the underlying function object, not a raw HTML-VIEW")
+    (assert-true source-view
+                 "Opening the evaluated source-of-function target must expose a Source code view without inspector slot failures")
+    (assert-true (search "defexample" source-html :test #'char-equal)
+                 "The opened Source code view must render the defexample form")
+    (assert-true (search "graphviz-story-item-upstream-assimilation-example"
+                         source-html :test #'char-equal)
+                 "The opened Source code view must render the requested function name")
+    (assert-true (search "Run example" source-html :test #'char-equal)
+                 "The opened Source code view must still expose the runnable defexample affordance")))
+
 (defun run-function-lookup-issues-smoke-tests ()
   (run-raw-function-lookup-issue-smoke-test)
   (run-authored-function-lookup-issue-smoke-test)
+  (run-authored-source-reference-open-smoke-test)
   (format t "~&Function lookup issue smoke tests passed.~%")
   t)
