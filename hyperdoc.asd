@@ -291,6 +291,7 @@
                              (:file "lookup-issue-docs-render-smoke")
                              (:file "page-lookup-issues-smoke")
                              (:file "function-lookup-issues-smoke")
+                             (:file "class-lookup-issues-smoke")
                              (:file "collective-knowledge-slice-smoke")
                              (:file "reproducible-devenv-as-knowledge-artifact-slice-smoke")
                              (:file "localhost-fedwiki-page-pipeline-smoke")
