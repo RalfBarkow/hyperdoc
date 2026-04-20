@@ -1,0 +1,69 @@
+<h1>Special HyperBook Collection Contracts</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  If a special hyperbook overview says it “contains one page for each …”
+  runtime object, that prose is a runtime and user-visible contract, not just
+  descriptive background.
+</p>
+
+<p>
+  Direct lookup alone is not enough. If readers can reach the promised pages
+  only by guessing ids, the collection claim is semantically true but not
+  visibly true.
+</p>
+
+<h2>Rule</h2>
+
+<p>
+  A special hyperbook with a collection promise must satisfy both halves of the
+  contract:
+</p>
+
+<ul>
+  <li>real page materialization for valid ids</li>
+  <li>a visible live inventory or browse view of the promised collection</li>
+</ul>
+
+<p>
+  It must also keep a bounded negative path for ids that parse correctly but do
+  not resolve to a real runtime object.
+</p>
+
+<p>
+  The browse surface should be derived from the same runtime source of truth as
+  direct lookup, so the visible inventory and the open-by-id behavior cannot
+  drift apart.
+</p>
+
+<h2>Checklist</h2>
+
+<ul>
+  <li>overview text makes a collection claim</li>
+  <li>positive lookup opens real pages</li>
+  <li>browse view enumerates the live collection</li>
+  <li>browse entries link to canonical page ids</li>
+  <li>parsed-but-missing ids surface a bounded issue path</li>
+</ul>
+
+<h2>Proving cases</h2>
+
+<ul>
+  <li><tt>lisp-functions</tt></li>
+  <li><tt>lisp-classes</tt></li>
+</ul>
+
+<p>
+  These two hyperbooks make the rule durable: both claim a collection in their
+  overview text, and both now provide direct page materialization, a visible
+  live inventory, and a bounded negative path.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a hyperbook="hyperbook" page="Special hyperbooks">Special hyperbooks</a></li>
+  <li><a hyperbook="hyperbook" page="Implementing a HyperBook interface">Implementing a HyperBook interface</a></li>
+  <li><a page="Codex handover for HyperDoc">Codex handover for HyperDoc</a></li>
+</ul>
