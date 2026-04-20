@@ -259,6 +259,23 @@
             :initarg :summary
             :type string)))
 
+(defclass adapted-frame-snippet ()
+  ((source-item :reader adapted-frame-snippet-source-item-of
+                :initarg :source-item
+                :type story-item)
+   (source-page :reader adapted-frame-snippet-source-page-of
+                :initarg :source-page
+                :type fedwiki-page)
+   (target-url :reader adapted-frame-snippet-target-url-of
+               :initarg :target-url
+               :type string)
+   (height :reader adapted-frame-snippet-height-of
+           :initarg :height
+           :type integer)
+   (summary :reader adapted-frame-snippet-summary-of
+            :initarg :summary
+            :type string)))
+
 (defclass story-item-adaptation-failure ()
   ((source-item :reader adaptation-failure-source-item-of
                 :initarg :source-item
@@ -287,6 +304,10 @@
 (defmethod views:text-representation ((snippet adapted-video-snippet))
   (format nil "video ~A"
           (adapted-video-snippet-video-id-of snippet)))
+
+(defmethod views:text-representation ((snippet adapted-frame-snippet))
+  (format nil "frame ~A"
+          (adapted-frame-snippet-target-url-of snippet)))
 
 (defmethod views:text-representation ((failure story-item-adaptation-failure))
   (format nil "~(~A~) adaptation failed"
@@ -337,11 +358,14 @@
   (format nil "https://www.youtube.com/embed/~A" video-id))
 
 (defun make-story-item-adaptation-failure (item page reason message
-                                           &key partial-provider partial-video-id)
+                                           &key
+                                             (snippet-kind :video)
+                                             partial-provider
+                                             partial-video-id)
   (make-instance 'story-item-adaptation-failure
                  :source-item item
                  :source-page page
-                 :snippet-kind :video
+                 :snippet-kind snippet-kind
                  :reason reason
                  :message message
                  :partial-provider partial-provider
@@ -383,6 +407,104 @@
                         :embed-url (youtube-embed-url video-id)
                         :summary (format nil "YouTube video ~A" video-id)))))))
 
+(defparameter *default-frame-snippet-height* 300)
+
+(defun normalize-frame-snippet-source-text (text)
+  (coerce (remove #\Return (or text "")) 'string))
+
+(defun frame-snippet-raw-iframe-html-p (text)
+  (let ((trimmed (string-left-trim '(#\Space #\Tab #\Newline #\Return)
+                                   (or text ""))))
+    (not (null (search "<iframe" trimmed :test #'char-equal)))))
+
+(defun frame-snippet-non-empty-lines (text)
+  (remove ""
+          (mapcar (lambda (line)
+                    (string-trim '(#\Space #\Tab #\Newline) line))
+                  (cl-ppcre:split "\\n"
+                                   (normalize-frame-snippet-source-text text)))
+          :test #'string=))
+
+(defun absolute-http-url-p (url)
+  (or (str:starts-with? "http://" url)
+      (str:starts-with? "https://" url)))
+
+(defun parse-frame-snippet-height-line (line)
+  (let ((tokens (remove ""
+                       (cl-ppcre:split "\\s+" line)
+                       :test #'string=)))
+    (cond
+      ((or (/= (length tokens) 2)
+           (not (string= (string-upcase (first tokens)) "HEIGHT")))
+       (values nil
+               :malformed-height
+               "Frame snippet second line must be HEIGHT <pixels>."))
+      (t
+       (let ((height-token (second tokens)))
+         (handler-case
+             (let ((height (parse-integer height-token)))
+               (if (plusp height)
+                   (values height nil nil)
+                   (values nil
+                           :malformed-height
+                           "Frame snippet HEIGHT must be a positive integer.")))
+           (parse-error ()
+             (values nil
+                     :malformed-height
+                     "Frame snippet HEIGHT must be a positive integer."))))))))
+
+(defun parse-frame-snippet-source-text (text)
+  (cond
+    ((frame-snippet-raw-iframe-html-p text)
+     (values nil
+             nil
+             :raw-iframe-html-unsupported
+             "Raw <iframe ...> HTML is unsupported in this slice. Expected <url> plus optional HEIGHT <pixels>."))
+    (t
+     (let ((lines (frame-snippet-non-empty-lines text)))
+       (cond
+         ((null lines)
+          (values nil
+                  nil
+                  :missing-url
+                  "Frame snippet must start with a target URL."))
+         ((> (length lines) 2)
+          (values nil
+                  nil
+                  :malformed-frame-snippet
+                  "Frame snippet supports only <url> and optional HEIGHT <pixels> in this slice."))
+         ((not (absolute-http-url-p (first lines)))
+          (values nil
+                  nil
+                  :malformed-frame-snippet
+                  "Frame snippet first line must be an absolute http(s) URL."))
+         ((null (second lines))
+          (values (first lines)
+                  *default-frame-snippet-height*
+                  nil
+                  nil))
+         (t
+          (multiple-value-bind (height parse-failure message)
+              (parse-frame-snippet-height-line (second lines))
+            (if parse-failure
+                (values nil nil parse-failure message)
+                (values (first lines) height nil nil)))))))))
+
+(defmethod adapt-plugin-like-story-item ((type (eql :frame)) item page)
+  (declare (ignore type))
+  (multiple-value-bind (target-url height parse-failure message)
+      (parse-frame-snippet-source-text (text-of item))
+    (if parse-failure
+        (make-story-item-adaptation-failure
+         item page parse-failure message
+         :snippet-kind :frame)
+        (make-instance 'adapted-frame-snippet
+                       :source-item item
+                       :source-page page
+                       :target-url target-url
+                       :height height
+                       :summary (format nil "Frame ~A" target-url)))))
+
 (defun render-video-snippet-preferred (snippet page)
   (views:html
     (:div :class "fedwiki-video-snippet-preferred"
@@ -416,12 +538,18 @@
                    (adapted-video-snippet-caption-of snippet)
                    page)))))))
 
-(defun render-video-adaptation-failure (failure)
+(defun adaptation-failure-heading (failure)
+  (format nil "~A adaptation failed."
+          (string-capitalize
+           (string-downcase
+            (symbol-name (adaptation-failure-snippet-kind-of failure))))))
+
+(defun render-story-item-adaptation-failure (failure)
   (let ((item (adaptation-failure-source-item-of failure)))
     (views:html
-      (:div :class "fedwiki-video-snippet-failure"
+      (:div :class "fedwiki-story-item-adaptation-failure"
             (:p
-             (:b (views:esc "Video adaptation failed.")))
+             (:b (views:esc (adaptation-failure-heading failure))))
             (:p (views:esc (adaptation-failure-message-of failure)))
             (:p
              (views:esc "Failure object: ")
@@ -432,6 +560,9 @@
             (:pre :style "background-color: #eee;"
                   (views:esc (text-of item)))))))
 
+(defun render-video-adaptation-failure (failure)
+  (render-story-item-adaptation-failure failure))
+
 (defun render-adapted-video-snippet (snippet page)
   (views:html
     (:div :class "fedwiki-video-snippet"
@@ -440,6 +571,39 @@
            snippet
            page
            :include-caption-p nil))))
+
+(defun render-frame-snippet-preferred (snippet)
+  (views:html
+    (:div :class "fedwiki-frame-snippet-preferred"
+          (:iframe :src (adapted-frame-snippet-target-url-of snippet)
+                   :title (adapted-frame-snippet-summary-of snippet)
+                   :width "100%"
+                   :height (princ-to-string
+                            (adapted-frame-snippet-height-of snippet))
+                   :loading "lazy"))))
+
+(defun render-frame-snippet-fallback (snippet)
+  (views:html
+    (:div :class "fedwiki-frame-snippet-fallback"
+          (:p
+           (:a :href (adapted-frame-snippet-target-url-of snippet)
+               :target "_blank"
+               :rel "noopener noreferrer"
+               (views:esc "Open frame target")))
+          (:p
+           (:small
+            (views:esc
+             (format nil "Frame height: ~D px"
+                     (adapted-frame-snippet-height-of snippet))))))))
+
+(defun render-frame-adaptation-failure (failure)
+  (render-story-item-adaptation-failure failure))
+
+(defun render-adapted-frame-snippet (snippet)
+  (views:html
+    (:div :class "fedwiki-frame-snippet"
+          (render-frame-snippet-preferred snippet)
+          (render-frame-snippet-fallback snippet))))
 
 ;; Paragraphs
 
@@ -500,6 +664,22 @@
         (make-story-item-adaptation-failure
          item page :missing-adaptation-result
          "Video adaptation produced no inspectable result."))))))
+
+;; Frames
+
+(defmethod render-story-item ((type (eql :frame)) item page)
+  (let ((adapted (adapt-plugin-like-story-item type item page)))
+    (typecase adapted
+      (adapted-frame-snippet
+       (render-adapted-frame-snippet adapted))
+      (story-item-adaptation-failure
+       (render-frame-adaptation-failure adapted))
+      (t
+       (render-frame-adaptation-failure
+        (make-story-item-adaptation-failure
+         item page :missing-adaptation-result
+         "Frame adaptation produced no inspectable result."
+         :snippet-kind :frame))))))
 
 ;; Graphviz
 

@@ -296,6 +296,144 @@ Published Dec 1, 2007.")))
     (assert-true (not (search "Fallback: watch on YouTube" html :test #'char=))
                  "The failure renderer must stay visibly separate from the success/fallback video render path.")))
 
+(defun run-fedwiki-story-item-frame-adaptation-with-height-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :frame
+       "https://example.org/embed/widget
+HEIGHT 420")
+    (assert-true (typep adapted 'hyperbook/fedwiki::adapted-frame-snippet)
+                 "Valid frame URL plus HEIGHT must adapt to an adapted-frame-snippet.")
+    (assert-equal "https://example.org/embed/widget"
+                  (hyperbook/fedwiki::adapted-frame-snippet-target-url-of adapted)
+                  "The adapted frame snippet must preserve the parsed target URL.")
+    (assert-equal 420
+                  (hyperbook/fedwiki::adapted-frame-snippet-height-of adapted)
+                  "The adapted frame snippet must preserve the parsed HEIGHT value.")
+    (assert-true (eq item
+                     (hyperbook/fedwiki::adapted-frame-snippet-source-item-of adapted))
+                 "The adapted frame snippet must retain the original source-faithful story item.")
+    (assert-true (eq page
+                     (hyperbook/fedwiki::adapted-frame-snippet-source-page-of adapted))
+                 "The adapted frame snippet must retain the source page.")
+    (assert-equal :frame
+                  (hyperbook/fedwiki::item-type-of item)
+                  "The original frame story item type must remain unchanged.")
+    (assert-equal "https://example.org/embed/widget
+HEIGHT 420"
+                  (hyperbook/fedwiki::text-of item)
+                  "The original frame story item text must remain source-faithful after adaptation.")))
+
+(defun run-fedwiki-story-item-frame-adaptation-url-only-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :frame
+       "https://example.org/embed/widget")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::adapted-frame-snippet)
+                 "A frame snippet with URL only must still adapt successfully.")
+    (assert-equal "https://example.org/embed/widget"
+                  (hyperbook/fedwiki::adapted-frame-snippet-target-url-of adapted)
+                  "URL-only frame snippets must preserve the target URL.")
+    (assert-equal 300
+                  (hyperbook/fedwiki::adapted-frame-snippet-height-of adapted)
+                  "URL-only frame snippets must use the default height for this slice.")))
+
+(defun run-fedwiki-story-item-frame-malformed-height-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :frame
+       "https://example.org/embed/widget
+HEIGHT giant")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Malformed frame HEIGHT must produce a story-item-adaptation-failure.")
+    (assert-equal :malformed-height
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Malformed frame HEIGHT must stay on the explicit malformed-height failure path.")))
+
+(defun run-fedwiki-story-item-frame-missing-url-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :frame
+       "
+
+")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Frame snippets without a URL must produce a story-item-adaptation-failure.")
+    (assert-equal :missing-url
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Missing frame URL must stay on the explicit missing-url failure path.")))
+
+(defun run-fedwiki-story-item-frame-raw-iframe-html-unsupported-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :frame
+       "<iframe src=\"https://example.org/embed/widget\" height=\"420\"></iframe>")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Raw <iframe ...> HTML must stay on the explicit failure path in this slice.")
+    (assert-equal :raw-iframe-html-unsupported
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Raw <iframe ...> HTML must be rejected explicitly instead of best-effort embedding.")))
+
+(defun run-fedwiki-story-item-frame-preferred-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :frame
+           "https://example.org/embed/widget
+HEIGHT 420")))
+    (assert-true (search "<iframe" html :test #'char-equal)
+                 "Successful frame rendering must use the preferred iframe path.")
+    (assert-true (search "https://example.org/embed/widget" html :test #'char=)
+                 "Successful frame rendering must include the frame target URL.")
+    (assert-true (search "height='420'" html :test #'char-equal)
+                 "Successful frame rendering must include the parsed iframe height.")
+    (assert-true (search "Open frame target" html :test #'char=)
+                 "Successful frame rendering must keep a visible direct-open fallback link.")
+    (assert-true (not (search "Frame adaptation failed." html :test #'char=))
+                 "Successful frame rendering must stay on the success path, not the failure path.")))
+
+(defun run-fedwiki-story-item-frame-fallback-render-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :frame
+       "https://example.org/embed/widget
+HEIGHT 420")
+    (declare (ignore item page))
+    (multiple-value-bind (html assets)
+        (render-html-fragment-to-string-and-assets
+         (lambda ()
+           (hyperbook/fedwiki::render-frame-snippet-fallback adapted)))
+      (declare (ignore assets))
+      (assert-true (search "https://example.org/embed/widget" html :test #'char=)
+                   "The explicit frame fallback renderer must point to the target URL.")
+      (assert-true (search "Open frame target" html :test #'char=)
+                   "The explicit frame fallback renderer must expose the direct-open link.")
+      (assert-true (search "Frame height: 420 px" html :test #'char=)
+                   "The explicit frame fallback renderer must expose the parsed height.")
+      (assert-true (not (search "<iframe" html :test #'char-equal))
+                   "The explicit frame fallback renderer must stay separate from the iframe path."))))
+
+(defun run-fedwiki-story-item-frame-failure-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :frame
+           "<iframe src=\"https://example.org/embed/widget\" height=\"420\"></iframe>")))
+    (assert-true (search "Frame adaptation failed." html :test #'char=)
+                 "Unsupported raw <iframe ...> input must render an explicit frame failure block.")
+    (assert-true (search "Raw &lt;iframe ...&gt; HTML is unsupported in this slice." html :test #'char=)
+                 "The frame failure renderer must expose the explicit unsupported-html reason.")
+    (assert-true (search "Original story item:" html :test #'char=)
+                 "The frame failure renderer must keep the original story item inspectable.")
+    (assert-true (search "&lt;iframe src=&quot;https://example.org/embed/widget&quot; height=&quot;420&quot;&gt;&lt;/iframe&gt;"
+                         html
+                         :test #'char=)
+                 "The frame failure renderer must include raw source fallback from the original story item.")
+    (assert-true (not (search "Open frame target" html :test #'char=))
+                 "The frame failure renderer must stay visibly separate from the success/fallback frame render path.")))
+
 (defun run-fedwiki-story-item-short-hash-negative-test ()
   (let* ((page (make-story-items-smoke-page))
          (links (meaningful-links
@@ -341,6 +479,14 @@ Published Dec 1, 2007.")))
   (run-fedwiki-story-item-video-preferred-render-smoke-test)
   (run-fedwiki-story-item-video-fallback-render-smoke-test)
   (run-fedwiki-story-item-video-failure-render-smoke-test)
+  (run-fedwiki-story-item-frame-adaptation-with-height-smoke-test)
+  (run-fedwiki-story-item-frame-adaptation-url-only-smoke-test)
+  (run-fedwiki-story-item-frame-malformed-height-smoke-test)
+  (run-fedwiki-story-item-frame-missing-url-smoke-test)
+  (run-fedwiki-story-item-frame-raw-iframe-html-unsupported-smoke-test)
+  (run-fedwiki-story-item-frame-preferred-render-smoke-test)
+  (run-fedwiki-story-item-frame-fallback-render-smoke-test)
+  (run-fedwiki-story-item-frame-failure-render-smoke-test)
   (run-fedwiki-story-item-graphviz-render-smoke-test)
   (run-fedwiki-story-item-short-hash-negative-test)
   (run-fedwiki-story-item-non-hex-negative-test)
