@@ -336,21 +336,9 @@
    :title title
    :priority priority))
 
-(defun render-plain-source-surface-for-page
-    (page &key (title "Plain source") (priority 12))
-  (render-source-surface-for-page-with-designator
-   page
-   :plain
-   :title title
-   :priority priority))
-
-(defun render-historical-plain-text-page-source-definition
-    (page &key (title "Source") (priority 10))
-  (views:html-view :title title :priority priority
-    (hb:render-file-source-surface (file-of page))))
-
 (views:defview 👀plain-source (page text-page)
-  (render-plain-source-surface-for-page page))
+  (views:html-view :title "Plain source" :priority 12
+    (hb:render-file-source-surface (file-of page))))
 
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
   (render-source-surface-for-page-with-designator
@@ -541,10 +529,12 @@
             (source-surface-swap-preview-alternate-designator-of preview))))
     (if (and (typep page 'text-page)
              (eql designator :plain))
-        (render-historical-plain-text-page-source-definition
-         page
-         :title "Alternate Source"
-         :priority 4)
+        (let ((plain-view (👀plain-source page)))
+          (make-precomputed-html-view
+           "Alternate Source"
+           (views:view-html plain-view)
+           (copy-list (views:view-references plain-view))
+           (copy-list (views:view-assets plain-view))))
         (render-source-surface-for-page-with-designator
          page
          designator

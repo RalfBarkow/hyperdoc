@@ -1070,10 +1070,7 @@
                               (html-inspector-views:view-html alternate-view)))
          (expected-alternate-html
            (html-inspector-views:view-html
-            (hyperdoc::render-historical-plain-text-page-source-definition
-             page
-             :title "Alternate Source"
-             :priority 4))))
+            (hyperdoc::👀plain-source page))))
     (assert-type 'hyperdoc::source-surface-swap-preview
                  preview
                  "Swap preview must materialize as an inspectable object.")
@@ -1138,7 +1135,7 @@
      "Swap preview current Source must keep the connect runtime contract.")
     (assert-true
      (string= alternate-html expected-alternate-html)
-     "Swap preview alternate Source must render the historical plain text-page Source definition.")
+     "Swap preview alternate Source must render the actual text-page Plain source definition.")
     (assert-true
      (not (string= current-html alternate-html))
      "Swap preview current and alternate Source views must remain different renderings of the same page.")
@@ -1317,14 +1314,23 @@
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
          (plain-view
            (dmx-shared-workspace-docs-find-view-by-title views "Plain source"))
+         (plain-source-code-view
+           (html-inspector-views/standard:source-code-view
+            #'hyperdoc::👀plain-source
+            :in-file? nil))
          (source-html (and source-view
                            (html-inspector-views:view-html source-view)))
          (plain-html (and plain-view
-                          (html-inspector-views:view-html plain-view))))
+                          (html-inspector-views:view-html plain-view)))
+         (plain-source-code-html
+           (and plain-source-code-view
+                (html-inspector-views:view-html plain-source-code-view))))
     (assert-true plain-view
                  (format nil "~A must expose a Plain source view" page-title))
     (assert-true source-view
                  (format nil "~A must still expose the Source view" page-title))
+    (assert-true plain-source-code-view
+                 "The text-page Plain source definition must expose a Source code view.")
     (assert-true (search "data-hyperdoc-connect-provider-kind='source-v1'"
                          source-html
                          :test #'char=)
@@ -1351,7 +1357,17 @@
                    plain-html
                    :test #'char=))
      (format nil "~A Plain source view must suppress source-v1 provider metadata"
-             page-title))))
+             page-title))
+    (assert-true
+     (search "render-file-source-surface"
+             plain-source-code-html
+             :test #'char-equal)
+     "The text-page Plain source definition must expose the historical file/content path directly.")
+    (assert-true
+     (null (search "render-plain-source-surface-for-page"
+                   plain-source-code-html
+                   :test #'char-equal))
+     "The text-page Plain source definition must no longer read as the plain strategy wrapper.")))
 
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
