@@ -1064,20 +1064,21 @@
            (html-inspector-views/standard:source-code-view
             #'hyperdoc::👀alternate-source
             :in-file? nil))
+         (expected-alternate-view
+           (hyperdoc::->
+            page
+            hyperdoc::file-of
+            html-inspector-views:👀content
+            (html-inspector-views:rename :title "Alternate Source" :priority 4)))
          (overview-html (and overview-view
                              (html-inspector-views:view-html overview-view)))
          (compare-html (and compare-view
                             (html-inspector-views:view-html compare-view)))
          (current-html (and current-view
                             (html-inspector-views:view-html current-view)))
-         (alternate-html (and alternate-view
-                              (html-inspector-views:view-html alternate-view)))
          (alternate-source-code-html
            (and alternate-source-code-view
-                (html-inspector-views:view-html alternate-source-code-view)))
-         (expected-alternate-html
-           (html-inspector-views:view-html
-            (hyperdoc::👀plain-source page))))
+                (html-inspector-views:view-html alternate-source-code-view))))
     (assert-type 'hyperdoc::source-surface-swap-preview
                  preview
                  "Swap preview must materialize as an inspectable object.")
@@ -1117,6 +1118,12 @@
                    "Swap preview must expose overview, compare, current, and alternate views."))
     (assert-true alternate-source-code-view
                  "The Alternate Source definition must expose a Source code view.")
+    (assert-true
+     (typep alternate-view 'clog-moldable-inspector::clog-view)
+     "The Alternate Source runtime surface must materialize as the historical file-content view type.")
+    (assert-true
+     (typep expected-alternate-view 'clog-moldable-inspector::clog-view)
+     "The expected historical text-page Source path must materialize as a CLOG view.")
     (assert-shared-workspace-page-contains-all
      overview-html
      (format nil "~A swap preview overview" page-title)
@@ -1143,27 +1150,10 @@
              :test #'char=)
      "Swap preview current Source must keep the connect runtime contract.")
     (assert-true
-     (string= alternate-html expected-alternate-html)
-     "Swap preview alternate Source must render the actual text-page Plain source definition.")
+     (not (typep current-view 'clog-moldable-inspector::clog-view))
+     "The Current Source runtime surface must remain the non-historical connect-oriented view type.")
     (assert-true
-     (not (string= current-html alternate-html))
-     "Swap preview current and alternate Source views must remain different renderings of the same page.")
-    (assert-true
-     (search "hyperdoc-source-pane" alternate-html :test #'char=)
-     "Swap preview alternate Source must render the plain source pane.")
-    (assert-true
-     (search "hyperdoc-source-pane-line-number" alternate-html :test #'char=)
-     "Swap preview alternate Source must render line-numbered plain source content.")
-    (assert-true
-     (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
-                   alternate-html
-                   :test #'char=))
-     "Swap preview alternate Source must suppress the connect runtime contract.")
-    (assert-true
-     (null (search "hyperdoc-connect-provider" alternate-html :test #'char=))
-     "Swap preview alternate Source must suppress connect-provider metadata.")
-    (assert-true
-     (search "hb:render-file-source-surface"
+     (search "👀content"
              alternate-source-code-html
              :test #'char-equal)
      "The Alternate Source definition must expose the old plain file/content path directly.")
@@ -1173,10 +1163,40 @@
              :test #'char-equal)
      "The Alternate Source definition must read as the direct text-page file/content path.")
     (assert-true
+     (search "rename"
+             alternate-source-code-html
+             :test #'char-equal)
+     "The Alternate Source definition must rename the historical plain Source path into the Alternate Source tab.")
+    (assert-true
+     (search "->"
+             alternate-source-code-html
+             :test #'char-equal)
+     "The Alternate Source definition must read as the historical upstream threaded Source path.")
+    (assert-true
      (null (search "make-precomputed-html-view"
                    alternate-source-code-html
                    :test #'char-equal))
      "The Alternate Source definition must no longer read as copied HTML wrapping.")
+    (assert-true
+     (null (search "👀plain-source"
+                   alternate-source-code-html
+                   :test #'char-equal))
+     "The Alternate Source definition must not route through the Plain source view.")
+    (assert-true
+     (null (search "render-file-source-surface"
+                   alternate-source-code-html
+                   :test #'char-equal))
+     "The Alternate Source definition must not expose the direct file-source helper path.")
+    (assert-true
+     (null (search "render-plain-source-surface-for-page"
+                   alternate-source-code-html
+                   :test #'char-equal))
+     "The Alternate Source definition must not expose the modern plain strategy wrapper.")
+    (assert-true
+     (null (search "views:view-html"
+                   alternate-source-code-html
+                   :test #'char-equal))
+     "The Alternate Source definition must not expose copied HTML plumbing.")
     (handler-case
         (progn
           (hyperdoc::render-source-surface-for-page-with-designator page :bogus)
@@ -1234,12 +1254,15 @@
                 (dmx-shared-workspace-docs-find-view-by-title
                  preview-views
                  "Alternate Source")))
+         (expected-alternate-view
+           (hyperdoc::->
+            page
+            hyperdoc::file-of
+            html-inspector-views:👀content
+            (html-inspector-views:rename :title "Alternate Source" :priority 4)))
          (preview-overview-html
            (and preview-overview
-                (html-inspector-views:view-html preview-overview)))
-         (preview-alternate-html
-           (and preview-alternate
-                (html-inspector-views:view-html preview-alternate))))
+                (html-inspector-views:view-html preview-overview))))
     (assert-equal :connect
                   (getf report :effective-strategy-id)
                   (format nil "~A current effective Source path must stay connect by default"
@@ -1281,6 +1304,12 @@
                  "Plain preview reached from the page-level view must expose Overview.")
     (assert-true preview-alternate
                  "Plain preview reached from the page-level view must expose Alternate Source.")
+    (assert-true
+     (typep preview-alternate 'clog-moldable-inspector::clog-view)
+     "Plain preview reached from the page-level view must expose the historical Alternate Source as a CLOG view.")
+    (assert-true
+     (typep expected-alternate-view 'clog-moldable-inspector::clog-view)
+     "The direct historical text-page Source path must materialize as a CLOG view.")
     (assert-shared-workspace-page-contains-all
      preview-overview-html
      (format nil "~A plain swap preview overview" page-title)
@@ -1291,13 +1320,9 @@
        "connect"
        "plain"))
     (assert-true
-     (search "hyperdoc-source-pane" preview-alternate-html :test #'char=)
-     "Plain preview reached from the page-level view must render the alternate source pane.")
-    (assert-true
-     (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
-                   preview-alternate-html
-                   :test #'char=))
-     "Plain preview reached from the page-level view must suppress the connect runtime contract.")))
+     (typep preview-alternate
+            (type-of expected-alternate-view))
+     "Plain preview reached from the page-level view must stay on the historical text-page Source path instead of the connect-oriented HTML view.")))
 
 (defun run-source-surface-resolution-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)

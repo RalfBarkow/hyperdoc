@@ -529,8 +529,10 @@
             (source-surface-swap-preview-alternate-designator-of preview))))
     (if (and (typep page 'text-page)
              (eql designator :plain))
-        (views:html-view :title "Alternate Source" :priority 4
-          (hb:render-file-source-surface (file-of page)))
+        (-> page
+            file-of
+            views:👀content
+            (views:rename :title "Alternate Source" :priority 4))
         (render-source-surface-for-page-with-designator
          page
          designator
