@@ -213,7 +213,10 @@ Published Dec 1, 2007.")
                  "Missing video id must produce a story-item-adaptation-failure.")
     (assert-equal :missing-video-id
                   (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
-                  "Missing video id must stay on the explicit adaptation-failure path.")))
+                  "Missing video id must stay on the explicit adaptation-failure path.")
+    (assert-equal '(:provider "YOUTUBE")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Missing video id must keep the parsed provider in partial-fields.")))
 
 (defun run-fedwiki-story-item-video-malformed-header-smoke-test ()
   (multiple-value-bind (adapted item page)
@@ -226,7 +229,10 @@ Published Dec 1, 2007.")
                  "Malformed video headers must produce a story-item-adaptation-failure.")
     (assert-equal :malformed-header
                   (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
-                  "Extra header tokens must stay on the explicit malformed-header failure path.")))
+                  "Extra header tokens must stay on the explicit malformed-header failure path.")
+    (assert-equal '(:provider "YOUTUBE" :video-id "UjPxDOEdsX8")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Malformed video headers must keep the parsed header fields in partial-fields.")))
 
 (defun run-fedwiki-story-item-video-unsupported-provider-smoke-test ()
   (multiple-value-bind (adapted item page)
@@ -239,7 +245,10 @@ Published Dec 1, 2007.")
                  "Unsupported providers must produce a story-item-adaptation-failure.")
     (assert-equal :unsupported-provider
                   (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
-                  "Unsupported providers must stay on the explicit adaptation-failure path.")))
+                  "Unsupported providers must stay on the explicit adaptation-failure path.")
+    (assert-equal '(:provider "VIMEO" :video-id "UjPxDOEdsX8")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Unsupported video providers must keep the parsed provider and id in partial-fields.")))
 
 (defun run-fedwiki-story-item-video-preferred-render-smoke-test ()
   (let ((html
@@ -350,7 +359,11 @@ HEIGHT giant")
                  "Malformed frame HEIGHT must produce a story-item-adaptation-failure.")
     (assert-equal :malformed-height
                   (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
-                  "Malformed frame HEIGHT must stay on the explicit malformed-height failure path.")))
+                  "Malformed frame HEIGHT must stay on the explicit malformed-height failure path.")
+    (assert-equal '(:target-url "https://example.org/embed/widget"
+                    :height-line "HEIGHT giant")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Malformed frame HEIGHT must keep the parsed URL and height line in partial-fields.")))
 
 (defun run-fedwiki-story-item-frame-missing-url-smoke-test ()
   (multiple-value-bind (adapted item page)
@@ -364,7 +377,10 @@ HEIGHT giant")
                  "Frame snippets without a URL must produce a story-item-adaptation-failure.")
     (assert-equal :missing-url
                   (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
-                  "Missing frame URL must stay on the explicit missing-url failure path.")))
+                  "Missing frame URL must stay on the explicit missing-url failure path.")
+    (assert-equal nil
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Missing frame URL should not invent partial-fields.")))
 
 (defun run-fedwiki-story-item-frame-raw-iframe-html-unsupported-smoke-test ()
   (multiple-value-bind (adapted item page)
@@ -376,7 +392,10 @@ HEIGHT giant")
                  "Raw <iframe ...> HTML must stay on the explicit failure path in this slice.")
     (assert-equal :raw-iframe-html-unsupported
                   (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
-                  "Raw <iframe ...> HTML must be rejected explicitly instead of best-effort embedding.")))
+                  "Raw <iframe ...> HTML must be rejected explicitly instead of best-effort embedding.")
+    (assert-equal '(:first-line "<iframe src=\"https://example.org/embed/widget\" height=\"420\"></iframe>")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Raw <iframe ...> HTML failures must keep the first line in partial-fields.")))
 
 (defun run-fedwiki-story-item-frame-preferred-render-smoke-test ()
   (let ((html

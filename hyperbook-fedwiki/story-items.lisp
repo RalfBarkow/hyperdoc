@@ -292,14 +292,10 @@
    (message :reader adaptation-failure-message-of
             :initarg :message
             :type string)
-   (partial-provider :reader adaptation-failure-partial-provider-of
-                     :initarg :partial-provider
-                     :initform nil
-                     :type (or null string))
-   (partial-video-id :reader adaptation-failure-partial-video-id-of
-                     :initarg :partial-video-id
-                     :initform nil
-                     :type (or null string))))
+   (partial-fields :reader adaptation-failure-partial-fields-of
+                   :initarg :partial-fields
+                   :initform nil
+                   :type list)))
 
 (defmethod views:text-representation ((snippet adapted-video-snippet))
   (format nil "video ~A"
@@ -360,16 +356,25 @@
 (defun make-story-item-adaptation-failure (item page reason message
                                            &key
                                              (snippet-kind :video)
-                                             partial-provider
-                                             partial-video-id)
+                                             partial-fields)
   (make-instance 'story-item-adaptation-failure
                  :source-item item
                  :source-page page
                  :snippet-kind snippet-kind
                  :reason reason
                  :message message
-                 :partial-provider partial-provider
-                 :partial-video-id partial-video-id))
+                 :partial-fields partial-fields))
+
+(defun video-snippet-partial-fields (&key provider video-id)
+  (cond
+    ((and provider video-id)
+     (list :provider provider :video-id video-id))
+    (provider
+     (list :provider provider))
+    (video-id
+     (list :video-id video-id))
+    (t
+     nil)))
 
 (defmethod adapt-plugin-like-story-item ((type (eql :video)) item page)
   (declare (ignore type))
@@ -383,19 +388,25 @@
           item page :unsupported-provider
           (format nil "Unsupported video provider ~A. Only YOUTUBE <video-id> is supported in this slice."
                   provider-token)
-          :partial-provider provider-token
-          :partial-video-id video-id))
+          :partial-fields
+          (video-snippet-partial-fields
+           :provider provider-token
+           :video-id video-id)))
         (:missing-video-id
          (make-story-item-adaptation-failure
           item page :missing-video-id
           "Video snippet header must be YOUTUBE <video-id>."
-          :partial-provider provider-token))
+          :partial-fields
+          (video-snippet-partial-fields
+           :provider provider-token)))
         (:malformed-header
          (make-story-item-adaptation-failure
           item page :malformed-header
           "Malformed video snippet header. Expected YOUTUBE <video-id>."
-          :partial-provider provider-token
-          :partial-video-id video-id))
+          :partial-fields
+          (video-snippet-partial-fields
+           :provider provider-token
+           :video-id video-id)))
         (otherwise
          (make-instance 'adapted-video-snippet
                         :source-item item
@@ -459,7 +470,10 @@
      (values nil
              nil
              :raw-iframe-html-unsupported
-             "Raw <iframe ...> HTML is unsupported in this slice. Expected <url> plus optional HEIGHT <pixels>."))
+             "Raw <iframe ...> HTML is unsupported in this slice. Expected <url> plus optional HEIGHT <pixels>."
+             (let ((first-line (first (frame-snippet-non-empty-lines text))))
+               (and first-line
+                    (list :first-line first-line)))))
     (t
      (let ((lines (frame-snippet-non-empty-lines text)))
        (cond
@@ -467,37 +481,49 @@
           (values nil
                   nil
                   :missing-url
-                  "Frame snippet must start with a target URL."))
+                  "Frame snippet must start with a target URL."
+                  nil))
          ((> (length lines) 2)
           (values nil
                   nil
                   :malformed-frame-snippet
-                  "Frame snippet supports only <url> and optional HEIGHT <pixels> in this slice."))
+                  "Frame snippet supports only <url> and optional HEIGHT <pixels> in this slice."
+                  (list :first-line (first lines)
+                        :second-line (second lines)
+                        :extra-line (third lines))))
          ((not (absolute-http-url-p (first lines)))
           (values nil
                   nil
                   :malformed-frame-snippet
-                  "Frame snippet first line must be an absolute http(s) URL."))
+                  "Frame snippet first line must be an absolute http(s) URL."
+                  (list :first-line (first lines))))
          ((null (second lines))
           (values (first lines)
                   *default-frame-snippet-height*
+                  nil
                   nil
                   nil))
          (t
           (multiple-value-bind (height parse-failure message)
               (parse-frame-snippet-height-line (second lines))
             (if parse-failure
-                (values nil nil parse-failure message)
-                (values (first lines) height nil nil)))))))))
+                (values nil
+                        nil
+                        parse-failure
+                        message
+                        (list :target-url (first lines)
+                              :height-line (second lines)))
+                (values (first lines) height nil nil nil)))))))))
 
 (defmethod adapt-plugin-like-story-item ((type (eql :frame)) item page)
   (declare (ignore type))
-  (multiple-value-bind (target-url height parse-failure message)
+  (multiple-value-bind (target-url height parse-failure message partial-fields)
       (parse-frame-snippet-source-text (text-of item))
     (if parse-failure
         (make-story-item-adaptation-failure
          item page parse-failure message
-         :snippet-kind :frame)
+         :snippet-kind :frame
+         :partial-fields partial-fields)
         (make-instance 'adapted-frame-snippet
                        :source-item item
                        :source-page page
