@@ -1,10 +1,9 @@
-
 <h1>Optional semantic adaptation for FedWiki story items</h1>
 
 <in-package>hyperdoc</in-package>
 
 <p>
-  This page records a now-proven boundary in HyperDoc's FedWiki handling:
+  This page records a now-stable boundary in HyperDoc's FedWiki handling:
   source-faithful story-item import stays primary, and semantic adaptation is
   an optional second stage used only where a story-item kind benefits from it.
 </p>
@@ -30,9 +29,10 @@ FedWiki JSON
 </pre>
 
 <p>
-  The key point is that the source-faithful story item remains the authoritative
-  imported object. Adaptation does not replace it. Adaptation derives a second
-  object that is easier to inspect and render meaningfully.
+  The source-faithful story item remains the authoritative imported object.
+  Adaptation does not replace it. Adaptation derives a second object that is
+  easier to inspect and render meaningfully without rewriting the imported
+  source.
 </p>
 
 <h2>Why source-faithful import stays primary</h2>
@@ -45,13 +45,21 @@ FedWiki JSON
 </p>
 
 <p>
-  That source-faithful object is still the right anchor for inspection,
-  provenance, and raw fallback. The semantic adaptation layer is deliberately
+  That source-faithful object stays the right anchor for provenance,
+  inspection, and raw fallback. The semantic adaptation layer is deliberately
   second-stage so that parsing or rendering improvements do not rewrite the
   imported meaning of the page.
 </p>
 
-<h2>Why adaptation is opt-in</h2>
+<h2>Stable boundary now proven</h2>
+
+<ul>
+  <li>source-faithful story item stays primary</li>
+  <li>adaptation is optional and second-stage</li>
+  <li>success and failure stay visibly distinct</li>
+  <li>the shared failure payload is normalized</li>
+  <li>Graphviz remains on its thin shared seam</li>
+</ul>
 
 <p>
   Adaptation is not part of generic story-item construction. It is called only
@@ -60,21 +68,12 @@ FedWiki JSON
   <tt>adapt-plugin-like-story-item</tt> remains inert.
 </p>
 
-<p>
-  That boundary matters because most story-item kinds do not need a second
-  semantic object. Paragraphs, markdown blocks, references, and images already
-  have direct rendering paths. The adaptation seam exists for kinds where
-  parsing into a smaller, more explicit object improves both rendering and
-  failure handling.
-</p>
-
-<h2>Two proving cases</h2>
+<h2>Three proving cases</h2>
 
 <h3>Video: parse-first semantic normalization</h3>
 
 <p>
-  The <tt>:video</tt> slice proves the parse-first case. HyperDoc supports the
-  narrow form:
+  The <tt>:video</tt> slice proves the parse-first case. HyperDoc supports:
 </p>
 
 <pre>
@@ -83,26 +82,19 @@ caption...
 </pre>
 
 <p>
-  The adapter derives a small semantic object with provider, video id, caption,
-  canonical URL, and embed URL. Rendering then uses:
-</p>
-
-<ul>
-  <li>preferred: embedded player plus caption</li>
-  <li>safe fallback: canonical external link plus caption</li>
-</ul>
-
-<p>
-  Malformed or unsupported input does not silently degrade into a half-working
-  embed. It becomes a <tt>story-item-adaptation-failure</tt> plus raw-source
-  fallback from the original story item.
+  The adapter derives provider, video id, caption, canonical URL, and embed
+  URL. Rendering then uses an embedded player plus caption with a safe
+  canonical-link fallback. Malformed or unsupported input does not silently
+  degrade into a half-working embed. It becomes a
+  <tt>story-item-adaptation-failure</tt> plus raw-source fallback from the
+  original story item.
 </p>
 
 <h3>Frame: bounded embed with explicit rejection of raw HTML</h3>
 
 <p>
-  The <tt>:frame</tt> slice proves a different but compatible case. It supports
-  only the narrow textual form:
+  The <tt>:frame</tt> slice proves a different but compatible case. HyperDoc
+  supports:
 </p>
 
 <pre>
@@ -111,46 +103,46 @@ HEIGHT &lt;pixels&gt;
 </pre>
 
 <p>
-  The adapter derives a semantic object with target URL and height. Rendering
-  then uses:
+  The adapter derives target URL and height, then renders a bounded iframe plus
+  direct-open link. Raw <tt>&lt;iframe ...&gt;</tt> HTML is an explicit failure
+  case, not a best-effort success path. That preserves the seam as semantic
+  adaptation rather than ambient HTML reuse.
+</p>
+
+<h3>Audio: capability-sensitive success rendering from a typed semantic object</h3>
+
+<p>
+  The <tt>:audio</tt> slice proves a third case: semantic validity is separate
+  from inline playability. HyperDoc supports a narrow form in which the first
+  non-empty line is an absolute <tt>http(s)</tt> URL and the remaining text is
+  optional caption/body.
+</p>
+
+<p>
+  The adapter derives a typed semantic object and classifies the URL before
+  rendering:
 </p>
 
 <ul>
-  <li>preferred: bounded iframe plus direct-open link</li>
-  <li>safe fallback: direct-open link plus explicit height note</li>
+  <li>direct media gets bounded <tt>&lt;audio&gt;</tt> rendering plus caption/body and explicit open/download link</li>
+  <li>non-direct-media but semantically valid URLs get fallback-only success rendering plus caption/body and explicit open link</li>
+  <li>malformed or HTML-ish input stays on the explicit failure path</li>
 </ul>
 
 <p>
-  The important discipline in this slice is what does <b>not</b> happen:
-  raw <tt>&lt;iframe ...&gt;</tt> HTML is an explicit failure case, not a
-  best-effort success path. That preserves the seam as semantic adaptation
-  rather than ambient HTML reuse.
+  This matters because parse success and preferred inline rendering are not the
+  same question. The typed semantic object keeps them separate.
 </p>
 
 <h2>Why raw iframe HTML is explicit failure</h2>
 
 <p>
   HyperDoc is not trying to inherit the FedWiki plugin runtime or accept raw
-  plugin HTML as the main abstraction. The current <tt>:frame</tt> slice is
-  therefore intentionally narrow.
+  plugin HTML as the main abstraction. A raw
+  <tt>&lt;iframe ...&gt;</tt> string may contain meaningful source evidence, but
+  in this stage it is not treated as a trusted semantic object. The correct
+  outcome is an inspectable failure plus raw source, not a silent embed.
 </p>
-
-<p>
-  A raw <tt>&lt;iframe ...&gt;</tt> string may contain meaningful source
-  evidence, but in this stage it is not treated as a trusted semantic object.
-  The correct outcome is an inspectable failure plus raw source, not a silent
-  embed.
-</p>
-
-<p>
-  That keeps the boundary clear:
-</p>
-
-<ul>
-  <li>source-faithful import remains available</li>
-  <li>unsupported semantic input stays explicit</li>
-  <li>the renderer does not quietly become an HTML passthrough</li>
-</ul>
 
 <h2>Why Graphviz is not the next proving case</h2>
 
@@ -174,18 +166,32 @@ HEIGHT &lt;pixels&gt;
 
 <p>
   Keep <tt>adapt-plugin-like-story-item</tt> and
-  <tt>story-item-adaptation-failure</tt> for now. Before a third type is added,
-  normalize the failure payload so it is no longer shaped by the video-specific
-  first slice.
+  <tt>story-item-adaptation-failure</tt> for now. The shared failure payload is
+  now normalized to <tt>partial-fields</tt>, which is enough for the currently
+  proven cases without introducing per-type failure classes.
 </p>
 
-<h2>Should a third type be attempted yet?</h2>
+<h2>What would count as new evidence vs just more surface area?</h2>
 
 <p>
-  Recommendation: pause first. <tt>:video</tt> and <tt>:frame</tt> are enough
-  to document the seam and review naming and failure-shape decisions before
-  broadening it. If a third type is evaluated later, <tt>:audio</tt> is the
-  most plausible candidate.
+  New evidence would mean a new type forces a genuinely different boundary
+  question than the three current cases. Examples would include a different kind
+  of semantic parsing contract, a different safe-fallback contract, or a new
+  separation between semantic validity and preferred inline rendering that is
+  not already covered by <tt>:video</tt>, <tt>:frame</tt>, or <tt>:audio</tt>.
+</p>
+
+<p>
+  More surface area would mean another type merely repeats the same
+  source-faithful import, optional adaptation, normalized failure, and bounded
+  render/fallback pattern without changing what the seam needs to prove.
+</p>
+
+<h2>Recommendation</h2>
+
+<p>
+  Pause further type additions unless a new type demonstrates a genuinely
+  different boundary question.
 </p>
 
 <h2>Related pages</h2>
@@ -198,9 +204,11 @@ HEIGHT &lt;pixels&gt;
   <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="optional-semantic-adaptation-for-fedwiki-story-items">Localhost FedWiki canonical twin (slug)</a></li>
 </ul>
 
-<h2>Proven by commits</h2>
+<h2>Provenance note</h2>
 
 <ul>
   <li><tt>d23724007eafab1a39fa9748592dfab43dc758b3</tt> — <tt>:video</tt> adaptation seam</li>
   <li><tt>caf839321fce4939d7eec85e24c4e84c6d95e3ca</tt> — <tt>:frame</tt> adaptation seam</li>
+  <li><tt>a52e1d634aacffb5fd85c0b6c67652b842170df9</tt> — normalized shared failure payload</li>
+  <li><tt>4de0968586c546e7b4ae8a22fc2e80ee74de1543</tt> — <tt>:audio</tt> adaptation seam</li>
 </ul>
