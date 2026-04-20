@@ -2251,6 +2251,17 @@
                  "Journalmatic Journal Checker"
                  "Python json.tool Source and Usage")))
 
+(defun optional-semantic-adaptation-for-fedwiki-story-items-topic ()
+  (make-topic
+   :id "optional-semantic-adaptation-for-fedwiki-story-items"
+   :title "Optional semantic adaptation for FedWiki story items"
+   :summary "Keep FedWiki story-item import source-faithful, then let selected render methods opt into a second-stage semantic adaptation that yields either an adapted semantic object or an inspectable adaptation failure before preferred rendering and safe fallback."
+   :references '("Optional semantic adaptation for FedWiki story items"
+                 "FedWiki Video Snippet Plugin for HyperDoc"
+                 "Implementing a FedWiki Video Snippet Adapter"
+                 "FedWiki Graphviz story item render trace"
+                 "The iFrame Is Not the Compute Sandbox")))
+
 (defun fedwiki-id-runtime-contract-topic ()
   (make-topic
    :id "fedwiki-id-runtime-contract"

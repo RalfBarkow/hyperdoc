@@ -1,0 +1,206 @@
+
+<h1>Optional semantic adaptation for FedWiki story items</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page records a now-proven boundary in HyperDoc's FedWiki handling:
+  source-faithful story-item import stays primary, and semantic adaptation is
+  an optional second stage used only where a story-item kind benefits from it.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Optional semantic adaptation for FedWiki story items"><tt>Optional semantic adaptation for FedWiki story items</tt></a></li>
+</ul>
+
+<h2>Stable pipeline</h2>
+
+<p>
+  The stable pipeline is:
+</p>
+
+<pre>
+FedWiki JSON
+-&gt; source-faithful story item
+-&gt; optional adaptation
+-&gt; adapted semantic object or adaptation-failure
+-&gt; preferred render + safe fallback
+</pre>
+
+<p>
+  The key point is that the source-faithful story item remains the authoritative
+  imported object. Adaptation does not replace it. Adaptation derives a second
+  object that is easier to inspect and render meaningfully.
+</p>
+
+<h2>Why source-faithful import stays primary</h2>
+
+<p>
+  HyperDoc already has a good import seam in <tt>make-story-item</tt>. That seam
+  preserves the original FedWiki structure as a typed <tt>story-item</tt> with
+  its original <tt>type</tt>, <tt>id</tt>, <tt>text</tt>, and remaining
+  <tt>data</tt>.
+</p>
+
+<p>
+  That source-faithful object is still the right anchor for inspection,
+  provenance, and raw fallback. The semantic adaptation layer is deliberately
+  second-stage so that parsing or rendering improvements do not rewrite the
+  imported meaning of the page.
+</p>
+
+<h2>Why adaptation is opt-in</h2>
+
+<p>
+  Adaptation is not part of generic story-item construction. It is called only
+  from selected <tt>render-story-item</tt> methods that explicitly opt into the
+  extra step. The default method for
+  <tt>adapt-plugin-like-story-item</tt> remains inert.
+</p>
+
+<p>
+  That boundary matters because most story-item kinds do not need a second
+  semantic object. Paragraphs, markdown blocks, references, and images already
+  have direct rendering paths. The adaptation seam exists for kinds where
+  parsing into a smaller, more explicit object improves both rendering and
+  failure handling.
+</p>
+
+<h2>Two proving cases</h2>
+
+<h3>Video: parse-first semantic normalization</h3>
+
+<p>
+  The <tt>:video</tt> slice proves the parse-first case. HyperDoc supports the
+  narrow form:
+</p>
+
+<pre>
+YOUTUBE &lt;video-id&gt;
+caption...
+</pre>
+
+<p>
+  The adapter derives a small semantic object with provider, video id, caption,
+  canonical URL, and embed URL. Rendering then uses:
+</p>
+
+<ul>
+  <li>preferred: embedded player plus caption</li>
+  <li>safe fallback: canonical external link plus caption</li>
+</ul>
+
+<p>
+  Malformed or unsupported input does not silently degrade into a half-working
+  embed. It becomes a <tt>story-item-adaptation-failure</tt> plus raw-source
+  fallback from the original story item.
+</p>
+
+<h3>Frame: bounded embed with explicit rejection of raw HTML</h3>
+
+<p>
+  The <tt>:frame</tt> slice proves a different but compatible case. It supports
+  only the narrow textual form:
+</p>
+
+<pre>
+&lt;url&gt;
+HEIGHT &lt;pixels&gt;
+</pre>
+
+<p>
+  The adapter derives a semantic object with target URL and height. Rendering
+  then uses:
+</p>
+
+<ul>
+  <li>preferred: bounded iframe plus direct-open link</li>
+  <li>safe fallback: direct-open link plus explicit height note</li>
+</ul>
+
+<p>
+  The important discipline in this slice is what does <b>not</b> happen:
+  raw <tt>&lt;iframe ...&gt;</tt> HTML is an explicit failure case, not a
+  best-effort success path. That preserves the seam as semantic adaptation
+  rather than ambient HTML reuse.
+</p>
+
+<h2>Why raw iframe HTML is explicit failure</h2>
+
+<p>
+  HyperDoc is not trying to inherit the FedWiki plugin runtime or accept raw
+  plugin HTML as the main abstraction. The current <tt>:frame</tt> slice is
+  therefore intentionally narrow.
+</p>
+
+<p>
+  A raw <tt>&lt;iframe ...&gt;</tt> string may contain meaningful source
+  evidence, but in this stage it is not treated as a trusted semantic object.
+  The correct outcome is an inspectable failure plus raw source, not a silent
+  embed.
+</p>
+
+<p>
+  That keeps the boundary clear:
+</p>
+
+<ul>
+  <li>source-faithful import remains available</li>
+  <li>unsupported semantic input stays explicit</li>
+  <li>the renderer does not quietly become an HTML passthrough</li>
+</ul>
+
+<h2>Why Graphviz is not the next proving case</h2>
+
+<p>
+  Graphviz is important, but it is not the next proving case for this seam.
+  Graphviz already has a good thin ownership boundary:
+</p>
+
+<ul>
+  <li>the FedWiki story-item side stays thin</li>
+  <li>the shared lower Graphviz seam owns transport, runtime, and raw fallback</li>
+  <li>the FedWiki renderer hands off quickly to <tt>views:graphviz-snippet</tt></li>
+</ul>
+
+<p>
+  If Graphviz is ever wrapped into the same contract, it should be a light
+  retrofit that preserves that handoff.
+</p>
+
+<h2>Current naming decision</h2>
+
+<p>
+  Keep <tt>adapt-plugin-like-story-item</tt> and
+  <tt>story-item-adaptation-failure</tt> for now. Before a third type is added,
+  normalize the failure payload so it is no longer shaped by the video-specific
+  first slice.
+</p>
+
+<h2>Should a third type be attempted yet?</h2>
+
+<p>
+  Recommendation: pause first. <tt>:video</tt> and <tt>:frame</tt> are enough
+  to document the seam and review naming and failure-shape decisions before
+  broadening it. If a third type is evaluated later, <tt>:audio</tt> is the
+  most plausible candidate.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="FedWiki Video Snippet Plugin for HyperDoc">FedWiki Video Snippet Plugin for HyperDoc</a></li>
+  <li><a page="Implementing a FedWiki Video Snippet Adapter">Implementing a FedWiki Video Snippet Adapter</a></li>
+  <li><a page="FedWiki Graphviz story item render trace">FedWiki Graphviz story item render trace</a></li>
+  <li><a page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="optional-semantic-adaptation-for-fedwiki-story-items">Localhost FedWiki canonical twin (slug)</a></li>
+</ul>
+
+<h2>Proven by commits</h2>
+
+<ul>
+  <li><tt>d23724007eafab1a39fa9748592dfab43dc758b3</tt> — <tt>:video</tt> adaptation seam</li>
+  <li><tt>caf839321fce4939d7eec85e24c4e84c6d95e3ca</tt> — <tt>:frame</tt> adaptation seam</li>
+</ul>
