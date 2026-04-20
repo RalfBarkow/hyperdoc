@@ -453,6 +453,177 @@ HEIGHT 420")
     (assert-true (not (search "Open frame target" html :test #'char=))
                  "The frame failure renderer must stay visibly separate from the success/fallback frame render path.")))
 
+(defun run-fedwiki-story-item-audio-direct-media-adaptation-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :audio
+       "https://example.org/audio.mp3
+Episode notes for the direct media case.")
+    (assert-true (typep adapted 'hyperbook/fedwiki::adapted-audio-snippet)
+                 "A direct-media audio URL plus caption must adapt to an adapted-audio-snippet.")
+    (assert-equal "https://example.org/audio.mp3"
+                  (hyperbook/fedwiki::adapted-audio-snippet-target-url-of adapted)
+                  "The adapted audio snippet must preserve the parsed target URL.")
+    (assert-equal "Episode notes for the direct media case."
+                  (hyperbook/fedwiki::adapted-audio-snippet-caption-of adapted)
+                  "The adapted audio snippet must preserve the trailing caption/body text.")
+    (assert-equal :direct-media
+                  (hyperbook/fedwiki::adapted-audio-snippet-url-kind-of adapted)
+                  "Direct media URLs must classify to the preferred direct-media path.")
+    (assert-true (eq item
+                     (hyperbook/fedwiki::adapted-audio-snippet-source-item-of adapted))
+                 "The adapted audio snippet must retain the original source-faithful story item.")
+    (assert-true (eq page
+                     (hyperbook/fedwiki::adapted-audio-snippet-source-page-of adapted))
+                 "The adapted audio snippet must retain the source page.")
+    (assert-equal :audio
+                  (hyperbook/fedwiki::item-type-of item)
+                  "The original audio story item type must remain unchanged.")
+    (assert-equal "https://example.org/audio.mp3
+Episode notes for the direct media case."
+                  (hyperbook/fedwiki::text-of item)
+                  "The original audio story item text must remain source-faithful after adaptation.")))
+
+(defun run-fedwiki-story-item-audio-direct-media-url-only-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :audio
+       "https://example.org/audio.mp3")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::adapted-audio-snippet)
+                 "A direct-media audio URL without caption must still adapt successfully.")
+    (assert-equal :direct-media
+                  (hyperbook/fedwiki::adapted-audio-snippet-url-kind-of adapted)
+                  "A direct-media audio URL without caption must stay on the direct-media path.")
+    (assert-equal ""
+                  (hyperbook/fedwiki::adapted-audio-snippet-caption-of adapted)
+                  "A URL-only audio snippet must produce an empty caption/body string.")))
+
+(defun run-fedwiki-story-item-audio-fallback-only-adaptation-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :audio
+       "https://www.listennotes.com/e/p/4308ac34a98a4027b735398ea21d3582/
+Line one of the audio notes.
+Line two with [https://example.org link].")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::adapted-audio-snippet)
+                 "A valid non-direct-media audio reference must still adapt successfully.")
+    (assert-equal :fallback-only
+                  (hyperbook/fedwiki::adapted-audio-snippet-url-kind-of adapted)
+                  "Semantically valid non-direct-media audio URLs must classify to the fallback-only path.")
+    (assert-equal "Line one of the audio notes.
+Line two with [https://example.org link]."
+                  (hyperbook/fedwiki::adapted-audio-snippet-caption-of adapted)
+                  "Fallback-only audio snippets must preserve the multiline body as caption text.")))
+
+(defun run-fedwiki-story-item-audio-missing-url-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :audio
+       "
+
+")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Audio snippets without a URL must produce a story-item-adaptation-failure.")
+    (assert-equal :missing-url
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Missing audio URLs must stay on the explicit missing-url failure path.")
+    (assert-equal nil
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Missing audio URLs should not invent partial-fields.")))
+
+(defun run-fedwiki-story-item-audio-non-http-url-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :audio
+       "ftp://example.org/audio.mp3
+Fallback body")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Non-http(s) first lines must produce a story-item-adaptation-failure.")
+    (assert-equal :non-http-url
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Non-http(s) first lines must stay on the explicit non-http-url failure path.")
+    (assert-equal '(:first-line "ftp://example.org/audio.mp3")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Non-http(s) audio failures must keep the first line in partial-fields.")))
+
+(defun run-fedwiki-story-item-audio-raw-html-unsupported-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :audio
+       "<audio src=\"https://example.org/audio.mp3\"></audio>")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Raw <audio ...> HTML must stay on the explicit failure path in this slice.")
+    (assert-equal :raw-audio-html-unsupported
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Raw <audio ...> HTML must be rejected explicitly instead of best-effort embedding.")
+    (assert-equal '(:first-line "<audio src=\"https://example.org/audio.mp3\"></audio>")
+                  (hyperbook/fedwiki::adaptation-failure-partial-fields-of adapted)
+                  "Raw <audio ...> failures must keep the first line in partial-fields.")))
+
+(defun run-fedwiki-story-item-audio-preferred-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :audio
+           "https://example.org/audio.mp3
+Episode notes for the direct media case.")))
+    (assert-true (search "<audio" html :test #'char-equal)
+                 "Direct-media audio rendering must use the preferred HTML5 audio path.")
+    (assert-true (search "https://example.org/audio.mp3" html :test #'char=)
+                 "Direct-media audio rendering must include the source URL.")
+    (assert-true (search "Episode notes for the direct media case." html :test #'char=)
+                 "Direct-media audio rendering must include the caption/body text.")
+    (assert-true (search "Open/download audio" html :test #'char=)
+                 "Direct-media audio rendering must keep a visible open/download link.")
+    (assert-true (not (search "External audio reference" html :test #'char=))
+                 "Direct-media audio rendering must stay on the preferred path, not the fallback-only card.")
+    (assert-true (not (search "Audio adaptation failed." html :test #'char=))
+                 "Direct-media audio rendering must stay on the success path, not the failure path.")))
+
+(defun run-fedwiki-story-item-audio-fallback-only-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :audio
+           "https://www.listennotes.com/e/p/4308ac34a98a4027b735398ea21d3582/
+Line one of the audio notes.
+Line two with [https://example.org link].")))
+    (assert-true (not (search "<audio" html :test #'char-equal))
+                 "Fallback-only audio references must not force an HTML5 audio element.")
+    (assert-true (search "External audio reference" html :test #'char=)
+                 "Fallback-only audio rendering must use the bounded external-audio reference card.")
+    (assert-true (search "Open audio reference" html :test #'char=)
+                 "Fallback-only audio rendering must expose the explicit open link.")
+    (assert-true (search "Line one of the audio notes." html :test #'char=)
+                 "Fallback-only audio rendering must preserve the first caption/body line.")
+    (assert-true (search "Line two with" html :test #'char=)
+                 "Fallback-only audio rendering must preserve later body lines.")
+    (assert-true (not (search "Audio adaptation failed." html :test #'char=))
+                 "Fallback-only audio rendering must stay on the success path, not the failure path.")))
+
+(defun run-fedwiki-story-item-audio-failure-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :audio
+           "<audio src=\"https://example.org/audio.mp3\"></audio>")))
+    (assert-true (search "Audio adaptation failed." html :test #'char=)
+                 "Unsupported raw <audio ...> input must render an explicit audio failure block.")
+    (assert-true (search "Raw &lt;audio ...&gt; HTML or HTML-contaminated audio lines are unsupported in this slice." html :test #'char=)
+                 "The audio failure renderer must expose the explicit unsupported-html reason.")
+    (assert-true (search "Original story item:" html :test #'char=)
+                 "The audio failure renderer must keep the original story item inspectable.")
+    (assert-true (search "&lt;audio src=&quot;https://example.org/audio.mp3&quot;&gt;&lt;/audio&gt;"
+                         html
+                         :test #'char=)
+                 "The audio failure renderer must include raw source fallback from the original story item.")
+    (assert-true (not (search "Open/download audio" html :test #'char=))
+                 "The audio failure renderer must stay visibly separate from the direct-media success path.")
+    (assert-true (not (search "External audio reference" html :test #'char=))
+                 "The audio failure renderer must stay visibly separate from the fallback-only success path.")))
+
 (defun run-fedwiki-story-item-short-hash-negative-test ()
   (let* ((page (make-story-items-smoke-page))
          (links (meaningful-links
@@ -506,6 +677,15 @@ HEIGHT 420")
   (run-fedwiki-story-item-frame-preferred-render-smoke-test)
   (run-fedwiki-story-item-frame-fallback-render-smoke-test)
   (run-fedwiki-story-item-frame-failure-render-smoke-test)
+  (run-fedwiki-story-item-audio-direct-media-adaptation-smoke-test)
+  (run-fedwiki-story-item-audio-direct-media-url-only-smoke-test)
+  (run-fedwiki-story-item-audio-fallback-only-adaptation-smoke-test)
+  (run-fedwiki-story-item-audio-missing-url-smoke-test)
+  (run-fedwiki-story-item-audio-non-http-url-smoke-test)
+  (run-fedwiki-story-item-audio-raw-html-unsupported-smoke-test)
+  (run-fedwiki-story-item-audio-preferred-render-smoke-test)
+  (run-fedwiki-story-item-audio-fallback-only-render-smoke-test)
+  (run-fedwiki-story-item-audio-failure-render-smoke-test)
   (run-fedwiki-story-item-graphviz-render-smoke-test)
   (run-fedwiki-story-item-short-hash-negative-test)
   (run-fedwiki-story-item-non-hex-negative-test)

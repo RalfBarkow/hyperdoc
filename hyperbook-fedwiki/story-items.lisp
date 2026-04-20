@@ -276,6 +276,26 @@
             :initarg :summary
             :type string)))
 
+(defclass adapted-audio-snippet ()
+  ((source-item :reader adapted-audio-snippet-source-item-of
+                :initarg :source-item
+                :type story-item)
+   (source-page :reader adapted-audio-snippet-source-page-of
+                :initarg :source-page
+                :type fedwiki-page)
+   (target-url :reader adapted-audio-snippet-target-url-of
+               :initarg :target-url
+               :type string)
+   (caption :reader adapted-audio-snippet-caption-of
+            :initarg :caption
+            :type string)
+   (url-kind :reader adapted-audio-snippet-url-kind-of
+             :initarg :url-kind
+             :type keyword)
+   (summary :reader adapted-audio-snippet-summary-of
+            :initarg :summary
+            :type string)))
+
 (defclass story-item-adaptation-failure ()
   ((source-item :reader adaptation-failure-source-item-of
                 :initarg :source-item
@@ -304,6 +324,10 @@
 (defmethod views:text-representation ((snippet adapted-frame-snippet))
   (format nil "frame ~A"
           (adapted-frame-snippet-target-url-of snippet)))
+
+(defmethod views:text-representation ((snippet adapted-audio-snippet))
+  (format nil "audio ~A"
+          (adapted-audio-snippet-target-url-of snippet)))
 
 (defmethod views:text-representation ((failure story-item-adaptation-failure))
   (format nil "~(~A~) adaptation failed"
@@ -419,6 +443,8 @@
                         :summary (format nil "YouTube video ~A" video-id)))))))
 
 (defparameter *default-frame-snippet-height* 300)
+(defparameter *direct-media-audio-extensions*
+  '(".mp3" ".m4a" ".aac" ".ogg" ".opus" ".wav" ".flac"))
 
 (defun normalize-frame-snippet-source-text (text)
   (coerce (remove #\Return (or text "")) 'string))
@@ -531,6 +557,102 @@
                        :height height
                        :summary (format nil "Frame ~A" target-url)))))
 
+(defun normalize-audio-snippet-source-text (text)
+  (coerce (remove #\Return (or text "")) 'string))
+
+(defun audio-snippet-first-non-empty-line-and-caption (text)
+  (let* ((normalized (normalize-audio-snippet-source-text text))
+         (lines (cl-ppcre:split "\\n" normalized))
+         (index (position-if (lambda (line)
+                               (plusp (length (string-trim '(#\Space #\Tab #\Newline)
+                                                           line))))
+                             lines)))
+    (if index
+        (values (string-trim '(#\Space #\Tab #\Newline)
+                             (nth index lines))
+                (string-trim '(#\Space #\Tab #\Newline)
+                             (format nil "~{~A~^~%~}"
+                                     (subseq lines (1+ index)))))
+        (values nil ""))))
+
+(defun audio-snippet-html-contaminated-first-line-p (line)
+  (or (search "<audio" line :test #'char-equal)
+      (search "<source" line :test #'char-equal)
+      (search "type=\"audio/" line :test #'char-equal)
+      (search "type='audio/" line :test #'char-equal)))
+
+(defun audio-direct-media-url-p (url)
+  (let* ((query-position (position #\? url))
+         (fragment-position (position #\# url))
+         (end (reduce #'min
+                      (remove nil (list query-position fragment-position))
+                      :initial-value (length url)))
+         (lowercase-url (string-downcase (subseq url 0 end))))
+    (loop for extension in *direct-media-audio-extensions*
+          thereis (str:ends-with? extension lowercase-url))))
+
+(defun classify-audio-snippet-url (url)
+  (if (audio-direct-media-url-p url)
+      :direct-media
+      :fallback-only))
+
+(defun parse-audio-snippet-source-text (text)
+  (multiple-value-bind (first-line caption)
+      (audio-snippet-first-non-empty-line-and-caption text)
+    (cond
+      ((null first-line)
+       (values nil
+               ""
+               nil
+               :missing-url
+               "Audio snippet must start with an absolute http(s) URL."
+               nil))
+      ((string= first-line "-")
+       (values nil
+               caption
+               nil
+               :placeholder-url
+               "Audio snippet placeholder '-' is unsupported in this slice."
+               (list :first-line first-line)))
+      ((audio-snippet-html-contaminated-first-line-p first-line)
+       (values nil
+               caption
+               nil
+               :raw-audio-html-unsupported
+               "Raw <audio ...> HTML or HTML-contaminated audio lines are unsupported in this slice. Expected an absolute http(s) URL on the first non-empty line."
+               (list :first-line first-line)))
+      ((not (absolute-http-url-p first-line))
+       (values nil
+               caption
+               nil
+               :non-http-url
+               "Audio snippet first line must be an absolute http(s) URL."
+               (list :first-line first-line)))
+      (t
+       (values first-line
+               caption
+               (classify-audio-snippet-url first-line)
+               nil
+               nil
+               nil)))))
+
+(defmethod adapt-plugin-like-story-item ((type (eql :audio)) item page)
+  (declare (ignore type))
+  (multiple-value-bind (target-url caption url-kind parse-failure message partial-fields)
+      (parse-audio-snippet-source-text (text-of item))
+    (if parse-failure
+        (make-story-item-adaptation-failure
+         item page parse-failure message
+         :snippet-kind :audio
+         :partial-fields partial-fields)
+        (make-instance 'adapted-audio-snippet
+                       :source-item item
+                       :source-page page
+                       :target-url target-url
+                       :caption caption
+                       :url-kind url-kind
+                       :summary (format nil "Audio ~A" target-url)))))
+
 (defun render-video-snippet-preferred (snippet page)
   (views:html
     (:div :class "fedwiki-video-snippet-preferred"
@@ -631,6 +753,52 @@
           (render-frame-snippet-preferred snippet)
           (render-frame-snippet-fallback snippet))))
 
+(defun render-audio-snippet-caption (snippet page)
+  (when (plusp (length (adapted-audio-snippet-caption-of snippet)))
+    (views:html
+      (:div :class "fedwiki-audio-snippet-caption"
+            :style "white-space: pre-wrap;"
+            (render-wiki-text (adapted-audio-snippet-caption-of snippet)
+                              page)))))
+
+(defun render-audio-snippet-open-link (snippet label)
+  (views:html
+    (:p
+     (:a :href (adapted-audio-snippet-target-url-of snippet)
+         :target "_blank"
+         :rel "noopener noreferrer"
+         (views:esc label)))))
+
+(defun render-audio-snippet-direct-media (snippet page)
+  (views:html
+    (:div :class "fedwiki-audio-snippet-direct-media"
+          (:audio :controls "controls"
+                  :preload "none"
+                  :src (adapted-audio-snippet-target-url-of snippet))
+          (render-audio-snippet-caption snippet page)
+          (render-audio-snippet-open-link snippet "Open/download audio"))))
+
+(defun render-audio-snippet-fallback-only (snippet page)
+  (views:html
+    (:div :class "fedwiki-audio-snippet-fallback-only"
+          (:p (:b (views:esc "External audio reference")))
+          (render-audio-snippet-caption snippet page)
+          (render-audio-snippet-open-link snippet "Open audio reference"))))
+
+(defun render-audio-adaptation-failure (failure)
+  (render-story-item-adaptation-failure failure))
+
+(defun render-adapted-audio-snippet (snippet page)
+  (ecase (adapted-audio-snippet-url-kind-of snippet)
+    (:direct-media
+     (views:html
+       (:div :class "fedwiki-audio-snippet"
+             (render-audio-snippet-direct-media snippet page))))
+    (:fallback-only
+     (views:html
+       (:div :class "fedwiki-audio-snippet"
+             (render-audio-snippet-fallback-only snippet page))))))
+
 ;; Paragraphs
 
 (defmethod render-story-item ((type (eql :paragraph)) item page)
@@ -706,6 +874,22 @@
          item page :missing-adaptation-result
          "Frame adaptation produced no inspectable result."
          :snippet-kind :frame))))))
+
+;; Audio
+
+(defmethod render-story-item ((type (eql :audio)) item page)
+  (let ((adapted (adapt-plugin-like-story-item type item page)))
+    (typecase adapted
+      (adapted-audio-snippet
+       (render-adapted-audio-snippet adapted page))
+      (story-item-adaptation-failure
+       (render-audio-adaptation-failure adapted))
+      (t
+       (render-audio-adaptation-failure
+        (make-story-item-adaptation-failure
+         item page :missing-adaptation-result
+         "Audio adaptation produced no inspectable result."
+         :snippet-kind :audio))))))
 
 ;; Graphviz
 
