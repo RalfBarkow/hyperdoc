@@ -11,12 +11,14 @@ A HyperDoc is defined by
  - Optionally: the title of a page to be displayed as the entry page
 
 A HyperDoc is part of system defined via ASDF, its directory resides
-next to the .asd file in the file system. The directory contains both
-the text pages (in HTML or Markdown format) and the source code files,
-which must be loaded as a module in the system component list. In other
-words, a HyperDoc is not outside the ASDF model: it lives inside a real
-ASDF system, under a real module, with real file ordering and loading
-rules.
+next to the .asd file in the file system. In the current implementation,
+a HyperDoc unit is realized as a real ASDF system in a version-controlled
+repository. The directory contains both the text pages (in HTML or Markdown
+format) and the source code files, which must be loaded as a module in the
+system component list. In other words, a HyperDoc is not outside the ASDF
+model: it lives inside a real ASDF system, under a real module, with real
+file ordering and loading rules. HyperDoc is therefore a standard Common Lisp
+software package with added conventions for organizing non-code media.
 
 See for example the <a expr="(asdf:system-relative-pathname
 &quot;hyperdoc&quot; &quot;hyperdoc/&quot;)">directory for the

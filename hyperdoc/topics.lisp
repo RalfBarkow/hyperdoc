@@ -3353,6 +3353,61 @@
   (make-the-life-cycle-of-collective-knowledge-topic
    "stable-software-environments"))
 
+(defun code-as-knowledge-representation-topic ()
+  (make-topic
+   :id "code-as-knowledge-representation"
+   :title "Code as knowledge representation"
+   :summary "In HyperDoc, code is treated both as a representation of knowledge and as a medium for building situated tools that help inspect and process that knowledge."
+   :references '("Design"
+                 "Goals and values"
+                 "HyperDoc Runtime Model")))
+
+(defun computational-story-topic ()
+  (make-topic
+   :id "computational-story"
+   :title "Computational story"
+   :summary "A computational story combines narrative, the steps of a computation, and its intermediate results without collapsing them into one linear notebook-style execution stream."
+   :references '("Design"
+                 "Goals and values")))
+
+(defun common-lisp-as-implementation-substrate-topic ()
+  (make-topic
+   :id "common-lisp-as-implementation-substrate"
+   :title "Common Lisp as implementation substrate"
+   :summary "Common Lisp is HyperDoc's current implementation substrate because it combines interactivity, introspection, and long-term stability in a form that still supports durable source reconstruction."
+   :references '("Design"
+                 "Goals and values"
+                 "Creating a HyperDoc"
+                 "Source-oriented and image-oriented development in Common Lisp"
+                 "The Life Cycle of Collective Knowledge")))
+
+(defun hypermedia-item-as-in-memory-object-topic ()
+  (make-topic
+   :id "hypermedia-item-as-in-memory-object"
+   :title "Hypermedia item as in-memory object"
+   :summary "In the current Common Lisp implementation, each hypermedia item is represented by a live object, often acting as a proxy to a file, source artifact, or network resource."
+   :references '("HyperDoc Runtime Model"
+                 "Creating a HyperDoc"
+                 "Design")))
+
+(defun inspector-as-browser-topic ()
+  (make-topic
+   :id "inspector-as-browser"
+   :title "Inspector as browser"
+   :summary "Inspector as browser means that an object inspector is not just a debugging tool but the current primary browsing surface for HyperDoc's page and object model."
+   :references '("HyperDoc Runtime Model"
+                 "Design"
+                 "Glamorous Toolkit and HyperDoc")))
+
+(defun hyperdoc-as-protocol-topic ()
+  (make-topic
+   :id "hyperdoc-as-protocol"
+   :title "HyperDoc as protocol"
+   :summary "HyperDoc as protocol is the longer-term direction in which HyperDoc units could interact through a more explicit protocol and support multiple browsers without being tied to one implementation technology."
+   :references '("Design"
+                 "HyperDoc Runtime Model"
+                 "HyperDoc and HyperBook")))
+
 (defun make-reproducible-devenv-as-knowledge-artifact-topic (topic-id)
   (make-generated-page-topic-with-fallback
    topic-id

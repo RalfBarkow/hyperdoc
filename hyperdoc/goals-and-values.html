@@ -1,5 +1,13 @@
 <h1>Goals and values</h1>
 
+<p>
+  HyperDoc is meant for knowledge workers:
+  professionals who consult and contribute to networks of collective knowledge.
+  That includes scientific research, but also any practice that needs durable
+  links between explanation, code, runtime objects, and heterogeneous external
+  systems.
+</p>
+
 <h2>Explorability</h2>
 
 <p>
@@ -16,6 +24,22 @@
   HyperDoc's main role in software systems is to provide guidance to
   the code, through explanatory narratives and interactive execution
   of code examples.
+</p>
+<p>
+  This assumes that code itself can be part of the knowledge surface.
+  HyperDoc treats
+  <a hyperbook="topics" page="Code as knowledge representation"><tt>code as knowledge representation</tt></a>
+  rather than as a sealed implementation layer beneath passive documentation.
+  Functions, classes, code snippets, and runnable examples should stay
+  inspectable and linkable because they are often the shortest accurate account
+  of how a computational idea actually works.
+</p>
+<p>
+  The first implementation priority under that value is
+  consulting rather than authoring.
+  HyperDoc assumes that early adopters already have tools for editing code and
+  prose. The more urgent gap is consulting and exploring code-as-knowledge
+  across longer-lived collaborative networks.
 </p>
 <p>
   See <a page="Glamorous Toolkit and HyperDoc">Glamorous Toolkit and HyperDoc</a>
@@ -69,6 +93,15 @@
   implements the page's representation in memory. That's intentional!
 </p>
 <p>
+  HyperDoc therefore places explicit value on
+  code transparency.
+  It prefers clear and simple situated code over abstractions that save local
+  labor at the cost of making the system harder for later readers to inspect,
+  fork, and adapt. In that spirit, HyperDoc often favors
+  fork-and-adapt
+  over adding dependencies that hide the relevant mechanism somewhere else.
+</p>
+<p>
   Another important contribution to conviviality is "don't be disruptive".
   HyperDoc is a new tool in the Common Lisp ecosystem. Its role is to
   complement the existing tools, not to replace them. Seasoned Common Lisp
@@ -77,6 +110,25 @@
   established conventions. HyperDoc tries to respect and integrate them.
   Inversely, people for who HyperDoc is the entry point to Common Lisp
   should not find it difficult to adopt other coding tools later on.
+</p>
+<p>
+  Adopting HyperDoc should therefore feel closer to adding a software library
+  to an existing workflow than to switching to a new programming language or a
+  sealed development toolbox.
+</p>
+
+<h2>Development strategy</h2>
+
+<p>
+  In the spirit of collective knowledge, HyperDoc prefers evolutionary growth
+  over top-down redesign. The working strategy is to improve the state of the
+  art by connecting real systems, real code, and real documentation surfaces,
+  rather than by assuming a clean-slate replacement of existing practice.
+</p>
+<p>
+  That strategy is visible in the way HyperDoc relates to reference systems and
+  neighboring tools: concepts can be adopted, reinterpreted, or left out, but
+  the boundary should remain explicit and bridgeable.
 </p>
 
 <h2>Composability</h2>
@@ -110,4 +162,18 @@
   in HyperDoc use plain Lisp data objects, meaning that there
   are no constraints on linking to other HyperDocs or even to
   different HyperDoc-like systems.
+</p>
+<p>
+  Being a good citizen of existing and emerging knowledge ecosystems also means
+  helping them connect to HyperDoc. The
+  <a page="HyperDoc and HyperBook">HyperBook interface</a> is the most concrete
+  result so far: it provides bridgeable page/link surfaces for systems such as
+  Wikipedia and Federated Wiki without demanding that those systems adopt
+  HyperDoc's exact runtime or editorial model.
+</p>
+<p>
+  Collaboration likewise spans more than one time scale. HyperDoc should fit
+  into collaboration at three time scales:
+  real-time collaboration, asynchronous team collaboration, and long-term
+  community-scale publication and reuse.
 </p>

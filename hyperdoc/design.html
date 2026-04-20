@@ -7,6 +7,14 @@
   a more detailed discussion of goals and values.
 </p>
 <p>
+  HyperDoc is aimed at knowledge workers:
+  people who consult and contribute to networks of collective knowledge, with
+  scientific research as one important case. That audience needs a hypermedia
+  substrate that can combine diverse media, support both manual and automated
+  processing, and tolerate a steeper learning curve than consumer-oriented
+  personal knowledge tools.
+</p>
+<p>
   One source of inspiration is Bret Victor's
   <a href="https://worrydream.com/ExplorableExplanations/">"Explorable Explanations"</a>
   (read in particular the "Postscript from 2024" at the end). HyperDoc
@@ -32,6 +40,16 @@
   the code exactly as the compiler sees it.
 </p>
 <p>
+  The major innovation attempted in HyperDoc is integrating
+  <a hyperbook="topics" page="Code as knowledge representation"><tt>code as knowledge representation</tt></a>
+  into hypermedia systems that would otherwise remain limited to passive media.
+  Code has a double role here: it represents knowledge, and it also provides
+  small situated tools for processing that knowledge. HyperDoc therefore favors
+  links to code, functions, classes, and inspectable runtime objects as part of
+  the documentation surface rather than as implementation details that should be
+  hidden from view.
+</p>
+<p>
   A third source of inspiration are
   <a href="https://en.wikipedia.org/wiki/Notebook_interface">notebook interfaces</a>,
   which are similar to literate programming but embed a <i>computation</i> rather than
@@ -43,6 +61,15 @@
   computations as well, but fail in this role by their restriction to
   a single linear narrative and computation. Notebooks are not
   composable. <a page="Goals and values">HyperDocs are</a>.
+</p>
+<p>
+  HyperDoc's current architectural emphasis is
+  consulting rather than authoring.
+  Existing tools already cover many authoring workflows for code and text, even
+  if they usually keep them separate. What is still weak in today's tooling is
+  the ability to consult and explore code as collective knowledge. That is why
+  HyperDoc puts more energy into explanation, inspection, code links, and
+  runnable examples than into replacing every existing editing environment.
 </p>
 <p>
   <a page="Tectonopedia">Tectonopedia</a> illustrates another path in the
@@ -68,6 +95,17 @@
   cross-link seamlessly.
 </p>
 <p>
+  The currently documented techniques remain deliberately experimental. The
+  concrete set already present in the repository is expressed in existing
+  HyperDoc vocabulary: source-code pages, links in code, special-hyperbook
+  links to functions and classes by package-qualified name, and
+  <tt>defexample</tt> forms with their play-button execution surface. One
+  important use case remains weaker than the current examples model:
+  <a hyperbook="topics" page="Computational story"><tt>computational story</tt></a>,
+  where a narrative, the steps of a computation, and its intermediate results
+  should stay together without collapsing into one linear notebook cell stream.
+</p>
+<p>
   HyperDoc pages also act as communication objects in ongoing
   collaboration. They can start as focused discussion artifacts and later
   be consolidated into broader reference documentation. In that workflow,
@@ -84,6 +122,15 @@
   For the explicit architectural model of reference systems in this
   documentation, see
   <a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a>.
+</p>
+<p>
+  This also means building bridges to other knowledge ecosystems instead of
+  asking users to abandon them. The
+  <a page="HyperDoc and HyperBook">HyperBook interface</a> is the clearest
+  concrete outcome of that bridge-building so far: the existing documentation
+  already uses Wikipedia as the example of a HyperBook that is not a HyperDoc,
+  and the same interface pattern is what makes other wiki-like systems, such as
+  Federated Wiki, relevant neighbors rather than foreign islands.
 </p>
 <p>
   For a direct model of documentation surfaces and correspondence rules, see
@@ -126,14 +173,38 @@
   as they see fit.
 </p>
 <p>
+  The current implementation substrate for this work is
+  <a hyperbook="topics" page="Common Lisp as implementation substrate"><tt>Common Lisp as implementation substrate</tt></a>.
+  It offers the interactivity and introspection needed for practical
+  experimentation while remaining stable enough for the long life cycle of
+  collective knowledge. In the current repository form, a HyperDoc unit is
+  realized as an ASDF system in a version-controlled source tree. The
+  longer-term vision is
+  <a hyperbook="topics" page="HyperDoc as protocol"><tt>HyperDoc as protocol</tt></a>:
+  a more encapsulated network of units that could support multiple browsers,
+  including special-purpose browsers, without collapsing everything into one
+  implementation technology or one browser surface.
+</p>
+<p>
   Examples are another key ingredient of HyperDoc, although their
   implementation remains intentionally lightweight. Examples produce
   inspectable results, which permit explorers to better understand the
   software system. Examples can also contain assertions, taking the role
   of traditional unit tests, and HyperDoc now has a checks runner for
   batch discovery and execution. The current architectural question is
-  not whether runnable support exists, but how examples and validation
-  should be scoped and placed in the object model. See
+  not whether runnable support exists, but how <tt>defexample</tt> execution
+  and validation should be scoped and placed in the object model. In this
+  repository, that question is answered against
+  <a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF-system-scoped examples and tests</a>,
+  where the runnable surface belongs to systems and the runner stays separate
+  from root identity. See
   <a href="http://arxiv.org/abs/2409.00514">this paper on example-driven development</a>
   to learn more about this approach.
+</p>
+<p>
+  For the longer horizon beyond individual runs and sessions, see
+  <a page="The Life Cycle of Collective Knowledge">The Life Cycle of Collective Knowledge</a>.
+  That page anchors why HyperDoc cares not only about reproducibility in one
+  environment, but also about software knowledge remaining intelligible and
+  reusable across time.
 </p>

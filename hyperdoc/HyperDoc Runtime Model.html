@@ -13,6 +13,9 @@
   <li><a hyperbook="topics" page="HyperDoc runtime model"><tt>HyperDoc runtime model</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc runtime entities"><tt>HyperDoc runtime entities</tt></a></li>
   <li><a hyperbook="topics" page="HyperDoc runtime boundaries"><tt>HyperDoc runtime boundaries</tt></a></li>
+  <li><a hyperbook="topics" page="Hypermedia item as in-memory object"><tt>Hypermedia item as in-memory object</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector as browser"><tt>Inspector as browser</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc as protocol"><tt>HyperDoc as protocol</tt></a></li>
   <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Documentation Surfaces in HyperDoc</tt></a></li>
   <li><a hyperbook="topics" page="Execution evidence object"><tt>Execution evidence object</tt></a></li>
   <li><a hyperbook="topics" page="Persistence of investigation context"><tt>Persistence of investigation context</tt></a></li>
@@ -42,6 +45,23 @@
   <li><b>Inspector views:</b> object-specific representations for runtime exploration.</li>
 </ul>
 
+<h2>Hypermedia items as objects</h2>
+
+<p>
+  In the current Common Lisp implementation, each
+  <a hyperbook="topics" page="Hypermedia item as in-memory object"><tt>hypermedia item as in-memory object</tt></a>
+  is represented by a live Lisp object. That object may directly contain the
+  content, or it may act as a proxy to another representation such as a file,
+  an ASDF component, or a network resource.
+</p>
+
+<p>
+  This matters because HyperDoc does not treat its browser surface as a thin
+  wrapper around static files. The browser is already a runtime view onto live
+  objects that can expose code, metadata, relations, and object-specific
+  inspector views.
+</p>
+
 <h2>Page, topic, and inspectable object</h2>
 
 <p>
@@ -52,6 +72,18 @@
   These are related but not interchangeable: pages organize explanation, topics
   stabilize concept references, and inspectable links make runtime structures
   explorable in context.
+</p>
+
+<h2>Inspector as browser</h2>
+
+<p>
+  HyperDoc currently treats the
+  <a hyperbook="topics" page="Inspector as browser"><tt>inspector as browser</tt></a>
+  as a first-class browsing model. Any inspector that can render the relevant
+  runtime objects could serve as a HyperDoc browser. The current web-facing
+  inspector is implemented with CLOG and is strongly informed by Glamorous
+  Toolkit's inspector practice, but that is a current browser realization, not
+  the whole conceptual boundary.
 </p>
 
 <h2>Execution evidence should survive the run</h2>
@@ -103,6 +135,24 @@
   <li>Remote hyperbooks/external pages are linked as references with explicit boundaries.</li>
 </ul>
 
+<h2>Current browser versus protocol direction</h2>
+
+<p>
+  The long-term direction is
+  <a hyperbook="topics" page="HyperDoc as protocol"><tt>HyperDoc as protocol</tt></a>:
+  a more explicit interaction layer between units that may be realized as
+  different processes, services, or implementation technologies. That would
+  support multiple browsers, including special-purpose browsers, without
+  requiring every HyperDoc unit to live inside one monolithic runtime image.
+</p>
+
+<p>
+  The current repository does not claim that this protocol layer already
+  exists. What is already true is the object-centered browser model above: the
+  current in-image implementation is concrete, while the protocol-level
+  decomposition remains a longer-term architectural direction.
+</p>
+
 <h2>Runtime boundaries and responsibilities</h2>
 
 <ul>
@@ -134,6 +184,7 @@
   <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
   <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
   <li><a page="Reference Systems in HyperDoc">Reference Systems in HyperDoc</a></li>
   <li><a page="Design">Design</a></li>
   <li><a hyperbook="moldable-inspector" page="What is a moldable inspector?">What is a moldable inspector?</a></li>
