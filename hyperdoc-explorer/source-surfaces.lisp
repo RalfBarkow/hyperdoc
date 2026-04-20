@@ -56,8 +56,22 @@
 (defmethod source-surface-strategy-for ((page text-page))
   *connect-source-surface-strategy*)
 
+(defun normalize-source-surface-designator (designator)
+  (typecase designator
+    (null nil)
+    (source-surface-strategy
+     (source-surface-strategy-id designator))
+    (keyword designator)
+    (symbol
+     (intern (string-upcase (symbol-name designator)) :keyword))
+    (string
+     (let ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                 designator)))
+       (unless (string= trimmed "")
+         (intern (string-upcase trimmed) :keyword))))))
+
 (defun source-surface-strategy-from-designator (designator)
-  (etypecase designator
+  (etypecase (normalize-source-surface-designator designator)
     (null nil)
     (source-surface-strategy designator)
     ((eql :connect) *connect-source-surface-strategy*)
@@ -123,7 +137,7 @@
                 *plain-source-surface-strategy*)))
 
 (defun source-surface-strategy-catalog-entry-for-designator (designator)
-  (find designator
+  (find (normalize-source-surface-designator designator)
         (source-surface-strategy-catalog)
         :key (lambda (entry) (getf entry :designator))
         :test #'eq))
@@ -133,9 +147,10 @@
               designator))))
 
 (defun source-surface-strategy-for-stable-designator (designator)
-  (unless (source-surface-designator-supported-p designator)
-    (error "Unsupported Source surface designator: ~S" designator))
-  (source-surface-strategy-from-designator designator))
+  (let ((normalized (normalize-source-surface-designator designator)))
+    (unless (source-surface-designator-supported-p normalized)
+      (error "Unsupported Source surface designator: ~S" designator))
+    (source-surface-strategy-from-designator normalized)))
 
 (defun source-surface-resolution-report-for (page)
   (multiple-value-bind (class-policy-strategy class-policy-class)
@@ -368,15 +383,17 @@
 
 (defun make-source-surface-swap-preview (page alternate-designator)
   (let* ((current-report (source-surface-resolution-report-for page))
+         (normalized-alternate-designator
+           (normalize-source-surface-designator alternate-designator))
          (current-designator (getf current-report :effective-strategy-id)))
     (make-instance 'source-surface-swap-preview
                    :page page
                    :current-report current-report
                    :current-designator current-designator
-                   :alternate-designator alternate-designator
+                   :alternate-designator normalized-alternate-designator
                    :alternate-supported-p
                    (source-surface-designator-supported-p
-                    alternate-designator))))
+                    normalized-alternate-designator))))
 
 (defun source-surface-swap-preview-alternate-entry (preview)
   (source-surface-strategy-catalog-entry-for-designator
@@ -513,26 +530,21 @@
    :priority 3))
 
 (views:defview 👀alternate-source (preview source-surface-swap-preview)
-  (if (source-surface-swap-preview-alternate-supported-p preview)
-      (render-source-surface-for-page-with-designator
-       (source-surface-swap-preview-page-of preview)
-       (source-surface-swap-preview-alternate-designator-of preview)
-       :title "Alternate Source"
-       :priority 4)
-      (views:html-view :title "Alternate Source" :priority 4
-        (views:html
-          (:p
-           (views:esc
-            "Unsupported Source designator. No alternate rendering is available for this preview."))
-          (:table :class "inspector-table"
-                  (:tr (:td (views:esc "Requested alternate"))
-                       (:td (:tt
-                             (views:esc
-                              (source-surface-swap-preview-designator-display-value
-                               (source-surface-swap-preview-alternate-designator-of
-                                preview))))))
-                  (:tr (:td (views:esc "Alternate supported"))
-                       (:td (:tt (views:esc "no")))))))))
+  (let ((designator
+          (normalize-source-surface-designator
+           (source-surface-swap-preview-alternate-designator-of preview))))
+    (case designator
+      (:plain
+       (render-plain-source-surface-for-page
+        (source-surface-swap-preview-page-of preview)
+        :title "Alternate Source"
+        :priority 4))
+      (t
+       (render-source-surface-for-page-with-designator
+        (source-surface-swap-preview-page-of preview)
+        designator
+        :title "Alternate Source"
+        :priority 4)))))
 
 (defun render-source-surface-swap-operations-for-page (page)
   (let* ((report (source-surface-resolution-report-for page))

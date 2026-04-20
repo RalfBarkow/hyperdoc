@@ -985,6 +985,8 @@
                                     :signal-error? t))
          (connect-strategy
            (hyperdoc::source-surface-strategy-for-stable-designator :connect))
+         (plain-symbol-strategy
+           (hyperdoc::source-surface-strategy-for-stable-designator 'plain))
          (plain-strategy
            (hyperdoc::source-surface-strategy-for-stable-designator :plain))
          (connect-view
@@ -1004,11 +1006,17 @@
      (hyperdoc::source-surface-designator-supported-p :plain)
      "Plain designator must be supported.")
     (assert-true
+     (hyperdoc::source-surface-designator-supported-p 'plain)
+     "Symbolic plain designator must normalize to the supported plain path.")
+    (assert-true
      (null (hyperdoc::source-surface-designator-supported-p :bogus))
      "Unknown Source designator must not be treated as supported.")
     (assert-type 'hyperdoc::connect-source-surface-strategy
                  connect-strategy
                  "Connect designator must resolve to the connect strategy.")
+    (assert-type 'hyperdoc::plain-source-surface-strategy
+                 plain-symbol-strategy
+                 "Symbolic plain designator must resolve to the plain strategy.")
     (assert-type 'hyperdoc::plain-source-surface-strategy
                  plain-strategy
                  "Plain designator must resolve to the plain strategy.")
@@ -1039,6 +1047,8 @@
                                     page-title
                                     :signal-error? t))
          (preview (hyperdoc::make-source-surface-swap-preview page :plain))
+         (plain-symbol-preview
+           (hyperdoc::make-source-surface-swap-preview page 'plain))
          (unsupported-preview
            (hyperdoc::make-source-surface-swap-preview page :bogus))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object preview))
@@ -1061,6 +1071,9 @@
     (assert-type 'hyperdoc::source-surface-swap-preview
                  preview
                  "Swap preview must materialize as an inspectable object.")
+    (assert-type 'hyperdoc::source-surface-swap-preview
+                 plain-symbol-preview
+                 "Symbolic plain swap preview must materialize as an inspectable object.")
     (assert-equal :connect
                   (hyperdoc::source-surface-swap-preview-current-designator-of
                    preview)
@@ -1074,9 +1087,17 @@
                   (hyperdoc::source-surface-swap-preview-alternate-designator-of
                    preview)
                   "Swap preview must retain the requested alternate designator.")
+    (assert-equal :plain
+                  (hyperdoc::source-surface-swap-preview-alternate-designator-of
+                   plain-symbol-preview)
+                  "Swap preview must normalize symbolic plain to the plain designator.")
     (assert-true
      (hyperdoc::source-surface-swap-preview-alternate-supported-p preview)
      "Plain alternate designator must be supported for swap preview.")
+    (assert-true
+     (hyperdoc::source-surface-swap-preview-alternate-supported-p
+      plain-symbol-preview)
+     "Symbolic plain alternate designator must stay supported for swap preview.")
     (assert-true
      (not (hyperdoc::source-surface-swap-preview-alternate-supported-p
            unsupported-preview))
@@ -1113,10 +1134,16 @@
      (search "hyperdoc-source-pane" alternate-html :test #'char=)
      "Swap preview alternate Source must render the plain source pane.")
     (assert-true
+     (search "hyperdoc-source-pane-line-number" alternate-html :test #'char=)
+     "Swap preview alternate Source must render line-numbered plain source content.")
+    (assert-true
      (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
                    alternate-html
                    :test #'char=))
      "Swap preview alternate Source must suppress the connect runtime contract.")
+    (assert-true
+     (null (search "hyperdoc-connect-provider" alternate-html :test #'char=))
+     "Swap preview alternate Source must suppress connect-provider metadata.")
     (handler-case
         (progn
           (hyperdoc::render-source-surface-for-page-with-designator page :bogus)
@@ -1126,7 +1153,19 @@
          (search "Unsupported Source surface designator"
                  (princ-to-string condition)
                  :test #'char=)
-         "Unsupported swap designator error must be explicit.")))))
+         "Unsupported swap designator error must be explicit.")))
+    (handler-case
+        (progn
+          (dmx-shared-workspace-docs-load-inspector-views-for-object
+           unsupported-preview)
+          (error
+           "Unsupported alternate swap preview must signal explicitly when rendered."))
+      (error (condition)
+        (assert-true
+         (search "Unsupported Source surface designator"
+                 (princ-to-string condition)
+                 :test #'char=)
+         "Unsupported alternate swap preview render must stay explicit.")))))
 
 (defun run-source-surface-page-level-swap-operations-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
