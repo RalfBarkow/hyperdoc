@@ -1060,6 +1060,10 @@
            (dmx-shared-workspace-docs-find-view-by-title views "Current Source"))
          (alternate-view
            (dmx-shared-workspace-docs-find-view-by-title views "Alternate Source"))
+         (alternate-source-code-view
+           (html-inspector-views/standard:source-code-view
+            #'hyperdoc::👀alternate-source
+            :in-file? nil))
          (overview-html (and overview-view
                              (html-inspector-views:view-html overview-view)))
          (compare-html (and compare-view
@@ -1068,6 +1072,9 @@
                             (html-inspector-views:view-html current-view)))
          (alternate-html (and alternate-view
                               (html-inspector-views:view-html alternate-view)))
+         (alternate-source-code-html
+           (and alternate-source-code-view
+                (html-inspector-views:view-html alternate-source-code-view)))
          (expected-alternate-html
            (html-inspector-views:view-html
             (hyperdoc::👀plain-source page))))
@@ -1108,6 +1115,8 @@
     (dolist (view (list overview-view compare-view current-view alternate-view))
       (assert-true view
                    "Swap preview must expose overview, compare, current, and alternate views."))
+    (assert-true alternate-source-code-view
+                 "The Alternate Source definition must expose a Source code view.")
     (assert-shared-workspace-page-contains-all
      overview-html
      (format nil "~A swap preview overview" page-title)
@@ -1153,6 +1162,21 @@
     (assert-true
      (null (search "hyperdoc-connect-provider" alternate-html :test #'char=))
      "Swap preview alternate Source must suppress connect-provider metadata.")
+    (assert-true
+     (search "hb:render-file-source-surface"
+             alternate-source-code-html
+             :test #'char-equal)
+     "The Alternate Source definition must expose the old plain file/content path directly.")
+    (assert-true
+     (search "file-of"
+             alternate-source-code-html
+             :test #'char-equal)
+     "The Alternate Source definition must read as the direct text-page file/content path.")
+    (assert-true
+     (null (search "make-precomputed-html-view"
+                   alternate-source-code-html
+                   :test #'char-equal))
+     "The Alternate Source definition must no longer read as copied HTML wrapping.")
     (handler-case
         (progn
           (hyperdoc::render-source-surface-for-page-with-designator page :bogus)

@@ -529,12 +529,8 @@
             (source-surface-swap-preview-alternate-designator-of preview))))
     (if (and (typep page 'text-page)
              (eql designator :plain))
-        (let ((plain-view (👀plain-source page)))
-          (make-precomputed-html-view
-           "Alternate Source"
-           (views:view-html plain-view)
-           (copy-list (views:view-references plain-view))
-           (copy-list (views:view-assets plain-view))))
+        (views:html-view :title "Alternate Source" :priority 4
+          (hb:render-file-source-surface (file-of page)))
         (render-source-surface-for-page-with-designator
          page
          designator
