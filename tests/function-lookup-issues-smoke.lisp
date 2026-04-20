@@ -11,6 +11,122 @@
 
 (in-package :hyperdoc/tests)
 
+(defun package-qualified-symbol-name (symbol &key internal?)
+  (let ((package (symbol-package symbol)))
+    (assert-true package
+                 "Focused Lisp Functions smoke must use an interned symbol")
+    (format nil "~A~A~A"
+            (package-name package)
+            (if internal? "::" ":")
+            (symbol-name symbol))))
+
+(defun find-lisp-function-page-by-id (pages page-id)
+  (find page-id pages
+        :key #'hyperbook:id-of
+        :test #'string=))
+
+(defun run-fbound-generic-function-page-smoke-test ()
+  (let* ((symbol 'hyperbook:find-page)
+         (page-id (package-qualified-symbol-name symbol))
+         (page (hyperbook:find-page hyperbook::*lisp-functions*
+                                    page-id
+                                    :signal-error? t)))
+    (assert-true (fboundp symbol)
+                 "Focused Lisp Functions smoke must use an actually fbound generic function")
+    (assert-true (typep page 'hyperbook::lisp-function-page)
+                 "Opening a known fbound exported function must yield a real lisp-function-page.")
+    (assert-equal page-id
+                  (hyperbook:id-of page)
+                  "The Lisp Functions page id must remain the package-qualified function name.")
+    (assert-true (typep (hyperbook::function-of page) 'generic-function)
+                 "The Lisp Functions hyperbook must open generic functions as real function pages.")
+    (assert-true (eq (hyperbook::function-of page)
+                     (fdefinition symbol))
+                 "The Lisp Functions page must carry the live function object from the running image.")))
+
+(defun run-package-qualified-internal-function-page-smoke-test ()
+  (let* ((symbol 'hyperbook::read-symbol)
+         (page-id (package-qualified-symbol-name symbol :internal? t))
+         (page (hyperbook:find-page hyperbook::*lisp-functions*
+                                    page-id
+                                    :signal-error? t)))
+    (assert-true (fboundp symbol)
+                 "Focused Lisp Functions smoke must use an actually fbound internal helper")
+    (assert-true (typep page 'hyperbook::lisp-function-page)
+                 "Opening a known fbound internal function must yield a real lisp-function-page.")
+    (assert-equal page-id
+                  (hyperbook:id-of page)
+                  "Package-qualified internal names must resolve through the Lisp Functions hyperbook.")
+    (assert-true (typep (hyperbook::function-of page) 'function)
+                 "The opened internal Lisp Functions page must hold a function object.")
+    (assert-true (eq (hyperbook::function-of page)
+                     (fdefinition symbol))
+                 "The internal Lisp Functions page must carry the live function object from the running image.")))
+
+(defun run-fbound-macro-function-page-smoke-test ()
+  (let* ((symbol 'cl:when)
+         (page-id (package-qualified-symbol-name symbol))
+         (page (hyperbook:find-page hyperbook::*lisp-functions*
+                                    page-id
+                                    :signal-error? t)))
+    (assert-true (fboundp symbol)
+                 "Focused Lisp Functions smoke must use an actually fbound macro name")
+    (assert-true (typep page 'hyperbook::lisp-function-page)
+                 "Opening a known fbound macro name must still yield a real lisp-function-page.")
+    (assert-equal page-id
+                  (hyperbook:id-of page)
+                  "Package-qualified macro names must resolve through the Lisp Functions hyperbook.")
+    (assert-true (typep (hyperbook::function-of page) 'function)
+                 "The Lisp Functions hyperbook must open other fbound callable names as function pages.")
+    (assert-true (eq (hyperbook::function-of page)
+                     (fdefinition symbol))
+                 "Macro lookup must carry the live fdefinition object from the running image.")))
+
+(defun run-loaded-functions-inventory-smoke-test ()
+  (let* ((generic-id (package-qualified-symbol-name 'hyperbook:find-page))
+         (internal-id (package-qualified-symbol-name 'hyperbook::read-symbol
+                                                    :internal? t))
+         (macro-id (package-qualified-symbol-name 'cl:when))
+         (pages (hyperbook::collect-lisp-function-pages
+                 hyperbook::*lisp-functions*)))
+    (assert-true pages
+                 "The Lisp Functions hyperbook must expose a non-empty inventory of loaded function pages.")
+    (dolist (page-id (list generic-id internal-id macro-id))
+      (let ((page (find-lisp-function-page-by-id pages page-id)))
+        (assert-true page
+                     (format nil "Loaded function inventory must contain ~A." page-id))
+        (assert-true (typep page 'hyperbook::lisp-function-page)
+                     (format nil "Loaded function inventory entry ~A must be a real lisp-function-page."
+                             page-id))))))
+
+(defun run-loaded-functions-view-smoke-test ()
+  (let* ((generic-id (package-qualified-symbol-name 'hyperbook:find-page))
+         (internal-id (package-qualified-symbol-name 'hyperbook::read-symbol
+                                                    :internal? t))
+         (macro-id (package-qualified-symbol-name 'cl:when))
+         (views (load-inspector-views-for-object hyperbook::*lisp-functions*))
+         (overview-view (smoke-find-view-by-title views "Overview"))
+         (loaded-view (smoke-find-view-by-title views "Loaded functions"))
+         (overview-html (and overview-view
+                             (html-inspector-views:view-html overview-view)))
+         (loaded-html (and loaded-view
+                           (html-inspector-views:view-html loaded-view))))
+    (assert-true overview-view
+                 "The Lisp Functions hyperbook must still expose an Overview view.")
+    (assert-true loaded-view
+                 "The Lisp Functions hyperbook must expose a browseable Loaded functions view.")
+    (assert-true (search "Loaded functions view"
+                         overview-html
+                         :test #'char-equal)
+                 "Overview text must now point users to the browseable Loaded functions view.")
+    (dolist (page-id (list generic-id internal-id macro-id))
+      (assert-true (search page-id loaded-html :test #'char-equal)
+                   (format nil "Loaded functions view must list ~A." page-id)))
+    (assert-true (search "class='inspector-inspect'"
+                         loaded-html
+                         :test #'char-equal)
+                 "Loaded functions view must render inspectable navigation rows for the listed function pages.")))
+
 (defun run-raw-function-lookup-issue-smoke-test ()
   (let* ((symbol (intern "FUNCTION-LOOKUP-ISSUE-SMOKE-MISSING" :hyperdoc))
          (page-id (format nil "~A::~A"
@@ -301,6 +417,11 @@
                  "The opened Source code view must still expose the runnable defexample affordance")))
 
 (defun run-function-lookup-issues-smoke-tests ()
+  (run-fbound-generic-function-page-smoke-test)
+  (run-package-qualified-internal-function-page-smoke-test)
+  (run-fbound-macro-function-page-smoke-test)
+  (run-loaded-functions-inventory-smoke-test)
+  (run-loaded-functions-view-smoke-test)
   (run-raw-function-lookup-issue-smoke-test)
   (run-authored-function-lookup-issue-smoke-test)
   (run-authored-source-reference-open-smoke-test)
