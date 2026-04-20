@@ -229,6 +229,218 @@
       (:a :href url :target "_blank"
           (views:esc link-text)))))
 
+;;
+;; Optional second-stage adaptation for plugin-like snippet story items
+;;
+
+(defclass adapted-video-snippet ()
+  ((source-item :reader adapted-video-snippet-source-item-of
+                :initarg :source-item
+                :type story-item)
+   (source-page :reader adapted-video-snippet-source-page-of
+                :initarg :source-page
+                :type fedwiki-page)
+   (provider :reader adapted-video-snippet-provider-of
+             :initarg :provider
+             :type keyword)
+   (video-id :reader adapted-video-snippet-video-id-of
+             :initarg :video-id
+             :type string)
+   (caption :reader adapted-video-snippet-caption-of
+            :initarg :caption
+            :type string)
+   (canonical-url :reader adapted-video-snippet-canonical-url-of
+                  :initarg :canonical-url
+                  :type string)
+   (embed-url :reader adapted-video-snippet-embed-url-of
+              :initarg :embed-url
+              :type string)
+   (summary :reader adapted-video-snippet-summary-of
+            :initarg :summary
+            :type string)))
+
+(defclass story-item-adaptation-failure ()
+  ((source-item :reader adaptation-failure-source-item-of
+                :initarg :source-item
+                :type story-item)
+   (source-page :reader adaptation-failure-source-page-of
+                :initarg :source-page
+                :type fedwiki-page)
+   (snippet-kind :reader adaptation-failure-snippet-kind-of
+                 :initarg :snippet-kind
+                 :type keyword)
+   (reason :reader adaptation-failure-reason-of
+           :initarg :reason
+           :type keyword)
+   (message :reader adaptation-failure-message-of
+            :initarg :message
+            :type string)
+   (partial-provider :reader adaptation-failure-partial-provider-of
+                     :initarg :partial-provider
+                     :initform nil
+                     :type (or null string))
+   (partial-video-id :reader adaptation-failure-partial-video-id-of
+                     :initarg :partial-video-id
+                     :initform nil
+                     :type (or null string))))
+
+(defmethod views:text-representation ((snippet adapted-video-snippet))
+  (format nil "video ~A"
+          (adapted-video-snippet-video-id-of snippet)))
+
+(defmethod views:text-representation ((failure story-item-adaptation-failure))
+  (format nil "~(~A~) adaptation failed"
+          (adaptation-failure-snippet-kind-of failure)))
+
+(defgeneric adapt-plugin-like-story-item (type item page)
+  (:method ((type t) item page)
+    (declare (ignore type item page))
+    nil))
+
+(defun normalize-video-snippet-source-text (text)
+  (coerce (remove #\Return (or text "")) 'string))
+
+(defun split-video-snippet-source-text (text)
+  (let* ((normalized (normalize-video-snippet-source-text text))
+         (newline-position (position #\Newline normalized))
+         (header (if newline-position
+                     (subseq normalized 0 newline-position)
+                     normalized))
+         (caption (if newline-position
+                      (subseq normalized (1+ newline-position))
+                      "")))
+    (values (string-trim '(#\Space #\Tab #\Newline) header)
+            (string-trim '(#\Space #\Tab #\Newline) caption))))
+
+(defun parse-video-snippet-header (header)
+  (let* ((tokens (remove ""
+                        (cl-ppcre:split "\\s+" header)
+                        :test #'string=))
+         (provider-token (first tokens))
+         (video-id (second tokens)))
+    (cond
+      ((null provider-token)
+       (values nil nil :malformed-header))
+      ((not (string= (string-upcase provider-token) "YOUTUBE"))
+       (values provider-token video-id :unsupported-provider))
+      ((null video-id)
+       (values provider-token nil :missing-video-id))
+      ((> (length tokens) 2)
+       (values provider-token video-id :malformed-header))
+      (t
+       (values provider-token video-id nil)))))
+
+(defun youtube-watch-url (video-id)
+  (format nil "https://www.youtube.com/watch?v=~A" video-id))
+
+(defun youtube-embed-url (video-id)
+  (format nil "https://www.youtube.com/embed/~A" video-id))
+
+(defun make-story-item-adaptation-failure (item page reason message
+                                           &key partial-provider partial-video-id)
+  (make-instance 'story-item-adaptation-failure
+                 :source-item item
+                 :source-page page
+                 :snippet-kind :video
+                 :reason reason
+                 :message message
+                 :partial-provider partial-provider
+                 :partial-video-id partial-video-id))
+
+(defmethod adapt-plugin-like-story-item ((type (eql :video)) item page)
+  (declare (ignore type))
+  (multiple-value-bind (header caption)
+      (split-video-snippet-source-text (text-of item))
+    (multiple-value-bind (provider-token video-id parse-failure)
+        (parse-video-snippet-header header)
+      (case parse-failure
+        (:unsupported-provider
+         (make-story-item-adaptation-failure
+          item page :unsupported-provider
+          (format nil "Unsupported video provider ~A. Only YOUTUBE <video-id> is supported in this slice."
+                  provider-token)
+          :partial-provider provider-token
+          :partial-video-id video-id))
+        (:missing-video-id
+         (make-story-item-adaptation-failure
+          item page :missing-video-id
+          "Video snippet header must be YOUTUBE <video-id>."
+          :partial-provider provider-token))
+        (:malformed-header
+         (make-story-item-adaptation-failure
+          item page :malformed-header
+          "Malformed video snippet header. Expected YOUTUBE <video-id>."
+          :partial-provider provider-token
+          :partial-video-id video-id))
+        (otherwise
+         (make-instance 'adapted-video-snippet
+                        :source-item item
+                        :source-page page
+                        :provider :youtube
+                        :video-id video-id
+                        :caption caption
+                        :canonical-url (youtube-watch-url video-id)
+                        :embed-url (youtube-embed-url video-id)
+                        :summary (format nil "YouTube video ~A" video-id)))))))
+
+(defun render-video-snippet-preferred (snippet page)
+  (views:html
+    (:div :class "fedwiki-video-snippet-preferred"
+          (:iframe :src (adapted-video-snippet-embed-url-of snippet)
+                   :title (adapted-video-snippet-summary-of snippet)
+                   :width "560"
+                   :height "315"
+                   :loading "lazy"
+                   :allow "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                   :allowfullscreen "allowfullscreen")
+          (when (plusp (length (adapted-video-snippet-caption-of snippet)))
+            (views:html
+              (:p :class "fedwiki-video-snippet-caption"
+                  (render-wiki-text
+                   (adapted-video-snippet-caption-of snippet)
+                   page)))))))
+
+(defun render-video-snippet-fallback (snippet page &key (include-caption-p t))
+  (views:html
+    (:div :class "fedwiki-video-snippet-fallback"
+          (:p
+           (:a :href (adapted-video-snippet-canonical-url-of snippet)
+               :target "_blank"
+               :rel "noopener noreferrer"
+               (views:esc "Watch on YouTube")))
+          (when (and include-caption-p
+                     (plusp (length (adapted-video-snippet-caption-of snippet))))
+            (views:html
+              (:p :class "fedwiki-video-snippet-caption"
+                  (render-wiki-text
+                   (adapted-video-snippet-caption-of snippet)
+                   page)))))))
+
+(defun render-video-adaptation-failure (failure)
+  (let ((item (adaptation-failure-source-item-of failure)))
+    (views:html
+      (:div :class "fedwiki-video-snippet-failure"
+            (:p
+             (:b (views:esc "Video adaptation failed.")))
+            (:p (views:esc (adaptation-failure-message-of failure)))
+            (:p
+             (views:esc "Failure object: ")
+             (views:object-ref failure))
+            (:p
+             (views:esc "Original story item: ")
+             (views:object-ref item))
+            (:pre :style "background-color: #eee;"
+                  (views:esc (text-of item)))))))
+
+(defun render-adapted-video-snippet (snippet page)
+  (views:html
+    (:div :class "fedwiki-video-snippet"
+          (render-video-snippet-preferred snippet page)
+          (render-video-snippet-fallback
+           snippet
+           page
+           :include-caption-p nil))))
+
 ;; Paragraphs
 
 (defmethod render-story-item ((type (eql :paragraph)) item page)
@@ -273,6 +485,21 @@
           (:hr :style "color: gray;")
           (:span :style "color: gray;"
                  (views:esc (text-of item))))))
+
+;; Video
+
+(defmethod render-story-item ((type (eql :video)) item page)
+  (let ((adapted (adapt-plugin-like-story-item type item page)))
+    (typecase adapted
+      (adapted-video-snippet
+       (render-adapted-video-snippet adapted page))
+      (story-item-adaptation-failure
+       (render-video-adaptation-failure adapted))
+      (t
+       (render-video-adaptation-failure
+        (make-story-item-adaptation-failure
+         item page :missing-adaptation-result
+         "Video adaptation produced no inspectable result."))))))
 
 ;; Graphviz
 

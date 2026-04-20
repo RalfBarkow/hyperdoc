@@ -18,12 +18,12 @@
                              :id "fedwiki:smoke.example")))
     (hyperbook/fedwiki::make-fedwiki-page wiki "smoke-page" "Smoke Page")))
 
-(defun make-story-items-smoke-item (type text)
+(defun make-story-items-smoke-item (type text &optional data)
   (make-instance 'hyperbook/fedwiki::story-item
                  :item-type type
                  :id "item-1"
                  :text text
-                 :data nil))
+                 :data data))
 
 (defun web-link-urls (links)
   (mapcar #'hyperbook:url-of
@@ -53,6 +53,21 @@
              (html-inspector-views::*view-accumulator* accumulator))
          (hyperbook/fedwiki::render-story-item type item page)))
      (html-inspector-views::accumulator-assets accumulator))))
+
+(defun render-html-fragment-to-string-and-assets (thunk)
+  (let ((accumulator (make-instance 'html-inspector-views::view-accumulator)))
+    (values
+     (with-output-to-string (stream)
+       (let ((html-inspector-views::*html-stream* stream)
+             (html-inspector-views::*view-accumulator* accumulator))
+         (funcall thunk)))
+     (html-inspector-views::accumulator-assets accumulator))))
+
+(defun adapt-story-items-smoke-item (type text)
+  (let* ((page (make-story-items-smoke-page))
+         (item (make-story-items-smoke-item type text))
+         (adapted (hyperbook/fedwiki::adapt-plugin-like-story-item type item page)))
+    (values adapted item page)))
 
 (defun asset-urls-of-type (assets type)
   (loop for asset in assets
@@ -144,6 +159,143 @@
     (assert-true (asset-script-present-p assets "window.inspectorGraphviz.initCurrentView")
                  "Graphviz story items must include the shared init script")))
 
+(defun run-fedwiki-story-item-video-adaptation-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :video
+       "YOUTUBE UjPxDOEdsX8
+Published Dec 1, 2007.")
+    (assert-true (typep adapted 'hyperbook/fedwiki::adapted-video-snippet)
+                 "Valid YOUTUBE <video-id> input must adapt to an adapted-video-snippet.")
+    (assert-equal :youtube
+                  (hyperbook/fedwiki::adapted-video-snippet-provider-of adapted)
+                  "The adapted video snippet must normalize the provider to :youtube.")
+    (assert-equal "UjPxDOEdsX8"
+                  (hyperbook/fedwiki::adapted-video-snippet-video-id-of adapted)
+                  "The adapted video snippet must preserve the parsed video id.")
+    (assert-equal "Published Dec 1, 2007."
+                  (hyperbook/fedwiki::adapted-video-snippet-caption-of adapted)
+                  "The adapted video snippet must extract the remaining lines as caption text.")
+    (assert-equal "https://www.youtube.com/watch?v=UjPxDOEdsX8"
+                  (hyperbook/fedwiki::adapted-video-snippet-canonical-url-of adapted)
+                  "The adapted video snippet must derive the canonical YouTube watch URL.")
+    (assert-equal "https://www.youtube.com/embed/UjPxDOEdsX8"
+                  (hyperbook/fedwiki::adapted-video-snippet-embed-url-of adapted)
+                  "The adapted video snippet must derive the YouTube embed URL.")
+    (assert-true (eq item
+                     (hyperbook/fedwiki::adapted-video-snippet-source-item-of adapted))
+                 "The adapted video snippet must retain the original source-faithful story item.")
+    (assert-true (eq page
+                     (hyperbook/fedwiki::adapted-video-snippet-source-page-of adapted))
+                 "The adapted video snippet must retain the source page.")
+    (assert-equal :video
+                  (hyperbook/fedwiki::item-type-of item)
+                  "The original story item type must remain unchanged.")
+    (assert-equal "YOUTUBE UjPxDOEdsX8
+Published Dec 1, 2007."
+                  (hyperbook/fedwiki::text-of item)
+                  "The original story item text must remain source-faithful after adaptation.")
+    (assert-true
+     (null (hyperbook/fedwiki::adapt-plugin-like-story-item
+            :paragraph
+            (make-story-items-smoke-item :paragraph "plain paragraph")
+            page))
+     "The default adaptation method must stay inert for non-plugin story-item kinds.")))
+
+(defun run-fedwiki-story-item-video-missing-id-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :video
+       "YOUTUBE
+Published Dec 1, 2007.")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Missing video id must produce a story-item-adaptation-failure.")
+    (assert-equal :missing-video-id
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Missing video id must stay on the explicit adaptation-failure path.")))
+
+(defun run-fedwiki-story-item-video-malformed-header-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :video
+       "YOUTUBE UjPxDOEdsX8 EXTRA
+Published Dec 1, 2007.")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Malformed video headers must produce a story-item-adaptation-failure.")
+    (assert-equal :malformed-header
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Extra header tokens must stay on the explicit malformed-header failure path.")))
+
+(defun run-fedwiki-story-item-video-unsupported-provider-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :video
+       "VIMEO UjPxDOEdsX8
+Published Dec 1, 2007.")
+    (declare (ignore item page))
+    (assert-true (typep adapted 'hyperbook/fedwiki::story-item-adaptation-failure)
+                 "Unsupported providers must produce a story-item-adaptation-failure.")
+    (assert-equal :unsupported-provider
+                  (hyperbook/fedwiki::adaptation-failure-reason-of adapted)
+                  "Unsupported providers must stay on the explicit adaptation-failure path.")))
+
+(defun run-fedwiki-story-item-video-preferred-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :video
+           "YOUTUBE UjPxDOEdsX8
+Published Dec 1, 2007.")))
+    (assert-true (search "<iframe" html :test #'char-equal)
+                 "Successful video rendering must use the preferred embedded player path.")
+    (assert-true (search "https://www.youtube.com/embed/UjPxDOEdsX8" html :test #'char=)
+                 "Successful video rendering must include the YouTube embed URL.")
+    (assert-true (search "Published Dec 1, 2007." html :test #'char=)
+                 "Successful video rendering must include the caption.")
+    (assert-true (search "https://www.youtube.com/watch?v=UjPxDOEdsX8" html :test #'char=)
+                 "Successful video rendering must keep a visible safe fallback link.")
+    (assert-true (not (search "Video adaptation failed." html :test #'char=))
+                 "Successful video rendering must stay on the success path, not the failure path.")))
+
+(defun run-fedwiki-story-item-video-fallback-render-smoke-test ()
+  (multiple-value-bind (adapted item page)
+      (adapt-story-items-smoke-item
+       :video
+       "YOUTUBE UjPxDOEdsX8
+Published Dec 1, 2007.")
+    (declare (ignore item))
+    (multiple-value-bind (html assets)
+        (render-html-fragment-to-string-and-assets
+         (lambda ()
+           (hyperbook/fedwiki::render-video-snippet-fallback adapted page)))
+      (declare (ignore assets))
+      (assert-true (search "https://www.youtube.com/watch?v=UjPxDOEdsX8" html :test #'char=)
+                   "The explicit video fallback renderer must point to the canonical watch URL.")
+      (assert-true (search "Published Dec 1, 2007." html :test #'char=)
+                   "The explicit video fallback renderer must preserve the caption.")
+      (assert-true (not (search "<iframe" html :test #'char-equal))
+                   "The explicit video fallback renderer must stay separate from the embed path."))))
+
+(defun run-fedwiki-story-item-video-failure-render-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :video
+           "VIMEO UjPxDOEdsX8
+Published Dec 1, 2007.")))
+    (assert-true (search "Video adaptation failed." html :test #'char=)
+                 "Malformed or unsupported video input must render an explicit failure block.")
+    (assert-true (search "Unsupported video provider VIMEO." html :test #'char=)
+                 "The failure renderer must expose the adaptation failure reason.")
+    (assert-true (search "Original story item:" html :test #'char=)
+                 "The failure renderer must keep the original story item inspectable.")
+    (assert-true (search "VIMEO UjPxDOEdsX8" html :test #'char=)
+                 "The failure renderer must include raw source fallback from the original story item.")
+    (assert-true (not (search "https://www.youtube.com/embed/UjPxDOEdsX8" html :test #'char=))
+                 "The failure renderer must not silently fall into the success embed path.")
+    (assert-true (not (search "Fallback: watch on YouTube" html :test #'char=))
+                 "The failure renderer must stay visibly separate from the success/fallback video render path.")))
+
 (defun run-fedwiki-story-item-short-hash-negative-test ()
   (let* ((page (make-story-items-smoke-page))
          (links (meaningful-links
@@ -182,6 +334,13 @@
   (run-fedwiki-story-item-link-extraction-smoke-test)
   (run-fedwiki-story-item-paragraph-render-smoke-test)
   (run-fedwiki-story-item-markdown-render-smoke-test)
+  (run-fedwiki-story-item-video-adaptation-smoke-test)
+  (run-fedwiki-story-item-video-missing-id-smoke-test)
+  (run-fedwiki-story-item-video-malformed-header-smoke-test)
+  (run-fedwiki-story-item-video-unsupported-provider-smoke-test)
+  (run-fedwiki-story-item-video-preferred-render-smoke-test)
+  (run-fedwiki-story-item-video-fallback-render-smoke-test)
+  (run-fedwiki-story-item-video-failure-render-smoke-test)
   (run-fedwiki-story-item-graphviz-render-smoke-test)
   (run-fedwiki-story-item-short-hash-negative-test)
   (run-fedwiki-story-item-non-hex-negative-test)
