@@ -344,6 +344,11 @@
    :title title
    :priority priority))
 
+(defun render-historical-plain-text-page-source-definition
+    (page &key (title "Source") (priority 10))
+  (views:html-view :title title :priority priority
+    (hb:render-file-source-surface (file-of page))))
+
 (views:defview 👀plain-source (page text-page)
   (render-plain-source-surface-for-page page))
 
@@ -530,21 +535,21 @@
    :priority 3))
 
 (views:defview 👀alternate-source (preview source-surface-swap-preview)
-  (let ((designator
-          (normalize-source-surface-designator
-           (source-surface-swap-preview-alternate-designator-of preview))))
-    (case designator
-      (:plain
-       (render-plain-source-surface-for-page
-        (source-surface-swap-preview-page-of preview)
-        :title "Alternate Source"
-        :priority 4))
-      (t
-       (render-source-surface-for-page-with-designator
-        (source-surface-swap-preview-page-of preview)
-        designator
-        :title "Alternate Source"
-        :priority 4)))))
+  (let* ((page (source-surface-swap-preview-page-of preview))
+         (designator
+           (normalize-source-surface-designator
+            (source-surface-swap-preview-alternate-designator-of preview))))
+    (if (and (typep page 'text-page)
+             (eql designator :plain))
+        (render-historical-plain-text-page-source-definition
+         page
+         :title "Alternate Source"
+         :priority 4)
+        (render-source-surface-for-page-with-designator
+         page
+         designator
+         :title "Alternate Source"
+         :priority 4))))
 
 (defun render-source-surface-swap-operations-for-page (page)
   (let* ((report (source-surface-resolution-report-for page))

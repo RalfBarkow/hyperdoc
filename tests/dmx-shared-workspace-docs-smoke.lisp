@@ -1067,7 +1067,13 @@
          (current-html (and current-view
                             (html-inspector-views:view-html current-view)))
          (alternate-html (and alternate-view
-                              (html-inspector-views:view-html alternate-view))))
+                              (html-inspector-views:view-html alternate-view)))
+         (expected-alternate-html
+           (html-inspector-views:view-html
+            (hyperdoc::render-historical-plain-text-page-source-definition
+             page
+             :title "Alternate Source"
+             :priority 4))))
     (assert-type 'hyperdoc::source-surface-swap-preview
                  preview
                  "Swap preview must materialize as an inspectable object.")
@@ -1130,6 +1136,12 @@
              current-html
              :test #'char=)
      "Swap preview current Source must keep the connect runtime contract.")
+    (assert-true
+     (string= alternate-html expected-alternate-html)
+     "Swap preview alternate Source must render the historical plain text-page Source definition.")
+    (assert-true
+     (not (string= current-html alternate-html))
+     "Swap preview current and alternate Source views must remain different renderings of the same page.")
     (assert-true
      (search "hyperdoc-source-pane" alternate-html :test #'char=)
      "Swap preview alternate Source must render the plain source pane.")
