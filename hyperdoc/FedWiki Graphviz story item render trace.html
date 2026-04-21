@@ -10,6 +10,12 @@
   adapter path rather than a merely hypothetical one.
 </p>
 
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Discourse Graphs adaptation boundary">Discourse Graphs adaptation boundary</a></li>
+</ul>
+
 <h2>Localhost page example</h2>
 
 <p>
@@ -187,6 +193,59 @@
   browser init, pending/error state, and raw DOT fallback.
 </p>
 
+<h2>Dreyeck Discourse-Graphs boundary</h2>
+
+<p>
+  This page is also the first concrete boundary for the later dreyeck claim
+  that Mech is "adapted for Discourse Graphs." The first tracked code/config
+  seam outside <tt>~/workspace/wiki-plugin-mech</tt> that changes what a Mech
+  graph looks like on dreyeck is not a Mech fork. It is this shared
+  Graphviz-rendering path.
+</p>
+
+<ul>
+  <li><tt>hyperbook-fedwiki/story-items.lisp</tt> treats a FedWiki <tt>graphviz</tt> story item as a thin typed adapter and forwards DOT from story item <tt>text</tt> into <tt>views:graphviz-snippet</tt>.</li>
+  <li><tt>flake.nix</tt> packages dreyeck with <tt>htmlInspectorViewsSrcPatched</tt>, which applies <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt>.</li>
+  <li>That patch supplies the shared browser/runtime contract: <tt>data-inspector-graphviz-dot</tt>, pending/rendered/error state, raw DOT fallback, and <tt>window.inspectorGraphviz</tt>.</li>
+</ul>
+
+<p>
+  So any upstream Mech page that emits a normal <tt>graphviz</tt> story item
+  already acquires a dreyeck-specific rendering behavior through this tracked
+  HyperDoc packaging seam, even when <tt>wiki-plugin-mech</tt> itself is still
+  exactly at Ward upstream.
+</p>
+
+<p>
+  The inspected repo surfaces did <b>not</b> contain a tracked
+  <tt>Discourse Graphs</tt>-named Mech code path. The first explicit
+  Discourse-Graphs-specific adaptation evidence was instead local and
+  untracked:
+</p>
+
+<ul>
+  <li><tt>~/workspace/wiki-plugin-mech/mech.patch</tt> contains downstream Mech edits around <tt>EXTRACT</tt>, <tt>EDGES</tt>, and <tt>WALK</tt> role names such as <tt>questions</tt> and <tt>claims</tt>.</li>
+  <li>The localhost FedWiki page <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="discourse-graphs">Discourse Graphs</a> uses exactly those commands in its authored <tt>mech</tt> items.</li>
+  <li>Those commands are absent from the tracked upstream checkout currently at <tt>47cba6d57bef6db43e237abcbad60829d78b691c</tt>.</li>
+</ul>
+
+<p>
+  The truthful classification is therefore split:
+</p>
+
+<ul>
+  <li><b>tracked code/config boundary:</b> the shared Graphviz rendering seam on dreyeck</li>
+  <li><b>untracked local artifact boundary:</b> <tt>~/workspace/wiki-plugin-mech/mech.patch</tt></li>
+  <li><b>content convention boundary:</b> the localhost FedWiki page <tt>discourse-graphs</tt> that assumes those downstream blocks</li>
+</ul>
+
+<p>
+  That is the smallest honest account of the adaptation boundary visible from
+  the inspected surfaces. The server-side Mech effect on dreyeck is real, but
+  the Discourse-Graphs-specific block vocabulary is not currently present as
+  tracked code in this repo snapshot.
+</p>
+
 <h2>Mental model</h2>
 
 <p>
@@ -201,6 +260,8 @@
 
 <ul>
   <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="graphviz-demo">Graphviz Demo</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="discourse-graphs">Discourse Graphs</a></li>
+  <li><a page="Mech CODE Block analysis">Mech CODE Block analysis</a></li>
   <li><a page="FedWiki Video Snippet Plugin for HyperDoc">FedWiki Video Snippet Plugin for HyperDoc</a></li>
   <li><a page="Code path graphs in HyperDoc">Code path graphs in HyperDoc</a></li>
   <li><a page="State-machine visualization">State-machine visualization</a></li>
