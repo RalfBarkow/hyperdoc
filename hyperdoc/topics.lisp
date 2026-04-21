@@ -2835,6 +2835,7 @@
    :title "Iconic state"
    :summary "Potentially grounded semantic station or inspectable world-state proxy that a HyperDoc route can retrieve or re-enter, rather than a bare symbolic label."
    :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
                  "Focused semantic source stations"
                  "Touch-Fahrplan view for Zotero topic enrichment")))
 
@@ -2844,6 +2845,7 @@
    :title "Iconic hypothesis"
    :summary "Working claim that language supports understanding by retrieving grounded or iconic state instead of merely attaching arbitrary labels to symbols."
    :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
                  "Symbols and semantics in Mind and Mechanism")))
 
 (defun understanding-as-retrieval-topic ()
@@ -2852,6 +2854,7 @@
    :title "Understanding as retrieval"
    :summary "HyperDoc reading in which understanding succeeds when a cue or route re-enters the grounded state, evidence chain, trajectory, or interpretation path that makes the meaning inspectable."
    :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
                  "Touch-Fahrplan view for Zotero topic enrichment"
                  "Focused semantic source stations"
                  "Symbols and semantics in Mind and Mechanism")))
@@ -2862,6 +2865,7 @@
    :title "Language as retrieval vehicle"
    :summary "View that language cues can serve as durable route starters into richer grounded semantic state, not only as names or labels."
    :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
                  "Touch-Fahrplan view for Zotero topic enrichment"
                  "Symbols and semantics in Mind and Mechanism")))
 
@@ -2871,6 +2875,7 @@
    :title "Neural State Machine Model"
    :summary "Paper-specific model in which semantic distinctions appear as state trajectories through grounded or iconic representation rather than as static token labels."
    :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
                  "Symbols and semantics in Mind and Mechanism")))
 
 (defun iconic-route-language-in-hyperdoc-topic ()
@@ -2879,10 +2884,87 @@
    :title "Iconic route language in HyperDoc"
    :summary "Assimilation of the iconic hypothesis into Touch-Fahrplan: stations can stand for grounded semantic states, routes can act as retrieval relations, and following a route can re-enter an inspectable state or trajectory."
    :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
                  "Skillization in HyperDoc"
                  "Touch-Fahrplan view for Zotero topic enrichment"
                  "Focused semantic source stations"
                  "Symbols and semantics in Mind and Mechanism")))
+
+(defun world-state-topic ()
+  (make-topic
+   :id "world-state"
+   :title "World state"
+   :summary "Static or temporal arrangement in the world that a learning state machine mirrors through grounded/iconic representation."
+   :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects")))
+
+(defun world-state-proxy-topic ()
+  (make-topic
+   :id "world-state-proxy"
+   :title "World-state proxy"
+   :summary "Inspectable HyperDoc stand-in for a grounded semantic state or event pattern that can anchor iconic retrieval."
+   :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun acquisition-of-iconic-representation-topic ()
+  (make-topic
+   :id "acquisition-of-iconic-representation"
+   :title "Acquisition of iconic representation"
+   :summary "Creation of state structure with a many-to-some relationship to world states and their temporal changes."
+   :references '("Inspectable iconic retrieval objects"
+                 "Iconic route language in HyperDoc")))
+
+(defun linguistic-retrieval-cue-topic ()
+  (make-topic
+   :id "linguistic-retrieval-cue"
+   :title "Linguistic retrieval cue"
+   :summary "Symbolic trigger or route starter that retrieves an iconic representation without collapsing into the grounded state it points to."
+   :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun iconic-retrieval-route-topic ()
+  (make-topic
+   :id "iconic-retrieval-route"
+   :title "Iconic retrieval route"
+   :summary "First-class route relation that links a cue to a grounded/iconic state and the trajectory by which it is retrieved."
+   :references '("Iconic route language in HyperDoc"
+                 "Inspectable iconic retrieval objects"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun iconic-state-trajectory-topic ()
+  (make-topic
+   :id "iconic-state-trajectory"
+   :title "Iconic state trajectory"
+   :summary "Inspectable path through iconic state structure that preserves semantic distinctions such as case-role readings."
+   :references '("Inspectable iconic retrieval objects"
+                 "Iconic route language in HyperDoc")))
+
+(defun reentrant-state-topic ()
+  (make-topic
+   :id "reentrant-state"
+   :title "Reentrant state"
+   :summary "Iconic state that remains re-enterable from perceptual or symbolic cueing rather than vanishing after one pass through the sequence."
+   :references '("Inspectable iconic retrieval objects"
+                 "Iconic route language in HyperDoc")))
+
+(defun early-processing-topic ()
+  (make-topic
+   :id "early-processing"
+   :title "Early processing"
+   :summary "Pre-fashioned processing stage that precedes iconic state formation and performs fixed sensory tasks such as edge extraction or auditory encoding."
+   :references '("Inspectable iconic retrieval objects"
+                 "Iconic route language in HyperDoc")))
+
+(defun grounded-symbolic-operation-topic ()
+  (make-topic
+   :id "grounded-symbolic-operation"
+   :title "Grounded symbolic operation"
+   :summary "Integrated mode in which symbolic cues and grounded/iconic states remain distinct but operate together inside one system."
+   :references '("Symbols and semantics in Mind and Mechanism"
+                 "Inspectable iconic retrieval objects"
+                 "Iconic route language in HyperDoc")))
 
 ;; Topic objects for the narrow Zotero title-to-local-PDF bridge slice.
 (defun zotero-library-topic ()

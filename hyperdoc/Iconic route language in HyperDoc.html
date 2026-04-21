@@ -21,9 +21,38 @@
   <li><a hyperbook="topics" page="Understanding as retrieval"><tt>Understanding as retrieval</tt></a></li>
   <li><a hyperbook="topics" page="Language as retrieval vehicle"><tt>Language as retrieval vehicle</tt></a></li>
   <li><a hyperbook="topics" page="Neural State Machine Model"><tt>Neural State Machine Model</tt></a></li>
+  <li><a hyperbook="topics" page="World-state proxy"><tt>World-state proxy</tt></a></li>
+  <li><a hyperbook="topics" page="Linguistic retrieval cue"><tt>Linguistic retrieval cue</tt></a></li>
+  <li><a hyperbook="topics" page="Iconic retrieval route"><tt>Iconic retrieval route</tt></a></li>
+  <li><a hyperbook="topics" page="Iconic state trajectory"><tt>Iconic state trajectory</tt></a></li>
+  <li><a hyperbook="topics" page="Grounded symbolic operation"><tt>Grounded symbolic operation</tt></a></li>
   <li><a hyperbook="topics" page="Touch-Fahrplan view for Zotero topic enrichment"><tt>Touch-Fahrplan view for Zotero topic enrichment</tt></a></li>
   <li><a hyperbook="topics" page="Focused semantic source stations"><tt>Focused semantic source stations</tt></a></li>
   <li><a hyperbook="topics" page="Symbols and semantics"><tt>Symbols and semantics</tt></a></li>
+</ul>
+
+<h2>Operational objects</h2>
+
+<p>
+  The paper's abstract claims are operationalized here as inspectable
+  route-language objects, not as a neural runtime. The cue remains symbolic,
+  the source station remains grounded, and understanding is represented as the
+  retrieval route that links them.
+</p>
+
+<p>
+  The route-language example is primary. The NSMM object is exposed only as a
+  supporting formalization of that route-level reading, not as a replacement
+  abstraction for HyperDoc.
+</p>
+
+<ul>
+  <li><a expr="(make-iconic-route-language-example)"><tt>(make-iconic-route-language-example)</tt></a></li>
+  <li><a expr="(iconic-retrieval-summary-alist (make-iconic-route-language-example))"><tt>(iconic-retrieval-summary-alist (make-iconic-route-language-example))</tt></a></li>
+  <li><a expr="(follow-route-retrieves-grounded-state-p (make-iconic-route-language-example))"><tt>(follow-route-retrieves-grounded-state-p (make-iconic-route-language-example))</tt></a></li>
+  <li><a expr="(make-lexical-iconic-association-example)"><tt>(make-lexical-iconic-association-example)</tt></a></li>
+  <li><a expr="(make-case-role-iconic-trajectory-example)"><tt>(make-case-role-iconic-trajectory-example)</tt></a></li>
+  <li><a expr="(make-neural-state-machine-model-example)"><tt>(make-neural-state-machine-model-example)</tt></a></li>
 </ul>
 
 <h2>Conceptual order</h2>
@@ -61,6 +90,14 @@
   path. It does not need to mean only graph traversal.
 </p>
 
+<p>
+  The paper's two worked patterns matter locally as well. The cup example shows
+  that a multimodal association can settle into a reentrant iconic state that a
+  cue later retrieves. The rock-versus-curtain example shows that distinct
+  semantics can live in distinct trajectories through iconic state structure,
+  not only in flat labels attached after analysis.
+</p>
+
 <h2>Station and route definitions</h2>
 
 <p>
@@ -96,6 +133,22 @@
 </p>
 
 <p>
+  In the narrow operational model exposed above, a <b>world-state proxy</b> is
+  the grounded station, a <b>linguistic retrieval cue</b> is the symbolic route
+  starter, an <b>iconic state</b> is the inspectable grounded representation, a
+  <b>retrieval route</b> is the first-class relation between them, and a
+  <b>trajectory</b> records the understanding path that makes the route more
+  than a static label link.
+</p>
+
+<p>
+  The supporting operational page
+  <a page="Inspectable iconic retrieval objects">Inspectable iconic retrieval objects</a>
+  exposes the fuller paper-backed example surface without turning this page into
+  a second conceptual center.
+</p>
+
+<p>
   Trajectory matters here because a later state can mean something different
   depending on the path that led to it. HyperDoc already preserves this kind of
   distinction in route chains, evidence sequences, and authorial review paths.
@@ -115,6 +168,7 @@
 <h2>Related pages</h2>
 
 <ul>
+  <li><a page="Inspectable iconic retrieval objects">Inspectable iconic retrieval objects</a></li>
   <li><a page="Touch-Fahrplan view for Zotero topic enrichment">Touch-Fahrplan view for Zotero topic enrichment</a></li>
   <li><a page="Focused semantic source stations">Focused semantic source stations</a></li>
   <li><a page="Symbols and semantics in Mind and Mechanism">Symbols and semantics in Mind and Mechanism</a></li>

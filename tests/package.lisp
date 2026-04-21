@@ -37,6 +37,7 @@
    :run-fedwiki-story-items-smoke-tests
    :run-inspector-performance-smoke-tests
    :run-merged-doc-slices-smoke-tests
+   :run-iconic-retrieval-smoke-tests
    :run-git-commit-assimilation-smoke-tests
    :run-skillization-smoke-tests
    :run-mech-deployment-provenance-smoke-tests
