@@ -7,13 +7,23 @@
   FedWiki <tt>graphviz</tt> story item and traces how HyperDoc
   handles it today versus how it would flow through the shared Graphviz
   renderer. The example is explanatory, but it now reflects the current typed
-  adapter path rather than a merely hypothetical one.
+  adapter path rather than a merely hypothetical one. It also serves as the
+  canonical page for the Mech / Discourse-Graphs deployment-provenance
+  investigation because the same shared Graphviz seam became the first tracked
+  dreyeck runtime boundary and the anchor for the later live host comparison.
 </p>
 
 <h2>Inspectable objects</h2>
 
 <ul>
   <li><a hyperbook="topics" page="Discourse Graphs adaptation boundary">Discourse Graphs adaptation boundary</a></li>
+  <li><a hyperbook="topics" page="Live Mech deployment provenance">Live Mech deployment provenance</a></li>
+  <li><a hyperbook="topics" page="Host-by-host live runtime comparison">Host-by-host live runtime comparison</a></li>
+  <li><a hyperbook="topics" page="Patched Mech / Discourse-Graphs block vocabulary">Patched Mech / Discourse-Graphs block vocabulary</a></li>
+  <li><a expr="(make-live-mech-deployment-provenance-skill)"><tt>(make-live-mech-deployment-provenance-skill)</tt></a></li>
+  <li><a expr="(live-plugin-provenance-skill-summary-alist (make-live-mech-deployment-provenance-skill))"><tt>(live-plugin-provenance-skill-summary-alist (make-live-mech-deployment-provenance-skill))</tt></a></li>
+  <li><a expr="(make-live-mech-plugin-provenance-check)"><tt>(make-live-mech-plugin-provenance-check)</tt></a></li>
+  <li><a expr="(live-mech-plugin-provenance-check-summary-alist (make-live-mech-plugin-provenance-check))"><tt>(live-mech-plugin-provenance-check-summary-alist (make-live-mech-plugin-provenance-check))</tt></a></li>
 </ul>
 
 <h2>Localhost page example</h2>
@@ -323,6 +333,20 @@
   <tt>discourse.dreyeck.ch</tt> exposes a stronger provenance trail for its
   deployed plugin bytes.
 </p>
+
+<h3>Operational materialization</h3>
+
+<p>
+  This page now ties four layers together explicitly rather than leaving the
+  provenance result as prose only:
+</p>
+
+<ul>
+  <li><b>topics</b> stabilize the durable concepts: live deployment provenance, host-by-host runtime comparison, and the patched Discourse-Graphs block vocabulary;</li>
+  <li><b>the skill object</b> captures the recurring host-by-host deployed plugin provenance proof as a reusable evidence routine;</li>
+  <li><b>the read-only operation object</b> records one concrete live Mech provenance check with host reports and supporting evidence;</li>
+  <li><b>the authored page</b> remains the canonical narrative surface that explains why those inspectable objects matter and how they connect to the shared Graphviz seam.</li>
+</ul>
 
 <h2>Mental model</h2>
 

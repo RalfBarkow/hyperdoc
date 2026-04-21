@@ -39,4 +39,5 @@
    :run-merged-doc-slices-smoke-tests
    :run-git-commit-assimilation-smoke-tests
    :run-skillization-smoke-tests
+   :run-mech-deployment-provenance-smoke-tests
    :run-py4dmx-cluster-smoke-tests))

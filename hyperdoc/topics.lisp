@@ -5030,6 +5030,29 @@
    :references '("Mech CODE Block analysis"
                  "FedWiki Graphviz story item render trace")))
 
+(defun live-mech-deployment-provenance-topic ()
+  (make-topic
+   :id "live-mech-deployment-provenance"
+   :title "Live Mech deployment provenance"
+   :summary "Deployment-provenance object for proving what live hosts actually serve for Mech from served plugin metadata, served assets, hashes, and live page content."
+   :references '("FedWiki Graphviz story item render trace"
+                 "Mech CODE Block analysis")))
+
+(defun host-by-host-live-runtime-comparison-topic ()
+  (make-topic
+   :id "host-by-host-live-runtime-comparison"
+   :title "Host-by-host live runtime comparison"
+   :summary "Host-separated runtime comparison that keeps each host's served plugin metadata, asset evidence, and classification explicit instead of collapsing them into one blended deployment story."
+   :references '("FedWiki Graphviz story item render trace")))
+
+(defun patched-mech-discourse-graphs-block-vocabulary-topic ()
+  (make-topic
+   :id "patched-mech-discourse-graphs-block-vocabulary"
+   :title "Patched Mech / Discourse-Graphs block vocabulary"
+   :summary "Downstream Mech block vocabulary such as EXTRACT, EDGES, questions, claims, and WALK roles that marks the patched Discourse-Graphs lineage distinct from upstream 47c."
+   :references '("FedWiki Graphviz story item render trace"
+                 "Mech CODE Block analysis")))
+
 (defun operation-argument-normalization-topic ()
   (make-topic
    :id "operation-argument-normalization"
