@@ -5005,6 +5005,31 @@
    :references '("Mech Execution Context and Emit Protocol"
                  "Mech Plugin Progress March 2026")))
 
+(defun mech-code-to-graphviz-preview-path-topic ()
+  (make-topic
+   :id "mech-code-to-graphviz-preview-path"
+   :title "Mech CODE-to-graphviz preview path"
+   :summary "Current upstream Mech can preview Graphviz directly when a page-local code item makes CODE populate state.items with a graphviz story item and PREVIEW items publishes it unchanged."
+   :references '("Mech CODE Block analysis"
+                 "Mech Execution Context and Emit Protocol"
+                 "FedWiki Graphviz story item render trace")))
+
+(defun quick-brown-fox-text-to-graph-example-topic ()
+  (make-topic
+   :id "quick-brown-fox-text-to-graph-example"
+   :title "Quick Brown Fox text-to-graph example"
+   :summary "Worked example: split plain text into successive character edges and emit Graphviz DOT as a previewable graphviz story item."
+   :references '("Mech CODE Block analysis"
+                 "Mech Execution Context and Emit Protocol")))
+
+(defun discourse-graphs-adaptation-boundary-topic ()
+  (make-topic
+   :id "discourse-graphs-adaptation-boundary"
+   :title "Discourse Graphs adaptation boundary"
+   :summary "Boundary object for slices where tracked wiki-plugin-mech matches Ward upstream but the dreyeck Discourse-Graphs behavior lives in an external adapted runtime rather than in this checkout."
+   :references '("Mech CODE Block analysis"
+                 "FedWiki Graphviz story item render trace")))
+
 (defun operation-argument-normalization-topic ()
   (make-topic
    :id "operation-argument-normalization"

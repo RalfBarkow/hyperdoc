@@ -1,217 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Mech CODE Block analysis</title>
-</head>
-<body>
-  <h1>Mech CODE Block analysis</h1>
+<h1>Mech CODE Block analysis</h1>
 
-  <p>
-    I read Ward's page as a proposal for one new Mech capability layered on top of a much larger
-    client-side Mech that already exists: execute a dynamically created JavaScript module against
-    the current Mech state and then continue with the rest of the block. <a href="https://chatgpt.com/g/g-p-68b1afbede4c8191be613fef9c8571ae-fedwiki/c/69ba3fae-df54-838c-a1dd-35b18ce1cadc">chatgpt</a>
-  </p>
+<p>
+  This page records the current tracked Mech contract around Ward's <a hyperbook="fedwiki:next.ward.dojo.fed.wiki" page="quick-brown-fox">Quick Brown Fox</a> example. In <tt>~/workspace/wiki-plugin-mech</tt>, the checked-out
+  <tt>main</tt> is already Ward upstream commit
+  <tt>47cba6d57bef6db43e237abcbad60829d78b691c</tt>. The truthful question is
+  therefore not whether local tracked code diverges from upstream, but how the
+  existing <tt>CODE</tt> and <tt>PREVIEW</tt> seams already express the example
+  and where the dreyeck Discourse-Graphs behavior lives outside this checkout.
+</p>
 
-  <h2>What already exists</h2>
+<h2>Inspectable objects</h2>
 
-  <p>
-    The newer Mech already has the surrounding execution path that Ward's example wants.
-    <code>CLICK</code> runs an indented body on demand. <code>NEIGHBORS</code> populates
-    <code>state.neighborhood</code> from sitemap entries collected from the browser's neighborhood cache.
-    <code>PREVIEW</code> can open a result page, and <code>PREVIEW ... items</code> already expects
-    <code>state.items</code>. <code>SOLO</code> is also already present in the current Mech block catalog.
-  </p>
+<ul>
+  <li><a hyperbook="topics" page="Mech CODE-to-graphviz preview path"><tt>Mech CODE-to-graphviz preview path</tt></a></li>
+  <li><a hyperbook="topics" page="Quick Brown Fox text-to-graph example"><tt>Quick Brown Fox text-to-graph example</tt></a></li>
+  <li><a hyperbook="topics" page="Discourse Graphs adaptation boundary"><tt>Discourse Graphs adaptation boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a></li>
+  <li><a hyperbook="topics" page="Execution context bundle"><tt>Execution context bundle</tt></a></li>
+  <li><a hyperbook="topics" page="Block registry protocol"><tt>Block registry protocol</tt></a></li>
+</ul>
 
-  <p>
-    This means the proposed example is structurally coherent:
-  </p>
+<h2>Observed upstream contract</h2>
 
-  <pre><code>CLICK
-  NEIGHBORS next
-  CODE
-  PREVIEW synopsis items</code></pre>
+<p>
+  The current upstream client already contains the two seams this example
+  needs.
+</p>
 
-  <p>
-    The missing step is simply: after <code>NEIGHBORS</code>, run code that turns
-    <code>state.neighborhood</code> entries into reference items and stores them in
-    <code>state.items</code>.
-  </p>
+<ul>
+  <li><tt>src/client/blocks.js</tt> <tt>code_emit</tt> reads <tt>code</tt> story items from the current page, concatenates them into one JavaScript module, selects <tt>default</tt> or a named export from the first argument, and calls that export with the Mech state proxy as <tt>this</tt>.</li>
+  <li><tt>src/client/blocks.js</tt> <tt>preview_emit</tt> has two distinct output routes that matter here:
+    <ul>
+      <li><tt>PREVIEW items</tt> passes story items through unchanged from <tt>state.items</tt></li>
+      <li><tt>PREVIEW graph</tt> expects <tt>state.aspect</tt> graph objects and turns them into <tt>graphviz</tt> story items via <tt>dotify(graph)</tt></li>
+    </ul>
+  </li>
+  <li><tt>src/client/library.js</tt> <tt>dotify</tt> is the current graph-object-to-DOT seam. It is separate from the literal-DOT path used by Ward's Quick Brown Fox sketch.</li>
+</ul>
 
-  <h2>Why the state shape matches</h2>
+<p>
+  One practical boundary matters immediately: <tt>CODE</tt> does not scan the
+  whole lineup and it does not consume an indented Mech body as JavaScript
+  source. It reads <tt>code</tt> items from the same page that contains the
+  running <tt>mech</tt> item.
+</p>
 
-  <p>
-    The current <code>NEIGHBORS</code> block stores an array of neighborhood page records in
-    <code>state.neighborhood</code>. Those records come from site sitemaps and include the fields needed
-    for this example: domain, slug, title, and synopsis. The current wiki-server tests also confirm that
-    sitemap entries include <code>synopsis</code> and <code>links</code>.
-  </p>
+<h2>Inference for the Quick Brown Fox example</h2>
 
-  <p>
-    So the proposed module body is the right transformation:
-  </p>
+<p>
+  Ward's character-walk kernel is a literal text-to-DOT transformation:
+</p>
 
-  <pre><code>export async function doit({state}) {
-  state.items = state.neighborhood.map(info =&gt; ({
-    type: "reference",
-    site: info.domain,
-    slug: info.slug,
-    title: info.title,
-    text: info.synopsis
-  }))
+<pre><code>.split('').map((c, i, v) =&gt; `"${c}"-&gt;"${v[i + 1] || '.'}";`)</code></pre>
+
+<p>
+  The closest current upstream mapping is therefore not <tt>PREVIEW graph</tt>
+  but <tt>PREVIEW items</tt>. The code module can emit a normal
+  <tt>graphviz</tt> story item directly, keep DOT in the item's
+  <tt>text</tt>, and let Mech preview that item unchanged.
+</p>
+
+<pre><code>export default async function () {
+  const text = "Quick Brown Fox"
+  const edges = text
+    .split("")
+    .map((c, i, v) =&gt; `"${c}"-&gt;"${v[i + 1] || "."}";`)
+    .join("\n")
+  this.items = [{ type: "graphviz", text: `digraph {\n${edges}\n}` }]
 }</code></pre>
 
-  <h2>What is still underspecified</h2>
+<pre><code>CODE
+PREVIEW items</code></pre>
 
-  <p>
-    As written, Ward's example shows <code>CODE</code> as a command, but the JavaScript source is not shown
-    as an indented Mech body beneath that command. That leaves two possible designs.
-  </p>
+<p>
+  That authoring shape is already executable on the tracked repo. The proof run
+  for this slice produced a <tt>Mech Preview</tt> page whose first story item
+  was <tt>{ type: "graphviz", text: "digraph { ... }" }</tt>. No production
+  Mech change was required.
+</p>
 
-  <h3>Option A: inline source under CODE</h3>
+<p>
+  <tt>PREVIEW graph</tt> remains a second, different seam. It is the right
+  path when the module wants to populate <tt>state.aspect</tt> with graph
+  objects and let upstream <tt>dotify</tt> own the DOT serialization. That is
+  closer to neighborhood/aspect workflows than to the literal Quick Brown Fox
+  kernel.
+</p>
 
-  <p>
-    Example:
-  </p>
+<h2>Discourse Graphs adaptation boundary</h2>
 
-  <pre><code>CLICK
-  NEIGHBORS next
-  CODE
-    export async function doit({state}) {
-      state.items = state.neighborhood.map(info =&gt; ({
-        type: "reference",
-        site: info.domain,
-        slug: info.slug,
-        title: info.title,
-        text: info.synopsis
-      }))
-    }
-  PREVIEW synopsis items</code></pre>
+<p>
+  The tracked <tt>wiki-plugin-mech</tt> checkout shows no local code delta
+  against Ward upstream at <tt>47cba6d57bef6db43e237abcbad60829d78b691c</tt>.
+  The dreyeck Discourse-Graphs behavior therefore cannot be claimed here as an
+  in-tree Mech modification.
+</p>
 
-  <p>
-    This is the easiest first slice. The existing Mech tree parser already preserves nested body structure,
-    and <code>CODE</code> can serialize that body back into JavaScript source instead of asking Mech to execute it
-    as more block commands.
-  </p>
+<p>
+  The truthful boundary is narrower:
+</p>
 
-  <h3>Option B: source from a neighboring page item</h3>
+<ul>
+  <li>Upstream Mech already supplies the executable <tt>CODE</tt> seam.</li>
+  <li>Upstream Mech already supplies two preview routes: direct story-item preview and graph-object preview.</li>
+  <li>The local dreyeck adaptation is downstream of that tracked contract: it changes how graph output is consumed or embedded, not the fact that Mech can already produce the graph-oriented preview artifact.</li>
+</ul>
 
-  <p>
-    This may be closer to Ward's page sketch, because the source line appears outside the command sequence.
-    In that model, <code>CODE</code> would scan nearby page items for a code-bearing source item, much like the
-    existing <code>SOURCE</code> block scans earlier items for topic-specific source providers.
-  </p>
+<p>
+  Until the dreyeck adaptation itself is brought into an inspectable repo or
+  trace, HyperDoc should describe it as an external adaptation boundary rather
+  than as local code in <tt>wiki-plugin-mech</tt>.
+</p>
 
-  <p>
-    This design fits the page-authoring story better, but it needs one more protocol: how a preceding item
-    exposes code text to Mech.
-  </p>
+<h2>Recommendation for this slice</h2>
 
-  <h2>Security note</h2>
+<p>
+  The smallest truthful slice is a documentation repair, not a Mech redesign.
+  Earlier HyperDoc prose that treated <tt>CODE</tt> as the missing seam is now
+  stale relative to the actual repo. The current repo already supports the
+  Quick Brown Fox preview flow through page-local <tt>code</tt> items,
+  <tt>CODE</tt>, and <tt>PREVIEW items</tt>, while <tt>PREVIEW graph</tt>
+  remains the separate graph-object path.
+</p>
 
-  <p>
-    Dynamic module import is not, by itself, a sandbox. Browsers do support dynamic import of blob URLs,
-    but that still executes code in the page's JavaScript environment. If actual isolation is wanted,
-    this must move into a worker or a sandboxed iframe with an explicit message protocol.
-  </p>
+<p>
+  If a later slice wants to document the dreyeck Discourse-Graphs behavior in
+  more than boundary terms, it should first bring that adapted runtime into an
+  inspectable code or trace surface. This page does not pretend that surface is
+  already present in the tracked repo.
+</p>
 
-  <h2>Why ad hoc CODE should not be the default extension model</h2>
+<h2>Related pages / references</h2>
 
-  <p>
-    The <code>CODE</code> proposal is still interesting because it exposes a real
-    executable seam in Mech. But the durable path should move away from
-    silently executing arbitrary page-authored JavaScript and toward
-    host-mediated capabilities.
-  </p>
-
-  <p>
-    Jan d's capability split is the right local refinement: powers to change
-    content, change user interface, access data, and transform data should be
-    requested separately rather than collapsed into one broad permission to run
-    code. That makes room for a host-defined API boundary, a published
-    capability profile, and an explicit consent gate before execution.
-  </p>
-
-  <p>
-    This also fits the existing
-    <a hyperbook="topics" page="Mech op/args and emit dispatch"><tt>Mech op/args and emit dispatch</tt></a>
-    and
-    <a hyperbook="topics" page="Runtime dispatch seam"><tt>Runtime dispatch seam</tt></a>
-    framing. The dispatch seam is where authored syntax has already been
-    normalized enough for the host to evaluate a
-    <a hyperbook="topics" page="Declarative extension manifest"><tt>declarative extension manifest</tt></a>,
-    compare it to a
-    <a hyperbook="topics" page="Capability-scoped extension"><tt>capability-scoped extension</tt></a>
-    profile, and publish the resulting
-    <a hyperbook="topics" page="Consent-gated execution"><tt>consent-gated execution</tt></a>
-    decision as inspectable evidence.
-  </p>
-
-  <p>
-    In that maturation path, a future CODE-like feature would not merely run
-    arbitrary text because it happened to appear on a page. It would surface
-    its requested powers, consent boundary, and message surface as inspectable
-    objects before the host decides whether and how to run it.
-  </p>
-
-  <p>
-    The <a hyperbook="hyperdoc" page="Implementation Boundary for Capability-scoped Extensions">Implementation Boundary for Capability-scoped Extensions</a>
-    page is the continuity shell that calls out the pending FedWiki twins,
-    inspectable objects, and runtime surfaces for this story.
-  </p>
-
-  <p>
-    The local design notes for that direction are
-    <a hyperbook="hyperdoc" page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a>
-    and
-    <a hyperbook="hyperdoc" page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a>.
-  </p>
-
-  <h2>Best first implementation</h2>
-
-  <p>
-    If the goal is only to prove that Ward's example can execute, the shortest
-    truthful path is:
-  </p>
-
-  <ol>
-    <li>Add a client-side <code>CODE</code> block to <code>wiki-plugin-mech/client/mech.js</code>.</li>
-    <li>Have it consume indented source as literal JavaScript text.</li>
-    <li>Create a Blob from that text and <code>import()</code> it.</li>
-    <li>Call <code>await module.doit({state, elem, wiki, context: state.context})</code>.</li>
-    <li>Resume the remaining Mech body after the module returns.</li>
-  </ol>
-
-  <p>
-    That gets Ward's example running without inventing a new page-level source protocol first.
-    After that, the block can be generalized to fetch code from neighboring items if that authoring style
-    proves more natural.
-  </p>
-
-  <p>
-    Even then, it should stay framed as an experiment about the execution seam,
-    not as the default long-term extension model. The durable design target is
-    still host-mediated, manifest-declared, capability-scoped execution.
-  </p>
-
-  <h2>Bottom line</h2>
-
-  <p>
-    Ward's example is viable right now. The current Mech already has the input state and the output surface.
-    The only missing seam is a <code>CODE</code> block that turns page-authored JavaScript into a callable module.
-    For an experiment, keeping it client-side and inline is coherent. It should not become the default
-    extension model; the durable path is capability-scoped, manifest-declared, and consent-gated.
-  </p>
-
-  <h2>Related links</h2>
-
-  <ul>
-    <li><a page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a></li>
-    <li><a page="WebXDC-style Story Items for FedWiki and HyperDoc">WebXDC-style Story Items for FedWiki and HyperDoc</a></li>
-    <li><a page="Universal Thing and Browser Isolation in FedWiki">Universal Thing and Browser Isolation in FedWiki</a></li>
-    <li><a page="The iFrame Is Not the Compute Sandbox">The iFrame Is Not the Compute Sandbox</a></li>
-    <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
-    <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
-  </ul>
-</body>
-</html>
+<ul>
+  <li><a page="Mech Execution Context and Emit Protocol">Mech Execution Context and Emit Protocol</a></li>
+  <li><a page="Mech Plugin Progress March 2026">Mech Plugin Progress March 2026</a></li>
+  <li><a page="Inspectable Mech Runs">Inspectable Mech Runs</a></li>
+  <li><a page="Capability-scoped Extensions for FedWiki">Capability-scoped Extensions for FedWiki</a></li>
+  <li><a page="FedWiki Graphviz story item render trace">FedWiki Graphviz story item render trace</a></li>
+</ul>
