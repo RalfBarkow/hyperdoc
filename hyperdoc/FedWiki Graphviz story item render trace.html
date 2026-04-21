@@ -246,6 +246,28 @@
   tracked code in this repo snapshot.
 </p>
 
+<h3>Runtime sourcing status</h3>
+
+<p>
+  The tracked HyperDoc deployment surfaces inspected for this slice do
+  <b>not</b> source <tt>~/workspace/wiki-plugin-mech/mech.patch</tt> or any
+  local Mech bundle directly.
+</p>
+
+<ul>
+  <li><tt>flake.nix</tt> and the release packaging path contain no reference to <tt>wiki-plugin-mech</tt>, <tt>mech.patch</tt>, or <tt>client/mech-build-info.js</tt>.</li>
+  <li><tt>hyperbook-fedwiki/story-items.lisp</tt> has no <tt>:mech</tt> renderer; the tracked local story-item runtime covers types such as <tt>graphviz</tt>, <tt>video</tt>, <tt>frame</tt>, <tt>audio</tt>, and text-derived items, but not a Mech execution stack.</li>
+  <li><tt>hyperbook-fedwiki/fedwiki.lisp</tt> and <tt>hyperbook-fedwiki/plugins.lisp</tt> show the last confirmed boundary instead: HyperDoc discovers FedWiki site/plugin state over HTTP through <tt>/system/sitemap.json</tt>, <tt>/system/plugins.json</tt>, and <tt>/plugin/plugmatic/plugins</tt>.</li>
+</ul>
+
+<p>
+  So this slice can disprove only the tracked local-sourcing story: the
+  inspected HyperDoc/dreyeck repo surfaces do not prove that dreyeck is running
+  the local patched Mech artifact. If that patched Mech is active at runtime,
+  its source must be on the external wiki/plugin server side or another
+  deployment surface not present in the tracked repos inspected here.
+</p>
+
 <h2>Mental model</h2>
 
 <p>
