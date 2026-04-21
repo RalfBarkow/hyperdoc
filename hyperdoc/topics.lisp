@@ -2828,6 +2828,61 @@
                  "Mind and Mechanism compatibility with HyperDoc"
                  "PDDL and Opt in Drew McDermott's work")))
 
+;; Topic objects for iconic retrieval and route-language assimilation.
+(defun iconic-state-topic ()
+  (make-topic
+   :id "iconic-state"
+   :title "Iconic state"
+   :summary "Potentially grounded semantic station or inspectable world-state proxy that a HyperDoc route can retrieve or re-enter, rather than a bare symbolic label."
+   :references '("Iconic route language in HyperDoc"
+                 "Focused semantic source stations"
+                 "Touch-Fahrplan view for Zotero topic enrichment")))
+
+(defun iconic-hypothesis-topic ()
+  (make-topic
+   :id "iconic-hypothesis"
+   :title "Iconic hypothesis"
+   :summary "Working claim that language supports understanding by retrieving grounded or iconic state instead of merely attaching arbitrary labels to symbols."
+   :references '("Iconic route language in HyperDoc"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun understanding-as-retrieval-topic ()
+  (make-topic
+   :id "understanding-as-retrieval"
+   :title "Understanding as retrieval"
+   :summary "HyperDoc reading in which understanding succeeds when a cue or route re-enters the grounded state, evidence chain, trajectory, or interpretation path that makes the meaning inspectable."
+   :references '("Iconic route language in HyperDoc"
+                 "Touch-Fahrplan view for Zotero topic enrichment"
+                 "Focused semantic source stations"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun language-as-retrieval-vehicle-topic ()
+  (make-topic
+   :id "language-as-retrieval-vehicle"
+   :title "Language as retrieval vehicle"
+   :summary "View that language cues can serve as durable route starters into richer grounded semantic state, not only as names or labels."
+   :references '("Iconic route language in HyperDoc"
+                 "Touch-Fahrplan view for Zotero topic enrichment"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun neural-state-machine-model-topic ()
+  (make-topic
+   :id "neural-state-machine-model"
+   :title "Neural State Machine Model"
+   :summary "Paper-specific model in which semantic distinctions appear as state trajectories through grounded or iconic representation rather than as static token labels."
+   :references '("Iconic route language in HyperDoc"
+                 "Symbols and semantics in Mind and Mechanism")))
+
+(defun iconic-route-language-in-hyperdoc-topic ()
+  (make-topic
+   :id "iconic-route-language-in-hyperdoc"
+   :title "Iconic route language in HyperDoc"
+   :summary "Assimilation of the iconic hypothesis into Touch-Fahrplan: stations can stand for grounded semantic states, routes can act as retrieval relations, and following a route can re-enter an inspectable state or trajectory."
+   :references '("Iconic route language in HyperDoc"
+                 "Touch-Fahrplan view for Zotero topic enrichment"
+                 "Focused semantic source stations"
+                 "Symbols and semantics in Mind and Mechanism")))
+
 ;; Topic objects for the narrow Zotero title-to-local-PDF bridge slice.
 (defun zotero-library-topic ()
   (make-topic
@@ -2974,8 +3029,9 @@
   (make-topic
    :id "touch-fahrplan-view-for-zotero-topic-enrichment"
    :title "Touch-Fahrplan view for Zotero topic enrichment"
-   :summary "Topic-pane view that treats topics and sources as stations, prefers the user-facing action label Lay route, opens inspectable route and plan objects, and summarizes the latest successful enrichment report inline."
+   :summary "Topic-pane view that treats topics and sources as stations, prefers the user-facing action label Lay route, and makes the durable route chain an inspectable retrieval path rather than a hidden live query."
    :references '("Touch-Fahrplan view for Zotero topic enrichment"
+                 "Iconic route language in HyperDoc"
                  "Topic-to-Zotero enrichment route"
                  "Inspectable Zotero enrichment plan for a topic"
                  "Topic enrichment report")))
@@ -3026,8 +3082,9 @@
   (make-topic
    :id "focused-semantic-source-stations"
    :title "Focused semantic source stations"
-   :summary "Durable source-review surface that names semantically meaningful source stations, keeps the completed DMX MCP journal-projection cleanup as a first tactical slice, and leaves the broader HyperDoc-owned journal migration deferred."
+   :summary "Durable source-review surface that names semantically meaningful source stations as grounded retrieval targets, keeps route judgments inspectable, and leaves the broader HyperDoc-owned journal migration deferred."
    :references '("Focused semantic source stations"
+                 "Iconic route language in HyperDoc"
                  "DMX MCP server for shared workspace"
                  "Context window workspace as shared blackboard"
                  "DMX workspace journal model"
