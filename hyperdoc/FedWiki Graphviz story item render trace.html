@@ -268,6 +268,62 @@
   deployment surface not present in the tracked repos inspected here.
 </p>
 
+<h3>Host-by-host live runtime comparison</h3>
+
+<p>
+  Live probing of <tt>wiki.ralfbarkow.ch</tt> and
+  <tt>discourse.dreyeck.ch</tt> shows that both hosts are real Mech runtime
+  surfaces, not just passive content mirrors.
+</p>
+
+<ul>
+  <li>Both hosts answer <tt>/system/plugins.json</tt> and <tt>/plugin/plugmatic/plugins</tt> with a live <tt>mech</tt> plugin entry.</li>
+  <li>Both hosts serve <tt>/plugins/mech/mech.js</tt> and companion files such as <tt>blocks.js</tt>, <tt>interpreter.js</tt>, and <tt>library.js</tt>.</li>
+  <li>Both hosts also serve <tt>/discourse-graphs.json</tt> with a real <tt>mech</tt> story item whose text uses the downstream vocabulary <tt>EXTRACT</tt>, <tt>EDGES</tt>, <tt>WALK 60 questions</tt>, and <tt>WALK 30 claims</tt>.</li>
+</ul>
+
+<p>
+  Neither live host matches Ward upstream commit
+  <tt>47cba6d57bef6db43e237abcbad60829d78b691c</tt>. Upstream now reports
+  package version <tt>0.1.42-0</tt> and its tracked
+  <tt>src/client/blocks.js</tt> does <b>not</b> contain
+  <tt>EXTRACT</tt>, <tt>EDGES</tt>, <tt>questions</tt>, <tt>claims</tt>,
+  <tt>renderEdgesHtml</tt>, or <tt>parse_walk_command</tt>.
+</p>
+
+<p>
+  By contrast, both live hosts advertise plugmatic package version
+  <tt>0.1.32-dev.1</tt> and their served <tt>blocks.js</tt> does contain those
+  downstream signatures. That puts both hosts on the patched side of the
+  upstream/local split.
+</p>
+
+<p>
+  The proof is strongest on <tt>discourse.dreyeck.ch</tt>. Its served
+  <tt>/plugins/mech/mech.js</tt> embeds
+  <tt>MECH_GIT_COMMIT: "abd88d2da6c89029515f2a456356832dffe038ab"</tt>, and the
+  served <tt>blocks.js</tt>, <tt>library.js</tt>, and
+  <tt>interpreter.js</tt> byte-hashes match that exact commit in the local
+  <tt>wiki-plugin-mech</tt> history.
+</p>
+
+<p>
+  <tt>wiki.ralfbarkow.ch</tt> also serves patched Mech, but its
+  <tt>mech.js</tt> omits a build stamp. The served <tt>blocks.js</tt> and
+  <tt>library.js</tt> hashes match older patched commits in the local history,
+  so the host is clearly not serving plain upstream Mech, but the exact commit
+  cannot be pinned from the live bytes alone as narrowly as on
+  <tt>discourse.dreyeck.ch</tt>.
+</p>
+
+<p>
+  The host relationship is therefore not "wiki host supplies content while
+  discourse host alone supplies runtime." Both hosts supply content and a
+  patched Mech runtime. The live difference is that
+  <tt>discourse.dreyeck.ch</tt> exposes a stronger provenance trail for its
+  deployed plugin bytes.
+</p>
+
 <h2>Mental model</h2>
 
 <p>
