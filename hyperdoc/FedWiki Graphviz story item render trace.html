@@ -24,13 +24,15 @@
   <li><a expr="(live-plugin-provenance-skill-summary-alist (make-live-mech-deployment-provenance-skill))"><tt>(live-plugin-provenance-skill-summary-alist (make-live-mech-deployment-provenance-skill))</tt></a></li>
   <li><a expr="(make-live-mech-plugin-provenance-check)"><tt>(make-live-mech-plugin-provenance-check)</tt></a></li>
   <li><a expr="(live-mech-plugin-provenance-check-summary-alist (make-live-mech-plugin-provenance-check))"><tt>(live-mech-plugin-provenance-check-summary-alist (make-live-mech-plugin-provenance-check))</tt></a></li>
+  <li><a expr="(execute-live-mech-plugin-provenance-check)"><tt>(execute-live-mech-plugin-provenance-check)</tt></a></li>
+  <li><a expr="(live-mech-plugin-provenance-check-summary-alist (execute-live-mech-plugin-provenance-check))"><tt>(live-mech-plugin-provenance-check-summary-alist (execute-live-mech-plugin-provenance-check))</tt></a></li>
 </ul>
 
-<h2>Localhost page example</h2>
+<h2>FedWiki page example</h2>
 
 <p>
-  Real localhost FedWiki page example:
-  <tt>Graphviz Demo</tt>,
+  Real page example:
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="graphviz-demo">Graphviz Demo</a>,
   slug <tt>graphviz-demo</tt>,
   path <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/graphviz-demo</tt>.
 </p>
@@ -344,7 +346,7 @@
 <ul>
   <li><b>topics</b> stabilize the durable concepts: live deployment provenance, host-by-host runtime comparison, and the patched Discourse-Graphs block vocabulary;</li>
   <li><b>the skill object</b> captures the recurring host-by-host deployed plugin provenance proof as a reusable evidence routine;</li>
-  <li><b>the read-only operation object</b> records one concrete live Mech provenance check with host reports and supporting evidence;</li>
+  <li><b>the read-only operation object</b> now supports both the preserved baseline proof record and a re-runnable live execution path that refetches host evidence without mutating deployment state;</li>
   <li><b>the authored page</b> remains the canonical narrative surface that explains why those inspectable objects matter and how they connect to the shared Graphviz seam.</li>
 </ul>
 

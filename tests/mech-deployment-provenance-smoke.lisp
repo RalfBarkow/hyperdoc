@@ -131,8 +131,18 @@
      operation
      "Operation factory must materialize a live-mech-plugin-provenance-check.")
     (mech-provenance-assert-true
+     (fboundp 'hyperdoc::execute-live-mech-plugin-provenance-check)
+     "Live execution entrypoint must be defined.")
+    (mech-provenance-assert-true
      (hyperdoc::live-mech-plugin-provenance-check-read-only-p-of operation)
      "Live Mech provenance check must remain read-only.")
+    (mech-provenance-assert-equal
+     :baseline
+     (hyperdoc::live-mech-plugin-provenance-check-execution-mode-of operation)
+     "Factory must keep the baseline proof record as the default execution mode.")
+    (mech-provenance-assert-true
+     (not (hyperdoc::live-mech-plugin-provenance-check-live-p operation))
+     "Baseline operation object must not claim to be a live execution result.")
     (mech-provenance-assert-equal
      hyperdoc::*upstream-mech-reference-commit*
      (hyperdoc::live-mech-plugin-provenance-check-upstream-reference-commit-of

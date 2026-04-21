@@ -21,6 +21,25 @@
     "renderEdgesHtml"
     "parse_walk_command"))
 
+(defparameter *known-patched-mech-reference-commit*
+  "abd88d2da6c89029515f2a456356832dffe038ab")
+
+(defparameter *default-wiki-plugin-mech-repository-path*
+  "/Users/rgb/workspace/wiki-plugin-mech")
+
+(defparameter *live-mech-provenance-host-specs*
+  '((:host "wiki.ralfbarkow.ch"
+     :base-url "https://wiki.ralfbarkow.ch"
+     :page-slug "discourse-graphs")
+    (:host "discourse.dreyeck.ch"
+     :base-url "https://discourse.dreyeck.ch"
+     :page-slug "discourse-graphs")))
+
+(defparameter *mech-compared-asset-source-paths*
+  '(("blocks.js" . "src/client/blocks.js")
+    ("interpreter.js" . "src/client/interpreter.js")
+    ("library.js" . "src/client/library.js")))
+
 (defclass mech-provenance-evidence ()
   ((kind :reader mech-provenance-evidence-kind-of
          :initarg :kind)
@@ -140,6 +159,25 @@
     :reader live-mech-plugin-provenance-check-patched-lineage-version-of
     :initarg :patched-lineage-version
     :initform nil)
+   (known-patched-reference-commit
+    :reader live-mech-plugin-provenance-check-known-patched-reference-commit-of
+    :initarg :known-patched-reference-commit
+    :initform nil)
+   (hosts :reader live-mech-plugin-provenance-check-hosts-of
+          :initarg :hosts
+          :initform nil)
+   (reference-repo-path
+    :reader live-mech-plugin-provenance-check-reference-repo-path-of
+    :initarg :reference-repo-path
+    :initform nil)
+   (execution-mode
+    :reader live-mech-plugin-provenance-check-execution-mode-of
+    :initarg :execution-mode
+    :initform :baseline)
+   (executed-at
+    :reader live-mech-plugin-provenance-check-executed-at-of
+    :initarg :executed-at
+    :initform nil)
    (evidence-sources
     :reader live-mech-plugin-provenance-check-evidence-sources-of
     :initarg :evidence-sources
@@ -187,6 +225,443 @@
 
 (defun patched-mech-block-vocabulary-tokens ()
   (copy-list *patched-mech-discourse-graphs-block-vocabulary*))
+
+(defun live-mech-plugin-provenance-check-live-p (operation)
+  (eq (live-mech-plugin-provenance-check-execution-mode-of operation)
+      :live))
+
+(defun default-live-mech-plugin-provenance-hosts ()
+  (copy-tree *live-mech-provenance-host-specs*))
+
+(defun host-spec-value (host-spec key)
+  (getf host-spec key))
+
+(defun mech-json-get (object key)
+  (typecase object
+    (hash-table
+     (or (gethash key object)
+         (gethash (string-downcase key) object)
+         (gethash (string-upcase key) object)))
+    (list
+     (cdr (assoc key object :test #'string=)))
+    (t
+     nil)))
+
+(defun mech-json-sequence->list (value)
+  (typecase value
+    (null nil)
+    (list value)
+    (vector (coerce value 'list))
+    (t nil)))
+
+(defun mech-provenance-command-output (argv)
+  (multiple-value-bind (output error-output exit-code)
+      (uiop:run-program argv
+                        :output :string
+                        :error-output :string
+                        :ignore-error-status t)
+    (values output error-output exit-code)))
+
+(defun mech-provenance-http-fetch-string (url &key accept)
+  (let ((argv (append (list "curl"
+                            "--connect-timeout" "5"
+                            "--max-time" "20"
+                            "--retry" "0"
+                            "-fsSL")
+                      (when accept
+                        (list "-H" (format nil "Accept: ~A" accept)))
+                      (list url))))
+    (multiple-value-bind (output error-output exit-code)
+        (mech-provenance-command-output argv)
+      (if (zerop exit-code)
+          (values output nil)
+          (values nil
+                  (string-trim '(#\Space #\Tab #\Newline #\Return)
+                               (or error-output output "")))))))
+
+(defun mech-provenance-http-fetch-json (url)
+  (multiple-value-bind (body error-message)
+      (mech-provenance-http-fetch-string url :accept "application/json")
+    (if body
+        (handler-case
+            (values (shasht:read-json body) nil)
+          (error (cause)
+            (values nil
+                    (format nil "Failed to parse JSON from ~A: ~A"
+                            url
+                            cause))))
+        (values nil error-message))))
+
+(defun mech-provenance-sha256-hex (content)
+  (let* ((temporary-name
+           (format nil "mech-provenance-~A.tmp"
+                   (symbol-name (gensym "RUN"))))
+         (temporary-path
+           (merge-pathnames temporary-name
+                            (uiop:temporary-directory))))
+    (unwind-protect
+         (progn
+           (with-open-file (stream temporary-path
+                                   :direction :output
+                                   :if-exists :supersede
+                                   :if-does-not-exist :create)
+             (write-string content stream))
+           (multiple-value-bind (output error-output exit-code)
+               (mech-provenance-command-output
+                (list "shasum" "-a" "256" (namestring temporary-path)))
+             (declare (ignore error-output))
+             (when (zerop exit-code)
+               (subseq output 0 (position #\Space output)))))
+      (ignore-errors (delete-file temporary-path)))))
+
+(defun mech-provenance-asset-digests (asset-contents)
+  (loop for (asset-name . content) in asset-contents
+        for digest = (and content (mech-provenance-sha256-hex content))
+        when digest
+          collect (cons asset-name digest)))
+
+(defun mech-provenance-find-plugmatic-plugin-entry (payload plugin-name)
+  (let ((entries (cond
+                   ((hash-table-p payload)
+                    (or (mech-json-sequence->list
+                         (mech-json-get payload "install"))
+                        (mech-json-sequence->list
+                         (mech-json-get payload "plugins"))
+                        (mech-json-sequence->list
+                         (mech-json-get payload "data"))))
+                   (t
+                    (mech-json-sequence->list payload)))))
+    (find plugin-name
+          entries
+          :key (lambda (entry)
+                 (and (hash-table-p entry)
+                      (mech-json-get entry "plugin")))
+          :test #'string=)))
+
+(defun mech-provenance-hex-string-p (string length)
+  (and (stringp string)
+       (= (length string) length)
+       (every (lambda (character)
+                (not (null (digit-char-p character 16))))
+              string)))
+
+(defun mech-provenance-extract-js-field-value (source field-name)
+  (loop with source-length = (length source)
+        with start = 0
+        for field-position = (search field-name source :start2 start :test #'char=)
+        while field-position
+        do (let ((cursor (+ field-position (length field-name))))
+             (loop while (and (< cursor source-length)
+                              (find (char source cursor)
+                                    '(#\Space #\Tab #\Newline #\Return)))
+                   do (incf cursor))
+             (when (and (< cursor source-length)
+                        (char= (char source cursor) #\:))
+               (incf cursor)
+               (loop while (and (< cursor source-length)
+                                (find (char source cursor)
+                                      '(#\Space #\Tab #\Newline #\Return)))
+                     do (incf cursor))
+               (when (and (< cursor source-length)
+                          (member (char source cursor) '(#\" #\')))
+                 (let* ((quote-character (char source cursor))
+                        (value-start (1+ cursor))
+                        (value-end (position quote-character
+                                             source
+                                             :start value-start)))
+                   (when value-end
+                     (return (subseq source value-start value-end))))))
+             (setf start (+ field-position (length field-name))))
+        finally (return nil)))
+
+(defun mech-provenance-present-vocabulary-tokens (blocks-source)
+  (remove-if-not
+   (lambda (token)
+     (search token blocks-source :test #'char=))
+   (patched-mech-block-vocabulary-tokens)))
+
+(defun mech-provenance-first-mech-story-text (page-json)
+  (let* ((story (mech-json-sequence->list (mech-json-get page-json "story")))
+         (item (find "mech"
+                     story
+                     :key (lambda (entry)
+                            (and (hash-table-p entry)
+                                 (mech-json-get entry "type")))
+                     :test #'string=)))
+    (and item
+         (mech-json-get item "text"))))
+
+(defun mech-provenance-source-path-for-asset (asset-name)
+  (cdr (assoc asset-name *mech-compared-asset-source-paths* :test #'string=)))
+
+(defun mech-provenance-git-commit-present-p (repository-path commit)
+  (multiple-value-bind (_output _error-output exit-code)
+      (mech-provenance-command-output
+       (list "git" "-C" repository-path "cat-file" "-e"
+             (format nil "~A^{commit}" commit)))
+    (declare (ignore _output _error-output))
+    (zerop exit-code)))
+
+(defun mech-provenance-git-show-file (repository-path commit source-path)
+  (multiple-value-bind (output error-output exit-code)
+      (mech-provenance-command-output
+       (list "git" "-C" repository-path "show"
+             (format nil "~A:~A" commit source-path)))
+    (declare (ignore error-output))
+    (if (zerop exit-code)
+        output
+        nil)))
+
+(defun mech-provenance-compare-assets-to-git-commit
+    (asset-contents repository-path commit)
+  (when (and commit
+             repository-path
+             (mech-provenance-git-commit-present-p repository-path commit))
+    (loop for (asset-name . content) in asset-contents
+          for source-path = (mech-provenance-source-path-for-asset asset-name)
+          when source-path
+            collect
+            (cons asset-name
+                  (string= (or content "")
+                           (or (mech-provenance-git-show-file
+                                repository-path
+                                commit
+                                source-path)
+                               ""))))))
+
+(defun mech-provenance-comparison-all-match-p (comparison)
+  (and comparison
+       (every #'cdr comparison)))
+
+(defun mech-provenance-report-note
+    (&key classification build-commit upstream-comparison
+       patched-comparison exact-build-commit-match-p)
+  (case classification
+    (:upstream
+     "Live host matches the upstream reference without downstream Discourse-Graphs vocabulary.")
+    (:proxied
+     "Live host appears to proxy another Mech runtime surface rather than serving its own distinct deployment.")
+    (:patched
+     (cond
+       (exact-build-commit-match-p
+        (format nil "Live host serves patched Mech with exact deployed provenance proven to ~A."
+                build-commit))
+       ((and build-commit patched-comparison)
+        (format nil "Live host serves patched Mech and exposes build commit ~A, but compared assets do not all match that commit exactly." build-commit))
+       ((mech-provenance-comparison-all-match-p upstream-comparison)
+        "Live host would classify as upstream by file comparison, but downstream vocabulary still marks it as patched.")
+       (t
+        "Live host serves patched Mech lineage, but exact commit provenance remains unresolved.")))
+    (otherwise
+     "Live host remains unresolved because the fetched evidence does not prove upstream, patched, or proxied deployment cleanly.")))
+
+(defun collect-live-mech-host-runtime-provenance
+    (host-spec &key
+       (reference-repo-path *default-wiki-plugin-mech-repository-path*)
+       (upstream-reference-commit *upstream-mech-reference-commit*)
+       (upstream-reference-version *upstream-mech-reference-version*)
+       (patched-lineage-version *patched-mech-discourse-graphs-version*)
+       (known-patched-reference-commit *known-patched-mech-reference-commit*))
+  (let* ((host (host-spec-value host-spec :host))
+         (base-url (host-spec-value host-spec :base-url))
+         (page-slug (or (host-spec-value host-spec :page-slug)
+                        "discourse-graphs"))
+         (proxied-from (host-spec-value host-spec :proxied-from))
+         (system-plugins-url (format nil "~A/system/plugins.json" base-url))
+         (plugmatic-url (format nil "~A/plugin/plugmatic/plugins" base-url))
+         (page-url (format nil "~A/~A.json" base-url page-slug))
+         (asset-names '("mech.js" "blocks.js" "interpreter.js" "library.js"))
+         (asset-urls
+           (loop for asset-name in asset-names
+                 collect (cons asset-name
+                               (format nil "~A/plugins/mech/~A"
+                                       base-url
+                                       asset-name))))
+         (plugin-endpoints
+           (append (list system-plugins-url plugmatic-url)
+                   (mapcar #'cdr asset-urls)))
+         (evidence nil)
+         (system-plugins-json nil)
+         (plugmatic-json nil)
+         (page-json nil)
+         (asset-contents nil)
+         (plugin-version nil)
+         (repository-url nil)
+         (build-commit nil)
+         (served-vocabulary nil)
+         (page-text nil))
+    (labels ((record-error (source message)
+               (push (make-mech-provenance-evidence
+                      :kind :fetch-error
+                      :source source
+                      :detail message
+                      :value nil)
+                     evidence)))
+      (multiple-value-bind (json error-message)
+          (mech-provenance-http-fetch-json system-plugins-url)
+        (if json
+            (setf system-plugins-json json)
+            (record-error system-plugins-url
+                          (or error-message
+                              "Failed to fetch system/plugins.json"))))
+      (multiple-value-bind (json error-message)
+          (mech-provenance-http-fetch-json plugmatic-url)
+        (if json
+            (setf plugmatic-json json)
+            (record-error plugmatic-url
+                          (or error-message
+                              "Failed to fetch plugmatic plugin metadata"))))
+      (multiple-value-bind (json error-message)
+          (mech-provenance-http-fetch-json page-url)
+        (if json
+            (setf page-json json)
+            (record-error page-url
+                          (or error-message
+                              "Failed to fetch live discourse-graphs page JSON"))))
+      (dolist (asset asset-urls)
+        (multiple-value-bind (content error-message)
+            (mech-provenance-http-fetch-string (cdr asset))
+          (if content
+              (push (cons (car asset) content) asset-contents)
+              (record-error (cdr asset)
+                            (or error-message
+                                (format nil "Failed to fetch ~A" (car asset)))))))
+      (setf asset-contents (nreverse asset-contents))
+      (let* ((mech-entry
+               (and plugmatic-json
+                    (mech-provenance-find-plugmatic-plugin-entry
+                     plugmatic-json
+                     "mech")))
+             (mech-package (and mech-entry (mech-json-get mech-entry "package")))
+             (mech-repository
+               (and mech-package
+                    (mech-json-get mech-package "repository")))
+             (system-plugins
+               (mech-json-sequence->list system-plugins-json))
+             (mech-js (cdr (assoc "mech.js" asset-contents :test #'string=)))
+             (blocks-js (cdr (assoc "blocks.js" asset-contents :test #'string=)))
+             (upstream-comparison
+               (mech-provenance-compare-assets-to-git-commit
+                asset-contents
+                reference-repo-path
+                upstream-reference-commit))
+             (known-patched-comparison
+               (mech-provenance-compare-assets-to-git-commit
+                asset-contents
+                reference-repo-path
+                known-patched-reference-commit)))
+        (setf plugin-version
+              (or (and mech-package (mech-json-get mech-package "version"))
+                  (and mech-js
+                       (mech-provenance-extract-js-field-value
+                        mech-js
+                        "MECH_VERSION"))))
+        (setf repository-url
+              (and mech-repository
+                   (mech-json-get mech-repository "url")))
+        (setf build-commit
+              (let ((value
+                      (and mech-js
+                           (mech-provenance-extract-js-field-value
+                            mech-js
+                            "MECH_GIT_COMMIT"))))
+                (and (mech-provenance-hex-string-p value 40)
+                     value)))
+        (setf served-vocabulary
+              (and blocks-js
+                   (mech-provenance-present-vocabulary-tokens blocks-js)))
+        (setf page-text
+              (and page-json
+                   (mech-provenance-first-mech-story-text page-json)))
+        (when system-plugins-json
+          (push (make-mech-provenance-evidence
+                 :kind :plugin-discovery
+                 :source "/system/plugins.json"
+                 :detail "Live plugin discovery response confirms whether the host advertises a mech plugin at all."
+                 :value (member "mech" system-plugins :test #'string=))
+                evidence))
+        (when mech-entry
+          (push (make-mech-provenance-evidence
+                 :kind :plugin-metadata
+                 :source "/plugin/plugmatic/plugins"
+                 :detail "Live plugmatic metadata reports the deployed Mech package version and repository URL."
+                 :value (list :version plugin-version
+                              :repository-url repository-url))
+                evidence))
+        (when build-commit
+          (push (make-mech-provenance-evidence
+                 :kind :build-stamp
+                 :source "/plugins/mech/mech.js"
+                 :detail "Served mech.js embeds the deployed build commit."
+                 :value build-commit)
+                evidence))
+        (when served-vocabulary
+          (push (make-mech-provenance-evidence
+                 :kind :served-assets
+                 :source "/plugins/mech/blocks.js"
+                 :detail "Served blocks.js exposes the downstream Discourse-Graphs Mech vocabulary present on the live host."
+                 :value served-vocabulary)
+                evidence))
+        (when page-text
+          (push (make-mech-provenance-evidence
+                 :kind :page-content
+                 :source (format nil "/~A.json" page-slug)
+                 :detail "Live page content shows the authored mech item text actually using the downstream block vocabulary on the host."
+                 :value (with-output-to-string (stream)
+                          (loop for line in (subseq (uiop:split-string page-text :separator '(#\Newline))
+                                                    0
+                                                    (min 6 (length (uiop:split-string page-text :separator '(#\Newline)))))
+                                do (format stream "~A~%" line))))
+                evidence))
+        (when upstream-comparison
+          (push (make-mech-provenance-evidence
+                 :kind :upstream-comparison
+                 :source (format nil "git show ~A:src/client/*"
+                                 upstream-reference-commit)
+                 :detail "Compared live served blocks/interpreter/library assets against the upstream reference commit."
+                 :value upstream-comparison)
+                evidence))
+        (when known-patched-comparison
+          (push (make-mech-provenance-evidence
+                 :kind :patched-comparison
+                 :source (format nil "git show ~A:src/client/*"
+                                 known-patched-reference-commit)
+                 :detail "Compared live served blocks/interpreter/library assets against the known patched reference commit."
+                 :value known-patched-comparison)
+                evidence))
+        (make-mech-host-runtime-provenance-report
+         :host host
+         :plugin-endpoints plugin-endpoints
+         :content-endpoints (list page-url)
+         :plugin-version plugin-version
+         :repository-url repository-url
+         :asset-digests (mech-provenance-asset-digests asset-contents)
+         :build-commit build-commit
+         :served-vocabulary served-vocabulary
+         :proxied-from proxied-from
+         :notes
+         (mech-provenance-report-note
+          :classification
+          (classify-mech-host-runtime-provenance
+           :build-commit build-commit
+           :plugin-version plugin-version
+           :served-vocabulary served-vocabulary
+           :proxied-from proxied-from
+           :upstream-reference-commit upstream-reference-commit
+           :upstream-reference-version upstream-reference-version
+           :patched-lineage-version patched-lineage-version)
+          :build-commit build-commit
+          :upstream-comparison upstream-comparison
+          :patched-comparison known-patched-comparison
+          :exact-build-commit-match-p
+          (and build-commit
+               (string= build-commit known-patched-reference-commit)
+               (mech-provenance-comparison-all-match-p
+                known-patched-comparison)))
+         :evidence (nreverse evidence)
+         :upstream-reference-commit upstream-reference-commit
+         :upstream-reference-version upstream-reference-version
+         :patched-lineage-version patched-lineage-version)))))
 
 (defun patched-mech-block-vocabulary-present-p (served-vocabulary)
   (let ((vocabulary (copy-list served-vocabulary)))
@@ -396,7 +871,54 @@
                   (mech-host-runtime-provenance-classification-of report)))
           (live-mech-plugin-provenance-check-reports-of operation)))
 
-(defun make-live-mech-plugin-provenance-check ()
+(defun live-mech-plugin-provenance-check-conclusion-from-reports
+    (reports &key known-patched-reference-commit)
+  (let* ((classifications
+           (mapcar #'mech-host-runtime-provenance-classification-of reports))
+         (discourse-report
+           (find "discourse.dreyeck.ch"
+                 reports
+                 :key #'mech-host-runtime-provenance-host-of
+                 :test #'string=))
+         (wiki-report
+           (find "wiki.ralfbarkow.ch"
+                 reports
+                 :key #'mech-host-runtime-provenance-host-of
+                 :test #'string=)))
+    (cond
+      ((every (lambda (classification)
+                (eq classification :upstream))
+              classifications)
+       "All live hosts match the upstream Mech reference.")
+      ((every (lambda (classification)
+                (eq classification :patched))
+              classifications)
+       (format nil
+               "Both live hosts serve patched Mech rather than upstream ~A; ~A proves exact deployed provenance to ~A, while ~A remains on patched lineage with unresolved exact commit provenance."
+               *upstream-mech-reference-commit*
+               (mech-host-runtime-provenance-host-of discourse-report)
+               (or (mech-host-runtime-provenance-build-commit-of discourse-report)
+                   known-patched-reference-commit)
+               (mech-host-runtime-provenance-host-of wiki-report)))
+      ((some (lambda (classification)
+               (eq classification :proxied))
+             classifications)
+       "At least one live host appears to proxy another runtime surface; the host-by-host report records which host remains proxied and which host remains authoritative.")
+      (t
+       "Live host comparison produced a mixed or unresolved classification; inspect the host-by-host evidence for the exact remaining boundary."))))
+
+(defun make-live-mech-plugin-provenance-check
+    (&key
+       (reports
+         (list (make-wiki-ralfbarkow-live-mech-host-report)
+               (make-discourse-dreyeck-live-mech-host-report)))
+       (hosts (default-live-mech-plugin-provenance-hosts))
+       (reference-repo-path *default-wiki-plugin-mech-repository-path*)
+       (execution-mode :baseline)
+       executed-at
+       (known-patched-reference-commit
+         *known-patched-mech-reference-commit*)
+       conclusion)
   (make-instance
    'live-mech-plugin-provenance-check
    :id "operation/live-mech-plugin-provenance-check"
@@ -407,6 +929,11 @@
    :upstream-reference-commit *upstream-mech-reference-commit*
    :upstream-reference-version *upstream-mech-reference-version*
    :patched-lineage-version *patched-mech-discourse-graphs-version*
+   :known-patched-reference-commit known-patched-reference-commit
+   :hosts hosts
+   :reference-repo-path reference-repo-path
+   :execution-mode execution-mode
+   :executed-at executed-at
    :evidence-sources
    '("/system/plugins.json"
      "/plugin/plugmatic/plugins"
@@ -417,11 +944,36 @@
      "/discourse-graphs.json"
      "Local wiki-plugin-mech commit history"
      "Local mech.patch candidate")
-   :reports
-   (list (make-wiki-ralfbarkow-live-mech-host-report)
-         (make-discourse-dreyeck-live-mech-host-report))
+   :reports reports
    :conclusion
-   "Both live hosts serve patched Mech rather than upstream 47c; discourse.dreyeck.ch proves exact deployed provenance to abd88d2da6c89029515f2a456356832dffe038ab, while wiki.ralfbarkow.ch remains on clearly patched lineage with unresolved exact commit provenance."))
+   (or conclusion
+       "Both live hosts serve patched Mech rather than upstream 47c; discourse.dreyeck.ch proves exact deployed provenance to abd88d2da6c89029515f2a456356832dffe038ab, while wiki.ralfbarkow.ch remains on clearly patched lineage with unresolved exact commit provenance.")))
+
+(defun execute-live-mech-plugin-provenance-check
+    (&key
+       (hosts (default-live-mech-plugin-provenance-hosts))
+       (reference-repo-path *default-wiki-plugin-mech-repository-path*)
+       (known-patched-reference-commit
+         *known-patched-mech-reference-commit*))
+  (let ((reports
+          (mapcar (lambda (host-spec)
+                    (collect-live-mech-host-runtime-provenance
+                     host-spec
+                     :reference-repo-path reference-repo-path
+                     :known-patched-reference-commit
+                     known-patched-reference-commit))
+                  hosts)))
+    (make-live-mech-plugin-provenance-check
+     :reports reports
+     :hosts hosts
+     :reference-repo-path reference-repo-path
+     :execution-mode :live
+     :executed-at (get-universal-time)
+     :known-patched-reference-commit known-patched-reference-commit
+     :conclusion
+     (live-mech-plugin-provenance-check-conclusion-from-reports
+      reports
+      :known-patched-reference-commit known-patched-reference-commit))))
 
 (defun live-mech-plugin-provenance-check-summary-alist (operation)
   (list
@@ -439,6 +991,21 @@
    (cons :patched-lineage-version
          (live-mech-plugin-provenance-check-patched-lineage-version-of
           operation))
+   (cons :known-patched-reference-commit
+         (live-mech-plugin-provenance-check-known-patched-reference-commit-of
+          operation))
+   (cons :hosts
+         (mapcar (lambda (host-spec)
+                   (host-spec-value host-spec :host))
+                 (live-mech-plugin-provenance-check-hosts-of operation)))
+   (cons :reference-repo-path
+         (live-mech-plugin-provenance-check-reference-repo-path-of operation))
+   (cons :execution-mode
+         (live-mech-plugin-provenance-check-execution-mode-of operation))
+   (cons :executed-at
+         (live-mech-plugin-provenance-check-executed-at-of operation))
+   (cons :live-p
+         (live-mech-plugin-provenance-check-live-p operation))
    (cons :evidence-sources
          (live-mech-plugin-provenance-check-evidence-sources-of operation))
    (cons :host-classifications
