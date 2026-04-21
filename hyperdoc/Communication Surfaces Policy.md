@@ -58,6 +58,11 @@ Robot assistants participate in this interaction system by helping maintain:
  - cross-links between surfaces,
  - extraction of stable material from working pages into reference pages.
 
+When an answer depends on declared evaluation criteria rather than only facts,
+materialize those criteria as an inspectable review contract instead of leaving
+them hidden in a chat prompt; see
+<a page="Inspectable review contracts for automated code review">Inspectable review contracts for automated code review</a>.
+
 ## Recorded feedback
 
 Konrad's feedback on how to handle focused communication pages is

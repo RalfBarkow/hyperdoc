@@ -4438,6 +4438,47 @@
    :references '("Discoverability propagation in HyperDoc"
                  "Operational definition: skill pattern, conceptual center, discoverability propagation")))
 
+(defun review-contract-topic ()
+  (make-topic
+   :id "review-contract"
+   :title "Review contract"
+   :summary "Durable declaration of the priorities, priors, comparison mode, burden of proof, rejection policy, and output shape for one review task."
+   :references '("Inspectable review contracts for automated code review"
+                 "Surface and Artifact Answers"
+                 "Konrad Feedback on Communication Pages")))
+
+(defun review-priorities-topic ()
+  (make-topic
+   :id "review-priorities"
+   :title "Review priorities"
+   :summary "Declared optimization weights for a review, such as clarity, inspectability, local convention fit, or performance."
+   :references '("Inspectable review contracts for automated code review"
+                 "Surface and Artifact Answers")))
+
+(defun review-priors-topic ()
+  (make-topic
+   :id "review-priors"
+   :title "Review priors"
+   :summary "Declared assumptions brought into a review before reading the code, such as trusted-reference roles, candidate roles, or expected local patterns."
+   :references '("Inspectable review contracts for automated code review"
+                 "Surface and Artifact Answers")))
+
+(defun comparison-mode-topic ()
+  (make-topic
+   :id "comparison-mode"
+   :title "Comparison mode"
+   :summary "Declared task relation between candidate and reference, distinguishing symmetric comparison from exemplar, pedagogical, or regression review."
+   :references '("Inspectable review contracts for automated code review"
+                 "Konrad Feedback on Communication Pages")))
+
+(defun asymmetric-exemplar-review-topic ()
+  (make-topic
+   :id "asymmetric-exemplar-review"
+   :title "Asymmetric exemplar review"
+   :summary "Review mode in which a candidate is critiqued against a trusted exemplar under declared priors, rather than compared symmetrically in the abstract."
+   :references '("Inspectable review contracts for automated code review"
+                 "Konrad Feedback on Communication Pages")))
+
 (defun codex-resume-branch-context-topic ()
   (make-topic
    :id "codex-resume-branch-context"

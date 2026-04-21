@@ -1,0 +1,194 @@
+<h1>Inspectable review contracts for automated code review</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page materializes one HyperDoc answer to the question of how automated
+  code-review criteria should be made explicit, modifiable, and reviewable
+  rather than hidden in opaque prompts or unstated preferences.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Review contract"><tt>Review contract</tt></a></li>
+  <li><a hyperbook="topics" page="Review priorities"><tt>Review priorities</tt></a></li>
+  <li><a hyperbook="topics" page="Review priors"><tt>Review priors</tt></a></li>
+  <li><a hyperbook="topics" page="Comparison mode"><tt>Comparison mode</tt></a></li>
+  <li><a hyperbook="topics" page="Asymmetric exemplar review"><tt>Asymmetric exemplar review</tt></a></li>
+  <li><a expr="(list :review-contract
+                     :priorities '((:clarity 1.0)
+                                   (:inspectability 0.9)
+                                   (:local-convention-fit 0.7)
+                                   (:micro-optimization 0.2))
+                     :priors '((:candidate-role . :student)
+                               (:reference-role . :teacher)
+                               (:reference-trust . 0.85))
+                     :comparison-mode :asymmetric-exemplar
+                     :burden-of-proof '(:show-tradeoffs :name-assumptions :cite-local-patterns)
+                     :rejection-policy :allowed
+                     :output-shape '(:applied-priors
+                                     :applied-priorities
+                                     :alternatives
+                                     :tradeoffs
+                                     :verdict
+                                     :rejections
+                                     :uncertainty))"><tt>Example asymmetric exemplar review contract</tt></a></li>
+</ul>
+
+<h2>Problem</h2>
+
+<p>
+  Automated review is useful only if its criteria are visible and modifiable.
+  Semantic equivalence analysis can be valuable, but normative critique always
+  depends on declared assumptions about what matters, what counts as evidence,
+  and what the reviewer is allowed to reject. If those assumptions stay hidden,
+  the review becomes hard to contest, tune, or compare with later reviews.
+</p>
+
+<h2>Review contract</h2>
+
+<p>
+  A <b>review contract</b> is the durable object that carries the declared
+  review criteria for one review task. In HyperDoc terms, it should make the
+  following things explicit and inspectable:
+</p>
+
+<ul>
+  <li>priorities</li>
+  <li>priors</li>
+  <li>comparison mode</li>
+  <li>burden of proof</li>
+  <li>rejection policy</li>
+  <li>output shape</li>
+</ul>
+
+<p>
+  This is the boundary between useful analysis and opaque judgment. Without the
+  contract, a review can still say what it prefers, but it cannot show why
+  those preferences were authoritative for this task.
+</p>
+
+<h2>Priorities and priors</h2>
+
+<p>
+  <b>Review priorities</b> state what the review optimizes for. They answer
+  questions such as: should clarity outrank micro-optimization, should local
+  convention fit outrank generic elegance, and how much weight should
+  inspectability carry?
+</p>
+
+<p>
+  <b>Review priors</b> state what the review assumes before reading the code.
+  They answer questions such as: is one implementation treated as a trusted
+  reference, is the candidate assumed to be a student attempt, and is the task
+  local-convention-sensitive or not?
+</p>
+
+<p>
+  Both are needed. Priorities without priors leave the task relation vague.
+  Priors without priorities leave the evaluation target vague. A review that
+  claims to be explicit must declare both.
+</p>
+
+<h2>Comparison modes</h2>
+
+<p>
+  <b>Comparison mode</b> states what kind of review task is actually being run.
+  These modes should not be conflated:
+</p>
+
+<ul>
+  <li><b>symmetric comparison</b>: compare alternatives on the same footing</li>
+  <li><b>asymmetric exemplar critique</b>: critique a candidate against a trusted exemplar</li>
+  <li><b>pedagogical review</b>: optimize for learning and explanation, not only selection</li>
+  <li><b>migration/regression review</b>: compare candidate behavior against an existing local contract or baseline</li>
+</ul>
+
+<p>
+  Each mode changes what counts as relevant evidence and what counts as a fair
+  verdict. A reviewer that mixes these modes without naming them hides its own
+  task definition.
+</p>
+
+<h2>Teacher/student exemplar</h2>
+
+<p>
+  The student/teacher case is an <b>asymmetric exemplar review</b>, not a
+  symmetric comparison. The point is not “which version is better in general?”
+  but “how does the student candidate differ from the trusted teacher exemplar
+  under the declared contract?”
+</p>
+
+<p>
+  In that mode, the priors matter directly: the student candidate and teacher
+  exemplar do not carry the same burden. The trusted reference prior licenses a
+  critique that asks where the candidate diverges, what trade-offs the
+  divergence introduces, and whether those trade-offs are acceptable under the
+  declared priorities.
+</p>
+
+<pre><code>(:review-contract
+  :priorities ((:clarity 1.0)
+               (:inspectability 0.9)
+               (:local-convention-fit 0.7)
+               (:micro-optimization 0.2))
+  :priors ((:candidate-role . :student)
+           (:reference-role . :teacher)
+           (:reference-trust . 0.85))
+  :comparison-mode :asymmetric-exemplar
+  :burden-of-proof (:show-tradeoffs :name-assumptions :cite-local-patterns)
+  :rejection-policy :allowed
+  :output-shape (:applied-priors
+                 :applied-priorities
+                 :alternatives
+                 :tradeoffs
+                 :verdict
+                 :rejections
+                 :uncertainty))</code></pre>
+
+<h2>Required reviewer output shape</h2>
+
+<p>
+  A reviewer operating under an inspectable contract should make its output
+  shape explicit. At minimum, the review should list:
+</p>
+
+<ul>
+  <li>applied priorities</li>
+  <li>applied priors</li>
+  <li>options considered</li>
+  <li>trade-offs</li>
+  <li>verdict</li>
+  <li>rejected alternatives and why</li>
+  <li>uncertainty or missing evidence</li>
+</ul>
+
+<p>
+  This makes the trade-offs and rejections inspectable later. It also makes it
+  possible to say that the review was coherent under one contract while still
+  changing the contract for a different task.
+</p>
+
+<h2>Why this belongs in HyperDoc</h2>
+
+<p>
+  HyperDoc is the right place for this answer because review criteria are part
+  of the local documentation substrate, not just transient chat style. A review
+  contract should be durable, inspectable, and linkable so later readers can
+  see what assumptions were applied, which modes were chosen, and how a verdict
+  was justified.
+</p>
+
+<p>
+  Leaving this only as an opaque prompt or chat-side norm would hide exactly
+  the thing that the review is supposed to make explicit.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Konrad Feedback on Communication Pages">Konrad Feedback on Communication Pages</a></li>
+  <li><a page="Communication Surfaces Policy">Communication Surfaces Policy</a></li>
+</ul>
