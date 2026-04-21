@@ -2879,6 +2879,7 @@
    :title "Iconic route language in HyperDoc"
    :summary "Assimilation of the iconic hypothesis into Touch-Fahrplan: stations can stand for grounded semantic states, routes can act as retrieval relations, and following a route can re-enter an inspectable state or trajectory."
    :references '("Iconic route language in HyperDoc"
+                 "Skillization in HyperDoc"
                  "Touch-Fahrplan view for Zotero topic enrichment"
                  "Focused semantic source stations"
                  "Symbols and semantics in Mind and Mechanism")))
@@ -3053,6 +3054,7 @@
    :title "Dock capabilities in HyperDoc"
    :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect is introduced to users as Lay route, Annotation remains a sibling capability, and richer Touch-Fahrplan or DMX route/traversal workflows stay in the pane body."
    :references '("Dock capabilities in HyperDoc"
+                 "Discoverability propagation in HyperDoc"
                  "Dock presentation state model"
                  "Annotation"
                  "A DOM-annotation connect gesture"
@@ -3064,6 +3066,7 @@
    :title "Dock presentation state model"
    :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Lay route / Connect, Annotation, Touch-Fahrplan route-laying, and DMX traversal fit the same UX grammar."
    :references '("Dock presentation state model"
+                 "Discoverability propagation in HyperDoc"
                  "Dock capabilities in HyperDoc"
                  "Annotation"
                  "Touch-Fahrplan view for Zotero topic enrichment")))
@@ -4379,6 +4382,61 @@
    :summary "Recurring workflow extraction into callable Lisp/skill routines so repeated tasks move from ad-hoc execution to reusable runtime behavior."
    :references '("Surface and Artifact Answers"
                  "ASDF Components Workflow")))
+
+(defun skillization-topic ()
+  (make-topic
+   :id "skillization"
+   :title "Skillization"
+   :summary "HyperDoc pattern that turns a recurring editorial move into durable pages, topic factories, inspectable definition objects, and narrow validation."
+   :references '("Skillization in HyperDoc"
+                 "Operational definition: skill pattern, conceptual center, discoverability propagation"
+                 "Iconic route language in HyperDoc"
+                 "Surface and Artifact Answers")))
+
+(defun skill-pattern-topic ()
+  (make-topic
+   :id "skill-pattern"
+   :title "Skill pattern"
+   :summary "Reusable local documentation pattern with a fixed purpose, bounded slice shape, and stable acceptance rule."
+   :references '("Skillization in HyperDoc"
+                 "Operational definition: skill pattern, conceptual center, discoverability propagation")))
+
+(defun conceptual-center-topic ()
+  (make-topic
+   :id "conceptual-center"
+   :title "Conceptual center"
+   :summary "First documentation slice that lands the local editorial center for a concept in HyperDoc's own language before propagation begins."
+   :references '("Conceptual center in HyperDoc"
+                 "Operational definition: skill pattern, conceptual center, discoverability propagation"
+                 "Iconic route language in HyperDoc")))
+
+(defun discoverability-propagation-topic ()
+  (make-topic
+   :id "discoverability-propagation"
+   :title "Discoverability propagation"
+   :summary "Second documentation slice that adds one-click orientation from adjacent surfaces to an already-landed conceptual center."
+   :references '("Discoverability propagation in HyperDoc"
+                 "Operational definition: skill pattern, conceptual center, discoverability propagation"
+                 "Dock capabilities in HyperDoc"
+                 "Dock presentation state model")))
+
+(defun docs-only-propagation-slice-topic ()
+  (make-topic
+   :id "docs-only-propagation-slice"
+   :title "Docs-only propagation slice"
+   :summary "Conservative propagation slice that adds page-level discoverability cues without topic growth, runtime redesign, or hidden architecture changes."
+   :references '("Discoverability propagation in HyperDoc"
+                 "Operational definition: skill pattern, conceptual center, discoverability propagation"
+                 "Dock capabilities in HyperDoc"
+                 "Dock presentation state model")))
+
+(defun architectural-drift-topic ()
+  (make-topic
+   :id "architectural-drift"
+   :title "Architectural drift"
+   :summary "Failure mode in which a narrow propagation slice quietly reopens architecture, runtime design, or fresh topic growth."
+   :references '("Discoverability propagation in HyperDoc"
+                 "Operational definition: skill pattern, conceptual center, discoverability propagation")))
 
 (defun codex-resume-branch-context-topic ()
   (make-topic

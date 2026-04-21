@@ -1,0 +1,87 @@
+<h1>Skillization in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  In HyperDoc, <b>skillization</b> means turning a recurring editorial move
+  into durable local material: authored pages, topic factories, inspectable
+  definition objects, and narrow validation. It is a good fit for HyperDoc
+  because the repository already distinguishes durable pages, reusable topic
+  identity, and inspectable objects instead of collapsing them into one layer.
+</p>
+
+<p>
+  A common HyperDoc skill pattern has two deliberately separate documentation
+  slices. First, land the <b>conceptual center</b>. Second, add
+  <b>discoverability propagation</b> from adjacent surfaces. The second slice
+  should usually stay docs-only and should usually not reopen architecture or
+  grow topics again.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Skillization"><tt>Skillization</tt></a></li>
+  <li><a hyperbook="topics" page="Skill pattern"><tt>Skill pattern</tt></a></li>
+  <li><a hyperbook="topics" page="Conceptual center"><tt>Conceptual center</tt></a></li>
+  <li><a hyperbook="topics" page="Discoverability propagation"><tt>Discoverability propagation</tt></a></li>
+  <li><a hyperbook="topics" page="Docs-only propagation slice"><tt>Docs-only propagation slice</tt></a></li>
+  <li><a hyperbook="topics" page="Architectural drift"><tt>Architectural drift</tt></a></li>
+  <li><a hyperbook="topics" page="Skillization loop"><tt>Skillization loop</tt></a></li>
+  <li><a expr="(make-route-language-skill-pattern-definition)"><tt>(make-route-language-skill-pattern-definition)</tt></a></li>
+  <li><a expr="(skill-pattern-summary-alist (make-route-language-skill-pattern-definition))"><tt>(skill-pattern-summary-alist (make-route-language-skill-pattern-definition))</tt></a></li>
+</ul>
+
+<h2>When to use this pattern</h2>
+
+<p>
+  Use skillization when an imported concept or theory has already proved that
+  it belongs in the local corpus, and the recurring editorial move is stable
+  enough to deserve reuse. HyperDoc-native language should come first: the
+  imported material is translated into local distinctions, then those
+  distinctions are preserved as durable pages, topics, and inspectable
+  examples.
+</p>
+
+<h2>Worked example</h2>
+
+<p>
+  The route-language retrieval assimilation is the worked example for this
+  page. The conceptual-center slice landed
+  <a page="Iconic route language in HyperDoc">Iconic route language in HyperDoc</a>
+  and the supporting route-language pages. The later discoverability slice then
+  added one-click propagation from
+  <a page="Dock capabilities in HyperDoc">Dock capabilities in HyperDoc</a>
+  and
+  <a page="Dock presentation state model">Dock presentation state model</a>
+  without reopening theory or adding new topics.
+</p>
+
+<h2>Skillization versus skillization loop</h2>
+
+<p>
+  The <a hyperbook="topics" page="Skillization loop"><tt>Skillization loop</tt></a>
+  remains the later move in which repeated work is extracted into callable
+  routines. The base skillization pattern documented here is earlier and
+  narrower: first make the recurring editorial move explicit and inspectable,
+  then decide later whether runtime extraction is warranted at all.
+</p>
+
+<h2>Boundary</h2>
+
+<p>
+  The base pattern ends at durable documentation and inspectable definition
+  objects. A later runtime follow-up may exist, but it is not part of the
+  minimal skillization pattern and should not be smuggled into the
+  discoverability slice.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Operational definition: skill pattern, conceptual center, discoverability propagation">Operational definition: skill pattern, conceptual center, discoverability propagation</a></li>
+  <li><a page="Conceptual center in HyperDoc">Conceptual center in HyperDoc</a></li>
+  <li><a page="Discoverability propagation in HyperDoc">Discoverability propagation in HyperDoc</a></li>
+  <li><a page="Iconic route language in HyperDoc">Iconic route language in HyperDoc</a></li>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+</ul>

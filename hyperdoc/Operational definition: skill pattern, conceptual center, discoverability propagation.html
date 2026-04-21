@@ -1,0 +1,90 @@
+<h1>Operational definition: skill pattern, conceptual center, discoverability propagation</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A <b>skill pattern</b> is a reusable local documentation pattern with a
+  fixed purpose, a bounded slice shape, and a stable acceptance rule.
+</p>
+
+<p>
+  In HyperDoc, the pattern documented here distinguishes four things:
+</p>
+
+<ul>
+  <li>a <b>conceptual center</b> that lands the local editorial center</li>
+  <li><b>discoverability propagation</b> that adds one-click entry points from adjacent surfaces</li>
+  <li>a <b>docs-only propagation slice</b> that keeps the second move conservative</li>
+  <li><b>architectural drift</b> when the propagation slice starts reopening theory, runtime design, or topic growth without need</li>
+</ul>
+
+<p>
+  The base pattern is intentionally two-step:
+</p>
+
+<ol>
+  <li>land the conceptual center first</li>
+  <li>add discoverability propagation second</li>
+</ol>
+
+<p>
+  A later runtime follow-up is optional and separate. It is not part of the
+  operational definition of the base pattern.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Skill pattern"><tt>Skill pattern</tt></a></li>
+  <li><a hyperbook="topics" page="Conceptual center"><tt>Conceptual center</tt></a></li>
+  <li><a hyperbook="topics" page="Discoverability propagation"><tt>Discoverability propagation</tt></a></li>
+  <li><a hyperbook="topics" page="Docs-only propagation slice"><tt>Docs-only propagation slice</tt></a></li>
+  <li><a hyperbook="topics" page="Architectural drift"><tt>Architectural drift</tt></a></li>
+  <li><a expr="(make-route-language-skill-pattern-definition)"><tt>(make-route-language-skill-pattern-definition)</tt></a></li>
+  <li><a expr="(skill-pattern-summary-alist (make-route-language-skill-pattern-definition))"><tt>(skill-pattern-summary-alist (make-route-language-skill-pattern-definition))</tt></a></li>
+</ul>
+
+<h2>Definitions</h2>
+
+<p>
+  A <b>conceptual center</b> is the first slice that fixes the local editorial
+  center for a concept in HyperDoc's own language. It may add pages and, when
+  genuinely needed, new topics.
+</p>
+
+<p>
+  <b>Discoverability propagation</b> is the second slice that makes the new
+  center easier to find from adjacent surfaces. It should usually add compact
+  cross-links or orientation cues rather than new theory sections.
+</p>
+
+<p>
+  A <b>docs-only propagation slice</b> is the conservative form of that second
+  move: page-level discoverability only, with no topic growth, no runtime
+  claims, and no hidden architecture rewrite.
+</p>
+
+<p>
+  <b>Architectural drift</b> is the failure mode in which the second slice
+  stops being propagation and starts widening scope into fresh conceptual
+  center work, runtime design, or topic growth.
+</p>
+
+<h2>Worked example</h2>
+
+<p>
+  The route-language retrieval assimilation is the worked example carried by
+  <a expr="(make-route-language-skill-pattern-definition)"><tt>(make-route-language-skill-pattern-definition)</tt></a>.
+  It landed
+  <a page="Iconic route language in HyperDoc">Iconic route language in HyperDoc</a>
+  first, then propagated discoverability into Dock-facing pages second.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Skillization in HyperDoc">Skillization in HyperDoc</a></li>
+  <li><a page="Conceptual center in HyperDoc">Conceptual center in HyperDoc</a></li>
+  <li><a page="Discoverability propagation in HyperDoc">Discoverability propagation in HyperDoc</a></li>
+  <li><a page="Iconic route language in HyperDoc">Iconic route language in HyperDoc</a></li>
+</ul>
