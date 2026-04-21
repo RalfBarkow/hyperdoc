@@ -101,11 +101,48 @@ Preserve these semantic distinctions:
 When one sentence needs both layers, prefer explicit phrasing such as:
 `Touch-Fahrplan route-laying gesture (implemented initially as drag-to-connect).`
 
-## Touch-first McCLIM Gesture Grammar
+## Touch-Fahrplan Route Language and Touch-first McCLIM Grammar
 
 When a slice touches Touch-Fahrplan, Connect, Dock, Annotation, DMX
 association authoring, or touch-first McCLIM interaction, preserve this
-gesture grammar as a durable architectural rule.
+guidance as a durable architectural rule.
+
+Read it first as a Touch-Fahrplan route language for HyperDoc:
+
+- topics are stations
+- associations are routes between stations
+- the route is itself first-class
+- `Lay route` is the preferred user-facing authoring label
+- `Follow route` is the preferred traversal label
+- `drag-to-connect` is the mechanic term, not the primary user-facing label
+- `two-tap route-laying` is the non-drag fallback
+
+The touch-first gesture grammar exists to preserve and operationalize that
+route-language model. It should not be presented first as a generic mobile
+touch catalog.
+
+### Canonical Touch-Fahrplan mapping
+
+Keep the branded Touch-Fahrplan mapping readable as a route-language system:
+
+- orient
+  - tap = focus
+  - press = inspect
+  - two-finger tap = metadata
+  - tap(blank) = clear
+- move
+  - swipe-left/right = back/forward
+  - swipe-up/down = parent/child or collapse/expand
+  - edge-swipe = global navigation rail
+- understand
+  - drag(source -> target) = route preview / route reveal
+  - press-then-drag(source -> target) = `Lay route`
+  - tap(link) = `Follow route`
+  - double-tap = open / drill in
+- scale
+  - pinch-out = more detail
+  - pinch-in = more abstraction
+  - scrub = preview alternate views
 
 ### Semantic authority
 
@@ -176,15 +213,16 @@ Notes:
   `hd-press` plus `hd-drag`; it does not need a separate durable namespace
   token unless a slice proves that one is required.
 - The recognizer namespace may include `swipe`, but plain `swipe` is still not
-  the durable user-facing term for route authoring. Keep `Lay route`,
-  `drag-to-connect`, and `two-tap route-laying` distinct.
+  the durable user-facing term for route authoring or route traversal. Keep
+  `Lay route`, `Follow route`, `drag-to-connect`, and `two-tap route-laying`
+  distinct.
 
 ### Semantic gesture defaults
 
 - tap = focus / select / nearest primary action
 - double-tap = open / drill in / expand primary detail
 - press = reveal actions / inspect / secondary affordances
-- drag = relation / reorder / pan from blank area
+- drag = route preview / reorder / pan from blank area
 - flick = navigate / dismiss / neighbor / history
 - swipe left-right = back-forward or sibling traversal
 - swipe up-down = hierarchy traversal or collapse-expand
@@ -204,8 +242,8 @@ On `doc-node`:
 - second tap on focused node -> `com-select-object`
 - double-tap -> `com-open-object`
 - press -> `com-show-actions`
-- drag node->node -> preview relation, commit `com-show-relation`
-- press-then-drag node->node -> `com-create-relation`
+- drag node->node -> route preview / route reveal, commit `com-show-relation`
+- press-then-drag node->node -> `Lay route`, dispatch `com-create-relation`
 - swipe-left -> `com-go-back`
 - swipe-right -> `com-go-forward`
 - swipe-up -> `com-go-parent`
@@ -221,10 +259,11 @@ Touch-Fahrplan interpretation:
 - `press-then-drag` or explicit Author mode lays a new route
 - use `Lay route` for the user-facing authoring label
 - keep `Follow route` distinct as traversal of an existing route
+- use `drag-to-connect` only for the underlying mechanic
 
 On `doc-link`:
 
-- tap -> `com-follow-link`
+- tap -> `Follow route` via `com-follow-link`
 - press -> `com-show-citations` or `com-show-metadata`
 - drag -> `com-highlight-path`
 
@@ -259,8 +298,8 @@ On `doc-view`:
 ### Safety and parsing rules
 
 - Browse mode is the safe default.
-- Plain drag between semantic objects defaults to non-destructive relation
-  reveal, not creation.
+- Plain drag between semantic objects defaults to non-destructive route preview
+  or route reveal, not route authoring.
 - Destructive or authoring semantics require explicit Author mode or
   `press-then-drag`.
 - Never bind destructive semantics to plain tap.
