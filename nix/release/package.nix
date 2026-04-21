@@ -169,6 +169,8 @@ let
       host="''${HYPERDOC_VERIFY_HOST:-127.0.0.1}"
       port="''${HYPERDOC_VERIFY_PORT:-18080}"
       timeout_s="''${HYPERDOC_VERIFY_TIMEOUT:-60}"
+      curl_connect_timeout_s="''${HYPERDOC_VERIFY_CONNECT_TIMEOUT:-2}"
+      curl_max_time_s="''${HYPERDOC_VERIFY_MAX_TIME:-8}"
       verify_home="$(mktemp -d /tmp/hyperdoc-release-verify-home.XXXXXX)"
       export HOME="$verify_home"
       export XDG_CACHE_HOME="$verify_home/.cache"
@@ -284,25 +286,77 @@ let
       server_pid=$!
       cleanup() {
         kill "$server_pid" 2>/dev/null || true
+        wait "$server_pid" 2>/dev/null || true
       }
       trap cleanup EXIT
+
+      curl_common_args=(
+        --retry 0
+        --connect-timeout "$curl_connect_timeout_s"
+        --max-time "$curl_max_time_s"
+      )
+
+      show_server_log_tail() {
+        echo "[verify] server log tail:" >&2
+        tail -n 120 "$log_file" >&2 || true
+      }
+
+      server_alive() {
+        kill -0 "$server_pid" 2>/dev/null
+      }
+
+      http_probe() {
+        local url="$1"
+        local output="$2"
+        curl "''${curl_common_args[@]}" -fsS "$url" -o "$output"
+      }
+
+      http_fetch() {
+        local label="$1"
+        local url="$2"
+        local headers="$3"
+        local body="$4"
+        if ! curl "''${curl_common_args[@]}" -fsS -D "$headers" "$url" -o "$body"; then
+          echo "[verify] HTTP fetch failed for $label: $url" >&2
+          show_server_log_tail
+          exit 1
+        fi
+      }
+
+      http_status_fetch() {
+        local label="$1"
+        local url="$2"
+        local output="$3"
+        local status
+        if ! status="$(curl "''${curl_common_args[@]}" -sS -o "$output" -w '%{http_code}' "$url")"; then
+          echo "[verify] HTTP fetch failed for $label: $url" >&2
+          show_server_log_tail
+          exit 1
+        fi
+        printf '%s\n' "$status"
+      }
 
       warning_count=0
       ready=0
       ready_attempts=0
       for _i in $(seq 1 60); do
         ready_attempts=$((ready_attempts + 1))
-        if curl -fsS "http://$host:$port/boot.html" \
-          -o /tmp/hyperdoc-release-boot.$$ \
-          2>/dev/null; then
+        if ! server_alive; then
+          echo "[verify] server process exited before readiness probe succeeded" >&2
+          show_server_log_tail
+          wait "$server_pid" 2>/dev/null || true
+          exit 1
+        fi
+        if http_probe "http://$host:$port/boot.html" /tmp/hyperdoc-release-boot.$$ \
+          >/dev/null 2>&1; then
           ready=1
           break
         fi
         sleep 1
       done
       if [ "$ready" -ne 1 ]; then
-        echo "[verify] server did not become ready; log tail:" >&2
-        tail -n 120 "$log_file" >&2 || true
+        echo "[verify] server did not become ready after $ready_attempts bounded probes" >&2
+        show_server_log_tail
         exit 1
       fi
       if [ "$ready_attempts" -gt 1 ]; then
@@ -333,21 +387,21 @@ let
       }
 
       echo "[verify] HTTP boot check"
-      curl -fsS -D /tmp/hyperdoc-release-boot-headers.$$ "http://$host:$port/boot.html" -o /tmp/hyperdoc-release-boot-body.$$
+      http_fetch /boot.html "http://$host:$port/boot.html" /tmp/hyperdoc-release-boot-headers.$$ /tmp/hyperdoc-release-boot-body.$$
       head -n 1 /tmp/hyperdoc-release-boot-headers.$$
       check_html_shell /tmp/hyperdoc-release-boot-body.$$ /boot.html
 
       echo "[verify] HTTP key-page checks"
       while IFS= read -r path; do
         [ -n "$path" ] || continue
-        curl -fsS -D /tmp/hyperdoc-release-page-headers.$$ "http://$host:$port$path" -o /tmp/hyperdoc-release-page-body.$$
+        http_fetch "$path" "http://$host:$port$path" /tmp/hyperdoc-release-page-headers.$$ /tmp/hyperdoc-release-page-body.$$
         head -n 1 /tmp/hyperdoc-release-page-headers.$$
         check_html_shell /tmp/hyperdoc-release-page-body.$$ "$path"
       done <<< "$key_page_paths"
 
       echo "[verify] URL helper asset checks"
       url_js_path="/tmp/hyperdoc-release-urljs.$$"
-      url_js_code="$(curl -sS -o "$url_js_path" -w '%{http_code}' "http://$host:$port/hyperbook-server/js/url.js" || true)"
+      url_js_code="$(http_status_fetch /hyperbook-server/js/url.js "http://$host:$port/hyperbook-server/js/url.js" "$url_js_path")"
       if [ "$url_js_code" = "200" ]; then
         echo "HTTP/1.1 200 OK"
       else
