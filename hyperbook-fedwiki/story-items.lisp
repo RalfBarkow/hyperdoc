@@ -1006,70 +1006,68 @@
   (declare (ignore type))
   (let* ((dot (text-of item))
          (engine (graphviz-story-item-engine-of item))
-         (draft-cell (lwcells:cell dot))
-         (draft-input-id (html-inspector-views/reactive:input-id
-                          draft-cell :event :change))
-         (editable-p (localhost-fedwiki-story-item-editable-p page)))
+         (editable-p (localhost-fedwiki-story-item-editable-p page))
+         (draft-cell (and editable-p (lwcells:cell dot)))
+         (draft-input-id (and editable-p
+                              (html-inspector-views/reactive:input-id
+                               draft-cell :event :change))))
     (views:html
       (:div :class "hyperbook-fedwiki-graphviz-edit-shell"
             :data-fedwiki-graphviz-story-item-id (id-of item)
             :data-fedwiki-graphviz-canonical-dot dot
             :data-fedwiki-graphviz-engine engine
             :data-fedwiki-graphviz-editable (if editable-p "true" "false")
-            :data-fedwiki-graphviz-input-id draft-input-id
+            :data-fedwiki-graphviz-input-id (or draft-input-id "")
             (:div :class "hyperbook-fedwiki-graphviz-view-state"
                   (views:graphviz-snippet
                    dot
                    :engine engine
                    :fallback-title "Raw DOT source"))
-            (:div :class "hyperbook-fedwiki-graphviz-controls"
-                  (:button :type "button"
-                           :class "hyperbook-fedwiki-graphviz-edit-button"
-                           :onclick (graphviz-story-item-edit-button-script)
-                           "Edit DOT"))
-            (:div :class "hyperbook-fedwiki-graphviz-edit-state"
-                  :hidden "hidden"
-                  (:label :class "hyperbook-fedwiki-graphviz-editor-label"
-                          "DOT source")
-                  (:textarea :class "hyperbook-fedwiki-graphviz-editor"
-                             :rows "10"
-                             :spellcheck "false"
-                             :data-fedwiki-graphviz-input-id draft-input-id
-                             :oninput (graphviz-story-item-sync-draft-script)
-                             (views:esc dot))
-                  (:input :type "hidden" :id draft-input-id :value dot)
-                  (:div :class "hyperbook-fedwiki-graphviz-editor-actions"
-                        (:button :type "button"
-                                 :class "hyperbook-fedwiki-graphviz-preview-button"
-                                 :onclick (graphviz-story-item-preview-script)
-                                 "Preview")
-                        " "
-                        (if editable-p
-                            (views:html
-                              (:span :class "hyperbook-fedwiki-graphviz-save-submit"
-                                     :style "display:none"
-                                     (views:action-button
-                                      "Save"
-                                      (views:thunk
-                                        (persist-localhost-fedwiki-story-item-text-edit
-                                         page
-                                         item
-                                         (lwcells:cell-ref draft-cell))
-                                       t)
-                                      "Persist the current DOT as a FedWiki story-item text edit"))
-                              " "
-                              (:button :type "button"
-                                       :class "hyperbook-fedwiki-graphviz-save-button"
-                                       :onclick (graphviz-story-item-save-script)
-                                       "Save"))
-                            (views:html
-                              (:span :class "hyperbook-fedwiki-graphviz-save-unavailable"
-                                     "Save unavailable for non-local page views")))
-                        " "
-                        (:button :type "button"
-                                 :class "hyperbook-fedwiki-graphviz-cancel-button"
-                                 :onclick (graphviz-story-item-cancel-script)
-                                 "Cancel")))))))
+            (when editable-p
+              (views:html
+                (:div :class "hyperbook-fedwiki-graphviz-controls"
+                      (:button :type "button"
+                               :class "hyperbook-fedwiki-graphviz-edit-button"
+                               :onclick (graphviz-story-item-edit-button-script)
+                               "Edit DOT"))
+                (:div :class "hyperbook-fedwiki-graphviz-edit-state"
+                      :hidden "hidden"
+                      (:label :class "hyperbook-fedwiki-graphviz-editor-label"
+                              "DOT source")
+                      (:textarea :class "hyperbook-fedwiki-graphviz-editor"
+                                 :rows "10"
+                                 :spellcheck "false"
+                                 :data-fedwiki-graphviz-input-id draft-input-id
+                                 :oninput (graphviz-story-item-sync-draft-script)
+                                 (views:esc dot))
+                      (:input :type "hidden" :id draft-input-id :value dot)
+                      (:div :class "hyperbook-fedwiki-graphviz-editor-actions"
+                            (:button :type "button"
+                                     :class "hyperbook-fedwiki-graphviz-preview-button"
+                                     :onclick (graphviz-story-item-preview-script)
+                                     "Preview")
+                            " "
+                            (:span :class "hyperbook-fedwiki-graphviz-save-submit"
+                                   :style "display:none"
+                                   (views:action-button
+                                    "Save"
+                                    (views:thunk
+                                      (persist-localhost-fedwiki-story-item-text-edit
+                                       page
+                                       item
+                                       (lwcells:cell-ref draft-cell))
+                                     t)
+                                    "Persist the current DOT as a FedWiki story-item text edit"))
+                            " "
+                            (:button :type "button"
+                                     :class "hyperbook-fedwiki-graphviz-save-button"
+                                     :onclick (graphviz-story-item-save-script)
+                                     "Save")
+                            " "
+                            (:button :type "button"
+                                     :class "hyperbook-fedwiki-graphviz-cancel-button"
+                                     :onclick (graphviz-story-item-cancel-script)
+                                     "Cancel")))))))))
 
 ;; Images
 

@@ -221,8 +221,39 @@ images, etc.")
    (domain-name-of (origin-of page))
    (origin-id-of page)))
 
+(defun env-truthy-p (name &optional (default nil))
+  (let ((v (uiop:getenv name)))
+    (cond
+      ((null v) default)
+      ((member (string-downcase v)
+               '("1" "true" "yes" "on")
+               :test #'string=)
+       t)
+      (t nil))))
+
+(defun server-development-mode-value ()
+  "Return the active server development policy when that runtime seam is loaded."
+  (let* ((pkg (find-package "HYPERBOOK/SERVER"))
+         (sym (and pkg (find-symbol "DEVELOPMENT-MODE-P" pkg))))
+    (if (and sym (fboundp sym))
+        (values (funcall sym) t)
+        (values nil nil))))
+
+(defun localhost-fedwiki-editing-enabled-p ()
+  "Reuse the same development-mode policy that gates Playground evaluation."
+  (multiple-value-bind (development-mode known-p)
+      (server-development-mode-value)
+    (if known-p
+        development-mode
+        (env-truthy-p "HYPERDOC_DEVELOPMENT" nil))))
+
+(defun ensure-localhost-fedwiki-editing-enabled ()
+  (unless (localhost-fedwiki-editing-enabled-p)
+    (error "FedWiki page editing is disabled outside development mode.")))
+
 (defun localhost-fedwiki-story-item-editable-p (page)
-  (and (typep page 'fedwiki-page)
+  (and (localhost-fedwiki-editing-enabled-p)
+       (typep page 'fedwiki-page)
        (probe-file (localhost-fedwiki-page-pathname page))))
 
 (defun read-localhost-fedwiki-page-json-file (path)
@@ -321,6 +352,7 @@ images, etc.")
 
 (defun persist-localhost-fedwiki-story-item-text-edit-at-path (path item-id new-text
                                                                &key item-type)
+  (ensure-localhost-fedwiki-editing-enabled)
   (let* ((page-json (read-localhost-fedwiki-page-json-file path))
          (updated (apply-story-item-text-edit-to-page-json
                    page-json item-id new-text :item-type item-type)))
@@ -328,6 +360,7 @@ images, etc.")
     updated))
 
 (defun persist-localhost-fedwiki-story-item-text-edit (page item new-text)
+  (ensure-localhost-fedwiki-editing-enabled)
   (let ((path (probe-file (localhost-fedwiki-page-pathname page))))
     (unless path
       (error "No writable localhost FedWiki page file for ~A." (hb:title-of page)))

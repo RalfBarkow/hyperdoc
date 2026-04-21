@@ -10,6 +10,7 @@
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :serve-catalog
            :serve-hyperbooks
+           :development-mode-p
            :register-server-startup-hook
            :canonical-route-origin
            :canonical-page-path

@@ -226,6 +226,13 @@ Enable web debugger only when that extension is loaded."
        t)
       (t nil))))
 
+(defun development-mode-p ()
+  "Return the active server development policy.
+This is the same runtime switch used for Playground evaluation."
+  (if *server-parameters*
+      (second *server-parameters*)
+      (env-truthy-p "HYPERDOC_DEVELOPMENT" nil)))
+
 (defun serve-hyperbooks (root-object &key (port 8080)
                                        (title "Inspector")
                                        (pane-width "700px")
