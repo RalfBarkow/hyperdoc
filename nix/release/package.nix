@@ -167,7 +167,8 @@ let
       ${runtimeInit}
 
       host="''${HYPERDOC_VERIFY_HOST:-127.0.0.1}"
-      port="''${HYPERDOC_VERIFY_PORT:-18080}"
+      requested_port="''${HYPERDOC_VERIFY_PORT:-}"
+      default_port="18080"
       timeout_s="''${HYPERDOC_VERIFY_TIMEOUT:-60}"
       curl_connect_timeout_s="''${HYPERDOC_VERIFY_CONNECT_TIMEOUT:-2}"
       curl_max_time_s="''${HYPERDOC_VERIFY_MAX_TIME:-8}"
@@ -200,6 +201,49 @@ let
       sbcl() {
         ${sbclEnv}/bin/sbcl "''${sbcl_base_args[@]}" "$@"
       }
+
+      choose_free_port() {
+        ${pkgs.python3}/bin/python3 - <<'PY'
+import socket
+with socket.socket() as s:
+    s.bind(("0.0.0.0", 0))
+    print(s.getsockname()[1])
+PY
+      }
+
+      port_is_free() {
+        local port="$1"
+        ${pkgs.python3}/bin/python3 - "$port" <<'PY'
+import socket, sys
+port = int(sys.argv[1])
+with socket.socket() as s:
+    try:
+        s.bind(("0.0.0.0", port))
+        print("free")
+    except OSError:
+        print("busy")
+PY
+      }
+
+      warning_count=0
+      if [ -n "$requested_port" ]; then
+        port="$requested_port"
+        if [ "$(port_is_free "$port")" != "free" ]; then
+          selected_port="$(choose_free_port)"
+          echo "[verify][warn] requested verify port $port busy; selected free port $selected_port"
+          port="$selected_port"
+          warning_count=$((warning_count + 1))
+        fi
+      else
+        port="$default_port"
+        if [ "$(port_is_free "$port")" != "free" ]; then
+          selected_port="$(choose_free_port)"
+          echo "[verify][warn] default verify port $port busy; selected free port $selected_port"
+          port="$selected_port"
+          warning_count=$((warning_count + 1))
+        fi
+      fi
+      echo "[verify] selected endpoint http://$host:$port/boot.html"
 
       echo "[verify] release=$HYPERDOC_RELEASE_ID"
       echo "[verify] load hyperdoc/server and assert key symbols"
@@ -336,7 +380,6 @@ let
         printf '%s\n' "$status"
       }
 
-      warning_count=0
       ready=0
       ready_attempts=0
       for _i in $(seq 1 60); do
