@@ -123,6 +123,7 @@
   :depends-on (#:hyperbook
                #:hyperbook/explorer
                #:html-inspector-views
+               #:html-inspector-views/reactive
                #:html-inspector-views/standard
                #:clog
                #:plump

@@ -79,6 +79,12 @@
         thereis (and (eq (car asset) :script)
                      (search fragment (cdr asset)))))
 
+(defun make-story-items-smoke-json-table (&rest pairs)
+  (let ((table (make-hash-table :test #'equal)))
+    (loop for (key value) on pairs by #'cddr
+          do (setf (gethash key table) value))
+    table))
+
 (defun run-fedwiki-story-item-link-extraction-smoke-test ()
   (let* ((page (make-story-items-smoke-page))
          (text (format nil "See ~A and [https://example.org Example] and [[Wiki Link]]"
@@ -158,6 +164,69 @@
                  "Graphviz story items must include the shared Graphviz CSS")
     (assert-true (asset-script-present-p assets "window.inspectorGraphviz.initCurrentView")
                  "Graphviz story items must include the shared init script")))
+
+(defun run-fedwiki-story-item-graphviz-edit-persistence-smoke-test ()
+  (let* ((directory (uiop:ensure-directory-pathname
+                     (merge-pathnames "hyperdoc-fedwiki-story-item-smoke/"
+                                      (uiop:temporary-directory))))
+         (path (merge-pathnames "graphviz-edit-fixture" directory))
+         (original-dot "digraph { a -> b }")
+         (updated-dot "digraph { alpha -> beta; beta -> gamma }")
+         (page-json
+           (make-story-items-smoke-json-table
+            "title" "Graphviz edit persistence fixture"
+            "story" (list (make-story-items-smoke-json-table
+                           "id" "fixture-graphviz"
+                           "type" "graphviz"
+                           "text" original-dot))
+            "journal" (list (make-story-items-smoke-json-table
+                             "type" "create"
+                             "date" 1000)
+                            (make-story-items-smoke-json-table
+                             "type" "add"
+                             "date" 1001
+                             "id" "fixture-graphviz"
+                             "item" (make-story-items-smoke-json-table
+                                     "id" "fixture-graphviz"
+                                     "type" "graphviz"
+                                     "text" original-dot))))))
+    (ensure-directories-exist path)
+    (hyperbook/fedwiki::write-localhost-fedwiki-page-json-file path page-json)
+    (let* ((updated
+             (hyperbook/fedwiki::persist-localhost-fedwiki-story-item-text-edit-at-path
+              path
+              "fixture-graphviz"
+              updated-dot
+              :item-type :graphviz))
+           (story-item (elt (gethash "story" updated) 0))
+           (journal (hyperbook/fedwiki::json-array-elements
+                     (gethash "journal" updated)))
+           (last-entry (car (last journal)))
+           (last-item (gethash "item" last-entry)))
+      (assert-equal "graphviz"
+                    (gethash "type" story-item)
+                    "Persisted graphviz edits must preserve the story item type.")
+      (assert-equal "fixture-graphviz"
+                    (gethash "id" story-item)
+                    "Persisted graphviz edits must preserve the stable story item id.")
+      (assert-equal updated-dot
+                    (gethash "text" story-item)
+                    "Persisted graphviz edits must keep DOT in story item text.")
+      (assert-equal "edit"
+                    (gethash "type" last-entry)
+                    "Persisted graphviz edits must append a journal edit action.")
+      (assert-equal "fixture-graphviz"
+                    (gethash "id" last-entry)
+                    "Journal edit actions must be keyed by the stable story item id.")
+      (assert-equal "graphviz"
+                    (gethash "type" last-item)
+                    "Journal edit payload must preserve graphviz item type.")
+      (assert-equal "fixture-graphviz"
+                    (gethash "id" last-item)
+                    "Journal edit payload must preserve the stable story item id.")
+      (assert-equal updated-dot
+                    (gethash "text" last-item)
+                    "Journal edit payload must store the updated DOT in text."))))
 
 (defun run-fedwiki-story-item-video-adaptation-smoke-test ()
   (multiple-value-bind (adapted item page)
@@ -687,6 +756,7 @@ Line two with [https://example.org link].")))
   (run-fedwiki-story-item-audio-fallback-only-render-smoke-test)
   (run-fedwiki-story-item-audio-failure-render-smoke-test)
   (run-fedwiki-story-item-graphviz-render-smoke-test)
+  (run-fedwiki-story-item-graphviz-edit-persistence-smoke-test)
   (run-fedwiki-story-item-short-hash-negative-test)
   (run-fedwiki-story-item-non-hex-negative-test)
   (run-fedwiki-story-item-explicit-link-boundary-test)

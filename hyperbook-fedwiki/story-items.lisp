@@ -229,6 +229,115 @@
       (:a :href url :target "_blank"
           (views:esc link-text)))))
 
+(defun graphviz-story-item-engine-of (item)
+  (or (and (data-of item)
+           (gethash "engine" (data-of item)))
+      "dot"))
+
+(defun graphviz-story-item-sync-draft-script ()
+  "var shell=this.closest(\".hyperbook-fedwiki-graphviz-edit-shell\");\
+ if(!shell){return false;}\
+ var textarea=shell.querySelector(\".hyperbook-fedwiki-graphviz-editor\");\
+ var inputId=shell.dataset.fedwikiGraphvizInputId;\
+ var hiddenInput=inputId ? shell.querySelector(\"#\"+CSS.escape(inputId)) : null;\
+ if(textarea && hiddenInput){\
+ hiddenInput.value=textarea.value;\
+ hiddenInput.dispatchEvent(new Event(\"input\",{bubbles:true}));\
+ hiddenInput.dispatchEvent(new Event(\"change\",{bubbles:true}));\
+ }")
+
+(defun graphviz-story-item-edit-button-script ()
+  (format nil "~A\
+ var editState=shell && shell.querySelector(\".hyperbook-fedwiki-graphviz-edit-state\");\
+ var editButton=shell && shell.querySelector(\".hyperbook-fedwiki-graphviz-edit-button\");\
+ if(editState){editState.hidden=false;}\
+ if(editButton){editButton.hidden=true;}\
+ var textarea=shell && shell.querySelector(\".hyperbook-fedwiki-graphviz-editor\");\
+ if(textarea){\
+ textarea.focus();\
+ textarea.setSelectionRange(textarea.value.length, textarea.value.length);\
+ }\
+ return false;"
+          (graphviz-story-item-sync-draft-script)))
+
+(defun graphviz-story-item-preview-script ()
+  (format nil "~A\
+ var placeholder=shell && shell.querySelector(\".inspector-graphviz\");\
+ if(!placeholder){return false;}\
+ var textarea=shell.querySelector(\".hyperbook-fedwiki-graphviz-editor\");\
+ var dot=textarea ? textarea.value : \"\";\
+ placeholder.setAttribute(\"data-inspector-graphviz-dot\", dot);\
+ placeholder.setAttribute(\"data-inspector-graphviz-state\", \"pending\");\
+ placeholder.removeAttribute(\"data-inspector-graphviz-rendered\");\
+ var canvas=placeholder.querySelector(\".inspector-graphviz-canvas\");\
+ if(canvas){\
+ canvas.innerHTML=`<p class=inspector-graphviz-pending>Rendering Graphviz diagram...</p>`;\
+ }\
+ var fallback=placeholder.querySelector(\".inspector-graphviz-dot-fallback pre\");\
+ if(fallback){fallback.textContent=dot;}\
+ var errorNode=placeholder.querySelector(\".inspector-graphviz-error\");\
+ if(errorNode){errorNode.remove();}\
+ if(window.inspectorGraphviz && window.inspectorGraphviz.renderPlaceholder){\
+ window.inspectorGraphviz.renderPlaceholder(placeholder);\
+ }\
+ return false;"
+          (graphviz-story-item-sync-draft-script)))
+
+(defun graphviz-story-item-cancel-script ()
+  "var shell=this.closest(\".hyperbook-fedwiki-graphviz-edit-shell\");\
+ if(!shell){return false;}\
+ var canonicalDot=shell.dataset.fedwikiGraphvizCanonicalDot || \"\";\
+ var textarea=shell.querySelector(\".hyperbook-fedwiki-graphviz-editor\");\
+ if(textarea){textarea.value=canonicalDot;}\
+ var inputId=shell.dataset.fedwikiGraphvizInputId;\
+ var hiddenInput=inputId ? shell.querySelector(\"#\"+CSS.escape(inputId)) : null;\
+ if(hiddenInput){\
+ hiddenInput.value=canonicalDot;\
+ hiddenInput.dispatchEvent(new Event(\"input\",{bubbles:true}));\
+ hiddenInput.dispatchEvent(new Event(\"change\",{bubbles:true}));\
+ }\
+ var placeholder=shell.querySelector(\".inspector-graphviz\");\
+ if(placeholder){\
+ placeholder.setAttribute(\"data-inspector-graphviz-dot\", canonicalDot);\
+ placeholder.setAttribute(\"data-inspector-graphviz-state\", \"pending\");\
+ placeholder.removeAttribute(\"data-inspector-graphviz-rendered\");\
+ var canvas=placeholder.querySelector(\".inspector-graphviz-canvas\");\
+ if(canvas){\
+ canvas.innerHTML=`<p class=inspector-graphviz-pending>Rendering Graphviz diagram...</p>`;\
+ }\
+ var fallback=placeholder.querySelector(\".inspector-graphviz-dot-fallback pre\");\
+ if(fallback){fallback.textContent=canonicalDot;}\
+ var errorNode=placeholder.querySelector(\".inspector-graphviz-error\");\
+ if(errorNode){errorNode.remove();}\
+ if(window.inspectorGraphviz && window.inspectorGraphviz.renderPlaceholder){\
+ window.inspectorGraphviz.renderPlaceholder(placeholder);\
+ }\
+ }\
+ var editState=shell.querySelector(\".hyperbook-fedwiki-graphviz-edit-state\");\
+ var editButton=shell.querySelector(\".hyperbook-fedwiki-graphviz-edit-button\");\
+ if(editState){editState.hidden=true;}\
+ if(editButton){editButton.hidden=false;}\
+ return false;")
+
+(defun graphviz-story-item-save-script ()
+  "var shell=this.closest(\".hyperbook-fedwiki-graphviz-edit-shell\");\
+ if(!shell){return false;}\
+ var textarea=shell.querySelector(\".hyperbook-fedwiki-graphviz-editor\");\
+ var dot=textarea ? textarea.value : \"\";\
+ this.setAttribute(\"data-hyperbook-fedwiki-graphviz-dot\", dot);\
+ this.value=dot;\
+ var inputId=shell.dataset.fedwikiGraphvizInputId || \"\";\
+ var hiddenInput=inputId ? document.getElementById(inputId) : null;\
+ if(hiddenInput){\
+ hiddenInput.value=dot;\
+ hiddenInput.dispatchEvent(new Event(\"input\",{bubbles:true}));\
+ hiddenInput.dispatchEvent(new Event(\"change\",{bubbles:true}));\
+ }\
+ var submitButton=this.previousElementSibling && this.previousElementSibling.firstElementChild;\
+ if(!submitButton){return false;}\
+ window.setTimeout(function () { submitButton.click(); }, 250);\
+ return false;")
+
 ;;
 ;; Optional second-stage adaptation for plugin-like snippet story items
 ;;
@@ -894,13 +1003,73 @@
 ;; Graphviz
 
 (defmethod render-story-item ((type (eql :graphviz)) item page)
-  (declare (ignore type page))
-  (views:graphviz-snippet
-   (text-of item)
-   :engine (or (and (data-of item)
-                    (gethash "engine" (data-of item)))
-               "dot")
-   :fallback-title "Raw DOT source"))
+  (declare (ignore type))
+  (let* ((dot (text-of item))
+         (engine (graphviz-story-item-engine-of item))
+         (draft-cell (lwcells:cell dot))
+         (draft-input-id (html-inspector-views/reactive:input-id
+                          draft-cell :event :change))
+         (editable-p (localhost-fedwiki-story-item-editable-p page)))
+    (views:html
+      (:div :class "hyperbook-fedwiki-graphviz-edit-shell"
+            :data-fedwiki-graphviz-story-item-id (id-of item)
+            :data-fedwiki-graphviz-canonical-dot dot
+            :data-fedwiki-graphviz-engine engine
+            :data-fedwiki-graphviz-editable (if editable-p "true" "false")
+            :data-fedwiki-graphviz-input-id draft-input-id
+            (:div :class "hyperbook-fedwiki-graphviz-view-state"
+                  (views:graphviz-snippet
+                   dot
+                   :engine engine
+                   :fallback-title "Raw DOT source"))
+            (:div :class "hyperbook-fedwiki-graphviz-controls"
+                  (:button :type "button"
+                           :class "hyperbook-fedwiki-graphviz-edit-button"
+                           :onclick (graphviz-story-item-edit-button-script)
+                           "Edit DOT"))
+            (:div :class "hyperbook-fedwiki-graphviz-edit-state"
+                  :hidden "hidden"
+                  (:label :class "hyperbook-fedwiki-graphviz-editor-label"
+                          "DOT source")
+                  (:textarea :class "hyperbook-fedwiki-graphviz-editor"
+                             :rows "10"
+                             :spellcheck "false"
+                             :data-fedwiki-graphviz-input-id draft-input-id
+                             :oninput (graphviz-story-item-sync-draft-script)
+                             (views:esc dot))
+                  (:input :type "hidden" :id draft-input-id :value dot)
+                  (:div :class "hyperbook-fedwiki-graphviz-editor-actions"
+                        (:button :type "button"
+                                 :class "hyperbook-fedwiki-graphviz-preview-button"
+                                 :onclick (graphviz-story-item-preview-script)
+                                 "Preview")
+                        " "
+                        (if editable-p
+                            (views:html
+                              (:span :class "hyperbook-fedwiki-graphviz-save-submit"
+                                     :style "display:none"
+                                     (views:action-button
+                                      "Save"
+                                      (views:thunk
+                                        (persist-localhost-fedwiki-story-item-text-edit
+                                         page
+                                         item
+                                         (lwcells:cell-ref draft-cell))
+                                       t)
+                                      "Persist the current DOT as a FedWiki story-item text edit"))
+                              " "
+                              (:button :type "button"
+                                       :class "hyperbook-fedwiki-graphviz-save-button"
+                                       :onclick (graphviz-story-item-save-script)
+                                       "Save"))
+                            (views:html
+                              (:span :class "hyperbook-fedwiki-graphviz-save-unavailable"
+                                     "Save unavailable for non-local page views")))
+                        " "
+                        (:button :type "button"
+                                 :class "hyperbook-fedwiki-graphviz-cancel-button"
+                                 :onclick (graphviz-story-item-cancel-script)
+                                 "Cancel")))))))
 
 ;; Images
 

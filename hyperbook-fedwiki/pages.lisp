@@ -201,6 +201,144 @@ images, etc.")
                    :date date
                    :data entry)))
 
+;;
+;; Localhost page persistence
+;;
+
+(defun default-localhost-fedwiki-root-directory ()
+  (merge-pathnames ".wiki/" (user-homedir-pathname)))
+
+(defun localhost-fedwiki-pages-directory (domain-name)
+  (merge-pathnames (format nil "~A/pages/" domain-name)
+                   (default-localhost-fedwiki-root-directory)))
+
+(defun localhost-fedwiki-page-pathname-from-domain-and-slug (domain-name slug)
+  (merge-pathnames slug
+                   (localhost-fedwiki-pages-directory domain-name)))
+
+(defun localhost-fedwiki-page-pathname (page)
+  (localhost-fedwiki-page-pathname-from-domain-and-slug
+   (domain-name-of (origin-of page))
+   (origin-id-of page)))
+
+(defun localhost-fedwiki-story-item-editable-p (page)
+  (and (typep page 'fedwiki-page)
+       (probe-file (localhost-fedwiki-page-pathname page))))
+
+(defun read-localhost-fedwiki-page-json-file (path)
+  (with-open-file (stream path :direction :input :external-format :utf-8)
+    (shasht:read-json stream)))
+
+(defun write-localhost-fedwiki-page-json-file (path json)
+  (ensure-directories-exist path)
+  (with-open-file (stream path
+                          :direction :output
+                          :if-exists :supersede
+                          :if-does-not-exist :create
+                          :external-format :utf-8)
+    (shasht:write-json json stream)))
+
+(defun copy-json-like-value (value)
+  (cond
+    ((hash-table-p value)
+     (let ((copy (make-hash-table :test #'equal)))
+       (loop for key being the hash-keys in value
+               using (hash-value hash-value)
+             do (setf (gethash key copy)
+                      (copy-json-like-value hash-value)))
+       copy))
+    ((stringp value)
+     value)
+    ((vectorp value)
+     (map 'vector #'copy-json-like-value value))
+    ((listp value)
+     (mapcar #'copy-json-like-value value))
+    (t
+     value)))
+
+(defun fedwiki-story-item-type-name (type)
+  (etypecase type
+    (keyword (str:downcase (symbol-name type)))
+    (string type)))
+
+(defun json-array-elements (value)
+  (cond
+    ((null value)
+     '())
+    ((listp value)
+     value)
+    ((vectorp value)
+     (coerce value 'list))
+    (t
+     (error "Expected a JSON array represented as a list or vector, got ~A."
+            (type-of value)))))
+
+(defun next-localhost-fedwiki-journal-date (page-json)
+  (let* ((journal (json-array-elements (gethash "journal" page-json)))
+         (last-entry (car (last journal)))
+         (last-date (if last-entry
+                        (let ((value (gethash "date" last-entry)))
+                          (if (numberp value)
+                              value
+                              0))
+                        0))
+         (now (* 1000 (local-time:timestamp-to-unix (local-time:now)))))
+    (max now (1+ last-date))))
+
+(defun find-story-item-json-by-id (page-json item-id)
+  (find item-id
+        (json-array-elements (gethash "story" page-json))
+        :key (lambda (item)
+               (and (hash-table-p item)
+                    (gethash "id" item)))
+        :test #'equal))
+
+(defun apply-story-item-text-edit-to-page-json (page-json item-id new-text
+                                                &key item-type)
+  (let ((item (find-story-item-json-by-id page-json item-id)))
+    (unless item
+      (error "No FedWiki story item with id ~A in page JSON." item-id))
+    (when item-type
+      (let* ((normalized-type (fedwiki-story-item-type-name item-type))
+             (existing-type (gethash "type" item)))
+        (when (and existing-type
+                   (not (string= existing-type normalized-type)))
+          (error "FedWiki story item ~A changed type from ~A to ~A."
+                 item-id existing-type normalized-type))
+        (setf (gethash "type" item) normalized-type)))
+    (setf (gethash "id" item) item-id
+          (gethash "text" item) new-text)
+    (let ((journal-entry (make-hash-table :test #'equal))
+          (journal (copy-list (json-array-elements (gethash "journal" page-json)))))
+      (setf (gethash "type" journal-entry) "edit"
+            (gethash "id" journal-entry) item-id
+            (gethash "item" journal-entry) (copy-json-like-value item)
+            (gethash "date" journal-entry)
+            (next-localhost-fedwiki-journal-date page-json))
+      (setf (gethash "journal" page-json)
+            (append journal (list journal-entry))))
+    page-json))
+
+(defun persist-localhost-fedwiki-story-item-text-edit-at-path (path item-id new-text
+                                                               &key item-type)
+  (let* ((page-json (read-localhost-fedwiki-page-json-file path))
+         (updated (apply-story-item-text-edit-to-page-json
+                   page-json item-id new-text :item-type item-type)))
+    (write-localhost-fedwiki-page-json-file path updated)
+    updated))
+
+(defun persist-localhost-fedwiki-story-item-text-edit (page item new-text)
+  (let ((path (probe-file (localhost-fedwiki-page-pathname page))))
+    (unless path
+      (error "No writable localhost FedWiki page file for ~A." (hb:title-of page)))
+    (persist-localhost-fedwiki-story-item-text-edit-at-path
+     path
+     (id-of item)
+     new-text
+     :item-type (item-type-of item))
+    (set-page-data page (read-localhost-fedwiki-page-json-file path))
+    page))
+
 (defun site-of (entry)
   (or (->> entry
         data-of

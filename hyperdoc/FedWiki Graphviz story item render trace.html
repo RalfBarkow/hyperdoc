@@ -108,6 +108,23 @@
   </li>
 </ol>
 
+<h2>Edit parity</h2>
+
+<p>
+  Graphviz story items in the HyperDoc FedWiki Story view now keep one
+  authoritative DOT source in story item <tt>text</tt> while adding a narrow
+  edit shell around the shared Graphviz placeholder. The rendered SVG is the
+  normal view state; the edit state exposes a textarea seeded from the same
+  <tt>text</tt> value.
+</p>
+
+<p>
+  Preview updates the existing shared placeholder by replacing
+  <tt>data-inspector-graphviz-dot</tt> and reusing the shared Graphviz runtime.
+  Save writes the edited DOT back to story item <tt>text</tt> and appends a
+  normal FedWiki journal <tt>edit</tt> action keyed by the stable story item id.
+</p>
+
 <h2>Shared render path</h2>
 
 <ol>
