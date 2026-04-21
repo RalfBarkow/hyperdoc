@@ -101,6 +101,242 @@ Preserve these semantic distinctions:
 When one sentence needs both layers, prefer explicit phrasing such as:
 `Touch-Fahrplan route-laying gesture (implemented initially as drag-to-connect).`
 
+## Touch-first McCLIM Gesture Grammar
+
+When a slice touches Touch-Fahrplan, Connect, Dock, Annotation, DMX
+association authoring, or touch-first McCLIM interaction, preserve this
+gesture grammar as a durable architectural rule.
+
+### Semantic authority
+
+- gestures are the input language
+- semantic objects on screen are the nouns
+- CLIM commands are the verbs
+- command execution is the only way application state changes
+
+Interpretation:
+
+- interactive content must be presentation-backed
+- gesture recognition feeds command dispatch
+- dispatch is the semantic authority
+- commands mutate frame/application state and then redisplay
+- do not mutate UI state directly from raw pointer handlers or widget-local
+  callbacks
+
+### Required presentation-backed object model
+
+Use at least these semantic target classes when this area is in scope:
+
+- `doc-node`
+- `doc-link`
+- `doc-collection`
+- `doc-view`
+- `doc-anchor`
+- `doc-tool`
+- `doc-selection`
+- `doc-blank-area`
+
+These are the noun layer. The recognizer may start from raw pointer input, but
+gesture meaning must resolve against these presentation-backed semantic
+objects.
+
+### Interaction layers
+
+Keep the architecture explicit:
+
+1. raw touch / pointer-event layer
+2. gesture-recognition layer
+3. command-dispatch layer
+
+Raw events are not the semantic contract. The command-dispatch layer is.
+
+### Normalized gesture namespace
+
+Use this normalized technical gesture vocabulary:
+
+- `hd-tap`
+- `hd-double-tap`
+- `hd-press`
+- `hd-drag`
+- `hd-flick-left`
+- `hd-flick-right`
+- `hd-swipe-up`
+- `hd-swipe-down`
+- `hd-pinch-in`
+- `hd-pinch-out`
+- `hd-two-finger-tap`
+- `hd-edge-swipe-left`
+- `hd-edge-swipe-right`
+- `hd-lasso`
+- `hd-scrub`
+
+Notes:
+
+- `press-then-drag` is the explicit armed relation-creation pattern built from
+  `hd-press` plus `hd-drag`; it does not need a separate durable namespace
+  token unless a slice proves that one is required.
+- The recognizer namespace may include `swipe`, but plain `swipe` is still not
+  the durable user-facing term for route authoring. Keep `Lay route`,
+  `drag-to-connect`, and `two-tap route-laying` distinct.
+
+### Semantic gesture defaults
+
+- tap = focus / select / nearest primary action
+- double-tap = open / drill in / expand primary detail
+- press = reveal actions / inspect / secondary affordances
+- drag = relation / reorder / pan from blank area
+- flick = navigate / dismiss / neighbor / history
+- swipe left-right = back-forward or sibling traversal
+- swipe up-down = hierarchy traversal or collapse-expand
+- pinch-out = more detail / zoom in / lower abstraction
+- pinch-in = more abstraction / zoom out / collapse detail
+- two-finger tap = metadata / cancel transient state / dismiss overlay
+- press-then-drag = explicit relation creation
+- edge-swipe = global navigation rail / hidden context pane / stack pop
+- lasso = multi-select
+- scrub = preview alternate views without commit
+
+### Target-specific command mapping
+
+On `doc-node`:
+
+- tap -> `com-focus-object`
+- second tap on focused node -> `com-select-object`
+- double-tap -> `com-open-object`
+- press -> `com-show-actions`
+- drag node->node -> preview relation, commit `com-show-relation`
+- press-then-drag node->node -> `com-create-relation`
+- swipe-left -> `com-go-back`
+- swipe-right -> `com-go-forward`
+- swipe-up -> `com-go-parent`
+- swipe-down -> `com-go-child` or `com-expand-object`
+- pinch-out -> `com-expand-neighborhood` or `com-zoom-in`
+- pinch-in -> `com-collapse-neighborhood` or `com-zoom-out`
+- two-finger tap -> `com-show-metadata`
+
+Touch-Fahrplan interpretation:
+
+- a topic-like `doc-node` is a station
+- drag in Browse mode previews or reveals a route between stations
+- `press-then-drag` or explicit Author mode lays a new route
+- use `Lay route` for the user-facing authoring label
+- keep `Follow route` distinct as traversal of an existing route
+
+On `doc-link`:
+
+- tap -> `com-follow-link`
+- press -> `com-show-citations` or `com-show-metadata`
+- drag -> `com-highlight-path`
+
+On `doc-collection`:
+
+- tap -> `com-focus-object`
+- double-tap -> `com-open-object`
+- press -> `com-show-actions`
+- swipe-up -> `com-collapse-object`
+- swipe-down -> `com-expand-object`
+- pinch-in -> higher abstraction
+- pinch-out -> lower abstraction
+
+On `doc-blank-area`:
+
+- tap -> `com-clear-selection`
+- drag -> viewport pan through command-driven navigation
+- flick-left -> `com-go-forward`
+- flick-right -> `com-go-back`
+- press -> `com-toggle-overview`
+- two-finger tap -> `com-dismiss-overlay`
+- pinch-out -> global zoom-in
+- pinch-in -> global zoom-out
+- lasso -> `com-select-region`
+
+On `doc-view`:
+
+- tap -> `com-switch-view`
+- scrub -> preview alternate views with no commit until release
+- double-tap -> `com-switch-view` plus recenter current focus
+
+### Safety and parsing rules
+
+- Browse mode is the safe default.
+- Plain drag between semantic objects defaults to non-destructive relation
+  reveal, not creation.
+- Destructive or authoring semantics require explicit Author mode or
+  `press-then-drag`.
+- Never bind destructive semantics to plain tap.
+
+Parsing precedence:
+
+1. press beats tap after hold threshold
+2. drag beats press after motion threshold
+3. flick beats ordinary drag on end velocity
+4. stable second contact makes multi-touch win
+5. initial target fixes source semantics
+6. relation creation requires explicit arm state or Author mode
+
+### Explicit gesture states and feedback
+
+Recognizer states:
+
+- `idle`
+- `contact-began`
+- `armed-tap`
+- `armed-press`
+- `dragging`
+- `multitouch`
+- `preview`
+- `commit`
+- `cancel`
+
+Mandatory visual feedback:
+
+- focus halo on contact
+- press ring when hold threshold crosses
+- relation line preview while dragging
+- snap highlight on candidate target
+- ghost overlay for previewed expansion
+- cancellation fade on abort
+
+### McCLIM implementation stance
+
+Future slices in this area should frame implementation in McCLIM terms:
+
+- presentation-backed output for all semantic targets
+- presentation translators and presentation-to-command translators for dispatch
+- blank-area translators for background gestures
+- `define-gesture-name` for normalized gesture names
+- pointer tracking / pointer-motion handling for recognizer support
+- command objects and redisplay, not widget-local hidden mutation
+
+### Minimal first implementation profile
+
+If a slice only establishes the first credible touch-first surface, keep it to:
+
+Gestures:
+
+- tap
+- press
+- drag
+- swipe-left-right
+- pinch-in-out
+- two-finger tap
+
+Commands:
+
+- `com-focus-object`
+- `com-open-object`
+- `com-show-actions`
+- `com-show-relation`
+- `com-go-back`
+- `com-go-forward`
+- `com-expand-object`
+- `com-collapse-object`
+- `com-zoom-in`
+- `com-zoom-out`
+- `com-clear-selection`
+
+Do not broaden beyond that profile unless the slice explicitly asks for it.
+
 ## Codex task execution rules
 
 - Work one slice per thread. Do not switch to a different slice inside the same thread unless I explicitly retarget the task.
