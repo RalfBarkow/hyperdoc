@@ -395,6 +395,14 @@ Do not broaden beyond that profile unless the slice explicitly asks for it.
 - Do not broaden scope. If one small adjacent documentation update is explicitly in scope, keep it tightly coupled to the code change.
 - Return exact files changed, exact validation commands run, and exact outcomes.
 
+### Analysis and explanation quality
+
+- For analysis, review, and documentation work, prefer rationale and evidence over verbose paraphrase of code that is already visible.
+- Keep explanation length proportional to the importance, risk, and complexity of the point; do not turn straightforward code paths into long prose walkthroughs.
+- State the inspected evidence basis for analysis claims when it matters, for example the relevant code paths, authored HyperDoc pages, tests, issue pages, or discussion pages.
+- Separate `observation`, `inference`, and `recommendation` so readers can tell what was directly seen, what was concluded, and what is being proposed.
+- Do not create durable pages whose main value is restating code behavior without adding rationale, boundary clarification, evidence, or a reusable concept.
+
 ## Expectation Handling Policy
 
 When an expectation fails, preserve the expectation itself as an artifact before
