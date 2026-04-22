@@ -203,6 +203,18 @@
 ;; Graphviz dot language
 
 (defmethod render-story-item ((type (eql :graphviz)) item page)
+  ;; The graphviz plugin
+  ;;   https://github.com/fedwiki/wiki-plugin-graphviz
+  ;; accepts an extended DOT syntax in item.text.
+  ;; It is preprocessed, with the final
+  ;; DOT script stored in item.dot. However,
+  ;; item.dot is not systematically stored in the
+  ;; page, so it may be missing.
+  ;;
+  ;; For now, we feed item.dot to Graphviz, will
+  ;; item.text as a fallback. We should of course
+  ;; do all the preprocessing that the graphviz
+  ;; plugin does.
   (let ((dot (or (some->> item data-of (gethash "dot"))
                  (text-of item))))
     (views:transclusion (views:graphviz-view dot))))
