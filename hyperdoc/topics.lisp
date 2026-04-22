@@ -5394,6 +5394,15 @@
                  "https://2025.splashcon.org/details/splash-2025-Onward-papers/11/Literate-Tracing"
                  "https://brown.columbia.edu/portfolio/literate-tracing-unusually-interactive-visual-and-informative-software-documentation/")))
 
+(defun a-language-based-on-two-relations-between-symbols-topic ()
+  (make-topic
+   :id "a-language-based-on-two-relations-between-symbols"
+   :title "A Language Based on Two Relations between Symbols"
+   :summary "Paper-level topic for Agustin Rafael Martinez's 2022 Onward! paper on Representar, a language organized around substitution and categorization across visual and textual programming surfaces with inspectable substitution execution and domain-specific notation."
+   :references '("Reference Systems in HyperDoc"
+                 "HyperTalk and English-ish Programming"
+                 "Topic arrangement in HyperDoc")))
+
 (defun python-json-tool-source-topic ()
   (make-topic
    :id "python-json-tool-source"
