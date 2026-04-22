@@ -328,7 +328,7 @@ test("snippet playground summary stays sparse while foregrounding the transforma
   });
 });
 
-test("snippet playground comparison view shows the minimal Left and Right pair", async ({
+test("snippet playground comparison view uses a shared center Mech between JavaScript and Lisp", async ({
   page,
 }, testInfo) => {
   await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
@@ -346,22 +346,26 @@ test("snippet playground comparison view shows the minimal Left and Right pair",
   const lastPane = page.locator(".inspector-pane").last();
   const activeView = activePaneView(lastPane);
   const leftColumn = activeView.locator(".hyperdoc-snippet-comparison-left");
+  const centerColumn = activeView.locator(".hyperdoc-snippet-comparison-center");
   const rightColumn = activeView.locator(".hyperdoc-snippet-comparison-right");
   const transformationUnit = activeView.locator(
     ".hyperdoc-snippet-transformation-unit"
   );
 
   await activatePaneTab(page, snippetPaneIndex, "Comparison");
-  await expect(leftColumn).toContainText(/Left/i);
-  await expect(leftColumn).toContainText(/Mech/i);
   await expect(leftColumn).toContainText(/JavaScript/i);
   await expect(leftColumn).toContainText(/CODE/i);
   await expect(leftColumn).toContainText(/this\.items|state\.items/i);
-  await expect(rightColumn).toContainText(/Right/i);
-  await expect(rightColumn).toContainText(/Mech/i);
+  await expect(centerColumn).toContainText(/Mech/i);
+  await expect(centerColumn).toContainText(/CLICK/i);
+  await expect(centerColumn).toContainText(/NEIGHBORS next/i);
+  await expect(centerColumn).toContainText(/PREVIEW (synopsis )?items/i);
   await expect(rightColumn).toContainText(/Lisp/i);
   await expect(rightColumn).toContainText(/Quick Brown Fox/i);
   await expect(rightColumn).toContainText(/derived-items-of|let\*/i);
+  expect(
+    await activeView.locator("h3", { hasText: /^Mech$/ }).count()
+  ).toBe(1);
   await expect(transformationUnit).toContainText(/Transformation unit/i);
   await expect(transformationUnit).toContainText(/Interface/i);
   await expect(transformationUnit).toContainText(/state\.items/i);
@@ -478,8 +482,14 @@ test("fedwiki Quick Brown Fox produces transformation unit with execution interf
     comparisonView.locator(".hyperdoc-snippet-comparison-left")
   ).toContainText(/JavaScript/i);
   await expect(
+    comparisonView.locator(".hyperdoc-snippet-comparison-center")
+  ).toContainText(/Mech/i);
+  await expect(
     comparisonView.locator(".hyperdoc-snippet-comparison-right")
   ).toContainText(/Lisp/i);
+  expect(
+    await comparisonView.locator("h3", { hasText: /^Mech$/ }).count()
+  ).toBe(1);
   await expect(
     comparisonView.locator(".hyperdoc-snippet-transformation-unit")
   ).toContainText(/state\.items/i);

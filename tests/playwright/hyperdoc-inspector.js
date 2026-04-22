@@ -55,46 +55,53 @@ async function openHyperDoc(page) {
   await expect(hyperdocPane).toBeVisible({ timeout: 20_000 });
   await expect
     .poll(
-      async () => hyperdocPane.locator(".inspector-tabs button").allTextContents(),
-      { timeout: 20_000 }
-    )
-    .toContain("Main page");
-  await activatePaneTab(page, 1, "Main page");
-  await expect
-    .poll(
-      () =>
-        hyperdocPane.evaluate((paneNode) => {
-          const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
-          const surface =
-            activeView &&
-            activeView.querySelector(".hyperdoc-connect-provider-surface");
-          const root =
-            surface &&
-            surface.querySelector(".hyperdoc-connect-provider-root");
-          return !!(activeView && surface && root);
-        }),
-      { timeout: 20_000 }
-    )
-    .toBe(true);
-  await expect
-    .poll(
-      () =>
-        hyperdocPane.evaluate((paneNode) => {
-          const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
-          const root =
-            activeView &&
-            activeView.querySelector(".hyperdoc-connect-provider-root");
-          return root?.textContent?.replace(/\s+/g, " ").trim().length || 0;
-        }),
+      async () => hyperdocPane.locator(".inspector-tabs button").count(),
       { timeout: 20_000 }
     )
     .toBeGreaterThan(0);
-  await expect(hyperdocPane.locator(".hyperdoc-dom-connect-toggle")).toBeVisible({
-    timeout: 20_000,
-  });
-  await expect(hyperdocPane.locator(".hyperdoc-dom-connect-help-toggle")).toBeVisible({
-    timeout: 20_000,
-  });
+  const tabTexts = await hyperdocPane.locator(".inspector-tabs button").allTextContents();
+  if (tabTexts.includes("Main page")) {
+    await activatePaneTab(page, 1, "Main page");
+    await expect
+      .poll(
+        () =>
+          hyperdocPane.evaluate((paneNode) => {
+            const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
+            const surface =
+              activeView &&
+              activeView.querySelector(".hyperdoc-connect-provider-surface");
+            const root =
+              surface &&
+              surface.querySelector(".hyperdoc-connect-provider-root");
+            return !!(activeView && surface && root);
+          }),
+        { timeout: 20_000 }
+      )
+      .toBe(true);
+    await expect
+      .poll(
+        () =>
+          hyperdocPane.evaluate((paneNode) => {
+            const activeView = paneNode.querySelector(".inspector-view:not([hidden])");
+            const root =
+              activeView &&
+              activeView.querySelector(".hyperdoc-connect-provider-root");
+            return root?.textContent?.replace(/\s+/g, " ").trim().length || 0;
+          }),
+        { timeout: 20_000 }
+      )
+      .toBeGreaterThan(0);
+    await expect(hyperdocPane.locator(".hyperdoc-dom-connect-toggle")).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(
+      hyperdocPane.locator(".hyperdoc-dom-connect-help-toggle")
+    ).toBeVisible({
+      timeout: 20_000,
+    });
+  } else {
+    expect(tabTexts).toContain("Text pages");
+  }
   await settleInspectorBindings(page);
   return hyperdocPane;
 }

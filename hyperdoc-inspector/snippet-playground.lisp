@@ -89,6 +89,60 @@
 
 (defclass unsupported-code-snippet (code-snippet) ())
 
+(defclass snippet-comparison-region ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (placement :reader snippet-comparison-region-placement-of
+              :initarg :placement)
+   (content-key :reader snippet-comparison-region-content-key-of
+                :initarg :content-key)
+   (source-text :reader snippet-comparison-region-source-text-of
+                :initarg :source-text
+                :initform "")
+   (findings :reader snippet-comparison-region-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass snippet-comparison-surface ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (layout-spec :reader snippet-comparison-surface-layout-spec-of
+                :initarg :layout-spec)
+   (regions :reader snippet-comparison-surface-regions-of
+            :initarg :regions
+            :initform nil)
+   (left-code-region :reader snippet-comparison-surface-left-code-region-of
+                     :initarg :left-code-region
+                     :initform nil)
+   (shared-mech-region :reader snippet-comparison-surface-shared-mech-region-of
+                       :initarg :shared-mech-region
+                       :initform nil)
+   (right-code-region :reader snippet-comparison-surface-right-code-region-of
+                      :initarg :right-code-region
+                      :initform nil)
+   (execution-interface :reader snippet-comparison-surface-execution-interface-of
+                        :initarg :execution-interface
+                        :initform nil)
+   (transformation-unit :reader snippet-comparison-surface-transformation-unit-of
+                        :initarg :transformation-unit
+                        :initform nil)
+   (lifecycle-run :reader snippet-comparison-surface-lifecycle-run-of
+                  :initarg :lifecycle-run
+                  :initform nil)
+   (findings :reader snippet-comparison-surface-findings-of
+             :initarg :findings
+             :initform nil)))
+
 (defclass snippet-execution-interface ()
   ((id :reader id-of
        :initarg :id)
@@ -274,6 +328,10 @@
      :reader snippet-playground-session-transformation-unit-of
      :initarg :transformation-unit
      :initform nil)
+   (comparison-surface
+     :reader snippet-playground-session-comparison-surface-of
+     :initarg :comparison-surface
+     :initform nil)
    (crosswalk :reader snippet-playground-session-crosswalk-of
               :initarg :crosswalk
               :initform nil)
@@ -316,6 +374,14 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object snippet-comparison-region) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-comparison-surface) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object snippet-execution-interface) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -343,6 +409,14 @@
   (title-of object))
 
 (defmethod html-inspector-views:text-representation ((object code-snippet))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-comparison-region))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-comparison-surface))
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
@@ -386,6 +460,18 @@
      :detail detail)))
 
 (defvar *snippet-playground-run-state-machine* nil)
+
+(defparameter *snippet-comparison-layout-spec*
+  '(:surface snippet-comparison
+    :regions ((:left :region left-code-region :content javascript-code
+               :title "JavaScript")
+              (:center :region shared-mech-region :content shared-mech
+               :title "Mech")
+              (:right :region right-code-region :content lisp-code
+               :title "Lisp"))
+    :rules ((:show-once shared-mech))))
+
+(defvar *snippet-comparison-surface-lifecycle-state-machine* nil)
 
 (defun snippet-playground-run-state-machine ()
   (or *snippet-playground-run-state-machine*
@@ -542,6 +628,135 @@
                     :reference "hyperdoc-inspector/snippet-playground.lisp"
                     :detail
                     "Recognition, evidence selection, session construction, and failure objects all share the same run definition."))))))
+
+(defun snippet-comparison-surface-lifecycle-state-machine ()
+  (or *snippet-comparison-surface-lifecycle-state-machine*
+      (setf *snippet-comparison-surface-lifecycle-state-machine*
+            (make-state-machine-definition
+             :id "snippet_comparison_surface"
+             :title "snippet_comparison_surface"
+             :summary
+             "Small lifecycle for the declarative snippet comparison surface."
+             :states
+             (list
+              (make-state-machine-state
+               :id :available
+               :title "available"
+               :summary
+               "Comparison surface can be built from the selected snippet evidence.")
+              (make-state-machine-state
+               :id :pending
+               :title "pending"
+               :summary
+               "Pending pane is visible to the right of the origin pane.")
+              (make-state-machine-state
+               :id :ready
+               :title "ready"
+               :summary
+               "Pending pane was replaced in place by a ready comparison surface.")
+              (make-state-machine-state
+               :id :failed
+               :title "failed"
+               :summary
+               "Pending pane was replaced in place by an inspectable failed comparison surface."))
+             :transitions
+             (list
+              (make-state-machine-transition
+               :id "comparison/available->pending"
+               :from-state :available
+               :to-state :pending
+               :trigger :open-pending-pane
+               :side-effects
+               "Open a pending pane to the right of the origin pane.")
+              (make-state-machine-transition
+               :id "comparison/pending->ready"
+               :from-state :pending
+               :to-state :ready
+               :trigger :comparison-built
+               :side-effects
+               "Replace the pending pane in place with the ready comparison surface.")
+              (make-state-machine-transition
+               :id "comparison/pending->failed"
+               :from-state :pending
+               :to-state :failed
+               :trigger :comparison-failed
+               :side-effects
+               "Replace the pending pane in place with an inspectable failure surface."))
+             :initial-state :available
+             :terminal-states '(:ready :failed)
+             :failure-states '(:failed)
+             :events '(:open-pending-pane :comparison-built :comparison-failed)
+             :invariants
+             (list
+              (list :label "Placement invariant"
+                    :detail
+                    "Result pane remains to the right of the pane that initiated Snippet.")
+              (list :label "Pending replacement"
+                    :detail
+                    "Ready and failed surfaces both replace the pending pane in place."))
+             :source-evidence
+             (list
+              (list :layer "session"
+                    :reference "hyperdoc-inspector/snippet-playground.lisp"
+                    :detail
+                    "Comparison surface layout and lifecycle are carried separately from the primary snippet run state machine."))))))
+
+(defun make-snippet-comparison-surface-lifecycle-run
+    (&key status source-label origin-pane-id pending-pane-id
+       failure-classification)
+  (let* ((current-state (if (eq status :ready) :ready :failed))
+         (transition-id (if (eq status :ready)
+                            :comparison-built
+                            :comparison-failed))
+         (status-label (if (eq status :ready) :finished :failed))
+         (end-time (snippet-playground-current-millis)))
+    (make-state-machine-run
+     :id (format nil "state-machine-run/snippet-comparison/~A"
+                 (or pending-pane-id origin-pane-id source-label "surface"))
+     :title (format nil "snippet_comparison_surface (~A)"
+                    (or source-label "snippet"))
+     :summary
+     "Lifecycle for the three-region comparison surface."
+     :machine (snippet-comparison-surface-lifecycle-state-machine)
+     :input
+     (list
+      :origin_pane_id origin-pane-id
+      :pending_pane_id pending-pane-id
+      :surface_layout *snippet-comparison-layout-spec*)
+     :current-state current-state
+     :visited-states (if (eq status :ready)
+                         '(:available :pending :ready)
+                         '(:available :pending :failed))
+     :transition-trace
+     (list
+      (snippet-playground-transition-entry
+       :available
+       :pending
+       :open-pending-pane
+       (format nil
+               "Comparison surface pending pane ~A opened to the right of origin pane ~A."
+               (or pending-pane-id "n/a")
+               (or origin-pane-id "n/a")))
+      (snippet-playground-transition-entry
+       :pending
+       current-state
+       transition-id
+       (if (eq status :ready)
+           "Comparison surface replaced the pending pane in place."
+           "Failed comparison surface replaced the pending pane in place.")))
+     :evidence-trace nil
+     :start-time end-time
+     :end-time end-time
+     :status status-label
+     :failure-classification failure-classification
+     :notes
+     (list
+      (list :label "Placement invariant"
+            :detail
+            (format nil
+                    "Origin pane ~A determines right-of placement; pending pane ~A is replaced in place."
+                    (or origin-pane-id "n/a")
+                    (or pending-pane-id "n/a")))))))
 
 (defun snippet-playground-object-label (object)
   (cond
@@ -1255,6 +1470,109 @@
       execution-interface
       normal-form))))
 
+(defun snippet-comparison-region-source
+    (content-key mech code lisp-source)
+  (ecase content-key
+    (shared-mech
+     (if mech
+         (mech-snippet-source-of mech)
+         "No Mech snippet is available for this session."))
+    (javascript-code
+     (if code
+         (code-snippet-source-of code)
+         "No JavaScript snippet is available for this session."))
+    (lisp-code
+     (if (and (stringp lisp-source)
+              (> (length lisp-source) 0))
+         lisp-source
+         "No Lisp scaffold is available for this session."))))
+
+(defun make-snippet-comparison-region
+    (region-id placement content-key title mech code lisp-source)
+  (make-instance
+   'snippet-comparison-region
+   :id (format nil "snippet-comparison-region/~A" region-id)
+   :title title
+   :summary (format nil "~A region of the snippet comparison surface." title)
+   :placement placement
+   :content-key content-key
+   :source-text (snippet-comparison-region-source
+                 content-key
+                 mech
+                 code
+                 lisp-source)
+   :findings
+   (list
+    (format nil
+            "Region ~A renders ~A on the comparison surface."
+            title
+            (string-downcase (string content-key))))))
+
+(defun snippet-comparison-surface-findings (execution-interface)
+  (let ((findings '("Comparison surface renders JavaScript left, shared Mech center, and Lisp right.")))
+    (when execution-interface
+      (push (format nil
+                    "Execution interface ~A remains visible in the compact transformation-unit block."
+                    (snippet-execution-interface-handoff-path-of
+                     execution-interface))
+            findings))
+    (nreverse findings)))
+
+(defun make-snippet-comparison-surface
+    (&key status source-label mech code lisp-source execution-interface
+       transformation-unit origin-pane-id pending-pane-id
+       failure-classification)
+  (let* ((left-region
+           (make-snippet-comparison-region
+            "left-code-region"
+            :left
+            'javascript-code
+            "JavaScript"
+            mech
+            code
+            lisp-source))
+         (center-region
+           (make-snippet-comparison-region
+            "shared-mech-region"
+            :center
+            'shared-mech
+            "Mech"
+            mech
+            code
+            lisp-source))
+         (right-region
+           (make-snippet-comparison-region
+            "right-code-region"
+            :right
+            'lisp-code
+            "Lisp"
+            mech
+            code
+            lisp-source)))
+    (make-instance
+     'snippet-comparison-surface
+     :id (format nil "snippet-comparison-surface/~A"
+                 (or source-label "surface"))
+     :title "Snippet comparison"
+     :summary
+     "Three-region comparison surface with JavaScript, shared Mech, and Lisp."
+     :layout-spec *snippet-comparison-layout-spec*
+     :regions (list left-region center-region right-region)
+     :left-code-region left-region
+     :shared-mech-region center-region
+     :right-code-region right-region
+     :execution-interface execution-interface
+     :transformation-unit transformation-unit
+     :lifecycle-run
+     (make-snippet-comparison-surface-lifecycle-run
+      :status status
+      :source-label source-label
+      :origin-pane-id origin-pane-id
+      :pending-pane-id pending-pane-id
+      :failure-classification failure-classification)
+     :findings
+     (snippet-comparison-surface-findings execution-interface))))
+
 (defun snippet-playground-crosswalk (mech code)
   (let* ((preview-mode (or (mech-snippet-preview-mode-of mech)
                            "items"))
@@ -1439,6 +1757,7 @@
          (selected-code nil)
          (execution-interface nil)
          (transformation-unit nil)
+         (comparison-surface nil)
          (lefty-projection nil)
          (rita-projection nil)
          (result-object nil)
@@ -1478,6 +1797,26 @@
                             selected-code
                             execution-interface
                             transformation-unit))
+                  (comparison
+                    (or comparison-surface
+                        (when (or selected-mech
+                                  selected-code
+                                  transformation-unit)
+                          (setf comparison-surface
+                                (make-snippet-comparison-surface
+                                 :status status
+                                 :source-label resolved-source-label
+                                 :mech selected-mech
+                                 :code selected-code
+                                 :lisp-source
+                                 (and rita-projection
+                                      (snippet-rita-projection-lisp-scaffold-source-of
+                                       rita-projection))
+                                 :execution-interface execution-interface
+                                 :transformation-unit transformation-unit
+                                 :origin-pane-id origin-pane-id
+                                 :pending-pane-id pending-pane-id
+                                 :failure-classification failure-classification)))))
                   (class (if (eq status :ready)
                              'snippet-playground-session
                              'snippet-playground-failure))
@@ -1504,6 +1843,7 @@
                      :selected-code selected-code
                      :execution-interface execution-interface
                      :transformation-unit transformation-unit
+                     :comparison-surface comparison
                      :crosswalk (and selected-mech
                                      selected-code
                                      (snippet-playground-crosswalk
@@ -1831,6 +2171,9 @@
                        :transformation-unit
                        (snippet-playground-session-transformation-unit-of
                         session)
+                       :comparison-surface
+                       (snippet-playground-session-comparison-surface-of
+                        session)
                        :crosswalk
                        (snippet-playground-session-crosswalk-of session)
                        :pairing-notes
@@ -1904,19 +2247,97 @@
   (or (snippet-playground-session-lisp-scaffold-source-of session)
       "No Lisp scaffold is available for this session."))
 
-(defun snippet-playground-view-comparison-column
-    (pair-label left-title left-source right-title right-source class-name)
-  (html-inspector-views:html
-    (:td :class class-name
-         :style "width: 50%; vertical-align: top; padding: 0 0.75rem 0.75rem 0;"
-         (:h3 (html-inspector-views:esc pair-label))
-         (:h4 (html-inspector-views:esc left-title))
-         (snippet-source-pre left-source)
-         (:h4 (html-inspector-views:esc right-title))
-         (snippet-source-pre right-source))))
+(defun snippet-comparison-layout-region-specs (layout-spec)
+  (getf layout-spec :regions))
+
+(defun snippet-comparison-layout-show-once-content-keys (layout-spec)
+  (loop for rule in (getf layout-spec :rules)
+        when (eq (first rule) :show-once)
+          collect (second rule)))
+
+(defun snippet-comparison-surface-region-for-placement (surface placement)
+  (find placement
+        (snippet-comparison-surface-regions-of surface)
+        :key #'snippet-comparison-region-placement-of
+        :test #'eq))
+
+(defun snippet-comparison-region-css-class (placement)
+  (format nil
+          "hyperdoc-snippet-comparison-region hyperdoc-snippet-comparison-~(~A~)"
+          placement))
 
 (defun snippet-playground-view-transformation-row (label value)
   (snippet-playground-status-table-row label value))
+
+(defun snippet-comparison-render-region (region)
+  (html-inspector-views:html
+    (:div :class (snippet-comparison-region-css-class
+                  (snippet-comparison-region-placement-of region))
+          :style "min-width: 0;"
+          (:h3 (html-inspector-views:esc (title-of region)))
+          (snippet-source-pre
+           (snippet-comparison-region-source-text-of region)))))
+
+(defun snippet-comparison-render-surface (surface)
+  (let ((shown-content-keys '())
+        (show-once-keys
+          (snippet-comparison-layout-show-once-content-keys
+           (snippet-comparison-surface-layout-spec-of surface))))
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-comparison"
+            (:div :class "hyperdoc-snippet-comparison-layout"
+                  :style
+                  "display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr); gap: 1rem; align-items: start;"
+                  (dolist (region-spec
+                           (snippet-comparison-layout-region-specs
+                            (snippet-comparison-surface-layout-spec-of surface)))
+                    (let* ((placement (first region-spec))
+                           (region
+                             (snippet-comparison-surface-region-for-placement
+                              surface
+                              placement))
+                           (content-key
+                             (and region
+                                  (snippet-comparison-region-content-key-of
+                                   region))))
+                      (when (and region
+                                 (not (and (member content-key
+                                                   show-once-keys
+                                                   :test #'eq)
+                                           (member content-key
+                                                   shown-content-keys
+                                                   :test #'eq))))
+                        (push content-key shown-content-keys)
+                        (snippet-comparison-render-region region)))))
+            (:div :class "hyperdoc-snippet-transformation-unit"
+                  (:h3 "Transformation unit")
+                  (if-let (unit
+                           (snippet-comparison-surface-transformation-unit-of
+                            surface))
+                    (html-inspector-views:html
+                      (:table :class "inspector-table"
+                              (snippet-playground-view-transformation-row
+                               "Interface"
+                               (and (snippet-transformation-unit-execution-interface-of
+                                     unit)
+                                    (snippet-execution-interface-handoff-path-of
+                                     (snippet-transformation-unit-execution-interface-of
+                                      unit))))
+                              (snippet-playground-view-transformation-row
+                               "Operation"
+                               (or (snippet-transformation-unit-operation-summary-of
+                                    unit)
+                                   (snippet-transformation-unit-operation-kind-of
+                                    unit)))
+                              (snippet-playground-view-transformation-row
+                               "Output"
+                               (snippet-transformation-unit-output-shape-of unit))
+                              (snippet-playground-view-transformation-row
+                               "Preview"
+                               (snippet-transformation-unit-preview-mode-of unit))))
+                    (html-inspector-views:html
+                      (:p (html-inspector-views:esc
+                           "No transformation unit is available for this session.")))))))))
 
 (html-inspector-views:defview snippet-playground-step-summary
     (step mech-snippet-step)
@@ -2136,6 +2557,56 @@
          (html-inspector-views:html
            (:li (html-inspector-views:esc finding))))))))
 
+(html-inspector-views:defview snippet-comparison-region-summary
+    (region snippet-comparison-region)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Placement"
+               (snippet-comparison-region-placement-of region))
+              (snippet-playground-status-table-row
+               "Content"
+               (snippet-comparison-region-content-key-of region)))
+      (snippet-source-pre
+       (snippet-comparison-region-source-text-of region)))))
+
+(html-inspector-views:defview snippet-comparison-surface-summary
+    (surface snippet-comparison-surface)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (snippet-comparison-render-surface surface)))
+
+(html-inspector-views:defview snippet-comparison-surface-details
+    (surface snippet-comparison-surface)
+  (html-inspector-views:html-view :title "Details" :priority 2
+    (html-inspector-views:html
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Layout"
+               (getf (snippet-comparison-surface-layout-spec-of surface)
+                     :surface))
+              (snippet-playground-status-table-row
+               "Rules"
+               (getf (snippet-comparison-surface-layout-spec-of surface)
+                     :rules))
+              (maybe-object-ref-row
+               "Lifecycle run"
+               (snippet-comparison-surface-lifecycle-run-of surface))
+              (maybe-object-ref-row
+               "Shared Mech region"
+               (snippet-comparison-surface-shared-mech-region-of surface))
+              (maybe-object-ref-row
+               "Left code region"
+               (snippet-comparison-surface-left-code-region-of surface))
+              (maybe-object-ref-row
+               "Right code region"
+               (snippet-comparison-surface-right-code-region-of surface)))
+      (:h3 "Findings")
+      (:ul
+       (dolist (finding (snippet-comparison-surface-findings-of surface))
+         (html-inspector-views:html
+           (:li (html-inspector-views:esc finding))))))))
+
 (html-inspector-views:defview snippet-playground-session-summary-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Summary" :priority 1
@@ -2181,6 +2652,9 @@
               (maybe-object-ref-row
                "Transformation unit"
                (snippet-playground-session-transformation-unit-of session))
+              (maybe-object-ref-row
+               "Comparison surface"
+               (snippet-playground-session-comparison-surface-of session))
               (maybe-object-ref-row
                "Lefty projection"
                (and (snippet-playground-session-transformation-unit-of session)
@@ -2331,54 +2805,11 @@
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Comparison" :priority 2
     (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-comparison"
-            (:table :class "hyperdoc-snippet-comparison-table"
-                    :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
-                    (:tr
-                     (snippet-playground-view-comparison-column
-                      "Left"
-                      "Mech"
-                      (if-let (mech (snippet-playground-session-selected-mech-of session))
-                        (mech-snippet-source-of mech)
-                        "No Mech snippet is available for this session.")
-                      "JavaScript"
-                      (if-let (code (snippet-playground-session-selected-code-of session))
-                        (code-snippet-source-of code)
-                        "No JavaScript snippet is available for this session.")
-                      "hyperdoc-snippet-comparison-left")
-                     (snippet-playground-view-comparison-column
-                      "Right"
-                      "Mech"
-                      (if-let (mech (snippet-playground-session-selected-mech-of session))
-                        (mech-snippet-source-of mech)
-                        "No Mech snippet is available for this session.")
-                      "Lisp"
-                      (snippet-playground-view-lisp-source session)
-                      "hyperdoc-snippet-comparison-right"))))
-      (:div :class "hyperdoc-snippet-transformation-unit"
-            (:h3 "Transformation unit")
-            (if-let (unit (snippet-playground-session-transformation-unit-of session))
-              (html-inspector-views:html
-                (:table :class "inspector-table"
-                        (snippet-playground-view-transformation-row
-                         "Interface"
-                         (and (snippet-transformation-unit-execution-interface-of unit)
-                              (snippet-execution-interface-handoff-path-of
-                               (snippet-transformation-unit-execution-interface-of
-                                unit))))
-                        (snippet-playground-view-transformation-row
-                         "Operation"
-                         (or (snippet-transformation-unit-operation-summary-of unit)
-                             (snippet-transformation-unit-operation-kind-of unit)))
-                        (snippet-playground-view-transformation-row
-                         "Output"
-                         (snippet-transformation-unit-output-shape-of unit))
-                        (snippet-playground-view-transformation-row
-                         "Preview"
-                         (snippet-transformation-unit-preview-mode-of unit))))
-              (html-inspector-views:html
-                (:p (html-inspector-views:esc
-                     "No transformation unit is available for this session."))))))))
+      (if-let (surface (snippet-playground-session-comparison-surface-of session))
+        (snippet-comparison-render-surface surface)
+        (html-inspector-views:html
+          (:p (html-inspector-views:esc
+               "No comparison surface is available for this session.")))))))
 
 (html-inspector-views:defview snippet-playground-session-crosswalk-view
     (session snippet-playground-session)
