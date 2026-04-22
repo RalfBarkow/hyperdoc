@@ -206,6 +206,45 @@
 (define-zotero-runtime-wrapper mind-and-mechanism-zotero-resolution-report ()
   "inspect the Mind and Mechanism Zotero title-resolution report")
 
+(define-zotero-runtime-wrapper martinez-zotero-demo-title ()
+  "read the Martínez demo title")
+
+(define-zotero-runtime-wrapper martinez-zotero-demo-item-id ()
+  "read the Martínez demo item id")
+
+(define-zotero-runtime-wrapper martinez-zotero-paper-attachment-key ()
+  "read the Martínez paper attachment key")
+
+(define-zotero-runtime-wrapper martinez-zotero-supplement-attachment-key ()
+  "read the Martínez supplement attachment key")
+
+(define-zotero-runtime-wrapper martinez-zotero-title-query ()
+  "inspect the Martínez Zotero title query")
+
+(define-zotero-runtime-wrapper martinez-zotero-item-id-query ()
+  "inspect the Martínez Zotero item-id query")
+
+(define-zotero-runtime-wrapper martinez-zotero-item-hit ()
+  "inspect the Martínez Zotero item hit")
+
+(define-zotero-runtime-wrapper martinez-zotero-paper-attachment-hit ()
+  "inspect the Martínez paper attachment hit")
+
+(define-zotero-runtime-wrapper martinez-zotero-supplement-attachment-hit ()
+  "inspect the Martínez supplement attachment hit")
+
+(define-zotero-runtime-wrapper martinez-zotero-paper-path-resolution-report ()
+  "inspect the Martínez paper path-resolution report")
+
+(define-zotero-runtime-wrapper martinez-zotero-supplement-path-resolution-report ()
+  "inspect the Martínez supplement path-resolution report")
+
+(define-zotero-runtime-wrapper martinez-zotero-paper-resolution-report ()
+  "inspect the Martínez paper resolution report")
+
+(define-zotero-runtime-wrapper martinez-zotero-supplement-resolution-report ()
+  "inspect the Martínez supplement resolution report")
+
 (define-zotero-runtime-wrapper make-zotero-bibliography-source
     (&key bridge default-collection materialization-root)
   "create Zotero-backed bibliography source")

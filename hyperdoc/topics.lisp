@@ -5399,8 +5399,21 @@
    :id "a-language-based-on-two-relations-between-symbols"
    :title "A Language Based on Two Relations between Symbols"
    :summary "Paper-level topic for Agustin Rafael Martinez's 2022 Onward! paper on Representar, a language organized around substitution and categorization across visual and textual programming surfaces with inspectable substitution execution and domain-specific notation."
-   :references '("Reference Systems in HyperDoc"
+   :references '("A Language Based on Two Relations between Symbols"
+                 "A Language Based on Two Relations between Symbols arrangement"
+                 "Reference Systems in HyperDoc"
                  "HyperTalk and English-ish Programming"
+                 "Topic arrangement in HyperDoc")))
+
+(defun a-language-based-on-two-relations-between-symbols-arrangement-topic ()
+  (make-topic
+   :id "a-language-based-on-two-relations-between-symbols-arrangement"
+   :title "A Language Based on Two Relations between Symbols arrangement"
+   :summary "Authored arrangement view preserving the paper, its supplement, and the nearby HyperDoc comparison neighborhood without asserting semantic identity."
+   :references '("A Language Based on Two Relations between Symbols arrangement"
+                 "A Language Based on Two Relations between Symbols"
+                 "Reference Systems in HyperDoc"
+                 "Documentation Surfaces in HyperDoc"
                  "Topic arrangement in HyperDoc")))
 
 (defun python-json-tool-source-topic ()

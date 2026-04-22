@@ -1707,3 +1707,168 @@
    (mind-and-mechanism-zotero-demo-title)
    :bridge (make-zotero-live-demo-library)
    :match-mode :exact))
+
+(defun martinez-zotero-demo-title ()
+  (or (uiop:getenv "HYPERDOC_MARTINEZ_ZOTERO_DEMO_TITLE")
+      "A Language Based on Two Relations between Symbols"))
+
+(defun martinez-zotero-demo-item-id ()
+  (or (getenv-integer "HYPERDOC_MARTINEZ_ZOTERO_ITEM_ID")
+      61122))
+
+(defun martinez-zotero-paper-attachment-key ()
+  (or (uiop:getenv "HYPERDOC_MARTINEZ_ZOTERO_PAPER_ATTACHMENT_KEY")
+      "8T3KSBAY"))
+
+(defun martinez-zotero-supplement-attachment-key ()
+  (or (uiop:getenv "HYPERDOC_MARTINEZ_ZOTERO_SUPPLEMENT_ATTACHMENT_KEY")
+      "ZZ59IGHZ"))
+
+(defun martinez-zotero-title-query ()
+  (nth-value 1
+             (lookup-zotero-items-by-title
+              (martinez-zotero-demo-title)
+              :bridge (make-zotero-live-demo-library)
+              :match-mode :exact)))
+
+(defun martinez-zotero-item-id-query ()
+  (nth-value 1
+             (lookup-zotero-item-by-id
+              (martinez-zotero-demo-item-id)
+              :bridge (make-zotero-live-demo-library))))
+
+(defun martinez-zotero-item-hit ()
+  (lookup-zotero-item-by-id
+   (martinez-zotero-demo-item-id)
+   :bridge (make-zotero-live-demo-library)))
+
+(defun martinez-zotero-attachment-hit-by-key (attachment-key)
+  (let* ((bridge (make-zotero-live-demo-library))
+         (item (martinez-zotero-item-hit))
+         (attachments
+           (when item
+             (multiple-value-bind (hits query)
+                 (list-zotero-attachments-for-item item :bridge bridge)
+               (declare (ignore query))
+               hits))))
+    (find attachment-key
+          attachments
+          :key #'zotero-attachment-key-of
+          :test #'string=)))
+
+(defun martinez-zotero-paper-attachment-hit ()
+  (martinez-zotero-attachment-hit-by-key
+   (martinez-zotero-paper-attachment-key)))
+
+(defun martinez-zotero-supplement-attachment-hit ()
+  (martinez-zotero-attachment-hit-by-key
+   (martinez-zotero-supplement-attachment-key)))
+
+(defun martinez-zotero-path-resolution-report-for-attachment (attachment-key)
+  (let* ((bridge (make-zotero-live-demo-library))
+         (item (martinez-zotero-item-hit))
+         (attachment (martinez-zotero-attachment-hit-by-key attachment-key)))
+    (and attachment
+         (resolve-zotero-attachment-path bridge
+                                         attachment
+                                         :item-hit item))))
+
+(defun martinez-zotero-paper-path-resolution-report ()
+  (martinez-zotero-path-resolution-report-for-attachment
+   (martinez-zotero-paper-attachment-key)))
+
+(defun martinez-zotero-supplement-path-resolution-report ()
+  (martinez-zotero-path-resolution-report-for-attachment
+   (martinez-zotero-supplement-attachment-key)))
+
+(defun martinez-zotero-resolution-report-for-attachment
+    (attachment-key query-title)
+  (let* ((bridge (make-zotero-live-demo-library))
+         (item-query (martinez-zotero-item-id-query))
+         (item (martinez-zotero-item-hit))
+         (attachments nil)
+         (attachment-query nil))
+    (when item
+      (multiple-value-setq (attachments attachment-query)
+        (list-zotero-attachments-for-item item :bridge bridge)))
+    (let* ((attachment
+             (find attachment-key
+                   attachments
+                   :key #'zotero-attachment-key-of
+                   :test #'string=))
+           (resolution
+             (and attachment
+                  (resolve-zotero-attachment-path bridge
+                                                  attachment
+                                                  :item-hit item)))
+           (selected-evidence
+             (and resolution
+                  (make-zotero-resolution-evidence-from-report
+                   resolution
+                   nil)))
+           (failure-mode
+             (cond
+               ((null item)
+                :no-item-id-match)
+               ((null attachment)
+                :selected-attachment-missing)
+               (resolution
+                (or (zotero-path-report-failure-mode-of resolution)
+                    (unless (zotero-path-report-exists-p resolution)
+                      :resolved-pdf-missing)))
+               (t
+                :unresolved-attachment-path)))
+           (detail
+             (cond
+               ((null item)
+                (format nil "No Zotero item matched the configured Martínez item id ~A."
+                        (martinez-zotero-demo-item-id)))
+               ((null attachment)
+                (format nil "No child attachment matched the configured key ~A."
+                        attachment-key))
+               (resolution
+                (or (zotero-path-report-detail-of resolution)
+                    (unless (zotero-path-report-exists-p resolution)
+                      "The resolved PDF path does not exist.")))
+               (t
+                "Attachment resolution did not yield a report.")))
+           (resolved-path
+             (and resolution
+                  (zotero-path-report-resolved-path-of resolution)))
+           (exists-p
+             (and resolution
+                  (zotero-path-report-exists-p resolution))))
+      (make-instance 'zotero-title-resolution-report
+                     :bridge bridge
+                     :query-title query-title
+                     :item-query item-query
+                     :attachment-query attachment-query
+                     :item-candidates (and item (list item))
+                     :attachment-candidates attachments
+                     :attachment-resolutions (and resolution (list resolution))
+                     :candidate-evidence (and selected-evidence
+                                              (list selected-evidence))
+                     :selected-item item
+                     :selected-attachment attachment
+                     :selected-resolution resolution
+                     :selected-evidence selected-evidence
+                     :evidence-chain
+                     (remove nil (list item
+                                       attachment
+                                       resolution
+                                       selected-evidence))
+                     :resolved-path resolved-path
+                     :exists-p exists-p
+                     :status (or failure-mode :resolved)
+                     :failure-mode failure-mode
+                     :detail detail))))
+
+(defun martinez-zotero-paper-resolution-report ()
+  (martinez-zotero-resolution-report-for-attachment
+   (martinez-zotero-paper-attachment-key)
+   "A Language Based on Two Relations between Symbols [paper PDF]"))
+
+(defun martinez-zotero-supplement-resolution-report ()
+  (martinez-zotero-resolution-report-for-attachment
+   (martinez-zotero-supplement-attachment-key)
+   "A Language Based on Two Relations between Symbols [supplement PDF]"))
