@@ -89,6 +89,132 @@
 
 (defclass unsupported-code-snippet (code-snippet) ())
 
+(defclass snippet-execution-interface ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (handoff-path :reader snippet-execution-interface-handoff-path-of
+                 :initarg :handoff-path
+                 :initform nil)
+   (preview-mode :reader snippet-execution-interface-preview-mode-of
+                 :initarg :preview-mode
+                 :initform nil)
+   (output-channel :reader snippet-execution-interface-output-channel-of
+                   :initarg :output-channel
+                   :initform nil)
+   (input-role-name :reader snippet-execution-interface-input-role-name-of
+                    :initarg :input-role-name
+                    :initform nil)
+   (output-role-name :reader snippet-execution-interface-output-role-name-of
+                     :initarg :output-role-name
+                     :initform nil)
+   (findings :reader snippet-execution-interface-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass snippet-lefty-projection ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (origin-surface-kind :reader snippet-lefty-projection-origin-surface-kind-of
+                        :initarg :origin-surface-kind
+                        :initform nil)
+   (provider-kind :reader snippet-lefty-projection-provider-kind-of
+                  :initarg :provider-kind
+                  :initform nil)
+   (origin-label :reader snippet-lefty-projection-origin-label-of
+                 :initarg :origin-label
+                 :initform nil)
+   (context-view-title :reader snippet-lefty-projection-context-view-title-of
+                       :initarg :context-view-title
+                       :initform nil)
+   (mech-snippet :reader snippet-lefty-projection-mech-snippet-of
+                 :initarg :mech-snippet
+                 :initform nil)
+   (code-snippet :reader snippet-lefty-projection-code-snippet-of
+                 :initarg :code-snippet
+                 :initform nil)
+   (findings :reader snippet-lefty-projection-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass snippet-rita-projection ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (mech-snippet :reader snippet-rita-projection-mech-snippet-of
+                 :initarg :mech-snippet
+                 :initform nil)
+   (execution-interface :reader snippet-rita-projection-execution-interface-of
+                        :initarg :execution-interface
+                        :initform nil)
+   (lisp-scaffold-source :reader snippet-rita-projection-lisp-scaffold-source-of
+                         :initarg :lisp-scaffold-source
+                         :initform nil)
+   (findings :reader snippet-rita-projection-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass snippet-transformation-unit ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (mech-snippet :reader snippet-transformation-unit-mech-snippet-of
+                 :initarg :mech-snippet
+                 :initform nil)
+   (code-snippet :reader snippet-transformation-unit-code-snippet-of
+                 :initarg :code-snippet
+                 :initform nil)
+   (execution-interface :reader snippet-transformation-unit-execution-interface-of
+                        :initarg :execution-interface
+                        :initform nil)
+   (preview-mode :reader snippet-transformation-unit-preview-mode-of
+                 :initarg :preview-mode
+                 :initform nil)
+   (input-kind :reader snippet-transformation-unit-input-kind-of
+               :initarg :input-kind
+               :initform nil)
+   (input-shape :reader snippet-transformation-unit-input-shape-of
+                :initarg :input-shape
+                :initform nil)
+   (operation-kind :reader snippet-transformation-unit-operation-kind-of
+                   :initarg :operation-kind
+                   :initform nil)
+   (operation-summary :reader snippet-transformation-unit-operation-summary-of
+                      :initarg :operation-summary
+                      :initform nil)
+   (output-kind :reader snippet-transformation-unit-output-kind-of
+                :initarg :output-kind
+                :initform nil)
+   (output-shape :reader snippet-transformation-unit-output-shape-of
+                 :initarg :output-shape
+                 :initform nil)
+   (lefty-projection :reader snippet-transformation-unit-lefty-projection-of
+                     :initarg :lefty-projection
+                     :initform nil)
+   (rita-projection :reader snippet-transformation-unit-rita-projection-of
+                    :initarg :rita-projection
+                    :initform nil)
+   (findings :reader snippet-transformation-unit-findings-of
+             :initarg :findings
+             :initform nil)))
+
 (defclass snippet-playground-session ()
   ((id :reader id-of
        :initarg :id)
@@ -140,6 +266,14 @@
    (selected-code :reader snippet-playground-session-selected-code-of
                   :initarg :selected-code
                   :initform nil)
+   (execution-interface
+     :reader snippet-playground-session-execution-interface-of
+     :initarg :execution-interface
+     :initform nil)
+   (transformation-unit
+     :reader snippet-playground-session-transformation-unit-of
+     :initarg :transformation-unit
+     :initform nil)
    (crosswalk :reader snippet-playground-session-crosswalk-of
               :initarg :crosswalk
               :initform nil)
@@ -182,6 +316,22 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object snippet-execution-interface) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-lefty-projection) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-rita-projection) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-transformation-unit) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object snippet-playground-session) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -193,6 +343,22 @@
   (title-of object))
 
 (defmethod html-inspector-views:text-representation ((object code-snippet))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-execution-interface))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-lefty-projection))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-rita-projection))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-transformation-unit))
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
@@ -258,7 +424,7 @@
               (make-state-machine-state
                :id :pairing
                :title "pairing"
-               :summary "A Mech/code pair is being selected or inferred.")
+               :summary "Recognized Mech/code evidence is being selected before semantic binding.")
               (make-state-machine-state
                :id :building-session
                :title "building_session"
@@ -375,7 +541,7 @@
               (list :layer "session"
                     :reference "hyperdoc-inspector/snippet-playground.lisp"
                     :detail
-                    "Recognition, pairing, session construction, and failure objects all share the same run definition."))))))
+                    "Recognition, evidence selection, session construction, and failure objects all share the same run definition."))))))
 
 (defun snippet-playground-object-label (object)
   (cond
@@ -388,7 +554,7 @@
 (defun snippet-playground-snippet-labels (snippets)
   (mapcar #'snippet-playground-object-label snippets))
 
-(defun snippet-playground-selected-pair-summary (selected-mech selected-code)
+(defun snippet-playground-selected-evidence-summary (selected-mech selected-code)
   (when (or selected-mech selected-code)
     (list (cons :mech (snippet-playground-object-label selected-mech))
           (cons :code (snippet-playground-object-label selected-code)))))
@@ -398,7 +564,8 @@
        start-time end-time status failure-classification
        source-label origin-pane-id origin-surface-kind provider-kind
        pending-pane-id recognized-mech-snippets recognized-code-snippets
-       selected-mech selected-code result-object failure-object)
+       selected-mech selected-code execution-interface transformation-unit
+       result-object failure-object)
   (make-state-machine-run
    :id (format nil "state-machine-run/snippet-playground/~A"
                (or pending-pane-id origin-pane-id source-label "session"))
@@ -417,8 +584,12 @@
     (snippet-playground-snippet-labels recognized-mech-snippets)
     :recognized_code_snippets
     (snippet-playground-snippet-labels recognized-code-snippets)
-    :selected_pair
-    (snippet-playground-selected-pair-summary selected-mech selected-code)
+    :selected_evidence
+    (snippet-playground-selected-evidence-summary selected-mech selected-code)
+    :execution_interface
+    (snippet-playground-object-label execution-interface)
+    :transformation_unit
+    (snippet-playground-object-label transformation-unit)
     :result_object (snippet-playground-object-label result-object)
     :failure_object (snippet-playground-object-label failure-object))
    :current-state current-state
@@ -755,6 +926,14 @@
       (push "Recognized an export default entrypoint in the JavaScript block." findings))
     (nreverse findings)))
 
+(defun code-language-display-name (language)
+  (case language
+    (:javascript "JavaScript")
+    (:python "Python")
+    (:unknown "Unknown")
+    (t
+     (string-capitalize (string-downcase (string language))))))
+
 (defun make-code-snippet-object (block language score)
   (let* ((source (getf block :source))
          (output-path (code-output-path source))
@@ -767,8 +946,7 @@
                        'unsupported-code-snippet)
                    :id (format nil "code-snippet/~D" (getf block :index))
                    :title (format nil "~A code snippet #~D"
-                                  (string-capitalize
-                                   (string-downcase (string language)))
+                                  (code-language-display-name language)
                                   (getf block :index))
                    :summary
                    (format nil "Recognized ~A code block at ~A."
@@ -861,6 +1039,222 @@
        (format stream "(values :unsupported ~S)~%"
                (code-snippet-language-of code))))))
 
+(defun snippet-execution-interface-output-channel (handoff-path)
+  (cond
+    ((string= (or handoff-path "") "state.items")
+     "items stream")
+    ((string= (or handoff-path "") "state.aspect")
+     "aspect channel")
+    ((snippet-playground-empty-string-p handoff-path)
+     "unresolved output channel")
+    (t
+     (format nil "channel ~A" handoff-path))))
+
+(defun snippet-execution-interface-findings (mech code handoff-path preview-mode)
+  (declare (ignore mech))
+  (let ((findings '()))
+    (when handoff-path
+      (push (format nil "Inferred execution handoff through ~A." handoff-path)
+            findings))
+    (when preview-mode
+      (push (format nil "Preview mode remains ~A on the Mech side."
+                    preview-mode)
+            findings))
+    (when (and handoff-path
+               (string= handoff-path "state.items"))
+      (push "state.items is the current execution bridge between CODE and PREVIEW."
+            findings))
+    (when (and code
+               (eq (code-snippet-language-of code) :javascript))
+      (push "JavaScript is the concrete Lefty implementation for this slice."
+            findings))
+    (nreverse findings)))
+
+(defun make-snippet-execution-interface (mech code)
+  (let* ((handoff-path (or (and code (code-snippet-output-path-of code))
+                           "unresolved"))
+         (preview-mode (or (and mech (mech-snippet-preview-mode-of mech))
+                           "items"))
+         (output-channel (snippet-execution-interface-output-channel handoff-path)))
+    (make-instance
+     'snippet-execution-interface
+     :id (format nil "snippet-execution-interface/~A/~A"
+                 (or (and mech (mech-snippet-block-index-of mech)) "mech")
+                 (or (and code (code-snippet-block-index-of code)) "code"))
+     :title (format nil "Execution interface: ~A" handoff-path)
+     :summary
+     (format nil "Operational handoff from CODE to PREVIEW through ~A." handoff-path)
+     :handoff-path handoff-path
+     :preview-mode preview-mode
+     :output-channel output-channel
+     :input-role-name "current Mech state"
+     :output-role-name (format nil "preview ~A" preview-mode)
+     :findings
+     (snippet-execution-interface-findings mech code handoff-path preview-mode))))
+
+(defun snippet-lefty-projection-findings (origin-surface-kind provider-kind)
+  (list (format nil "Lefty remains anchored in ~A via provider ~A."
+                (or origin-surface-kind "unknown")
+                (or provider-kind "unknown"))))
+
+(defun make-snippet-lefty-projection
+    (mech code &key origin-surface-kind provider-kind source-label
+       context-view-title)
+  (make-instance
+   'snippet-lefty-projection
+   :id (format nil "snippet-lefty/~A/~A"
+               (or origin-surface-kind "surface")
+               (or source-label "origin"))
+   :title (format nil "Lefty projection: ~A"
+                  (or source-label "origin"))
+   :summary
+   (format nil "Concrete source-side projection binding ~A with ~A."
+           (and mech (title-of mech))
+           (and code (title-of code)))
+   :origin-surface-kind origin-surface-kind
+   :provider-kind provider-kind
+   :origin-label source-label
+   :context-view-title context-view-title
+   :mech-snippet mech
+   :code-snippet code
+   :findings
+   (snippet-lefty-projection-findings origin-surface-kind provider-kind)))
+
+(defun snippet-rita-projection-findings (execution-interface scaffold-source)
+  (let ((findings '()))
+    (when execution-interface
+      (push (format nil "Rita rewrites the slice against execution interface ~A."
+                    (snippet-execution-interface-handoff-path-of
+                     execution-interface))
+            findings))
+    (when (and scaffold-source
+               (not (snippet-playground-empty-string-p scaffold-source)))
+      (push "Rita carries an inspectable Lisp scaffold for the current slice."
+            findings))
+    (nreverse findings)))
+
+(defun make-snippet-rita-projection (mech code execution-interface)
+  (let ((scaffold-source (and code
+                              (snippet-playground-lisp-scaffold nil code))))
+    (make-instance
+     'snippet-rita-projection
+     :id (format nil "snippet-rita/~A/~A"
+                 (or (and mech (mech-snippet-block-index-of mech)) "mech")
+                 (or (and code (code-snippet-block-index-of code)) "code"))
+     :title "Rita projection"
+     :summary
+     (format nil "Inspectable Lisp-side rewrite around ~A."
+             (and execution-interface
+                  (snippet-execution-interface-handoff-path-of
+                   execution-interface)))
+     :mech-snippet mech
+     :execution-interface execution-interface
+     :lisp-scaffold-source scaffold-source
+     :findings
+     (snippet-rita-projection-findings execution-interface scaffold-source))))
+
+(defun snippet-transformation-normal-form (code execution-interface)
+  (let ((translation-mode (and code (code-snippet-translation-mode-of code))))
+    (cond
+      ((eq translation-mode :quick-brown-fox-state-items)
+       (list
+        :input-kind :text
+        :input-shape "text string"
+        :operation-kind :adjacency-extraction
+        :operation-summary
+        "Extract adjacent character pairs from text and publish them as graph-like items."
+        :output-kind :items
+        :output-shape "items stream carrying graph-like structure"))
+      ((and execution-interface
+            (string= (snippet-execution-interface-handoff-path-of execution-interface)
+                     "state.items"))
+       (list
+        :input-kind :mech-state
+        :input-shape "current Mech state"
+        :operation-kind :state-items-transformation
+        :operation-summary
+        "Transform the current Mech state into preview items through the inferred interface."
+        :output-kind :items
+        :output-shape "items stream prepared for preview"))
+      (t
+       (list
+        :input-kind :snippet-state
+        :input-shape "current snippet execution state"
+        :operation-kind :code-driven-transformation
+        :operation-summary
+        "Execute the selected CODE block and publish its result through the inferred interface."
+        :output-kind :preview-output
+        :output-shape
+        (or (and execution-interface
+                 (snippet-execution-interface-output-channel-of
+                  execution-interface))
+            "preview output"))))))
+
+(defun snippet-transformation-unit-summary-text (normal-form execution-interface)
+  (format nil "Transformation unit normal form: ~A -> ~A -> ~A via ~A."
+          (getf normal-form :input-shape)
+          (snippet-playground-display-value
+           (getf normal-form :operation-kind))
+          (getf normal-form :output-shape)
+          (and execution-interface
+               (snippet-execution-interface-handoff-path-of execution-interface))))
+
+(defun snippet-transformation-unit-findings (execution-interface normal-form)
+  (let ((findings '()))
+    (when execution-interface
+      (push (format nil "The transformation unit stores its normal form around execution interface ~A."
+                    (snippet-execution-interface-handoff-path-of
+                     execution-interface))
+            findings))
+    (when normal-form
+      (push (format nil "Normal form captures ~A as a language-neutral operation."
+                    (snippet-playground-display-value
+                     (getf normal-form :operation-kind)))
+            findings))
+    (nreverse findings)))
+
+(defun make-snippet-transformation-unit
+    (mech code execution-interface lefty-projection rita-projection)
+  (let* ((normal-form (snippet-transformation-normal-form
+                       code
+                       execution-interface))
+         (preview-mode
+           (and execution-interface
+                (snippet-execution-interface-preview-mode-of
+                 execution-interface)))
+         (input-kind (getf normal-form :input-kind))
+         (input-shape (getf normal-form :input-shape))
+         (operation-kind (getf normal-form :operation-kind))
+         (operation-summary (getf normal-form :operation-summary))
+         (output-kind (getf normal-form :output-kind))
+         (output-shape (getf normal-form :output-shape)))
+    (make-instance
+     'snippet-transformation-unit
+     :id (format nil "snippet-transformation-unit/~A/~A"
+                 (or (and mech (mech-snippet-block-index-of mech)) "mech")
+                 (or (and code (code-snippet-block-index-of code)) "code"))
+     :title (format nil "Transformation unit: ~A"
+                    (snippet-playground-display-value operation-kind))
+     :summary (snippet-transformation-unit-summary-text
+               normal-form
+               execution-interface)
+     :mech-snippet mech
+     :code-snippet code
+     :execution-interface execution-interface
+     :preview-mode preview-mode
+     :input-kind input-kind
+     :input-shape input-shape
+     :operation-kind operation-kind
+     :operation-summary operation-summary
+     :output-kind output-kind
+     :output-shape output-shape
+     :lefty-projection lefty-projection
+     :rita-projection rita-projection
+     :findings
+     (snippet-transformation-unit-findings
+      execution-interface
+      normal-form))))
+
 (defun snippet-playground-crosswalk (mech code)
   (let* ((preview-mode (or (mech-snippet-preview-mode-of mech)
                            "items"))
@@ -901,7 +1295,8 @@
            :lisp "Inspect the derived items directly or step through their construction."
            :detail "The narrow slice stays on the state.items seam rather than implementing a full Mech runtime."))))
 
-(defun snippet-playground-findings (selected-mech selected-code)
+(defun snippet-playground-findings
+    (selected-mech selected-code execution-interface transformation-unit)
   (let ((findings '()))
     (unless selected-mech
       (push "No Mech snippet was recognized in the current origin surface." findings))
@@ -912,9 +1307,18 @@
       (push (format nil "Recognized ~A, but only JavaScript is supported in this slice."
                     (string-downcase (string (code-snippet-language-of selected-code))))
             findings))
+    (when execution-interface
+      (push (format nil "Execution interface ~A is now the primary semantic bridge."
+                    (snippet-execution-interface-handoff-path-of
+                     execution-interface))
+            findings))
+    (when transformation-unit
+      (push "Constructed a snippet transformation unit as the durable inspectable artifact."
+            findings))
     (nreverse findings)))
 
-(defun snippet-playground-pairing-notes (selected-mech selected-code)
+(defun snippet-playground-evidence-notes
+    (selected-mech selected-code execution-interface)
   (let ((notes '()))
     (when selected-mech
       (push (format nil "Selected Mech block #~D at ~A."
@@ -931,19 +1335,39 @@
                         (format nil "line ~D"
                                 (code-snippet-line-number-of selected-code))))
             notes))
+    (when execution-interface
+      (push (format nil "Bound the selected evidence through execution interface ~A."
+                    (snippet-execution-interface-handoff-path-of
+                     execution-interface))
+            notes))
     (nreverse notes)))
 
-(defun snippet-playground-session-summary (status selected-mech selected-code)
-  (case status
-    (:ready
+(defun mech-snippet-short-label (snippet)
+  (if snippet
+      (format nil "Mech #~D" (mech-snippet-block-index-of snippet))
+      "Mech"))
+
+(defun code-snippet-short-label (snippet)
+  (if snippet
+      (format nil "~A #~D"
+              (code-language-display-name
+               (code-snippet-language-of snippet))
+              (code-snippet-block-index-of snippet))
+      "Code"))
+
+(defun snippet-playground-session-summary
+    (status selected-mech selected-code execution-interface transformation-unit)
+  (cond
+    ((and transformation-unit execution-interface
+          selected-mech selected-code)
      (format nil
-             "Recognized ~A and ~A as a snippet playground pair."
-             (title-of selected-mech)
-             (title-of selected-code)))
-    (:unsupported
-     "Recognized a snippet pair, but only JavaScript is supported in this slice.")
+             "Constructed transformation unit from ~A and ~A."
+             (mech-snippet-short-label selected-mech)
+             (code-snippet-short-label selected-code)))
+    ((eq status :unsupported)
+     "Unsupported snippet input: only JavaScript currently gets a concrete Rita scaffold.")
     (t
-     "The current origin surface does not expose a complete Mech/code pair yet.")))
+     "Malformed or incomplete snippet input: the current origin surface does not expose enough evidence to construct a transformation unit yet.")))
 
 (defun snippet-playground-session-status (selected-mech selected-code)
   (cond
@@ -1013,6 +1437,10 @@
          (recognized-code-snippets nil)
          (selected-mech nil)
          (selected-code nil)
+         (execution-interface nil)
+         (transformation-unit nil)
+         (lefty-projection nil)
+         (rita-projection nil)
          (result-object nil)
          (failure-object nil)
          (failure-classification nil))
@@ -1047,7 +1475,9 @@
                   (summary (snippet-playground-session-summary
                             status
                             selected-mech
-                            selected-code))
+                            selected-code
+                            execution-interface
+                            transformation-unit))
                   (class (if (eq status :ready)
                              'snippet-playground-session
                              'snippet-playground-failure))
@@ -1072,20 +1502,26 @@
                      :recognized-code-snippets recognized-code-snippets
                      :selected-mech selected-mech
                      :selected-code selected-code
+                     :execution-interface execution-interface
+                     :transformation-unit transformation-unit
                      :crosswalk (and selected-mech
                                      selected-code
                                      (snippet-playground-crosswalk
                                       selected-mech
                                       selected-code))
-                     :pairing-notes (snippet-playground-pairing-notes
+                     :pairing-notes (snippet-playground-evidence-notes
                                      selected-mech
-                                     selected-code)
+                                     selected-code
+                                     execution-interface)
                      :lisp-scaffold-source
-                     (and selected-code
-                          (snippet-playground-lisp-scaffold nil selected-code))
+                     (and rita-projection
+                          (snippet-rita-projection-lisp-scaffold-source-of
+                           rita-projection))
                      :findings (snippet-playground-findings
                                 selected-mech
-                                selected-code)))
+                                selected-code
+                                execution-interface
+                                transformation-unit)))
                   (object
                     (apply #'make-instance
                            class
@@ -1113,6 +1549,8 @@
                       :recognized-code-snippets recognized-code-snippets
                       :selected-mech selected-mech
                       :selected-code selected-code
+                      :execution-interface execution-interface
+                      :transformation-unit transformation-unit
                       :result-object (and (eq status :ready) object)
                       :failure-object (unless (eq status :ready) object))))
                (setf (snippet-playground-session-state-machine-run-of object)
@@ -1195,10 +1633,10 @@
                 failure-object))
             (advance :pairing
                      :snippets-recognized
-                     "Selecting a Mech/code pair from the recognized candidates."
+                     "Selecting evidential Mech/code inputs from the recognized candidates."
                      :guard :candidates-found
                      :progress-phase :pairing
-                     :progress-message "Pairing snippets...")
+                     :progress-message "Selecting evidence...")
             (setf selected-mech
                   (select-best-snippet recognized-mech-snippets
                                        #'mech-snippet-score-of))
@@ -1207,15 +1645,15 @@
                                        #'code-snippet-score-of))
             (note-evidence
              :pairing
-             "Pair selection completed."
-             (snippet-playground-selected-pair-summary
+             "Selected evidential Mech/code inputs."
+             (snippet-playground-selected-evidence-summary
               selected-mech
               selected-code))
             (unless (and selected-mech selected-code)
               (setf failure-classification :pairing-failed)
               (advance :failed
                        :pairing-failed
-                       "The collected snippets did not yield a complete Mech/code pair."
+                       "The collected snippets did not yield enough evidence to construct a transformation unit."
                        :progress-phase :failed
                        :progress-message "Failed")
               (setf failure-object
@@ -1229,18 +1667,56 @@
                      :guard :valid-pair
                      :progress-phase :building-session
                      :progress-message "Building session...")
+            (setf execution-interface
+                  (make-snippet-execution-interface selected-mech selected-code))
+            (setf lefty-projection
+                  (make-snippet-lefty-projection
+                   selected-mech
+                   selected-code
+                   :origin-surface-kind origin-surface-kind
+                   :provider-kind provider-kind
+                   :source-label resolved-source-label
+                   :context-view-title context-view-title))
+            (setf rita-projection
+                  (make-snippet-rita-projection
+                   selected-mech
+                   selected-code
+                   execution-interface))
+            (setf transformation-unit
+                  (make-snippet-transformation-unit
+                   selected-mech
+                   selected-code
+                   execution-interface
+                   lefty-projection
+                   rita-projection))
+            (note-evidence
+             :building-session
+             "Constructed execution interface and transformation unit."
+             (list
+              :execution_interface
+              (snippet-playground-object-label execution-interface)
+              :transformation_unit
+              (snippet-playground-object-label transformation-unit)
+              :handoff_path
+              (and execution-interface
+                   (snippet-execution-interface-handoff-path-of
+                    execution-interface))
+              :preview_mode
+              (and execution-interface
+                   (snippet-execution-interface-preview-mode-of
+                    execution-interface))))
             (if (typep selected-code 'javascript-code-snippet)
                 (progn
                   (advance :ready
                            :session-built
-                           "Built a ready snippet-playground session for the selected pair.")
+                           "Built a ready snippet-playground session around the constructed transformation unit.")
                   (setf result-object
                         (make-result :ready)))
                 (progn
                   (setf failure-classification :unsupported-language)
                   (advance :failed
                            :session-build-failed
-                           "Recognized a pair, but only JavaScript is supported in this slice."
+                           "Recognized the evidential inputs, but only JavaScript is supported in this slice."
                            :progress-phase :failed
                            :progress-message "Failed")
                   (setf failure-object
@@ -1350,6 +1826,11 @@
                        (snippet-playground-session-selected-mech-of session)
                        :selected-code
                        (snippet-playground-session-selected-code-of session)
+                       :execution-interface
+                       (snippet-playground-session-execution-interface-of session)
+                       :transformation-unit
+                       (snippet-playground-session-transformation-unit-of
+                        session)
                        :crosswalk
                        (snippet-playground-session-crosswalk-of session)
                        :pairing-notes
@@ -1382,10 +1863,24 @@
                      session
                      source)))))))
 
+(defun snippet-playground-display-value (value)
+  (cond
+    ((null value)
+     "n/a")
+    ((keywordp value)
+     (string-downcase (string value)))
+    ((symbolp value)
+     (string-downcase (string value)))
+    ((listp value)
+     (format nil "~{~A~^, ~}" value))
+    (t
+     (format nil "~A" value))))
+
 (defun snippet-playground-status-table-row (label value)
   (html-inspector-views:html
     (:tr (:td (html-inspector-views:esc label))
-         (:td (html-inspector-views:esc (or value "n/a"))))))
+         (:td (html-inspector-views:esc
+               (snippet-playground-display-value value))))))
 
 (defun maybe-object-ref-row (label object)
   (html-inspector-views:html
@@ -1398,6 +1893,30 @@
   (html-inspector-views:html
     (:pre :style "white-space: pre-wrap"
           (html-inspector-views:esc (or source "")))))
+
+(defun snippet-playground-view-interface-text (session)
+  (or (and (snippet-playground-session-execution-interface-of session)
+           (snippet-execution-interface-handoff-path-of
+            (snippet-playground-session-execution-interface-of session)))
+      "n/a"))
+
+(defun snippet-playground-view-lisp-source (session)
+  (or (snippet-playground-session-lisp-scaffold-source-of session)
+      "No Lisp scaffold is available for this session."))
+
+(defun snippet-playground-view-comparison-column
+    (pair-label left-title left-source right-title right-source class-name)
+  (html-inspector-views:html
+    (:td :class class-name
+         :style "width: 50%; vertical-align: top; padding: 0 0.75rem 0.75rem 0;"
+         (:h3 (html-inspector-views:esc pair-label))
+         (:h4 (html-inspector-views:esc left-title))
+         (snippet-source-pre left-source)
+         (:h4 (html-inspector-views:esc right-title))
+         (snippet-source-pre right-source))))
+
+(defun snippet-playground-view-transformation-row (label value)
+  (snippet-playground-status-table-row label value))
 
 (html-inspector-views:defview snippet-playground-step-summary
     (step mech-snippet-step)
@@ -1491,11 +2010,149 @@
       (:h3 "Source")
       (snippet-source-pre (code-snippet-source-of snippet)))))
 
+(html-inspector-views:defview snippet-execution-interface-summary
+    (interface snippet-execution-interface)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of interface)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Handoff path"
+               (snippet-execution-interface-handoff-path-of interface))
+              (snippet-playground-status-table-row
+               "Preview mode"
+               (snippet-execution-interface-preview-mode-of interface))
+              (snippet-playground-status-table-row
+               "Output channel"
+               (snippet-execution-interface-output-channel-of interface))
+              (snippet-playground-status-table-row
+               "Input role"
+               (snippet-execution-interface-input-role-name-of interface))
+              (snippet-playground-status-table-row
+               "Output role"
+               (snippet-execution-interface-output-role-name-of interface)))
+      (:h3 "Findings")
+      (:ul
+       (dolist (finding (snippet-execution-interface-findings-of interface))
+         (html-inspector-views:html
+           (:li (html-inspector-views:esc finding))))))))
+
+(html-inspector-views:defview snippet-lefty-projection-summary
+    (projection snippet-lefty-projection)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of projection)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Origin surface"
+               (snippet-lefty-projection-origin-surface-kind-of projection))
+              (snippet-playground-status-table-row
+               "Provider kind"
+               (snippet-lefty-projection-provider-kind-of projection))
+              (snippet-playground-status-table-row
+               "Origin label"
+               (snippet-lefty-projection-origin-label-of projection))
+              (snippet-playground-status-table-row
+               "Context view"
+               (snippet-lefty-projection-context-view-title-of projection))
+              (maybe-object-ref-row
+               "Mech evidence"
+               (snippet-lefty-projection-mech-snippet-of projection))
+              (maybe-object-ref-row
+               "JavaScript evidence"
+               (snippet-lefty-projection-code-snippet-of projection)))
+      (:h3 "Findings")
+      (:ul
+       (dolist (finding (snippet-lefty-projection-findings-of projection))
+         (html-inspector-views:html
+           (:li (html-inspector-views:esc finding))))))))
+
+(html-inspector-views:defview snippet-rita-projection-summary
+    (projection snippet-rita-projection)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of projection)))
+      (:table :class "inspector-table"
+              (maybe-object-ref-row
+               "Mech evidence"
+               (snippet-rita-projection-mech-snippet-of projection))
+              (maybe-object-ref-row
+               "Execution interface"
+               (snippet-rita-projection-execution-interface-of projection))
+              (snippet-playground-status-table-row
+               "Scaffold available"
+               (if (snippet-playground-empty-string-p
+                    (snippet-rita-projection-lisp-scaffold-source-of projection))
+                   "no"
+                   "yes")))
+      (:h3 "Findings")
+      (:ul
+       (dolist (finding (snippet-rita-projection-findings-of projection))
+         (html-inspector-views:html
+           (:li (html-inspector-views:esc finding)))))
+      (:h3 "Lisp scaffold")
+      (snippet-source-pre
+       (snippet-rita-projection-lisp-scaffold-source-of projection)))))
+
+(html-inspector-views:defview snippet-transformation-unit-summary
+    (unit snippet-transformation-unit)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of unit)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Input kind"
+               (snippet-transformation-unit-input-kind-of unit))
+              (snippet-playground-status-table-row
+               "Input shape"
+               (snippet-transformation-unit-input-shape-of unit))
+              (snippet-playground-status-table-row
+               "Operation kind"
+               (snippet-transformation-unit-operation-kind-of unit))
+              (snippet-playground-status-table-row
+               "Operation summary"
+               (snippet-transformation-unit-operation-summary-of unit))
+              (snippet-playground-status-table-row
+               "Preview mode"
+               (snippet-transformation-unit-preview-mode-of unit))
+              (snippet-playground-status-table-row
+               "Output kind"
+               (snippet-transformation-unit-output-kind-of unit))
+              (snippet-playground-status-table-row
+               "Output shape"
+               (snippet-transformation-unit-output-shape-of unit))
+              (maybe-object-ref-row
+               "Execution interface"
+               (snippet-transformation-unit-execution-interface-of unit))
+              (maybe-object-ref-row
+               "Lefty projection"
+               (snippet-transformation-unit-lefty-projection-of unit))
+              (maybe-object-ref-row
+               "Rita projection"
+               (snippet-transformation-unit-rita-projection-of unit)))
+      (:h3 "Findings")
+      (:ul
+       (dolist (finding (snippet-transformation-unit-findings-of unit))
+         (html-inspector-views:html
+           (:li (html-inspector-views:esc finding))))))))
+
 (html-inspector-views:defview snippet-playground-session-summary-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Summary" :priority 1
     (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of session)))
+      (:div :class "hyperdoc-snippet-summary-minimal"
+            (:p :class "hyperdoc-snippet-summary-sentence"
+                (html-inspector-views:esc (summary-of session)))
+            (:p :class "hyperdoc-snippet-summary-interface"
+                (:strong "Interface:")
+                " "
+                (html-inspector-views:esc
+                 (snippet-playground-view-interface-text session)))))))
+
+(html-inspector-views:defview snippet-playground-session-details-view
+    (session snippet-playground-session)
+  (html-inspector-views:html-view :title "Details" :priority 3
+    (html-inspector-views:html
       (:table :class "inspector-table"
               (snippet-playground-status-table-row
                "Status"
@@ -1518,6 +2175,40 @@
                (and (snippet-playground-session-source-pathname-of session)
                     (namestring
                      (snippet-playground-session-source-pathname-of session))))
+              (maybe-object-ref-row
+               "Execution interface"
+               (snippet-playground-session-execution-interface-of session))
+              (maybe-object-ref-row
+               "Transformation unit"
+               (snippet-playground-session-transformation-unit-of session))
+              (maybe-object-ref-row
+               "Lefty projection"
+               (and (snippet-playground-session-transformation-unit-of session)
+                    (snippet-transformation-unit-lefty-projection-of
+                     (snippet-playground-session-transformation-unit-of session))))
+              (maybe-object-ref-row
+               "Rita projection"
+               (and (snippet-playground-session-transformation-unit-of session)
+                    (snippet-transformation-unit-rita-projection-of
+                     (snippet-playground-session-transformation-unit-of session))))
+              (snippet-playground-status-table-row
+               "Transformation input kind"
+               (and (snippet-playground-session-transformation-unit-of session)
+                    (snippet-transformation-unit-input-kind-of
+                     (snippet-playground-session-transformation-unit-of
+                      session))))
+              (snippet-playground-status-table-row
+               "Transformation operation"
+               (and (snippet-playground-session-transformation-unit-of session)
+                    (snippet-transformation-unit-operation-kind-of
+                     (snippet-playground-session-transformation-unit-of
+                      session))))
+              (snippet-playground-status-table-row
+               "Transformation output kind"
+               (and (snippet-playground-session-transformation-unit-of session)
+                    (snippet-transformation-unit-output-kind-of
+                     (snippet-playground-session-transformation-unit-of
+                      session))))
               (snippet-playground-status-table-row
                "Collected inputs"
                (format nil "~D"
@@ -1536,29 +2227,17 @@
                         (snippet-playground-session-recognized-code-snippets-of
                          session))))
               (maybe-object-ref-row
-               "Selected Mech"
+               "Selected Mech evidence"
                (snippet-playground-session-selected-mech-of session))
               (maybe-object-ref-row
-               "Selected code"
+               "Selected code evidence"
                (snippet-playground-session-selected-code-of session))
               (snippet-playground-status-table-row
                "Detected code language"
                (and (snippet-playground-session-selected-code-of session)
-                    (string-downcase
-                     (string
-                      (code-snippet-language-of
-                       (snippet-playground-session-selected-code-of session)))))
-               )
-              (snippet-playground-status-table-row
-               "Execution handoff"
-               (and (snippet-playground-session-selected-code-of session)
-                    (code-snippet-output-path-of
-                     (snippet-playground-session-selected-code-of session))))
-              (snippet-playground-status-table-row
-               "Preview mode"
-               (and (snippet-playground-session-selected-mech-of session)
-                    (mech-snippet-preview-mode-of
-                     (snippet-playground-session-selected-mech-of session))))
+                    (code-language-display-name
+                     (code-snippet-language-of
+                      (snippet-playground-session-selected-code-of session)))))
               (maybe-object-ref-row
                "Run"
                (snippet-playground-session-state-machine-run-of session))
@@ -1577,8 +2256,8 @@
                  (:li (html-inspector-views:esc finding))))))
           (html-inspector-views:html
             (:p (html-inspector-views:esc
-                 "Recognized Mech and JavaScript snippets for the current slice."))))
-      (:h3 "Pairing notes")
+                 "Constructed execution interface and transformation unit for the current slice."))))
+      (:h3 "Evidence inputs")
       (:ul
        (dolist (note (snippet-playground-session-pairing-notes-of session))
          (html-inspector-views:html
@@ -1586,15 +2265,15 @@
 
 (html-inspector-views:defview snippet-playground-session-source-pair
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Source pair" :priority 2
+  (html-inspector-views:html-view :title "Evidence" :priority 4
     (html-inspector-views:html
-      (:h3 "Mech snippet")
+      (:h3 "Mech evidence")
       (if-let (mech (snippet-playground-session-selected-mech-of session))
         (snippet-source-pre (mech-snippet-source-of mech))
         (html-inspector-views:html
           (:p (html-inspector-views:esc
                "No Mech snippet was selected from the current origin surface."))))
-      (:h3 "Code snippet")
+      (:h3 "Code evidence")
       (if-let (code (snippet-playground-session-selected-code-of session))
         (snippet-source-pre (code-snippet-source-of code))
         (html-inspector-views:html
@@ -1603,7 +2282,7 @@
 
 (html-inspector-views:defview snippet-playground-session-mech
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Mech" :priority 3
+  (html-inspector-views:html-view :title "Mech" :priority 5
     (html-inspector-views:html
       (if-let (mech (snippet-playground-session-selected-mech-of session))
         (html-inspector-views:html
@@ -1627,7 +2306,7 @@
 
 (html-inspector-views:defview snippet-playground-session-code
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Code" :priority 4
+  (html-inspector-views:html-view :title "Code" :priority 6
     (html-inspector-views:html
       (if-let (code (snippet-playground-session-selected-code-of session))
         (html-inspector-views:html
@@ -1648,9 +2327,62 @@
           (:p (html-inspector-views:esc
                "No supported code snippet is available for this session.")))))))
 
+(html-inspector-views:defview snippet-playground-session-comparison-view
+    (session snippet-playground-session)
+  (html-inspector-views:html-view :title "Comparison" :priority 2
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-comparison"
+            (:table :class "hyperdoc-snippet-comparison-table"
+                    :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+                    (:tr
+                     (snippet-playground-view-comparison-column
+                      "Left"
+                      "Mech"
+                      (if-let (mech (snippet-playground-session-selected-mech-of session))
+                        (mech-snippet-source-of mech)
+                        "No Mech snippet is available for this session.")
+                      "JavaScript"
+                      (if-let (code (snippet-playground-session-selected-code-of session))
+                        (code-snippet-source-of code)
+                        "No JavaScript snippet is available for this session.")
+                      "hyperdoc-snippet-comparison-left")
+                     (snippet-playground-view-comparison-column
+                      "Right"
+                      "Mech"
+                      (if-let (mech (snippet-playground-session-selected-mech-of session))
+                        (mech-snippet-source-of mech)
+                        "No Mech snippet is available for this session.")
+                      "Lisp"
+                      (snippet-playground-view-lisp-source session)
+                      "hyperdoc-snippet-comparison-right"))))
+      (:div :class "hyperdoc-snippet-transformation-unit"
+            (:h3 "Transformation unit")
+            (if-let (unit (snippet-playground-session-transformation-unit-of session))
+              (html-inspector-views:html
+                (:table :class "inspector-table"
+                        (snippet-playground-view-transformation-row
+                         "Interface"
+                         (and (snippet-transformation-unit-execution-interface-of unit)
+                              (snippet-execution-interface-handoff-path-of
+                               (snippet-transformation-unit-execution-interface-of
+                                unit))))
+                        (snippet-playground-view-transformation-row
+                         "Operation"
+                         (or (snippet-transformation-unit-operation-summary-of unit)
+                             (snippet-transformation-unit-operation-kind-of unit)))
+                        (snippet-playground-view-transformation-row
+                         "Output"
+                         (snippet-transformation-unit-output-shape-of unit))
+                        (snippet-playground-view-transformation-row
+                         "Preview"
+                         (snippet-transformation-unit-preview-mode-of unit))))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No transformation unit is available for this session."))))))))
+
 (html-inspector-views:defview snippet-playground-session-crosswalk-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Crosswalk" :priority 5
+  (html-inspector-views:html-view :title "Crosswalk" :priority 7
     (html-inspector-views:html
       (if (snippet-playground-session-crosswalk-of session)
           (html-inspector-views:html
@@ -1676,7 +2408,7 @@
 
 (html-inspector-views:defview snippet-playground-session-lisp-scaffold-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Lisp scaffold" :priority 6
+  (html-inspector-views:html-view :title "Lisp scaffold" :priority 8
     (html-inspector-views:html
       (if (snippet-playground-session-ready-p session)
           (html-inspector-views:html

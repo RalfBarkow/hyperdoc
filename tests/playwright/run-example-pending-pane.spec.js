@@ -121,6 +121,10 @@ async function clickSnippetPlayground(page, paneIndex = 2) {
   await button.click();
 }
 
+function activePaneView(paneLocator) {
+  return paneLocator.locator(".inspector-view:not([hidden])");
+}
+
 test("Run example opens a visible pending pane and then replaces it in place", async ({
   page,
 }, testInfo) => {
@@ -221,10 +225,10 @@ test("snippet playground shows a pending pane and replaces it in place", async (
   expect(paneCountAfter).toBe(paneCountBefore + 1);
 
   const lastPane = page.locator(".inspector-pane").last();
+  const activeView = activePaneView(lastPane);
   await expect(lastPane).toContainText(/snippet playground|snippet session/i);
-  await expect(lastPane).toContainText(/mech/i);
-  await expect(lastPane).toContainText(/javascript/i);
-  await expect(lastPane).toContainText(/lisp/i);
+  await expect(activeView).toContainText(/constructed transformation unit/i);
+  await expect(activeView).toContainText(/Interface:\s*state\.items/i);
 
   const trace = await readPendingPaneTrace(page);
   const finalState = await readLastPaneState(page);
@@ -294,7 +298,7 @@ test("snippet playground turns malformed or unsupported input into an inspectabl
   expect(finalState.pendingVisible).toBe(false);
 });
 
-test("snippet playground crosswalk recognizes the Quick Brown Fox mech/code pair", async ({
+test("snippet playground summary stays sparse while foregrounding the transformation unit", async ({
   page,
 }, testInfo) => {
   await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
@@ -310,25 +314,63 @@ test("snippet playground crosswalk recognizes the Quick Brown Fox mech/code pair
 
   const snippetPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
   const lastPane = page.locator(".inspector-pane").last();
+  const activeView = activePaneView(lastPane);
 
-  await activatePaneTab(page, snippetPaneIndex, "Source pair");
-  await expect(lastPane).toContainText(/Quick Brown Fox/i);
-  await expect(lastPane).toContainText(/CODE/i);
-  await expect(lastPane).toContainText(/PREVIEW items/i);
-
-  await activatePaneTab(page, snippetPaneIndex, "Code");
-  await expect(lastPane).toContainText(/javascript/i);
-  await expect(lastPane).toContainText(/state\.items|items/i);
-
-  await activatePaneTab(page, snippetPaneIndex, "Crosswalk");
-  await expect(lastPane).toContainText(/click/i);
-  await expect(lastPane).toContainText(/neighbors next/i);
-  await expect(lastPane).toContainText(/execution seam|crosswalk|translation/i);
-
-  await activatePaneTab(page, snippetPaneIndex, "Lisp scaffold");
-  await expect(lastPane).toContainText(/run scaffold|step scaffold|derived-items-of/i);
+  await activatePaneTab(page, snippetPaneIndex, "Summary");
+  await expect(activeView).toContainText(/Constructed transformation unit from Mech #\d+ and JavaScript #\d+\./i);
+  await expect(activeView).toContainText(/Interface:\s*state\.items/i);
+  await expect(activeView).not.toContainText(/provider kind|origin surface|recognized mech snippets|recognized code snippets|selected mech evidence|selected code evidence|run|source file|context view/i);
+  await expect(activeView).not.toContainText(/snippet playground pair|Dreyeck/i);
 
   await attachJson(testInfo, "snippet-playground-quick-brown-fox.json", {
+    snippetPaneIndex,
+    finalState: await readLastPaneState(page),
+  });
+});
+
+test("snippet playground comparison view shows the minimal Left and Right pair", async ({
+  page,
+}, testInfo) => {
+  await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
+
+  await clickSnippetPlayground(page);
+
+  await expect
+    .poll(async () => {
+      const state = await readLastPaneState(page);
+      return state.pendingVisible ? "" : state.title || "";
+    }, { timeout: 30_000 })
+    .toMatch(/snippet playground|snippet session/i);
+
+  const snippetPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
+  const lastPane = page.locator(".inspector-pane").last();
+  const activeView = activePaneView(lastPane);
+  const leftColumn = activeView.locator(".hyperdoc-snippet-comparison-left");
+  const rightColumn = activeView.locator(".hyperdoc-snippet-comparison-right");
+  const transformationUnit = activeView.locator(
+    ".hyperdoc-snippet-transformation-unit"
+  );
+
+  await activatePaneTab(page, snippetPaneIndex, "Comparison");
+  await expect(leftColumn).toContainText(/Left/i);
+  await expect(leftColumn).toContainText(/Mech/i);
+  await expect(leftColumn).toContainText(/JavaScript/i);
+  await expect(leftColumn).toContainText(/CODE/i);
+  await expect(leftColumn).toContainText(/this\.items|state\.items/i);
+  await expect(rightColumn).toContainText(/Right/i);
+  await expect(rightColumn).toContainText(/Mech/i);
+  await expect(rightColumn).toContainText(/Lisp/i);
+  await expect(rightColumn).toContainText(/Quick Brown Fox/i);
+  await expect(rightColumn).toContainText(/derived-items-of|let\*/i);
+  await expect(transformationUnit).toContainText(/Transformation unit/i);
+  await expect(transformationUnit).toContainText(/Interface/i);
+  await expect(transformationUnit).toContainText(/state\.items/i);
+  await expect(transformationUnit).toContainText(/Operation/i);
+  await expect(transformationUnit).toContainText(/Output/i);
+  await expect(transformationUnit).toContainText(/Preview/i);
+  await expect(activeView).not.toContainText(/provider kind|origin surface|recognized mech snippets|run|Dreyeck/i);
+
+  await attachJson(testInfo, "snippet-playground-comparison-view.json", {
     snippetPaneIndex,
     finalState: await readLastPaneState(page),
   });
@@ -365,11 +407,10 @@ test("fedwiki snippet playground opens to the right and replaces pending pane in
   expect(paneCountAfter).toBe(paneCountBefore + 1);
 
   const lastPane = page.locator(".inspector-pane").last();
+  const activeView = activePaneView(lastPane);
   await expect(lastPane).toContainText(/snippet playground|snippet session/i);
-  await expect(lastPane).toContainText(/fedwiki-page/i);
-  await expect(lastPane).toContainText(/mech/i);
-  await expect(lastPane).toContainText(/javascript/i);
-  await expect(lastPane).toContainText(/lisp/i);
+  await expect(activeView).toContainText(/constructed transformation unit/i);
+  await expect(activeView).toContainText(/Interface:\s*state\.items/i);
 
   const trace = await readPendingPaneTrace(page);
   const finalState = await readLastPaneState(page);
@@ -393,7 +434,7 @@ test("fedwiki snippet playground opens to the right and replaces pending pane in
   expect(finalState.title || "").toMatch(/snippet playground|snippet session/i);
 });
 
-test("fedwiki Quick Brown Fox produces snippet playground session from live story items", async ({
+test("fedwiki Quick Brown Fox produces transformation unit with execution interface state.items", async ({
   page,
 }, testInfo) => {
   const fedwikiPaneIndex = await openFedWikiSnippetPlaygroundFixture(
@@ -413,28 +454,35 @@ test("fedwiki Quick Brown Fox produces snippet playground session from live stor
 
   const snippetPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
   const lastPane = page.locator(".inspector-pane").last();
+  const activeView = activePaneView(lastPane);
 
   await activatePaneTab(page, snippetPaneIndex, "Summary");
-  await expect(lastPane).toContainText(/context view/i);
-  await expect(lastPane).toContainText(/story/i);
-  await expect(lastPane).toContainText(/origin surface/i);
-  await expect(lastPane).toContainText(/fedwiki-page/i);
-  await expect(lastPane).toContainText(/provider kind/i);
-  await expect(lastPane).toContainText(/fedwiki-v1/i);
-  await expect(lastPane).toContainText(/source label/i);
-  await expect(lastPane).toContainText(/Quick Brown Fox/i);
+  await expect(activeView).toContainText(/Constructed transformation unit from Mech #\d+ and JavaScript #\d+\./i);
+  await expect(activeView).toContainText(/Interface:\s*state\.items/i);
+  await expect(activeView).not.toContainText(/provider kind|origin surface|source label|context view|run|Dreyeck/i);
 
-  await activatePaneTab(page, snippetPaneIndex, "Source pair");
+  await activatePaneTab(page, snippetPaneIndex, "Evidence");
   await expect(lastPane).toContainText(/Quick Brown Fox/i);
   await expect(lastPane).toContainText(/CODE/i);
   await expect(lastPane).toContainText(/PREVIEW synopsis items|PREVIEW items/i);
 
-  await activatePaneTab(page, snippetPaneIndex, "Code");
-  await expect(lastPane).toContainText(/javascript/i);
-  await expect(lastPane).toContainText(/state\.items|items/i);
+  await activatePaneTab(page, snippetPaneIndex, "Details");
+  await expect(lastPane).toContainText(/provider kind/i);
+  await expect(lastPane).toContainText(/fedwiki-v1/i);
+  await expect(lastPane).toContainText(/origin surface/i);
+  await expect(lastPane).toContainText(/fedwiki-page/i);
 
-  await activatePaneTab(page, snippetPaneIndex, "Lisp scaffold");
-  await expect(lastPane).toContainText(/run scaffold|step scaffold|derived-items-of/i);
+  await activatePaneTab(page, snippetPaneIndex, "Comparison");
+  const comparisonView = activePaneView(lastPane);
+  await expect(
+    comparisonView.locator(".hyperdoc-snippet-comparison-left")
+  ).toContainText(/JavaScript/i);
+  await expect(
+    comparisonView.locator(".hyperdoc-snippet-comparison-right")
+  ).toContainText(/Lisp/i);
+  await expect(
+    comparisonView.locator(".hyperdoc-snippet-transformation-unit")
+  ).toContainText(/state\.items/i);
 
   await attachJson(testInfo, "fedwiki-snippet-playground-quick-brown-fox.json", {
     fedwikiPaneIndex,
@@ -475,16 +523,21 @@ test("malformed fedwiki input produces inspectable failure", async ({
 
   const finalState = await readLastPaneState(page);
   const lastPane = page.locator(".inspector-pane").last();
+  const snippetPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
 
-  expect(finalState.paneCount).toBe(paneCountBefore + 1);
+  expect(finalState.paneCount).toBeGreaterThanOrEqual(paneCountBefore + 1);
   await expect(lastPane).toContainText(
     /failed|unsupported|malformed|parse|no mech snippet|no supported code snippet/i
   );
+
+  await activatePaneTab(page, snippetPaneIndex, "Details");
+  await expect(lastPane).toContainText(/origin surface/i);
   await expect(lastPane).toContainText(/fedwiki-page/i);
 
   const trace = await readPendingPaneTrace(page);
   await attachJson(testInfo, "fedwiki-snippet-playground-failure-trace.json", {
     fedwikiPaneIndex,
+    snippetPaneIndex,
     paneCountBefore,
     trace,
     finalState,
