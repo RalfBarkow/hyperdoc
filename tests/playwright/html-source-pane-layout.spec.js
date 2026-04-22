@@ -2,7 +2,9 @@
 
 const { test, expect } = require("@playwright/test");
 const {
+  activatePaneTab,
   attachJson,
+  openFedWikiPageFromTextPageLink,
   openHyperDoc,
   openTextPageFromHyperDoc,
   selectSourceTab,
@@ -169,5 +171,89 @@ test("snippet playground opens in a fresh pane to the right without collapsing t
   );
 
   await expect(sourcePaneAfter).toContainText(/Mech CODE Block analysis/i);
+  await expect(snippetPane).toContainText(/snippet playground|snippet session/i);
+});
+
+test("fedwiki-page exposes snippet capability for recognizable story items", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, "Mech CODE Block analysis");
+  await settleInspectorBindings(page, 1000);
+  await openFedWikiPageFromTextPageLink(page, 2, "Quick Brown Fox");
+
+  const fedwikiPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
+  await activatePaneTab(page, fedwikiPaneIndex, "Story");
+  await settleInspectorBindings(page, 1500);
+
+  const chrome = await readPaneChromeState(page, fedwikiPaneIndex);
+
+  await attachJson(testInfo, "fedwiki-snippet-capability.json", {
+    fedwikiPaneIndex,
+    chrome,
+  });
+
+  expect(chrome.activeTab).toBe("Story");
+  expect(chrome.providerKind).toBe("fedwiki-v1");
+  expect(chrome.compactActions).toContain("Snippet");
+  expect(chrome.snippetHidden).toBe(false);
+});
+
+test("fedwiki snippet playground opens in a fresh pane to the right without collapsing the fedwiki pane", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, "Mech CODE Block analysis");
+  await settleInspectorBindings(page, 1000);
+  await openFedWikiPageFromTextPageLink(page, 2, "Quick Brown Fox");
+
+  const fedwikiPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
+  await activatePaneTab(page, fedwikiPaneIndex, "Story");
+  await settleInspectorBindings(page, 1500);
+
+  const panesBefore = page.locator(".inspector-pane");
+  const paneCountBefore = await panesBefore.count();
+  const fedwikiPaneBefore = panesBefore.nth(fedwikiPaneIndex);
+  const fedwikiBoxBefore = await fedwikiPaneBefore.boundingBox();
+  const chromeBefore = await readPaneChromeState(page, fedwikiPaneIndex);
+
+  const snippetButton = fedwikiPaneBefore.locator(
+    '[data-hyperdoc-snippet-playground-submit="true"]'
+  );
+  await expect(snippetButton).toBeVisible({ timeout: 20_000 });
+  await snippetButton.click();
+
+  await expect
+    .poll(async () => page.locator(".inspector-pane").count(), {
+      timeout: 30_000,
+    })
+    .toBe(paneCountBefore + 1);
+
+  const panesAfter = page.locator(".inspector-pane");
+  const fedwikiPaneAfter = panesAfter.nth(fedwikiPaneIndex);
+  const snippetPane = panesAfter.last();
+
+  const fedwikiBoxAfter = await fedwikiPaneAfter.boundingBox();
+  const snippetBox = await snippetPane.boundingBox();
+
+  await attachJson(testInfo, "fedwiki-snippet-playground-pane-layout.json", {
+    fedwikiPaneIndex,
+    paneCountBefore,
+    fedwikiBoxBefore,
+    fedwikiBoxAfter,
+    snippetBox,
+    chromeBefore,
+  });
+
+  expect(fedwikiBoxBefore).toBeTruthy();
+  expect(fedwikiBoxAfter).toBeTruthy();
+  expect(snippetBox).toBeTruthy();
+
+  expect(snippetBox.x).toBeGreaterThan(fedwikiBoxAfter.x);
+  expect(snippetBox.x).toBeGreaterThan(
+    (fedwikiBoxAfter.x || 0) + ((fedwikiBoxAfter.width || 0) * 0.5)
+  );
+
+  await expect(fedwikiPaneAfter).toContainText(/Quick Brown Fox/i);
   await expect(snippetPane).toContainText(/snippet playground|snippet session/i);
 });

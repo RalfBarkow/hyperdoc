@@ -34,6 +34,9 @@
                 :initarg :block-index)
    (line-number :reader mech-snippet-line-number-of
                 :initarg :line-number)
+   (location-label :reader snippet-location-label-of
+                   :initarg :location-label
+                   :initform nil)
    (source :reader mech-snippet-source-of
            :initarg :source)
    (steps :reader mech-snippet-steps-of
@@ -61,6 +64,9 @@
                 :initarg :block-index)
    (line-number :reader code-snippet-line-number-of
                 :initarg :line-number)
+   (location-label :reader snippet-location-label-of
+                   :initarg :location-label
+                   :initform nil)
    (source :reader code-snippet-source-of
            :initarg :source)
    (language :reader code-snippet-language-of
@@ -100,12 +106,26 @@
    (context-view-title :reader snippet-playground-session-context-view-title-of
                        :initarg :context-view-title
                        :initform nil)
+   (origin-surface-kind
+     :reader snippet-playground-session-origin-surface-kind-of
+     :initarg :origin-surface-kind
+     :initform "html-source")
+   (provider-kind :reader snippet-playground-session-provider-kind-of
+                  :initarg :provider-kind
+                  :initform "source-v1")
+   (source-label :reader snippet-playground-session-source-label-of
+                 :initarg :source-label
+                 :initform nil)
    (source-pathname :reader snippet-playground-session-source-pathname-of
                     :initarg :source-pathname
                     :initform nil)
    (source-text :reader snippet-playground-session-source-text-of
                 :initarg :source-text
                 :initform "")
+   (source-block-count
+     :reader snippet-playground-session-source-block-count-of
+     :initarg :source-block-count
+     :initform 0)
    (recognized-mech-snippets
      :reader snippet-playground-session-recognized-mech-snippets-of
      :initarg :recognized-mech-snippets
@@ -136,9 +156,19 @@
    (last-run-object :accessor snippet-playground-session-last-run-object-of
                     :initarg :last-run-object
                     :initform nil)
+   (state-machine-run
+     :accessor snippet-playground-session-state-machine-run-of
+     :initarg :state-machine-run
+     :initform nil)
    (findings :reader snippet-playground-session-findings-of
              :initarg :findings
              :initform nil)))
+
+(defclass snippet-playground-failure (snippet-playground-session)
+  ((failure-classification
+     :reader snippet-playground-failure-classification-of
+     :initarg :failure-classification
+     :initform :failed)))
 
 (defmethod print-object ((object mech-snippet-step) stream)
   (print-unreadable-object (object stream :type t)
@@ -168,6 +198,250 @@
 (defmethod html-inspector-views:text-representation
     ((object snippet-playground-session))
   (title-of object))
+
+(defun snippet-playground-current-millis ()
+  (if (fboundp 'clog-moldable-inspector::maybe-current-time-millis)
+      (clog-moldable-inspector::maybe-current-time-millis)
+      (* 1000 (get-universal-time))))
+
+(defun pending-evaluation-origin-pane-id ()
+  (when (fboundp 'clog-moldable-inspector::pending-evaluation-origin-pane-id)
+    (clog-moldable-inspector::pending-evaluation-origin-pane-id)))
+
+(defun pending-evaluation-pane-id ()
+  (when (fboundp 'clog-moldable-inspector::pending-evaluation-pane-id)
+    (clog-moldable-inspector::pending-evaluation-pane-id)))
+
+(defun snippet-playground-report-progress (phase message &key detail)
+  (when (fboundp 'clog-moldable-inspector::report-pending-evaluation-progress)
+    (clog-moldable-inspector::report-pending-evaluation-progress
+     phase
+     message
+     :detail detail)))
+
+(defvar *snippet-playground-run-state-machine* nil)
+
+(defun snippet-playground-run-state-machine ()
+  (or *snippet-playground-run-state-machine*
+      (setf *snippet-playground-run-state-machine*
+            (make-state-machine-definition
+             :id "snippet_playground_run"
+             :title "snippet_playground_run"
+             :summary
+             "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."
+             :states
+             (list
+              (make-state-machine-state
+               :id :unavailable
+               :title "unavailable"
+               :summary "Snippet capability is hidden because the current pane does not expose a snippet provider.")
+              (make-state-machine-state
+               :id :available
+               :title "available"
+               :summary "Snippet capability is visible on the origin pane.")
+              (make-state-machine-state
+               :id :invoked
+               :title "invoked"
+               :summary "The user clicked Snippet on the origin pane.")
+              (make-state-machine-state
+               :id :pending
+               :title "pending"
+               :summary "A pending pane has opened to the right of the origin pane.")
+              (make-state-machine-state
+               :id :collecting-input
+               :title "collecting_input"
+               :summary "Provider-specific snippet input is being collected.")
+              (make-state-machine-state
+               :id :recognizing
+               :title "recognizing"
+               :summary "Mech and code snippets are being recognized.")
+              (make-state-machine-state
+               :id :pairing
+               :title "pairing"
+               :summary "A Mech/code pair is being selected or inferred.")
+              (make-state-machine-state
+               :id :building-session
+               :title "building_session"
+               :summary "The inspectable snippet-playground session is being built.")
+              (make-state-machine-state
+               :id :ready
+               :title "ready"
+               :summary "Pending pane has been replaced in place by a ready snippet session.")
+              (make-state-machine-state
+               :id :failed
+               :title "failed"
+               :summary "Pending pane has been replaced by an inspectable failure object."))
+             :transitions
+             (list
+              (make-state-machine-transition
+               :id "snippet/unavailable->available"
+               :from-state :unavailable
+               :to-state :available
+               :guard :pane-supports-snippet-provider
+               :side-effects
+               "Show Snippet in the capability row for html-source and fedwiki-page surfaces.")
+              (make-state-machine-transition
+               :id "snippet/available->invoked"
+               :from-state :available
+               :to-state :invoked
+               :trigger :snippet-click)
+              (make-state-machine-transition
+               :id "snippet/invoked->pending"
+               :from-state :invoked
+               :to-state :pending
+               :trigger :open-pending-pane
+               :side-effects
+               "Open a pending pane to the right of the origin pane and retain the origin-pane placement invariant.")
+              (make-state-machine-transition
+               :id "snippet/pending->collecting-input"
+               :from-state :pending
+               :to-state :collecting-input
+               :trigger :pending-pane-opened)
+              (make-state-machine-transition
+               :id "snippet/collecting-input->recognizing"
+               :from-state :collecting-input
+               :to-state :recognizing
+               :guard :input-extracted)
+              (make-state-machine-transition
+               :id "snippet/recognizing->pairing"
+               :from-state :recognizing
+               :to-state :pairing
+               :guard :candidates-found)
+              (make-state-machine-transition
+               :id "snippet/pairing->building-session"
+               :from-state :pairing
+               :to-state :building-session
+               :guard :valid-pair)
+              (make-state-machine-transition
+               :id "snippet/building-session->ready"
+               :from-state :building-session
+               :to-state :ready
+               :trigger :session-built)
+              (make-state-machine-transition
+               :id "snippet/collecting-input->failed"
+               :from-state :collecting-input
+               :to-state :failed
+               :trigger :input-collection-failed)
+              (make-state-machine-transition
+               :id "snippet/recognizing->failed"
+               :from-state :recognizing
+               :to-state :failed
+               :trigger :recognition-failed)
+              (make-state-machine-transition
+               :id "snippet/pairing->failed"
+               :from-state :pairing
+               :to-state :failed
+               :trigger :pairing-failed)
+              (make-state-machine-transition
+               :id "snippet/building-session->failed"
+               :from-state :building-session
+               :to-state :failed
+               :trigger :session-build-failed))
+             :initial-state :unavailable
+             :terminal-states '(:ready :failed)
+             :failure-states '(:failed)
+             :guards
+             '(:pane-supports-snippet-provider :input-extracted
+               :candidates-found :valid-pair)
+             :events
+             '(:snippet-click :open-pending-pane :pending-pane-opened
+               :input-collection-failed :recognition-failed :pairing-failed
+               :session-build-failed :session-built)
+             :invariants
+             (list
+              (list :label "Result pane placement"
+                    :detail
+                    "The result pane is always created to the right of the pane that initiated Snippet.")
+              (list :label "Shared lifecycle"
+                    :detail
+                    "The same run states apply to html-source and fedwiki-page providers.")
+              (list :label "Inspectable failure"
+                    :detail
+                    "Malformed or unsupported input resolves to an inspectable failure object rather than a silent failure."))
+             :source-evidence
+             (list
+              (list :layer "browser"
+                    :reference "assets/hyperdoc/js/dom-annotation-connect.js"
+                    :detail
+                    "Capability visibility and invocation reuse the existing pane-shell submit bridge.")
+              (list :layer "server"
+                    :reference "hyperbook-server/inspector-wiring.lisp"
+                    :detail
+                    "Pending panes open to the right of the origin pane and are replaced in place.")
+              (list :layer "provider"
+                    :reference "hyperdoc-explorer/dom-annotations.lisp"
+                    :detail
+                    "html-source and fedwiki-page surfaces both dispatch through provider-aware snippet targets.")
+              (list :layer "session"
+                    :reference "hyperdoc-inspector/snippet-playground.lisp"
+                    :detail
+                    "Recognition, pairing, session construction, and failure objects all share the same run definition."))))))
+
+(defun snippet-playground-object-label (object)
+  (cond
+    ((null object)
+     nil)
+    ((ignore-errors (title-of object)))
+    (t
+     (format nil "~A" object))))
+
+(defun snippet-playground-snippet-labels (snippets)
+  (mapcar #'snippet-playground-object-label snippets))
+
+(defun snippet-playground-selected-pair-summary (selected-mech selected-code)
+  (when (or selected-mech selected-code)
+    (list (cons :mech (snippet-playground-object-label selected-mech))
+          (cons :code (snippet-playground-object-label selected-code)))))
+
+(defun make-snippet-playground-state-machine-run
+    (&key current-state visited-states transition-trace evidence-trace
+       start-time end-time status failure-classification
+       source-label origin-pane-id origin-surface-kind provider-kind
+       pending-pane-id recognized-mech-snippets recognized-code-snippets
+       selected-mech selected-code result-object failure-object)
+  (make-state-machine-run
+   :id (format nil "state-machine-run/snippet-playground/~A"
+               (or pending-pane-id origin-pane-id source-label "session"))
+   :title (format nil "snippet_playground_run (~A)"
+                  (or source-label origin-surface-kind "snippet"))
+   :summary
+   "Shared snippet-playground lifecycle from visible capability to ready session or inspectable failure."
+   :machine (snippet-playground-run-state-machine)
+   :input
+   (list
+    :origin_pane_id origin-pane-id
+    :origin_surface_kind origin-surface-kind
+    :provider_kind provider-kind
+    :pending_pane_id pending-pane-id
+    :recognized_mech_snippets
+    (snippet-playground-snippet-labels recognized-mech-snippets)
+    :recognized_code_snippets
+    (snippet-playground-snippet-labels recognized-code-snippets)
+    :selected_pair
+    (snippet-playground-selected-pair-summary selected-mech selected-code)
+    :result_object (snippet-playground-object-label result-object)
+    :failure_object (snippet-playground-object-label failure-object))
+   :current-state current-state
+   :visited-states visited-states
+   :transition-trace transition-trace
+   :evidence-trace evidence-trace
+   :start-time start-time
+   :end-time end-time
+   :status status
+   :failure-classification failure-classification
+   :notes
+   (list
+    (list :label "Placement invariant"
+          :detail
+          (format nil
+                  "Origin pane ~A determines right-hand-pane placement; pending pane ~A is replaced in place."
+                  (or origin-pane-id "n/a")
+                  (or pending-pane-id "n/a")))
+    (list :label "Origin surface"
+          :detail
+          (format nil "~A via provider ~A"
+                  (or origin-surface-kind "unknown")
+                  (or provider-kind "unknown"))))))
 
 (defun snippet-playground-empty-string-p (value)
   (zerop (length (string-trim '(#\Space #\Tab #\Newline #\Return #\Page)
@@ -244,10 +518,55 @@
         do (push (list :index index
                        :line-number (source-line-number-at-offset source open-start)
                        :open-tag open-tag
-                       :source (snippet-playground-trim-source decoded-source))
+                 :source (snippet-playground-trim-source decoded-source))
                  blocks)
            (setf scan-start (+ close-start (length end-token)))
         finally (return (nreverse blocks))))
+
+(defun snippet-block-location-label (block)
+  (or (getf block :location-label)
+      (let ((line-number (getf block :line-number)))
+        (if line-number
+            (format nil "source line ~D" line-number)
+            "source surface"))))
+
+(defun snippet-playground-candidate-fedwiki-story-item-p (item)
+  (member (hyperbook/fedwiki::item-type-of item)
+          '(:code :mech :paragraph :markdown :reference)
+          :test #'eq))
+
+(defun extract-fedwiki-story-item-blocks (page)
+  (loop with blocks = '()
+        for item across (hyperbook/fedwiki::story-of page)
+        for index from 1
+        for item-type = (hyperbook/fedwiki::item-type-of item)
+        for source = (snippet-playground-trim-source
+                      (hyperbook/fedwiki::text-of item))
+        when (and (snippet-playground-candidate-fedwiki-story-item-p item)
+                  (not (snippet-playground-empty-string-p source)))
+          do (push (list :index index
+                         :line-number index
+                         :location-label
+                         (format nil "story item ~D (~A)"
+                                 index
+                                 (string-downcase (string item-type)))
+                         :open-tag (format nil "fedwiki-~(~A~)" item-type)
+                         :source source
+                         :origin-surface-kind "fedwiki-page"
+                         :provider-kind "fedwiki-v1")
+                   blocks)
+        finally (return (nreverse blocks))))
+
+(defun snippet-playground-source-text-from-blocks (blocks)
+  (with-output-to-string (stream)
+    (loop for block in blocks
+          for first = t then nil
+          do (unless first
+               (terpri stream)
+               (terpri stream))
+             (format stream ";; ~A~%~A"
+                     (snippet-block-location-label block)
+                     (getf block :source)))))
 
 (defun snippet-playground-language-hint (open-tag)
   (cond
@@ -350,10 +669,11 @@
                          :title (format nil "Mech snippet #~D"
                                         (getf block :index))
                          :summary
-                         (format nil "Recognized Mech block at source line ~D."
-                                 (getf block :line-number))
+                         (format nil "Recognized Mech block at ~A."
+                                 (snippet-block-location-label block))
                          :block-index (getf block :index)
                          :line-number (getf block :line-number)
+                         :location-label (snippet-block-location-label block)
                          :source source
                          :steps ordered-steps
                          :preview-mode (mech-snippet-preview-mode ordered-steps)
@@ -451,11 +771,12 @@
                                    (string-downcase (string language)))
                                   (getf block :index))
                    :summary
-                   (format nil "Recognized ~A code block at source line ~D."
+                   (format nil "Recognized ~A code block at ~A."
                            (string-downcase (string language))
-                           (getf block :line-number))
+                           (snippet-block-location-label block))
                    :block-index (getf block :index)
                    :line-number (getf block :line-number)
+                   :location-label (snippet-block-location-label block)
                    :source source
                    :language language
                    :output-path output-path
@@ -583,9 +904,9 @@
 (defun snippet-playground-findings (selected-mech selected-code)
   (let ((findings '()))
     (unless selected-mech
-      (push "No Mech snippet was recognized in the current source surface." findings))
+      (push "No Mech snippet was recognized in the current origin surface." findings))
     (unless selected-code
-      (push "No supported code snippet was recognized in the current source surface." findings))
+      (push "No supported code snippet was recognized in the current origin surface." findings))
     (when (and selected-code
                (typep selected-code 'unsupported-code-snippet))
       (push (format nil "Recognized ~A, but only JavaScript is supported in this slice."
@@ -596,15 +917,19 @@
 (defun snippet-playground-pairing-notes (selected-mech selected-code)
   (let ((notes '()))
     (when selected-mech
-      (push (format nil "Selected Mech block #~D at source line ~D."
+      (push (format nil "Selected Mech block #~D at ~A."
                     (mech-snippet-block-index-of selected-mech)
-                    (mech-snippet-line-number-of selected-mech))
+                    (or (snippet-location-label-of selected-mech)
+                        (format nil "line ~D"
+                                (mech-snippet-line-number-of selected-mech))))
             notes))
     (when selected-code
-      (push (format nil "Selected ~A block #~D at source line ~D."
+      (push (format nil "Selected ~A block #~D at ~A."
                     (string-downcase (string (code-snippet-language-of selected-code)))
                     (code-snippet-block-index-of selected-code)
-                    (code-snippet-line-number-of selected-code))
+                    (or (snippet-location-label-of selected-code)
+                        (format nil "line ~D"
+                                (code-snippet-line-number-of selected-code))))
             notes))
     (nreverse notes)))
 
@@ -618,7 +943,7 @@
     (:unsupported
      "Recognized a snippet pair, but only JavaScript is supported in this slice.")
     (t
-     "The current source surface does not expose a complete Mech/code pair yet.")))
+     "The current origin surface does not expose a complete Mech/code pair yet.")))
 
 (defun snippet-playground-session-status (selected-mech selected-code)
   (cond
@@ -631,74 +956,372 @@
     (t
      :malformed)))
 
+(defun snippet-playground-transition-entry (from-state to-state trigger detail
+                                            &key guard)
+  (list :timestamp (snippet-playground-current-millis)
+        :kind :transition
+        :transition-id
+        (format nil "~(~A~)->~(~A~)/~(~A~)"
+                from-state
+                to-state
+                trigger)
+        :from-state from-state
+        :to-state to-state
+        :detail (if guard
+                    (format nil "~A Guard: ~A." detail guard)
+                    detail)))
+
+(defun snippet-playground-evidence-entry (state detail evidence)
+  (list :timestamp (snippet-playground-current-millis)
+        :kind :evidence
+        :from-state state
+        :to-state state
+        :detail detail
+        :evidence evidence))
+
+(defun snippet-playground-session-id (origin-surface-kind source-label source-pathname)
+  (format nil "snippet-playground/~A/~A"
+          (or origin-surface-kind "surface")
+          (or (and source-pathname
+                   (namestring source-pathname))
+              source-label
+              "session")))
+
+(defun snippet-playground-session-title
+    (context-object source-label source-pathname)
+  (format nil "Snippet playground: ~A"
+          (or source-label
+              (session-title-label context-object source-pathname))))
+
+(defun make-snippet-playground-result-from-blocks
+    (&key context-object context-view-title source-pathname source-text
+       blocks origin-surface-kind provider-kind source-label)
+  (let* ((resolved-source-label
+           (or source-label
+               (ignore-errors (title-of context-object))
+               (and source-pathname
+                    (file-namestring source-pathname))
+               "Source"))
+         (origin-pane-id (pending-evaluation-origin-pane-id))
+         (pending-pane-id (pending-evaluation-pane-id))
+         (start-time (snippet-playground-current-millis))
+         (current-state :available)
+         (visited-states (list :available))
+         (transition-trace '())
+         (evidence-trace '())
+         (recognized-mech-snippets nil)
+         (recognized-code-snippets nil)
+         (selected-mech nil)
+         (selected-code nil)
+         (result-object nil)
+         (failure-object nil)
+         (failure-classification nil))
+    (labels
+        ((advance (to-state trigger detail &key guard progress-phase progress-message)
+           (push (snippet-playground-transition-entry
+                  current-state
+                  to-state
+                  trigger
+                  detail
+                  :guard guard)
+                 transition-trace)
+           (setf current-state to-state)
+           (unless (equal (car visited-states) to-state)
+             (push to-state visited-states))
+           (when progress-message
+             (snippet-playground-report-progress
+              progress-phase
+              progress-message
+              :detail detail)))
+         (note-evidence (state detail evidence)
+           (push (snippet-playground-evidence-entry
+                  state
+                  detail
+                  evidence)
+                 evidence-trace))
+         (make-result (status &key failure-classification)
+           (let* ((title (snippet-playground-session-title
+                          context-object
+                          resolved-source-label
+                          source-pathname))
+                  (summary (snippet-playground-session-summary
+                            status
+                            selected-mech
+                            selected-code))
+                  (class (if (eq status :ready)
+                             'snippet-playground-session
+                             'snippet-playground-failure))
+                  (initargs
+                    (list
+                     :id (snippet-playground-session-id
+                          origin-surface-kind
+                          resolved-source-label
+                          source-pathname)
+                     :title title
+                     :summary summary
+                     :status status
+                     :context-object context-object
+                     :context-view-title context-view-title
+                     :origin-surface-kind origin-surface-kind
+                     :provider-kind provider-kind
+                     :source-label resolved-source-label
+                     :source-pathname source-pathname
+                     :source-text (or source-text "")
+                     :source-block-count (length blocks)
+                     :recognized-mech-snippets recognized-mech-snippets
+                     :recognized-code-snippets recognized-code-snippets
+                     :selected-mech selected-mech
+                     :selected-code selected-code
+                     :crosswalk (and selected-mech
+                                     selected-code
+                                     (snippet-playground-crosswalk
+                                      selected-mech
+                                      selected-code))
+                     :pairing-notes (snippet-playground-pairing-notes
+                                     selected-mech
+                                     selected-code)
+                     :lisp-scaffold-source
+                     (and selected-code
+                          (snippet-playground-lisp-scaffold nil selected-code))
+                     :findings (snippet-playground-findings
+                                selected-mech
+                                selected-code)))
+                  (object
+                    (apply #'make-instance
+                           class
+                           (if (eq class 'snippet-playground-failure)
+                               (append initargs
+                                       (list :failure-classification
+                                             failure-classification))
+                               initargs))))
+             (let ((run
+                     (make-snippet-playground-state-machine-run
+                      :current-state current-state
+                      :visited-states (nreverse visited-states)
+                      :transition-trace (nreverse transition-trace)
+                      :evidence-trace (nreverse evidence-trace)
+                      :start-time start-time
+                      :end-time (snippet-playground-current-millis)
+                      :status (if (eq status :ready) :finished :failed)
+                      :failure-classification failure-classification
+                      :source-label resolved-source-label
+                      :origin-pane-id origin-pane-id
+                      :origin-surface-kind origin-surface-kind
+                      :provider-kind provider-kind
+                      :pending-pane-id pending-pane-id
+                      :recognized-mech-snippets recognized-mech-snippets
+                      :recognized-code-snippets recognized-code-snippets
+                      :selected-mech selected-mech
+                      :selected-code selected-code
+                      :result-object (and (eq status :ready) object)
+                      :failure-object (unless (eq status :ready) object))))
+               (setf (snippet-playground-session-state-machine-run-of object)
+                     run))
+             object)))
+      (handler-case
+          (progn
+            (advance :invoked
+                     :snippet-click
+                     "Snippet capability invoked from the origin pane.")
+            (advance :pending
+                     :open-pending-pane
+                     (format nil
+                             "Pending pane ~A opened to the right of origin pane ~A."
+                             (or pending-pane-id "n/a")
+                             (or origin-pane-id "n/a")))
+            (note-evidence
+             :pending
+             "Captured origin and pending-pane placement context."
+             (list :origin_pane_id origin-pane-id
+                   :origin_surface_kind origin-surface-kind
+                   :provider_kind provider-kind
+                   :pending_pane_id pending-pane-id))
+            (advance :collecting-input
+                     :pending-pane-opened
+                     (format nil "Collecting snippet input from ~A."
+                             resolved-source-label)
+                     :progress-phase :collecting-input
+                     :progress-message "Collecting input...")
+            (unless blocks
+              (setf failure-classification :no-input)
+              (advance :failed
+                       :input-collection-failed
+                       "No snippet candidates could be extracted from the origin surface."
+                       :progress-phase :failed
+                       :progress-message "Failed")
+              (setf failure-object
+                    (make-result :malformed
+                                 :failure-classification failure-classification))
+              (return-from make-snippet-playground-result-from-blocks
+                failure-object))
+            (note-evidence
+             :collecting-input
+             "Collected provider-specific snippet candidates."
+             (list :source_block_count (length blocks)
+                   :origin_surface_kind origin-surface-kind
+                   :provider_kind provider-kind))
+            (advance :recognizing
+                     :input-extracted
+                     (format nil "Recognizing snippet candidates from ~D collected inputs."
+                             (length blocks))
+                     :guard :input-extracted
+                     :progress-phase :recognizing
+                     :progress-message "Recognizing snippets...")
+            (setf recognized-mech-snippets
+                  (remove nil
+                          (mapcar #'maybe-make-mech-snippet blocks)))
+            (setf recognized-code-snippets
+                  (recognized-code-snippets-from-blocks blocks))
+            (note-evidence
+             :recognizing
+             "Recognition finished."
+             (list
+              :recognized_mech_snippets
+              (snippet-playground-snippet-labels recognized-mech-snippets)
+              :recognized_code_snippets
+              (snippet-playground-snippet-labels recognized-code-snippets)))
+            (unless (or recognized-mech-snippets
+                        recognized-code-snippets)
+              (setf failure-classification :no-candidates)
+              (advance :failed
+                       :recognition-failed
+                       "No recognizable Mech or code snippets were found."
+                       :progress-phase :failed
+                       :progress-message "Failed")
+              (setf failure-object
+                    (make-result :malformed
+                                 :failure-classification failure-classification))
+              (return-from make-snippet-playground-result-from-blocks
+                failure-object))
+            (advance :pairing
+                     :snippets-recognized
+                     "Selecting a Mech/code pair from the recognized candidates."
+                     :guard :candidates-found
+                     :progress-phase :pairing
+                     :progress-message "Pairing snippets...")
+            (setf selected-mech
+                  (select-best-snippet recognized-mech-snippets
+                                       #'mech-snippet-score-of))
+            (setf selected-code
+                  (select-best-snippet recognized-code-snippets
+                                       #'code-snippet-score-of))
+            (note-evidence
+             :pairing
+             "Pair selection completed."
+             (snippet-playground-selected-pair-summary
+              selected-mech
+              selected-code))
+            (unless (and selected-mech selected-code)
+              (setf failure-classification :pairing-failed)
+              (advance :failed
+                       :pairing-failed
+                       "The collected snippets did not yield a complete Mech/code pair."
+                       :progress-phase :failed
+                       :progress-message "Failed")
+              (setf failure-object
+                    (make-result :malformed
+                                 :failure-classification failure-classification))
+              (return-from make-snippet-playground-result-from-blocks
+                failure-object))
+            (advance :building-session
+                     :pair-selected
+                     "Building the snippet-playground session object."
+                     :guard :valid-pair
+                     :progress-phase :building-session
+                     :progress-message "Building session...")
+            (if (typep selected-code 'javascript-code-snippet)
+                (progn
+                  (advance :ready
+                           :session-built
+                           "Built a ready snippet-playground session for the selected pair.")
+                  (setf result-object
+                        (make-result :ready)))
+                (progn
+                  (setf failure-classification :unsupported-language)
+                  (advance :failed
+                           :session-build-failed
+                           "Recognized a pair, but only JavaScript is supported in this slice."
+                           :progress-phase :failed
+                           :progress-message "Failed")
+                  (setf failure-object
+                        (make-result :unsupported
+                                     :failure-classification
+                                     failure-classification))))
+            (or result-object failure-object))
+        (error (condition)
+          (setf failure-classification :session-build-error)
+          (unless (eq current-state :failed)
+            (advance :failed
+                     :session-build-failed
+                     (format nil "Snippet playground build failed: ~A" condition)
+                     :progress-phase :failed
+                     :progress-message "Failed"))
+          (note-evidence
+           :failed
+           "Caught a condition while building the snippet-playground result."
+           (princ-to-string condition))
+          (setf failure-object
+                (make-result :malformed
+                             :failure-classification failure-classification))
+          failure-object)))))
+
 (defun make-snippet-playground-session-from-source
     (&key context-object context-view-title source-pathname source-text)
-  (let* ((trimmed-source (or source-text ""))
-         (blocks (extract-html-code-blocks trimmed-source))
-         (mech-snippets (remove nil
-                                (mapcar #'maybe-make-mech-snippet blocks)))
-         (code-snippets (recognized-code-snippets-from-blocks blocks))
-         (selected-mech (select-best-snippet mech-snippets
-                                             #'mech-snippet-score-of))
-         (selected-code (select-best-snippet code-snippets
-                                             #'code-snippet-score-of))
-         (status (snippet-playground-session-status selected-mech selected-code))
-         (title (format nil "Snippet playground: ~A"
-                        (session-title-label context-object source-pathname)))
-         (summary (snippet-playground-session-summary
-                   status
-                   selected-mech
-                   selected-code)))
-    (make-instance 'snippet-playground-session
-                   :id (format nil "snippet-playground/~A"
-                               (or (and source-pathname
-                                        (namestring source-pathname))
-                                   (session-title-label context-object source-pathname)))
-                   :title title
-                   :summary summary
-                   :status status
-                   :context-object context-object
-                   :context-view-title context-view-title
-                   :source-pathname source-pathname
-                   :source-text trimmed-source
-                   :recognized-mech-snippets mech-snippets
-                   :recognized-code-snippets code-snippets
-                   :selected-mech selected-mech
-                   :selected-code selected-code
-                   :crosswalk (and selected-mech
-                                   selected-code
-                                   (snippet-playground-crosswalk
-                                    selected-mech
-                                    selected-code))
-                   :pairing-notes (snippet-playground-pairing-notes
-                                   selected-mech
-                                   selected-code)
-                   :lisp-scaffold-source
-                   (and selected-code
-                        (snippet-playground-lisp-scaffold nil selected-code))
-                   :findings (snippet-playground-findings
-                              selected-mech
-                              selected-code))))
+  (let ((trimmed-source (or source-text "")))
+    (make-snippet-playground-result-from-blocks
+     :context-object context-object
+     :context-view-title context-view-title
+     :source-pathname source-pathname
+     :source-text trimmed-source
+     :blocks (extract-html-code-blocks trimmed-source)
+     :origin-surface-kind "html-source"
+     :provider-kind "source-v1")))
+
+(defun make-snippet-playground-session-from-fedwiki-page
+    (&key context-object context-view-title page)
+  (when page
+    (hyperbook/fedwiki::load-page page))
+  (let ((blocks (if page
+                    (extract-fedwiki-story-item-blocks page)
+                    nil)))
+    (make-snippet-playground-result-from-blocks
+     :context-object (or context-object page)
+     :context-view-title context-view-title
+     :source-text (snippet-playground-source-text-from-blocks blocks)
+     :blocks blocks
+     :origin-surface-kind "fedwiki-page"
+     :provider-kind "fedwiki-v1"
+     :source-label (and page (title-of page)))))
 
 (defun make-snippet-playground-session-target
-    (&key context-object context-view-title source-pathname)
-  (if (and source-pathname
-           (probe-file source-pathname))
-      (make-snippet-playground-session-from-source
-       :context-object context-object
-       :context-view-title context-view-title
-       :source-pathname source-pathname
-       :source-text (uiop:read-file-string source-pathname))
-      (make-snippet-playground-session-from-source
-       :context-object context-object
-       :context-view-title context-view-title
-       :source-pathname source-pathname
-       :source-text "")))
+    (&key context-object context-view-title source-pathname fedwiki-page
+       provider-kind origin-surface-kind)
+  (cond
+    ((or (string= (or provider-kind "") "fedwiki-v1")
+         (string= (or origin-surface-kind "") "fedwiki-page")
+         fedwiki-page)
+     (make-snippet-playground-session-from-fedwiki-page
+      :context-object context-object
+      :context-view-title context-view-title
+      :page fedwiki-page))
+    ((and source-pathname
+          (probe-file source-pathname))
+     (make-snippet-playground-session-from-source
+      :context-object context-object
+      :context-view-title context-view-title
+      :source-pathname source-pathname
+      :source-text (uiop:read-file-string source-pathname)))
+    (t
+     (make-snippet-playground-session-from-source
+      :context-object context-object
+      :context-view-title context-view-title
+      :source-pathname source-pathname
+      :source-text ""))))
 
 (defun snippet-playground-run-scaffold (session)
   (let ((source (snippet-playground-session-lisp-scaffold-source-of session)))
     (if (snippet-playground-empty-string-p source)
-        (make-instance 'snippet-playground-session
+        (make-instance 'snippet-playground-failure
                        :id (id-of session)
                        :title (title-of session)
                        :summary (summary-of session)
@@ -707,10 +1330,18 @@
                        (snippet-playground-session-context-object-of session)
                        :context-view-title
                        (snippet-playground-session-context-view-title-of session)
+                       :origin-surface-kind
+                       (snippet-playground-session-origin-surface-kind-of session)
+                       :provider-kind
+                       (snippet-playground-session-provider-kind-of session)
+                       :source-label
+                       (snippet-playground-session-source-label-of session)
                        :source-pathname
                        (snippet-playground-session-source-pathname-of session)
                        :source-text
                        (snippet-playground-session-source-text-of session)
+                       :source-block-count
+                       (snippet-playground-session-source-block-count-of session)
                        :recognized-mech-snippets
                        (snippet-playground-session-recognized-mech-snippets-of session)
                        :recognized-code-snippets
@@ -724,9 +1355,13 @@
                        :pairing-notes
                        (snippet-playground-session-pairing-notes-of session)
                        :lisp-scaffold-source source
+                       :state-machine-run
+                       (snippet-playground-session-state-machine-run-of session)
                        :findings
                        (append (snippet-playground-session-findings-of session)
-                               (list "No Lisp scaffold is available for this session.")))
+                               (list "No Lisp scaffold is available for this session."))
+                       :failure-classification
+                       :missing-lisp-scaffold)
         (handler-case
             (let ((result (clog-moldable-inspector::playground-eval-source
                            session
@@ -870,10 +1505,24 @@
                "Context view"
                (snippet-playground-session-context-view-title-of session))
               (snippet-playground-status-table-row
+               "Origin surface"
+               (snippet-playground-session-origin-surface-kind-of session))
+              (snippet-playground-status-table-row
+               "Provider kind"
+               (snippet-playground-session-provider-kind-of session))
+              (snippet-playground-status-table-row
+               "Source label"
+               (snippet-playground-session-source-label-of session))
+              (snippet-playground-status-table-row
                "Source file"
                (and (snippet-playground-session-source-pathname-of session)
                     (namestring
                      (snippet-playground-session-source-pathname-of session))))
+              (snippet-playground-status-table-row
+               "Collected inputs"
+               (format nil "~D"
+                       (snippet-playground-session-source-block-count-of
+                        session)))
               (snippet-playground-status-table-row
                "Recognized Mech snippets"
                (format nil "~D"
@@ -909,7 +1558,16 @@
                "Preview mode"
                (and (snippet-playground-session-selected-mech-of session)
                     (mech-snippet-preview-mode-of
-                     (snippet-playground-session-selected-mech-of session)))))
+                     (snippet-playground-session-selected-mech-of session))))
+              (maybe-object-ref-row
+               "Run"
+               (snippet-playground-session-state-machine-run-of session))
+              (when (typep session 'snippet-playground-failure)
+                (snippet-playground-status-table-row
+                 "Failure classification"
+                 (string-downcase
+                  (string
+                   (snippet-playground-failure-classification-of session))))))
       (:h3 "Findings")
       (if (snippet-playground-session-findings-of session)
           (html-inspector-views:html
@@ -935,13 +1593,13 @@
         (snippet-source-pre (mech-snippet-source-of mech))
         (html-inspector-views:html
           (:p (html-inspector-views:esc
-               "No Mech snippet was selected from the current source surface."))))
+               "No Mech snippet was selected from the current origin surface."))))
       (:h3 "Code snippet")
       (if-let (code (snippet-playground-session-selected-code-of session))
         (snippet-source-pre (code-snippet-source-of code))
         (html-inspector-views:html
           (:p (html-inspector-views:esc
-               "No supported code snippet was selected from the current source surface.")))))))
+               "No supported code snippet was selected from the current origin surface.")))))))
 
 (html-inspector-views:defview snippet-playground-session-mech
     (session snippet-playground-session)

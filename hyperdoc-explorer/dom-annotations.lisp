@@ -1714,13 +1714,23 @@
                            "dock-capability-inspection-v1"
                            (views:eval-button
                             "Open snippet playground"
-                            (views:thunk
+                             (views:thunk
                               (make-snippet-playground-session-target
                                :context-object context-object
                                :context-view-title view-title
+                               :origin-surface-kind
+                               (if (string= (anchor-provider-kind-of provider)
+                                            "fedwiki-v1")
+                                   "fedwiki-page"
+                                   "html-source")
+                               :provider-kind
+                               (anchor-provider-kind-of provider)
                                :source-pathname
                                (and (typep provider 'source-view-anchor-provider)
-                                    (anchor-provider-pathname-of provider)))))))
+                                    (anchor-provider-pathname-of provider))
+                               :fedwiki-page
+                               (and (typep provider 'fedwiki-view-anchor-provider)
+                                    (anchor-provider-page-of provider)))))))
               (:svg :class "hyperdoc-dom-connect-overlay"
                     :hidden "hidden"
                     :xmlns "http://www.w3.org/2000/svg"

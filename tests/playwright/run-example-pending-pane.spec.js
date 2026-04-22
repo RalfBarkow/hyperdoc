@@ -4,6 +4,7 @@ const { test, expect } = require("@playwright/test");
 const {
   activatePaneTab,
   attachJson,
+  openFedWikiPageFromTextPageLink,
   openHyperDoc,
   openTextPageFromHyperDoc,
   selectSourceTab,
@@ -98,6 +99,17 @@ async function openSnippetPlaygroundFixture(page, title) {
   await openTextPageFromHyperDoc(page, title);
   await selectSourceTab(page, 2);
   await settleInspectorBindings(page, 1500);
+}
+
+async function openFedWikiSnippetPlaygroundFixture(page, title, fedwikiLinkText) {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, title);
+  await settleInspectorBindings(page, 1000);
+  await openFedWikiPageFromTextPageLink(page, 2, fedwikiLinkText);
+  const fedwikiPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
+  await activatePaneTab(page, fedwikiPaneIndex, "Story");
+  await settleInspectorBindings(page, 1500);
+  return fedwikiPaneIndex;
 }
 
 async function clickSnippetPlayground(page, paneIndex = 2) {
@@ -320,4 +332,164 @@ test("snippet playground crosswalk recognizes the Quick Brown Fox mech/code pair
     snippetPaneIndex,
     finalState: await readLastPaneState(page),
   });
+});
+
+test("fedwiki snippet playground opens to the right and replaces pending pane in place", async ({
+  page,
+}, testInfo) => {
+  const fedwikiPaneIndex = await openFedWikiSnippetPlaygroundFixture(
+    page,
+    "Mech CODE Block analysis",
+    "Quick Brown Fox"
+  );
+  await installPendingPaneTrace(page);
+
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  await clickSnippetPlayground(page, fedwikiPaneIndex);
+
+  await page.waitForFunction(
+    () =>
+      (window.__hyperdocPendingPaneTrace || []).some(
+        (snapshot) => snapshot.pendingPaneCount > 0
+      ),
+    { timeout: 20_000 }
+  );
+
+  await expect
+    .poll(async () => page.locator(".hyperdoc-evaluation-pending").count(), {
+      timeout: 30_000,
+    })
+    .toBe(0);
+
+  const paneCountAfter = await page.locator(".inspector-pane").count();
+  expect(paneCountAfter).toBe(paneCountBefore + 1);
+
+  const lastPane = page.locator(".inspector-pane").last();
+  await expect(lastPane).toContainText(/snippet playground|snippet session/i);
+  await expect(lastPane).toContainText(/fedwiki-page/i);
+  await expect(lastPane).toContainText(/mech/i);
+  await expect(lastPane).toContainText(/javascript/i);
+  await expect(lastPane).toContainText(/lisp/i);
+
+  const trace = await readPendingPaneTrace(page);
+  const finalState = await readLastPaneState(page);
+  await attachJson(testInfo, "fedwiki-snippet-playground-pending-trace.json", {
+    fedwikiPaneIndex,
+    paneCountBefore,
+    trace,
+    finalState,
+  });
+
+  expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
+  expect(
+    trace.some((snapshot) =>
+      snapshot.pendingPhases.some((phase) =>
+        /collecting-input|recognizing|pairing|building-session|failed/i.test(
+          phase || ""
+        )
+      )
+    )
+  ).toBe(true);
+  expect(finalState.title || "").toMatch(/snippet playground|snippet session/i);
+});
+
+test("fedwiki Quick Brown Fox produces snippet playground session from live story items", async ({
+  page,
+}, testInfo) => {
+  const fedwikiPaneIndex = await openFedWikiSnippetPlaygroundFixture(
+    page,
+    "Mech CODE Block analysis",
+    "Quick Brown Fox"
+  );
+
+  await clickSnippetPlayground(page, fedwikiPaneIndex);
+
+  await expect
+    .poll(async () => {
+      const state = await readLastPaneState(page);
+      return state.pendingVisible ? "" : state.title || "";
+    }, { timeout: 30_000 })
+    .toMatch(/snippet playground|snippet session/i);
+
+  const snippetPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
+  const lastPane = page.locator(".inspector-pane").last();
+
+  await activatePaneTab(page, snippetPaneIndex, "Summary");
+  await expect(lastPane).toContainText(/context view/i);
+  await expect(lastPane).toContainText(/story/i);
+  await expect(lastPane).toContainText(/origin surface/i);
+  await expect(lastPane).toContainText(/fedwiki-page/i);
+  await expect(lastPane).toContainText(/provider kind/i);
+  await expect(lastPane).toContainText(/fedwiki-v1/i);
+  await expect(lastPane).toContainText(/source label/i);
+  await expect(lastPane).toContainText(/Quick Brown Fox/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Source pair");
+  await expect(lastPane).toContainText(/Quick Brown Fox/i);
+  await expect(lastPane).toContainText(/CODE/i);
+  await expect(lastPane).toContainText(/PREVIEW synopsis items|PREVIEW items/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Code");
+  await expect(lastPane).toContainText(/javascript/i);
+  await expect(lastPane).toContainText(/state\.items|items/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Lisp scaffold");
+  await expect(lastPane).toContainText(/run scaffold|step scaffold|derived-items-of/i);
+
+  await attachJson(testInfo, "fedwiki-snippet-playground-quick-brown-fox.json", {
+    fedwikiPaneIndex,
+    snippetPaneIndex,
+    finalState: await readLastPaneState(page),
+  });
+});
+
+test("malformed fedwiki input produces inspectable failure", async ({
+  page,
+}, testInfo) => {
+  const fedwikiPaneIndex = await openFedWikiSnippetPlaygroundFixture(
+    page,
+    "FedWiki Graphviz story item render trace",
+    "Graphviz Demo"
+  );
+  await installPendingPaneTrace(page);
+
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+  await clickSnippetPlayground(page, fedwikiPaneIndex);
+
+  await page.waitForFunction(
+    () =>
+      (window.__hyperdocPendingPaneTrace || []).some(
+        (snapshot) => snapshot.pendingPaneCount > 0
+      ),
+    { timeout: 20_000 }
+  );
+
+  await expect
+    .poll(async () => {
+      const state = await readLastPaneState(page);
+      return state.pendingVisible ? "" : state.body;
+    }, { timeout: 30_000 })
+    .toMatch(
+      /failed|unsupported|malformed|parse|no mech snippet|no supported code snippet/i
+    );
+
+  const finalState = await readLastPaneState(page);
+  const lastPane = page.locator(".inspector-pane").last();
+
+  expect(finalState.paneCount).toBe(paneCountBefore + 1);
+  await expect(lastPane).toContainText(
+    /failed|unsupported|malformed|parse|no mech snippet|no supported code snippet/i
+  );
+  await expect(lastPane).toContainText(/fedwiki-page/i);
+
+  const trace = await readPendingPaneTrace(page);
+  await attachJson(testInfo, "fedwiki-snippet-playground-failure-trace.json", {
+    fedwikiPaneIndex,
+    paneCountBefore,
+    trace,
+    finalState,
+  });
+
+  expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
+  expect(finalState.pendingVisible).toBe(false);
 });

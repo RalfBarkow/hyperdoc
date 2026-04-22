@@ -58,32 +58,65 @@
     (and title
          (search "Run example" title :test #'char-equal))))
 
+(defun snippet-playground-click-p (element)
+  (let ((title (hover-label-for-element element)))
+    (and title
+         (search "snippet playground" title :test #'char-equal))))
+
 (defun pending-evaluation-click-p (element target)
   (or (example-run-click-p element)
+      (snippet-playground-click-p element)
       (authored-expression-reference-p target)))
 
 (defun pending-evaluation-title (element target)
   (declare (ignore target))
-  (if (example-run-click-p element)
-      "Running example..."
-      "Evaluating..."))
+  (cond
+    ((example-run-click-p element)
+     "Running example...")
+    ((snippet-playground-click-p element)
+     "Building snippet playground...")
+    (t
+     "Evaluating...")))
 
 (defun pending-evaluation-phase-label (phase)
   (case phase
     (:running-example "Running example...")
     (:evaluating "Evaluating...")
+    (:collecting-input "Collecting input...")
+    (:recognizing "Recognizing snippets...")
+    (:pairing "Pairing snippets...")
+    (:building-session "Building session...")
     (:waiting-for-git "Waiting for Git...")
     (:opening-result "Opening result...")
     (:failed "Failed")
     (t "Pending...")))
 
 (defun pending-evaluation-phase-for-click (element target)
-  (declare (ignore target))
-  (if (example-run-click-p element)
-      :running-example
-      :evaluating))
+  (cond
+    ((example-run-click-p element)
+     :running-example)
+    ((snippet-playground-click-p element)
+     :collecting-input)
+    ((authored-expression-reference-p target)
+     :evaluating)
+    (t
+     :evaluating)))
 
 (defparameter +minimum-pending-pane-visibility-ms+ 250)
+
+(defvar *pending-evaluation-progress-hook* nil)
+(defvar *pending-evaluation-origin-pane-id* nil)
+(defvar *pending-evaluation-pane-id* nil)
+
+(defun report-pending-evaluation-progress (phase message &key detail)
+  (when *pending-evaluation-progress-hook*
+    (funcall *pending-evaluation-progress-hook* phase message :detail detail)))
+
+(defun pending-evaluation-origin-pane-id ()
+  *pending-evaluation-origin-pane-id*)
+
+(defun pending-evaluation-pane-id ()
+  *pending-evaluation-pane-id*)
 
 (defclass evaluation-pending-state ()
   ((request-id :reader evaluation-pending-request-id-of
@@ -269,6 +302,11 @@
          (clog:connection-body (clog-obj pane))
          (not (string= (clog:html-id (clog-obj pane)) "undefined")))))
 
+(defun pane-runtime-id (pane)
+  (ignore-errors
+    (and (live-pane-p pane)
+         (clog:html-id (clog-obj pane)))))
+
 (defun replace-pane-object-in-place (pane object &key select)
   (when (live-pane-p pane)
     (setf (pane-object pane) object)
@@ -327,7 +365,13 @@
     (set-active-eval-button-state element t)
     (bordeaux-threads:make-thread
      (lambda ()
-       (let ((result nil))
+       (let ((result nil)
+             (*pending-evaluation-progress-hook*
+               (lambda (phase message &key detail)
+                 (clog:with-sync-event ((clog-obj pending-pane))
+                   (refresh-pending-pane pending-pane phase message :detail detail))))
+             (*pending-evaluation-origin-pane-id* (pane-runtime-id pane))
+             (*pending-evaluation-pane-id* (pane-runtime-id pending-pane)))
          (handler-case
              (progn
                (clog:with-sync-event ((clog-obj pending-pane))

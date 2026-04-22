@@ -935,7 +935,9 @@
   }
 
   function openSnippetPlayground(state, event) {
-    if (!state || !state.available || state.providerKind !== "source-v1" ||
+    if (!state || !state.available ||
+        (state.providerKind !== "source-v1" &&
+         state.providerKind !== "fedwiki-v1") ||
         !state.snippetPlaygroundSubmit) {
       return;
     }
@@ -1357,7 +1359,8 @@
     var showDmx = dmxDockAvailable(state);
     var showSnippetPlayground = !!(
       state.available &&
-      state.providerKind === "source-v1" &&
+      (state.providerKind === "source-v1" ||
+       state.providerKind === "fedwiki-v1") &&
       state.snippetPlaygroundSubmit
     );
     state.touchFahrplan.hidden = !showTouchFahrplan;
