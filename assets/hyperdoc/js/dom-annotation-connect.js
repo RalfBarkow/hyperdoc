@@ -934,6 +934,19 @@
     );
   }
 
+  function openSnippetPlayground(state, event) {
+    if (!state || !state.available || state.providerKind !== "source-v1" ||
+        !state.snippetPlaygroundSubmit) {
+      return;
+    }
+    markDockCapabilityMastered(state, "snippet-playground-opened");
+    refreshPaneStateFromSession(state);
+    dispatchHiddenDockButton(state.snippetPlaygroundSubmit, {
+      shiftKey: !!(event && event.shiftKey),
+      dispatchDelayMs: 250
+    });
+  }
+
   function openCurrentAnnotation(state) {
     if (!state.available || !state.dockAnnotationSubmit) {
       return;
@@ -1337,13 +1350,19 @@
   }
 
   function syncDockCapabilities(state) {
-    if (!state || !state.touchFahrplan || !state.dmx) {
+    if (!state || !state.touchFahrplan || !state.dmx || !state.snippetPlayground) {
       return;
     }
     var showTouchFahrplan = zoteroDockAvailable(state);
     var showDmx = dmxDockAvailable(state);
+    var showSnippetPlayground = !!(
+      state.available &&
+      state.providerKind === "source-v1" &&
+      state.snippetPlaygroundSubmit
+    );
     state.touchFahrplan.hidden = !showTouchFahrplan;
     state.dmx.hidden = !showDmx;
+    state.snippetPlayground.hidden = !showSnippetPlayground;
     state.providerHandoff.hidden = !(showTouchFahrplan || showDmx);
     state.providerHandoffs = [];
     if (showTouchFahrplan) {
@@ -1388,6 +1407,9 @@
                     'title="Click a source anchor, then a target anchor.">Connect</button>' +
             '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
                     'title="Tap to complete Connect to the generic Annotation target, or reopen the current-object annotation when Connect is idle.">Annotation</button>' +
+            '<button type="button" class="hyperdoc-dock-snippet-playground hyperdoc-dock-action" ' +
+                    'title="Open a snippet playground crosswalk for the current source surface." ' +
+                    'data-hyperdoc-snippet-playground-submit="true" hidden>Snippet</button>' +
           '</div>' +
           '<button type="button" class="hyperdoc-dom-connect-help-toggle hyperdoc-dock-guide" ' +
                   'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
@@ -1522,6 +1544,7 @@
     state.annotationEvidenceSubmit = null;
     state.guideModelSubmit = null;
     state.guideEvidenceSubmit = null;
+    state.snippetPlaygroundSubmit = null;
     state.provider = provider;
     state.providerKind = surfaceProviderKind(surface);
     if (!surface) {
@@ -1556,13 +1579,15 @@
     var annotationEvidenceSubmit = controls.querySelector(".hyperdoc-dock-annotation-evidence-submit");
     var guideModelSubmit = controls.querySelector(".hyperdoc-dock-guide-model-submit");
     var guideEvidenceSubmit = controls.querySelector(".hyperdoc-dock-guide-evidence-submit");
+    var snippetPlaygroundSubmit = controls.querySelector(".hyperdoc-dock-snippet-playground-submit");
     if (!sourceInput || !targetInput || !inspectInput ||
         !requestIdInput || !browserFailureKindInput ||
         !browserMessageInput || !browserDetailInput ||
         !submit || !evidenceSubmit || !dockAnnotationSubmit ||
         !connectRuntimeSubmit || !connectEvidenceSubmit ||
         !annotationSemanticSubmit || !annotationEvidenceSubmit ||
-        !guideModelSubmit || !guideEvidenceSubmit) {
+        !guideModelSubmit || !guideEvidenceSubmit ||
+        !snippetPlaygroundSubmit) {
       return false;
     }
     state.root = root;
@@ -1584,6 +1609,7 @@
     state.annotationEvidenceSubmit = annotationEvidenceSubmit;
     state.guideModelSubmit = guideModelSubmit;
     state.guideEvidenceSubmit = guideEvidenceSubmit;
+    state.snippetPlaygroundSubmit = snippetPlaygroundSubmit;
     updateProviderCopy(state);
     syncDockCapabilities(state);
     return true;
@@ -1712,7 +1738,11 @@
     state.providerHandoffLabel.textContent =
       "Richer workflow lives in the pane body";
     state.dismiss.hidden = presentation.state === "active" || !coachmark;
-    state.compactCapabilities = ["Connect", "Annotation", "Guide"];
+    state.compactCapabilities = ["Connect", "Annotation"];
+    if (!state.snippetPlayground.hidden) {
+      state.compactCapabilities.push("Snippet");
+    }
+    state.compactCapabilities.push("Guide");
     state.coachmarkCapabilities = coachmark
       ? (state.providerHandoffs || []).slice()
       : [];
@@ -2234,6 +2264,7 @@
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
     var annotation = slot.querySelector(".hyperdoc-dock-annotation");
+    var snippetPlayground = slot.querySelector(".hyperdoc-dock-snippet-playground");
     var touchFahrplan = slot.querySelector(".hyperdoc-dock-touch-fahrplan");
     var dmx = slot.querySelector(".hyperdoc-dock-dmx");
     var cue = slot.querySelector(".hyperdoc-dom-connect-cue");
@@ -2252,7 +2283,8 @@
     var providerHandoff = slot.querySelector(".hyperdoc-dock-provider-handoff");
     var providerHandoffLabel = slot.querySelector(".hyperdoc-dock-provider-handoff-label");
     var dismiss = slot.querySelector(".hyperdoc-dock-dismiss");
-    if (!control || !toggle || !annotation || !touchFahrplan || !dmx ||
+    if (!control || !toggle || !annotation || !snippetPlayground ||
+        !touchFahrplan || !dmx ||
         !cue || !sourceSummary || !sourceChip || !clear ||
         !stateBadge || !coachmarkTitle || !coachmarkSummary ||
         !coachmarkDetail || !providerHandoff || !providerHandoffLabel || !dismiss ||
@@ -2267,6 +2299,7 @@
       control: control,
       toggle: toggle,
       annotation: annotation,
+      snippetPlayground: snippetPlayground,
       touchFahrplan: touchFahrplan,
       dmx: dmx,
       cue: cue,
@@ -2322,6 +2355,7 @@
       annotationEvidenceSubmit: null,
       guideModelSubmit: null,
       guideEvidenceSubmit: null,
+      snippetPlaygroundSubmit: null,
       compactCapabilities: [],
       coachmarkCapabilities: [],
       providerHandoffs: [],
@@ -2366,6 +2400,11 @@
         return;
       }
       completeAnnotationTarget(state);
+    });
+    snippetPlayground.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openSnippetPlayground(state, event);
     });
     touchFahrplan.addEventListener("click", function (event) {
       event.preventDefault();

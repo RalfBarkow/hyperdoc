@@ -20,6 +20,7 @@ function paneChrome(page, paneIndex) {
     connectControl: currentPane.locator(".hyperdoc-dom-connect-control"),
     connectToggle: currentPane.locator(".hyperdoc-dom-connect-toggle"),
     annotationButton: currentPane.locator(".hyperdoc-dock-annotation"),
+    snippetButton: currentPane.locator(".hyperdoc-dock-snippet-playground"),
     status: currentPane.locator(".hyperdoc-dom-connect-status"),
     cue: currentPane.locator(".hyperdoc-dom-connect-cue"),
     sourceChip: currentPane.locator(".hyperdoc-dom-connect-source-chip"),
@@ -49,6 +50,7 @@ async function readPaneChromeState(page, paneIndex) {
     const cancelButton = slot?.querySelector(".hyperdoc-dom-connect-cancel");
     const feedback = slot?.querySelector(".hyperdoc-dom-connect-feedback");
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
+    const snippetButton = slot?.querySelector(".hyperdoc-dock-snippet-playground");
     const stateBadge = slot?.querySelector(".hyperdoc-dock-state-badge");
     const coachmarkSummary = slot?.querySelector(".hyperdoc-dock-coachmark-summary");
     const coachmarkDetail = slot?.querySelector(".hyperdoc-dock-coachmark-detail");
@@ -78,9 +80,14 @@ async function readPaneChromeState(page, paneIndex) {
       toggleMode: toggle?.dataset.mode || null,
       toggleText: toggle?.textContent?.trim() || null,
       compactActions: slot
-        ? Array.from(slot.querySelectorAll(".hyperdoc-dock-compact .hyperdoc-dock-action"))
+        ? Array.from(
+            slot.querySelectorAll(
+              ".hyperdoc-dock-compact .hyperdoc-dock-action:not([hidden])"
+            )
+          )
             .map((node) => node.textContent?.trim() || "")
         : [],
+      snippetHidden: !!snippetButton?.hidden,
       statusHidden: !!status?.hidden,
       statusText: status?.textContent?.trim() || null,
       cueHidden: !!cue?.hidden,

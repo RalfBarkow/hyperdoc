@@ -2,9 +2,11 @@
 
 const { test, expect } = require("@playwright/test");
 const {
+  activatePaneTab,
   attachJson,
   openHyperDoc,
   openTextPageFromHyperDoc,
+  selectSourceTab,
   settleInspectorBindings,
 } = require("./hyperdoc-inspector");
 
@@ -91,6 +93,22 @@ async function readLastPaneState(page) {
   });
 }
 
+async function openSnippetPlaygroundFixture(page, title) {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, title);
+  await selectSourceTab(page, 2);
+  await settleInspectorBindings(page, 1500);
+}
+
+async function clickSnippetPlayground(page, paneIndex = 2) {
+  const button = page
+    .locator(".inspector-pane")
+    .nth(paneIndex)
+    .locator('[data-hyperdoc-snippet-playground-submit="true"]');
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
+}
+
 test("Run example opens a visible pending pane and then replaces it in place", async ({
   page,
 }, testInfo) => {
@@ -161,4 +179,145 @@ test("Run example opens a visible pending pane and then replaces it in place", a
       finalState.body
     )
   ).toBe(true);
+});
+
+test("snippet playground shows a pending pane and replaces it in place", async ({
+  page,
+}, testInfo) => {
+  await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
+  await installPendingPaneTrace(page);
+
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+
+  await clickSnippetPlayground(page);
+
+  await page.waitForFunction(
+    () =>
+      (window.__hyperdocPendingPaneTrace || []).some(
+        (snapshot) => snapshot.pendingPaneCount > 0
+      ),
+    { timeout: 20_000 }
+  );
+
+  await expect
+    .poll(async () => {
+      return page.locator(".hyperdoc-evaluation-pending").count();
+    }, { timeout: 30_000 })
+    .toBe(0);
+
+  const paneCountAfter = await page.locator(".inspector-pane").count();
+  expect(paneCountAfter).toBe(paneCountBefore + 1);
+
+  const lastPane = page.locator(".inspector-pane").last();
+  await expect(lastPane).toContainText(/snippet playground|snippet session/i);
+  await expect(lastPane).toContainText(/mech/i);
+  await expect(lastPane).toContainText(/javascript/i);
+  await expect(lastPane).toContainText(/lisp/i);
+
+  const trace = await readPendingPaneTrace(page);
+  const finalState = await readLastPaneState(page);
+  await attachJson(testInfo, "snippet-playground-pending-trace.json", {
+    paneCountBefore,
+    trace,
+    finalState,
+  });
+
+  expect(
+    trace.some(
+      (snapshot) =>
+        snapshot.pendingPaneCount > 0 &&
+        snapshot.pendingPhases.some((phase) => phase)
+    )
+  ).toBe(true);
+
+  const finalSnapshot = trace[trace.length - 1];
+  expect(finalSnapshot.pendingPaneCount).toBe(0);
+  expect(finalState.title || "").toMatch(/snippet playground|snippet session/i);
+});
+
+test("snippet playground turns malformed or unsupported input into an inspectable failure", async ({
+  page,
+}, testInfo) => {
+  await openSnippetPlaygroundFixture(page, "Mechs at Sea");
+  await installPendingPaneTrace(page);
+
+  const paneCountBefore = await page.locator(".inspector-pane").count();
+
+  await clickSnippetPlayground(page);
+
+  await page.waitForFunction(
+    () =>
+      (window.__hyperdocPendingPaneTrace || []).some(
+        (snapshot) => snapshot.pendingPaneCount > 0
+      ),
+    { timeout: 20_000 }
+  );
+
+  await expect
+    .poll(async () => {
+      const state = await readLastPaneState(page);
+      if (state.pendingVisible) {
+        return "";
+      }
+      return state.body;
+    }, { timeout: 30_000 })
+    .toMatch(/failed|unsupported|malformed|parse|no mech snippet|no supported code snippet/i);
+
+  const finalState = await readLastPaneState(page);
+  expect(finalState.paneCount).toBe(paneCountBefore + 1);
+
+  const lastPane = page.locator(".inspector-pane").last();
+  await expect(lastPane).toContainText(
+    /failed|unsupported|malformed|parse|no mech snippet|no supported code snippet/i
+  );
+
+  const trace = await readPendingPaneTrace(page);
+  await attachJson(testInfo, "snippet-playground-failure-trace.json", {
+    paneCountBefore,
+    trace,
+    finalState,
+  });
+
+  expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
+  expect(finalState.pendingVisible).toBe(false);
+});
+
+test("snippet playground crosswalk recognizes the Quick Brown Fox mech/code pair", async ({
+  page,
+}, testInfo) => {
+  await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
+
+  await clickSnippetPlayground(page);
+
+  await expect
+    .poll(async () => {
+      const state = await readLastPaneState(page);
+      return state.pendingVisible ? "" : state.title || "";
+    }, { timeout: 30_000 })
+    .toMatch(/snippet playground|snippet session/i);
+
+  const snippetPaneIndex = (await page.locator(".inspector-pane").count()) - 1;
+  const lastPane = page.locator(".inspector-pane").last();
+
+  await activatePaneTab(page, snippetPaneIndex, "Source pair");
+  await expect(lastPane).toContainText(/Quick Brown Fox/i);
+  await expect(lastPane).toContainText(/CODE/i);
+  await expect(lastPane).toContainText(/PREVIEW items/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Code");
+  await expect(lastPane).toContainText(/javascript/i);
+  await expect(lastPane).toContainText(/state\.items|items/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Crosswalk");
+  await expect(lastPane).toContainText(/click/i);
+  await expect(lastPane).toContainText(/neighbors next/i);
+  await expect(lastPane).toContainText(/execution seam|crosswalk|translation/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Lisp scaffold");
+  await expect(lastPane).toContainText(/run scaffold|step scaffold|derived-items-of/i);
+
+  await attachJson(testInfo, "snippet-playground-quick-brown-fox.json", {
+    snippetPaneIndex,
+    finalState: await readLastPaneState(page),
+  });
 });

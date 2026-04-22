@@ -1707,7 +1707,20 @@
                            (views:eval-button
                             "Inspect Dock runtime claim and evidence"
                             (views:thunk
-                              (guide-capability-evidence-target)))))
+                              (guide-capability-evidence-target))))
+                    (:span :class "hyperdoc-dock-snippet-playground-submit"
+                           :style "display:none"
+                           :data-dom-association-transport
+                           "dock-capability-inspection-v1"
+                           (views:eval-button
+                            "Open snippet playground"
+                            (views:thunk
+                              (make-snippet-playground-session-target
+                               :context-object context-object
+                               :context-view-title view-title
+                               :source-pathname
+                               (and (typep provider 'source-view-anchor-provider)
+                                    (anchor-provider-pathname-of provider)))))))
               (:svg :class "hyperdoc-dom-connect-overlay"
                     :hidden "hidden"
                     :xmlns "http://www.w3.org/2000/svg"

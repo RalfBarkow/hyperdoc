@@ -82,6 +82,8 @@ test("HTML Source keeps dock chrome above a full-width source pane", async ({
   expect(layout.controlPresent).toBe(true);
   expect(layout.controlText).toContain("Connect");
   expect(layout.controlText).toContain("Annotation");
+  expect(chrome.compactActions).toContain("Snippet");
+  expect(chrome.snippetHidden).toBe(false);
   expect(layout.controlText).toContain("Guide");
   expect(layout.sourcePanePresent).toBe(true);
   expect(layout.sourceViewPresent).toBe(true);
@@ -116,4 +118,56 @@ test("HTML Source keeps dock chrome above a full-width source pane", async ({
   expect(layout.sourceViewRect?.height || 0).toBeGreaterThan(
     ((layout.sourcePaneRect?.height || 0) * 0.95)
   );
+});
+
+test("snippet playground opens in a fresh pane to the right without collapsing the source pane", async ({
+  page,
+}, testInfo) => {
+  await openHyperDoc(page);
+  await openTextPageFromHyperDoc(page, "Mech CODE Block analysis");
+  await selectSourceTab(page, 2);
+  await settleInspectorBindings(page, 1500);
+
+  const panesBefore = page.locator(".inspector-pane");
+  const paneCountBefore = await panesBefore.count();
+  const sourcePaneBefore = panesBefore.last();
+  const sourceBoxBefore = await sourcePaneBefore.boundingBox();
+  const chromeBefore = await readPaneChromeState(page, 2);
+
+  const snippetButton = sourcePaneBefore.locator(
+    '[data-hyperdoc-snippet-playground-submit="true"]'
+  );
+  await expect(snippetButton).toBeVisible({ timeout: 20_000 });
+  await snippetButton.click();
+
+  await expect
+    .poll(async () => page.locator(".inspector-pane").count(), { timeout: 30_000 })
+    .toBe(paneCountBefore + 1);
+
+  const panesAfter = page.locator(".inspector-pane");
+  const sourcePaneAfter = panesAfter.nth(paneCountBefore - 1);
+  const snippetPane = panesAfter.last();
+
+  const sourceBoxAfter = await sourcePaneAfter.boundingBox();
+  const snippetBox = await snippetPane.boundingBox();
+
+  await attachJson(testInfo, "snippet-playground-pane-layout.json", {
+    paneCountBefore,
+    sourceBoxBefore,
+    sourceBoxAfter,
+    snippetBox,
+    chromeBefore,
+  });
+
+  expect(sourceBoxBefore).toBeTruthy();
+  expect(sourceBoxAfter).toBeTruthy();
+  expect(snippetBox).toBeTruthy();
+
+  expect(snippetBox.x).toBeGreaterThan(sourceBoxAfter.x);
+  expect(snippetBox.x).toBeGreaterThan(
+    (sourceBoxAfter.x || 0) + ((sourceBoxAfter.width || 0) * 0.5)
+  );
+
+  await expect(sourcePaneAfter).toContainText(/Mech CODE Block analysis/i);
+  await expect(snippetPane).toContainText(/snippet playground|snippet session/i);
 });

@@ -129,6 +129,16 @@
   border-color: #8a3b2d;
 }
 
+.hyperdoc-dock-snippet-playground {
+  border-color: #0f766e;
+  color: #115e59;
+}
+
+.hyperdoc-dock-snippet-playground:hover,
+.hyperdoc-dock-snippet-playground:focus {
+  background: rgba(15, 118, 110, 0.12);
+}
+
 .hyperdoc-dock-touch-fahrplan {
   border-color: #0f766e;
   color: #115e59;
