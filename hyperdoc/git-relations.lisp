@@ -1335,10 +1335,8 @@ Use this object to capture ownership, rationale, and merge policy before merge e
    (list
     :bucket-type "glue-code"
     :title "Glue code"
-    :summary "Local wrappers, dependency shims, and vendor patches should stay as dreyeck-owned glue around the core systems until cleaner extension seams replace them."
+    :summary "Local wrappers, dependency shims, and source-rewrite glue should stay as dreyeck-owned glue around the core systems until cleaner extension seams replace them."
     :paths '("dev.sh"
-             "nix/patches/clog-boot-ignore-empty-ids.patch"
-             "nix/patches/clog-moldable-inspector-playground-eval.patch"
              "nix/sbcl-named-closure.nix"
              "nix/vendor/named-closure/named-closure.asd"
              "nix/vendor/named-closure/named-closure.lisp")
@@ -1455,7 +1453,7 @@ Use this object to capture ownership, rationale, and merge policy before merge e
     :title "Wrap local glue around stable core entrypoints"
     :summary "Keep local dev wrappers, vendor shims, and release patches in a downstream support layer that wraps official HyperDoc entrypoints instead of redefining them in core."
     :target-destination
-    ":dreyeck/dev support plus dreyeck/nix/patches and dreyeck/vendor/named-closure."
+    ":dreyeck/dev support plus derivation-scoped source overrides and dreyeck/vendor/named-closure."
     :dependency-direction
     "dreyeck dev/release glue depends on :hyperdoc/server and external tooling; HyperDoc core must not depend on the wrappers."
     :transition-mode "wrap"

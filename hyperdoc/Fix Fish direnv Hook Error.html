@@ -62,7 +62,7 @@ end</code></pre>
 <h2>Inspect the flake failure directly</h2>
 
 <pre><code>nix-store -l /nix/store/fwgh4qwhilxnx00vn8qsbzz7sdg9rhh6-clog-src-patched.drv
-rg -n "clog-src-patched|clog-boot-ignore-empty-ids.patch|patches =" .</code></pre>
+rg -n "clog-src-patched|postPatch|clogSrcPatched|htmlInspectorViewsSrcPatched" .</code></pre>
 
 <p>
   The environment manager is healthy. The broken unit is the project

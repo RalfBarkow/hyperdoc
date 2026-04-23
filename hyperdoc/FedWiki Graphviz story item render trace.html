@@ -153,7 +153,7 @@
   </li>
   <li>
     From there, the lower-layer helper carried locally by
-    <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt>
+    <tt>htmlInspectorViewsSrcPatched</tt> in <tt>flake.nix</tt>
     takes over.
   </li>
   <li>
@@ -193,15 +193,15 @@
 <p>
   The commit did not add a FedWiki <tt>:graphviz</tt> story-item renderer.
   It changed no files in <tt>hyperbook-fedwiki/</tt>. Instead, it unified the
-  lower shared DOT-to-SVG seam through
-  <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt> so
+  lower shared DOT-to-SVG seam through the
+  <tt>htmlInspectorViewsSrcPatched</tt> source rewrite in <tt>flake.nix</tt> so
   higher layers can reuse one Graphviz renderer contract.
 </p>
 
 <p>
   That matters because the now-implemented FedWiki <tt>:graphviz</tt> story-item
   adapter does not need to invent a second browser Graphviz stack. The lower-layer
-  patch already provides the reusable contract: entity-safe DOT transport, shared
+  rewrite already provides the reusable contract: entity-safe DOT transport, shared
   browser init, pending/error state, and raw DOT fallback.
 </p>
 
@@ -217,8 +217,8 @@
 
 <ul>
   <li><tt>hyperbook-fedwiki/story-items.lisp</tt> treats a FedWiki <tt>graphviz</tt> story item as a thin typed adapter and forwards DOT from story item <tt>text</tt> into <tt>views:graphviz-snippet</tt>.</li>
-  <li><tt>flake.nix</tt> packages dreyeck with <tt>htmlInspectorViewsSrcPatched</tt>, which applies <tt>nix/patches/html-inspector-views-graphviz-unification.patch</tt>.</li>
-  <li>That patch supplies the shared browser/runtime contract: <tt>data-inspector-graphviz-dot</tt>, pending/rendered/error state, raw DOT fallback, and <tt>window.inspectorGraphviz</tt>.</li>
+  <li><tt>flake.nix</tt> packages dreyeck with <tt>htmlInspectorViewsSrcPatched</tt>, which applies deterministic <tt>postPatch</tt> source rewrites for the shared Graphviz path.</li>
+  <li>That rewrite supplies the shared browser/runtime contract: <tt>data-inspector-graphviz-dot</tt>, pending/rendered/error state, raw DOT fallback, and <tt>window.inspectorGraphviz</tt>.</li>
 </ul>
 
 <p>
