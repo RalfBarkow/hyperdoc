@@ -351,7 +351,7 @@ the primary pane-local object in this slice."))
   (make-dock-implementation-evidence
    "dock-evidence/pane-snapshot"
    "Dock presentation state snapshot"
-   "The current pane snapshot exposes the active Dock presentation state and reason through the existing Connect inspection seam."
+   "The current pane snapshot exposes the active Dock presentation state, capability-scoped reason, and introduced capability through the existing Connect inspection seam."
    "source file"
    "hyperdoc/dom-annotations.lisp"
    :target-name "dom-connect-pane-state-snapshot"))
@@ -387,7 +387,7 @@ the primary pane-local object in this slice."))
   (make-dock-implementation-evidence
    "dock-evidence/playwright"
    "Dock coachmark browser regression"
-   "A focused browser regression proves introduction, active, degraded, and Touch-Fahrplan handoff behavior without relying on toolbar permanence."
+   "A focused browser regression proves capability-scoped introduction, Connect active-state ownership, Snippet degraded/rediscovery behavior, and provider handoff behavior without relying on toolbar permanence."
    "test"
    "tests/playwright/dock-presentation.spec.js"
    :target-name "Dock coachmark states degrade chrome without removing capability"))
@@ -499,28 +499,30 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-state/latent"
                  :title "latent"
-                 :summary "No expanded coachmark is visible, but compact Connect and Annotation actions remain in the pane chrome."
-                 :compact-representation "Compact capability strip with Connect, Annotation, and Guide."
+                 :summary "No expanded coachmark is visible, but compact Dock actions remain available in pane chrome."
+                 :compact-representation "Compact capability strip with Connect, Annotation, optional Snippet, and Guide."
                  :expanded-representation "None."
                  :entry-triggers '("Capability is available but no active gesture or coachmark teaching is currently shown.")
                  :exit-conditions '("A newly relevant capability triggers introduction."
                                     "Guide requests rediscovery."
                                     "Connect starts and makes the interaction active.")
-                 :capabilities '("Connect" "Annotation")
+                 :capabilities '("Connect" "Annotation" "Snippet")
                  :claims (list (dock-degrade-chrome-claim))))
 
 (defun dock-introduction-state ()
   (make-instance 'dock-presentation-state
                  :id "dock-state/introduction"
                  :title "introduction"
-                 :summary "The Dock expands because a capability has become newly relevant and needs teaching."
+                 :summary "The Dock expands for first contextual teaching of one capability at the chosen presentation-memory scope."
                  :compact-representation "Compact capability strip remains visible underneath the teaching layer."
                  :expanded-representation "Coachmark summary, explanation, and contextual handoff actions."
-                 :entry-triggers '("First newly relevant Dock capability in the current browser session.")
+                 :entry-triggers
+                 '("capability.newly_relevant guard: available && teachable && !introduced(capability, scope) && !active_session.")
                  :exit-conditions '("Dismiss coachmark."
-                                    "Start Connect."
+                                    "Acknowledge the capability teaching and recede to degraded."
+                                    "Start Connect (stateful capability only)."
                                     "Switch to a steady-state pane where only compact access remains.")
-                 :capabilities '("Connect" "Annotation" "Touch-Fahrplan handoff" "DMX handoff")
+                 :capabilities '("Connect" "Annotation" "Snippet" "Touch-Fahrplan handoff" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 
@@ -528,7 +530,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-state/active"
                  :title "active"
-                 :summary "The Dock stays expanded while the user is mid-gesture so task state remains visible."
+                 :summary "The Dock stays expanded only for Dock-owned stateful capability sessions."
                  :compact-representation "Compact capability strip remains present, but active Connect state owns the expanded surface."
                  :expanded-representation "Status, next expected step, selected source summary, clear, and cancel."
                  :entry-triggers '("Connect enters choose-source, choose-target, or submitting.")
@@ -542,29 +544,30 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-state/degraded"
                  :title "degraded"
-                 :summary "The expanded Dock has receded after use or dismissal, but the same capability remains available in lighter form."
+                 :summary "The expanded Dock has receded after use, dismissal, or acknowledgement, while the introduced capability remains compactly available."
                  :compact-representation "Compact capability strip only."
                  :expanded-representation "None until rediscovery is requested."
                  :entry-triggers '("Coachmark dismissed."
+                                    "Capability acknowledged."
                                     "Connect used once."
-                                    "A sibling Dock action demonstrated the capability cluster.")
+                                    "Snippet handoff used once.")
                  :exit-conditions '("Guide requests rediscovery."
-                                    "Connect becomes active again.")
-                 :capabilities '("Connect" "Annotation")
+                                    "Connect becomes active again (stateful capability).")
+                 :capabilities '("Connect" "Annotation" "Snippet")
                  :claims (list (dock-degrade-chrome-claim))))
 
 (defun dock-rediscovery-state ()
   (make-instance 'dock-presentation-state
                  :id "dock-state/rediscovery"
                  :title "rediscovery"
-                 :summary "The richer coachmark layer reappears on demand without changing the underlying compact capability model."
+                 :summary "The richer coachmark layer reappears on demand for the currently introduced capability without changing compact availability."
                  :compact-representation "Compact capability strip remains visible."
                  :expanded-representation "Coachmark explanation and contextual handoff actions reopened from Guide."
-                 :entry-triggers '("Guide clicked from latent or degraded state.")
+                 :entry-triggers '("Guide clicked from latent or degraded state for the introduced capability.")
                  :exit-conditions '("Guide closes again."
                                     "Dismiss coachmark."
                                     "Connect becomes active.")
-                 :capabilities '("Connect" "Annotation" "Touch-Fahrplan handoff" "DMX handoff")
+                 :capabilities '("Connect" "Annotation" "Snippet" "Touch-Fahrplan handoff" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 
@@ -572,21 +575,21 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-transition
                  :id "dock-transition/introduction-active"
                  :title "Introduction -> Active"
-                 :summary "Starting Connect turns the teaching layer into task-state chrome."
+                 :summary "Starting a Dock-owned stateful capability session (Connect) turns teaching into task-state chrome."
                  :from-state (dock-introduction-state)
                  :to-state (dock-active-state)
-                 :trigger "Connect clicked."
-                 :exit-condition "The pane enters choose-source or choose-target."
+                 :trigger "Connect clicked while stateful session ownership remains in the Dock."
+                 :exit-condition "The pane enters choose-source, choose-target, or submitting."
                  :claims (list (dock-connect-active-claim))))
 
 (defun dock-introduction-to-degraded-transition ()
   (make-instance 'dock-presentation-transition
                  :id "dock-transition/introduction-degraded"
                  :title "Introduction -> Degraded"
-                 :summary "Dismissing the coachmark retracts the Dock to compact capabilities."
+                 :summary "Dismissing or acknowledging the capability introduction retracts the Dock to compact capabilities."
                  :from-state (dock-introduction-state)
                  :to-state (dock-degraded-state)
-                 :trigger "Dismiss clicked or the teaching layer is explicitly closed."
+                 :trigger "Dismiss clicked, outside-click dismiss, or explicit acknowledgement."
                  :exit-condition "Compact actions remain visible."
                  :claims (list (dock-degrade-chrome-claim))))
 
@@ -601,11 +604,22 @@ the primary pane-local object in this slice."))
                  :exit-condition "The expanded coachmark is visible again."
                  :claims (list (dock-degrade-chrome-claim))))
 
+(defun dock-degraded-to-active-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-transition/degraded-active"
+                 :title "Degraded -> Active"
+                 :summary "Direct use of a Dock-owned stateful capability (Connect) re-enters active task-state chrome."
+                 :from-state (dock-degraded-state)
+                 :to-state (dock-active-state)
+                 :trigger "Connect clicked from degraded state."
+                 :exit-condition "The pane enters choose-source, choose-target, or submitting."
+                 :claims (list (dock-connect-active-claim))))
+
 (defun dock-active-to-degraded-transition ()
   (make-instance 'dock-presentation-transition
                  :id "dock-transition/active-degraded"
                  :title "Active -> Degraded"
-                 :summary "When the stateful Connect gesture ends, the Dock recedes to compact capabilities."
+                 :summary "When the stateful Connect gesture ends, the Dock recedes to compact capabilities without changing Snippet's non-stateful model."
                  :from-state (dock-active-state)
                  :to-state (dock-degraded-state)
                  :trigger "Connect succeeds or is cancelled."
@@ -628,7 +642,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-model
                  :id "dock-presentation-model"
                  :title "Dock presentation model"
-                 :summary "Inspectable state model for the Dock as a progressive enhancement over inspector tabs: introduction and active states expand the coachmark, while latent, degraded, and rediscovery keep capability and chrome separate."
+                 :summary "Inspectable SCXML-style state model for Dock presentation: capability-scoped introduction, Connect-only active session ownership, and shared degraded/rediscovery coachmark behavior."
                  :states (list (dock-latent-state)
                                (dock-introduction-state)
                                (dock-active-state)
@@ -636,6 +650,7 @@ the primary pane-local object in this slice."))
                                (dock-rediscovery-state))
                  :transitions (list (dock-introduction-to-active-transition)
                                     (dock-introduction-to-degraded-transition)
+                                    (dock-degraded-to-active-transition)
                                     (dock-active-to-degraded-transition)
                                     (dock-degraded-to-rediscovery-transition)
                                     (dock-rediscovery-to-degraded-transition))

@@ -3518,6 +3518,10 @@
                                         (presentation-state-of snapshot))
               (render-connect-field-row "Presentation reason"
                                         (presentation-reason-of snapshot))
+              (render-connect-field-row "Introduced capability"
+                                        (introduced-capability-of snapshot))
+              (render-connect-field-row "Presentation scope"
+                                        (presentation-scope-of snapshot))
               (render-connect-field-row "Coachmark visible"
                                         (dom-connect-bool-label
                                          (coachmark-visible-p-of snapshot)))
@@ -3619,6 +3623,7 @@
                    (:th "Enabled")
                    (:th "Local phase")
                    (:th "Presentation")
+                   (:th "Introduced capability")
                    (:th "Coachmark")
                    (:th "Selected source label")
                    (:th "Compact capabilities")
@@ -3652,6 +3657,9 @@
                                   (:td (:tt (views:esc
                                              (or (presentation-state-of pane-state)
                                                  "-"))))
+                                  (:td (:tt (views:esc
+                                             (or (introduced-capability-of pane-state)
+                                                 "-"))))
                                   (:td (views:esc
                                         (dom-connect-bool-label
                                          (coachmark-visible-p-of pane-state))))
@@ -3668,7 +3676,7 @@
                                                   pane-state)
                                                  "-")))))))
                   (views:html
-                    (:tr (:td :colspan "13"
+                    (:tr (:td :colspan "14"
                               (:span :style "opacity: 0.55;"
                                      "No live panes are registered.")))))))))
 

@@ -93,6 +93,12 @@
    (presentation-reason :initarg :presentation-reason
                         :initform nil
                         :reader presentation-reason-of)
+   (introduced-capability :initarg :introduced-capability
+                          :initform nil
+                          :reader introduced-capability-of)
+   (presentation-scope :initarg :presentation-scope
+                       :initform nil
+                       :reader presentation-scope-of)
    (coachmark-visible :initarg :coachmark-visible
                       :initform nil
                       :reader coachmark-visible-p-of)
@@ -809,13 +815,15 @@
          (format nil "~A" stage))))))
 
 (defun dom-connect-pane-state-summary (pane-id local-phase provider-kind
-                                       active-tab presentation-state)
-  (format nil "Pane ~A is ~A in ~A (~A), with Dock presentation ~A."
+                                       active-tab presentation-state
+                                       introduced-capability)
+  (format nil "Pane ~A is ~A in ~A (~A), with Dock presentation ~A~@[ for ~A~]."
           (or pane-id "?")
           (or local-phase "dormant")
           (or active-tab "its current view")
           (or provider-kind "unknown provider")
-          (or presentation-state "latent")))
+          (or presentation-state "latent")
+          introduced-capability))
 
 (defun dom-connect-transition-title (stage timestamp-label)
   (if (dom-connect-present-p timestamp-label)
@@ -835,6 +843,7 @@
          (provider-kind (getf json :providerKind))
          (local-phase (getf json :phase))
          (presentation-state (getf json :presentationState))
+         (introduced-capability (getf json :introducedCapability))
          (selected-source-label (getf json :selectedSourceLabel)))
     (make-instance 'dom-connect-pane-state-snapshot
                    :id (format nil "connect-pane/~A" (or pane-id "unknown"))
@@ -845,7 +854,8 @@
                              local-phase
                              provider-kind
                              active-tab
-                             presentation-state)
+                             presentation-state
+                             introduced-capability)
                    :pane-id pane-id
                    :active-tab active-tab
                    :context-view-title context-view-title
@@ -856,6 +866,8 @@
                    :help-open (getf json :helpOpen)
                    :presentation-state presentation-state
                    :presentation-reason (getf json :presentationReason)
+                   :introduced-capability introduced-capability
+                   :presentation-scope (getf json :presentationScope)
                    :coachmark-visible (getf json :coachmarkVisible)
                    :selected-source-label selected-source-label
                    :selected-source-pane (getf json :selectedSourcePane)

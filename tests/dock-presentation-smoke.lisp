@@ -40,6 +40,8 @@
               :helpOpen t
               :presentationState "active"
               :presentationReason "choose-target"
+              :introducedCapability "connect"
+              :presentationScope "browser-session"
               :coachmarkVisible t
               :selectedSourceLabel "Text pages"
               :selectedSourcePane t
@@ -58,9 +60,9 @@
                                 :test #'string=))
                    (format nil "Dock state ~A should not enumerate Inspect as a Dock capability"
                            (hyperdoc::title-of state))))
-    (assert-equal 5
+    (assert-equal 6
                   (length transitions)
-                  "Dock presentation model should expose the five explicit coachmark transitions in this slice")
+                  "Dock presentation model should expose the six explicit coachmark transitions in this slice")
     (assert-true (member "Degrade chrome, not capability"
                          claim-titles
                          :test #'string=)
@@ -91,6 +93,12 @@
     (assert-equal "choose-target"
                   (hyperdoc::presentation-reason-of snapshot)
                   "Pane snapshot should preserve the Dock presentation reason")
+    (assert-equal "connect"
+                  (hyperdoc::introduced-capability-of snapshot)
+                  "Pane snapshot should expose which capability currently owns Dock presentation")
+    (assert-equal "browser-session"
+                  (hyperdoc::presentation-scope-of snapshot)
+                  "Pane snapshot should expose the current Dock presentation memory scope")
     (assert-true (hyperdoc::coachmark-visible-p-of snapshot)
                  "Pane snapshot should preserve whether the expanded coachmark is visible")
     (assert-equal '("Connect" "Annotation" "Guide")

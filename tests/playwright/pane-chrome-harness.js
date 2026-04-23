@@ -52,6 +52,7 @@ async function readPaneChromeState(page, paneIndex) {
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
     const snippetButton = slot?.querySelector(".hyperdoc-dock-snippet-playground");
     const stateBadge = slot?.querySelector(".hyperdoc-dock-state-badge");
+    const coachmarkTitle = slot?.querySelector(".hyperdoc-dock-coachmark-title");
     const coachmarkSummary = slot?.querySelector(".hyperdoc-dock-coachmark-summary");
     const coachmarkDetail = slot?.querySelector(".hyperdoc-dock-coachmark-detail");
     const providerHandoff = slot?.querySelector(".hyperdoc-dock-provider-handoff");
@@ -76,6 +77,8 @@ async function readPaneChromeState(page, paneIndex) {
       slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
       presentationState: slot?.dataset.dockPresentation || null,
+      introducedCapability: slot?.dataset.dockIntroducedCapability || null,
+      presentationReason: slot?.dataset.dockPresentationReason || null,
       connectState: slot?.dataset.connectState || null,
       toggleMode: toggle?.dataset.mode || null,
       toggleText: toggle?.textContent?.trim() || null,
@@ -106,6 +109,7 @@ async function readPaneChromeState(page, paneIndex) {
       coachmarkVisible:
         !!helpPanel && window.getComputedStyle(helpPanel).display !== "none",
       coachmarkBadge: stateBadge?.textContent?.trim() || null,
+      coachmarkTitle: coachmarkTitle?.textContent?.trim() || null,
       coachmarkSummary: coachmarkSummary?.textContent?.replace(/\s+/g, " ").trim() || null,
       coachmarkDetail: coachmarkDetail?.textContent?.replace(/\s+/g, " ").trim() || null,
       providerHandoffHidden: !!providerHandoff?.hidden,

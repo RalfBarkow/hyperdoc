@@ -730,21 +730,68 @@
     };
   }
 
+  var DOCK_PRESENTATION_SCOPE = "browser-session";
+  var DOCK_CAPABILITY_CONNECT = "connect";
+  var DOCK_CAPABILITY_SNIPPET = "snippet";
+  var DOCK_INTRODUCTION_PRIORITY = [
+    DOCK_CAPABILITY_SNIPPET,
+    DOCK_CAPABILITY_CONNECT
+  ];
+
+  function createDockPresentationMemory() {
+    return {
+      scope: DOCK_PRESENTATION_SCOPE,
+      introducedByCapability: {}
+    };
+  }
+
   function dockPresentationMemory() {
-    if (!window.hyperdocDockPresentationMemory) {
-      window.hyperdocDockPresentationMemory = {
-        introductionShown: false,
-        connectMastered: false
-      };
+    if (!window.hyperdocDockPresentationMemory ||
+        typeof window.hyperdocDockPresentationMemory !== "object") {
+      window.hyperdocDockPresentationMemory = createDockPresentationMemory();
+    }
+    if (!window.hyperdocDockPresentationMemory.scope) {
+      window.hyperdocDockPresentationMemory.scope = DOCK_PRESENTATION_SCOPE;
+    }
+    if (!window.hyperdocDockPresentationMemory.introducedByCapability ||
+        typeof window.hyperdocDockPresentationMemory.introducedByCapability !== "object") {
+      window.hyperdocDockPresentationMemory.introducedByCapability = {};
     }
     return window.hyperdocDockPresentationMemory;
   }
 
   function resetDockPresentationMemory() {
-    window.hyperdocDockPresentationMemory = {
-      introductionShown: false,
-      connectMastered: false
-    };
+    window.hyperdocDockPresentationMemory = createDockPresentationMemory();
+  }
+
+  function capabilityScopedPresentationReason(capability, reason) {
+    if (!reason) {
+      return capability || null;
+    }
+    if (!capability) {
+      return reason;
+    }
+    if (reason.indexOf(capability + ".") === 0) {
+      return reason;
+    }
+    return capability + "." + reason;
+  }
+
+  function dockCapabilityIntroduced(memory, capability) {
+    return !!(memory &&
+      memory.introducedByCapability &&
+      capability &&
+      memory.introducedByCapability[capability]);
+  }
+
+  function markDockCapabilityIntroduced(memory, capability) {
+    if (!memory || !capability) {
+      return;
+    }
+    if (!memory.introducedByCapability) {
+      memory.introducedByCapability = {};
+    }
+    memory.introducedByCapability[capability] = true;
   }
 
   function paneSnapshot(state) {
@@ -761,6 +808,8 @@
       helpOpen: !!state.helpOpen,
       presentationState: state.presentationState || "latent",
       presentationReason: state.presentationReason || null,
+      introducedCapability: state.introducedCapability || null,
+      presentationScope: state.presentationScope || DOCK_PRESENTATION_SCOPE,
       coachmarkVisible: !!state.helpOpen,
       selectedSourceLabel: anchorLabel(session && session.sourceAnchor, null),
       selectedSourcePane: !!(session && session.sourcePaneId &&
@@ -935,13 +984,14 @@
   }
 
   function openSnippetPlayground(state, event) {
-    if (!state || !state.available ||
-        (state.providerKind !== "source-v1" &&
-         state.providerKind !== "fedwiki-v1") ||
-        !state.snippetPlaygroundSubmit) {
+    if (!snippetDockAvailable(state)) {
       return;
     }
-    markDockCapabilityMastered(state, "snippet-playground-opened");
+    markDockCapabilityUsed(
+      state,
+      DOCK_CAPABILITY_SNIPPET,
+      "snippet-playground-opened"
+    );
     refreshPaneStateFromSession(state);
     dispatchHiddenDockButton(state.snippetPlaygroundSubmit, {
       shiftKey: !!(event && event.shiftKey),
@@ -953,7 +1003,11 @@
     if (!state.available || !state.dockAnnotationSubmit) {
       return;
     }
-    markDockCapabilityMastered(state, "annotation-opened");
+    markDockCapabilityUsed(
+      state,
+      state.introducedCapability || DOCK_CAPABILITY_CONNECT,
+      "annotation-opened"
+    );
     refreshPaneStateFromSession(state);
     dispatchHiddenDockButton(state.dockAnnotationSubmit, {
       shiftKey: true,
@@ -969,7 +1023,11 @@
       openCurrentAnnotation(state);
       return;
     }
-    markDockCapabilityMastered(state, "annotation-target-selected");
+    markDockCapabilityUsed(
+      state,
+      DOCK_CAPABILITY_CONNECT,
+      "annotation-target-selected"
+    );
     completeConnection(state, buildAnnotationTargetAnchor(state));
   }
 
@@ -1248,6 +1306,15 @@
       return;
     }
     state.rediscoveryRequested = false;
+    state.presentationEvent = {
+      type: "guide-close",
+      capability: state.introducedCapability || null,
+      reason: "guide-closed"
+    };
+    state.presentationReason = capabilityScopedPresentationReason(
+      state.introducedCapability,
+      "guide-closed"
+    );
     refreshPaneStateFromSession(state);
   }
 
@@ -1255,10 +1322,16 @@
     if (!state) {
       return;
     }
-    var memory = dockPresentationMemory();
-    memory.connectMastered = true;
     state.rediscoveryRequested = false;
-    state.presentationReason = reason || "dismissed";
+    state.presentationEvent = {
+      type: "dismiss",
+      capability: state.introducedCapability || null,
+      reason: reason || "dismissed"
+    };
+    state.presentationReason = capabilityScopedPresentationReason(
+      state.introducedCapability,
+      reason || "dismissed"
+    );
     refreshPaneStateFromSession(state);
   }
 
@@ -1271,6 +1344,10 @@
       return;
     }
     state.rediscoveryRequested = true;
+    state.presentationReason = capabilityScopedPresentationReason(
+      state.introducedCapability,
+      "guide-opened"
+    );
     refreshPaneStateFromSession(state);
   }
 
@@ -1351,18 +1428,109 @@
     );
   }
 
+  function snippetDockAvailable(state) {
+    return !!(
+      state &&
+      state.available &&
+      (state.providerKind === "source-v1" ||
+       state.providerKind === "fedwiki-v1") &&
+      state.snippetPlaygroundSubmit
+    );
+  }
+
+  function dockCapabilityActionable(state, capability) {
+    if (capability === DOCK_CAPABILITY_CONNECT) {
+      return !!(state && state.available);
+    }
+    if (capability === DOCK_CAPABILITY_SNIPPET) {
+      return snippetDockAvailable(state);
+    }
+    return false;
+  }
+
+  function dockCapabilityTeachable(state, capability) {
+    if (capability === DOCK_CAPABILITY_CONNECT) {
+      return dockCapabilityActionable(state, capability) &&
+        !!collapseWhitespace(state && state.providerHelpSummary || "");
+    }
+    if (capability === DOCK_CAPABILITY_SNIPPET) {
+      return snippetDockAvailable(state);
+    }
+    return false;
+  }
+
+  function relevantDockCapabilities(state) {
+    var capabilities = [];
+    if (dockCapabilityActionable(state, DOCK_CAPABILITY_CONNECT)) {
+      capabilities.push(DOCK_CAPABILITY_CONNECT);
+    }
+    if (dockCapabilityActionable(state, DOCK_CAPABILITY_SNIPPET)) {
+      capabilities.push(DOCK_CAPABILITY_SNIPPET);
+    }
+    return capabilities;
+  }
+
+  function newlyRelevantDockCapabilities(state, capabilities) {
+    var previous = state && state.relevantDockCapabilities || [];
+    var next = capabilities ? capabilities.slice() : [];
+    var newlyRelevant = [];
+    next.forEach(function (capability) {
+      if (previous.indexOf(capability) === -1) {
+        newlyRelevant.push(capability);
+      }
+    });
+    if (state) {
+      state.relevantDockCapabilities = next;
+    }
+    return newlyRelevant;
+  }
+
+  function preferredDockCapability(state, memory, capabilities) {
+    var options = capabilities || [];
+    if (!options.length) {
+      return null;
+    }
+    if (state && state.introducedCapability &&
+        options.indexOf(state.introducedCapability) !== -1) {
+      return state.introducedCapability;
+    }
+    for (var i = 0; i < DOCK_INTRODUCTION_PRIORITY.length; i += 1) {
+      var candidate = DOCK_INTRODUCTION_PRIORITY[i];
+      if (options.indexOf(candidate) !== -1 &&
+          dockCapabilityIntroduced(memory, candidate)) {
+        return candidate;
+      }
+    }
+    return options[0];
+  }
+
+  function nextDockIntroductionCapability(state, memory, newlyRelevantCapabilities) {
+    for (var i = 0; i < DOCK_INTRODUCTION_PRIORITY.length; i += 1) {
+      var capability = DOCK_INTRODUCTION_PRIORITY[i];
+      if (newlyRelevantCapabilities.indexOf(capability) === -1) {
+        continue;
+      }
+      if (!dockCapabilityActionable(state, capability)) {
+        continue;
+      }
+      if (!dockCapabilityTeachable(state, capability)) {
+        continue;
+      }
+      if (dockCapabilityIntroduced(memory, capability)) {
+        continue;
+      }
+      return capability;
+    }
+    return null;
+  }
+
   function syncDockCapabilities(state) {
     if (!state || !state.touchFahrplan || !state.dmx || !state.snippetPlayground) {
       return;
     }
     var showTouchFahrplan = zoteroDockAvailable(state);
     var showDmx = dmxDockAvailable(state);
-    var showSnippetPlayground = !!(
-      state.available &&
-      (state.providerKind === "source-v1" ||
-       state.providerKind === "fedwiki-v1") &&
-      state.snippetPlaygroundSubmit
-    );
+    var showSnippetPlayground = snippetDockAvailable(state);
     state.touchFahrplan.hidden = !showTouchFahrplan;
     state.dmx.hidden = !showDmx;
     state.snippetPlayground.hidden = !showSnippetPlayground;
@@ -1381,7 +1549,11 @@
     if (!tab || !zoteroDockAvailable(state)) {
       return;
     }
-    markDockCapabilityMastered(state, "touch-fahrplan-opened");
+    markDockCapabilityUsed(
+      state,
+      state.introducedCapability || DOCK_CAPABILITY_CONNECT,
+      "touch-fahrplan-opened"
+    );
     refreshPaneStateFromSession(state);
     tab.click();
   }
@@ -1391,7 +1563,11 @@
     if (!tab || !dmxDockAvailable(state)) {
       return;
     }
-    markDockCapabilityMastered(state, "dmx-opened");
+    markDockCapabilityUsed(
+      state,
+      state.introducedCapability || DOCK_CAPABILITY_CONNECT,
+      "dmx-opened"
+    );
     refreshPaneStateFromSession(state);
     tab.click();
   }
@@ -1634,59 +1810,152 @@
     return "Latent";
   }
 
-  function markDockCapabilityMastered(state, reason) {
+  function markDockCapabilityUsed(state, capability, reason) {
     var memory = dockPresentationMemory();
-    memory.connectMastered = true;
+    markDockCapabilityIntroduced(memory, capability);
     state.rediscoveryRequested = false;
-    state.presentationReason = reason || "capability-used";
+    state.presentationEvent = {
+      type: "capability-used",
+      capability: capability || null,
+      reason: reason || "capability-used"
+    };
+    state.presentationReason = capabilityScopedPresentationReason(
+      capability,
+      reason || "capability-used"
+    );
   }
 
   function dockPresentationForState(state, session, sessionVisible) {
     var memory = dockPresentationMemory();
+    var relevantCapabilities = relevantDockCapabilities(state);
+    var newlyRelevantCapabilities = newlyRelevantDockCapabilities(
+      state,
+      relevantCapabilities
+    );
+    var preferredCapability = preferredDockCapability(
+      state,
+      memory,
+      relevantCapabilities
+    );
+    var event = state.presentationEvent;
     if (!state.available) {
       return {
         state: "hidden",
-        reason: "provider-unavailable"
+        introducedCapability: null,
+        presentationScope: memory.scope,
+        reason: "provider-unavailable",
+        consumeEvent: true
       };
     }
     if (sessionVisible) {
       return {
         state: "active",
-        reason: session && session.phase || "connect-session-active"
+        introducedCapability: DOCK_CAPABILITY_CONNECT,
+        presentationScope: memory.scope,
+        reason: capabilityScopedPresentationReason(
+          DOCK_CAPABILITY_CONNECT,
+          session && session.phase || "session-active"
+        ),
+        consumeEvent: true
       };
     }
     if (state.rediscoveryRequested) {
       return {
         state: "rediscovery",
-        reason: "rediscovery-requested"
+        introducedCapability: preferredCapability,
+        presentationScope: memory.scope,
+        reason: capabilityScopedPresentationReason(
+          preferredCapability,
+          "guide-opened"
+        ),
+        consumeEvent: true
       };
     }
-    if (state.presentationState === "introduction" && !memory.connectMastered) {
+    if (state.presentationState === "introduction" &&
+        state.introducedCapability &&
+        !event &&
+        dockCapabilityActionable(state, state.introducedCapability) &&
+        dockCapabilityTeachable(state, state.introducedCapability)) {
       return {
         state: "introduction",
-        reason: state.presentationReason || "newly-relevant-capability"
+        introducedCapability: state.introducedCapability,
+        presentationScope: memory.scope,
+        reason: state.presentationReason ||
+          capabilityScopedPresentationReason(
+            state.introducedCapability,
+            "newly-relevant"
+          ),
+        consumeEvent: false
       };
     }
-    if (!memory.introductionShown) {
-      memory.introductionShown = true;
+    var introductionCapability = nextDockIntroductionCapability(
+      state,
+      memory,
+      newlyRelevantCapabilities
+    );
+    if (introductionCapability) {
+      markDockCapabilityIntroduced(memory, introductionCapability);
       return {
         state: "introduction",
-        reason: "newly-relevant-capability"
+        introducedCapability: introductionCapability,
+        presentationScope: memory.scope,
+        reason: capabilityScopedPresentationReason(
+          introductionCapability,
+          "newly-relevant"
+        ),
+        consumeEvent: true
       };
     }
-    if (memory.connectMastered) {
+    if (event && (event.type === "dismiss" ||
+        event.type === "guide-close" ||
+        event.type === "capability-used")) {
       return {
         state: "degraded",
-        reason: state.presentationReason || "used-or-dismissed"
+        introducedCapability: event.capability || preferredCapability,
+        presentationScope: memory.scope,
+        reason: capabilityScopedPresentationReason(
+          event.capability || preferredCapability,
+          event.reason || "compact-available"
+        ),
+        consumeEvent: true
+      };
+    }
+    if ((state.presentationState === "active" ||
+         state.presentationState === "degraded" ||
+         state.presentationState === "rediscovery") &&
+        preferredCapability) {
+      return {
+        state: "degraded",
+        introducedCapability: preferredCapability,
+        presentationScope: memory.scope,
+        reason: state.presentationReason ||
+          capabilityScopedPresentationReason(
+            preferredCapability,
+            "compact-available"
+          ),
+        consumeEvent: true
       };
     }
     return {
       state: "latent",
-      reason: "compact-capabilities-remain-available"
+      introducedCapability: null,
+      presentationScope: memory.scope,
+      reason: "compact-capabilities-remain-available",
+      consumeEvent: true
     };
   }
 
-  function dockCoachmarkCopy(state, presentationState) {
+  function dockCoachmarkCopy(state, presentationState, introducedCapability) {
+    if (introducedCapability === DOCK_CAPABILITY_SNIPPET) {
+      return {
+        title: "Snippet",
+        summary: "Open a snippet workflow for the current source surface.",
+        detail:
+          presentationState === "rediscovery"
+            ? "Guide reopened Snippet guidance for this pane. The richer snippet workflow lives in the pane body, and the compact Snippet action remains available after this guidance recedes."
+            : "The Dock is temporarily expanded because Snippet became newly relevant here. The richer snippet workflow lives in the pane body, and the compact Snippet action remains available after this introduction recedes."
+      };
+    }
     if (presentationState === "active") {
       return {
         title: "Connect",
@@ -1708,7 +1977,7 @@
         title: "Connect",
         summary: state.providerHelpSummary,
         detail:
-          "The Dock is temporarily expanded because Connect became newly relevant here. Annotation remains available after the coachmark recedes and can complete an active Connect gesture as a generic target, while inspection stays in the inspector tabs."
+          "The Dock is temporarily expanded because Connect became newly relevant here. Annotation remains available after this introduction recedes and can complete an active Connect gesture as a generic target, while inspection stays in the inspector tabs."
       };
     }
     return {
@@ -1722,13 +1991,27 @@
     var coachmark = presentation.state === "introduction" ||
       presentation.state === "active" ||
       presentation.state === "rediscovery";
-    var copy = dockCoachmarkCopy(state, presentation.state);
+    var introducedCapability = presentation.introducedCapability || null;
+    var copy = dockCoachmarkCopy(
+      state,
+      presentation.state,
+      introducedCapability
+    );
     state.presentationState = presentation.state;
+    state.introducedCapability = introducedCapability;
+    state.presentationScope = presentation.presentationScope || DOCK_PRESENTATION_SCOPE;
     state.presentationReason = presentation.reason || null;
+    if (presentation.consumeEvent) {
+      state.presentationEvent = null;
+    }
     state.helpOpen = coachmark;
     state.slot.dataset.helpOpen = coachmark ? "true" : "false";
     state.slot.dataset.dockPresentation = presentation.state;
+    state.slot.dataset.dockIntroducedCapability = introducedCapability || "";
+    state.slot.dataset.dockPresentationReason = state.presentationReason || "";
     state.control.dataset.dockPresentation = presentation.state;
+    state.control.dataset.dockIntroducedCapability = introducedCapability || "";
+    state.control.dataset.dockPresentationReason = state.presentationReason || "";
     state.helpToggle.textContent = coachmark && presentation.state === "rediscovery"
       ? "Hide guide"
       : "Guide";
@@ -1763,7 +2046,16 @@
       state.enabled = false;
       state.toggle.dataset.mode = "inactive";
       state.presentationState = "hidden";
+      state.introducedCapability = null;
+      state.presentationReason = "provider-unavailable";
       state.helpOpen = false;
+      state.slot.dataset.helpOpen = "false";
+      state.slot.dataset.dockPresentation = "hidden";
+      state.slot.dataset.dockIntroducedCapability = "";
+      state.slot.dataset.dockPresentationReason = state.presentationReason;
+      state.control.dataset.dockPresentation = "hidden";
+      state.control.dataset.dockIntroducedCapability = "";
+      state.control.dataset.dockPresentationReason = state.presentationReason;
       if (!state.pendingRequest) {
         setPhase(state, "dormant");
       }
@@ -1819,7 +2111,11 @@
 
   function startConnectSession(state) {
     var manager = state.manager;
-    markDockCapabilityMastered(state, "connect-started");
+    markDockCapabilityUsed(
+      state,
+      DOCK_CAPABILITY_CONNECT,
+      "connect-started"
+    );
     if (sessionActive(manager)) {
       resetConnectSession(manager);
     }
@@ -2327,6 +2623,10 @@
       helpOpen: false,
       presentationState: "latent",
       presentationReason: null,
+      introducedCapability: null,
+      presentationScope: DOCK_PRESENTATION_SCOPE,
+      presentationEvent: null,
+      relevantDockCapabilities: [],
       rediscoveryRequested: false,
       hoverElement: null,
       source: null,
@@ -2370,9 +2670,13 @@
     slot.hidden = true;
     slot.dataset.helpOpen = "false";
     slot.dataset.dockPresentation = "latent";
+    slot.dataset.dockIntroducedCapability = "";
+    slot.dataset.dockPresentationReason = "";
     toggle.dataset.mode = "inactive";
     control.dataset.connectState = "dormant";
     control.dataset.dockPresentation = "latent";
+    control.dataset.dockIntroducedCapability = "";
+    control.dataset.dockPresentationReason = "";
     if (!helpPanel.id) {
       helpPanel.id = (slot.id || "hyperdoc-dom-connect-pane-slot") + "-help-panel";
     }
@@ -2579,6 +2883,10 @@
         liveStates(connectManager()).forEach(function (state) {
           state.rediscoveryRequested = false;
           state.presentationReason = null;
+          state.introducedCapability = null;
+          state.presentationScope = DOCK_PRESENTATION_SCOPE;
+          state.presentationEvent = null;
+          state.relevantDockCapabilities = [];
           refreshPaneStateFromSession(state);
         });
       }
