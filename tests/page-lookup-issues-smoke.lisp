@@ -278,7 +278,139 @@
                                     :validate t
                                     :if-does-not-exist :ignore)))))
 
+(defun page-lookup-authored-artifact-state-ids (machine)
+  (mapcar #'hyperdoc::id-of
+          (hyperdoc::state-machine-definition-states-of machine)))
+
+(defun page-lookup-authored-artifact-transition-triggers (machine)
+  (mapcar #'hyperdoc::state-machine-transition-trigger-of
+          (hyperdoc::state-machine-definition-transitions-of machine)))
+
+(defun page-lookup-authored-artifact-layout-relation-p
+    (layout-spec predicate subject object)
+  (member (list predicate subject object)
+          (getf layout-spec :relations)
+          :test #'equal))
+
+(defun run-page-lookup-authored-artifact-smoke-test ()
+  (let* ((source (hyperdoc::page-lookup-issue-authored-source-artifact))
+         (authored (hyperdoc::page-lookup-issue-authored-artifact))
+         (behavior (hyperdoc::page-lookup-issue-behavior-artifact))
+         (layout (hyperdoc::page-lookup-issue-layout-artifact))
+         (machine (hyperdoc::compiled-behavior-artifact-machine behavior))
+         (layout-spec
+           (hyperdoc::compiled-layout-artifact-layout-spec-of layout))
+         (issue (smoke-make-page-lookup-issue "topics"
+                                             "Synthetic artifact target"))
+         (source-views (page-lookup-load-inspector-views-for-object source))
+         (authored-views (page-lookup-load-inspector-views-for-object authored))
+         (behavior-views
+           (page-lookup-load-inspector-views-for-object behavior))
+         (layout-views (page-lookup-load-inspector-views-for-object layout)))
+    (assert-true
+     (typep source 'hyperdoc::authored-relation-artifact-source)
+     "Page lookup authored source must exist as a repo-native source artifact")
+    (assert-true
+     (typep authored 'hyperdoc::page-lookup-issue-authored-artifact)
+     "Page lookup authored artifact must reconstruct from the authored source")
+    (assert-true
+     (typep behavior 'hyperdoc::page-lookup-issue-behavior-artifact)
+     "Page lookup behavior artifact must compile from the authored artifact")
+    (assert-true
+     (typep layout 'hyperdoc::page-lookup-issue-layout-artifact)
+     "Page lookup layout artifact must compile from the authored artifact")
+    (assert-true
+     (hyperdoc::compiled-artifact-derived-p behavior authored)
+     "Page lookup behavior artifact must keep its authored-artifact derivation")
+    (assert-true
+     (hyperdoc::compiled-artifact-derived-p layout authored)
+     "Page lookup layout artifact must keep its authored-artifact derivation")
+    (assert-equal (list authored)
+                  (hyperdoc::compiled-artifact-compiler-inputs-of behavior)
+                  "Behavior compiler inputs must name the reconstructed authored artifact")
+    (assert-equal (list authored)
+                  (hyperdoc::compiled-artifact-compiler-inputs-of layout)
+                  "Layout compiler inputs must name the reconstructed authored artifact")
+    (assert-equal 4
+                  (length
+                   (hyperdoc::authored-relation-artifact-semantic-roles-of
+                    authored))
+                  "The page-lookup artifact should expose its compact semantic roles")
+    (assert-equal '(:overview-pane :repair-pane)
+                  (getf layout-spec :ordered-panes)
+                  "Page lookup layout should keep Overview before Repair")
+    (assert-true
+     (page-lookup-authored-artifact-layout-relation-p
+      layout-spec
+      :contains
+      :lookup-issue-pane
+      :overview-pane)
+     "Layout artifact must place the Overview pane in the lookup issue pane")
+    (assert-true
+     (page-lookup-authored-artifact-layout-relation-p
+      layout-spec
+      :contains
+      :lookup-issue-pane
+      :repair-pane)
+     "Layout artifact must place the Repair pane in the lookup issue pane")
+    (assert-true
+     (page-lookup-authored-artifact-layout-relation-p
+      layout-spec
+      :after
+      :repair-pane
+      :overview-pane)
+     "Layout artifact must preserve the Repair-after-Overview relation")
+    (assert-equal '(:open :needs-target-chunk :fixed)
+                  (page-lookup-authored-artifact-state-ids machine)
+                  "Behavior artifact must include the expected lookup issue lifecycle states")
+    (assert-equal '(:target-chunk-derived :target-resolved)
+                  (page-lookup-authored-artifact-transition-triggers machine)
+                  "Behavior artifact must include the expected lifecycle events")
+    (assert-equal :open
+                  (hyperdoc::state-machine-definition-initial-state-of machine)
+                  "Page lookup lifecycle should start open")
+    (assert-equal '(:fixed)
+                  (hyperdoc::state-machine-definition-terminal-states-of
+                   machine)
+                  "Page lookup lifecycle should terminate at fixed")
+    (assert-true
+     (search "<scxml"
+             (hyperdoc::compiled-behavior-artifact-machine-scxml behavior)
+             :test #'char=)
+     "Behavior artifact should expose SCXML for inspection")
+    (assert-equal authored
+                  (hyperdoc::page-lookup-issue-authored-artifact-for issue)
+                  "A page-lookup-issue should expose the reconstructed authored artifact")
+    (assert-equal behavior
+                  (hyperdoc::page-lookup-issue-behavior-artifact-for issue)
+                  "A page-lookup-issue should expose the compiled behavior artifact")
+    (assert-equal layout
+                  (hyperdoc::page-lookup-issue-layout-artifact-for issue)
+                  "A page-lookup-issue should expose the compiled layout artifact")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title source-views "Relation definitions")
+     "Authored source artifact should expose relation definitions as an inspector view")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title authored-views "Semantic roles")
+     "Authored relation artifact should expose semantic roles as an inspector view")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title authored-views "Behavior relations")
+     "Authored relation artifact should expose behavior relations as an inspector view")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title authored-views "Layout relations")
+     "Authored relation artifact should expose layout relations as an inspector view")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title behavior-views "Behavior machine")
+     "Compiled behavior artifact should expose its behavior machine view")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title behavior-views "SCXML")
+     "Compiled behavior artifact should expose its SCXML view")
+    (assert-true
+     (page-lookup-smoke-find-view-by-title layout-views "Layout")
+     "Compiled layout artifact should expose its layout view")))
+
 (defun run-page-lookup-issues-smoke-tests ()
+  (run-page-lookup-authored-artifact-smoke-test)
   (let* ((denk-page (smoke-find-hyperdoc-page "Denkpanzer paper 2013"))
          (denk-headings (smoke-heading-texts denk-page))
          (denk-counterpart-issues
