@@ -14,6 +14,12 @@
 
 (defclass page-lookup-issue-layout-artifact (compiled-layout-artifact) ())
 
+(defmethod authored-relation-artifact-derived-artifacts-of
+    ((artifact page-lookup-issue-authored-artifact))
+  (declare (ignore artifact))
+  (list (page-lookup-issue-behavior-artifact)
+        (page-lookup-issue-layout-artifact)))
+
 (defvar *page-lookup-issue-authored-artifact* nil)
 (defvar *page-lookup-issue-behavior-artifact* nil)
 (defvar *page-lookup-issue-layout-artifact* nil)

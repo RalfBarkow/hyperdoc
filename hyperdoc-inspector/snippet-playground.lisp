@@ -290,6 +290,12 @@
 
 (defclass snippet-playground-layout-artifact (compiled-layout-artifact) ())
 
+(defmethod authored-relation-artifact-derived-artifacts-of
+    ((artifact snippet-playground-authored-artifact))
+  (declare (ignore artifact))
+  (list (snippet-playground-behavior-artifact)
+        (snippet-comparison-layout-artifact)))
+
 (defmacro define-snippet-playground-forwarding-reader (name target)
   `(defun ,name (object)
      (,target object)))
