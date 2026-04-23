@@ -4,6 +4,9 @@
 
 (in-package :hyperdoc)
 
+(defparameter *page-lookup-issue-authored-layout-source-path*
+  "hyperdoc/page-lookup-issue-authored-layout-relation.sexp")
+
 (defun page-lookup-issue-authored-source-role
     (&key id title summary kind binding participants findings)
   (list :id id
@@ -52,7 +55,7 @@
     :kind :pane
     :binding :repair-pane)))
 
-(defun page-lookup-issue-authored-source-relation-definitions ()
+(defun page-lookup-issue-authored-source-base-relation-definitions ()
   (list
    (page-lookup-issue-authored-source-relation
     :id "semantic/issue-targets-page"
@@ -225,41 +228,145 @@
     :title "Target chunk opens from repair"
     :summary "The target chunk is a bounded inspectable object opened from repair context."
     :layer :layout
-    :subject :target-chunk-pane
-    :predicate :opens-from
-    :object :repair-pane)))
+   :subject :target-chunk-pane
+   :predicate :opens-from
+   :object :repair-pane)))
+
+(defun page-lookup-issue-authored-layout-source-pathname
+    (&optional (source-path *page-lookup-issue-authored-layout-source-path*))
+  (let ((pathname (pathname source-path)))
+    (if (uiop:absolute-pathname-p pathname)
+        pathname
+        (asdf:system-relative-pathname :hyperdoc source-path))))
+
+(defun page-lookup-issue-authored-source-relation-by-id
+    (definitions relation-id)
+  (find relation-id
+        definitions
+        :key (lambda (definition) (getf definition :id))
+        :test #'equal))
+
+(defun page-lookup-issue-authored-layout-default-override-payload ()
+  (let* ((base-relations (page-lookup-issue-authored-source-base-relation-definitions))
+         (default-layout-relation
+           (page-lookup-issue-authored-source-relation-by-id
+            base-relations
+            "layout/page-lookup/repair-after-overview")))
+    (unless default-layout-relation
+      (error "Missing default layout relation for page-lookup authored source."))
+    (list :schema-version 1
+          :relation-overrides (list default-layout-relation)
+          :findings
+          '("This repo-native source file is the narrow mutation target for the page-lookup authored relation artifact."
+            "Only the explicit layout relation override is persisted here in this slice."))))
+
+(defun page-lookup-issue-authored-layout-override-payload
+    (&key (source-path *page-lookup-issue-authored-layout-source-path*))
+  (let ((pathname (page-lookup-issue-authored-layout-source-pathname source-path)))
+    (if (probe-file pathname)
+        (with-open-file (stream pathname
+                                :direction :input
+                                :external-format :utf-8)
+          (let ((*read-eval* nil))
+            (or (read stream nil nil)
+                (page-lookup-issue-authored-layout-default-override-payload))))
+        (page-lookup-issue-authored-layout-default-override-payload))))
+
+(defun write-page-lookup-issue-authored-layout-override-payload
+    (payload &key (source-path *page-lookup-issue-authored-layout-source-path*))
+  (let ((pathname (page-lookup-issue-authored-layout-source-pathname source-path)))
+    (uiop:ensure-all-directories-exist (list pathname))
+    (with-open-file (stream pathname
+                            :direction :output
+                            :if-exists :supersede
+                            :if-does-not-exist :create
+                            :external-format :utf-8)
+      (let ((*print-case* :downcase)
+            (*print-pretty* t))
+        (pprint payload stream)
+        (terpri stream)))
+    pathname))
+
+(defun page-lookup-issue-authored-source-upsert-relation-definition
+    (definitions replacement)
+  (let ((relation-id (getf replacement :id))
+        (replaced nil))
+    (let ((updated
+            (mapcar (lambda (definition)
+                      (if (equal relation-id (getf definition :id))
+                          (progn
+                            (setf replaced t)
+                            replacement)
+                          definition))
+                    definitions)))
+      (if replaced
+          updated
+          (append updated (list replacement))))))
+
+(defun page-lookup-issue-authored-source-apply-relation-overrides
+    (base-relations relation-overrides)
+  (reduce #'page-lookup-issue-authored-source-upsert-relation-definition
+          relation-overrides
+          :initial-value base-relations))
+
+(defun page-lookup-issue-authored-source-relation-definitions
+    (&key (source-path *page-lookup-issue-authored-layout-source-path*))
+  (let* ((base-relations (page-lookup-issue-authored-source-base-relation-definitions))
+         (override-payload
+           (page-lookup-issue-authored-layout-override-payload
+            :source-path source-path))
+         (relation-overrides
+           (copy-tree (or (getf override-payload :relation-overrides)
+                          nil))))
+    (page-lookup-issue-authored-source-apply-relation-overrides
+     base-relations
+     relation-overrides)))
 
 (defun make-page-lookup-issue-authored-source-artifact ()
-  (make-authored-relation-artifact-source
-   :id "source/page-lookup-issue-authored-artifact"
-   :title "Page lookup issue authored source artifact"
-   :summary
-   "Repo-native authored source for the page-lookup issue relation artifact."
-   :source-kind :repo-native-lisp
-   :source-path "hyperdoc/page-lookup-issue-authored-source.lisp"
-   :schema-version 1
-   :artifact-id "page-lookup-issue-authored-artifact"
-   :artifact-title "Page lookup issue authored relation artifact"
-   :artifact-summary
-   "Authored relation artifact that compiles into page-lookup issue behavior and layout artifacts."
-   :workflow-role
-   "Graph-authored reconstruction surface for the bounded page-lookup issue failure path."
-   :compiler-pipeline
-   "repo-native authored source -> authored relation artifact -> compiled behavior artifact + compiled layout artifact -> page-lookup issue inspector"
-   :semantic-role-definitions
-   (page-lookup-issue-authored-source-role-definitions)
-   :relation-definitions
-   (page-lookup-issue-authored-source-relation-definitions)
-   :compiled-targets
-   '("page-lookup-issue-behavior-artifact"
-     "page-lookup-issue-layout-artifact")
-   :findings
-   '("Page lookup issue uses authored source as a reconstruction point."
-     "Behavior remains a simple open/chunk-derived/fixed lifecycle."
-     "Layout records existing Overview/Repair pane placement without changing UI.")))
+  (let* ((override-payload (page-lookup-issue-authored-layout-override-payload))
+         (override-findings
+           (copy-list (or (getf override-payload :findings)
+                          nil))))
+    (make-authored-relation-artifact-source
+     :id "source/page-lookup-issue-authored-artifact"
+     :title "Page lookup issue authored source artifact"
+     :summary
+     "Repo-native authored source for the page-lookup issue relation artifact."
+     :source-kind :repo-native-lisp
+     :source-path
+     (namestring (page-lookup-issue-authored-layout-source-pathname))
+     :schema-version (or (getf override-payload :schema-version)
+                         1)
+     :artifact-id "page-lookup-issue-authored-artifact"
+     :artifact-title "Page lookup issue authored relation artifact"
+     :artifact-summary
+     "Authored relation artifact that compiles into page-lookup issue behavior and layout artifacts."
+     :workflow-role
+     "Graph-authored reconstruction surface for the bounded page-lookup issue failure path."
+     :compiler-pipeline
+     "repo-native authored source -> authored relation artifact -> compiled behavior artifact + compiled layout artifact -> page-lookup issue inspector"
+     :semantic-role-definitions
+     (page-lookup-issue-authored-source-role-definitions)
+     :relation-definitions
+     (page-lookup-issue-authored-source-relation-definitions)
+     :compiled-targets
+     '("page-lookup-issue-behavior-artifact"
+       "page-lookup-issue-layout-artifact")
+     :findings
+     (append
+      override-findings
+      '("Page lookup issue uses authored source as a reconstruction point."
+        "Behavior remains a simple open/chunk-derived/fixed lifecycle."
+        "Layout records existing Overview/Repair pane placement without changing UI.")))))
 
-(defparameter *page-lookup-issue-authored-source-artifact*
-  (make-page-lookup-issue-authored-source-artifact))
+(defvar *page-lookup-issue-authored-source-artifact* nil)
 
-(defun page-lookup-issue-authored-source-artifact ()
-  *page-lookup-issue-authored-source-artifact*)
+(defun reset-page-lookup-issue-authored-source-artifact-cache ()
+  (setf *page-lookup-issue-authored-source-artifact* nil))
+
+(defun page-lookup-issue-authored-source-artifact (&key refresh)
+  (if (or refresh
+          (null *page-lookup-issue-authored-source-artifact*))
+      (setf *page-lookup-issue-authored-source-artifact*
+            (make-page-lookup-issue-authored-source-artifact))
+      *page-lookup-issue-authored-source-artifact*))

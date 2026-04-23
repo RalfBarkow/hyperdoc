@@ -24,6 +24,23 @@
 (defvar *page-lookup-issue-behavior-artifact* nil)
 (defvar *page-lookup-issue-layout-artifact* nil)
 
+(defun reset-page-lookup-issue-artifact-caches (&key (reset-source t))
+  (setf *page-lookup-issue-authored-artifact* nil
+        *page-lookup-issue-behavior-artifact* nil
+        *page-lookup-issue-layout-artifact* nil)
+  (when reset-source
+    (reset-page-lookup-issue-authored-source-artifact-cache))
+  t)
+
+(defun reconstruct-page-lookup-issue-artifacts-from-source
+    (&key (refresh-source t))
+  (reset-page-lookup-issue-artifact-caches :reset-source refresh-source)
+  (list :source (page-lookup-issue-authored-source-artifact
+                 :refresh refresh-source)
+        :authored (page-lookup-issue-authored-artifact)
+        :behavior (page-lookup-issue-behavior-artifact)
+        :layout (page-lookup-issue-layout-artifact)))
+
 (defgeneric page-lookup-issue-authored-artifact-for (issue))
 (defgeneric page-lookup-issue-behavior-artifact-for (issue))
 (defgeneric page-lookup-issue-layout-artifact-for (issue))

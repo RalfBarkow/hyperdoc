@@ -383,6 +383,37 @@
                     :data-hyperdoc-authored-relation-graph-lines "true"
                     (views:esc (format nil "~{~A~%~}" edge-lines))))))))
 
+(views:defview page-lookup-issue-authored-artifact-mutation-surface
+    (artifact hyperdoc::page-lookup-issue-authored-artifact)
+  (declare (ignore artifact))
+  (views:html-view :title "Mutation surface" :priority 25
+    (let* ((source (hyperdoc::page-lookup-issue-authored-source-artifact))
+           (source-path
+             (hyperdoc::authored-relation-artifact-source-path-of source))
+           (mutation
+             (hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation
+              :source-path source-path)))
+      (views:html
+        (:div :class "hyperdoc-authored-relation-mutation-surface"
+              :data-hyperdoc-authored-relation-mutation-surface "true"
+              (:p
+               "Narrow mutation surface for the page-lookup authored artifact.")
+              (:table :class "inspector-table"
+                      (authored-artifact-table-row
+                       "Operation"
+                       (views:esc
+                        (authored-artifact-string
+                         (hyperdoc::authored-relation-mutation-operation-kind-of
+                          mutation))))
+                      (authored-artifact-table-row
+                       "Write target"
+                       (views:esc source-path))
+                      (authored-artifact-table-row
+                       "Mutation object"
+                       (views:object-ref mutation)))
+              (:p :style "opacity: 0.75;"
+                  "Apply this mutation via apply-authored-relation-mutation to run write-back + reconstruction."))))))
+
 (views:defview authored-relation-artifact-source-summary
     (source hyperdoc::authored-relation-artifact-source)
   (views:html-view :title "Summary" :priority 1
