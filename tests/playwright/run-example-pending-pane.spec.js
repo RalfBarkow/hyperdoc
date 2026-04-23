@@ -15,6 +15,18 @@ async function installPendingPaneTrace(page) {
   await page.evaluate(() => {
     const inspector = document.querySelector(".inspector");
     const snapshots = [];
+    const nodeIds = new WeakMap();
+    let nextNodeId = 1;
+
+    function nodeId(node, prefix) {
+      if (!node) {
+        return null;
+      }
+      if (!nodeIds.has(node)) {
+        nodeIds.set(node, `${prefix}-${nextNodeId++}`);
+      }
+      return nodeIds.get(node);
+    }
 
     function titleForPane(paneNode) {
       const titleNode =
@@ -34,17 +46,34 @@ async function installPendingPaneTrace(page) {
         document.querySelectorAll(".hyperdoc-evaluation-pending")
       );
       const lastPane = panes[panes.length - 1] || null;
+      const activeView =
+        lastPane?.querySelector(".inspector-view:not([hidden])") || null;
+      const pendingInLastPane =
+        activeView?.querySelector(".hyperdoc-evaluation-pending") || null;
       snapshots.push({
         at: Date.now(),
         paneCount: panes.length,
         pendingPaneCount: pendingNodes.length,
+        pendingNodeIds: pendingNodes.map((node) => nodeId(node, "pending")),
+        lastPaneActiveViewNodeId: nodeId(activeView, "view"),
+        lastPanePendingNodeId: nodeId(pendingInLastPane, "pending"),
         pendingPhases: pendingNodes.map(
           (node) => node.getAttribute("data-hyperdoc-pending-phase") || null
+        ),
+        pendingRequestIds: pendingNodes.map(
+          (node) => node.getAttribute("data-hyperdoc-pending-request-id") || null
         ),
         pendingStatuses: pendingNodes.map(
           (node) =>
             node
               .querySelector(".hyperdoc-evaluation-pending-status")
+              ?.textContent?.replace(/\s+/g, " ")
+              .trim() || null
+        ),
+        pendingStageLogs: pendingNodes.map(
+          (node) =>
+            node
+              .querySelector(".hyperdoc-evaluation-stage-log pre")
               ?.textContent?.replace(/\s+/g, " ")
               .trim() || null
         ),
@@ -125,6 +154,39 @@ function activePaneView(paneLocator) {
   return paneLocator.locator(".inspector-view:not([hidden])");
 }
 
+function expectStablePendingDomIdentity(trace) {
+  const pendingSnapshots = trace.filter(
+    (snapshot) =>
+      snapshot.pendingPaneCount > 0 &&
+      snapshot.lastPanePendingNodeId &&
+      snapshot.lastPaneActiveViewNodeId
+  );
+  expect(pendingSnapshots.length).toBeGreaterThan(1);
+
+  const pendingNodeIds = new Set(
+    pendingSnapshots.map((snapshot) => snapshot.lastPanePendingNodeId)
+  );
+  const activeViewNodeIds = new Set(
+    pendingSnapshots.map((snapshot) => snapshot.lastPaneActiveViewNodeId)
+  );
+  expect(pendingNodeIds.size).toBe(1);
+  expect(activeViewNodeIds.size).toBe(1);
+}
+
+function expectPendingProgressAdvances(trace) {
+  const pendingSnapshots = trace.filter((snapshot) => snapshot.pendingPaneCount > 0);
+  const pendingStateSamples = new Set(
+    pendingSnapshots.map((snapshot) =>
+      JSON.stringify({
+        phase: snapshot.pendingPhases?.[0] || null,
+        status: snapshot.pendingStatuses?.[0] || null,
+        stageLog: snapshot.pendingStageLogs?.[0] || null,
+      })
+    )
+  );
+  expect(pendingStateSamples.size).toBeGreaterThan(1);
+}
+
 test("Run example opens a visible pending pane and then replaces it in place", async ({
   page,
 }, testInfo) => {
@@ -177,6 +239,8 @@ test("Run example opens a visible pending pane and then replaces it in place", a
     trace,
     finalState,
   });
+
+  expectStablePendingDomIdentity(trace);
 
   expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
   expect(
@@ -238,6 +302,8 @@ test("snippet playground shows a pending pane and replaces it in place", async (
     finalState,
   });
 
+  expectStablePendingDomIdentity(trace);
+  expectPendingProgressAdvances(trace);
   expect(
     trace.some(
       (snapshot) =>
@@ -467,6 +533,8 @@ test("fedwiki snippet playground opens to the right and replaces pending pane in
     finalState,
   });
 
+  expectStablePendingDomIdentity(trace);
+  expectPendingProgressAdvances(trace);
   expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
   expect(
     trace.some((snapshot) =>

@@ -207,27 +207,55 @@
         (max 0 (- timestamp started-at))
         0)))
 
+(defun evaluation-pending-stage-log-text (state)
+  (with-output-to-string (stream)
+    (dolist (entry (evaluation-pending-stage-log-of state))
+      (format stream "[+~Dms] ~A"
+              (pending-stage-relative-ms state entry)
+              (getf entry :message))
+      (when-let (detail (getf entry :detail))
+        (format stream " -- ~A" detail))
+      (terpri stream))))
+
+(defun pending-pane-dom-update-script (pane-id state)
+  (let ((phase-text
+          (string-downcase
+           (symbol-name (evaluation-pending-current-phase-of state))))
+        (status-text
+          (pending-evaluation-phase-label
+           (evaluation-pending-current-phase-of state)))
+        (log-text (evaluation-pending-stage-log-text state)))
+    (format nil
+            "(function(){ var pane = document.getElementById(~S); if (!pane) { return; } var pendingNodes = pane.querySelectorAll('.hyperdoc-evaluation-pending'); pendingNodes.forEach(function(node){ node.setAttribute('data-hyperdoc-pending-phase', ~S); var status = node.querySelector('.hyperdoc-evaluation-pending-status'); if (status) { status.textContent = ~S; } }); var logNodes = pane.querySelectorAll('.hyperdoc-evaluation-stage-log pre'); logNodes.forEach(function(node){ node.textContent = ~S; }); })();"
+            pane-id
+            phase-text
+            status-text
+            log-text)))
+
+(defun update-pending-pane-dom-in-place (pane state)
+  (when (and (live-pane-p pane)
+             state)
+    (when-let (pane-id (pane-runtime-id pane))
+      (ignore-errors
+        (clog:js-execute (clog-obj pane)
+                         (pending-pane-dom-update-script pane-id state)))))
+  pane)
+
 (defun render-evaluation-pending-stage-log (state)
   (hv:html
     (:div :class "hyperdoc-evaluation-stage-log"
           :style "margin-top: 0.8em; border: 1px solid #ddd; background: #fafafa; padding: 0.6em;"
           (:div :style "font-weight: 600; margin-bottom: 0.4em;" "Console")
           (:pre :style "white-space: pre-wrap; margin: 0;"
-                (hv:esc
-                 (with-output-to-string (stream)
-                   (dolist (entry (evaluation-pending-stage-log-of state))
-                     (format stream "[+~Dms] ~A"
-                             (pending-stage-relative-ms state entry)
-                             (getf entry :message))
-                     (when-let (detail (getf entry :detail))
-                       (format stream " -- ~A" detail))
-                     (terpri stream))))))))
+                (hv:esc (evaluation-pending-stage-log-text state))))))
 
 (hv:defview 👀summary (state evaluation-pending-state)
   (hv:html-view :title "Summary" :priority 1
     (hv:html
       (:div :class "hyperdoc-evaluation-pending"
             :data-hyperdoc-pending-pane "true"
+            :data-hyperdoc-pending-request-id
+            (hv:esc (evaluation-pending-request-id-of state))
             :data-hyperdoc-pending-phase
             (string-downcase
              (symbol-name (evaluation-pending-current-phase-of state)))
@@ -321,7 +349,7 @@
              (typep (pane-object pane) 'evaluation-pending-state))
     (let ((state (pane-object pane)))
       (append-evaluation-pending-stage state phase message :detail detail)
-      (replace-pane-object-in-place pane state :select "Summary"))))
+      (update-pending-pane-dom-in-place pane state))))
 
 (defun make-deferred-evaluation-issue (pane element condition)
   (make-instance
