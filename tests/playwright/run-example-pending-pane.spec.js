@@ -84,6 +84,11 @@ async function installPendingPaneTrace(page) {
               ?.textContent?.replace(/\s+/g, " ")
               .trim() || null
         ),
+        pendingStageLogsRaw: pendingNodes.map(
+          (node) =>
+            node.querySelector(".hyperdoc-evaluation-stage-log pre")
+              ?.textContent || null
+        ),
         lastPaneTitle: titleForPane(lastPane),
         lastPaneBody: bodyForPane(lastPane),
       });
@@ -131,6 +136,23 @@ async function readLastPaneState(page) {
       pendingPhase: pending?.getAttribute("data-hyperdoc-pending-phase") || null,
     };
   });
+}
+
+function installPageErrorTrace(page) {
+  const errors = [];
+  const onPageError = (error) => {
+    const message = error?.message || String(error);
+    errors.push(message);
+  };
+  page.on("pageerror", onPageError);
+  return {
+    read() {
+      return errors.slice();
+    },
+    dispose() {
+      page.off("pageerror", onPageError);
+    },
+  };
 }
 
 async function openSnippetPlaygroundFixture(page, title) {
@@ -234,9 +256,25 @@ function expectPendingStageLogAdvancesWhenAvailable(trace) {
   }
 }
 
+function expectPendingMultilineStageLog(trace) {
+  const pendingSnapshots = trace.filter((snapshot) => snapshot.pendingPaneCount > 0);
+  const rawStageLogSamples = pendingSnapshots
+    .map((snapshot) => snapshot.pendingStageLogsRaw?.[0] || "")
+    .filter((sample) => sample.length > 0);
+  expect(rawStageLogSamples.some((sample) => sample.includes("\n"))).toBe(true);
+}
+
+function expectNoPendingSerializationSyntaxErrors(pageErrors) {
+  const pendingSerializationErrors = pageErrors.filter((message) =>
+    /SyntaxError:.*string literal contains an unescaped line break/i.test(message)
+  );
+  expect(pendingSerializationErrors).toEqual([]);
+}
+
 test("Run example opens a visible pending pane and then replaces it in place", async ({
   page,
 }, testInfo) => {
+  const pageErrorTrace = installPageErrorTrace(page);
   await openHyperDoc(page);
   await openTextPageFromHyperDoc(page, "Graphviz story item upstream assimilation example");
   await settleInspectorBindings(page, 1000);
@@ -280,16 +318,21 @@ test("Run example opens a visible pending pane and then replaces it in place", a
 
   const trace = await readPendingPaneTrace(page);
   const finalState = await readLastPaneState(page);
+  const pageErrors = pageErrorTrace.read();
+  pageErrorTrace.dispose();
 
   await attachJson(testInfo, "run-example-pending-pane-trace.json", {
     paneCountBefore,
     trace,
     finalState,
+    pageErrors,
   });
 
   expectStablePendingDomIdentity(trace);
   expectPendingProgressTextAdvances(trace);
   expectPendingStageLogAdvancesWhenAvailable(trace);
+  expectPendingMultilineStageLog(trace);
+  expectNoPendingSerializationSyntaxErrors(pageErrors);
 
   expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
   expect(
@@ -309,6 +352,7 @@ test("Run example opens a visible pending pane and then replaces it in place", a
 test("snippet playground shows a pending pane and replaces it in place", async ({
   page,
 }, testInfo) => {
+  const pageErrorTrace = installPageErrorTrace(page);
   await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
   await installPendingPaneTrace(page);
 
@@ -341,14 +385,19 @@ test("snippet playground shows a pending pane and replaces it in place", async (
 
   const trace = await readPendingPaneTrace(page);
   const finalState = await readLastPaneState(page);
+  const pageErrors = pageErrorTrace.read();
+  pageErrorTrace.dispose();
   await attachJson(testInfo, "snippet-playground-pending-trace.json", {
     paneCountBefore,
     trace,
     finalState,
+    pageErrors,
   });
 
   expectStablePendingDomIdentity(trace);
   expectPendingStageLogAdvancesWhenAvailable(trace);
+  expectPendingMultilineStageLog(trace);
+  expectNoPendingSerializationSyntaxErrors(pageErrors);
   expect(
     trace.some(
       (snapshot) =>
@@ -536,6 +585,7 @@ test("snippet playground comparison layout places Lefty left and Rita right", as
 test("fedwiki snippet playground opens to the right and replaces pending pane in place", async ({
   page,
 }, testInfo) => {
+  const pageErrorTrace = installPageErrorTrace(page);
   const fedwikiPaneIndex = await openFedWikiSnippetPlaygroundFixture(
     page,
     "Mech CODE Block analysis",
@@ -571,15 +621,20 @@ test("fedwiki snippet playground opens to the right and replaces pending pane in
 
   const trace = await readPendingPaneTrace(page);
   const finalState = await readLastPaneState(page);
+  const pageErrors = pageErrorTrace.read();
+  pageErrorTrace.dispose();
   await attachJson(testInfo, "fedwiki-snippet-playground-pending-trace.json", {
     fedwikiPaneIndex,
     paneCountBefore,
     trace,
     finalState,
+    pageErrors,
   });
 
   expectStablePendingDomIdentity(trace);
   expectPendingStageLogAdvancesWhenAvailable(trace);
+  expectPendingMultilineStageLog(trace);
+  expectNoPendingSerializationSyntaxErrors(pageErrors);
   expect(trace.some((snapshot) => snapshot.pendingPaneCount > 0)).toBe(true);
   expect(
     trace.some((snapshot) =>

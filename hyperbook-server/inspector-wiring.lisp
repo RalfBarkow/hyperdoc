@@ -21,6 +21,34 @@
       (elapsed-millis start)
       0))
 
+(defun maybe-hyperdoc-json-encoder ()
+  (let* ((package (find-package "HYPERDOC"))
+         (symbol (and package (find-symbol "ENCODE-JSON-STRING" package))))
+    (and symbol
+         (fboundp symbol)
+         (symbol-function symbol))))
+
+(defun encode-json-string-for-browser (value)
+  (or (when-let (encoder (maybe-hyperdoc-json-encoder))
+        (funcall encoder value))
+      (with-output-to-string (stream)
+        (write-char #\" stream)
+        (loop for char across (or value "")
+              do (case char
+                   (#\" (write-string "\\\"" stream))
+                   (#\\ (write-string "\\\\" stream))
+                   (#\Backspace (write-string "\\b" stream))
+                   (#\Page (write-string "\\f" stream))
+                   (#\Newline (write-string "\\n" stream))
+                   (#\Return (write-string "\\r" stream))
+                   (#\Tab (write-string "\\t" stream))
+                   (otherwise
+                    (let ((code (char-code char)))
+                      (if (< code 32)
+                          (format stream "\\u~4,'0X" code)
+                          (write-char char stream))))))
+        (write-char #\" stream))))
+
 (defun maybe-log-inspector-performance (phase &rest kvs)
   (when (fboundp 'log-inspector-performance)
     (apply #'log-inspector-performance phase kvs)))
@@ -226,11 +254,11 @@
            (evaluation-pending-current-phase-of state)))
         (log-text (evaluation-pending-stage-log-text state)))
     (format nil
-            "(function(){ var pane = document.getElementById(~S); if (!pane) { return; } var pendingNodes = pane.querySelectorAll('.hyperdoc-evaluation-pending'); pendingNodes.forEach(function(node){ node.setAttribute('data-hyperdoc-pending-phase', ~S); var status = node.querySelector('.hyperdoc-evaluation-pending-status'); if (status) { status.textContent = ~S; } }); var logNodes = pane.querySelectorAll('.hyperdoc-evaluation-stage-log pre'); logNodes.forEach(function(node){ node.textContent = ~S; }); })();"
-            pane-id
-            phase-text
-            status-text
-            log-text)))
+            "(function(){ var pane = document.getElementById(~A); if (!pane) { return; } var pendingNodes = pane.querySelectorAll('.hyperdoc-evaluation-pending'); pendingNodes.forEach(function(node){ node.setAttribute('data-hyperdoc-pending-phase', ~A); var status = node.querySelector('.hyperdoc-evaluation-pending-status'); if (status) { status.textContent = ~A; } }); var logNodes = pane.querySelectorAll('.hyperdoc-evaluation-stage-log pre'); logNodes.forEach(function(node){ node.textContent = ~A; }); })();"
+            (encode-json-string-for-browser pane-id)
+            (encode-json-string-for-browser phase-text)
+            (encode-json-string-for-browser status-text)
+            (encode-json-string-for-browser log-text))))
 
 (defun update-pending-pane-dom-in-place (pane state)
   (when (and (live-pane-p pane)

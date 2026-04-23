@@ -598,14 +598,15 @@
       (clog:js-execute
        element
        (format nil
-               "(function(){ if (window.hyperdocDomConnect && window.hyperdocDomConnect.notifyServerResult) { window.hyperdocDomConnect.notifyServerResult({requestId: ~S, status: ~S, message: ~A, detail: ~A}); } })();"
-               request-id
-               status
+               "(function(){ if (window.hyperdocDomConnect && window.hyperdocDomConnect.notifyServerResult) { window.hyperdocDomConnect.notifyServerResult({requestId: ~A, status: ~A, message: ~A, detail: ~A}); } })();"
+               (encode-json-string-for-browser request-id)
+               (encode-json-string-for-browser
+                (string-downcase (string status)))
                (if message
-                   (format nil "~S" message)
+                   (encode-json-string-for-browser message)
                    "null")
                (if detail
-                   (format nil "~S" detail)
+                   (encode-json-string-for-browser detail)
                    "null"))))))
 
 ;; Extend the pane tab row with a dedicated slot for the pane-level Connect
