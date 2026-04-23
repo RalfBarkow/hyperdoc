@@ -217,6 +217,41 @@
                 :initarg :layout-spec
                 :initform nil)))
 
+(defclass authored-relation-mutation ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (target-artifact-id :reader authored-relation-mutation-target-artifact-id-of
+                       :initarg :target-artifact-id
+                       :initform nil)
+   (source-path :reader authored-relation-mutation-source-path-of
+                :initarg :source-path
+                :initform nil)
+   (operation-kind :reader authored-relation-mutation-operation-kind-of
+                   :initarg :operation-kind
+                   :initform nil)
+   (relation-id :reader authored-relation-mutation-relation-id-of
+                :initarg :relation-id
+                :initform nil)
+   (before-relation-definition
+     :reader authored-relation-mutation-before-relation-definition-of
+     :initarg :before-relation-definition
+     :initform nil)
+   (after-relation-definition
+     :reader authored-relation-mutation-after-relation-definition-of
+     :initarg :after-relation-definition
+     :initform nil)
+   (status :reader authored-relation-mutation-status-of
+           :initarg :status
+           :initform :planned)
+   (findings :reader authored-relation-mutation-findings-of
+             :initarg :findings
+             :initform nil)))
+
 (defgeneric authored-relation-artifact-derived-artifacts-of (artifact)
   (:documentation
    "Return compiled artifacts that derive from AUTHORED-RELATION-ARTIFACT.
@@ -228,6 +263,15 @@ artifacts for inspector graph views without widening runtime mutation paths."))
     ((artifact authored-relation-artifact))
   (declare (ignore artifact))
   nil)
+
+(defgeneric apply-authored-relation-mutation (mutation &key)
+  (:documentation
+   "Apply the explicit MUTATION operation to its authored source and return the
+result of that bounded mutation loop."))
+
+(defmethod apply-authored-relation-mutation
+    ((mutation authored-relation-mutation) &key)
+  (error "No mutation apply method for ~S." mutation))
 
 (defun make-authored-relation-role (&rest initargs)
   (apply #'make-instance 'authored-relation-role initargs))
@@ -246,6 +290,9 @@ artifacts for inspector graph views without widening runtime mutation paths."))
 
 (defun make-compiled-layout-artifact (&rest initargs)
   (apply #'make-instance 'compiled-layout-artifact initargs))
+
+(defun make-authored-relation-mutation (&rest initargs)
+  (apply #'make-instance 'authored-relation-mutation initargs))
 
 (defun authored-relation-artifact-relations-by-layer (artifact layer)
   (remove layer
@@ -307,5 +354,9 @@ artifacts for inspector graph views without widening runtime mutation paths."))
     (format stream "~A" (authored-relation-artifact-display-label object))))
 
 (defmethod print-object ((object compiled-artifact) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (authored-relation-artifact-display-label object))))
+
+(defmethod print-object ((object authored-relation-mutation) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (authored-relation-artifact-display-label object))))

@@ -35,6 +35,7 @@
                              (:file "authored-relation-artifacts")
                              (:file "page-lookup-issue-authored-source")
                              (:file "page-lookup-issue-artifacts")
+                             (:file "page-lookup-issue-authored-mutations")
                              (:file "shared-projection-ir")
                              (:file "iconic-retrieval")
                              (:file "surfaces")

@@ -190,6 +190,10 @@
     ((object hyperdoc::compiled-artifact))
   (hyperdoc::title-of object))
 
+(defmethod views:text-representation
+    ((object hyperdoc::authored-relation-mutation))
+  (hyperdoc::title-of object))
+
 (views:defview authored-relation-role-summary
     (role hyperdoc::authored-relation-role)
   (views:html-view :title "Summary" :priority 1
@@ -521,3 +525,70 @@
   (views:html-view :title "Layout" :priority 22
     (authored-artifact-lines-html
      (compiled-layout-artifact-lines artifact))))
+
+(views:defview authored-relation-mutation-summary
+    (mutation hyperdoc::authored-relation-mutation)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:div :class "hyperdoc-authored-relation-mutation"
+            :data-hyperdoc-authored-relation-mutation "true"
+            (:p (views:esc (hyperdoc::summary-of mutation)))
+            (:table :class "inspector-table"
+                    (authored-artifact-table-row
+                     "Target artifact"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-mutation-target-artifact-id-of
+                        mutation))))
+                    (authored-artifact-table-row
+                     "Source path"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-mutation-source-path-of
+                        mutation))))
+                    (authored-artifact-table-row
+                     "Operation kind"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-mutation-operation-kind-of
+                        mutation))))
+                    (authored-artifact-table-row
+                     "Relation id"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-mutation-relation-id-of
+                        mutation))))
+                    (authored-artifact-table-row
+                     "Status"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-mutation-status-of
+                        mutation)))))
+            (when (hyperdoc::authored-relation-mutation-findings-of mutation)
+              (views:html
+                (:h3 "Findings")
+                (:ul
+                 (dolist
+                     (finding
+                      (hyperdoc::authored-relation-mutation-findings-of
+                       mutation))
+                   (views:html
+                     (:li (views:esc finding)))))))))))
+
+(views:defview authored-relation-mutation-before
+    (mutation hyperdoc::authored-relation-mutation)
+  (views:html-view :title "Before relation" :priority 2
+    (authored-artifact-lines-html
+     (list
+      (format nil "~S"
+              (hyperdoc::authored-relation-mutation-before-relation-definition-of
+               mutation))))))
+
+(views:defview authored-relation-mutation-after
+    (mutation hyperdoc::authored-relation-mutation)
+  (views:html-view :title "After relation" :priority 3
+    (authored-artifact-lines-html
+     (list
+      (format nil "~S"
+              (hyperdoc::authored-relation-mutation-after-relation-definition-of
+               mutation))))))
