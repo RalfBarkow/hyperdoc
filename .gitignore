@@ -19,6 +19,7 @@
 
 # ---> Local dev artifacts
 .DS_Store
+.codex/
 .direnv/
 .flake-deps/
 node_modules/
