@@ -33,6 +33,7 @@
                              (:file "page-lookup-chunks")
                              (:file "state-machines")
                              (:file "authored-relation-artifacts")
+                             (:file "page-lookup-issue-authored-source")
                              (:file "shared-projection-ir")
                              (:file "iconic-retrieval")
                              (:file "surfaces")
