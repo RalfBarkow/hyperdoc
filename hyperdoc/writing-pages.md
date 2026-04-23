@@ -62,6 +62,50 @@ Use this practical rule:
  - when both exist, keep titles and links aligned, but do not force
    identical markup or identical structure.
 
+## Page genres: reference vs walkthrough example
+
+Classify page intent before drafting:
+
+- `Reference/contract page` for definitions, contracts, inventories,
+  architecture summaries, and browseable inspectable-object indexes.
+- `Walkthrough example page` for story-driven demonstrations, click-through
+  learning, and before/after operational workflows.
+
+If a task asks for an `example page`, default to a walkthrough example page.
+Do not answer with a reference/index page that only lists object links.
+
+### Walkthrough example page pattern
+
+Use this compact structure:
+
+- `Goal`
+- `Starting situation`
+- `Step 1`, `Step 2`, ...
+- `Expected result` and/or `Why this matters`
+- `Boundary`
+
+Each step should include:
+
+- `Click:` what to open or run
+- `Observe:` what to notice
+- `Why this matters:` what that observation proves
+
+Narrative arc:
+
+- start state
+- inspect cause
+- inspect derivation
+- act / mutate / run
+- observe changed result
+- explain significance
+
+For mutation/rewrite/debug walkthroughs, make `before -> cause -> action ->
+after` explicit.
+
+HyperDoc-specific rule:
+- clickable `expr` links alone do not make a good example page; examples must
+  be staged as actions with observations and consequences.
+
 ## Links
 
 Links are written using standard `<a>` tags, using non-standard

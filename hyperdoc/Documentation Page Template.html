@@ -3,17 +3,33 @@
 <in-package>hyperdoc</in-package>
 
 <p>
+  Choose the page genre before drafting.
+</p>
+
+<ul>
+  <li><b>Reference/contract page:</b> definitions, contracts, inventories, architecture summaries, inspectable-object indexes.</li>
+  <li><b>Walkthrough example page:</b> story-driven demonstration with operational steps and before/after payoff.</li>
+</ul>
+
+<p>
+  If the request says <tt>example page</tt>, default to the walkthrough example
+  template below.
+</p>
+
+<h2>Template A: Reference/contract page</h2>
+
+<p>
   Purpose/context: replace this text with a concise statement describing why
   this page exists and what stable distinction it contributes.
 </p>
 
-<h2>Inspectable objects</h2>
+<h3>Inspectable objects</h3>
 
 <ul>
   <li><a hyperbook="topics" page="Documentation Surfaces in HyperDoc"><tt>Replace with inspectable topic page</tt></a></li>
 </ul>
 
-<h2>Core distinctions</h2>
+<h3>Core distinctions</h3>
 
 <ul>
   <li>Replace with the first durable distinction this page establishes.</li>
@@ -21,10 +37,55 @@
   <li>Replace with explicit boundary statements to avoid false equivalence.</li>
 </ul>
 
-<h2>Related pages / references</h2>
+<h3>Related pages / references</h3>
 
 <ul>
   <li><a page="Documentation Architecture in HyperDoc">Documentation Architecture in HyperDoc</a></li>
   <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
   <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+</ul>
+
+<h2>Template B: Walkthrough example page (default for "example page" requests)</h2>
+
+<p>
+  Keep prose compact and task-centric. Do not use a bare object catalog as the
+  primary structure.
+</p>
+
+<h3>Goal</h3>
+
+<p>State the concrete workflow that will be demonstrated.</p>
+
+<h3>Starting situation</h3>
+
+<ul>
+  <li><b>Click:</b> open the baseline consumer/object/run.</li>
+  <li><b>Observe:</b> describe the baseline behavior.</li>
+  <li><b>Why this matters:</b> this is the before-state for the walkthrough.</li>
+</ul>
+
+<h3>Step 1 ... Step N</h3>
+
+<ul>
+  <li><b>Click:</b> open/run the next operational item.</li>
+  <li><b>Observe:</b> state what to notice.</li>
+  <li><b>Why this matters:</b> state what this proves in the chain.</li>
+</ul>
+
+<p>
+  Repeat the same <tt>Click / Observe / Why this matters</tt> pattern for each
+  step.
+</p>
+
+<h3>Expected result / Why this matters</h3>
+
+<p>
+  State the before/after payoff and what the full round-trip demonstrates.
+</p>
+
+<h3>Boundary</h3>
+
+<ul>
+  <li>State what this walkthrough intentionally does not implement.</li>
+  <li>Keep boundary language explicit and minimal.</li>
 </ul>

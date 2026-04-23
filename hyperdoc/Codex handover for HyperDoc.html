@@ -77,6 +77,10 @@
   <li>Keep adjacent documentation edits tightly coupled to the slice that justified them.</li>
   <li>Ask for exact validation outcomes rather than generic success language.</li>
   <li>When prompts describe route authoring, prefer Touch-Fahrplan route-laying language over generic connect/swipe/provider-first wording.</li>
+  <li>Distinguish page genre in prompts: <tt>reference/contract</tt> pages for definitions/contracts/inventories, <tt>walkthrough example</tt> pages for story-driven click-through demonstrations.</li>
+  <li>If the user asks for an <tt>example page</tt>, default to a walkthrough example page with <tt>Goal</tt>, <tt>Starting situation</tt>, step sequence, <tt>Expected result/Why this matters</tt>, and <tt>Boundary</tt>.</li>
+  <li>Require per-step <tt>Click / Observe / Why this matters</tt> wording for walkthrough examples; reject bare object-list pages even if links are clickable.</li>
+  <li>For mutation/rewrite/debug walkthroughs, require explicit <tt>before -> cause -> action -> after</tt> payoff.</li>
 </ul>
 
 <h2>Touch-first prompt-local rule</h2>
@@ -168,6 +172,13 @@ Inventory outcome
 Docs coupling
 - Update HyperDoc pages only when they directly document this slice.
 - Keep any adjacent documentation edit directly coupled to the task that justified it.
+
+Example-page rule
+- If this slice asks for an example page, produce a walkthrough example page, not a reference/index page.
+- Use this structure: Goal, Starting situation, Step 1..N, Expected result/Why this matters, Boundary.
+- In every step include: Click, Observe, Why this matters.
+- Keep a visible narrative arc: start state -> inspect cause/derivation -> act/mutate/run -> observe changed result.
+- For mutation/rewrite/debug walkthroughs, make before/cause/action/after explicit.
 
 Implementation rules
 - Prefer a narrow file boundary over a broad subsystem rewrite.
