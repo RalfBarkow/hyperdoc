@@ -89,6 +89,8 @@
 (defun run-snippet-playground-artifact-runtime-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-artifact-smoke-session))
+         (authored-source
+           (hyperdoc::snippet-playground-authored-source-artifact))
          (authored-artifact
            (hyperdoc::snippet-playground-session-authored-artifact-of session))
          (behavior-artifact
@@ -122,6 +124,20 @@
      'hyperdoc::snippet-playground-session
      session
      "Worked example must materialize as a ready snippet-playground session")
+    (snippet-playground-assert-typep
+     'hyperdoc::authored-relation-artifact-source
+     authored-source
+     "Snippet-playground must expose a repo-native authored source artifact")
+    (snippet-playground-assert-equal
+     :repo-native-lisp
+     (hyperdoc::authored-relation-artifact-source-kind-of authored-source)
+     "Authored source must be repo-native Lisp")
+    (snippet-playground-assert-true
+     (uiop:file-exists-p
+      (merge-pathnames
+       (hyperdoc::authored-relation-artifact-source-path-of authored-source)
+       (uiop:getcwd)))
+     "External authored source file must exist in the repo")
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -130,6 +146,25 @@
      'hyperdoc::snippet-playground-authored-artifact
      authored-artifact
      "Authored artifact must materialize as a first-class object")
+    (snippet-playground-assert-equal
+     (hyperdoc::authored-relation-artifact-source-artifact-id-of
+      authored-source)
+     (hyperdoc::id-of authored-artifact)
+     "Authored artifact id must be reconstructed from the source artifact")
+    (snippet-playground-assert-equal
+     (hyperdoc::authored-relation-artifact-source-role-count
+      authored-source)
+     (length
+      (hyperdoc::snippet-playground-authored-artifact-semantic-roles-of
+       authored-artifact))
+     "Reconstructed authored artifact must preserve source semantic roles")
+    (snippet-playground-assert-equal
+     (hyperdoc::authored-relation-artifact-source-relation-count
+      authored-source)
+     (length
+      (hyperdoc::snippet-playground-authored-artifact-relations-of
+       authored-artifact))
+     "Reconstructed authored artifact must preserve source relations")
     (snippet-playground-assert-typep
      'hyperdoc::snippet-playground-behavior-artifact
      behavior-artifact
@@ -200,6 +235,8 @@
 (defun run-snippet-playground-artifact-rendering-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-artifact-smoke-session))
+         (authored-source
+           (hyperdoc::snippet-playground-authored-source-artifact))
          (authored-artifact
            (hyperdoc::snippet-playground-session-authored-artifact-of session))
          (session-views
@@ -207,6 +244,9 @@
          (artifact-views
            (snippet-playground-smoke-load-inspector-views-for-object
             authored-artifact))
+         (source-views
+           (snippet-playground-smoke-load-inspector-views-for-object
+            authored-source))
          (summary-view
            (snippet-playground-smoke-find-view-by-title session-views
                                                         "Summary"))
@@ -228,6 +268,12 @@
       (snippet-playground-assert-true
        (snippet-playground-smoke-find-view-by-title artifact-views title)
        (format nil "Authored artifact must expose view ~A" title)))
+    (dolist (title '("Summary"
+                     "Role definitions"
+                     "Relation definitions"))
+      (snippet-playground-assert-true
+       (snippet-playground-smoke-find-view-by-title source-views title)
+       (format nil "Authored source artifact must expose view ~A" title)))
     (snippet-playground-assert-contains
      "Constructed transformation unit"
      (html-inspector-views:view-html summary-view)
