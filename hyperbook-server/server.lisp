@@ -89,6 +89,23 @@ Enable web debugger only when that extension is loaded."
                (uiop:getenv "CLOG_SRC")))))
   root)
 
+(defun valid-clog-static-root-p (root)
+  (and root
+       (typep root '(or pathname string))))
+
+(defun make-static-root-lifecycle-guard-middleware (fallback-root)
+  (assert (typep fallback-root 'pathname) (fallback-root)
+          "Fallback static root must be a pathname, got ~S" fallback-root)
+  (lambda (app)
+    (lambda (env)
+      (unless (valid-clog-static-root-p clog-connection:*static-root*)
+        (format t "~&[HYPERBOOK] restoring CLOG static root for request ~A from ~S to ~A~%"
+                (getf env :path-info)
+                clog-connection:*static-root*
+                fallback-root)
+        (setf clog-connection:*static-root* fallback-root))
+      (funcall app env))))
+
 (defun register-runtime-asset-paths ()
   (clog-connection:add-plugin-path
    "^/hyperbook-server/"
@@ -261,6 +278,8 @@ recommended on public servers because it allows the execution of
      :port port
      :static-root static-root
      :static-boot-js t
+     :lack-middleware-list
+     (list (make-static-root-lifecycle-guard-middleware static-root))
      :extended-routing t)
     (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
       (add-path-to-hyperbook hb pane-width development*))
