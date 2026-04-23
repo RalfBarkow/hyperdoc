@@ -699,7 +699,7 @@
               (:tr (:td (views:esc "Current status"))
                    (:td (:tt (views:esc
                               (issue-label (lookup-issue-status-of issue))))))
-              (:tr (:td (views:esc "Suggested repair"))
+              (:tr (:td (views:esc "Current repair operation"))
                    (:td (:tt (views:esc
                               (or (and (lookup-issue-suggested-repair-of issue)
                                        (issue-label

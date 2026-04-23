@@ -609,6 +609,14 @@
            (hyperbook:enrich-lookup-issue
             (smoke-make-page-lookup-issue "topics"
                                           "Synthetic missing topic")))
+         (topic-issue-views
+           (page-lookup-load-inspector-views-for-object topic-issue))
+         (topic-issue-overview-html
+           (html-inspector-views:view-html
+            (page-lookup-smoke-find-view-by-title topic-issue-views "Overview")))
+         (topic-issue-repair-html
+           (html-inspector-views:view-html
+            (page-lookup-smoke-find-view-by-title topic-issue-views "Repair")))
          (topic-repair (funcall (hyperbook::lookup-issue-repair-thunk-of topic-issue)))
          (topic-repair-views
            (page-lookup-load-inspector-views-for-object topic-repair))
@@ -633,6 +641,10 @@
     (assert-equal :ensure-target-chunk
                   (hyperbook:lookup-issue-suggested-repair-of topic-issue)
                   "Topics targets should point to a target chunk repair path")
+    (assert-string=
+     "Ensure target chunk"
+     (hyperbook::lookup-issue-repair-button-label-of topic-issue)
+     "Topics targets should render a chunk-first repair action label")
     (assert-true (typep topic-repair 'hyperdoc::topic-page-availability-chunk)
                  "Topic repair thunk should now expose the target chunk itself")
     (assert-equal :needs-topic-creation
@@ -641,6 +653,30 @@
     (assert-true (typep (hyperdoc::issue-target-chunk topic-issue)
                         'hyperdoc::topic-page-availability-chunk)
                  "Topics lookup issues should compute a target chunk directly")
+    (assert-equal :needs-topic-creation
+                  (getf (hyperbook:lookup-issue-details-of topic-issue)
+                        :derived-status)
+                  "Topics lookup issue details should expose the runtime-derived status")
+    (assert-true (search "Current repair operation"
+                         topic-issue-overview-html
+                         :test #'char=)
+                 "Lookup issue overview should expose the current repair operation label")
+    (assert-true (search "Target chunk"
+                         topic-issue-overview-html
+                         :test #'char=)
+                 "Lookup issue overview should expose the target chunk row")
+    (assert-true (search "Repair path on click"
+                         topic-issue-overview-html
+                         :test #'char=)
+                 "Lookup issue overview should expose the chunk-first repair path row")
+    (assert-true (search "Ensure target chunk"
+                         topic-issue-overview-html
+                         :test #'char=)
+                 "Lookup issue overview should point to ensure-target-chunk as the active repair path")
+    (assert-true (search "chunk-first"
+                         topic-issue-repair-html
+                         :test #'char-equal)
+                 "Lookup issue repair view should describe the chunk-first repair flow")
     (assert-true (search "Status reason" overview-html :test #'char=)
                  "Topic-page chunk overview should expose the runtime-derived status reason")
     (assert-true (search "No authored topic factory for this title exists in the bound topics source."

@@ -509,6 +509,43 @@
             :repair-hint (topic-page-lookup-repair-hint chunk)
             :freshness-mode (topic-page-lookup-freshness-mode chunk)))))
 
+(defun page-lookup-issue-repair-path-label (issue)
+  (cond
+    ((topic-page-lookup-issue-target-chunk issue)
+     "Ensure target chunk")
+    ((when-let (state (missing-local-fedwiki-twin-lookup-issue-runtime-state issue))
+       (when (getf state :materialization-plan)
+         t))
+     "Materialize local FedWiki twin")
+    ((when-let (repair (hb:lookup-issue-suggested-repair-of issue))
+       (hb::issue-label repair)))
+    (t
+     "No bounded repair operation is currently attached.")))
+
+(defun render-page-lookup-issue-runtime-summary-rows
+    (issue &key include-target-chunk)
+  (let* ((details (hb:lookup-issue-details-of issue))
+         (chunk (topic-page-lookup-issue-target-chunk issue))
+         (status-reason (or (getf details :status-reason)
+                            (hb:lookup-issue-repair-description-of issue)))
+         (freshness-mode (getf details :freshness-mode)))
+    (views:html
+      (when include-target-chunk
+        (views:html
+          (:tr (:td (views:esc "Target chunk"))
+               (:td (if chunk
+                        (views:object-ref chunk)
+                        (views:esc ""))))))
+      (:tr (:td (views:esc "Current-state reason"))
+           (:td (views:esc (or status-reason ""))))
+      (:tr (:td (views:esc "Repair path on click"))
+           (:td (views:esc (page-lookup-issue-repair-path-label issue))))
+      (when freshness-mode
+        (views:html
+          (:tr (:td (views:esc "Freshness mode"))
+               (:td (:tt (views:esc
+                          (hb::issue-label freshness-mode))))))))))
+
 (defmethod hb:bounded-lookup-issue-current-status-of ((issue hb:page-lookup-issue))
   (or (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
         (topic-page-lookup-chunk-state chunk))
@@ -553,6 +590,28 @@
               (getf state :local-page-exists-p)
               :current-materialization-action
               (getf state :materialization-action)))))
+
+(defmethod hb::bounded-lookup-issue-overview-extra-rows
+    ((issue hb:page-lookup-issue))
+  (render-page-lookup-issue-runtime-summary-rows
+   issue
+   :include-target-chunk t))
+
+(defmethod hb::bounded-lookup-issue-repair-button-label-of
+    ((issue hb:page-lookup-issue))
+  (page-lookup-issue-repair-path-label issue))
+
+(defmethod hb::bounded-lookup-issue-repair-extra-content
+    ((issue hb:page-lookup-issue))
+  (views:html
+    (:table :class "inspector-table"
+            (render-page-lookup-issue-runtime-summary-rows
+             issue
+             :include-target-chunk t))
+    (when (topic-page-lookup-issue-target-chunk issue)
+      (views:html
+        (:p (views:esc
+             "This repair path is chunk-first: clicking repair ensures the target chunk and its basis chain."))))))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))
   (title-of chunk))
