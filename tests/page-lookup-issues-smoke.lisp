@@ -292,6 +292,13 @@
           (getf layout-spec :relations)
           :test #'equal))
 
+(defun page-lookup-authored-source-relation-definition-by-id
+    (definitions relation-id)
+  (find relation-id
+        definitions
+        :key (lambda (definition) (getf definition :id))
+        :test #'equal))
+
 (defun run-page-lookup-authored-artifact-smoke-test ()
   (let* ((source (hyperdoc::page-lookup-issue-authored-source-artifact))
          (authored (hyperdoc::page-lookup-issue-authored-artifact))
@@ -426,8 +433,130 @@
      (page-lookup-smoke-find-view-by-title layout-views "Layout")
      "Compiled layout artifact should expose its layout view")))
 
+(defun run-page-lookup-authored-mutation-roundtrip-smoke-test ()
+  (let* ((root (page-lookup-smoke-tempdir))
+         (source-pathname
+           (merge-pathnames "page-lookup-issue-authored-layout-relation.sexp"
+                            root))
+         (source-path (namestring source-pathname))
+         (relation-id "layout/page-lookup/repair-after-overview"))
+    (unwind-protect
+         (let ((hyperdoc::*page-lookup-issue-authored-layout-source-path*
+                 source-path))
+           (hyperdoc::write-page-lookup-issue-authored-layout-override-payload
+            (hyperdoc::page-lookup-issue-authored-layout-default-override-payload)
+            :source-path source-path)
+           (let* ((initial-reconstruction
+                    (hyperdoc::reconstruct-page-lookup-issue-artifacts-from-source
+                     :refresh-source t))
+                  (initial-layout (getf initial-reconstruction :layout))
+                  (initial-layout-spec
+                    (hyperdoc::compiled-layout-artifact-layout-spec-of
+                     initial-layout))
+                  (mutation
+                    (hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation
+                     :source-path source-path)))
+             (assert-true
+              (typep mutation
+                     'hyperdoc::page-lookup-issue-authored-relation-mutation)
+              "Page-lookup mutation path should expose an explicit authored-relation mutation object")
+             (assert-equal source-path
+                           (hyperdoc::authored-relation-mutation-source-path-of
+                            mutation)
+                           "Mutation object should retain the repo-native authored source write target")
+             (assert-equal '(:overview-pane :repair-pane)
+                           (getf initial-layout-spec :ordered-panes)
+                           "Baseline reconstruction should keep Overview before Repair before mutation")
+             (multiple-value-bind (applied reconstruction)
+                 (hyperdoc::apply-authored-relation-mutation
+                  mutation
+                  :source-path source-path)
+               (let* ((updated-source-payload
+                        (hyperdoc::page-lookup-issue-authored-layout-override-payload
+                         :source-path source-path))
+                      (updated-relation-definition
+                        (page-lookup-authored-source-relation-definition-by-id
+                         (getf updated-source-payload :relation-overrides)
+                         relation-id))
+                      (updated-source (getf reconstruction :source))
+                      (updated-authored (getf reconstruction :authored))
+                      (updated-behavior (getf reconstruction :behavior))
+                      (updated-layout (getf reconstruction :layout))
+                      (updated-layout-spec
+                        (hyperdoc::compiled-layout-artifact-layout-spec-of
+                         updated-layout))
+                      (issue (smoke-make-page-lookup-issue
+                              "topics"
+                              "Synthetic mutation target"))
+                      (issue-layout
+                        (hyperdoc::page-lookup-issue-layout-artifact-for issue)))
+                 (assert-equal :applied
+                               (hyperdoc::authored-relation-mutation-status-of
+                                applied)
+                               "Mutation apply should report applied status")
+                 (assert-true
+                  updated-relation-definition
+                  "Mutation apply should persist the updated layout relation override in source payload")
+                 (assert-equal :overview-pane
+                               (getf updated-relation-definition :subject)
+                               "Mutation apply should rewrite the relation subject in the authored source payload")
+                 (assert-equal :repair-pane
+                               (getf updated-relation-definition :object)
+                               "Mutation apply should rewrite the relation object in the authored source payload")
+                 (assert-true
+                  (typep updated-source 'hyperdoc::authored-relation-artifact-source)
+                  "Reconstruction after mutation should still yield a source artifact")
+                 (assert-equal source-path
+                               (hyperdoc::authored-relation-artifact-source-path-of
+                                updated-source)
+                               "Reconstruction should report the mutated repo-native source path")
+                 (assert-true
+                  (typep updated-authored
+                         'hyperdoc::page-lookup-issue-authored-artifact)
+                  "Reconstruction after mutation should still yield a page-lookup authored artifact")
+                 (assert-true
+                  (typep updated-behavior
+                         'hyperdoc::page-lookup-issue-behavior-artifact)
+                  "Behavior artifact should recompile from mutated authored source")
+                 (assert-true
+                  (typep updated-layout
+                         'hyperdoc::page-lookup-issue-layout-artifact)
+                  "Layout artifact should recompile from mutated authored source")
+                 (assert-true
+                  (hyperdoc::compiled-artifact-derived-p
+                   updated-behavior
+                   updated-authored)
+                  "Recompiled behavior artifact must remain derived from reconstructed authored artifact")
+                 (assert-true
+                  (hyperdoc::compiled-artifact-derived-p
+                   updated-layout
+                   updated-authored)
+                  "Recompiled layout artifact must remain derived from reconstructed authored artifact")
+                 (assert-equal '(:repair-pane :overview-pane)
+                               (getf updated-layout-spec :ordered-panes)
+                               "Mutated layout relation should invert pane ordering in compiled layout artifact")
+                 (assert-true
+                  (page-lookup-authored-artifact-layout-relation-p
+                   updated-layout-spec
+                   :after
+                   :overview-pane
+                   :repair-pane)
+                  "Compiled layout relations should reflect the mutated authored relation")
+                 (assert-equal updated-layout
+                               issue-layout
+                               "Page-lookup issue consumer should expose the recompiled layout artifact after mutation")))))
+      (let ((hyperdoc::*page-lookup-issue-authored-layout-source-path*
+              "hyperdoc/page-lookup-issue-authored-layout-relation.sexp"))
+        (hyperdoc::reconstruct-page-lookup-issue-artifacts-from-source
+         :refresh-source t))
+      (ignore-errors
+        (uiop:delete-directory-tree root
+                                    :validate t
+                                    :if-does-not-exist :ignore)))))
+
 (defun run-page-lookup-issues-smoke-tests ()
   (run-page-lookup-authored-artifact-smoke-test)
+  (run-page-lookup-authored-mutation-roundtrip-smoke-test)
   (let* ((denk-page (smoke-find-hyperdoc-page "Denkpanzer paper 2013"))
          (denk-headings (smoke-heading-texts denk-page))
          (denk-counterpart-issues
