@@ -38,7 +38,17 @@
                           "repair-lookup-issue-via-chunks"
                           "function-lookup-issue")
      :source-substrings ("&lt;h2&gt;Current architecture boundary&lt;/h2&gt;"
-                         "&lt;h2&gt;Repair procedure&lt;/h2&gt;"))))
+                         "&lt;h2&gt;Repair procedure&lt;/h2&gt;"))
+    (:title "Authored relation mutation round-trip for page-lookup issue"
+     :headings ("Step 2. Start from the repo-native source"
+                "Step 6. Apply the bounded mutation"
+                "Step 7. Show the consumer change after mutation/reconstruction")
+     :content-substrings ("page-lookup-issue-authored-source-artifact"
+                          "page-lookup-issue-authored-mutation-roundtrip-report"
+                          "layout/page-lookup/repair-after-overview")
+     :source-substrings ("&lt;h2&gt;Step 2. Start from the repo-native source&lt;/h2&gt;"
+                         "&lt;h2&gt;Step 6. Apply the bounded mutation&lt;/h2&gt;"
+                         "&lt;h2&gt;Step 7. Show the consumer change after mutation/reconstruction&lt;/h2&gt;"))))
 
 (defun lookup-issue-docs-find-view-by-title (views title)
   (find title
