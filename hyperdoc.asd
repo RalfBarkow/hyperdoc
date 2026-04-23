@@ -173,6 +173,7 @@
                              (:file "playground-debug")
                              (:file "web-debugger")
                              (:file "playground-eval")
+                             (:file "snippet-playground-authored-source")
                              (:file "snippet-playground")
                              (:file "inspector")))))
 

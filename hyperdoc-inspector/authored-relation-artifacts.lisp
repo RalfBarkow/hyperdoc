@@ -99,6 +99,10 @@
   (hyperdoc::title-of object))
 
 (defmethod views:text-representation
+    ((object hyperdoc::authored-relation-artifact-source))
+  (hyperdoc::title-of object))
+
+(defmethod views:text-representation
     ((object hyperdoc::compiled-artifact))
   (hyperdoc::title-of object))
 
@@ -270,7 +274,78 @@
                 (:span :style "opacity: 0.6;"
                        (views:esc
                         (authored-relation-artifact-relation-line
-                         relation))))))))))
+                        relation))))))))))
+
+(views:defview authored-relation-artifact-source-summary
+    (source hyperdoc::authored-relation-artifact-source)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:div :class "hyperdoc-authored-relation-artifact-source"
+            :data-hyperdoc-authored-source-artifact "true"
+            (:p (views:esc (hyperdoc::summary-of source)))
+            (:table :class "inspector-table"
+                    (authored-artifact-table-row
+                     "Source kind"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-artifact-source-kind-of
+                        source))))
+                    (authored-artifact-table-row
+                     "Source path"
+                     (views:esc
+                      (authored-artifact-string
+                       (hyperdoc::authored-relation-artifact-source-path-of
+                        source))))
+                    (authored-artifact-table-row
+                     "Schema version"
+                     (views:esc
+                      (format nil "~D"
+                              (hyperdoc::authored-relation-artifact-source-schema-version-of
+                               source))))
+                    (authored-artifact-table-row
+                     "Artifact id"
+                     (views:esc
+                      (hyperdoc::authored-relation-artifact-source-artifact-id-of
+                       source)))
+                    (authored-artifact-table-row
+                     "Semantic roles"
+                     (views:esc
+                      (format nil "~D"
+                              (hyperdoc::authored-relation-artifact-source-role-count
+                               source))))
+                    (authored-artifact-table-row
+                     "Relations"
+                     (views:esc
+                      (format nil "~D"
+                              (hyperdoc::authored-relation-artifact-source-relation-count
+                               source)))))))))
+
+(views:defview authored-relation-artifact-source-roles
+    (source hyperdoc::authored-relation-artifact-source)
+  (views:html-view :title "Role definitions" :priority 2
+    (authored-artifact-lines-html
+     (mapcar
+      (lambda (definition)
+        (format nil "~A | ~A | ~A"
+                (getf definition :id)
+                (getf definition :kind)
+                (getf definition :binding)))
+      (hyperdoc::authored-relation-artifact-source-semantic-role-definitions-of
+       source)))))
+
+(views:defview authored-relation-artifact-source-relations
+    (source hyperdoc::authored-relation-artifact-source)
+  (views:html-view :title "Relation definitions" :priority 3
+    (authored-artifact-lines-html
+     (mapcar
+      (lambda (definition)
+        (format nil "~A | ~A ~A ~A"
+                (getf definition :layer)
+                (getf definition :subject)
+                (getf definition :predicate)
+                (getf definition :object)))
+      (hyperdoc::authored-relation-artifact-source-relation-definitions-of
+       source)))))
 
 (views:defview compiled-artifact-summary
     (artifact hyperdoc::compiled-artifact)

@@ -94,6 +94,53 @@
              :initarg :findings
              :initform nil)))
 
+(defclass authored-relation-artifact-source ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (source-kind :reader authored-relation-artifact-source-kind-of
+                :initarg :source-kind
+                :initform :repo-native-lisp)
+   (source-path :reader authored-relation-artifact-source-path-of
+                :initarg :source-path
+                :initform nil)
+   (schema-version :reader authored-relation-artifact-source-schema-version-of
+                   :initarg :schema-version
+                   :initform 1)
+   (artifact-id :reader authored-relation-artifact-source-artifact-id-of
+                :initarg :artifact-id)
+   (artifact-title :reader authored-relation-artifact-source-artifact-title-of
+                   :initarg :artifact-title)
+   (artifact-summary :reader authored-relation-artifact-source-artifact-summary-of
+                     :initarg :artifact-summary
+                     :initform nil)
+   (workflow-role :reader authored-relation-artifact-source-workflow-role-of
+                  :initarg :workflow-role
+                  :initform nil)
+   (compiler-pipeline
+     :reader authored-relation-artifact-source-compiler-pipeline-of
+     :initarg :compiler-pipeline
+     :initform nil)
+   (semantic-role-definitions
+     :reader authored-relation-artifact-source-semantic-role-definitions-of
+     :initarg :semantic-role-definitions
+     :initform nil)
+   (relation-definitions
+     :reader authored-relation-artifact-source-relation-definitions-of
+     :initarg :relation-definitions
+     :initform nil)
+   (compiled-targets
+     :reader authored-relation-artifact-source-compiled-targets-of
+     :initarg :compiled-targets
+     :initform nil)
+   (findings :reader authored-relation-artifact-source-findings-of
+             :initarg :findings
+             :initform nil)))
+
 (defclass compiled-artifact ()
   ((id :reader id-of
        :initarg :id)
@@ -158,6 +205,9 @@
 (defun make-authored-relation-artifact (&rest initargs)
   (apply #'make-instance 'authored-relation-artifact initargs))
 
+(defun make-authored-relation-artifact-source (&rest initargs)
+  (apply #'make-instance 'authored-relation-artifact-source initargs))
+
 (defun make-compiled-behavior-artifact (&rest initargs)
   (apply #'make-instance 'compiled-behavior-artifact initargs))
 
@@ -169,6 +219,19 @@
           (authored-relation-artifact-relations-of artifact)
           :key #'authored-relation-layer-of
           :test-not #'eq))
+
+(defun authored-relation-artifact-source-relations-by-layer (source layer)
+  (remove layer
+          (authored-relation-artifact-source-relation-definitions-of source)
+          :key (lambda (definition) (getf definition :layer))
+          :test-not #'eq))
+
+(defun authored-relation-artifact-source-role-count (source)
+  (length
+   (authored-relation-artifact-source-semantic-role-definitions-of source)))
+
+(defun authored-relation-artifact-source-relation-count (source)
+  (length (authored-relation-artifact-source-relation-definitions-of source)))
 
 (defun compiled-artifact-derived-p (artifact authored-artifact)
   (eq authored-artifact
@@ -203,6 +266,10 @@
     (format stream "~A" (authored-relation-artifact-display-label object))))
 
 (defmethod print-object ((object authored-relation-artifact) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (authored-relation-artifact-display-label object))))
+
+(defmethod print-object ((object authored-relation-artifact-source) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (authored-relation-artifact-display-label object))))
 
