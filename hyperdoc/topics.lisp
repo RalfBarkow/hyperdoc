@@ -78,6 +78,9 @@
 (defmethod dmx-workspace-id-of ((page dmx-workspace-repair-triage))
   *dmx-context-window-workspace-id*)
 
+(defmethod dmx-workspace-id-of ((page dmx-topic-proxy))
+  *dmx-context-window-workspace-id*)
+
 (defclass dmx-shared-workspace-object (dmx-workspace-repair-triage)
   ((workspace-id :reader dmx-workspace-id-of
                  :type integer

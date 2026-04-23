@@ -1500,6 +1500,173 @@
     (unless raised
       (error "Bad topicmap helper input must signal HYPERDOC::UNKNOWN-DMX-TOPIC-IDENTIFIER"))))
 
+(defun run-shared-workspace-operational-state-page-awareness-test ()
+  (let* ((page (hyperdoc::make-dmx-shared-workspace-object
+                :workspace-id 111111
+                :topicmap-id 222222))
+         (matching-result
+           '(:success-p t
+             :dry-run nil
+             :result-workspace-id 111111
+             :result-in-topicmap-p t))
+         (mismatched-result
+           '(:success-p t
+             :dry-run nil
+             :result-workspace-id 919815
+             :result-in-topicmap-p t)))
+    (assert-equal "repair-succeeded"
+                  (hyperdoc/inspector::dmx-repair-result-operational-state-label
+                   page
+                   matching-result)
+                  "Operational-state helper must classify success against the page workspace id")
+    (assert-equal "in-topicmap-but-unassigned"
+                  (hyperdoc/inspector::dmx-repair-result-operational-state-label
+                   page
+                   mismatched-result)
+                  "Operational-state helper must not treat mismatched workspace ids as repair success")))
+
+(defun run-dmx-repair-auth-state-machine-run-status-smoke-test ()
+  (let* ((running-run
+           (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
+            :result '(:trace-state :s6 :success-p nil)
+            :auth-context '(:auth-mode :basic)
+            :debug-events nil))
+         (success-run
+           (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
+            :result '(:trace-state :s12 :success-p t :outcome :ok)
+            :auth-context '(:auth-mode :basic)
+            :debug-events nil))
+         (failure-run
+           (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
+            :result '(:trace-state :s13 :success-p nil :outcome :repair-failed)
+            :auth-context '(:auth-mode :basic)
+            :debug-events nil)))
+    (assert-equal :running
+                  (hyperdoc::state-machine-run-status-of running-run)
+                  "Intermediate auth states must remain running")
+    (assert-equal :finished
+                  (hyperdoc::state-machine-run-status-of success-run)
+                  "S12 must classify as finished")
+    (assert-equal :failed
+                  (hyperdoc::state-machine-run-status-of failure-run)
+                  "S13 must classify as failed")))
+
+(defun run-shared-workspace-nondefault-id-rendering-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((missing-proxy
+           (make-smoke-diagnostics-proxy
+            922464
+            "Operational definition: chunk, chunk note, manifest note, content topic"
+            :workspace-id nil
+            :status :in-topicmap-but-unassigned
+            :repair-needed-p t))
+         (projection
+           (make-smoke-topicmap-projection
+            (list (make-smoke-topicmap-projection-topic
+                   922464
+                   "Operational definition: chunk, chunk note, manifest note, content topic"))))
+         (workspace (hyperdoc::make-dmx-shared-workspace-object
+                     :workspace-id 111111
+                     :topicmap-id 222222))
+         (topicmap (hyperdoc::make-dmx-shared-topicmap-object
+                    :workspace-id 111111
+                    :topicmap-id 222222))
+         (original-ensure
+           (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page))
+           (dolist (page (list workspace topicmap))
+             (setf (hyperdoc::dmx-topicmap-projection-of page) projection
+                   (hyperdoc::dmx-triage-topic-proxies-of page) (list missing-proxy)
+                   (hyperdoc::dmx-repair-topic-proxies-of page) (list missing-proxy)
+                   (hyperdoc::dmx-repair-results-of page) nil
+                   (hyperdoc::dmx-repair-summary-of page) nil
+                   (hyperdoc::dmx-load-error-of page) nil))
+           (let* ((workspace-views
+                    (dmx-topic-proxy-smoke-load-inspector-views-for-object workspace))
+                  (topicmap-views
+                    (dmx-topic-proxy-smoke-load-inspector-views-for-object topicmap))
+                  (workspace-overview
+                    (dmx-topic-proxy-smoke-find-view-by-title workspace-views "Overview"))
+                  (workspace-missing
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     workspace-views
+                     "Topics missing workspace assignment"))
+                  (topicmap-overview
+                    (dmx-topic-proxy-smoke-find-view-by-title topicmap-views "Overview")))
+             (assert-true
+              (search "topicmap 222222"
+                      (html-inspector-views:view-html workspace-overview)
+                      :test #'char=)
+              "Workspace overview must render the page topicmap id, not a hard-coded default")
+             (assert-true
+              (search "topicmap 222222"
+                      (html-inspector-views:view-html workspace-missing)
+                      :test #'char=)
+              "Missing-assignment view must render the page topicmap id, not a hard-coded default")
+             (assert-true
+              (search "workspace 111111"
+                      (html-inspector-views:view-html workspace-missing)
+                      :test #'char=)
+              "Missing-assignment view must render the page workspace id, not a hard-coded default")
+             (assert-true
+              (search "topicmap 222222"
+                      (html-inspector-views:view-html topicmap-overview)
+                      :test #'char=)
+              "Topicmap overview must render the page topicmap id, not a hard-coded default")))
+      (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
+            original-ensure))))
+
+(defun run-repair-results-table-page-aware-state-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((page (hyperdoc::make-dmx-shared-workspace-object
+                :workspace-id 111111
+                :topicmap-id 222222))
+         (result
+           '(:topic-id 922464
+             :topic-title "Operational definition: chunk, chunk note, manifest note, content topic"
+             :auth-mode :header
+             :success-p t
+             :dry-run nil
+             :workspace-action :assigned
+             :result-workspace-id 111111
+             :result-workspace-title "alt-context"
+             :result-in-topicmap-p t
+             :debug-report (:current-state-label "S12 terminal success")))
+         (original-ensure
+           (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page))
+           (setf (hyperdoc::dmx-topicmap-projection-of page) nil
+                 (hyperdoc::dmx-triage-topic-proxies-of page) nil
+                 (hyperdoc::dmx-repair-topic-proxies-of page) nil
+                 (hyperdoc::dmx-repair-results-of page) (list result)
+                 (hyperdoc::dmx-repair-summary-of page) nil
+                 (hyperdoc::dmx-load-error-of page) nil)
+           (let* ((views (dmx-topic-proxy-smoke-load-inspector-views-for-object page))
+                  (repair-view
+                    (dmx-topic-proxy-smoke-find-view-by-title views "Repair console"))
+                  (html (html-inspector-views:view-html repair-view)))
+             (assert-true
+              (search "Operational state" html :test #'char=)
+              "Repair-results table must keep the Operational state column")
+             (assert-true
+              (search "repair-succeeded" html :test #'char=)
+              "Repair-results table must classify state with the page-aware helper")
+             (assert-true
+              (search "In topicmap 222222" html :test #'char=)
+              "Repair-results table header must render the page topicmap id")))
+      (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
+            original-ensure))))
+
 (defun run-shared-workspace-inspectable-object-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((healthy-proxy
@@ -1697,8 +1864,12 @@
   (run-repair-console-helper-regression-test)
   (run-repair-console-localhost-rehearsal-bridge-smoke-test)
   (run-repair-console-debug-trace-regression-test)
+  (run-shared-workspace-operational-state-page-awareness-test)
+  (run-dmx-repair-auth-state-machine-run-status-smoke-test)
+  (run-shared-workspace-nondefault-id-rendering-smoke-test)
+  (run-repair-results-table-page-aware-state-smoke-test)
   (run-shared-workspace-inspectable-object-smoke-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace inspectable-object smoke + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace operational-state page-awareness smoke + repair-auth state-machine run-status smoke + shared-workspace nondefault-id rendering smoke + repair-results table page-aware-state smoke + shared-workspace inspectable-object smoke + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)

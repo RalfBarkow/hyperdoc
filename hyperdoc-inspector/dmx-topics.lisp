@@ -115,7 +115,7 @@
     (or (member (getf debug-report :bootstrap-status-code) '(401 403))
         (member (getf debug-report :guarded-put-status-code) '(401 403)))))
 
-(defun dmx-repair-result-operational-state-label (result)
+(defun dmx-repair-result-operational-state-label (page result)
   (cond
     ((null result)
      nil)
@@ -123,7 +123,7 @@
           (not (getf result :dry-run))
           (or (eql (getf result :workspace-action) :already-assigned)
               (and (eql (getf result :result-workspace-id)
-                        hyperdoc::*dmx-context-window-workspace-id*)
+                        (hyperdoc::dmx-workspace-id-of page))
                    (getf result :result-in-topicmap-p))))
      (if (eql (getf result :workspace-action) :already-assigned)
          "healthy"
@@ -140,7 +140,7 @@
   (let* ((result
            (find-dmx-repair-result-for-topic page
                                             (hyperdoc::dmx-topic-id-of proxy)))
-         (result-label (dmx-repair-result-operational-state-label result))
+         (result-label (dmx-repair-result-operational-state-label page result))
          (diagnostics (hyperdoc::dmx-diagnostics-of proxy)))
     (or result-label
         (cond
@@ -592,8 +592,14 @@
          (current-state
            (or (getf result :trace-state)
                (getf result :state)
+               (and result
+                    (if (getf result :success-p) :s12 :s13))
                (car (last visited-states))
-               :s0)))
+               :s0))
+         (run-status
+           (cond ((eq current-state :s13) :failed)
+                 ((eq current-state :s12) :finished)
+                 (t :running))))
     (hyperdoc::make-state-machine-run
      :id "state-machine-run/dmx-repair-auth"
      :title "DMX repair-console authentication run"
@@ -604,9 +610,9 @@
      :visited-states visited-states
      :transition-trace transition-trace
      :evidence-trace evidence-trace
-     :status (if (eq current-state :s13) :failed :finished)
+     :status run-status
      :failure-classification
-     (and (eq current-state :s13)
+     (and (eq run-status :failed)
           (or (getf result :outcome) :repair-failed))
      :notes
      (remove nil
@@ -1562,12 +1568,13 @@
                     (views:html
                       (:tr (:td (views:esc "Summary"))
                            (:td (views:esc message))))))))
-      (render-dmx-repair-results-table (hyperdoc::dmx-repair-results-of page)
+      (render-dmx-repair-results-table page
+                                       (hyperdoc::dmx-repair-results-of page)
                                        :topicmap-id (hyperdoc::dmx-topicmap-id-of page))
       (render-dmx-repair-debug-traces
        (hyperdoc::dmx-repair-results-of page)))))
 
-(defun render-dmx-repair-results-table (results &key topicmap-id)
+(defun render-dmx-repair-results-table (page results &key topicmap-id)
   (if results
       (views:html
         (:table :class "inspector-table"
@@ -1577,7 +1584,10 @@
                      (:th (views:esc "Auth mode"))
                      (:th (views:esc "Dry-run"))
                      (:th (views:esc "Workspace readback"))
-                     (:th (views:esc "In topicmap 919822"))
+                     (:th (views:esc
+                           (format nil "In topicmap ~D"
+                                   (or topicmap-id
+                                       (hyperdoc::dmx-topicmap-id-of page)))))
                      (:th (views:esc "Outcome"))
                      (:th (views:esc "Trace state"))
                      (:th (views:esc "Message")))
@@ -1600,6 +1610,7 @@
                               (:td (views:esc (or (getf result :topic-title) "n/a")))
                               (:td (:tt (views:esc
                                          (or (dmx-repair-result-operational-state-label
+                                              page
                                               result)
                                              "n/a"))))
                               (:td (:tt (views:esc
@@ -2474,9 +2485,13 @@
                     :authorization-header (lwcells:cell-ref header-cell)
                     :auth-token (lwcells:cell-ref token-cell))
                   t)
-                "Assign workspace 919815 in place while preserving topicmap 919822 placement")))))
+                (format nil
+                        "Assign workspace ~D in place while preserving topicmap ~D placement"
+                        (hyperdoc::dmx-workspace-id-of page)
+                        (hyperdoc::dmx-topicmap-id-of page)))))))
         (:h4 "Result readback")
-        (render-dmx-repair-results-table (hyperdoc::dmx-repair-results-of page)
+        (render-dmx-repair-results-table page
+                                         (hyperdoc::dmx-repair-results-of page)
                                          :topicmap-id (hyperdoc::dmx-topicmap-id-of page))
         (render-dmx-repair-debug-traces
          (hyperdoc::dmx-repair-results-of page))))))
@@ -2598,7 +2613,9 @@
   (views:html-view :title "Overview" :priority 1
     (views:html
       (:p (views:esc
-           "This first-class workspace object keeps workspace assignment distinct from topicmap placement while centering the visible context-window blackboard in topicmap 919822."))
+           (format nil
+                   "This first-class workspace object keeps workspace assignment distinct from topicmap placement while centering the visible context-window blackboard in topicmap ~D."
+                   (hyperdoc::dmx-topicmap-id-of page))))
       (render-dmx-shared-workspace-context-summary-table page))))
 
 (views:defview 👀topics-missing-workspace-assignment
@@ -2607,7 +2624,10 @@
   (views:html-view :title "Topics missing workspace assignment" :priority 2
     (views:html
       (:p (views:esc
-           "These topics are visible in topicmap 919822 but still lack workspace assignment for workspace 919815. Foreign rows stay read-only as foreign-no-action; HyperDoc-owned rows stay read-only here as in-topicmap-but-unassigned until you move to Repair console."))
+           (format nil
+                   "These topics are visible in topicmap ~D but still lack workspace assignment for workspace ~D. Foreign rows stay read-only as foreign-no-action; HyperDoc-owned rows stay read-only here as in-topicmap-but-unassigned until you move to Repair console."
+                   (hyperdoc::dmx-topicmap-id-of page)
+                   (hyperdoc::dmx-workspace-id-of page))))
       (render-dmx-operational-topic-proxy-table
        page
        (hyperdoc::dmx-visible-but-unassigned-topic-proxies page)
@@ -2619,12 +2639,17 @@
   (views:html-view :title "Assigned topics" :priority 3
     (views:html
       (:p (views:esc
-           "These topics are visible in topicmap 919822 and currently assigned to workspace 919815."))
+           (format nil
+                   "These topics are visible in topicmap ~D and currently assigned to workspace ~D."
+                   (hyperdoc::dmx-topicmap-id-of page)
+                   (hyperdoc::dmx-workspace-id-of page))))
       (render-dmx-operational-topic-proxy-table
        page
        (hyperdoc::dmx-visible-assigned-topic-proxies page)
        :empty-message
-       "No visible topics currently read back as assigned to workspace 919815."))))
+       (format nil
+               "No visible topics currently read back as assigned to workspace ~D."
+               (hyperdoc::dmx-workspace-id-of page))))))
 
 (views:defview 👀repair-console (page hyperdoc::dmx-shared-workspace-object)
   (hyperdoc::ensure-dmx-workspace-repair-triage page)
@@ -2636,7 +2661,9 @@
   (views:html-view :title "Overview" :priority 1
     (views:html
       (:p (views:esc
-           "This first-class topicmap object models topicmap 919822 as the visible context-window shared blackboard while keeping workspace assignment diagnosis separate from topicmap placement."))
+           (format nil
+                   "This first-class topicmap object models topicmap ~D as the visible context-window shared blackboard while keeping workspace assignment diagnosis separate from topicmap placement."
+                   (hyperdoc::dmx-topicmap-id-of page))))
       (render-dmx-shared-workspace-context-summary-table page))))
 
 (views:defview 👀visible-but-unassigned (page hyperdoc::dmx-shared-topicmap-object)
@@ -2644,7 +2671,10 @@
   (views:html-view :title "Visible but unassigned" :priority 2
     (views:html
       (:p (views:esc
-           "This is the key triage view for topicmap 919822: visible topics that still lack workspace assignment for workspace 919815. Each row opens the existing single-topic Workspace diagnostics surface."))
+           (format nil
+                   "This is the key triage view for topicmap ~D: visible topics that still lack workspace assignment for workspace ~D. Each row opens the existing single-topic Workspace diagnostics surface."
+                   (hyperdoc::dmx-topicmap-id-of page)
+                   (hyperdoc::dmx-workspace-id-of page))))
       (render-dmx-operational-topic-proxy-table
        page
        (hyperdoc::dmx-visible-but-unassigned-topic-proxies page)
@@ -2656,7 +2686,9 @@
   (views:html-view :title "Visible topics" :priority 3
     (views:html
       (:p (views:esc
-           "All currently visible topics in topicmap 919822, classified with the shared read-only operational vocabulary."))
+           (format nil
+                   "All currently visible topics in topicmap ~D, classified with the shared read-only operational vocabulary."
+                   (hyperdoc::dmx-topicmap-id-of page))))
       (render-dmx-operational-topic-proxy-table
        page
        (hyperdoc::dmx-visible-topic-proxies page)

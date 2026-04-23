@@ -56,6 +56,11 @@
   <li>No repair without an explicit reviewed plan object.</li>
 </ul>
 
+<p>
+  This boundary is intentionally capability-scoped to avoid ambient authority:
+  datastore reachability does not imply broad mutation permission.
+</p>
+
 <h2>Adapter boundary</h2>
 
 <p>

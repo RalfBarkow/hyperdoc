@@ -50,6 +50,15 @@
   while still allowing both to be inspected through generic views.
 </p>
 
+<p>
+  Implementation rule: prefer the public constructor helpers
+  (<tt>make-state-machine-state</tt>,
+  <tt>make-state-machine-transition</tt>,
+  <tt>make-state-machine-definition</tt>,
+  <tt>make-state-machine-run</tt>) so view contracts stay uniform across
+  machines and runs.
+</p>
+
 <h2>Worked example boundary</h2>
 
 <p>
