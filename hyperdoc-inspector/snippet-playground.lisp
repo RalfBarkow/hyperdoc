@@ -104,6 +104,14 @@
    (source-text :reader snippet-comparison-region-source-text-of
                 :initarg :source-text
                 :initform "")
+   (source-original-length
+     :reader snippet-comparison-region-source-original-length-of
+     :initarg :source-original-length
+     :initform 0)
+   (source-truncated-p
+     :reader snippet-comparison-region-source-truncated-p
+     :initarg :source-truncated-p
+     :initform nil)
    (findings :reader snippet-comparison-region-findings-of
              :initarg :findings
              :initform nil)))
@@ -530,6 +538,8 @@
 (defvar *snippet-comparison-surface-lifecycle-state-machine* nil)
 (defvar *snippet-comparison-surface-lifecycle-state-machine-scxml* nil)
 (defvar *snippet-playground-layout-artifact* nil)
+(defparameter *snippet-playground-inline-source-render-limit* 4096)
+(defparameter *snippet-playground-scaffold-source-excerpt-limit* 1024)
 
 (defun make-snippet-playground-authored-relation
     (&key id title summary layer subject predicate object attributes)
@@ -1846,6 +1856,31 @@
   (string-trim '(#\Space #\Tab #\Newline #\Return #\Page)
                (or value "")))
 
+(defun snippet-playground-bounded-source-text
+    (source &key (limit *snippet-playground-inline-source-render-limit*))
+  (let* ((text (or source ""))
+         (bounded-limit (max 0 limit))
+         (original-length (length text))
+         (truncated-p (> original-length bounded-limit))
+         (excerpt (if truncated-p
+                      (subseq text 0 bounded-limit)
+                      text)))
+    (values excerpt original-length truncated-p)))
+
+(defun snippet-playground-inline-truncation-note
+    (shown-length original-length)
+  (format nil
+          "Inline source view truncated to ~D of ~D characters. Full source remains inspectable on the underlying object."
+          shown-length
+          original-length))
+
+(defun snippet-playground-scaffold-truncation-note
+    (shown-length original-length)
+  (format nil
+          "Embedded JavaScript excerpt truncated to ~D of ~D characters for scaffold safety."
+          shown-length
+          original-length))
+
 (defun snippet-playground-string-contains-p (haystack needle)
   (and (stringp haystack)
        (stringp needle)
@@ -2223,16 +2258,36 @@
 
 (defun generic-state-items-scaffold (session code)
   (declare (ignore session))
-  (with-output-to-string (stream)
-    (format stream ";; Translation scaffold for the recognized JavaScript CODE block.~%")
-    (format stream "(let* ((session *)~%")
-    (format stream "       (original-javascript ~S))~%" (code-snippet-source-of code))
-    (format stream "  (declare (ignore original-javascript))~%")
-    (format stream "  ;; TODO: translate the JavaScript transformation into Lisp.~%")
-    (format stream "  (setf (hyperdoc::snippet-playground-session-derived-items-of session)~%")
-    (format stream "        (list (list :type \"draft\"~%")
-    (format stream "                    :note \"TODO: replace this placeholder with translated state.items output.\")))~%")
-    (format stream "  (hyperdoc::snippet-playground-session-derived-items-of session))~%")))
+  (multiple-value-bind (excerpt original-length truncated-p)
+      (snippet-playground-bounded-source-text
+       (code-snippet-source-of code)
+       :limit *snippet-playground-scaffold-source-excerpt-limit*)
+    (with-output-to-string (stream)
+      (format stream ";; Translation scaffold for the recognized JavaScript CODE block.~%")
+      (format stream ";; Full JavaScript remains inspectable on the selected code snippet.~%")
+      (format stream ";; Original JavaScript length: ~D characters.~%" original-length)
+      (when truncated-p
+        (format stream ";; ~A~%"
+                (snippet-playground-scaffold-truncation-note
+                 (length excerpt)
+                 original-length)))
+      (format stream "(let* ((session *)~%")
+      (format stream "       (original-javascript-excerpt ~S)~%" excerpt)
+      (format stream "       (original-javascript-length ~D)~%" original-length)
+      (format stream "       (original-javascript-excerpt-truncated-p ~S))~%"
+              truncated-p)
+      (format stream "  (declare (ignore original-javascript-excerpt~%")
+      (format stream "                   original-javascript-length~%")
+      (format stream "                   original-javascript-excerpt-truncated-p))~%")
+      (format stream "  ;; Inspect (hyperdoc::snippet-playground-session-selected-code-of session) for the full JavaScript block.~%")
+      (format stream "  ;; Unsupported JavaScript should surface an explicit translation error, not a fake rewrite.~%")
+      (format stream "  (setf (hyperdoc::snippet-playground-session-derived-items-of session)~%")
+      (format stream "        (list (list :type \"translation-error\"~%")
+      (format stream "                    :report \"Unsupported JavaScript construct for the current snippet-playground translator.\"~%")
+      (format stream "                    :source-length original-javascript-length~%")
+      (format stream "                    :source-excerpt original-javascript-excerpt~%")
+      (format stream "                    :source-excerpt-truncated-p original-javascript-excerpt-truncated-p)))~%")
+      (format stream "  (hyperdoc::snippet-playground-session-derived-items-of session))~%"))))
 
 (defun quick-brown-fox-scaffold ()
   (with-output-to-string (stream)
@@ -2479,7 +2534,7 @@
       execution-interface
       normal-form))))
 
-(defun snippet-comparison-region-source
+(defun snippet-comparison-region-raw-source
     (content-key mech code lisp-source)
   (ecase content-key
     (shared-mech
@@ -2496,26 +2551,41 @@
          lisp-source
          "No Lisp scaffold is available for this session."))))
 
+(defun make-snippet-comparison-region-display-source
+    (content-key mech code lisp-source)
+  (snippet-playground-bounded-source-text
+   (snippet-comparison-region-raw-source content-key mech code lisp-source)
+   :limit *snippet-playground-inline-source-render-limit*))
+
 (defun make-snippet-comparison-region
     (region-id placement content-key title mech code lisp-source)
-  (make-instance
-   'snippet-comparison-region
-   :id (format nil "snippet-comparison-region/~A" region-id)
-   :title title
-   :summary (format nil "~A region of the snippet comparison surface." title)
-   :placement placement
-   :content-key content-key
-   :source-text (snippet-comparison-region-source
-                 content-key
-                 mech
-                 code
-                 lisp-source)
-   :findings
-   (list
-    (format nil
-            "Region ~A renders ~A on the comparison surface."
-            title
-            (string-downcase (string content-key))))))
+  (multiple-value-bind (source-text original-length truncated-p)
+      (make-snippet-comparison-region-display-source
+       content-key
+       mech
+       code
+       lisp-source)
+    (make-instance
+     'snippet-comparison-region
+     :id (format nil "snippet-comparison-region/~A" region-id)
+     :title title
+     :summary (format nil "~A region of the snippet comparison surface." title)
+     :placement placement
+     :content-key content-key
+     :source-text source-text
+     :source-original-length original-length
+     :source-truncated-p truncated-p
+     :findings
+     (append
+      (list
+       (format nil
+               "Region ~A renders ~A on the comparison surface."
+               title
+               (string-downcase (string content-key))))
+      (when truncated-p
+        (list (snippet-playground-inline-truncation-note
+               (length source-text)
+               original-length)))))))
 
 (defun snippet-comparison-surface-findings (execution-interface)
   (let ((findings '("Comparison surface renders shared Mech once above JavaScript left and Lisp right.")))
@@ -2527,11 +2597,85 @@
             findings))
     (nreverse findings)))
 
+(defparameter *snippet-comparison-supported-placements*
+  '(:center :left :right))
+
+(defun snippet-comparison-default-region-title (placement)
+  (ecase placement
+    (:center "Mech")
+    (:left "JavaScript")
+    (:right "Lisp")))
+
+(defun snippet-comparison-default-content-key (placement)
+  (ecase placement
+    (:center 'shared-mech)
+    (:left 'javascript-code)
+    (:right 'lisp-code)))
+
+(defun normalize-snippet-comparison-region-spec (region-spec)
+  (let ((placement (first region-spec)))
+    (list placement
+          :region (or (snippet-comparison-layout-region-attribute region-spec
+                                                                  :region)
+                      (ecase placement
+                        (:center 'shared-mech-region)
+                        (:left 'left-code-region)
+                        (:right 'right-code-region)))
+          :content (or (snippet-comparison-layout-region-attribute region-spec
+                                                                   :content)
+                       (snippet-comparison-default-content-key placement))
+          :title (or (snippet-comparison-layout-region-attribute region-spec
+                                                                 :title)
+                     (snippet-comparison-default-region-title placement))
+          :row (ecase placement
+                 (:center 1)
+                 (:left 2)
+                 (:right 2))
+          :column (ecase placement
+                    (:center 1)
+                    (:left 1)
+                    (:right 2))
+          :column-span (ecase placement
+                         (:center 2)
+                         (:left 1)
+                         (:right 1)))))
+
+(defun normalize-snippet-comparison-layout-spec (layout-spec)
+  (let* ((region-specs (snippet-comparison-layout-region-specs layout-spec))
+         (normalized-regions
+           (loop for placement in *snippet-comparison-supported-placements*
+                 for match = (find placement
+                                   region-specs
+                                   :key #'car
+                                   :test #'eq)
+                 when match
+                   collect (normalize-snippet-comparison-region-spec match)))
+         (ignored-region-count
+           (max 0 (- (length region-specs)
+                     (length normalized-regions))))
+         (findings '()))
+    (when (> ignored-region-count 0)
+      (push (format nil
+                    "Comparison layout ignored ~D malformed or duplicate region entr~:@P and degraded to the supported center/left/right placements."
+                    ignored-region-count)
+            findings))
+    (values
+     (list :surface (getf layout-spec :surface)
+           :regions normalized-regions
+           :relations (getf layout-spec :relations)
+           :rules (getf layout-spec :rules))
+     (nreverse findings))))
+
 (defun make-snippet-comparison-surface
     (&key status source-label mech code lisp-source execution-interface
        transformation-unit origin-pane-id pending-pane-id
        failure-classification)
   (let* ((layout-artifact (snippet-comparison-layout-artifact))
+         (raw-layout-spec
+           (snippet-playground-layout-artifact-comparison-layout-spec-of
+            layout-artifact))
+         (normalized-layout-spec nil)
+         (layout-findings nil)
          (left-region
            (make-snippet-comparison-region
             "left-code-region"
@@ -2555,10 +2699,12 @@
             "right-code-region"
             :right
             'lisp-code
-            "Lisp"
-            mech
-            code
-            lisp-source)))
+           "Lisp"
+           mech
+           code
+           lisp-source)))
+    (multiple-value-setq (normalized-layout-spec layout-findings)
+      (normalize-snippet-comparison-layout-spec raw-layout-spec))
     (make-instance
      'snippet-comparison-surface
      :id (format nil "snippet-comparison-surface/~A"
@@ -2566,9 +2712,7 @@
      :title "Snippet comparison"
      :summary
      "Three-region comparison surface with JavaScript, shared Mech, and Lisp."
-     :layout-spec
-     (snippet-playground-layout-artifact-comparison-layout-spec-of
-      layout-artifact)
+     :layout-spec normalized-layout-spec
      :layout-artifact layout-artifact
      :regions (list left-region center-region right-region)
      :left-code-region left-region
@@ -2584,7 +2728,8 @@
       :pending-pane-id pending-pane-id
       :failure-classification failure-classification)
      :findings
-     (snippet-comparison-surface-findings execution-interface))))
+     (append (snippet-comparison-surface-findings execution-interface)
+             layout-findings))))
 
 (defun snippet-playground-crosswalk (mech code)
   (let* ((preview-mode (or (mech-snippet-preview-mode-of mech)
@@ -3245,10 +3390,29 @@
                   (html-inspector-views:object-ref object)
                   (html-inspector-views:esc "n/a"))))))
 
-(defun snippet-source-pre (source)
-  (html-inspector-views:html
-    (:pre :style "white-space: pre-wrap"
-          (html-inspector-views:esc (or source "")))))
+(defun snippet-source-pre
+    (source
+     &key
+       (limit *snippet-playground-inline-source-render-limit*)
+       original-length
+       truncated-p)
+  (multiple-value-bind (excerpt effective-original-length effective-truncated-p)
+      (if (or original-length truncated-p)
+          (values (or source "")
+                  (or original-length (length (or source "")))
+                  truncated-p)
+          (snippet-playground-bounded-source-text source :limit limit))
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-source-view"
+            (when effective-truncated-p
+              (html-inspector-views:html
+                (:p :class "hyperdoc-snippet-source-boundary"
+                    (html-inspector-views:esc
+                     (snippet-playground-inline-truncation-note
+                      (length excerpt)
+                      effective-original-length)))))
+            (:pre :style "white-space: pre-wrap"
+                  (html-inspector-views:esc excerpt))))))
 
 (defun snippet-playground-view-interface-text (session)
   (or (and (snippet-playground-session-execution-interface-of session)
@@ -3300,7 +3464,11 @@
           :style (snippet-comparison-render-region-style region-spec)
           (:h3 (html-inspector-views:esc (title-of region)))
           (snippet-source-pre
-           (snippet-comparison-region-source-text-of region)))))
+           (snippet-comparison-region-source-text-of region)
+           :original-length
+           (snippet-comparison-region-source-original-length-of region)
+           :truncated-p
+           (snippet-comparison-region-source-truncated-p region)))))
 
 (defun snippet-comparison-layout-column-count (layout-spec)
   (loop for region-spec in (snippet-comparison-layout-region-specs layout-spec)
@@ -3311,72 +3479,196 @@
                                                                         :column-span)
                             1)))))
 
-(defun snippet-comparison-render-surface (surface)
+(defun snippet-comparison-visible-regions (surface)
   (let ((shown-content-keys '())
         (layout-spec (snippet-comparison-surface-layout-spec-of surface))
         (show-once-keys
           (snippet-comparison-layout-show-once-content-keys
-           (snippet-comparison-surface-layout-spec-of surface))))
-    (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-comparison"
-            (:div :class "hyperdoc-snippet-comparison-layout"
-                  :style
-                  (format nil
-                          "display: grid; grid-template-columns: ~{minmax(0, 1fr)~^ ~}; gap: 1rem; align-items: start;"
-                          (make-list
-                           (max 1 (or (snippet-comparison-layout-column-count
-                                       layout-spec)
-                                      1))))
-                  (dolist (region-spec
-                           (snippet-comparison-layout-region-specs
-                            layout-spec))
-                    (let* ((placement (first region-spec))
-                           (region
-                             (snippet-comparison-surface-region-for-placement
-                              surface
-                              placement))
-                           (content-key
-                             (and region
-                                  (snippet-comparison-region-content-key-of
-                                   region))))
-                      (when (and region
-                                 (not (and (member content-key
-                                                   show-once-keys
-                                                   :test #'eq)
-                                           (member content-key
-                                                   shown-content-keys
-                                                   :test #'eq))))
-                        (push content-key shown-content-keys)
-                        (snippet-comparison-render-region region region-spec)))))
-            (:div :class "hyperdoc-snippet-transformation-unit"
-                  (:h3 "Transformation unit")
-                  (if-let (unit
-                           (snippet-comparison-surface-transformation-unit-of
-                            surface))
-                    (html-inspector-views:html
-                      (:table :class "inspector-table"
-                              (snippet-playground-view-transformation-row
-                               "Interface"
-                               (and (snippet-transformation-unit-execution-interface-of
-                                     unit)
-                                    (snippet-execution-interface-handoff-path-of
-                                     (snippet-transformation-unit-execution-interface-of
-                                      unit))))
-                              (snippet-playground-view-transformation-row
-                               "Operation"
-                               (or (snippet-transformation-unit-operation-summary-of
-                                    unit)
-                                   (snippet-transformation-unit-operation-kind-of
-                                    unit)))
-                              (snippet-playground-view-transformation-row
-                               "Output"
-                               (snippet-transformation-unit-output-shape-of unit))
-                              (snippet-playground-view-transformation-row
-                               "Preview"
-                               (snippet-transformation-unit-preview-mode-of unit))))
-                    (html-inspector-views:html
-                      (:p (html-inspector-views:esc
-                           "No transformation unit is available for this session.")))))))))
+           (snippet-comparison-surface-layout-spec-of surface)))
+        (visible '()))
+    (dolist (region-spec (snippet-comparison-layout-region-specs layout-spec)
+                         (nreverse visible))
+      (let* ((placement (first region-spec))
+             (region
+               (snippet-comparison-surface-region-for-placement
+                surface
+                placement))
+             (content-key
+               (and region
+                    (snippet-comparison-region-content-key-of region))))
+        (when (and region
+                   (not (and (member content-key
+                                     show-once-keys
+                                     :test #'eq)
+                             (member content-key
+                                     shown-content-keys
+                                     :test #'eq))))
+          (push content-key shown-content-keys)
+          (push (cons region region-spec) visible))))))
+
+(defun snippet-comparison-layout-grid-column-count (layout-spec)
+  (min 3
+       (max 1
+            (or (snippet-comparison-layout-column-count layout-spec)
+                1))))
+
+(defun snippet-playground-log-comparison-render (phase &rest pairs)
+  (format *trace-output*
+          "~&[SNIPPET-COMPARISON-PERF] ~A"
+          phase)
+  (loop for (key value) on pairs by #'cddr
+        do (format *trace-output* " ~A=~S" key value))
+  (terpri *trace-output*)
+  (finish-output *trace-output*))
+
+(defun snippet-playground-render-html-fragment-to-string-and-accumulator (thunk)
+  (let ((accumulator (make-instance 'html-inspector-views::view-accumulator)))
+    (values
+     (with-output-to-string (stream)
+       (let ((html-inspector-views::*html-stream* stream)
+             (html-inspector-views::*view-accumulator* accumulator))
+         (funcall thunk)))
+     accumulator)))
+
+(defun snippet-playground-render-html-fragment-to-string (thunk)
+  (multiple-value-bind (html accumulator)
+      (snippet-playground-render-html-fragment-to-string-and-accumulator thunk)
+    (declare (ignore accumulator))
+    html))
+
+(defun snippet-playground-merge-rendered-html-into-current-render
+    (html accumulator)
+  (declare (ignore accumulator))
+  (write-string html html-inspector-views::*html-stream*)
+  html)
+
+(defun snippet-comparison-layout-style (column-count)
+  (format nil
+          "display: grid; grid-template-columns: ~{~A~^ ~}; gap: 1rem; align-items: start;"
+          (make-list column-count
+                     :initial-element "minmax(0, 1fr)")))
+
+(defun snippet-comparison-render-transformation-unit (surface)
+  (html-inspector-views:html
+    (:div :class "hyperdoc-snippet-transformation-unit"
+          (:h3 "Transformation unit")
+          (if-let (unit
+                   (snippet-comparison-surface-transformation-unit-of
+                    surface))
+            (html-inspector-views:html
+              (:table :class "inspector-table"
+                      (snippet-playground-view-transformation-row
+                       "Interface"
+                       (and (snippet-transformation-unit-execution-interface-of
+                             unit)
+                            (snippet-execution-interface-handoff-path-of
+                             (snippet-transformation-unit-execution-interface-of
+                              unit))))
+                      (snippet-playground-view-transformation-row
+                       "Operation"
+                       (or (snippet-transformation-unit-operation-summary-of
+                            unit)
+                           (snippet-transformation-unit-operation-kind-of
+                            unit)))
+                      (snippet-playground-view-transformation-row
+                       "Output"
+                       (snippet-transformation-unit-output-shape-of unit))
+                      (snippet-playground-view-transformation-row
+                       "Preview"
+                       (snippet-transformation-unit-preview-mode-of unit))))
+            (html-inspector-views:html
+              (:p (html-inspector-views:esc
+                   "No transformation unit is available for this session.")))))))
+
+(defun snippet-comparison-render-surface (surface)
+  (let* ((layout-spec (snippet-comparison-surface-layout-spec-of surface))
+         (visible-regions (snippet-comparison-visible-regions surface))
+         (column-count
+           (snippet-comparison-layout-grid-column-count layout-spec)))
+    (write-string
+     "<div class=\"hyperdoc-snippet-comparison\">"
+     html-inspector-views::*html-stream*)
+    (write-string
+     (format nil
+             "<div class=\"hyperdoc-snippet-comparison-layout\" style=\"~A\">"
+             (snippet-comparison-layout-style column-count))
+     html-inspector-views::*html-stream*)
+    (dolist (entry visible-regions)
+      (let* ((region (car entry))
+             (placement (snippet-comparison-region-placement-of region)))
+        (snippet-playground-log-comparison-render
+         "REGION-START"
+         :placement placement)
+        (snippet-comparison-render-region
+         region
+         (cdr entry))
+        (snippet-playground-log-comparison-render
+         "REGION-DONE"
+         :placement placement)))
+    (write-string "</div>" html-inspector-views::*html-stream*)
+    (snippet-playground-log-comparison-render
+     "TRANSFORMATION-START")
+    (snippet-comparison-render-transformation-unit surface)
+    (snippet-playground-log-comparison-render
+     "TRANSFORMATION-DONE")
+    (write-string "</div>" html-inspector-views::*html-stream*)))
+
+(defun snippet-playground-render-comparison-surface-into-current-view (surface)
+  (let* ((layout-spec (snippet-comparison-surface-layout-spec-of surface))
+         (visible-regions (snippet-comparison-visible-regions surface))
+         (normalized-placements
+           (mapcar #'first
+                   (snippet-comparison-layout-region-specs layout-spec)))
+         (visible-placements
+           (mapcar (lambda (entry)
+                     (snippet-comparison-region-placement-of (car entry)))
+                   visible-regions))
+         (column-count
+           (snippet-comparison-layout-grid-column-count layout-spec)))
+    (snippet-playground-log-comparison-render
+     "MATERIALIZE-START"
+     :visible-region-count (length visible-regions)
+     :normalized-placements normalized-placements
+     :visible-placements visible-placements
+     :column-count column-count)
+    (multiple-value-bind (html accumulator)
+        (handler-case
+            (snippet-playground-render-html-fragment-to-string-and-accumulator
+             (lambda ()
+               (snippet-comparison-render-surface surface)))
+          (storage-condition (condition)
+            (snippet-playground-log-comparison-render
+             "MATERIALIZE-FAILED"
+             :visible-region-count (length visible-regions)
+             :normalized-placements normalized-placements
+             :visible-placements visible-placements
+             :column-count column-count
+             :condition condition)
+            (error condition)))
+      (snippet-playground-log-comparison-render
+       "MATERIALIZE-DONE"
+       :visible-region-count (length visible-regions)
+       :normalized-placements normalized-placements
+       :visible-placements visible-placements
+       :column-count column-count
+       :html-length (length html))
+      (handler-case
+          (progn
+            (snippet-playground-log-comparison-render
+             "INSERT-START"
+             :html-length (length html))
+            (snippet-playground-merge-rendered-html-into-current-render
+             html
+             accumulator)
+            (snippet-playground-log-comparison-render
+             "INSERT-DONE"
+             :html-length (length html)))
+        (storage-condition (condition)
+          (snippet-playground-log-comparison-render
+           "INSERT-FAILED"
+           :html-length (length html)
+           :condition condition)
+          (error condition))))))
 
 (defun snippet-playground-authored-relation-line (relation)
   (format nil "~(~A~) ~(~A~) ~(~A~)"
@@ -3697,9 +3989,24 @@
                (snippet-comparison-region-placement-of region))
               (snippet-playground-status-table-row
                "Content"
-               (snippet-comparison-region-content-key-of region)))
+               (snippet-comparison-region-content-key-of region))
+              (snippet-playground-status-table-row
+               "Displayed characters"
+               (length (snippet-comparison-region-source-text-of region)))
+              (snippet-playground-status-table-row
+               "Original characters"
+               (snippet-comparison-region-source-original-length-of region))
+              (snippet-playground-status-table-row
+               "Truncated"
+               (if (snippet-comparison-region-source-truncated-p region)
+                   "yes"
+                   "no")))
       (snippet-source-pre
-       (snippet-comparison-region-source-text-of region)))))
+       (snippet-comparison-region-source-text-of region)
+       :original-length
+       (snippet-comparison-region-source-original-length-of region)
+       :truncated-p
+       (snippet-comparison-region-source-truncated-p region)))))
 
 (html-inspector-views:defview snippet-comparison-surface-summary
     (surface snippet-comparison-surface)
@@ -3993,12 +4300,11 @@
 (html-inspector-views:defview snippet-playground-session-comparison-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Comparison" :priority 2
-    (html-inspector-views:html
-      (if-let (surface (snippet-playground-session-comparison-surface-of session))
-        (snippet-comparison-render-surface surface)
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No comparison surface is available for this session.")))))))
+    (if-let (surface (snippet-playground-session-comparison-surface-of session))
+      (snippet-playground-render-comparison-surface-into-current-view surface)
+      (html-inspector-views:html
+        (:p (html-inspector-views:esc
+             "No comparison surface is available for this session."))))))
 
 (html-inspector-views:defview snippet-playground-session-crosswalk-view
     (session snippet-playground-session)

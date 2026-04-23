@@ -363,6 +363,7 @@ test("snippet playground comparison layout places Lefty left and Rita right", as
   );
 
   await activatePaneTab(page, snippetPaneIndex, "Comparison");
+  await expect(page.locator(".hyperdoc-evaluation-pending")).toHaveCount(0);
   await expect(leftColumn).toContainText(/JavaScript/i);
   await expect(leftColumn).toContainText(/export default|async function|const text/i);
   await expect(leftColumn).toContainText(/this\.items|state\.items/i);
@@ -395,6 +396,13 @@ test("snippet playground comparison layout places Lefty left and Rita right", as
   await expect(transformationUnit).toContainText(/Output/i);
   await expect(transformationUnit).toContainText(/Preview/i);
   await expect(activeView).not.toContainText(/provider kind|origin surface|recognized mech snippets|run|Dreyeck/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Lisp scaffold");
+  await expect(page.locator(".hyperdoc-evaluation-pending")).toHaveCount(0);
+  await expect(activeView).toContainText(/Scaffold source/i);
+  await expect(activeView).toContainText(/Quick Brown Fox/i);
+  await expect(activeView).toContainText(/derived-items-of|let\*/i);
+  await expect(activeView).not.toContainText(/translation-error/i);
 
   await activatePaneTab(page, snippetPaneIndex, "Layout");
   await expect(
