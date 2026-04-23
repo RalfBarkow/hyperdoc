@@ -172,6 +172,18 @@ test("snippet playground opens in a fresh pane to the right without collapsing t
 
   await expect(sourcePaneAfter).toContainText(/Mech CODE Block analysis/i);
   await expect(snippetPane).toContainText(/snippet playground|snippet session/i);
+
+  const snippetPaneIndex = (await panesAfter.count()) - 1;
+  await activatePaneTab(page, snippetPaneIndex, "Layout");
+  const snippetActiveView = snippetPane.locator(".inspector-view:not([hidden])");
+  await expect(
+    snippetActiveView.locator('[data-hyperdoc-snippet-layout-artifact="true"]')
+  ).toBeVisible();
+  await expect(snippetActiveView).toContainText(/result-pane right-of origin-pane/i);
+  await expect(snippetActiveView).toContainText(/ready-pane replaces pending-pane/i);
+  await expect(snippetActiveView).toContainText(/comparison-pane contains-center shared-mech/i);
+  await expect(snippetActiveView).toContainText(/shared-mech above lefty-javascript/i);
+  await expect(snippetActiveView).toContainText(/shared-mech above rita-lisp/i);
 });
 
 test("fedwiki-page exposes snippet capability for recognizable story items", async ({

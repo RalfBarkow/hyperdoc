@@ -322,13 +322,23 @@ test("snippet playground summary stays sparse while foregrounding the transforma
   await expect(activeView).not.toContainText(/provider kind|origin surface|recognized mech snippets|recognized code snippets|selected mech evidence|selected code evidence|run|source file|context view/i);
   await expect(activeView).not.toContainText(/snippet playground pair|Dreyeck/i);
 
+  await activatePaneTab(page, snippetPaneIndex, "Behavior");
+  await expect(
+    activeView.locator('[data-hyperdoc-snippet-machine-scxml="true"]')
+  ).toBeVisible();
+  await expect(activeView).toContainText(/snippet_playground_run/i);
+  await expect(activeView).toContainText(/snippet-click/i);
+  await expect(activeView).toContainText(/html-source/i);
+  await expect(activeView).toContainText(/fedwiki-page/i);
+  await expect(activeView).toContainText(/<scxml/i);
+
   await attachJson(testInfo, "snippet-playground-quick-brown-fox.json", {
     snippetPaneIndex,
     finalState: await readLastPaneState(page),
   });
 });
 
-test("snippet playground comparison view uses a shared center Mech between JavaScript and Lisp", async ({
+test("snippet playground comparison layout places Lefty left and Rita right", async ({
   page,
 }, testInfo) => {
   await openSnippetPlaygroundFixture(page, "Mech CODE Block analysis");
@@ -354,15 +364,27 @@ test("snippet playground comparison view uses a shared center Mech between JavaS
 
   await activatePaneTab(page, snippetPaneIndex, "Comparison");
   await expect(leftColumn).toContainText(/JavaScript/i);
-  await expect(leftColumn).toContainText(/CODE/i);
+  await expect(leftColumn).toContainText(/export default|async function|const text/i);
   await expect(leftColumn).toContainText(/this\.items|state\.items/i);
   await expect(centerColumn).toContainText(/Mech/i);
-  await expect(centerColumn).toContainText(/CLICK/i);
-  await expect(centerColumn).toContainText(/NEIGHBORS next/i);
+  await expect(centerColumn).toContainText(/CODE/i);
   await expect(centerColumn).toContainText(/PREVIEW (synopsis )?items/i);
   await expect(rightColumn).toContainText(/Lisp/i);
   await expect(rightColumn).toContainText(/Quick Brown Fox/i);
   await expect(rightColumn).toContainText(/derived-items-of|let\*/i);
+  const [leftBox, centerBox, rightBox] = await Promise.all([
+    leftColumn.boundingBox(),
+    centerColumn.boundingBox(),
+    rightColumn.boundingBox(),
+  ]);
+  expect(leftBox).toBeTruthy();
+  expect(centerBox).toBeTruthy();
+  expect(rightBox).toBeTruthy();
+  expect(centerBox.y).toBeLessThan(leftBox.y);
+  expect(centerBox.y).toBeLessThan(rightBox.y);
+  expect(leftBox.x).toBeLessThan(rightBox.x);
+  expect(centerBox.width).toBeGreaterThan(leftBox.width);
+  expect(centerBox.width).toBeGreaterThan(rightBox.width);
   expect(
     await activeView.locator("h3", { hasText: /^Mech$/ }).count()
   ).toBe(1);
@@ -373,6 +395,18 @@ test("snippet playground comparison view uses a shared center Mech between JavaS
   await expect(transformationUnit).toContainText(/Output/i);
   await expect(transformationUnit).toContainText(/Preview/i);
   await expect(activeView).not.toContainText(/provider kind|origin surface|recognized mech snippets|run|Dreyeck/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Layout");
+  await expect(
+    activeView.locator('[data-hyperdoc-snippet-layout-relations="true"]')
+  ).toBeVisible();
+  await expect(activeView).toContainText(/comparison-pane contains-left lefty-javascript/i);
+  await expect(activeView).toContainText(/comparison-pane contains-center shared-mech/i);
+  await expect(activeView).toContainText(/comparison-pane contains-right rita-lisp/i);
+  await expect(activeView).toContainText(/shared-mech above lefty-javascript/i);
+  await expect(activeView).toContainText(/shared-mech above rita-lisp/i);
+  await expect(activeView).toContainText(/result-pane right-of origin-pane/i);
+  await expect(activeView).toContainText(/ready-pane replaces pending-pane/i);
 
   await attachJson(testInfo, "snippet-playground-comparison-view.json", {
     snippetPaneIndex,
@@ -475,6 +509,15 @@ test("fedwiki Quick Brown Fox produces transformation unit with execution interf
   await expect(lastPane).toContainText(/fedwiki-v1/i);
   await expect(lastPane).toContainText(/origin surface/i);
   await expect(lastPane).toContainText(/fedwiki-page/i);
+
+  await activatePaneTab(page, snippetPaneIndex, "Behavior");
+  await expect(
+    activeView.locator('[data-hyperdoc-snippet-machine-scxml="true"]')
+  ).toBeVisible();
+  await expect(activeView).toContainText(/snippet_playground_run/i);
+  await expect(activeView).toContainText(/html-source/i);
+  await expect(activeView).toContainText(/fedwiki-page/i);
+  await expect(activeView).toContainText(/<scxml/i);
 
   await activatePaneTab(page, snippetPaneIndex, "Comparison");
   const comparisonView = activePaneView(lastPane);

@@ -118,6 +118,9 @@
             :initform nil)
    (layout-spec :reader snippet-comparison-surface-layout-spec-of
                 :initarg :layout-spec)
+   (layout-artifact :reader snippet-comparison-surface-layout-artifact-of
+                    :initarg :layout-artifact
+                    :initform nil)
    (regions :reader snippet-comparison-surface-regions-of
             :initarg :regions
             :initform nil)
@@ -269,6 +272,52 @@
              :initarg :findings
              :initform nil)))
 
+(defclass snippet-playground-authored-relation ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (layer :reader snippet-playground-authored-relation-layer-of
+          :initarg :layer)
+   (subject :reader snippet-playground-authored-relation-subject-of
+            :initarg :subject)
+   (predicate :reader snippet-playground-authored-relation-predicate-of
+              :initarg :predicate)
+   (object :reader snippet-playground-authored-relation-object-of
+           :initarg :object)
+   (attributes :reader snippet-playground-authored-relation-attributes-of
+               :initarg :attributes
+               :initform nil)))
+
+(defclass snippet-playground-layout-artifact ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (relations :reader snippet-playground-layout-artifact-relations-of
+              :initarg :relations
+              :initform nil)
+   (pane-relations :reader snippet-playground-layout-artifact-pane-relations-of
+                   :initarg :pane-relations
+                   :initform nil)
+   (comparison-relations
+     :reader snippet-playground-layout-artifact-comparison-relations-of
+     :initarg :comparison-relations
+     :initform nil)
+   (comparison-layout-spec
+     :reader snippet-playground-layout-artifact-comparison-layout-spec-of
+     :initarg :comparison-layout-spec
+     :initform nil)
+   (findings :reader snippet-playground-layout-artifact-findings-of
+             :initarg :findings
+             :initform nil)))
+
 (defclass snippet-playground-session ()
   ((id :reader id-of
        :initarg :id)
@@ -398,6 +447,14 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object snippet-playground-authored-relation) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-playground-layout-artifact) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object snippet-playground-session) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -436,6 +493,14 @@
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
+    ((object snippet-playground-authored-relation))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-playground-layout-artifact))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
     ((object snippet-playground-session))
   (title-of object))
 
@@ -459,247 +524,1191 @@
      message
      :detail detail)))
 
+(defvar *snippet-playground-authored-graph* nil)
 (defvar *snippet-playground-run-state-machine* nil)
-
-(defparameter *snippet-comparison-layout-spec*
-  '(:surface snippet-comparison
-    :regions ((:left :region left-code-region :content javascript-code
-               :title "JavaScript")
-              (:center :region shared-mech-region :content shared-mech
-               :title "Mech")
-              (:right :region right-code-region :content lisp-code
-               :title "Lisp"))
-    :rules ((:show-once shared-mech))))
-
+(defvar *snippet-playground-run-state-machine-scxml* nil)
 (defvar *snippet-comparison-surface-lifecycle-state-machine* nil)
+(defvar *snippet-comparison-surface-lifecycle-state-machine-scxml* nil)
+(defvar *snippet-playground-layout-artifact* nil)
+
+(defun make-snippet-playground-authored-relation
+    (&key id title summary layer subject predicate object attributes)
+  (make-instance
+   'snippet-playground-authored-relation
+   :id id
+   :title title
+   :summary summary
+   :layer layer
+   :subject subject
+   :predicate predicate
+   :object object
+   :attributes attributes))
+
+(defun snippet-playground-authored-relation-attribute (relation key)
+  (getf (snippet-playground-authored-relation-attributes-of relation)
+        key))
+
+(defun make-snippet-playground-authored-graph ()
+  (list
+             (make-snippet-playground-authored-relation
+              :id "semantic/evidence/mech"
+              :title "Snippet evidence -> Mech"
+              :summary "Snippet-playground gathers Mech evidence."
+              :layer :semantic
+              :subject :snippet-playground
+              :predicate :uses-evidence
+              :object :mech-snippet)
+             (make-snippet-playground-authored-relation
+              :id "semantic/evidence/code"
+              :title "Snippet evidence -> Code"
+              :summary "Snippet-playground gathers code evidence."
+              :layer :semantic
+              :subject :snippet-playground
+              :predicate :uses-evidence
+              :object :code-snippet)
+             (make-snippet-playground-authored-relation
+              :id "semantic/interface"
+              :title "Snippet infers execution interface"
+              :summary "Execution interface is inferred from Mech + code evidence."
+              :layer :semantic
+              :subject :snippet-playground
+              :predicate :infers
+              :object :snippet-execution-interface)
+             (make-snippet-playground-authored-relation
+              :id "semantic/transformation-unit"
+              :title "Snippet constructs transformation unit"
+              :summary "Transformation unit is the primary semantic artifact."
+              :layer :semantic
+              :subject :snippet-playground
+              :predicate :constructs
+              :object :snippet-transformation-unit)
+             (make-snippet-playground-authored-relation
+              :id "semantic/transformation-unit/lefty"
+              :title "Transformation unit -> Lefty"
+              :summary "Transformation unit exposes the Lefty projection."
+              :layer :semantic
+              :subject :snippet-transformation-unit
+              :predicate :projects-to
+              :object :lefty)
+             (make-snippet-playground-authored-relation
+              :id "semantic/transformation-unit/rita"
+              :title "Transformation unit -> Rita"
+              :summary "Transformation unit exposes the Rita projection."
+              :layer :semantic
+              :subject :snippet-transformation-unit
+              :predicate :projects-to
+              :object :rita)
+             (make-snippet-playground-authored-relation
+              :id "projection/behavior"
+              :title "Compiled behavior projection"
+              :summary "Authored snippet relations compile into a lifecycle machine."
+              :layer :projection
+              :subject :snippet-playground
+              :predicate :projects-to
+              :object :snippet_playground_run)
+             (make-snippet-playground-authored-relation
+              :id "projection/layout"
+              :title "Compiled layout projection"
+              :summary "Authored layout relations compile into a comparison layout spec."
+              :layer :projection
+              :subject :snippet-playground
+              :predicate :projects-to
+              :object :snippet-comparison-layout)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/unavailable"
+              :title "State unavailable"
+              :summary "Snippet capability is hidden."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :unavailable
+              :attributes
+              '(:title "unavailable"
+                :summary "Snippet capability is hidden because the current pane does not expose a snippet provider."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/available"
+              :title "State available"
+              :summary "Snippet capability is visible."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :available
+              :attributes
+              '(:title "available"
+                :summary "Snippet capability is visible on the origin pane."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/invoked"
+              :title "State invoked"
+              :summary "Snippet was clicked."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :invoked
+              :attributes
+              '(:title "invoked"
+                :summary "The user clicked Snippet on the origin pane."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/pending"
+              :title "State pending"
+              :summary "Pending pane is visible."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :pending
+              :attributes
+              '(:title "pending"
+                :summary "A pending pane has opened to the right of the origin pane."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/collecting-input"
+              :title "State collecting_input"
+              :summary "Collecting provider input."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :collecting-input
+              :attributes
+              '(:title "collecting_input"
+                :summary "Provider-specific snippet input is being collected."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/recognizing"
+              :title "State recognizing"
+              :summary "Recognizing snippets."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :recognizing
+              :attributes
+              '(:title "recognizing"
+                :summary "Mech and code snippets are being recognized."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/pairing"
+              :title "State pairing"
+              :summary "Selecting evidential inputs."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :pairing
+              :attributes
+              '(:title "pairing"
+                :summary "Recognized Mech/code evidence is being selected before semantic binding."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/building-session"
+              :title "State building_session"
+              :summary "Building the session."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :building-session
+              :attributes
+              '(:title "building_session"
+                :summary "The inspectable snippet-playground session is being built."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/ready"
+              :title "State ready"
+              :summary "Ready pane replaced pending."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :ready
+              :attributes
+              '(:title "ready"
+                :summary "Pending pane has been replaced in place by a ready snippet session."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/state/failed"
+              :title "State failed"
+              :summary "Failure replaced pending."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-state
+              :object :failed
+              :attributes
+              '(:title "failed"
+                :summary "Pending pane has been replaced by an inspectable failure object."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/initial"
+              :title "Initial run state"
+              :summary "State machine initial state."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :initial-state
+              :object :unavailable)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/terminal/ready"
+              :title "Terminal ready"
+              :summary "Ready is terminal."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :terminal-state
+              :object :ready)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/terminal/failed"
+              :title "Terminal failed"
+              :summary "Failed is terminal."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :terminal-state
+              :object :failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/failure/failed"
+              :title "Failure failed"
+              :summary "Failed is a failure state."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :failure-state
+              :object :failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/guard/provider"
+              :title "Guard pane-supports-snippet-provider"
+              :summary "Origin pane supports a snippet provider."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-guard
+              :object :pane-supports-snippet-provider)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/guard/input"
+              :title "Guard input-extracted"
+              :summary "Input was extracted."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-guard
+              :object :input-extracted)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/guard/candidates"
+              :title "Guard candidates-found"
+              :summary "Snippet candidates were recognized."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-guard
+              :object :candidates-found)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/guard/valid-pair"
+              :title "Guard valid-pair"
+              :summary "Evidential Mech + code pair is valid."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-guard
+              :object :valid-pair)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/snippet-click"
+              :title "Event snippet-click"
+              :summary "User clicked Snippet."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :snippet-click)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/open-pending-pane"
+              :title "Event open-pending-pane"
+              :summary "Pending pane was opened."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :open-pending-pane)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/pending-pane-opened"
+              :title "Event pending-pane-opened"
+              :summary "Pending pane is visible."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :pending-pane-opened)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/input-collected"
+              :title "Event input-collected"
+              :summary "Provider input was collected."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :input-collected)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/snippets-recognized"
+              :title "Event snippets-recognized"
+              :summary "Snippet candidates were recognized."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :snippets-recognized)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/pair-selected"
+              :title "Event pair-selected"
+              :summary "Mech + code evidence pair was selected."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :pair-selected)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/transformation-unit-built"
+              :title "Event transformation-unit-built"
+              :summary "Transformation unit was built into a session."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :transformation-unit-built)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/input-collection-failed"
+              :title "Event input-collection-failed"
+              :summary "Input collection failed."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :input-collection-failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/recognition-failed"
+              :title "Event recognition-failed"
+              :summary "Recognition failed."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :recognition-failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/pairing-failed"
+              :title "Event pairing-failed"
+              :summary "Pairing failed."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :pairing-failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/event/session-build-failed"
+              :title "Event session-build-failed"
+              :summary "Session build failed."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-event
+              :object :session-build-failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/unavailable-available"
+              :title "Transition unavailable -> available"
+              :summary "Snippet capability becomes visible."
+              :layer :behavior
+              :subject :unavailable
+              :predicate :transition-to
+              :object :available
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/unavailable->available"
+                :guard :pane-supports-snippet-provider
+                :side-effects
+                "Show Snippet in the capability row for html-source and fedwiki-page surfaces."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/available-invoked"
+              :title "Transition available -> invoked"
+              :summary "Snippet is clicked."
+              :layer :behavior
+              :subject :available
+              :predicate :transition-to
+              :object :invoked
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/available->invoked"
+                :trigger :snippet-click))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/invoked-pending"
+              :title "Transition invoked -> pending"
+              :summary "Pending pane opens."
+              :layer :behavior
+              :subject :invoked
+              :predicate :transition-to
+              :object :pending
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/invoked->pending"
+                :trigger :open-pending-pane
+                :side-effects
+                "Open a pending pane to the right of the origin pane and retain the origin-pane placement invariant."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/pending-collecting"
+              :title "Transition pending -> collecting-input"
+              :summary "Pending pane is ready for collection."
+              :layer :behavior
+              :subject :pending
+              :predicate :transition-to
+              :object :collecting-input
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/pending->collecting-input"
+                :trigger :pending-pane-opened))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/collecting-recognizing"
+              :title "Transition collecting-input -> recognizing"
+              :summary "Collected input moves into recognition."
+              :layer :behavior
+              :subject :collecting-input
+              :predicate :transition-to
+              :object :recognizing
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/collecting-input->recognizing"
+                :trigger :input-collected
+                :guard :input-extracted))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/recognizing-pairing"
+              :title "Transition recognizing -> pairing"
+              :summary "Recognized snippets move into pairing."
+              :layer :behavior
+              :subject :recognizing
+              :predicate :transition-to
+              :object :pairing
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/recognizing->pairing"
+                :trigger :snippets-recognized
+                :guard :candidates-found))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/pairing-building"
+              :title "Transition pairing -> building-session"
+              :summary "Selected evidence builds a session."
+              :layer :behavior
+              :subject :pairing
+              :predicate :transition-to
+              :object :building-session
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/pairing->building-session"
+                :trigger :pair-selected
+                :guard :valid-pair))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/building-ready"
+              :title "Transition building-session -> ready"
+              :summary "Transformation unit becomes a ready session."
+              :layer :behavior
+              :subject :building-session
+              :predicate :transition-to
+              :object :ready
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/building-session->ready"
+                :trigger :transformation-unit-built))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/collecting-failed"
+              :title "Transition collecting-input -> failed"
+              :summary "Collection failure."
+              :layer :behavior
+              :subject :collecting-input
+              :predicate :transition-to
+              :object :failed
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/collecting-input->failed"
+                :trigger :input-collection-failed))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/recognizing-failed"
+              :title "Transition recognizing -> failed"
+              :summary "Recognition failure."
+              :layer :behavior
+              :subject :recognizing
+              :predicate :transition-to
+              :object :failed
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/recognizing->failed"
+                :trigger :recognition-failed))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/pairing-failed"
+              :title "Transition pairing -> failed"
+              :summary "Pairing failure."
+              :layer :behavior
+              :subject :pairing
+              :predicate :transition-to
+              :object :failed
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/pairing->failed"
+                :trigger :pairing-failed))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/transition/building-failed"
+              :title "Transition building-session -> failed"
+              :summary "Session build failure."
+              :layer :behavior
+              :subject :building-session
+              :predicate :transition-to
+              :object :failed
+              :attributes
+              '(:machine :snippet-playground-run
+                :id "snippet/building-session->failed"
+                :trigger :session-build-failed))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/invariant/placement"
+              :title "Invariant result pane placement"
+              :summary "Result pane opens right-of the origin."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-invariant
+              :object "Result pane placement"
+              :attributes
+              '(:detail "The result pane is always created to the right of the pane that initiated Snippet."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/invariant/shared-lifecycle"
+              :title "Invariant shared lifecycle"
+              :summary "Source and FedWiki share the same machine."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-invariant
+              :object "Shared lifecycle"
+              :attributes
+              '(:detail "The same run states apply to html-source and fedwiki-page providers."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/invariant/failure"
+              :title "Invariant inspectable failure"
+              :summary "Failures are inspectable."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :has-invariant
+              :object "Inspectable failure"
+              :attributes
+              '(:detail "Malformed or unsupported input resolves to an inspectable failure object rather than a silent failure."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/source-evidence/browser"
+              :title "Browser source evidence"
+              :summary "Browser capability wiring."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :source-evidence
+              :object "assets/hyperdoc/js/dom-annotation-connect.js"
+              :attributes
+              '(:layer "browser"
+                :detail "Capability visibility and invocation reuse the existing pane-shell submit bridge."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/source-evidence/server"
+              :title "Server source evidence"
+              :summary "Pending-pane replacement wiring."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :source-evidence
+              :object "hyperbook-server/inspector-wiring.lisp"
+              :attributes
+              '(:layer "server"
+                :detail "Pending panes open to the right of the origin pane and are replaced in place."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/source-evidence/provider"
+              :title "Provider source evidence"
+              :summary "Provider-aware target dispatch."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :source-evidence
+              :object "hyperdoc-explorer/dom-annotations.lisp"
+              :attributes
+              '(:layer "provider"
+                :detail "html-source and fedwiki-page surfaces both dispatch through provider-aware snippet targets."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/run/source-evidence/session"
+              :title "Session source evidence"
+              :summary "Session construction logic."
+              :layer :behavior
+              :subject :snippet-playground-run
+              :predicate :source-evidence
+              :object "hyperdoc-inspector/snippet-playground.lisp"
+              :attributes
+              '(:layer "session"
+                :detail "Recognition, evidence selection, session construction, and failure objects all share the same run definition."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/state/available"
+              :title "Comparison state available"
+              :summary "Comparison surface can be built."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-state
+              :object :available
+              :attributes
+              '(:title "available"
+                :summary "Comparison surface can be built from the selected snippet evidence."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/state/pending"
+              :title "Comparison state pending"
+              :summary "Comparison surface is pending."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-state
+              :object :pending
+              :attributes
+              '(:title "pending"
+                :summary "Pending pane is visible to the right of the origin pane."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/state/ready"
+              :title "Comparison state ready"
+              :summary "Comparison surface is ready."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-state
+              :object :ready
+              :attributes
+              '(:title "ready"
+                :summary "Pending pane was replaced in place by a ready comparison surface."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/state/failed"
+              :title "Comparison state failed"
+              :summary "Comparison surface failed."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-state
+              :object :failed
+              :attributes
+              '(:title "failed"
+                :summary "Pending pane was replaced in place by an inspectable failed comparison surface."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/initial"
+              :title "Comparison initial state"
+              :summary "Comparison machine initial state."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :initial-state
+              :object :available)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/terminal/ready"
+              :title "Comparison terminal ready"
+              :summary "Ready is terminal."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :terminal-state
+              :object :ready)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/terminal/failed"
+              :title "Comparison terminal failed"
+              :summary "Failed is terminal."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :terminal-state
+              :object :failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/failure/failed"
+              :title "Comparison failure state"
+              :summary "Failed is a failure state."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :failure-state
+              :object :failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/event/open-pending-pane"
+              :title "Comparison event open-pending-pane"
+              :summary "Comparison pending pane opens."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-event
+              :object :open-pending-pane)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/event/comparison-built"
+              :title "Comparison event comparison-built"
+              :summary "Comparison was built."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-event
+              :object :comparison-built)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/event/comparison-failed"
+              :title "Comparison event comparison-failed"
+              :summary "Comparison failed."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-event
+              :object :comparison-failed)
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/transition/available-pending"
+              :title "Comparison transition available -> pending"
+              :summary "Comparison pending opens."
+              :layer :behavior
+              :subject :available
+              :predicate :transition-to
+              :object :pending
+              :attributes
+              '(:machine :snippet-comparison-surface
+                :id "comparison/available->pending"
+                :trigger :open-pending-pane
+                :side-effects
+                "Open a pending pane to the right of the origin pane."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/transition/pending-ready"
+              :title "Comparison transition pending -> ready"
+              :summary "Comparison replaces pending."
+              :layer :behavior
+              :subject :pending
+              :predicate :transition-to
+              :object :ready
+              :attributes
+              '(:machine :snippet-comparison-surface
+                :id "comparison/pending->ready"
+                :trigger :comparison-built
+                :side-effects
+                "Replace the pending pane in place with the ready comparison surface."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/transition/pending-failed"
+              :title "Comparison transition pending -> failed"
+              :summary "Failed comparison replaces pending."
+              :layer :behavior
+              :subject :pending
+              :predicate :transition-to
+              :object :failed
+              :attributes
+              '(:machine :snippet-comparison-surface
+                :id "comparison/pending->failed"
+                :trigger :comparison-failed
+                :side-effects
+                "Replace the pending pane in place with an inspectable failure surface."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/invariant/placement"
+              :title "Comparison invariant placement"
+              :summary "Comparison result remains right-of origin."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-invariant
+              :object "Placement invariant"
+              :attributes
+              '(:detail "Result pane remains to the right of the pane that initiated Snippet."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/invariant/pending"
+              :title "Comparison invariant pending replacement"
+              :summary "Pending is replaced in place."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :has-invariant
+              :object "Pending replacement"
+              :attributes
+              '(:detail "Ready and failed surfaces both replace the pending pane in place."))
+             (make-snippet-playground-authored-relation
+              :id "behavior/comparison/source-evidence/session"
+              :title "Comparison source evidence"
+              :summary "Comparison layout and lifecycle are session-backed."
+              :layer :behavior
+              :subject :snippet-comparison-surface
+              :predicate :source-evidence
+              :object "hyperdoc-inspector/snippet-playground.lisp"
+              :attributes
+              '(:layer "session"
+                :detail "Comparison surface layout and lifecycle are carried separately from the primary snippet run state machine."))
+             (make-snippet-playground-authored-relation
+              :id "layout/result/right-of"
+              :title "Result pane right-of origin pane"
+              :summary "Result pane opens right-of the origin pane."
+              :layer :layout
+              :subject :result-pane
+              :predicate :right-of
+              :object :origin-pane)
+             (make-snippet-playground-authored-relation
+              :id "layout/ready/replaces"
+              :title "Ready pane replaces pending pane"
+              :summary "Ready pane replaces pending in place."
+              :layer :layout
+              :subject :ready-pane
+              :predicate :replaces
+              :object :pending-pane)
+             (make-snippet-playground-authored-relation
+              :id "layout/failed/replaces"
+              :title "Failed pane replaces pending pane"
+              :summary "Failed pane replaces pending in place."
+              :layer :layout
+              :subject :failed-pane
+              :predicate :replaces
+              :object :pending-pane)
+             (make-snippet-playground-authored-relation
+              :id "layout/comparison/left"
+              :title "Comparison contains Lefty JavaScript"
+              :summary "Comparison pane contains JavaScript on the left."
+              :layer :layout
+              :subject :comparison-pane
+              :predicate :contains-left
+              :object :lefty-javascript)
+             (make-snippet-playground-authored-relation
+              :id "layout/comparison/center"
+              :title "Comparison contains shared Mech"
+              :summary "Comparison pane contains shared Mech in the center."
+              :layer :layout
+              :subject :comparison-pane
+              :predicate :contains-center
+              :object :shared-mech)
+             (make-snippet-playground-authored-relation
+              :id "layout/comparison/right"
+              :title "Comparison contains Rita Lisp"
+              :summary "Comparison pane contains Lisp on the right."
+              :layer :layout
+              :subject :comparison-pane
+              :predicate :contains-right
+              :object :rita-lisp)
+             (make-snippet-playground-authored-relation
+              :id "layout/comparison/shared-mech-above-left"
+              :title "Shared Mech above JavaScript"
+              :summary "Shared Mech appears above the JavaScript region."
+              :layer :layout
+              :subject :shared-mech
+              :predicate :above
+              :object :lefty-javascript)
+             (make-snippet-playground-authored-relation
+              :id "layout/comparison/shared-mech-above-right"
+              :title "Shared Mech above Lisp"
+              :summary "Shared Mech appears above the Lisp region."
+              :layer :layout
+              :subject :shared-mech
+              :predicate :above
+              :object :rita-lisp)
+             (make-snippet-playground-authored-relation
+              :id "layout/comparison/show-once"
+              :title "Comparison shows shared Mech once"
+              :summary "Shared Mech renders once above the code comparison."
+              :layer :layout
+              :subject :comparison-pane
+              :predicate :show-once
+              :object :shared-mech)
+             (make-snippet-playground-authored-relation
+              :id "layout/projection/lefty"
+              :title "Lefty renders JavaScript"
+              :summary "Lefty projection renders JavaScript on the left."
+              :layer :layout
+              :subject :lefty-javascript
+              :predicate :renders
+              :object :javascript-code
+              :attributes '(:title "JavaScript"
+                            :region left-code-region
+                            :placement :left))
+             (make-snippet-playground-authored-relation
+              :id "layout/projection/shared-mech"
+              :title "Shared Mech renders once above the split"
+              :summary "Shared Mech renders once above JavaScript and Lisp."
+              :layer :layout
+              :subject :shared-mech
+              :predicate :renders
+              :object :shared-mech
+              :attributes '(:title "Mech"
+                            :region shared-mech-region
+                            :placement :center))
+             (make-snippet-playground-authored-relation
+              :id "layout/projection/rita"
+              :title "Rita renders Lisp"
+              :summary "Rita projection renders Lisp on the right."
+              :layer :layout
+              :subject :rita-lisp
+              :predicate :renders
+              :object :lisp-code
+              :attributes '(:title "Lisp"
+                            :region right-code-region
+                            :placement :right))))
+
+(defparameter *snippet-playground-authored-graph*
+  (make-snippet-playground-authored-graph))
+
+(defun snippet-playground-authored-relations ()
+  *snippet-playground-authored-graph*)
+
+(defun snippet-playground-relations-by-layer (layer)
+  (remove layer
+          (snippet-playground-authored-relations)
+          :key #'snippet-playground-authored-relation-layer-of
+          :test-not #'eq))
+
+(defun snippet-playground-machine-relations (machine-key predicate)
+  (remove-if-not
+   (lambda (relation)
+     (and (eq (snippet-playground-authored-relation-layer-of relation) :behavior)
+          (eq (snippet-playground-authored-relation-subject-of relation)
+              machine-key)
+          (eq (snippet-playground-authored-relation-predicate-of relation)
+              predicate)))
+   (snippet-playground-authored-relations)))
+
+(defun snippet-playground-transition-relations (machine-key)
+  (remove-if-not
+   (lambda (relation)
+     (and (eq (snippet-playground-authored-relation-layer-of relation) :behavior)
+          (eq (snippet-playground-authored-relation-predicate-of relation)
+              :transition-to)
+          (eq (snippet-playground-authored-relation-attribute relation :machine)
+              machine-key)))
+   (snippet-playground-authored-relations)))
+
+(defun snippet-playground-layout-relation-p (relation)
+  (eq (snippet-playground-authored-relation-layer-of relation) :layout))
+
+(defun snippet-playground-machine-state-from-relation (relation)
+  (make-state-machine-state
+   :id (snippet-playground-authored-relation-object-of relation)
+   :title (or (snippet-playground-authored-relation-attribute relation :title)
+              (string-downcase
+               (string (snippet-playground-authored-relation-object-of relation))))
+   :summary (snippet-playground-authored-relation-attribute relation :summary)
+   :role (snippet-playground-authored-relation-attribute relation :role)
+   :entry-condition
+   (snippet-playground-authored-relation-attribute relation :entry-condition)
+   :exit-condition
+   (snippet-playground-authored-relation-attribute relation :exit-condition)
+   :notes (snippet-playground-authored-relation-attribute relation :notes)))
+
+(defun snippet-playground-machine-transition-from-relation (relation)
+  (make-state-machine-transition
+   :id (or (snippet-playground-authored-relation-attribute relation :id)
+           (id-of relation))
+   :title (snippet-playground-authored-relation-attribute relation :title)
+   :from-state (snippet-playground-authored-relation-subject-of relation)
+   :to-state (snippet-playground-authored-relation-object-of relation)
+   :trigger (snippet-playground-authored-relation-attribute relation :trigger)
+   :guard (snippet-playground-authored-relation-attribute relation :guard)
+   :emitted-evidence
+   (snippet-playground-authored-relation-attribute relation :emitted-evidence)
+   :side-effects
+   (snippet-playground-authored-relation-attribute relation :side-effects)
+   :reversible-p
+   (snippet-playground-authored-relation-attribute relation :reversible-p)
+   :notes (snippet-playground-authored-relation-attribute relation :notes)))
+
+(defun snippet-playground-machine-items (machine-key predicate)
+  (mapcar #'snippet-playground-authored-relation-object-of
+          (snippet-playground-machine-relations machine-key predicate)))
+
+(defun snippet-playground-machine-source-evidence (machine-key)
+  (mapcar
+   (lambda (relation)
+     (list :layer (snippet-playground-authored-relation-attribute relation :layer)
+           :reference (snippet-playground-authored-relation-object-of relation)
+           :detail (snippet-playground-authored-relation-attribute relation :detail)))
+   (snippet-playground-machine-relations machine-key :source-evidence)))
+
+(defun snippet-playground-machine-invariants (machine-key)
+  (mapcar
+   (lambda (relation)
+     (list :label (snippet-playground-authored-relation-object-of relation)
+           :detail (snippet-playground-authored-relation-attribute relation :detail)))
+   (snippet-playground-machine-relations machine-key :has-invariant)))
+
+(defun compile-snippet-playground-machine
+    (machine-key machine-id title summary)
+  (make-state-machine-definition
+   :id machine-id
+   :title title
+   :summary summary
+   :states
+   (mapcar #'snippet-playground-machine-state-from-relation
+           (snippet-playground-machine-relations machine-key :has-state))
+   :transitions
+   (mapcar #'snippet-playground-machine-transition-from-relation
+           (snippet-playground-transition-relations machine-key))
+   :initial-state
+   (first (snippet-playground-machine-items machine-key :initial-state))
+   :terminal-states
+   (snippet-playground-machine-items machine-key :terminal-state)
+   :failure-states
+   (snippet-playground-machine-items machine-key :failure-state)
+   :guards
+   (snippet-playground-machine-items machine-key :has-guard)
+   :events
+   (snippet-playground-machine-items machine-key :has-event)
+   :invariants
+   (snippet-playground-machine-invariants machine-key)
+   :source-evidence
+   (snippet-playground-machine-source-evidence machine-key)))
+
+(defun snippet-playground-xml-escape (value)
+  (let ((text (format nil "~A" value)))
+    (with-output-to-string (stream)
+      (loop for char across text
+            do (write-string
+                (case char
+                  (#\< "&lt;")
+                  (#\> "&gt;")
+                  (#\& "&amp;")
+                  (#\" "&quot;")
+                  (t (string char)))
+                stream)))))
+
+(defun state-machine-definition-scxml-text (machine)
+  (with-output-to-string (stream)
+    (format stream
+            "<scxml name=\"~A\" initial=\"~A\" xmlns=\"http://www.w3.org/2005/07/scxml\">~%"
+            (snippet-playground-xml-escape (id-of machine))
+            (snippet-playground-xml-escape
+             (state-machine-definition-initial-state-of machine)))
+    (dolist (state (state-machine-definition-states-of machine))
+      (let* ((state-id (id-of state))
+             (outgoing (state-machine-transitions-from-state machine state-id))
+             (terminal-p
+               (member state-id
+                       (state-machine-definition-terminal-states-of machine)
+                       :test #'equal)))
+        (if (and terminal-p (null outgoing))
+            (format stream "  <final id=\"~A\"/>~%"
+                    (snippet-playground-xml-escape state-id))
+            (progn
+              (format stream "  <state id=\"~A\">~%"
+                      (snippet-playground-xml-escape state-id))
+              (dolist (transition outgoing)
+                (format stream "    <transition")
+                (when (state-machine-transition-trigger-of transition)
+                  (format stream
+                          " event=\"~A\""
+                          (snippet-playground-xml-escape
+                           (state-machine-transition-trigger-of transition))))
+                (when (state-machine-transition-guard-of transition)
+                  (format stream
+                          " cond=\"~A\""
+                          (snippet-playground-xml-escape
+                           (state-machine-transition-guard-of transition))))
+                (format stream
+                        " target=\"~A\"/>~%"
+                        (snippet-playground-xml-escape
+                         (state-machine-transition-to-state-of transition))))
+              (format stream "  </state>~%")))))
+    (write-string "</scxml>" stream)))
+
+(defun snippet-playground-layout-artifact-findings (relations)
+  (declare (ignore relations))
+  '("Compiled pane placement and comparison layout now derive from authored snippet relations."
+    "Comparison layout keeps JavaScript left, shared Mech center, and Lisp right without duplicating Mech."))
+
+(defun compile-snippet-playground-layout-spec (relations)
+  (let* ((comparison-relations
+           (remove-if-not
+            (lambda (relation)
+              (member (snippet-playground-authored-relation-predicate-of relation)
+                      '(:contains-left :contains-center :contains-right :show-once
+                        :above :renders)
+                      :test #'eq))
+            relations))
+         (render-relations
+           (remove-if-not
+            (lambda (relation)
+              (eq (snippet-playground-authored-relation-predicate-of relation)
+                  :renders))
+            comparison-relations))
+         (region-relations
+           (remove-if-not
+            (lambda (relation)
+              (member (snippet-playground-authored-relation-predicate-of relation)
+                      '(:contains-left :contains-center :contains-right)
+                      :test #'eq))
+            comparison-relations))
+         (above-relations
+           (remove-if-not
+            (lambda (relation)
+              (eq (snippet-playground-authored-relation-predicate-of relation)
+                  :above))
+            comparison-relations))
+         (placement-order '(:contains-center :contains-left :contains-right))
+         (regions
+           (loop for predicate in placement-order
+                 for relation = (find predicate
+                                      region-relations
+                                      :key
+                                      #'snippet-playground-authored-relation-predicate-of
+                                      :test #'eq)
+                 for component = (and relation
+                                      (snippet-playground-authored-relation-object-of
+                                       relation))
+                 for render = (and component
+                                   (find component
+                                         render-relations
+                                         :key
+                                         #'snippet-playground-authored-relation-subject-of
+                                         :test #'eq))
+                 for top-band-p = (and component
+                                       (find component
+                                             above-relations
+                                             :key
+                                             #'snippet-playground-authored-relation-subject-of
+                                             :test #'eq))
+                 when render
+                   collect
+                   (list (ecase predicate
+                           (:contains-left :left)
+                           (:contains-center :center)
+                           (:contains-right :right))
+                         :region
+                         (snippet-playground-authored-relation-attribute
+                          render
+                          :region)
+                         :content
+                         (snippet-playground-authored-relation-object-of render)
+                         :title
+                         (snippet-playground-authored-relation-attribute
+                          render
+                          :title)
+                         :row (if top-band-p 1 2)
+                         :column (ecase predicate
+                                   (:contains-left 1)
+                                   (:contains-center 1)
+                                   (:contains-right 2))
+                         :column-span (if top-band-p 2 1))))
+         (rules
+           (loop for relation in comparison-relations
+                 when (eq (snippet-playground-authored-relation-predicate-of relation)
+                          :show-once)
+                   collect
+                   (list :show-once
+                         (snippet-playground-authored-relation-object-of
+                          relation)))))
+    (list :surface 'snippet-comparison
+          :regions regions
+          :relations
+          (mapcar
+           (lambda (relation)
+             (list (snippet-playground-authored-relation-predicate-of relation)
+                   (snippet-playground-authored-relation-subject-of relation)
+                   (snippet-playground-authored-relation-object-of relation)))
+           comparison-relations)
+          :rules rules)))
+
+(defun snippet-comparison-layout-artifact ()
+  (or *snippet-playground-layout-artifact*
+      (let* ((relations
+               (remove-if-not #'snippet-playground-layout-relation-p
+                              (snippet-playground-authored-relations)))
+             (pane-relations
+               (remove-if-not
+                (lambda (relation)
+                  (member (snippet-playground-authored-relation-predicate-of relation)
+                          '(:right-of :below :replaces)
+                          :test #'eq))
+                relations))
+             (comparison-relations
+               (remove-if-not
+                (lambda (relation)
+                  (member (snippet-playground-authored-relation-predicate-of relation)
+                          '(:contains-left :contains-center :contains-right
+                            :show-once :above :renders)
+                          :test #'eq))
+                relations)))
+        (setf *snippet-playground-layout-artifact*
+              (make-instance
+               'snippet-playground-layout-artifact
+               :id "snippet-playground-layout"
+               :title "Snippet playground layout"
+               :summary
+               "Compiled pane-placement and comparison-layout artifact for snippet-playground."
+               :relations relations
+               :pane-relations pane-relations
+               :comparison-relations comparison-relations
+               :comparison-layout-spec
+               (compile-snippet-playground-layout-spec relations)
+               :findings
+               (snippet-playground-layout-artifact-findings relations))))))
+
+(defun snippet-comparison-layout-spec ()
+  (snippet-playground-layout-artifact-comparison-layout-spec-of
+   (snippet-comparison-layout-artifact)))
 
 (defun snippet-playground-run-state-machine ()
   (or *snippet-playground-run-state-machine*
       (setf *snippet-playground-run-state-machine*
-            (make-state-machine-definition
-             :id "snippet_playground_run"
-             :title "snippet_playground_run"
-             :summary
-             "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."
-             :states
-             (list
-              (make-state-machine-state
-               :id :unavailable
-               :title "unavailable"
-               :summary "Snippet capability is hidden because the current pane does not expose a snippet provider.")
-              (make-state-machine-state
-               :id :available
-               :title "available"
-               :summary "Snippet capability is visible on the origin pane.")
-              (make-state-machine-state
-               :id :invoked
-               :title "invoked"
-               :summary "The user clicked Snippet on the origin pane.")
-              (make-state-machine-state
-               :id :pending
-               :title "pending"
-               :summary "A pending pane has opened to the right of the origin pane.")
-              (make-state-machine-state
-               :id :collecting-input
-               :title "collecting_input"
-               :summary "Provider-specific snippet input is being collected.")
-              (make-state-machine-state
-               :id :recognizing
-               :title "recognizing"
-               :summary "Mech and code snippets are being recognized.")
-              (make-state-machine-state
-               :id :pairing
-               :title "pairing"
-               :summary "Recognized Mech/code evidence is being selected before semantic binding.")
-              (make-state-machine-state
-               :id :building-session
-               :title "building_session"
-               :summary "The inspectable snippet-playground session is being built.")
-              (make-state-machine-state
-               :id :ready
-               :title "ready"
-               :summary "Pending pane has been replaced in place by a ready snippet session.")
-              (make-state-machine-state
-               :id :failed
-               :title "failed"
-               :summary "Pending pane has been replaced by an inspectable failure object."))
-             :transitions
-             (list
-              (make-state-machine-transition
-               :id "snippet/unavailable->available"
-               :from-state :unavailable
-               :to-state :available
-               :guard :pane-supports-snippet-provider
-               :side-effects
-               "Show Snippet in the capability row for html-source and fedwiki-page surfaces.")
-              (make-state-machine-transition
-               :id "snippet/available->invoked"
-               :from-state :available
-               :to-state :invoked
-               :trigger :snippet-click)
-              (make-state-machine-transition
-               :id "snippet/invoked->pending"
-               :from-state :invoked
-               :to-state :pending
-               :trigger :open-pending-pane
-               :side-effects
-               "Open a pending pane to the right of the origin pane and retain the origin-pane placement invariant.")
-              (make-state-machine-transition
-               :id "snippet/pending->collecting-input"
-               :from-state :pending
-               :to-state :collecting-input
-               :trigger :pending-pane-opened)
-              (make-state-machine-transition
-               :id "snippet/collecting-input->recognizing"
-               :from-state :collecting-input
-               :to-state :recognizing
-               :guard :input-extracted)
-              (make-state-machine-transition
-               :id "snippet/recognizing->pairing"
-               :from-state :recognizing
-               :to-state :pairing
-               :guard :candidates-found)
-              (make-state-machine-transition
-               :id "snippet/pairing->building-session"
-               :from-state :pairing
-               :to-state :building-session
-               :guard :valid-pair)
-              (make-state-machine-transition
-               :id "snippet/building-session->ready"
-               :from-state :building-session
-               :to-state :ready
-               :trigger :session-built)
-              (make-state-machine-transition
-               :id "snippet/collecting-input->failed"
-               :from-state :collecting-input
-               :to-state :failed
-               :trigger :input-collection-failed)
-              (make-state-machine-transition
-               :id "snippet/recognizing->failed"
-               :from-state :recognizing
-               :to-state :failed
-               :trigger :recognition-failed)
-              (make-state-machine-transition
-               :id "snippet/pairing->failed"
-               :from-state :pairing
-               :to-state :failed
-               :trigger :pairing-failed)
-              (make-state-machine-transition
-               :id "snippet/building-session->failed"
-               :from-state :building-session
-               :to-state :failed
-               :trigger :session-build-failed))
-             :initial-state :unavailable
-             :terminal-states '(:ready :failed)
-             :failure-states '(:failed)
-             :guards
-             '(:pane-supports-snippet-provider :input-extracted
-               :candidates-found :valid-pair)
-             :events
-             '(:snippet-click :open-pending-pane :pending-pane-opened
-               :input-collection-failed :recognition-failed :pairing-failed
-               :session-build-failed :session-built)
-             :invariants
-             (list
-              (list :label "Result pane placement"
-                    :detail
-                    "The result pane is always created to the right of the pane that initiated Snippet.")
-              (list :label "Shared lifecycle"
-                    :detail
-                    "The same run states apply to html-source and fedwiki-page providers.")
-              (list :label "Inspectable failure"
-                    :detail
-                    "Malformed or unsupported input resolves to an inspectable failure object rather than a silent failure."))
-             :source-evidence
-             (list
-              (list :layer "browser"
-                    :reference "assets/hyperdoc/js/dom-annotation-connect.js"
-                    :detail
-                    "Capability visibility and invocation reuse the existing pane-shell submit bridge.")
-              (list :layer "server"
-                    :reference "hyperbook-server/inspector-wiring.lisp"
-                    :detail
-                    "Pending panes open to the right of the origin pane and are replaced in place.")
-              (list :layer "provider"
-                    :reference "hyperdoc-explorer/dom-annotations.lisp"
-                    :detail
-                    "html-source and fedwiki-page surfaces both dispatch through provider-aware snippet targets.")
-              (list :layer "session"
-                    :reference "hyperdoc-inspector/snippet-playground.lisp"
-                    :detail
-                    "Recognition, evidence selection, session construction, and failure objects all share the same run definition."))))))
+            (compile-snippet-playground-machine
+             :snippet-playground-run
+             "snippet_playground_run"
+             "snippet_playground_run"
+             "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."))))
+
+(defun snippet-playground-run-state-machine-scxml-text ()
+  (or *snippet-playground-run-state-machine-scxml*
+      (setf *snippet-playground-run-state-machine-scxml*
+            (state-machine-definition-scxml-text
+             (snippet-playground-run-state-machine)))))
 
 (defun snippet-comparison-surface-lifecycle-state-machine ()
   (or *snippet-comparison-surface-lifecycle-state-machine*
       (setf *snippet-comparison-surface-lifecycle-state-machine*
-            (make-state-machine-definition
-             :id "snippet_comparison_surface"
-             :title "snippet_comparison_surface"
-             :summary
-             "Small lifecycle for the declarative snippet comparison surface."
-             :states
-             (list
-              (make-state-machine-state
-               :id :available
-               :title "available"
-               :summary
-               "Comparison surface can be built from the selected snippet evidence.")
-              (make-state-machine-state
-               :id :pending
-               :title "pending"
-               :summary
-               "Pending pane is visible to the right of the origin pane.")
-              (make-state-machine-state
-               :id :ready
-               :title "ready"
-               :summary
-               "Pending pane was replaced in place by a ready comparison surface.")
-              (make-state-machine-state
-               :id :failed
-               :title "failed"
-               :summary
-               "Pending pane was replaced in place by an inspectable failed comparison surface."))
-             :transitions
-             (list
-              (make-state-machine-transition
-               :id "comparison/available->pending"
-               :from-state :available
-               :to-state :pending
-               :trigger :open-pending-pane
-               :side-effects
-               "Open a pending pane to the right of the origin pane.")
-              (make-state-machine-transition
-               :id "comparison/pending->ready"
-               :from-state :pending
-               :to-state :ready
-               :trigger :comparison-built
-               :side-effects
-               "Replace the pending pane in place with the ready comparison surface.")
-              (make-state-machine-transition
-               :id "comparison/pending->failed"
-               :from-state :pending
-               :to-state :failed
-               :trigger :comparison-failed
-               :side-effects
-               "Replace the pending pane in place with an inspectable failure surface."))
-             :initial-state :available
-             :terminal-states '(:ready :failed)
-             :failure-states '(:failed)
-             :events '(:open-pending-pane :comparison-built :comparison-failed)
-             :invariants
-             (list
-              (list :label "Placement invariant"
-                    :detail
-                    "Result pane remains to the right of the pane that initiated Snippet.")
-              (list :label "Pending replacement"
-                    :detail
-                    "Ready and failed surfaces both replace the pending pane in place."))
-             :source-evidence
-             (list
-              (list :layer "session"
-                    :reference "hyperdoc-inspector/snippet-playground.lisp"
-                    :detail
-                    "Comparison surface layout and lifecycle are carried separately from the primary snippet run state machine."))))))
+            (compile-snippet-playground-machine
+             :snippet-comparison-surface
+             "snippet_comparison_surface"
+             "snippet_comparison_surface"
+             "Small lifecycle for the declarative snippet comparison surface."))))
+
+(defun snippet-comparison-surface-lifecycle-state-machine-scxml-text ()
+  (or *snippet-comparison-surface-lifecycle-state-machine-scxml*
+      (setf *snippet-comparison-surface-lifecycle-state-machine-scxml*
+            (state-machine-definition-scxml-text
+             (snippet-comparison-surface-lifecycle-state-machine)))))
 
 (defun make-snippet-comparison-surface-lifecycle-run
     (&key status source-label origin-pane-id pending-pane-id
@@ -722,7 +1731,7 @@
      (list
       :origin_pane_id origin-pane-id
       :pending_pane_id pending-pane-id
-      :surface_layout *snippet-comparison-layout-spec*)
+      :surface_layout (snippet-comparison-layout-spec))
      :current-state current-state
      :visited-states (if (eq status :ready)
                          '(:available :pending :ready)
@@ -1509,7 +2518,7 @@
             (string-downcase (string content-key))))))
 
 (defun snippet-comparison-surface-findings (execution-interface)
-  (let ((findings '("Comparison surface renders JavaScript left, shared Mech center, and Lisp right.")))
+  (let ((findings '("Comparison surface renders shared Mech once above JavaScript left and Lisp right.")))
     (when execution-interface
       (push (format nil
                     "Execution interface ~A remains visible in the compact transformation-unit block."
@@ -1522,7 +2531,8 @@
     (&key status source-label mech code lisp-source execution-interface
        transformation-unit origin-pane-id pending-pane-id
        failure-classification)
-  (let* ((left-region
+  (let* ((layout-artifact (snippet-comparison-layout-artifact))
+         (left-region
            (make-snippet-comparison-region
             "left-code-region"
             :left
@@ -1556,7 +2566,10 @@
      :title "Snippet comparison"
      :summary
      "Three-region comparison surface with JavaScript, shared Mech, and Lisp."
-     :layout-spec *snippet-comparison-layout-spec*
+     :layout-spec
+     (snippet-playground-layout-artifact-comparison-layout-spec-of
+      layout-artifact)
+     :layout-artifact layout-artifact
      :regions (list left-region center-region right-region)
      :left-code-region left-region
      :shared-mech-region center-region
@@ -1939,7 +2952,7 @@
                    :origin_surface_kind origin-surface-kind
                    :provider_kind provider-kind))
             (advance :recognizing
-                     :input-extracted
+                     :input-collected
                      (format nil "Recognizing snippet candidates from ~D collected inputs."
                              (length blocks))
                      :guard :input-extracted
@@ -2048,7 +3061,7 @@
             (if (typep selected-code 'javascript-code-snippet)
                 (progn
                   (advance :ready
-                           :session-built
+                           :transformation-unit-built
                            "Built a ready snippet-playground session around the constructed transformation unit.")
                   (setf result-object
                         (make-result :ready)))
@@ -2261,6 +3274,9 @@
         :key #'snippet-comparison-region-placement-of
         :test #'eq))
 
+(defun snippet-comparison-layout-region-attribute (region-spec key)
+  (getf (rest region-spec) key))
+
 (defun snippet-comparison-region-css-class (placement)
   (format nil
           "hyperdoc-snippet-comparison-region hyperdoc-snippet-comparison-~(~A~)"
@@ -2269,17 +3285,35 @@
 (defun snippet-playground-view-transformation-row (label value)
   (snippet-playground-status-table-row label value))
 
-(defun snippet-comparison-render-region (region)
+(defun snippet-comparison-render-region-style (region-spec)
+  (format nil
+          "min-width: 0; grid-row: ~D; grid-column: ~D / span ~D;"
+          (or (snippet-comparison-layout-region-attribute region-spec :row) 1)
+          (or (snippet-comparison-layout-region-attribute region-spec :column) 1)
+          (or (snippet-comparison-layout-region-attribute region-spec :column-span)
+              1)))
+
+(defun snippet-comparison-render-region (region region-spec)
   (html-inspector-views:html
     (:div :class (snippet-comparison-region-css-class
                   (snippet-comparison-region-placement-of region))
-          :style "min-width: 0;"
+          :style (snippet-comparison-render-region-style region-spec)
           (:h3 (html-inspector-views:esc (title-of region)))
           (snippet-source-pre
            (snippet-comparison-region-source-text-of region)))))
 
+(defun snippet-comparison-layout-column-count (layout-spec)
+  (loop for region-spec in (snippet-comparison-layout-region-specs layout-spec)
+        maximize (+ (or (snippet-comparison-layout-region-attribute region-spec
+                                                                    :column)
+                        1)
+                    (1- (or (snippet-comparison-layout-region-attribute region-spec
+                                                                        :column-span)
+                            1)))))
+
 (defun snippet-comparison-render-surface (surface)
   (let ((shown-content-keys '())
+        (layout-spec (snippet-comparison-surface-layout-spec-of surface))
         (show-once-keys
           (snippet-comparison-layout-show-once-content-keys
            (snippet-comparison-surface-layout-spec-of surface))))
@@ -2287,10 +3321,15 @@
       (:div :class "hyperdoc-snippet-comparison"
             (:div :class "hyperdoc-snippet-comparison-layout"
                   :style
-                  "display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr); gap: 1rem; align-items: start;"
+                  (format nil
+                          "display: grid; grid-template-columns: ~{minmax(0, 1fr)~^ ~}; gap: 1rem; align-items: start;"
+                          (make-list
+                           (max 1 (or (snippet-comparison-layout-column-count
+                                       layout-spec)
+                                      1))))
                   (dolist (region-spec
                            (snippet-comparison-layout-region-specs
-                            (snippet-comparison-surface-layout-spec-of surface)))
+                            layout-spec))
                     (let* ((placement (first region-spec))
                            (region
                              (snippet-comparison-surface-region-for-placement
@@ -2308,7 +3347,7 @@
                                                    shown-content-keys
                                                    :test #'eq))))
                         (push content-key shown-content-keys)
-                        (snippet-comparison-render-region region)))))
+                        (snippet-comparison-render-region region region-spec)))))
             (:div :class "hyperdoc-snippet-transformation-unit"
                   (:h3 "Transformation unit")
                   (if-let (unit
@@ -2338,6 +3377,97 @@
                     (html-inspector-views:html
                       (:p (html-inspector-views:esc
                            "No transformation unit is available for this session.")))))))))
+
+(defun snippet-playground-authored-relation-line (relation)
+  (format nil "~(~A~) ~(~A~) ~(~A~)"
+          (snippet-playground-authored-relation-subject-of relation)
+          (snippet-playground-authored-relation-predicate-of relation)
+          (snippet-playground-authored-relation-object-of relation)))
+
+(defun snippet-playground-layout-relation-lines (relations)
+  (mapcar #'snippet-playground-authored-relation-line relations))
+
+(html-inspector-views:defview snippet-playground-authored-relation-summary
+    (relation snippet-playground-authored-relation)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Layer"
+               (snippet-playground-authored-relation-layer-of relation))
+              (snippet-playground-status-table-row
+               "Subject"
+               (snippet-playground-authored-relation-subject-of relation))
+              (snippet-playground-status-table-row
+               "Predicate"
+               (snippet-playground-authored-relation-predicate-of relation))
+              (snippet-playground-status-table-row
+               "Object"
+               (snippet-playground-authored-relation-object-of relation)))
+      (when (snippet-playground-authored-relation-attributes-of relation)
+        (html-inspector-views:html
+          (:h3 "Attributes")
+          (:pre :style "white-space: pre-wrap"
+                (html-inspector-views:esc
+                 (format nil "~S"
+                         (snippet-playground-authored-relation-attributes-of
+                          relation)))))))))
+
+(html-inspector-views:defview snippet-playground-layout-artifact-summary
+    (artifact snippet-playground-layout-artifact)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-layout-artifact"
+            :data-hyperdoc-snippet-layout-artifact "true"
+            (:p (html-inspector-views:esc (summary-of artifact)))
+            (:table :class "inspector-table"
+                    (snippet-playground-status-table-row
+                     "Pane relations"
+                     (length
+                      (snippet-playground-layout-artifact-pane-relations-of
+                       artifact)))
+                    (snippet-playground-status-table-row
+                     "Comparison relations"
+                     (length
+                      (snippet-playground-layout-artifact-comparison-relations-of
+                       artifact))))
+            (:h3 "Relations")
+            (:pre :style "white-space: pre-wrap"
+                  (html-inspector-views:esc
+                   (format nil
+                           "~{~A~%~}"
+                           (snippet-playground-layout-relation-lines
+                            (snippet-playground-layout-artifact-relations-of
+                             artifact)))))
+            (:h3 "Compiled spec")
+            (:pre :style "white-space: pre-wrap"
+                  (html-inspector-views:esc
+                   (format nil "~S"
+                           (snippet-playground-layout-artifact-comparison-layout-spec-of
+                            artifact))))))))
+
+(html-inspector-views:defview snippet-playground-layout-artifact-details
+    (artifact snippet-playground-layout-artifact)
+  (html-inspector-views:html-view :title "Details" :priority 2
+    (html-inspector-views:html
+      (:h3 "Pane placement")
+      (:ul
+       (dolist (relation
+                (snippet-playground-layout-artifact-pane-relations-of artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:object-ref relation)))))
+      (:h3 "Comparison layout")
+      (:ul
+       (dolist (relation
+                (snippet-playground-layout-artifact-comparison-relations-of
+                 artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:object-ref relation)))))
+      (:h3 "Findings")
+      (:ul
+       (dolist (finding (snippet-playground-layout-artifact-findings-of artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:esc finding))))))))
 
 (html-inspector-views:defview snippet-playground-step-summary
     (step mech-snippet-step)
@@ -2590,6 +3720,9 @@
                (getf (snippet-comparison-surface-layout-spec-of surface)
                      :rules))
               (maybe-object-ref-row
+               "Layout artifact"
+               (snippet-comparison-surface-layout-artifact-of surface))
+              (maybe-object-ref-row
                "Lifecycle run"
                (snippet-comparison-surface-lifecycle-run-of surface))
               (maybe-object-ref-row
@@ -2620,9 +3753,65 @@
                 (html-inspector-views:esc
                  (snippet-playground-view-interface-text session)))))))
 
+(html-inspector-views:defview snippet-playground-session-behavior-view
+    (session snippet-playground-session)
+  (html-inspector-views:html-view :title "Behavior" :priority 3
+    (let ((run (snippet-playground-session-state-machine-run-of session))
+          (comparison-machine
+           (snippet-comparison-surface-lifecycle-state-machine)))
+      (html-inspector-views:html
+        (:div :class "hyperdoc-snippet-behavior-artifact"
+              :data-hyperdoc-snippet-behavior-artifact "true"
+              (:table :class "inspector-table"
+                      (maybe-object-ref-row
+                       "Lifecycle machine"
+                       (and run (state-machine-run-machine-of run)))
+                      (maybe-object-ref-row
+                       "Lifecycle run"
+                       run)
+                      (maybe-object-ref-row
+                       "Comparison surface machine"
+                       comparison-machine))
+              (:p (html-inspector-views:esc
+                   "Compiled lifecycle artifact shared by html-source and fedwiki-page providers."))
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-snippet-machine-scxml "true"
+                    (html-inspector-views:esc
+                     (snippet-playground-run-state-machine-scxml-text))))))))
+
+(html-inspector-views:defview snippet-playground-session-layout-view
+    (session snippet-playground-session)
+  (html-inspector-views:html-view :title "Layout" :priority 4
+    (let ((artifact (snippet-comparison-layout-artifact)))
+      (html-inspector-views:html
+        (:div :class "hyperdoc-snippet-layout-artifact"
+              :data-hyperdoc-snippet-layout-artifact "true"
+              (:table :class "inspector-table"
+                      (maybe-object-ref-row
+                       "Layout artifact"
+                       artifact)
+                      (maybe-object-ref-row
+                       "Comparison surface"
+                       (snippet-playground-session-comparison-surface-of session)))
+              (:p (html-inspector-views:esc
+                   "Compiled layout artifact keeps result placement right-of the origin pane and comparison placement declarative."))
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-snippet-layout-relations "true"
+                    (html-inspector-views:esc
+                     (format nil "~{~A~%~}"
+                             (snippet-playground-layout-relation-lines
+                              (snippet-playground-layout-artifact-relations-of
+                               artifact)))))
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-snippet-layout-spec "true"
+                    (html-inspector-views:esc
+                     (format nil "~S"
+                             (snippet-playground-layout-artifact-comparison-layout-spec-of
+                              artifact)))))))))
+
 (html-inspector-views:defview snippet-playground-session-details-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Details" :priority 3
+  (html-inspector-views:html-view :title "Details" :priority 5
     (html-inspector-views:html
       (:table :class "inspector-table"
               (snippet-playground-status-table-row
