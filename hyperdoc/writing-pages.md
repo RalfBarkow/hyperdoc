@@ -142,7 +142,7 @@ may not contain raw double quotes, encode Lisp string quotes as
 Do not use backslash-escaped quotes (`\"`) inside HTML `expr`
 attributes. Use:
 
-`expr="(hyperdoc::fn &quot;string-arg&quot;)"`
+`expr="(hyperdoc::trim-whitespace-string &quot;string-arg&quot;)"`
 
 ## Computed text
 
@@ -158,9 +158,9 @@ The custom tag `html-expr` permits inserting HTML code that is computed. The tex
 
 The custom tag `view-transclusion` has a Lisp expression as its text content. Its value must be an instance of <a expr="(find-class 'html-inspector-views:html-view)">`html-inspector-views:html-view`</a>. The HTML code corresponding to that view is inserted at the point of transclusion.
 
-As an example, this is the <a expr="#'html-inspector-views:👀items">items view</a> of the vector <a expr="#(a b)"/>:
+As an example, this is the <a expr="#'html-inspector-views:👀items">items view</a> of the vector <a expr="#(:a :b)"/>:
 
-<view-transclusion>(html-inspector-views:👀items #(a b))</view-transclusion>
+<view-transclusion>(html-inspector-views:👀items #(:a :b))</view-transclusion>
 
 When using this tag in Markdown, watch out for parts of the Lisp code being interpreted as Markdown markup. In particular, the ear-muff convention for special variables is interpreted as italic. Asterisks therefore need to be written as `&#42;`.
 
