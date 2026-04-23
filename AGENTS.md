@@ -486,6 +486,99 @@ Interpretation:
   wrong expectation through docs, naming, UI, or examples
 - in that case, repair the promise surface too, not only the assertion
 
+## Documentation page genres: reference vs walkthrough example
+
+When producing or revising HyperDoc documentation pages, explicitly classify the
+target page genre before drafting.
+
+### 1) Reference/contract pages
+
+Use this genre for:
+
+- definitions
+- contracts
+- inventories
+- architecture summaries
+- browseable inspectable-object indexes
+
+### 2) Walkthrough example pages
+
+Use this genre for:
+
+- story-driven demonstrations
+- click-through learning
+- before/after workflows
+- operational "how and why this works" teaching pages
+
+Rule:
+- if the user asks for an `example page`, default to a walkthrough example page
+  unless they explicitly ask for a reference/contract page.
+- do not respond to an example-page request with an index/catalog page plus
+  numbered headings.
+
+### Required structure for walkthrough example pages
+
+Default structure:
+
+- `Goal`
+- `Starting situation`
+- `Step 1`, `Step 2`, ...
+- `Expected result` and/or `Why this matters`
+- `Boundary`
+
+Each step must include, compactly:
+
+- `Click:` what to open/run
+- `Observe:` what to notice
+- `Why this matters:` what that observation proves
+
+### Narrative arc requirement
+
+Walkthrough example pages should follow this arc:
+
+- start state
+- inspect cause
+- inspect derivation
+- act / mutate / run
+- observe changed result
+- explain significance
+
+For mutation/rewrite/debug walkthroughs, require explicit:
+
+- before
+- cause
+- action
+- after
+
+### HyperDoc-specific clickable example rule
+
+Clickable `expr` links alone do not make a page a good example page.
+A HyperDoc walkthrough example page must stage clickable expressions as a
+sequence of actions with observations and consequences.
+
+### Style constraints for walkthrough example pages
+
+- compact prose
+- task-centric rather than object-centric organization
+- operational examples do most of the teaching
+- every step states what the reader should notice
+- include a minimal but explicit `Boundary` section
+- avoid manifesto-style expansion
+- do not mistake "clickable" for "example-driven"
+
+### Walkthrough acceptance heuristic
+
+Before marking an example page done, verify:
+
+1. Does the page tell a story?
+2. Does each step include `Click / Observe / Why`?
+3. Is there a clear before/after payoff?
+4. Could a reader follow it without already knowing the architecture?
+5. Would it still read as an example if raw object names were hidden?
+
+If any answer is no, rewrite the page as a walkthrough rather than polishing an
+index page.
+
 ## Routine: Update HyperDoc + FedWiki Twins + Topics
 
 When adding/updating a concept cluster (e.g. new external input, architecture note, workflow correction), update all three surfaces together:
