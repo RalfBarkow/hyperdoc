@@ -39,6 +39,90 @@
           (hyperdoc::authored-relation-predicate-of relation)
           (hyperdoc::authored-relation-object-of relation)))
 
+(defun authored-relation-artifact-node-id-string (value)
+  (authored-artifact-string
+   (or (ignore-errors (hyperdoc::id-of value))
+       value)))
+
+(defun authored-relation-artifact-derived-artifacts (artifact)
+  (remove nil
+          (hyperdoc::authored-relation-artifact-derived-artifacts-of artifact)))
+
+(defun authored-relation-artifact-find-derived-artifact-by-id
+    (artifact target-id)
+  (find target-id
+        (authored-relation-artifact-derived-artifacts artifact)
+        :key #'authored-relation-artifact-node-id-string
+        :test #'string=))
+
+(defun authored-relation-artifact-compiled-target-nodes (artifact)
+  (let ((nodes nil)
+        (seen (make-hash-table :test #'equal)))
+    (dolist (target (hyperdoc::authored-relation-artifact-compiled-targets-of
+                     artifact))
+      (let* ((target-id (authored-artifact-string target))
+             (derived
+               (authored-relation-artifact-find-derived-artifact-by-id
+                artifact
+                target-id)))
+        (unless (gethash target-id seen)
+          (setf (gethash target-id seen) t)
+          (push (list :id target-id :object derived) nodes))))
+    (dolist (derived (authored-relation-artifact-derived-artifacts artifact))
+      (let ((derived-id (authored-relation-artifact-node-id-string derived)))
+        (unless (gethash derived-id seen)
+          (setf (gethash derived-id seen) t)
+          (push (list :id derived-id :object derived) nodes))))
+    (nreverse nodes)))
+
+(defun authored-relation-artifact-graph-edges (artifact)
+  (let ((artifact-id (authored-relation-artifact-node-id-string artifact))
+        (edges nil))
+    (dolist (role (hyperdoc::authored-relation-artifact-semantic-roles-of artifact))
+      (push (list artifact-id
+                  "has-role"
+                  (authored-relation-artifact-node-id-string role))
+            edges))
+    (dolist (relation (hyperdoc::authored-relation-artifact-relations-of artifact))
+      (push (list (authored-artifact-string
+                   (hyperdoc::authored-relation-subject-of relation))
+                  (authored-artifact-string
+                   (hyperdoc::authored-relation-predicate-of relation))
+                  (authored-artifact-string
+                   (hyperdoc::authored-relation-object-of relation)))
+            edges))
+    (dolist (target-node (authored-relation-artifact-compiled-target-nodes artifact))
+      (push (list (getf target-node :id)
+                  "compiled-from"
+                  artifact-id)
+            edges))
+    (nreverse edges)))
+
+(defun authored-relation-artifact-graph-edge-lines (artifact)
+  (mapcar (lambda (edge)
+            (destructuring-bind (from relation to) edge
+              (format nil "~A --~A--> ~A" from relation to)))
+          (authored-relation-artifact-graph-edges artifact)))
+
+(defun authored-relation-artifact-graph-node-lines (artifact)
+  (append
+   (list
+    (format nil "authored-artifact: ~A"
+            (authored-relation-artifact-node-id-string artifact)))
+   (mapcar
+    (lambda (role)
+      (format nil "semantic-role: ~A"
+              (authored-relation-artifact-node-id-string role)))
+    (hyperdoc::authored-relation-artifact-semantic-roles-of artifact))
+   (mapcar
+    (lambda (target-node)
+      (if-let (object (getf target-node :object))
+        (format nil "compiled-artifact: ~A (object: ~A)"
+                (getf target-node :id)
+                (hyperdoc::title-of object))
+        (format nil "compiled-artifact: ~A" (getf target-node :id))))
+    (authored-relation-artifact-compiled-target-nodes artifact))))
+
 (defun compiled-behavior-artifact-machine-lines (artifact)
   (append
    (list
@@ -275,6 +359,25 @@
                        (views:esc
                         (authored-relation-artifact-relation-line
                         relation))))))))))
+
+(views:defview authored-relation-artifact-relation-graph
+    (artifact hyperdoc::authored-relation-artifact)
+  (views:html-view :title "Relation graph" :priority 24
+    (let ((node-lines (authored-relation-artifact-graph-node-lines artifact))
+          (edge-lines (authored-relation-artifact-graph-edge-lines artifact)))
+      (views:html
+        (:div :class "hyperdoc-authored-relation-graph"
+              :data-hyperdoc-authored-relation-graph "true"
+              (:p :style "opacity: 0.82;"
+                  "Compact relation graph: authored roles, layered relations, and derivation links to compiled artifacts.")
+              (:h3 "Nodes")
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-authored-relation-graph-nodes "true"
+                    (views:esc (format nil "~{~A~%~}" node-lines)))
+              (:h3 "Edges")
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-authored-relation-graph-lines "true"
+                    (views:esc (format nil "~{~A~%~}" edge-lines))))))))
 
 (views:defview authored-relation-artifact-source-summary
     (source hyperdoc::authored-relation-artifact-source)

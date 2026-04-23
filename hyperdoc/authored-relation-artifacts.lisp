@@ -217,6 +217,18 @@
                 :initarg :layout-spec
                 :initform nil)))
 
+(defgeneric authored-relation-artifact-derived-artifacts-of (artifact)
+  (:documentation
+   "Return compiled artifacts that derive from AUTHORED-RELATION-ARTIFACT.
+
+Consumers may specialize this to expose concrete compiled behavior/layout
+artifacts for inspector graph views without widening runtime mutation paths."))
+
+(defmethod authored-relation-artifact-derived-artifacts-of
+    ((artifact authored-relation-artifact))
+  (declare (ignore artifact))
+  nil)
+
 (defun make-authored-relation-role (&rest initargs)
   (apply #'make-instance 'authored-relation-role initargs))
 
