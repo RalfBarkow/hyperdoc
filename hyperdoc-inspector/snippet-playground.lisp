@@ -280,51 +280,121 @@
              :initarg :findings
              :initform nil)))
 
-(defclass snippet-playground-authored-relation ()
-  ((id :reader id-of
-       :initarg :id)
-   (title :reader title-of
-          :initarg :title)
-   (summary :reader summary-of
-            :initarg :summary
-            :initform nil)
-   (layer :reader snippet-playground-authored-relation-layer-of
-          :initarg :layer)
-   (subject :reader snippet-playground-authored-relation-subject-of
-            :initarg :subject)
-   (predicate :reader snippet-playground-authored-relation-predicate-of
-              :initarg :predicate)
-   (object :reader snippet-playground-authored-relation-object-of
-           :initarg :object)
-   (attributes :reader snippet-playground-authored-relation-attributes-of
-               :initarg :attributes
-               :initform nil)))
+(defclass snippet-playground-authored-role (authored-relation-role) ())
 
-(defclass snippet-playground-layout-artifact ()
-  ((id :reader id-of
-       :initarg :id)
-   (title :reader title-of
-          :initarg :title)
-   (summary :reader summary-of
-            :initarg :summary
-            :initform nil)
-   (relations :reader snippet-playground-layout-artifact-relations-of
-              :initarg :relations
-              :initform nil)
-   (pane-relations :reader snippet-playground-layout-artifact-pane-relations-of
-                   :initarg :pane-relations
-                   :initform nil)
-   (comparison-relations
-     :reader snippet-playground-layout-artifact-comparison-relations-of
-     :initarg :comparison-relations
-     :initform nil)
-   (comparison-layout-spec
-     :reader snippet-playground-layout-artifact-comparison-layout-spec-of
-     :initarg :comparison-layout-spec
-     :initform nil)
-   (findings :reader snippet-playground-layout-artifact-findings-of
-             :initarg :findings
-             :initform nil)))
+(defclass snippet-playground-authored-relation (authored-relation) ())
+
+(defclass snippet-playground-authored-artifact (authored-relation-artifact) ())
+
+(defclass snippet-playground-behavior-artifact (compiled-behavior-artifact) ())
+
+(defclass snippet-playground-layout-artifact (compiled-layout-artifact) ())
+
+(defmacro define-snippet-playground-forwarding-reader (name target)
+  `(defun ,name (object)
+     (,target object)))
+
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-role-kind-of
+    authored-relation-role-kind-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-role-binding-of
+    authored-relation-role-binding-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-role-participants-of
+    authored-relation-role-participants-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-role-findings-of
+    authored-relation-role-findings-of)
+
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-relation-layer-of
+    authored-relation-layer-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-relation-subject-of
+    authored-relation-subject-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-relation-predicate-of
+    authored-relation-predicate-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-relation-object-of
+    authored-relation-object-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-relation-attributes-of
+    authored-relation-attributes-of)
+
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-kind-of
+    authored-relation-artifact-kind-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-workflow-role-of
+    authored-relation-artifact-workflow-role-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-compiler-pipeline-of
+    authored-relation-artifact-compiler-pipeline-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-semantic-roles-of
+    authored-relation-artifact-semantic-roles-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-semantic-relations-of
+    authored-relation-artifact-semantic-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-behavior-relations-of
+    authored-relation-artifact-behavior-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-layout-relations-of
+    authored-relation-artifact-layout-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-relations-of
+    authored-relation-artifact-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-compiled-targets-of
+    authored-relation-artifact-compiled-targets-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-authored-artifact-findings-of
+    authored-relation-artifact-findings-of)
+
+(define-snippet-playground-forwarding-reader
+    snippet-playground-behavior-artifact-authored-artifact-of
+    compiled-artifact-authored-artifact-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-behavior-artifact-relations-of
+    compiled-artifact-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-behavior-artifact-findings-of
+    compiled-artifact-findings-of)
+
+(define-snippet-playground-forwarding-reader
+    snippet-playground-layout-artifact-authored-artifact-of
+    compiled-artifact-authored-artifact-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-layout-artifact-relations-of
+    compiled-artifact-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-layout-artifact-pane-relations-of
+    compiled-layout-artifact-pane-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-layout-artifact-comparison-relations-of
+    compiled-layout-artifact-comparison-relations-of)
+(define-snippet-playground-forwarding-reader
+    snippet-playground-layout-artifact-findings-of
+    compiled-artifact-findings-of)
+
+(defun snippet-playground-behavior-artifact-run-machine-of (artifact)
+  (compiled-behavior-artifact-machine artifact :primary))
+
+(defun snippet-playground-behavior-artifact-run-machine-scxml-of (artifact)
+  (compiled-behavior-artifact-machine-scxml artifact :primary))
+
+(defun snippet-playground-behavior-artifact-comparison-machine-of (artifact)
+  (compiled-behavior-artifact-machine artifact :comparison-surface))
+
+(defun snippet-playground-behavior-artifact-comparison-machine-scxml-of
+    (artifact)
+  (compiled-behavior-artifact-machine-scxml artifact :comparison-surface))
+
+(defun snippet-playground-layout-artifact-comparison-layout-spec-of (artifact)
+  (compiled-layout-artifact-layout-spec-of artifact))
 
 (defclass snippet-playground-session ()
   ((id :reader id-of
@@ -395,6 +465,18 @@
    (pairing-notes :reader snippet-playground-session-pairing-notes-of
                   :initarg :pairing-notes
                   :initform nil)
+   (authored-artifact
+     :reader snippet-playground-session-authored-artifact-of
+     :initarg :authored-artifact
+     :initform nil)
+   (behavior-artifact
+     :reader snippet-playground-session-behavior-artifact-of
+     :initarg :behavior-artifact
+     :initform nil)
+   (layout-artifact
+     :reader snippet-playground-session-layout-artifact-of
+     :initarg :layout-artifact
+     :initform nil)
    (lisp-scaffold-source
      :reader snippet-playground-session-lisp-scaffold-source-of
      :initarg :lisp-scaffold-source
@@ -455,7 +537,19 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object snippet-playground-authored-role) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object snippet-playground-authored-relation) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-playground-authored-artifact) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object snippet-playground-behavior-artifact) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -501,7 +595,19 @@
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
+    ((object snippet-playground-authored-role))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
     ((object snippet-playground-authored-relation))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-playground-authored-artifact))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object snippet-playground-behavior-artifact))
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
@@ -532,11 +638,8 @@
      message
      :detail detail)))
 
-(defvar *snippet-playground-authored-graph* nil)
-(defvar *snippet-playground-run-state-machine* nil)
-(defvar *snippet-playground-run-state-machine-scxml* nil)
-(defvar *snippet-comparison-surface-lifecycle-state-machine* nil)
-(defvar *snippet-comparison-surface-lifecycle-state-machine-scxml* nil)
+(defvar *snippet-playground-authored-artifact* nil)
+(defvar *snippet-playground-behavior-artifact* nil)
 (defvar *snippet-playground-layout-artifact* nil)
 (defparameter *snippet-playground-inline-source-render-limit* 4096)
 (defparameter *snippet-playground-scaffold-source-excerpt-limit* 1024)
@@ -1390,19 +1493,131 @@
                             :region right-code-region
                             :placement :right))))
 
-(defparameter *snippet-playground-authored-graph*
-  (make-snippet-playground-authored-graph))
+(defun make-snippet-playground-authored-role
+    (&key id title summary kind binding participants findings)
+  (make-instance
+   'snippet-playground-authored-role
+   :id id
+   :title title
+   :summary summary
+   :kind kind
+   :binding binding
+   :participants participants
+   :findings findings))
 
-(defun snippet-playground-authored-relations ()
-  *snippet-playground-authored-graph*)
+(defun make-snippet-playground-authored-roles ()
+  (list
+   (make-snippet-playground-authored-role
+    :id "role/selected-mech-snippet"
+    :title "Selected Mech snippet"
+    :summary "Evidence input chosen from the origin surface."
+    :kind :evidence-input
+    :binding :selected-mech-snippet)
+   (make-snippet-playground-authored-role
+    :id "role/selected-javascript-snippet"
+    :title "Selected JavaScript snippet"
+    :summary "Executable evidence input chosen from the origin surface."
+    :kind :evidence-input
+    :binding :selected-javascript-snippet)
+   (make-snippet-playground-authored-role
+    :id "role/derived-lisp-snippet"
+    :title "Derived Lisp snippet"
+    :summary "Rita-side scaffold derived from the selected evidence and interface."
+    :kind :derived-output
+    :binding :derived-lisp-snippet)
+   (make-snippet-playground-authored-role
+    :id "role/transformation-unit"
+    :title "Transformation unit"
+    :summary "Primary semantic artifact that binds evidence to the execution interface."
+    :kind :semantic-artifact
+    :binding :transformation-unit)
+   (make-snippet-playground-authored-role
+    :id "role/execution-interface"
+    :title "Execution interface"
+    :summary "Operational handoff such as state.items."
+    :kind :semantic-artifact
+    :binding :execution-interface)
+   (make-snippet-playground-authored-role
+    :id "role/lefty-pair"
+    :title "Lefty pair"
+    :summary "Representational pair combining Mech with JavaScript."
+    :kind :comparison-pair
+    :binding :lefty-pair
+    :participants '(:selected-mech-snippet :selected-javascript-snippet))
+   (make-snippet-playground-authored-role
+    :id "role/rita-pair"
+    :title "Rita pair"
+    :summary "Representational pair combining Mech with Lisp."
+    :kind :comparison-pair
+    :binding :rita-pair
+    :participants '(:selected-mech-snippet :derived-lisp-snippet))))
 
-(defun snippet-playground-relations-by-layer (layer)
-  (remove layer
-          (snippet-playground-authored-relations)
-          :key #'snippet-playground-authored-relation-layer-of
-          :test-not #'eq))
+(defun snippet-playground-authored-artifact-findings ()
+  '("Authored relation artifact stays separate from compiler/runtime glue."
+    "Behavior and layout compile independently from the same authored artifact."
+    "Lefty/Rita remain representational pairs; transformation unit remains the primary semantic artifact."))
 
-(defun snippet-playground-machine-relations (machine-key predicate)
+(defun make-snippet-playground-authored-artifact ()
+  (let* ((relations (make-snippet-playground-authored-graph))
+         (semantic-relations
+           (remove-if-not
+            (lambda (relation)
+              (eq (snippet-playground-authored-relation-layer-of relation)
+                  :semantic))
+            relations))
+         (behavior-relations
+           (remove-if-not
+            (lambda (relation)
+              (eq (snippet-playground-authored-relation-layer-of relation)
+                  :behavior))
+            relations))
+         (layout-relations
+           (remove-if-not
+            (lambda (relation)
+              (eq (snippet-playground-authored-relation-layer-of relation)
+                  :layout))
+            relations)))
+    (make-instance
+     'snippet-playground-authored-artifact
+     :id "snippet-playground-authored-artifact"
+     :title "Snippet playground authored relation artifact"
+     :summary
+     "Authored relation artifact that compiles into snippet-playground behavior and layout artifacts."
+     :artifact-kind :authored-relation-artifact
+     :workflow-role
+     "Graph-authored reconstruction surface for snippet-playground."
+     :compiler-pipeline
+     "authored relation artifact -> compiled behavior artifact + compiled layout artifact -> runtime snippet-playground UI"
+     :semantic-roles (make-snippet-playground-authored-roles)
+     :semantic-relations semantic-relations
+     :behavior-relations behavior-relations
+     :layout-relations layout-relations
+     :relations relations
+     :compiled-targets
+     '("snippet-playground-behavior-artifact"
+       "snippet-playground-layout-artifact")
+     :findings (snippet-playground-authored-artifact-findings))))
+
+(setf *snippet-playground-authored-artifact*
+      (make-snippet-playground-authored-artifact))
+
+(defun snippet-playground-authored-artifact ()
+  *snippet-playground-authored-artifact*)
+
+(defun snippet-playground-authored-relations
+    (&optional (artifact (snippet-playground-authored-artifact)))
+  (snippet-playground-authored-artifact-relations-of artifact))
+
+(defun snippet-playground-authored-roles
+    (&optional (artifact (snippet-playground-authored-artifact)))
+  (snippet-playground-authored-artifact-semantic-roles-of artifact))
+
+(defun snippet-playground-relations-by-layer
+    (layer &optional (artifact (snippet-playground-authored-artifact)))
+  (authored-relation-artifact-relations-by-layer artifact layer))
+
+(defun snippet-playground-machine-relations
+    (machine-key predicate &optional (artifact (snippet-playground-authored-artifact)))
   (remove-if-not
    (lambda (relation)
      (and (eq (snippet-playground-authored-relation-layer-of relation) :behavior)
@@ -1410,9 +1625,10 @@
               machine-key)
           (eq (snippet-playground-authored-relation-predicate-of relation)
               predicate)))
-   (snippet-playground-authored-relations)))
+   (snippet-playground-authored-relations artifact)))
 
-(defun snippet-playground-transition-relations (machine-key)
+(defun snippet-playground-transition-relations
+    (machine-key &optional (artifact (snippet-playground-authored-artifact)))
   (remove-if-not
    (lambda (relation)
      (and (eq (snippet-playground-authored-relation-layer-of relation) :behavior)
@@ -1420,7 +1636,7 @@
               :transition-to)
           (eq (snippet-playground-authored-relation-attribute relation :machine)
               machine-key)))
-   (snippet-playground-authored-relations)))
+   (snippet-playground-authored-relations artifact)))
 
 (defun snippet-playground-layout-relation-p (relation)
   (eq (snippet-playground-authored-relation-layer-of relation) :layout))
@@ -1456,51 +1672,54 @@
    (snippet-playground-authored-relation-attribute relation :reversible-p)
    :notes (snippet-playground-authored-relation-attribute relation :notes)))
 
-(defun snippet-playground-machine-items (machine-key predicate)
+(defun snippet-playground-machine-items
+    (machine-key predicate &optional (artifact (snippet-playground-authored-artifact)))
   (mapcar #'snippet-playground-authored-relation-object-of
-          (snippet-playground-machine-relations machine-key predicate)))
+          (snippet-playground-machine-relations machine-key predicate artifact)))
 
-(defun snippet-playground-machine-source-evidence (machine-key)
+(defun snippet-playground-machine-source-evidence
+    (machine-key &optional (artifact (snippet-playground-authored-artifact)))
   (mapcar
    (lambda (relation)
      (list :layer (snippet-playground-authored-relation-attribute relation :layer)
            :reference (snippet-playground-authored-relation-object-of relation)
            :detail (snippet-playground-authored-relation-attribute relation :detail)))
-   (snippet-playground-machine-relations machine-key :source-evidence)))
+   (snippet-playground-machine-relations machine-key :source-evidence artifact)))
 
-(defun snippet-playground-machine-invariants (machine-key)
+(defun snippet-playground-machine-invariants
+    (machine-key &optional (artifact (snippet-playground-authored-artifact)))
   (mapcar
    (lambda (relation)
      (list :label (snippet-playground-authored-relation-object-of relation)
            :detail (snippet-playground-authored-relation-attribute relation :detail)))
-   (snippet-playground-machine-relations machine-key :has-invariant)))
+   (snippet-playground-machine-relations machine-key :has-invariant artifact)))
 
 (defun compile-snippet-playground-machine
-    (machine-key machine-id title summary)
+    (artifact machine-key machine-id title summary)
   (make-state-machine-definition
    :id machine-id
    :title title
    :summary summary
    :states
    (mapcar #'snippet-playground-machine-state-from-relation
-           (snippet-playground-machine-relations machine-key :has-state))
+           (snippet-playground-machine-relations machine-key :has-state artifact))
    :transitions
    (mapcar #'snippet-playground-machine-transition-from-relation
-           (snippet-playground-transition-relations machine-key))
+           (snippet-playground-transition-relations machine-key artifact))
    :initial-state
-   (first (snippet-playground-machine-items machine-key :initial-state))
+   (first (snippet-playground-machine-items machine-key :initial-state artifact))
    :terminal-states
-   (snippet-playground-machine-items machine-key :terminal-state)
+   (snippet-playground-machine-items machine-key :terminal-state artifact)
    :failure-states
-   (snippet-playground-machine-items machine-key :failure-state)
+   (snippet-playground-machine-items machine-key :failure-state artifact)
    :guards
-   (snippet-playground-machine-items machine-key :has-guard)
+   (snippet-playground-machine-items machine-key :has-guard artifact)
    :events
-   (snippet-playground-machine-items machine-key :has-event)
+   (snippet-playground-machine-items machine-key :has-event artifact)
    :invariants
-   (snippet-playground-machine-invariants machine-key)
+   (snippet-playground-machine-invariants machine-key artifact)
    :source-evidence
-   (snippet-playground-machine-source-evidence machine-key)))
+   (snippet-playground-machine-source-evidence machine-key artifact)))
 
 (defun snippet-playground-xml-escape (value)
   (let ((text (format nil "~A" value)))
@@ -1558,6 +1777,10 @@
   (declare (ignore relations))
   '("Compiled pane placement and comparison layout now derive from authored snippet relations."
     "Comparison layout keeps JavaScript left, shared Mech center, and Lisp right without duplicating Mech."))
+
+(defun snippet-playground-behavior-artifact-findings ()
+  '("Behavior artifact compiles directly from the authored relation artifact."
+    "Run lifecycle and comparison lifecycle remain separate machines with separate SCXML text."))
 
 (defun compile-snippet-playground-layout-spec (relations)
   (let* ((comparison-relations
@@ -1653,9 +1876,10 @@
 
 (defun snippet-comparison-layout-artifact ()
   (or *snippet-playground-layout-artifact*
-      (let* ((relations
-               (remove-if-not #'snippet-playground-layout-relation-p
-                              (snippet-playground-authored-relations)))
+      (let* ((authored-artifact (snippet-playground-authored-artifact))
+             (relations
+               (snippet-playground-authored-artifact-layout-relations-of
+                authored-artifact))
              (pane-relations
                (remove-if-not
                 (lambda (relation)
@@ -1678,10 +1902,14 @@
                :title "Snippet playground layout"
                :summary
                "Compiled pane-placement and comparison-layout artifact for snippet-playground."
+               :artifact-kind :compiled-layout-artifact
+               :authored-artifact authored-artifact
+               :compiler-stage :layout-compilation
+               :compiler-inputs (list authored-artifact)
                :relations relations
                :pane-relations pane-relations
                :comparison-relations comparison-relations
-               :comparison-layout-spec
+               :layout-spec
                (compile-snippet-playground-layout-spec relations)
                :findings
                (snippet-playground-layout-artifact-findings relations))))))
@@ -1690,35 +1918,64 @@
   (snippet-playground-layout-artifact-comparison-layout-spec-of
    (snippet-comparison-layout-artifact)))
 
+(defun snippet-playground-behavior-artifact ()
+  (or *snippet-playground-behavior-artifact*
+      (let* ((authored-artifact (snippet-playground-authored-artifact))
+             (relations
+               (snippet-playground-authored-artifact-behavior-relations-of
+                authored-artifact))
+             (run-machine
+               (compile-snippet-playground-machine
+                authored-artifact
+                :snippet-playground-run
+                "snippet_playground_run"
+                "snippet_playground_run"
+                "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."))
+             (comparison-machine
+               (compile-snippet-playground-machine
+                authored-artifact
+                :snippet-comparison-surface
+                "snippet_comparison_surface"
+                "snippet_comparison_surface"
+                "Small lifecycle for the declarative snippet comparison surface.")))
+        (setf *snippet-playground-behavior-artifact*
+              (make-instance
+               'snippet-playground-behavior-artifact
+               :id "snippet-playground-behavior-artifact"
+               :title "Snippet playground behavior"
+               :summary
+               "Compiled lifecycle artifact for snippet-playground and its comparison surface."
+               :artifact-kind :compiled-behavior-artifact
+               :authored-artifact authored-artifact
+               :compiler-stage :behavior-compilation
+               :compiler-inputs (list authored-artifact)
+               :relations relations
+               :primary-machine run-machine
+               :primary-machine-scxml
+               (state-machine-definition-scxml-text run-machine)
+               :related-machines
+               (list (cons :comparison-surface comparison-machine))
+               :related-machine-scxml
+               (list
+                (cons :comparison-surface
+                      (state-machine-definition-scxml-text comparison-machine)))
+               :findings (snippet-playground-behavior-artifact-findings))))))
+
 (defun snippet-playground-run-state-machine ()
-  (or *snippet-playground-run-state-machine*
-      (setf *snippet-playground-run-state-machine*
-            (compile-snippet-playground-machine
-             :snippet-playground-run
-             "snippet_playground_run"
-             "snippet_playground_run"
-             "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."))))
+  (snippet-playground-behavior-artifact-run-machine-of
+   (snippet-playground-behavior-artifact)))
 
 (defun snippet-playground-run-state-machine-scxml-text ()
-  (or *snippet-playground-run-state-machine-scxml*
-      (setf *snippet-playground-run-state-machine-scxml*
-            (state-machine-definition-scxml-text
-             (snippet-playground-run-state-machine)))))
+  (snippet-playground-behavior-artifact-run-machine-scxml-of
+   (snippet-playground-behavior-artifact)))
 
 (defun snippet-comparison-surface-lifecycle-state-machine ()
-  (or *snippet-comparison-surface-lifecycle-state-machine*
-      (setf *snippet-comparison-surface-lifecycle-state-machine*
-            (compile-snippet-playground-machine
-             :snippet-comparison-surface
-             "snippet_comparison_surface"
-             "snippet_comparison_surface"
-             "Small lifecycle for the declarative snippet comparison surface."))))
+  (snippet-playground-behavior-artifact-comparison-machine-of
+   (snippet-playground-behavior-artifact)))
 
 (defun snippet-comparison-surface-lifecycle-state-machine-scxml-text ()
-  (or *snippet-comparison-surface-lifecycle-state-machine-scxml*
-      (setf *snippet-comparison-surface-lifecycle-state-machine-scxml*
-            (state-machine-definition-scxml-text
-             (snippet-comparison-surface-lifecycle-state-machine)))))
+  (snippet-playground-behavior-artifact-comparison-machine-scxml-of
+   (snippet-playground-behavior-artifact)))
 
 (defun make-snippet-comparison-surface-lifecycle-run
     (&key status source-label origin-pane-id pending-pane-id
@@ -2902,6 +3159,9 @@
                (and source-pathname
                     (file-namestring source-pathname))
                "Source"))
+         (authored-artifact (snippet-playground-authored-artifact))
+         (behavior-artifact (snippet-playground-behavior-artifact))
+         (layout-artifact (snippet-comparison-layout-artifact))
          (origin-pane-id (pending-evaluation-origin-pane-id))
          (pending-pane-id (pending-evaluation-pane-id))
          (start-time (snippet-playground-current-millis))
@@ -3001,6 +3261,9 @@
                      :selected-code selected-code
                      :execution-interface execution-interface
                      :transformation-unit transformation-unit
+                     :authored-artifact authored-artifact
+                     :behavior-artifact behavior-artifact
+                     :layout-artifact layout-artifact
                      :comparison-surface comparison
                      :crosswalk (and selected-mech
                                      selected-code
@@ -3329,6 +3592,12 @@
                        :transformation-unit
                        (snippet-playground-session-transformation-unit-of
                         session)
+                       :authored-artifact
+                       (snippet-playground-session-authored-artifact-of session)
+                       :behavior-artifact
+                       (snippet-playground-session-behavior-artifact-of session)
+                       :layout-artifact
+                       (snippet-playground-session-layout-artifact-of session)
                        :comparison-surface
                        (snippet-playground-session-comparison-surface-of
                         session)
@@ -3679,6 +3948,30 @@
 (defun snippet-playground-layout-relation-lines (relations)
   (mapcar #'snippet-playground-authored-relation-line relations))
 
+(html-inspector-views:defview snippet-playground-authored-role-summary
+    (role snippet-playground-authored-role)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of role)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Kind"
+               (snippet-playground-authored-role-kind-of role))
+              (snippet-playground-status-table-row
+               "Binding"
+               (snippet-playground-authored-role-binding-of role))
+              (snippet-playground-status-table-row
+               "Participants"
+               (or (snippet-playground-authored-role-participants-of role)
+                   "n/a")))
+      (when (snippet-playground-authored-role-findings-of role)
+        (html-inspector-views:html
+          (:h3 "Findings")
+          (:ul
+           (dolist (finding (snippet-playground-authored-role-findings-of role))
+             (html-inspector-views:html
+               (:li (html-inspector-views:esc finding))))))))))
+
 (html-inspector-views:defview snippet-playground-authored-relation-summary
     (relation snippet-playground-authored-relation)
   (html-inspector-views:html-view :title "Summary" :priority 1
@@ -3705,6 +3998,145 @@
                          (snippet-playground-authored-relation-attributes-of
                           relation)))))))))
 
+(html-inspector-views:defview snippet-playground-authored-artifact-summary
+    (artifact snippet-playground-authored-artifact)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-authored-artifact"
+            :data-hyperdoc-snippet-authored-artifact "true"
+            (:p (html-inspector-views:esc (summary-of artifact)))
+            (:table :class "inspector-table"
+                    (snippet-playground-status-table-row
+                     "Kind"
+                     (snippet-playground-authored-artifact-kind-of artifact))
+                    (snippet-playground-status-table-row
+                     "Workflow role"
+                     (snippet-playground-authored-artifact-workflow-role-of
+                      artifact))
+                    (snippet-playground-status-table-row
+                     "Compiler pipeline"
+                     (snippet-playground-authored-artifact-compiler-pipeline-of
+                      artifact))
+                    (snippet-playground-status-table-row
+                     "Semantic roles"
+                     (length
+                      (snippet-playground-authored-artifact-semantic-roles-of
+                       artifact)))
+                    (snippet-playground-status-table-row
+                     "Behavior relations"
+                     (length
+                      (snippet-playground-authored-artifact-behavior-relations-of
+                       artifact)))
+                    (snippet-playground-status-table-row
+                     "Layout relations"
+                     (length
+                      (snippet-playground-authored-artifact-layout-relations-of
+                       artifact))))
+            (:h3 "Compiled targets")
+            (:ul
+             (dolist (target
+                      (snippet-playground-authored-artifact-compiled-targets-of
+                       artifact))
+               (html-inspector-views:html
+                 (:li (html-inspector-views:esc target)))))
+            (:h3 "Findings")
+            (:ul
+             (dolist (finding
+                      (snippet-playground-authored-artifact-findings-of artifact))
+               (html-inspector-views:html
+                 (:li (html-inspector-views:esc finding)))))))))
+
+(html-inspector-views:defview snippet-playground-authored-artifact-semantic-roles
+    (artifact snippet-playground-authored-artifact)
+  (html-inspector-views:html-view :title "Semantic roles" :priority 2
+    (html-inspector-views:html
+      (:ul
+       (dolist (role
+                (snippet-playground-authored-artifact-semantic-roles-of artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:object-ref role))))))))
+
+(html-inspector-views:defview snippet-playground-authored-artifact-behavior-relations
+    (artifact snippet-playground-authored-artifact)
+  (html-inspector-views:html-view :title "Behavior relations" :priority 3
+    (html-inspector-views:html
+      (:ul
+       (dolist (relation
+                (snippet-playground-authored-artifact-behavior-relations-of
+                 artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:object-ref relation))))))))
+
+(html-inspector-views:defview snippet-playground-authored-artifact-layout-relations
+    (artifact snippet-playground-authored-artifact)
+  (html-inspector-views:html-view :title "Layout relations" :priority 4
+    (html-inspector-views:html
+      (:ul
+       (dolist (relation
+                (snippet-playground-authored-artifact-layout-relations-of
+                 artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:object-ref relation))))))))
+
+(html-inspector-views:defview snippet-playground-behavior-artifact-summary
+    (artifact snippet-playground-behavior-artifact)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-behavior-artifact"
+            :data-hyperdoc-snippet-behavior-artifact "true"
+            (:p (html-inspector-views:esc (summary-of artifact)))
+            (:table :class "inspector-table"
+                    (maybe-object-ref-row
+                     "Authored artifact"
+                     (snippet-playground-behavior-artifact-authored-artifact-of
+                      artifact))
+                    (maybe-object-ref-row
+                     "Run machine"
+                     (snippet-playground-behavior-artifact-run-machine-of
+                      artifact))
+                    (maybe-object-ref-row
+                     "Comparison machine"
+                     (snippet-playground-behavior-artifact-comparison-machine-of
+                      artifact))
+                    (snippet-playground-status-table-row
+                     "Behavior relations"
+                     (length
+                      (snippet-playground-behavior-artifact-relations-of
+                       artifact))))
+            (:h3 "Findings")
+            (:ul
+             (dolist (finding
+                      (snippet-playground-behavior-artifact-findings-of artifact))
+               (html-inspector-views:html
+                 (:li (html-inspector-views:esc finding)))))))))
+
+(html-inspector-views:defview snippet-playground-behavior-artifact-relations
+    (artifact snippet-playground-behavior-artifact)
+  (html-inspector-views:html-view :title "Relations" :priority 2
+    (html-inspector-views:html
+      (:ul
+       (dolist (relation (snippet-playground-behavior-artifact-relations-of
+                          artifact))
+         (html-inspector-views:html
+           (:li (html-inspector-views:object-ref relation))))))))
+
+(html-inspector-views:defview snippet-playground-behavior-artifact-scxml
+    (artifact snippet-playground-behavior-artifact)
+  (html-inspector-views:html-view :title "SCXML" :priority 3
+    (html-inspector-views:html
+      (:h3 "Run machine")
+      (:pre :style "white-space: pre-wrap"
+            :data-hyperdoc-snippet-machine-scxml "true"
+            (html-inspector-views:esc
+             (snippet-playground-behavior-artifact-run-machine-scxml-of
+              artifact)))
+      (:h3 "Comparison machine")
+      (:pre :style "white-space: pre-wrap"
+            :data-hyperdoc-snippet-comparison-machine-scxml "true"
+            (html-inspector-views:esc
+             (snippet-playground-behavior-artifact-comparison-machine-scxml-of
+              artifact))))))
+
 (html-inspector-views:defview snippet-playground-layout-artifact-summary
     (artifact snippet-playground-layout-artifact)
   (html-inspector-views:html-view :title "Summary" :priority 1
@@ -3713,6 +4145,10 @@
             :data-hyperdoc-snippet-layout-artifact "true"
             (:p (html-inspector-views:esc (summary-of artifact)))
             (:table :class "inspector-table"
+                    (maybe-object-ref-row
+                     "Authored artifact"
+                     (snippet-playground-layout-artifact-authored-artifact-of
+                      artifact))
                     (snippet-playground-status-table-row
                      "Pane relations"
                      (length
@@ -3740,8 +4176,13 @@
 
 (html-inspector-views:defview snippet-playground-layout-artifact-details
     (artifact snippet-playground-layout-artifact)
-  (html-inspector-views:html-view :title "Details" :priority 2
+    (html-inspector-views:html-view :title "Details" :priority 2
     (html-inspector-views:html
+      (:table :class "inspector-table"
+              (maybe-object-ref-row
+               "Authored artifact"
+               (snippet-playground-layout-artifact-authored-artifact-of
+                artifact)))
       (:h3 "Pane placement")
       (:ul
        (dolist (relation
@@ -4060,36 +4501,111 @@
                 (html-inspector-views:esc
                  (snippet-playground-view-interface-text session)))))))
 
+(html-inspector-views:defview snippet-playground-session-authored-view
+    (session snippet-playground-session)
+  (html-inspector-views:html-view :title "Authored" :priority 3
+    (if-let (artifact (snippet-playground-session-authored-artifact-of session))
+      (html-inspector-views:html
+        (:div :class "hyperdoc-snippet-authored-artifact"
+              :data-hyperdoc-snippet-authored-tab "true"
+              (:table :class "inspector-table"
+                      (maybe-object-ref-row "Authored artifact" artifact)
+                      (maybe-object-ref-row
+                       "Behavior artifact"
+                       (snippet-playground-session-behavior-artifact-of
+                        session))
+                      (maybe-object-ref-row
+                       "Layout artifact"
+                       (snippet-playground-session-layout-artifact-of session))
+                      (snippet-playground-status-table-row
+                       "Semantic roles"
+                       (length
+                        (snippet-playground-authored-artifact-semantic-roles-of
+                         artifact)))
+                      (snippet-playground-status-table-row
+                       "Behavior relations"
+                       (length
+                        (snippet-playground-authored-artifact-behavior-relations-of
+                         artifact)))
+                      (snippet-playground-status-table-row
+                       "Layout relations"
+                       (length
+                        (snippet-playground-authored-artifact-layout-relations-of
+                         artifact))))
+              (:h3 "Semantic roles")
+              (:ul
+               (dolist (role
+                        (snippet-playground-authored-artifact-semantic-roles-of
+                         artifact))
+                 (html-inspector-views:html
+                   (:li (html-inspector-views:object-ref role)))))
+              (:h3 "Behavior relations")
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-snippet-behavior-relations "true"
+                    (html-inspector-views:esc
+                     (format nil
+                             "~{~A~%~}"
+                             (snippet-playground-layout-relation-lines
+                              (snippet-playground-authored-artifact-behavior-relations-of
+                               artifact)))))
+              (:h3 "Layout relations")
+              (:pre :style "white-space: pre-wrap"
+                    :data-hyperdoc-snippet-layout-relations "true"
+                    (html-inspector-views:esc
+                     (format nil
+                             "~{~A~%~}"
+                             (snippet-playground-layout-relation-lines
+                              (snippet-playground-authored-artifact-layout-relations-of
+                               artifact)))))))
+      (html-inspector-views:html
+        (:p (html-inspector-views:esc
+             "No authored artifact is available for this session."))))))
+
 (html-inspector-views:defview snippet-playground-session-behavior-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Behavior" :priority 3
-    (let ((run (snippet-playground-session-state-machine-run-of session))
-          (comparison-machine
-           (snippet-comparison-surface-lifecycle-state-machine)))
+  (html-inspector-views:html-view :title "Behavior" :priority 4
+    (let ((artifact (snippet-playground-session-behavior-artifact-of session))
+          (run (snippet-playground-session-state-machine-run-of session)))
       (html-inspector-views:html
         (:div :class "hyperdoc-snippet-behavior-artifact"
               :data-hyperdoc-snippet-behavior-artifact "true"
               (:table :class "inspector-table"
                       (maybe-object-ref-row
+                       "Behavior artifact"
+                       artifact)
+                      (maybe-object-ref-row
+                       "Authored artifact"
+                       (and artifact
+                            (snippet-playground-behavior-artifact-authored-artifact-of
+                             artifact)))
+                      (maybe-object-ref-row
                        "Lifecycle machine"
-                       (and run (state-machine-run-machine-of run)))
+                       (or (and run (state-machine-run-machine-of run))
+                           (and artifact
+                                (snippet-playground-behavior-artifact-run-machine-of
+                                 artifact))))
                       (maybe-object-ref-row
                        "Lifecycle run"
                        run)
                       (maybe-object-ref-row
                        "Comparison surface machine"
-                       comparison-machine))
+                       (and artifact
+                            (snippet-playground-behavior-artifact-comparison-machine-of
+                             artifact))))
               (:p (html-inspector-views:esc
                    "Compiled lifecycle artifact shared by html-source and fedwiki-page providers."))
-              (:pre :style "white-space: pre-wrap"
-                    :data-hyperdoc-snippet-machine-scxml "true"
-                    (html-inspector-views:esc
-                     (snippet-playground-run-state-machine-scxml-text))))))))
+              (when artifact
+                (html-inspector-views:html
+                  (:pre :style "white-space: pre-wrap"
+                        :data-hyperdoc-snippet-machine-scxml "true"
+                        (html-inspector-views:esc
+                         (snippet-playground-behavior-artifact-run-machine-scxml-of
+                          artifact))))))))))
 
 (html-inspector-views:defview snippet-playground-session-layout-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Layout" :priority 4
-    (let ((artifact (snippet-comparison-layout-artifact)))
+  (html-inspector-views:html-view :title "Layout" :priority 5
+    (let ((artifact (snippet-playground-session-layout-artifact-of session)))
       (html-inspector-views:html
         (:div :class "hyperdoc-snippet-layout-artifact"
               :data-hyperdoc-snippet-layout-artifact "true"
@@ -4118,7 +4634,7 @@
 
 (html-inspector-views:defview snippet-playground-session-details-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Details" :priority 5
+  (html-inspector-views:html-view :title "Details" :priority 7
     (html-inspector-views:html
       (:table :class "inspector-table"
               (snippet-playground-status-table-row
@@ -4148,6 +4664,15 @@
               (maybe-object-ref-row
                "Transformation unit"
                (snippet-playground-session-transformation-unit-of session))
+              (maybe-object-ref-row
+               "Authored artifact"
+               (snippet-playground-session-authored-artifact-of session))
+              (maybe-object-ref-row
+               "Behavior artifact"
+               (snippet-playground-session-behavior-artifact-of session))
+              (maybe-object-ref-row
+               "Layout artifact"
+               (snippet-playground-session-layout-artifact-of session))
               (maybe-object-ref-row
                "Comparison surface"
                (snippet-playground-session-comparison-surface-of session))
@@ -4235,7 +4760,7 @@
 
 (html-inspector-views:defview snippet-playground-session-source-pair
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Evidence" :priority 4
+  (html-inspector-views:html-view :title "Evidence" :priority 6
     (html-inspector-views:html
       (:h3 "Mech evidence")
       (if-let (mech (snippet-playground-session-selected-mech-of session))
@@ -4252,7 +4777,7 @@
 
 (html-inspector-views:defview snippet-playground-session-mech
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Mech" :priority 5
+  (html-inspector-views:html-view :title "Mech" :priority 8
     (html-inspector-views:html
       (if-let (mech (snippet-playground-session-selected-mech-of session))
         (html-inspector-views:html
@@ -4276,7 +4801,7 @@
 
 (html-inspector-views:defview snippet-playground-session-code
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Code" :priority 6
+  (html-inspector-views:html-view :title "Code" :priority 9
     (html-inspector-views:html
       (if-let (code (snippet-playground-session-selected-code-of session))
         (html-inspector-views:html
@@ -4308,7 +4833,7 @@
 
 (html-inspector-views:defview snippet-playground-session-crosswalk-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Crosswalk" :priority 7
+  (html-inspector-views:html-view :title "Crosswalk" :priority 10
     (html-inspector-views:html
       (if (snippet-playground-session-crosswalk-of session)
           (html-inspector-views:html
@@ -4334,7 +4859,7 @@
 
 (html-inspector-views:defview snippet-playground-session-lisp-scaffold-view
     (session snippet-playground-session)
-  (html-inspector-views:html-view :title "Lisp scaffold" :priority 8
+  (html-inspector-views:html-view :title "Lisp scaffold" :priority 11
     (html-inspector-views:html
       (if (snippet-playground-session-ready-p session)
           (html-inspector-views:html

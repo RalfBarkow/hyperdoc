@@ -9,6 +9,8 @@
    :run-dmx-topic-proxy-smoke-tests
    :run-code-path-graphs-smoke-tests
    :run-state-machine-smoke-tests
+   :run-snippet-playground-artifact-smoke-tests
+   :run-authored-relation-artifact-pattern-smoke-tests
    :run-surface-smoke-tests
    :run-boundary-smoke-tests
    :run-relation-topic-proposals-smoke-tests
