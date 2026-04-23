@@ -1,0 +1,88 @@
+<h1>Authored relation artifacts in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  HyperDoc now treats authored relation artifacts as a reusable reconstruction
+  pattern, not a feature-local trick. The pattern keeps authored intent,
+  compiled behavior, and compiled layout separate while preserving explicit
+  derivation links between them.
+</p>
+
+<h2>Pattern in one line</h2>
+
+<p>
+  <tt>repo-native authored source</tt> -&gt; <tt>reconstructed authored relation artifact</tt>
+  -&gt; <tt>compiled behavior artifact</tt> + <tt>compiled layout artifact</tt>
+  -&gt; <tt>feature runtime glue</tt>.
+</p>
+
+<h2>What each artifact means</h2>
+
+<ul>
+  <li><b>Authored relation artifact:</b> semantic coordination object containing role definitions, layered relations, and compiled target intent.</li>
+  <li><b>Compiled behavior artifact:</b> lifecycle machine projection derived from authored behavior relations.</li>
+  <li><b>Compiled layout artifact:</b> pane/comparison layout projection derived from authored layout relations.</li>
+</ul>
+
+<p>
+  The compiled artifacts are first-class objects, not anonymous intermediate
+  plists. They remain inspectable and keep explicit derivation fields back to
+  the authored artifact.
+</p>
+
+<h2>Implementation contract</h2>
+
+<p>
+  This is the stable reusable contract enforced by runtime and tests.
+</p>
+
+<ul>
+  <li><b>Source identity contract:</b> <tt>authored-relation-artifact-source</tt> carries stable <tt>id</tt>, <tt>artifact-id</tt>, <tt>schema-version</tt>, role definitions, relation definitions, and explicit compiled target ids.</li>
+  <li><b>Reconstruction contract:</b> reconstruction yields exactly one <tt>authored-relation-artifact</tt> whose id matches source <tt>artifact-id</tt> and whose relations remain partitionable by layer (<tt>:semantic</tt>, <tt>:behavior</tt>, <tt>:layout</tt>).</li>
+  <li><b>Derivation contract:</b> each compiled artifact keeps <tt>authored-artifact</tt>, <tt>compiler-stage</tt>, and <tt>compiler-inputs</tt> so derivation remains machine-checkable.</li>
+  <li><b>Separation contract:</b> behavior and layout stay distinct compiled artifacts; neither collapses into the other.</li>
+  <li><b>Boundary contract:</b> consumer-specific runtime glue stays narrow (hooking existing domain objects to artifacts). The generic layer is not a generic unrestricted mutation surface.</li>
+</ul>
+
+<h2>Consumer responsibilities vs generic layer</h2>
+
+<ul>
+  <li><b>Consumer must provide:</b> repo-native source definitions (roles/relations), domain-specific behavior compiler rules, domain-specific layout compiler rules, and narrow object-to-artifact glue.</li>
+  <li><b>Generic layer provides:</b> common CLOS object family, relation-layer partitioning helpers, source relation/role counters, compiled-derivation checks, and shared inspector views.</li>
+</ul>
+
+<h2>Current proof cases</h2>
+
+<ul>
+  <li><b>Snippet playground:</b> authored snippet relation source reconstructs into a snippet authored artifact and compiles into snippet behavior/layout artifacts.</li>
+  <li><b>Page lookup issue:</b> authored lookup-failure source reconstructs into a lookup authored artifact and compiles into lookup behavior/layout artifacts.</li>
+</ul>
+
+<p>
+  These two consumers are intentionally different in scope and UI density. The
+  same pattern serves both, which is the current reuse proof.
+</p>
+
+<h2>Imperative glue that remains</h2>
+
+<ul>
+  <li>provider-specific input extraction</li>
+  <li>browser click/dispatch routing</li>
+  <li>pending-pane open/replace mechanics where relevant</li>
+</ul>
+
+<p>
+  Keeping this imperative glue narrow is deliberate. The authored relation
+  artifact pattern is about reconstruction and derivation contracts, not about
+  replacing all runtime dispatch code.
+</p>
+
+<h2>Non-goals in this slice</h2>
+
+<ul>
+  <li>No third consumer.</li>
+  <li>No DMX or MCP integration widening.</li>
+  <li>No editor surface work.</li>
+  <li>No UI prose expansion in snippet-playground or page-lookup surfaces.</li>
+</ul>

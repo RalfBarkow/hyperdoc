@@ -1,6 +1,27 @@
 ;;;; Generic authored relation artifact pattern
 ;;
 ;;;; Copyright (c) 2026
+;;
+;;;; Implementation contract (repo-level, reusable pattern)
+;;;;
+;;;; 1. Source contract
+;;;;    - `authored-relation-artifact-source` is the repo-native reconstruction
+;;;;      point and carries stable identity, schema version, role definitions,
+;;;;      relation definitions, and explicit compiled target ids.
+;;;; 2. Reconstruction contract
+;;;;    - Reconstructing from source yields one `authored-relation-artifact`
+;;;;      whose id matches the source artifact id and whose relations remain
+;;;;      partitionable by layer (`:semantic`, `:behavior`, `:layout`).
+;;;; 3. Compilation contract
+;;;;    - Behavior and layout compile into separate first-class artifacts:
+;;;;      `compiled-behavior-artifact` and `compiled-layout-artifact`.
+;;;;    - Each compiled artifact keeps explicit derivation breadcrumbs:
+;;;;      `authored-artifact`, `compiler-stage`, and `compiler-inputs`.
+;;;; 4. Consumer boundary contract
+;;;;    - Consumer code provides domain-specific source definitions and narrow
+;;;;      runtime glue.
+;;;;    - The generic layer provides common object shape, layered partitioning,
+;;;;      and derivation invariants; it is not a generic mutation surface.
 
 (in-package :hyperdoc)
 
