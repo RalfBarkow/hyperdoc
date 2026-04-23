@@ -194,6 +194,10 @@
     ((object hyperdoc::authored-relation-mutation))
   (hyperdoc::title-of object))
 
+(defmethod views:text-representation
+    ((object hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report))
+  (hyperdoc::title-of object))
+
 (views:defview authored-relation-role-summary
     (role hyperdoc::authored-relation-role)
   (views:html-view :title "Summary" :priority 1
@@ -623,3 +627,145 @@
       (format nil "~S"
               (hyperdoc::authored-relation-mutation-after-relation-definition-of
                mutation))))))
+
+(views:defview page-lookup-issue-authored-mutation-roundtrip-summary
+    (report hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)
+  (views:html-view :title "Summary" :priority 1
+    (views:html
+      (:div
+       :class "hyperdoc-page-lookup-issue-authored-mutation-roundtrip"
+       :data-hyperdoc-page-lookup-issue-authored-mutation-roundtrip "true"
+       (:p (views:esc (hyperdoc::summary-of report)))
+       (:table :class "inspector-table"
+               (authored-artifact-table-row
+                "Source path"
+                (views:esc
+                 (authored-artifact-string
+                  (hyperdoc::page-lookup-issue-roundtrip-source-path-of
+                   report))))
+               (authored-artifact-table-row
+                "Before ordered panes"
+                (views:esc
+                 (authored-artifact-string
+                  (hyperdoc::page-lookup-issue-roundtrip-before-ordered-panes-of
+                   report))))
+               (authored-artifact-table-row
+                "After ordered panes"
+                (views:esc
+                 (authored-artifact-string
+                  (hyperdoc::page-lookup-issue-roundtrip-after-ordered-panes-of
+                   report))))
+               (authored-artifact-table-row
+                "Source restored after run"
+                (views:esc
+                 (if (hyperdoc::page-lookup-issue-roundtrip-restored-p report)
+                     "yes"
+                     "no")))
+               (authored-artifact-table-row
+                "Planned mutation"
+                (authored-artifact-render-object-ref
+                 (hyperdoc::page-lookup-issue-roundtrip-planned-mutation-of
+                  report)))
+               (authored-artifact-table-row
+                "Applied mutation"
+                (authored-artifact-render-object-ref
+                 (hyperdoc::page-lookup-issue-roundtrip-applied-mutation-of
+                  report))))
+       (when (hyperdoc::page-lookup-issue-roundtrip-findings-of report)
+         (views:html
+           (:h3 "Findings")
+           (:ul
+            (dolist
+                (finding
+                 (hyperdoc::page-lookup-issue-roundtrip-findings-of report))
+              (views:html
+                (:li (views:esc finding)))))))))))
+
+(views:defview page-lookup-issue-authored-mutation-roundtrip-consumer-change
+    (report hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)
+  (views:html-view :title "Consumer change" :priority 2
+    (views:html
+      (:div
+       :class "hyperdoc-page-lookup-issue-authored-consumer-change"
+       :data-hyperdoc-page-lookup-issue-authored-consumer-change "true"
+       (:p
+        "Before and after consumer snapshots from one bounded mutation round-trip.")
+       (:table :class "inspector-table"
+               (authored-artifact-table-row
+                "Before consumer"
+                (authored-artifact-render-object-ref
+                 (hyperdoc::page-lookup-issue-roundtrip-before-consumer-of
+                  report)))
+               (authored-artifact-table-row
+                "Before layout artifact"
+                (authored-artifact-render-object-ref
+                 (hyperdoc::page-lookup-issue-roundtrip-before-layout-artifact-of
+                  report)))
+               (authored-artifact-table-row
+                "Before ordered panes"
+                (views:esc
+                 (authored-artifact-string
+                  (hyperdoc::page-lookup-issue-roundtrip-before-ordered-panes-of
+                   report))))
+               (authored-artifact-table-row
+                "After consumer"
+                (authored-artifact-render-object-ref
+                 (hyperdoc::page-lookup-issue-roundtrip-after-consumer-of
+                  report)))
+               (authored-artifact-table-row
+                "After layout artifact"
+                (authored-artifact-render-object-ref
+                 (hyperdoc::page-lookup-issue-roundtrip-after-layout-artifact-of
+                  report)))
+               (authored-artifact-table-row
+                "After ordered panes"
+                (views:esc
+                 (authored-artifact-string
+                  (hyperdoc::page-lookup-issue-roundtrip-after-ordered-panes-of
+                   report)))))))))
+
+(views:defview page-lookup-issue-authored-mutation-roundtrip-artifacts
+    (report hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)
+  (views:html-view :title "Artifacts" :priority 3
+    (views:html
+      (:table :class "inspector-table"
+              (authored-artifact-table-row
+               "Before source"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-before-source-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "Before authored"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-before-authored-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "Before behavior"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-before-behavior-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "Before layout"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-before-layout-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "After source"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-after-source-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "After authored"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-after-authored-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "After behavior"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-after-behavior-artifact-of
+                 report)))
+              (authored-artifact-table-row
+               "After layout"
+               (authored-artifact-render-object-ref
+                (hyperdoc::page-lookup-issue-roundtrip-after-layout-artifact-of
+                 report)))))))

@@ -43,7 +43,12 @@
 
 <p>
   Inspect a synthetic lookup issue consumer:
-  <a expr="(hyperbook:enrich-lookup-issue (hyperbook:make-page-lookup-issue (make-condition 'simple-error :format-control &quot;Example page-lookup issue&quot; :format-arguments nil) :source-hyperbook &quot;hyperdoc&quot; :source-page-id &quot;Authored relation mutation round-trip for page-lookup issue&quot; :source-page-title &quot;Authored relation mutation round-trip for page-lookup issue&quot; :source-section &quot;Example walkthrough&quot; :link-text &quot;Synthetic missing topic page&quot; :target-hyperbook-id &quot;topics&quot; :expected-page-id &quot;Synthetic missing topic page&quot; :classification :lookup-failure))" view="Overview"><tt>Page-lookup issue consumer (Overview)</tt></a>.
+  <a expr="(hyperdoc::make-page-lookup-issue-example-consumer)" view="Overview"><tt>Page-lookup issue consumer (Overview)</tt></a>.
+</p>
+
+<p>
+  Inspect the same consumer's compiled layout artifact before mutation:
+  <a expr="(hyperdoc::page-lookup-issue-example-consumer-layout-artifact)" view="Layout"><tt>Consumer layout artifact (before)</tt></a>.
 </p>
 
 <h2>Step 6. Apply the bounded mutation</h2>
@@ -54,11 +59,21 @@
   <a expr="(hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation)"><tt>make-page-lookup-issue-layout-order-toggle-mutation</tt></a>.
 </p>
 
+<p>
+  Run one bounded mutation round-trip and inspect the report:
+  <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report :refresh t)" view="Summary"><tt>Run page-lookup mutation round-trip</tt></a>.
+</p>
+
 <h2>Step 7. Show the consumer change after mutation/reconstruction</h2>
 
 <p>
-  Inspect the compiled layout artifact currently used by the consumer:
-  <a expr="(hyperdoc::page-lookup-issue-layout-artifact)" view="Layout"><tt>page-lookup-issue-layout-artifact</tt></a>.
+  Inspect consumer-visible change from that round-trip:
+  <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)" view="Consumer change"><tt>Round-trip report (consumer change)</tt></a>.
+</p>
+
+<p>
+  Inspect all before/after reconstruction artifacts captured in that run:
+  <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)" view="Artifacts"><tt>Round-trip report (artifacts)</tt></a>.
 </p>
 
 <h2>Boundary</h2>
