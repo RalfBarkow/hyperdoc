@@ -5,6 +5,7 @@
   (run-code-path-graphs-smoke-tests)
   (run-dmx-topic-proxy-smoke-tests)
   (run-state-machine-smoke-tests)
+  (run-shared-projection-ir-smoke-tests)
   (run-surface-smoke-tests)
   (run-boundary-smoke-tests)
   (run-relation-topic-proposals-smoke-tests)
