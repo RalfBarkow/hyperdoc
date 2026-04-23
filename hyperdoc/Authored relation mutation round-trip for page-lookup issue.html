@@ -1,0 +1,71 @@
+<h1>Authored relation mutation round-trip for page-lookup issue</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This walkthrough shows one real end-to-end authored relation workflow for
+  <tt>page-lookup-issue</tt>: repo-native source, reconstruction, compiled
+  behavior/layout artifacts, relation graph inspection, and bounded mutation.
+</p>
+
+<h2>Step 1. Why this matters</h2>
+
+<p>
+  Authored relation artifacts in HyperDoc are no longer read-only. This example
+  keeps the flow inspectable while proving a minimal write path with explicit
+  boundaries.
+</p>
+
+<h2>Step 2. Start from the repo-native source</h2>
+
+<p>
+  Open the source artifact object:
+  <a expr="(hyperdoc::page-lookup-issue-authored-source-artifact)"><tt>page-lookup-issue-authored-source-artifact</tt></a>.
+</p>
+
+<h2>Step 3. Reconstruct the authored artifact</h2>
+
+<p>
+  Reconstruct and inspect the authored artifact:
+  <a expr="(hyperdoc::page-lookup-issue-authored-artifact)"><tt>page-lookup-issue-authored-artifact</tt></a>.
+</p>
+
+<h2>Step 4. Inspect compiled behavior, compiled layout, and relation graph</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::page-lookup-issue-behavior-artifact)" view="Behavior machine"><tt>Compiled behavior artifact (Behavior machine)</tt></a></li>
+  <li><a expr="(hyperdoc::page-lookup-issue-behavior-artifact)" view="SCXML"><tt>Compiled behavior artifact (SCXML)</tt></a></li>
+  <li><a expr="(hyperdoc::page-lookup-issue-layout-artifact)" view="Layout"><tt>Compiled layout artifact (Layout)</tt></a></li>
+  <li><a expr="(hyperdoc::page-lookup-issue-authored-artifact)" view="Relation graph"><tt>Authored artifact relation graph view</tt></a></li>
+</ul>
+
+<h2>Step 5. Show the consumer before mutation</h2>
+
+<p>
+  Inspect a synthetic lookup issue consumer:
+  <a expr="(hyperbook:enrich-lookup-issue (hyperbook:make-page-lookup-issue (make-condition 'simple-error :format-control &quot;Example page-lookup issue&quot; :format-arguments nil) :source-hyperbook &quot;hyperdoc&quot; :source-page-id &quot;Authored relation mutation round-trip for page-lookup issue&quot; :source-page-title &quot;Authored relation mutation round-trip for page-lookup issue&quot; :source-section &quot;Example walkthrough&quot; :link-text &quot;Synthetic missing topic page&quot; :target-hyperbook-id &quot;topics&quot; :expected-page-id &quot;Synthetic missing topic page&quot; :classification :lookup-failure))" view="Overview"><tt>Page-lookup issue consumer (Overview)</tt></a>.
+</p>
+
+<h2>Step 6. Apply the bounded mutation</h2>
+
+<p>
+  Inspect the explicit mutation object for
+  <tt>layout/page-lookup/repair-after-overview</tt>:
+  <a expr="(hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation)"><tt>make-page-lookup-issue-layout-order-toggle-mutation</tt></a>.
+</p>
+
+<h2>Step 7. Show the consumer change after mutation/reconstruction</h2>
+
+<p>
+  Inspect the compiled layout artifact currently used by the consumer:
+  <a expr="(hyperdoc::page-lookup-issue-layout-artifact)" view="Layout"><tt>page-lookup-issue-layout-artifact</tt></a>.
+</p>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>One narrow mutation path on one consumer.</li>
+  <li>One explicit write target in repo-native source format.</li>
+  <li>Reconstruction/recompile loop remains separate and inspectable.</li>
+  <li>No full graph editor, no DMX/MCP write widening, no free-form mutation surface.</li>
+</ul>
