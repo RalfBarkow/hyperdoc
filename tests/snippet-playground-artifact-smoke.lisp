@@ -264,7 +264,8 @@
     (dolist (title '("Summary"
                      "Semantic roles"
                      "Behavior relations"
-                     "Layout relations"))
+                     "Layout relations"
+                     "Relation graph"))
       (snippet-playground-assert-true
        (snippet-playground-smoke-find-view-by-title artifact-views title)
        (format nil "Authored artifact must expose view ~A" title)))
@@ -294,6 +295,28 @@
      "comparison-pane contains-center shared-mech"
      (html-inspector-views:view-html authored-view)
      "Authored tab must surface layout relations directly")
+    (let ((relation-graph-view
+            (snippet-playground-smoke-find-view-by-title
+             artifact-views
+             "Relation graph")))
+      (let ((relation-graph-html
+              (html-inspector-views:view-html relation-graph-view)))
+      (snippet-playground-assert-contains
+       "data-hyperdoc-authored-relation-graph"
+       relation-graph-html
+       "Authored artifact relation graph view must render with the graph marker")
+      (snippet-playground-assert-contains
+       "snippet-playground-behavior-artifact"
+       relation-graph-html
+       "Authored artifact relation graph must mention the compiled behavior artifact target")
+      (snippet-playground-assert-contains
+       "snippet-playground-layout-artifact"
+       relation-graph-html
+       "Authored artifact relation graph must mention the compiled layout artifact target")
+      (snippet-playground-assert-contains
+       "compiled-from"
+       relation-graph-html
+       "Authored artifact relation graph must expose compiled-from derivation edges")))
     (snippet-playground-assert-contains
      "data-hyperdoc-snippet-authored-artifact"
      (html-inspector-views:view-html

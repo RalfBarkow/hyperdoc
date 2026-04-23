@@ -26,6 +26,10 @@
            expected-type
            (type-of object))))
 
+(defun authored-relation-pattern-assert-contains (substring string message)
+  (unless (search substring string :test #'char=)
+    (error "~A -- missing substring: ~S" message substring)))
+
 (defun authored-relation-pattern-find-view-by-title (views title)
   (find title
         views
@@ -195,10 +199,23 @@
       (dolist (title '("Summary"
                        "Semantic roles"
                        "Behavior relations"
-                       "Layout relations"))
+                       "Layout relations"
+                       "Relation graph"))
         (authored-relation-pattern-assert-true
          (authored-relation-pattern-find-view-by-title artifact-views title)
          (format nil "Generic authored artifact must expose view ~A" title)))
+      (let ((graph-view
+              (authored-relation-pattern-find-view-by-title
+               artifact-views
+               "Relation graph")))
+        (authored-relation-pattern-assert-contains
+         "data-hyperdoc-authored-relation-graph"
+         (html-inspector-views:view-html graph-view)
+         "Generic authored artifact relation graph view must render the graph marker")
+        (authored-relation-pattern-assert-contains
+         "compiled-from"
+         (html-inspector-views:view-html graph-view)
+         "Generic authored artifact relation graph view must render derivation edges"))
       (dolist (title '("Summary" "Relations" "Behavior machine" "SCXML"))
         (authored-relation-pattern-assert-true
          (authored-relation-pattern-find-view-by-title behavior-views title)

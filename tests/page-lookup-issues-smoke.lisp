@@ -304,6 +304,10 @@
                                              "Synthetic artifact target"))
          (source-views (page-lookup-load-inspector-views-for-object source))
          (authored-views (page-lookup-load-inspector-views-for-object authored))
+         (relation-graph-view
+           (page-lookup-smoke-find-view-by-title
+            authored-views
+            "Relation graph"))
          (behavior-views
            (page-lookup-load-inspector-views-for-object behavior))
          (layout-views (page-lookup-load-inspector-views-for-object layout)))
@@ -399,6 +403,19 @@
     (assert-true
      (page-lookup-smoke-find-view-by-title authored-views "Layout relations")
      "Authored relation artifact should expose layout relations as an inspector view")
+    (assert-true
+     relation-graph-view
+     "Authored relation artifact should expose the relation graph view")
+    (assert-true
+     (search "data-hyperdoc-authored-relation-graph"
+             (html-inspector-views:view-html relation-graph-view)
+             :test #'char=)
+     "Relation graph view should render with the graph marker")
+    (assert-true
+     (search "compiled-from"
+             (html-inspector-views:view-html relation-graph-view)
+             :test #'char=)
+     "Relation graph view should render compiled-from derivation edges")
     (assert-true
      (page-lookup-smoke-find-view-by-title behavior-views "Behavior machine")
      "Compiled behavior artifact should expose its behavior machine view")
