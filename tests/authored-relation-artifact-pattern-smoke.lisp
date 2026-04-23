@@ -149,32 +149,6 @@
           :behavior-artifact behavior-artifact
           :layout-artifact layout-artifact)))
 
-(defun authored-relation-pattern-smoke-make-snippet-session ()
-  (let ((blocks
-          (list
-           (list :index 1
-                 :line-number 1
-                 :location-label "source line 1"
-                 :open-tag "<pre><code class=\"language-mech\">"
-                 :source (format nil
-                                 "CLICK node~%CODE transform~%PREVIEW items"))
-           (list :index 2
-                 :line-number 10
-                 :location-label "source line 10"
-                 :open-tag "<pre><code class=\"language-javascript\">"
-                 :source
-                 (format nil
-                         "export default function(state) {~%  const text = \"Quick Brown Fox\";~%  state.items = text.split(\"\").map((value) => value);~%  return state.items;~%}")))))
-    (hyperdoc::make-snippet-playground-result-from-blocks
-     :context-object nil
-     :context-view-title "Source"
-     :source-pathname nil
-     :source-text (hyperdoc::snippet-playground-source-text-from-blocks blocks)
-     :blocks blocks
-     :origin-surface-kind "html-source"
-     :provider-kind "source-v1"
-     :source-label "Authored relation artifact pattern smoke")))
-
 (defun run-authored-relation-artifact-pattern-runtime-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (destructuring-bind (&key artifact behavior-artifact layout-artifact)
@@ -234,44 +208,111 @@
          (authored-relation-pattern-find-view-by-title layout-views title)
          (format nil "Generic layout artifact must expose view ~A" title))))))
 
-(defun run-authored-relation-artifact-pattern-snippet-integration-smoke-test ()
+(defun authored-relation-pattern-assert-consumer-derivation-contract
+    (&key consumer-name source authored behavior layout expected-compiled-targets)
+  (authored-relation-pattern-assert-typep
+   'hyperdoc::authored-relation-artifact-source
+   source
+   (format nil "~A source must be a first-class authored relation source artifact."
+           consumer-name))
+  (authored-relation-pattern-assert-equal
+   :repo-native-lisp
+   (hyperdoc::authored-relation-artifact-source-kind-of source)
+   (format nil "~A source must remain repo-native." consumer-name))
+  (authored-relation-pattern-assert-true
+   (plusp (hyperdoc::authored-relation-artifact-source-schema-version-of source))
+   (format nil "~A source must declare a positive schema version." consumer-name))
+  (authored-relation-pattern-assert-equal
+   expected-compiled-targets
+   (hyperdoc::authored-relation-artifact-source-compiled-targets-of source)
+   (format nil "~A source must declare explicit compiled targets." consumer-name))
+  (authored-relation-pattern-assert-typep
+   'hyperdoc::authored-relation-artifact
+   authored
+   (format nil "~A authored artifact must use the reusable base class."
+           consumer-name))
+  (authored-relation-pattern-assert-equal
+   (hyperdoc::authored-relation-artifact-source-artifact-id-of source)
+   (hyperdoc::id-of authored)
+   (format nil "~A reconstruction must preserve authored artifact identity."
+           consumer-name))
+  (dolist (layer '(:semantic :behavior :layout))
+    (authored-relation-pattern-assert-true
+     (plusp
+      (length
+       (hyperdoc::authored-relation-artifact-source-relations-by-layer
+        source
+        layer)))
+     (format nil "~A source must carry ~A relations." consumer-name layer))
+    (authored-relation-pattern-assert-true
+     (plusp (length (hyperdoc::authored-relation-artifact-relations-by-layer
+                     authored
+                     layer)))
+     (format nil "~A reconstructed artifact must preserve ~A relations."
+             consumer-name
+             layer)))
+  (authored-relation-pattern-assert-typep
+   'hyperdoc::compiled-behavior-artifact
+   behavior
+   (format nil "~A behavior artifact must use the reusable compiled base class."
+           consumer-name))
+  (authored-relation-pattern-assert-typep
+   'hyperdoc::compiled-layout-artifact
+   layout
+   (format nil "~A layout artifact must use the reusable compiled base class."
+           consumer-name))
+  (authored-relation-pattern-assert-equal
+   :behavior-compilation
+   (hyperdoc::compiled-artifact-compiler-stage-of behavior)
+   (format nil "~A behavior artifact must keep an explicit compiler stage."
+           consumer-name))
+  (authored-relation-pattern-assert-equal
+   :layout-compilation
+   (hyperdoc::compiled-artifact-compiler-stage-of layout)
+   (format nil "~A layout artifact must keep an explicit compiler stage."
+           consumer-name))
+  (authored-relation-pattern-assert-equal
+   (list authored)
+   (hyperdoc::compiled-artifact-compiler-inputs-of behavior)
+   (format nil "~A behavior artifact must keep explicit compiler inputs."
+           consumer-name))
+  (authored-relation-pattern-assert-equal
+   (list authored)
+   (hyperdoc::compiled-artifact-compiler-inputs-of layout)
+   (format nil "~A layout artifact must keep explicit compiler inputs."
+           consumer-name))
+  (authored-relation-pattern-assert-true
+   (hyperdoc::compiled-artifact-derived-p behavior authored)
+   (format nil "~A behavior artifact must derive from reconstructed authored artifact."
+           consumer-name))
+  (authored-relation-pattern-assert-true
+   (hyperdoc::compiled-artifact-derived-p layout authored)
+   (format nil "~A layout artifact must derive from reconstructed authored artifact."
+           consumer-name)))
+
+(defun run-authored-relation-artifact-pattern-source-reconstruction-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
-  (let* ((session (authored-relation-pattern-smoke-make-snippet-session))
-         (authored-artifact
-           (hyperdoc::snippet-playground-session-authored-artifact-of session))
-         (behavior-artifact
-           (hyperdoc::snippet-playground-session-behavior-artifact-of session))
-         (layout-artifact
-           (hyperdoc::snippet-playground-session-layout-artifact-of session)))
-    (authored-relation-pattern-assert-typep
-     'hyperdoc::authored-relation-artifact
-     authored-artifact
-     "Snippet-playground authored artifact must sit on the generic artifact pattern")
-    (authored-relation-pattern-assert-typep
-     'hyperdoc::compiled-behavior-artifact
-     behavior-artifact
-     "Snippet-playground behavior artifact must sit on the generic compiled behavior pattern")
-    (authored-relation-pattern-assert-typep
-     'hyperdoc::compiled-layout-artifact
-     layout-artifact
-     "Snippet-playground layout artifact must sit on the generic compiled layout pattern")
-    (authored-relation-pattern-assert-true
-     (hyperdoc::compiled-artifact-derived-p behavior-artifact authored-artifact)
-     "Snippet-playground behavior artifact must derive from the generic authored artifact path")
-    (authored-relation-pattern-assert-true
-     (hyperdoc::compiled-artifact-derived-p layout-artifact authored-artifact)
-     "Snippet-playground layout artifact must derive from the generic authored artifact path")
-    (authored-relation-pattern-assert-equal
-     (list authored-artifact)
-     (hyperdoc::compiled-artifact-compiler-inputs-of behavior-artifact)
-     "Snippet-playground behavior artifact must retain explicit compiler inputs")
-    (authored-relation-pattern-assert-equal
-     (list authored-artifact)
-     (hyperdoc::compiled-artifact-compiler-inputs-of layout-artifact)
-     "Snippet-playground layout artifact must retain explicit compiler inputs")))
+  (authored-relation-pattern-assert-consumer-derivation-contract
+   :consumer-name "snippet-playground"
+   :source (hyperdoc::snippet-playground-authored-source-artifact)
+   :authored (hyperdoc::snippet-playground-authored-artifact)
+   :behavior (hyperdoc::snippet-playground-behavior-artifact)
+   :layout (hyperdoc::snippet-comparison-layout-artifact)
+   :expected-compiled-targets
+   '("snippet-playground-behavior-artifact"
+     "snippet-playground-layout-artifact"))
+  (authored-relation-pattern-assert-consumer-derivation-contract
+   :consumer-name "page-lookup-issue"
+   :source (hyperdoc::page-lookup-issue-authored-source-artifact)
+   :authored (hyperdoc::page-lookup-issue-authored-artifact)
+   :behavior (hyperdoc::page-lookup-issue-behavior-artifact)
+   :layout (hyperdoc::page-lookup-issue-layout-artifact)
+   :expected-compiled-targets
+   '("page-lookup-issue-behavior-artifact"
+     "page-lookup-issue-layout-artifact")))
 
 (defun run-authored-relation-artifact-pattern-smoke-tests ()
   (run-authored-relation-artifact-pattern-runtime-smoke-test)
   (run-authored-relation-artifact-pattern-rendering-smoke-test)
-  (run-authored-relation-artifact-pattern-snippet-integration-smoke-test)
+  (run-authored-relation-artifact-pattern-source-reconstruction-smoke-test)
   (format t "~&Authored relation artifact pattern smoke tests passed.~%"))
