@@ -21,74 +21,68 @@
 <h2>Starting situation</h2>
 
 <p>
-  Start from the current consumer state:
-  <a expr="(hyperdoc::make-page-lookup-issue-example-consumer)" view="Overview"><tt>page-lookup issue consumer (Overview)</tt></a>.
+  Establish the baseline consumer state before any mutation.
 </p>
 
-<p>
-  This is the baseline that the mutation round-trip must change.
-</p>
+<ul>
+  <li><b>Click:</b> <a expr="(hyperdoc::make-page-lookup-issue-example-consumer)" view="Overview"><tt>Open consumer before mutation</tt></a></li>
+  <li><b>Observe:</b> the issue consumer shows the original ordering where <tt>Overview</tt> is before <tt>Repair</tt>.</li>
+  <li><b>Why this matters:</b> this is the before-state that the mutation round-trip must change.</li>
+</ul>
 
 <h2>Step 1. Find the authored source of the current layout</h2>
 
-<p>
-  Open the repo-native authored source artifact:
-  <a expr="(hyperdoc::page-lookup-issue-authored-source-artifact)"><tt>page-lookup-issue-authored-source-artifact</tt></a>.
-</p>
+<ul>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-authored-source-artifact)"><tt>Open repo-native authored source artifact</tt></a></li>
+  <li><b>Observe:</b> the source artifact is a durable repo object, not runtime-only state.</li>
+  <li><b>Why this matters:</b> the write target for the mutation loop is explicit and versionable.</li>
+</ul>
 
 <h2>Step 2. Reconstruct and inspect the authored artifact</h2>
 
-<p>
-  Reconstruct the authored artifact:
-  <a expr="(hyperdoc::page-lookup-issue-authored-artifact)"><tt>page-lookup-issue-authored-artifact</tt></a>,
-  then inspect the relation graph:
-  <a expr="(hyperdoc::page-lookup-issue-authored-artifact)" view="Relation graph"><tt>Relation graph view</tt></a>.
-</p>
+<ul>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-authored-artifact)"><tt>Reconstruct authored artifact</tt></a></li>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-authored-artifact)" view="Relation graph"><tt>Open relation graph view</tt></a></li>
+  <li><b>Observe:</b> the authored relation graph exposes roles and layout/lifecycle relations as inspectable graph edges.</li>
+  <li><b>Why this matters:</b> the causal structure is visible before touching compiled artifacts.</li>
+</ul>
 
 <h2>Step 3. Inspect compiled behavior and compiled layout</h2>
 
-<p>
-  Open behavior:
-  <a expr="(hyperdoc::page-lookup-issue-behavior-artifact)" view="Behavior machine"><tt>Behavior machine</tt></a>
-  and
-  <a expr="(hyperdoc::page-lookup-issue-behavior-artifact)" view="SCXML"><tt>SCXML</tt></a>.
-</p>
-
-<p>
-  Open layout:
-  <a expr="(hyperdoc::page-lookup-issue-layout-artifact)" view="Layout"><tt>Compiled layout artifact (Layout)</tt></a>.
-</p>
+<ul>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-behavior-artifact)" view="Behavior machine"><tt>Open compiled behavior machine</tt></a></li>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-behavior-artifact)" view="SCXML"><tt>Open behavior SCXML</tt></a></li>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-layout-artifact)" view="Layout"><tt>Open compiled layout artifact</tt></a></li>
+  <li><b>Observe:</b> behavior and layout are separate compiled outputs from the same authored source.</li>
+  <li><b>Why this matters:</b> mutation can remain narrow while preserving behavior/layout separation.</li>
+</ul>
 
 <h2>Step 4. Apply the bounded mutation</h2>
 
-<p>
-  Inspect the explicit mutation object:
-  <a expr="(hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation)"><tt>make-page-lookup-issue-layout-order-toggle-mutation</tt></a>.
-</p>
-
-<p>
-  Execute one bounded mutation round-trip:
-  <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report :refresh t)" view="Summary"><tt>Run mutation round-trip</tt></a>.
-</p>
+<ul>
+  <li><b>Click:</b> <a expr="(hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation)"><tt>Open bounded mutation object</tt></a></li>
+  <li><b>Observe:</b> the mutation explicitly targets <tt>layout/page-lookup/repair-after-overview</tt>.</li>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report :refresh t)" view="Summary"><tt>Run bounded mutation round-trip</tt></a></li>
+  <li><b>Observe:</b> the report confirms write-back to source plus reconstruction/recompile.</li>
+  <li><b>Why this matters:</b> this is a controlled mutation loop, not free-form graph editing.</li>
+</ul>
 
 <h2>Step 5. Observe the changed consumer after reconstruction</h2>
 
-<p>
-  Inspect the before/after consumer effect:
-  <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)" view="Consumer change"><tt>Consumer change view</tt></a>.
-</p>
-
-<p>
-  Inspect the full before/after artifact set:
-  <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)" view="Artifacts"><tt>Artifacts view</tt></a>.
-</p>
+<ul>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)" view="Consumer change"><tt>Open consumer change view</tt></a></li>
+  <li><b>Observe:</b> the consumer ordering changes from <tt>Overview -&gt; Repair</tt> to <tt>Repair -&gt; Overview</tt>.</li>
+  <li><b>Click:</b> <a expr="(hyperdoc::page-lookup-issue-authored-mutation-roundtrip-report)" view="Artifacts"><tt>Open before/after artifacts</tt></a></li>
+  <li><b>Observe:</b> the changed consumer state is tied to updated reconstructed and compiled artifacts.</li>
+  <li><b>Why this matters:</b> this is the before/after payoff for the authored mutation round-trip.</li>
+</ul>
 
 <h2>Expected result</h2>
 
 <p>
-  One bounded authored mutation changes the repo-native source relation, then
-  reconstruction and compilation produce a visible consumer layout change
-  without widening into a general editor.
+  You can follow one task-centric chain: baseline consumer -&gt; authored source
+  -&gt; reconstructed relation graph -&gt; compiled behavior/layout -&gt; bounded
+  mutation -&gt; changed consumer.
 </p>
 
 <h2>Why this matters</h2>
