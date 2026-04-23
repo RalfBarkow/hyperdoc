@@ -1,0 +1,124 @@
+<h1>Shared Projection IR</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Shared Projection IR is the narrow architecture layer that lets HyperDoc
+  expose a rebuildable shared coordination surface without turning the visible
+  <tt>context-window</tt> topicmap into the durable authority or into a compiler
+  intermediate representation. It keeps semantic coordination, behavior, and
+  execution/backend concerns separate while making each layer inspectable.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard"><tt>Context window workspace as shared blackboard</tt></a></li>
+  <li><a page="Shared-workspace collaboration model"><tt>Shared-workspace collaboration model</tt></a></li>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement"><tt>Diagnosing DMX workspace assignment and topicmap placement</tt></a></li>
+  <li><a page="DMX workspace journal model"><tt>DMX workspace journal model</tt></a></li>
+  <li><a page="State machine"><tt>State machine</tt></a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="Summary"><tt>(make-workspace-annotation-shared-projection-example)</tt> Summary</a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="Graph / relations"><tt>(make-workspace-annotation-shared-projection-example)</tt> Graph / relations</a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="Behavior machine"><tt>(make-workspace-annotation-shared-projection-example)</tt> Behavior machine</a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="Current run / trace"><tt>(make-workspace-annotation-shared-projection-example)</tt> Current run / trace</a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="Provenance / source evidence"><tt>(make-workspace-annotation-shared-projection-example)</tt> Provenance / source evidence</a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="SCXML"><tt>(make-workspace-annotation-shared-projection-example)</tt> SCXML</a></li>
+  <li><a expr="(make-workspace-annotation-shared-projection-example)" view="JavaScript / JSON"><tt>(make-workspace-annotation-shared-projection-example)</tt> JavaScript / JSON</a></li>
+  <li><a expr="(shared-projection-context-window-primary-machine (make-workspace-annotation-shared-projection-example))" view="Overview"><tt>workspace annotation lifecycle machine</tt> Overview</a></li>
+  <li><a expr="(shared-projection-context-window-primary-run (make-workspace-annotation-shared-projection-example))" view="Overview"><tt>workspace annotation lifecycle run</tt> Overview</a></li>
+  <li><a expr="(shared-projection-context-window-primary-trace (make-workspace-annotation-shared-projection-example))" view="Trace"><tt>workspace annotation lifecycle trace</tt> Trace</a></li>
+</ul>
+
+<h2>The three-layer split</h2>
+
+<ul>
+  <li><b>Semantic coordination IR:</b> objects such as <tt>shared-projection-context-window</tt>, <tt>shared-projection-entity</tt>, <tt>shared-projection-relation</tt>, and <tt>shared-projection-journal-event</tt> model the curated shared blackboard as a rebuildable projection.</li>
+  <li><b>Behavior IR:</b> objects such as <tt>behavior-machine-definition</tt>, <tt>behavior-state</tt>, <tt>behavior-transition</tt>, <tt>behavior-run</tt>, and <tt>behavior-trace</tt> model machine structure and concrete traversals as first-class inspectable objects.</li>
+  <li><b>Execution/backend IR:</b> JavaScript, Common Lisp, and any native execution backends remain separate execution concerns. The shared projection layer should not become a compiler IR, and the topicmap should not become a backend-neutral mutation graph.</li>
+</ul>
+
+<p>
+  SCXML belongs to the behavior layer as import/export and transport. It is
+  useful for round-trip and interchange, but it is not the canonical store for
+  the whole architecture.
+</p>
+
+<h2>Authority boundary</h2>
+
+<ul>
+  <li>The shared <tt>context-window</tt> surface is a rebuildable shared projection and a bounded shared blackboard.</li>
+  <li>Authoritative state remains HyperDoc-side and journal-backed; the visible projection is derived, inspectable, and replayable rather than the only durable record.</li>
+  <li>Topicmap visibility stays a projection fact. It does not imply ownership, and it does not imply workspace assignment.</li>
+  <li>Workspace assignment remains distinct from topicmap placement, exactly as documented in <a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a>.</li>
+</ul>
+
+<p>
+  The broader shared-blackboard reasoning and shared-workspace collaboration
+  contract already live in
+  <a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a>
+  and
+  <a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a>.
+  This page only adds the IR split that keeps those boundary claims inspectable
+  in runtime objects.
+</p>
+
+<h2>Worked example</h2>
+
+<p>
+  The first worked example is the workspace annotation lifecycle projection.
+  Its projection object has stable id <tt>context-window/919822</tt>, its active
+  behavior machine id is <tt>workspace_annotation_lifecycle</tt>, and it carries
+  explicit provenance plus journal linkage so the shared projection is not just
+  another anonymous graph DTO.
+</p>
+
+<ul>
+  <li>Inspect the projection object through <tt>(make-workspace-annotation-shared-projection-example)</tt>.</li>
+  <li>Inspect the behavior machine through <tt>(shared-projection-context-window-primary-machine ...)</tt>.</li>
+  <li>Inspect the concrete run through <tt>(shared-projection-context-window-primary-run ...)</tt>.</li>
+  <li>Inspect the trace through <tt>(shared-projection-context-window-primary-trace ...)</tt>.</li>
+</ul>
+
+<p>
+  The example is intentionally small: one context-window projection, one linked
+  machine, one sample run, and one sample trace. That keeps the semantic split
+  clear before any future integration work reaches DMX or MCP write paths.
+</p>
+
+<h2>Inspector entry points</h2>
+
+<ul>
+  <li><tt>Summary</tt>: shows workspace name, topicmap id, projection status, focus ids, and the primary machine/run/trace handles.</li>
+  <li><tt>Graph / relations</tt>: shows the projection entities and typed relations, including ownership/workspace/topicmap distinctions.</li>
+  <li><tt>Behavior machine</tt>: opens the linked behavior definition without collapsing the projection layer into the machine layer.</li>
+  <li><tt>Current run / trace</tt>: shows the concrete traversal separately from the reusable machine definition.</li>
+  <li><tt>Provenance / source evidence</tt>: keeps provenance payloads and journal linkage explicit.</li>
+  <li><tt>SCXML</tt>: exposes the behavior-layer transport form.</li>
+  <li><tt>JavaScript / JSON</tt>: exposes the plain-object and JSON forms, including the versioned JSON shape.</li>
+</ul>
+
+<h2>What this page does not change</h2>
+
+<ul>
+  <li>No DMX write widening.</li>
+  <li>No MCP integration work.</li>
+  <li>No backend or runtime execution changes.</li>
+  <li>No attempt to make SCXML the canonical storage format.</li>
+</ul>
+
+<p>
+  Those boundaries are deliberate. The point of this first page is to make the
+  new object family and inspection path legible without claiming a larger
+  integration surface than the code currently provides.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Context window workspace as shared blackboard">Context window workspace as shared blackboard</a></li>
+  <li><a page="Shared-workspace collaboration model">Shared-workspace collaboration model</a></li>
+  <li><a page="Diagnosing DMX workspace assignment and topicmap placement">Diagnosing DMX workspace assignment and topicmap placement</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="State machine">State machine</a></li>
+</ul>
