@@ -40,15 +40,18 @@
      :source-substrings ("&lt;h2&gt;Current architecture boundary&lt;/h2&gt;"
                          "&lt;h2&gt;Repair procedure&lt;/h2&gt;"))
     (:title "Authored relation mutation round-trip for page-lookup issue"
-     :headings ("Step 2. Start from the repo-native source"
-                "Step 6. Apply the bounded mutation"
-                "Step 7. Show the consumer change after mutation/reconstruction")
+     :headings ("Goal"
+                "Starting situation"
+                "Step 4. Apply the bounded mutation"
+                "Step 5. Observe the changed consumer after reconstruction")
      :content-substrings ("page-lookup-issue-authored-source-artifact"
                           "page-lookup-issue-authored-mutation-roundtrip-report"
-                          "layout/page-lookup/repair-after-overview")
-     :source-substrings ("&lt;h2&gt;Step 2. Start from the repo-native source&lt;/h2&gt;"
-                         "&lt;h2&gt;Step 6. Apply the bounded mutation&lt;/h2&gt;"
-                         "&lt;h2&gt;Step 7. Show the consumer change after mutation/reconstruction&lt;/h2&gt;"))))
+                          "layout/page-lookup/repair-after-overview"
+                          "Open consumer before mutation")
+     :source-substrings ("&lt;h2&gt;Goal&lt;/h2&gt;"
+                         "&lt;h2&gt;Starting situation&lt;/h2&gt;"
+                         "&lt;h2&gt;Step 4. Apply the bounded mutation&lt;/h2&gt;"
+                         "&lt;h2&gt;Step 5. Observe the changed consumer after reconstruction&lt;/h2&gt;"))))
 
 (defun lookup-issue-docs-find-view-by-title (views title)
   (find title
