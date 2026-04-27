@@ -2205,7 +2205,9 @@
      "DMX dry-run review must not leak absolute paths for the second real page")))
 
 (defun run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test ()
-  (let* ((workflow-page-source
+  (call-with-collective-knowledge-source-fixture
+   (lambda ()
+    (let* ((workflow-page-source
            (uiop:read-file-string
             (localhost-fedwiki-page-promotion-workflow-relative-path)))
          (collective-page-source
@@ -2246,6 +2248,12 @@
            (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
          (repro-plan
            (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+         (collective-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+            collective-plan))
+         (repro-status
+           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+            repro-plan))
          (collective-source
            (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
          (repro-source
@@ -2335,11 +2343,19 @@
        (search "Review source page" status-html :test #'char=)
        "Generated page workflow-status view must link to the source-page surface"))
     (assert-true
-     (search "No action needed" collective-status-html :test #'char=)
-     "Collective knowledge generated page workflow-status view must expose the fresh no-action summary")
+     (search
+      (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+       collective-status)
+      collective-status-html
+      :test #'char=)
+     "Collective knowledge generated page workflow-status view must expose the model-derived recommended-action summary")
     (assert-true
-     (search "No action needed" repro-status-html :test #'char=)
-     "Second real generated page workflow-status view must expose the fresh no-action summary")
+     (search
+      (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+       repro-status)
+      repro-status-html
+      :test #'char=)
+     "Second real generated page workflow-status view must expose the model-derived recommended-action summary")
     (dolist (needle
              '("expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Overview\""
                "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source freshness\""
@@ -2403,7 +2419,7 @@
               repro-plan)
              repro-status-html
              :test #'char=)
-     "Second real generated page workflow-status surface must expose the canonical source slug")))
+     "Second real generated page workflow-status surface must expose the canonical source slug")))))
 
 (defun run-localhost-fedwiki-page-promotion-output-sync-smoke-test ()
   (let ((collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
