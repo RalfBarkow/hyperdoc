@@ -13,6 +13,11 @@
    :hyperdoc
    "hyperdoc/page-lookup-issue-topic-repair.stub.scxml"))
 
+(defparameter *page-promotion-output-sync-expectation-scxml*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/page-promotion-output-sync-expectation.scxml"))
+
 (defclass page-lookup-topic-repair-scxml-run ()
   ((issue :reader scxml-run-issue-of
           :initarg :issue
@@ -50,6 +55,40 @@
    (validation-findings :reader native-scxml-run-validation-findings-of
                         :initarg :validation-findings
                         :initform nil)))
+
+(defclass scxml-expectation-run ()
+  ((scxml-path :reader scxml-expectation-run-scxml-path-of
+               :initarg :scxml-path)
+   (expected-subject :reader scxml-expectation-run-expected-subject-of
+                     :initarg :expected-subject
+                     :initform nil)
+   (input-events :reader scxml-expectation-run-input-events-of
+                 :initarg :input-events
+                 :initform nil)
+   (semantic-facts :reader scxml-expectation-run-semantic-facts-of
+                   :initarg :semantic-facts
+                   :initform nil)
+   (validation-findings :reader scxml-expectation-run-validation-findings-of
+                        :initarg :validation-findings
+                        :initform nil)
+   (generated-package :reader scxml-expectation-run-generated-package-of
+                      :initarg :generated-package
+                      :initform nil)
+   (generated-function :reader scxml-expectation-run-generated-function-of
+                       :initarg :generated-function
+                       :initform nil)
+   (trace :reader scxml-expectation-run-trace-of
+          :initarg :trace
+          :initform nil)
+   (final-state :reader scxml-expectation-run-final-state-of
+                :initarg :final-state
+                :initform nil)
+   (done-p :reader scxml-expectation-run-done-p-of
+           :initarg :done-p
+           :initform nil)
+   (passed-p :reader scxml-expectation-run-passed-p-of
+             :initarg :passed-p
+             :initform nil)))
 
 (defun uscxml-browser-pathname ()
   (let ((browser *uscxml-browser*))
@@ -91,6 +130,75 @@
                         :scxml-validation-finding-severity-of
                         finding)))
                  findings))
+
+(defun scxml-final-state= (expected final-state)
+  (let ((state
+          (cond
+            ((stringp final-state) final-state)
+            ((symbolp final-state) (string-downcase (symbol-name final-state)))
+            (t (princ-to-string final-state)))))
+    (string= (string-downcase expected)
+             (string-downcase state))))
+
+(defun run-scxml-expectation-with-events
+    (scxml-path input-events semantic-facts
+     &key expected-subject package-name function-name)
+  (let* ((resolved-path (pathname scxml-path))
+         (generated-package (or package-name
+                                "HYPERDOC/SCXML/GENERATED/EXPECTATION"))
+         (generated-function (or function-name
+                                 "RUN-SCXML-EXPECTATION"))
+         (chart (call-hyperdoc-scxml
+                 :parse-scxml-file
+                 resolved-path))
+         (validation-findings (call-hyperdoc-scxml
+                               :validate-scxml-chart
+                               chart))
+         (error-findings (scxml-validation-error-findings validation-findings)))
+    (if error-findings
+        (make-instance 'scxml-expectation-run
+                       :scxml-path resolved-path
+                       :expected-subject expected-subject
+                       :input-events (copy-list input-events)
+                       :semantic-facts (copy-tree semantic-facts)
+                       :validation-findings validation-findings
+                       :generated-package generated-package
+                       :generated-function generated-function
+                       :trace nil
+                       :final-state nil
+                       :done-p nil
+                       :passed-p nil)
+        (let* ((generated-run (call-hyperdoc-scxml
+                               :compile-and-run-scxml-file-with-events
+                               resolved-path
+                               input-events
+                               :package-name generated-package
+                               :function-name generated-function))
+               (trace (call-hyperdoc-scxml
+                       :generated-scxml-run-trace-of
+                       generated-run))
+               (final-state (call-hyperdoc-scxml
+                             :generated-scxml-run-final-state-of
+                             generated-run))
+               (done-p (call-hyperdoc-scxml
+                        :generated-scxml-run-done-p
+                        generated-run))
+               (passed-p (and done-p
+                              (scxml-final-state=
+                               "passed"
+                               final-state))))
+          (make-instance 'scxml-expectation-run
+                         :scxml-path resolved-path
+                         :expected-subject expected-subject
+                         :input-events (copy-list input-events)
+                         :semantic-facts (copy-tree semantic-facts)
+                         :validation-findings validation-findings
+                         :generated-package generated-package
+                         :generated-function generated-function
+                         :trace trace
+                         :final-state final-state
+                         :done-p done-p
+                         :passed-p passed-p)))))
 
 (defun run-page-lookup-topic-repair-native-scxml (&optional issue)
   (let* ((scxml-path *page-lookup-topic-repair-stub-scxml*)

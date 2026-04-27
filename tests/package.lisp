@@ -32,6 +32,7 @@
    :run-localhost-fedwiki-page-pipeline-smoke-tests
    :run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test
    :run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test
+   :run-localhost-fedwiki-page-promotion-output-sync-smoke-test
    :run-dmx-topicmap-919822-repair-runbook-smoke-test
    :run-localhost-fedwiki-page-promotion-plans-smoke-tests
    :run-topic-factory-snippet-dmx-smoke-tests

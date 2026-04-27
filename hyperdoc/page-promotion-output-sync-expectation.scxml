@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="page-promotion-output-sync-expectation"
+    initial="start">
+
+  <state id="start">
+    <onentry>
+      <log label="Starting page promotion output-sync expectation"/>
+    </onentry>
+
+    <transition event="BASELINE.CAPTURED" target="captureBaseline"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="captureBaseline">
+    <onentry>
+      <log label="Baseline captured for collective and repro promotion plans"/>
+    </onentry>
+
+    <transition event="COLLECTIVE.SOURCE_UNAVAILABLE" target="applyCollectiveMissingSourceSeam"/>
+    <transition event="FAIL.COLLECTIVE_NOT_SOURCE_UNAVAILABLE" target="failedCollectiveDidNotFailSoft"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="applyCollectiveMissingSourceSeam">
+    <onentry>
+      <log label="Applied missing-source seam to collective promotion plan"/>
+    </onentry>
+
+    <transition event="COLLECTIVE.FALLBACK_RENDERED" target="inspectCollectiveFallback"/>
+    <transition event="FAIL.COLLECTIVE_NO_FALLBACK" target="failedCollectiveDidNotFailSoft"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="inspectCollectiveFallback">
+    <onentry>
+      <log label="Collective plan entered source-unavailable fallback"/>
+    </onentry>
+
+    <transition event="COLLECTIVE.OUTPUT_UNSYNCED_EXPECTED" target="inspectReproIsolation"/>
+    <transition event="FAIL.UNEXPECTED_SYNC_CONTRACT" target="failedUnexpectedSyncContract"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="inspectReproIsolation">
+    <onentry>
+      <log label="Collective output unsynced is expected under fallback rendering"/>
+    </onentry>
+
+    <transition event="REPRO.AVAILABLE" target="verifyReproAvailability"/>
+    <transition event="FAIL.REPRO_SOURCE_UNAVAILABLE" target="failedReproInheritedMissingSource"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="verifyReproAvailability">
+    <onentry>
+      <log label="Repro promotion plan remained isolated from collective missing-source seam"/>
+    </onentry>
+
+    <transition event="REPRO.NOT_SOURCE_UNAVAILABLE" target="verifyReproStateUnchanged"/>
+    <transition event="FAIL.REPRO_SOURCE_UNAVAILABLE" target="failedReproInheritedMissingSource"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="verifyReproStateUnchanged">
+    <onentry>
+      <log label="Repro promotion plan preserved baseline availability and freshness classifications"/>
+    </onentry>
+
+    <transition event="REPRO.STATE_UNCHANGED" target="classifyExpectation"/>
+    <transition event="FAIL.REPRO_STATE_CHANGED" target="failedReproInheritedMissingSource"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <state id="classifyExpectation">
+    <onentry>
+      <log label="Expectation passed: fallback is bounded and isolation holds"/>
+    </onentry>
+
+    <transition event="EXPECTATION.PASSED" target="passed"/>
+    <transition event="FAIL.GLOBAL_ABORT" target="failedGlobalAbort"/>
+  </state>
+
+  <final id="passed">
+    <onentry>
+      <log label="EXPECTATION.PASSED output-sync fallback contract"/>
+    </onentry>
+  </final>
+
+  <final id="failedCollectiveDidNotFailSoft">
+    <onentry>
+      <log label="FAIL collective plan did not enter bounded source-unavailable fallback"/>
+    </onentry>
+  </final>
+
+  <final id="failedReproInheritedMissingSource">
+    <onentry>
+      <log label="FAIL repro plan inherited collective missing-source degradation"/>
+    </onentry>
+  </final>
+
+  <final id="failedGlobalAbort">
+    <onentry>
+      <log label="FAIL global abort interrupted output-sync expectation run"/>
+    </onentry>
+  </final>
+
+  <final id="failedUnexpectedSyncContract">
+    <onentry>
+      <log label="FAIL collective fallback did not match unsynced expectation contract"/>
+    </onentry>
+  </final>
+
+</scxml>

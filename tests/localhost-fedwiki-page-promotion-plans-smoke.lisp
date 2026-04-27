@@ -2421,33 +2421,217 @@
              :test #'char=)
      "Second real generated page workflow-status surface must expose the canonical source slug")))))
 
+(defun page-promotion-sync-status-signature (status)
+  (list
+   (getf status :source-availability-state)
+   (getf status :page-source-freshness-state)
+   (getf status :snippet-source-freshness-state)
+   (getf status :page-synced)
+   (getf status :snippet-synced)
+   (not (null (getf status :source-issue)))))
+
+(defun page-promotion-output-sync-semantic-facts ()
+  (call-with-collective-knowledge-source-fixture
+   (lambda ()
+     (let* ((collective-baseline
+              (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+            (repro-baseline
+              (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+            (collective-baseline-status
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+               collective-baseline))
+            (repro-baseline-status
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+               repro-baseline))
+            (facts
+              (list :baseline-captured-p t
+                    :global-abort-p nil
+                    :global-abort-condition nil
+                    :collective-baseline-status collective-baseline-status
+                    :repro-baseline-status repro-baseline-status
+                    :collective-status-after-seam nil
+                    :repro-status-after-seam nil
+                    :collective-source-unavailable-p nil
+                    :collective-fallback-rendered-p nil
+                    :collective-output-unsynced-expected-p nil
+                    :repro-available-p nil
+                    :repro-not-source-unavailable-p nil
+                    :repro-state-unchanged-p nil)))
+       (handler-case
+           (call-with-simulated-missing-collective-knowledge-source
+            (lambda ()
+              (let* ((collective-after
+                       (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+                     (repro-after
+                       (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+                     (collective-after-status
+                       (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                        collective-after))
+                     (repro-after-status
+                       (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                        repro-after)))
+                (setf (getf facts :collective-status-after-seam)
+                      collective-after-status
+                      (getf facts :repro-status-after-seam)
+                      repro-after-status
+                      (getf facts :collective-source-unavailable-p)
+                      (and (not (null (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
+                                       collective-after)))
+                           (eql (getf collective-after-status :source-availability-state)
+                                :source-unavailable))
+                      (getf facts :collective-fallback-rendered-p)
+                      (and (not (getf collective-after-status :page-synced))
+                           (not (getf collective-after-status :snippet-synced))
+                           (eql (getf collective-after-status :page-source-freshness-state)
+                                :source-unavailable)
+                           (eql (getf collective-after-status :snippet-source-freshness-state)
+                                :source-unavailable))
+                      (getf facts :collective-output-unsynced-expected-p)
+                      (and (not (getf collective-after-status :page-synced))
+                           (not (getf collective-after-status :snippet-synced)))
+                      (getf facts :repro-available-p)
+                      (eql (getf repro-after-status :source-availability-state)
+                           :available)
+                      (getf facts :repro-not-source-unavailable-p)
+                      (and (null (getf repro-after-status :source-issue))
+                           (not (eql (getf repro-after-status :source-availability-state)
+                                     :source-unavailable)))
+                      (getf facts :repro-state-unchanged-p)
+                      (equal (page-promotion-sync-status-signature
+                              repro-baseline-status)
+                             (page-promotion-sync-status-signature
+                              repro-after-status))))))
+         (error (condition)
+           (setf (getf facts :global-abort-p) t
+                 (getf facts :global-abort-condition) (princ-to-string condition))))
+       facts))))
+
+(defun page-promotion-output-sync-expectation-events (semantic-facts)
+  (if (getf semantic-facts :global-abort-p)
+      (list "FAIL.GLOBAL_ABORT")
+      (let ((events (list "BASELINE.CAPTURED"))
+            (collective-source-unavailable-p
+              (getf semantic-facts :collective-source-unavailable-p))
+            (collective-fallback-rendered-p
+              (getf semantic-facts :collective-fallback-rendered-p))
+            (collective-output-unsynced-expected-p
+              (getf semantic-facts :collective-output-unsynced-expected-p))
+            (repro-available-p
+              (getf semantic-facts :repro-available-p))
+            (repro-not-source-unavailable-p
+              (getf semantic-facts :repro-not-source-unavailable-p))
+            (repro-state-unchanged-p
+              (getf semantic-facts :repro-state-unchanged-p)))
+        (setf events
+              (append events
+                      (list (if collective-source-unavailable-p
+                                "COLLECTIVE.SOURCE_UNAVAILABLE"
+                                "FAIL.COLLECTIVE_NOT_SOURCE_UNAVAILABLE"))
+                      (list (if collective-fallback-rendered-p
+                                "COLLECTIVE.FALLBACK_RENDERED"
+                                "FAIL.COLLECTIVE_NO_FALLBACK"))
+                      (list (if collective-output-unsynced-expected-p
+                                "COLLECTIVE.OUTPUT_UNSYNCED_EXPECTED"
+                                "FAIL.UNEXPECTED_SYNC_CONTRACT"))
+                      (list (if repro-available-p
+                                "REPRO.AVAILABLE"
+                                "FAIL.REPRO_SOURCE_UNAVAILABLE"))
+                      (list (if repro-not-source-unavailable-p
+                                "REPRO.NOT_SOURCE_UNAVAILABLE"
+                                "FAIL.REPRO_SOURCE_UNAVAILABLE"))
+                      (list (if repro-state-unchanged-p
+                                "REPRO.STATE_UNCHANGED"
+                                "FAIL.REPRO_STATE_CHANGED"))))
+        (if (and collective-source-unavailable-p
+                 collective-fallback-rendered-p
+                 collective-output-unsynced-expected-p
+                 repro-available-p
+                 repro-not-source-unavailable-p
+                 repro-state-unchanged-p)
+            (append events (list "EXPECTATION.PASSED"))
+            events))))
+
+(defun run-page-promotion-output-sync-expectation-scxml ()
+  (let* ((semantic-facts (page-promotion-output-sync-semantic-facts))
+         (input-events
+           (page-promotion-output-sync-expectation-events semantic-facts)))
+    (hyperdoc::run-scxml-expectation-with-events
+     hyperdoc::*page-promotion-output-sync-expectation-scxml*
+     input-events
+     semantic-facts
+     :expected-subject
+     "localhost-fedwiki-page-promotion-output-sync"
+     :package-name
+     "HYPERDOC/SCXML/GENERATED/PAGE-PROMOTION-OUTPUT-SYNC-EXPECTATION"
+     :function-name
+     "RUN-PAGE-PROMOTION-OUTPUT-SYNC-EXPECTATION")))
+
 (defun run-localhost-fedwiki-page-promotion-output-sync-smoke-test ()
-  (let ((collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
-        (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)))
+  (let* ((expectation-run
+           (run-page-promotion-output-sync-expectation-scxml))
+         (trace
+           (hyperdoc::scxml-expectation-run-trace-of expectation-run))
+         (semantic-facts
+           (hyperdoc::scxml-expectation-run-semantic-facts-of expectation-run))
+         (error-findings
+           (remove-if-not
+            (lambda (finding)
+              (eq :error
+                  (hyperdoc/scxml:scxml-validation-finding-severity-of finding)))
+            (hyperdoc::scxml-expectation-run-validation-findings-of
+             expectation-run)))
+         (failure-final-states
+           '("failedCollectiveDidNotFailSoft"
+             "failedReproInheritedMissingSource"
+             "failedGlobalAbort"
+             "failedUnexpectedSyncContract")))
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-page-output-synced-p collective)
-     "Collective knowledge page output must stay synced with the current artifact rendering")
+     (null error-findings)
+     "Output-sync expectation SCXML must validate without :error findings")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-output-synced-p collective)
-     "Collective knowledge snippet output must stay synced with the current artifact rendering")
+     (hyperdoc::scxml-expectation-run-done-p-of expectation-run)
+     "Output-sync expectation SCXML run must reach a final state")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-page-output-synced-p repro)
-     "Second real-page output must stay synced with the current artifact rendering")
+     (hyperdoc::scxml-expectation-run-passed-p-of expectation-run)
+     "Output-sync expectation SCXML run must reach the passed state")
+    (assert-equal
+     "passed"
+     (hyperdoc::scxml-expectation-run-final-state-of expectation-run)
+     "Output-sync expectation SCXML run must finish in final state passed")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-output-synced-p repro)
-     "Second real-page snippet output must stay synced with the current artifact rendering")
+     (find-if (lambda (line)
+                (search "Collective output unsynced is expected under fallback rendering"
+                        line
+                        :test #'char-equal))
+              trace)
+     "Output-sync expectation trace must document the collective unsynced fallback contract")
     (assert-true
-     (not (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p collective))
-     "Collective knowledge page output must no longer report fresh while the localhost source file is unavailable")
+     (find-if (lambda (line)
+                (search "Repro promotion plan remained isolated from collective missing-source seam"
+                        line
+                        :test #'char-equal))
+              trace)
+     "Output-sync expectation trace must document repro isolation from the collective missing-source seam")
     (assert-true
-     (not (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p collective))
-     "Collective knowledge snippet output must no longer report fresh while the localhost source file is unavailable")
+     (not (member (hyperdoc::scxml-expectation-run-final-state-of expectation-run)
+                  failure-final-states
+                  :test #'string=))
+     "Output-sync expectation run must not finish in a failure final state")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-page-source-fresh-p repro)
-     "Second real-page output must stay fresh relative to the current source snapshot")
+     (getf semantic-facts :collective-source-unavailable-p)
+     "Output-sync semantic facts must classify collective as source-unavailable under the seam")
     (assert-true
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-snippet-source-fresh-p repro)
-     "Second real-page snippet output must stay fresh relative to the current source snapshot")))
+     (getf semantic-facts :collective-fallback-rendered-p)
+     "Output-sync semantic facts must classify collective fallback rendering as active")
+    (assert-true
+     (getf semantic-facts :collective-output-unsynced-expected-p)
+     "Output-sync semantic facts must classify collective unsynced output as expected under fallback")
+    (assert-true
+     (getf semantic-facts :repro-not-source-unavailable-p)
+     "Output-sync semantic facts must keep repro outside source-unavailable classification")
+    (assert-true
+     (getf semantic-facts :repro-state-unchanged-p)
+     "Output-sync semantic facts must preserve repro baseline sync-state identity")))
 
 (defun run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -3007,7 +3191,6 @@
      (run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test)
      (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
      (run-localhost-fedwiki-page-promotion-guarded-dmx-dry-run-smoke-test)
-     (call-with-simulated-missing-collective-knowledge-source
-      #'run-localhost-fedwiki-page-promotion-output-sync-smoke-test)))
+     (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)))
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
   t)

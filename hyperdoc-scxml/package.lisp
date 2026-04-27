@@ -13,6 +13,8 @@
    #:compile-scxml-chart-to-string
    #:compile-scxml-file-to-lisp-file
    #:compile-and-run-scxml-file
+   #:run-compiled-scxml-with-events
+   #:compile-and-run-scxml-file-with-events
 
    #:scxml-chart
    #:scxml-state
