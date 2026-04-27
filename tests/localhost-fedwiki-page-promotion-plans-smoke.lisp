@@ -2676,8 +2676,9 @@
                "topicmaps/919822"
                "dmx.topicmaps.visibility"
                "dmx.topicmaps.x"
-               "No POST, PUT, or DELETE is attached to this runbook object."
-               "The public API does not expose the exact write payload for <tt>/topicmaps/919822/assoc/&lt;assoc-id&gt;</tt>."))
+               "Why HyperDoc now narrows its own write boundary"
+               "generic DMX <tt>ViewProps</tt> endpoints can persist malformed short-key-only payloads unchanged"
+               "Unproven: <tt>DELETE /topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt>"))
       (assert-true
        (search needle page-source :test #'char=)
        (format nil "Repair runbook page must expose ~A" needle)))
@@ -2727,7 +2728,8 @@
        (format nil "Repair runbook evidence view must expose ~A" needle)))
     (dolist (needle
              '("This checklist is read-only by default."
-               "No POST, PUT, or DELETE is attached to this runbook object."
+               "Default mode remains read-only"
+               "Dry-run inspection remains read-first until a backend/admin repair contract is explicitly proven."
                "Returns 200 OK and exposes assoc 921503"
                "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921404."
                "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921471."
@@ -2751,7 +2753,9 @@
                "no"
                "/topicmaps/919822/assoc/921503"
                "921404, 921471"
-               "The public API does not reveal the exact write payload for /topicmaps/919822/assoc/&lt;assoc-id&gt;."))
+               "does not reveal the original write payload"
+               "/topicmaps/919822/assoc/&lt;assoc-id&gt;"
+               "validates its own writes explicitly"))
       (assert-true
        (search needle operations-html :test #'char=)
        (format nil "Repair runbook operations view must expose ~A" needle)))
