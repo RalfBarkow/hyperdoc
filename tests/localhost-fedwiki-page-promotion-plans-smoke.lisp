@@ -2818,161 +2818,176 @@
 
 (defun run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
-  (let* ((healthy-plan (first-healthy-real-localhost-fedwiki-page-promotion-plan))
-         (healthy-title
-           (and healthy-plan
-                (hyperdoc::localhost-fedwiki-page-promotion-plan-title
-                 healthy-plan)))
-         (healthy-status
-           (and healthy-plan
-                (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-                 healthy-plan)))
-         (healthy-views
-           (and healthy-plan
-                (load-inspector-views-for-object healthy-plan)))
-         (healthy-overview-html
-           (and healthy-views
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title healthy-views "Overview"))))
-         (healthy-freshness-html
-           (and healthy-views
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title healthy-views "Source freshness"))))
-         (healthy-surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
-         (healthy-surface-views (load-inspector-views-for-object healthy-surface))
-         (healthy-surface-all-fresh-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title healthy-surface-views "All fresh"))))
-    (assert-true healthy-plan
-                 "At least one real promotion plan must remain healthy outside the missing-source seam")
-    (assert-true
-     (null (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
-            healthy-plan))
-     "Unaffected real promotion plans must keep their normal source state")
-    (assert-equal
-     :available
-     (getf healthy-status :source-availability-state)
-     "Unaffected real promotion plans must keep an available source state")
-    (assert-equal
-     :fresh
-     (getf healthy-status :page-source-freshness-state)
-     "Unaffected real promotion plans must keep a fresh page source state")
-    (assert-equal
-     :fresh
-     (getf healthy-status :snippet-source-freshness-state)
-     "Unaffected real promotion plans must keep a fresh snippet source state")
-    (assert-true
-     (search healthy-title healthy-surface-all-fresh-html :test #'char=)
-     "Healthy real-plan proof must keep the unaffected plan in the all-fresh aggregate scope")
-    (dolist (html (list healthy-overview-html
-                        healthy-freshness-html))
-      (assert-true
-       (search "No action needed" html :test #'char=)
-       "Healthy real-plan proof must preserve the passive no-action state"))
-    (call-with-simulated-missing-reproducible-devenv-source
-     (lambda ()
-       (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
-              (repro
-                (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
-              (issue
-                (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
-                 repro))
-              (status
-                (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-                 repro))
-              (views (load-inspector-views-for-object repro))
-              (issue-views (load-inspector-views-for-object issue))
-              (surface-views (load-inspector-views-for-object surface))
-              (overview-html
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title views "Overview")))
-              (source-page-html
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title views "Source page")))
-              (source-freshness-html
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title views "Source freshness")))
-              (dmx-html
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title views "DMX dry-run")))
-              (surface-source-unavailable-html
-                (html-inspector-views:view-html
-                 (smoke-find-view-by-title surface-views "Source unavailable")))
-              (page-regeneration-result
-                (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
-                 repro))
-              (dmx-review-result
-                (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
-                 repro))
-              (canonical-page-id
-                (format nil "fedwiki:~A/~A"
-                        hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-site*
-                        hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*))
-              (canonical-path
-                (format nil "pages/~A"
-                        hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*)))
-         (assert-true issue
-                      "Missing-source seam must still instantiate a bounded promotion-plan source issue")
-         (assert-equal
-          :source-unavailable
-          (hyperdoc::localhost-fedwiki-page-promotion-source-unavailable-issue-classification
-           issue)
-          "Missing-source seam must classify the bounded issue as source-unavailable")
-         (assert-equal
-          :source-unavailable
-          (getf status :source-availability-state)
-          "Missing-source plan status must preserve a source-unavailable availability state")
-         (assert-equal
-          :source-unavailable
-          (getf status :page-source-freshness-state)
-          "Missing-source plan must classify page freshness as source-unavailable")
-         (assert-equal
-          :source-unavailable
-          (getf status :snippet-source-freshness-state)
-          "Missing-source plan must classify snippet freshness as source-unavailable")
-         (assert-equal
-          canonical-page-id
-          (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-id repro)
-          "Missing-source plan must preserve the canonical source page id")
-         (assert-equal
-          canonical-path
-          (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-path repro)
-          "Missing-source plan must preserve the canonical repo-relative source path")
-         (assert-view-titles-present
-          views
-          '("Overview"
-            "Source page"
-            "Story items"
-            "Fragments"
-            "Promoted topics"
-            "Page output"
-            "Source freshness"
-            "Snippet metadata"
-            "DMX dry-run")
-          "Missing-source promotion plan")
-         (assert-view-titles-present
-          issue-views
-          '("Overview"
-            "Condition")
-          "Missing-source issue")
-         (assert-true
-          (search "Reproducible DevEnv as Knowledge Artifact promotion plan"
-                  surface-source-unavailable-html
-                  :test #'char=)
-          "Source-unavailable surface filter must list the degraded real plan")
-         (assert-true
-          (search "source unavailable"
-                  surface-source-unavailable-html
-                  :test #'char-equal)
-          "Source-unavailable surface filter must classify the degraded plan explicitly")
-         (assert-true
-          (typep page-regeneration-result
-                 'hyperdoc::localhost-fedwiki-page-promotion-source-unavailable-issue)
-          "Missing-source page regeneration must fail softly by returning the bounded issue")
-         (assert-true
-          (typep dmx-review-result
-                 'hyperdoc::localhost-fedwiki-page-promotion-source-unavailable-issue)
-          "Missing-source DMX review must fail softly by returning the bounded issue"))))))
+  (call-with-collective-knowledge-source-fixture
+   (lambda ()
+     (let* ((unaffected-plan
+              (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+            (unaffected-title
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-title
+               unaffected-plan))
+            (unaffected-status
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+               unaffected-plan))
+            (unaffected-page-state
+              (getf unaffected-status :page-source-freshness-state))
+            (unaffected-snippet-state
+              (getf unaffected-status :snippet-source-freshness-state))
+            (unaffected-summary
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+               unaffected-status))
+            (unaffected-surface
+              (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
+            (unaffected-surface-views
+              (load-inspector-views-for-object unaffected-surface))
+            (unaffected-surface-triage-html
+              (html-inspector-views:view-html
+               (smoke-find-view-by-title unaffected-surface-views "Triage"))))
+       (assert-true unaffected-plan
+                    "A deterministic unaffected real promotion plan must be available under the collective-knowledge fixture")
+       (assert-true
+        (null (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
+               unaffected-plan))
+        "Unaffected real promotion plans must keep their normal source state")
+       (assert-equal
+        :available
+        (getf unaffected-status :source-availability-state)
+        "Unaffected real promotion plans must keep an available source state")
+       (assert-true
+        (not (eql unaffected-page-state :source-unavailable))
+        "Unaffected real promotion plans must keep a computable page-source freshness classification")
+       (assert-true
+        (not (eql unaffected-snippet-state :source-unavailable))
+        "Unaffected real promotion plans must keep a computable snippet-source freshness classification")
+       (assert-true
+        (search unaffected-title unaffected-surface-triage-html :test #'char=)
+        "Unaffected real promotion plans must remain visible in the promotion triage scope")
+       (assert-true
+        (search unaffected-summary unaffected-surface-triage-html :test #'char=)
+        "Unaffected real promotion plans must keep their model-derived next-action summary")
+       (call-with-simulated-missing-reproducible-devenv-source
+        (lambda ()
+          (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
+                 (repro
+                   (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+                 (issue
+                   (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
+                    repro))
+                 (status
+                   (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                    repro))
+                 (views (load-inspector-views-for-object repro))
+                 (issue-views (load-inspector-views-for-object issue))
+                 (surface-views (load-inspector-views-for-object surface))
+                 (surface-source-unavailable-html
+                   (html-inspector-views:view-html
+                    (smoke-find-view-by-title surface-views "Source unavailable")))
+                 (surface-triage-html
+                   (html-inspector-views:view-html
+                    (smoke-find-view-by-title surface-views "Triage")))
+                 (unaffected-status-during
+                   (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                    unaffected-plan))
+                 (page-regeneration-result
+                   (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+                    repro))
+                 (dmx-review-result
+                   (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+                    repro))
+                 (canonical-page-id
+                   (format nil "fedwiki:~A/~A"
+                           hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-site*
+                           hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*))
+                 (canonical-path
+                   (format nil "pages/~A"
+                           hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*)))
+            (assert-true issue
+                         "Missing-source seam must still instantiate a bounded promotion-plan source issue")
+            (assert-equal
+             :source-unavailable
+             (hyperdoc::localhost-fedwiki-page-promotion-source-unavailable-issue-classification
+              issue)
+             "Missing-source seam must classify the bounded issue as source-unavailable")
+            (assert-equal
+             :source-unavailable
+             (getf status :source-availability-state)
+             "Missing-source plan status must preserve a source-unavailable availability state")
+            (assert-equal
+             :source-unavailable
+             (getf status :page-source-freshness-state)
+             "Missing-source plan must classify page freshness as source-unavailable")
+            (assert-equal
+             :source-unavailable
+             (getf status :snippet-source-freshness-state)
+             "Missing-source plan must classify snippet freshness as source-unavailable")
+            (assert-equal
+             canonical-page-id
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-id repro)
+             "Missing-source plan must preserve the canonical source page id")
+            (assert-equal
+             canonical-path
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-path repro)
+             "Missing-source plan must preserve the canonical repo-relative source path")
+            (assert-view-titles-present
+             views
+             '("Overview"
+               "Source page"
+               "Story items"
+               "Fragments"
+               "Promoted topics"
+               "Page output"
+               "Source freshness"
+               "Snippet metadata"
+               "DMX dry-run")
+             "Missing-source promotion plan")
+            (assert-view-titles-present
+             issue-views
+             '("Overview"
+               "Condition")
+             "Missing-source issue")
+            (assert-true
+             (search unaffected-title surface-triage-html :test #'char=)
+             "Missing-source seam must keep the unaffected real plan visible in triage")
+            (assert-true
+             (search unaffected-summary surface-triage-html :test #'char=)
+             "Missing-source seam must preserve the unaffected plan next-action summary")
+            (assert-true
+             (not (search unaffected-title
+                          surface-source-unavailable-html
+                          :test #'char=))
+             "Missing-source seam must not leak source-unavailable classification to unaffected plans")
+            (assert-true
+             (null (getf unaffected-status-during :source-issue))
+             "Missing-source seam must not inject a source issue into unaffected plans")
+            (assert-equal
+             :available
+             (getf unaffected-status-during :source-availability-state)
+             "Missing-source seam must keep unaffected plans available")
+            (assert-equal
+             unaffected-page-state
+             (getf unaffected-status-during :page-source-freshness-state)
+             "Missing-source seam must preserve unaffected page-source freshness state")
+            (assert-equal
+             unaffected-snippet-state
+             (getf unaffected-status-during :snippet-source-freshness-state)
+             "Missing-source seam must preserve unaffected snippet-source freshness state")
+            (assert-true
+             (search "Reproducible DevEnv as Knowledge Artifact promotion plan"
+                     surface-source-unavailable-html
+                     :test #'char=)
+             "Source-unavailable surface filter must list the degraded real plan")
+            (assert-true
+             (search "source unavailable"
+                     surface-source-unavailable-html
+                     :test #'char-equal)
+             "Source-unavailable surface filter must classify the degraded plan explicitly")
+            (assert-true
+             (typep page-regeneration-result
+                    'hyperdoc::localhost-fedwiki-page-promotion-source-unavailable-issue)
+             "Missing-source page regeneration must fail softly by returning the bounded issue")
+            (assert-true
+             (typep dmx-review-result
+                    'hyperdoc::localhost-fedwiki-page-promotion-source-unavailable-issue)
+             "Missing-source DMX review must fail softly by returning the bounded issue"))))))))
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
   (call-with-collective-knowledge-source-fixture
