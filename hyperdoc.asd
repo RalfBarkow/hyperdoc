@@ -304,6 +304,7 @@
   :version "0.0.1"
   :serial t
   :depends-on (#:hyperdoc/mcp
+               #:hyperdoc/scxml
                #:hyperdoc/explorer)
   :components ((:module "tests"
                 :serial t
@@ -348,6 +349,7 @@
                              (:file "skillization-smoke")
                              (:file "mech-deployment-provenance-smoke")
                              (:file "py4dmx-cluster-smoke")
+                             (:file "scxml-compiler-smoke")
                              (:file "page-lookup-topic-repair-scxml-smoke")
                              (:file "test-runner"))))
   :perform (test-op (op c)

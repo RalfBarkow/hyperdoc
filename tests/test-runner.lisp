@@ -5,6 +5,7 @@
   (run-code-path-graphs-smoke-tests)
   (run-dmx-topic-proxy-smoke-tests)
   (run-state-machine-smoke-tests)
+  (run-scxml-compiler-smoke-tests)
   (run-page-lookup-topic-repair-scxml-smoke-tests)
   (run-shared-projection-ir-smoke-tests)
   (run-snippet-playground-artifact-smoke-tests)
