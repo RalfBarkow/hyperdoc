@@ -14,6 +14,34 @@
 (defun collective-knowledge-relative-path (relative-path)
   (asdf:system-relative-pathname :hyperdoc relative-path))
 
+(defun collective-knowledge-fixture-fedwiki-pages-directory ()
+  (uiop:ensure-directory-pathname
+   (collective-knowledge-relative-path
+    "tools/testdata/collective-knowledge-slice/pages/")))
+
+(defun call-with-collective-knowledge-fedwiki-fixture (thunk)
+  (let* ((fixture-pages-directory
+           (collective-knowledge-fixture-fedwiki-pages-directory))
+         (fixture-page-path
+           (merge-pathnames "the-life-cycle-of-collective-knowledge"
+                            fixture-pages-directory))
+         (original
+           (symbol-function
+            'hyperdoc::article-allegation-default-fedwiki-pages-directory)))
+    (assert-true
+     (uiop:file-exists-p fixture-page-path)
+     (format nil "Collective-knowledge fixture missing at ~A"
+             fixture-page-path))
+    (unwind-protect
+         (progn
+           (setf (symbol-function
+                  'hyperdoc::article-allegation-default-fedwiki-pages-directory)
+                 (lambda () fixture-pages-directory))
+           (funcall thunk))
+      (setf (symbol-function
+             'hyperdoc::article-allegation-default-fedwiki-pages-directory)
+            original))))
+
 (defun run-collective-knowledge-chunk-parse-smoke-test ()
   (let* ((parsed (hyperdoc::parse-the-life-cycle-of-collective-knowledge-chunks))
          (pipeline (hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline))
@@ -43,7 +71,7 @@
                   "Source chunk must keep the repo-relative localhost FedWiki page path")
     (assert-equal 2
                   (length (hyperdoc::story-items-of source))
-                  "Source parse must preserve the real localhost FedWiki story item structure")
+                  "Source parse must preserve the deterministic fixture story item structure")
     (assert-equal "paragraph"
                   (hyperdoc::item-type-of first-item)
                   "First normalized story item type")
@@ -117,18 +145,26 @@
                   "Page chunk must point at the authored HyperDoc page path")))
 
 (defun run-collective-knowledge-render-smoke-test ()
-  (let ((expected-page (uiop:read-file-string
-                        (collective-knowledge-relative-path
-                         "hyperdoc/The Life Cycle of Collective Knowledge.html")))
-        (expected-topic-snippet (uiop:read-file-string
-                                 (collective-knowledge-relative-path
-                                  "assets/the-life-cycle-of-collective-knowledge-topic.lisp")))
-        (source
-          (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
-        (rendered-page
-          (hyperdoc::render-the-life-cycle-of-collective-knowledge-page))
-        (rendered-topic-snippet
-          (hyperdoc::render-the-life-cycle-of-collective-knowledge-topic-factory-snippet)))
+  (let* ((committed-page (uiop:read-file-string
+                          (collective-knowledge-relative-path
+                           "hyperdoc/The Life Cycle of Collective Knowledge.html")))
+         (committed-topic-snippet (uiop:read-file-string
+                                   (collective-knowledge-relative-path
+                                    "assets/the-life-cycle-of-collective-knowledge-topic.lisp")))
+         (source
+           (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
+         (rendered-page
+           (hyperdoc::render-the-life-cycle-of-collective-knowledge-page))
+         (rendered-topic-snippet
+           (hyperdoc::render-the-life-cycle-of-collective-knowledge-topic-factory-snippet))
+         (rendered-page-with-snapshot
+           (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
+            rendered-page
+            source))
+         (rendered-topic-snippet-with-snapshot
+           (hyperdoc::render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+            rendered-topic-snippet
+            source)))
     (assert-true
      (search "preserve fragment-level provenance within that item instead of claiming"
              rendered-page)
@@ -138,14 +174,14 @@
      "Rendered page must explicitly distinguish fragment-level derivation from whole-item provenance")
     (assert-true
      (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot
-      expected-page)
+      committed-page)
      "Committed page artifact must embed a source snapshot comment")
     (assert-true
      (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
-      expected-topic-snippet)
+      committed-topic-snippet)
      "Committed topic snippet must embed a source snapshot comment")
     (multiple-value-bind (page-first-line page-body)
-        (hyperdoc::split-string-first-line expected-page)
+        (hyperdoc::split-string-first-line committed-page)
       (assert-true
        (hyperdoc::string-prefix-p*
         hyperdoc::+localhost-fedwiki-page-source-snapshot-page-prefix+
@@ -162,7 +198,7 @@
                     :test #'char=))
        "Committed page artifact must not leak the snapshot tag into visible page body content"))
     (multiple-value-bind (snippet-first-line snippet-rest)
-        (hyperdoc::split-string-first-line expected-topic-snippet)
+        (hyperdoc::split-string-first-line committed-topic-snippet)
       (declare (ignore snippet-rest))
       (assert-true
        (hyperdoc::string-prefix-p*
@@ -171,7 +207,7 @@
        "Committed topic snippet must keep the source snapshot in a reader-safe Lisp comment")
       (assert-equal
        :topic-factory-snippet
-       (with-input-from-string (stream expected-topic-snippet)
+       (with-input-from-string (stream committed-topic-snippet)
          (let ((*read-eval* nil))
            (first (read stream nil :eof))))
        "Committed topic snippet must remain reader-safe because the envelope comment is skipped before the snippet form")
@@ -201,10 +237,10 @@
             (delete-file temp-path)))))
     (let ((page-reflection
             (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
-             expected-page))
+             committed-page))
           (snippet-reflection
             (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot-reflection
-             expected-topic-snippet)))
+             committed-topic-snippet)))
       (assert-equal
        :present
        (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-status
@@ -225,36 +261,75 @@
         (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-error-message
          snippet-reflection))
        "Valid snippet envelopes must not report parse errors"))
+    (assert-true
+     (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot
+      rendered-page-with-snapshot)
+     "Rendered page artifact must embed a source snapshot comment")
+    (assert-true
+     (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot
+      rendered-topic-snippet-with-snapshot)
+     "Rendered snippet artifact must embed a source snapshot comment")
+    (assert-true
+     (search "<h1>The Life Cycle of Collective Knowledge</h1>"
+             rendered-page-with-snapshot
+             :test #'char=)
+     "Rendered page artifact must include the composed page heading")
     (assert-equal
-     expected-page
-     (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
-      rendered-page
-      source)
-     "Committed HyperDoc page must stay in sync with the rendered page plus the source snapshot envelope")
-    (assert-equal
-     expected-topic-snippet
-     (hyperdoc::render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
-      rendered-topic-snippet
-      source)
-     "Committed topic-factory snippet must stay in sync with the rendered snippet plus the source snapshot envelope")))
+     :topic-factory-snippet
+     (with-input-from-string (stream rendered-topic-snippet-with-snapshot)
+       (let ((*read-eval* nil))
+         (first (read stream nil :eof))))
+     "Rendered snippet artifact must remain reader-safe with the snapshot envelope comment")
+    (let* ((reflection
+             (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
+              rendered-page-with-snapshot))
+           (snapshot
+             (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+              reflection)))
+      (assert-equal
+       :present
+       (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-status
+        reflection)
+       "Rendered page artifact must provide a parseable snapshot envelope")
+      (assert-equal 2
+                    (getf snapshot :story-item-count)
+                    "Rendered page snapshot must report the deterministic two-item fixture")
+      (assert-equal 7
+                    (getf snapshot :fragment-count)
+                    "Rendered page snapshot must report the deterministic seven-fragment fixture"))))
 
 (defun run-collective-knowledge-generated-output-idempotence-smoke-test ()
-  (let ((page-path
-          (collective-knowledge-relative-path
-           "hyperdoc/The Life Cycle of Collective Knowledge.html"))
-        (snippet-path
-          (collective-knowledge-relative-path
-           "assets/the-life-cycle-of-collective-knowledge-topic.lisp")))
-    (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
-    (let ((first-page (uiop:read-file-string page-path))
-          (first-snippet (uiop:read-file-string snippet-path)))
-      (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
-      (assert-equal first-page
-                    (uiop:read-file-string page-path)
-                    "Repeated page generation must be idempotent")
-      (assert-equal first-snippet
-                    (uiop:read-file-string snippet-path)
-                    "Repeated topic snippet generation must be idempotent"))))
+  (let* ((run-id (get-universal-time))
+         (root-relative
+           (format nil "tmp/collective-knowledge-smoke-~D/" run-id))
+         (root-path (collective-knowledge-relative-path root-relative))
+         (page-relative
+           (format nil "~Ahyperdoc/The Life Cycle of Collective Knowledge.html"
+                   root-relative))
+         (snippet-relative
+           (format nil "~Aassets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                   root-relative)))
+    (let ((hyperdoc::*the-life-cycle-of-collective-knowledge-page-path*
+            page-relative)
+          (hyperdoc::*the-life-cycle-of-collective-knowledge-topic-asset*
+            snippet-relative))
+      (unwind-protect
+           (let ((page-path
+                   (hyperdoc::the-life-cycle-of-collective-knowledge-page-pathname))
+                 (snippet-path
+                   (hyperdoc::the-life-cycle-of-collective-knowledge-topic-asset-path)))
+             (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
+             (let ((first-page (uiop:read-file-string page-path))
+                   (first-snippet (uiop:read-file-string snippet-path)))
+               (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
+               (assert-equal first-page
+                             (uiop:read-file-string page-path)
+                             "Repeated page generation must be idempotent")
+               (assert-equal first-snippet
+                             (uiop:read-file-string snippet-path)
+                             "Repeated topic snippet generation must be idempotent")))
+        (when (uiop:directory-exists-p root-path)
+          (uiop:delete-directory-tree root-path :validate t))))))
 
 (defun run-collective-knowledge-topic-presence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -283,9 +358,11 @@
                "The composed HyperDoc page must be browseable"))
 
 (defun run-collective-knowledge-slice-smoke-tests ()
-  (run-collective-knowledge-chunk-parse-smoke-test)
-  (run-collective-knowledge-render-smoke-test)
-  (run-collective-knowledge-generated-output-idempotence-smoke-test)
-  (run-collective-knowledge-topic-presence-smoke-test)
+  (call-with-collective-knowledge-fedwiki-fixture
+   (lambda ()
+     (run-collective-knowledge-chunk-parse-smoke-test)
+     (run-collective-knowledge-render-smoke-test)
+     (run-collective-knowledge-generated-output-idempotence-smoke-test)
+     (run-collective-knowledge-topic-presence-smoke-test)))
   (format t "~&Collective knowledge slice smoke tests passed.~%")
   t)

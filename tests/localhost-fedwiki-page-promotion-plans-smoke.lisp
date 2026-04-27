@@ -66,6 +66,75 @@
           (funcall thunk))
       (setf (symbol-function symbol) original))))
 
+(defun call-with-simulated-missing-collective-knowledge-source (thunk)
+  (let* ((symbol
+           'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
+         (original (symbol-function symbol))
+         (missing-path
+           (merge-pathnames
+            (format nil "hyperdoc-missing-fedwiki-page-~A.json"
+                    (gensym "COLLECTIVE-"))
+            (uiop:temporary-directory))))
+    (unwind-protect
+        (progn
+          (setf (symbol-function symbol)
+                (lambda ()
+                  (let ((spec (funcall original)))
+                    (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
+                           spec)
+                          (lambda ()
+                            (hyperdoc::article-allegation-read-json-file
+                             missing-path)))
+                    spec)))
+          (funcall thunk))
+      (setf (symbol-function symbol) original))))
+
+(defun collective-knowledge-fixture-page-path ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "tools/testdata/collective-knowledge-slice/pages/the-life-cycle-of-collective-knowledge"))
+
+(defun call-with-collective-knowledge-source-fixture (thunk)
+  (let* ((symbol
+           'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
+         (original (symbol-function symbol))
+         (fixture-path (collective-knowledge-fixture-page-path)))
+    (unwind-protect
+        (progn
+          (setf (symbol-function symbol)
+                (lambda ()
+                  (let ((spec (funcall original)))
+                    (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
+                           spec)
+                          (lambda ()
+                            (hyperdoc::article-allegation-read-json-file
+                             fixture-path)))
+                    spec)))
+          (funcall thunk))
+      (setf (symbol-function symbol) original))))
+
+(defun call-with-temporary-collective-knowledge-artifact-targets (thunk)
+  (let* ((run-id (get-universal-time))
+         (root-relative
+           (format nil "tmp/localhost-fedwiki-promotion-collective-~D/" run-id))
+         (root-path (asdf:system-relative-pathname :hyperdoc root-relative))
+         (page-relative
+           (format nil "~Ahyperdoc/The Life Cycle of Collective Knowledge.html"
+                   root-relative))
+         (snippet-relative
+           (format nil "~Aassets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                   root-relative)))
+    (let ((hyperdoc::*the-life-cycle-of-collective-knowledge-page-path*
+            page-relative)
+          (hyperdoc::*the-life-cycle-of-collective-knowledge-topic-asset*
+            snippet-relative))
+      (unwind-protect
+           (progn
+             (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
+             (funcall thunk))
+        (when (uiop:directory-exists-p root-path)
+          (uiop:delete-directory-tree root-path :validate t))))))
+
 (defun real-localhost-fedwiki-page-promotion-plans ()
   (list (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)
         (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)))
@@ -2886,18 +2955,24 @@
           "Missing-source DMX review must fail softly by returning the bounded issue"))))))
 
 (defun run-localhost-fedwiki-page-promotion-plans-smoke-tests ()
-  (run-localhost-first-fedwiki-publication-plan-smoke-test)
-  (run-localhost-first-fedwiki-live-publication-smoke-test)
-  (run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
-  (run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
-  (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
-  (run-localhost-fedwiki-page-promotion-operations-smoke-test)
-  (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
-  (run-dmx-topicmap-919822-repair-runbook-smoke-test)
-  (run-localhost-fedwiki-page-promotion-lookup-boundary-smoke-test)
-  (run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test)
-  (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
-  (run-localhost-fedwiki-page-promotion-guarded-dmx-dry-run-smoke-test)
-  (run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
+  (call-with-collective-knowledge-source-fixture
+   (lambda ()
+     (run-localhost-first-fedwiki-publication-plan-smoke-test)
+     (run-localhost-first-fedwiki-live-publication-smoke-test)
+     (call-with-simulated-missing-collective-knowledge-source
+      #'run-localhost-fedwiki-page-promotion-plan-view-smoke-test)
+     (call-with-simulated-missing-collective-knowledge-source
+      #'run-localhost-fedwiki-page-promotion-surface-triage-smoke-test)
+     (run-localhost-fedwiki-page-promotion-entry-point-smoke-test)
+     (call-with-temporary-collective-knowledge-artifact-targets
+      #'run-localhost-fedwiki-page-promotion-operations-smoke-test)
+     (run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test)
+     (run-dmx-topicmap-919822-repair-runbook-smoke-test)
+     (run-localhost-fedwiki-page-promotion-lookup-boundary-smoke-test)
+     (run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test)
+     (run-localhost-fedwiki-page-promotion-dmx-handover-smoke-test)
+     (run-localhost-fedwiki-page-promotion-guarded-dmx-dry-run-smoke-test)
+     (call-with-simulated-missing-collective-knowledge-source
+      #'run-localhost-fedwiki-page-promotion-output-sync-smoke-test)))
   (format t "~&Localhost FedWiki page promotion plan smoke tests passed.~%")
   t)

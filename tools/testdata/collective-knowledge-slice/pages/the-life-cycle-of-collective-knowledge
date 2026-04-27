@@ -1,0 +1,71 @@
+{
+  "title": "The Life Cycle of Collective Knowledge",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "3cf5038a96d6b6ee",
+      "text": "This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, and eventually detached from its original representation.\n\nFedWiki source\nThis fragment keeps ordinal spacing stable for deterministic topic extraction.\n\nInspectable objects\nThis fragment keeps ordinal spacing stable for deterministic topic extraction.\n\nWhy this matters for HyperDoc\nThe central claim is that collective knowledge depends on representations that stay usable long enough to be reviewed, recombined, and carried forward. Natural-language documents often degrade gracefully across decades, but software source code is much more fragile because it depends on machines, runtimes, toolchains, and surrounding environments.\n\nArchiving old environments improves reproducibility, but the stronger demand for collective knowledge is interoperability across time: later work must be able to inspect, compare, and reuse earlier software components instead of only freezing them as historical snapshots.\n\nThis is the point at which the FedWiki note connects directly to HyperDoc's long-term interest in Common Lisp. The note presents Common Lisp as an example of a stable, standardized, multi-implementation language whose software can remain usable over long spans of time.\n\nClaim carried by this page\nThe life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication that remain intelligible and reusable across time."
+    },
+    {
+      "type": "assets",
+      "id": "efdd0f3f87f95fd0",
+      "text": "[]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "3cf5038a96d6b6ee",
+      "item": {
+        "type": "paragraph",
+        "id": "3cf5038a96d6b6ee"
+      },
+      "date": 1774540076497
+    },
+    {
+      "type": "edit",
+      "id": "3cf5038a96d6b6ee",
+      "item": {
+        "type": "paragraph",
+        "id": "3cf5038a96d6b6ee"
+      },
+      "date": 1774540081043
+    },
+    {
+      "type": "add",
+      "id": "efdd0f3f87f95fd0",
+      "item": {
+        "type": "assets",
+        "id": "efdd0f3f87f95fd0"
+      },
+      "date": 1774540084901
+    },
+    {
+      "type": "edit",
+      "id": "efdd0f3f87f95fd0",
+      "item": {
+        "type": "assets",
+        "id": "efdd0f3f87f95fd0"
+      },
+      "date": 1774540090011
+    },
+    {
+      "type": "edit",
+      "id": "efdd0f3f87f95fd0",
+      "item": {
+        "type": "assets",
+        "id": "efdd0f3f87f95fd0"
+      },
+      "date": 1774540097711
+    },
+    {
+      "type": "edit",
+      "id": "efdd0f3f87f95fd0",
+      "item": {
+        "type": "assets",
+        "id": "efdd0f3f87f95fd0"
+      },
+      "date": 1774540104897
+    }
+  ]
+}
