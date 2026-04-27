@@ -611,7 +611,13 @@
     (when (topic-page-lookup-issue-target-chunk issue)
       (views:html
         (:p (views:esc
-             "This repair path is chunk-first: clicking repair ensures the target chunk and its basis chain."))))))
+             "This repair path is chunk-first: clicking repair ensures the target chunk and its basis chain."))
+        (:p
+         (views:action-button
+          "Run SCXML dry-run"
+          (views:thunk
+            (run-page-lookup-topic-repair-stub-scxml issue))
+          "Run the SCXML repair protocol stub without mutating HyperDoc source."))))))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))
   (title-of chunk))

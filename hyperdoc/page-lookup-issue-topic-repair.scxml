@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    datamodel="ecmascript"
+    name="page-lookup-issue-topic-repair"
+    initial="idle">
+
+  <datamodel>
+    <data id="issue" expr="null"/>
+    <data id="targetHyperBook" expr="null"/>
+    <data id="targetKind" expr="null"/>
+    <data id="targetTitle" expr="null"/>
+    <data id="targetSlug" expr="null"/>
+
+    <data id="chunk" expr="null"/>
+    <data id="chunkState" expr="null"/>
+
+    <data id="classification" expr="null"/>
+    <data id="status" expr="null"/>
+    <data id="repairOperation" expr="null"/>
+    <data id="repairDescription" expr="null"/>
+
+    <data id="plan" expr="null"/>
+    <data id="existingTopicFactory" expr="null"/>
+    <data id="applyResult" expr="null"/>
+    <data id="verifyResult" expr="null"/>
+    <data id="error" expr="null"/>
+  </datamodel>
+
+  <!--
+    Expected incoming event:
+
+      ISSUE.OPEN {
+        issue,
+        targetHyperBook,
+        targetKind,
+        targetTitle,
+        targetSlug
+      }
+
+    Example for the screenshot case:
+
+      targetHyperBook = "topics"
+      targetKind      = "hyperdoc-topic-page"
+      targetTitle     = "Linear logic"
+      targetSlug      = "Linear logic"
+  -->
+
+  <state id="idle">
+    <transition event="ISSUE.OPEN" target="deriveTargetChunk">
+      <assign location="issue" expr="_event.data.issue"/>
+      <assign location="targetHyperBook" expr="_event.data.targetHyperBook"/>
+      <assign location="targetKind" expr="_event.data.targetKind"/>
+      <assign location="targetTitle" expr="_event.data.targetTitle"/>
+      <assign location="targetSlug" expr="_event.data.targetSlug"/>
+
+      <assign location="classification" expr="null"/>
+      <assign location="status" expr="null"/>
+      <assign location="repairOperation" expr="null"/>
+      <assign location="repairDescription" expr="null"/>
+      <assign location="plan" expr="null"/>
+      <assign location="existingTopicFactory" expr="null"/>
+      <assign location="applyResult" expr="null"/>
+      <assign location="verifyResult" expr="null"/>
+      <assign location="error" expr="null"/>
+    </transition>
+  </state>
+
+  <!-- Build or refresh the chunk that knows the actual repair state. -->
+  <state id="deriveTargetChunk">
+    <invoke id="derive-target-chunk"
+            type="application/hyperdoc"
+            src="hyperdoc:derive-target-chunk">
+      <param name="issue" expr="issue"/>
+      <param name="targetHyperBook" expr="targetHyperBook"/>
+      <param name="targetKind" expr="targetKind"/>
+      <param name="targetTitle" expr="targetTitle"/>
+      <param name="targetSlug" expr="targetSlug"/>
+    </invoke>
+
+    <transition event="done.invoke.derive-target-chunk" target="classify">
+      <assign location="chunk" expr="_event.data.chunk"/>
+      <assign location="chunkState" expr="_event.data.chunkState"/>
+    </transition>
+
+    <transition event="error.invoke.derive-target-chunk" target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="classification" expr="'lookup-classification-error'"/>
+      <assign location="status" expr="'classification failed'"/>
+      <assign location="repairOperation" expr="'inspect failure'"/>
+    </transition>
+  </state>
+
+  <!--
+    Classification is derived from chunk state.
+
+    Important distinction:
+
+      :needs-topic-creation
+        => missing topic
+
+      :needs-local-materialization
+        => missing hyperdoc topic page
+
+    This prevents the screenshot bug where the issue says
+    "missing hyperdoc topic page" even though the actual condition is
+    "no authored topic factory exists".
+  -->
+  <state id="classify">
+
+    <transition
+        cond="targetHyperBook === 'topics' &amp;&amp; chunkState === 'needs-topic-creation'"
+        target="missingTopic">
+      <assign location="classification" expr="'missing-topic'"/>
+      <assign location="status" expr="'needs topic creation'"/>
+      <assign location="repairOperation" expr="'create topic'"/>
+      <assign location="repairDescription"
+              expr="'No authored topic factory exists for this title in the bound topics source.'"/>
+    </transition>
+
+    <transition
+        cond="targetHyperBook === 'topics' &amp;&amp; chunkState === 'needs-local-materialization'"
+        target="missingHyperdocTopicPage">
+      <assign location="classification" expr="'missing-hyperdoc-topic-page'"/>
+      <assign location="status" expr="'needs local materialization'"/>
+      <assign location="repairOperation" expr="'materialize topic page'"/>
+      <assign location="repairDescription"
+              expr="'An authored topic exists, but the rendered HyperDoc topic page is absent or stale.'"/>
+    </transition>
+
+    <transition
+        cond="targetHyperBook === 'topics' &amp;&amp; chunkState === 'fixed'"
+        target="fixed">
+      <assign location="classification" expr="'fixed'"/>
+      <assign location="status" expr="'fixed'"/>
+      <assign location="repairOperation" expr="'open target'"/>
+      <assign location="repairDescription" expr="'The topic page now resolves.'"/>
+    </transition>
+
+    <transition
+        cond="targetHyperBook !== 'topics'"
+        target="missingNonTopicPage">
+      <assign location="classification" expr="'missing-page'"/>
+      <assign location="status" expr="'needs page repair'"/>
+      <assign location="repairOperation" expr="'inspect target chunk'"/>
+      <assign location="repairDescription"
+              expr="'The failed lookup does not target the topics HyperBook.'"/>
+    </transition>
+
+    <transition target="unknownLookupFailure">
+      <assign location="classification" expr="'unknown-lookup-failure'"/>
+      <assign location="status" expr="'needs inspection'"/>
+      <assign location="repairOperation" expr="'inspect target chunk'"/>
+      <assign location="repairDescription"
+              expr="'The chunk state does not map to a known lookup-repair path.'"/>
+    </transition>
+  </state>
+
+  <!-- Primary screenshot case. -->
+  <state id="missingTopic">
+    <onentry>
+      <send event="UI.UPDATE">
+        <param name="classification" expr="classification"/>
+        <param name="status" expr="status"/>
+        <param name="repairOperation" expr="repairOperation"/>
+        <param name="repairDescription" expr="repairDescription"/>
+      </send>
+    </onentry>
+
+    <transition event="USER.INSPECT_CHUNK" target="inspectTargetChunk"/>
+    <transition event="USER.CREATE_TOPIC" target="planTopicFactoryAddition"/>
+    <transition event="USER.REFRESH" target="deriveTargetChunk"/>
+  </state>
+
+  <state id="inspectTargetChunk">
+    <invoke id="inspect-target-chunk"
+            type="application/hyperdoc"
+            src="hyperdoc:inspect-target-chunk">
+      <param name="issue" expr="issue"/>
+      <param name="chunk" expr="chunk"/>
+    </invoke>
+
+    <transition event="done.invoke.inspect-target-chunk" target="missingTopic"/>
+    <transition event="error.invoke.inspect-target-chunk" target="failed">
+      <assign location="error" expr="_event.data"/>
+    </transition>
+  </state>
+
+  <!-- Create an explicit, inspectable plan before mutating source. -->
+  <state id="planTopicFactoryAddition">
+    <invoke id="plan-topic-factory-addition"
+            type="application/hyperdoc"
+            src="hyperdoc:plan-topic-factory-addition">
+      <param name="issue" expr="issue"/>
+      <param name="title" expr="targetTitle"/>
+      <param name="slug" expr="targetSlug"/>
+      <param name="targetHyperBook" expr="targetHyperBook"/>
+    </invoke>
+
+    <transition event="done.invoke.plan-topic-factory-addition"
+                target="previewTopicFactoryAddition">
+      <assign location="plan" expr="_event.data.plan"/>
+    </transition>
+
+    <transition event="error.invoke.plan-topic-factory-addition" target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'topic creation planning failed'"/>
+    </transition>
+  </state>
+
+  <state id="previewTopicFactoryAddition">
+    <onentry>
+      <send event="UI.PREVIEW_TOPIC_FACTORY_ADDITION">
+        <param name="plan" expr="plan"/>
+      </send>
+    </onentry>
+
+    <transition event="USER.APPLY_TOPIC_FACTORY_ADDITION"
+                target="checkExistingTopicFactory"/>
+    <transition event="USER.CANCEL" target="missingTopic"/>
+    <transition event="USER.REFRESH" target="deriveTargetChunk"/>
+  </state>
+
+  <!-- Guard against duplicate authored topics before writing. -->
+  <state id="checkExistingTopicFactory">
+    <invoke id="find-authored-topic-factory-by-title"
+            type="application/hyperdoc"
+            src="hyperdoc:find-authored-topic-factory-by-title">
+      <param name="title" expr="targetTitle"/>
+    </invoke>
+
+    <transition
+        event="done.invoke.find-authored-topic-factory-by-title"
+        cond="_event.data.exists === true"
+        target="topicFactoryAlreadyExists">
+      <assign location="existingTopicFactory" expr="_event.data.factory"/>
+    </transition>
+
+    <transition
+        event="done.invoke.find-authored-topic-factory-by-title"
+        cond="_event.data.exists !== true"
+        target="applyTopicFactoryAddition"/>
+
+    <transition event="error.invoke.find-authored-topic-factory-by-title"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'duplicate check failed'"/>
+    </transition>
+  </state>
+
+  <state id="topicFactoryAlreadyExists">
+    <onentry>
+      <assign location="status" expr="'authored topic factory already exists'"/>
+      <assign location="repairOperation" expr="'materialize topic page'"/>
+      <assign location="repairDescription"
+              expr="'A topic factory for this title already exists; reclassify after materialization check.'"/>
+    </onentry>
+
+    <transition event="USER.MATERIALIZE_TOPIC_PAGE"
+                target="materializeTopicPage"/>
+    <transition event="USER.RECLASSIFY"
+                target="deriveTargetChunk"/>
+    <transition event="USER.CANCEL"
+                target="missingTopic"/>
+  </state>
+
+  <!-- Atomic source mutation: temp write, validate read, rename. -->
+  <state id="applyTopicFactoryAddition">
+    <invoke id="apply-topic-factory-addition"
+            type="application/hyperdoc"
+            src="hyperdoc:apply-topic-factory-addition">
+      <param name="plan" expr="plan"/>
+    </invoke>
+
+    <transition event="done.invoke.apply-topic-factory-addition"
+                target="loadTopicsSource">
+      <assign location="applyResult" expr="_event.data"/>
+    </transition>
+
+    <transition event="error.invoke.apply-topic-factory-addition"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'topic factory write failed'"/>
+    </transition>
+  </state>
+
+  <state id="loadTopicsSource">
+    <invoke id="load-topics-source"
+            type="application/hyperdoc"
+            src="hyperdoc:load-topics-source">
+      <param name="sourcePath" expr="plan.sourcePath"/>
+    </invoke>
+
+    <transition event="done.invoke.load-topics-source"
+                target="rebuildTopicIndex"/>
+
+    <transition event="error.invoke.load-topics-source"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'topics source load failed'"/>
+    </transition>
+  </state>
+
+  <state id="rebuildTopicIndex">
+    <invoke id="rebuild-topic-index"
+            type="application/hyperdoc"
+            src="hyperdoc:rebuild-topic-index">
+      <param name="targetHyperBook" expr="targetHyperBook"/>
+    </invoke>
+
+    <transition event="done.invoke.rebuild-topic-index"
+                target="verifyTopicPage"/>
+
+    <transition event="error.invoke.rebuild-topic-index"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'topic index rebuild failed'"/>
+    </transition>
+  </state>
+
+  <state id="verifyTopicPage">
+    <invoke id="verify-topic-page"
+            type="application/hyperdoc"
+            src="hyperdoc:verify-topic-page">
+      <param name="targetHyperBook" expr="targetHyperBook"/>
+      <param name="title" expr="targetTitle"/>
+      <param name="slug" expr="targetSlug"/>
+    </invoke>
+
+    <transition
+        event="done.invoke.verify-topic-page"
+        cond="_event.data.fixed === true"
+        target="fixed">
+      <assign location="verifyResult" expr="_event.data"/>
+      <assign location="classification" expr="'fixed'"/>
+      <assign location="status" expr="'fixed'"/>
+      <assign location="repairOperation" expr="'open target'"/>
+      <assign location="repairDescription" expr="'The generated topic page resolves.'"/>
+    </transition>
+
+    <transition
+        event="done.invoke.verify-topic-page"
+        cond="_event.data.fixed !== true"
+        target="missingHyperdocTopicPage">
+      <assign location="verifyResult" expr="_event.data"/>
+      <assign location="classification" expr="'missing-hyperdoc-topic-page'"/>
+      <assign location="status" expr="'needs local materialization'"/>
+      <assign location="repairOperation" expr="'materialize topic page'"/>
+      <assign location="repairDescription"
+              expr="'The topic factory exists, but the rendered topic page still does not resolve.'"/>
+    </transition>
+
+    <transition event="error.invoke.verify-topic-page" target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'topic page verification failed'"/>
+    </transition>
+  </state>
+
+  <!-- Secondary case: authored topic exists, rendered topic page missing/stale. -->
+  <state id="missingHyperdocTopicPage">
+    <onentry>
+      <send event="UI.UPDATE">
+        <param name="classification" expr="classification"/>
+        <param name="status" expr="status"/>
+        <param name="repairOperation" expr="repairOperation"/>
+        <param name="repairDescription" expr="repairDescription"/>
+      </send>
+    </onentry>
+
+    <transition event="USER.INSPECT_CHUNK" target="inspectMaterializationChunk"/>
+    <transition event="USER.MATERIALIZE_TOPIC_PAGE" target="materializeTopicPage"/>
+    <transition event="USER.REFRESH" target="deriveTargetChunk"/>
+  </state>
+
+  <state id="inspectMaterializationChunk">
+    <invoke id="inspect-materialization-chunk"
+            type="application/hyperdoc"
+            src="hyperdoc:inspect-target-chunk">
+      <param name="issue" expr="issue"/>
+      <param name="chunk" expr="chunk"/>
+    </invoke>
+
+    <transition event="done.invoke.inspect-materialization-chunk"
+                target="missingHyperdocTopicPage"/>
+
+    <transition event="error.invoke.inspect-materialization-chunk"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+    </transition>
+  </state>
+
+  <state id="materializeTopicPage">
+    <invoke id="materialize-topic-page"
+            type="application/hyperdoc"
+            src="hyperdoc:materialize-topic-page">
+      <param name="issue" expr="issue"/>
+      <param name="chunk" expr="chunk"/>
+      <param name="targetHyperBook" expr="targetHyperBook"/>
+      <param name="title" expr="targetTitle"/>
+      <param name="slug" expr="targetSlug"/>
+    </invoke>
+
+    <transition event="done.invoke.materialize-topic-page"
+                target="verifyTopicPage"/>
+
+    <transition event="error.invoke.materialize-topic-page"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+      <assign location="status" expr="'topic page materialization failed'"/>
+    </transition>
+  </state>
+
+  <!-- Non-topic lookup failures remain inspect-first. -->
+  <state id="missingNonTopicPage">
+    <onentry>
+      <send event="UI.UPDATE">
+        <param name="classification" expr="classification"/>
+        <param name="status" expr="status"/>
+        <param name="repairOperation" expr="repairOperation"/>
+        <param name="repairDescription" expr="repairDescription"/>
+      </send>
+    </onentry>
+
+    <transition event="USER.INSPECT_CHUNK" target="inspectNonTopicChunk"/>
+    <transition event="USER.REFRESH" target="deriveTargetChunk"/>
+  </state>
+
+  <state id="inspectNonTopicChunk">
+    <invoke id="inspect-non-topic-chunk"
+            type="application/hyperdoc"
+            src="hyperdoc:inspect-target-chunk">
+      <param name="issue" expr="issue"/>
+      <param name="chunk" expr="chunk"/>
+    </invoke>
+
+    <transition event="done.invoke.inspect-non-topic-chunk"
+                target="missingNonTopicPage"/>
+
+    <transition event="error.invoke.inspect-non-topic-chunk"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+    </transition>
+  </state>
+
+  <state id="unknownLookupFailure">
+    <onentry>
+      <send event="UI.UPDATE">
+        <param name="classification" expr="classification"/>
+        <param name="status" expr="status"/>
+        <param name="repairOperation" expr="repairOperation"/>
+        <param name="repairDescription" expr="repairDescription"/>
+      </send>
+    </onentry>
+
+    <transition event="USER.INSPECT_CHUNK" target="inspectUnknownChunk"/>
+    <transition event="USER.REFRESH" target="deriveTargetChunk"/>
+  </state>
+
+  <state id="inspectUnknownChunk">
+    <invoke id="inspect-unknown-chunk"
+            type="application/hyperdoc"
+            src="hyperdoc:inspect-target-chunk">
+      <param name="issue" expr="issue"/>
+      <param name="chunk" expr="chunk"/>
+    </invoke>
+
+    <transition event="done.invoke.inspect-unknown-chunk"
+                target="unknownLookupFailure"/>
+
+    <transition event="error.invoke.inspect-unknown-chunk"
+                target="failed">
+      <assign location="error" expr="_event.data"/>
+    </transition>
+  </state>
+
+  <state id="failed">
+    <onentry>
+      <assign location="classification"
+              expr="classification || 'repair-failed'"/>
+      <assign location="status"
+              expr="status || 'failed'"/>
+      <assign location="repairOperation" expr="'inspect failure'"/>
+
+      <send event="UI.REPAIR_FAILED">
+        <param name="classification" expr="classification"/>
+        <param name="status" expr="status"/>
+        <param name="error" expr="error"/>
+      </send>
+    </onentry>
+
+    <transition event="USER.INSPECT_FAILURE" target="inspectFailure"/>
+    <transition event="USER.RETRY" target="deriveTargetChunk"/>
+    <transition event="USER.CANCEL" target="idle"/>
+  </state>
+
+  <state id="inspectFailure">
+    <invoke id="inspect-failure"
+            type="application/hyperdoc"
+            src="hyperdoc:inspect-repair-failure">
+      <param name="issue" expr="issue"/>
+      <param name="error" expr="error"/>
+      <param name="classification" expr="classification"/>
+      <param name="status" expr="status"/>
+    </invoke>
+
+    <transition event="done.invoke.inspect-failure" target="failed"/>
+    <transition event="error.invoke.inspect-failure" target="failed"/>
+  </state>
+
+  <final id="fixed">
+    <onentry>
+      <send event="UI.REPAIR_FIXED">
+        <param name="classification" expr="classification"/>
+        <param name="status" expr="status"/>
+        <param name="targetHyperBook" expr="targetHyperBook"/>
+        <param name="targetTitle" expr="targetTitle"/>
+        <param name="targetSlug" expr="targetSlug"/>
+        <param name="verifyResult" expr="verifyResult"/>
+      </send>
+    </onentry>
+  </final>
+
+</scxml>

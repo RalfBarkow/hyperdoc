@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="page-lookup-issue-topic-repair-stub"
+    initial="openIssue">
+
+  <!--
+    Pure stub chart.
+
+    Purpose:
+      Exercise the missing-topic classification and create-topic repair path
+      without any external HyperDoc invoker/service.
+
+    Stubbed scenario:
+      targetHyperBook = topics
+      targetKind      = hyperdoc-topic-page
+      targetTitle     = Linear logic
+      targetSlug      = Linear logic
+
+    Stubbed chunk result:
+      chunkState      = needs-topic-creation
+
+    Expected path:
+      openIssue
+        -> deriveTargetChunk
+        -> classify
+        -> missingTopic
+        -> planTopicFactoryAddition
+        -> previewTopicFactoryAddition
+        -> checkExistingTopicFactory
+        -> applyTopicFactoryAddition
+        -> loadTopicsSource
+        -> rebuildTopicIndex
+        -> verifyTopicPage
+        -> fixed
+  -->
+
+  <state id="openIssue">
+    <onentry>
+      <log label="ISSUE.OPEN targetHyperBook=topics targetKind=hyperdoc-topic-page targetTitle='Linear logic'"/>
+      <raise event="ISSUE.OPEN"/>
+    </onentry>
+
+    <transition event="ISSUE.OPEN" target="deriveTargetChunk"/>
+  </state>
+
+  <state id="deriveTargetChunk">
+    <onentry>
+      <log label="STUB hyperdoc:derive-target-chunk => chunk=topic-page-availability-chunk:linear-logic chunkState=needs-topic-creation"/>
+      <raise event="done.invoke.derive-target-chunk"/>
+    </onentry>
+
+    <transition event="done.invoke.derive-target-chunk" target="classify"/>
+  </state>
+
+  <state id="classify">
+    <onentry>
+      <log label="CLASSIFY targetHyperBook=topics chunkState=needs-topic-creation"/>
+      <log label="classification=missing-topic status='needs topic creation' repairOperation='create topic'"/>
+      <raise event="CLASSIFIED.MISSING_TOPIC"/>
+    </onentry>
+
+    <transition event="CLASSIFIED.MISSING_TOPIC" target="missingTopic"/>
+  </state>
+
+  <state id="missingTopic">
+    <onentry>
+      <log label="ENTER missingTopic"/>
+      <log label="UI.UPDATE classification=missing-topic status='needs topic creation' repairOperation='create topic'"/>
+      <log label="AUTO USER.CREATE_TOPIC"/>
+      <raise event="USER.CREATE_TOPIC"/>
+    </onentry>
+
+    <transition event="USER.CREATE_TOPIC" target="planTopicFactoryAddition"/>
+  </state>
+
+  <state id="planTopicFactoryAddition">
+    <onentry>
+      <log label="STUB hyperdoc:plan-topic-factory-addition title='Linear logic' id=linear-logic sourcePath=hyperdoc/topics.lisp"/>
+      <raise event="done.invoke.plan-topic-factory-addition"/>
+    </onentry>
+
+    <transition event="done.invoke.plan-topic-factory-addition" target="previewTopicFactoryAddition"/>
+  </state>
+
+  <state id="previewTopicFactoryAddition">
+    <onentry>
+      <log label="UI.PREVIEW_TOPIC_FACTORY_ADDITION factorySymbol=LINEAR-LOGIC-TOPIC"/>
+      <log label="AUTO USER.APPLY_TOPIC_FACTORY_ADDITION"/>
+      <raise event="USER.APPLY_TOPIC_FACTORY_ADDITION"/>
+    </onentry>
+
+    <transition event="USER.APPLY_TOPIC_FACTORY_ADDITION" target="checkExistingTopicFactory"/>
+  </state>
+
+  <state id="checkExistingTopicFactory">
+    <onentry>
+      <log label="STUB hyperdoc:find-authored-topic-factory-by-title title='Linear logic' => exists=false"/>
+      <raise event="done.invoke.find-authored-topic-factory-by-title"/>
+    </onentry>
+
+    <transition event="done.invoke.find-authored-topic-factory-by-title" target="applyTopicFactoryAddition"/>
+  </state>
+
+  <state id="applyTopicFactoryAddition">
+    <onentry>
+      <log label="STUB hyperdoc:apply-topic-factory-addition => append generated factory atomically"/>
+      <raise event="done.invoke.apply-topic-factory-addition"/>
+    </onentry>
+
+    <transition event="done.invoke.apply-topic-factory-addition" target="loadTopicsSource"/>
+  </state>
+
+  <state id="loadTopicsSource">
+    <onentry>
+      <log label="STUB hyperdoc:load-topics-source sourcePath=hyperdoc/topics.lisp"/>
+      <raise event="done.invoke.load-topics-source"/>
+    </onentry>
+
+    <transition event="done.invoke.load-topics-source" target="rebuildTopicIndex"/>
+  </state>
+
+  <state id="rebuildTopicIndex">
+    <onentry>
+      <log label="STUB hyperdoc:rebuild-topic-index targetHyperBook=topics"/>
+      <raise event="done.invoke.rebuild-topic-index"/>
+    </onentry>
+
+    <transition event="done.invoke.rebuild-topic-index" target="verifyTopicPage"/>
+  </state>
+
+  <state id="verifyTopicPage">
+    <onentry>
+      <log label="STUB hyperdoc:verify-topic-page title='Linear logic' => fixed=true"/>
+      <raise event="done.invoke.verify-topic-page"/>
+    </onentry>
+
+    <transition event="done.invoke.verify-topic-page" target="fixed"/>
+  </state>
+
+  <final id="fixed">
+    <onentry>
+      <log label="UI.REPAIR_FIXED classification=fixed status=fixed targetHyperBook=topics targetTitle='Linear logic'"/>
+    </onentry>
+  </final>
+
+</scxml>

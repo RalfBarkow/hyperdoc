@@ -43,4 +43,5 @@
    :run-git-commit-assimilation-smoke-tests
    :run-skillization-smoke-tests
    :run-mech-deployment-provenance-smoke-tests
-   :run-py4dmx-cluster-smoke-tests))
+   :run-py4dmx-cluster-smoke-tests
+   :run-page-lookup-topic-repair-scxml-smoke-tests))
