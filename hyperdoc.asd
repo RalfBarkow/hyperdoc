@@ -172,6 +172,7 @@
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
   :depends-on (#:hyperdoc
+               #:hyperdoc/scxml
                #:hyperdoc/dmx-import
                #:hyperbook/server
                #:hyperbook/wikipedia

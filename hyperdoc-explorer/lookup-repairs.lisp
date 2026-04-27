@@ -613,11 +613,17 @@
         (:p (views:esc
              "This repair path is chunk-first: clicking repair ensures the target chunk and its basis chain."))
         (:p
-         (views:action-button
-          "Run SCXML dry-run"
+         (views:eval-button
+          "Inspect SCXML dry-run"
           (views:thunk
             (run-page-lookup-topic-repair-stub-scxml issue))
-          "Run the SCXML repair protocol stub without mutating HyperDoc source."))))))
+          "Run the SCXML repair protocol stub without mutating HyperDoc source.")
+         (views:esc " ")
+         (views:eval-button
+          "Inspect native SCXML run"
+          (views:thunk
+            (run-page-lookup-topic-repair-native-scxml issue))
+          "Compile and run the SCXML repair protocol with HyperDoc's Lisp-native SCXML compiler."))))))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))
   (title-of chunk))
