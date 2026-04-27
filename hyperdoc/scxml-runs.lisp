@@ -28,6 +28,29 @@
    (exit-code :reader scxml-run-exit-code-of
               :initarg :exit-code)))
 
+(defclass page-lookup-topic-repair-native-scxml-run ()
+  ((issue :reader native-scxml-run-issue-of
+          :initarg :issue
+          :initform nil)
+   (scxml-path :reader native-scxml-run-scxml-path-of
+               :initarg :scxml-path)
+   (generated-package :reader native-scxml-run-generated-package-of
+                      :initarg :generated-package)
+   (generated-function :reader native-scxml-run-generated-function-of
+                       :initarg :generated-function)
+   (trace :reader native-scxml-run-trace-of
+          :initarg :trace
+          :initform nil)
+   (final-state :reader native-scxml-run-final-state-of
+                :initarg :final-state
+                :initform nil)
+   (done-p :reader native-scxml-run-done-p-of
+           :initarg :done-p
+           :initform nil)
+   (validation-findings :reader native-scxml-run-validation-findings-of
+                        :initarg :validation-findings
+                        :initform nil)))
+
 (defun uscxml-browser-pathname ()
   (let ((browser *uscxml-browser*))
     (and browser (probe-file browser))))
@@ -53,3 +76,63 @@
                        :stdout stdout
                        :stderr stderr
                        :exit-code exit-code)))))
+
+(defun ensure-hyperdoc-scxml-system-loaded ()
+  (asdf:load-system :hyperdoc/scxml))
+
+(defun call-hyperdoc-scxml (function &rest arguments)
+  (ensure-hyperdoc-scxml-system-loaded)
+  (apply #'uiop:symbol-call :hyperdoc/scxml function arguments))
+
+(defun scxml-validation-error-findings (findings)
+  (remove-if-not (lambda (finding)
+                   (eq :error
+                       (call-hyperdoc-scxml
+                        :scxml-validation-finding-severity-of
+                        finding)))
+                 findings))
+
+(defun run-page-lookup-topic-repair-native-scxml (&optional issue)
+  (let* ((scxml-path *page-lookup-topic-repair-stub-scxml*)
+         (generated-package "HYPERDOC/SCXML/GENERATED/PAGE-LOOKUP-TOPIC-REPAIR")
+         (generated-function "RUN-PAGE-LOOKUP-ISSUE-TOPIC-REPAIR")
+         (chart (call-hyperdoc-scxml
+                 :parse-scxml-file
+                 scxml-path))
+         (validation-findings (call-hyperdoc-scxml
+                               :validate-scxml-chart
+                               chart))
+         (error-findings (scxml-validation-error-findings validation-findings)))
+    (if error-findings
+        (make-instance 'page-lookup-topic-repair-native-scxml-run
+                       :issue issue
+                       :scxml-path scxml-path
+                       :generated-package generated-package
+                       :generated-function generated-function
+                       :trace nil
+                       :final-state nil
+                       :done-p nil
+                       :validation-findings validation-findings)
+        (let* ((generated-run (call-hyperdoc-scxml
+                               :compile-and-run-scxml-file
+                               scxml-path
+                               :package-name generated-package
+                               :function-name generated-function))
+               (trace (call-hyperdoc-scxml
+                       :generated-scxml-run-trace-of
+                       generated-run))
+               (final-state (call-hyperdoc-scxml
+                             :generated-scxml-run-final-state-of
+                             generated-run))
+               (done-p (call-hyperdoc-scxml
+                        :generated-scxml-run-done-p
+                        generated-run)))
+          (make-instance 'page-lookup-topic-repair-native-scxml-run
+                         :issue issue
+                         :scxml-path scxml-path
+                         :generated-package generated-package
+                         :generated-function generated-function
+                         :trace trace
+                         :final-state final-state
+                         :done-p done-p
+                         :validation-findings validation-findings)))))
