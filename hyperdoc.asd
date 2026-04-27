@@ -65,6 +65,24 @@
                              (:file "git-commit-equivalence")
                              (:file "hyperdoc")))))
 
+(defsystem #:hyperdoc/scxml
+  :description "SCXML parser and ANSI Common Lisp code generator for HyperDoc"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
+  :license "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:hyperdoc
+               #:plump)
+  :components ((:module "hyperdoc-scxml"
+                :serial t
+                :components ((:file "package")
+                             (:file "ast")
+                             (:file "parser")
+                             (:file "validator")
+                             (:file "runtime-model")
+                             (:file "codegen-common-lisp")
+                             (:file "compiler")))))
+
 (defsystem #:hyperdoc/zotero
   :description "Optional Zotero backend for HyperDoc"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
