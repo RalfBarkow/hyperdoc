@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="hyperdoc-test-system-runbook"
+    initial="start">
+
+  <state id="start">
+    <onentry>
+      <log label="Starting HyperDoc test-system SCXML runbook"/>
+    </onentry>
+
+    <transition event="ENV.CAPTURED" target="captureEnvironment"/>
+  </state>
+
+  <state id="captureEnvironment">
+    <onentry>
+      <log label="Captured HyperDoc test environment"/>
+    </onentry>
+
+    <transition event="SCXML.COMPILER.PASS" target="runScxmlCompilerSmoke"/>
+    <transition event="COMPILE_ORDER.FAIL_NESTED_ASDF_FORCE" target="failedCompileOrder"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runScxmlCompilerSmoke">
+    <onentry>
+      <log label="SCXML compiler smoke passed"/>
+    </onentry>
+
+    <transition event="USCXML.REPAIR.PASS" target="runUscxmlRepairSmoke"/>
+    <transition event="COMPILE_ORDER.FAIL_NESTED_ASDF_FORCE" target="failedCompileOrder"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runUscxmlRepairSmoke">
+    <onentry>
+      <log label="uSCXML repair dry-run smoke passed"/>
+    </onentry>
+
+    <transition event="DMX.ANNOTATIONS.PASS" target="runDmxAnnotationsSmoke"/>
+    <transition event="DMX.ANNOTATIONS.SKIPPED_LIVE_PRECONDITION" target="runDmxAnnotationsSmoke"/>
+    <transition event="DMX.ANNOTATIONS.FAIL_LIVE_PRECONDITION" target="failedLivePrecondition"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runDmxAnnotationsSmoke">
+    <onentry>
+      <log label="DMX annotations smoke passed or skipped explicit live precondition"/>
+    </onentry>
+
+    <transition event="COLLECTIVE_KNOWLEDGE.PASS" target="runCollectiveKnowledgeSmoke"/>
+    <transition event="COLLECTIVE_KNOWLEDGE.FAIL_FIXTURE_DRIFT" target="failedFixtureDrift"/>
+    <transition event="COLLECTIVE_KNOWLEDGE.FAIL_MATERIALIZATION_DRIFT" target="failedMaterializationDrift"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runCollectiveKnowledgeSmoke">
+    <onentry>
+      <log label="Collective-knowledge slice smoke passed"/>
+    </onentry>
+
+    <transition event="FEDWIKI.PROMOTION_OUTPUT_SYNC.PASS" target="runFedWikiPromotionSmokes"/>
+    <transition event="FEDWIKI.PROMOTION.FAIL_MATERIALIZATION_DRIFT" target="failedMaterializationDrift"/>
+    <transition event="FEDWIKI.PROMOTION.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runFedWikiPromotionSmokes">
+    <onentry>
+      <log label="FedWiki promotion smoke passed"/>
+    </onentry>
+
+    <transition event="TOPIC_FACTORY_DMX.PASS" target="runTopicFactoryDmxSmoke"/>
+    <transition event="TOPIC_FACTORY_DMX.FAIL_SERIALIZER_CONTRACT" target="failedSerializerContract"/>
+    <transition event="TOPIC_FACTORY_DMX.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runTopicFactoryDmxSmoke">
+    <onentry>
+      <log label="Topic factory DMX smoke passed"/>
+    </onentry>
+
+    <transition event="ASDF.TEST_SYSTEM.PASS" target="runFullAsdfTestSystem"/>
+    <transition event="COMPILE_ORDER.FAIL_NESTED_ASDF_FORCE" target="failedCompileOrder"/>
+    <transition event="DMX.ANNOTATIONS.FAIL_LIVE_PRECONDITION" target="failedLivePrecondition"/>
+    <transition event="COLLECTIVE_KNOWLEDGE.FAIL_FIXTURE_DRIFT" target="failedFixtureDrift"/>
+    <transition event="COLLECTIVE_KNOWLEDGE.FAIL_MATERIALIZATION_DRIFT" target="failedMaterializationDrift"/>
+    <transition event="FEDWIKI.PROMOTION.FAIL_MATERIALIZATION_DRIFT" target="failedMaterializationDrift"/>
+    <transition event="TOPIC_FACTORY_DMX.FAIL_SERIALIZER_CONTRACT" target="failedSerializerContract"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="runFullAsdfTestSystem">
+    <onentry>
+      <log label="Full test-system run completed"/>
+    </onentry>
+
+    <transition event="RUNBOOK.PASSED" target="classifyResult"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNEXPECTED_REGRESSION" target="failedUnexpectedRegression"/>
+    <transition event="ASDF.TEST_SYSTEM.FAIL_UNKNOWN" target="failedUnknown"/>
+  </state>
+
+  <state id="classifyResult">
+    <onentry>
+      <log label="Runbook completed with current blocker classification"/>
+    </onentry>
+
+    <transition event="EXPECTATION.PASSED" target="passed"/>
+  </state>
+
+  <final id="passed">
+    <onentry>
+      <log label="HyperDoc test-system runbook passed"/>
+    </onentry>
+  </final>
+
+  <final id="failedCompileOrder">
+    <onentry>
+      <log label="Compile-order blocker classified: nested ASDF force"/>
+    </onentry>
+  </final>
+
+  <final id="failedLivePrecondition">
+    <onentry>
+      <log label="Live precondition blocker classified: DMX workspace journal stream unavailable"/>
+    </onentry>
+  </final>
+
+  <final id="failedFixtureDrift">
+    <onentry>
+      <log label="Fixture drift blocker classified for collective-knowledge smoke"/>
+    </onentry>
+  </final>
+
+  <final id="failedMaterializationDrift">
+    <onentry>
+      <log label="Materialization drift blocker classified for FedWiki promotion output"/>
+    </onentry>
+  </final>
+
+  <final id="failedSerializerContract">
+    <onentry>
+      <log label="Topic factory DMX smoke failed: serializer contract"/>
+    </onentry>
+  </final>
+
+  <final id="failedUnexpectedRegression">
+    <onentry>
+      <log label="Full test-system run failed with classified blocker: unexpected regression"/>
+    </onentry>
+  </final>
+
+  <final id="failedUnknown">
+    <onentry>
+      <log label="Full test-system run failed with classified blocker: unknown"/>
+    </onentry>
+  </final>
+
+</scxml>

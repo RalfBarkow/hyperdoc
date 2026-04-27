@@ -335,6 +335,7 @@
                              (:file "localhost-fedwiki-page-pipeline-smoke")
                              (:file "localhost-fedwiki-page-promotion-plans-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
+                             (:file "hyperdoc-test-system-runbook-smoke")
                              (:file "dmx-mcp-smoke")
                              (:file "dmx-incident-arc-smoke")
                              (:file "dmx-shared-workspace-docs-smoke")

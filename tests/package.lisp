@@ -36,6 +36,7 @@
    :run-dmx-topicmap-919822-repair-runbook-smoke-test
    :run-localhost-fedwiki-page-promotion-plans-smoke-tests
    :run-topic-factory-snippet-dmx-smoke-tests
+   :run-hyperdoc-test-system-runbook-smoke-tests
    :run-dmx-mcp-smoke-tests
    :run-dmx-incident-arc-smoke-tests
    :run-dmx-shared-workspace-docs-smoke-tests
