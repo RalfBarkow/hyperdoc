@@ -16,6 +16,11 @@
 (defparameter *topic-factory-snippet-dmx-custom-topic-value*
   "HyperDoc localhost FedWiki promotion workflow")
 
+(defun captured-http-json-object (content)
+  (let ((json-text (hyperdoc::http-request-content-string content)))
+    (and json-text
+         (shasht:read-json json-text))))
+
 (defun make-test-topic-factory-snippet-definition ()
   (make-instance
    'hyperdoc::topic-definition-chunk
@@ -228,18 +233,27 @@
               *topic-factory-snippet-dmx-workspace-topicmap-id*
               7010
               (hyperdoc::make-dmx-topicmap-view-props-json-object
-               :x 160 :y 120 :visibility t :pinned nil))
+              :x 160 :y 120 :visibility t :pinned nil))
              (assert-equal :post captured-method
                            "HTTP topicmap add must stay a POST")
              (assert-true
               (search "/topicmaps/919822/topic/7010" captured-url)
-             "HTTP topicmap add must target the topicmap membership endpoint")
-             (assert-true
-              (search "\"dmx.topicmaps.x\"" captured-content)
-              "HTTP topicmap add must serialize long-form x in the outbound JSON")
-             (assert-true
-              (not (search "\"x\"" captured-content))
-              "HTTP topicmap add must not serialize forbidden short x in the outbound JSON")))
+              "HTTP topicmap add must target the topicmap membership endpoint")
+             (let ((payload (captured-http-json-object captured-content)))
+               (assert-true payload
+                            "HTTP topicmap add must serialize a JSON payload")
+               (assert-equal 160
+                             (gethash "dmx.topicmaps.x" payload)
+                             "HTTP topicmap add must serialize long-form x in the outbound JSON")
+               (assert-equal 120
+                             (gethash "dmx.topicmaps.y" payload)
+                             "HTTP topicmap add must serialize long-form y in the outbound JSON")
+               (assert-true
+                (not (nth-value 1 (gethash "x" payload)))
+                "HTTP topicmap add must not serialize forbidden short x in the outbound JSON")
+               (assert-true
+                (not (nth-value 1 (gethash "y" payload)))
+                "HTTP topicmap add must not serialize forbidden short y in the outbound JSON"))))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-topic-factory-snippet-dmx-custom-topic-value-smoke-test ()
