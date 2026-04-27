@@ -65,18 +65,23 @@
      "Boundary helpers must load before dmx-topics"))
   t)
 
-(defun run-fresh-inspector-compile-smoke-test ()
+(defun run-fresh-inspector-compile-smoke-test (&key force?)
   ;; The practical safety contract is:
   ;; 1. explorer loads and provides make-code-page-source-navigation
   ;; 2. inspector then compiles/loads cleanly on top of that image
   ;; 3. the new DMX repair auth state-machine helpers are fbound afterwards
-  (asdf:load-system :hyperdoc/explorer :force t)
+  (if force?
+      (progn
+        (asdf:load-system :hyperdoc/explorer :force t)
+        (asdf:compile-system :hyperdoc/inspector :force t)
+        (asdf:load-system :hyperdoc/inspector :force t))
+      (progn
+        (asdf:load-system :hyperdoc/explorer)
+        (asdf:load-system :hyperdoc/inspector)))
+
   (compile-order-assert-true
    (fboundp 'hyperdoc::make-code-page-source-navigation)
    "Explorer load must provide HYPERDOC::MAKE-CODE-PAGE-SOURCE-NAVIGATION before inspector compilation")
-
-  (asdf:compile-system :hyperdoc/inspector :force t)
-  (asdf:load-system :hyperdoc/inspector :force t)
 
   (compile-order-assert-true
    (find-package :hyperdoc/inspector)
@@ -100,8 +105,11 @@
 
   t)
 
-(defun run-compile-order-smoke-tests ()
+(defun run-compile-order-smoke-tests (&key force?)
   (run-hyperdoc-inspector-asd-order-smoke-test)
-  (run-fresh-inspector-compile-smoke-test)
+  (run-fresh-inspector-compile-smoke-test :force? force?)
   (format t "~&Compile-order smoke tests passed.~%")
   t)
+
+(defun run-forced-compile-order-smoke-tests ()
+  (run-compile-order-smoke-tests :force? t))

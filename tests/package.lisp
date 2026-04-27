@@ -4,6 +4,7 @@
    :run-hyperdoc-tests
 
    :run-compile-order-smoke-tests
+   :run-forced-compile-order-smoke-tests
    :run-fresh-inspector-compile-smoke-test
 
    :run-dmx-topic-proxy-smoke-tests

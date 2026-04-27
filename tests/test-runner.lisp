@@ -1,7 +1,7 @@
 (in-package :hyperdoc/tests)
 
 (defun run-hyperdoc-tests ()
-  (run-compile-order-smoke-tests)
+  (run-compile-order-smoke-tests :force? nil)
   (run-code-path-graphs-smoke-tests)
   (run-dmx-topic-proxy-smoke-tests)
   (run-state-machine-smoke-tests)
