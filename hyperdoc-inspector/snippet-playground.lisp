@@ -2765,6 +2765,157 @@
       'javascript-code-snippet
       'unsupported-code-snippet))
 
+(defun snippet-playground-story-item-kind-from-location-label (location-label)
+  (when (and (stringp location-label)
+             (search "story item " location-label :test #'char-equal))
+    (let ((open (position #\( location-label :from-end t))
+          (close (position #\) location-label :from-end t)))
+      (when (and open close (< open close))
+        (let ((kind-token
+                (string-downcase
+                 (subseq location-label (1+ open) close))))
+          (cond
+            ((string= kind-token "code") :code)
+            ((string= kind-token "mech") :mech)
+            ((string= kind-token "paragraph") :paragraph)
+            ((string= kind-token "markdown") :markdown)
+            ((string= kind-token "reference") :reference)
+            ((string= kind-token "html") :html)
+            (t nil)))))))
+
+(defun snippet-playground-synthetic-html-pre-id-from-location-label
+    (location-label)
+  (when (and (stringp location-label)
+             (search "html-pre/" location-label :test #'char=))
+    (let ((start (search "html-pre/" location-label :test #'char=))
+          (end (search " from " location-label :test #'char=)))
+      (when start
+        (subseq location-label start (or end (length location-label)))))))
+
+(defun snippet-playground-synthetic-html-pre-snippet-p (snippet)
+  (let ((location-label (snippet-location-label-of snippet)))
+    (and (stringp location-label)
+         (snippet-playground-synthetic-html-pre-id-from-location-label
+          location-label))))
+
+(defun snippet-playground-source-expansion-candidate-for-snippet (snippet report)
+  (let* ((location-label (snippet-location-label-of snippet))
+         (synthetic-id
+           (snippet-playground-synthetic-html-pre-id-from-location-label
+            location-label))
+         (candidates
+           (and report
+                (snippet-source-expansion-report-candidates report))))
+    (when candidates
+      (or (and location-label
+               (find location-label
+                     candidates
+                     :key (lambda (entry)
+                            (getf entry :location_label))
+                     :test #'string=))
+          (and synthetic-id
+               (find synthetic-id
+                     candidates
+                     :key (lambda (entry)
+                            (getf entry :synthetic_id))
+                     :test #'string=))))))
+
+(defun snippet-playground-source-expansion-candidate-discrepancy-p
+    (candidate report)
+  (let ((discrepancies
+          (and report
+               (snippet-source-expansion-report-discrepancies report))))
+    (when (and candidate discrepancies)
+      (let ((parent-index (getf candidate :parent_block_index))
+            (line-number (getf candidate :source_line_number))
+            (character-offset (getf candidate :character_offset)))
+        (some (lambda (discrepancy)
+                (and (or (null parent-index)
+                         (eql parent-index
+                              (snippet-source-parse-discrepancy-source-block-index
+                               discrepancy)))
+                     (or (null line-number)
+                         (eql line-number
+                              (snippet-source-parse-discrepancy-source-line-number
+                               discrepancy)))
+                     (or (null character-offset)
+                         (eql character-offset
+                              (snippet-source-parse-discrepancy-character-offset
+                               discrepancy)))))
+              discrepancies)))))
+
+(defun snippet-playground-explicit-fedwiki-code-snippet-p (snippet)
+  (eq (snippet-playground-story-item-kind-from-location-label
+       (snippet-location-label-of snippet))
+      :code))
+
+(defun snippet-playground-html-wrapper-source-p (source)
+  (or (snippet-playground-string-contains-p source "<pre")
+      (snippet-playground-string-contains-p source "</pre>")
+      (snippet-playground-string-contains-p source "<code")
+      (snippet-playground-string-contains-p source "</code>")
+      (snippet-playground-string-contains-p source "<p>")
+      (snippet-playground-string-contains-p source "</p>")))
+
+(defun snippet-playground-elided-source-p (source)
+  (or (snippet-playground-string-contains-p source "…")
+      (snippet-playground-string-contains-p source "omitted-code")
+      (snippet-playground-string-contains-p source "omitted code")
+      (snippet-playground-string-contains-p source "elided")))
+
+(defun snippet-playground-synthetic-html-pre-superseded-p
+    (snippet slice-code-snippets)
+  (and (snippet-playground-synthetic-html-pre-snippet-p snippet)
+       (let ((snippet-block-index (code-snippet-block-index-of snippet)))
+         (some (lambda (candidate)
+                 (and (snippet-playground-explicit-fedwiki-code-snippet-p
+                       candidate)
+                      (> (code-snippet-block-index-of candidate)
+                         snippet-block-index)))
+               slice-code-snippets))))
+
+(defun executable-code-snippet-for-bundle-p
+    (snippet &key policy report slice-code-snippets)
+  (let* ((source (or (code-snippet-source-of snippet) ""))
+         (story-item-kind
+           (snippet-playground-story-item-kind-from-location-label
+            (snippet-location-label-of snippet)))
+         (synthetic-html-pre-p
+           (snippet-playground-synthetic-html-pre-snippet-p snippet))
+         (candidate
+           (and synthetic-html-pre-p
+                (snippet-playground-source-expansion-candidate-for-snippet
+                 snippet
+                 report)))
+         (candidate-accepted-p
+           (or (null candidate)
+               (eql (getf candidate :status) :accepted)
+               (eq (getf candidate :accepted_p) t)))
+         (candidate-discrepancy-p
+           (and candidate
+                (snippet-playground-source-expansion-candidate-discrepancy-p
+                 candidate
+                 report)))
+         (superseded-p
+           (snippet-playground-synthetic-html-pre-superseded-p
+            snippet
+            slice-code-snippets))
+         (html-pre-policy-allowed-p
+           (or (null policy)
+               (snippet-source-expansion-policy-extract-html-pre-p policy))))
+    (and (typep snippet 'javascript-code-snippet)
+         (not (snippet-playground-empty-string-p source))
+         (not (member story-item-kind
+                      '(:paragraph :markdown :reference :mech)
+                      :test #'eq))
+         (not (snippet-playground-html-wrapper-source-p source))
+         (not (snippet-playground-elided-source-p source))
+         (or (not synthetic-html-pre-p)
+             (and html-pre-policy-allowed-p
+                  candidate-accepted-p
+                  (not candidate-discrepancy-p)
+                  (not superseded-p))))))
+
 (defun snippet-playground-bundled-code-source (snippets)
   (with-output-to-string (stream)
     (loop for snippet in snippets
@@ -2827,21 +2978,31 @@
      :findings bundle-findings)))
 
 (defun select-code-snippet-for-mech-slice
-    (selected-mech recognized-mech-snippets recognized-code-snippets)
+    (selected-mech recognized-mech-snippets recognized-code-snippets
+     &key policy report)
   (let* ((slice-code-snippets
            (snippet-playground-code-snippets-for-mech-slice
             selected-mech
             recognized-mech-snippets
             recognized-code-snippets))
+         (executable-snippets
+           (remove-if-not
+            (lambda (snippet)
+              (executable-code-snippet-for-bundle-p
+               snippet
+               :policy policy
+               :report report
+               :slice-code-snippets slice-code-snippets))
+            slice-code-snippets))
          (entry-snippet
-           (select-best-snippet slice-code-snippets
+           (select-best-snippet executable-snippets
                                 #'code-snippet-score-of)))
     (if (and entry-snippet
-             (> (length slice-code-snippets) 1))
+             (> (length executable-snippets) 1))
         (make-snippet-playground-bundled-code-snippet
          selected-mech
          entry-snippet
-         (sort (copy-list slice-code-snippets)
+         (sort (copy-list executable-snippets)
                #'<
                :key #'code-snippet-block-index-of))
         entry-snippet)))
@@ -3774,7 +3935,9 @@
                   (select-code-snippet-for-mech-slice
                    selected-mech
                    recognized-mech-snippets
-                   recognized-code-snippets))
+                   recognized-code-snippets
+                   :policy effective-source-expansion-policy
+                   :report source-expansion-report))
             (note-evidence
              :pairing
              "Selected evidential Mech/code inputs."

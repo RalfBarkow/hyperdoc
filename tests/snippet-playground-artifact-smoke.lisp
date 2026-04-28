@@ -190,6 +190,171 @@
               selected-findings)
      "Bundled selected code findings must include the bundle size")))
 
+(defun snippet-playground-smoke-make-elided-html-pre-pollution-blocks ()
+  (list
+   (list :index 1
+         :line-number 1
+         :location-label "story item 1 (mech)"
+         :open-tag "fedwiki-mech"
+         :source (format nil
+                         "CLICK station~%CODE popular~%PREVIEW items"))
+   (list :index 2
+         :line-number 10
+         :location-label "story item 2 (html)"
+         :open-tag "fedwiki-html"
+         :source
+         (format nil
+                 "<pre>export function popular(count) {~%  let tally = this.neighborhood.reduce( … )~%  let top = tally.sort.slice(0,count)~%  this.items = top.map( … )~%}</pre>"))
+   (list :index 3
+         :line-number 20
+         :location-label "story item 3 (paragraph)"
+         :open-tag "fedwiki-paragraph"
+         :source "Here I replace some elided code with function names.")
+   (list :index 4
+         :line-number 30
+         :location-label "story item 4 (code)"
+         :open-tag "fedwiki-code"
+         :source
+         (format nil
+                 "export function popular(count) {~%  globalThis = this~%  let infos = this.neighborhood~%  let tally = infos.reduce(links, [])~%  let top = tally.sort(desc).slice(0,count)~%  this.items = top.map(report)~%  return `${tally.length} linked pages`~%}"))
+   (list :index 5
+         :line-number 40
+         :location-label "story item 5 (code)"
+         :open-tag "fedwiki-code"
+         :source
+         (format nil
+                 "function links(tally, page) {~%  tally.push(page)~%  return tally~%}"))
+   (list :index 6
+         :line-number 50
+         :location-label "story item 6 (code)"
+         :open-tag "fedwiki-code"
+         :source
+         (format nil
+                 "function desc(left, right) {~%  return right.count - left.count~%}"))
+   (list :index 7
+         :line-number 60
+         :location-label "story item 7 (code)"
+         :open-tag "fedwiki-code"
+         :source
+         (format nil
+                 "function report(item) {~%  return item~%}"))
+   (list :index 8
+         :line-number 70
+         :location-label "story item 8 (code)"
+         :open-tag "fedwiki-code"
+         :source
+         (format nil
+                 "class Bag {~%  constructor(items) {~%    this.items = items~%  }~%}"))))
+
+(defun make-snippet-playground-elided-html-pre-pollution-smoke-session ()
+  (let* ((blocks (snippet-playground-smoke-make-elided-html-pre-pollution-blocks))
+         (source-text (hyperdoc::snippet-playground-source-text-from-blocks
+                       blocks)))
+    (hyperdoc::make-snippet-playground-result-from-blocks
+     :context-object nil
+     :context-view-title "Source"
+     :source-pathname nil
+     :source-text source-text
+     :blocks blocks
+     :origin-surface-kind "fedwiki-page"
+     :provider-kind "fedwiki-v1"
+     :source-label "Snippet playground elided html-pre pollution smoke")))
+
+(defun run-snippet-playground-elided-html-pre-pollution-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((session
+           (make-snippet-playground-elided-html-pre-pollution-smoke-session))
+         (report
+           (hyperdoc::snippet-playground-session-source-expansion-report-of
+            session))
+         (selected-code
+           (hyperdoc::snippet-playground-session-selected-code-of session))
+         (selected-source
+           (and selected-code
+                (hyperdoc::code-snippet-source-of selected-code)))
+         (selected-findings
+           (and selected-code
+                (hyperdoc::code-snippet-findings-of selected-code)))
+         (recognized-labels
+           (mapcar #'hyperdoc::snippet-location-label-of
+                   (hyperdoc::snippet-playground-session-recognized-code-snippets-of
+                    session)))
+         (candidates
+           (and report
+                (hyperdoc::snippet-source-expansion-report-candidates report)))
+         (preview-candidate
+           (find-if (lambda (entry)
+                      (string= (getf entry :synthetic_id) "html-pre/2/1"))
+                    candidates))
+         (preview-source
+           (and preview-candidate
+                (getf preview-candidate :preview))))
+    (snippet-playground-assert-equal
+     :ready
+     (hyperdoc::snippet-playground-session-status-of session)
+     "Elided html-pre fixture must still produce a ready session")
+    (snippet-playground-assert-true
+     (member "html-pre/2/1 from story item 2 (html)"
+             recognized-labels
+             :test #'string=)
+     "Parser output must retain html-pre candidate provenance in recognized snippets")
+    (snippet-playground-assert-true
+     preview-candidate
+     "Source expansion report must include html-pre/2/1 candidate provenance")
+    (snippet-playground-assert-equal
+     :accepted
+     (getf preview-candidate :status)
+     "Elided html-pre preview candidate should still be tracked as accepted exploratory evidence")
+    (snippet-playground-assert-contains
+     "…"
+     (or preview-source "")
+     "Candidate preview must preserve the ellipsis marker")
+    (snippet-playground-assert-contains
+     "export function popular(count)"
+     selected-source
+     "Selected code must include the explicit code story item entry function")
+    (snippet-playground-assert-contains
+     "function links"
+     selected-source
+     "Selected code must include helper links function")
+    (snippet-playground-assert-contains
+     "function desc"
+     selected-source
+     "Selected code must include helper desc function")
+    (snippet-playground-assert-contains
+     "function report"
+     selected-source
+     "Selected code must include helper report function")
+    (snippet-playground-assert-contains
+     "class Bag"
+     selected-source
+     "Selected code must include helper class Bag")
+    (snippet-playground-assert-not-contains
+     "<pre>"
+     selected-source
+     "Selected code bundle must exclude HTML wrapper tags")
+    (snippet-playground-assert-not-contains
+     "</pre>"
+     selected-source
+     "Selected code bundle must exclude closing HTML wrapper tags")
+    (snippet-playground-assert-not-contains
+     "Here I replace some elided code with function names."
+     selected-source
+     "Selected code bundle must exclude paragraph prose")
+    (snippet-playground-assert-not-contains
+     "…"
+     selected-source
+     "Selected code bundle must exclude elided html-pre preview text")
+    (snippet-playground-assert-not-contains
+     "let tally = this.neighborhood.reduce( … )"
+     selected-source
+     "Selected code bundle must exclude the synthetic html-pre elided preview body")
+    (snippet-playground-assert-true
+     (find-if (lambda (finding)
+                (search "Bundled 5 code snippets" finding :test #'char=))
+              selected-findings)
+     "Bundle findings must report only the executable snippet count")))
+
 (defun snippet-playground-smoke-make-html-pre-expansion-blocks ()
   (list
    (list :index 1
@@ -937,6 +1102,7 @@
 (defun run-snippet-playground-artifact-smoke-tests ()
   (run-snippet-playground-artifact-runtime-smoke-test)
   (run-snippet-playground-code-slice-bundle-smoke-test)
+  (run-snippet-playground-elided-html-pre-pollution-smoke-test)
   (run-snippet-playground-html-pre-expansion-smoke-test)
   (run-snippet-playground-html-pre-expansion-disabled-smoke-test)
   (run-snippet-playground-html-pre-expansion-discrepancy-smoke-test)
