@@ -57,8 +57,46 @@
 (defun mcp-test-header-value (headers name)
   (cdr (find name headers :test #'string-equal :key #'car)))
 
+(defun mcp-content-type-media-type (content-type)
+  (when content-type
+    (let* ((separator (position #\; content-type))
+           (media-type (if separator
+                           (subseq content-type 0 separator)
+                           content-type)))
+      (string-downcase
+       (string-trim '(#\Space #\Tab #\Newline #\Return)
+                    media-type)))))
+
+(defun mcp-content-type-parameter (content-type parameter-name)
+  (when content-type
+    (let* ((separator (position #\; content-type))
+           (parameter-section
+             (and separator
+                  (< separator (1- (length content-type)))
+                  (subseq content-type (1+ separator))))
+           (parameter-name-downcase (string-downcase parameter-name)))
+      (when parameter-section
+        (loop for raw-part in (uiop:split-string parameter-section :separator '(#\;))
+              for part = (string-trim '(#\Space #\Tab #\Newline #\Return) raw-part)
+              for equals = (position #\= part)
+              for key = (and equals
+                             (string-downcase
+                              (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                           (subseq part 0 equals))))
+              for value = (and equals
+                               (string-downcase
+                                (string-trim '(#\Space #\Tab #\Newline #\Return #\")
+                                             (subseq part (1+ equals)))))
+              when (and key (string= key parameter-name-downcase))
+                return value)))))
+
 (defun mcp-test-json-stream (object)
   (make-string-input-stream (hyperdoc::encode-json-string object)))
+
+(defun mcp-request-content-json (content)
+  (let ((body (mcp-test-body-string content)))
+    (and (stringp body)
+         (shasht:read-json body))))
 
 (defun ensure-dmx-mcp-smoke-runtime-loaded ()
   (unless (and (fboundp 'hyperdoc::make-dmx-mcp-server)
@@ -271,21 +309,41 @@
               :dry-run nil))
            (dolist (call (list create-call add-call update-call))
              (mcp-assert-true call "Each guarded HTTP write call must be captured")
-             (mcp-assert-equal "application/json"
-                               (getf call :content-type)
-                               "Guarded HTTP write must keep Drakma content-type")
+             (let ((request-content-type (getf call :content-type)))
+               (mcp-assert-equal "application/json"
+                                 (mcp-content-type-media-type request-content-type)
+                                 "Guarded HTTP write must keep JSON media-type")
+               (mcp-assert-true
+                (member (mcp-content-type-parameter request-content-type "charset")
+                        '(nil "utf-8")
+                        :test #'string=)
+                "Guarded HTTP write must keep charset either absent or utf-8"))
              (mcp-assert-equal "dmx_workspace_id=919815"
                                (mcp-test-header-value (getf call :headers) "Cookie")
                                "Guarded HTTP write must carry the configured DMX workspace cookie")
              (mcp-assert-true
               (null (mcp-test-header-value (getf call :headers) "Content-Type"))
               "Guarded HTTP write must not duplicate Content-Type in additional headers"))
-           (mcp-assert-true
-            (search "\"dmx.notes.title\"" (getf create-call :content))
-            "Guarded create payload must still carry the note title child")
-           (mcp-assert-true
-            (search "\"dmx.notes.text\"" (getf update-call :content))
-            "Guarded update payload must still carry the note text child"))
+           (let* ((create-payload (mcp-request-content-json (getf create-call :content)))
+                  (create-children (and (hash-table-p create-payload)
+                                        (gethash "children" create-payload)))
+                  (update-payload (mcp-request-content-json (getf update-call :content)))
+                  (update-children (and (hash-table-p update-payload)
+                                        (gethash "children" update-payload))))
+             (mcp-assert-true
+              (and (hash-table-p create-children)
+                   (multiple-value-bind (_ present-p)
+                       (gethash "dmx.notes.title" create-children)
+                     (declare (ignore _))
+                     present-p))
+              "Guarded create payload must still carry the note title child")
+             (mcp-assert-true
+              (and (hash-table-p update-children)
+                   (multiple-value-bind (_ present-p)
+                       (gethash "dmx.notes.text" update-children)
+                     (declare (ignore _))
+                     present-p))
+              "Guarded update payload must still carry the note text child")))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun mcp-test-seed-note

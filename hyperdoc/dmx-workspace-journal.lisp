@@ -1843,22 +1843,26 @@
   (let* ((topicmap-json (dmx-import-read-topicmap client workspace-topicmap-id))
          (candidates-by-subject (make-hash-table :test #'equal))
          (streams '()))
-    (dolist (topic (json-array-elements (gethash "topics" topicmap-json)))
-      (when (dmx-workspace-journal-stream-topic-p topic)
-        (let ((stream (dmx-workspace-journal-companion-stream-from-topic topic)))
-          (when stream
-            (push (list :topic topic
-                        :stream stream
-                        :topic-id (dmx-import-object-id topic)
-                        :assigned-workspace-id
-                        (getf (dmx-workspace-journal-existing-topic-workspace-summary
-                               client
-                               topic)
-                              :assigned-workspace-id)
-                        :supersedes-topic-id
-                        (gethash "supersedesCompanionTopicId" stream))
-                  (gethash (gethash "subjectKey" stream)
-                           candidates-by-subject)))))
+    ;; TODO(topic-journal-store): once journal storage is fully decoupled from
+    ;; topicmap projection, replace this topicmap scan with backend-native stream
+    ;; enumeration and keep topicmap usage only for optional live observations.
+    (when (hash-table-p topicmap-json)
+      (dolist (topic (json-array-elements (gethash "topics" topicmap-json)))
+        (when (dmx-workspace-journal-stream-topic-p topic)
+          (let ((stream (dmx-workspace-journal-companion-stream-from-topic topic)))
+            (when stream
+              (push (list :topic topic
+                          :stream stream
+                          :topic-id (dmx-import-object-id topic)
+                          :assigned-workspace-id
+                          (getf (dmx-workspace-journal-existing-topic-workspace-summary
+                                 client
+                                 topic)
+                                :assigned-workspace-id)
+                          :supersedes-topic-id
+                          (gethash "supersedesCompanionTopicId" stream))
+                    (gethash (gethash "subjectKey" stream)
+                             candidates-by-subject)))))))
     (maphash (lambda (_subject-key subject-candidates)
                (declare (ignore _subject-key))
                (when-let (current-candidate
@@ -1866,7 +1870,7 @@
                             subject-candidates))
                  (push (getf current-candidate :stream) streams)))
              candidates-by-subject)
-    (values (nreverse streams) topicmap-json))))
+    (values (nreverse streams) topicmap-json)))
 
 (defun dmx-workspace-journal-live-topic-snapshots (client workspace-topicmap-id topicmap-json)
   (let ((snapshots (make-hash-table :test #'equal)))
@@ -2063,6 +2067,71 @@
                  (and current
                       (gethash "topicId" current))))))
 
+(defun dmx-workspace-journal-stream-readable-p
+    (stream &key existing-topic current-live-state)
+  (and stream
+       (or existing-topic
+           (plusp (or (gethash "currentRevision" stream) 0))
+           (and current-live-state
+                (gethash "topicExists" current-live-state)))))
+
+(defun dmx-workspace-journal-locate-subject-stream
+    (client workspace-topicmap-id subject-key
+     &key note-key note-kind reconcile subject-meta live-snapshot)
+  ;; Compatibility step toward decoupling topic-journal reads from workspace
+  ;; topicmap projection. Resolve one subject stream directly instead of
+  ;; requiring a workspace-wide topicmap reconciliation pass.
+  (if reconcile
+      (multiple-value-bind (current-live-state _events stream _repair-summary)
+          (dmx-workspace-journal-reconcile-subject
+           client
+           subject-key
+           "uri"
+           subject-key
+           workspace-topicmap-id
+           :subject-uri (and subject-meta
+                             (gethash "subjectUri" subject-meta))
+           :subject-kind (and subject-meta
+                              (gethash "subjectKind" subject-meta))
+           :ownership-class (and subject-meta
+                                 (gethash "ownershipClass" subject-meta))
+           :note-key (or note-key
+                         (and subject-meta
+                              (gethash "noteKey" subject-meta)))
+           :note-kind (or note-kind
+                          (and subject-meta
+                               (gethash "noteKind" subject-meta)))
+           :live-snapshot live-snapshot
+           :persist-events-p nil)
+        (declare (ignore _events _repair-summary))
+        (and (dmx-workspace-journal-stream-readable-p
+              stream
+              :current-live-state current-live-state)
+             stream))
+      (multiple-value-bind (stream existing-topic)
+          (dmx-workspace-journal-read-stream
+           client
+           subject-key
+           "uri"
+           subject-key
+           workspace-topicmap-id
+           :subject-uri (and subject-meta
+                             (gethash "subjectUri" subject-meta))
+           :subject-kind (and subject-meta
+                              (gethash "subjectKind" subject-meta))
+           :ownership-class (and subject-meta
+                                 (gethash "ownershipClass" subject-meta))
+           :note-key (or note-key
+                         (and subject-meta
+                              (gethash "noteKey" subject-meta)))
+           :note-kind (or note-kind
+                          (and subject-meta
+                               (gethash "noteKind" subject-meta))))
+        (and (dmx-workspace-journal-stream-readable-p
+              stream
+              :existing-topic existing-topic)
+             stream))))
+
 (defun dmx-workspace-journal-locate-stream
     (client workspace-topicmap-id
      &key subject-key topic-id note-key note-kind reconcile)
@@ -2071,36 +2140,63 @@
                (make-default-dmx-import-client :dry-run t :verbose nil)))
          (resolved-topicmap-id
            (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+         (resolved-note-kind
+           (and note-key
+                (normalize-dmx-workspace-note-kind-designator
+                 note-kind
+                 'dmx-workspace-journal-locate-stream)))
          (resolved-subject-key
            (cond
              (subject-key
               subject-key)
              (note-key
               (dmx-workspace-note-uri
-               (normalize-dmx-workspace-note-kind-designator
-                note-kind
-                'dmx-workspace-journal-locate-stream)
+               resolved-note-kind
                note-key))
              (t
               nil))))
-    (multiple-value-bind (streams _)
-        (if reconcile
-            (dmx-workspace-journal-reconcile-workspace
-             resolved-client
-             resolved-topicmap-id
-             :persist-events-p nil)
-            (dmx-workspace-journal-collect-streams
-             resolved-client
-             resolved-topicmap-id))
-      (declare (ignore _))
-      (or (and resolved-subject-key
-               (dmx-workspace-journal-find-stream-by-subject-key
-                streams
-                resolved-subject-key))
-          (and topic-id
-               (dmx-workspace-journal-find-stream-by-topic-id
-                streams
-                topic-id))))))
+    (or (and resolved-subject-key
+             (dmx-workspace-journal-locate-subject-stream
+              resolved-client
+              resolved-topicmap-id
+              resolved-subject-key
+              :note-key note-key
+              :note-kind resolved-note-kind
+              :reconcile reconcile))
+        (and topic-id
+             (multiple-value-bind (live-subject-key _lookup-kind _lookup-value
+                                   subject-meta live-snapshot)
+                 (dmx-workspace-journal-locate-live-subject
+                  resolved-client
+                  topic-id
+                  resolved-topicmap-id)
+               (declare (ignore _lookup-kind _lookup-value))
+               (and live-subject-key
+                    (dmx-workspace-journal-locate-subject-stream
+                     resolved-client
+                     resolved-topicmap-id
+                     live-subject-key
+                     :reconcile reconcile
+                     :subject-meta subject-meta
+                     :live-snapshot live-snapshot))))
+        (multiple-value-bind (streams _)
+            (if reconcile
+                (dmx-workspace-journal-reconcile-workspace
+                 resolved-client
+                 resolved-topicmap-id
+                 :persist-events-p nil)
+                (dmx-workspace-journal-collect-streams
+                 resolved-client
+                 resolved-topicmap-id))
+          (declare (ignore _))
+          (or (and resolved-subject-key
+                   (dmx-workspace-journal-find-stream-by-subject-key
+                    streams
+                    resolved-subject-key))
+              (and topic-id
+                   (dmx-workspace-journal-find-stream-by-topic-id
+                    streams
+                    topic-id)))))))
 
 (defun read-dmx-topic-journal
     (&key workspace-topicmap-id client subject-key topic-id note-key note-kind
