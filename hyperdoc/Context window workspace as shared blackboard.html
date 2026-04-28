@@ -139,7 +139,8 @@
   <li>Add an existing topic to topicmap <tt>919822</tt> or update its validated view props with <tt>upsert_workspace_topicmap_context</tt>.</li>
   <li>Plan a typed topicmap unlink with <tt>remove_workspace_topic_from_topicmap</tt>, while treating live HTTP unlink as intentionally unsupported until the membership DELETE contract is proven.</li>
   <li>Delete a HyperDoc-owned snippet twin with <tt>delete_workspace_topic</tt>.</li>
-  <li>Inspect journal history through <tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, and <tt>list_workspace_topic_revisions</tt>.</li>
+  <li>Inspect HyperDoc-local journal history through <tt>read_hyperdoc_workspace_journal</tt>, <tt>read_hyperdoc_topic_journal</tt>, and <tt>list_hyperdoc_topic_revisions</tt>.</li>
+  <li>Inventory legacy DMX companion artifacts through <tt>inventory_legacy_dmx_workspace_journal_artifacts</tt> and prepare explicit-ID dry-run cleanup plans with <tt>plan_legacy_dmx_workspace_journal_cleanup</tt>.</li>
   <li>Restore an owned note or topic through <tt>restore_workspace_note_revision</tt> or <tt>restore_workspace_topic_revision</tt>.</li>
   <li>Keep a simple durable history in the workspace rather than overwriting arbitrary unrelated topics.</li>
 </ul>

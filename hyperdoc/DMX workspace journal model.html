@@ -43,19 +43,18 @@
 <h2>Storage model</h2>
 
 <p>
-  The implemented storage model is <tt>companion-workspace-note</tt>. Every
-  journal stream is stored as one hidden HyperDoc-owned workspace note whose
-  URI starts with <tt>hyperdoc:mcp/workspace-journal/</tt>. The note lives in
-  topicmap <tt>919822</tt>, but HyperDoc places it off-canvas with hidden view
-  props and excludes those companion topics from normal visible workspace
-  counts.
+  The historical DMX projection storage model is
+  <tt>companion-workspace-note</tt>. Legacy companion topics use the URI prefix
+  <tt>hyperdoc:mcp/workspace-journal/</tt>. HyperDoc now treats these as legacy
+  projection artifacts and deferred cleanup candidates, not as the current
+  persistence authority for workspace-journal streams.
 </p>
 
 <p>
-  That implemented storage model still matters today for replay, restore, and
-  repair. It should not, however, be misread as the ultimate authority model.
-  In the target architecture, the companion note is the DMX-side projected
-  shadow of journaled state that is owned first by the HyperDoc instance.
+  The current authority model is explicit: the workspace journal is
+  HyperDoc-local. DMX companion notes may still exist as legacy projections,
+  but read tools now separate HyperDoc-local journal reads from DMX legacy
+  inventory and dry-run cleanup planning.
 </p>
 
 <p>
@@ -141,9 +140,11 @@
 </p>
 
 <ul>
-  <li><tt>read_workspace_journal</tt> reads the bounded workspace-wide overview.</li>
-  <li><tt>read_topic_journal</tt> reads one subject stream with revisions and full events.</li>
-  <li><tt>list_workspace_topic_revisions</tt> exposes the revision list without widening into raw event writes.</li>
+  <li><tt>read_hyperdoc_workspace_journal</tt> reads the bounded workspace-wide overview.</li>
+  <li><tt>read_hyperdoc_topic_journal</tt> reads one subject stream with revisions and full events.</li>
+  <li><tt>list_hyperdoc_topic_revisions</tt> exposes the revision list without widening into raw event writes.</li>
+  <li><tt>inventory_legacy_dmx_workspace_journal_artifacts</tt> inventories legacy DMX companion topics in read-only mode.</li>
+  <li><tt>plan_legacy_dmx_workspace_journal_cleanup</tt> provides an explicit-ID dry-run cleanup plan only.</li>
   <li><tt>restore_workspace_topic_revision</tt> restores a topic revision.</li>
   <li><tt>restore_workspace_note_revision</tt> restores a note or handover revision.</li>
 </ul>
@@ -166,16 +167,16 @@
   entries are DMX-side drift records, not the primary journal truth.
 </p>
 
-<h2>Reconcile-on-read boundary</h2>
+<h2>Legacy reconcile boundary</h2>
 
 <p>
   The live call-graph surface
   <a page="DMX workspace journal reconcile call graph">DMX workspace journal
-  reconcile call graph</a> makes one boundary explicit: reconcile-on-read may
-  synthesize diff events in memory, but it must not persist or reattach the
-  hidden companion journal notes while a read is in progress. The concrete
-  incident anchor for that rule is companion journal note <tt>924694</tt> in
-  topicmap <tt>919822</tt>.
+  reconcile call graph</a> remains as a legacy incident map for the old
+  reconcile-on-read path. The current MCP read tools do not accept
+  <tt>reconcile</tt> and do not persist, repair, or reattach DMX companion
+  notes while reading. The concrete legacy anchor for deferred cleanup planning
+  remains companion journal note <tt>924694</tt> in topicmap <tt>919822</tt>.
 </p>
 
 <h2>Restore safety</h2>

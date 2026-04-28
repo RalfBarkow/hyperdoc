@@ -20,6 +20,11 @@
   "hyperdoc-snapshot-diff-reconciler")
 (defparameter *dmx-unix-epoch-universal-time-offset* 2208988800)
 (defvar *dmx-workspace-journal-suppressed-p* nil)
+(defparameter *hyperdoc-local-workspace-journal-schema-version* 1)
+(defparameter *hyperdoc-local-workspace-journal-storage-model*
+  "hyperdoc-local-workspace-journal")
+(defvar *hyperdoc-local-workspace-journal-streams*
+  (make-hash-table :test #'equal))
 
 (define-condition dmx-workspace-journal-unassigned-companion-topic-error
     (fedwiki-dmx-import-error)
@@ -1995,6 +2000,254 @@
      "lastEventType" (and events (gethash "eventType" (car (last events))))
      "lastObservationKind"
      (and events (gethash "observationKind" (car (last events)))))))
+
+(defun clear-hyperdoc-local-workspace-journal-store ()
+  (clrhash *hyperdoc-local-workspace-journal-streams*)
+  t)
+
+(defun set-hyperdoc-local-workspace-journal-stream (subject-key stream)
+  (unless (dmx-non-empty-string-p subject-key)
+    (error 'fedwiki-dmx-import-error
+           :message "subject-key is required for HyperDoc-local workspace-journal stream update"))
+  (unless (hash-table-p stream)
+    (error 'fedwiki-dmx-import-error
+           :message "stream must be a JSON object hash-table"))
+  (setf (gethash subject-key *hyperdoc-local-workspace-journal-streams*) stream))
+
+(defun hyperdoc-local-workspace-journal-streams ()
+  (let ((streams '()))
+    (maphash (lambda (_subject-key stream)
+               (declare (ignore _subject-key))
+               (push stream streams))
+             *hyperdoc-local-workspace-journal-streams*)
+    (nreverse streams)))
+
+(defun hyperdoc-local-workspace-journal-subject-key
+    (&key subject-key topic-id note-key note-kind)
+  (cond
+    ((dmx-non-empty-string-p subject-key)
+     subject-key)
+    ((dmx-non-empty-string-p note-key)
+     (dmx-workspace-note-uri
+      (normalize-dmx-workspace-note-kind-designator
+       note-kind
+       'hyperdoc-local-workspace-journal-subject-key)
+      note-key))
+    ((integerp topic-id)
+     (format nil "dmx:topic/~D" topic-id))
+    (t
+     (error 'fedwiki-dmx-import-error
+            :message "Provide subjectKey, noteKey, or topicId for HyperDoc-local topic-journal reads"))))
+
+(defun read-hyperdoc-workspace-journal
+    (&key workspace-topicmap-id)
+  (let* ((resolved-topicmap-id
+           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+         (streams (hyperdoc-local-workspace-journal-streams)))
+    (dmx-workspace-journal-json-object
+     "workspaceTopicmapId" resolved-topicmap-id
+     "storageModel" *hyperdoc-local-workspace-journal-storage-model*
+     "schemaVersion" *hyperdoc-local-workspace-journal-schema-version*
+     "authority" "hyperdoc-local-only"
+     "streamCount" (length streams)
+     "eventCount"
+     (reduce #'+
+             (mapcar (lambda (stream)
+                       (length (dmx-workspace-journal-stream-events-list stream)))
+                     streams)
+             :initial-value 0)
+     "legacyDmxCompanionProjection"
+     (dmx-workspace-journal-json-object
+      "status" "out-of-scope"
+      "message"
+      "DMX companion workspace-journal notes are legacy cleanup candidates only; use inventory_legacy_dmx_workspace_journal_artifacts for read-only inventory and plan_legacy_dmx_workspace_journal_cleanup for dry-run cleanup planning.")
+     "streams"
+     (coerce (mapcar #'dmx-workspace-journal-stream-summary streams)
+             'vector))))
+
+(defun read-hyperdoc-topic-journal
+    (&key subject-key topic-id note-key note-kind)
+  (let* ((resolved-subject-key
+           (hyperdoc-local-workspace-journal-subject-key
+            :subject-key subject-key
+            :topic-id topic-id
+            :note-key note-key
+            :note-kind note-kind))
+         (stream (gethash resolved-subject-key
+                          *hyperdoc-local-workspace-journal-streams*)))
+    (unless stream
+      (error 'fedwiki-dmx-import-error
+             :message "No HyperDoc-local workspace journal stream matched the requested subject"))
+    (let ((current (or (dmx-workspace-journal-current-snapshot stream)
+                       (dmx-workspace-journal-subject-snapshot-from-stream stream))))
+      (dmx-workspace-journal-json-object
+       "subjectKey" (gethash "subjectKey" stream)
+       "subjectUri" (gethash "subjectUri" stream)
+       "subjectKind" (gethash "subjectKind" stream)
+       "ownershipClass" (gethash "ownershipClass" stream)
+       "currentRevision" (gethash "currentRevision" stream)
+       "currentState" current
+       "revisions" (dmx-workspace-journal-revision-summaries stream)
+       "events"
+       (coerce (dmx-workspace-journal-stream-events-list stream) 'vector)))))
+
+(defun list-hyperdoc-topic-revisions
+    (&key subject-key topic-id note-key note-kind)
+  (let* ((resolved-subject-key
+           (hyperdoc-local-workspace-journal-subject-key
+            :subject-key subject-key
+            :topic-id topic-id
+            :note-key note-key
+            :note-kind note-kind))
+         (stream (gethash resolved-subject-key
+                          *hyperdoc-local-workspace-journal-streams*)))
+    (unless stream
+      (error 'fedwiki-dmx-import-error
+             :message "No HyperDoc-local workspace journal stream matched the requested subject"))
+    (dmx-workspace-journal-json-object
+     "subjectKey" (gethash "subjectKey" stream)
+     "subjectKind" (gethash "subjectKind" stream)
+     "currentRevision" (gethash "currentRevision" stream)
+     "revisions" (dmx-workspace-journal-revision-summaries stream))))
+
+(defun dmx-workspace-journal-topic-assoc-ids (topic)
+  (let ((assoc-ids '()))
+    (dolist (assoc (json-array-elements (gethash "assocs" topic)))
+      (let ((assoc-id (dmx-json-object-value assoc "id")))
+        (when (integerp assoc-id)
+          (push assoc-id assoc-ids))))
+    (nreverse assoc-ids)))
+
+(defun dmx-workspace-journal-legacy-candidate-p (topic)
+  (let ((uri (dmx-workspace-journal-topic-uri topic)))
+    (and (dmx-non-empty-string-p uri)
+         (dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix* uri))))
+
+(defun dmx-workspace-journal-legacy-candidate-summary (topic source)
+  (let* ((assoc-ids (dmx-workspace-journal-topic-assoc-ids topic))
+         (assoc-count (or (dmx-json-object-value topic "assocCount")
+                          (length assoc-ids))))
+    (dmx-workspace-journal-json-object
+     "topicId" (dmx-import-object-id topic)
+     "uri" (dmx-workspace-journal-topic-uri topic)
+     "typeUri" (or (dmx-json-object-value topic "typeUri")
+                   (dmx-json-object-value topic "type_uri"))
+     "assocCount" assoc-count
+     "assocIds" (coerce assoc-ids 'vector)
+     "source" source
+     "reason"
+     "Legacy DMX workspace-journal persistence candidate (hyperdoc:mcp/workspace-journal/*). HyperDoc-local workspace journal is authoritative; DMX record is deferred cleanup candidate only.")))
+
+(defun inventory-legacy-dmx-workspace-journal-artifacts
+    (&key workspace-topicmap-id client candidate-topic-ids)
+  (let* ((resolved-topicmap-id
+           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+         (resolved-client
+           (or client
+               (make-default-dmx-import-client :dry-run t :verbose nil)))
+         (topicmap-json
+           (dmx-import-read-topicmap resolved-client resolved-topicmap-id))
+         (candidate-table (make-hash-table :test #'eql)))
+    (dolist (topic (json-array-elements (gethash "topics" topicmap-json)))
+      (when (dmx-workspace-journal-legacy-candidate-p topic)
+        (setf (gethash (dmx-import-object-id topic) candidate-table)
+              (dmx-workspace-journal-legacy-candidate-summary
+               topic
+               "workspace-topicmap-scan"))))
+    (dolist (candidate-topic-id candidate-topic-ids)
+      (let ((topic (dmx-import-read-topic resolved-client candidate-topic-id)))
+        (when (and topic
+                   (dmx-workspace-journal-legacy-candidate-p topic))
+          (setf (gethash candidate-topic-id candidate-table)
+                (dmx-workspace-journal-legacy-candidate-summary
+                 topic
+                 "explicit-topic-id")))))
+    (let ((candidates
+            (sort (loop for candidate being the hash-values in candidate-table
+                        collect candidate)
+                  #'<
+                  :key (lambda (candidate)
+                         (or (gethash "topicId" candidate) most-positive-fixnum)))))
+      (dmx-workspace-journal-json-object
+       "workspaceTopicmapId" resolved-topicmap-id
+       "inventoryMode" "read-only"
+       "mutationPerformed" nil
+       "candidateCount" (length candidates)
+       "candidates" (coerce candidates 'vector)
+       "nextStep"
+       "Provide explicit candidateTopicIds to plan_legacy_dmx_workspace_journal_cleanup for a dry-run cleanup plan."))))
+
+(defun plan-legacy-dmx-workspace-journal-cleanup
+    (&key workspace-topicmap-id client candidate-topic-ids)
+  (unless (and (listp candidate-topic-ids)
+               candidate-topic-ids)
+    (error 'fedwiki-dmx-import-error
+           :message "candidateTopicIds must be a non-empty array for plan_legacy_dmx_workspace_journal_cleanup"))
+  (let* ((resolved-topicmap-id
+           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+         (resolved-client
+           (or client
+               (make-default-dmx-import-client :dry-run t :verbose nil)))
+         (accepted '())
+         (rejected '()))
+    (dolist (candidate-topic-id candidate-topic-ids)
+      (let ((topic (dmx-import-read-topic resolved-client candidate-topic-id)))
+        (cond
+          ((null topic)
+           (push (dmx-workspace-journal-json-object
+                  "topicId" candidate-topic-id
+                  "status" "rejected"
+                  "reason" "Topic is not readable from the configured DMX read path")
+                 rejected))
+          ((not (dmx-workspace-journal-legacy-candidate-p topic))
+           (push (dmx-workspace-journal-json-object
+                  "topicId" candidate-topic-id
+                  "status" "rejected"
+                  "reason" "Topic URI does not match hyperdoc:mcp/workspace-journal/* legacy persistence shape")
+                 rejected))
+          (t
+           (let ((candidate
+                   (dmx-workspace-journal-legacy-candidate-summary
+                    topic
+                    "explicit-topic-id")))
+             (setf (gethash "status" candidate) "accepted")
+             (push candidate accepted))))))
+    (setf accepted
+          (sort accepted #'<
+                :key (lambda (candidate)
+                       (or (gethash "assocCount" candidate) 0))))
+    (let ((planned-actions
+            (loop for candidate in accepted
+                  for step from 1
+                  collect
+                    (dmx-workspace-journal-json-object
+                     "step" step
+                     "topicId" (gethash "topicId" candidate)
+                     "uri" (gethash "uri" candidate)
+                     "orderRationale"
+                     "Delete association IDs first, then delete the legacy topic by explicit ID."
+                     "plannedOperations"
+                     (dmx-workspace-journal-json-array
+                      (dmx-workspace-journal-json-object
+                       "kind" "delete-associations"
+                       "assocIds" (gethash "assocIds" candidate))
+                      (dmx-workspace-journal-json-object
+                       "kind" "delete-topic"
+                       "topicId" (gethash "topicId" candidate)))))))
+      (dmx-workspace-journal-json-object
+       "workspaceTopicmapId" resolved-topicmap-id
+       "dryRun" t
+       "mutationPerformed" nil
+       "acceptedCount" (length accepted)
+       "rejectedCount" (length rejected)
+       "acceptedCandidates" (coerce accepted 'vector)
+       "rejectedCandidates" (coerce (nreverse rejected) 'vector)
+       "plannedActions" (coerce planned-actions 'vector)
+       "validationChecklist"
+       (dmx-workspace-journal-json-array
+        "Re-run inventory_legacy_dmx_workspace_journal_artifacts after cleanup and confirm candidateCount reached 0 for removed IDs."
+        "Confirm read_hyperdoc_workspace_journal remains side-effect free and reports HyperDoc-local authority."
+        "Confirm no DMX journal companion note was recreated by any read path.")))))
 
 (defun read-dmx-workspace-journal
     (&key workspace-topicmap-id client (reconcile t))

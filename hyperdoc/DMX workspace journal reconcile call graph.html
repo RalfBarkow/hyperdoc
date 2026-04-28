@@ -4,12 +4,14 @@
 
 <p>
   <a hyperbook="topics" page="DMX workspace journal reconcile call graph"><tt>DMX
-  workspace journal reconcile call graph</tt></a> turns the reconcile-on-read
-  boundary into a live inspectable surface. It centers the healthy handover
-  topic <tt>923609</tt>, companion journal note <tt>924694</tt>, workspace
-  topicmap <tt>919822</tt>, and the write-capable persistence edge that must
-  stay suppressed while <tt>read_workspace_journal</tt> or
-  <tt>read_topic_journal</tt> runs with <tt>reconcile=true</tt>.
+  workspace journal reconcile call graph</tt></a> preserves the legacy
+  reconcile-on-read incident boundary as a live inspectable surface. It centers
+  the healthy handover topic <tt>923609</tt>, companion journal note
+  <tt>924694</tt>, workspace topicmap <tt>919822</tt>, and the write-capable
+  persistence edge that must stay suppressed on all read paths. Current MCP
+  read tools (<tt>read_hyperdoc_workspace_journal</tt> and
+  <tt>read_hyperdoc_topic_journal</tt>) no longer accept
+  <tt>reconcile</tt>.
 </p>
 
 <p>
@@ -50,8 +52,8 @@
 <h2>Expectation preserved</h2>
 
 <p>
-  The reasonable expectation was that <tt>reconcile=true</tt> would remain a
-  read surface. Observed reality was different: the healthy handover topic
+  The reasonable expectation was that reconcile-on-read would remain a read
+  surface. Observed reality was different: the healthy handover topic
   <tt>923609</tt> resolved and read correctly, but reconcile-time handling
   still write-touched companion journal note <tt>924694</tt> and triggered
   backend 500s. That is a disappointed expectation case, not a false one,
@@ -61,7 +63,7 @@
 <h2>What the live view shows</h2>
 
 <ul>
-  <li>The active reconcile-on-read path for <tt>read_workspace_journal</tt> and <tt>read_topic_journal</tt>.</li>
+  <li>The deprecated reconcile-on-read path that motivated the current read-only contract split.</li>
   <li>The exact edge where synthesized diff events now stay in memory only.</li>
   <li>The explicit write paths that still legitimately use the append and persist helpers.</li>
   <li>The concrete live anchors: topicmap <tt>919822</tt>, assoc <tt>923622</tt>, healthy note topic <tt>923609</tt>, and companion journal note <tt>924694</tt>.</li>

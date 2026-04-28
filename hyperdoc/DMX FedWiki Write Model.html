@@ -107,7 +107,7 @@
   <li><tt>upsert_workspace_topicmap_context</tt> and <tt>upsert_workspace_topic_factory_snippet</tt> provide the supported typed path for placing HyperDoc-managed topics into workspace topicmap <tt>919822</tt>.</li>
   <li><tt>delete_workspace_topic</tt> is ownership-limited to HyperDoc-owned workspace artifacts; foreign topics are rejected.</li>
   <li><tt>remove_workspace_topic_from_topicmap</tt> exists as a typed unlink tool, but live HTTP execution remains intentionally unsupported until the membership DELETE contract is proven.</li>
-  <li><tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, <tt>list_workspace_topic_revisions</tt>, <tt>restore_workspace_topic_revision</tt>, and <tt>restore_workspace_note_revision</tt> add bounded history inspection and explicit restore without exposing raw journal writes.</li>
+  <li><tt>read_hyperdoc_workspace_journal</tt>, <tt>read_hyperdoc_topic_journal</tt>, <tt>list_hyperdoc_topic_revisions</tt>, <tt>inventory_legacy_dmx_workspace_journal_artifacts</tt>, <tt>plan_legacy_dmx_workspace_journal_cleanup</tt>, <tt>restore_workspace_topic_revision</tt>, and <tt>restore_workspace_note_revision</tt> add bounded history inspection, explicit dry-run cleanup planning, and explicit restore without exposing raw journal writes.</li>
   <li>No generic raw <tt>ViewProps</tt> passthrough is exposed through MCP.</li>
 </ul>
 

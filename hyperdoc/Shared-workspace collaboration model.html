@@ -56,12 +56,15 @@
 
 <p>
   Collaboration stays explicit about history. HyperDoc-managed writes emit
-  durable journal events, <tt>read_topic_journal</tt> and
-  <tt>read_workspace_journal</tt> expose bounded inspection surfaces, and
-  restore is an explicit action rather than editor magic. Out-of-band changes
-  can be discovered only through bounded snapshot diff today, so those entries
-  are marked <tt>synthesized-from-diff</tt> instead of being advertised as a
-  native DMX event stream.
+  durable journal events, <tt>read_hyperdoc_topic_journal</tt> and
+  <tt>read_hyperdoc_workspace_journal</tt> expose bounded HyperDoc-local
+  inspection surfaces, and restore is an explicit action rather than editor
+  magic. Legacy DMX companion notes are inventoried only through
+  <tt>inventory_legacy_dmx_workspace_journal_artifacts</tt>, and cleanup is
+  planned through <tt>plan_legacy_dmx_workspace_journal_cleanup</tt> in dry-run
+  mode. Out-of-band changes can be discovered only through bounded snapshot
+  diff today, so those entries are marked <tt>synthesized-from-diff</tt>
+  instead of being advertised as a native DMX event stream.
 </p>
 
 <p>

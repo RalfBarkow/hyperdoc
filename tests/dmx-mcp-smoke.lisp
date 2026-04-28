@@ -932,13 +932,14 @@
 	                                        "read_dmx_topicmap"
 	                                        "read_dmx_topic"
 	                                        "resolve_workspace_note"
-	                                        "read_workspace_journal"
-	                                        "read_topic_journal"
-	                                        "list_workspace_topic_revisions"
+	                                        "read_hyperdoc_workspace_journal"
+	                                        "read_hyperdoc_topic_journal"
+	                                        "list_hyperdoc_topic_revisions"
+	                                        "inventory_legacy_dmx_workspace_journal_artifacts"
+	                                        "plan_legacy_dmx_workspace_journal_cleanup"
 	                                        "append_workspace_note"
 	                                        "update_workspace_note"
 	                                        "continue_workspace_annotation"
-	                                        "repair_workspace_journal_companion"
 	                                        "upsert_workspace_topicmap_context"
 	                                        "remove_workspace_topic_from_topicmap"
 	                                        "repair_workspace_topic_assignment"
@@ -1246,12 +1247,20 @@
          (url (format nil "http://127.0.0.1:~D/mcp" port))
          (server (make-dmx-mcp-smoke-server))
          (client (hyperdoc::dmx-mcp-server-write-client server))
-         (note-key "workspace-journal-smoke-note")
-         (note-title "Workspace journal smoke note")
-         (note-uri (hyperdoc::dmx-workspace-note-uri :workspace-note note-key))
-         (created-topic-id nil)
-         (created-subject-key nil)
-         (updated-revision nil))
+         (subject-key "hyperdoc:mcp/workspace-annotation/hyperdoc-local-journal-smoke")
+         (legacy-topic-id 924694)
+         (legacy-uri
+           "hyperdoc:mcp/workspace-journal/workspace-journal-646d783a746f7069632f323232353731"))
+    (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
+    (hyperdoc::set-hyperdoc-local-workspace-journal-stream
+     subject-key
+     (mcp-test-make-journal-stream subject-key))
+    (mcp-test-seed-note
+     client
+     legacy-topic-id
+     "Legacy DMX workspace journal companion"
+     "Legacy persisted companion note"
+     :uri legacy-uri)
     (unwind-protect
          (progn
            (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
@@ -1260,348 +1269,162 @@
                    (mcp-test-open-session url
                                           :id 401
                                           :client-name "hyperdoc-workspace-journal-smoke")))
-             (multiple-value-bind (dry-run-body dry-run-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  402
-                  "append_workspace_note"
-                  (mcp-test-json-object
-                   "title" note-title
-                   "text" "Initial journaled text."
-                   "noteKey" note-key
-                   "dryRun" t))
-               (declare (ignore _))
-               (mcp-assert-equal 200 dry-run-status
-                                 "append_workspace_note dry-run journal status")
-               (let* ((tool-result (gethash "result" dry-run-body))
-                      (structured (gethash "structuredContent" tool-result))
-                      (preview (gethash "journal-event-preview" structured)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "append_workspace_note dry-run for journal smoke must succeed")
-                 (mcp-assert-equal
-                  '("note-create" "add-to-topicmap")
-                  (mcp-journal-event-types preview)
-                  "Dry-run note create must preview note-create plus add-to-topicmap")))
-             (multiple-value-bind (create-body create-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  403
-                  "append_workspace_note"
-                  (mcp-test-json-object
-                   "title" note-title
-                   "text" "Initial journaled text."
-                   "noteKey" note-key
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 create-status
-                                 "append_workspace_note live journal status")
-               (let* ((tool-result (gethash "result" create-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "append_workspace_note live for journal smoke must succeed")
-                 (setf created-topic-id (gethash "topic-id" structured)
-                       created-subject-key (gethash "journal-subject-key" structured))
-                 (mcp-assert-equal 2
-                                   (gethash "journal-event-count" structured)
-                                   "Live note create must emit create plus add journal events")))
-             (mcp-assert-equal note-uri
-                               created-subject-key
-                               "Live note create must surface the stable journal subject key")
-             (multiple-value-bind (read-body read-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  404
-                  "read_topic_journal"
-                  (mcp-test-json-object
-                   "noteKey" note-key))
-               (declare (ignore _))
-               (mcp-assert-equal 200 read-status "read_topic_journal initial status")
-               (let* ((tool-result (gethash "result" read-body))
-                      (structured (gethash "structuredContent" tool-result))
-                      (current-state (gethash "currentState" structured))
-                      (revisions (gethash "revisions" structured)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "read_topic_journal initial must succeed")
-                 (mcp-assert-equal 2
-                                   (gethash "currentRevision" structured)
-                                   "Initial note journal must expose two revisions")
-                 (mcp-assert-equal note-uri
-                                   (gethash "subjectKey" structured)
-                                   "Initial note journal must keep the stable subject key")
-                 (mcp-assert-equal note-title
-                                   (gethash "value" (gethash "payload" current-state))
-                                   "Replay to current state must preserve the note title")
-                 (mcp-assert-equal
-                  '("note-create" "add-to-topicmap")
-                  (mapcar (lambda (revision) (gethash "eventType" revision))
-                          (hyperdoc::json-array-elements revisions))
-                  "Initial note journal must replay create and add revisions")))
-             (multiple-value-bind (update-body update-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  405
-                  "update_workspace_note"
-                  (mcp-test-json-object
-                   "topicId" created-topic-id
-                   "text" "Updated journaled text."
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 update-status
-                                 "update_workspace_note live journal status")
-               (let* ((tool-result (gethash "result" update-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "update_workspace_note live for journal smoke must succeed")
-                 (mcp-assert-equal 1
-                                   (gethash "journal-event-count" structured)
-                                   "Live note update must emit one note-update journal event")))
-             (multiple-value-bind (revision-body revision-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  406
-                  "list_workspace_topic_revisions"
-                  (mcp-test-json-object
-                   "noteKey" note-key))
-               (declare (ignore _))
-               (mcp-assert-equal 200 revision-status
-                                 "list_workspace_topic_revisions note status")
-               (let* ((tool-result (gethash "result" revision-body))
-                      (structured (gethash "structuredContent" tool-result))
-                      (revisions (hyperdoc::json-array-elements
-                                  (gethash "revisions" structured)))
-                      (event-types
-                        (mapcar (lambda (revision) (gethash "eventType" revision))
-                                revisions)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "list_workspace_topic_revisions for note must succeed")
-                 (setf updated-revision (gethash "currentRevision" structured))
-                 (mcp-assert-true (>= updated-revision 3)
-                                  "Note revision list must advance after update")
-                 (mcp-assert-equal
-                  '("note-create" "add-to-topicmap")
-                  (subseq event-types 0 2)
-                  "Note revision list must start with create/add history")
-                 (mcp-assert-equal "note-update"
-                                   (car (last event-types))
-                                   "Note revision list must end with note-update")))
-             (hyperdoc::dmx-import-remove-topic-from-topicmap
-              client
-              *dmx-mcp-smoke-workspace-topicmap-id*
-              created-topic-id)
-             (mcp-assert-true
-              (null (hyperdoc::dmx-import-topic-in-topicmap-p
-                     client
-                     *dmx-mcp-smoke-workspace-topicmap-id*
-                     created-topic-id))
-              "Out-of-band topicmap removal must remove the live membership before reconciliation")
-             (multiple-value-bind (reconciled-body reconciled-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  407
-                  "read_topic_journal"
-                  (mcp-test-json-object
-                   "noteKey" note-key
-                   "reconcile" t))
-               (declare (ignore _))
-               (mcp-assert-equal 200 reconciled-status
-                                 "read_topic_journal reconciled status")
-               (let* ((tool-result (gethash "result" reconciled-body))
-                      (structured (gethash "structuredContent" tool-result))
-                      (events (gethash "events" structured))
-                      (last-event (mcp-last-json-array-element events)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "Reconciled note journal must succeed")
-                 (mcp-assert-equal "remove-from-topicmap"
-                                   (gethash "eventType" last-event)
-                                   "Out-of-band topicmap removal must synthesize remove-from-topicmap")
-                 (mcp-assert-equal "synthesized-from-diff"
-                                   (gethash "observationKind" last-event)
-                                   "Out-of-band topicmap removal must be marked synthesized-from-diff")))
-             (multiple-value-bind (stored-body stored-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  4071
-                  "read_topic_journal"
-                  (mcp-test-json-object
-                   "noteKey" note-key
-                   "reconcile" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 stored-status
-                                 "read_topic_journal stored status")
-               (let* ((tool-result (gethash "result" stored-body))
-                      (structured (gethash "structuredContent" tool-result))
-                      (current-state (gethash "currentState" structured))
-                      (events (hyperdoc::json-array-elements
-                               (gethash "events" structured))))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "Stored note journal must succeed after a reconciled read")
-                 (mcp-assert-equal updated-revision
-                                   (gethash "currentRevision" structured)
-                                   "Reconciled read must not persist synthesized events")
-                 (mcp-assert-true
-                  (gethash "inTopicmap" current-state)
-                  "Stored journal state must remain unchanged for reconcile=false")
-                 (mcp-assert-equal
-                  "note-update"
-                  (gethash "eventType" (car (last events)))
-                  "Stored journal stream must still end at the explicit note-update event")))
-             (multiple-value-bind (restore-membership-body restore-membership-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  408
-                  "restore_workspace_note_revision"
-                  (mcp-test-json-object
-                   "noteKey" note-key
-                   "revision" updated-revision
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 restore-membership-status
-                                 "restore_workspace_note_revision membership status")
-               (let* ((tool-result (gethash "result" restore-membership-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "Membership restore must succeed")
-                 (mcp-assert-equal "restored"
-                                   (gethash "status" structured)
-                                   "Membership restore must report restored")
-                 (mcp-assert-equal
-                  '("restore-topicmap-membership")
-                  (mcp-json-array-strings (gethash "actions" structured))
-                  "Membership restore must explicitly report restore-topicmap-membership")))
-             (mcp-assert-true
-              (hyperdoc::dmx-import-topic-in-topicmap-p
-               client
-               *dmx-mcp-smoke-workspace-topicmap-id*
-               created-topic-id)
-              "Membership restore must reattach the note to the workspace topicmap")
-             (multiple-value-bind (delete-body delete-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  409
-                  "delete_workspace_note"
-                  (mcp-test-json-object
-                   "noteKey" note-key
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 delete-status
-                                 "delete_workspace_note journal status")
-               (let* ((tool-result (gethash "result" delete-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "delete_workspace_note for journal smoke must succeed")
-                 (mcp-assert-equal 2
-                                   (gethash "journal-event-count" structured)
-                                   "Live note delete must emit archive plus delete journal events")))
-             (mcp-assert-true
-              (null (hyperdoc::dmx-import-find-existing-topic client note-uri))
-              "Live note delete must remove the note topic while preserving the journal stream")
-             (multiple-value-bind (restore-note-body restore-note-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  410
-                  "restore_workspace_note_revision"
-                  (mcp-test-json-object
-                   "noteKey" note-key
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 restore-note-status
-                                 "restore_workspace_note_revision delete status")
-               (let* ((tool-result (gethash "result" restore-note-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "Restore after delete must succeed for HyperDoc-owned notes")
-                 (mcp-assert-equal "restored"
-                                   (gethash "status" structured)
-                                   "Restore after delete must report restored")
-                 (mcp-assert-equal
-                  '("create-topic" "restore-topicmap-membership")
-                  (mcp-json-array-strings (gethash "actions" structured))
-                  "Restore after delete must explicitly recreate the topic and reattach membership")))
-             (let ((restored-topic (hyperdoc::dmx-import-find-existing-topic client note-uri)))
-               (mcp-assert-true restored-topic
-                                "Restore after delete must recreate the note topic")
-               (mcp-assert-true
-                (hyperdoc::dmx-import-topic-in-topicmap-p
-                 client
-                 *dmx-mcp-smoke-workspace-topicmap-id*
-                 (hyperdoc::dmx-import-object-id restored-topic))
-                "Restore after delete must return the note to the workspace topicmap"))
-             (multiple-value-bind (final-read-body final-read-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  411
-                  "read_topic_journal"
-                  (mcp-test-json-object
-                   "noteKey" note-key
-                   "reconcile" t))
-               (declare (ignore _))
-               (mcp-assert-equal 200 final-read-status
-                                 "read_topic_journal final status")
-               (let* ((tool-result (gethash "result" final-read-body))
-                      (structured (gethash "structuredContent" tool-result))
-                      (events (hyperdoc::json-array-elements
-                               (gethash "events" structured))))
-                 (mcp-assert-true
-                 (null (gethash "isError" tool-result))
-                 "Final note journal read must succeed")
-                 (mcp-assert-equal
-                  '("note-archive"
-                    "note-delete"
-                    "restore-topic"
-                    "restore-topicmap-membership")
-                  (mapcar (lambda (event) (gethash "eventType" event))
-                          (subseq events (- (length events) 4)))
-                  "Delete plus restore must append explicit archive, delete, and restore events to the journal")))
              (multiple-value-bind (workspace-body workspace-status _)
                  (mcp-test-call-tool
                   url
                   session-id
-                  412
-                  "read_workspace_journal"
-                  (mcp-test-json-object
-                   "reconcile" t))
+                  402
+                  "read_hyperdoc_workspace_journal"
+                  (mcp-test-json-object))
                (declare (ignore _))
                (mcp-assert-equal 200 workspace-status
-                                 "read_workspace_journal status")
+                                 "read_hyperdoc_workspace_journal status")
                (let* ((tool-result (gethash "result" workspace-body))
                       (structured (gethash "structuredContent" tool-result))
-                      (backend-contract (gethash "backendHistoryContract" structured))
                       (streams (hyperdoc::json-array-elements
                                 (gethash "streams" structured))))
                  (mcp-assert-true
                   (null (gethash "isError" tool-result))
-                  "read_workspace_journal must succeed")
-                 (mcp-assert-equal "not-proven"
-                                   (gethash "status" backend-contract)
-                                   "Workspace journal must disclose the unproven backend history contract")
+                  "read_hyperdoc_workspace_journal must succeed")
+                 (mcp-assert-equal
+                  "hyperdoc-local-workspace-journal"
+                  (gethash "storageModel" structured)
+                  "HyperDoc-local workspace journal read must disclose the local storage model")
+                 (mcp-assert-equal 1
+                                   (gethash "streamCount" structured)
+                                   "HyperDoc-local workspace journal read must expose the seeded local stream")
                  (mcp-assert-true
-                 (find created-subject-key
-                       streams
-                       :test #'string=
-                       :key (lambda (stream) (gethash "subjectKey" stream)))
-                  "Workspace journal overview must include the created note stream")))))
+                  (null (gethash "reconciliation" structured))
+                  "HyperDoc-local workspace journal read must not expose reconcile-on-read fields")
+                 (mcp-assert-true
+                  (find subject-key
+                        streams
+                        :test #'string=
+                        :key (lambda (stream) (gethash "subjectKey" stream)))
+                  "HyperDoc-local workspace journal read must include the seeded stream")))
+             (multiple-value-bind (topic-body topic-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  403
+                  "read_hyperdoc_topic_journal"
+                  (mcp-test-json-object
+                   "subjectKey" subject-key))
+               (declare (ignore _))
+               (mcp-assert-equal 200 topic-status
+                                 "read_hyperdoc_topic_journal status")
+               (let* ((tool-result (gethash "result" topic-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (events (hyperdoc::json-array-elements
+                               (gethash "events" structured))))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "read_hyperdoc_topic_journal must succeed")
+                 (mcp-assert-equal subject-key
+                                   (gethash "subjectKey" structured)
+                                   "HyperDoc-local topic journal read must keep the requested subject key")
+                 (mcp-assert-equal 0
+                                   (length events)
+                                   "Seeded base stream should expose zero persisted events in this smoke")))
+             (multiple-value-bind (revisions-body revisions-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  404
+                  "list_hyperdoc_topic_revisions"
+                  (mcp-test-json-object
+                   "subjectKey" subject-key))
+               (declare (ignore _))
+               (mcp-assert-equal 200 revisions-status
+                                 "list_hyperdoc_topic_revisions status")
+               (let* ((tool-result (gethash "result" revisions-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (revisions (gethash "revisions" structured)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "list_hyperdoc_topic_revisions must succeed")
+                 (mcp-assert-equal 0
+                                   (length (hyperdoc::json-array-elements revisions))
+                                   "Seeded base stream must expose zero revisions")
+                 (mcp-assert-equal subject-key
+                                   (gethash "subjectKey" structured)
+                                   "Revision listing must keep the requested subject key")))
+             (multiple-value-bind (reject-body reject-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  405
+                  "read_hyperdoc_workspace_journal"
+                  (mcp-test-json-object
+                   "reconcile" t))
+               (declare (ignore _))
+               (mcp-assert-equal 200 reject-status
+                                 "read_hyperdoc_workspace_journal reconcile rejection status")
+               (let* ((tool-result (gethash "result" reject-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (gethash "isError" tool-result)
+                  "HyperDoc-local workspace journal read must reject reconcile arguments")
+                 (mcp-assert-true
+                  (search "does not accept reconcile"
+                          (or (gethash "message" structured) "")
+                          :test #'char=)
+                  "Reconcile rejection must state the HyperDoc-local boundary")))
+             (multiple-value-bind (inventory-body inventory-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  406
+                  "inventory_legacy_dmx_workspace_journal_artifacts"
+                  (mcp-test-json-object
+                   "candidateTopicIds" (vector legacy-topic-id)))
+               (declare (ignore _))
+               (mcp-assert-equal 200 inventory-status
+                                 "inventory_legacy_dmx_workspace_journal_artifacts status")
+               (let* ((tool-result (gethash "result" inventory-body))
+                      (structured (gethash "structuredContent" tool-result))
+                      (candidates (hyperdoc::json-array-elements
+                                   (gethash "candidates" structured))))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Legacy inventory tool must stay read-only")
+                 (mcp-assert-true
+                  (not (eql t (gethash "mutationPerformed" structured)))
+                  "Legacy inventory tool must not mutate DMX")
+                 (mcp-assert-true
+                  (find legacy-topic-id
+                        candidates
+                        :test #'eql
+                        :key (lambda (candidate)
+                               (gethash "topicId" candidate)))
+                  "Legacy inventory tool must include topic 924694-style candidates when visible")))
+             (multiple-value-bind (plan-body plan-status _)
+                 (mcp-test-call-tool
+                  url
+                  session-id
+                  407
+                  "plan_legacy_dmx_workspace_journal_cleanup"
+                  (mcp-test-json-object
+                   "candidateTopicIds" (vector legacy-topic-id)))
+               (declare (ignore _))
+               (mcp-assert-equal 200 plan-status
+                                 "plan_legacy_dmx_workspace_journal_cleanup status")
+               (let* ((tool-result (gethash "result" plan-body))
+                      (structured (gethash "structuredContent" tool-result)))
+                 (mcp-assert-true
+                  (null (gethash "isError" tool-result))
+                  "Legacy cleanup planner must stay dry-run only")
+                 (mcp-assert-equal t
+                                   (gethash "dryRun" structured)
+                                   "Legacy cleanup planner must report dryRun true")
+                 (mcp-assert-equal 1
+                                   (gethash "acceptedCount" structured)
+                                   "Legacy cleanup planner must accept explicit 924694-style candidates")
+                 (mcp-assert-true
+                  (not (eql t (gethash "mutationPerformed" structured)))
+                  "Legacy cleanup planner must not mutate DMX")))))
       (hyperdoc::stop-dmx-mcp-server)))
+  (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
   t)
 
 (defun run-dmx-workspace-journal-foreign-restore-guardrail-smoke-test ()
@@ -3308,11 +3131,7 @@
   (run-dmx-mcp-workspace-annotation-continuation-auth-blocked-smoke-test)
   (run-dmx-mcp-workspace-topic-lifecycle-smoke-test)
   (run-dmx-mcp-workspace-journal-smoke-test)
-  (run-dmx-mcp-workspace-journal-companion-repair-smoke-test)
-  (run-dmx-mcp-workspace-journal-companion-repair-failure-smoke-test)
-  (run-dmx-mcp-workspace-journal-companion-replacement-create-failure-smoke-test)
   (run-dmx-mcp-owned-topic-lifecycle-proof-smoke-test)
-  (run-dmx-workspace-journal-foreign-restore-guardrail-smoke-test)
   (run-dmx-mcp-workspace-assignment-localhost-rehearsal-smoke-test)
   (run-dmx-mcp-workspace-assignment-repair-smoke-test)
   (run-dmx-workspace-journal-assignment-repair-nonrecursive-smoke-test)

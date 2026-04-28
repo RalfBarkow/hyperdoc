@@ -69,16 +69,21 @@
   <li><tt>remove_workspace_topic_from_topicmap</tt></li>
   <li><tt>upsert_workspace_topic_factory_snippet</tt></li>
   <li><tt>create_handover</tt></li>
-  <li><tt>read_workspace_journal</tt></li>
-  <li><tt>read_topic_journal</tt></li>
-  <li><tt>list_workspace_topic_revisions</tt></li>
+  <li><tt>read_hyperdoc_workspace_journal</tt></li>
+  <li><tt>read_hyperdoc_topic_journal</tt></li>
+  <li><tt>list_hyperdoc_topic_revisions</tt></li>
+  <li><tt>inventory_legacy_dmx_workspace_journal_artifacts</tt></li>
+  <li><tt>plan_legacy_dmx_workspace_journal_cleanup</tt></li>
   <li><tt>restore_workspace_topic_revision</tt></li>
   <li><tt>restore_workspace_note_revision</tt></li>
 </ul>
 
 <p>
-  The resource surface remains canonical, but these read tools mirror the same
-  projections for clients that only surface MCP tools. The server still
+  The resource surface remains canonical. HyperDoc-local journal reads are
+  explicitly separated from DMX inventory reads: the <tt>read_hyperdoc_*</tt>
+  tools read HyperDoc-local journal state only, while the legacy inventory and
+  cleanup-plan tools inspect DMX companion artifacts in read-only or dry-run
+  mode. The server still
   deliberately does <b>not</b> expose a generic raw DMX JSON write tool or
   arbitrary topicmap mutation surface.
 </p>
@@ -111,9 +116,12 @@
   <tt>journal-event-preview</tt> in dry run and return
   <tt>journal-subject-key</tt> plus <tt>journal-event-count</tt> on live
   execution. History inspection stays typed through
-  <tt>read_workspace_journal</tt>, <tt>read_topic_journal</tt>, and
-  <tt>list_workspace_topic_revisions</tt>, while explicit restore stays bounded
-  to <tt>restore_workspace_topic_revision</tt> and
+  <tt>read_hyperdoc_workspace_journal</tt>, <tt>read_hyperdoc_topic_journal</tt>, and
+  <tt>list_hyperdoc_topic_revisions</tt>. Legacy DMX companion artifacts are
+  discovered through <tt>inventory_legacy_dmx_workspace_journal_artifacts</tt>
+  and cleanup is planned through
+  <tt>plan_legacy_dmx_workspace_journal_cleanup</tt> (dry run only). Explicit
+  restore stays bounded to <tt>restore_workspace_topic_revision</tt> and
   <tt>restore_workspace_note_revision</tt>.
 </p>
 

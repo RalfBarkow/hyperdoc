@@ -242,6 +242,20 @@
   (multiple-value-bind (value present-p) (gethash key arguments)
     (if present-p value default)))
 
+(defun dmx-mcp-integer-array-argument (arguments key)
+  (let ((raw (gethash key arguments)))
+    (unless raw
+      (return-from dmx-mcp-integer-array-argument nil))
+    (let ((values '()))
+      (dolist (entry (json-array-elements raw))
+        (unless (integerp entry)
+          (error 'fedwiki-dmx-import-error
+                 :message (format nil "~A entries must be integers, got ~S"
+                                  key
+                                  entry)))
+        (push entry values))
+      (nreverse values))))
+
 (defun dmx-mcp-session-for-request (server &key initialize?)
   (let ((session-id (hunchentoot:header-in* "Mcp-Session-Id")))
     (cond
@@ -1107,37 +1121,54 @@
      "topic" (and existing-topic
                   (dmx-mcp-topic-projection existing-topic)))))
 
-(defun dmx-mcp-read-workspace-journal-tool (server arguments)
-  (read-dmx-workspace-journal
+(defun dmx-mcp-read-hyperdoc-workspace-journal-tool (server arguments)
+  (when (gethash "reconcile" arguments)
+    (error 'fedwiki-dmx-import-error
+           :message "read_hyperdoc_workspace_journal does not accept reconcile"))
+  (read-hyperdoc-workspace-journal
    :workspace-topicmap-id
    (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-       (dmx-mcp-server-workspace-topicmap-id server))
-   :client (dmx-mcp-server-write-client server)
-   :reconcile (dmx-mcp-argument arguments "reconcile" t)))
+       (dmx-mcp-server-workspace-topicmap-id server))))
 
-(defun dmx-mcp-read-topic-journal-tool (server arguments)
-  (read-dmx-topic-journal
-   :workspace-topicmap-id
-   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-       (dmx-mcp-server-workspace-topicmap-id server))
-   :client (dmx-mcp-server-write-client server)
+(defun dmx-mcp-read-hyperdoc-topic-journal-tool (server arguments)
+  (when (gethash "reconcile" arguments)
+    (error 'fedwiki-dmx-import-error
+           :message "read_hyperdoc_topic_journal does not accept reconcile"))
+  (read-hyperdoc-topic-journal
    :subject-key (dmx-mcp-argument arguments "subjectKey")
    :topic-id (dmx-mcp-argument arguments "topicId")
    :note-key (dmx-mcp-argument arguments "noteKey")
-   :note-kind (dmx-mcp-argument arguments "noteKind")
-   :reconcile (dmx-mcp-argument arguments "reconcile" t)))
+   :note-kind (dmx-mcp-argument arguments "noteKind")))
 
-(defun dmx-mcp-list-workspace-topic-revisions-tool (server arguments)
-  (list-dmx-workspace-topic-revisions
-   :workspace-topicmap-id
-   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-       (dmx-mcp-server-workspace-topicmap-id server))
-   :client (dmx-mcp-server-write-client server)
+(defun dmx-mcp-list-hyperdoc-topic-revisions-tool (server arguments)
+  (when (gethash "reconcile" arguments)
+    (error 'fedwiki-dmx-import-error
+           :message "list_hyperdoc_topic_revisions does not accept reconcile"))
+  (list-hyperdoc-topic-revisions
    :subject-key (dmx-mcp-argument arguments "subjectKey")
    :topic-id (dmx-mcp-argument arguments "topicId")
    :note-key (dmx-mcp-argument arguments "noteKey")
-   :note-kind (dmx-mcp-argument arguments "noteKind")
-   :reconcile (dmx-mcp-argument arguments "reconcile" t)))
+   :note-kind (dmx-mcp-argument arguments "noteKind")))
+
+(defun dmx-mcp-inventory-legacy-workspace-journal-artifacts-tool
+    (server arguments)
+  (inventory-legacy-dmx-workspace-journal-artifacts
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-read-client server)
+   :candidate-topic-ids
+   (dmx-mcp-integer-array-argument arguments "candidateTopicIds")))
+
+(defun dmx-mcp-plan-legacy-workspace-journal-cleanup-tool
+    (server arguments)
+  (plan-legacy-dmx-workspace-journal-cleanup
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-read-client server)
+   :candidate-topic-ids
+   (dmx-mcp-integer-array-argument arguments "candidateTopicIds")))
 
 (defun dmx-mcp-restore-workspace-topic-revision-tool (server arguments)
   (restore-dmx-workspace-topic-revision
@@ -1206,15 +1237,34 @@
             ((equal tool-name "resolve_workspace_note")
              (dmx-mcp-tool-result
               (dmx-mcp-resolve-workspace-note-tool server arguments)))
-            ((equal tool-name "read_workspace_journal")
+            ((equal tool-name "read_hyperdoc_workspace_journal")
              (dmx-mcp-tool-result
-              (dmx-mcp-read-workspace-journal-tool server arguments)))
-            ((equal tool-name "read_topic_journal")
+              (dmx-mcp-read-hyperdoc-workspace-journal-tool server arguments)))
+            ((equal tool-name "read_hyperdoc_topic_journal")
              (dmx-mcp-tool-result
-              (dmx-mcp-read-topic-journal-tool server arguments)))
-            ((equal tool-name "list_workspace_topic_revisions")
+              (dmx-mcp-read-hyperdoc-topic-journal-tool server arguments)))
+            ((equal tool-name "list_hyperdoc_topic_revisions")
              (dmx-mcp-tool-result
-              (dmx-mcp-list-workspace-topic-revisions-tool server arguments)))
+              (dmx-mcp-list-hyperdoc-topic-revisions-tool server arguments)))
+            ((equal tool-name "inventory_legacy_dmx_workspace_journal_artifacts")
+             (dmx-mcp-tool-result
+              (dmx-mcp-inventory-legacy-workspace-journal-artifacts-tool
+               server arguments)))
+            ((equal tool-name "plan_legacy_dmx_workspace_journal_cleanup")
+             (dmx-mcp-tool-result
+              (dmx-mcp-plan-legacy-workspace-journal-cleanup-tool
+               server arguments)))
+            ((member tool-name
+                     '("read_workspace_journal"
+                       "read_topic_journal"
+                       "list_workspace_topic_revisions"
+                       "repair_workspace_journal_companion")
+                     :test #'string=)
+             (error 'fedwiki-dmx-import-error
+                    :message
+                    (format nil
+                            "Tool ~A is deprecated. Use read_hyperdoc_workspace_journal, read_hyperdoc_topic_journal, list_hyperdoc_topic_revisions, inventory_legacy_dmx_workspace_journal_artifacts, and plan_legacy_dmx_workspace_journal_cleanup."
+                            tool-name)))
             ((equal tool-name "append_workspace_note")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -1268,13 +1318,6 @@
               (dmx-mcp-continue-workspace-annotation-tool
                server
                arguments)))
-            ((equal tool-name "repair_workspace_journal_companion")
-             (ensure-live-write-available)
-             (multiple-value-bind (result-object is-error)
-                 (dmx-mcp-repair-workspace-journal-companion-tool
-                  server
-                  arguments)
-               (dmx-mcp-tool-result result-object :is-error is-error)))
             ((equal tool-name "upsert_workspace_topicmap_context")
              (ensure-live-write-available)
              (dmx-mcp-tool-result
@@ -1451,23 +1494,6 @@
 	     "required" (dmx-mcp-json-array "topicId")
 	     "additionalProperties" t))
 	   (dmx-mcp-json-object
-	    "name" "repair_workspace_journal_companion"
-	    "description"
-	    "Repair a stale HyperDoc-owned workspace-journal companion topic by creating a replacement under the current writable workspace context while retaining the stale unassigned companion as history."
-	    "inputSchema"
-	    (dmx-mcp-json-object
-	     "type" "object"
-	     "properties"
-	     (dmx-mcp-json-object
-	      "journalTopicId" (dmx-mcp-json-object "type" "integer")
-	      "subjectKey" (dmx-mcp-json-object "type" "string")
-	      "subjectUri" (dmx-mcp-json-object "type" "string")
-	      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
-	      "workspaceId" (dmx-mcp-json-object "type" "integer")
-	      "dryRun" (dmx-mcp-json-object "type" "boolean"))
-	     "required" (dmx-mcp-json-array)
-	     "additionalProperties" t))
-	   (dmx-mcp-json-object
 	    "name" "upsert_workspace_topicmap_context"
     "description"
     "Ensure a typed topicmap-context placement for an existing topic by adding it to a workspace topicmap or updating its validated long-form view props."
@@ -1553,22 +1579,21 @@
      "required" (dmx-mcp-json-array "noteKey")
      "additionalProperties" t))
    (dmx-mcp-json-object
-    "name" "read_workspace_journal"
+    "name" "read_hyperdoc_workspace_journal"
     "description"
-    "Read the HyperDoc-owned journal overview for the shared workspace, optionally reconciling synthesized out-of-band events from snapshot diff."
+    "Read the HyperDoc-local workspace journal overview. This read path never reconciles, repairs, or persists DMX companion journal topics."
     "inputSchema"
     (dmx-mcp-json-object
      "type" "object"
      "properties"
      (dmx-mcp-json-object
-      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
-      "reconcile" (dmx-mcp-json-object "type" "boolean"))
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer"))
      "required" (dmx-mcp-json-array)
      "additionalProperties" t))
    (dmx-mcp-json-object
-    "name" "read_topic_journal"
+    "name" "read_hyperdoc_topic_journal"
     "description"
-    "Read the full journal stream for one workspace topic or note subject."
+    "Read one HyperDoc-local topic journal stream by subject key, topic id, or note key. No reconcile and no DMX persistence side effects."
     "inputSchema"
     (dmx-mcp-json-object
      "type" "object"
@@ -1577,15 +1602,13 @@
       "subjectKey" (dmx-mcp-json-object "type" "string")
       "topicId" (dmx-mcp-json-object "type" "integer")
       "noteKey" (dmx-mcp-json-object "type" "string")
-      "noteKind" (dmx-mcp-json-object "type" "string")
-      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
-      "reconcile" (dmx-mcp-json-object "type" "boolean"))
+      "noteKind" (dmx-mcp-json-object "type" "string"))
      "required" (dmx-mcp-json-array)
      "additionalProperties" t))
    (dmx-mcp-json-object
-    "name" "list_workspace_topic_revisions"
+    "name" "list_hyperdoc_topic_revisions"
     "description"
-    "List the revision headers for one workspace topic or note subject without returning the full event payloads."
+    "List revision headers for one HyperDoc-local topic journal stream without returning full event payloads."
     "inputSchema"
     (dmx-mcp-json-object
      "type" "object"
@@ -1594,10 +1617,40 @@
       "subjectKey" (dmx-mcp-json-object "type" "string")
       "topicId" (dmx-mcp-json-object "type" "integer")
       "noteKey" (dmx-mcp-json-object "type" "string")
-      "noteKind" (dmx-mcp-json-object "type" "string")
-      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
-      "reconcile" (dmx-mcp-json-object "type" "boolean"))
+      "noteKind" (dmx-mcp-json-object "type" "string"))
      "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "inventory_legacy_dmx_workspace_journal_artifacts"
+    "description"
+    "Read-only DMX inventory for legacy workspace-journal persistence topics (hyperdoc:mcp/workspace-journal/*). Returns cleanup candidates only."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "candidateTopicIds"
+      (dmx-mcp-json-object
+       "type" "array"
+       "items" (dmx-mcp-json-object "type" "integer")))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "plan_legacy_dmx_workspace_journal_cleanup"
+    "description"
+    "Dry-run-only cleanup planner for legacy DMX workspace-journal artifacts. Requires explicit candidate topic ids and performs no deletion."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "candidateTopicIds"
+      (dmx-mcp-json-object
+       "type" "array"
+       "items" (dmx-mcp-json-object "type" "integer")))
+     "required" (dmx-mcp-json-array "candidateTopicIds")
      "additionalProperties" t))
    (dmx-mcp-json-object
     "name" "update_workspace_note"
