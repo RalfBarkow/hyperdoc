@@ -3702,6 +3702,15 @@
                           :line-number (mech-snippet-step-line-number-of step)))
       nil))
 
+(defun snippet-playground-mech-operation-token (operation-entry)
+  (string-upcase (or (getf operation-entry :operation) "")))
+
+(defun mech-operations-require-neighborhood-p (operations)
+  (find "NEIGHBORS"
+        operations
+        :key #'snippet-playground-mech-operation-token
+        :test #'string=))
+
 (defun snippet-playground-mech-code-step (mech)
   (when mech
     (find "CODE"
@@ -3727,11 +3736,7 @@
             (or args '()))))
 
 (defun snippet-playground-default-neighborhood-input ()
-  (list
-   (list :title "Alpha" :links '("Gamma" "Delta" "Gamma"))
-   (list :title "Beta" :links '("Gamma" "Epsilon"))
-   (list :title "Gamma" :links '("Delta" "Epsilon" "Gamma"))
-   (list :title "Delta" :links '("Gamma"))))
+  nil)
 
 (defun snippet-playground-neighborhood-links-from-page (page)
   (cond
@@ -4223,6 +4228,18 @@
            (copy-list (mech-execution-input-code-operation-arguments-of
                        execution-input)))
          (output-path (mech-execution-input-handoff-path-of execution-input))
+         (requires-neighborhood
+           (mech-operations-require-neighborhood-p
+            (mech-execution-input-parsed-mech-operations-of execution-input)))
+         (input-slots
+           (if requires-neighborhood
+               '("neighborhood")
+               '("page/context story")))
+         (operation-summary
+           (if (and function-name
+                    (string-equal function-name "popular"))
+               "Tally neighborhood links, sort by descending count, report top N items, and publish to state.items."
+               "Bounded execution/equivalence layer currently specializes popular(count); non-popular CODE operations remain explicit unsupported paths."))
          (equivalence-status
            (cond
              ((null equivalence-report)
@@ -4242,17 +4259,19 @@
      :title "Mech state.items IR"
      :summary
      (format nil
-             "Bounded semantic IR for ~A(~{~A~^, ~}) writing to ~A."
+             "Bounded semantic IR for ~A(~{~A~^, ~}) writing to ~A with ~A input."
              (or function-name "unknown")
              function-arguments
-             (or output-path "unresolved"))
-     :input-slots '("neighborhood")
+             (or output-path "unresolved")
+             (if requires-neighborhood
+                 "NEIGHBORS"
+                 "page/context story"))
+     :input-slots input-slots
      :output-path output-path
      :function-name function-name
      :function-arguments function-arguments
      :helper-functions (snippet-playground-helper-function-labels code-source)
-     :operation-summary
-     "Tally neighborhood links, sort by descending count, report top N items, and publish to state.items."
+     :operation-summary operation-summary
      :equivalence-status equivalence-status
      :source-provenance
      (list :mech_block
@@ -4271,10 +4290,19 @@
 (defun make-mech-execution-input
     (selected-mech selected-code execution-interface
      &key neighborhood-input)
-  (let* ((effective-neighborhood
-           (snippet-playground-normalize-neighborhood-input
-            (or neighborhood-input
-                (snippet-playground-default-neighborhood-input))))
+  (let* ((parsed-mech-operations
+           (snippet-playground-mech-operation-entries selected-mech))
+         (requires-neighborhood
+           (mech-operations-require-neighborhood-p parsed-mech-operations))
+         (effective-neighborhood
+           (when (and requires-neighborhood neighborhood-input)
+             (snippet-playground-normalize-neighborhood-input
+              neighborhood-input)))
+         (normalized-state
+           (if effective-neighborhood
+               (list :neighborhood effective-neighborhood
+                     :items nil)
+               (list :items nil)))
          (code-operation-name
            (snippet-playground-mech-code-function-name selected-mech))
          (code-operation-arguments
@@ -4294,20 +4322,30 @@
      :title "Mech execution input"
      :summary
      (format nil
-             "Normalized Mech/code execution input for ~A via ~A."
+             "Normalized Mech/code execution input for ~A via ~A (~A)."
              (or code-operation-name "unknown")
-             (or handoff-path "unresolved"))
+             (or handoff-path "unresolved")
+             (if requires-neighborhood
+                 "requires NEIGHBORS input"
+                 "uses page/context story input"))
      :selected-mech selected-mech
      :selected-code selected-code
-     :normalized-state (list :neighborhood effective-neighborhood
-                             :items nil)
+     :normalized-state normalized-state
      :parsed-mech-operations
-     (snippet-playground-mech-operation-entries selected-mech)
+     parsed-mech-operations
      :code-operation-name code-operation-name
      :code-operation-arguments code-operation-arguments
      :handoff-path handoff-path
      :findings
-     (list "Execution input keeps Mech/code evidence and normalized neighborhood state in one inspectable object."))))
+     (append
+      (list "Execution input is derived from parsed Mech operations, not from a global fixture.")
+      (if requires-neighborhood
+          (if effective-neighborhood
+              (list "NEIGHBORS operation resolved to normalized neighborhood state.")
+              (list "NEIGHBORS operation is present but no neighborhood input was provided."))
+          (list "No NEIGHBORS operation present; neighborhood state is omitted."))
+      (when (and (not requires-neighborhood) neighborhood-input)
+        (list "Ignored caller-provided neighborhood input because Mech IR does not request NEIGHBORS."))))))
 
 (defun mech-ir-token-slug (token)
   (let ((text (string-downcase (format nil "~A" token))))
@@ -4494,6 +4532,16 @@
       (when unsupported-operations
         (list "IR records unsupported Mech operations explicitly for chart/report propagation."))))))
 
+(defun mech-ir-requires-neighborhood-p (ir)
+  (and ir
+       (or (find :neighbors
+                 (or (mech-execution-ir-required-inputs-of ir) '())
+                 :key (lambda (entry)
+                        (getf entry :kind))
+                 :test #'eq)
+           (mech-operations-require-neighborhood-p
+            (or (mech-execution-ir-ordered-operations-of ir) '())))))
+
 (defun mech-ir-terminal-result-state-for-event (event)
   (cond
     ((string= event "result/ok")
@@ -4505,6 +4553,7 @@
 
 (defun mech-ir-to-state-machine-definition (ir)
   (let* ((operations (or (mech-execution-ir-ordered-operations-of ir) '()))
+         (neighborhood-required-p (mech-ir-requires-neighborhood-p ir))
          (state-ids (mapcar (lambda (operation)
                               (getf operation :state-id))
                             operations))
@@ -4599,6 +4648,11 @@
      (list
       (list :label "Mech operation order"
             :detail "SCXML transition sequence preserves parsed Mech operation order.")
+      (list :label "Neighborhood loading"
+            :detail
+            (if neighborhood-required-p
+                "NEIGHBORS operation is present; generated chart includes load-neighborhood state(s)."
+                "No NEIGHBORS operation is present; generated chart omits load-neighborhood state(s)."))
       (list :label "Bounded semantic seam"
             :detail "CODE operation dispatch remains bounded to the state.items popular(count) seam."))
      :source-evidence
@@ -4610,6 +4664,7 @@
 (defun mech-ir-to-scxml-chart (ir)
   (let* ((machine (mech-ir-to-state-machine-definition ir))
          (scxml-text (state-machine-definition-scxml-text machine))
+         (neighborhood-required-p (mech-ir-requires-neighborhood-p ir))
          (chart nil)
          (warning nil))
     (handler-case
@@ -4642,7 +4697,10 @@
      :scxml-text scxml-text
      :findings
      (append
-      (list "SCXML chart is generated from Mech IR operation states and transitions.")
+      (list "SCXML chart is generated from Mech IR operation states and transitions."
+            (if neighborhood-required-p
+                "Chart includes neighborhood-loading state(s) because Mech IR contains NEIGHBORS."
+                "Chart omits neighborhood-loading state(s) because Mech IR contains no NEIGHBORS."))
       (when warning
         (list warning))))))
 
@@ -4693,8 +4751,15 @@
                        semantic-trace)
                  (cond
                    ((string= token "NEIGHBORS")
-                    (push "loaded normalized neighborhood input"
-                          semantic-trace))
+                    (let ((neighborhood
+                            (getf (mech-execution-input-normalized-state-of
+                                   execution-input)
+                                  :neighborhood)))
+                      (if neighborhood
+                          (push "loaded normalized neighborhood input"
+                                semantic-trace)
+                          (push "NEIGHBORS operation requested neighborhood input, but no neighborhood state was resolved."
+                                semantic-trace))))
                    ((string= token "CODE")
                     (setf lefty-run-result
                           (run-lefty-mech-execution execution-input)
@@ -6360,26 +6425,53 @@
                   (:p (html-inspector-views:esc
                        "Generated SCXML chart is unavailable."))))
             (if execution-input
-                (html-inspector-views:html
-                  (:h4 "Execution input")
-                  (:table :class "inspector-table"
-                          (snippet-playground-status-table-row
-                           "Function"
-                           (mech-execution-input-code-operation-name-of
-                            execution-input))
-                          (snippet-playground-status-table-row
-                           "Arguments"
-                           (mech-execution-input-code-operation-arguments-of
-                            execution-input))
-                          (snippet-playground-status-table-row
-                           "Output path"
-                           (mech-execution-input-handoff-path-of
-                            execution-input)))
-                  (:h5 "Normalized neighborhood state")
-                  (snippet-source-pre
-                   (snippet-playground-value-or-na
-                    (mech-execution-input-normalized-state-of
-                     execution-input))))
+                (let* ((normalized-state
+                         (mech-execution-input-normalized-state-of execution-input))
+                       (neighborhood-required-p
+                         (or (and mech-execution-ir
+                                  (mech-ir-requires-neighborhood-p
+                                   mech-execution-ir))
+                             (mech-operations-require-neighborhood-p
+                              (mech-execution-input-parsed-mech-operations-of
+                               execution-input))))
+                       (neighborhood-state
+                         (and normalized-state
+                              (getf normalized-state :neighborhood))))
+                  (html-inspector-views:html
+                    (:h4 "Execution input")
+                    (:table :class "inspector-table"
+                            (snippet-playground-status-table-row
+                             "Function"
+                             (mech-execution-input-code-operation-name-of
+                              execution-input))
+                            (snippet-playground-status-table-row
+                             "Arguments"
+                             (mech-execution-input-code-operation-arguments-of
+                              execution-input))
+                            (snippet-playground-status-table-row
+                             "Output path"
+                             (mech-execution-input-handoff-path-of
+                              execution-input))
+                            (snippet-playground-status-table-row
+                             "Required input"
+                             (if neighborhood-required-p
+                                 "NEIGHBORS input"
+                                 "Page/context story")))
+                    (if neighborhood-required-p
+                        (if neighborhood-state
+                            (html-inspector-views:html
+                              (:h5 "Normalized neighborhood state")
+                              (snippet-source-pre
+                               (snippet-playground-value-or-na
+                                neighborhood-state)))
+                            (html-inspector-views:html
+                              (:h5 "Neighborhood input")
+                              (:p (html-inspector-views:esc
+                                   "NEIGHBORS is requested by Mech IR, but no neighborhood input is resolved."))))
+                        (html-inspector-views:html
+                          (:h5 "Required input")
+                          (snippet-source-pre
+                           "Page/context story")))))
                 (html-inspector-views:html
                   (:p (html-inspector-views:esc
                        "Execution input is unavailable."))))

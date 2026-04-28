@@ -428,11 +428,47 @@
      :execution-neighborhood-input
      (snippet-playground-smoke-popular-neighborhood-input))))
 
+(defun snippet-playground-smoke-make-quick-brown-fox-equivalence-blocks ()
+  (list
+   (list :index 1
+         :line-number 1
+         :location-label "story item 1 (mech)"
+         :open-tag "fedwiki-mech"
+         :source (format nil
+                         "CLICK~%CODE quick~%PREVIEW synopsis items"))
+   (list :index 2
+         :line-number 10
+         :location-label "story item 2 (code)"
+         :open-tag "fedwiki-code"
+         :source
+         (format nil
+                 "export function quick() {~%  let item = this.context.page.story[1]~%  let dot = item.text~%    .split('')~%    .map((c,i,v) => \"\\\"${c}\\\"->\\\"${v[i+1]||'.'}\\\";\")~%  let graph = {~%    type:'graphviz',~%    text:`digraph {~%      node [style=filled fillcolor=gold];~%      ${dot.join(\"\\\\n\")} }`}~%  this.items = [item, graph]~%}"))))
+
+(defun make-snippet-playground-quick-brown-fox-equivalence-smoke-session ()
+  (let* ((blocks
+           (snippet-playground-smoke-make-quick-brown-fox-equivalence-blocks))
+         (source-text
+           (hyperdoc::snippet-playground-source-text-from-blocks blocks)))
+    (hyperdoc::make-snippet-playground-result-from-blocks
+     :context-object nil
+     :context-view-title "Source"
+     :source-pathname nil
+     :source-text source-text
+     :blocks blocks
+     :origin-surface-kind "fedwiki-page"
+     :provider-kind "fedwiki-v1"
+     :source-label "Snippet playground quick brown fox equivalence smoke"
+     :execution-neighborhood-input
+     (snippet-playground-smoke-popular-neighborhood-input))))
+
 (defun run-snippet-playground-popular-equivalence-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-popular-equivalence-smoke-session))
          (execution-interface
            (hyperdoc::snippet-playground-session-execution-interface-of
+            session))
+         (execution-input
+           (hyperdoc::snippet-playground-session-mech-execution-input-of
             session))
          (mech-execution-ir
            (hyperdoc::snippet-playground-session-mech-execution-ir-of
@@ -497,6 +533,13 @@
     (snippet-playground-assert-true
      (member "PREVIEW" operation-tokens :test #'string=)
      "Mech execution IR must include PREVIEW items")
+    (snippet-playground-assert-true
+     (hyperdoc::mech-ir-requires-neighborhood-p mech-execution-ir)
+     "NEIGHBORS operation must require neighborhood input in execution IR")
+    (snippet-playground-assert-true
+     (getf (hyperdoc::mech-execution-input-normalized-state-of execution-input)
+           :neighborhood)
+     "Execution input must include normalized neighborhood state when NEIGHBORS is present")
     (snippet-playground-assert-true
      mech-scxml-execution-chart
      "Generated SCXML chart must be available for popular/count fixture")
@@ -626,6 +669,107 @@
      "equal-p"
      comparison-html
      "Comparison surface must expose equivalence verdict details")))
+
+(defun run-snippet-playground-quick-brown-fox-input-leakage-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((session
+           (make-snippet-playground-quick-brown-fox-equivalence-smoke-session))
+         (execution-input
+           (hyperdoc::snippet-playground-session-mech-execution-input-of
+            session))
+         (mech-execution-ir
+           (hyperdoc::snippet-playground-session-mech-execution-ir-of
+            session))
+         (mech-scxml-execution-chart
+           (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of
+            session))
+         (scxml-run-result
+           (hyperdoc::snippet-playground-session-scxml-run-result-of
+            session))
+         (lefty
+           (hyperdoc::snippet-playground-session-lefty-run-result-of session))
+         (rita
+           (hyperdoc::snippet-playground-session-rita-run-result-of session))
+         (operation-tokens
+           (mapcar (lambda (operation)
+                     (getf operation :operation))
+                   (hyperdoc::mech-execution-ir-ordered-operations-of
+                    mech-execution-ir)))
+         (chart-source
+           (or (and mech-scxml-execution-chart
+                    (hyperdoc::mech-scxml-execution-chart-scxml-text-of
+                     mech-scxml-execution-chart))
+               ""))
+         (session-views
+           (snippet-playground-smoke-load-inspector-views-for-object session))
+         (execution-view
+           (snippet-playground-smoke-find-view-by-title session-views
+                                                        "Execution"))
+         (execution-html
+           (or (and execution-view
+                    (html-inspector-views:view-html execution-view))
+               ""))
+         (scxml-trace
+           (format nil "~{~A~%~}"
+                   (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                       '())))
+         (diagnostic-text
+           (format nil "~{~A~%~}"
+                   (append
+                    (or (hyperdoc::mech-run-result-diagnostics-of
+                         scxml-run-result)
+                        '())
+                    (or (hyperdoc::mech-run-result-unsupported-constructs-of
+                         lefty)
+                        '())
+                    (or (hyperdoc::mech-run-result-unsupported-constructs-of
+                         rita)
+                        '())))))
+    (snippet-playground-assert-equal
+     :ready
+     (hyperdoc::snippet-playground-session-status-of session)
+     "Quick Brown Fox fixture must still produce an inspectable ready session")
+    (snippet-playground-assert-true
+     (not (member "NEIGHBORS" operation-tokens :test #'string=))
+     "Quick Brown Fox Mech IR must not contain NEIGHBORS")
+    (snippet-playground-assert-equal
+     nil
+     (hyperdoc::mech-ir-requires-neighborhood-p mech-execution-ir)
+     "Quick Brown Fox Mech IR must not require neighborhood input")
+    (snippet-playground-assert-not-contains
+     "load-neighborhood"
+     chart-source
+     "Generated SCXML chart must omit load-neighborhood state when NEIGHBORS is absent")
+    (snippet-playground-assert-equal
+     nil
+     (getf (hyperdoc::mech-execution-input-normalized-state-of execution-input)
+           :neighborhood)
+     "Execution input must not include neighborhood state when NEIGHBORS is absent")
+    (snippet-playground-assert-not-contains
+     "Normalized neighborhood state"
+     execution-html
+     "Execution view must not show normalized neighborhood state for Quick Brown Fox")
+    (dolist (title '("Alpha" "Beta" "Gamma" "Delta"))
+      (snippet-playground-assert-not-contains
+       title
+       execution-html
+       "Execution view must not leak sample neighborhood fixture titles"))
+    (snippet-playground-assert-contains
+     "Page/context story"
+     execution-html
+     "Execution view must show page/context story as required input for Quick Brown Fox")
+    (snippet-playground-assert-equal
+     :unsupported
+     (hyperdoc::mech-run-result-status-of scxml-run-result)
+     "Unsupported quick CODE operation must drive SCXML run to :unsupported")
+    (snippet-playground-assert-contains
+     "Entering: unsupported"
+     scxml-trace
+     "Quick Brown Fox unsupported run must still reach unsupported SCXML final state")
+    (snippet-playground-assert-not-contains
+     "neighborhood"
+     (string-downcase diagnostic-text)
+     "Unsupported quick diagnostics must not mention neighborhood input leakage")))
 
 (defun run-snippet-playground-popular-unsupported-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
@@ -1427,6 +1571,7 @@
   (run-snippet-playground-code-slice-bundle-smoke-test)
   (run-snippet-playground-elided-html-pre-pollution-smoke-test)
   (run-snippet-playground-popular-equivalence-smoke-test)
+  (run-snippet-playground-quick-brown-fox-input-leakage-smoke-test)
   (run-snippet-playground-popular-unsupported-smoke-test)
   (run-snippet-playground-html-pre-expansion-smoke-test)
   (run-snippet-playground-html-pre-expansion-disabled-smoke-test)
