@@ -3783,7 +3783,7 @@
   (make-topic
    :id "shared-workspace-collaboration-model"
    :title "Shared-workspace collaboration model"
-   :summary "The collaboration model keeps each HyperDoc instance as the durable journal and inspection side, uses the context-window workspace as a rebuildable shared projection, and lets me, ChatGPT, and Codex converge through the same MCP-facing DMX surfaces."
+   :summary "The collaboration model keeps each HyperDoc instance as the durable journal and inspection side, uses the context-window workspace as a curated shared blackboard and rebuildable shared projection, and lets me, ChatGPT, and Codex converge through the same MCP-facing DMX surfaces."
    :references '("Shared-workspace collaboration model"
                  "Context window workspace as shared blackboard"
                  "DMX MCP server for shared workspace"
