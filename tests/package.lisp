@@ -33,6 +33,7 @@
    :run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test
    :run-localhost-fedwiki-page-promotion-missing-source-fail-soft-smoke-test
    :run-localhost-fedwiki-page-promotion-output-sync-smoke-test
+   :run-localhost-fedwiki-page-promotion-workflow-scxml-smoke-tests
    :run-dmx-topicmap-919822-repair-runbook-smoke-test
    :run-localhost-fedwiki-page-promotion-plans-smoke-tests
    :run-topic-factory-snippet-dmx-smoke-tests

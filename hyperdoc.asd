@@ -334,6 +334,7 @@
                              (:file "reproducible-devenv-as-knowledge-artifact-slice-smoke")
                              (:file "localhost-fedwiki-page-pipeline-smoke")
                              (:file "localhost-fedwiki-page-promotion-plans-smoke")
+                             (:file "localhost-fedwiki-page-promotion-workflow-scxml-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
                              (:file "hyperdoc-test-system-runbook-smoke")
                              (:file "dmx-mcp-smoke")

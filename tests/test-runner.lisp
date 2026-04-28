@@ -28,6 +28,7 @@
   (run-reproducible-devenv-as-knowledge-artifact-slice-smoke-tests)
   (run-localhost-fedwiki-page-pipeline-smoke-tests)
   (run-localhost-fedwiki-page-promotion-plans-smoke-tests)
+  (run-localhost-fedwiki-page-promotion-workflow-scxml-smoke-tests)
   (run-topic-factory-snippet-dmx-smoke-tests)
   (run-hyperdoc-test-system-runbook-smoke-tests)
   (run-dmx-mcp-smoke-tests)

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="localhost-fedwiki-page-promotion-workflow"
+    initial="start">
+
+  <state id="start">
+    <onentry>
+      <log label="Starting localhost FedWiki page-promotion workflow"/>
+    </onentry>
+
+    <transition event="SOURCE.RESOLVED" target="resolveSourcePage"/>
+    <transition event="SOURCE.UNAVAILABLE" target="sourceUnavailable"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="resolveSourcePage">
+    <onentry>
+      <log label="Resolved localhost FedWiki source page"/>
+    </onentry>
+
+    <transition event="SOURCE.NORMALIZED" target="normalizeFedWikiSource"/>
+    <transition event="SOURCE.ENVELOPE_MALFORMED" target="malformedSourceEnvelope"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="normalizeFedWikiSource">
+    <onentry>
+      <log label="Normalized localhost FedWiki source object"/>
+    </onentry>
+
+    <transition event="PROMOTION_PLAN.BUILT" target="buildPromotionPlan"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="buildPromotionPlan">
+    <onentry>
+      <log label="Built page-promotion plan"/>
+    </onentry>
+
+    <transition event="HYPERDOC_PAGE.COMPOSED" target="composeHyperDocPage"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="composeHyperDocPage">
+    <onentry>
+      <log label="Composed generated HyperDoc page"/>
+    </onentry>
+
+    <transition event="TOPIC_FACTORY_SNIPPET.GENERATED" target="generateTopicFactorySnippet"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="generateTopicFactorySnippet">
+    <onentry>
+      <log label="Generated topic-factory snippet"/>
+    </onentry>
+
+    <transition event="PAGE_ARTIFACT.SYNCED" target="checkPageArtifactSync"/>
+    <transition event="PAGE_ARTIFACT.STALE" target="pageArtifactStale"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="checkPageArtifactSync">
+    <onentry>
+      <log label="Page artifact is synced with current rendering"/>
+    </onentry>
+
+    <transition event="SNIPPET_ARTIFACT.SYNCED" target="checkSnippetArtifactSync"/>
+    <transition event="SNIPPET_ARTIFACT.STALE" target="snippetArtifactStale"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="checkSnippetArtifactSync">
+    <onentry>
+      <log label="Snippet artifact is synced with current rendering"/>
+    </onentry>
+
+    <transition event="DMX.DRY_RUN_PAYLOAD.BUILT" target="buildDmxDryRunPayload"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="buildDmxDryRunPayload">
+    <onentry>
+      <log label="Built guarded DMX dry-run payload"/>
+    </onentry>
+
+    <transition event="DMX.PAYLOAD.VALIDATED" target="validateDmxPayload"/>
+    <transition event="DMX.PAYLOAD.INVALID" target="dmxPayloadInvalid"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="validateDmxPayload">
+    <onentry>
+      <log label="Validated DMX payload"/>
+    </onentry>
+
+    <transition event="GUARDED_WRITE_BOUNDARY.ACCEPTED" target="reviewGuardedWriteBoundary"/>
+    <transition event="GUARDED_WRITE_BOUNDARY.REJECTED" target="guardedWriteRejected"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="reviewGuardedWriteBoundary">
+    <onentry>
+      <log label="Guarded write boundary accepted"/>
+    </onentry>
+
+    <transition event="LIVE_DMX_WRITE.SKIPPED_PRECONDITION" target="optionallyExecuteLiveDmxWrite"/>
+    <transition event="LIVE_DMX_WRITE.SUCCEEDED" target="optionallyExecuteLiveDmxWrite"/>
+    <transition event="LIVE_DMX_WRITE.PRECONDITION_MISSING" target="liveWritePreconditionMissing"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <state id="optionallyExecuteLiveDmxWrite">
+    <onentry>
+      <log label="Live DMX write skipped by explicit precondition or succeeded"/>
+    </onentry>
+
+    <transition event="WORKFLOW.PASSED" target="passed"/>
+    <transition event="WORKFLOW.UNEXPECTED_REGRESSION" target="unexpectedRegression"/>
+  </state>
+
+  <final id="passed">
+    <onentry>
+      <log label="Page-promotion workflow passed"/>
+    </onentry>
+  </final>
+
+  <final id="sourceUnavailable">
+    <onentry>
+      <log label="FAIL source unavailable for localhost FedWiki page promotion workflow"/>
+    </onentry>
+  </final>
+
+  <final id="malformedSourceEnvelope">
+    <onentry>
+      <log label="FAIL malformed source envelope blocks normalization"/>
+    </onentry>
+  </final>
+
+  <final id="pageArtifactStale">
+    <onentry>
+      <log label="FAIL generated HyperDoc page artifact is stale"/>
+    </onentry>
+  </final>
+
+  <final id="snippetArtifactStale">
+    <onentry>
+      <log label="FAIL generated topic-factory snippet artifact is stale"/>
+    </onentry>
+  </final>
+
+  <final id="dmxPayloadInvalid">
+    <onentry>
+      <log label="FAIL DMX dry-run payload validation rejected workflow"/>
+    </onentry>
+  </final>
+
+  <final id="guardedWriteRejected">
+    <onentry>
+      <log label="FAIL guarded write boundary rejected this promotion plan"/>
+    </onentry>
+  </final>
+
+  <final id="liveWritePreconditionMissing">
+    <onentry>
+      <log label="FAIL live DMX write precondition missing in strict mode"/>
+    </onentry>
+  </final>
+
+  <final id="unexpectedRegression">
+    <onentry>
+      <log label="FAIL unexpected regression interrupted page-promotion workflow"/>
+    </onentry>
+  </final>
+
+</scxml>

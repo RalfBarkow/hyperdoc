@@ -18,6 +18,11 @@
    :hyperdoc
    "hyperdoc/page-promotion-output-sync-expectation.scxml"))
 
+(defparameter *localhost-fedwiki-page-promotion-workflow-scxml*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/localhost-fedwiki-page-promotion-workflow.scxml"))
+
 (defparameter *hyperdoc-test-system-runbook-scxml*
   (asdf:system-relative-pathname
    :hyperdoc
@@ -138,6 +143,60 @@
              :initarg :passed-p
              :initform nil)))
 
+(defclass localhost-fedwiki-page-promotion-workflow-scxml-run ()
+  ((scxml-path :reader localhost-fedwiki-page-promotion-workflow-scxml-run-scxml-path-of
+               :initarg :scxml-path)
+   (promotion-surface
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-promotion-surface-of
+    :initarg :promotion-surface
+    :initform nil)
+   (plan-id :reader localhost-fedwiki-page-promotion-workflow-scxml-run-plan-id-of
+            :initarg :plan-id
+            :initform nil)
+   (plan-title :reader localhost-fedwiki-page-promotion-workflow-scxml-run-plan-title-of
+               :initarg :plan-title
+               :initform nil)
+   (semantic-facts
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-semantic-facts-of
+    :initarg :semantic-facts
+    :initform nil)
+   (input-events
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-input-events-of
+    :initarg :input-events
+    :initform nil)
+   (phase-results
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-phase-results-of
+    :initarg :phase-results
+    :initform nil)
+   (validation-findings
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-validation-findings-of
+    :initarg :validation-findings
+    :initform nil)
+   (trace :reader localhost-fedwiki-page-promotion-workflow-scxml-run-trace-of
+          :initarg :trace
+          :initform nil)
+   (final-state
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-final-state-of
+    :initarg :final-state
+    :initform nil)
+   (done-p :reader localhost-fedwiki-page-promotion-workflow-scxml-run-done-p-of
+           :initarg :done-p
+           :initform nil)
+   (passed-p :reader localhost-fedwiki-page-promotion-workflow-scxml-run-passed-p-of
+             :initarg :passed-p
+             :initform nil)
+   (blocker :reader localhost-fedwiki-page-promotion-workflow-scxml-run-blocker-of
+            :initarg :blocker
+            :initform nil)
+   (failure-classification
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-failure-classification-of
+    :initarg :failure-classification
+    :initform :unknown)
+   (suggested-next-action
+    :reader localhost-fedwiki-page-promotion-workflow-scxml-run-suggested-next-action-of
+    :initarg :suggested-next-action
+    :initform nil)))
+
 (defun uscxml-browser-pathname ()
   (let ((browser *uscxml-browser*))
     (and browser (probe-file browser))))
@@ -247,6 +306,455 @@
                          :final-state final-state
                          :done-p done-p
                          :passed-p passed-p)))))
+
+(defun localhost-fedwiki-page-promotion-workflow-find-plan
+    (surface plan-id)
+  (let ((plans (and surface
+                    (localhost-fedwiki-page-promotion-surface-plans
+                     surface))))
+    (or (and plan-id
+             (find plan-id
+                   plans
+                   :key #'localhost-fedwiki-page-promotion-plan-id
+                   :test #'equal))
+        (first plans))))
+
+(defun localhost-fedwiki-page-promotion-workflow-default-semantic-facts ()
+  (list :source-resolved-p t
+        :source-normalized-p t
+        :source-envelope-malformed-p nil
+        :source-availability-state :available
+        :promotion-plan-built-p t
+        :page-composed-p t
+        :snippet-generated-p t
+        :page-artifact-state :synced
+        :snippet-artifact-state :synced
+        :dmx-dry-run-payload-built-p t
+        :dmx-payload-valid-p t
+        :guarded-write-boundary :accepted
+        :live-dmx-write :skipped-precondition
+        :unexpected-regression-p nil
+        :unexpected-regression-condition nil))
+
+(defun localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+    (facts)
+  (apply #'plist-with-overrides
+         (localhost-fedwiki-page-promotion-workflow-default-semantic-facts)
+         facts))
+
+(defun localhost-fedwiki-page-promotion-workflow-artifact-state
+    (synced-p freshness-state source-availability-state)
+  (cond
+    ((eq :source-unavailable source-availability-state)
+     :source-unavailable)
+    (synced-p :synced)
+    ((eq :stale freshness-state) :stale)
+    ((eq :unknown-malformed-envelope freshness-state)
+     :malformed-envelope)
+    ((eq :unknown-missing-envelope freshness-state)
+     :missing-envelope)
+    (t :unknown)))
+
+(defun localhost-fedwiki-page-promotion-workflow-semantic-facts
+    (&key promotion-surface plan-id (live-dmx-write :skipped-precondition))
+  (let* ((surface (or promotion-surface
+                      (current-localhost-fedwiki-page-promotion-surface)))
+         (plan (localhost-fedwiki-page-promotion-workflow-find-plan
+                surface
+                plan-id)))
+    (unless plan
+      (error "No localhost FedWiki page-promotion plan is available for workflow SCXML run."))
+    (let* ((status (localhost-fedwiki-page-promotion-plan-sync-status plan))
+           (dmx-summary (getf status :dmx-dry-run-summary))
+           (source-availability-state
+             (getf status :source-availability-state :unknown))
+           (page-freshness-state
+             (getf status :page-source-freshness-state :unknown))
+           (snippet-freshness-state
+             (getf status :snippet-source-freshness-state :unknown))
+           (source-envelope-malformed-p
+             (or (eq :unknown-malformed-envelope page-freshness-state)
+                 (eq :unknown-malformed-envelope snippet-freshness-state)))
+           (page-artifact-state
+             (localhost-fedwiki-page-promotion-workflow-artifact-state
+              (getf status :page-synced)
+              page-freshness-state
+              source-availability-state))
+           (snippet-artifact-state
+             (localhost-fedwiki-page-promotion-workflow-artifact-state
+              (getf status :snippet-synced)
+              snippet-freshness-state
+              source-availability-state))
+           (dmx-dry-run-payload-built-p
+             (and dmx-summary
+                  (getf dmx-summary :available)))
+           (dmx-payload-valid-p
+             (and dmx-dry-run-payload-built-p
+                  (eq :canonical
+                      (getf dmx-summary :view-props-validation-status))
+                  (null (getf dmx-summary :forbidden-short-keys))))
+           (guarded-write-boundary
+             (if dmx-payload-valid-p
+                 :accepted
+                 :rejected)))
+      (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+       (list :promotion-surface surface
+             :plan-id (localhost-fedwiki-page-promotion-plan-id plan)
+             :plan-title (localhost-fedwiki-page-promotion-plan-title plan)
+             :source-page-id
+             (localhost-fedwiki-page-promotion-plan-source-page-id plan)
+             :source-page-slug
+             (localhost-fedwiki-page-promotion-plan-source-page-slug plan)
+             :source-resolved-p
+             (not (eq :source-unavailable source-availability-state))
+             :source-normalized-p
+             (and (eq :available source-availability-state)
+                  (not source-envelope-malformed-p))
+             :source-envelope-malformed-p source-envelope-malformed-p
+             :source-availability-state source-availability-state
+             :promotion-plan-built-p t
+             :page-composed-p
+             (let ((rendered-page
+                     (localhost-fedwiki-page-promotion-plan-rendered-page
+                      plan)))
+               (and (stringp rendered-page)
+                    (plusp (length rendered-page))))
+             :snippet-generated-p
+             (let ((snippet
+                     (snippet-text-of
+                      (localhost-fedwiki-page-promotion-plan-topic-definition
+                       plan))))
+               (and (stringp snippet)
+                    (plusp (length snippet))))
+             :page-artifact-state page-artifact-state
+             :snippet-artifact-state snippet-artifact-state
+             :dmx-dry-run-payload-built-p dmx-dry-run-payload-built-p
+             :dmx-payload-valid-p dmx-payload-valid-p
+             :guarded-write-boundary guarded-write-boundary
+             :live-dmx-write live-dmx-write
+             :unexpected-regression-p nil
+             :unexpected-regression-condition nil
+             :sync-status status
+             :dmx-dry-run-summary dmx-summary)))))
+
+(defun localhost-fedwiki-page-promotion-workflow-events (semantic-facts)
+  (let* ((facts
+           (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+            semantic-facts))
+         (events '()))
+    (labels ((emit (event)
+               (push event events)))
+      (block workflow
+        (when (getf facts :unexpected-regression-p)
+          (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+          (return-from workflow (nreverse events)))
+
+        (when (eq :source-unavailable
+                  (getf facts :source-availability-state))
+          (emit "SOURCE.UNAVAILABLE")
+          (return-from workflow (nreverse events)))
+
+        (emit "SOURCE.RESOLVED")
+        (when (getf facts :source-envelope-malformed-p)
+          (emit "SOURCE.ENVELOPE_MALFORMED")
+          (return-from workflow (nreverse events)))
+
+        (if (getf facts :source-normalized-p)
+            (emit "SOURCE.NORMALIZED")
+            (progn
+              (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+              (return-from workflow (nreverse events))))
+
+        (if (getf facts :promotion-plan-built-p)
+            (emit "PROMOTION_PLAN.BUILT")
+            (progn
+              (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+              (return-from workflow (nreverse events))))
+
+        (if (getf facts :page-composed-p)
+            (emit "HYPERDOC_PAGE.COMPOSED")
+            (progn
+              (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+              (return-from workflow (nreverse events))))
+
+        (if (getf facts :snippet-generated-p)
+            (emit "TOPIC_FACTORY_SNIPPET.GENERATED")
+            (progn
+              (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+              (return-from workflow (nreverse events))))
+
+        (case (getf facts :page-artifact-state)
+          (:synced
+           (emit "PAGE_ARTIFACT.SYNCED"))
+          (:stale
+           (emit "PAGE_ARTIFACT.STALE")
+           (return-from workflow (nreverse events)))
+          (otherwise
+           (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+           (return-from workflow (nreverse events))))
+
+        (case (getf facts :snippet-artifact-state)
+          (:synced
+           (emit "SNIPPET_ARTIFACT.SYNCED"))
+          (:stale
+           (emit "SNIPPET_ARTIFACT.STALE")
+           (return-from workflow (nreverse events)))
+          (otherwise
+           (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+           (return-from workflow (nreverse events))))
+
+        (if (getf facts :dmx-dry-run-payload-built-p)
+            (emit "DMX.DRY_RUN_PAYLOAD.BUILT")
+            (progn
+              (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+              (return-from workflow (nreverse events))))
+
+        (if (getf facts :dmx-payload-valid-p)
+            (emit "DMX.PAYLOAD.VALIDATED")
+            (progn
+              (emit "DMX.PAYLOAD.INVALID")
+              (return-from workflow (nreverse events))))
+
+        (case (getf facts :guarded-write-boundary)
+          (:accepted
+           (emit "GUARDED_WRITE_BOUNDARY.ACCEPTED"))
+          (:rejected
+           (emit "GUARDED_WRITE_BOUNDARY.REJECTED")
+           (return-from workflow (nreverse events)))
+          (otherwise
+           (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+           (return-from workflow (nreverse events))))
+
+        (case (getf facts :live-dmx-write)
+          (:skipped-precondition
+           (emit "LIVE_DMX_WRITE.SKIPPED_PRECONDITION")
+           (emit "WORKFLOW.PASSED"))
+          (:succeeded
+           (emit "LIVE_DMX_WRITE.SUCCEEDED")
+           (emit "WORKFLOW.PASSED"))
+          (:precondition-missing
+           (emit "LIVE_DMX_WRITE.PRECONDITION_MISSING")
+           (return-from workflow (nreverse events)))
+          (otherwise
+           (emit "WORKFLOW.UNEXPECTED_REGRESSION")
+           (return-from workflow (nreverse events))))
+        (nreverse events)))))
+
+(defun localhost-fedwiki-page-promotion-workflow-phase-results
+    (semantic-facts)
+  (let ((facts
+          (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+           semantic-facts)))
+    (list :resolve-source
+          (case (getf facts :source-availability-state)
+            (:source-unavailable :source-unavailable)
+            (:available :pass)
+            (otherwise :unknown))
+          :normalize-fedwiki-source
+          (cond
+            ((eq :source-unavailable
+                 (getf facts :source-availability-state))
+             :skipped-source-unavailable)
+            ((getf facts :source-envelope-malformed-p)
+             :malformed-envelope)
+            ((getf facts :source-normalized-p)
+             :pass)
+            (t :failed))
+          :build-promotion-plan
+          (if (getf facts :promotion-plan-built-p) :pass :failed)
+          :compose-hyperdoc-page
+          (if (getf facts :page-composed-p) :pass :failed)
+          :generate-topic-factory-snippet
+          (if (getf facts :snippet-generated-p) :pass :failed)
+          :check-page-artifact-sync
+          (getf facts :page-artifact-state)
+          :check-snippet-artifact-sync
+          (getf facts :snippet-artifact-state)
+          :build-dmx-dry-run-payload
+          (if (getf facts :dmx-dry-run-payload-built-p) :pass :failed)
+          :validate-dmx-payload
+          (if (getf facts :dmx-payload-valid-p) :pass :invalid)
+          :review-guarded-write-boundary
+          (getf facts :guarded-write-boundary)
+          :live-dmx-write
+          (getf facts :live-dmx-write))))
+
+(defun localhost-fedwiki-page-promotion-workflow-failure-classification
+    (final-state)
+  (cond
+    ((scxml-final-state= "passed" final-state)
+     :none)
+    ((scxml-final-state= "sourceUnavailable" final-state)
+     :source-unavailable)
+    ((scxml-final-state= "malformedSourceEnvelope" final-state)
+     :malformed-source-envelope)
+    ((scxml-final-state= "pageArtifactStale" final-state)
+     :page-artifact-stale)
+    ((scxml-final-state= "snippetArtifactStale" final-state)
+     :snippet-artifact-stale)
+    ((scxml-final-state= "dmxPayloadInvalid" final-state)
+     :dmx-payload-invalid)
+    ((scxml-final-state= "guardedWriteRejected" final-state)
+     :guarded-write-rejected)
+    ((scxml-final-state= "liveWritePreconditionMissing" final-state)
+     :live-write-precondition-missing)
+    ((scxml-final-state= "unexpectedRegression" final-state)
+     :unexpected-regression)
+    (t :unknown)))
+
+(defun localhost-fedwiki-page-promotion-workflow-blocker-summary
+    (classification)
+  (case classification
+    (:none nil)
+    (:source-unavailable
+     "Localhost FedWiki source page is unavailable for the selected promotion plan.")
+    (:malformed-source-envelope
+     "Promotion source snapshot envelope is malformed and blocks workflow normalization.")
+    (:page-artifact-stale
+     "Generated HyperDoc page artifact is stale relative to the normalized source.")
+    (:snippet-artifact-stale
+     "Generated topic-factory snippet artifact is stale relative to the normalized source.")
+    (:dmx-payload-invalid
+     "DMX dry-run payload failed validation for the selected promotion plan.")
+    (:guarded-write-rejected
+     "Guarded DMX write boundary rejected the selected promotion plan.")
+    (:live-write-precondition-missing
+     "Live DMX write precondition is missing in strict mode.")
+    (:unexpected-regression
+     "Unexpected regression interrupted the page-promotion workflow.")
+    (:unknown
+     "Unclassified page-promotion workflow failure.")
+    (otherwise
+     "Unclassified page-promotion workflow failure.")))
+
+(defun localhost-fedwiki-page-promotion-workflow-suggested-next-action
+    (classification)
+  (case classification
+    (:none
+     "No blocking action is required; the page-promotion workflow passed.")
+    (:source-unavailable
+     "Restore the missing localhost FedWiki source page file and rerun the promotion workflow.")
+    (:malformed-source-envelope
+     "Repair or regenerate malformed source snapshot envelope evidence, then rerun the workflow.")
+    (:page-artifact-stale
+     "Regenerate the HyperDoc page artifact from the current normalized source and rerun checks.")
+    (:snippet-artifact-stale
+     "Regenerate the topic-factory snippet artifact from the current normalized source and rerun checks.")
+    (:dmx-payload-invalid
+     "Inspect DMX dry-run payload validation findings and correct the payload contract.")
+    (:guarded-write-rejected
+     "Review guarded write boundary requirements and fix the rejected promotion payload.")
+    (:live-write-precondition-missing
+     "Set explicit live-write preconditions or keep live writes in skipped-precondition mode.")
+    (:unexpected-regression
+     "Run focused reproduction/classification on the failing promotion-workflow phase before changing expectations.")
+    (:unknown
+     "Run focused reproduction/classification for the workflow failure and classify the blocker.")
+    (otherwise
+     "Run focused reproduction/classification for the workflow failure and classify the blocker.")))
+
+(defun run-localhost-fedwiki-page-promotion-workflow-scxml
+    (&key promotion-surface plan-id semantic-facts input-events
+       package-name function-name)
+  (let* ((resolved-surface
+           (or promotion-surface
+               (ignore-errors
+                 (current-localhost-fedwiki-page-promotion-surface))))
+         (resolved-plan
+           (and resolved-surface
+                (localhost-fedwiki-page-promotion-workflow-find-plan
+                 resolved-surface
+                 plan-id)))
+         (computed-facts
+           (or semantic-facts
+               (handler-case
+                   (localhost-fedwiki-page-promotion-workflow-semantic-facts
+                    :promotion-surface resolved-surface
+                    :plan-id plan-id)
+                 (error (condition)
+                   (list :plan-id
+                         (or plan-id
+                             (and resolved-plan
+                                  (localhost-fedwiki-page-promotion-plan-id
+                                   resolved-plan)))
+                         :plan-title
+                         (and resolved-plan
+                              (localhost-fedwiki-page-promotion-plan-title
+                               resolved-plan))
+                         :source-resolved-p nil
+                         :source-normalized-p nil
+                         :source-availability-state :unknown
+                         :unexpected-regression-p t
+                         :unexpected-regression-condition
+                         (princ-to-string condition))))))
+         (resolved-facts
+           (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+            computed-facts))
+         (resolved-input-events
+           (or input-events
+               (localhost-fedwiki-page-promotion-workflow-events
+                resolved-facts)))
+         (phase-results
+           (localhost-fedwiki-page-promotion-workflow-phase-results
+            resolved-facts))
+         (resolved-package
+           (or package-name
+               "HYPERDOC/SCXML/GENERATED/LOCALHOST-FEDWIKI-PAGE-PROMOTION-WORKFLOW"))
+         (resolved-function
+           (or function-name
+               "RUN-LOCALHOST-FEDWIKI-PAGE-PROMOTION-WORKFLOW"))
+         (expectation-run
+           (run-scxml-expectation-with-events
+            *localhost-fedwiki-page-promotion-workflow-scxml*
+            resolved-input-events
+            resolved-facts
+            :expected-subject
+            (format nil
+                    "localhost-fedwiki-page-promotion-workflow ~A"
+                    (or (getf resolved-facts :plan-id)
+                        (and resolved-plan
+                             (localhost-fedwiki-page-promotion-plan-id
+                              resolved-plan))
+                        "default-plan"))
+            :package-name resolved-package
+            :function-name resolved-function))
+         (final-state
+           (scxml-expectation-run-final-state-of expectation-run))
+         (classification
+           (localhost-fedwiki-page-promotion-workflow-failure-classification
+            final-state))
+         (blocker
+           (localhost-fedwiki-page-promotion-workflow-blocker-summary
+            classification))
+         (suggested-next-action
+           (localhost-fedwiki-page-promotion-workflow-suggested-next-action
+            classification)))
+    (make-instance 'localhost-fedwiki-page-promotion-workflow-scxml-run
+                   :scxml-path *localhost-fedwiki-page-promotion-workflow-scxml*
+                   :promotion-surface resolved-surface
+                   :plan-id
+                   (or (getf resolved-facts :plan-id)
+                       (and resolved-plan
+                            (localhost-fedwiki-page-promotion-plan-id
+                             resolved-plan)))
+                   :plan-title
+                   (or (getf resolved-facts :plan-title)
+                       (and resolved-plan
+                            (localhost-fedwiki-page-promotion-plan-title
+                             resolved-plan)))
+                   :semantic-facts (copy-tree resolved-facts)
+                   :input-events (copy-list resolved-input-events)
+                   :phase-results (copy-tree phase-results)
+                   :validation-findings
+                   (scxml-expectation-run-validation-findings-of
+                    expectation-run)
+                   :trace (scxml-expectation-run-trace-of expectation-run)
+                   :final-state final-state
+                   :done-p (scxml-expectation-run-done-p-of expectation-run)
+                   :passed-p (scxml-expectation-run-passed-p-of expectation-run)
+                   :blocker blocker
+                   :failure-classification classification
+                   :suggested-next-action suggested-next-action)))
 
 (defun test-system-runbook-string-contains-ci-p (haystack needle)
   (and haystack needle

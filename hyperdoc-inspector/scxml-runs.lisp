@@ -98,6 +98,48 @@
                run)
               stream))))
 
+(defun localhost-fedwiki-page-promotion-workflow-scxml-finding-lines (run)
+  (let ((findings
+          (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-validation-findings-of
+           run)))
+    (if findings
+        (mapcar (lambda (finding)
+                  (format nil "[~A] ~A: ~A"
+                          (hyperdoc/scxml:scxml-validation-finding-severity-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-code-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-message-of
+                           finding)))
+                findings)
+        (list "No validation findings."))))
+
+(defun localhost-fedwiki-page-promotion-workflow-scxml-trace-string (run)
+  (with-output-to-string (stream)
+    (dolist (line
+             (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-trace-of
+                  run)
+                 '()))
+      (write-string line stream)
+      (terpri stream))))
+
+(defun localhost-fedwiki-page-promotion-workflow-scxml-events-string (run)
+  (with-output-to-string (stream)
+    (dolist (event
+             (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-input-events-of
+                  run)
+                 '()))
+      (write-string event stream)
+      (terpri stream))))
+
+(defun localhost-fedwiki-page-promotion-workflow-scxml-facts-string (run)
+  (with-output-to-string (stream)
+    (let ((*print-pretty* t))
+      (pprint
+       (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-semantic-facts-of
+        run)
+       stream))))
+
 (views:defview 👀overview
     (run hyperdoc::page-lookup-topic-repair-scxml-run)
   (views:html-view :title "Overview" :priority 1
@@ -306,3 +348,93 @@
                      (test-system-scxml-finding-lines run))))
       (:h3 (views:esc "Trace"))
       (:pre (views:esc (test-system-scxml-trace-string run))))))
+
+(views:defview 👀overview
+    (run hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run)
+  (views:html-view :title "Localhost FedWiki page-promotion workflow (SCXML)"
+                   :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "SCXML"))
+                   (:td (:tt
+                         (views:esc
+                          (namestring
+                           (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-scxml-path-of
+                            run))))))
+              (:tr (:td (views:esc "Plan id"))
+                   (:td (:tt
+                         (views:esc
+                          (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-plan-id-of
+                               run)
+                              "n/a")))))
+              (:tr (:td (views:esc "Plan title"))
+                   (:td (views:esc
+                         (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-plan-title-of
+                              run)
+                             "n/a"))))
+              (:tr (:td (views:esc "Done"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-done-p-of
+                               run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Passed"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-passed-p-of
+                               run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Final state"))
+                   (:td (:tt
+                         (views:esc
+                          (if-let (final-state
+                                   (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-final-state-of
+                                    run))
+                              (format nil "~A" final-state)
+                              "n/a")))))
+              (:tr (:td (views:esc "Failure classification"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-failure-classification-of
+                                   run))))))
+              (:tr (:td (views:esc "Blocker"))
+                   (:td (views:esc
+                         (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-blocker-of
+                              run)
+                             "n/a"))))
+              (:tr (:td (views:esc "Suggested next action"))
+                   (:td (views:esc
+                         (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-suggested-next-action-of
+                              run)
+                             "n/a")))))
+      (:h3 (views:esc "Semantic facts"))
+      (:pre (views:esc
+             (localhost-fedwiki-page-promotion-workflow-scxml-facts-string
+              run)))
+      (:h3 (views:esc "Phase results"))
+      (:table :class "inspector-table"
+              (dolist (pair
+                       (test-system-scxml-plist-pairs
+                        (or (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-phase-results-of
+                             run)
+                            '())))
+                (views:html
+                  (:tr (:td (:tt (views:esc (format nil "~A" (first pair)))))
+                       (:td (:tt (views:esc (format nil "~A" (second pair)))))))))
+      (:h3 (views:esc "Input events"))
+      (:pre (views:esc
+             (localhost-fedwiki-page-promotion-workflow-scxml-events-string
+              run)))
+      (:h3 (views:esc "Validation findings"))
+      (:pre (views:esc
+             (format nil
+                     "~{~A~%~}"
+                     (localhost-fedwiki-page-promotion-workflow-scxml-finding-lines
+                      run))))
+      (:h3 (views:esc "Trace"))
+      (:pre (views:esc
+             (localhost-fedwiki-page-promotion-workflow-scxml-trace-string
+              run))))))
