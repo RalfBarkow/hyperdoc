@@ -5,6 +5,19 @@
 (in-package :hyperdoc)
 
 ;;
+;; Scoped example registrations
+;;
+
+(eval-when (:load-toplevel :execute)
+  (register-example-check
+   'graphviz-story-item-upstream-assimilation-example
+   :system "hyperdoc/examples/ops"
+   :source-file (asdf:system-relative-pathname
+                 :hyperdoc
+                 "hyperdoc/git-commit-equivalence.lisp")
+   :page "Graphviz story item upstream assimilation example"))
+
+;;
 ;; SD card creation runbook helpers for Playground usage
 ;;
 

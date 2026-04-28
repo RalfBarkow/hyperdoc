@@ -13,14 +13,44 @@
 ;; An example is a function of zero arguments.
 
 (defmacro defexample (name &body body)
-  "Define an example function NAME with BODY. The syntax is the same as for
-DEFUN, except that there is no lambda list because example functions take no
-arguments."
-  (let ((source-file (or *compile-file-truename* *load-truename*)))
+  "Define an example function NAME with BODY.
+
+The syntax is the same as DEFUN, except that example functions take no
+arguments.
+
+An optional property list may be provided as the first body form to control
+check registration metadata:
+
+  (defexample my-example
+    (:register t :system \"hyperdoc/examples/ops\")
+    ...body...)
+
+Supported keys mirror REGISTER-EXAMPLE-CHECK keyword arguments."
+  (let* ((source-file (or *compile-file-truename* *load-truename*))
+         (options (and body
+                       (listp (first body))
+                       (keywordp (first (first body)))
+                       (first body)))
+         (forms (if options (rest body) body))
+         (register? (if options
+                        (getf options :register t)
+                        t))
+         (system (and options (getf options :system)))
+         (package (and options (getf options :package)))
+         (page (and options (getf options :page)))
+         (title (and options (getf options :title)))
+         (tags (and options (getf options :tags))))
     `(progn
-       (defun ,name () ,@body)
-       (eval-when (:load-toplevel :execute)
-         (register-example-check ',name :source-file ,source-file))
+       (defun ,name () ,@forms)
+       ,(when register?
+          `(eval-when (:load-toplevel :execute)
+             (register-example-check ',name
+                                     :source-file ,source-file
+                                     ,@(when system `(:system ,system))
+                                     ,@(when package `(:package ,package))
+                                     ,@(when page `(:page ,page))
+                                     ,@(when title `(:title ,title))
+                                     ,@(when tags `(:tags ,tags)))))
        ',name)))
 
 ;;

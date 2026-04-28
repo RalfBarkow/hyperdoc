@@ -1633,6 +1633,7 @@
      (%hyperdoc-graphviz-story-item-commit-assimilation-check))))
 
 (defexample graphviz-story-item-upstream-assimilation-example
+  (:register nil)
   "Run the ceae9d graphviz upstream assimilation check and return the inspectable result."
   (let ((check (hyperdoc-graphviz-story-item-commit-assimilation-check)))
     (typecase check
