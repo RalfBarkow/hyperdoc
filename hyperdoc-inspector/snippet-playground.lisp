@@ -244,6 +244,21 @@
    (transformation-unit :reader snippet-comparison-surface-transformation-unit-of
                         :initarg :transformation-unit
                         :initform nil)
+   (execution-input :reader snippet-comparison-surface-execution-input-of
+                    :initarg :execution-input
+                    :initform nil)
+   (lefty-run-result :reader snippet-comparison-surface-lefty-run-result-of
+                     :initarg :lefty-run-result
+                     :initform nil)
+   (rita-run-result :reader snippet-comparison-surface-rita-run-result-of
+                    :initarg :rita-run-result
+                    :initform nil)
+   (equivalence-report :reader snippet-comparison-surface-equivalence-report-of
+                       :initarg :equivalence-report
+                       :initform nil)
+   (transformation-ir :reader snippet-comparison-surface-transformation-ir-of
+                      :initarg :transformation-ir
+                      :initform nil)
    (lifecycle-run :reader snippet-comparison-surface-lifecycle-run-of
                   :initarg :lifecycle-run
                   :initform nil)
@@ -374,6 +389,147 @@
                     :initarg :rita-projection
                     :initform nil)
    (findings :reader snippet-transformation-unit-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass mech-execution-input ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (selected-mech :reader mech-execution-input-selected-mech-of
+                  :initarg :selected-mech
+                  :initform nil)
+   (selected-code :reader mech-execution-input-selected-code-of
+                  :initarg :selected-code
+                  :initform nil)
+   (normalized-state :reader mech-execution-input-normalized-state-of
+                     :initarg :normalized-state
+                     :initform nil)
+   (parsed-mech-operations :reader mech-execution-input-parsed-mech-operations-of
+                           :initarg :parsed-mech-operations
+                           :initform nil)
+   (code-operation-name :reader mech-execution-input-code-operation-name-of
+                        :initarg :code-operation-name
+                        :initform nil)
+   (code-operation-arguments
+     :reader mech-execution-input-code-operation-arguments-of
+     :initarg :code-operation-arguments
+     :initform nil)
+   (handoff-path :reader mech-execution-input-handoff-path-of
+                 :initarg :handoff-path
+                 :initform nil)
+   (findings :reader mech-execution-input-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass mech-run-result ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (engine :reader mech-run-result-engine-of
+           :initarg :engine
+           :initform :unsupported)
+   (status :reader mech-run-result-status-of
+           :initarg :status
+           :initform :unsupported)
+   (return-value :reader mech-run-result-return-value-of
+                 :initarg :return-value
+                 :initform nil)
+   (final-state :reader mech-run-result-final-state-of
+                :initarg :final-state
+                :initform nil)
+   (normalized-output :reader mech-run-result-normalized-output-of
+                      :initarg :normalized-output
+                      :initform nil)
+   (trace :reader mech-run-result-trace-of
+          :initarg :trace
+          :initform nil)
+   (diagnostics :reader mech-run-result-diagnostics-of
+                :initarg :diagnostics
+                :initform nil)
+   (unsupported-constructs :reader mech-run-result-unsupported-constructs-of
+                           :initarg :unsupported-constructs
+                           :initform nil)
+   (source-provenance :reader mech-run-result-source-provenance-of
+                      :initarg :source-provenance
+                      :initform nil)))
+
+(defclass mech-equivalence-report ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (lefty-run-result :reader mech-equivalence-report-lefty-run-result-of
+                     :initarg :lefty-run-result
+                     :initform nil)
+   (rita-run-result :reader mech-equivalence-report-rita-run-result-of
+                    :initarg :rita-run-result
+                    :initform nil)
+   (normalized-comparison-value
+     :reader mech-equivalence-report-normalized-comparison-value-of
+     :initarg :normalized-comparison-value
+     :initform nil)
+   (equal-p :reader mech-equivalence-report-equal-p
+            :initarg :equal-p
+            :initform nil)
+   (differences :reader mech-equivalence-report-differences-of
+                :initarg :differences
+                :initform nil)
+   (unsupported-constructs
+     :reader mech-equivalence-report-unsupported-constructs-of
+     :initarg :unsupported-constructs
+     :initform nil)
+   (source-provenance :reader mech-equivalence-report-source-provenance-of
+                      :initarg :source-provenance
+                      :initform nil)
+   (findings :reader mech-equivalence-report-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass mech-state-items-ir ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (input-slots :reader mech-state-items-ir-input-slots-of
+                :initarg :input-slots
+                :initform nil)
+   (output-path :reader mech-state-items-ir-output-path-of
+                :initarg :output-path
+                :initform nil)
+   (function-name :reader mech-state-items-ir-function-name-of
+                  :initarg :function-name
+                  :initform nil)
+   (function-arguments :reader mech-state-items-ir-function-arguments-of
+                       :initarg :function-arguments
+                       :initform nil)
+   (helper-functions :reader mech-state-items-ir-helper-functions-of
+                     :initarg :helper-functions
+                     :initform nil)
+   (operation-summary :reader mech-state-items-ir-operation-summary-of
+                      :initarg :operation-summary
+                      :initform nil)
+   (equivalence-status :reader mech-state-items-ir-equivalence-status-of
+                       :initarg :equivalence-status
+                       :initform nil)
+   (source-provenance :reader mech-state-items-ir-source-provenance-of
+                      :initarg :source-provenance
+                      :initform nil)
+   (findings :reader mech-state-items-ir-findings-of
              :initarg :findings
              :initform nil)))
 
@@ -562,6 +718,26 @@
      :reader snippet-playground-session-transformation-unit-of
      :initarg :transformation-unit
      :initform nil)
+   (mech-execution-input
+     :reader snippet-playground-session-mech-execution-input-of
+     :initarg :mech-execution-input
+     :initform nil)
+   (lefty-run-result
+     :reader snippet-playground-session-lefty-run-result-of
+     :initarg :lefty-run-result
+     :initform nil)
+   (rita-run-result
+     :reader snippet-playground-session-rita-run-result-of
+     :initarg :rita-run-result
+     :initform nil)
+   (equivalence-report
+     :reader snippet-playground-session-equivalence-report-of
+     :initarg :equivalence-report
+     :initform nil)
+   (transformation-ir
+     :reader snippet-playground-session-transformation-ir-of
+     :initarg :transformation-ir
+     :initform nil)
    (comparison-surface
      :reader snippet-playground-session-comparison-surface-of
      :initarg :comparison-surface
@@ -644,6 +820,22 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object mech-execution-input) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mech-run-result) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mech-equivalence-report) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mech-state-items-ir) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object snippet-playground-authored-role) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -699,6 +891,22 @@
 
 (defmethod html-inspector-views:text-representation
     ((object snippet-transformation-unit))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-execution-input))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-run-result))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-equivalence-report))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-state-items-ir))
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
@@ -1316,6 +1524,8 @@
        source-label origin-pane-id origin-surface-kind provider-kind
        pending-pane-id recognized-mech-snippets recognized-code-snippets
        selected-mech selected-code execution-interface transformation-unit
+       mech-execution-input lefty-run-result rita-run-result
+       equivalence-report transformation-ir
        result-object failure-object)
   (make-state-machine-run
    :id (format nil "state-machine-run/snippet-playground/~A"
@@ -1341,6 +1551,16 @@
     (snippet-playground-object-label execution-interface)
     :transformation_unit
     (snippet-playground-object-label transformation-unit)
+    :mech_execution_input
+    (snippet-playground-object-label mech-execution-input)
+    :lefty_run_result
+    (snippet-playground-object-label lefty-run-result)
+    :rita_run_result
+    (snippet-playground-object-label rita-run-result)
+    :equivalence_report
+    (snippet-playground-object-label equivalence-report)
+    :transformation_ir
+    (snippet-playground-object-label transformation-ir)
     :result_object (snippet-playground-object-label result-object)
     :failure_object (snippet-playground-object-label failure-object))
    :current-state current-state
@@ -3297,8 +3517,624 @@
      :rita-projection rita-projection
      :findings
      (snippet-transformation-unit-findings
-      execution-interface
-      normal-form))))
+     execution-interface
+     normal-form))))
+
+(defun snippet-playground-mech-operation-entries (mech)
+  (if mech
+      (loop for step in (mech-snippet-steps-of mech)
+            collect (list :operation (mech-snippet-step-operation-of step)
+                          :arguments (copy-list
+                                      (mech-snippet-step-arguments-of step))
+                          :line-number (mech-snippet-step-line-number-of step)))
+      nil))
+
+(defun snippet-playground-mech-code-step (mech)
+  (when mech
+    (find "CODE"
+          (mech-snippet-steps-of mech)
+          :key #'mech-snippet-step-operation-of
+          :test #'string=)))
+
+(defun snippet-playground-parse-code-argument-value (argument)
+  (if-let (number (and argument
+                       (ignore-errors (parse-integer argument))))
+    number
+    argument))
+
+(defun snippet-playground-mech-code-function-name (mech)
+  (let ((code-step (snippet-playground-mech-code-step mech)))
+    (and code-step
+         (first (mech-snippet-step-arguments-of code-step)))))
+
+(defun snippet-playground-mech-code-arguments (mech)
+  (let* ((code-step (snippet-playground-mech-code-step mech))
+         (args (and code-step (rest (mech-snippet-step-arguments-of code-step)))))
+    (mapcar #'snippet-playground-parse-code-argument-value
+            (or args '()))))
+
+(defun snippet-playground-default-neighborhood-input ()
+  (list
+   (list :title "Alpha" :links '("Gamma" "Delta" "Gamma"))
+   (list :title "Beta" :links '("Gamma" "Epsilon"))
+   (list :title "Gamma" :links '("Delta" "Epsilon" "Gamma"))
+   (list :title "Delta" :links '("Gamma"))))
+
+(defun snippet-playground-neighborhood-links-from-page (page)
+  (cond
+    ((null page)
+     nil)
+    ((hash-table-p page)
+     (copy-list (or (gethash "links" page)
+                    (gethash :links page)
+                    '())))
+    ((and (listp page)
+          (every #'consp page))
+     (copy-list (or (cdr (assoc :links page))
+                    (cdr (assoc "links" page :test #'string=))
+                    '())))
+    ((listp page)
+     (copy-list (or (getf page :links)
+                    (getf page "links")
+                    '())))
+    (t
+     nil)))
+
+(defun snippet-playground-neighborhood-title-from-page (page index)
+  (cond
+    ((null page)
+     (format nil "page-~D" index))
+    ((hash-table-p page)
+     (or (gethash "title" page)
+         (gethash :title page)
+         (format nil "page-~D" index)))
+    ((and (listp page)
+          (every #'consp page))
+     (or (cdr (assoc :title page))
+         (cdr (assoc "title" page :test #'string=))
+         (format nil "page-~D" index)))
+    ((listp page)
+     (or (getf page :title)
+         (getf page "title")
+         (format nil "page-~D" index)))
+    (t
+     (format nil "page-~D" index))))
+
+(defun snippet-playground-normalize-neighborhood-input (neighborhood)
+  (loop for page in (or neighborhood '())
+        for index from 1
+        for title = (snippet-playground-neighborhood-title-from-page page index)
+        for links = (snippet-playground-neighborhood-links-from-page page)
+        collect (list :title (format nil "~A" title)
+                      :links (sort (mapcar (lambda (link-title)
+                                             (format nil "~A" link-title))
+                                           (or links '()))
+                                   #'string<))))
+
+(defun snippet-playground-plist-like-p (value)
+  (and (listp value)
+       (evenp (length value))
+       (loop for (key nil) on value by #'cddr
+             always (or (keywordp key)
+                        (symbolp key)
+                        (stringp key)))))
+
+(defun snippet-playground-alist-like-p (value)
+  (and (listp value)
+       (every #'consp value)
+       (loop for entry in value
+             always (or (keywordp (car entry))
+                        (symbolp (car entry))
+                        (stringp (car entry))))))
+
+(defun snippet-playground-object-key-string (key)
+  (cond
+    ((stringp key)
+     key)
+    ((keywordp key)
+     (string-downcase (symbol-name key)))
+    ((symbolp key)
+     (string-downcase (symbol-name key)))
+    (t
+     (format nil "~A" key))))
+
+(defun snippet-playground-normalize-object-entries (entries)
+  (sort
+   (loop for (key . value) in entries
+         collect (cons (snippet-playground-object-key-string key)
+                       (snippet-playground-normalize-runtime-value value)))
+   #'string<
+   :key #'car))
+
+(defun snippet-playground-normalize-runtime-value (value)
+  (cond
+    ((null value)
+     nil)
+    ((or (stringp value)
+         (numberp value)
+         (characterp value)
+         (eq value t))
+     value)
+    ((hash-table-p value)
+     (list :object
+           (snippet-playground-normalize-object-entries
+            (loop for key being the hash-keys in value
+                  collect (cons key (gethash key value))))))
+    ((snippet-playground-plist-like-p value)
+     (list :object
+           (snippet-playground-normalize-object-entries
+            (loop for (key raw-value) on value by #'cddr
+                  collect (cons key raw-value)))))
+    ((snippet-playground-alist-like-p value)
+     (list :object
+           (snippet-playground-normalize-object-entries value)))
+    ((vectorp value)
+     (list :array
+           (loop for item across value
+                 collect (snippet-playground-normalize-runtime-value item))))
+    ((listp value)
+     (list :array
+           (mapcar #'snippet-playground-normalize-runtime-value value)))
+    ((symbolp value)
+     (string-downcase (symbol-name value)))
+    (t
+     (format nil "~A" value))))
+
+(defun snippet-playground-mech-state-value-at-handoff-path (state handoff-path)
+  (if (string= (or handoff-path "") "state.items")
+      (or (getf state :items)
+          (getf state "items"))
+      nil))
+
+(defun snippet-playground-popular-bundle-missing-constructs (code-source)
+  (let ((checks '(("export function popular" . "popular(count) export")
+                  ("function links" . "links helper")
+                  ("function desc" . "desc helper")
+                  ("function report" . "report helper")
+                  ("class Bag" . "Bag class")
+                  ("addAll" . "Bag.addAll helper method"))))
+    (loop for (token . label) in checks
+          unless (snippet-playground-string-contains-p code-source token)
+            collect label)))
+
+(defun snippet-playground-copy-execution-state (state)
+  (copy-tree (or state '())))
+
+(defun rita-links (bag page)
+  (dolist (link-title (getf page :links))
+    (incf (gethash link-title bag 0)))
+  bag)
+
+(defun rita-bag-add-all (bag pages)
+  (dolist (page (or pages '()))
+    (rita-links bag page))
+  bag)
+
+(defun rita-bag->tally-entries (bag)
+  (loop for title being the hash-keys in bag
+        using (hash-value count)
+        collect (list :title title :count count)))
+
+(defun rita-desc (left right)
+  (let ((left-count (or (getf left :count) 0))
+        (right-count (or (getf right :count) 0))
+        (left-title (or (getf left :title) ""))
+        (right-title (or (getf right :title) "")))
+    (or (> left-count right-count)
+        (and (= left-count right-count)
+             (string< left-title right-title)))))
+
+(defun rita-report (entry)
+  (list :title (getf entry :title)
+        :count (getf entry :count)))
+
+(defun rita-popular (state count)
+  (let* ((bag (make-hash-table :test #'equal))
+         (neighborhood (or (getf state :neighborhood) '()))
+         (trace (list "rita-popular: initialize bag"
+                      "rita-popular: tally neighborhood links")))
+    (rita-bag-add-all bag neighborhood)
+    (let* ((tally (sort (rita-bag->tally-entries bag) #'rita-desc))
+           (bounded-count (max 0 (or count 0)))
+           (top (subseq tally 0 (min (length tally) bounded-count)))
+           (items (mapcar #'rita-report top))
+           (return-value (format nil "~D linked pages" (length tally))))
+      (setf (getf state :items) items)
+      (push "rita-popular: publish state.items and return summary" trace)
+      (values return-value state (nreverse trace)))))
+
+(defun lefty-links (bag page)
+  (dolist (link-title (getf page :links))
+    (incf (gethash link-title bag 0)))
+  bag)
+
+(defun lefty-bag-add-all (bag pages)
+  (dolist (page (or pages '()))
+    (lefty-links bag page))
+  bag)
+
+(defun lefty-bag->tally-entries (bag)
+  (loop for title being the hash-keys in bag
+        using (hash-value count)
+        collect (list :title title :count count)))
+
+(defun lefty-desc (left right)
+  (let ((left-count (or (getf left :count) 0))
+        (right-count (or (getf right :count) 0))
+        (left-title (or (getf left :title) ""))
+        (right-title (or (getf right :title) "")))
+    (or (> left-count right-count)
+        (and (= left-count right-count)
+             (string< left-title right-title)))))
+
+(defun lefty-report (entry)
+  (list :title (getf entry :title)
+        :count (getf entry :count)))
+
+(defun lefty-popular (state count)
+  (let* ((bag (make-hash-table :test #'equal))
+         (neighborhood (or (getf state :neighborhood) '()))
+         (trace (list "lefty-popular: initialize Bag"
+                      "lefty-popular: Bag.addAll(neighborhood)"
+                      "lefty-popular: tally.sort(desc).slice(0,count)"
+                      "lefty-popular: items = top.map(report)")))
+    (lefty-bag-add-all bag neighborhood)
+    (let* ((tally (sort (lefty-bag->tally-entries bag) #'lefty-desc))
+           (bounded-count (max 0 (or count 0)))
+           (top (subseq tally 0 (min (length tally) bounded-count)))
+           (items (mapcar #'lefty-report top))
+           (return-value (format nil "~D linked pages" (length tally))))
+      (setf (getf state :items) items)
+      (values return-value state trace))))
+
+(defun make-mech-run-result
+    (&key engine status return-value final-state normalized-output trace
+       diagnostics unsupported-constructs source-provenance)
+  (make-instance
+   'mech-run-result
+   :id (format nil "mech-run-result/~(~A~)" engine)
+   :title (format nil "~(~A~) run result" engine)
+   :summary (format nil "~(~A~) execution status: ~(~A~)." engine status)
+   :engine engine
+   :status status
+   :return-value return-value
+   :final-state final-state
+   :normalized-output normalized-output
+   :trace trace
+   :diagnostics diagnostics
+   :unsupported-constructs unsupported-constructs
+   :source-provenance source-provenance))
+
+(defun run-lefty-mech-execution (execution-input)
+  (let* ((code (mech-execution-input-selected-code-of execution-input))
+         (code-source (and code (code-snippet-source-of code)))
+         (operation-name
+           (mech-execution-input-code-operation-name-of execution-input))
+         (args (mech-execution-input-code-operation-arguments-of execution-input))
+         (count-arg (first args))
+         (handoff-path (mech-execution-input-handoff-path-of execution-input))
+         (missing-constructs
+           (snippet-playground-popular-bundle-missing-constructs
+            (or code-source "")))
+         (unsupported-constructs
+           (append
+            (unless (and operation-name
+                         (string-equal operation-name "popular"))
+              (list (format nil
+                            "Unsupported CODE operation ~A; only popular is currently executable."
+                            (or operation-name "n/a"))))
+            (unless (string= (or handoff-path "") "state.items")
+              (list (format nil
+                            "Unsupported handoff path ~A; only state.items is currently executable."
+                            (or handoff-path "n/a"))))
+            (unless (integerp count-arg)
+              (list (format nil
+                            "Unsupported CODE argument ~S; popular currently requires an integer count."
+                            count-arg)))
+            (mapcar (lambda (item)
+                      (format nil "Missing popular bundle construct: ~A" item))
+                    missing-constructs))))
+    (if unsupported-constructs
+        (make-mech-run-result
+         :engine :lefty
+         :status :unsupported
+         :diagnostics
+         (list "Lefty execution stayed bounded; unsupported constructs were reported.")
+         :unsupported-constructs unsupported-constructs
+         :source-provenance
+         (list :code_block (and code (code-snippet-block-index-of code))
+               :code_location (and code (snippet-location-label-of code))))
+        (handler-case
+            (let ((state
+                    (snippet-playground-copy-execution-state
+                     (mech-execution-input-normalized-state-of execution-input))))
+              (multiple-value-bind (return-value final-state trace)
+                  (lefty-popular state count-arg)
+                (let ((output
+                        (snippet-playground-mech-state-value-at-handoff-path
+                         final-state
+                         handoff-path)))
+                  (make-mech-run-result
+                   :engine :lefty
+                   :status :ok
+                   :return-value (snippet-playground-normalize-runtime-value
+                                  return-value)
+                   :final-state (snippet-playground-normalize-runtime-value
+                                 final-state)
+                   :normalized-output
+                   (snippet-playground-normalize-runtime-value output)
+                   :trace trace
+                   :diagnostics
+                   (list "Lefty execution completed through the bounded popular(count) runner.")
+                   :source-provenance
+                   (list :code_block (and code (code-snippet-block-index-of code))
+                         :code_location (and code (snippet-location-label-of
+                                                   code))
+                         :operation operation-name
+                         :arguments args)))))
+          (error (condition)
+            (make-mech-run-result
+             :engine :lefty
+             :status :error
+             :diagnostics
+             (list (format nil "Lefty execution error: ~A" condition))
+             :source-provenance
+             (list :operation operation-name
+                   :arguments args)))))))
+
+(defun run-rita-mech-execution (execution-input)
+  (let* ((operation-name
+           (mech-execution-input-code-operation-name-of execution-input))
+         (args (mech-execution-input-code-operation-arguments-of execution-input))
+         (count-arg (first args))
+         (handoff-path (mech-execution-input-handoff-path-of execution-input))
+         (unsupported-constructs
+           (append
+            (unless (and operation-name
+                         (string-equal operation-name "popular"))
+              (list (format nil
+                            "Rita currently implements only popular; got ~A."
+                            (or operation-name "n/a"))))
+            (unless (string= (or handoff-path "") "state.items")
+              (list (format nil
+                            "Rita currently supports only state.items handoff; got ~A."
+                            (or handoff-path "n/a"))))
+            (unless (integerp count-arg)
+              (list (format nil
+                            "Rita popular currently requires an integer count; got ~S."
+                            count-arg))))))
+    (if unsupported-constructs
+        (make-mech-run-result
+         :engine :rita
+         :status :unsupported
+         :diagnostics
+         (list "Rita execution stayed bounded; unsupported constructs were reported.")
+         :unsupported-constructs unsupported-constructs
+         :source-provenance (list :operation operation-name :arguments args))
+        (handler-case
+            (let ((state
+                    (snippet-playground-copy-execution-state
+                     (mech-execution-input-normalized-state-of execution-input))))
+              (multiple-value-bind (return-value final-state trace)
+                  (rita-popular state count-arg)
+                (let ((output
+                        (snippet-playground-mech-state-value-at-handoff-path
+                         final-state
+                         handoff-path)))
+                  (make-mech-run-result
+                   :engine :rita
+                   :status :ok
+                   :return-value (snippet-playground-normalize-runtime-value
+                                  return-value)
+                   :final-state (snippet-playground-normalize-runtime-value
+                                 final-state)
+                   :normalized-output
+                   (snippet-playground-normalize-runtime-value output)
+                   :trace trace
+                   :diagnostics
+                   (list "Rita execution completed through hand-authored popular(count) helpers.")
+                   :source-provenance
+                   (list :operation operation-name
+                         :arguments args)))))
+          (error (condition)
+            (make-mech-run-result
+             :engine :rita
+             :status :error
+             :diagnostics
+             (list (format nil "Rita execution error: ~A" condition))
+             :source-provenance
+             (list :operation operation-name
+                   :arguments args)))))))
+
+(defun make-mech-equivalence-differences (lefty-run-result rita-run-result)
+  (let ((differences '()))
+    (unless (eq (mech-run-result-status-of lefty-run-result)
+                (mech-run-result-status-of rita-run-result))
+      (push (list :kind :status-mismatch
+                  :lefty (mech-run-result-status-of lefty-run-result)
+                  :rita (mech-run-result-status-of rita-run-result))
+            differences))
+    (unless (equal (mech-run-result-normalized-output-of lefty-run-result)
+                   (mech-run-result-normalized-output-of rita-run-result))
+      (push (list :kind :output-mismatch
+                  :lefty (mech-run-result-normalized-output-of lefty-run-result)
+                  :rita (mech-run-result-normalized-output-of rita-run-result))
+            differences))
+    (unless (equal (mech-run-result-return-value-of lefty-run-result)
+                   (mech-run-result-return-value-of rita-run-result))
+      (push (list :kind :return-value-mismatch
+                  :lefty (mech-run-result-return-value-of lefty-run-result)
+                  :rita (mech-run-result-return-value-of rita-run-result))
+            differences))
+    (nreverse differences)))
+
+(defun make-mech-equivalence-report (lefty-run-result rita-run-result)
+  (let* ((unsupported-constructs
+           (append (when lefty-run-result
+                     (copy-list
+                      (mech-run-result-unsupported-constructs-of
+                       lefty-run-result)))
+                   (when rita-run-result
+                     (copy-list
+                      (mech-run-result-unsupported-constructs-of
+                       rita-run-result)))))
+         (differences
+           (if (and lefty-run-result rita-run-result)
+               (make-mech-equivalence-differences
+                lefty-run-result
+                rita-run-result)
+               (list (list :kind :missing-run-results))))
+         (equal-p
+           (and (null unsupported-constructs)
+                (null differences)
+                (eq (mech-run-result-status-of lefty-run-result) :ok)
+                (eq (mech-run-result-status-of rita-run-result) :ok)))
+         (comparison-value
+           (list :lefty (and lefty-run-result
+                             (mech-run-result-normalized-output-of
+                              lefty-run-result))
+                 :rita (and rita-run-result
+                            (mech-run-result-normalized-output-of
+                             rita-run-result)))))
+    (make-instance
+     'mech-equivalence-report
+     :id "mech-equivalence-report/state.items"
+     :title "Mech execution equivalence"
+     :summary
+     (if equal-p
+         "Lefty and Rita agree on normalized state.items output."
+         "Lefty and Rita do not currently prove normalized state.items equivalence.")
+     :lefty-run-result lefty-run-result
+     :rita-run-result rita-run-result
+     :normalized-comparison-value comparison-value
+     :equal-p equal-p
+     :differences differences
+     :unsupported-constructs unsupported-constructs
+     :source-provenance
+     (list :lefty (and lefty-run-result
+                       (mech-run-result-source-provenance-of
+                        lefty-run-result))
+           :rita (and rita-run-result
+                      (mech-run-result-source-provenance-of
+                       rita-run-result)))
+     :findings
+     (if equal-p
+         (list "Normalized state.items outputs match across Lefty and Rita.")
+         (list "Equivalence is explicit and inspectable; unsupported or mismatched paths are reported without fake success.")))))
+
+(defun snippet-playground-helper-function-labels (code-source)
+  (remove nil
+          (list (and (snippet-playground-string-contains-p
+                      code-source
+                      "function links")
+                     "links")
+                (and (snippet-playground-string-contains-p
+                      code-source
+                      "function desc")
+                     "desc")
+                (and (snippet-playground-string-contains-p
+                      code-source
+                      "function report")
+                     "report")
+                (and (snippet-playground-string-contains-p
+                      code-source
+                      "class Bag")
+                     "Bag.addAll"))))
+
+(defun make-mech-state-items-ir (execution-input equivalence-report)
+  (let* ((code (mech-execution-input-selected-code-of execution-input))
+         (code-source (or (and code (code-snippet-source-of code)) ""))
+         (function-name
+           (mech-execution-input-code-operation-name-of execution-input))
+         (function-arguments
+           (copy-list (mech-execution-input-code-operation-arguments-of
+                       execution-input)))
+         (output-path (mech-execution-input-handoff-path-of execution-input))
+         (equivalence-status
+           (cond
+             ((null equivalence-report)
+              :unavailable)
+             ((mech-equivalence-report-equal-p equivalence-report)
+              :equal)
+             ((mech-equivalence-report-unsupported-constructs-of
+               equivalence-report)
+              :unsupported)
+             (t
+              :different))))
+    (make-instance
+     'mech-state-items-ir
+     :id (format nil "mech-state-items-ir/~A/~A"
+                 (or function-name "unknown")
+                 (or output-path "unresolved"))
+     :title "Mech state.items IR"
+     :summary
+     (format nil
+             "Bounded semantic IR for ~A(~{~A~^, ~}) writing to ~A."
+             (or function-name "unknown")
+             function-arguments
+             (or output-path "unresolved"))
+     :input-slots '("neighborhood")
+     :output-path output-path
+     :function-name function-name
+     :function-arguments function-arguments
+     :helper-functions (snippet-playground-helper-function-labels code-source)
+     :operation-summary
+     "Tally neighborhood links, sort by descending count, report top N items, and publish to state.items."
+     :equivalence-status equivalence-status
+     :source-provenance
+     (list :mech_block
+           (and (mech-execution-input-selected-mech-of execution-input)
+                (mech-snippet-block-index-of
+                 (mech-execution-input-selected-mech-of execution-input)))
+           :code_block
+           (and code
+                (code-snippet-block-index-of code))
+           :code_location
+           (and code
+                (snippet-location-label-of code)))
+     :findings
+     (list "IR is semantic and bounded to the state.items popular(count) execution seam."))))
+
+(defun make-mech-execution-input
+    (selected-mech selected-code execution-interface
+     &key neighborhood-input)
+  (let* ((effective-neighborhood
+           (snippet-playground-normalize-neighborhood-input
+            (or neighborhood-input
+                (snippet-playground-default-neighborhood-input))))
+         (code-operation-name
+           (snippet-playground-mech-code-function-name selected-mech))
+         (code-operation-arguments
+           (snippet-playground-mech-code-arguments selected-mech))
+         (handoff-path
+           (and execution-interface
+                (snippet-execution-interface-handoff-path-of execution-interface))))
+    (make-instance
+     'mech-execution-input
+     :id (format nil "mech-execution-input/~A/~A"
+                 (or (and selected-mech
+                          (mech-snippet-block-index-of selected-mech))
+                     "mech")
+                 (or (and selected-code
+                          (code-snippet-block-index-of selected-code))
+                     "code"))
+     :title "Mech execution input"
+     :summary
+     (format nil
+             "Normalized Mech/code execution input for ~A via ~A."
+             (or code-operation-name "unknown")
+             (or handoff-path "unresolved"))
+     :selected-mech selected-mech
+     :selected-code selected-code
+     :normalized-state (list :neighborhood effective-neighborhood
+                             :items nil)
+     :parsed-mech-operations
+     (snippet-playground-mech-operation-entries selected-mech)
+     :code-operation-name code-operation-name
+     :code-operation-arguments code-operation-arguments
+     :handoff-path handoff-path
+     :findings
+     (list "Execution input keeps Mech/code evidence and normalized neighborhood state in one inspectable object."))))
 
 (defun snippet-comparison-region-raw-source
     (content-key mech code lisp-source)
@@ -3434,7 +4270,9 @@
 
 (defun make-snippet-comparison-surface
     (&key status source-label mech code lisp-source execution-interface
-       transformation-unit origin-pane-id pending-pane-id
+       transformation-unit execution-input lefty-run-result
+       rita-run-result equivalence-report transformation-ir
+       origin-pane-id pending-pane-id
        failure-classification)
   (let* ((layout-artifact (snippet-comparison-layout-artifact))
          (raw-layout-spec
@@ -3486,6 +4324,11 @@
      :right-code-region right-region
      :execution-interface execution-interface
      :transformation-unit transformation-unit
+     :execution-input execution-input
+     :lefty-run-result lefty-run-result
+     :rita-run-result rita-run-result
+     :equivalence-report equivalence-report
+     :transformation-ir transformation-ir
      :lifecycle-run
      (make-snippet-comparison-surface-lifecycle-run
       :status status
@@ -3538,7 +4381,8 @@
            :detail "The narrow slice stays on the state.items seam rather than implementing a full Mech runtime."))))
 
 (defun snippet-playground-findings
-    (selected-mech selected-code execution-interface transformation-unit)
+    (selected-mech selected-code execution-interface transformation-unit
+     equivalence-report)
   (let ((findings '()))
     (unless selected-mech
       (push "No Mech snippet was recognized in the current origin surface." findings))
@@ -3556,6 +4400,11 @@
             findings))
     (when transformation-unit
       (push "Constructed a snippet transformation unit as the durable inspectable artifact."
+            findings))
+    (when equivalence-report
+      (push (if (mech-equivalence-report-equal-p equivalence-report)
+                "Recorded a Lefty/Rita execution equivalence report for state.items."
+                "Recorded a Lefty/Rita execution report with explicit mismatches or unsupported constructs.")
             findings))
     (nreverse findings)))
 
@@ -3662,7 +4511,8 @@
 (defun make-snippet-playground-result-from-blocks
     (&key context-object context-view-title source-pathname source-text
        blocks origin-surface-kind provider-kind source-label
-       source-expansion-policy source-parser-policy)
+       source-expansion-policy source-parser-policy
+       execution-neighborhood-input)
   (let* ((resolved-source-label
            (or source-label
                (ignore-errors (title-of context-object))
@@ -3691,6 +4541,11 @@
          (selected-code nil)
          (execution-interface nil)
          (transformation-unit nil)
+         (mech-execution-input nil)
+         (lefty-run-result nil)
+         (rita-run-result nil)
+         (equivalence-report nil)
+         (transformation-ir nil)
          (comparison-surface nil)
          (lefty-projection nil)
          (rita-projection nil)
@@ -3748,6 +4603,11 @@
                                        rita-projection))
                                  :execution-interface execution-interface
                                  :transformation-unit transformation-unit
+                                 :execution-input mech-execution-input
+                                 :lefty-run-result lefty-run-result
+                                 :rita-run-result rita-run-result
+                                 :equivalence-report equivalence-report
+                                 :transformation-ir transformation-ir
                                  :origin-pane-id origin-pane-id
                                  :pending-pane-id pending-pane-id
                                  :failure-classification failure-classification)))))
@@ -3782,6 +4642,11 @@
                      :selected-code selected-code
                      :execution-interface execution-interface
                      :transformation-unit transformation-unit
+                     :mech-execution-input mech-execution-input
+                     :lefty-run-result lefty-run-result
+                     :rita-run-result rita-run-result
+                     :equivalence-report equivalence-report
+                     :transformation-ir transformation-ir
                      :authored-artifact authored-artifact
                      :behavior-artifact behavior-artifact
                      :layout-artifact layout-artifact
@@ -3803,7 +4668,8 @@
                                 selected-mech
                                 selected-code
                                 execution-interface
-                                transformation-unit)))
+                                transformation-unit
+                                equivalence-report)))
                   (object
                     (apply #'make-instance
                            class
@@ -3833,6 +4699,11 @@
                       :selected-code selected-code
                       :execution-interface execution-interface
                       :transformation-unit transformation-unit
+                      :mech-execution-input mech-execution-input
+                      :lefty-run-result lefty-run-result
+                      :rita-run-result rita-run-result
+                      :equivalence-report equivalence-report
+                      :transformation-ir transformation-ir
                       :result-object (and (eq status :ready) object)
                       :failure-object (unless (eq status :ready) object))))
                (setf (snippet-playground-session-state-machine-run-of object)
@@ -3984,14 +4855,43 @@
                    execution-interface
                    lefty-projection
                    rita-projection))
+            (setf mech-execution-input
+                  (make-mech-execution-input
+                   selected-mech
+                   selected-code
+                   execution-interface
+                   :neighborhood-input execution-neighborhood-input))
+            (setf lefty-run-result
+                  (run-lefty-mech-execution mech-execution-input))
+            (setf rita-run-result
+                  (run-rita-mech-execution mech-execution-input))
+            (setf equivalence-report
+                  (make-mech-equivalence-report
+                   lefty-run-result
+                   rita-run-result))
+            (setf transformation-ir
+                  (make-mech-state-items-ir
+                   mech-execution-input
+                   equivalence-report))
             (note-evidence
              :building-session
-             "Constructed execution interface and transformation unit."
+             "Constructed execution interface, transformation unit, and bounded Lefty/Rita execution equivalence evidence."
              (list
               :execution_interface
               (snippet-playground-object-label execution-interface)
               :transformation_unit
               (snippet-playground-object-label transformation-unit)
+              :mech_execution_input
+              (snippet-playground-object-label mech-execution-input)
+              :lefty_status
+              (and lefty-run-result
+                   (mech-run-result-status-of lefty-run-result))
+              :rita_status
+              (and rita-run-result
+                   (mech-run-result-status-of rita-run-result))
+              :equivalent_p
+              (and equivalence-report
+                   (mech-equivalence-report-equal-p equivalence-report))
               :handoff_path
               (and execution-interface
                    (snippet-execution-interface-handoff-path-of
@@ -4038,7 +4938,8 @@
 
 (defun make-snippet-playground-session-from-source
     (&key context-object context-view-title source-pathname source-text
-       source-expansion-policy source-parser-policy)
+       source-expansion-policy source-parser-policy
+       execution-neighborhood-input)
   (let ((trimmed-source (or source-text "")))
     (make-snippet-playground-result-from-blocks
      :context-object context-object
@@ -4049,11 +4950,13 @@
      :origin-surface-kind "html-source"
      :provider-kind "source-v1"
      :source-expansion-policy source-expansion-policy
-     :source-parser-policy source-parser-policy)))
+     :source-parser-policy source-parser-policy
+     :execution-neighborhood-input execution-neighborhood-input)))
 
 (defun make-snippet-playground-session-from-fedwiki-page
     (&key context-object context-view-title page
-       source-expansion-policy source-parser-policy)
+       source-expansion-policy source-parser-policy
+       execution-neighborhood-input)
   (when page
     (hyperbook/fedwiki::load-page page))
   (let ((blocks (if page
@@ -4068,12 +4971,14 @@
      :provider-kind "fedwiki-v1"
      :source-label (and page (title-of page))
      :source-expansion-policy source-expansion-policy
-     :source-parser-policy source-parser-policy)))
+     :source-parser-policy source-parser-policy
+     :execution-neighborhood-input execution-neighborhood-input)))
 
 (defun make-snippet-playground-session-target
     (&key context-object context-view-title source-pathname fedwiki-page
        provider-kind origin-surface-kind
-       source-expansion-policy source-parser-policy)
+       source-expansion-policy source-parser-policy
+       execution-neighborhood-input)
   (cond
     ((or (string= (or provider-kind "") "fedwiki-v1")
          (string= (or origin-surface-kind "") "fedwiki-page")
@@ -4083,7 +4988,8 @@
       :context-view-title context-view-title
       :page fedwiki-page
       :source-expansion-policy source-expansion-policy
-      :source-parser-policy source-parser-policy))
+      :source-parser-policy source-parser-policy
+      :execution-neighborhood-input execution-neighborhood-input))
     ((and source-pathname
           (probe-file source-pathname))
      (make-snippet-playground-session-from-source
@@ -4092,7 +4998,8 @@
       :source-pathname source-pathname
       :source-text (uiop:read-file-string source-pathname)
       :source-expansion-policy source-expansion-policy
-      :source-parser-policy source-parser-policy))
+      :source-parser-policy source-parser-policy
+      :execution-neighborhood-input execution-neighborhood-input))
     (t
      (make-snippet-playground-session-from-source
       :context-object context-object
@@ -4100,7 +5007,8 @@
       :source-pathname source-pathname
       :source-text ""
       :source-expansion-policy source-expansion-policy
-      :source-parser-policy source-parser-policy))))
+      :source-parser-policy source-parser-policy
+      :execution-neighborhood-input execution-neighborhood-input))))
 
 (defun snippet-playground-run-scaffold (session)
   (let ((source (snippet-playground-session-lisp-scaffold-source-of session)))
@@ -4141,6 +5049,19 @@
                        (snippet-playground-session-execution-interface-of session)
                        :transformation-unit
                        (snippet-playground-session-transformation-unit-of
+                        session)
+                       :mech-execution-input
+                       (snippet-playground-session-mech-execution-input-of
+                        session)
+                       :lefty-run-result
+                       (snippet-playground-session-lefty-run-result-of session)
+                       :rita-run-result
+                       (snippet-playground-session-rita-run-result-of session)
+                       :equivalence-report
+                       (snippet-playground-session-equivalence-report-of
+                        session)
+                       :transformation-ir
+                       (snippet-playground-session-transformation-ir-of
                         session)
                        :authored-artifact
                        (snippet-playground-session-authored-artifact-of session)
@@ -4267,6 +5188,170 @@
 
 (defun snippet-playground-view-transformation-row (label value)
   (snippet-playground-status-table-row label value))
+
+(defun snippet-playground-value-or-na (value)
+  (if (null value)
+      "n/a"
+      (format nil "~S" value)))
+
+(defun snippet-comparison-render-mech-run-result (label run-result)
+  (html-inspector-views:html
+    (:h4 (html-inspector-views:esc label))
+    (if run-result
+        (html-inspector-views:html
+          (:table :class "inspector-table"
+                  (snippet-playground-status-table-row
+                   "Engine"
+                   (mech-run-result-engine-of run-result))
+                  (snippet-playground-status-table-row
+                   "Status"
+                   (mech-run-result-status-of run-result))
+                  (snippet-playground-status-table-row
+                   "Return value"
+                   (snippet-playground-value-or-na
+                    (mech-run-result-return-value-of run-result))))
+          (:h5 "Normalized output")
+          (snippet-source-pre
+           (snippet-playground-value-or-na
+            (mech-run-result-normalized-output-of run-result)))
+          (:h5 "Diagnostics")
+          (snippet-source-pre
+           (snippet-playground-value-or-na
+            (mech-run-result-diagnostics-of run-result)))
+          (:h5 "Trace")
+          (snippet-source-pre
+           (snippet-playground-value-or-na
+            (mech-run-result-trace-of run-result))))
+        (html-inspector-views:html
+          (:p (html-inspector-views:esc
+               "Run result is unavailable."))))))
+
+(defun snippet-comparison-render-execution-equivalence (surface)
+  (let ((execution-input
+          (snippet-comparison-surface-execution-input-of surface))
+        (lefty-run-result
+          (snippet-comparison-surface-lefty-run-result-of surface))
+        (rita-run-result
+          (snippet-comparison-surface-rita-run-result-of surface))
+        (equivalence-report
+          (snippet-comparison-surface-equivalence-report-of surface))
+        (transformation-ir
+          (snippet-comparison-surface-transformation-ir-of surface)))
+    (html-inspector-views:html
+      (:div :class "hyperdoc-snippet-execution-equivalence"
+            (:h3 "Execution equivalence")
+            (:table :class "inspector-table"
+                    (maybe-object-ref-row "Execution input" execution-input)
+                    (maybe-object-ref-row "Lefty run result" lefty-run-result)
+                    (maybe-object-ref-row "Rita run result" rita-run-result)
+                    (maybe-object-ref-row "Equivalence report" equivalence-report)
+                    (maybe-object-ref-row "Shared IR" transformation-ir))
+            (if execution-input
+                (html-inspector-views:html
+                  (:h4 "Execution input")
+                  (:table :class "inspector-table"
+                          (snippet-playground-status-table-row
+                           "Function"
+                           (mech-execution-input-code-operation-name-of
+                            execution-input))
+                          (snippet-playground-status-table-row
+                           "Arguments"
+                           (mech-execution-input-code-operation-arguments-of
+                            execution-input))
+                          (snippet-playground-status-table-row
+                           "Output path"
+                           (mech-execution-input-handoff-path-of
+                            execution-input)))
+                  (:h5 "Normalized neighborhood state")
+                  (snippet-source-pre
+                   (snippet-playground-value-or-na
+                    (mech-execution-input-normalized-state-of
+                     execution-input))))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Execution input is unavailable."))))
+            (snippet-comparison-render-mech-run-result
+             "Lefty run"
+             lefty-run-result)
+            (snippet-comparison-render-mech-run-result
+             "Rita run"
+             rita-run-result)
+            (if equivalence-report
+                (html-inspector-views:html
+                  (:h4 "Equivalence report")
+                  (:table :class "inspector-table"
+                          (snippet-playground-status-table-row
+                           "equal-p"
+                           (if (mech-equivalence-report-equal-p
+                                equivalence-report)
+                               "true"
+                               "false"))
+                          (snippet-playground-status-table-row
+                           "Unsupported constructs"
+                           (length
+                            (or (mech-equivalence-report-unsupported-constructs-of
+                                 equivalence-report)
+                                '())))
+                          (snippet-playground-status-table-row
+                           "Differences"
+                           (length
+                            (or (mech-equivalence-report-differences-of
+                                 equivalence-report)
+                                '()))))
+                  (:h5 "Normalized comparison value")
+                  (snippet-source-pre
+                   (snippet-playground-value-or-na
+                    (mech-equivalence-report-normalized-comparison-value-of
+                     equivalence-report)))
+                  (:h5 "Differences")
+                  (snippet-source-pre
+                   (snippet-playground-value-or-na
+                    (mech-equivalence-report-differences-of
+                     equivalence-report)))
+                  (:h5 "Unsupported constructs")
+                  (snippet-source-pre
+                   (snippet-playground-value-or-na
+                    (mech-equivalence-report-unsupported-constructs-of
+                     equivalence-report))))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Equivalence report is unavailable."))))
+            (if transformation-ir
+                (html-inspector-views:html
+                  (:h4 "Shared IR")
+                  (:table :class "inspector-table"
+                          (snippet-playground-status-table-row
+                           "Function"
+                           (mech-state-items-ir-function-name-of
+                            transformation-ir))
+                          (snippet-playground-status-table-row
+                           "Arguments"
+                           (mech-state-items-ir-function-arguments-of
+                            transformation-ir))
+                          (snippet-playground-status-table-row
+                           "Input slots"
+                           (mech-state-items-ir-input-slots-of
+                            transformation-ir))
+                          (snippet-playground-status-table-row
+                           "Output path"
+                           (mech-state-items-ir-output-path-of
+                            transformation-ir))
+                          (snippet-playground-status-table-row
+                           "Helpers"
+                           (mech-state-items-ir-helper-functions-of
+                            transformation-ir))
+                          (snippet-playground-status-table-row
+                           "Equivalence status"
+                           (mech-state-items-ir-equivalence-status-of
+                            transformation-ir)))
+                  (:h5 "Operation summary")
+                  (snippet-source-pre
+                   (snippet-playground-value-or-na
+                    (mech-state-items-ir-operation-summary-of
+                     transformation-ir))))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Shared IR is unavailable."))))))))
 
 (defun snippet-comparison-render-region-style (region-spec)
   (format nil
@@ -4430,6 +5515,11 @@
     (snippet-comparison-render-transformation-unit surface)
     (snippet-playground-log-comparison-render
      "TRANSFORMATION-DONE")
+    (snippet-playground-log-comparison-render
+     "EQUIVALENCE-START")
+    (snippet-comparison-render-execution-equivalence surface)
+    (snippet-playground-log-comparison-render
+     "EQUIVALENCE-DONE")
     (write-string "</div>" html-inspector-views::*html-stream*)))
 
 (defun snippet-playground-render-comparison-surface-into-current-view (surface)
@@ -4970,6 +6060,120 @@
          (html-inspector-views:html
            (:li (html-inspector-views:esc finding))))))))
 
+(html-inspector-views:defview mech-execution-input-summary
+    (input mech-execution-input)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of input)))
+      (:table :class "inspector-table"
+              (maybe-object-ref-row
+               "Selected Mech"
+               (mech-execution-input-selected-mech-of input))
+              (maybe-object-ref-row
+               "Selected code"
+               (mech-execution-input-selected-code-of input))
+              (snippet-playground-status-table-row
+               "Function"
+               (mech-execution-input-code-operation-name-of input))
+              (snippet-playground-status-table-row
+               "Arguments"
+               (mech-execution-input-code-operation-arguments-of input))
+              (snippet-playground-status-table-row
+               "Output path"
+               (mech-execution-input-handoff-path-of input)))
+      (:h3 "Normalized state")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-execution-input-normalized-state-of input))))))
+
+(html-inspector-views:defview mech-run-result-summary
+    (result mech-run-result)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of result)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Engine"
+               (mech-run-result-engine-of result))
+              (snippet-playground-status-table-row
+               "Status"
+               (mech-run-result-status-of result))
+              (snippet-playground-status-table-row
+               "Unsupported constructs"
+               (length (or (mech-run-result-unsupported-constructs-of result)
+                           '()))))
+      (:h3 "Return value")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-run-result-return-value-of result)))
+      (:h3 "Normalized output")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-run-result-normalized-output-of result)))
+      (:h3 "Diagnostics")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-run-result-diagnostics-of result))))))
+
+(html-inspector-views:defview mech-equivalence-report-summary
+    (report mech-equivalence-report)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of report)))
+      (:table :class "inspector-table"
+              (maybe-object-ref-row
+               "Lefty run"
+               (mech-equivalence-report-lefty-run-result-of report))
+              (maybe-object-ref-row
+               "Rita run"
+               (mech-equivalence-report-rita-run-result-of report))
+              (snippet-playground-status-table-row
+               "equal-p"
+               (if (mech-equivalence-report-equal-p report)
+                   "true"
+                   "false"))
+              (snippet-playground-status-table-row
+               "Differences"
+               (length (or (mech-equivalence-report-differences-of report)
+                           '()))))
+      (:h3 "Comparison value")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-equivalence-report-normalized-comparison-value-of report)))
+      (:h3 "Unsupported constructs")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-equivalence-report-unsupported-constructs-of report))))))
+
+(html-inspector-views:defview mech-state-items-ir-summary
+    (ir mech-state-items-ir)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of ir)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Function"
+               (mech-state-items-ir-function-name-of ir))
+              (snippet-playground-status-table-row
+               "Arguments"
+               (mech-state-items-ir-function-arguments-of ir))
+              (snippet-playground-status-table-row
+               "Input slots"
+               (mech-state-items-ir-input-slots-of ir))
+              (snippet-playground-status-table-row
+               "Output path"
+               (mech-state-items-ir-output-path-of ir))
+              (snippet-playground-status-table-row
+               "Helpers"
+               (mech-state-items-ir-helper-functions-of ir))
+              (snippet-playground-status-table-row
+               "Equivalence status"
+               (mech-state-items-ir-equivalence-status-of ir)))
+      (:h3 "Operation summary")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-state-items-ir-operation-summary-of ir))))))
+
 (html-inspector-views:defview snippet-comparison-region-summary
     (region snippet-comparison-region)
   (html-inspector-views:html-view :title "Summary" :priority 1
@@ -5214,6 +6418,21 @@
               (maybe-object-ref-row
                "Transformation unit"
                (snippet-playground-session-transformation-unit-of session))
+              (maybe-object-ref-row
+               "Execution input"
+               (snippet-playground-session-mech-execution-input-of session))
+              (maybe-object-ref-row
+               "Lefty run result"
+               (snippet-playground-session-lefty-run-result-of session))
+              (maybe-object-ref-row
+               "Rita run result"
+               (snippet-playground-session-rita-run-result-of session))
+              (maybe-object-ref-row
+               "Equivalence report"
+               (snippet-playground-session-equivalence-report-of session))
+              (maybe-object-ref-row
+               "Shared IR"
+               (snippet-playground-session-transformation-ir-of session))
               (maybe-object-ref-row
                "Authored artifact"
                (snippet-playground-session-authored-artifact-of session))
@@ -5619,3 +6838,13 @@
           (html-inspector-views:html
             (:p (html-inspector-views:esc
                  "No runnable Lisp scaffold is available for this session.")))))))
+
+(html-inspector-views:defview snippet-playground-session-execution-view
+    (session snippet-playground-session)
+  (html-inspector-views:html-view :title "Execution" :priority 12
+    (html-inspector-views:html
+      (if-let (surface (snippet-playground-session-comparison-surface-of session))
+        (snippet-comparison-render-execution-equivalence surface)
+        (html-inspector-views:html
+          (:p (html-inspector-views:esc
+               "No execution/equivalence surface is available for this session.")))))))

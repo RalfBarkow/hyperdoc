@@ -355,6 +355,194 @@
               selected-findings)
      "Bundle findings must report only the executable snippet count")))
 
+(defun snippet-playground-smoke-popular-neighborhood-input ()
+  (list
+   (list :title "Alpha" :links '("Gamma" "Delta" "Gamma"))
+   (list :title "Beta" :links '("Gamma" "Epsilon"))
+   (list :title "Gamma" :links '("Delta" "Epsilon" "Gamma"))
+   (list :title "Delta" :links '("Gamma"))))
+
+(defun snippet-playground-smoke-make-popular-equivalence-blocks
+    (&key code-operation)
+  (let ((operation-line (or code-operation "CODE popular 15")))
+    (list
+     (list :index 1
+           :line-number 1
+           :location-label "story item 1 (mech)"
+           :open-tag "fedwiki-mech"
+           :source (format nil
+                           "CLICK station~%~A~%PREVIEW items"
+                           operation-line))
+     (list :index 2
+           :line-number 10
+           :location-label "story item 2 (code)"
+           :open-tag "fedwiki-code"
+           :source
+           (format nil
+                   "export function popular(count) {~%  let tally = new Bag([]).addAll(this.neighborhood)~%  let top = tally.sort(desc).slice(0,count)~%  this.items = top.map(report)~%  return `${tally.length} linked pages`~%}"))
+     (list :index 3
+           :line-number 20
+           :location-label "story item 3 (code)"
+           :open-tag "fedwiki-code"
+           :source
+           (format nil
+                   "function links(bag, page) {~%  return bag.add(page)~%}"))
+     (list :index 4
+           :line-number 30
+           :location-label "story item 4 (code)"
+           :open-tag "fedwiki-code"
+           :source
+           (format nil
+                   "function desc(left, right) {~%  return right.count - left.count~%}"))
+     (list :index 5
+           :line-number 40
+           :location-label "story item 5 (code)"
+           :open-tag "fedwiki-code"
+           :source
+           (format nil
+                   "function report(item) {~%  return { title: item.title, count: item.count }~%}"))
+     (list :index 6
+           :line-number 50
+           :location-label "story item 6 (code)"
+           :open-tag "fedwiki-code"
+           :source
+           (format nil
+                   "class Bag {~%  constructor(items = []) {~%    this.items = items~%  }~%  add(link) {~%    const found = this.items.find((entry) => entry.title === link)~%    if (found) {~%      found.count += 1~%    } else {~%      this.items.push({title: link, count: 1})~%    }~%    return this~%  }~%  addAll(neighborhood) {~%    neighborhood.forEach((page) => {~%      page.links.forEach((link) => this.add(link))~%    })~%    return this.items~%  }~%}")))))
+
+(defun make-snippet-playground-popular-equivalence-smoke-session
+    (&key code-operation)
+  (let* ((blocks
+           (snippet-playground-smoke-make-popular-equivalence-blocks
+            :code-operation code-operation))
+         (source-text
+           (hyperdoc::snippet-playground-source-text-from-blocks blocks)))
+    (hyperdoc::make-snippet-playground-result-from-blocks
+     :context-object nil
+     :context-view-title "Source"
+     :source-pathname nil
+     :source-text source-text
+     :blocks blocks
+     :origin-surface-kind "fedwiki-page"
+     :provider-kind "fedwiki-v1"
+     :source-label "Snippet playground popular equivalence smoke"
+     :execution-neighborhood-input
+     (snippet-playground-smoke-popular-neighborhood-input))))
+
+(defun run-snippet-playground-popular-equivalence-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((session (make-snippet-playground-popular-equivalence-smoke-session))
+         (execution-interface
+           (hyperdoc::snippet-playground-session-execution-interface-of
+            session))
+         (lefty
+           (hyperdoc::snippet-playground-session-lefty-run-result-of session))
+         (rita
+           (hyperdoc::snippet-playground-session-rita-run-result-of session))
+         (equivalence-report
+           (hyperdoc::snippet-playground-session-equivalence-report-of
+            session))
+         (transformation-ir
+           (hyperdoc::snippet-playground-session-transformation-ir-of
+            session))
+         (session-views
+           (snippet-playground-smoke-load-inspector-views-for-object session))
+         (comparison-view
+           (snippet-playground-smoke-find-view-by-title session-views
+                                                        "Comparison"))
+         (comparison-html
+           (and comparison-view
+                (html-inspector-views:view-html comparison-view))))
+    (snippet-playground-assert-equal
+     :ready
+     (hyperdoc::snippet-playground-session-status-of session)
+     "Popular equivalence fixture must produce a ready session")
+    (snippet-playground-assert-equal
+     "state.items"
+     (hyperdoc::snippet-execution-interface-handoff-path-of execution-interface)
+     "Execution interface must infer state.items handoff")
+    (snippet-playground-assert-equal
+     :ok
+     (hyperdoc::mech-run-result-status-of lefty)
+     "Lefty run must complete for popular/count fixture")
+    (snippet-playground-assert-equal
+     :ok
+     (hyperdoc::mech-run-result-status-of rita)
+     "Rita run must complete for popular/count fixture")
+    (snippet-playground-assert-true
+     (hyperdoc::mech-run-result-normalized-output-of lefty)
+     "Lefty run must publish normalized state.items output")
+    (snippet-playground-assert-true
+     (hyperdoc::mech-run-result-normalized-output-of rita)
+     "Rita run must publish normalized state.items output")
+    (snippet-playground-assert-equal
+     (hyperdoc::mech-run-result-normalized-output-of lefty)
+     (hyperdoc::mech-run-result-normalized-output-of rita)
+     "Lefty and Rita normalized state.items outputs must match")
+    (snippet-playground-assert-equal
+     t
+     (hyperdoc::mech-equivalence-report-equal-p equivalence-report)
+     "Equivalence report must mark popular/count state.items as equal")
+    (snippet-playground-assert-true
+     transformation-ir
+     "Shared IR must be constructed for the execution equivalence seam")
+    (snippet-playground-assert-equal
+     "popular"
+     (hyperdoc::mech-state-items-ir-function-name-of transformation-ir)
+     "Shared IR must capture the CODE function name")
+    (snippet-playground-assert-contains
+     "Execution equivalence"
+     comparison-html
+     "Comparison surface must render execution/equivalence section")
+    (snippet-playground-assert-contains
+     "Lefty run"
+     comparison-html
+     "Comparison surface must render Lefty run output")
+    (snippet-playground-assert-contains
+     "Rita run"
+     comparison-html
+     "Comparison surface must render Rita run output")
+    (snippet-playground-assert-contains
+     "Shared IR"
+     comparison-html
+     "Comparison surface must render shared IR summary")
+    (snippet-playground-assert-contains
+     "equal-p"
+     comparison-html
+     "Comparison surface must expose equivalence verdict details")))
+
+(defun run-snippet-playground-popular-unsupported-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((session
+           (make-snippet-playground-popular-equivalence-smoke-session
+            :code-operation "CODE trending 15"))
+         (lefty
+           (hyperdoc::snippet-playground-session-lefty-run-result-of session))
+         (rita
+           (hyperdoc::snippet-playground-session-rita-run-result-of session))
+         (equivalence-report
+           (hyperdoc::snippet-playground-session-equivalence-report-of
+            session)))
+    (snippet-playground-assert-equal
+     :ready
+     (hyperdoc::snippet-playground-session-status-of session)
+     "Unsupported fixture should still produce an inspectable ready session")
+    (snippet-playground-assert-equal
+     :unsupported
+     (hyperdoc::mech-run-result-status-of lefty)
+     "Unsupported CODE operation must yield explicit Lefty :unsupported status")
+    (snippet-playground-assert-equal
+     :unsupported
+     (hyperdoc::mech-run-result-status-of rita)
+     "Unsupported CODE operation must yield explicit Rita :unsupported status")
+    (snippet-playground-assert-equal
+     nil
+     (hyperdoc::mech-equivalence-report-equal-p equivalence-report)
+     "Unsupported execution must not report fake equivalence")
+    (snippet-playground-assert-true
+     (hyperdoc::mech-equivalence-report-unsupported-constructs-of
+      equivalence-report)
+     "Unsupported execution must preserve explicit unsupported constructs evidence")))
+
 (defun snippet-playground-smoke-make-html-pre-expansion-blocks ()
   (list
    (list :index 1
@@ -1103,6 +1291,8 @@
   (run-snippet-playground-artifact-runtime-smoke-test)
   (run-snippet-playground-code-slice-bundle-smoke-test)
   (run-snippet-playground-elided-html-pre-pollution-smoke-test)
+  (run-snippet-playground-popular-equivalence-smoke-test)
+  (run-snippet-playground-popular-unsupported-smoke-test)
   (run-snippet-playground-html-pre-expansion-smoke-test)
   (run-snippet-playground-html-pre-expansion-disabled-smoke-test)
   (run-snippet-playground-html-pre-expansion-discrepancy-smoke-test)
