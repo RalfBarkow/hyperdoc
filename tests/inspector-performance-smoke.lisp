@@ -22,6 +22,28 @@
   (unless (search substring string)
     (error "~A -- missing substring: ~S" message substring)))
 
+(defun clog-empty-id-normalizer-available-p ()
+  (let ((sym (find-symbol "NORMALIZE-HTML-ID-FOR-ATTACH" :clog)))
+    (and sym (fboundp sym))))
+
+(defun ensure-patched-clog-empty-id-guards-loaded ()
+  (unless (clog-empty-id-normalizer-available-p)
+    (let* ((clog-src (uiop:getenv "CLOG_SRC"))
+           (clog-dir (and clog-src
+                          (uiop:ensure-directory-pathname clog-src)))
+           (clog-element-source
+             (and clog-dir
+                  (merge-pathnames "source/clog-element.lisp" clog-dir))))
+      (unless (and clog-element-source (probe-file clog-element-source))
+        (error "CLOG_SRC does not expose source/clog-element.lisp: ~S" clog-src))
+      ;; Loading the patched CLOG element source avoids nested ASDF :force
+      ;; during :asdf:test-system while still rebinding attach helpers
+      ;; to the patched empty-id normalizer contract.
+      (load clog-element-source)))
+  (inspector-assert-true
+   (clog-empty-id-normalizer-available-p)
+   "Patched CLOG runtime must expose NORMALIZE-HTML-ID-FOR-ATTACH"))
+
 (defun run-dom-node-count-query-script-smoke-test ()
   (asdf:load-system :hyperdoc/server)
   (let ((string-script
@@ -55,6 +77,8 @@
 
 (defun run-clog-empty-html-id-emission-smoke-test ()
   (asdf:load-system :hyperdoc/server)
+  ;; Keep the patched CLOG methods active after loading :hyperdoc/server.
+  (ensure-patched-clog-empty-id-guards-loaded)
   (inspector-assert-equal
    "undefined"
    (funcall (intern "NORMALIZE-HTML-ID-FOR-ATTACH" :clog) "")
