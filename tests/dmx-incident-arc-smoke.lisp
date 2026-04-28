@@ -6,6 +6,8 @@
   (unless (find-package :hyperdoc/tests)
     (make-package :hyperdoc/tests :use '(:cl)))
   (export (list (intern "RUN-DMX-INCIDENT-ARC-SMOKE-TESTS"
+                        :hyperdoc/tests)
+                (intern "RUN-DMX-INCIDENT-GUARDED-WRITE-BOUNDARY-SMOKE-TEST"
                         :hyperdoc/tests))
           :hyperdoc/tests))
 
@@ -136,53 +138,83 @@
      (hyperbook:find-page hyperdoc::*hyperdoc* page-title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" page-title))))
 
+(defun dmx-incident-collective-knowledge-fixture-page-path ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "tools/testdata/collective-knowledge-slice/pages/the-life-cycle-of-collective-knowledge"))
+
+(defun call-with-dmx-incident-collective-knowledge-source-fixture (thunk)
+  (let* ((symbol
+           'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
+         (original (symbol-function symbol))
+         (fixture-path (dmx-incident-collective-knowledge-fixture-page-path)))
+    (assert-true
+     (uiop:file-exists-p fixture-path)
+     (format nil "Collective-knowledge fixture missing at ~A"
+             fixture-path))
+    (unwind-protect
+         (progn
+           (setf (symbol-function symbol)
+                 (lambda ()
+                   (let ((spec (funcall original)))
+                     (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
+                            spec)
+                           (lambda ()
+                             (hyperdoc::article-allegation-read-json-file
+                              fixture-path)))
+                     spec)))
+           (funcall thunk))
+      (setf (symbol-function symbol) original))))
+
 (defun run-dmx-incident-guarded-write-boundary-smoke-test ()
-  (let* ((healthy-plan
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
-         (summary
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
-            healthy-plan))
-         (evidence
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
-            healthy-plan))
-         (handover-summary
-           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary))
-         (handover-evidence
-           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence)))
-    (assert-true (getf summary :available)
-                 "Healthy promotion plan must keep DMX dry-run available")
-    (assert-equal :canonical
-                  (getf summary :view-props-validation-status)
-                  "Healthy promotion plan must expose canonical view-props validation")
-    (assert-equal nil
-                  (getf summary :forbidden-short-keys)
-                  "Healthy promotion plan must expose no forbidden short keys")
-    (assert-true
-     (search "\"dmx.topicmaps.x\"" (getf summary :normalized-view-props-json))
-     "Healthy promotion plan must expose long-form x in the normalized payload")
-    (assert-true
-     (not (search "\"x\":" (getf summary :normalized-view-props-json)))
-     "Healthy promotion plan must not expose forbidden short x in the normalized payload")
-    (assert-true
-     (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
-             evidence)
-     "Healthy promotion plan dry-run evidence must expose canonical validation")
-    (assert-true
-     (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_PAYLOAD {\"dmx.topicmaps.x\""
-             evidence)
-     "Healthy promotion plan dry-run evidence must expose the normalized long-form payload")
-    (assert-true (getf handover-summary :available)
-                 "Workflow handover DMX dry-run summary must remain available")
-    (assert-equal :canonical
-                  (getf handover-summary :view-props-validation-status)
-                  "Workflow handover DMX dry-run summary must expose canonical validation")
-    (assert-true
-     (search "\"dmx.topicmaps.x\"" (getf handover-summary :normalized-view-props-json))
-     "Workflow handover DMX dry-run summary must expose the normalized long-form payload")
-    (assert-true
-     (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
-             handover-evidence)
-     "Workflow handover DMX dry-run evidence must expose canonical validation")))
+  (call-with-dmx-incident-collective-knowledge-source-fixture
+   (lambda ()
+     (let* ((healthy-plan
+              (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+            (summary
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
+               healthy-plan))
+            (evidence
+              (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
+               healthy-plan))
+            (handover-summary
+              (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary))
+            (handover-evidence
+              (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence)))
+       (assert-true (getf summary :available)
+                    "Healthy promotion plan must keep DMX dry-run available")
+       (assert-equal :canonical
+                     (getf summary :view-props-validation-status)
+                     "Healthy promotion plan must expose canonical view-props validation")
+       (assert-equal nil
+                     (getf summary :forbidden-short-keys)
+                     "Healthy promotion plan must expose no forbidden short keys")
+       (assert-true
+        (search "\"dmx.topicmaps.x\"" (getf summary :normalized-view-props-json))
+        "Healthy promotion plan must expose long-form x in the normalized payload")
+       (assert-true
+        (not (search "\"x\":" (getf summary :normalized-view-props-json)))
+        "Healthy promotion plan must not expose forbidden short x in the normalized payload")
+       (assert-true
+        (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
+                evidence)
+        "Healthy promotion plan dry-run evidence must expose canonical validation")
+       (assert-true
+        (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_PAYLOAD {\"dmx.topicmaps.x\""
+                evidence)
+        "Healthy promotion plan dry-run evidence must expose the normalized long-form payload")
+       (assert-true (getf handover-summary :available)
+                    "Workflow handover DMX dry-run summary must remain available")
+       (assert-equal :canonical
+                     (getf handover-summary :view-props-validation-status)
+                     "Workflow handover DMX dry-run summary must expose canonical validation")
+       (assert-true
+        (search "\"dmx.topicmaps.x\"" (getf handover-summary :normalized-view-props-json))
+        "Workflow handover DMX dry-run summary must expose the normalized long-form payload")
+       (assert-true
+        (search "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
+                handover-evidence)
+        "Workflow handover DMX dry-run evidence must expose canonical validation")))))
 
 (defun run-dmx-incident-arc-smoke-tests ()
   (run-dmx-incident-documentation-pages-smoke-test)
