@@ -371,7 +371,7 @@
            :location-label "story item 1 (mech)"
            :open-tag "fedwiki-mech"
            :source (format nil
-                           "CLICK station~%~A~%PREVIEW items"
+                           "CLICK~%NEIGHBORS fed.wiki~%~A~%CLICK~%PREVIEW items"
                            operation-line))
      (list :index 2
            :line-number 10
@@ -434,6 +434,15 @@
          (execution-interface
            (hyperdoc::snippet-playground-session-execution-interface-of
             session))
+         (mech-execution-ir
+           (hyperdoc::snippet-playground-session-mech-execution-ir-of
+            session))
+         (mech-scxml-execution-chart
+           (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of
+            session))
+         (scxml-run-result
+           (hyperdoc::snippet-playground-session-scxml-run-result-of
+            session))
          (lefty
            (hyperdoc::snippet-playground-session-lefty-run-result-of session))
          (rita
@@ -451,11 +460,73 @@
                                                         "Comparison"))
          (comparison-html
            (and comparison-view
-                (html-inspector-views:view-html comparison-view))))
+                (html-inspector-views:view-html comparison-view)))
+         (execution-view
+           (snippet-playground-smoke-find-view-by-title session-views
+                                                        "Execution"))
+         (execution-html
+           (and execution-view
+                (html-inspector-views:view-html execution-view)))
+         (lisp-scaffold-source
+           (hyperdoc::snippet-playground-session-lisp-scaffold-source-of
+            session))
+         (operation-tokens
+           (mapcar (lambda (operation)
+                     (getf operation :operation))
+                   (hyperdoc::mech-execution-ir-ordered-operations-of
+                    mech-execution-ir))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
      "Popular equivalence fixture must produce a ready session")
+    (snippet-playground-assert-true
+     mech-execution-ir
+     "Popular equivalence fixture must construct a Mech execution IR")
+    (snippet-playground-assert-equal
+     2
+     (length
+      (or (hyperdoc::mech-execution-ir-click-groups-of mech-execution-ir)
+          '()))
+     "Mech execution IR must preserve two CLICK groups")
+    (snippet-playground-assert-true
+     (member "NEIGHBORS" operation-tokens :test #'string=)
+     "Mech execution IR must include NEIGHBORS fed.wiki")
+    (snippet-playground-assert-true
+     (member "CODE" operation-tokens :test #'string=)
+     "Mech execution IR must include CODE popular 15")
+    (snippet-playground-assert-true
+     (member "PREVIEW" operation-tokens :test #'string=)
+     "Mech execution IR must include PREVIEW items")
+    (snippet-playground-assert-true
+     mech-scxml-execution-chart
+     "Generated SCXML chart must be available for popular/count fixture")
+    (snippet-playground-assert-contains
+     "load-neighborhood-fed-wiki"
+     (or (hyperdoc::mech-scxml-execution-chart-scxml-text-of
+          mech-scxml-execution-chart)
+         "")
+     "Generated SCXML chart must include neighborhood loading state")
+    (snippet-playground-assert-contains
+     "run-code-popular-15"
+     (or (hyperdoc::mech-scxml-execution-chart-scxml-text-of
+          mech-scxml-execution-chart)
+         "")
+     "Generated SCXML chart must include CODE popular 15 state")
+    (snippet-playground-assert-contains
+     "preview-items"
+     (or (hyperdoc::mech-scxml-execution-chart-scxml-text-of
+          mech-scxml-execution-chart)
+         "")
+     "Generated SCXML chart must include PREVIEW items state")
+    (snippet-playground-assert-equal
+     :ok
+     (hyperdoc::mech-run-result-status-of scxml-run-result)
+     "SCXML run must complete with :ok status on happy path")
+    (snippet-playground-assert-equal
+     "done"
+     (getf (hyperdoc::mech-run-result-final-state-of scxml-run-result)
+           :final-state)
+     "SCXML happy path must reach done final state")
     (snippet-playground-assert-equal
      "state.items"
      (hyperdoc::snippet-execution-interface-handoff-path-of execution-interface)
@@ -490,9 +561,55 @@
      (hyperdoc::mech-state-items-ir-function-name-of transformation-ir)
      "Shared IR must capture the CODE function name")
     (snippet-playground-assert-contains
+     "Entering: click-1"
+     (format nil "~{~A~%~}"
+             (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                 '()))
+     "SCXML trace must include first CLICK stage")
+    (snippet-playground-assert-contains
+     "Entering: load-neighborhood-fed-wiki"
+     (format nil "~{~A~%~}"
+             (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                 '()))
+     "SCXML trace must include neighborhood loading stage")
+    (snippet-playground-assert-contains
+     "Entering: run-code-popular-15"
+     (format nil "~{~A~%~}"
+             (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                 '()))
+     "SCXML trace must include CODE execution stage")
+    (snippet-playground-assert-contains
+     "Entering: preview-items"
+     (format nil "~{~A~%~}"
+             (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                 '()))
+     "SCXML trace must include PREVIEW stage")
+    (snippet-playground-assert-contains
+     "Entering: done"
+     (format nil "~{~A~%~}"
+             (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                 '()))
+     "SCXML trace must reach done state")
+    (snippet-playground-assert-contains
+     "rita-popular"
+     (or lisp-scaffold-source "")
+     "Lisp scaffold source must include Rita popular semantic function")
+    (snippet-playground-assert-contains
+     "run-rita-popular-mech"
+     (or lisp-scaffold-source "")
+     "Lisp scaffold source must include runnable Rita Mech entry function")
+    (snippet-playground-assert-contains
      "Execution equivalence"
      comparison-html
      "Comparison surface must render execution/equivalence section")
+    (snippet-playground-assert-contains
+     "Generated SCXML chart"
+     (or execution-html "")
+     "Execution view must expose generated SCXML chart summary")
+    (snippet-playground-assert-contains
+     "SCXML run"
+     (or execution-html "")
+     "Execution view must expose SCXML run details")
     (snippet-playground-assert-contains
      "Lefty run"
      comparison-html
@@ -515,6 +632,9 @@
   (let* ((session
            (make-snippet-playground-popular-equivalence-smoke-session
             :code-operation "CODE trending 15"))
+         (scxml-run-result
+           (hyperdoc::snippet-playground-session-scxml-run-result-of
+            session))
          (lefty
            (hyperdoc::snippet-playground-session-lefty-run-result-of session))
          (rita
@@ -538,6 +658,21 @@
      nil
      (hyperdoc::mech-equivalence-report-equal-p equivalence-report)
      "Unsupported execution must not report fake equivalence")
+    (snippet-playground-assert-equal
+     :unsupported
+     (hyperdoc::mech-run-result-status-of scxml-run-result)
+     "Unsupported CODE operation must drive SCXML run to :unsupported")
+    (snippet-playground-assert-equal
+     "unsupported"
+     (getf (hyperdoc::mech-run-result-final-state-of scxml-run-result)
+           :final-state)
+     "Unsupported CODE operation must end in unsupported SCXML final state")
+    (snippet-playground-assert-contains
+     "Entering: unsupported"
+     (format nil "~{~A~%~}"
+             (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                 '()))
+     "Unsupported CODE operation must reach unsupported SCXML trace state")
     (snippet-playground-assert-true
      (hyperdoc::mech-equivalence-report-unsupported-constructs-of
       equivalence-report)

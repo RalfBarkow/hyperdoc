@@ -244,6 +244,9 @@
    (transformation-unit :reader snippet-comparison-surface-transformation-unit-of
                         :initarg :transformation-unit
                         :initform nil)
+   (mech-execution-ir :reader snippet-comparison-surface-mech-execution-ir-of
+                      :initarg :mech-execution-ir
+                      :initform nil)
    (execution-input :reader snippet-comparison-surface-execution-input-of
                     :initarg :execution-input
                     :initform nil)
@@ -259,6 +262,18 @@
    (transformation-ir :reader snippet-comparison-surface-transformation-ir-of
                       :initarg :transformation-ir
                       :initform nil)
+   (mech-scxml-execution-chart
+     :reader snippet-comparison-surface-mech-scxml-execution-chart-of
+     :initarg :mech-scxml-execution-chart
+     :initform nil)
+   (scxml-run-result
+     :reader snippet-comparison-surface-scxml-run-result-of
+     :initarg :scxml-run-result
+     :initform nil)
+   (mech-lisp-scaffold-source
+     :reader snippet-comparison-surface-mech-lisp-scaffold-source-of
+     :initarg :mech-lisp-scaffold-source
+     :initform nil)
    (lifecycle-run :reader snippet-comparison-surface-lifecycle-run-of
                   :initarg :lifecycle-run
                   :initform nil)
@@ -533,6 +548,111 @@
              :initarg :findings
              :initform nil)))
 
+(defclass mech-execution-ir ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (source-mech :reader mech-execution-ir-source-mech-of
+                :initarg :source-mech
+                :initform nil)
+   (ordered-operations :reader mech-execution-ir-ordered-operations-of
+                       :initarg :ordered-operations
+                       :initform nil)
+   (click-groups :reader mech-execution-ir-click-groups-of
+                 :initarg :click-groups
+                 :initform nil)
+   (required-inputs :reader mech-execution-ir-required-inputs-of
+                    :initarg :required-inputs
+                    :initform nil)
+   (code-invocations :reader mech-execution-ir-code-invocations-of
+                     :initarg :code-invocations
+                     :initform nil)
+   (preview-output-paths :reader mech-execution-ir-preview-output-paths-of
+                         :initarg :preview-output-paths
+                         :initform nil)
+   (provenance :reader mech-execution-ir-provenance-of
+               :initarg :provenance
+               :initform nil)
+   (unsupported-operations :reader mech-execution-ir-unsupported-operations-of
+                           :initarg :unsupported-operations
+                           :initform nil)
+   (findings :reader mech-execution-ir-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass mech-scxml-execution-chart ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (chart-name :reader mech-scxml-execution-chart-name-of
+               :initarg :chart-name
+               :initform nil)
+   (initial-state :reader mech-scxml-execution-chart-initial-state-of
+                  :initarg :initial-state
+                  :initform nil)
+   (terminal-states :reader mech-scxml-execution-chart-terminal-states-of
+                    :initarg :terminal-states
+                    :initform nil)
+   (failure-states :reader mech-scxml-execution-chart-failure-states-of
+                   :initarg :failure-states
+                   :initform nil)
+   (events :reader mech-scxml-execution-chart-events-of
+           :initarg :events
+           :initform nil)
+   (execution-ir :reader mech-scxml-execution-chart-execution-ir-of
+                 :initarg :execution-ir
+                 :initform nil)
+   (machine-definition :reader mech-scxml-execution-chart-machine-definition-of
+                       :initarg :machine-definition
+                       :initform nil)
+   (chart :reader mech-scxml-execution-chart-chart-of
+          :initarg :chart
+          :initform nil)
+   (scxml-text :reader mech-scxml-execution-chart-scxml-text-of
+               :initarg :scxml-text
+               :initform nil)
+   (findings :reader mech-scxml-execution-chart-findings-of
+             :initarg :findings
+             :initform nil)))
+
+(defclass mech-lisp-scaffold-source ()
+  ((id :reader id-of
+       :initarg :id)
+   (title :reader title-of
+          :initarg :title)
+   (summary :reader summary-of
+            :initarg :summary
+            :initform nil)
+   (source :reader mech-lisp-scaffold-source-source-of
+           :initarg :source
+           :initform nil)
+   (execution-input :reader mech-lisp-scaffold-source-execution-input-of
+                    :initarg :execution-input
+                    :initform nil)
+   (transformation-ir :reader mech-lisp-scaffold-source-transformation-ir-of
+                      :initarg :transformation-ir
+                      :initform nil)
+   (scxml-execution-chart :reader mech-lisp-scaffold-source-scxml-execution-chart-of
+                          :initarg :scxml-execution-chart
+                          :initform nil)
+   (scxml-run-result :reader mech-lisp-scaffold-source-scxml-run-result-of
+                     :initarg :scxml-run-result
+                     :initform nil)
+   (equivalence-report :reader mech-lisp-scaffold-source-equivalence-report-of
+                       :initarg :equivalence-report
+                       :initform nil)
+   (findings :reader mech-lisp-scaffold-source-findings-of
+             :initarg :findings
+             :initform nil)))
+
 (defclass snippet-playground-authored-role (authored-relation-role) ())
 
 (defclass snippet-playground-authored-relation (authored-relation) ())
@@ -718,6 +838,10 @@
      :reader snippet-playground-session-transformation-unit-of
      :initarg :transformation-unit
      :initform nil)
+   (mech-execution-ir
+     :reader snippet-playground-session-mech-execution-ir-of
+     :initarg :mech-execution-ir
+     :initform nil)
    (mech-execution-input
      :reader snippet-playground-session-mech-execution-input-of
      :initarg :mech-execution-input
@@ -737,6 +861,18 @@
    (transformation-ir
      :reader snippet-playground-session-transformation-ir-of
      :initarg :transformation-ir
+     :initform nil)
+   (mech-scxml-execution-chart
+     :reader snippet-playground-session-mech-scxml-execution-chart-of
+     :initarg :mech-scxml-execution-chart
+     :initform nil)
+   (scxml-run-result
+     :reader snippet-playground-session-scxml-run-result-of
+     :initarg :scxml-run-result
+     :initform nil)
+   (mech-lisp-scaffold-source
+     :reader snippet-playground-session-mech-lisp-scaffold-source-of
+     :initarg :mech-lisp-scaffold-source
      :initform nil)
    (comparison-surface
      :reader snippet-playground-session-comparison-surface-of
@@ -836,6 +972,18 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defmethod print-object ((object mech-execution-ir) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mech-scxml-execution-chart) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mech-lisp-scaffold-source) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
 (defmethod print-object ((object snippet-playground-authored-role) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
@@ -907,6 +1055,18 @@
 
 (defmethod html-inspector-views:text-representation
     ((object mech-state-items-ir))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-execution-ir))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-scxml-execution-chart))
+  (title-of object))
+
+(defmethod html-inspector-views:text-representation
+    ((object mech-lisp-scaffold-source))
   (title-of object))
 
 (defmethod html-inspector-views:text-representation
@@ -1524,8 +1684,9 @@
        source-label origin-pane-id origin-surface-kind provider-kind
        pending-pane-id recognized-mech-snippets recognized-code-snippets
        selected-mech selected-code execution-interface transformation-unit
-       mech-execution-input lefty-run-result rita-run-result
-       equivalence-report transformation-ir
+       mech-execution-ir mech-execution-input lefty-run-result rita-run-result
+       equivalence-report transformation-ir mech-scxml-execution-chart
+       scxml-run-result mech-lisp-scaffold-source
        result-object failure-object)
   (make-state-machine-run
    :id (format nil "state-machine-run/snippet-playground/~A"
@@ -1551,8 +1712,14 @@
     (snippet-playground-object-label execution-interface)
     :transformation_unit
     (snippet-playground-object-label transformation-unit)
+    :mech_execution_ir
+    (snippet-playground-object-label mech-execution-ir)
     :mech_execution_input
     (snippet-playground-object-label mech-execution-input)
+    :mech_scxml_execution_chart
+    (snippet-playground-object-label mech-scxml-execution-chart)
+    :scxml_run_result
+    (snippet-playground-object-label scxml-run-result)
     :lefty_run_result
     (snippet-playground-object-label lefty-run-result)
     :rita_run_result
@@ -1561,6 +1728,8 @@
     (snippet-playground-object-label equivalence-report)
     :transformation_ir
     (snippet-playground-object-label transformation-ir)
+    :mech_lisp_scaffold_source
+    (snippet-playground-object-label mech-lisp-scaffold-source)
     :result_object (snippet-playground-object-label result-object)
     :failure_object (snippet-playground-object-label failure-object))
    :current-state current-state
@@ -3398,9 +3567,12 @@
             findings))
     (nreverse findings)))
 
-(defun make-snippet-rita-projection (mech code execution-interface)
-  (let ((scaffold-source (and code
-                              (snippet-playground-lisp-scaffold nil code))))
+(defun make-snippet-rita-projection
+    (mech code execution-interface &key scaffold-source)
+  (let ((effective-scaffold-source
+          (or scaffold-source
+              (and code
+                   (snippet-playground-lisp-scaffold nil code)))))
     (make-instance
      'snippet-rita-projection
      :id (format nil "snippet-rita/~A/~A"
@@ -3414,9 +3586,10 @@
                    execution-interface)))
      :mech-snippet mech
      :execution-interface execution-interface
-     :lisp-scaffold-source scaffold-source
+     :lisp-scaffold-source effective-scaffold-source
      :findings
-     (snippet-rita-projection-findings execution-interface scaffold-source))))
+     (snippet-rita-projection-findings execution-interface
+                                       effective-scaffold-source))))
 
 (defun snippet-transformation-normal-form (code execution-interface)
   (let ((translation-mode (and code (code-snippet-translation-mode-of code))))
@@ -4136,6 +4309,758 @@
      :findings
      (list "Execution input keeps Mech/code evidence and normalized neighborhood state in one inspectable object."))))
 
+(defun mech-ir-token-slug (token)
+  (let ((text (string-downcase (format nil "~A" token))))
+    (let ((slug
+            (with-output-to-string (stream)
+              (loop with emitted-p = nil
+                    with pending-dash-p = nil
+                    for char across text
+                    do (cond
+                         ((or (alphanumericp char)
+                              (char= char #\_))
+                          (when (and pending-dash-p emitted-p)
+                            (write-char #\- stream))
+                          (setf pending-dash-p nil)
+                          (write-char char stream)
+                          (setf emitted-p t))
+                         (emitted-p
+                          (setf pending-dash-p t)))))))
+      (if (zerop (length slug))
+          "token"
+          slug))))
+
+(defun mech-ir-operation-state-id (operation-entry click-index)
+  (let* ((operation (string-upcase (or (getf operation-entry :operation) "")))
+         (arguments (or (getf operation-entry :arguments) '()))
+         (state-id
+           (cond
+             ((string= operation "CLICK")
+              (format nil "click-~D" (max 1 click-index)))
+             ((string= operation "NEIGHBORS")
+              (if arguments
+                  (format nil "load-neighborhood-~A"
+                          (mech-ir-token-slug (format nil "~{~A~^-~}" arguments)))
+                  "load-neighborhood"))
+             ((string= operation "CODE")
+              (format nil "run-code-~A"
+                      (if arguments
+                          (mech-ir-token-slug
+                           (format nil "~{~A~^-~}" arguments))
+                          "unknown")))
+             ((string= operation "PREVIEW")
+              (format nil "preview-~A"
+                      (if arguments
+                          (mech-ir-token-slug
+                           (format nil "~{~A~^-~}" arguments))
+                          "output")))
+             (t
+              (format nil "operation-~A-~D"
+                      (mech-ir-token-slug operation)
+                      (or (getf operation-entry :index) 0))))))
+    state-id))
+
+(defun mech-ir-click-groups-from-operations (operations)
+  (let ((groups '()))
+    (dolist (operation operations)
+      (let ((group-index (getf operation :click-group)))
+        (when group-index
+          (let ((existing
+                  (assoc group-index groups :test #'=)))
+            (if existing
+                (setf (cdr existing)
+                      (append (cdr existing) (list operation)))
+                (push (cons group-index (list operation)) groups))))))
+    (mapcar (lambda (entry)
+              (list :click-group (car entry)
+                    :operations (cdr entry)))
+            (sort groups #'< :key #'car))))
+
+(defun mech-ir-required-inputs-from-operations (operations)
+  (loop for operation in operations
+        when (string= (string-upcase (or (getf operation :operation) ""))
+                      "NEIGHBORS")
+          collect (list :kind :neighbors
+                        :source (format nil "~{~A~^ ~}"
+                                        (or (getf operation :arguments) '()))
+                        :state-id (getf operation :state-id)
+                        :line-number (getf operation :line-number))))
+
+(defun mech-ir-code-invocations-from-operations (operations)
+  (loop for operation in operations
+        when (string= (string-upcase (or (getf operation :operation) ""))
+                      "CODE")
+          collect (list :function-name (first (getf operation :arguments))
+                        :arguments
+                        (mapcar #'snippet-playground-parse-code-argument-value
+                                (rest (or (getf operation :arguments) '())))
+                        :state-id (getf operation :state-id)
+                        :line-number (getf operation :line-number))))
+
+(defun mech-ir-preview-output-paths-from-operations (operations)
+  (loop for operation in operations
+        when (string= (string-upcase (or (getf operation :operation) ""))
+                      "PREVIEW")
+          collect (list :path (format nil "~{~A~^ ~}"
+                                      (or (getf operation :arguments) '()))
+                        :state-id (getf operation :state-id)
+                        :line-number (getf operation :line-number))))
+
+(defun mech-ir-unsupported-operations-from-operations (operations)
+  (remove nil
+          (mapcar (lambda (operation)
+                    (let ((token (string-upcase (or (getf operation :operation) ""))))
+                      (unless (member token
+                                      '("CLICK" "NEIGHBORS" "CODE" "PREVIEW")
+                                      :test #'string=)
+                        (list :operation token
+                              :arguments (copy-list
+                                          (or (getf operation :arguments) '()))
+                              :line-number (getf operation :line-number)
+                              :state-id (getf operation :state-id)))))
+                  operations)))
+
+(defun make-mech-execution-ir (execution-input)
+  (let* ((source-mech (mech-execution-input-selected-mech-of execution-input))
+         (raw-operations
+           (copy-tree (or (mech-execution-input-parsed-mech-operations-of
+                           execution-input)
+                          '())))
+         (click-index 0)
+         (operations
+           (loop for raw-operation in raw-operations
+                 for operation-index from 1
+                 for operation-token =
+                   (string-upcase (or (getf raw-operation :operation) ""))
+                 do (when (string= operation-token "CLICK")
+                      (incf click-index))
+                 collect
+                 (let* ((state-click-index
+                          (if (plusp click-index) click-index 1))
+                        (entry
+                          (list :index operation-index
+                                :operation operation-token
+                                :arguments
+                                (copy-list (or (getf raw-operation :arguments)
+                                               '()))
+                                :line-number (getf raw-operation :line-number)
+                                :click-group state-click-index)))
+                   (setf (getf entry :state-id)
+                         (mech-ir-operation-state-id
+                          entry
+                          state-click-index)
+                         (getf entry :provenance)
+                         (list :line-number (getf entry :line-number)
+                               :operation (getf entry :operation)
+                               :arguments (copy-list
+                                           (getf entry :arguments))))
+                   entry)))
+         (click-groups (mech-ir-click-groups-from-operations operations))
+         (required-inputs (mech-ir-required-inputs-from-operations operations))
+         (code-invocations (mech-ir-code-invocations-from-operations operations))
+         (preview-output-paths
+           (mech-ir-preview-output-paths-from-operations operations))
+         (unsupported-operations
+           (mech-ir-unsupported-operations-from-operations operations)))
+    (make-instance
+     'mech-execution-ir
+     :id (format nil "mech-execution-ir/~A"
+                 (or (and source-mech
+                          (mech-snippet-block-index-of source-mech))
+                     "unknown"))
+     :title "Mech execution IR"
+     :summary
+     (format nil
+             "Parsed Mech execution IR with ~D operation~:P and ~D click group~:P."
+             (length operations)
+             (length click-groups))
+     :source-mech source-mech
+     :ordered-operations operations
+     :click-groups click-groups
+     :required-inputs required-inputs
+     :code-invocations code-invocations
+     :preview-output-paths preview-output-paths
+     :provenance
+     (list :mech_block
+           (and source-mech
+                (mech-snippet-block-index-of source-mech))
+           :mech_location
+           (and source-mech
+                (snippet-location-label-of source-mech)))
+     :unsupported-operations unsupported-operations
+     :findings
+     (append
+      (list "Mech execution IR is derived directly from the selected Mech snippet operation sequence.")
+      (when unsupported-operations
+        (list "IR records unsupported Mech operations explicitly for chart/report propagation."))))))
+
+(defun mech-ir-terminal-result-state-for-event (event)
+  (cond
+    ((string= event "result/ok")
+     "done")
+    ((string= event "result/different")
+     "different")
+    (t
+     "unsupported")))
+
+(defun mech-ir-to-state-machine-definition (ir)
+  (let* ((operations (or (mech-execution-ir-ordered-operations-of ir) '()))
+         (state-ids (mapcar (lambda (operation)
+                              (getf operation :state-id))
+                            operations))
+         (operation-transitions
+           (loop with chain = (append state-ids
+                                      (list "compare-equivalence"))
+                 for source in (cons "initial" chain)
+                 for target in chain
+                 for transition-index from 1
+                 when target
+                   collect
+                   (make-state-machine-transition
+                    :id (format nil "mech-ir/step-~D" transition-index)
+                    :title (format nil "Step ~D" transition-index)
+                    :from-state source
+                    :to-state target
+                    :trigger (format nil "step/~A" target)
+                    :notes (format nil "Advance to ~A." target))))
+         (result-transitions
+           (list
+            (make-state-machine-transition
+             :id "mech-ir/result-ok"
+             :title "Result ok"
+             :from-state "compare-equivalence"
+             :to-state "done"
+             :trigger "result/ok")
+            (make-state-machine-transition
+             :id "mech-ir/result-different"
+             :title "Result different"
+             :from-state "compare-equivalence"
+             :to-state "different"
+             :trigger "result/different")
+            (make-state-machine-transition
+             :id "mech-ir/result-unsupported"
+             :title "Result unsupported"
+             :from-state "compare-equivalence"
+             :to-state "unsupported"
+             :trigger "result/unsupported")))
+         (states
+           (append
+            (list
+             (make-state-machine-state
+              :id "initial"
+              :title "Initial"
+              :summary "Initial Mech execution state before operation sequencing."))
+            (mapcar (lambda (operation)
+                      (make-state-machine-state
+                       :id (getf operation :state-id)
+                       :title (format nil "~A ~{~A~^ ~}"
+                                      (or (getf operation :operation) "OP")
+                                      (or (getf operation :arguments) '()))
+                       :summary
+                       (format nil "Mech line ~A."
+                               (or (getf operation :line-number) "n/a"))))
+                    operations)
+            (list
+             (make-state-machine-state
+              :id "compare-equivalence"
+              :title "Compare equivalence"
+              :summary "Compare normalized state.items output between Lefty and Rita.")
+             (make-state-machine-state
+              :id "done"
+              :title "Done"
+              :summary "SCXML Mech execution completed with equivalence.")
+             (make-state-machine-state
+              :id "different"
+              :title "Different"
+              :summary "SCXML Mech execution completed with differences.")
+             (make-state-machine-state
+              :id "unsupported"
+              :title "Unsupported"
+              :summary "SCXML Mech execution completed with unsupported constructs.")))))
+    (make-state-machine-definition
+     :id (format nil "state-machine-definition/mech-ir/~A"
+                 (or (id-of ir) "unknown"))
+     :title "Mech execution SCXML machine"
+     :summary "State machine generated from parsed Mech execution IR."
+     :states states
+     :transitions (append operation-transitions result-transitions)
+     :initial-state "initial"
+     :terminal-states '("done" "different" "unsupported")
+     :failure-states '("different" "unsupported")
+     :events
+     (append (mapcar (lambda (operation)
+                       (format nil "step/~A" (getf operation :state-id)))
+                     operations)
+             (list "step/compare-equivalence"
+                   "result/ok"
+                   "result/different"
+                   "result/unsupported"))
+     :invariants
+     (list
+      (list :label "Mech operation order"
+            :detail "SCXML transition sequence preserves parsed Mech operation order.")
+      (list :label "Bounded semantic seam"
+            :detail "CODE operation dispatch remains bounded to the state.items popular(count) seam."))
+     :source-evidence
+     (list
+      (list :layer :semantic
+            :reference "mech-execution-ir"
+            :detail (summary-of ir))))))
+
+(defun mech-ir-to-scxml-chart (ir)
+  (let* ((machine (mech-ir-to-state-machine-definition ir))
+         (scxml-text (state-machine-definition-scxml-text machine))
+         (chart nil)
+         (warning nil))
+    (handler-case
+        (setf chart (hyperdoc/scxml:parse-scxml-string scxml-text))
+      (error (condition)
+        (setf warning
+              (format nil "Failed to parse generated Mech SCXML chart: ~A"
+                      condition))))
+    (make-instance
+     'mech-scxml-execution-chart
+     :id (format nil "mech-scxml-execution-chart/~A"
+                 (or (id-of ir) "unknown"))
+     :title "Mech-derived SCXML chart"
+     :summary
+     "Executable SCXML chart generated from parsed Mech execution IR."
+     :chart-name
+     (or (and chart
+              (hyperdoc/scxml:scxml-chart-name-of chart))
+         (id-of machine))
+     :initial-state (state-machine-definition-initial-state-of machine)
+     :terminal-states (copy-list
+                       (state-machine-definition-terminal-states-of machine))
+     :failure-states (copy-list
+                      (state-machine-definition-failure-states-of machine))
+     :events
+     (copy-list (state-machine-definition-events-of machine))
+     :execution-ir ir
+     :machine-definition machine
+     :chart chart
+     :scxml-text scxml-text
+     :findings
+     (append
+      (list "SCXML chart is generated from Mech IR operation states and transitions.")
+      (when warning
+        (list warning))))))
+
+(defun mech-scxml-state-sequence-events (ir)
+  (append
+   (mapcar (lambda (operation)
+             (format nil "step/~A" (getf operation :state-id)))
+           (or (mech-execution-ir-ordered-operations-of ir) '()))
+   (list "step/compare-equivalence")))
+
+(defun mech-scxml-run-trace-states (trace)
+  (loop for line in (or trace '())
+        for marker = (search "Entering: " line :test #'char=)
+        when marker
+          collect (subseq line (+ marker (length "Entering: ")))))
+
+(defun mech-scxml-result-event
+    (lefty-run-result rita-run-result equivalence-report ir)
+  (cond
+    ((mech-execution-ir-unsupported-operations-of ir)
+     "result/unsupported")
+    ((or (eq (mech-run-result-status-of lefty-run-result) :unsupported)
+         (eq (mech-run-result-status-of rita-run-result) :unsupported)
+         (mech-equivalence-report-unsupported-constructs-of equivalence-report))
+     "result/unsupported")
+    ((mech-equivalence-report-equal-p equivalence-report)
+     "result/ok")
+    (t
+     "result/different")))
+
+(defun run-mech-ir-semantic-actions (ir execution-input)
+  (let ((operations-by-state
+          (make-hash-table :test #'equal))
+        (semantic-trace '())
+        (lefty-run-result nil)
+        (rita-run-result nil))
+    (dolist (operation (or (mech-execution-ir-ordered-operations-of ir) '()))
+      (setf (gethash (getf operation :state-id) operations-by-state)
+            operation))
+    (labels
+        ((dispatch-state-action (state-id)
+           (let ((operation (gethash state-id operations-by-state)))
+             (when operation
+               (let ((token (string-upcase (or (getf operation :operation) ""))))
+                 (push (format nil "mech-ir action: ~A (~A)"
+                               token
+                               state-id)
+                       semantic-trace)
+                 (cond
+                   ((string= token "NEIGHBORS")
+                    (push "loaded normalized neighborhood input"
+                          semantic-trace))
+                   ((string= token "CODE")
+                    (setf lefty-run-result
+                          (run-lefty-mech-execution execution-input)
+                          rita-run-result
+                          (run-rita-mech-execution execution-input))
+                    (push "dispatched bounded Lefty and Rita CODE runners"
+                          semantic-trace))
+                   ((string= token "PREVIEW")
+                    (push "preview operation consumed state.items handoff"
+                          semantic-trace))
+                   (t
+                    (push (format nil "unsupported Mech operation ~A recorded"
+                                  token)
+                          semantic-trace))))))))
+      (values
+       (lambda (state-id)
+         (dispatch-state-action state-id))
+       (lambda ()
+         (nreverse semantic-trace))
+       (lambda ()
+         (values lefty-run-result rita-run-result))))))
+
+(defun run-mech-scxml-execution
+    (scxml-chart execution-input ir lefty-run-result rita-run-result
+     equivalence-report)
+  (let* ((chart (and scxml-chart (mech-scxml-execution-chart-chart-of scxml-chart)))
+         (chart-name
+           (or (and scxml-chart
+                    (mech-scxml-execution-chart-name-of scxml-chart))
+               "mech-ir-chart"))
+         (state-sequence-events (mech-scxml-state-sequence-events ir))
+         (result-event
+           (mech-scxml-result-event
+            lefty-run-result
+            rita-run-result
+            equivalence-report
+            ir))
+         (events (append state-sequence-events (list result-event)))
+         (generated-run nil)
+         (warning nil))
+    (if (null chart)
+        (make-mech-run-result
+         :engine :scxml
+         :status :error
+         :diagnostics
+         (list "Generated Mech SCXML chart is unavailable; chart execution could not run.")
+         :source-provenance (list :chart_name chart-name))
+        (progn
+          (handler-case
+              (setf generated-run
+                    (hyperdoc/scxml:run-compiled-scxml-with-events
+                     chart
+                     events
+                     :package-name "HYPERDOC/SCXML/GENERATED/MECH-EXECUTION"
+                     :function-name "RUN-MECH-EXECUTION-CHART"))
+            (error (condition)
+              (setf warning
+                    (format nil "SCXML execution failed: ~A" condition))))
+          (if (or warning (null generated-run))
+              (make-mech-run-result
+               :engine :scxml
+               :status :error
+               :diagnostics
+               (list (or warning
+                         "SCXML execution failed without a concrete condition."))
+               :source-provenance
+               (list :chart_name chart-name
+                     :events events))
+              (let* ((final-state
+                       (hyperdoc/scxml:generated-scxml-run-final-state-of
+                        generated-run))
+                     (done-p
+                       (hyperdoc/scxml:generated-scxml-run-done-p
+                        generated-run))
+                     (status
+                       (cond
+                         ((string= (or final-state "") "done")
+                          :ok)
+                         ((string= (or final-state "") "different")
+                          :different)
+                         ((string= (or final-state "") "unsupported")
+                          :unsupported)
+                         (t
+                          :error))))
+                (make-mech-run-result
+                 :engine :scxml
+                 :status status
+                 :return-value result-event
+                 :final-state
+                 (list :initial-state
+                       (and scxml-chart
+                            (mech-scxml-execution-chart-initial-state-of
+                             scxml-chart))
+                       :final-state final-state
+                       :done-p done-p)
+                 :normalized-output
+                 (and equivalence-report
+                      (mech-equivalence-report-normalized-comparison-value-of
+                       equivalence-report))
+                 :trace (hyperdoc/scxml:generated-scxml-run-trace-of
+                         generated-run)
+                 :diagnostics
+                 (list
+                  (format nil
+                          "SCXML chart ~A executed ~D event~:P and reached ~A."
+                          chart-name
+                          (length events)
+                          final-state))
+                 :unsupported-constructs
+                 (and (eq status :unsupported)
+                      (append (copy-list
+                               (or (mech-execution-ir-unsupported-operations-of
+                                    ir)
+                                   '()))
+                              (copy-list
+                               (or (mech-equivalence-report-unsupported-constructs-of
+                                    equivalence-report)
+                                   '()))))
+                 :source-provenance
+                 (list :chart_name chart-name
+                       :events events
+                       :result_event result-event))))))))
+
+(defun run-mech-scxml-equivalence-orchestration
+    (execution-input ir scxml-chart)
+  (let* ((chart (and scxml-chart (mech-scxml-execution-chart-chart-of scxml-chart)))
+         (prefix-events (mech-scxml-state-sequence-events ir))
+         (prefix-run nil)
+         (prefix-warning nil)
+         (dispatcher nil)
+         (semantic-trace-reader nil)
+         (results-reader nil)
+         (lefty-run-result nil)
+         (rita-run-result nil))
+    (multiple-value-setq (dispatcher semantic-trace-reader results-reader)
+      (run-mech-ir-semantic-actions ir execution-input))
+    (when chart
+      (handler-case
+          (setf prefix-run
+                (hyperdoc/scxml:run-compiled-scxml-with-events
+                 chart
+                 prefix-events
+                 :package-name "HYPERDOC/SCXML/GENERATED/MECH-EXECUTION/PREFIX"
+                 :function-name "RUN-MECH-EXECUTION-CHART-PREFIX"))
+        (error (condition)
+          (setf prefix-warning
+                (format nil "SCXML prefix orchestration failed: ~A" condition)))))
+    (dolist (state-id
+             (if prefix-run
+                 (mech-scxml-run-trace-states
+                  (hyperdoc/scxml:generated-scxml-run-trace-of prefix-run))
+                 (mapcar (lambda (operation)
+                           (getf operation :state-id))
+                         (or (mech-execution-ir-ordered-operations-of ir) '()))))
+      (when dispatcher
+        (funcall dispatcher state-id)))
+    (multiple-value-setq (lefty-run-result rita-run-result)
+      (if results-reader
+          (funcall results-reader)
+          (values nil nil)))
+    (unless lefty-run-result
+      (setf lefty-run-result
+            (make-mech-run-result
+             :engine :lefty
+             :status :unsupported
+             :diagnostics
+             (list "No CODE operation was dispatched from Mech execution IR.")
+             :unsupported-constructs (list "Missing CODE operation in Mech execution IR."))))
+    (unless rita-run-result
+      (setf rita-run-result
+            (make-mech-run-result
+             :engine :rita
+             :status :unsupported
+             :diagnostics
+             (list "No CODE operation was dispatched from Mech execution IR.")
+             :unsupported-constructs (list "Missing CODE operation in Mech execution IR."))))
+    (let* ((equivalence-report
+             (make-mech-equivalence-report
+              lefty-run-result
+              rita-run-result))
+           (scxml-run-result
+             (run-mech-scxml-execution
+              scxml-chart
+              execution-input
+              ir
+              lefty-run-result
+              rita-run-result
+              equivalence-report)))
+      (when prefix-warning
+        (setf scxml-run-result
+              (make-mech-run-result
+               :engine :scxml
+               :status :error
+               :return-value (mech-run-result-return-value-of scxml-run-result)
+               :final-state (mech-run-result-final-state-of scxml-run-result)
+               :normalized-output
+               (mech-run-result-normalized-output-of scxml-run-result)
+               :trace (mech-run-result-trace-of scxml-run-result)
+               :diagnostics
+               (append (list prefix-warning)
+                       (copy-list
+                        (or (mech-run-result-diagnostics-of scxml-run-result)
+                            '())))
+               :unsupported-constructs
+               (mech-run-result-unsupported-constructs-of scxml-run-result)
+               :source-provenance
+               (mech-run-result-source-provenance-of scxml-run-result))))
+      (let ((semantic-trace (and semantic-trace-reader
+                                 (funcall semantic-trace-reader))))
+        (when semantic-trace
+          (setf scxml-run-result
+                (make-mech-run-result
+                 :engine :scxml
+                 :status (mech-run-result-status-of scxml-run-result)
+                 :return-value (mech-run-result-return-value-of scxml-run-result)
+                 :final-state (mech-run-result-final-state-of scxml-run-result)
+                 :normalized-output
+                 (mech-run-result-normalized-output-of scxml-run-result)
+                 :trace
+                 (append (copy-list (or (mech-run-result-trace-of scxml-run-result)
+                                        '()))
+                         semantic-trace)
+                 :diagnostics
+                 (mech-run-result-diagnostics-of scxml-run-result)
+                 :unsupported-constructs
+                 (mech-run-result-unsupported-constructs-of scxml-run-result)
+                 :source-provenance
+                 (mech-run-result-source-provenance-of scxml-run-result)))))
+      (values lefty-run-result
+              rita-run-result
+              equivalence-report
+              scxml-run-result))))
+
+(defun mech-lisp-scaffold-source-from-ir
+    (ir execution-input scxml-chart scxml-run-result)
+  (declare (ignore scxml-run-result))
+  (let* ((operation-name
+           (or (mech-execution-input-code-operation-name-of execution-input)
+               "popular"))
+         (count-value
+           (or (first (mech-execution-input-code-operation-arguments-of
+                       execution-input))
+               0))
+         (normalized-neighborhood
+           (getf (mech-execution-input-normalized-state-of execution-input)
+                 :neighborhood))
+         (chart-name
+           (or (and scxml-chart
+                    (mech-scxml-execution-chart-name-of scxml-chart))
+               "n/a"))
+         (operations (or (mech-execution-ir-ordered-operations-of ir) '())))
+    (with-output-to-string (stream)
+      (format stream
+              ";; Lisp scaffold derived from Mech execution IR + generated SCXML chart.~%")
+      (dolist (operation operations)
+        (format stream
+                ";; Mech operation line ~A: ~A ~{~A~^ ~}~%"
+                (or (getf operation :line-number) "n/a")
+                (or (getf operation :operation) "OP")
+                (or (getf operation :arguments) '())))
+      (format stream
+              ";; SCXML chart name: ~A~%"
+              chart-name)
+      (format stream
+              "(let* ((session *)~%")
+      (format stream
+              "       (normalized-neighborhood ~S)~%"
+              normalized-neighborhood)
+      (format stream
+              "       (count ~S))~%"
+              count-value)
+      (write-line "  (labels ((rita-links (bag page)" stream)
+      (write-line "             (dolist (link-title (getf page :links))" stream)
+      (write-line "               (incf (gethash link-title bag 0)))" stream)
+      (write-line "             bag)" stream)
+      (write-line "           (rita-bag-add-all (bag pages)" stream)
+      (write-line "             (dolist (page (or pages '()))" stream)
+      (write-line "               (rita-links bag page))" stream)
+      (write-line "             bag)" stream)
+      (write-line "           (rita-bag->tally-entries (bag)" stream)
+      (write-line "             (loop for title being the hash-keys in bag" stream)
+      (write-line "                   using (hash-value item-count)" stream)
+      (write-line "                   collect (list :title title :count item-count)))" stream)
+      (write-line "           (rita-desc (left right)" stream)
+      (write-line "             (let ((left-count (or (getf left :count) 0))" stream)
+      (write-line "                   (right-count (or (getf right :count) 0))" stream)
+      (write-line "                   (left-title (or (getf left :title) \"\"))" stream)
+      (write-line "                   (right-title (or (getf right :title) \"\")))" stream)
+      (write-line "               (or (> left-count right-count)" stream)
+      (write-line "                   (and (= left-count right-count)" stream)
+      (write-line "                        (string< left-title right-title)))))" stream)
+      (write-line "           (rita-report (entry)" stream)
+      (write-line "             (list :title (getf entry :title)" stream)
+      (write-line "                   :count (getf entry :count)))" stream)
+      (write-line "           (rita-popular (state count)" stream)
+      (write-line "             (let* ((bag (make-hash-table :test #'equal))" stream)
+      (write-line "                    (neighborhood (or (getf state :neighborhood) '())))" stream)
+      (write-line "               (rita-bag-add-all bag neighborhood)" stream)
+      (write-line "               (let* ((tally (sort (rita-bag->tally-entries bag) #'rita-desc))" stream)
+      (write-line "                      (bounded-count (max 0 (or count 0)))" stream)
+      (write-line "                      (top (subseq tally 0 (min (length tally) bounded-count)))" stream)
+      (write-line "                      (items (mapcar #'rita-report top))" stream)
+      (write-line "                      (return-value (format nil \"~D linked pages\" (length tally))))" stream)
+      (write-line "                 (setf (getf state :items) items)" stream)
+      (write-line "                 (values return-value state items))))" stream)
+      (write-line "           (run-rita-popular-mech (&key (neighborhood normalized-neighborhood) (count count))" stream)
+      (write-line "             (let ((state (list :neighborhood (copy-tree neighborhood) :items nil)))" stream)
+      (write-line "               (rita-popular state count))))" stream)
+      (write-line "    (multiple-value-bind (return-value final-state state-items)" stream)
+      (write-line "        (run-rita-popular-mech)" stream)
+      (write-line "      (declare (ignore final-state))" stream)
+      (write-line "      ;; SCXML runner orchestrates the same Mech execution path from IR-derived chart states." stream)
+      (write-line "      (let* ((execution-input (hyperdoc::snippet-playground-session-mech-execution-input-of session))" stream)
+      (write-line "             (execution-ir (hyperdoc::snippet-playground-session-mech-execution-ir-of session))" stream)
+      (write-line "             (scxml-chart (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of session))" stream)
+      (write-line "             (lefty-run (hyperdoc::run-lefty-mech-execution execution-input))" stream)
+      (write-line "             (rita-run (hyperdoc::run-rita-mech-execution execution-input))" stream)
+      (write-line "             (equivalence (hyperdoc::make-mech-equivalence-report lefty-run rita-run))" stream)
+      (write-line "             (scxml-run (hyperdoc::run-mech-scxml-execution scxml-chart execution-input execution-ir lefty-run rita-run equivalence)))" stream)
+      (write-line "        (setf (hyperdoc::snippet-playground-session-derived-items-of session) state-items)" stream)
+      (format stream
+              "        (list :operation ~S~%"
+              operation-name)
+      (write-line "              :output-path \"state.items\"" stream)
+      (write-line "              :return-value return-value" stream)
+      (write-line "              :state-items state-items" stream)
+      (write-line "              :scxml-final-state (getf (hyperdoc::mech-run-result-final-state-of scxml-run) :final-state)" stream)
+      (write-line "              :scxml-done-p (getf (hyperdoc::mech-run-result-final-state-of scxml-run) :done-p)" stream)
+      (write-line "              :scxml-trace (hyperdoc::mech-run-result-trace-of scxml-run))))))" stream))))
+
+(defun make-mech-lisp-scaffold-source
+    (ir execution-input transformation-ir scxml-chart scxml-run-result
+     equivalence-report code)
+  (let* ((source
+           (if (and execution-input
+                    (string-equal
+                     (or (mech-execution-input-code-operation-name-of
+                          execution-input)
+                         "")
+                     "popular"))
+               (mech-lisp-scaffold-source-from-ir
+                ir
+                execution-input
+                scxml-chart
+                scxml-run-result)
+               (and code
+                    (snippet-playground-lisp-scaffold nil code)))))
+    (make-instance
+     'mech-lisp-scaffold-source
+     :id (format nil "mech-lisp-scaffold-source/~A"
+                 (or (and execution-input (id-of execution-input))
+                     "unknown"))
+     :title "Mech-derived Lisp scaffold source"
+     :summary
+     "Lisp scaffold derived from Mech execution IR, generated SCXML chart, and Rita semantic functions."
+     :source source
+     :execution-input execution-input
+     :transformation-ir transformation-ir
+     :scxml-execution-chart scxml-chart
+     :scxml-run-result scxml-run-result
+     :equivalence-report equivalence-report
+     :findings
+     (list
+      "Scaffold source is generated from Mech execution IR and SCXML orchestration, not a static JavaScript excerpt."
+      "Rita semantic functions and a Mech runner are included in the scaffold source."))))
+
 (defun snippet-comparison-region-raw-source
     (content-key mech code lisp-source)
   (ecase content-key
@@ -4270,8 +5195,9 @@
 
 (defun make-snippet-comparison-surface
     (&key status source-label mech code lisp-source execution-interface
-       transformation-unit execution-input lefty-run-result
+       transformation-unit mech-execution-ir execution-input lefty-run-result
        rita-run-result equivalence-report transformation-ir
+       mech-scxml-execution-chart scxml-run-result mech-lisp-scaffold-source
        origin-pane-id pending-pane-id
        failure-classification)
   (let* ((layout-artifact (snippet-comparison-layout-artifact))
@@ -4324,11 +5250,15 @@
      :right-code-region right-region
      :execution-interface execution-interface
      :transformation-unit transformation-unit
+     :mech-execution-ir mech-execution-ir
      :execution-input execution-input
      :lefty-run-result lefty-run-result
      :rita-run-result rita-run-result
      :equivalence-report equivalence-report
      :transformation-ir transformation-ir
+     :mech-scxml-execution-chart mech-scxml-execution-chart
+     :scxml-run-result scxml-run-result
+     :mech-lisp-scaffold-source mech-lisp-scaffold-source
      :lifecycle-run
      (make-snippet-comparison-surface-lifecycle-run
       :status status
@@ -4382,7 +5312,8 @@
 
 (defun snippet-playground-findings
     (selected-mech selected-code execution-interface transformation-unit
-     equivalence-report)
+     equivalence-report mech-execution-ir mech-scxml-execution-chart
+     scxml-run-result mech-lisp-scaffold-source)
   (let ((findings '()))
     (unless selected-mech
       (push "No Mech snippet was recognized in the current origin surface." findings))
@@ -4401,10 +5332,23 @@
     (when transformation-unit
       (push "Constructed a snippet transformation unit as the durable inspectable artifact."
             findings))
+    (when mech-execution-ir
+      (push "Parsed Mech snippet operations into a Mech execution IR with click-group and provenance tracking."
+            findings))
+    (when mech-scxml-execution-chart
+      (push "Generated an executable SCXML chart from the Mech execution IR operation sequence."
+            findings))
+    (when scxml-run-result
+      (push (format nil "SCXML orchestration run recorded explicit status ~A."
+                    (mech-run-result-status-of scxml-run-result))
+            findings))
     (when equivalence-report
       (push (if (mech-equivalence-report-equal-p equivalence-report)
                 "Recorded a Lefty/Rita execution equivalence report for state.items."
                 "Recorded a Lefty/Rita execution report with explicit mismatches or unsupported constructs.")
+            findings))
+    (when mech-lisp-scaffold-source
+      (push "Lisp scaffold source is derived from Mech IR + generated SCXML chart + Rita semantic functions."
             findings))
     (nreverse findings)))
 
@@ -4540,12 +5484,16 @@
          (selected-mech nil)
          (selected-code nil)
          (execution-interface nil)
+         (mech-execution-ir nil)
          (transformation-unit nil)
          (mech-execution-input nil)
          (lefty-run-result nil)
          (rita-run-result nil)
          (equivalence-report nil)
          (transformation-ir nil)
+         (mech-scxml-execution-chart nil)
+         (scxml-run-result nil)
+         (mech-lisp-scaffold-source nil)
          (comparison-surface nil)
          (lefty-projection nil)
          (rita-projection nil)
@@ -4603,11 +5551,17 @@
                                        rita-projection))
                                  :execution-interface execution-interface
                                  :transformation-unit transformation-unit
+                                 :mech-execution-ir mech-execution-ir
                                  :execution-input mech-execution-input
                                  :lefty-run-result lefty-run-result
                                  :rita-run-result rita-run-result
                                  :equivalence-report equivalence-report
                                  :transformation-ir transformation-ir
+                                 :mech-scxml-execution-chart
+                                 mech-scxml-execution-chart
+                                 :scxml-run-result scxml-run-result
+                                 :mech-lisp-scaffold-source
+                                 mech-lisp-scaffold-source
                                  :origin-pane-id origin-pane-id
                                  :pending-pane-id pending-pane-id
                                  :failure-classification failure-classification)))))
@@ -4641,12 +5595,17 @@
                      :selected-mech selected-mech
                      :selected-code selected-code
                      :execution-interface execution-interface
+                     :mech-execution-ir mech-execution-ir
                      :transformation-unit transformation-unit
                      :mech-execution-input mech-execution-input
                      :lefty-run-result lefty-run-result
                      :rita-run-result rita-run-result
                      :equivalence-report equivalence-report
                      :transformation-ir transformation-ir
+                     :mech-scxml-execution-chart
+                     mech-scxml-execution-chart
+                     :scxml-run-result scxml-run-result
+                     :mech-lisp-scaffold-source mech-lisp-scaffold-source
                      :authored-artifact authored-artifact
                      :behavior-artifact behavior-artifact
                      :layout-artifact layout-artifact
@@ -4669,7 +5628,11 @@
                                 selected-code
                                 execution-interface
                                 transformation-unit
-                                equivalence-report)))
+                                equivalence-report
+                                mech-execution-ir
+                                mech-scxml-execution-chart
+                                scxml-run-result
+                                mech-lisp-scaffold-source)))
                   (object
                     (apply #'make-instance
                            class
@@ -4697,15 +5660,20 @@
                       :recognized-code-snippets recognized-code-snippets
                       :selected-mech selected-mech
                       :selected-code selected-code
-                      :execution-interface execution-interface
-                      :transformation-unit transformation-unit
-                      :mech-execution-input mech-execution-input
-                      :lefty-run-result lefty-run-result
-                      :rita-run-result rita-run-result
-                      :equivalence-report equivalence-report
-                      :transformation-ir transformation-ir
-                      :result-object (and (eq status :ready) object)
-                      :failure-object (unless (eq status :ready) object))))
+                     :execution-interface execution-interface
+                     :mech-execution-ir mech-execution-ir
+                     :transformation-unit transformation-unit
+                     :mech-execution-input mech-execution-input
+                     :lefty-run-result lefty-run-result
+                     :rita-run-result rita-run-result
+                     :equivalence-report equivalence-report
+                     :transformation-ir transformation-ir
+                     :mech-scxml-execution-chart
+                     mech-scxml-execution-chart
+                     :scxml-run-result scxml-run-result
+                     :mech-lisp-scaffold-source mech-lisp-scaffold-source
+                     :result-object (and (eq status :ready) object)
+                     :failure-object (unless (eq status :ready) object))))
                (setf (snippet-playground-session-state-machine-run-of object)
                      run))
              object)))
@@ -4843,11 +5811,46 @@
                    :provider-kind provider-kind
                    :source-label resolved-source-label
                    :context-view-title context-view-title))
+            (setf mech-execution-input
+                  (make-mech-execution-input
+                   selected-mech
+                   selected-code
+                   execution-interface
+                   :neighborhood-input execution-neighborhood-input))
+            (setf mech-execution-ir
+                  (make-mech-execution-ir mech-execution-input))
+            (setf mech-scxml-execution-chart
+                  (mech-ir-to-scxml-chart mech-execution-ir))
+            (multiple-value-setq (lefty-run-result
+                                  rita-run-result
+                                  equivalence-report
+                                  scxml-run-result)
+              (run-mech-scxml-equivalence-orchestration
+               mech-execution-input
+               mech-execution-ir
+               mech-scxml-execution-chart))
+            (setf transformation-ir
+                  (make-mech-state-items-ir
+                   mech-execution-input
+                   equivalence-report))
+            (setf mech-lisp-scaffold-source
+                  (make-mech-lisp-scaffold-source
+                   mech-execution-ir
+                   mech-execution-input
+                   transformation-ir
+                   mech-scxml-execution-chart
+                   scxml-run-result
+                   equivalence-report
+                   selected-code))
             (setf rita-projection
                   (make-snippet-rita-projection
                    selected-mech
                    selected-code
-                   execution-interface))
+                   execution-interface
+                   :scaffold-source
+                   (and mech-lisp-scaffold-source
+                        (mech-lisp-scaffold-source-source-of
+                         mech-lisp-scaffold-source))))
             (setf transformation-unit
                   (make-snippet-transformation-unit
                    selected-mech
@@ -4855,30 +5858,19 @@
                    execution-interface
                    lefty-projection
                    rita-projection))
-            (setf mech-execution-input
-                  (make-mech-execution-input
-                   selected-mech
-                   selected-code
-                   execution-interface
-                   :neighborhood-input execution-neighborhood-input))
-            (setf lefty-run-result
-                  (run-lefty-mech-execution mech-execution-input))
-            (setf rita-run-result
-                  (run-rita-mech-execution mech-execution-input))
-            (setf equivalence-report
-                  (make-mech-equivalence-report
-                   lefty-run-result
-                   rita-run-result))
-            (setf transformation-ir
-                  (make-mech-state-items-ir
-                   mech-execution-input
-                   equivalence-report))
             (note-evidence
              :building-session
-             "Constructed execution interface, transformation unit, and bounded Lefty/Rita execution equivalence evidence."
+             "Constructed Mech IR, generated SCXML chart, and chart-orchestrated Lefty/Rita execution equivalence evidence."
              (list
               :execution_interface
               (snippet-playground-object-label execution-interface)
+              :mech_execution_ir
+              (snippet-playground-object-label mech-execution-ir)
+              :mech_scxml_execution_chart
+              (snippet-playground-object-label mech-scxml-execution-chart)
+              :scxml_status
+              (and scxml-run-result
+                   (mech-run-result-status-of scxml-run-result))
               :transformation_unit
               (snippet-playground-object-label transformation-unit)
               :mech_execution_input
@@ -5047,6 +6039,8 @@
                        (snippet-playground-session-selected-code-of session)
                        :execution-interface
                        (snippet-playground-session-execution-interface-of session)
+                       :mech-execution-ir
+                       (snippet-playground-session-mech-execution-ir-of session)
                        :transformation-unit
                        (snippet-playground-session-transformation-unit-of
                         session)
@@ -5062,6 +6056,14 @@
                         session)
                        :transformation-ir
                        (snippet-playground-session-transformation-ir-of
+                        session)
+                       :mech-scxml-execution-chart
+                       (snippet-playground-session-mech-scxml-execution-chart-of
+                        session)
+                       :scxml-run-result
+                       (snippet-playground-session-scxml-run-result-of session)
+                       :mech-lisp-scaffold-source
+                       (snippet-playground-session-mech-lisp-scaffold-source-of
                         session)
                        :authored-artifact
                        (snippet-playground-session-authored-artifact-of session)
@@ -5229,6 +6231,12 @@
 (defun snippet-comparison-render-execution-equivalence (surface)
   (let ((execution-input
           (snippet-comparison-surface-execution-input-of surface))
+        (mech-execution-ir
+          (snippet-comparison-surface-mech-execution-ir-of surface))
+        (mech-scxml-execution-chart
+          (snippet-comparison-surface-mech-scxml-execution-chart-of surface))
+        (scxml-run-result
+          (snippet-comparison-surface-scxml-run-result-of surface))
         (lefty-run-result
           (snippet-comparison-surface-lefty-run-result-of surface))
         (rita-run-result
@@ -5236,16 +6244,121 @@
         (equivalence-report
           (snippet-comparison-surface-equivalence-report-of surface))
         (transformation-ir
-          (snippet-comparison-surface-transformation-ir-of surface)))
+          (snippet-comparison-surface-transformation-ir-of surface))
+        (mech-lisp-scaffold-source
+          (snippet-comparison-surface-mech-lisp-scaffold-source-of surface)))
     (html-inspector-views:html
       (:div :class "hyperdoc-snippet-execution-equivalence"
             (:h3 "Execution equivalence")
             (:table :class "inspector-table"
                     (maybe-object-ref-row "Execution input" execution-input)
+                    (maybe-object-ref-row "Mech execution IR" mech-execution-ir)
+                    (maybe-object-ref-row "Generated SCXML chart"
+                                          mech-scxml-execution-chart)
+                    (maybe-object-ref-row "SCXML run result" scxml-run-result)
                     (maybe-object-ref-row "Lefty run result" lefty-run-result)
                     (maybe-object-ref-row "Rita run result" rita-run-result)
                     (maybe-object-ref-row "Equivalence report" equivalence-report)
-                    (maybe-object-ref-row "Shared IR" transformation-ir))
+                    (maybe-object-ref-row "Shared IR" transformation-ir)
+                    (maybe-object-ref-row "Mech-derived Lisp scaffold source"
+                                          mech-lisp-scaffold-source))
+            (if mech-execution-ir
+                (html-inspector-views:html
+                  (:h4 "Parsed Mech operations")
+                  (:table :class "inspector-table"
+                          (snippet-playground-status-table-row
+                           "Click groups"
+                           (length
+                            (or (mech-execution-ir-click-groups-of
+                                 mech-execution-ir)
+                                '())))
+                          (snippet-playground-status-table-row
+                           "Required inputs"
+                           (length
+                            (or (mech-execution-ir-required-inputs-of
+                                 mech-execution-ir)
+                                '())))
+                          (snippet-playground-status-table-row
+                           "Code invocations"
+                           (length
+                            (or (mech-execution-ir-code-invocations-of
+                                 mech-execution-ir)
+                                '())))
+                          (snippet-playground-status-table-row
+                           "Preview output paths"
+                           (length
+                            (or (mech-execution-ir-preview-output-paths-of
+                                 mech-execution-ir)
+                                '())))
+                          (snippet-playground-status-table-row
+                           "Unsupported operations"
+                           (length
+                            (or (mech-execution-ir-unsupported-operations-of
+                                 mech-execution-ir)
+                                '()))))
+                  (:table :class "inspector-table"
+                          (:tr (:th "Line")
+                               (:th "Operation")
+                               (:th "Arguments")
+                               (:th "Click group")
+                               (:th "State id"))
+                          (dolist (operation
+                                   (or (mech-execution-ir-ordered-operations-of
+                                        mech-execution-ir)
+                                       '()))
+                            (html-inspector-views:html
+                              (:tr
+                               (:td (html-inspector-views:esc
+                                     (format nil "~A"
+                                             (or (getf operation :line-number)
+                                                 "n/a"))))
+                               (:td (html-inspector-views:esc
+                                     (or (getf operation :operation) "")))
+                               (:td (html-inspector-views:esc
+                                     (format nil "~{~A~^ ~}"
+                                             (or (getf operation :arguments)
+                                                 '()))))
+                               (:td (html-inspector-views:esc
+                                     (format nil "~A"
+                                             (or (getf operation :click-group)
+                                                 "n/a"))))
+                               (:td (html-inspector-views:esc
+                                     (or (getf operation :state-id) ""))))))))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Mech execution IR is unavailable."))))
+            (if mech-scxml-execution-chart
+                (html-inspector-views:html
+                  (:h4 "Generated SCXML chart")
+                  (:table :class "inspector-table"
+                          (snippet-playground-status-table-row
+                           "Chart name"
+                           (mech-scxml-execution-chart-name-of
+                            mech-scxml-execution-chart))
+                          (snippet-playground-status-table-row
+                           "Initial state"
+                           (mech-scxml-execution-chart-initial-state-of
+                            mech-scxml-execution-chart))
+                          (snippet-playground-status-table-row
+                           "Terminal states"
+                           (mech-scxml-execution-chart-terminal-states-of
+                            mech-scxml-execution-chart))
+                          (snippet-playground-status-table-row
+                           "Failure states"
+                           (mech-scxml-execution-chart-failure-states-of
+                            mech-scxml-execution-chart))
+                          (snippet-playground-status-table-row
+                           "Events"
+                           (mech-scxml-execution-chart-events-of
+                            mech-scxml-execution-chart)))
+                  (:h5 "SCXML source")
+                  (snippet-source-pre
+                   (snippet-playground-value-or-na
+                    (mech-scxml-execution-chart-scxml-text-of
+                     mech-scxml-execution-chart))))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Generated SCXML chart is unavailable."))))
             (if execution-input
                 (html-inspector-views:html
                   (:h4 "Execution input")
@@ -5270,6 +6383,9 @@
                 (html-inspector-views:html
                   (:p (html-inspector-views:esc
                        "Execution input is unavailable."))))
+            (snippet-comparison-render-mech-run-result
+             "SCXML run"
+             scxml-run-result)
             (snippet-comparison-render-mech-run-result
              "Lefty run"
              lefty-run-result)
@@ -5351,7 +6467,17 @@
                      transformation-ir))))
                 (html-inspector-views:html
                   (:p (html-inspector-views:esc
-                       "Shared IR is unavailable."))))))))
+                       "Shared IR is unavailable."))))
+            (if mech-lisp-scaffold-source
+                (html-inspector-views:html
+                  (:h4 "Mech-derived Lisp scaffold")
+                  (snippet-source-pre
+                   (or (mech-lisp-scaffold-source-source-of
+                        mech-lisp-scaffold-source)
+                       "")))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Mech-derived Lisp scaffold source is unavailable."))))))))
 
 (defun snippet-comparison-render-region-style (region-spec)
   (format nil
@@ -6174,6 +7300,98 @@
        (snippet-playground-value-or-na
         (mech-state-items-ir-operation-summary-of ir))))))
 
+(html-inspector-views:defview mech-execution-ir-summary
+    (ir mech-execution-ir)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of ir)))
+      (:table :class "inspector-table"
+              (maybe-object-ref-row
+               "Source Mech snippet"
+               (mech-execution-ir-source-mech-of ir))
+              (snippet-playground-status-table-row
+               "Operation count"
+               (length (or (mech-execution-ir-ordered-operations-of ir) '())))
+              (snippet-playground-status-table-row
+               "Click groups"
+               (length (or (mech-execution-ir-click-groups-of ir) '())))
+              (snippet-playground-status-table-row
+               "Required inputs"
+               (mech-execution-ir-required-inputs-of ir))
+              (snippet-playground-status-table-row
+               "Code invocations"
+               (mech-execution-ir-code-invocations-of ir))
+              (snippet-playground-status-table-row
+               "Preview output paths"
+               (mech-execution-ir-preview-output-paths-of ir))
+              (snippet-playground-status-table-row
+               "Unsupported operations"
+               (mech-execution-ir-unsupported-operations-of ir)))
+      (:h3 "Ordered operations")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-execution-ir-ordered-operations-of ir))))))
+
+(html-inspector-views:defview mech-scxml-execution-chart-summary
+    (chart mech-scxml-execution-chart)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of chart)))
+      (:table :class "inspector-table"
+              (snippet-playground-status-table-row
+               "Chart name"
+               (mech-scxml-execution-chart-name-of chart))
+              (snippet-playground-status-table-row
+               "Initial state"
+               (mech-scxml-execution-chart-initial-state-of chart))
+              (snippet-playground-status-table-row
+               "Terminal states"
+               (mech-scxml-execution-chart-terminal-states-of chart))
+              (snippet-playground-status-table-row
+               "Failure states"
+               (mech-scxml-execution-chart-failure-states-of chart))
+              (snippet-playground-status-table-row
+               "Events"
+               (mech-scxml-execution-chart-events-of chart))
+              (maybe-object-ref-row
+               "Execution IR"
+               (mech-scxml-execution-chart-execution-ir-of chart))
+              (maybe-object-ref-row
+               "Machine definition"
+               (mech-scxml-execution-chart-machine-definition-of chart))
+              (maybe-object-ref-row
+               "Parsed SCXML chart"
+               (mech-scxml-execution-chart-chart-of chart)))
+      (:h3 "SCXML source")
+      (snippet-source-pre
+       (snippet-playground-value-or-na
+        (mech-scxml-execution-chart-scxml-text-of chart))))))
+
+(html-inspector-views:defview mech-lisp-scaffold-source-summary
+    (source mech-lisp-scaffold-source)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (summary-of source)))
+      (:table :class "inspector-table"
+              (maybe-object-ref-row
+               "Execution input"
+               (mech-lisp-scaffold-source-execution-input-of source))
+              (maybe-object-ref-row
+               "Transformation IR"
+               (mech-lisp-scaffold-source-transformation-ir-of source))
+              (maybe-object-ref-row
+               "SCXML chart"
+               (mech-lisp-scaffold-source-scxml-execution-chart-of source))
+              (maybe-object-ref-row
+               "SCXML run result"
+               (mech-lisp-scaffold-source-scxml-run-result-of source))
+              (maybe-object-ref-row
+               "Equivalence report"
+               (mech-lisp-scaffold-source-equivalence-report-of source)))
+      (:h3 "Scaffold source")
+      (snippet-source-pre
+       (or (mech-lisp-scaffold-source-source-of source) "")))))
+
 (html-inspector-views:defview snippet-comparison-region-summary
     (region snippet-comparison-region)
   (html-inspector-views:html-view :title "Summary" :priority 1
@@ -6235,7 +7453,21 @@
                (snippet-comparison-surface-left-code-region-of surface))
               (maybe-object-ref-row
                "Right code region"
-               (snippet-comparison-surface-right-code-region-of surface)))
+               (snippet-comparison-surface-right-code-region-of surface))
+              (maybe-object-ref-row
+               "Mech execution IR"
+               (snippet-comparison-surface-mech-execution-ir-of surface))
+              (maybe-object-ref-row
+               "Mech SCXML chart"
+               (snippet-comparison-surface-mech-scxml-execution-chart-of
+                surface))
+              (maybe-object-ref-row
+               "SCXML run result"
+               (snippet-comparison-surface-scxml-run-result-of surface))
+              (maybe-object-ref-row
+               "Mech-derived Lisp scaffold source"
+               (snippet-comparison-surface-mech-lisp-scaffold-source-of
+                surface)))
       (:h3 "Findings")
       (:ul
        (dolist (finding (snippet-comparison-surface-findings-of surface))
@@ -6416,6 +7648,9 @@
                "Execution interface"
                (snippet-playground-session-execution-interface-of session))
               (maybe-object-ref-row
+               "Mech execution IR"
+               (snippet-playground-session-mech-execution-ir-of session))
+              (maybe-object-ref-row
                "Transformation unit"
                (snippet-playground-session-transformation-unit-of session))
               (maybe-object-ref-row
@@ -6433,6 +7668,15 @@
               (maybe-object-ref-row
                "Shared IR"
                (snippet-playground-session-transformation-ir-of session))
+              (maybe-object-ref-row
+               "Mech SCXML chart"
+               (snippet-playground-session-mech-scxml-execution-chart-of session))
+              (maybe-object-ref-row
+               "SCXML run result"
+               (snippet-playground-session-scxml-run-result-of session))
+              (maybe-object-ref-row
+               "Mech-derived Lisp scaffold source"
+               (snippet-playground-session-mech-lisp-scaffold-source-of session))
               (maybe-object-ref-row
                "Authored artifact"
                (snippet-playground-session-authored-artifact-of session))
