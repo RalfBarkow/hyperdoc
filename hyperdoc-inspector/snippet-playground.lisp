@@ -4,6 +4,103 @@
   '("APPLY" "CLICK" "CODE" "DELTA" "EDGES" "EXTRACT" "GET" "NEIGHBORS"
     "PREVIEW" "PRINT" "PUT" "REVIEW" "SOLO" "WALK"))
 
+;; Exploratory Parsing precedent (narrowed for snippet-playground source import):
+;; explicit policy, incremental stats, discrepancy records with provenance,
+;; and optional DOT structure artifacts. The parser stage is inspectable
+;; import-cleanup, not a hidden extraction heuristic.
+(defstruct snippet-source-expansion-policy
+  (extract-html-pre-p t)
+  (decode-html-entities-p t)
+  (include-original-blocks-p t)
+  (recognize-pre-without-language-p t)
+  (collect-parser-stats-p t)
+  (collect-incremental-stats-p nil)
+  (stats-snapshot-period 10000)
+  (generate-graphviz-dot-p nil)
+  (graphviz-dot-snapshot-period 10000)
+  (record-discrepancies-p t)
+  (include-source-preview-p t)
+  (parser-engine-kind :direct)
+  (max-html-pre-blocks-per-source-block nil)
+  (html-pre-language-attributes
+    '("lang" "language" "data-lang" "data-language" "class"))
+  (minimum-pre-character-count 1))
+
+(defparameter *snippet-source-expansion-policy*
+  (make-snippet-source-expansion-policy))
+
+(defstruct snippet-source-expansion-report
+  (original-block-count 0)
+  (expanded-block-count 0)
+  (synthetic-block-count 0)
+  (synthetic-blocks nil)
+  (html-like-block-count 0)
+  (scanned-block-count 0)
+  (accepted-candidate-count 0)
+  (rejected-candidate-count 0)
+  (html-like-blocks-scanned 0)
+  (pre-regions-found 0)
+  (pre-regions-accepted 0)
+  (pre-regions-rejected 0)
+  (rejection-reasons nil)
+  (language-hints-observed nil)
+  (decode-count 0)
+  (warnings nil)
+  (discrepancies nil)
+  (parse-elapsed-millis nil)
+  (incremental-stats-snapshots nil)
+  (candidates nil)
+  (graphviz-dot-text nil)
+  (graphviz-dot-path nil)
+  (graphviz-dot-snapshots nil)
+  (parser-engine-kind :direct)
+  (parser-engine-identity nil)
+  (parser-engine-chart-name nil)
+  (parser-engine-trace nil)
+  (parser-engine-states-visited nil)
+  (parser-engine-events nil)
+  (policy-summary nil)
+  (notes nil))
+
+(defstruct snippet-source-parse-discrepancy
+  severity
+  kind
+  fact-summary
+  source-block-index
+  source-block-id
+  source-line-number
+  character-offset
+  evidence-value)
+
+(defstruct snippet-source-parse-context
+  policy
+  input-blocks
+  expanded-blocks
+  current-block-index
+  current-pre-index
+  synthetic-blocks
+  stats
+  warnings
+  trace
+  report)
+
+(defgeneric run-snippet-source-parser-engine (engine blocks policy))
+
+(defclass direct-snippet-source-parser-engine ()
+  ((identity :reader snippet-source-parser-engine-identity-of
+             :initarg :identity
+             :initform "snippet-source-parser/direct-html-pre-v1")))
+
+(defclass scxml-snippet-source-parser-engine ()
+  ((identity :reader snippet-source-parser-engine-identity-of
+             :initarg :identity
+             :initform "snippet-source-parser/scxml-html-pre-v1")
+   (chart :reader chart-of
+          :initarg :chart)
+   (compiled-runner :reader compiled-runner-of
+                    :initarg :compiled-runner
+                    :initform nil)))
+
 (defclass mech-snippet-step ()
   ((id :reader id-of
        :initarg :id)
@@ -439,6 +536,10 @@
      :reader snippet-playground-session-source-block-count-of
      :initarg :source-block-count
      :initform 0)
+   (source-expansion-report
+     :reader snippet-playground-session-source-expansion-report-of
+     :initarg :source-expansion-report
+     :initform nil)
    (recognized-mech-snippets
      :reader snippet-playground-session-recognized-mech-snippets-of
      :initarg :recognized-mech-snippets
@@ -1336,38 +1437,94 @@
   (1+ (count #\Newline source :end (min (length source)
                                         (max 0 offset)))))
 
-(defun extract-html-code-blocks (source)
+(defun extract-html-code-block-candidates-with-discrepancies
+    (source &key (decode-html-entities-p t))
   (loop with blocks = '()
+        with discrepancies = '()
         with start-token = "<pre"
-        with end-token = "</code></pre>"
+        with pre-end-token = "</pre>"
         with scan-start = 0
-        for index from 1
+        with index = 0
         for open-start = (search start-token source
                                  :test #'char-equal
                                  :start2 scan-start)
         while open-start
-        for pre-end = (position #\> source :start open-start)
-        for code-start = (and pre-end
-                              (search "<code" source
-                                      :test #'char-equal
-                                      :start2 (1+ pre-end)))
-        for code-end = (and code-start
-                            (position #\> source :start code-start))
-        for close-start = (and code-end
-                               (search end-token source
+        do (let* ((pre-end (position #\> source :start open-start))
+                  (line-number (source-line-number-at-offset source open-start)))
+             (cond
+               ((null pre-end)
+                (push (list :kind :malformed-pre
+                            :line-number line-number
+                            :character-offset open-start
+                            :summary "Missing closing > for <pre tag.")
+                      discrepancies)
+                (setf scan-start (+ open-start (length start-token))))
+               (t
+                (let ((close-pre-start (search pre-end-token source
+                                               :test #'char-equal
+                                               :start2 (1+ pre-end))))
+                  (if (null close-pre-start)
+                      (progn
+                        (push (list :kind :unterminated-html-region
+                                    :line-number line-number
+                                    :character-offset open-start
+                                    :summary "Missing closing </pre> tag.")
+                              discrepancies)
+                        (setf scan-start (1+ pre-end)))
+                      (let* ((code-start-candidate
+                               (search "<code" source
                                        :test #'char-equal
-                                       :start2 (1+ code-end)))
-        while close-start
-        for open-tag = (subseq source open-start (1+ code-end))
-        for raw-source = (subseq source (1+ code-end) close-start)
-        for decoded-source = (decode-html-code-block-text raw-source)
-        do (push (list :index index
-                       :line-number (source-line-number-at-offset source open-start)
-                       :open-tag open-tag
-                 :source (snippet-playground-trim-source decoded-source))
-                 blocks)
-           (setf scan-start (+ close-start (length end-token)))
-        finally (return (nreverse blocks))))
+                                       :start2 (1+ pre-end)))
+                             (code-start (and code-start-candidate
+                                              (< code-start-candidate
+                                                 close-pre-start)
+                                              code-start-candidate))
+                             (code-end (and code-start
+                                            (position #\> source
+                                                      :start code-start)))
+                             (close-code-start-candidate
+                               (and code-end
+                                    (search "</code>" source
+                                            :test #'char-equal
+                                            :start2 (1+ code-end))))
+                             (close-code-start
+                               (and close-code-start-candidate
+                                    (< close-code-start-candidate
+                                       close-pre-start)
+                                    close-code-start-candidate))
+                             (content-start (if code-end
+                                                (1+ code-end)
+                                                (1+ pre-end)))
+                             (content-end (or close-code-start close-pre-start))
+                             (open-tag (if code-end
+                                           (subseq source open-start
+                                                   (1+ code-end))
+                                           (subseq source open-start
+                                                   (1+ pre-end))))
+                             (raw-source (subseq source content-start content-end))
+                             (decoded-source
+                               (if decode-html-entities-p
+                                   (decode-html-code-block-text raw-source)
+                                   raw-source)))
+                        (incf index)
+                        (push (list :index index
+                                    :line-number line-number
+                                    :character-offset open-start
+                                    :open-tag open-tag
+                                    :source (snippet-playground-trim-source
+                                             decoded-source)
+                                    :raw-source raw-source)
+                              blocks)
+                        (setf scan-start
+                              (+ close-pre-start (length pre-end-token)))))))))
+        finally (return (values (nreverse blocks)
+                                (nreverse discrepancies)))))
+
+(defun extract-html-code-blocks (source &key (decode-html-entities-p t))
+  (nth-value 0
+             (extract-html-code-block-candidates-with-discrepancies
+              source
+              :decode-html-entities-p decode-html-entities-p)))
 
 (defun snippet-block-location-label (block)
   (or (getf block :location-label)
@@ -1378,7 +1535,7 @@
 
 (defun snippet-playground-candidate-fedwiki-story-item-p (item)
   (member (hyperbook/fedwiki::item-type-of item)
-          '(:code :mech :paragraph :markdown :reference)
+          '(:code :mech :paragraph :markdown :reference :html)
           :test #'eq))
 
 (defun extract-fedwiki-story-item-blocks (page)
@@ -1386,6 +1543,7 @@
         for item across (hyperbook/fedwiki::story-of page)
         for index from 1
         for item-type = (hyperbook/fedwiki::item-type-of item)
+        for story-item-id = (ignore-errors (id-of item))
         for source = (snippet-playground-trim-source
                       (hyperbook/fedwiki::text-of item))
         when (and (snippet-playground-candidate-fedwiki-story-item-p item)
@@ -1399,9 +1557,924 @@
                          :open-tag (format nil "fedwiki-~(~A~)" item-type)
                          :source source
                          :origin-surface-kind "fedwiki-page"
-                         :provider-kind "fedwiki-v1")
+                         :provider-kind "fedwiki-v1"
+                         :story-item-id story-item-id)
                    blocks)
         finally (return (nreverse blocks))))
+
+(defun snippet-source-expansion-policy-summary (policy)
+  (list
+   :extract_html_pre_p
+   (snippet-source-expansion-policy-extract-html-pre-p policy)
+   :decode_html_entities_p
+   (snippet-source-expansion-policy-decode-html-entities-p policy)
+   :include_original_blocks_p
+   (snippet-source-expansion-policy-include-original-blocks-p policy)
+   :recognize_pre_without_language_p
+   (snippet-source-expansion-policy-recognize-pre-without-language-p policy)
+   :collect_parser_stats_p
+   (snippet-source-expansion-policy-collect-parser-stats-p policy)
+   :collect_incremental_stats_p
+   (snippet-source-expansion-policy-collect-incremental-stats-p policy)
+   :stats_snapshot_period
+   (snippet-source-expansion-policy-stats-snapshot-period policy)
+   :generate_graphviz_dot_p
+   (snippet-source-expansion-policy-generate-graphviz-dot-p policy)
+   :graphviz_dot_snapshot_period
+   (snippet-source-expansion-policy-graphviz-dot-snapshot-period policy)
+   :record_discrepancies_p
+   (snippet-source-expansion-policy-record-discrepancies-p policy)
+   :include_source_preview_p
+   (snippet-source-expansion-policy-include-source-preview-p policy)
+   :parser_engine_kind
+   (snippet-source-expansion-policy-parser-engine-kind policy)
+   :max_html_pre_blocks_per_source_block
+   (snippet-source-expansion-policy-max-html-pre-blocks-per-source-block policy)
+   :html_pre_language_attributes
+   (copy-list
+    (snippet-source-expansion-policy-html-pre-language-attributes policy))
+   :minimum_pre_character_count
+   (snippet-source-expansion-policy-minimum-pre-character-count policy)))
+
+(defun snippet-playground-html-pre-source-block-p (block)
+  (let* ((source (or (getf block :source) ""))
+         (open-tag (or (getf block :open-tag) "")))
+    (and (not (snippet-playground-empty-string-p source))
+         (or (snippet-playground-string-contains-p source "<pre")
+             (snippet-playground-string-contains-p open-tag "html")
+             (snippet-playground-string-contains-p open-tag "markdown")))))
+
+(defun snippet-playground-html-pre-synthetic-block-p (block)
+  (eq (getf block :synthetic-kind) :html-pre))
+
+(defun snippet-playground-open-tag-attribute-value (open-tag attribute-name)
+  (when (and (stringp open-tag)
+             (stringp attribute-name))
+    (let* ((needle (format nil "~A=" attribute-name))
+           (match (search needle open-tag :test #'char-equal)))
+      (when match
+        (let* ((start (+ match (length needle)))
+               (cursor (or (position-if-not
+                            (lambda (char)
+                              (find char '(#\Space #\Tab)))
+                            open-tag
+                            :start start)
+                           (length open-tag))))
+          (when (< cursor (length open-tag))
+            (let ((first-char (char open-tag cursor)))
+              (if (or (char= first-char #\")
+                      (char= first-char #\'))
+                  (let ((end (position first-char open-tag :start (1+ cursor))))
+                    (and end
+                         (subseq open-tag (1+ cursor) end)))
+                  (let ((end (or (position-if
+                                  (lambda (char)
+                                    (or (find char '(#\Space #\Tab #\>))
+                                        (char= char #\/)))
+                                  open-tag
+                                  :start cursor)
+                                 (length open-tag))))
+                    (subseq open-tag cursor end))))))))))
+
+(defun snippet-playground-html-pre-language-hints (open-tag policy)
+  (let ((attributes
+          (snippet-source-expansion-policy-html-pre-language-attributes
+           policy)))
+    (loop for attribute-name in attributes
+          for value = (snippet-playground-open-tag-attribute-value
+                       open-tag
+                       attribute-name)
+          when (and value
+                    (not (snippet-playground-empty-string-p value)))
+            collect (list :attribute (string-downcase attribute-name)
+                          :value (string-downcase value)))))
+
+(defun snippet-playground-html-pre-open-tag-from-hints (hints)
+  (if hints
+      (format nil "~{~A~^ ~}"
+              (mapcar (lambda (hint)
+                        (getf hint :value))
+                      hints))
+      "html-pre"))
+
+(defun snippet-playground-synthetic-html-pre-labels-from-report (report)
+  (loop for synthetic-block in
+          (snippet-source-expansion-report-synthetic-blocks report)
+        collect (getf synthetic-block :synthetic_id)))
+
+(defun snippet-playground-recognized-synthetic-html-pre-labels (session)
+  (loop for snippet in
+          (snippet-playground-session-recognized-code-snippets-of session)
+        for label = (snippet-location-label-of snippet)
+        when (and label
+                  (search "html-pre/" label :test #'char=))
+          collect label))
+
+(defun snippet-source-parse-discrepancy->plist (discrepancy)
+  (list :severity
+        (snippet-source-parse-discrepancy-severity discrepancy)
+        :kind
+        (snippet-source-parse-discrepancy-kind discrepancy)
+        :fact_summary
+        (snippet-source-parse-discrepancy-fact-summary discrepancy)
+        :source_block_index
+        (snippet-source-parse-discrepancy-source-block-index discrepancy)
+        :source_block_id
+        (snippet-source-parse-discrepancy-source-block-id discrepancy)
+        :source_line_number
+        (snippet-source-parse-discrepancy-source-line-number discrepancy)
+        :character_offset
+        (snippet-source-parse-discrepancy-character-offset discrepancy)
+        :evidence_value
+        (snippet-source-parse-discrepancy-evidence-value discrepancy)))
+
+(defun snippet-source-parser-dot-escape-label (text)
+  (let ((escaped (or text "")))
+    (setf escaped
+          (snippet-playground-replace-all escaped "\\" "\\\\"))
+    (setf escaped
+          (snippet-playground-replace-all escaped "\"" "\\\""))
+    (setf escaped
+          (snippet-playground-replace-all escaped
+                                          (string #\Newline)
+                                          "\\n"))
+    escaped))
+
+(defun snippet-source-parser-report-graphviz-dot-text (blocks candidates)
+  (with-output-to-string (stream)
+    (format stream "digraph snippet_source_parser {~%")
+    (format stream "  rankdir=LR;~%")
+    (format stream "  node [shape=box, fontsize=10];~%")
+    (loop for block in blocks
+          for block-index = (or (getf block :index) 0)
+          for block-node = (format nil "source-block-~D" block-index)
+          for block-label = (snippet-source-parser-dot-escape-label
+                             (format nil "#~D ~A"
+                                     block-index
+                                     (or (snippet-block-location-label block)
+                                         "source block")))
+          do (format stream "  \"~A\" [label=\"~A\"];~%"
+                     block-node
+                     block-label))
+    (dolist (candidate candidates)
+      (let* ((parent-index (or (getf candidate :parent_block_index) 0))
+             (pre-ordinal (or (getf candidate :pre_ordinal) 0))
+             (candidate-node
+               (format nil "candidate-html-pre-~D-~D"
+                       parent-index
+                       pre-ordinal))
+             (candidate-label
+               (snippet-source-parser-dot-escape-label
+                (format nil "~A~%status=~A~%hint=~A~%lines=~A"
+                        (or (getf candidate :synthetic_id)
+                            candidate-node)
+                        (or (getf candidate :status) :unknown)
+                        (or (getf candidate :language_hint) "n/a")
+                        (or (getf candidate :line_count) 0))))
+             (parent-node (format nil "source-block-~D" parent-index))
+             (edge-label
+               (snippet-source-parser-dot-escape-label
+                (or (getf candidate :reason) "candidate"))))
+        (format stream "  \"~A\" [label=\"~A\", shape=note];~%"
+                candidate-node
+                candidate-label)
+        (format stream "  \"~A\" -> \"~A\" [label=\"~A\"];~%"
+                parent-node
+                candidate-node
+                edge-label)))
+    (format stream "}~%")))
+
+(defun snippet-playground-source-expansion-evidence (report)
+  (let ((effective-report
+          (or report
+              (make-snippet-source-expansion-report))))
+    (list
+     :source_block_count
+     (snippet-source-expansion-report-original-block-count effective-report)
+     :expanded_source_block_count
+     (snippet-source-expansion-report-expanded-block-count effective-report)
+     :synthetic_html_pre_candidate_count
+     (snippet-source-expansion-report-synthetic-block-count effective-report)
+     :html_like_block_count
+     (snippet-source-expansion-report-html-like-block-count effective-report)
+     :scanned_block_count
+     (snippet-source-expansion-report-scanned-block-count effective-report)
+     :accepted_candidate_count
+     (snippet-source-expansion-report-accepted-candidate-count effective-report)
+     :rejected_candidate_count
+     (snippet-source-expansion-report-rejected-candidate-count effective-report)
+     :synthetic_html_pre_candidate_labels
+     (snippet-playground-synthetic-html-pre-labels-from-report effective-report)
+     :html_like_blocks_scanned
+     (snippet-source-expansion-report-html-like-blocks-scanned effective-report)
+     :pre_regions_found
+     (snippet-source-expansion-report-pre-regions-found effective-report)
+     :pre_regions_accepted
+     (snippet-source-expansion-report-pre-regions-accepted effective-report)
+     :pre_regions_rejected
+     (snippet-source-expansion-report-pre-regions-rejected effective-report)
+     :parse_elapsed_millis
+     (snippet-source-expansion-report-parse-elapsed-millis effective-report)
+     :source_expansion_policy
+     (snippet-source-expansion-report-policy-summary effective-report)
+     :source_expansion_rejection_reasons
+     (snippet-source-expansion-report-rejection-reasons effective-report)
+     :source_expansion_language_hints
+     (snippet-source-expansion-report-language-hints-observed effective-report)
+     :source_expansion_decode_count
+     (snippet-source-expansion-report-decode-count effective-report)
+     :source_expansion_candidates
+     (snippet-source-expansion-report-candidates effective-report)
+     :source_expansion_discrepancies
+     (mapcar #'snippet-source-parse-discrepancy->plist
+             (snippet-source-expansion-report-discrepancies effective-report))
+     :source_expansion_incremental_stats_snapshots
+     (snippet-source-expansion-report-incremental-stats-snapshots
+      effective-report)
+     :source_expansion_graphviz_dot_text
+     (snippet-source-expansion-report-graphviz-dot-text effective-report)
+     :source_expansion_warnings
+     (snippet-source-expansion-report-warnings effective-report)
+     :source_parser_engine_kind
+     (snippet-source-expansion-report-parser-engine-kind effective-report)
+     :source_parser_engine_identity
+     (snippet-source-expansion-report-parser-engine-identity
+      effective-report)
+     :source_parser_engine_chart_name
+     (snippet-source-expansion-report-parser-engine-chart-name
+      effective-report)
+     :source_parser_engine_states
+     (snippet-source-expansion-report-parser-engine-states-visited
+      effective-report)
+     :source_parser_engine_events
+     (snippet-source-expansion-report-parser-engine-events effective-report)
+     :source_expansion_notes
+     (snippet-source-expansion-report-notes effective-report))))
+
+(defun parse-snippet-source-blocks-direct
+    (blocks &key (policy *snippet-source-expansion-policy*))
+  (let ((effective-policy (or policy *snippet-source-expansion-policy*))
+        (parse-start (snippet-playground-current-millis))
+        (expanded-blocks '())
+        (accepted-synthetic-entries '())
+        (candidate-entries '())
+        (notes '())
+        (warnings '())
+        (discrepancies '())
+        (rejection-reasons '())
+        (language-hints-observed '())
+        (html-like-block-count 0)
+        (scanned-block-count 0)
+        (pre-regions-found 0)
+        (pre-regions-accepted 0)
+        (pre-regions-rejected 0)
+        (decode-count 0)
+        (processed-node-count 0)
+        (incremental-stats-snapshots '())
+        (graphviz-dot-snapshots '())
+        (expanded-index 0))
+    (labels
+        ((append-expanded-block (block)
+           (let ((expanded-block (copy-list block)))
+             (setf (getf expanded-block :index) (incf expanded-index))
+             (push expanded-block expanded-blocks)))
+         (note (message)
+           (push message notes))
+         (record-warning (message)
+           (push message warnings))
+         (incf-table-count (key table)
+           (let ((entry (assoc key table :test #'equal)))
+             (if entry
+                 (incf (cdr entry))
+                 (push (cons key 1) table))
+             table))
+         (record-discrepancy
+             (severity kind fact-summary
+              &key block source-line-number character-offset evidence-value)
+           (when (snippet-source-expansion-policy-record-discrepancies-p
+                  effective-policy)
+             (push
+              (make-snippet-source-parse-discrepancy
+               :severity severity
+               :kind kind
+               :fact-summary fact-summary
+               :source-block-index (and block (getf block :index))
+               :source-block-id (and block (getf block :id))
+               :source-line-number source-line-number
+               :character-offset character-offset
+               :evidence-value evidence-value)
+              discrepancies)))
+         (record-rejection
+             (reason discrepancy-kind message
+              &key block source-line-number character-offset evidence-value)
+           (setf rejection-reasons
+                 (incf-table-count reason rejection-reasons))
+           (incf pre-regions-rejected)
+           (record-discrepancy :warning
+                               discrepancy-kind
+                               message
+                               :block block
+                               :source-line-number source-line-number
+                               :character-offset character-offset
+                               :evidence-value evidence-value))
+         (record-language-hints (hints)
+           (dolist (hint hints)
+             (let ((key (list :attribute (getf hint :attribute)
+                              :value (getf hint :value))))
+               (setf language-hints-observed
+                     (incf-table-count key language-hints-observed)))))
+         (maybe-record-incremental-snapshot (kind)
+           (when (and (snippet-source-expansion-policy-collect-parser-stats-p
+                       effective-policy)
+                      (snippet-source-expansion-policy-collect-incremental-stats-p
+                       effective-policy))
+             (let ((period
+                     (max 1
+                          (or (snippet-source-expansion-policy-stats-snapshot-period
+                               effective-policy)
+                              1))))
+               (when (or (= processed-node-count 1)
+                         (zerop (mod processed-node-count period)))
+                 (push (list :node_count processed-node-count
+                             :kind kind
+                             :original_block_count (length blocks)
+                             :expanded_block_count expanded-index
+                             :html_like_block_count html-like-block-count
+                             :scanned_block_count scanned-block-count
+                             :pre_regions_found pre-regions-found
+                             :accepted_candidate_count pre-regions-accepted
+                             :rejected_candidate_count pre-regions-rejected)
+                       incremental-stats-snapshots)))))
+         (maybe-record-graphviz-snapshot (kind)
+           (when (snippet-source-expansion-policy-generate-graphviz-dot-p
+                  effective-policy)
+             (let ((period
+                     (max 1
+                          (or (snippet-source-expansion-policy-graphviz-dot-snapshot-period
+                               effective-policy)
+                              1))))
+               (when (or (= processed-node-count 1)
+                         (zerop (mod processed-node-count period)))
+                 (push (list :node_count processed-node-count
+                             :kind kind
+                             :dot_text
+                             (snippet-source-parser-report-graphviz-dot-text
+                              blocks
+                              (nreverse candidate-entries)))
+                       graphviz-dot-snapshots)))))
+         (touch-node (kind)
+           (incf processed-node-count)
+           (maybe-record-incremental-snapshot kind)
+           (maybe-record-graphviz-snapshot kind))
+         (candidate-preview (source)
+           (when (snippet-source-expansion-policy-include-source-preview-p
+                  effective-policy)
+             (multiple-value-bind (preview)
+                 (snippet-playground-bounded-source-text source :limit 120)
+               preview)))
+         (record-candidate-entry
+             (parent-block parent-index parent-location-label pre-index
+              pre-source pre-char-count hinted-language hints reason accepted-p
+              pre-line-number pre-character-offset)
+           (let* ((synthetic-id
+                    (format nil "html-pre/~D/~D" parent-index pre-index))
+                  (synthetic-location-label
+                    (format nil "~A from ~A"
+                            synthetic-id
+                            parent-location-label))
+                  (line-count
+                    (max 1
+                         (1+ (count #\Newline pre-source))))
+                  (decoded-p
+                    (snippet-source-expansion-policy-decode-html-entities-p
+                     effective-policy))
+                  (entry
+                    (list
+                     :synthetic_id synthetic-id
+                     :location_label synthetic-location-label
+                     :parent_block_id (getf parent-block :id)
+                     :parent_story_item_id (getf parent-block :story-item-id)
+                     :parent_block_index parent-index
+                     :source_line_number pre-line-number
+                     :character_offset pre-character-offset
+                     :pre_ordinal pre-index
+                     :source_kind :html-pre
+                     :language_hint hinted-language
+                     :language_hint_attributes hints
+                     :accepted_p accepted-p
+                     :status (if accepted-p :accepted :rejected)
+                     :reason reason
+                     :decoded_entities_p decoded-p
+                     :character_count pre-char-count
+                     :line_count line-count
+                     :preview (candidate-preview pre-source)
+                     :parent_location_label parent-location-label)))
+             (push entry candidate-entries)
+             (when accepted-p
+               (push entry accepted-synthetic-entries)
+               (incf pre-regions-accepted))
+             entry)))
+      (dolist (block blocks)
+        (touch-node :source-block)
+        (let* ((html-pre-source-block-p
+                 (snippet-playground-html-pre-source-block-p block))
+               (include-original-p
+                 (or (not html-pre-source-block-p)
+                     (snippet-source-expansion-policy-include-original-blocks-p
+                      effective-policy))))
+          (when html-pre-source-block-p
+            (incf html-like-block-count))
+          (when include-original-p
+            (append-expanded-block block))
+          (when (and html-pre-source-block-p
+                     (not include-original-p))
+            (note (format nil
+                          "Skipped original HTML-like block #~D due to include_original_blocks_p = nil."
+                          (getf block :index))))
+          (cond
+            ((not html-pre-source-block-p)
+             nil)
+            ((not (snippet-source-expansion-policy-extract-html-pre-p
+                   effective-policy))
+             (record-warning
+              (format nil
+                      "HTML <pre> parsing disabled by policy for block #~D."
+                      (getf block :index))))
+            (t
+             (incf scanned-block-count)
+             (let* ((parent-index (getf block :index))
+                    (parent-line-number (or (getf block :line-number) 1))
+                    (parent-location-label (snippet-block-location-label block))
+                    (max-per-parent
+                      (snippet-source-expansion-policy-max-html-pre-blocks-per-source-block
+                       effective-policy))
+                    (min-char-count
+                      (max 0
+                           (or (snippet-source-expansion-policy-minimum-pre-character-count
+                                effective-policy)
+                               0)))
+                    (emitted-count 0)
+                    (source (or (getf block :source) ""))
+                    (pre-blocks '())
+                    (scan-discrepancies '()))
+               (multiple-value-setq (pre-blocks scan-discrepancies)
+                 (extract-html-code-block-candidates-with-discrepancies
+                  source
+                  :decode-html-entities-p
+                  (snippet-source-expansion-policy-decode-html-entities-p
+                   effective-policy)))
+               (incf pre-regions-found (length pre-blocks))
+               (when (snippet-source-expansion-policy-decode-html-entities-p
+                      effective-policy)
+                 (incf decode-count (length pre-blocks)))
+               (dolist (discrepancy scan-discrepancies)
+                 (let ((kind (getf discrepancy :kind))
+                       (line-number (+ parent-line-number
+                                       (max 0
+                                            (1- (or (getf discrepancy
+                                                         :line-number)
+                                                    1)))))
+                       (character-offset (getf discrepancy :character-offset))
+                       (summary (or (getf discrepancy :summary)
+                                    "Exploratory parser discrepancy.")))
+                   (record-warning
+                    (format nil
+                            "~A at block #~D line ~A offset ~A."
+                            summary
+                            (or parent-index "n/a")
+                            (or line-number "n/a")
+                            (or character-offset "n/a")))
+                   (record-discrepancy :warning
+                                       kind
+                                       summary
+                                       :block block
+                                       :source-line-number line-number
+                                       :character-offset character-offset
+                                       :evidence-value discrepancy)))
+               (loop for pre-block in pre-blocks
+                     for pre-index from 1
+                     for pre-line-number = (+ parent-line-number
+                                              (max 0
+                                                   (1- (or (getf pre-block
+                                                                 :line-number)
+                                                           1))))
+                     for pre-character-offset = (getf pre-block
+                                                      :character-offset)
+                     for pre-source = (snippet-playground-trim-source
+                                       (or (getf pre-block :source) ""))
+                     for pre-char-count = (length pre-source)
+                     for hints = (snippet-playground-html-pre-language-hints
+                                  (getf pre-block :open-tag)
+                                  effective-policy)
+                     for hinted-language = (and hints
+                                              (getf (first hints) :value))
+                     for allow-without-language-p =
+                       (snippet-source-expansion-policy-recognize-pre-without-language-p
+                        effective-policy)
+                     do (touch-node :pre-region)
+                        (record-language-hints hints)
+                        (cond
+                          ((and max-per-parent
+                                (>= emitted-count max-per-parent))
+                           (record-candidate-entry
+                            block
+                            parent-index
+                            parent-location-label
+                            pre-index
+                            pre-source
+                            pre-char-count
+                            hinted-language
+                            hints
+                            (format nil
+                                    "Rejected by max_html_pre_blocks_per_source_block (~D)."
+                                    max-per-parent)
+                            nil
+                            pre-line-number
+                            pre-character-offset)
+                           (record-rejection
+                            :max-per-parent
+                            :rejected-by-policy
+                            (format nil
+                                    "Rejected candidate ~D in block #~D by max_html_pre_blocks_per_source_block (~D)."
+                                    pre-index
+                                    parent-index
+                                    max-per-parent)
+                            :block block
+                            :source-line-number pre-line-number
+                            :character-offset pre-character-offset
+                            :evidence-value max-per-parent))
+                          ((< pre-char-count min-char-count)
+                           (record-candidate-entry
+                            block
+                            parent-index
+                            parent-location-label
+                            pre-index
+                            pre-source
+                            pre-char-count
+                            hinted-language
+                            hints
+                            (format nil
+                                    "Rejected by minimum_pre_character_count (~D)."
+                                    min-char-count)
+                            nil
+                            pre-line-number
+                            pre-character-offset)
+                           (record-rejection
+                            :minimum-pre-character-count
+                            (if (zerop pre-char-count)
+                                :empty-pre
+                                :rejected-by-policy)
+                            (format nil
+                                    "Rejected candidate ~D in block #~D by minimum_pre_character_count (~D): ~D chars."
+                                    pre-index
+                                    parent-index
+                                    min-char-count
+                                    pre-char-count)
+                            :block block
+                            :source-line-number pre-line-number
+                            :character-offset pre-character-offset
+                            :evidence-value pre-char-count))
+                          ((and (null hints)
+                                (not allow-without-language-p))
+                           (record-candidate-entry
+                            block
+                            parent-index
+                            parent-location-label
+                            pre-index
+                            pre-source
+                            pre-char-count
+                            hinted-language
+                            hints
+                            "Rejected because recognize_pre_without_language_p is nil and no policy-approved language hint was found."
+                            nil
+                            pre-line-number
+                            pre-character-offset)
+                           (record-rejection
+                            :missing-language-hint
+                            :ambiguous-language
+                            (format nil
+                                    "Rejected candidate ~D in block #~D because no policy-approved language hint was found."
+                                    pre-index
+                                    parent-index)
+                            :block block
+                            :source-line-number pre-line-number
+                            :character-offset pre-character-offset))
+                          (t
+                           (incf emitted-count)
+                           (let* ((reason
+                                    (if hints
+                                        (format nil
+                                                "Accepted with policy-approved language hint (~{~A~^, ~})."
+                                                (mapcar (lambda (hint)
+                                                          (getf hint :attribute))
+                                                        hints))
+                                        "Accepted as exploratory HTML <pre> candidate without language hint."))
+                                  (entry
+                                    (record-candidate-entry
+                                     block
+                                     parent-index
+                                     parent-location-label
+                                     pre-index
+                                     pre-source
+                                     pre-char-count
+                                     hinted-language
+                                     hints
+                                     reason
+                                     t
+                                     pre-line-number
+                                     pre-character-offset))
+                                  (synthetic-block
+                                    (list
+                                     :line-number
+                                     pre-line-number
+                                     :character-offset pre-character-offset
+                                     :location-label (getf entry :location_label)
+                                     :open-tag
+                                     (snippet-playground-html-pre-open-tag-from-hints
+                                      hints)
+                                     :source pre-source
+                                     :origin-surface-kind
+                                     (or (getf block :origin-surface-kind)
+                                         "html-source")
+                                     :provider-kind
+                                     (or (getf block :provider-kind)
+                                         "source-v1")
+                                     :synthetic-kind :html-pre
+                                     :synthetic-id (getf entry :synthetic_id)
+                                     :synthetic-parent-index parent-index
+                                     :synthetic-parent-id (getf block :id)
+                                     :synthetic-parent-story-item-id
+                                     (getf block :story-item-id)
+                                     :synthetic-parent-location-label
+                                     parent-location-label
+                                     :synthetic-source-line-number
+                                     pre-line-number
+                                     :synthetic-character-offset
+                                     pre-character-offset
+                                     :synthetic-language-hint hinted-language
+                                     :synthetic-language-hint-attributes hints
+                                     :synthetic-reason (getf entry :reason)
+                                     :synthetic-decoded-entities-p
+                                     (getf entry :decoded_entities_p)
+                                     :synthetic-character-count pre-char-count
+                                     :synthetic-line-count
+                                     (getf entry :line_count)
+                                     :synthetic-source-kind :html-pre
+                                     :synthetic-preview (getf entry :preview))))
+                             (append-expanded-block synthetic-block)))))))))))
+      (let* ((final-expanded-blocks (nreverse expanded-blocks))
+             (synthetic-blocks (nreverse accepted-synthetic-entries))
+             (all-candidates (nreverse candidate-entries))
+             (all-discrepancies (nreverse discrepancies))
+             (report-notes (nreverse notes))
+             (report-warnings (nreverse warnings))
+             (collect-stats-p
+               (snippet-source-expansion-policy-collect-parser-stats-p
+                effective-policy))
+             (elapsed
+               (and collect-stats-p
+                    (- (snippet-playground-current-millis) parse-start)))
+             (dot-text
+               (and (snippet-source-expansion-policy-generate-graphviz-dot-p
+                     effective-policy)
+                    (snippet-source-parser-report-graphviz-dot-text
+                     blocks
+                     all-candidates))))
+        (values
+         final-expanded-blocks
+         (make-snippet-source-expansion-report
+          :original-block-count (length blocks)
+          :expanded-block-count (length final-expanded-blocks)
+          :synthetic-block-count (length synthetic-blocks)
+          :synthetic-blocks synthetic-blocks
+          :html-like-block-count
+          (if collect-stats-p html-like-block-count 0)
+          :scanned-block-count
+          (if collect-stats-p scanned-block-count 0)
+          :accepted-candidate-count
+          (if collect-stats-p pre-regions-accepted 0)
+          :rejected-candidate-count
+          (if collect-stats-p pre-regions-rejected 0)
+          :html-like-blocks-scanned
+          (if collect-stats-p scanned-block-count 0)
+          :pre-regions-found
+          (if collect-stats-p pre-regions-found 0)
+          :pre-regions-accepted
+          (if collect-stats-p pre-regions-accepted 0)
+          :pre-regions-rejected
+          (if collect-stats-p pre-regions-rejected 0)
+          :rejection-reasons
+          (if collect-stats-p
+              (loop for (reason . count) in (nreverse rejection-reasons)
+                    collect (list :reason reason :count count))
+              nil)
+          :language-hints-observed
+          (if collect-stats-p
+              (loop for (hint . count) in (nreverse language-hints-observed)
+                    collect (list :attribute (getf hint :attribute)
+                                  :value (getf hint :value)
+                                  :count count))
+              nil)
+          :decode-count
+          (if collect-stats-p decode-count 0)
+          :warnings
+          (if collect-stats-p report-warnings nil)
+          :discrepancies
+          (if collect-stats-p all-discrepancies nil)
+          :parse-elapsed-millis elapsed
+          :incremental-stats-snapshots
+          (if collect-stats-p
+              (nreverse incremental-stats-snapshots)
+              nil)
+          :candidates
+          (if collect-stats-p all-candidates nil)
+          :graphviz-dot-text dot-text
+          :graphviz-dot-path nil
+          :graphviz-dot-snapshots
+          (if (and collect-stats-p
+                   (snippet-source-expansion-policy-generate-graphviz-dot-p
+                    effective-policy))
+              (nreverse graphviz-dot-snapshots)
+              nil)
+          :policy-summary
+          (snippet-source-expansion-policy-summary effective-policy)
+          :notes report-notes)))))
+
+(defparameter *snippet-source-parser-scxml-chart-string*
+  (format nil
+          "<scxml name=\"snippet-source-parser-html-pre-v1\" initial=\"initialize\">~%
+  <state id=\"initialize\">~%
+    <onentry><log label=\"initialize\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"scan-next-block\"/>~%
+  </state>~%
+  <state id=\"scan-next-block\">~%
+    <onentry><log label=\"scan-next-block\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"classify-block\"/>~%
+  </state>~%
+  <state id=\"classify-block\">~%
+    <onentry><log label=\"classify-block\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"scan-html-like-block\"/>~%
+  </state>~%
+  <state id=\"scan-html-like-block\">~%
+    <onentry><log label=\"scan-html-like-block\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"extract-next-pre\"/>~%
+  </state>~%
+  <state id=\"extract-next-pre\">~%
+    <onentry><log label=\"extract-next-pre\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"decode-entities\"/>~%
+  </state>~%
+  <state id=\"decode-entities\">~%
+    <onentry><log label=\"decode-entities\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"apply-policy\"/>~%
+  </state>~%
+  <state id=\"apply-policy\">~%
+    <onentry><log label=\"apply-policy\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"emit-synthetic-block\"/>~%
+  </state>~%
+  <state id=\"emit-synthetic-block\">~%
+    <onentry><log label=\"emit-synthetic-block\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"record-rejection\"/>~%
+  </state>~%
+  <state id=\"record-rejection\">~%
+    <onentry><log label=\"record-rejection\"/><raise event=\"next\"/></onentry>~%
+    <transition event=\"next\" target=\"finalize-report\"/>~%
+  </state>~%
+  <state id=\"finalize-report\">~%
+    <onentry><log label=\"finalize-report\"/><raise event=\"done\"/></onentry>~%
+    <transition event=\"done\" target=\"done\"/>~%
+  </state>~%
+  <final id=\"done\"/>~%
+</scxml>"))
+
+(defparameter *snippet-source-parser-scxml-chart* nil)
+
+(defun snippet-source-parser-scxml-chart ()
+  (or *snippet-source-parser-scxml-chart*
+      (setf *snippet-source-parser-scxml-chart*
+            (hyperdoc/scxml:parse-scxml-string
+             *snippet-source-parser-scxml-chart-string*))))
+
+(defun snippet-source-parser-scxml-states-from-trace (trace)
+  (loop for line in (or trace '())
+        for marker = (search "Entering: " line :test #'char=)
+        when marker
+          collect (subseq line (+ marker (length "Entering: ")))))
+
+(defun snippet-source-parser-scxml-events-from-trace (trace)
+  (loop for line in (or trace '())
+        for left = (search " --" line :test #'char=)
+        for right = (and left
+                         (search "--> " line :test #'char=
+                                 :start2 (+ left 3)))
+        when (and left right)
+          collect (subseq line (+ left 3) right)))
+
+(defun snippet-source-parser-engine-from-policy (policy)
+  (case (snippet-source-expansion-policy-parser-engine-kind policy)
+    (:scxml
+     (make-instance 'scxml-snippet-source-parser-engine
+                    :chart (snippet-source-parser-scxml-chart)))
+    (t
+     (make-instance 'direct-snippet-source-parser-engine))))
+
+(defmethod run-snippet-source-parser-engine
+    ((engine direct-snippet-source-parser-engine) blocks policy)
+  (multiple-value-bind (expanded-blocks report)
+      (parse-snippet-source-blocks-direct blocks :policy policy)
+    (setf (snippet-source-expansion-report-parser-engine-kind report)
+          :direct
+          (snippet-source-expansion-report-parser-engine-identity report)
+          (snippet-source-parser-engine-identity-of engine)
+          (snippet-source-expansion-report-parser-engine-chart-name report)
+          nil
+          (snippet-source-expansion-report-parser-engine-trace report)
+          nil
+          (snippet-source-expansion-report-parser-engine-states-visited report)
+          nil
+          (snippet-source-expansion-report-parser-engine-events report)
+          nil)
+    (let ((context
+            (make-snippet-source-parse-context
+             :policy policy
+             :input-blocks blocks
+             :expanded-blocks expanded-blocks
+             :synthetic-blocks
+             (snippet-source-expansion-report-synthetic-blocks report)
+             :stats (snippet-playground-source-expansion-evidence report)
+             :warnings (snippet-source-expansion-report-warnings report)
+             :trace nil
+             :report report)))
+      (declare (ignore context)))
+    (values expanded-blocks report)))
+
+(defmethod run-snippet-source-parser-engine
+    ((engine scxml-snippet-source-parser-engine) blocks policy)
+  (let ((scxml-run nil)
+        (scxml-warning nil))
+    (handler-case
+        (setf scxml-run
+              (hyperdoc/scxml:run-compiled-scxml-with-events
+               (chart-of engine)
+               nil
+               :package-name "HYPERDOC/SCXML/GENERATED/SNIPPET-SOURCE-PARSER"
+               :function-name "RUN-SNIPPET-SOURCE-PARSER"))
+      (error (condition)
+        (setf scxml-warning
+              (format nil
+                      "SCXML exploratory parser orchestration failed; falling back to direct parsing: ~A"
+                      condition))))
+    (multiple-value-bind (expanded-blocks report)
+        (parse-snippet-source-blocks-direct blocks :policy policy)
+      (let* ((trace (and scxml-run
+                         (hyperdoc/scxml:generated-scxml-run-trace-of scxml-run)))
+             (states (snippet-source-parser-scxml-states-from-trace trace))
+             (events (snippet-source-parser-scxml-events-from-trace trace))
+             (chart-name (and scxml-run
+                              (hyperdoc/scxml:scxml-chart-name-of
+                               (chart-of engine)))))
+        (setf (snippet-source-expansion-report-parser-engine-kind report)
+              (if scxml-run :scxml :scxml-fallback-direct)
+              (snippet-source-expansion-report-parser-engine-identity report)
+              (snippet-source-parser-engine-identity-of engine)
+              (snippet-source-expansion-report-parser-engine-chart-name report)
+              chart-name
+              (snippet-source-expansion-report-parser-engine-trace report)
+              trace
+              (snippet-source-expansion-report-parser-engine-states-visited report)
+              states
+              (snippet-source-expansion-report-parser-engine-events report)
+              events)
+        (when scxml-warning
+          (push scxml-warning
+                (snippet-source-expansion-report-warnings report))
+          (push scxml-warning
+                (snippet-source-expansion-report-notes report)))
+        (let ((context
+                (make-snippet-source-parse-context
+                 :policy policy
+                 :input-blocks blocks
+                 :expanded-blocks expanded-blocks
+                 :synthetic-blocks
+                 (snippet-source-expansion-report-synthetic-blocks report)
+                 :stats (snippet-playground-source-expansion-evidence report)
+                 :warnings (snippet-source-expansion-report-warnings report)
+                 :trace trace
+                 :report report)))
+          (declare (ignore context)))
+        (values expanded-blocks report)))))
+
+(defun parse-snippet-source-blocks
+    (blocks &key (policy *snippet-source-expansion-policy*))
+  (let* ((effective-policy (or policy *snippet-source-expansion-policy*))
+         (engine (snippet-source-parser-engine-from-policy effective-policy)))
+    (run-snippet-source-parser-engine
+     engine
+     blocks
+     effective-policy)))
+
+(defun expand-snippet-playground-source-blocks
+    (blocks &key (policy *snippet-source-expansion-policy*))
+  (parse-snippet-source-blocks blocks :policy policy))
 
 (defun snippet-playground-source-text-from-blocks (blocks)
   (with-output-to-string (stream)
@@ -1656,6 +2729,122 @@
 (defun select-best-snippet (snippets score-reader)
   (car (sort (copy-list snippets) #'>
              :key score-reader)))
+
+(defun snippet-playground-next-mech-block-index
+    (selected-mech recognized-mech-snippets)
+  (when selected-mech
+    (let ((selected-mech-block-index
+            (mech-snippet-block-index-of selected-mech))
+          (next-mech-block-index nil))
+      (dolist (mech-snippet recognized-mech-snippets next-mech-block-index)
+        (let ((block-index (mech-snippet-block-index-of mech-snippet)))
+          (when (and (> block-index selected-mech-block-index)
+                     (or (null next-mech-block-index)
+                         (< block-index next-mech-block-index)))
+            (setf next-mech-block-index block-index)))))))
+
+(defun snippet-playground-code-snippets-for-mech-slice
+    (selected-mech recognized-mech-snippets recognized-code-snippets)
+  (if (null selected-mech)
+      nil
+      (let* ((selected-mech-block-index
+               (mech-snippet-block-index-of selected-mech))
+             (next-mech-block-index
+               (snippet-playground-next-mech-block-index
+                selected-mech
+                recognized-mech-snippets)))
+        (loop for code-snippet in recognized-code-snippets
+              for block-index = (code-snippet-block-index-of code-snippet)
+              when (and (> block-index selected-mech-block-index)
+                        (or (null next-mech-block-index)
+                            (< block-index next-mech-block-index)))
+                collect code-snippet))))
+
+(defun snippet-playground-code-snippet-class (snippet)
+  (if (typep snippet 'javascript-code-snippet)
+      'javascript-code-snippet
+      'unsupported-code-snippet))
+
+(defun snippet-playground-bundled-code-source (snippets)
+  (with-output-to-string (stream)
+    (loop for snippet in snippets
+          for first = t then nil
+          do (unless first
+               (terpri stream)
+               (terpri stream))
+             (write-string (code-snippet-source-of snippet) stream))))
+
+(defun make-snippet-playground-bundled-code-snippet
+    (selected-mech entry-snippet ordered-slice-code-snippets)
+  (let* ((bundle-count (length ordered-slice-code-snippets))
+         (first-slice-snippet (first ordered-slice-code-snippets))
+         (last-slice-snippet (car (last ordered-slice-code-snippets)))
+         (selected-mech-block-index
+           (mech-snippet-block-index-of selected-mech))
+         (entry-block-index
+           (code-snippet-block-index-of entry-snippet))
+         (first-block-index
+           (code-snippet-block-index-of first-slice-snippet))
+         (last-block-index
+           (code-snippet-block-index-of last-slice-snippet))
+         (language-label
+           (code-language-display-name
+            (code-snippet-language-of entry-snippet)))
+         (bundle-findings
+           (append (copy-list (code-snippet-findings-of entry-snippet))
+                   (list (format nil
+                                 "Bundled ~D code snippets from the Mech slice after block #~D."
+                                 bundle-count
+                                 selected-mech-block-index)))))
+    (make-instance
+     (snippet-playground-code-snippet-class entry-snippet)
+     :id (format nil "code-snippet-bundle/mech-~D/code-~D-~D"
+                 selected-mech-block-index
+                 first-block-index
+                 last-block-index)
+     :title (format nil "~A code bundle #~D"
+                    language-label
+                    entry-block-index)
+     :summary
+     (format nil
+             "Bundled ~D ~A code blocks from the Mech slice after block #~D."
+             bundle-count
+             (string-downcase language-label)
+             selected-mech-block-index)
+     :block-index entry-block-index
+     :line-number (code-snippet-line-number-of entry-snippet)
+     :location-label
+     (format nil "Mech slice after block #~D (blocks #~D-#~D)"
+             selected-mech-block-index
+             first-block-index
+             last-block-index)
+     :source
+     (snippet-playground-bundled-code-source ordered-slice-code-snippets)
+     :language (code-snippet-language-of entry-snippet)
+     :output-path (code-snippet-output-path-of entry-snippet)
+     :translation-mode (code-snippet-translation-mode-of entry-snippet)
+     :score (code-snippet-score-of entry-snippet)
+     :findings bundle-findings)))
+
+(defun select-code-snippet-for-mech-slice
+    (selected-mech recognized-mech-snippets recognized-code-snippets)
+  (let* ((slice-code-snippets
+           (snippet-playground-code-snippets-for-mech-slice
+            selected-mech
+            recognized-mech-snippets
+            recognized-code-snippets))
+         (entry-snippet
+           (select-best-snippet slice-code-snippets
+                                #'code-snippet-score-of)))
+    (if (and entry-snippet
+             (> (length slice-code-snippets) 1))
+        (make-snippet-playground-bundled-code-snippet
+         selected-mech
+         entry-snippet
+         (sort (copy-list slice-code-snippets)
+               #'<
+               :key #'code-snippet-block-index-of))
+        entry-snippet)))
 
 (defun snippet-playground-status-label (status)
   (ecase status
@@ -2311,13 +3500,18 @@
 
 (defun make-snippet-playground-result-from-blocks
     (&key context-object context-view-title source-pathname source-text
-       blocks origin-surface-kind provider-kind source-label)
+       blocks origin-surface-kind provider-kind source-label
+       source-expansion-policy source-parser-policy)
   (let* ((resolved-source-label
            (or source-label
                (ignore-errors (title-of context-object))
                (and source-pathname
                     (file-namestring source-pathname))
                "Source"))
+         (effective-source-expansion-policy
+           (or source-parser-policy
+               source-expansion-policy
+               *snippet-source-expansion-policy*))
          (authored-artifact (snippet-playground-authored-artifact))
          (behavior-artifact (snippet-playground-behavior-artifact))
          (layout-artifact (snippet-comparison-layout-artifact))
@@ -2328,6 +3522,8 @@
          (visited-states (list :available))
          (transition-trace '())
          (evidence-trace '())
+         (expanded-blocks nil)
+         (source-expansion-report nil)
          (recognized-mech-snippets nil)
          (recognized-code-snippets nil)
          (selected-mech nil)
@@ -2413,7 +3609,12 @@
                      :source-label resolved-source-label
                      :source-pathname source-pathname
                      :source-text (or source-text "")
-                     :source-block-count (length blocks)
+                     :source-block-count
+                     (or (and source-expansion-report
+                              (snippet-source-expansion-report-expanded-block-count
+                               source-expansion-report))
+                         (length (or expanded-blocks blocks)))
+                     :source-expansion-report source-expansion-report
                      :recognized-mech-snippets recognized-mech-snippets
                      :recognized-code-snippets recognized-code-snippets
                      :selected-mech selected-mech
@@ -2512,32 +3713,41 @@
                                  :failure-classification failure-classification))
               (return-from make-snippet-playground-result-from-blocks
                 failure-object))
+            (multiple-value-setq (expanded-blocks source-expansion-report)
+              (parse-snippet-source-blocks
+               blocks
+               :policy effective-source-expansion-policy))
             (note-evidence
              :collecting-input
              "Collected provider-specific snippet candidates."
-             (list :source_block_count (length blocks)
-                   :origin_surface_kind origin-surface-kind
-                   :provider_kind provider-kind))
+             (append
+              (snippet-playground-source-expansion-evidence
+               source-expansion-report)
+              (list :origin_surface_kind origin-surface-kind
+                    :provider_kind provider-kind)))
             (advance :recognizing
                      :input-collected
                      (format nil "Recognizing snippet candidates from ~D collected inputs."
-                             (length blocks))
+                             (length expanded-blocks))
                      :guard :input-extracted
                      :progress-phase :recognizing
                      :progress-message "Recognizing snippets...")
             (setf recognized-mech-snippets
                   (remove nil
-                          (mapcar #'maybe-make-mech-snippet blocks)))
+                          (mapcar #'maybe-make-mech-snippet expanded-blocks)))
             (setf recognized-code-snippets
-                  (recognized-code-snippets-from-blocks blocks))
+                  (recognized-code-snippets-from-blocks expanded-blocks))
             (note-evidence
              :recognizing
              "Recognition finished."
-             (list
-              :recognized_mech_snippets
-              (snippet-playground-snippet-labels recognized-mech-snippets)
-              :recognized_code_snippets
-              (snippet-playground-snippet-labels recognized-code-snippets)))
+             (append
+              (snippet-playground-source-expansion-evidence
+               source-expansion-report)
+              (list
+               :recognized_mech_snippets
+               (snippet-playground-snippet-labels recognized-mech-snippets)
+               :recognized_code_snippets
+               (snippet-playground-snippet-labels recognized-code-snippets))))
             (unless (or recognized-mech-snippets
                         recognized-code-snippets)
               (setf failure-classification :no-candidates)
@@ -2561,8 +3771,10 @@
                   (select-best-snippet recognized-mech-snippets
                                        #'mech-snippet-score-of))
             (setf selected-code
-                  (select-best-snippet recognized-code-snippets
-                                       #'code-snippet-score-of))
+                  (select-code-snippet-for-mech-slice
+                   selected-mech
+                   recognized-mech-snippets
+                   recognized-code-snippets))
             (note-evidence
              :pairing
              "Selected evidential Mech/code inputs."
@@ -2662,7 +3874,8 @@
           failure-object)))))
 
 (defun make-snippet-playground-session-from-source
-    (&key context-object context-view-title source-pathname source-text)
+    (&key context-object context-view-title source-pathname source-text
+       source-expansion-policy source-parser-policy)
   (let ((trimmed-source (or source-text "")))
     (make-snippet-playground-result-from-blocks
      :context-object context-object
@@ -2671,10 +3884,13 @@
      :source-text trimmed-source
      :blocks (extract-html-code-blocks trimmed-source)
      :origin-surface-kind "html-source"
-     :provider-kind "source-v1")))
+     :provider-kind "source-v1"
+     :source-expansion-policy source-expansion-policy
+     :source-parser-policy source-parser-policy)))
 
 (defun make-snippet-playground-session-from-fedwiki-page
-    (&key context-object context-view-title page)
+    (&key context-object context-view-title page
+       source-expansion-policy source-parser-policy)
   (when page
     (hyperbook/fedwiki::load-page page))
   (let ((blocks (if page
@@ -2687,11 +3903,14 @@
      :blocks blocks
      :origin-surface-kind "fedwiki-page"
      :provider-kind "fedwiki-v1"
-     :source-label (and page (title-of page)))))
+     :source-label (and page (title-of page))
+     :source-expansion-policy source-expansion-policy
+     :source-parser-policy source-parser-policy)))
 
 (defun make-snippet-playground-session-target
     (&key context-object context-view-title source-pathname fedwiki-page
-       provider-kind origin-surface-kind)
+       provider-kind origin-surface-kind
+       source-expansion-policy source-parser-policy)
   (cond
     ((or (string= (or provider-kind "") "fedwiki-v1")
          (string= (or origin-surface-kind "") "fedwiki-page")
@@ -2699,20 +3918,26 @@
      (make-snippet-playground-session-from-fedwiki-page
       :context-object context-object
       :context-view-title context-view-title
-      :page fedwiki-page))
+      :page fedwiki-page
+      :source-expansion-policy source-expansion-policy
+      :source-parser-policy source-parser-policy))
     ((and source-pathname
           (probe-file source-pathname))
      (make-snippet-playground-session-from-source
       :context-object context-object
       :context-view-title context-view-title
       :source-pathname source-pathname
-      :source-text (uiop:read-file-string source-pathname)))
+      :source-text (uiop:read-file-string source-pathname)
+      :source-expansion-policy source-expansion-policy
+      :source-parser-policy source-parser-policy))
     (t
      (make-snippet-playground-session-from-source
       :context-object context-object
       :context-view-title context-view-title
       :source-pathname source-pathname
-      :source-text ""))))
+      :source-text ""
+      :source-expansion-policy source-expansion-policy
+      :source-parser-policy source-parser-policy))))
 
 (defun snippet-playground-run-scaffold (session)
   (let ((source (snippet-playground-session-lisp-scaffold-source-of session)))
@@ -2738,6 +3963,9 @@
                        (snippet-playground-session-source-text-of session)
                        :source-block-count
                        (snippet-playground-session-source-block-count-of session)
+                       :source-expansion-report
+                       (snippet-playground-session-source-expansion-report-of
+                        session)
                        :recognized-mech-snippets
                        (snippet-playground-session-recognized-mech-snippets-of session)
                        :recognized-code-snippets
@@ -3915,7 +5143,181 @@
       (:ul
        (dolist (note (snippet-playground-session-pairing-notes-of session))
          (html-inspector-views:html
-           (:li (html-inspector-views:esc note))))))))
+           (:li (html-inspector-views:esc note)))))
+      (:h3 "Exploratory source parser")
+      (if-let (report (snippet-playground-session-source-expansion-report-of
+                       session))
+        (html-inspector-views:html
+          (:table :class "inspector-table"
+                  (snippet-playground-status-table-row
+                   "Parser engine kind"
+                   (snippet-source-expansion-report-parser-engine-kind report))
+                  (snippet-playground-status-table-row
+                   "Parser engine identity"
+                   (snippet-source-expansion-report-parser-engine-identity
+                    report))
+                  (snippet-playground-status-table-row
+                   "Parser chart"
+                   (snippet-source-expansion-report-parser-engine-chart-name
+                    report))
+                  (snippet-playground-status-table-row
+                   "Original block count"
+                   (snippet-source-expansion-report-original-block-count report))
+                  (snippet-playground-status-table-row
+                   "Expanded block count"
+                   (snippet-source-expansion-report-expanded-block-count report))
+                  (snippet-playground-status-table-row
+                   "Synthetic block count"
+                   (snippet-source-expansion-report-synthetic-block-count report))
+                  (snippet-playground-status-table-row
+                   "HTML-like block count"
+                   (snippet-source-expansion-report-html-like-block-count report))
+                  (snippet-playground-status-table-row
+                   "Scanned block count"
+                   (snippet-source-expansion-report-scanned-block-count report))
+                  (snippet-playground-status-table-row
+                   "Accepted candidate count"
+                   (snippet-source-expansion-report-accepted-candidate-count
+                    report))
+                  (snippet-playground-status-table-row
+                   "Rejected candidate count"
+                   (snippet-source-expansion-report-rejected-candidate-count
+                    report))
+                  (snippet-playground-status-table-row
+                   "HTML-like blocks scanned"
+                   (snippet-source-expansion-report-html-like-blocks-scanned
+                    report))
+                  (snippet-playground-status-table-row
+                   "<pre> regions found"
+                   (snippet-source-expansion-report-pre-regions-found report))
+                  (snippet-playground-status-table-row
+                   "<pre> accepted"
+                   (snippet-source-expansion-report-pre-regions-accepted report))
+                  (snippet-playground-status-table-row
+                   "<pre> rejected"
+                   (snippet-source-expansion-report-pre-regions-rejected report))
+                  (snippet-playground-status-table-row
+                   "Entity decode count"
+                   (snippet-source-expansion-report-decode-count report))
+                  (snippet-playground-status-table-row
+                   "Discrepancy count"
+                   (length (snippet-source-expansion-report-discrepancies
+                            report)))
+                  (snippet-playground-status-table-row
+                   "Incremental snapshots"
+                   (length
+                    (snippet-source-expansion-report-incremental-stats-snapshots
+                     report)))
+                  (snippet-playground-status-table-row
+                   "Elapsed ms"
+                   (snippet-source-expansion-report-parse-elapsed-millis report)))
+          (:h4 "Policy")
+          (:ul
+           (loop for (key value) on
+                   (snippet-source-expansion-report-policy-summary report)
+                 by #'cddr
+                 do (html-inspector-views:html
+                      (:li (html-inspector-views:esc
+                            (format nil "~A = ~S" key value))))))
+          (:h4 "Candidates")
+          (if (snippet-source-expansion-report-candidates report)
+              (html-inspector-views:html
+                (:ul
+                 (dolist (entry (snippet-source-expansion-report-candidates
+                                 report))
+                   (html-inspector-views:html
+                     (:li (html-inspector-views:esc
+                           (format nil
+                                   "~A (~A) parent #~A pre #~A hint=~A reason=~A"
+                                   (or (getf entry :location_label)
+                                       (getf entry :synthetic_id))
+                                   (or (getf entry :status) :unknown)
+                                   (or (getf entry :parent_block_index) "n/a")
+                                   (or (getf entry :pre_ordinal) "n/a")
+                                   (or (getf entry :language_hint) "n/a")
+                                   (or (getf entry :reason) "n/a"))))))))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No exploratory candidates were recorded for this run."))))
+          (:h4 "Synthetic blocks entering code recognition")
+          (let ((recognized-labels
+                  (snippet-playground-recognized-synthetic-html-pre-labels
+                   session)))
+            (if recognized-labels
+                (html-inspector-views:html
+                  (:ul
+                   (dolist (label recognized-labels)
+                     (html-inspector-views:html
+                       (:li (html-inspector-views:esc label))))))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "No synthetic html-pre labels entered code recognition.")))))
+          (:h4 "Discrepancies")
+          (if (snippet-source-expansion-report-discrepancies report)
+              (html-inspector-views:html
+                (:ul
+                 (dolist (discrepancy
+                          (snippet-source-expansion-report-discrepancies report))
+                   (html-inspector-views:html
+                     (:li (html-inspector-views:esc
+                           (format nil
+                                   "~A/~A block=#~A id=~A line=~A offset=~A fact=~A evidence=~S"
+                                   (or (snippet-source-parse-discrepancy-severity
+                                        discrepancy)
+                                       :unknown)
+                                   (or (snippet-source-parse-discrepancy-kind
+                                        discrepancy)
+                                       :unknown)
+                                   (or (snippet-source-parse-discrepancy-source-block-index
+                                        discrepancy)
+                                       "n/a")
+                                   (or (snippet-source-parse-discrepancy-source-block-id
+                                        discrepancy)
+                                       "n/a")
+                                   (or (snippet-source-parse-discrepancy-source-line-number
+                                        discrepancy)
+                                       "n/a")
+                                   (or (snippet-source-parse-discrepancy-character-offset
+                                        discrepancy)
+                                       "n/a")
+                                   (or (snippet-source-parse-discrepancy-fact-summary
+                                        discrepancy)
+                                       "n/a")
+                                   (snippet-source-parse-discrepancy-evidence-value
+                                    discrepancy))))))))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No parser discrepancies were recorded."))))
+          (:h4 "Graphviz DOT")
+          (if (snippet-source-expansion-report-graphviz-dot-text report)
+              (snippet-source-pre
+               (snippet-source-expansion-report-graphviz-dot-text report))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No Graphviz DOT artifact was recorded."))))
+          (:h4 "SCXML parser trace")
+          (if (snippet-source-expansion-report-parser-engine-trace report)
+              (snippet-source-pre
+               (format nil "~{~A~%~}"
+                       (snippet-source-expansion-report-parser-engine-trace
+                        report)))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No SCXML parser trace was recorded."))))
+          (:h4 "Warnings")
+          (if (snippet-source-expansion-report-warnings report)
+              (html-inspector-views:html
+                (:ul
+                 (dolist (warning
+                          (snippet-source-expansion-report-warnings report))
+                   (html-inspector-views:html
+                     (:li (html-inspector-views:esc warning))))))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No parser warnings recorded.")))))
+        (html-inspector-views:html
+          (:p (html-inspector-views:esc
+               "No exploratory source parser report is available for this session.")))))))
 
 (html-inspector-views:defview snippet-playground-session-source-pair
     (session snippet-playground-session)
