@@ -945,8 +945,21 @@
                   (hyperdoc::note-of replayed)
                   "Persistence replay from the debug wrapper must preserve the underlying annotation text")
     (assert-true
-     (search "Debug workspace persistence" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must expose the Debug workspace persistence action")
+     (null (search "Debug workspace persistence" workspace-html
+                   :test #'char-equal))
+     "Workspace annotation primary Workspace view must not expose the old Debug workspace persistence action")
+    (assert-true
+     (search "Local journal lane" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must render the Local journal lane in the Workspace dashboard")
+    (assert-true
+     (search "DMX context-window lane" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must render the DMX context-window lane in the Workspace dashboard")
+    (assert-true
+     (search "SCXML chart visualization" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must render the Workspace-view SCXML chart visualization")
+    (assert-true
+     (search "Next action panel" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must render SCXML-backed next actions")
     (assert-true
      (search "Inspect workspace write plan" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the SCXML-backed Inspect workspace write plan action")
@@ -967,11 +980,11 @@
                    :test #'char-equal))
      "Workspace annotation inspector primary view must remove the old Compare with guarded workspace path label")
     (assert-true
-     (search "Destination source" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must expose the resolved save destination explicitly")
+     (search "919815" workspace-html :test #'char-equal)
+     "Workspace annotation dashboard must expose workspace target 919815")
     (assert-true
-     (search "context-window default fallback" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must label the context-window destination as a fallback, not as the only save story")
+     (search "919822" workspace-html :test #'char-equal)
+     "Workspace annotation dashboard must expose topicmap target 919822")
     (assert-true
      (getf (hyperdoc::workspace-annotation-persistence-debug-dry-run-preview-of
             debug)
@@ -5629,10 +5642,10 @@
       draft-run)
      "Draft-local/no-materialize path must preview SAVE_LOCAL")
     (assert-equal
-     "Save annotation locally"
+     "Record local annotation"
      (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
       draft-run)
-     "Draft-local/no-materialize path primary action must be Save annotation locally")
+     "Draft-local/no-materialize path primary action must be Record local annotation")
     (assert-true
      (null
       (hyperdoc::dmx-annotation-workspace-view-run-dmx-http-will-run-p-of
@@ -5713,7 +5726,7 @@
      (hyperdoc::dmx-annotation-workspace-view-run-current-state-of projected-run)
      "Projected-complete annotations must classify to projectedComplete")
     (assert-equal
-     "Reopen annotation"
+     "Inspect or reopen annotation"
      (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
       projected-run)
      "Projected-complete annotations must expose reopen/inspect, not save, as primary action")
@@ -5769,10 +5782,10 @@
                 (html-inspector-views:view-html topic-backed-workspace-view))))
     (declare (ignore _set-topic-id))
     (assert-true
-     (search "Save annotation locally"
+     (search "Record local annotation"
              draft-html
              :test #'char-equal)
-     "Draft workspace view must expose Save annotation locally as the primary action")
+     "Draft workspace view must expose Record local annotation as the primary action")
     (assert-true
      (search "Current SCXML state"
              draft-html
@@ -5789,30 +5802,30 @@
              :test #'char-equal)
      "Draft workspace preview must show SAVE_LOCAL as the selected event")
     (assert-true
-     (search "DMX HTTP will run"
+     (search "Next event mutates DMX"
              draft-html
              :test #'char-equal)
-     "Draft workspace preview must expose whether DMX HTTP will run")
+     "Draft workspace preview must expose whether the selected event mutates DMX")
     (assert-true
-     (search "TOPIC_UPSERT will run"
+     (search "TOPIC_UPSERT"
              draft-html
              :test #'char-equal)
-     "Draft workspace preview must expose whether TOPIC_UPSERT will run")
+     "Draft workspace preview must expose TOPIC_UPSERT effect flags in the action table")
     (assert-true
-     (search "Materialize to DMX now:"
+     (search "Record local annotation and materialize to DMX"
              draft-html
              :test #'char-equal)
-     "Draft workspace view must expose optional materialize-to-DMX choice")
+     "Draft workspace view must expose optional local-save-and-materialize action")
     (assert-true
      (null (search "Persist to workspace"
                    draft-html
                    :test #'char-equal))
      "Draft workspace view must no longer expose Persist to workspace")
     (assert-true
-     (search "local-first saved"
+     (search "Local journal lane"
              saved-html
              :test #'char-equal)
-     "Locally saved annotations must render a local-first saved state")
+     "Locally saved annotations must render the Local journal lane in the Workspace dashboard")
     (assert-true
      (search "Materialize to DMX"
              saved-html
@@ -5839,15 +5852,15 @@
              :test #'char-equal)
      "Topic-backed annotations must render projectionPending as current SCXML state")
     (assert-true
-     (null (search "Save annotation locally"
+     (null (search "Record local annotation"
                    topic-backed-html
                    :test #'char-equal))
-     "Topic-backed annotations must not expose Save annotation locally as primary action")
+     "Topic-backed annotations must not expose Record local annotation as primary action")
     (assert-true
-     (search "TOPIC_UPSERT will run"
+     (search "TOPIC_UPSERT"
              topic-backed-html
              :test #'char-equal)
-     "Topic-backed annotations must render TOPIC_UPSERT preview")
+     "Topic-backed annotations must render TOPIC_UPSERT effect flags in the action table")
     (assert-true
      (null (search "Persist to workspace"
                    topic-backed-html
