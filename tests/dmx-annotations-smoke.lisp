@@ -5267,6 +5267,162 @@
                            "Unsupported live backends must be blocked before POST /core/topic is attempted")))
       (setf (symbol-function 'drakma:http-request) original))))
 
+(defun run-dmx-workspace-annotation-local-first-save-smoke-test ()
+  (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
+  (let* ((annotation (make-test-dock-annotation
+                      :note "Local-first annotation save"))
+         (saved (hyperdoc::persist-dock-annotation-local-first
+                 annotation
+                 :workspace-topicmap-id
+                 *dmx-annotations-smoke-workspace-topicmap-id*))
+         (subject-key (hyperdoc::workspace-annotation-topic-uri-of saved))
+         (journal (hyperdoc::read-hyperdoc-topic-journal
+                   :subject-key subject-key))
+         (events (gethash "events" journal))
+         (event-types (annotation-journal-event-types events))
+         (current-state (gethash "currentState" journal))
+         (reconstructed (hyperdoc::read-hyperdoc-local-workspace-annotation
+                         :subject-key subject-key)))
+    (assert-true
+     (typep saved 'hyperdoc::workspace-dock-annotation)
+     "Local-first save must return a typed workspace annotation object")
+    (assert-equal nil
+                  (hyperdoc::workspace-annotation-topic-id-of saved)
+                  "Local-first save without materialization must not require a DMX topic id")
+    (assert-equal "local-only"
+                  (hyperdoc::workspace-annotation-status-of saved)
+                  "Local-first save must classify the saved annotation as local-only")
+    (assert-true
+     (member "create-topic" event-types :test #'string=)
+     "Local-first save must append a create-topic-style local journal event")
+    (assert-equal nil
+                  (gethash "workspaceId" current-state)
+                  "Local-first save must not claim a live DMX workspace assignment")
+    (assert-equal (hyperdoc::note-of annotation)
+                  (hyperdoc::note-of reconstructed)
+                  "Local-first annotation must be reconstructable from HyperDoc-local journal payload alone")
+    (assert-equal (hyperdoc::summary-of annotation)
+                  (hyperdoc::summary-of reconstructed)
+                  "Local-first reconstruction must preserve annotation summary")))
+
+(defun run-dmx-workspace-annotation-local-first-materialize-compatibility-smoke-test ()
+  (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
+  (let* ((client (make-instance 'compatibility-storage-http-dmx-import-client
+                                :base-url "https://dmx.ralfbarkow.ch"
+                                :authorization-header "Bearer test-token"
+                                :workspace-id *dmx-annotations-smoke-workspace-id*
+                                :next-topic-id 9310))
+         (annotation (make-test-dock-annotation
+                      :note "Local-first with DMX materialization"))
+         (result (hyperdoc::persist-dock-annotation-local-first
+                  annotation
+                  :workspace-topicmap-id
+                  *dmx-annotations-smoke-workspace-topicmap-id*
+                  :client client
+                  :materialize-to-dmx-p t))
+         (subject-key (hyperdoc::workspace-annotation-topic-uri-of result))
+         (topic-id (hyperdoc::workspace-annotation-topic-id-of result))
+         (journal (hyperdoc::read-hyperdoc-topic-journal
+                   :subject-key subject-key))
+         (events (gethash "events" journal))
+         (event-types (annotation-journal-event-types events))
+         (current-state (gethash "currentState" journal)))
+    (assert-true
+     (typep result 'hyperdoc::workspace-dock-annotation)
+     "Local-first materialize path must still reopen as workspace-dock-annotation")
+    (assert-equal hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+                  (hyperdoc::workspace-annotation-storage-mode-of result)
+                  "Optional DMX materialization must keep the compatibility carrier path when available")
+    (assert-true
+     (integerp topic-id)
+     "Optional DMX materialization success must capture the resulting topic id")
+    (assert-equal topic-id
+                  (gethash "topicId" current-state)
+                  "Local journal current state must preserve the projected DMX topic id")
+    (assert-equal *dmx-annotations-smoke-workspace-id*
+                  (gethash "workspaceId" current-state)
+                  "Local journal current state must preserve projected workspace assignment metadata")
+    (assert-equal t
+                  (gethash "inTopicmap" current-state)
+                  "Local journal current state must preserve projected topicmap membership metadata")
+    (assert-true
+     (member "repair-workspace-assignment" event-types :test #'string=)
+     "Local-first projection should record assignment materialization transition locally")
+    (assert-true
+     (member "restore-topicmap-membership" event-types :test #'string=)
+     "Local-first projection should record topicmap materialization transition locally")))
+
+(defun run-dmx-workspace-annotation-local-first-pending-auth-continuation-smoke-test ()
+  (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
+  (let* ((topics (make-hash-table :test #'equal))
+         (topicmap-memberships (make-hash-table :test #'equal))
+         (workspace-assignments (make-hash-table :test #'eql))
+         (pending-client
+           (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9320))
+         (auth-client
+           (make-instance 'pending-auth-compatibility-storage-http-dmx-import-client
+                          :base-url "https://dmx.ralfbarkow.ch"
+                          :workspace-id *dmx-annotations-smoke-workspace-id*
+                          :authorization-header "Bearer explicit-test-token"
+                          :assignment-auth-available-p t
+                          :topics-by-external-key topics
+                          :topicmap-memberships topicmap-memberships
+                          :workspace-assignments workspace-assignments
+                          :next-topic-id 9321))
+         (annotation (make-test-dock-annotation
+                      :note "Local-first pending-auth continuation"))
+         (blocked (hyperdoc::persist-dock-annotation-local-first
+                   annotation
+                   :workspace-topicmap-id
+                   *dmx-annotations-smoke-workspace-topicmap-id*
+                   :client pending-client
+                   :materialize-to-dmx-p t))
+         (saved-topic-id
+           (hyperdoc::workspace-annotation-persistence-report-saved-topic-id-of
+            blocked))
+         (saved-annotation
+           (hyperdoc::workspace-annotation-persistence-report-saved-annotation-of
+            blocked))
+         (subject-key
+           (or (and saved-annotation
+                    (hyperdoc::workspace-annotation-topic-uri-of
+                     saved-annotation))
+               (hyperdoc::dmx-workspace-annotation-write-plan-uri
+                (hyperdoc::workspace-annotation-persistence-report-plan-of
+                 blocked))))
+         (journal (hyperdoc::read-hyperdoc-topic-journal
+                   :subject-key subject-key))
+         (current-state (gethash "currentState" journal))
+         (continued (hyperdoc::continue-workspace-annotation-persistence-with-explicit-auth
+                     blocked
+                     :client auth-client)))
+    (assert-true
+     (typep blocked 'hyperdoc::workspace-annotation-persistence-report)
+     "Local-first materialization auth blocks must still return a continuation report")
+    (assert-equal :pending-auth
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   blocked)
+                  "Local-first materialization must preserve the pending-auth continuation boundary when assignment auth is missing")
+    (assert-true
+     (integerp saved-topic-id)
+     "Local-first pending-auth reports must preserve the created topic id for continuation")
+    (assert-equal saved-topic-id
+                  (gethash "topicId" current-state)
+                  "Local journal current state must preserve the created topic id after materialization blocks")
+    (assert-equal nil
+                  (gethash "workspaceId" current-state)
+                  "Blocked local-first materialization must not claim completed workspace assignment")
+    (assert-equal :persisted
+                  (hyperdoc::workspace-annotation-persistence-report-status-of
+                   continued)
+                  "Local-first pending-auth reports must continue through the existing explicit-auth continuation path")))
+
 (defun run-dmx-annotations-smoke-tests ()
   (run-dmx-workspace-annotation-plan-smoke-test)
   (run-dmx-workspace-annotation-compatibility-plan-smoke-test)
@@ -5309,5 +5465,8 @@
   (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)
+  (run-dmx-workspace-annotation-local-first-save-smoke-test)
+  (run-dmx-workspace-annotation-local-first-materialize-compatibility-smoke-test)
+  (run-dmx-workspace-annotation-local-first-pending-auth-continuation-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)

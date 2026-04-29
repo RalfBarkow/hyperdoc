@@ -844,12 +844,15 @@
 (defclass workspace-dock-annotation (dock-annotation)
   ((workspace-topic-id
     :initarg :workspace-topic-id
+    :initform nil
     :reader workspace-annotation-topic-id-of)
    (workspace-topic-uri
     :initarg :workspace-topic-uri
+    :initform nil
     :reader workspace-annotation-topic-uri-of)
    (workspace-topicmap-id
     :initarg :workspace-topicmap-id
+    :initform nil
     :reader workspace-annotation-topicmap-id-of)
    (workspace-id
    :initarg :workspace-id
@@ -916,6 +919,24 @@
     :initform nil
     :reader workspace-annotation-supersedes-topic-id-of)))
 
+(defparameter *hyperdoc-local-workspace-annotation-subject-kind*
+  "workspace-annotation")
+(defparameter *hyperdoc-local-workspace-annotation-ownership-class*
+  "hyperdoc-local-workspace-annotation")
+(defparameter *hyperdoc-local-workspace-annotation-observation-kind*
+  "hyperdoc-local-first")
+(defparameter *hyperdoc-local-workspace-annotation-actor*
+  "hyperdoc-local-annotation-persist")
+(defparameter *hyperdoc-local-workspace-annotation-status-local-only*
+  "local-only")
+(defparameter *hyperdoc-local-workspace-annotation-status-projected*
+  "persisted")
+(defparameter *hyperdoc-local-workspace-annotation-status-projection-pending*
+  "projection-pending-auth")
+(defparameter *hyperdoc-local-workspace-annotation-status-projection-failed*
+  "projection-failed")
+(defvar *hyperdoc-local-workspace-journal-streams*)
+
 (defun workspace-annotation-replay-subject (object)
   (typecase object
     (workspace-annotation-backend-compatibility-report
@@ -933,6 +954,303 @@
 
 (defun workspace-dock-annotation-p (object)
   (typep object 'workspace-dock-annotation))
+
+(defun workspace-annotation-topic-id-or-nil (annotation)
+  (and (workspace-dock-annotation-p annotation)
+       (ignore-errors (workspace-annotation-topic-id-of annotation))))
+
+(defun dmx-workspace-annotation-local-native-payload-from-object
+    (annotation workspace-topicmap-id
+     &key status supersedes-topic-id annotation-key provenance-json)
+  (let* ((normalized
+           (dmx-workspace-annotation-from-object
+            annotation
+            workspace-topicmap-id
+            :status status
+            :supersedes-topic-id supersedes-topic-id
+            :annotation-key annotation-key
+            :provenance-json provenance-json)))
+    (dmx-workspace-annotation-native-payload
+     :uri (getf normalized :uri)
+     :title (getf normalized :title)
+     :summary (getf normalized :summary)
+     :text (getf normalized :text)
+     :relation-kind (getf normalized :relation-kind)
+     :status (getf normalized :status)
+     :source-anchor-json (getf normalized :source-anchor-json)
+     :target-anchor-json (getf normalized :target-anchor-json)
+     :context-object-id (getf normalized :context-object-id)
+     :context-view-title (getf normalized :context-view-title)
+     :source-object-ref (getf normalized :source-object-ref)
+     :target-object-ref (getf normalized :target-object-ref)
+     :runtime-relation-id (getf normalized :runtime-relation-id)
+     :provenance-json (getf normalized :provenance-json)
+     :workspace-topicmap-id workspace-topicmap-id
+     :supersedes-topic-id (getf normalized :supersedes-topic-id))))
+
+(defun workspace-annotation-local-payload-with-status (payload status)
+  (let* ((payload-copy
+           (dmx-workspace-journal-payload-json->payload
+            (dmx-workspace-journal-payload-json-from-payload payload)))
+         (children (or (getf payload-copy :children)
+                       (let ((json (make-hash-table :test #'equal)))
+                         (setf (getf payload-copy :children) json)
+                         json))))
+    (setf (gethash *dmx-workspace-annotation-status-type-uri* children)
+          (normalize-dmx-workspace-note-string
+           status
+           :status
+           'workspace-annotation-local-payload-with-status
+           :required? t))
+    payload-copy))
+
+(defun ensure-hyperdoc-local-workspace-annotation-stream
+    (subject-key workspace-topicmap-id)
+  (or (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+      (setf (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+            (dmx-workspace-journal-make-base-stream
+             subject-key
+             "uri"
+             subject-key
+             workspace-topicmap-id
+             :subject-uri subject-key
+             :subject-kind *hyperdoc-local-workspace-annotation-subject-kind*
+             :ownership-class
+             *hyperdoc-local-workspace-annotation-ownership-class*))))
+
+(defun hyperdoc-local-workspace-annotation-current-state
+    (stream subject-key workspace-topicmap-id)
+  (or (dmx-workspace-journal-current-snapshot stream)
+      (dmx-workspace-journal-absent-snapshot
+       subject-key
+       "uri"
+       subject-key
+       workspace-topicmap-id
+       :subject-uri subject-key
+       :subject-kind *hyperdoc-local-workspace-annotation-subject-kind*
+       :ownership-class
+       *hyperdoc-local-workspace-annotation-ownership-class*)))
+
+(defun workspace-annotation-local-next-state-from-payload
+    (subject-key workspace-topicmap-id payload
+     &key topic-id workspace-id in-topicmap view-props)
+  (dmx-workspace-journal-snapshot-from-payload
+   subject-key
+   "uri"
+   subject-key
+   workspace-topicmap-id
+   (dmx-workspace-journal-payload-json-from-payload payload)
+   :subject-uri subject-key
+   :subject-kind *hyperdoc-local-workspace-annotation-subject-kind*
+   :ownership-class *hyperdoc-local-workspace-annotation-ownership-class*
+   :topic-id topic-id
+   :in-topicmap (and in-topicmap t)
+   :view-props view-props
+   :workspace-id workspace-id
+   :workspace-title
+   (and workspace-id
+        (dmx-workspace-annotation-workspace-label workspace-id))))
+
+(defun workspace-annotation-local-apply-transition
+    (subject-key workspace-topicmap-id next-state)
+  (let* ((stream
+           (ensure-hyperdoc-local-workspace-annotation-stream
+            subject-key
+            workspace-topicmap-id))
+         (previous-state
+           (hyperdoc-local-workspace-annotation-current-state
+            stream
+            subject-key
+            workspace-topicmap-id))
+         (events
+           (dmx-workspace-journal-transition-events
+            previous-state
+            next-state
+            *hyperdoc-local-workspace-annotation-observation-kind*
+            *hyperdoc-local-workspace-annotation-actor*)))
+    (when events
+      (dmx-workspace-journal-apply-events-to-stream stream events))
+    (set-hyperdoc-local-workspace-journal-stream subject-key stream)
+    (values stream events previous-state next-state)))
+
+(defun workspace-annotation-local-projection-status-from-report
+    (report saved-topic-id)
+  (cond
+    ((and (typep report 'workspace-annotation-persistence-report)
+          (eq (workspace-annotation-persistence-report-status-of report)
+              :persisted))
+     *hyperdoc-local-workspace-annotation-status-projected*)
+    ((and saved-topic-id
+          (typep report 'workspace-annotation-persistence-report)
+          (workspace-annotation-pending-auth-p report))
+     *hyperdoc-local-workspace-annotation-status-projection-pending*)
+    (saved-topic-id
+     *hyperdoc-local-workspace-annotation-status-projection-failed*)
+    (t
+     *hyperdoc-local-workspace-annotation-status-projection-failed*)))
+
+(defun workspace-dock-annotation-from-hyperdoc-local-journal-snapshot
+    (snapshot)
+  (let* ((payload-json (and snapshot (gethash "payload" snapshot)))
+         (payload
+           (and (hash-table-p payload-json)
+                (dmx-workspace-journal-payload-json->payload payload-json)))
+         (source-anchor-json
+           (and payload
+                (dmx-json-child-value
+                 payload
+                 *dmx-workspace-annotation-source-anchor-json-type-uri*)))
+         (target-anchor-json
+           (and payload
+                (dmx-json-child-value
+                 payload
+                 *dmx-workspace-annotation-target-anchor-json-type-uri*)))
+         (source-anchor
+           (and (dmx-non-empty-string-p source-anchor-json)
+                (make-dom-annotation-anchor-from-json
+                 (parse-dom-annotation-json source-anchor-json))))
+         (target-anchor
+           (and (dmx-non-empty-string-p target-anchor-json)
+                (make-dom-annotation-anchor-from-json
+                 (parse-dom-annotation-json target-anchor-json))))
+         (topic-type-uri (and payload (getf payload :type-uri)))
+         (workspace-topic-uri
+           (or (and payload (getf payload :uri))
+               (and snapshot (gethash "subjectUri" snapshot))
+               (and snapshot (gethash "subjectKey" snapshot))))
+         (topic-id (and snapshot (gethash "topicId" snapshot)))
+         (storage-mode
+           (if (or (string= (or topic-type-uri "")
+                            *dmx-workspace-annotation-compatibility-carrier-type-uri*)
+                   (string= (or topic-type-uri "")
+                            *dmx-notes-note-type-uri*))
+               *dmx-workspace-annotation-compatibility-storage-mode*
+               *dmx-workspace-annotation-native-storage-mode*))
+         (carrier-type-uri
+           (and (dmx-workspace-annotation-compatibility-storage-mode-p
+                 storage-mode)
+                (or (and (dmx-non-empty-string-p topic-type-uri) topic-type-uri)
+                    *dmx-workspace-annotation-compatibility-carrier-type-uri*)))
+         (annotation-key
+           (and (dmx-non-empty-string-p workspace-topic-uri)
+                (dmx-string-prefix-p *hyperdoc-workspace-annotation-uri-prefix*
+                                     workspace-topic-uri)
+                (subseq workspace-topic-uri
+                        (length *hyperdoc-workspace-annotation-uri-prefix*))))
+         (source-object-ref
+           (and payload
+                (dmx-json-child-value
+                 payload
+                 *dmx-workspace-annotation-source-object-ref-type-uri*)))
+         (target-object-ref
+           (and payload
+                (dmx-json-child-value
+                 payload
+                 *dmx-workspace-annotation-target-object-ref-type-uri*)))
+         (runtime-relation-id
+           (and payload
+                (dmx-json-child-value
+                 payload
+                 *dmx-workspace-annotation-runtime-relation-id-type-uri*)))
+         (summary
+           (or (and payload
+                    (dmx-json-child-value
+                     payload
+                     *dmx-workspace-annotation-summary-type-uri*))
+               (and payload (getf payload :value))
+               "Workspace annotation"))
+         (title
+           (or (and payload (getf payload :value))
+               "Workspace annotation"))
+         (stable-id
+           (if (integerp topic-id)
+               (format nil "workspace-annotation/~D" topic-id)
+               (format nil "workspace-annotation/local/~A"
+                       (or annotation-key
+                           (dmx-workspace-annotation-slug
+                            (or runtime-relation-id title "annotation"))))))
+         (workspace-status
+           (and payload
+                (dmx-json-child-value
+                 payload
+                 *dmx-workspace-annotation-status-type-uri*))))
+    (unless (and payload source-anchor target-anchor)
+      (error 'fedwiki-dmx-import-error
+             :message
+             "HyperDoc-local workspace annotation journal snapshot is missing payload or anchor JSON"))
+    (make-instance
+     'workspace-dock-annotation
+     :id stable-id
+     :title title
+     :summary summary
+     :context-object
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-context-object-id-type-uri*)
+     :context-view-title
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-context-view-title-type-uri*)
+     :source-anchor source-anchor
+     :target-anchor target-anchor
+     :source-object source-object-ref
+     :target-object (dmx-workspace-annotation-target-object target-object-ref)
+     :relation-kind
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-relation-kind-type-uri*)
+     :note (dmx-json-child-value payload
+                                 *dmx-workspace-annotation-text-type-uri*)
+     :matching-patch-target nil
+     :matching-defect nil
+     :matching-inserted-step nil
+     :registry-key (or runtime-relation-id stable-id)
+     :dock-capability "Annotation"
+     :workspace-topic-id topic-id
+     :workspace-topic-uri workspace-topic-uri
+     :workspace-topicmap-id (and snapshot (gethash "topicmapId" snapshot))
+     :workspace-id (and snapshot (gethash "workspaceId" snapshot))
+     :storage-mode storage-mode
+     :carrier-type-uri carrier-type-uri
+     :annotation-key annotation-key
+     :workspace-status workspace-status
+     :source-anchor-json source-anchor-json
+     :target-anchor-json target-anchor-json
+     :source-object-ref source-object-ref
+     :target-object-ref target-object-ref
+     :runtime-relation-id runtime-relation-id
+     :provenance-json
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-provenance-type-uri*)
+     :source-binding
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-source-binding-type-uri*)
+     :target-binding
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-target-binding-type-uri*)
+     :context-binding
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-context-binding-type-uri*)
+     :supersedes-binding
+     (dmx-json-child-value payload
+                           *dmx-workspace-annotation-supersedes-type-uri*)
+     :supersedes-topic-id nil)))
+
+(defun read-hyperdoc-local-workspace-annotation
+    (&key subject-key annotation-key)
+  (let* ((resolved-subject-key
+           (or subject-key
+               (and (dmx-non-empty-string-p annotation-key)
+                    (dmx-workspace-annotation-uri annotation-key))
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "Provide subject-key or annotation-key for HyperDoc-local workspace annotation read")))
+         (stream (gethash resolved-subject-key
+                          *hyperdoc-local-workspace-journal-streams*)))
+    (unless stream
+      (error 'fedwiki-dmx-import-error
+             :message
+             "No HyperDoc-local workspace annotation journal stream matched the requested subject"))
+    (workspace-dock-annotation-from-hyperdoc-local-journal-snapshot
+     (or (dmx-workspace-journal-current-snapshot stream)
+         (dmx-workspace-journal-subject-snapshot-from-stream stream)))))
 
 (defun workspace-annotation-storage-mode-label (storage-mode)
   (case storage-mode
@@ -7602,6 +7920,150 @@
        :supersedes-binding supersedes-binding
        :supersedes-topic-id
        (dmx-workspace-annotation-binding-topic-id supersedes-binding))))))
+
+(defun workspace-annotation-local-projection-topic-id (result)
+  (cond
+    ((typep result 'workspace-dock-annotation)
+     (workspace-annotation-topic-id-or-nil result))
+    ((typep result 'workspace-annotation-persistence-report)
+     (workspace-annotation-persistence-report-saved-topic-id-of result))
+    (t
+     nil)))
+
+(defun workspace-annotation-local-projection-workspace-id
+    (result fallback-workspace-id)
+  (cond
+    ((typep result 'workspace-dock-annotation)
+     (workspace-annotation-workspace-id-of result))
+    ((typep result 'workspace-annotation-persistence-report)
+     (let ((failure-stage
+             (workspace-annotation-persistence-report-failure-stage-of result)))
+       (if (eq failure-stage :topicmap-placement)
+           fallback-workspace-id
+           nil)))
+    (t
+     nil)))
+
+(defun workspace-annotation-local-projection-in-topicmap-p (result)
+  (cond
+    ((typep result 'workspace-dock-annotation)
+     t)
+    ((typep result 'workspace-annotation-persistence-report)
+     (eq (workspace-annotation-persistence-report-status-of result)
+         :persisted))
+    (t
+     nil)))
+
+(defun persist-dock-annotation-local-first
+    (annotation &key workspace-topicmap-id workspace-id client view-props
+       status supersedes-topic-id annotation-key provenance-json
+       storage-mode
+       (materialize-to-dmx-p nil))
+  (let* ((annotation (workspace-annotation-replay-subject annotation))
+         (planning-client
+           (resolve-dmx-workspace-annotation-client
+            :client client
+            :dry-run t
+            :verbose nil))
+         (destination
+           (resolve-dmx-workspace-annotation-destination
+            annotation
+            :workspace-topicmap-id workspace-topicmap-id
+            :workspace-id workspace-id
+            :client planning-client))
+         (resolved-topicmap-id
+           (dmx-workspace-annotation-destination-workspace-topicmap-id
+            destination))
+         (resolved-workspace-id
+           (dmx-workspace-annotation-destination-workspace-id destination))
+         (native-payload
+           (dmx-workspace-annotation-local-native-payload-from-object
+            annotation
+            resolved-topicmap-id
+            :status status
+            :supersedes-topic-id supersedes-topic-id
+            :annotation-key annotation-key
+            :provenance-json provenance-json))
+         (subject-key
+           (or (getf native-payload :uri)
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "Workspace annotation local-first persistence requires a stable URI subject key")))
+         (local-payload
+           (workspace-annotation-local-payload-with-status
+            native-payload
+            *hyperdoc-local-workspace-annotation-status-local-only*))
+         (local-state
+           (workspace-annotation-local-next-state-from-payload
+            subject-key
+            resolved-topicmap-id
+            local-payload)))
+    (workspace-annotation-local-apply-transition
+     subject-key
+     resolved-topicmap-id
+     local-state)
+    (let ((local-annotation
+            (read-hyperdoc-local-workspace-annotation
+             :subject-key subject-key)))
+      (unless materialize-to-dmx-p
+        (return-from persist-dock-annotation-local-first local-annotation))
+      (let* ((live-client
+               (resolve-dmx-workspace-annotation-client
+                :client client
+                :dry-run nil
+                :verbose nil))
+             (projection-result
+               (persist-dock-annotation-to-workspace
+                local-annotation
+                :workspace-topicmap-id resolved-topicmap-id
+                :workspace-id resolved-workspace-id
+                :client live-client
+                :view-props view-props
+                :status status
+                :supersedes-topic-id supersedes-topic-id
+                :annotation-key annotation-key
+                :provenance-json provenance-json
+                :storage-mode storage-mode
+                :dry-run nil))
+             (saved-topic-id
+               (workspace-annotation-local-projection-topic-id
+                projection-result))
+             (saved-workspace-id
+               (workspace-annotation-local-projection-workspace-id
+                projection-result
+                resolved-workspace-id))
+             (projected-in-topicmap-p
+               (workspace-annotation-local-projection-in-topicmap-p
+                projection-result))
+             (projection-status
+               (cond
+                 ((typep projection-result 'workspace-dock-annotation)
+                  *hyperdoc-local-workspace-annotation-status-projected*)
+                 ((typep projection-result 'workspace-annotation-persistence-report)
+                  (workspace-annotation-local-projection-status-from-report
+                   projection-result
+                   saved-topic-id))
+                 (t
+                  *hyperdoc-local-workspace-annotation-status-projection-failed*)))
+             (projected-payload
+               (workspace-annotation-local-payload-with-status
+                native-payload
+                projection-status))
+             (projected-state
+               (workspace-annotation-local-next-state-from-payload
+                subject-key
+                resolved-topicmap-id
+                projected-payload
+                :topic-id saved-topic-id
+                :workspace-id saved-workspace-id
+                :in-topicmap projected-in-topicmap-p
+                :view-props
+                (and projected-in-topicmap-p view-props))))
+        (workspace-annotation-local-apply-transition
+         subject-key
+         resolved-topicmap-id
+         projected-state)
+        projection-result))))
 
 (defun persist-dock-annotation-to-workspace
     (annotation &key workspace-topicmap-id workspace-id client view-props
