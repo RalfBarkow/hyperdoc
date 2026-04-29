@@ -1,0 +1,159 @@
+<h1>Source-station assimilation routine</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This routine standardizes how HyperDoc assimilates a source artifact when one
+  slice must produce both durable documentation and executable implementation/test
+  artifacts.
+</p>
+
+<h2>Goal</h2>
+
+<p>
+  Preserve source truth while producing a reviewable source-station page, a
+  bounded implementation seed, and a replayable validation report.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Source-station assimilation routine"><tt>Source-station assimilation routine</tt></a></li>
+  <li><a hyperbook="topics" page="Intake boundary for source assimilation"><tt>Intake boundary for source assimilation</tt></a></li>
+  <li><a hyperbook="topics" page="Source-station page construction"><tt>Source-station page construction</tt></a></li>
+  <li><a hyperbook="topics" page="Topic-factory assimilation pass"><tt>Topic-factory assimilation pass</tt></a></li>
+  <li><a hyperbook="topics" page="Implementation seed assimilation"><tt>Implementation seed assimilation</tt></a></li>
+  <li><a hyperbook="topics" page="Assimilation validation matrix"><tt>Assimilation validation matrix</tt></a></li>
+  <li><a hyperbook="topics" page="Assimilation handover report shape"><tt>Assimilation handover report shape</tt></a></li>
+  <li><a hyperbook="topics" page="Assimilation acceptance criteria"><tt>Assimilation acceptance criteria</tt></a></li>
+</ul>
+
+<h2>1) Intake boundary</h2>
+
+<ul>
+  <li>Identify source artifacts and classify each as primary source, implementation seed, notes, or generated code.</li>
+  <li>Preserve source-truth boundaries explicitly: what is implemented, what is only documented, and what remains future work.</li>
+  <li>Do not overclaim equivalence between source theory and implementation seed.</li>
+  <li>Record concrete source identity (bibliography/path/hash where applicable).</li>
+</ul>
+
+<h2>2) Source-station page construction</h2>
+
+<ul>
+  <li>Create a dedicated source-station page with bibliographic/source identity.</li>
+  <li>Add core concepts with concise source-faithful definitions.</li>
+  <li>Add related HyperDoc pages to preserve source lineage.</li>
+  <li>If code is involved, add an implementation crosswalk table.</li>
+  <li>Add an explicit <tt>Not yet implemented</tt> / <tt>Remaining gaps</tt> section.</li>
+</ul>
+
+<h2>3) Topic-factory assimilation pass</h2>
+
+<ul>
+  <li>Run exact-title collision checks before appending to <tt>hyperdoc/topics.lisp</tt>.</li>
+  <li>Add durable topics for the source station, core concepts, implementation seam, and test/trace artifacts.</li>
+  <li>Keep summaries concise, reconstruction-oriented, and source-anchored.</li>
+</ul>
+
+<h2>4) Implementation seed handling</h2>
+
+<ul>
+  <li>Place code in a repo-native ASDF/module location; avoid core-system pollution unless convention requires it.</li>
+  <li>Preserve inherited public API names when assimilating previous artifacts.</li>
+  <li>Harden the seed enough to load and test safely (validation, duplicate guards, bounded failure modes).</li>
+  <li>Mark incompleteness explicitly and keep bounded scope visible in docs/tests.</li>
+</ul>
+
+<h2>5) Test and validation matrix</h2>
+
+<p>
+  Minimum validation sequence:
+</p>
+
+<pre>
+tools/validate-documentation-slice.sh \
+  --page "hyperdoc/&lt;Source-station page&gt;.html" \
+  --topic &lt;topic-fn&gt; [--topic ...]
+
+nix develop --command sbcl --noinform --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :&lt;tests-system&gt;)' \
+  --eval '(&lt;package&gt;:run-&lt;targeted-smoke-tests&gt;)'
+
+# optional but recommended
+nix develop --command sbcl --noinform --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/tests)' \
+  --eval '(hyperdoc/tests:run-surface-smoke-tests)'
+</pre>
+
+<ul>
+  <li>Run targeted smoke tests for the assimilated implementation seed.</li>
+  <li>Run page/doc validation via existing doc-slice validators.</li>
+  <li>Run broader smoke suites relevant to touched surfaces.</li>
+  <li>Run full suite if feasible; if it fails outside the slice, name the exact external blocker.</li>
+</ul>
+
+<h2>6) Codex handoff template (short, reusable)</h2>
+
+<pre>
+Surface Answer
+- One-paragraph outcome and source/implementation boundary.
+
+Artifact Answer
+- Changed files
+- Implemented vs not implemented
+- Validation matrix results
+- Unrelated worktree state
+
+Process Trace
+- Inspected inputs, decisions, commands executed
+
+HyperDoc Reconstruction
+- New/updated pages and sections
+
+Lisp Source Reconstruction
+- New/updated systems/modules/APIs/tests
+
+FedWiki Delta
+- Changed pages or "none"
+
+Replay Checks
+- Exact commands and outcomes
+
+Remaining blockers
+- External failures explicitly bounded and named
+</pre>
+
+<h2>7) Acceptance criteria</h2>
+
+<ul>
+  <li>New source-station page renders.</li>
+  <li>New topics pass collision/coverage checks.</li>
+  <li>New code loads via ASDF.</li>
+  <li>Targeted tests pass.</li>
+  <li>External failures are bounded and named when present.</li>
+  <li>Source/implementation boundary remains explicit.</li>
+</ul>
+
+<h2>Worked example: Lafont 1990 Interaction Nets</h2>
+
+<p>
+  The Lafont 1990 assimilation is a concrete instance of this routine:
+</p>
+
+<ul>
+  <li>Primary source station: <a page="Lafont 1990 Interaction Nets">Lafont 1990 Interaction Nets</a>.</li>
+  <li>Implementation seam: standalone <tt>:interaction-net</tt> runtime seed in repository-native module paths.</li>
+  <li>Crosswalk and gaps documented on the Lafont page; tests added as focused smoke coverage.</li>
+  <li>Full-suite failures, when present, are reported as external blockers rather than mislabeled slice failures.</li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Lafont 1990 Interaction Nets">Lafont 1990 Interaction Nets</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a page="Focused semantic source stations">Focused semantic source stations</a></li>
+</ul>

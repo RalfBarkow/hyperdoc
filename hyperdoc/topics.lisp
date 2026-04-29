@@ -7279,5 +7279,73 @@
                  "Source-oriented and image-oriented development in Common Lisp"
                  "Literate Tracing")))
 
+;; Source-station assimilation routine topics.
+(defun source-station-assimilation-routine-topic ()
+  (make-topic
+   :id "source-station-assimilation-routine"
+   :title "Source-station assimilation routine"
+   :summary "Reusable routine for assimilating a source artifact into HyperDoc with bounded implementation, durable documentation, and replayable validation."
+   :references '("Source-station assimilation routine"
+                 "Lafont 1990 Interaction Nets"
+                 "Focused semantic source stations")))
+
+(defun intake-boundary-for-source-assimilation-topic ()
+  (make-topic
+   :id "intake-boundary-for-source-assimilation"
+   :title "Intake boundary for source assimilation"
+   :summary "Classification pass that separates primary source, implementation seed, notes, and generated artifacts while preserving source-truth boundaries."
+   :references '("Source-station assimilation routine"
+                 "Lafont 1990 Interaction Nets")))
+
+(defun source-station-page-construction-topic ()
+  (make-topic
+   :id "source-station-page-construction"
+   :title "Source-station page construction"
+   :summary "Routine step that creates the source-station page with bibliography, core concepts, crosswalk, related pages, and explicit remaining gaps."
+   :references '("Source-station assimilation routine"
+                 "Lafont 1990 Interaction Nets"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun topic-factory-assimilation-pass-topic ()
+  (make-topic
+   :id "topic-factory-assimilation-pass"
+   :title "Topic-factory assimilation pass"
+   :summary "Collision-checked topic-factory update that adds durable source, concept, implementation, and validation handles for the assimilation slice."
+   :references '("Source-station assimilation routine"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun implementation-seed-assimilation-topic ()
+  (make-topic
+   :id "implementation-seed-assimilation"
+   :title "Implementation seed assimilation"
+   :summary "Bounded code-assimilation step that places source-derived code in repo-native modules, preserves API continuity, hardens safety, and avoids completeness overclaims."
+   :references '("Source-station assimilation routine"
+                 "Lafont 1990 Interaction Nets"
+                 "Interaction-net implementation seed")))
+
+(defun assimilation-validation-matrix-topic ()
+  (make-topic
+   :id "assimilation-validation-matrix"
+   :title "Assimilation validation matrix"
+   :summary "Replayable validation checklist covering doc-slice checks, targeted smoke tests, broader smoke suites, and bounded reporting of external full-suite blockers."
+   :references '("Source-station assimilation routine"
+                 "Running DMX topic proxy smoke tests")))
+
+(defun assimilation-handover-report-shape-topic ()
+  (make-topic
+   :id "assimilation-handover-report-shape"
+   :title "Assimilation handover report shape"
+   :summary "Standard report shape for assimilation slices: Surface Answer, Artifact Answer, reconstruction deltas, replay checks, and named blockers."
+   :references '("Source-station assimilation routine"
+                 "Source-oriented and image-oriented development in Common Lisp")))
+
+(defun assimilation-acceptance-criteria-topic ()
+  (make-topic
+   :id "assimilation-acceptance-criteria"
+   :title "Assimilation acceptance criteria"
+   :summary "Completion criteria ensuring renderable source pages, collision-safe topics, loadable code, passing targeted tests, and explicit source/implementation boundaries."
+   :references '("Source-station assimilation routine"
+                 "Lafont 1990 Interaction Nets")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
