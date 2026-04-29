@@ -4,6 +4,8 @@
     version="1.0"
     name="dmx-annotation-local-first-continuation-runbook"
     initial="preflightCleanTree">
+  <!-- Auth/session transition reference:
+       hyperdoc/dmx-action-auth-session.scxml -->
 
   <state id="preflightCleanTree">
     <onentry>
@@ -16,6 +18,7 @@
   <state id="recordAcceptedCommits">
     <onentry>
       <log label="Recorded accepted commits: 0c2673e, 242410c, 9f489ab"/>
+      <log label="Linked request-scoped auth/session submachine: dmx-action-auth-session.scxml"/>
     </onentry>
 
     <transition event="COMMITS.ACCEPTED" target="localFirstSaveWithoutCredentials"/>

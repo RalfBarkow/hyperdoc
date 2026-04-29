@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="dmx-action-auth-session"
+    initial="no-auth-context">
+
+  <state id="no-auth-context">
+    <onentry>
+      <log label="No action-time auth context present yet"/>
+    </onentry>
+    <transition event="AUTH.INPUT_CAPTURED" target="input-captured"/>
+  </state>
+
+  <state id="input-captured">
+    <onentry>
+      <log label="Captured action-time auth input (credentials are never persisted)"/>
+    </onentry>
+    <transition event="AUTH.MODE_NORMALIZED" target="mode-normalized"/>
+  </state>
+
+  <state id="mode-normalized">
+    <onentry>
+      <log label="Normalized auth mode for request-scoped transition"/>
+    </onentry>
+    <transition event="AUTH.MODE.ANONYMOUS" target="anonymous-blocked"/>
+    <transition event="AUTH.MODE.USERPASS" target="bootstrap-required"/>
+    <transition event="AUTH.MODE.AUTHORIZATION_HEADER" target="request-shaped"/>
+    <transition event="AUTH.MODE.BEARER_TOKEN" target="request-shaped"/>
+  </state>
+
+  <state id="request-shaped">
+    <onentry>
+      <log label="Shaped request metadata using redacted auth/session evidence only"/>
+    </onentry>
+    <transition event="AUTH.REQUEST.GUARDED_SHAPED" target="guarded-request-shaped"/>
+    <transition event="AUTH.REQUEST.DIRECT_HEADER_SHAPED" target="direct-header-request-shaped"/>
+    <transition event="AUTH.REQUEST.BEARER_SHAPED" target="bearer-request-shaped"/>
+  </state>
+
+  <state id="bootstrap-required">
+    <onentry>
+      <log label="Username/password mode requires bootstrap via POST /access-control/login"/>
+    </onentry>
+    <transition event="AUTH.BOOTSTRAP_ATTEMPTED" target="bootstrap-attempted"/>
+  </state>
+
+  <state id="bootstrap-attempted">
+    <onentry>
+      <log label="Bootstrap/login attempted for request-scoped session establishment"/>
+    </onentry>
+    <transition event="AUTH.BOOTSTRAP.SUCCEEDED" target="session-established"/>
+    <transition event="AUTH.BOOTSTRAP.FAILED" target="auth-failed"/>
+  </state>
+
+  <state id="session-established">
+    <onentry>
+      <log label="Session established; session-cookie presence is represented as redacted shape only"/>
+    </onentry>
+    <transition event="AUTH.REQUEST_SHAPED" target="request-shaped"/>
+  </state>
+
+  <state id="guarded-request-shaped">
+    <onentry>
+      <log label="Guarded request shaped for continuation mutation boundary"/>
+    </onentry>
+    <transition event="AUTH.CONTINUATION_READY" target="continuation-ready"/>
+  </state>
+
+  <state id="direct-header-request-shaped">
+    <onentry>
+      <log label="Direct header-mode request shaped without revealing header value"/>
+    </onentry>
+    <transition event="AUTH.CONTINUATION_READY" target="continuation-ready"/>
+  </state>
+
+  <state id="bearer-request-shaped">
+    <onentry>
+      <log label="Bearer-token request shaped without revealing token value"/>
+    </onentry>
+    <transition event="AUTH.CONTINUATION_READY" target="continuation-ready"/>
+  </state>
+
+  <state id="anonymous-blocked">
+    <onentry>
+      <log label="Anonymous action-time mode blocked at local auth boundary"/>
+    </onentry>
+    <transition event="AUTH.BLOCKED" target="done"/>
+  </state>
+
+  <state id="continuation-ready">
+    <onentry>
+      <log label="Continuation request is ready with bounded redacted auth/session evidence"/>
+    </onentry>
+    <transition event="AUTH.DONE" target="done"/>
+  </state>
+
+  <state id="auth-failed">
+    <onentry>
+      <log label="Bootstrap/auth failed before continuation became ready"/>
+    </onentry>
+    <transition event="AUTH.FAILED" target="done"/>
+  </state>
+
+  <final id="done">
+    <onentry>
+      <log label="DMX action auth/session transition run completed"/>
+    </onentry>
+  </final>
+
+</scxml>

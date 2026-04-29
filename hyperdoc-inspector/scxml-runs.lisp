@@ -202,6 +202,37 @@
   (string= (or (uiop:getenv "HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS") "")
            "1"))
 
+(defun dmx-action-auth-session-scxml-finding-lines (run)
+  (let ((findings
+          (hyperdoc::dmx-action-auth-session-run-validation-findings-of run)))
+    (if findings
+        (mapcar (lambda (finding)
+                  (format nil "[~A] ~A: ~A"
+                          (hyperdoc/scxml:scxml-validation-finding-severity-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-code-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-message-of
+                           finding)))
+                findings)
+        (list "No validation findings."))))
+
+(defun dmx-action-auth-session-scxml-trace-string (run)
+  (with-output-to-string (stream)
+    (dolist (line
+             (or (hyperdoc::dmx-action-auth-session-run-trace-of run)
+                 '()))
+      (write-string line stream)
+      (terpri stream))))
+
+(defun dmx-action-auth-session-scxml-events-string (run)
+  (with-output-to-string (stream)
+    (dolist (event
+             (or (hyperdoc::dmx-action-auth-session-run-input-events-of run)
+                 '()))
+      (write-string event stream)
+      (terpri stream))))
+
 (views:defview 👀overview
     (run hyperdoc::page-lookup-topic-repair-scxml-run)
   (views:html-view :title "Overview" :priority 1
@@ -626,3 +657,113 @@
             (:p :style "opacity:0.65"
                 (views:esc
                  "Replay live smoke disabled. Set HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS=1 to enable the action.")))))))
+
+(views:defview 👀overview
+    (run hyperdoc::dmx-action-auth-session-run)
+  (views:html-view :title "DMX action auth/session SCXML" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "SCXML"))
+                   (:td (:tt
+                         (views:esc
+                          (namestring
+                           (hyperdoc::dmx-action-auth-session-run-scxml-path-of
+                            run))))))
+              (:tr (:td (views:esc "Selected auth mode"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-action-auth-session-run-selected-auth-mode-of
+                                   run))))))
+              (:tr (:td (views:esc "Workspace id"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (or (hyperdoc::dmx-action-auth-session-run-workspace-id-of
+                                       run)
+                                      "n/a"))))))
+              (:tr (:td (views:esc "Topic id"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (or (hyperdoc::dmx-action-auth-session-run-topic-id-of
+                                       run)
+                                      "n/a"))))))
+              (:tr (:td (views:esc "Bootstrap required"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-action-auth-session-run-bootstrap-required-p-of run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Bootstrap attempted"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-action-auth-session-run-bootstrap-attempted-p-of run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Bootstrap status"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-action-auth-session-run-bootstrap-status-of
+                                   run))))))
+              (:tr (:td (views:esc "Session cookie present"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-action-auth-session-run-session-cookie-present-p-of run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Cookie shape"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::dmx-action-auth-session-run-session-cookie-shape-of run)))))
+              (:tr (:td (views:esc "Authorization scheme"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of run)))))
+              (:tr (:td (views:esc "Continuation readiness"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-action-auth-session-run-continuation-readiness-of
+                                   run))))))
+              (:tr (:td (views:esc "Redaction status"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-action-auth-session-run-redaction-status-of
+                                   run))))))
+              (:tr (:td (views:esc "Failure boundary"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-action-auth-session-run-failure-boundary-of
+                                   run))))))
+              (:tr (:td (views:esc "Done"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-action-auth-session-run-done-p-of run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Final state"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (or (hyperdoc::dmx-action-auth-session-run-final-state-of run)
+                                      "n/a"))))))
+              (:tr (:td (views:esc "Passed"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-action-auth-session-run-passed-p-of run)
+                              "yes"
+                              "no"))))))
+      (:h3 (views:esc "Validation findings"))
+      (:pre (views:esc
+             (format nil "~{~A~%~}"
+                     (dmx-action-auth-session-scxml-finding-lines run))))
+      (:h3 (views:esc "Input events"))
+      (:pre (views:esc
+             (dmx-action-auth-session-scxml-events-string run)))
+      (:h3 (views:esc "Trace"))
+      (:pre (views:esc
+             (dmx-action-auth-session-scxml-trace-string run))))))

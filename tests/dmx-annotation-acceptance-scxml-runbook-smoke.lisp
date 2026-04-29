@@ -66,6 +66,11 @@
    :hyperdoc
    "hyperdoc/dmx-annotation-local-first-continuation-runbook.scxml"))
 
+(defun dmx-action-auth-session-scxml-pathname ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/dmx-action-auth-session.scxml"))
+
 (defun dmx-annotation-runbook-validation-error-findings (findings)
   (remove-if-not (lambda (finding)
                    (eq :error
@@ -95,6 +100,147 @@
      (format nil "Runbook SCXML must validate without errors: ~S"
              (mapcar #'hyperdoc/scxml:scxml-validation-finding-code-of
                      errors)))))
+
+(defun run-dmx-action-auth-session-scxml-parse-and-validate-smoke-test ()
+  (let* ((path (dmx-action-auth-session-scxml-pathname))
+         (chart (hyperdoc/scxml:parse-scxml-file path))
+         (findings (hyperdoc/scxml:validate-scxml-chart chart))
+         (errors (dmx-annotation-runbook-validation-error-findings findings)))
+    (dmx-annotation-runbook-assert-true
+     (null errors)
+     (format nil "Action auth/session SCXML must validate without errors: ~S"
+             (mapcar #'hyperdoc/scxml:scxml-validation-finding-code-of
+                     errors)))))
+
+(defun run-dmx-action-auth-session-scxml-mode-smoke-test
+    (mode &key bootstrap-status expected-state expected-failure-boundary)
+  (let* ((run (hyperdoc::make-dmx-action-auth-session-run
+               :selected-auth-mode mode
+               :workspace-id 919815
+               :topic-id 936040
+               :bootstrap-status bootstrap-status))
+         (views (dmx-annotation-runbook-load-inspector-views-for-object run))
+         (overview (dmx-annotation-runbook-find-view-by-title
+                    views
+                    "DMX action auth/session SCXML"))
+         (overview-html (and overview
+                             (html-inspector-views:view-html overview)))
+         (trace-text (format nil "~{~A~%~}"
+                             (or (hyperdoc::dmx-action-auth-session-run-trace-of run)
+                                 '())))
+         (facts-text (with-output-to-string (stream)
+                       (let ((*print-pretty* t))
+                         (pprint
+                          (hyperdoc::dmx-action-auth-session-run-semantic-facts-of
+                           run)
+                          stream))))
+         (session-cookie-shape
+           (hyperdoc::dmx-action-auth-session-run-session-cookie-shape-of run))
+         (authorization-scheme
+           (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of run)))
+    (dmx-annotation-runbook-assert-true
+     (hyperdoc::dmx-action-auth-session-run-done-p-of run)
+     "Action auth/session run must reach final state")
+    (dmx-annotation-runbook-assert-true
+     (hyperdoc::dmx-action-auth-session-run-passed-p-of run)
+     "Action auth/session run must pass")
+    (dmx-annotation-runbook-assert-equal
+     "done"
+     (hyperdoc::dmx-action-auth-session-run-final-state-of run)
+     "Action auth/session run must finish in done")
+    (when expected-state
+      (dmx-annotation-runbook-assert-substring
+       (format nil "Entering: ~A" expected-state)
+       trace-text
+       (format nil "Action auth/session trace must include state ~A"
+               expected-state)))
+    (when expected-failure-boundary
+      (dmx-annotation-runbook-assert-equal
+       expected-failure-boundary
+       (hyperdoc::dmx-action-auth-session-run-failure-boundary-of run)
+       "Action auth/session run must classify failure boundary"))
+    (dmx-annotation-runbook-assert-true
+     overview
+     "Action auth/session run object must expose an overview inspector view")
+    (dmx-annotation-runbook-assert-substring
+     "Selected auth mode"
+     overview-html
+     "Action auth/session inspector must render selected auth mode")
+    (dmx-annotation-runbook-assert-substring
+     "Session cookie present"
+     overview-html
+     "Action auth/session inspector must render session cookie presence")
+    (dmx-annotation-runbook-assert-substring
+     "Authorization scheme"
+     overview-html
+     "Action auth/session inspector must render authorization scheme")
+    (dmx-annotation-runbook-assert-substring
+     "Continuation readiness"
+     overview-html
+     "Action auth/session inspector must render continuation readiness")
+    (dmx-annotation-runbook-assert-substring
+     "Redaction status"
+     overview-html
+     "Action auth/session inspector must render redaction status")
+    (dmx-annotation-runbook-assert-no-secret-patterns
+     "Action auth/session trace"
+     trace-text)
+    (dmx-annotation-runbook-assert-no-secret-patterns
+     "Action auth/session facts"
+     facts-text)
+    (dmx-annotation-runbook-assert-no-secret-patterns
+     "Action auth/session inspector HTML"
+     overview-html)
+    (dmx-annotation-runbook-assert-no-secret-patterns
+     "Action auth/session cookie shape"
+     session-cookie-shape)
+    (dmx-annotation-runbook-assert-no-secret-patterns
+     "Action auth/session authorization scheme"
+     authorization-scheme)
+    (dolist (forbidden '("JSESSIONID"
+                         "Authorization header"
+                         "Cookie header"))
+      (dmx-annotation-runbook-assert-true
+       (null (search forbidden trace-text :test #'char-equal))
+       (format nil "Action auth/session trace must not include ~S" forbidden))
+      (dmx-annotation-runbook-assert-true
+       (null (search forbidden facts-text :test #'char-equal))
+       (format nil "Action auth/session facts must not include ~S" forbidden))
+      (dmx-annotation-runbook-assert-true
+       (null (search forbidden overview-html :test #'char-equal))
+       (format nil "Action auth/session inspector HTML must not include ~S"
+               forbidden)))
+    run))
+
+(defun run-dmx-action-auth-session-scxml-mode-path-smoke-tests ()
+  (run-dmx-action-auth-session-scxml-mode-smoke-test
+   :username-password
+   :expected-state "guarded-request-shaped")
+  (run-dmx-action-auth-session-scxml-mode-smoke-test
+   :anonymous
+   :expected-state "anonymous-blocked"
+   :expected-failure-boundary :anonymous-blocked)
+  (let ((header-run
+          (run-dmx-action-auth-session-scxml-mode-smoke-test
+           :authorization-header
+           :expected-state "direct-header-request-shaped")))
+    (dmx-annotation-runbook-assert-equal
+     "direct-header"
+     (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of
+      header-run)
+     "Authorization-header auth/session path must expose only the normalized scheme label"))
+  (let ((bearer-run
+          (run-dmx-action-auth-session-scxml-mode-smoke-test
+           :bearer-token
+           :expected-state "bearer-request-shaped")))
+    (dmx-annotation-runbook-assert-equal
+     "Bearer"
+     (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of bearer-run)
+     "Bearer-token auth/session path must keep only the Authorization scheme name")
+    (dmx-annotation-runbook-assert-equal
+     :redacted
+     (hyperdoc::dmx-action-auth-session-run-redaction-status-of bearer-run)
+     "Bearer-token auth/session path must keep redacted token evidence only")))
 
 (defun run-dmx-annotation-acceptance-scxml-runbook-local-replay-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
@@ -204,8 +350,14 @@
      "Live stderr"
      (hyperdoc::dmx-annotation-acceptance-scxml-run-live-stderr-of run))))
 
+(defun run-dmx-action-auth-session-credential-hygiene-cross-smoke-test ()
+  (run-dmx-workspace-annotation-local-first-pending-auth-continuation-smoke-test))
+
 (defun run-dmx-annotation-acceptance-scxml-runbook-smoke-tests ()
   (run-dmx-annotation-acceptance-scxml-runbook-parse-and-validate-smoke-test)
+  (run-dmx-action-auth-session-scxml-parse-and-validate-smoke-test)
+  (run-dmx-action-auth-session-scxml-mode-path-smoke-tests)
+  (run-dmx-action-auth-session-credential-hygiene-cross-smoke-test)
   (run-dmx-annotation-acceptance-scxml-runbook-local-replay-smoke-test)
   (format t "~&DMX annotation acceptance SCXML runbook smoke tests passed.~%")
   t)

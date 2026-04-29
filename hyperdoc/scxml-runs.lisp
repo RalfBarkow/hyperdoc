@@ -33,6 +33,11 @@
    :hyperdoc
    "hyperdoc/dmx-annotation-local-first-continuation-runbook.scxml"))
 
+(defparameter *dmx-action-auth-session-scxml*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/dmx-action-auth-session.scxml"))
+
 (defparameter *dmx-annotation-acceptance-runbook-accepted-commits*
   '("0c2673e"
     "242410c"
@@ -268,6 +273,84 @@
                 :initform nil)
    (live-stderr :reader dmx-annotation-acceptance-scxml-run-live-stderr-of
                 :initarg :live-stderr
+                :initform nil)))
+
+(defclass dmx-action-auth-session-run ()
+  ((scxml-path :reader dmx-action-auth-session-run-scxml-path-of
+               :initarg :scxml-path)
+   (selected-auth-mode
+    :reader dmx-action-auth-session-run-selected-auth-mode-of
+    :initarg :selected-auth-mode
+    :initform :anonymous)
+   (workspace-id :reader dmx-action-auth-session-run-workspace-id-of
+                 :initarg :workspace-id
+                 :initform nil)
+   (topic-id :reader dmx-action-auth-session-run-topic-id-of
+             :initarg :topic-id
+             :initform nil)
+   (bootstrap-required-p
+    :reader dmx-action-auth-session-run-bootstrap-required-p-of
+    :initarg :bootstrap-required-p
+    :initform nil)
+   (bootstrap-attempted-p
+    :reader dmx-action-auth-session-run-bootstrap-attempted-p-of
+    :initarg :bootstrap-attempted-p
+    :initform nil)
+   (bootstrap-status :reader dmx-action-auth-session-run-bootstrap-status-of
+                     :initarg :bootstrap-status
+                     :initform :not-required)
+   (session-cookie-present-p
+    :reader dmx-action-auth-session-run-session-cookie-present-p-of
+    :initarg :session-cookie-present-p
+    :initform nil)
+   (session-cookie-shape
+    :reader dmx-action-auth-session-run-session-cookie-shape-of
+    :initarg :session-cookie-shape
+    :initform "none")
+   (authorization-scheme
+    :reader dmx-action-auth-session-run-authorization-scheme-of
+    :initarg :authorization-scheme
+    :initform "none")
+   (continuation-readiness
+    :reader dmx-action-auth-session-run-continuation-readiness-of
+    :initarg :continuation-readiness
+    :initform :not-ready)
+   (redaction-status
+    :reader dmx-action-auth-session-run-redaction-status-of
+    :initarg :redaction-status
+    :initform :redacted)
+   (failure-boundary :reader dmx-action-auth-session-run-failure-boundary-of
+                     :initarg :failure-boundary
+                     :initform :none)
+   (validation-findings
+    :reader dmx-action-auth-session-run-validation-findings-of
+    :initarg :validation-findings
+    :initform nil)
+   (generated-package
+    :reader dmx-action-auth-session-run-generated-package-of
+    :initarg :generated-package
+    :initform nil)
+   (generated-function
+    :reader dmx-action-auth-session-run-generated-function-of
+    :initarg :generated-function
+    :initform nil)
+   (semantic-facts :reader dmx-action-auth-session-run-semantic-facts-of
+                   :initarg :semantic-facts
+                   :initform nil)
+   (input-events :reader dmx-action-auth-session-run-input-events-of
+                 :initarg :input-events
+                 :initform nil)
+   (trace :reader dmx-action-auth-session-run-trace-of
+          :initarg :trace
+          :initform nil)
+   (done-p :reader dmx-action-auth-session-run-done-p-of
+           :initarg :done-p
+           :initform nil)
+   (passed-p :reader dmx-action-auth-session-run-passed-p-of
+             :initarg :passed-p
+             :initform nil)
+   (final-state :reader dmx-action-auth-session-run-final-state-of
+                :initarg :final-state
                 :initform nil)))
 
 (defun uscxml-browser-pathname ()
@@ -829,6 +912,255 @@
                    :failure-classification classification
                    :suggested-next-action suggested-next-action)))
 
+(defparameter *dmx-action-auth-session-secret-needles*
+  '("Authorization:"
+    "Authorization="
+    "Cookie:"
+    "Cookie="
+    "JSESSIONID="
+    "Bearer "
+    "bearer "
+    "password="
+    "password:"
+    "\"password\""
+    "token="
+    "\"token\":\""))
+
+(defun read-dmx-action-auth-session-scxml ()
+  (call-hyperdoc-scxml :parse-scxml-file *dmx-action-auth-session-scxml*))
+
+(defun dmx-action-auth-session-normalize-mode (mode)
+  (case mode
+    ((:anonymous :none nil) :anonymous)
+    ((:username-password :userpass :basic :credentials) :username-password)
+    ((:authorization-header :auth-header :header) :authorization-header)
+    ((:bearer-token :bearer :token) :bearer-token)
+    (otherwise
+     (error "Unsupported DMX action auth/session mode: ~S" mode))))
+
+(defun dmx-action-auth-session-mode-label (mode)
+  (case mode
+    (:anonymous "anonymous")
+    (:username-password "username/password")
+    (:authorization-header "authorization-header")
+    (:bearer-token "bearer-token")
+    (otherwise "unknown")))
+
+(defun dmx-action-auth-session-authorization-scheme (mode)
+  (case mode
+    (:anonymous "none")
+    (:username-password "Basic")
+    (:authorization-header "direct-header")
+    (:bearer-token "Bearer")
+    (otherwise "none")))
+
+(defun dmx-action-auth-session-default-bootstrap-status (mode)
+  (if (eq mode :username-password)
+      :succeeded
+      :not-required))
+
+(defun dmx-action-auth-session-failure-boundary (mode bootstrap-status)
+  (cond
+    ((eq mode :anonymous)
+     :anonymous-blocked)
+    ((and (eq mode :username-password)
+          (eq bootstrap-status :failed))
+     :auth-failed)
+    (t :none)))
+
+(defun dmx-action-auth-session-continuation-readiness (mode bootstrap-status)
+  (if (or (member mode '(:authorization-header :bearer-token) :test #'eq)
+          (and (eq mode :username-password)
+               (eq bootstrap-status :succeeded)))
+      :continuation-ready
+      :blocked))
+
+(defun dmx-action-auth-session-session-cookie-present-p (mode bootstrap-status)
+  (and (eq mode :username-password)
+       (eq bootstrap-status :succeeded)))
+
+(defun dmx-action-auth-session-session-cookie-shape (session-cookie-present-p)
+  (if session-cookie-present-p
+      "session-cookie(redacted); workspace-cookie-shape-only"
+      "none"))
+
+(defun dmx-action-auth-session-string-contains-ci-p (haystack needle)
+  (and haystack needle
+       (search needle haystack :test #'char-equal)))
+
+(defun dmx-action-auth-session-secret-leak-p (text)
+  (find-if (lambda (needle)
+             (dmx-action-auth-session-string-contains-ci-p text needle))
+           *dmx-action-auth-session-secret-needles*))
+
+(defun dmx-action-auth-session-events (mode bootstrap-status)
+  (append
+   '("AUTH.INPUT_CAPTURED"
+     "AUTH.MODE_NORMALIZED")
+   (case mode
+     (:anonymous
+      '("AUTH.MODE.ANONYMOUS"
+        "AUTH.BLOCKED"
+        "AUTH.DONE"))
+     (:authorization-header
+      '("AUTH.MODE.AUTHORIZATION_HEADER"
+        "AUTH.REQUEST.DIRECT_HEADER_SHAPED"
+        "AUTH.CONTINUATION_READY"
+        "AUTH.DONE"))
+     (:bearer-token
+      '("AUTH.MODE.BEARER_TOKEN"
+        "AUTH.REQUEST.BEARER_SHAPED"
+        "AUTH.CONTINUATION_READY"
+        "AUTH.DONE"))
+     (:username-password
+      (if (eq bootstrap-status :failed)
+          '("AUTH.MODE.USERPASS"
+            "AUTH.BOOTSTRAP_ATTEMPTED"
+            "AUTH.BOOTSTRAP.FAILED"
+            "AUTH.FAILED")
+          '("AUTH.MODE.USERPASS"
+            "AUTH.BOOTSTRAP_ATTEMPTED"
+            "AUTH.BOOTSTRAP.SUCCEEDED"
+            "AUTH.REQUEST_SHAPED"
+            "AUTH.REQUEST.GUARDED_SHAPED"
+            "AUTH.CONTINUATION_READY"
+            "AUTH.DONE")))
+     (otherwise
+      (error "Unsupported DMX action auth/session mode for events: ~S" mode)))))
+
+(defun make-dmx-action-auth-session-example
+    (&key (selected-auth-mode :username-password)
+       (workspace-id 919815)
+       (topic-id 936040)
+       bootstrap-status)
+  (let* ((mode (dmx-action-auth-session-normalize-mode selected-auth-mode))
+         (resolved-bootstrap-status
+           (or bootstrap-status
+               (dmx-action-auth-session-default-bootstrap-status mode))))
+    (list :selected-auth-mode mode
+          :workspace-id workspace-id
+          :topic-id topic-id
+          :bootstrap-status resolved-bootstrap-status
+          :authorization-scheme
+          (dmx-action-auth-session-authorization-scheme mode)
+          :session-cookie-present-p
+          (dmx-action-auth-session-session-cookie-present-p
+           mode
+           resolved-bootstrap-status)
+          :session-cookie-shape
+          (dmx-action-auth-session-session-cookie-shape
+           (dmx-action-auth-session-session-cookie-present-p
+            mode
+            resolved-bootstrap-status))
+          :continuation-readiness
+          (dmx-action-auth-session-continuation-readiness
+           mode
+           resolved-bootstrap-status)
+          :redaction-status :redacted
+          :failure-boundary
+          (dmx-action-auth-session-failure-boundary
+           mode
+           resolved-bootstrap-status))))
+
+(defun make-dmx-action-auth-session-run
+    (&key (selected-auth-mode :username-password)
+       (workspace-id 919815)
+       (topic-id 936040)
+       bootstrap-status package-name function-name)
+  (let* ((mode (dmx-action-auth-session-normalize-mode selected-auth-mode))
+         (resolved-bootstrap-status
+           (or bootstrap-status
+               (dmx-action-auth-session-default-bootstrap-status mode)))
+         (session-cookie-present-p
+           (dmx-action-auth-session-session-cookie-present-p
+            mode
+            resolved-bootstrap-status))
+         (session-cookie-shape
+           (dmx-action-auth-session-session-cookie-shape
+            session-cookie-present-p))
+         (authorization-scheme
+           (dmx-action-auth-session-authorization-scheme mode))
+         (bootstrap-required-p (eq mode :username-password))
+         (bootstrap-attempted-p (eq mode :username-password))
+         (continuation-readiness
+           (dmx-action-auth-session-continuation-readiness
+            mode
+            resolved-bootstrap-status))
+         (failure-boundary
+           (dmx-action-auth-session-failure-boundary
+            mode
+            resolved-bootstrap-status))
+         (events
+           (dmx-action-auth-session-events mode resolved-bootstrap-status))
+         (semantic-facts
+           (list :selected-auth-mode mode
+                 :selected-auth-mode-label
+                 (dmx-action-auth-session-mode-label mode)
+                 :workspace-id workspace-id
+                 :topic-id topic-id
+                 :bootstrap-required-p bootstrap-required-p
+                 :bootstrap-attempted-p bootstrap-attempted-p
+                 :bootstrap-status resolved-bootstrap-status
+                 :session-cookie-present-p session-cookie-present-p
+                 :session-cookie-shape session-cookie-shape
+                 :authorization-scheme authorization-scheme
+                 :continuation-readiness continuation-readiness
+                 :redaction-status :redacted
+                 :failure-boundary failure-boundary))
+         (generated-package
+           (or package-name
+               "HYPERDOC/SCXML/GENERATED/DMX-ACTION-AUTH-SESSION"))
+         (generated-function
+           (or function-name
+               "RUN-DMX-ACTION-AUTH-SESSION"))
+         (expectation-run
+           (run-scxml-expectation-with-events
+            *dmx-action-auth-session-scxml*
+            events
+            semantic-facts
+            :expected-subject
+            (format nil
+                    "dmx-action-auth-session ~A"
+                    (dmx-action-auth-session-mode-label mode))
+            :package-name generated-package
+            :function-name generated-function))
+         (trace (or (scxml-expectation-run-trace-of expectation-run) '()))
+         (trace-string (format nil "~{~A~%~}" trace))
+         (redaction-status
+           (if (dmx-action-auth-session-secret-leak-p trace-string)
+               :unexpected-secret
+               :redacted)))
+    (make-instance 'dmx-action-auth-session-run
+                   :scxml-path *dmx-action-auth-session-scxml*
+                   :selected-auth-mode mode
+                   :workspace-id workspace-id
+                   :topic-id topic-id
+                   :bootstrap-required-p bootstrap-required-p
+                   :bootstrap-attempted-p bootstrap-attempted-p
+                   :bootstrap-status resolved-bootstrap-status
+                   :session-cookie-present-p session-cookie-present-p
+                   :session-cookie-shape session-cookie-shape
+                   :authorization-scheme authorization-scheme
+                   :continuation-readiness continuation-readiness
+                   :redaction-status redaction-status
+                   :failure-boundary failure-boundary
+                   :validation-findings
+                   (scxml-expectation-run-validation-findings-of
+                    expectation-run)
+                   :generated-package generated-package
+                   :generated-function generated-function
+                   :semantic-facts semantic-facts
+                   :input-events events
+                   :trace trace
+                   :done-p (scxml-expectation-run-done-p-of expectation-run)
+                   :passed-p (and (scxml-expectation-run-done-p-of expectation-run)
+                                  (scxml-final-state=
+                                   "done"
+                                   (scxml-expectation-run-final-state-of
+                                    expectation-run)))
+                   :final-state
+                   (scxml-expectation-run-final-state-of expectation-run))))
+
 (defparameter *dmx-annotation-acceptance-runbook-secret-needles*
   '("Authorization:"
     "Authorization="
@@ -909,6 +1241,9 @@
     (&key live-run-enabled-p live-exit-code live-pass-lines-observed-p)
   (list :accepted-commits
         (copy-list *dmx-annotation-acceptance-runbook-accepted-commits*)
+        :auth-session-submachine-scxml-path
+        (namestring *dmx-action-auth-session-scxml*)
+        :auth-session-submachine-modeled-p t
         :workspace-id 919815
         :workspace-topicmap-id 919822
         :preserved-topic-id 936040
