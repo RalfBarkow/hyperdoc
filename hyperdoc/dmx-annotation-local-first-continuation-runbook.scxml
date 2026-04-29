@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="dmx-annotation-local-first-continuation-runbook"
+    initial="preflightCleanTree">
+
+  <state id="preflightCleanTree">
+    <onentry>
+      <log label="Preflight confirmed clean tree for DMX annotation acceptance replay"/>
+    </onentry>
+
+    <transition event="PRECHECK.CLEAN_TREE" target="recordAcceptedCommits"/>
+  </state>
+
+  <state id="recordAcceptedCommits">
+    <onentry>
+      <log label="Recorded accepted commits: 0c2673e, 242410c, 9f489ab"/>
+    </onentry>
+
+    <transition event="COMMITS.ACCEPTED" target="localFirstSaveWithoutCredentials"/>
+  </state>
+
+  <state id="localFirstSaveWithoutCredentials">
+    <onentry>
+      <log label="Verified local-first DOM connect annotation save succeeds without credentialed DMX client"/>
+    </onentry>
+
+    <transition event="LOCAL_FIRST_SAVE.WITHOUT_CREDENTIALS" target="optionalDmxMaterialization"/>
+  </state>
+
+  <state id="optionalDmxMaterialization">
+    <onentry>
+      <log label="Verified optional DMX materialization uses one carrier lane and does not gate local save"/>
+    </onentry>
+
+    <transition event="DMX.MATERIALIZATION.ONE_CARRIER_LANE" target="createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"/>
+    <transition event="CREATE_TOPIC_FAILURE_EVIDENCE.SKIPPED_PRE_TOPIC_UPSERT" target="createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"/>
+  </state>
+
+  <state id="createTopicFailureEvidenceSmokeSkippedPreTopicUpsert">
+    <onentry>
+      <log label="Recorded designed skip: create-topic failure evidence smoke skipped at pre-topic-upsert preconditions"/>
+    </onentry>
+
+    <transition event="CREATE_TOPIC_FAILURE_EVIDENCE.SKIP_RECORDED" target="guardedContinuationForExistingTopic936040"/>
+  </state>
+
+  <state id="guardedContinuationForExistingTopic936040">
+    <onentry>
+      <log label="Verified existing topic-backed annotation 936040 routes to guarded continuation and skips raw topic upsert"/>
+    </onentry>
+
+    <transition event="CONTINUATION.GUARDED_PATH" target="workspaceAssignmentReadback919815"/>
+  </state>
+
+  <state id="workspaceAssignmentReadback919815">
+    <onentry>
+      <log label="Verified workspace assignment readback equals 919815"/>
+    </onentry>
+
+    <transition event="WORKSPACE_ASSIGNMENT.READBACK_919815" target="topicmapReadbackIncludes919822"/>
+  </state>
+
+  <state id="topicmapReadbackIncludes919822">
+    <onentry>
+      <log label="Verified topicmap readback includes 919822"/>
+    </onentry>
+
+    <transition event="TOPICMAP.READBACK_INCLUDES_919822" target="reopenReconstructsWorkspaceDockAnnotation"/>
+  </state>
+
+  <state id="reopenReconstructsWorkspaceDockAnnotation">
+    <onentry>
+      <log label="Verified reopen reconstructs workspace-dock-annotation and preserves topic id"/>
+    </onentry>
+
+    <transition event="REOPEN.WORKSPACE_DOCK_ANNOTATION" target="secretLeakageAudit"/>
+  </state>
+
+  <state id="secretLeakageAudit">
+    <onentry>
+      <log label="Verified no credential or session leakage into journal state, carrier JSON, SCXML trace, or runbook views"/>
+    </onentry>
+
+    <transition event="SECRET_LEAKAGE_AUDIT.PASSED" target="liveSmokeReplay"/>
+  </state>
+
+  <state id="liveSmokeReplay">
+    <onentry>
+      <log label="Live smoke replay branch: explicit opt-in only, otherwise skipped-precondition"/>
+    </onentry>
+
+    <transition event="LIVE_SMOKE.SKIPPED_PRECONDITION" target="accepted"/>
+    <transition event="LIVE_SMOKE.EXIT_0_EXPECTED_PASSES" target="accepted"/>
+  </state>
+
+  <final id="accepted">
+    <onentry>
+      <log label="DMX annotation local-first and guarded-continuation acceptance checkpoint accepted"/>
+    </onentry>
+  </final>
+
+</scxml>

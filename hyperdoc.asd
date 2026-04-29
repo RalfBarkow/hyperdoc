@@ -338,6 +338,7 @@
                              (:file "localhost-fedwiki-page-promotion-workflow-scxml-smoke")
                              (:file "topic-factory-snippet-dmx-smoke")
                              (:file "hyperdoc-test-system-runbook-smoke")
+                             (:file "dmx-annotation-acceptance-scxml-runbook-smoke")
                              (:file "dmx-mcp-smoke")
                              (:file "dmx-incident-arc-smoke")
                              (:file "dmx-shared-workspace-docs-smoke")

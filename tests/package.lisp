@@ -38,6 +38,7 @@
    :run-localhost-fedwiki-page-promotion-plans-smoke-tests
    :run-topic-factory-snippet-dmx-smoke-tests
    :run-hyperdoc-test-system-runbook-smoke-tests
+   :run-dmx-annotation-acceptance-scxml-runbook-smoke-tests
    :run-dmx-mcp-smoke-tests
    :run-dmx-incident-guarded-write-boundary-smoke-test
    :run-dmx-incident-arc-smoke-tests

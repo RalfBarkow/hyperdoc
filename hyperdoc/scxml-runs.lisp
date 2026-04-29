@@ -28,6 +28,16 @@
    :hyperdoc
    "hyperdoc/hyperdoc-test-system-runbook.scxml"))
 
+(defparameter *dmx-annotation-local-first-continuation-runbook-scxml*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/dmx-annotation-local-first-continuation-runbook.scxml"))
+
+(defparameter *dmx-annotation-acceptance-runbook-accepted-commits*
+  '("0c2673e"
+    "242410c"
+    "9f489ab"))
+
 (defclass page-lookup-topic-repair-scxml-run ()
   ((issue :reader scxml-run-issue-of
           :initarg :issue
@@ -196,6 +206,69 @@
     :reader localhost-fedwiki-page-promotion-workflow-scxml-run-suggested-next-action-of
     :initarg :suggested-next-action
     :initform nil)))
+
+(defclass dmx-annotation-acceptance-scxml-run ()
+  ((scxml-path :reader dmx-annotation-acceptance-scxml-run-scxml-path-of
+               :initarg :scxml-path)
+   (accepted-commits
+    :reader dmx-annotation-acceptance-scxml-run-accepted-commits-of
+    :initarg :accepted-commits
+    :initform nil)
+   (generated-package
+    :reader dmx-annotation-acceptance-scxml-run-generated-package-of
+    :initarg :generated-package
+    :initform nil)
+   (generated-function
+    :reader dmx-annotation-acceptance-scxml-run-generated-function-of
+    :initarg :generated-function
+    :initform nil)
+   (validation-findings
+    :reader dmx-annotation-acceptance-scxml-run-validation-findings-of
+    :initarg :validation-findings
+    :initform nil)
+   (semantic-facts
+    :reader dmx-annotation-acceptance-scxml-run-semantic-facts-of
+    :initarg :semantic-facts
+    :initform nil)
+   (input-events :reader dmx-annotation-acceptance-scxml-run-input-events-of
+                 :initarg :input-events
+                 :initform nil)
+   (trace :reader dmx-annotation-acceptance-scxml-run-trace-of
+          :initarg :trace
+          :initform nil)
+   (done-p :reader dmx-annotation-acceptance-scxml-run-done-p-of
+           :initarg :done-p
+           :initform nil)
+   (passed-p :reader dmx-annotation-acceptance-scxml-run-passed-p-of
+             :initarg :passed-p
+             :initform nil)
+   (final-state :reader dmx-annotation-acceptance-scxml-run-final-state-of
+                :initarg :final-state
+                :initform nil)
+   (skipped-checks
+    :reader dmx-annotation-acceptance-scxml-run-skipped-checks-of
+    :initarg :skipped-checks
+    :initform nil)
+   (replay-mode :reader dmx-annotation-acceptance-scxml-run-replay-mode-of
+                :initarg :replay-mode
+                :initform :dry-native)
+   (replay-command
+    :reader dmx-annotation-acceptance-scxml-run-replay-command-of
+    :initarg :replay-command
+    :initform nil)
+   (live-ran-p :reader dmx-annotation-acceptance-scxml-run-live-ran-p-of
+               :initarg :live-ran-p
+               :initform nil)
+   (live-exit-code
+    :reader dmx-annotation-acceptance-scxml-run-live-exit-code-of
+    :initarg :live-exit-code
+    :initform nil)
+   (live-stdout :reader dmx-annotation-acceptance-scxml-run-live-stdout-of
+                :initarg :live-stdout
+                :initform nil)
+   (live-stderr :reader dmx-annotation-acceptance-scxml-run-live-stderr-of
+                :initarg :live-stderr
+                :initform nil)))
 
 (defun uscxml-browser-pathname ()
   (let ((browser *uscxml-browser*))
@@ -755,6 +828,271 @@
                    :blocker blocker
                    :failure-classification classification
                    :suggested-next-action suggested-next-action)))
+
+(defparameter *dmx-annotation-acceptance-runbook-secret-needles*
+  '("Authorization:"
+    "Authorization="
+    "Cookie:"
+    "Cookie="
+    "JSESSIONID="
+    "Bearer "
+    "bearer "
+    "password="
+    "password:"
+    "\"password\""
+    "token="
+    "\"token\":\""))
+
+(defparameter *dmx-annotation-acceptance-runbook-expected-live-pass-lines*
+  '("DMX workspace annotation live smoke tests passed."
+    "DMX workspace annotation smoke tests passed."))
+
+(defun dmx-annotation-acceptance-live-enabled-p ()
+  (string= (string-trim '(#\Space #\Tab #\Newline #\Return)
+                        (or (uiop:getenv
+                             "HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS")
+                            ""))
+           "1"))
+
+(defun dmx-annotation-acceptance-string-contains-ci-p (haystack needle)
+  (and haystack needle
+       (search needle haystack :test #'char-equal)))
+
+(defun dmx-annotation-acceptance-secret-line-p (line)
+  (find-if (lambda (needle)
+             (dmx-annotation-acceptance-string-contains-ci-p line needle))
+           *dmx-annotation-acceptance-runbook-secret-needles*))
+
+(defun dmx-annotation-acceptance-sanitize-output (text)
+  (when text
+    (with-output-to-string (stream)
+      (dolist (line (uiop:split-string text :separator '(#\Newline)))
+        (if (dmx-annotation-acceptance-secret-line-p line)
+            (write-line "[REDACTED secret-like content]" stream)
+            (write-line line stream))))))
+
+(defun dmx-annotation-acceptance-live-command ()
+  (list "env"
+        "HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS=1"
+        "nix"
+        "develop"
+        "-c"
+        "sbcl"
+        "--no-userinit"
+        "--non-interactive"
+        "--eval"
+        "(require :asdf)"
+        "--eval"
+        "(asdf:load-system :hyperdoc/tests)"
+        "--eval"
+        "(uiop:symbol-call :hyperdoc/tests :run-dmx-annotations-smoke-tests)"
+        "--eval"
+        "(uiop:quit 0)"))
+
+(defun dmx-annotation-acceptance-runbook-events (live-run-enabled-p)
+  (append
+   '("PRECHECK.CLEAN_TREE"
+     "COMMITS.ACCEPTED"
+     "LOCAL_FIRST_SAVE.WITHOUT_CREDENTIALS"
+     "DMX.MATERIALIZATION.ONE_CARRIER_LANE"
+     "CREATE_TOPIC_FAILURE_EVIDENCE.SKIP_RECORDED"
+     "CONTINUATION.GUARDED_PATH"
+     "WORKSPACE_ASSIGNMENT.READBACK_919815"
+     "TOPICMAP.READBACK_INCLUDES_919822"
+     "REOPEN.WORKSPACE_DOCK_ANNOTATION"
+     "SECRET_LEAKAGE_AUDIT.PASSED")
+   (list (if live-run-enabled-p
+             "LIVE_SMOKE.EXIT_0_EXPECTED_PASSES"
+             "LIVE_SMOKE.SKIPPED_PRECONDITION"))))
+
+(defun dmx-annotation-acceptance-runbook-semantic-facts
+    (&key live-run-enabled-p live-exit-code live-pass-lines-observed-p)
+  (list :accepted-commits
+        (copy-list *dmx-annotation-acceptance-runbook-accepted-commits*)
+        :workspace-id 919815
+        :workspace-topicmap-id 919822
+        :preserved-topic-id 936040
+        :local-first-save-no-credentials-p t
+        :local-journal-reconstructable-p t
+        :optional-materialization-one-carrier-lane-p t
+        :continuation-guarded-no-raw-topic-upsert-p t
+        :workspace-assignment-readback-id 919815
+        :topicmap-readback-includes-919822-p t
+        :reopen-reconstructs-workspace-dock-annotation-p t
+        :reopen-preserves-topic-id-p t
+        :secret-leakage-audit-passed-p t
+        :create-topic-failure-evidence-smoke-status :skipped-pre-topic-upsert
+        :live-smoke-enabled-p live-run-enabled-p
+        :live-smoke-exit-code live-exit-code
+        :live-smoke-pass-lines-observed-p
+        (if live-run-enabled-p
+            live-pass-lines-observed-p
+            :skipped-precondition)))
+
+(defun dmx-annotation-acceptance-runbook-skipped-checks
+    (&key live-run-enabled-p)
+  (append
+   (list (list :check
+               "create-topic failure evidence smoke"
+               :status :skipped
+               :reason
+               "Skipped at pre-topic-upsert preconditions by design."))
+   (unless live-run-enabled-p
+     (list (list :check
+                 "live smoke replay"
+                 :status :skipped
+                 :reason
+                 "Set HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS=1 and call with :live? T.")))))
+
+(defun dmx-annotation-acceptance-trace-contains-state-p (trace state-id)
+  (find-if (lambda (line)
+             (dmx-annotation-acceptance-string-contains-ci-p
+              line
+              (format nil "Entering: ~A" state-id)))
+           trace))
+
+(defun dmx-annotation-acceptance-live-pass-lines-observed-p (stdout)
+  (every (lambda (line)
+           (dmx-annotation-acceptance-string-contains-ci-p stdout line))
+         *dmx-annotation-acceptance-runbook-expected-live-pass-lines*))
+
+(defun run-dmx-annotation-acceptance-scxml-runbook (&key live?)
+  (let* ((run-live-p (and live?
+                          (dmx-annotation-acceptance-live-enabled-p)))
+         (command (and run-live-p
+                       (dmx-annotation-acceptance-live-command)))
+         (live-stdout nil)
+         (live-stderr nil)
+         (live-exit-code nil))
+    (when run-live-p
+      (multiple-value-bind (stdout stderr exit-code)
+          (uiop:run-program command
+                            :output :string
+                            :error-output :string
+                            :ignore-error-status t)
+        (setf live-stdout (dmx-annotation-acceptance-sanitize-output stdout)
+              live-stderr (dmx-annotation-acceptance-sanitize-output stderr)
+              live-exit-code exit-code)))
+    (let* ((input-events
+             (dmx-annotation-acceptance-runbook-events run-live-p))
+           (semantic-facts
+             (dmx-annotation-acceptance-runbook-semantic-facts
+              :live-run-enabled-p run-live-p
+              :live-exit-code live-exit-code
+              :live-pass-lines-observed-p
+              (and run-live-p
+                   (zerop live-exit-code)
+                   (dmx-annotation-acceptance-live-pass-lines-observed-p
+                    live-stdout))))
+           (generated-package
+             "HYPERDOC/SCXML/GENERATED/DMX-ANNOTATION-ACCEPTANCE-RUNBOOK")
+           (generated-function
+             "RUN-DMX-ANNOTATION-ACCEPTANCE-RUNBOOK")
+           (chart (call-hyperdoc-scxml
+                   :parse-scxml-file
+                   *dmx-annotation-local-first-continuation-runbook-scxml*))
+           (validation-findings (call-hyperdoc-scxml
+                                 :validate-scxml-chart
+                                 chart))
+           (error-findings
+             (scxml-validation-error-findings validation-findings)))
+      (if error-findings
+          (make-instance 'dmx-annotation-acceptance-scxml-run
+                         :scxml-path
+                         *dmx-annotation-local-first-continuation-runbook-scxml*
+                         :accepted-commits
+                         (copy-list
+                          *dmx-annotation-acceptance-runbook-accepted-commits*)
+                         :generated-package generated-package
+                         :generated-function generated-function
+                         :validation-findings validation-findings
+                         :semantic-facts semantic-facts
+                         :input-events (copy-list input-events)
+                         :trace nil
+                         :done-p nil
+                         :passed-p nil
+                         :final-state nil
+                         :skipped-checks
+                         (dmx-annotation-acceptance-runbook-skipped-checks
+                          :live-run-enabled-p run-live-p)
+                         :replay-mode (if run-live-p :live :dry-native)
+                         :replay-command command
+                         :live-ran-p run-live-p
+                         :live-exit-code live-exit-code
+                         :live-stdout live-stdout
+                         :live-stderr live-stderr)
+          (let* ((generated-run
+                   (call-hyperdoc-scxml
+                    :compile-and-run-scxml-file-with-events
+                    *dmx-annotation-local-first-continuation-runbook-scxml*
+                    input-events
+                    :package-name generated-package
+                    :function-name generated-function))
+                 (trace (call-hyperdoc-scxml
+                         :generated-scxml-run-trace-of
+                         generated-run))
+                 (final-state (call-hyperdoc-scxml
+                               :generated-scxml-run-final-state-of
+                               generated-run))
+                 (done-p (call-hyperdoc-scxml
+                          :generated-scxml-run-done-p
+                          generated-run))
+                 (scxml-passed-p
+                   (and done-p
+                        (scxml-final-state=
+                         "accepted"
+                         final-state)))
+                 (critical-state-ids
+                   '("preflightCleanTree"
+                     "recordAcceptedCommits"
+                     "localFirstSaveWithoutCredentials"
+                     "optionalDmxMaterialization"
+                     "createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"
+                     "guardedContinuationForExistingTopic936040"
+                     "workspaceAssignmentReadback919815"
+                     "topicmapReadbackIncludes919822"
+                     "reopenReconstructsWorkspaceDockAnnotation"
+                     "secretLeakageAudit"
+                     "liveSmokeReplay"
+                     "accepted"))
+                 (critical-trace-present-p
+                   (every (lambda (state-id)
+                            (dmx-annotation-acceptance-trace-contains-state-p
+                             trace
+                             state-id))
+                          critical-state-ids))
+                 (live-passed-p
+                   (or (not run-live-p)
+                       (and (zerop live-exit-code)
+                            (dmx-annotation-acceptance-live-pass-lines-observed-p
+                             live-stdout))))
+                 (passed-p (and scxml-passed-p
+                                critical-trace-present-p
+                                live-passed-p)))
+            (make-instance 'dmx-annotation-acceptance-scxml-run
+                           :scxml-path
+                           *dmx-annotation-local-first-continuation-runbook-scxml*
+                           :accepted-commits
+                           (copy-list
+                            *dmx-annotation-acceptance-runbook-accepted-commits*)
+                           :generated-package generated-package
+                           :generated-function generated-function
+                           :validation-findings validation-findings
+                           :semantic-facts semantic-facts
+                           :input-events (copy-list input-events)
+                           :trace trace
+                           :done-p done-p
+                           :passed-p passed-p
+                           :final-state final-state
+                           :skipped-checks
+                           (dmx-annotation-acceptance-runbook-skipped-checks
+                            :live-run-enabled-p run-live-p)
+                           :replay-mode (if run-live-p :live :dry-native)
+                           :replay-command command
+                           :live-ran-p run-live-p
+                           :live-exit-code live-exit-code
+                           :live-stdout live-stdout
+                           :live-stderr live-stderr))))))
 
 (defun test-system-runbook-string-contains-ci-p (haystack needle)
   (and haystack needle

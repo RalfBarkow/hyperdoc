@@ -140,6 +140,68 @@
         run)
        stream))))
 
+(defun dmx-annotation-acceptance-scxml-finding-lines (run)
+  (let ((findings
+          (hyperdoc::dmx-annotation-acceptance-scxml-run-validation-findings-of
+           run)))
+    (if findings
+        (mapcar (lambda (finding)
+                  (format nil "[~A] ~A: ~A"
+                          (hyperdoc/scxml:scxml-validation-finding-severity-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-code-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-message-of
+                           finding)))
+                findings)
+        (list "No validation findings."))))
+
+(defun dmx-annotation-acceptance-scxml-trace-string (run)
+  (with-output-to-string (stream)
+    (dolist (line
+             (or (hyperdoc::dmx-annotation-acceptance-scxml-run-trace-of run)
+                 '()))
+      (write-string line stream)
+      (terpri stream))))
+
+(defun dmx-annotation-acceptance-scxml-events-string (run)
+  (with-output-to-string (stream)
+    (dolist (event
+             (or (hyperdoc::dmx-annotation-acceptance-scxml-run-input-events-of
+                  run)
+                 '()))
+      (write-string event stream)
+      (terpri stream))))
+
+(defun dmx-annotation-acceptance-scxml-facts-string (run)
+  (with-output-to-string (stream)
+    (let ((*print-pretty* t))
+      (pprint
+       (hyperdoc::dmx-annotation-acceptance-scxml-run-semantic-facts-of run)
+       stream))))
+
+(defun dmx-annotation-acceptance-scxml-skipped-checks-string (run)
+  (with-output-to-string (stream)
+    (let ((*print-pretty* t))
+      (pprint
+       (hyperdoc::dmx-annotation-acceptance-scxml-run-skipped-checks-of run)
+       stream))))
+
+(defun dmx-annotation-acceptance-scxml-commits-string (run)
+  (format nil "~{~A~^, ~}"
+          (or (hyperdoc::dmx-annotation-acceptance-scxml-run-accepted-commits-of
+               run)
+              '())))
+
+(defun dmx-annotation-acceptance-scxml-command-string (command)
+  (if command
+      (format nil "~{~A~^ ~}" command)
+      "n/a"))
+
+(defun dmx-annotation-acceptance-scxml-live-enabled-p ()
+  (string= (or (uiop:getenv "HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS") "")
+           "1"))
+
 (views:defview 👀overview
     (run hyperdoc::page-lookup-topic-repair-scxml-run)
   (views:html-view :title "Overview" :priority 1
@@ -437,4 +499,130 @@
       (:h3 (views:esc "Trace"))
       (:pre (views:esc
              (localhost-fedwiki-page-promotion-workflow-scxml-trace-string
-              run))))))
+             run))))))
+
+(views:defview 👀overview
+    (run hyperdoc::dmx-annotation-acceptance-scxml-run)
+  (views:html-view :title "DMX annotation acceptance SCXML runbook" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "SCXML"))
+                   (:td (:tt
+                         (views:esc
+                          (namestring
+                           (hyperdoc::dmx-annotation-acceptance-scxml-run-scxml-path-of
+                            run))))))
+              (:tr (:td (views:esc "Accepted commits"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-acceptance-scxml-commits-string run)))))
+              (:tr (:td (views:esc "Replay mode"))
+                   (:td (:tt
+                         (views:esc
+                          (case (hyperdoc::dmx-annotation-acceptance-scxml-run-replay-mode-of
+                                 run)
+                            (:live "live")
+                            (otherwise "dry/native"))))))
+              (:tr (:td (views:esc "Done"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-annotation-acceptance-scxml-run-done-p-of run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Passed"))
+                   (:td (:tt
+                         (views:esc
+                          (if (hyperdoc::dmx-annotation-acceptance-scxml-run-passed-p-of run)
+                              "yes"
+                              "no")))))
+              (:tr (:td (views:esc "Final state"))
+                   (:td (:tt
+                         (views:esc
+                          (if-let (final-state
+                                   (hyperdoc::dmx-annotation-acceptance-scxml-run-final-state-of
+                                    run))
+                              (format nil "~A" final-state)
+                              "n/a")))))
+              (:tr (:td (views:esc "Generated package"))
+                   (:td (:tt
+                         (views:esc
+                          (or (hyperdoc::dmx-annotation-acceptance-scxml-run-generated-package-of run)
+                              "n/a")))))
+              (:tr (:td (views:esc "Generated function"))
+                   (:td (:tt
+                         (views:esc
+                          (or (hyperdoc::dmx-annotation-acceptance-scxml-run-generated-function-of run)
+                              "n/a"))))))
+      (:h3 (views:esc "Skipped checks"))
+      (:pre (views:esc
+             (dmx-annotation-acceptance-scxml-skipped-checks-string run)))
+      (:h3 (views:esc "Validation findings"))
+      (:pre (views:esc
+             (format nil "~{~A~%~}"
+                     (dmx-annotation-acceptance-scxml-finding-lines run))))
+      (:h3 (views:esc "Semantic facts"))
+      (:pre (views:esc
+             (dmx-annotation-acceptance-scxml-facts-string run)))
+      (:h3 (views:esc "Input events"))
+      (:pre (views:esc
+             (dmx-annotation-acceptance-scxml-events-string run)))
+      (:h3 (views:esc "Trace"))
+      (:pre (views:esc
+             (dmx-annotation-acceptance-scxml-trace-string run)))
+      (when (hyperdoc::dmx-annotation-acceptance-scxml-run-live-ran-p-of run)
+        (views:html
+          (:h3 (views:esc "Live replay"))
+          (:table :class "inspector-table"
+                  (:tr (:td (views:esc "Command"))
+                       (:td (:tt
+                             (views:esc
+                              (dmx-annotation-acceptance-scxml-command-string
+                               (hyperdoc::dmx-annotation-acceptance-scxml-run-replay-command-of
+                                run))))))
+                  (:tr (:td (views:esc "Exit code"))
+                       (:td (:tt
+                             (views:esc
+                              (princ-to-string
+                               (or (hyperdoc::dmx-annotation-acceptance-scxml-run-live-exit-code-of
+                                    run)
+                                   "n/a")))))))
+          (when (plusp (length (or (hyperdoc::dmx-annotation-acceptance-scxml-run-live-stdout-of
+                                    run)
+                                   "")))
+            (views:html
+              (:h3 (views:esc "Live stdout (sanitized)"))
+              (:pre (views:esc
+                     (hyperdoc::dmx-annotation-acceptance-scxml-run-live-stdout-of
+                      run)))))
+          (when (plusp (length (or (hyperdoc::dmx-annotation-acceptance-scxml-run-live-stderr-of
+                                    run)
+                                   "")))
+            (views:html
+              (:h3 (views:esc "Live stderr (sanitized)"))
+              (:pre (views:esc
+                     (hyperdoc::dmx-annotation-acceptance-scxml-run-live-stderr-of
+                      run))))))))))
+
+(views:defview 👀actions
+    (run hyperdoc::dmx-annotation-acceptance-scxml-run)
+  (declare (ignore run))
+  (views:html-view :title "Replay" :priority 2
+    (views:html
+      (:p
+       (views:action-button
+        "Replay SCXML locally"
+        (views:thunk
+          (hyperdoc::run-dmx-annotation-acceptance-scxml-runbook :live? nil))
+        "Parse, validate, and replay the SCXML runbook locally without DMX credentials."))
+      (if (dmx-annotation-acceptance-scxml-live-enabled-p)
+          (views:html
+            (:p
+             (views:action-button
+              "Replay live smoke"
+              (views:thunk
+                (hyperdoc::run-dmx-annotation-acceptance-scxml-runbook :live? t))
+              "Replay live DMX smoke through the explicit runbook channel.")))
+          (views:html
+            (:p :style "opacity:0.65"
+                (views:esc
+                 "Replay live smoke disabled. Set HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS=1 to enable the action.")))))))

@@ -31,6 +31,7 @@
   (run-localhost-fedwiki-page-promotion-workflow-scxml-smoke-tests)
   (run-topic-factory-snippet-dmx-smoke-tests)
   (run-hyperdoc-test-system-runbook-smoke-tests)
+  (run-dmx-annotation-acceptance-scxml-runbook-smoke-tests)
   (run-dmx-mcp-smoke-tests)
   (run-dmx-incident-arc-smoke-tests)
   (run-dmx-shared-workspace-docs-smoke-tests)
