@@ -2245,8 +2245,9 @@
 (views:defview 👀workspace (annotation dock-annotation)
   (views:html-view :title "Workspace" :priority 4
     (let* ((workspace-annotation-p (workspace-dock-annotation-p annotation))
-           (persisted-topic-id (workspace-annotation-topic-id-or-nil annotation))
-           (continuable-p (and workspace-annotation-p persisted-topic-id))
+           (persisted-topic-id
+             (workspace-annotation-continuation-topic-id-or-nil annotation))
+           (continuable-p (and persisted-topic-id t))
            (default-client
              (resolve-dmx-workspace-annotation-client
               :dry-run nil
@@ -2286,7 +2287,7 @@
                   :topicmap-source)
                  :destination-rationale
                  (dmx-workspace-annotation-destination-rationale destination)))
-        (when workspace-annotation-p
+        (when (or workspace-annotation-p continuable-p)
           (views:html
             (:table :class "inspector-table"
                     (:tr (:th "Workspace topic id")
@@ -2296,31 +2297,43 @@
                     (:tr (:th "Workspace topic uri")
                          (:td (:tt (views:esc
                                     (workspace-annotation-render-value
-                                     (workspace-annotation-topic-uri-of
-                                      annotation))))))
+                                     (and workspace-annotation-p
+                                          (workspace-annotation-topic-uri-of
+                                           annotation)))))))
                     (:tr (:th "Storage mode")
                          (:td (:tt (views:esc
                                     (workspace-annotation-storage-mode-label
-                                     (workspace-annotation-storage-mode-of
-                                      annotation))))))
+                                     (and workspace-annotation-p
+                                          (workspace-annotation-storage-mode-of
+                                           annotation)))))))
                     (:tr (:th "Carrier type")
                          (:td (:tt (views:esc
                                     (workspace-annotation-render-value
-                                     (workspace-annotation-carrier-type-uri-of
-                                      annotation))))))
+                                     (and workspace-annotation-p
+                                          (workspace-annotation-carrier-type-uri-of
+                                           annotation)))))))
                     (:tr (:th "Workspace status")
                          (:td (:tt (views:esc
-                                    (or (workspace-annotation-status-of annotation)
+                                    (or (and workspace-annotation-p
+                                             (workspace-annotation-status-of
+                                              annotation))
                                         "-"))))))))
         (unless continuable-p
           (views:html
-            (:p (views:esc
-                 "Materialize to DMX is optional. Local save succeeds without DMX credentials, backend type support, workspace assignment, or topicmap placement."))
-            (setf materialize-mode-cell
-                  (hvr:select
-                   '(("No (save local only)" . "no")
-                     ("Yes (save local and materialize to DMX)" . "yes"))
-                   :label "Materialize to DMX now: "))))
+            (cond
+              (workspace-annotation-p
+               (views:html
+                 (:p (views:esc
+                      "This annotation is already saved locally. Materialize to DMX when you want workspace assignment and topicmap placement to run."))))
+              (t
+               (views:html
+                 (:p (views:esc
+                      "Materialize to DMX is optional. Local save succeeds without DMX credentials, backend type support, workspace assignment, or topicmap placement."))
+                 (setf materialize-mode-cell
+                       (hvr:select
+                        '(("No (save local only)" . "no")
+                          ("Yes (save local and materialize to DMX)" . "yes"))
+                        :label "Materialize to DMX now: ")))))))
         (:p
          (views:eval-button
           "Inspect workspace write plan"
@@ -2382,38 +2395,56 @@
           "Stop after the raw hyperdoc.annotation create-topic request and inspect the exact request/response boundary without assignment, topicmap placement, or journaling."))
         (:p
          (views:eval-button
-          (if continuable-p
-              "Continue"
-              "Persist to workspace")
+          (cond
+            (continuable-p "Continue DMX projection")
+            (workspace-annotation-p "Materialize to DMX now")
+            (t "Save annotation locally"))
           (views:thunk
-            (if continuable-p
-                (let* ((continuation-plan
-                         (plan-dmx-workspace-annotation-write-from-object
-                          annotation
-                          :workspace-topicmap-id workspace-topicmap-id
-                          :workspace-id workspace-id
-                          :client default-client))
-                       (continuation-report
-                         (make-workspace-annotation-continuation-report
-                          annotation
-                          continuation-plan
-                          persisted-topic-id
-                          workspace-topicmap-id
-                          default-client)))
-                  (continue-workspace-annotation-persistence-with-client
-                   continuation-report
-                   default-client))
-                (persist-dock-annotation-local-first
-                 annotation
-                 :workspace-topicmap-id workspace-topicmap-id
-                 :workspace-id workspace-id
-                 :client default-client
-                 :materialize-to-dmx-p
-                 (string= (or (and materialize-mode-cell
-                                    (lwcells:cell-ref materialize-mode-cell))
-                              "no")
-                          "yes"))))
-          "For existing annotation topics this resumes from the preserved topic through the guarded continuation stages. For drafts it saves locally first and materializes to DMX only when explicitly selected."))
+            (cond
+              (continuable-p
+               (let* ((continuation-subject
+                        (or (and workspace-annotation-p annotation)
+                            (ignore-errors
+                              (read-dmx-workspace-annotation
+                               :topic-id persisted-topic-id
+                               :workspace-topicmap-id workspace-topicmap-id
+                               :client default-client))
+                            annotation))
+                      (continuation-plan
+                        (plan-dmx-workspace-annotation-write-from-object
+                         continuation-subject
+                         :workspace-topicmap-id workspace-topicmap-id
+                         :workspace-id workspace-id
+                         :client default-client))
+                      (continuation-report
+                        (make-workspace-annotation-continuation-report
+                         continuation-subject
+                         continuation-plan
+                         persisted-topic-id
+                         workspace-topicmap-id
+                         default-client)))
+                 (continue-workspace-annotation-persistence-with-client
+                  continuation-report
+                  default-client)))
+              (workspace-annotation-p
+               (persist-dock-annotation-local-first
+                annotation
+                :workspace-topicmap-id workspace-topicmap-id
+                :workspace-id workspace-id
+                :client default-client
+                :materialize-to-dmx-p t))
+              (t
+               (persist-dock-annotation-local-first
+                annotation
+                :workspace-topicmap-id workspace-topicmap-id
+                :workspace-id workspace-id
+                :client default-client
+                :materialize-to-dmx-p
+                (string= (or (and materialize-mode-cell
+                                   (lwcells:cell-ref materialize-mode-cell))
+                             "no")
+                         "yes")))))
+          "Drafts save locally first. Local-only annotations can materialize later. Existing topic-backed annotations continue the guarded projection stages without re-running topic upsert."))
         (when continuable-p
           (views:html
             (:p
@@ -3370,7 +3401,7 @@
              report)))
       (views:html
         (:p (views:esc
-             "Live backend compatibility preflight for workspace annotations. The normal Persist to workspace action uses this check to choose deliberate compatibility storage when raw hyperdoc.annotation is missing, and to block only when neither the native type family nor the chosen carrier path is available."))
+             "Live backend compatibility preflight for workspace annotations. Materialize-to-DMX actions use this check to choose deliberate compatibility storage when raw hyperdoc.annotation is missing, and to block only when neither the native type family nor the chosen carrier path is available."))
         (:table :class "inspector-table"
                 (:tr (:th "Status")
                      (:td (:tt (views:esc

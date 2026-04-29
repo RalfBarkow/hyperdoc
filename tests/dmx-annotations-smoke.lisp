@@ -2939,14 +2939,13 @@
          (topics (make-hash-table :test #'eql))
          (topicmap-memberships (make-hash-table :test #'equal))
          (workspace-assignments (make-hash-table :test #'eql))
-         (topic-json nil)
-         (payload nil)
-         (view-props nil))
-    (multiple-value-setq (topic-json payload view-props)
-      (make-preserved-workspace-annotation-carrier-topic-json
-       :topic-id topic-id
-       :workspace-id workspace-id
-       :workspace-topicmap-id workspace-topicmap-id))
+         (topic-json
+           (nth-value
+            0
+            (make-preserved-workspace-annotation-carrier-topic-json
+             :topic-id topic-id
+             :workspace-id workspace-id
+             :workspace-topicmap-id workspace-topicmap-id))))
     (setf (gethash topic-id topics) topic-json)
     (let* ((read-client
              (make-instance
@@ -2961,35 +2960,61 @@
               :topic-id topic-id
               :workspace-topicmap-id workspace-topicmap-id
               :client read-client))
-           (dry-run
-             (hyperdoc::execute-dmx-workspace-annotation-write-from-object
+           (plan
+             (hyperdoc::plan-dmx-workspace-annotation-write-from-object
               reconstructed
               :workspace-id workspace-id
               :workspace-topicmap-id workspace-topicmap-id
-              :client read-client
-              :dry-run t)))
+              :client read-client))
+           (continuation-report
+             (hyperdoc::make-workspace-annotation-continuation-report
+              reconstructed
+              plan
+              topic-id
+              workspace-topicmap-id
+              read-client))
+           (topic-upsert-stage
+             (hyperdoc::workspace-annotation-persistence-stage-result
+              continuation-report
+              :topic-upsert)))
       (assert-true
        (typep reconstructed 'hyperdoc::workspace-dock-annotation)
-       "Preserved-topic continuation dry-run must reopen the compatibility carrier as a semantic workspace annotation object")
+       "Preserved-topic continuation must reopen the compatibility carrier as a semantic workspace annotation object")
       (assert-equal topic-id
                     (hyperdoc::workspace-annotation-topic-id-of reconstructed)
-                    "Preserved-topic continuation dry-run must target topic 936040")
+                    "Preserved-topic continuation must target topic 936040")
       (assert-equal
        hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
        (hyperdoc::workspace-annotation-storage-mode-of reconstructed)
-       "Preserved-topic continuation dry-run must reconstruct compatibility storage semantics from the carrier")
+       "Preserved-topic continuation must reconstruct compatibility storage semantics from the carrier")
+      (assert-equal :continuation-ready
+                    (hyperdoc::workspace-annotation-persistence-report-status-of
+                     continuation-report)
+                    "Preserved-topic continuation reports must be continuation-ready")
+      (assert-equal :completed
+                    (getf topic-upsert-stage :status)
+                    "Preserved-topic continuation reports must mark TOPIC-UPSERT as already complete")
+      (assert-true
+       (search "starts after topic upsert"
+               (or (getf topic-upsert-stage :summary) "")
+               :test #'char-equal)
+       "Preserved-topic continuation reports must state that guarded continuation starts after topic upsert")
       (assert-equal :update
-                    (getf dry-run :topic-action)
-                    "Preserved-topic continuation dry-run must plan TOPIC-UPSERT as update")
+                    (hyperdoc::dmx-workspace-annotation-write-plan-topic-action
+                     plan)
+                    "Preserved-topic continuation plan must still classify the preserved topic as UPDATE")
       (assert-equal topic-id
-                    (getf dry-run :existing-topic-id)
-                    "Preserved-topic continuation dry-run must preserve existing topic id 936040")
+                    (hyperdoc::dmx-workspace-annotation-write-plan-existing-topic-id
+                     plan)
+                    "Preserved-topic continuation plan must preserve existing topic id 936040")
       (assert-equal workspace-id
-                    (getf dry-run :workspace-id)
-                    "Preserved-topic continuation dry-run must keep workspace target 919815")
+                    (hyperdoc::dmx-workspace-annotation-write-plan-workspace-id
+                     plan)
+                    "Preserved-topic continuation plan must keep workspace target 919815")
       (assert-equal workspace-topicmap-id
-                    (getf dry-run :workspace-topicmap-id)
-                    "Preserved-topic continuation dry-run must keep topicmap target 919822")
+                    (hyperdoc::dmx-workspace-annotation-write-plan-workspace-topicmap-id
+                     plan)
+                    "Preserved-topic continuation plan must keep topicmap target 919822")
       (let ((anonymous-client
               (make-instance
                'preserved-workspace-annotation-http-dmx-import-client
@@ -2999,90 +3024,85 @@
                :topicmap-memberships topicmap-memberships
                :workspace-assignments workspace-assignments))
             (captured-calls '())
-            (blocked-condition nil)
-            (original-prepare
-              (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition))
+            (continued nil)
             (original-drakma
               (symbol-function 'drakma:http-request)))
-        (unwind-protect
-             (progn
-               (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
-                     (lambda (client subject-key lookup-kind lookup-value
-                              workspace-topicmap-id
-                              &rest args)
-                       (declare (ignore client subject-key lookup-kind lookup-value
-                                        workspace-topicmap-id args))
-                       (make-hash-table :test #'equal)))
-               (setf (symbol-function 'drakma:http-request)
-                     (lambda (url &key method additional-headers content-type
-                                 content content-length want-stream
-                                 &allow-other-keys)
-                       (declare (ignore want-stream))
-                       (push (list :url url
-                                   :method method
-                                   :headers additional-headers
-                                   :content-type content-type
-                                   :content content
-                                   :content-length content-length)
-                             captured-calls)
-                       (values (make-string-input-stream "{}")
-                               200
-                               '(("Content-Type" . "application/json"))
-                               nil
-                               nil
-                               "OK")))
-               (handler-case
-                   (hyperdoc::execute-dmx-workspace-annotation-write-from-object
-                    reconstructed
-                    :workspace-id workspace-id
-                    :workspace-topicmap-id workspace-topicmap-id
-                    :client anonymous-client
-                    :dry-run nil)
-                 (hyperdoc::dmx-import-http-error (condition)
-                   (setf blocked-condition condition))))
-          (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
-                original-prepare
-                (symbol-function 'drakma:http-request)
-                original-drakma))
-        (assert-true
-         blocked-condition
-         "Anonymous continuation for preserved topic 936040 must fail locally at AUTH-BOUNDARY")
-        (assert-equal 401
-                      (hyperdoc::dmx-import-http-status-code-of blocked-condition)
-                      "Anonymous continuation for preserved topic 936040 must classify as 401 auth boundary")
-        (assert-true
-         (getf (hyperdoc::dmx-import-http-evidence-of blocked-condition)
-               :blocked-before-http-p)
-         "Anonymous continuation for preserved topic 936040 must be blocked before HTTP PUT")
-        (assert-true
-         (null (find-if (lambda (call)
-                          (and (eq (getf call :method) :put)
-                               (search (format nil "/core/topic/~D" topic-id)
-                                       (getf call :url)
-                                       :test #'char-equal)))
-                        captured-calls))
-         "Anonymous continuation for preserved topic 936040 must not send TOPIC-UPSERT HTTP PUT after local AUTH-BOUNDARY"))
-      (let* ((auth-client
-               (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+        (labels ((core-topic-upsert-call-p (call)
+                   (and (eq (getf call :method) :put)
+                        (search (format nil "/core/topic/~D" topic-id)
+                                (getf call :url)
+                                :test #'char-equal))))
+          (unwind-protect
+               (progn
+                 (setf (symbol-function 'drakma:http-request)
+                       (lambda (url &key method additional-headers content-type
+                                   content content-length want-stream
+                                   &allow-other-keys)
+                         (declare (ignore want-stream))
+                         (push (list :url url
+                                     :method method
+                                     :headers additional-headers
+                                     :content-type content-type
+                                     :content content
+                                     :content-length content-length)
+                               captured-calls)
+                         (values (make-string-input-stream "{}")
+                                 200
+                                 '(("Content-Type" . "application/json"))
+                                 nil
+                                 nil
+                                 "OK")))
+                 (let ((hyperdoc::*dmx-workspace-journal-suppressed-p* t))
+                   (setf continued
+                         (hyperdoc::continue-workspace-annotation-persistence-with-client
+                          continuation-report
+                          anonymous-client))))
+            (setf (symbol-function 'drakma:http-request)
+                  original-drakma))
+          (assert-true
+           (typep continued 'hyperdoc::workspace-annotation-persistence-report)
+           "Anonymous preserved-topic continuation must return an inspectable continuation report")
+          (assert-equal :pending-auth
+                        (hyperdoc::workspace-annotation-persistence-report-status-of
+                         continued)
+                        "Anonymous preserved-topic continuation must stay at the explicit-auth boundary")
+          (assert-equal :workspace-assignment
+                        (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                         continued)
+                        "Anonymous preserved-topic continuation must block at workspace assignment")
+          (assert-true
+           (null (find-if #'core-topic-upsert-call-p captured-calls))
+           "Anonymous preserved-topic continuation must skip TOPIC-UPSERT and must not PUT /core/topic/936040")
+          (assert-equal nil
+                        (gethash topic-id workspace-assignments)
+                        "Anonymous preserved-topic continuation must not mutate workspace assignment")
+          (assert-true
+           (null (gethash (preserved-topicmap-membership-key
+                           workspace-topicmap-id
+                           topic-id)
+                          topicmap-memberships))
+           "Anonymous preserved-topic continuation must not mutate topicmap placement")))
+      (let* ((auth-topics (make-hash-table :test #'eql))
+             (auth-topicmap-memberships (make-hash-table :test #'equal))
+             (auth-workspace-assignments (make-hash-table :test #'eql))
+             (auth-client
+               (make-instance
+                'preserved-workspace-annotation-http-dmx-import-client
                 :base-url "https://dmx.ralfbarkow.ch"
                 :workspace-id workspace-id
-                :auth-mode :basic
-                :username "rgb"
-                :password "secret"))
-             (effective-view-props
-               (or view-props
-                   (hyperdoc::make-dmx-topicmap-view-props-json-object
-                    :x 0
-                    :y 0
-                    :visibility t
-                    :pinned nil)))
-             (topic-json-string
-               (hyperdoc::encode-json-string topic-json))
+                :authorization-header
+                (hyperdoc::basic-authorization-header "rgb" "secret")
+                :session-login-required-p t
+                :topics-by-id auth-topics
+                :topicmap-memberships auth-topicmap-memberships
+                :workspace-assignments auth-workspace-assignments))
              (workspace-json-string
                (hyperdoc::encode-json-string
                 (hyperdoc::memory-dmx-import-workspace-json workspace-id)))
              (captured-calls '())
+             (continued nil)
              (original-drakma (symbol-function 'drakma:http-request)))
+        (setf (gethash topic-id auth-topics) topic-json)
         (labels ((header-value (call name)
                    (cdr (assoc name
                                (getf call :headers)
@@ -3090,7 +3110,12 @@
                  (jsessionid-cookie-p (call)
                    (search "JSESSIONID="
                            (or (header-value call "Cookie") "")
-                           :test #'char-equal)))
+                           :test #'char-equal))
+                 (core-topic-upsert-call-p (call)
+                   (and (eq (getf call :method) :put)
+                        (search (format nil "/core/topic/~D" topic-id)
+                                (getf call :url)
+                                :test #'char-equal))))
           (unwind-protect
                (progn
                  (setf (symbol-function 'drakma:http-request)
@@ -3114,14 +3139,6 @@
                              nil
                              nil
                              "No Content"))
-                           ((search (format nil "/core/topic/~D" topic-id) url :test #'char-equal)
-                            (values
-                             (make-string-input-stream topic-json-string)
-                             200
-                             '(("Content-Type" . "application/json"))
-                             nil
-                             nil
-                             "OK"))
                            ((search (format nil "/workspaces/~D/object/~D"
                                             workspace-id
                                             topic-id)
@@ -3149,16 +3166,11 @@
                            (t
                             (error "Unexpected preserved-topic explicit-auth HTTP call ~S"
                                    url)))))
-                 (hyperdoc::dmx-import-update-topic auth-client topic-json payload)
-                 (hyperdoc::dmx-import-assign-topic-to-workspace
-                  auth-client
-                  workspace-id
-                  topic-id)
-                 (hyperdoc::dmx-import-add-topic-to-topicmap
-                  auth-client
-                  workspace-topicmap-id
-                  topic-id
-                  effective-view-props))
+                 (let ((hyperdoc::*dmx-workspace-journal-suppressed-p* t))
+                   (setf continued
+                         (hyperdoc::continue-workspace-annotation-persistence-with-client
+                          continuation-report
+                          auth-client))))
             (setf (symbol-function 'drakma:http-request)
                   original-drakma))
           (let* ((calls (nreverse captured-calls))
@@ -3167,13 +3179,6 @@
                               (search "/access-control/login"
                                       (getf call :url)
                                       :test #'char-equal))
-                            calls))
-                 (topic-upsert-call
-                   (find-if (lambda (call)
-                              (and (eq (getf call :method) :put)
-                                   (search (format nil "/core/topic/~D" topic-id)
-                                           (getf call :url)
-                                           :test #'char-equal)))
                             calls))
                  (assignment-call
                    (find-if (lambda (call)
@@ -3192,22 +3197,44 @@
                                                    topic-id)
                                            (getf call :url)
                                            :test #'char-equal)))
-                            calls)))
+                            calls))
+                 (persisted
+                   (hyperdoc::workspace-annotation-persistence-report-persisted-annotation-of
+                    continued))
+                 (carrier-topic (gethash topic-id auth-topics))
+                 (carrier-text
+                   (or (and carrier-topic
+                            (hyperdoc::dmx-json-child-value
+                             carrier-topic
+                             hyperdoc::*dmx-notes-text-type-uri*))
+                       "")))
             (assert-true
              (search "JSESSIONID="
                      (or (hyperdoc::dmx-import-session-cookie-of auth-client) "")
                      :test #'char-equal)
-             "Username/password explicit-auth continuation must capture JSESSIONID after POST /access-control/login")
+             "Explicit-auth continuation must capture JSESSIONID after POST /access-control/login")
             (assert-true
              (and login-call
                   (eq (getf login-call :method) :post))
-             "Username/password explicit-auth continuation must bootstrap with POST /access-control/login")
+             "Explicit-auth continuation must bootstrap with POST /access-control/login")
             (assert-true
-             topic-upsert-call
-             "Username/password explicit-auth continuation must execute TOPIC-UPSERT for preserved topic 936040")
+             (typep continued 'hyperdoc::workspace-annotation-persistence-report)
+             "Explicit-auth continuation must return an inspectable continuation report")
+            (assert-equal :persisted
+                          (hyperdoc::workspace-annotation-persistence-report-status-of
+                           continued)
+                          "Explicit-auth continuation must finish the remaining guarded projection stages")
+            (assert-equal nil
+                          (hyperdoc::workspace-annotation-persistence-report-failure-stage-of
+                           continued)
+                          "Successful explicit-auth continuation must clear failure-stage")
             (assert-true
-             (jsessionid-cookie-p topic-upsert-call)
-             "Username/password explicit-auth continuation must include Cookie/JSESSIONID on TOPIC-UPSERT")
+             (typep persisted 'hyperdoc::workspace-dock-annotation)
+             "Explicit-auth continuation must reopen the preserved topic as workspace-dock-annotation")
+            (assert-equal topic-id
+                          (and persisted
+                               (hyperdoc::workspace-annotation-topic-id-of persisted))
+                          "Explicit-auth continuation must reopen preserved topic 936040")
             (assert-true
              assignment-call
              "Preserved-topic explicit-auth continuation must call workspace assignment")
@@ -3221,12 +3248,34 @@
              (jsessionid-cookie-p topicmap-call)
              "Preserved-topic explicit-auth continuation must include Cookie/JSESSIONID on topicmap placement")
             (assert-true
+             (null (find-if #'core-topic-upsert-call-p calls))
+             "Preserved-topic continuation must skip TOPIC-UPSERT and must not PUT /core/topic/936040")
+            (assert-equal workspace-id
+                          (gethash topic-id auth-workspace-assignments)
+                          "Preserved-topic explicit-auth continuation must assign workspace 919815")
+            (assert-true
+             (not (null (gethash (preserved-topicmap-membership-key
+                                  workspace-topicmap-id
+                                  topic-id)
+                                 auth-topicmap-memberships)))
+             "Preserved-topic explicit-auth continuation must place topic 936040 in topicmap 919822")
+            (assert-equal 1
+                          (hash-table-count auth-topics)
+                          "Preserved-topic continuation must not create duplicate carrier topics")
+            (assert-true
              (null (search "secret"
-                           (or (hyperdoc::dmx-json-child-value topic-json
-                                                               hyperdoc::*dmx-notes-text-type-uri*)
-                               "")
+                           carrier-text
                            :test #'char-equal))
-             "Credentials must stay request-scoped and must not be serialized into compatibility carrier payload text")))))))
+             "Credentials must stay request-scoped and must not be serialized into compatibility carrier payload text")
+            (assert-true
+             (null (search "JSESSIONID" carrier-text :test #'char-equal))
+             "Session cookie values must not be serialized into compatibility carrier payload text")
+            (assert-true
+             (null (search "Authorization" carrier-text :test #'char-equal))
+             "Authorization headers must not be serialized into compatibility carrier payload text")
+            (assert-true
+             (null (search "Cookie" carrier-text :test #'char-equal))
+             "Cookie headers must not be serialized into compatibility carrier payload text")))))))
 
 (defun run-dmx-workspace-annotation-journal-preflight-failure-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -5398,7 +5447,14 @@
                  blocked))))
          (journal (hyperdoc::read-hyperdoc-topic-journal
                    :subject-key subject-key))
+         (journal-json-string (hyperdoc::encode-json-string journal))
          (current-state (gethash "currentState" journal))
+         (carrier-topic (hyperdoc::dmx-import-read-topic pending-client saved-topic-id))
+         (carrier-text (or (and carrier-topic
+                                (hyperdoc::dmx-json-child-value
+                                 carrier-topic
+                                 hyperdoc::*dmx-notes-text-type-uri*))
+                           ""))
          (continued (hyperdoc::continue-workspace-annotation-persistence-with-explicit-auth
                      blocked
                      :client auth-client)))
@@ -5421,7 +5477,120 @@
     (assert-equal :persisted
                   (hyperdoc::workspace-annotation-persistence-report-status-of
                    continued)
-                  "Local-first pending-auth reports must continue through the existing explicit-auth continuation path")))
+                  "Local-first pending-auth reports must continue through the existing explicit-auth continuation path")
+    (assert-true
+     (null (search "explicit-test-token"
+                   journal-json-string
+                   :test #'char-equal))
+     "Action-time authorization tokens must not be serialized into HyperDoc-local journal state")
+    (assert-true
+     (null (search "Authorization"
+                   journal-json-string
+                   :test #'char-equal))
+     "Authorization header metadata must not be serialized into HyperDoc-local journal state")
+    (assert-true
+     (null (search "Cookie"
+                   journal-json-string
+                   :test #'char-equal))
+     "Cookie header metadata must not be serialized into HyperDoc-local journal state")
+    (assert-true
+     (null (search "JSESSIONID"
+                   journal-json-string
+                   :test #'char-equal))
+     "Session cookies must not be serialized into HyperDoc-local journal state")
+    (assert-true
+     (null (search "explicit-test-token"
+                   carrier-text
+                   :test #'char-equal))
+     "Action-time authorization tokens must not be serialized into compatibility carrier text")
+    (assert-true
+     (null (search "Authorization"
+                   carrier-text
+                   :test #'char-equal))
+     "Authorization headers must not be serialized into compatibility carrier text")
+    (assert-true
+     (null (search "Cookie"
+                   carrier-text
+                   :test #'char-equal))
+     "Cookie headers must not be serialized into compatibility carrier text")
+    (assert-true
+     (null (search "JSESSIONID"
+                   carrier-text
+                   :test #'char-equal))
+     "Session cookies must not be serialized into compatibility carrier text")))
+
+(defun run-dmx-workspace-annotation-workspace-view-local-first-ux-smoke-test ()
+  (asdf:load-system :hyperdoc/explorer)
+  (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
+  (let* ((draft (make-test-dock-annotation
+                 :note "Workspace view local-first draft"))
+         (draft-views (dmx-annotation-smoke-load-inspector-views-for-object draft))
+         (draft-workspace-view
+           (dmx-annotation-smoke-find-view-by-title draft-views "Workspace"))
+         (draft-html (and draft-workspace-view
+                          (html-inspector-views:view-html draft-workspace-view)))
+         (locally-saved (hyperdoc::persist-dock-annotation-local-first
+                         draft
+                         :workspace-topicmap-id
+                         *dmx-annotations-smoke-workspace-topicmap-id*))
+         (saved-views
+           (dmx-annotation-smoke-load-inspector-views-for-object locally-saved))
+         (saved-workspace-view
+           (dmx-annotation-smoke-find-view-by-title saved-views "Workspace"))
+         (saved-html (and saved-workspace-view
+                          (html-inspector-views:view-html saved-workspace-view)))
+         (topic-backed-draft (make-test-dock-annotation
+                              :note "Workspace view continuation routing"))
+         (_set-topic-id
+           (setf (slot-value topic-backed-draft 'hyperdoc::target-object) 936040))
+         (topic-backed-views
+           (dmx-annotation-smoke-load-inspector-views-for-object topic-backed-draft))
+         (topic-backed-workspace-view
+           (dmx-annotation-smoke-find-view-by-title topic-backed-views "Workspace"))
+         (topic-backed-html
+           (and topic-backed-workspace-view
+                (html-inspector-views:view-html topic-backed-workspace-view))))
+    (declare (ignore _set-topic-id))
+    (assert-true
+     (search "Save annotation locally"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace view must expose Save annotation locally as the primary action")
+    (assert-true
+     (search "Materialize to DMX now:"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace view must expose optional materialize-to-DMX choice")
+    (assert-true
+     (null (search "Persist to workspace"
+                   draft-html
+                   :test #'char-equal))
+     "Draft workspace view must no longer expose Persist to workspace")
+    (assert-true
+     (search "local-first saved"
+             saved-html
+             :test #'char-equal)
+     "Locally saved annotations must render a local-first saved state")
+    (assert-true
+     (search "Materialize to DMX now"
+             saved-html
+             :test #'char-equal)
+     "Locally saved annotations must offer a dedicated Materialize to DMX action")
+    (assert-true
+     (null (search "Persist to workspace"
+                   saved-html
+                   :test #'char-equal))
+     "Locally saved annotations must no longer expose Persist to workspace")
+    (assert-true
+     (search "Continue DMX projection"
+             topic-backed-html
+             :test #'char-equal)
+     "Topic-backed annotations must route to guarded continuation in workspace view")
+    (assert-true
+     (null (search "Persist to workspace"
+                   topic-backed-html
+                   :test #'char-equal))
+     "Topic-backed annotations must not route through raw Persist to workspace action")))
 
 (defun run-dmx-annotations-smoke-tests ()
   (run-dmx-workspace-annotation-plan-smoke-test)
@@ -5468,5 +5637,6 @@
   (run-dmx-workspace-annotation-local-first-save-smoke-test)
   (run-dmx-workspace-annotation-local-first-materialize-compatibility-smoke-test)
   (run-dmx-workspace-annotation-local-first-pending-auth-continuation-smoke-test)
+  (run-dmx-workspace-annotation-workspace-view-local-first-ux-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)

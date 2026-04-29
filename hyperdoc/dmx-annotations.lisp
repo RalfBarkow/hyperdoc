@@ -959,6 +959,39 @@
   (and (workspace-dock-annotation-p annotation)
        (ignore-errors (workspace-annotation-topic-id-of annotation))))
 
+(defun workspace-annotation-strict-positive-topic-id-or-nil (value)
+  (cond
+    ((integerp value)
+     (and (plusp value) value))
+    ((stringp value)
+     (let ((trimmed
+             (string-trim '(#\Space #\Tab #\Newline #\Return)
+                          value)))
+       (and (plusp (length trimmed))
+            (every #'digit-char-p trimmed)
+            (parse-integer trimmed))))
+    (t
+     nil)))
+
+(defun workspace-annotation-target-topic-id-or-nil (annotation)
+  (let* ((target (and annotation
+                      (ignore-errors (target-object-of annotation))))
+         (target-id (and target
+                         (ignore-errors (id-of target))))
+         (target-anchor-object-id
+           (and annotation
+                (ignore-errors
+                  (anchor-object-id-of
+                   (target-anchor-of annotation))))))
+    (or (workspace-annotation-strict-positive-topic-id-or-nil target)
+        (workspace-annotation-strict-positive-topic-id-or-nil target-id)
+        (workspace-annotation-strict-positive-topic-id-or-nil
+         target-anchor-object-id))))
+
+(defun workspace-annotation-continuation-topic-id-or-nil (annotation)
+  (or (workspace-annotation-topic-id-or-nil annotation)
+      (workspace-annotation-target-topic-id-or-nil annotation)))
+
 (defun dmx-workspace-annotation-local-native-payload-from-object
     (annotation workspace-topicmap-id
      &key status supersedes-topic-id annotation-key provenance-json)
