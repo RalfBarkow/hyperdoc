@@ -44,6 +44,7 @@
   (run-git-commit-assimilation-smoke-tests)
   (run-skillization-smoke-tests)
   (run-mech-deployment-provenance-smoke-tests)
+  (run-interaction-net-smoke-tests)
   t)
 
 (export '(run-hyperdoc-tests))

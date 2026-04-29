@@ -7129,5 +7129,155 @@
                  "Swiss think-tank model transfer"
                  "Denkpanzer paper 2013")))
 
+;; Lafont 1990 interaction-net assimilation topics.
+(defun lafont-1990-interaction-nets-source-topic ()
+  (make-topic
+   :id "lafont-1990-interaction-nets-source"
+   :title "Lafont 1990 Interaction Nets source"
+   :summary "Primary source-station topic for Yves Lafont's 1990 POPL paper that defines interaction nets as a graph-rewriting language with principal-port interaction and typed/deadlock constraints."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Girard Linear Logic and Interaction Nets"
+                 "Girard Towards a Geometry of Interaction")))
+
+(defun interaction-nets-topic ()
+  (make-topic
+   :id "interaction-nets"
+   :title "Interaction nets"
+   :summary "A local interaction formalism based on labelled agents, ports, principal-port active pairs, and deterministic binary rewrite rules."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Girard Linear Logic and Interaction Nets"
+                 "Girard Towards a Geometry of Interaction")))
+
+(defun agent-in-an-interaction-net-topic ()
+  (make-topic
+   :id "agent-in-an-interaction-net"
+   :title "Agent in an interaction net"
+   :summary "A labelled vertex in an interaction net whose symbol fixes its port shape and participation in rewrite rules."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun port-in-an-interaction-net-topic ()
+  (make-topic
+   :id "port-in-an-interaction-net"
+   :title "Port in an interaction net"
+   :summary "A fixed attachment position on an interaction-net agent used to connect wires and enforce local symbol interfaces."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun principal-port-topic ()
+  (make-topic
+   :id "principal-port"
+   :title "Principal port"
+   :summary "Distinguished port of each interaction-net symbol; active pairs and binary interaction are defined through principal-port connections."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun active-pair-topic ()
+  (make-topic
+   :id "active-pair"
+   :title "Active pair"
+   :summary "Two agents connected by their principal ports; this local pair is the only redex form for interaction-net reduction."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun interaction-rule-topic ()
+  (make-topic
+   :id "interaction-rule"
+   :title "Interaction rule"
+   :summary "A local binary rewrite specifying how one active pair configuration rewires to another while preserving linear usage."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun linearity-in-interaction-nets-topic ()
+  (make-topic
+   :id "linearity-in-interaction-nets"
+   :title "Linearity in interaction nets"
+   :summary "Constraint that each variable occurs exactly twice across a rule, supporting locality and explicit duplication/erasing agents."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun no-ambiguity-in-interaction-nets-topic ()
+  (make-topic
+   :id "no-ambiguity-in-interaction-nets"
+   :title "No ambiguity in interaction nets"
+   :summary "Constraint that there is at most one rule for each pair of distinct symbols and no default same-symbol rule."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun strong-confluence-topic ()
+  (make-topic
+   :id "strong-confluence"
+   :title "Strong confluence"
+   :summary "Local confluence consequence of non-interfering binary interactions under linearity and no-ambiguity constraints."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun typed-interaction-net-topic ()
+  (make-topic
+   :id "typed-interaction-net"
+   :title "Typed interaction net"
+   :summary "Interaction-net configuration with type/polarity-respecting port connections so local interactions are well-formed."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction nets")))
+
+(defun completeness-of-interaction-rules-topic ()
+  (make-topic
+   :id "completeness-of-interaction-rules"
+   :title "Completeness of interaction rules"
+   :summary "Requirement that matching symbol pairs have a rule, so typed active pairs are always reducible."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Typed interaction net")))
+
+(defun vicious-circle-deadlock-topic ()
+  (make-topic
+   :id "vicious-circle-deadlock"
+   :title "Vicious circle deadlock"
+   :summary "Pathological principal-port cycle that remains irreducible and motivates simplicity/semi-simplicity constraints."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Typed interaction net")))
+
+(defun simple-net-topic ()
+  (make-topic
+   :id "simple-net"
+   :title "Simple net"
+   :summary "Net class generated by restricted construction operations that preserves deadlock safety under simple interaction rules."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Vicious circle deadlock")))
+
+(defun semi-simple-net-topic ()
+  (make-topic
+   :id "semi-simple-net"
+   :title "Semi-simple net"
+   :summary "Generalized safety class extending simple nets while still excluding vicious circles by structural constraints."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Vicious circle deadlock"
+                 "Simple net")))
+
+(defun cells-and-pointers-runtime-topic ()
+  (make-topic
+   :id "cells-and-pointers-runtime"
+   :title "Cells and pointers runtime"
+   :summary "Sequential runtime representation in which nets are encoded as cells and pointers and reductions operate on local pointer rewiring."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Interaction-net implementation seed")))
+
+(defun active-pair-stack-topic ()
+  (make-topic
+   :id "active-pair-stack"
+   :title "Active-pair stack"
+   :summary "Sequential scheduling structure that stores alive/active principal-port pairs to drive local interaction firing."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Cells and pointers runtime"
+                 "Interaction-net implementation seed")))
+
+(defun interaction-net-implementation-seed-topic ()
+  (make-topic
+   :id "interaction-net-implementation-seed"
+   :title "Interaction-net implementation seed"
+   :summary "Repository implementation seed demonstrating a sequential interaction-net runtime kernel with explicit scope limits relative to Lafont's full language."
+   :references '("Lafont 1990 Interaction Nets"
+                 "Source-oriented and image-oriented development in Common Lisp"
+                 "Literate Tracing")))
+
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))

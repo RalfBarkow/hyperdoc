@@ -305,7 +305,8 @@
   :serial t
   :depends-on (#:hyperdoc/mcp
                #:hyperdoc/scxml
-               #:hyperdoc/explorer)
+               #:hyperdoc/explorer
+               #:interaction-net)
   :components ((:module "tests"
                 :serial t
                 :components ((:file "package")
@@ -353,6 +354,7 @@
                              (:file "py4dmx-cluster-smoke")
                              (:file "scxml-compiler-smoke")
                              (:file "page-lookup-topic-repair-scxml-smoke")
+                             (:file "interaction-net-smoke")
                              (:file "test-runner"))))
   :perform (test-op (op c)
              (declare (ignore op c))

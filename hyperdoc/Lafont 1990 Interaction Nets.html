@@ -1,0 +1,164 @@
+<h1>Lafont 1990 Interaction Nets</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page assimilates Yves Lafont's 1990 POPL paper as the primary HyperDoc
+  source station for Interaction nets. It is downstream from the existing
+  Girard source stations and is the direct station for the Interaction-net
+  language/kernel vocabulary.
+</p>
+
+<h2>Bibliographic source</h2>
+
+<p>
+  LAFONT, Yves, 1990. <i>Interaction Nets</i>. POPL '90 (17th ACM SIGPLAN-SIGACT
+  Symposium on Principles of Programming Languages), p. 95-108.
+</p>
+
+<h2>Assimilation verdict</h2>
+
+<p>
+  Treat this page as the direct Interaction Nets source station in HyperDoc.
+  Keep <a page="Girard Linear Logic and Interaction Nets">Girard Linear Logic and Interaction Nets</a>
+  and <a page="Girard Towards a Geometry of Interaction">Girard Towards a Geometry of Interaction</a>
+  as precursor stations. The imported <tt>interaction-net/interaction-net.lisp</tt>
+  is an <b>implementation seed</b>: a sequential runtime kernel demonstrating
+  cells + pointers + active-pair stack, not a complete implementation of
+  Lafont's full language and correctness framework.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Lafont 1990 Interaction Nets source"><tt>Lafont 1990 Interaction Nets source</tt></a></li>
+  <li><a hyperbook="topics" page="Interaction nets"><tt>Interaction nets</tt></a></li>
+  <li><a hyperbook="topics" page="Agent in an interaction net"><tt>Agent in an interaction net</tt></a></li>
+  <li><a hyperbook="topics" page="Port in an interaction net"><tt>Port in an interaction net</tt></a></li>
+  <li><a hyperbook="topics" page="Principal port"><tt>Principal port</tt></a></li>
+  <li><a hyperbook="topics" page="Active pair"><tt>Active pair</tt></a></li>
+  <li><a hyperbook="topics" page="Interaction rule"><tt>Interaction rule</tt></a></li>
+  <li><a hyperbook="topics" page="Linearity in interaction nets"><tt>Linearity in interaction nets</tt></a></li>
+  <li><a hyperbook="topics" page="No ambiguity in interaction nets"><tt>No ambiguity in interaction nets</tt></a></li>
+  <li><a hyperbook="topics" page="Strong confluence"><tt>Strong confluence</tt></a></li>
+  <li><a hyperbook="topics" page="Typed interaction net"><tt>Typed interaction net</tt></a></li>
+  <li><a hyperbook="topics" page="Completeness of interaction rules"><tt>Completeness of interaction rules</tt></a></li>
+  <li><a hyperbook="topics" page="Vicious circle deadlock"><tt>Vicious circle deadlock</tt></a></li>
+  <li><a hyperbook="topics" page="Simple net"><tt>Simple net</tt></a></li>
+  <li><a hyperbook="topics" page="Semi-simple net"><tt>Semi-simple net</tt></a></li>
+  <li><a hyperbook="topics" page="Cells and pointers runtime"><tt>Cells and pointers runtime</tt></a></li>
+  <li><a hyperbook="topics" page="Active-pair stack"><tt>Active-pair stack</tt></a></li>
+  <li><a hyperbook="topics" page="Interaction-net implementation seed"><tt>Interaction-net implementation seed</tt></a></li>
+</ul>
+
+<h2>Core concepts from Lafont 1990</h2>
+
+<ul>
+  <li>Interaction nets are undirected graphs with labelled vertices (agents/symbols) and fixed ports per symbol.</li>
+  <li>Each symbol has one distinguished principal port.</li>
+  <li>An active/alive pair is two agents connected by principal ports.</li>
+  <li>Rules are local binary interactions on active pairs.</li>
+  <li>Constraint stack: linearity, binary interaction, no ambiguity, optimisation, typing, completeness, and simplicity.</li>
+  <li>Typing gives local correctness and matching on principal ports.</li>
+  <li>Simplicity / semi-simplicity blocks vicious-circle deadlock.</li>
+  <li>Sequential runtime hint: encode nets as cells and pointers, store active pairs in a stack, no language-level garbage collector needed under linearity.</li>
+</ul>
+
+<h2>Implementation crosswalk</h2>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Lafont 1990 claim</th>
+      <th>Implementation seed in <tt>interaction-net/interaction-net.lisp</tt></th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Cells + pointers encoding on a sequential machine</td>
+      <td><tt>cell</tt>, <tt>endpoint</tt>, <tt>net</tt> objects with explicit links</td>
+      <td>Implemented (seed)</td>
+    </tr>
+    <tr>
+      <td>Active/alive pairs in a stack</td>
+      <td><tt>net-active-stack</tt> with stale-pair validity checks before firing</td>
+      <td>Implemented (seed)</td>
+    </tr>
+    <tr>
+      <td>Local binary active-pair rewrite rules</td>
+      <td><tt>define-rule</tt>, symmetric dispatch, active-pair validation</td>
+      <td>Implemented (seed)</td>
+    </tr>
+    <tr>
+      <td>No ambiguity and no rule for <tt>S,S</tt> by default</td>
+      <td>Duplicate rule registration rejected; same-symbol rules rejected unless explicitly opted in</td>
+      <td>Implemented (seed)</td>
+    </tr>
+    <tr>
+      <td>Typing + matching symbols + completeness discipline</td>
+      <td><tt>define-symbol</tt>, <tt>check-port-compatible</tt>, <tt>matching-symbols-p</tt>, <tt>complete-rule-table-p</tt>, <tt>well-typed-net-p</tt></td>
+      <td>Incremental</td>
+    </tr>
+    <tr>
+      <td>Concrete language with symbol/typing/partition declarations and <tt>)(</tt> rules</td>
+      <td>Small declarative DSL accepted by <tt>define-lafont-rule</tt> for Figure 9 list rules</td>
+      <td>Partial</td>
+    </tr>
+    <tr>
+      <td>No language-level GC required by linearity</td>
+      <td><tt>kill-cell</tt> retires dead cells from live table into explicit free-cell pool</td>
+      <td>Implemented (seed)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Figure 9 rule DSL mapping</h2>
+
+<p>
+  Lafont writes interactions with <tt>)(</tt>. The seed keeps a first declarative,
+  S-expression layer:
+</p>
+
+<pre>
+((cons x (append u t))
+ (append v (cons x t)))
+
+(nil (append v v))
+</pre>
+
+<p>
+  These two specs are compiled by <tt>define-lafont-rule</tt> into runtime rewrites
+  for the Figure 9 list append fragment.
+</p>
+
+<h2>Not yet implemented</h2>
+
+<ul>
+  <li>Complete typed-port polarity discipline across all declared symbols and rule paths (current seed layer is incremental and optional).</li>
+  <li>Full Lafont concrete syntax parser/compiler for type/symbol/rule source text (including direct <tt>)(</tt> parsing).</li>
+  <li>Complete static checker for partition-derived simplicity/semi-simplicity proofs.</li>
+  <li>Global completeness/coverage diagnostics integrated with full language-level declarations.</li>
+  <li>Polymorphic typing and modularity layer discussed in the paper.</li>
+  <li>Full example suite from the paper (difference lists, Polish parser, full unary multiplication neighborhood with all checks).</li>
+</ul>
+
+<h2>Execution evidence object</h2>
+
+<p>
+  The reducer exposes a structured reduction trace object with per-step active
+  pair kinds/ids, fired rule key/name, produced active pairs, and final
+  normal-form/limit status. This keeps the runtime kernel inspectable and aligns
+  with HyperDoc execution-evidence surfaces.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Girard Linear Logic and Interaction Nets">Girard Linear Logic and Interaction Nets</a></li>
+  <li><a page="Girard Towards a Geometry of Interaction">Girard Towards a Geometry of Interaction</a></li>
+  <li><a page="Cut elimination as execution">Cut elimination as execution</a></li>
+  <li><a page="Proof-net">Proof-net</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a page="Literate Tracing">Literate Tracing</a></li>
+</ul>
