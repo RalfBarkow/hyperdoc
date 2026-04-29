@@ -1869,6 +1869,13 @@
        :bootstrap-request-p t)))
     (bootstrap-http-dmx-import-session client)))
 
+(defun ensure-http-dmx-import-session-cookie-for-protected-mutation
+    (client operation)
+  (when (and (typep client 'http-dmx-import-client)
+             (dmx-import-session-login-required-p-of client)
+             (null (dmx-import-session-cookie-of client)))
+    (ensure-http-dmx-import-authenticated-operation client operation)))
+
 (defmethod dmx-import-read-topic ((client http-dmx-import-client) topic-id)
   (validate-http-dmx-import-client client)
   (http-request-json client
@@ -1899,6 +1906,9 @@
 
 (defmethod dmx-import-create-topic ((client http-dmx-import-client) payload)
   (validate-http-dmx-import-client client :live? t)
+  (ensure-http-dmx-import-session-cookie-for-protected-mutation
+   client
+   :create-topic)
   (http-request-json client
                      :post
                      (dmx-topic-create-path)
@@ -1906,6 +1916,9 @@
 
 (defmethod dmx-import-update-topic ((client http-dmx-import-client) existing-topic payload)
   (validate-http-dmx-import-client client :live? t)
+  (ensure-http-dmx-import-session-cookie-for-protected-mutation
+   client
+   :update-topic)
   (let ((topic-id (dmx-import-object-id existing-topic)))
     (unless topic-id
       (error 'fedwiki-dmx-import-error
@@ -1981,6 +1994,9 @@
 (defmethod dmx-import-add-topic-to-topicmap ((client http-dmx-import-client)
                                              topicmap-id topic-id view-props)
   (validate-http-dmx-import-client client :live? t)
+  (ensure-http-dmx-import-session-cookie-for-protected-mutation
+   client
+   :add-topic-to-topicmap)
   (multiple-value-bind (normalized-view-props)
       (normalize-dmx-topicmap-view-props
        view-props
@@ -1993,6 +2009,9 @@
 (defmethod dmx-import-set-topic-view-props ((client http-dmx-import-client)
                                             topicmap-id topic-id view-props)
   (validate-http-dmx-import-client client :live? t)
+  (ensure-http-dmx-import-session-cookie-for-protected-mutation
+   client
+   :set-topic-view-props)
   (multiple-value-bind (normalized-view-props)
       (normalize-dmx-topicmap-view-props
        view-props

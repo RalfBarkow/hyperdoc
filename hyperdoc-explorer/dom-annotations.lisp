@@ -2369,16 +2369,34 @@
         (:p
          (views:eval-button
           (if persisted-p
-              "Update workspace topic"
+              "Continue"
               "Persist to workspace")
           (views:thunk
-            (persist-dock-annotation-to-workspace
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id
-             :client default-client
-             :dry-run nil))
-          "Preflight the live backend first. If raw hyperdoc.annotation is unsupported but compatibility storage is available, persist through the deliberate carrier instead of issuing a doomed raw create-topic write."))
+            (if (and persisted-p
+                     (workspace-annotation-topic-id-of annotation))
+                (let* ((continuation-plan
+                         (plan-dmx-workspace-annotation-write-from-object
+                          annotation
+                          :workspace-topicmap-id workspace-topicmap-id
+                          :workspace-id workspace-id
+                          :client default-client))
+                       (continuation-report
+                         (make-workspace-annotation-continuation-report
+                          annotation
+                          continuation-plan
+                          (workspace-annotation-topic-id-of annotation)
+                          workspace-topicmap-id
+                          default-client)))
+                  (continue-workspace-annotation-persistence-with-client
+                   continuation-report
+                   default-client))
+                (persist-dock-annotation-to-workspace
+                 annotation
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :workspace-id workspace-id
+                 :client default-client
+                 :dry-run nil)))
+          "For existing annotation topics this resumes from the preserved topic through the guarded continuation stages. For drafts it runs the normal persist path, including compatibility preflight before create-topic."))
         (when persisted-p
           (views:html
             (:p

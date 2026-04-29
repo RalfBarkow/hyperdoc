@@ -1470,6 +1470,77 @@
   (or (typep condition 'dmx-import-config-error)
       (workspace-annotation-http-auth-blocked-p condition)))
 
+(defun workspace-annotation-topic-upsert-existing-topic-anonymous-p
+    (client plan)
+  (and (typep client 'http-dmx-import-client)
+       plan
+       (eql (dmx-workspace-annotation-write-plan-topic-action plan)
+            :update)
+       (dmx-workspace-annotation-write-plan-existing-topic-id plan)
+       (null (effective-http-dmx-import-authorization-header client))
+       (null (dmx-import-session-cookie-of client))))
+
+(defun workspace-annotation-topic-upsert-endpoint-path-for-plan (plan)
+  (cond
+    ((null plan)
+     "/core/topic")
+    ((eql (dmx-workspace-annotation-write-plan-topic-action plan)
+          :update)
+     (if-let (topic-id (dmx-workspace-annotation-write-plan-existing-topic-id
+                        plan))
+       (dmx-topic-update-path topic-id)
+       "/core/topic"))
+    (t
+     (dmx-topic-create-path))))
+
+(defun signal-workspace-annotation-topic-upsert-auth-boundary
+    (client plan)
+  (let* ((topic-id (dmx-workspace-annotation-write-plan-existing-topic-id plan))
+         (path (workspace-annotation-topic-upsert-endpoint-path-for-plan plan))
+         (workspace-id (dmx-workspace-annotation-write-plan-workspace-id plan))
+         (cookie-values
+           (http-dmx-import-request-cookie-values
+            client
+            :workspace-id workspace-id))
+         (cookie-header
+           (and cookie-values
+                (format nil "~{~A~^; ~}" cookie-values)))
+         (payload-json
+           (workspace-annotation-write-plan-payload-json-string plan)))
+    (error 'dmx-import-http-error
+           :message
+           (format nil
+                   "AUTH-BOUNDARY: anonymous TOPIC-UPSERT for existing topic ~D was blocked locally before HTTP write"
+                   topic-id)
+           :url (or (normalize-http-client-url client path)
+                    path)
+           :status-code 401
+           :response-body
+           "{\"error\":\"AUTH-BOUNDARY\",\"reason\":\"anonymous-topic-upsert-blocked-before-http\"}"
+           :evidence
+           (list :method :put
+                 :path path
+                 :request-content-type "application/json; charset=utf-8"
+                 :request-body payload-json
+                 :auth-mode-summary "anonymous"
+                 :authorization-scheme nil
+                 :bootstrap-ran-p nil
+                 :cookie-shape (summarize-http-cookie-shape cookie-header)
+                 :jsessionid-cookie-p
+                 (and (cookie-contains-token-p cookie-header "JSESSIONID=")
+                      t)
+                 :workspace-cookie-p
+                 (and (cookie-contains-token-p cookie-header
+                                               "dmx_workspace_id=")
+                      t)
+                 :response-status-code 401
+                 :response-reason-phrase "AUTH-BOUNDARY"
+                 :response-body
+                 "{\"error\":\"AUTH-BOUNDARY\",\"reason\":\"anonymous-topic-upsert-blocked-before-http\"}"
+                 :blocked-before-http-p t
+                 :auth-boundary-classification
+                 "topic-upsert-existing-topic-anonymous"))))
+
 (defun workspace-annotation-assignment-auth-context
     (plan client topic-id condition)
   (let ((client-auth-context
@@ -2739,10 +2810,14 @@
            (workspace-annotation-persistence-report-topic-upsert-evidence-of
             report))
          (status-code (or (getf evidence :response-status-code) 401)))
-    (format nil
-            "FAILED because TOPIC-UPSERT attempted an anonymous write to existing topic ~D and DMX returned ~D. This is an authentication-boundary failure before workspace assignment, topicmap placement, journal recording, and reopen."
-            topic-id
-            status-code)))
+    (if (getf evidence :blocked-before-http-p)
+        (format nil
+                "FAILED at local AUTH-BOUNDARY because TOPIC-UPSERT would have attempted an anonymous write to existing topic ~D. The request was blocked before HTTP PUT. Workspace assignment, topicmap placement, journal recording, and reopen did not run."
+                topic-id)
+        (format nil
+                "FAILED because TOPIC-UPSERT attempted an anonymous write to existing topic ~D and DMX returned ~D. This is an authentication-boundary failure before workspace assignment, topicmap placement, journal recording, and reopen."
+                topic-id
+                status-code))))
 
 (defun workspace-annotation-persistence-topic-upsert-blocking-condition
     (report)
@@ -2752,12 +2827,18 @@
          (auth-mode (or (getf evidence :auth-mode-summary)
                         "anonymous"))
          (status-code (or (getf evidence :response-status-code) 401)))
-    (format nil
-            "~A ~A returned ~D"
-            auth-mode
-            (workspace-annotation-persistence-report-topic-upsert-endpoint-label
-             report)
-            status-code)))
+    (if (getf evidence :blocked-before-http-p)
+        (format nil
+                "AUTH-BOUNDARY blocked locally: ~A ~A before HTTP request"
+                auth-mode
+                (workspace-annotation-persistence-report-topic-upsert-endpoint-label
+                 report))
+        (format nil
+                "~A ~A returned ~D"
+                auth-mode
+                (workspace-annotation-persistence-report-topic-upsert-endpoint-label
+                 report)
+                status-code))))
 
 (defun workspace-annotation-persistence-report-continue-target (report)
   (let ((topic-id
@@ -4934,10 +5015,17 @@
                      resolved-client
                      (dmx-workspace-annotation-write-plan-payload plan)))
                    (:update
-                    (dmx-import-update-topic
-                     resolved-client
-                     (dmx-workspace-annotation-write-plan-existing-topic plan)
-                     (dmx-workspace-annotation-write-plan-payload plan)))))
+                    (progn
+                      (when (workspace-annotation-topic-upsert-existing-topic-anonymous-p
+                             resolved-client
+                             plan)
+                        (signal-workspace-annotation-topic-upsert-auth-boundary
+                         resolved-client
+                         plan))
+                      (dmx-import-update-topic
+                       resolved-client
+                       (dmx-workspace-annotation-write-plan-existing-topic plan)
+                       (dmx-workspace-annotation-write-plan-payload plan))))))
                (topic-id* (dmx-import-object-id topic)))
           (multiple-value-bind (_after-topic _after-state journal-events)
               (continue-dmx-workspace-annotation-write-after-topic-upsert
@@ -5155,12 +5243,19 @@
                          resolved-client
                          (dmx-workspace-annotation-write-plan-payload plan)))
                        (:update
-                        (dmx-import-update-topic
-                         resolved-client
-                         (dmx-workspace-annotation-write-plan-existing-topic
-                          plan)
-                         (dmx-workspace-annotation-write-plan-payload
-                          plan)))))))
+                        (progn
+                          (when (workspace-annotation-topic-upsert-existing-topic-anonymous-p
+                                 resolved-client
+                                 plan)
+                            (signal-workspace-annotation-topic-upsert-auth-boundary
+                             resolved-client
+                             plan))
+                          (dmx-import-update-topic
+                           resolved-client
+                           (dmx-workspace-annotation-write-plan-existing-topic
+                            plan)
+                           (dmx-workspace-annotation-write-plan-payload
+                            plan))))))))
             (setf topic-id* (dmx-import-object-id topic)
                   persisted-topic-id topic-id*
                   raw-result

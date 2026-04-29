@@ -604,6 +604,21 @@
    "savedAnnotationObject"
    (dmx-mcp-workspace-annotation-object annotation)))
 
+(defun dmx-mcp-continue-workspace-annotation-explicit-auth-mode (arguments)
+  (let ((requested-mode (dmx-mcp-argument arguments "authMode"))
+        (username (dmx-mcp-argument arguments "username"))
+        (password (dmx-mcp-argument arguments "password"))
+        (authorization-header (dmx-mcp-argument arguments "authorizationHeader"))
+        (auth-token (dmx-mcp-argument arguments "authToken")))
+    (or requested-mode
+        (and (or (dmx-non-empty-string-p username)
+                 (dmx-non-empty-string-p password))
+             :basic)
+        (and (dmx-non-empty-string-p authorization-header)
+             :header)
+        (and (dmx-non-empty-string-p auth-token)
+             :token))))
+
 (defun dmx-mcp-continue-workspace-annotation-tool (server arguments)
   (let* ((topic-id
            (or (parse-positive-integer
@@ -616,6 +631,20 @@
                (dmx-mcp-server-workspace-topicmap-id server)))
          (workspace-id
            (dmx-mcp-argument arguments "workspaceId"))
+         (auth-mode
+           (dmx-mcp-continue-workspace-annotation-explicit-auth-mode
+            arguments))
+         (username (dmx-mcp-argument arguments "username"))
+         (password (dmx-mcp-argument arguments "password"))
+         (authorization-header
+           (dmx-mcp-argument arguments "authorizationHeader"))
+         (auth-token (dmx-mcp-argument arguments "authToken"))
+         (explicit-auth-requested-p
+           (or auth-mode
+               (dmx-non-empty-string-p username)
+               (dmx-non-empty-string-p password)
+               (dmx-non-empty-string-p authorization-header)
+               (dmx-non-empty-string-p auth-token)))
          (dry-run (dmx-mcp-argument arguments "dryRun" t))
          (read-client (dmx-mcp-server-read-client server))
          (write-client (dmx-mcp-server-write-client server))
@@ -670,9 +699,17 @@
            dry-run-result
            annotation))
         (let* ((result
-                 (continue-workspace-annotation-persistence-with-client
-                  continuation-report
-                  write-client))
+                 (if explicit-auth-requested-p
+                     (continue-workspace-annotation-persistence-with-explicit-auth
+                      continuation-report
+                      :auth-mode auth-mode
+                      :username username
+                      :password password
+                      :authorization-header authorization-header
+                      :auth-token auth-token)
+                     (continue-workspace-annotation-persistence-with-client
+                      continuation-report
+                      write-client)))
                (status (workspace-annotation-persistence-report-status-of result))
                (saved-annotation
                  (workspace-annotation-persistence-report-saved-annotation-of
@@ -1312,7 +1349,10 @@
                :note-key (dmx-mcp-argument arguments "noteKey")
                :uri (dmx-mcp-argument arguments "uri")
                :dry-run dry-run)))
-            ((equal tool-name "continue_workspace_annotation")
+            ((member tool-name
+                     '("continue_workspace_annotation"
+                       "dmx-mcp-continue-workspace-annotation")
+                     :test #'string=)
              (ensure-live-write-available)
              (dmx-mcp-tool-result
               (dmx-mcp-continue-workspace-annotation-tool
@@ -1490,6 +1530,31 @@
       "topicId" (dmx-mcp-json-object "type" "integer")
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "authMode" (dmx-mcp-json-object "type" "string")
+      "username" (dmx-mcp-json-object "type" "string")
+      "password" (dmx-mcp-json-object "type" "string")
+      "authorizationHeader" (dmx-mcp-json-object "type" "string")
+      "authToken" (dmx-mcp-json-object "type" "string")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+	     "required" (dmx-mcp-json-array "topicId")
+	     "additionalProperties" t))
+	   (dmx-mcp-json-object
+	    "name" "dmx-mcp-continue-workspace-annotation"
+    "description"
+    "Alias for continue_workspace_annotation to keep dreyeck bridge compatibility while continuing a saved workspace annotation through the authenticated guarded stages."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "authMode" (dmx-mcp-json-object "type" "string")
+      "username" (dmx-mcp-json-object "type" "string")
+      "password" (dmx-mcp-json-object "type" "string")
+      "authorizationHeader" (dmx-mcp-json-object "type" "string")
+      "authToken" (dmx-mcp-json-object "type" "string")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
 	     "required" (dmx-mcp-json-array "topicId")
 	     "additionalProperties" t))
