@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="dmx-annotation-workspace-view"
+    initial="classifyAnnotation">
+  <!-- Continuation auth/session submachine reference:
+       hyperdoc/dmx-action-auth-session.scxml -->
+
+  <state id="classifyAnnotation">
+    <onentry>
+      <log label="Classify annotation state for Workspace-view primary action and preview routing"/>
+    </onentry>
+    <transition event="ANNOTATION.DRAFT" target="draftLocal"/>
+    <transition event="ANNOTATION.LOCALLY_SAVED" target="locallySaved"/>
+    <transition event="ANNOTATION.PROJECTION_PENDING" target="projectionPending"/>
+    <transition event="ANNOTATION.PROJECTED" target="projectedComplete"/>
+    <transition event="ANNOTATION.PROJECTION_FAILED" target="projectionFailed"/>
+  </state>
+
+  <state id="draftLocal">
+    <onentry>
+      <log label="Draft annotation lane: local journal append is authoritative"/>
+    </onentry>
+    <transition event="INSPECT_PLAN" target="previewLocalSavePlan"/>
+    <transition event="SAVE_LOCAL" target="previewLocalSavePlan"/>
+    <transition event="SAVE_LOCAL_AND_MATERIALIZE" target="previewLocalSavePlan"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="previewLocalSavePlan">
+    <onentry>
+      <log label="Preview local save plan with event/next-state/function/mutation boundaries"/>
+    </onentry>
+    <transition event="SAVE_LOCAL" target="savingLocal"/>
+    <transition event="SAVE_LOCAL_AND_MATERIALIZE" target="savingLocalThenMaterializing"/>
+    <transition event="BACK" target="draftLocal"/>
+    <transition event="CANCEL" target="draftLocal"/>
+  </state>
+
+  <state id="savingLocal">
+    <onentry>
+      <log label="Execute HyperDoc-local journal append only"/>
+    </onentry>
+    <transition event="LOCAL_SAVE.OK" target="locallySaved"/>
+    <transition event="LOCAL_SAVE.FAILED" target="localSaveFailed"/>
+  </state>
+
+  <state id="locallySaved">
+    <onentry>
+      <log label="Locally saved lane: offer optional DMX materialization"/>
+    </onentry>
+    <transition event="INSPECT_PLAN" target="previewDmxMaterializationPlan"/>
+    <transition event="MATERIALIZE_DMX" target="previewDmxMaterializationPlan"/>
+    <transition event="BACK" target="classifyAnnotation"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="previewDmxMaterializationPlan">
+    <onentry>
+      <log label="Preview optional DMX materialization plan"/>
+    </onentry>
+    <transition event="MATERIALIZE_DMX" target="materializationPreflight"/>
+    <transition event="BACK" target="locallySaved"/>
+    <transition event="CANCEL" target="locallySaved"/>
+  </state>
+
+  <state id="savingLocalThenMaterializing">
+    <onentry>
+      <log label="Save locally first, then continue to optional materialization"/>
+    </onentry>
+    <transition event="LOCAL_SAVE.OK" target="materializationPreflight"/>
+    <transition event="LOCAL_SAVE.FAILED" target="localSaveFailed"/>
+  </state>
+
+  <state id="materializationPreflight">
+    <onentry>
+      <log label="Select native topic storage or compatibility carrier lane"/>
+    </onentry>
+    <transition event="STORAGE.NATIVE_SUPPORTED" target="materializeNativeTopic"/>
+    <transition event="STORAGE.CARRIER_REQUIRED" target="materializeCompatibilityCarrier"/>
+    <transition event="STORAGE.UNSUPPORTED" target="projectionFailed"/>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+  </state>
+
+  <state id="materializeNativeTopic">
+    <onentry>
+      <log label="Materialize through native hyperdoc.annotation when supported"/>
+    </onentry>
+    <transition event="TOPIC_UPSERT.OK" target="assignWorkspace"/>
+    <transition event="TOPIC_UPSERT.FAILED" target="projectionFailed"/>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+  </state>
+
+  <state id="materializeCompatibilityCarrier">
+    <onentry>
+      <log label="Materialize through dmx.notes.note compatibility carrier with nativePayload"/>
+    </onentry>
+    <transition event="TOPIC_UPSERT.OK" target="assignWorkspace"/>
+    <transition event="TOPIC_UPSERT.FAILED" target="projectionFailed"/>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+  </state>
+
+  <state id="projectionPending">
+    <onentry>
+      <log label="Projection pending lane for existing topic-backed annotations"/>
+    </onentry>
+    <transition event="INSPECT_PLAN" target="previewContinuationPlan"/>
+    <transition event="CONTINUE_DMX_PROJECTION" target="previewContinuationPlan"/>
+    <transition event="BACK" target="classifyAnnotation"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="previewContinuationPlan">
+    <onentry>
+      <log label="Preview continuation plan: skip TOPIC-UPSERT and route to guarded assignment/topicmap/journal/reopen"/>
+    </onentry>
+    <transition event="CONTINUE_DMX_PROJECTION" target="continuationAuthCheck"/>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+    <transition event="BACK" target="projectionPending"/>
+    <transition event="CANCEL" target="projectionPending"/>
+  </state>
+
+  <state id="continuationAuthCheck">
+    <onentry>
+      <log label="Enter action-time auth/session submachine (dmx-action-auth-session.scxml) before guarded continuation mutations"/>
+    </onentry>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+    <transition event="AUTH.CONTINUATION_READY" target="assignWorkspace"/>
+    <transition event="AUTH.FAILED" target="authRequired"/>
+    <transition event="CANCEL" target="projectionPending"/>
+  </state>
+
+  <state id="authRequired">
+    <onentry>
+      <log label="Explicit action-time credentials required for guarded continuation/materialization mutation boundary"/>
+    </onentry>
+    <transition event="AUTH.SUBMIT" target="continuationAuthCheck"/>
+    <transition event="AUTH.CONTINUATION_READY" target="assignWorkspace"/>
+    <transition event="AUTH.FAILED" target="projectionFailed"/>
+    <transition event="BACK" target="projectionPending"/>
+    <transition event="CANCEL" target="projectionPending"/>
+  </state>
+
+  <state id="assignWorkspace">
+    <onentry>
+      <log label="Assign topic to workspace boundary"/>
+    </onentry>
+    <transition event="WORKSPACE_ASSIGNMENT.OK" target="placeTopicmap"/>
+    <transition event="WORKSPACE_ASSIGNMENT.FAILED" target="projectionFailed"/>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+  </state>
+
+  <state id="placeTopicmap">
+    <onentry>
+      <log label="Place topic in workspace topicmap boundary"/>
+    </onentry>
+    <transition event="TOPICMAP_PLACEMENT.OK" target="recordProjectionJournal"/>
+    <transition event="TOPICMAP_PLACEMENT.FAILED" target="projectionFailed"/>
+    <transition event="AUTH.REQUIRED" target="authRequired"/>
+  </state>
+
+  <state id="recordProjectionJournal">
+    <onentry>
+      <log label="Record projection transition in workspace journal lane"/>
+    </onentry>
+    <transition event="JOURNAL.OK" target="reopenAnnotation"/>
+    <transition event="JOURNAL.FAILED" target="projectionFailed"/>
+  </state>
+
+  <state id="reopenAnnotation">
+    <onentry>
+      <log label="Reopen persisted projection as workspace-dock-annotation"/>
+    </onentry>
+    <transition event="REOPEN.OK" target="projectedComplete"/>
+    <transition event="REOPEN.FAILED" target="projectionFailed"/>
+  </state>
+
+  <state id="projectedComplete">
+    <onentry>
+      <log label="Projection complete lane: inspect/reopen is primary action"/>
+    </onentry>
+    <transition event="INSPECT_PLAN" target="reopenAnnotation"/>
+    <transition event="BACK" target="classifyAnnotation"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="projectionFailed">
+    <onentry>
+      <log label="Projection failed lane: local save remains authoritative"/>
+    </onentry>
+    <transition event="INSPECT_FAILURE" target="projectionFailureReport"/>
+    <transition event="MATERIALIZE_DMX" target="previewDmxMaterializationPlan"/>
+    <transition event="CONTINUE_DMX_PROJECTION" target="previewContinuationPlan"/>
+    <transition event="BACK" target="classifyAnnotation"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="projectionFailureReport">
+    <onentry>
+      <log label="Projection failure details and boundary classification"/>
+    </onentry>
+    <transition event="BACK" target="projectionFailed"/>
+    <transition event="MATERIALIZE_DMX" target="previewDmxMaterializationPlan"/>
+    <transition event="CONTINUE_DMX_PROJECTION" target="previewContinuationPlan"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="localSaveFailed">
+    <onentry>
+      <log label="Local save failed lane"/>
+    </onentry>
+    <transition event="INSPECT_FAILURE" target="localSaveFailureReport"/>
+    <transition event="BACK" target="draftLocal"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+
+  <state id="localSaveFailureReport">
+    <onentry>
+      <log label="Local save failure details"/>
+    </onentry>
+    <transition event="BACK" target="draftLocal"/>
+    <transition event="CANCEL" target="classifyAnnotation"/>
+  </state>
+</scxml>

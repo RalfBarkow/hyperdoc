@@ -948,18 +948,24 @@
      (search "Debug workspace persistence" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the Debug workspace persistence action")
     (assert-true
-     (search "Trace workspace persistence path" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must expose the Trace workspace persistence path action")
+     (search "Inspect workspace write plan" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the SCXML-backed Inspect workspace write plan action")
     (assert-true
-     (search "Compare with guarded workspace path" workspace-html
+     (search "Trace workspace write plan" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must expose the Trace workspace write plan action")
+    (assert-true
+     (search "Check DMX annotation storage support" workspace-html
              :test #'char-equal)
-     "Workspace annotation inspector must expose the Compare with guarded workspace path action")
+     "Workspace annotation inspector must expose the DMX annotation storage support probe")
     (assert-true
-     (search "Probe live annotation type support" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must expose the live annotation type support probe")
+     (search "Probe native DMX create-topic boundary" workspace-html
+             :test #'char-equal)
+     "Workspace annotation inspector must expose the advanced native create-topic boundary probe")
     (assert-true
-     (search "Probe live create-topic" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must expose the Probe live create-topic action")
+     (null (search "Compare with guarded workspace path"
+                   workspace-html
+                   :test #'char-equal))
+     "Workspace annotation inspector primary view must remove the old Compare with guarded workspace path label")
     (assert-true
      (search "Destination source" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the resolved save destination explicitly")
@@ -5519,6 +5525,217 @@
                    :test #'char-equal))
      "Session cookies must not be serialized into compatibility carrier text")))
 
+(defun run-dmx-workspace-annotation-workspace-view-scxml-contract-smoke-test ()
+  (asdf:load-system :hyperdoc/scxml)
+  (let* ((scxml-path
+           (asdf:system-relative-pathname
+            :hyperdoc
+            "hyperdoc/dmx-annotation-workspace-view.scxml"))
+         (chart (hyperdoc/scxml:parse-scxml-file scxml-path))
+         (findings (hyperdoc/scxml:validate-scxml-chart chart))
+         (errors
+           (remove-if-not (lambda (finding)
+                            (eq :error
+                                (hyperdoc/scxml:scxml-validation-finding-severity-of
+                                 finding)))
+                          findings)))
+    (assert-true
+     (null errors)
+     (format nil "Workspace view SCXML must validate without errors: ~S"
+             (mapcar #'hyperdoc/scxml:scxml-validation-finding-code-of
+                     errors))))
+  (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
+  (let* ((draft (make-test-dock-annotation
+                 :note "Workspace view SCXML contract draft"))
+         (draft-run
+           (hyperdoc::make-dmx-annotation-workspace-view-run
+            draft
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :materialize-to-dmx-p nil))
+         (draft-save-result
+           (hyperdoc::persist-dock-annotation-local-first
+            draft
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :materialize-to-dmx-p nil))
+         (draft-materialize-run
+           (hyperdoc::make-dmx-annotation-workspace-view-run
+            draft
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :materialize-to-dmx-p t))
+         (locally-saved draft-save-result)
+         (locally-saved-run
+           (hyperdoc::make-dmx-annotation-workspace-view-run
+            locally-saved
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :materialize-to-dmx-p nil))
+         (topic-backed-draft
+           (make-test-dock-annotation
+            :note "Workspace view SCXML contract continuation"))
+         (_set-topic-id
+           (setf (slot-value topic-backed-draft 'hyperdoc::target-object) 936040))
+         (topic-backed-run
+           (hyperdoc::make-dmx-annotation-workspace-view-run
+            topic-backed-draft
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :materialize-to-dmx-p nil))
+         (projected locally-saved)
+         (_projected-topic-id
+           (setf (slot-value projected 'hyperdoc::workspace-topic-id) 936041))
+         (_projected-workspace-id
+           (setf (slot-value projected 'hyperdoc::workspace-id)
+                 *dmx-annotations-smoke-workspace-id*))
+         (_projected-status
+           (setf (slot-value projected 'hyperdoc::workspace-status)
+                 "persisted"))
+         (projected-run
+           (hyperdoc::make-dmx-annotation-workspace-view-run
+            projected
+            :workspace-topicmap-id
+            *dmx-annotations-smoke-workspace-topicmap-id*
+            :client nil
+            :materialize-to-dmx-p nil))
+         (plan-views
+           (dmx-annotation-smoke-load-inspector-views-for-object draft-run))
+         (plan-overview
+           (dmx-annotation-smoke-find-view-by-title
+            plan-views
+            "DMX annotation Workspace view SCXML plan"))
+         (plan-actions
+           (dmx-annotation-smoke-find-view-by-title
+            plan-views
+            "Actions"))
+         (plan-overview-html
+           (and plan-overview
+                (html-inspector-views:view-html plan-overview)))
+         (plan-actions-html
+           (and plan-actions
+                (html-inspector-views:view-html plan-actions))))
+    (declare (ignore _set-topic-id
+                     _projected-topic-id
+                     _projected-workspace-id
+                     _projected-status))
+    (assert-equal
+     "draftLocal"
+     (hyperdoc::dmx-annotation-workspace-view-run-current-state-of draft-run)
+     "Draft annotations must classify to draftLocal")
+    (assert-equal
+     "SAVE_LOCAL"
+     (hyperdoc::dmx-annotation-workspace-view-run-selected-preview-event-of
+      draft-run)
+     "Draft-local/no-materialize path must preview SAVE_LOCAL")
+    (assert-equal
+     "Save annotation locally"
+     (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
+      draft-run)
+     "Draft-local/no-materialize path primary action must be Save annotation locally")
+    (assert-true
+     (null
+      (hyperdoc::dmx-annotation-workspace-view-run-dmx-http-will-run-p-of
+       draft-run))
+     "Draft-local/no-materialize path must keep DMX HTTP disabled")
+    (assert-true
+     (null
+      (hyperdoc::dmx-annotation-workspace-view-run-topic-upsert-will-run-p-of
+       draft-run))
+     "Draft-local/no-materialize path must keep TOPIC_UPSERT disabled")
+    (assert-true
+     (typep draft-save-result 'hyperdoc::workspace-dock-annotation)
+     "Draft local save must return a local workspace-dock-annotation object")
+    (assert-true
+     (not (typep draft-save-result
+                 'hyperdoc::workspace-annotation-persistence-report))
+     "Draft local save must not return a workspace-annotation-persistence-report")
+    (assert-equal
+     "SAVE_LOCAL_AND_MATERIALIZE"
+     (hyperdoc::dmx-annotation-workspace-view-run-selected-preview-event-of
+      draft-materialize-run)
+     "Draft/local + materialize selector must preview SAVE_LOCAL_AND_MATERIALIZE")
+    (assert-true
+     (search "materializationPreflight"
+             (format nil "~{~A~^, ~}"
+                     (hyperdoc::dmx-annotation-workspace-view-run-next-states-of
+                      draft-materialize-run))
+             :test #'char-equal)
+     "Draft/local + materialize selector must preview transition to materializationPreflight")
+    (assert-true
+     (hyperdoc::dmx-annotation-workspace-view-run-local-save-authoritative-p-of
+      draft-materialize-run)
+     "Local save must remain authoritative even when materialization is selected")
+    (assert-equal
+     "locallySaved"
+     (hyperdoc::dmx-annotation-workspace-view-run-current-state-of
+      locally-saved-run)
+     "Locally saved unprojected annotations must classify to locallySaved")
+    (assert-equal
+     "Materialize to DMX"
+     (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
+      locally-saved-run)
+     "Locally saved unprojected annotations must expose Materialize to DMX as primary action")
+    (assert-true
+     (hyperdoc::dmx-annotation-workspace-view-run-topic-upsert-will-run-p-of
+      locally-saved-run)
+     "Locally saved unprojected materialization preview must allow TOPIC_UPSERT")
+    (assert-equal
+     "projectionPending"
+     (hyperdoc::dmx-annotation-workspace-view-run-current-state-of
+      topic-backed-run)
+     "Existing topic-backed annotations must classify to projectionPending")
+    (assert-equal
+     "Continue DMX projection"
+     (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
+      topic-backed-run)
+     "Existing topic-backed annotations must expose Continue DMX projection as primary action")
+    (assert-true
+     (null
+      (hyperdoc::dmx-annotation-workspace-view-run-topic-upsert-will-run-p-of
+       topic-backed-run))
+     "Existing topic-backed continuation preview must keep TOPIC_UPSERT disabled")
+    (assert-equal
+     *dmx-annotations-smoke-workspace-id*
+     (hyperdoc::dmx-annotation-workspace-view-run-workspace-id-of
+      topic-backed-run)
+     "Continuation preview must target workspace 919815")
+    (assert-equal
+     *dmx-annotations-smoke-workspace-topicmap-id*
+     (hyperdoc::dmx-annotation-workspace-view-run-workspace-topicmap-id-of
+      topic-backed-run)
+     "Continuation preview must target topicmap 919822")
+    (assert-true
+     (typep projected 'hyperdoc::workspace-dock-annotation)
+     "Projected-complete fixture must be a workspace-dock-annotation")
+    (assert-equal
+     "projectedComplete"
+     (hyperdoc::dmx-annotation-workspace-view-run-current-state-of projected-run)
+     "Projected-complete annotations must classify to projectedComplete")
+    (assert-equal
+     "Reopen annotation"
+     (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
+      projected-run)
+     "Projected-complete annotations must expose reopen/inspect, not save, as primary action")
+    (assert-true
+     plan-overview
+     "Workspace-view SCXML run object must expose an overview inspector view")
+    (assert-true
+     plan-actions
+     "Workspace-view SCXML run object must expose an actions inspector view")
+    (assert-true
+     (search "Selected preview event" plan-overview-html :test #'char-equal)
+     "Workspace-view SCXML overview must render selected preview event")
+    (assert-true
+     (search "Target workspace id" plan-overview-html :test #'char-equal)
+     "Workspace-view SCXML overview must render target workspace id")
+    (assert-true
+     (search "Target topicmap id" plan-overview-html :test #'char-equal)
+     "Workspace-view SCXML overview must render target topicmap id")
+    (assert-true
+     (search "Explain boundary ownership" plan-actions-html :test #'char-equal)
+     "Workspace-view SCXML actions view must expose Explain boundary ownership")))
+
 (defun run-dmx-workspace-annotation-workspace-view-local-first-ux-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
@@ -5557,6 +5774,31 @@
              :test #'char-equal)
      "Draft workspace view must expose Save annotation locally as the primary action")
     (assert-true
+     (search "Current SCXML state"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace view must expose SCXML current state in the preview table")
+    (assert-true
+     (search "draftLocal"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace preview must classify current state as draftLocal")
+    (assert-true
+     (search "SAVE_LOCAL"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace preview must show SAVE_LOCAL as the selected event")
+    (assert-true
+     (search "DMX HTTP will run"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace preview must expose whether DMX HTTP will run")
+    (assert-true
+     (search "TOPIC_UPSERT will run"
+             draft-html
+             :test #'char-equal)
+     "Draft workspace preview must expose whether TOPIC_UPSERT will run")
+    (assert-true
      (search "Materialize to DMX now:"
              draft-html
              :test #'char-equal)
@@ -5572,10 +5814,15 @@
              :test #'char-equal)
      "Locally saved annotations must render a local-first saved state")
     (assert-true
-     (search "Materialize to DMX now"
+     (search "Materialize to DMX"
              saved-html
              :test #'char-equal)
      "Locally saved annotations must offer a dedicated Materialize to DMX action")
+    (assert-true
+     (search "locallySaved"
+             saved-html
+             :test #'char-equal)
+     "Locally saved annotations must render locallySaved as current SCXML state")
     (assert-true
      (null (search "Persist to workspace"
                    saved-html
@@ -5586,6 +5833,21 @@
              topic-backed-html
              :test #'char-equal)
      "Topic-backed annotations must route to guarded continuation in workspace view")
+    (assert-true
+     (search "projectionPending"
+             topic-backed-html
+             :test #'char-equal)
+     "Topic-backed annotations must render projectionPending as current SCXML state")
+    (assert-true
+     (null (search "Save annotation locally"
+                   topic-backed-html
+                   :test #'char-equal))
+     "Topic-backed annotations must not expose Save annotation locally as primary action")
+    (assert-true
+     (search "TOPIC_UPSERT will run"
+             topic-backed-html
+             :test #'char-equal)
+     "Topic-backed annotations must render TOPIC_UPSERT preview")
     (assert-true
      (null (search "Persist to workspace"
                    topic-backed-html
@@ -5637,6 +5899,7 @@
   (run-dmx-workspace-annotation-local-first-save-smoke-test)
   (run-dmx-workspace-annotation-local-first-materialize-compatibility-smoke-test)
   (run-dmx-workspace-annotation-local-first-pending-auth-continuation-smoke-test)
+  (run-dmx-workspace-annotation-workspace-view-scxml-contract-smoke-test)
   (run-dmx-workspace-annotation-workspace-view-local-first-ux-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)

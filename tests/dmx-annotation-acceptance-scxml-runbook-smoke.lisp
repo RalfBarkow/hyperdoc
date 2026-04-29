@@ -71,6 +71,11 @@
    :hyperdoc
    "hyperdoc/dmx-action-auth-session.scxml"))
 
+(defun dmx-annotation-workspace-view-scxml-pathname ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/dmx-annotation-workspace-view.scxml"))
+
 (defun dmx-annotation-runbook-validation-error-findings (findings)
   (remove-if-not (lambda (finding)
                    (eq :error
@@ -109,6 +114,17 @@
     (dmx-annotation-runbook-assert-true
      (null errors)
      (format nil "Action auth/session SCXML must validate without errors: ~S"
+             (mapcar #'hyperdoc/scxml:scxml-validation-finding-code-of
+                     errors)))))
+
+(defun run-dmx-annotation-workspace-view-scxml-parse-and-validate-smoke-test ()
+  (let* ((path (dmx-annotation-workspace-view-scxml-pathname))
+         (chart (hyperdoc/scxml:parse-scxml-file path))
+         (findings (hyperdoc/scxml:validate-scxml-chart chart))
+         (errors (dmx-annotation-runbook-validation-error-findings findings)))
+    (dmx-annotation-runbook-assert-true
+     (null errors)
+     (format nil "Workspace-view SCXML must validate without errors: ~S"
              (mapcar #'hyperdoc/scxml:scxml-validation-finding-code-of
                      errors)))))
 
@@ -356,6 +372,7 @@
 (defun run-dmx-annotation-acceptance-scxml-runbook-smoke-tests ()
   (run-dmx-annotation-acceptance-scxml-runbook-parse-and-validate-smoke-test)
   (run-dmx-action-auth-session-scxml-parse-and-validate-smoke-test)
+  (run-dmx-annotation-workspace-view-scxml-parse-and-validate-smoke-test)
   (run-dmx-action-auth-session-scxml-mode-path-smoke-tests)
   (run-dmx-action-auth-session-credential-hygiene-cross-smoke-test)
   (run-dmx-annotation-acceptance-scxml-runbook-local-replay-smoke-test)

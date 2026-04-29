@@ -2334,117 +2334,219 @@
                         '(("No (save local only)" . "no")
                           ("Yes (save local and materialize to DMX)" . "yes"))
                         :label "Materialize to DMX now: ")))))))
-        (:p
-         (views:eval-button
-          "Inspect workspace write plan"
-          (views:thunk
-            (plan-dmx-workspace-annotation-write-from-object
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id))
-          "Render the typed DMX write plan without mutating DMX."))
-        (:p
-         (views:eval-button
-          "Debug workspace persistence"
-          (views:thunk
-            (debug-dock-annotation-workspace-persistence
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id
-             :client default-client))
-          "Open the exact persist form, a dry-run preview, and a step-through debug surface for the live write path."))
-        (:p
-         (views:eval-button
-          "Trace workspace persistence path"
-          (views:thunk
-            (trace-dock-annotation-workspace-persistence-path
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id
-             :client default-client))
-          "Inspect the persistence boundary as a reusable code-path graph before running the live write."))
-        (:p
-         (views:eval-button
-          "Compare with guarded workspace path"
-          (views:thunk
-            (compare-dock-annotation-with-guarded-workspace-path
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id
-             :client default-client))
-          "Compare the raw annotation persist path against the guarded continuation / MCP path while keeping workspace assignment distinct from topicmap placement."))
-        (:p
-         (views:eval-button
-          "Probe live annotation type support"
-          (views:thunk
-            (probe-live-workspace-annotation-type-support
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id
-             :client default-client))
-          "Check whether the live DMX backend exposes raw hyperdoc.annotation and whether the deliberate compatibility carrier is available for the normal persist path."))
-        (:p
-         (views:eval-button
-          "Probe live create-topic"
-          (views:thunk
-            (probe-live-create-topic-for-dock-annotation
-             annotation
-             :workspace-topicmap-id workspace-topicmap-id
-             :workspace-id workspace-id
-             :client default-client))
-          "Stop after the raw hyperdoc.annotation create-topic request and inspect the exact request/response boundary without assignment, topicmap placement, or journaling."))
-        (:p
-         (views:eval-button
-          (cond
-            (continuable-p "Continue DMX projection")
-            (workspace-annotation-p "Materialize to DMX now")
-            (t "Save annotation locally"))
-          (views:thunk
-            (cond
-              (continuable-p
-               (let* ((continuation-subject
-                        (or (and workspace-annotation-p annotation)
-                            (ignore-errors
-                              (read-dmx-workspace-annotation
-                               :topic-id persisted-topic-id
-                               :workspace-topicmap-id workspace-topicmap-id
-                               :client default-client))
-                            annotation))
-                      (continuation-plan
-                        (plan-dmx-workspace-annotation-write-from-object
-                         continuation-subject
-                         :workspace-topicmap-id workspace-topicmap-id
-                         :workspace-id workspace-id
-                         :client default-client))
-                      (continuation-report
-                        (make-workspace-annotation-continuation-report
-                         continuation-subject
-                         continuation-plan
-                         persisted-topic-id
-                         workspace-topicmap-id
-                         default-client)))
-                 (continue-workspace-annotation-persistence-with-client
-                  continuation-report
-                  default-client)))
-              (workspace-annotation-p
-               (persist-dock-annotation-local-first
-                annotation
-                :workspace-topicmap-id workspace-topicmap-id
-                :workspace-id workspace-id
-                :client default-client
-                :materialize-to-dmx-p t))
-              (t
-               (persist-dock-annotation-local-first
-                annotation
-                :workspace-topicmap-id workspace-topicmap-id
-                :workspace-id workspace-id
-                :client default-client
-                :materialize-to-dmx-p
-                (string= (or (and materialize-mode-cell
-                                   (lwcells:cell-ref materialize-mode-cell))
-                             "no")
-                         "yes")))))
-          "Drafts save locally first. Local-only annotations can materialize later. Existing topic-backed annotations continue the guarded projection stages without re-running topic upsert."))
+        (let* ((materialize-now-p
+                 (string= (or (and materialize-mode-cell
+                                    (lwcells:cell-ref materialize-mode-cell))
+                              "no")
+                          "yes"))
+               (workspace-view-run
+                 (make-dmx-annotation-workspace-view-run
+                  annotation
+                  :workspace-topicmap-id workspace-topicmap-id
+                  :workspace-id workspace-id
+                  :client default-client
+                  :materialize-to-dmx-p materialize-now-p))
+               (workspace-state
+                 (dmx-annotation-workspace-view-run-current-state-of
+                  workspace-view-run))
+               (preview-event
+                 (dmx-annotation-workspace-view-run-selected-preview-event-of
+                  workspace-view-run))
+               (next-states-label
+                 (format nil "~{~A~^, ~}"
+                         (or (dmx-annotation-workspace-view-run-next-states-of
+                              workspace-view-run)
+                             '())))
+               (primary-action-label
+                 (dmx-annotation-workspace-view-run-primary-action-label-of
+                  workspace-view-run))
+               (executor-function
+                 (dmx-annotation-workspace-view-run-executor-function-of
+                  workspace-view-run)))
+          (views:html
+            (:h4 "Workspace write plan")
+            (:table :class "inspector-table"
+                    (:tr (:th "Current SCXML state")
+                         (:td (:tt (views:esc workspace-state))))
+                    (:tr (:th "Preview event")
+                         (:td (:tt (views:esc preview-event))))
+                    (:tr (:th "Expected next state(s)")
+                         (:td (:tt (views:esc next-states-label))))
+                    (:tr (:th "Function")
+                         (:td (:tt (views:esc (format nil "~A"
+                                                      executor-function)))))
+                    (:tr (:th "Mutates local journal")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-local-journal-mutation-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "Mutates DMX")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-dmx-mutation-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "Auth required")
+                         (:td (:tt (views:esc
+                                    (dmx-annotation-workspace-view-run-auth-requirement-of
+                                     workspace-view-run)))))
+                    (:tr (:th "DMX HTTP will run")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-dmx-http-will-run-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "TOPIC_UPSERT will run")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-topic-upsert-will-run-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "Workspace assignment will run")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-workspace-assignment-will-run-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "Topicmap placement will run")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-topicmap-placement-will-run-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "Local save authoritative")
+                         (:td (:tt (views:esc
+                                    (if (dmx-annotation-workspace-view-run-local-save-authoritative-p-of
+                                         workspace-view-run)
+                                        "yes"
+                                        "no")))))
+                    (:tr (:th "Mutation boundary")
+                         (:td (views:esc
+                               (dmx-annotation-workspace-view-run-mutation-boundary-of
+                                workspace-view-run))))
+                    (:tr (:th "Target workspace")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (dmx-annotation-workspace-view-run-workspace-id-of
+                                             workspace-view-run))))))
+                    (:tr (:th "Target topicmap")
+                         (:td (:tt (views:esc
+                                    (format nil "~A"
+                                            (dmx-annotation-workspace-view-run-workspace-topicmap-id-of
+                                             workspace-view-run)))))))
+            (:p
+             (views:eval-button
+              "Inspect workspace write plan"
+              (views:thunk workspace-view-run)
+              "Open the SCXML-specified workspace plan object with current state, preview event, next states, and boundary ownership actions."))
+            (:p
+             (views:eval-button
+              "Debug workspace persistence"
+              (views:thunk
+                (debug-dock-annotation-workspace-persistence
+                 annotation
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :workspace-id workspace-id
+                 :client default-client))
+              "Open the exact persist form, a dry-run preview, and a step-through debug surface for the live write path."))
+            (:p
+             (views:eval-button
+              "Trace workspace write plan"
+              (views:thunk
+                (trace-dock-annotation-workspace-persistence-path
+                 annotation
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :workspace-id workspace-id
+                 :client default-client))
+              "Inspect the workspace write boundary as a reusable code-path graph before running the live write."))
+            (:p
+             (views:eval-button
+              "Check DMX annotation storage support"
+              (views:thunk
+                (probe-live-workspace-annotation-type-support
+                 annotation
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :workspace-id workspace-id
+                 :client default-client))
+              "Check whether native hyperdoc.annotation is available or whether the compatibility carrier lane is required."))
+            (:p
+             (views:eval-button
+              "Probe native DMX create-topic boundary"
+              (views:thunk
+                (probe-live-create-topic-for-dock-annotation
+                 annotation
+                 :workspace-topicmap-id workspace-topicmap-id
+                 :workspace-id workspace-id
+                 :client default-client))
+              "Advanced-only diagnostic: inspect the raw native create-topic boundary without assignment, topicmap placement, or journaling."))
+            (:p
+             (views:eval-button
+              primary-action-label
+              (views:thunk
+                (cond
+                  ((string= workspace-state "projectionPending")
+                   (let* ((continuation-subject
+                            (or (and workspace-annotation-p annotation)
+                                (ignore-errors
+                                  (read-dmx-workspace-annotation
+                                   :topic-id persisted-topic-id
+                                   :workspace-topicmap-id workspace-topicmap-id
+                                   :client default-client))
+                                annotation))
+                          (continuation-plan
+                            (plan-dmx-workspace-annotation-write-from-object
+                             continuation-subject
+                             :workspace-topicmap-id workspace-topicmap-id
+                             :workspace-id workspace-id
+                             :client default-client))
+                          (continuation-report
+                            (make-workspace-annotation-continuation-report
+                             continuation-subject
+                             continuation-plan
+                             persisted-topic-id
+                             workspace-topicmap-id
+                             default-client)))
+                     (continue-workspace-annotation-persistence-with-client
+                      continuation-report
+                      default-client)))
+                  ((string= workspace-state "locallySaved")
+                   (persist-dock-annotation-local-first
+                    annotation
+                    :workspace-topicmap-id workspace-topicmap-id
+                    :workspace-id workspace-id
+                    :client default-client
+                    :materialize-to-dmx-p t))
+                  ((string= workspace-state "projectedComplete")
+                   (read-dmx-workspace-annotation
+                    :topic-id persisted-topic-id
+                    :workspace-topicmap-id workspace-topicmap-id
+                    :client default-client))
+                  ((string= workspace-state "projectionFailed")
+                   (trace-dock-annotation-workspace-persistence-path
+                    annotation
+                    :workspace-topicmap-id workspace-topicmap-id
+                    :workspace-id workspace-id
+                    :client default-client))
+                  (t
+                   (persist-dock-annotation-local-first
+                    annotation
+                    :workspace-topicmap-id workspace-topicmap-id
+                    :workspace-id workspace-id
+                    :client default-client
+                    :materialize-to-dmx-p
+                    (string= preview-event
+                             "SAVE_LOCAL_AND_MATERIALIZE")))))
+              "Dispatch the SCXML-selected primary action. Drafts save locally first; optional materialization runs only when selected; topic-backed annotations continue guarded projection without topic upsert."))
+            (when (dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+                   workspace-view-run)
+              (views:html
+                (:p (views:esc
+                     "Continuation auth/session submachine:"))
+                (:p (views:object-ref
+                     (dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+                      workspace-view-run)
+                     :display "Inspect action-time auth/session run"))))))
         (when continuable-p
           (views:html
             (:p

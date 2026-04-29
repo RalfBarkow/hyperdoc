@@ -767,3 +767,198 @@
       (:h3 (views:esc "Trace"))
       (:pre (views:esc
              (dmx-action-auth-session-scxml-trace-string run))))))
+
+(defun dmx-annotation-workspace-view-scxml-finding-lines (run)
+  (let ((findings
+          (hyperdoc::dmx-annotation-workspace-view-run-validation-findings-of
+           run)))
+    (if findings
+        (mapcar (lambda (finding)
+                  (format nil "[~A] ~A: ~A"
+                          (hyperdoc/scxml:scxml-validation-finding-severity-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-code-of
+                           finding)
+                          (hyperdoc/scxml:scxml-validation-finding-message-of
+                           finding)))
+                findings)
+        (list "No validation findings."))))
+
+(defun dmx-annotation-workspace-view-boolean-label (value)
+  (if value "yes" "no"))
+
+(defun dmx-annotation-workspace-view-next-states-string (run)
+  (let ((states (hyperdoc::dmx-annotation-workspace-view-run-next-states-of run)))
+    (if states
+        (format nil "~{~A~^, ~}" states)
+        "-")))
+
+(defun dmx-annotation-workspace-view-secondary-actions-string (run)
+  (let ((labels
+          (hyperdoc::dmx-annotation-workspace-view-run-secondary-action-labels-of
+           run)))
+    (if labels
+        (format nil "~{~A~^, ~}" labels)
+        "-")))
+
+(views:defview 👀overview
+    (run hyperdoc::dmx-annotation-workspace-view-run)
+  (views:html-view :title "DMX annotation Workspace view SCXML plan" :priority 1
+    (views:html
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "SCXML path"))
+                   (:td (:tt
+                         (views:esc
+                          (namestring
+                           (hyperdoc::dmx-annotation-workspace-view-run-scxml-path-of
+                            run))))))
+              (:tr (:td (views:esc "Current state"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::dmx-annotation-workspace-view-run-current-state-of
+                           run)))))
+              (:tr (:td (views:esc "Selected preview event"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::dmx-annotation-workspace-view-run-selected-preview-event-of
+                           run)))))
+              (:tr (:td (views:esc "Expected next states"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-next-states-string
+                           run)))))
+              (:tr (:td (views:esc "Primary action label"))
+                   (:td (:tt
+                         (views:esc
+                          (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
+                           run)))))
+              (:tr (:td (views:esc "Secondary action labels"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-secondary-actions-string
+                           run)))))
+              (:tr (:td (views:esc "Mutation boundary"))
+                   (:td (views:esc
+                         (hyperdoc::dmx-annotation-workspace-view-run-mutation-boundary-of
+                          run))))
+              (:tr (:td (views:esc "Auth requirement"))
+                   (:td (views:esc
+                         (hyperdoc::dmx-annotation-workspace-view-run-auth-requirement-of
+                          run))))
+              (:tr (:td (views:esc "DMX HTTP will run"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-dmx-http-will-run-p-of
+                            run))))))
+              (:tr (:td (views:esc "TOPIC_UPSERT will run"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-topic-upsert-will-run-p-of
+                            run))))))
+              (:tr (:td (views:esc "Workspace assignment will run"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-workspace-assignment-will-run-p-of
+                            run))))))
+              (:tr (:td (views:esc "Topicmap placement will run"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-topicmap-placement-will-run-p-of
+                            run))))))
+              (:tr (:td (views:esc "Mutates local journal"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-local-journal-mutation-p-of
+                            run))))))
+              (:tr (:td (views:esc "Mutates DMX"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-dmx-mutation-p-of
+                            run))))))
+              (:tr (:td (views:esc "Local save authoritative"))
+                   (:td (:tt
+                         (views:esc
+                          (dmx-annotation-workspace-view-boolean-label
+                           (hyperdoc::dmx-annotation-workspace-view-run-local-save-authoritative-p-of
+                            run))))))
+              (:tr (:td (views:esc "Executor function"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-annotation-workspace-view-run-executor-function-of
+                                   run))))))
+              (:tr (:td (views:esc "Target workspace id"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-annotation-workspace-view-run-workspace-id-of
+                                   run))))))
+              (:tr (:td (views:esc "Target topicmap id"))
+                   (:td (:tt
+                         (views:esc
+                          (format nil "~A"
+                                  (hyperdoc::dmx-annotation-workspace-view-run-workspace-topicmap-id-of
+                                   run)))))))
+      (when (hyperdoc::dmx-annotation-workspace-view-run-workspace-write-plan-of
+             run)
+        (views:html
+          (:h3 (views:esc "Typed write plan"))
+          (:p (views:object-ref
+               (hyperdoc::dmx-annotation-workspace-view-run-workspace-write-plan-of
+                run)
+               :display "plan-dmx-workspace-annotation-write-from-object"))))
+      (when (hyperdoc::dmx-annotation-workspace-view-run-workspace-write-plan-error-of
+             run)
+        (views:html
+          (:h3 (views:esc "Write plan error"))
+          (:pre (views:esc
+                 (hyperdoc::dmx-annotation-workspace-view-run-workspace-write-plan-error-of
+                  run)))))
+      (when (hyperdoc::dmx-annotation-workspace-view-run-auth-session-submachine-scxml-path-of
+             run)
+        (views:html
+          (:h3 (views:esc "Continuation auth/session submachine"))
+          (:table :class "inspector-table"
+                  (:tr (:td (views:esc "SCXML path"))
+                       (:td (:tt
+                             (views:esc
+                              (namestring
+                               (hyperdoc::dmx-annotation-workspace-view-run-auth-session-submachine-scxml-path-of
+                                run)))))))
+          (when (hyperdoc::dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+                 run)
+            (views:html
+              (:p (views:object-ref
+                   (hyperdoc::dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+                    run)
+                   :display "Inspect continuation auth/session run"))))))
+      (:h3 (views:esc "Validation findings"))
+      (:pre (views:esc
+             (format nil "~{~A~%~}"
+                     (dmx-annotation-workspace-view-scxml-finding-lines
+                      run)))))))
+
+(views:defview 👀actions
+    (run hyperdoc::dmx-annotation-workspace-view-run)
+  (views:html-view :title "Actions" :priority 2
+    (views:html
+      (:p
+       (views:action-button
+        "Explain boundary ownership"
+        (views:thunk
+          (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+           (hyperdoc::dmx-annotation-workspace-view-run-annotation-of run)
+           :workspace-topicmap-id
+           (hyperdoc::dmx-annotation-workspace-view-run-workspace-topicmap-id-of
+            run)
+           :workspace-id
+           (hyperdoc::dmx-annotation-workspace-view-run-workspace-id-of run)
+           :client
+           (hyperdoc::dmx-annotation-workspace-view-run-client-of run)))
+        "Show why local save, DMX projection/materialization, and guarded continuation belong to distinct mutation boundaries.")))))

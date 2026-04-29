@@ -38,6 +38,11 @@
    :hyperdoc
    "hyperdoc/dmx-action-auth-session.scxml"))
 
+(defparameter *dmx-annotation-workspace-view-scxml*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/dmx-annotation-workspace-view.scxml"))
+
 (defparameter *dmx-annotation-acceptance-runbook-accepted-commits*
   '("0c2673e"
     "242410c"
@@ -352,6 +357,104 @@
    (final-state :reader dmx-action-auth-session-run-final-state-of
                 :initarg :final-state
                 :initform nil)))
+
+(defclass dmx-annotation-workspace-view-run ()
+  ((scxml-path :reader dmx-annotation-workspace-view-run-scxml-path-of
+               :initarg :scxml-path)
+   (annotation :reader dmx-annotation-workspace-view-run-annotation-of
+               :initarg :annotation
+               :initform nil)
+   (client :reader dmx-annotation-workspace-view-run-client-of
+           :initarg :client
+           :initform nil)
+   (workspace-id :reader dmx-annotation-workspace-view-run-workspace-id-of
+                 :initarg :workspace-id
+                 :initform 919815)
+   (workspace-topicmap-id
+    :reader dmx-annotation-workspace-view-run-workspace-topicmap-id-of
+    :initarg :workspace-topicmap-id
+    :initform 919822)
+   (current-state :reader dmx-annotation-workspace-view-run-current-state-of
+                  :initarg :current-state
+                  :initform "draftLocal")
+   (selected-preview-event
+    :reader dmx-annotation-workspace-view-run-selected-preview-event-of
+    :initarg :selected-preview-event
+    :initform "SAVE_LOCAL")
+   (next-states :reader dmx-annotation-workspace-view-run-next-states-of
+                :initarg :next-states
+                :initform nil)
+   (primary-action-label
+    :reader dmx-annotation-workspace-view-run-primary-action-label-of
+    :initarg :primary-action-label
+    :initform "Save annotation locally")
+   (secondary-action-labels
+    :reader dmx-annotation-workspace-view-run-secondary-action-labels-of
+    :initarg :secondary-action-labels
+    :initform nil)
+   (mutation-boundary
+    :reader dmx-annotation-workspace-view-run-mutation-boundary-of
+    :initarg :mutation-boundary
+    :initform "HyperDoc-local journal append boundary")
+   (auth-requirement
+    :reader dmx-annotation-workspace-view-run-auth-requirement-of
+    :initarg :auth-requirement
+    :initform "none")
+   (dmx-http-will-run-p
+    :reader dmx-annotation-workspace-view-run-dmx-http-will-run-p-of
+    :initarg :dmx-http-will-run-p
+    :initform nil)
+   (topic-upsert-will-run-p
+    :reader dmx-annotation-workspace-view-run-topic-upsert-will-run-p-of
+    :initarg :topic-upsert-will-run-p
+    :initform nil)
+   (workspace-assignment-will-run-p
+    :reader dmx-annotation-workspace-view-run-workspace-assignment-will-run-p-of
+    :initarg :workspace-assignment-will-run-p
+    :initform nil)
+   (topicmap-placement-will-run-p
+    :reader dmx-annotation-workspace-view-run-topicmap-placement-will-run-p-of
+    :initarg :topicmap-placement-will-run-p
+    :initform nil)
+   (local-journal-mutation-p
+    :reader dmx-annotation-workspace-view-run-local-journal-mutation-p-of
+    :initarg :local-journal-mutation-p
+    :initform nil)
+   (dmx-mutation-p :reader dmx-annotation-workspace-view-run-dmx-mutation-p-of
+                   :initarg :dmx-mutation-p
+                   :initform nil)
+   (local-save-authoritative-p
+    :reader dmx-annotation-workspace-view-run-local-save-authoritative-p-of
+    :initarg :local-save-authoritative-p
+    :initform t)
+   (executor-function
+    :reader dmx-annotation-workspace-view-run-executor-function-of
+    :initarg :executor-function
+    :initform 'persist-dock-annotation-local-first)
+   (continuation-topic-id
+    :reader dmx-annotation-workspace-view-run-continuation-topic-id-of
+    :initarg :continuation-topic-id
+    :initform nil)
+   (workspace-write-plan
+    :reader dmx-annotation-workspace-view-run-workspace-write-plan-of
+    :initarg :workspace-write-plan
+    :initform nil)
+   (workspace-write-plan-error
+    :reader dmx-annotation-workspace-view-run-workspace-write-plan-error-of
+    :initarg :workspace-write-plan-error
+    :initform nil)
+   (validation-findings
+    :reader dmx-annotation-workspace-view-run-validation-findings-of
+    :initarg :validation-findings
+    :initform nil)
+   (auth-session-submachine-scxml-path
+    :reader dmx-annotation-workspace-view-run-auth-session-submachine-scxml-path-of
+    :initarg :auth-session-submachine-scxml-path
+    :initform nil)
+   (auth-session-submachine-run
+    :reader dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+    :initarg :auth-session-submachine-run
+    :initform nil)))
 
 (defun uscxml-browser-pathname ()
   (let ((browser *uscxml-browser*))
@@ -911,6 +1014,320 @@
                    :blocker blocker
                    :failure-classification classification
                    :suggested-next-action suggested-next-action)))
+
+(defparameter *dmx-annotation-workspace-view-secondary-action-labels*
+  '("Trace workspace write plan"
+    "Check DMX annotation storage support"
+    "Probe native DMX create-topic boundary"
+    "Explain boundary ownership"))
+
+(defun read-dmx-annotation-workspace-view-scxml ()
+  (call-hyperdoc-scxml
+   :parse-scxml-file
+   *dmx-annotation-workspace-view-scxml*))
+
+(defun dmx-annotation-workspace-view-status= (left right)
+  (and left right
+       (string= (string-downcase (format nil "~A" left))
+                (string-downcase (format nil "~A" right)))))
+
+(defun dmx-annotation-workspace-view-instance-p (object)
+  (let ((class (find-class 'workspace-dock-annotation nil)))
+    (and class (typep object class))))
+
+(defun dmx-annotation-workspace-view-safe-call (function-name &rest arguments)
+  (when (fboundp function-name)
+    (ignore-errors
+      (apply (symbol-function function-name) arguments))))
+
+(defun dmx-annotation-workspace-view-annotation-status (annotation)
+  (and (dmx-annotation-workspace-view-instance-p annotation)
+       (dmx-annotation-workspace-view-safe-call
+        'workspace-annotation-status-of
+        annotation)))
+
+(defun dmx-annotation-workspace-view-continuation-topic-id (annotation)
+  (dmx-annotation-workspace-view-safe-call
+   'workspace-annotation-continuation-topic-id-or-nil
+   annotation))
+
+(defun dmx-annotation-workspace-view-classify-state
+    (annotation continuation-topic-id)
+  (let* ((workspace-annotation-p
+           (dmx-annotation-workspace-view-instance-p annotation))
+         (status
+           (dmx-annotation-workspace-view-annotation-status annotation))
+         (projected-p
+           (or (dmx-annotation-workspace-view-status= status "persisted")
+               (dmx-annotation-workspace-view-status= status "projected")))
+         (pending-p
+           (dmx-annotation-workspace-view-status=
+            status
+            "projection-pending-auth"))
+         (failed-p
+           (dmx-annotation-workspace-view-status=
+            status
+            "projection-failed")))
+    (cond
+      ((and workspace-annotation-p projected-p)
+       "projectedComplete")
+      (failed-p
+       "projectionFailed")
+      ((or pending-p
+           (and continuation-topic-id
+                (not projected-p)))
+       "projectionPending")
+      (workspace-annotation-p
+       "locallySaved")
+      (t
+       "draftLocal"))))
+
+(defun dmx-annotation-workspace-view-selected-event
+    (current-state materialize-to-dmx-p)
+  (cond
+    ((string= current-state "draftLocal")
+     (if materialize-to-dmx-p
+         "SAVE_LOCAL_AND_MATERIALIZE"
+         "SAVE_LOCAL"))
+    ((string= current-state "locallySaved")
+     "MATERIALIZE_DMX")
+    ((string= current-state "projectionPending")
+     "CONTINUE_DMX_PROJECTION")
+    ((string= current-state "projectedComplete")
+     "INSPECT_PLAN")
+    ((string= current-state "projectionFailed")
+     "INSPECT_FAILURE")
+    (t
+     "INSPECT_PLAN")))
+
+(defun dmx-annotation-workspace-view-secondary-actions (current-state)
+  (append
+   (copy-list *dmx-annotation-workspace-view-secondary-action-labels*)
+   (when (or (string= current-state "projectionPending")
+             (string= current-state "continuationAuthCheck")
+             (string= current-state "authRequired"))
+     (list "Inspect continuation auth/session submachine"))))
+
+(defun dmx-annotation-workspace-view-action-spec
+    (current-state selected-event)
+  (cond
+    ((and (string= current-state "draftLocal")
+          (string= selected-event "SAVE_LOCAL"))
+     (list :next-states
+           '("previewLocalSavePlan" "savingLocal" "locallySaved")
+           :primary-action-label "Save annotation locally"
+           :mutation-boundary
+           "HyperDoc-local journal append lane; DMX projection is not entered."
+           :auth-requirement "not required"
+           :dmx-http-will-run-p nil
+           :topic-upsert-will-run-p nil
+           :workspace-assignment-will-run-p nil
+           :topicmap-placement-will-run-p nil
+           :local-journal-mutation-p t
+           :dmx-mutation-p nil
+           :local-save-authoritative-p t
+           :executor-function 'persist-dock-annotation-local-first))
+    ((and (string= current-state "draftLocal")
+          (string= selected-event "SAVE_LOCAL_AND_MATERIALIZE"))
+     (list :next-states
+           '("previewLocalSavePlan"
+             "savingLocalThenMaterializing"
+             "materializationPreflight")
+           :primary-action-label "Save annotation locally"
+           :mutation-boundary
+           "Local-first journal append lane followed by optional DMX projection/materialization."
+           :auth-requirement
+           "local save does not require credentials; DMX projection may require action-time auth"
+           :dmx-http-will-run-p t
+           :topic-upsert-will-run-p t
+           :workspace-assignment-will-run-p t
+           :topicmap-placement-will-run-p t
+           :local-journal-mutation-p t
+           :dmx-mutation-p t
+           :local-save-authoritative-p t
+           :executor-function 'persist-dock-annotation-local-first))
+    ((string= current-state "locallySaved")
+     (list :next-states
+           '("previewDmxMaterializationPlan" "materializationPreflight")
+           :primary-action-label "Materialize to DMX"
+           :mutation-boundary
+           "DMX projection/materialization lane; local journal state remains authoritative."
+           :auth-requirement "may require action-time auth for guarded DMX mutations"
+           :dmx-http-will-run-p t
+           :topic-upsert-will-run-p t
+           :workspace-assignment-will-run-p t
+           :topicmap-placement-will-run-p t
+           :local-journal-mutation-p t
+           :dmx-mutation-p t
+           :local-save-authoritative-p t
+           :executor-function 'persist-dock-annotation-local-first))
+    ((string= current-state "projectionPending")
+     (list :next-states
+           '("previewContinuationPlan" "continuationAuthCheck")
+           :primary-action-label "Continue DMX projection"
+           :mutation-boundary
+           "Guarded continuation lane; resume assignment/topicmap/journal/reopen without TOPIC-UPSERT."
+           :auth-requirement "explicit action-time credentials are required when guarded mutations need auth"
+           :dmx-http-will-run-p t
+           :topic-upsert-will-run-p nil
+           :workspace-assignment-will-run-p t
+           :topicmap-placement-will-run-p t
+           :local-journal-mutation-p nil
+           :dmx-mutation-p t
+           :local-save-authoritative-p t
+           :executor-function
+           'continue-workspace-annotation-persistence-with-client))
+    ((string= current-state "projectedComplete")
+     (list :next-states
+           '("reopenAnnotation" "projectedComplete")
+           :primary-action-label "Reopen annotation"
+           :mutation-boundary "Readback/reopen lane; no mutation."
+           :auth-requirement "none for local preview; backend read auth depends on DMX host"
+           :dmx-http-will-run-p t
+           :topic-upsert-will-run-p nil
+           :workspace-assignment-will-run-p nil
+           :topicmap-placement-will-run-p nil
+           :local-journal-mutation-p nil
+           :dmx-mutation-p nil
+           :local-save-authoritative-p t
+           :executor-function 'read-dmx-workspace-annotation))
+    ((string= current-state "projectionFailed")
+     (list :next-states
+           '("projectionFailureReport")
+           :primary-action-label "Inspect projection failure"
+           :mutation-boundary "Failure-analysis lane; local save remains authoritative."
+           :auth-requirement "none for inspection"
+           :dmx-http-will-run-p nil
+           :topic-upsert-will-run-p nil
+           :workspace-assignment-will-run-p nil
+           :topicmap-placement-will-run-p nil
+           :local-journal-mutation-p nil
+           :dmx-mutation-p nil
+           :local-save-authoritative-p t
+           :executor-function 'trace-dock-annotation-workspace-persistence-path))
+    (t
+     (list :next-states '("previewLocalSavePlan")
+           :primary-action-label "Save annotation locally"
+           :mutation-boundary
+           "Default local journal append lane."
+           :auth-requirement "not required"
+           :dmx-http-will-run-p nil
+           :topic-upsert-will-run-p nil
+           :workspace-assignment-will-run-p nil
+           :topicmap-placement-will-run-p nil
+           :local-journal-mutation-p t
+           :dmx-mutation-p nil
+           :local-save-authoritative-p t
+           :executor-function 'persist-dock-annotation-local-first))))
+
+(defun dmx-annotation-workspace-view-auth-submachine-needed-p (current-state)
+  (or (string= current-state "projectionPending")
+      (string= current-state "previewContinuationPlan")
+      (string= current-state "continuationAuthCheck")
+      (string= current-state "authRequired")))
+
+(defun dmx-annotation-workspace-view-build-write-plan
+    (annotation workspace-topicmap-id workspace-id client)
+  (if (fboundp 'plan-dmx-workspace-annotation-write-from-object)
+      (handler-case
+          (values (plan-dmx-workspace-annotation-write-from-object
+                   annotation
+                   :workspace-topicmap-id workspace-topicmap-id
+                   :workspace-id workspace-id
+                   :client client)
+                  nil)
+        (condition (condition)
+          (values nil (princ-to-string condition))))
+      (values nil
+              "plan-dmx-workspace-annotation-write-from-object is unavailable")))
+
+(defun make-dmx-annotation-workspace-view-run
+    (annotation &key workspace-topicmap-id workspace-id client
+       (materialize-to-dmx-p nil))
+  (let* ((resolved-workspace-id (or workspace-id 919815))
+         (resolved-workspace-topicmap-id (or workspace-topicmap-id 919822))
+         (continuation-topic-id
+           (dmx-annotation-workspace-view-continuation-topic-id annotation))
+         (current-state
+           (dmx-annotation-workspace-view-classify-state
+            annotation
+            continuation-topic-id))
+         (selected-event
+           (dmx-annotation-workspace-view-selected-event
+            current-state
+            materialize-to-dmx-p))
+         (action-spec
+           (dmx-annotation-workspace-view-action-spec
+            current-state
+            selected-event))
+         (chart (read-dmx-annotation-workspace-view-scxml))
+         (validation-findings (call-hyperdoc-scxml
+                               :validate-scxml-chart
+                               chart))
+         (workspace-write-plan nil)
+         (workspace-write-plan-error nil))
+    (multiple-value-setq (workspace-write-plan workspace-write-plan-error)
+      (dmx-annotation-workspace-view-build-write-plan
+       annotation
+       resolved-workspace-topicmap-id
+       resolved-workspace-id
+       client))
+    (let ((auth-submachine-needed-p
+            (dmx-annotation-workspace-view-auth-submachine-needed-p
+             current-state))
+          (auth-session-submachine-run
+            (and (dmx-annotation-workspace-view-auth-submachine-needed-p
+                  current-state)
+                 (fboundp 'make-dmx-action-auth-session-run)
+                 (ignore-errors
+                   (make-dmx-action-auth-session-run
+                    :selected-auth-mode :anonymous
+                    :workspace-id resolved-workspace-id
+                    :topic-id continuation-topic-id)))))
+      (make-instance 'dmx-annotation-workspace-view-run
+                     :scxml-path *dmx-annotation-workspace-view-scxml*
+                     :annotation annotation
+                     :client client
+                     :workspace-id resolved-workspace-id
+                     :workspace-topicmap-id resolved-workspace-topicmap-id
+                     :current-state current-state
+                     :selected-preview-event selected-event
+                     :next-states (copy-list (getf action-spec :next-states))
+                     :primary-action-label
+                     (getf action-spec :primary-action-label)
+                     :secondary-action-labels
+                     (dmx-annotation-workspace-view-secondary-actions
+                      current-state)
+                     :mutation-boundary
+                     (getf action-spec :mutation-boundary)
+                     :auth-requirement
+                     (getf action-spec :auth-requirement)
+                     :dmx-http-will-run-p
+                     (and (getf action-spec :dmx-http-will-run-p) t)
+                     :topic-upsert-will-run-p
+                     (and (getf action-spec :topic-upsert-will-run-p) t)
+                     :workspace-assignment-will-run-p
+                     (and (getf action-spec :workspace-assignment-will-run-p)
+                          t)
+                     :topicmap-placement-will-run-p
+                     (and (getf action-spec :topicmap-placement-will-run-p) t)
+                     :local-journal-mutation-p
+                     (and (getf action-spec :local-journal-mutation-p) t)
+                     :dmx-mutation-p
+                     (and (getf action-spec :dmx-mutation-p) t)
+                     :local-save-authoritative-p
+                     (and (getf action-spec :local-save-authoritative-p) t)
+                     :executor-function
+                     (getf action-spec :executor-function)
+                     :continuation-topic-id continuation-topic-id
+                     :workspace-write-plan workspace-write-plan
+                     :workspace-write-plan-error workspace-write-plan-error
+                     :validation-findings validation-findings
+                     :auth-session-submachine-scxml-path
+                     (and auth-submachine-needed-p
+                          *dmx-action-auth-session-scxml*)
+                     :auth-session-submachine-run
+                     auth-session-submachine-run))))
 
 (defparameter *dmx-action-auth-session-secret-needles*
   '("Authorization:"
