@@ -219,6 +219,11 @@
                  (text-of item))))
     (views:transclusion (views:graphviz-view dot))))
 
+;; HTML snippets
+
+(defmethod render-story-item ((type (eql :html)) item page)
+  (views:unsafe-html (text-of item)))
+
 ;; Missing story item types (with reference to examples)
 
 ;; assets
@@ -233,10 +238,6 @@
 
 ;; grep
 ;; wiki.dbbs.co/welcome-visitors
-
-;; html
-;; fed.wiki/dorkbotpdx-may-2023
-;; wiki.ralfbarkow.ch/0000000010
 
 ;; line
 ;; fed.wiki/dorkbotpdx-may-2023
