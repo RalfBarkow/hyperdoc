@@ -3,23 +3,62 @@ set -euo pipefail
 
 # HyperDoc dev launcher:
 # - runs inside nix develop
-# - always enables development mode by default (playground eval)
-# - chooses a free Swank port (unless SWANK_PORT is explicitly set)
-# - always loads hyperdoc/server (includes explorer systems)
+# - always enables development mode by default
+# - chooses free ports unless explicitly set
+# - supports both SLIME/Swank and SLY/Slynk
+# - loads hyperdoc/server before serving
 #
 # Usage:
 #   ./dev.sh
+#   LISP_IDE=sly ./dev.sh
+#   LISP_IDE=slime ./dev.sh
 #
 # Env:
-#   HYPERDOC_DEVELOPMENT=0|1   (default 1; informational banner only)
-#   HYPERDOC_PORT=8080         (optional; if set and busy, we auto-pick another)
-#   HYPERDOC_BIND_ADDRESS=127.0.0.1 (default 127.0.0.1)
-#   SWANK_PORT=4005            (optional; if set and busy, we auto-pick another)
-#   SWANK_INTERFACE=127.0.0.1  (default 127.0.0.1)
+#   LISP_IDE=slime|sly              default: slime
+#   HYPERDOC_DEVELOPMENT=0|1        default: 1
+#   HYPERDOC_PORT=8080              optional; if busy, auto-pick another
+#   HYPERDOC_BIND_ADDRESS=127.0.0.1 default: 127.0.0.1
+#   SWANK_PORT=4005                 optional; SLIME/Swank port
+#   SWANK_INTERFACE=127.0.0.1       default: 127.0.0.1
+#   SLYNK_PORT=4006                 optional; SLY/Slynk port
+#   SLYNK_INTERFACE=127.0.0.1       default: 127.0.0.1
+#
+# Notes:
+#   Swank is the Lisp-side server for SLIME.
+#   Slynk is the Lisp-side server for SLY.
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${ROOT}"
 
 export HYPERDOC_DEVELOPMENT="${HYPERDOC_DEVELOPMENT:-1}"
-HYPERDOC_BIND_ADDRESS="${HYPERDOC_BIND_ADDRESS:-127.0.0.1}"
-SWANK_INTERFACE="${SWANK_INTERFACE:-127.0.0.1}"
+export HYPERDOC_BIND_ADDRESS="${HYPERDOC_BIND_ADDRESS:-127.0.0.1}"
+
+LISP_IDE="${LISP_IDE:-slime}"
+
+case "${LISP_IDE}" in
+  slime|swank)
+    LISP_IDE="slime"
+    LISP_SERVER_SYSTEM="swank"
+    LISP_SERVER_PACKAGE="swank"
+    LISP_SERVER_LABEL="Swank"
+    LISP_CONNECT_COMMAND="slime-connect"
+    LISP_SERVER_INTERFACE="${SWANK_INTERFACE:-127.0.0.1}"
+    LISP_SERVER_REQUESTED_PORT="${SWANK_PORT:-}"
+    ;;
+  sly|slynk)
+    LISP_IDE="sly"
+    LISP_SERVER_SYSTEM="slynk"
+    LISP_SERVER_PACKAGE="slynk"
+    LISP_SERVER_LABEL="Slynk"
+    LISP_CONNECT_COMMAND="sly-connect"
+    LISP_SERVER_INTERFACE="${SLYNK_INTERFACE:-${SWANK_INTERFACE:-127.0.0.1}}"
+    LISP_SERVER_REQUESTED_PORT="${SLYNK_PORT:-${SWANK_PORT:-}}"
+    ;;
+  *)
+    echo "Unsupported LISP_IDE=${LISP_IDE}; use 'slime' or 'sly'." >&2
+    exit 2
+    ;;
+esac
 
 choose_free_port() {
   python3 - <<'PY'
@@ -44,45 +83,64 @@ with socket.socket() as s:
 PY
 }
 
-# Determine Swank port:
-# - if SWANK_PORT set and free -> use it
-# - if SWANK_PORT set and busy -> pick a free one
-# - if not set -> pick a free one
-if [[ -n "${SWANK_PORT:-}" ]]; then
-  if [[ "$(port_is_free "$SWANK_PORT")" != "free" ]]; then
-    SWANK_PORT="$(choose_free_port)"
-  fi
-else
-  SWANK_PORT="$(choose_free_port)"
-fi
-
-export SWANK_PORT
-
-# Determine HyperDoc port:
-# - if HYPERDOC_PORT set and free -> use it
-# - if HYPERDOC_PORT set and busy -> pick a free one
-# - if not set -> default 8080 if free, else pick a free one
-if [[ -n "${HYPERDOC_PORT:-}" ]]; then
-  if [[ "$(port_is_free "$HYPERDOC_PORT")" != "free" ]]; then
-    HYPERDOC_PORT="$(choose_free_port)"
-  fi
-else
-  if [[ "$(port_is_free "8080")" == "free" ]]; then
-    HYPERDOC_PORT="8080"
+select_port() {
+  local requested="${1:-}"
+  if [[ -n "${requested}" ]]; then
+    if [[ "$(port_is_free "${requested}")" == "free" ]]; then
+      echo "${requested}"
+    else
+      choose_free_port
+    fi
   else
-    HYPERDOC_PORT="$(choose_free_port)"
+    choose_free_port
   fi
-fi
+}
+
+select_hyperdoc_port() {
+  if [[ -n "${HYPERDOC_PORT:-}" ]]; then
+    if [[ "$(port_is_free "${HYPERDOC_PORT}")" == "free" ]]; then
+      echo "${HYPERDOC_PORT}"
+    else
+      choose_free_port
+    fi
+  else
+    if [[ "$(port_is_free "8080")" == "free" ]]; then
+      echo "8080"
+    else
+      choose_free_port
+    fi
+  fi
+}
+
+LISP_SERVER_PORT="$(select_port "${LISP_SERVER_REQUESTED_PORT}")"
+HYPERDOC_PORT="$(select_hyperdoc_port)"
 
 export HYPERDOC_PORT
+export HYPERDOC_LISP_IDE="${LISP_IDE}"
+export HYPERDOC_LISP_SERVER_SYSTEM="${LISP_SERVER_SYSTEM}"
+export HYPERDOC_LISP_SERVER_PACKAGE="${LISP_SERVER_PACKAGE}"
+export HYPERDOC_LISP_SERVER_LABEL="${LISP_SERVER_LABEL}"
+export HYPERDOC_LISP_SERVER_INTERFACE="${LISP_SERVER_INTERFACE}"
+export HYPERDOC_LISP_SERVER_PORT="${LISP_SERVER_PORT}"
+
+case "${LISP_IDE}" in
+  slime)
+    export SWANK_INTERFACE="${LISP_SERVER_INTERFACE}"
+    export SWANK_PORT="${LISP_SERVER_PORT}"
+    ;;
+  sly)
+    export SLYNK_INTERFACE="${LISP_SERVER_INTERFACE}"
+    export SLYNK_PORT="${LISP_SERVER_PORT}"
+    ;;
+esac
 
 cat <<EOF2
 HyperDoc dev launcher
 
   HYPERDOC_DEVELOPMENT=${HYPERDOC_DEVELOPMENT} (1 enables Playground eval)
   HyperDoc: ${HYPERDOC_BIND_ADDRESS}:${HYPERDOC_PORT}
-  Swank: ${SWANK_INTERFACE}:${SWANK_PORT}
-  Emacs: M-x slime-connect  ${SWANK_INTERFACE}  ${SWANK_PORT}
+  ${LISP_SERVER_LABEL}: ${LISP_SERVER_INTERFACE}:${LISP_SERVER_PORT}
+  Emacs: M-x ${LISP_CONNECT_COMMAND}  ${LISP_SERVER_INTERFACE}  ${LISP_SERVER_PORT}
 
 URL (expected):
   http://${HYPERDOC_BIND_ADDRESS}:${HYPERDOC_PORT}/boot.html
@@ -93,14 +151,18 @@ EOF2
 unset ASDF_OUTPUT_TRANSLATIONS
 
 child_pid=""
+
 terminate_dev() {
   echo "[dev] terminated"
   if [[ -n "${child_pid}" ]]; then
+    kill -TERM "${child_pid}" 2>/dev/null || true
+    sleep 1
     kill -KILL "${child_pid}" 2>/dev/null || true
     wait "${child_pid}" 2>/dev/null || true
   fi
-  exit 124
+  exit 130
 }
+
 trap terminate_dev INT TERM
 
 nix develop --command sbcl --no-userinit --disable-debugger \
@@ -124,7 +186,7 @@ nix develop --command sbcl --no-userinit --disable-debugger \
             ;; and static assets come from the same source, while still inheriting the
             ;; packaged dependency trees through CL_SOURCE_REGISTRY/HYPERDOC_ASDF_TREES.
             ;; The project ASDs are loaded explicitly below so we do not recurse through
-            ;; the whole repo tree here (which can drag .direnv inputs into ASDF scans).
+            ;; the whole repo tree here.
             (asdf:initialize-source-registry
              (append (list :source-registry
                            (list :tree flake-deps))
@@ -135,6 +197,7 @@ nix develop --command sbcl --no-userinit --disable-debugger \
             (lambda (signal code scp)
               (declare (ignore signal code scp))
               (format t "~&Stopping HyperDoc dev server (Ctrl-C).~%")
+              (finish-output)
               (sb-ext:exit :code 130 :abort t)))' \
   --eval '(asdf:initialize-output-translations
             (list :output-translations
@@ -146,96 +209,74 @@ nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(format t "~&ASDF ready.~%")' \
   --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
   --eval '(asdf:load-asd (truename "hyperdoc.asd"))' \
-  --eval '(asdf:load-system "swank")' \
-  --eval "(swank:create-server :port ${SWANK_PORT} :interface \"${SWANK_INTERFACE}\" :dont-close t)" \
-  --eval '(format t "~&Swank listening.~%")' \
-  --eval "(let ((port ${HYPERDOC_PORT}))
-           (format t \"~&[dev] preflight port=~D development=~S debug=~S~%\"
-                   port
-                   (uiop:getenv \"HYPERDOC_DEVELOPMENT\")
-                   (uiop:getenv \"HYPERDOC_DEBUG\"))
-           (finish-output))" \
-  --eval "(let* ((port ${HYPERDOC_PORT})
-                (entry nil))
-           (handler-case
-               (progn
-                 (asdf:load-system :hyperdoc/server)
-                 (flet ((maybe-load (sys)
-                          (handler-case
-                              (if (asdf:find-system sys nil)
-                                  (progn
-                                    (asdf:load-system sys)
-                                    (format t \"~&[dev] optional ~S loaded~%\" sys))
-                                  (format t \"~&[dev] optional ~S skipped (not found)~%\" sys))
-                            (error (c)
-                              (format t \"~&[dev] optional ~S failed: ~A~%\" sys c)))))
-                   (let* ((names
-                           (sort
-                            (remove-duplicates
-                             (handler-case
-                                 (loop for s in (asdf:registered-systems)
-                                       for n = (string-downcase (string s))
-                                       when (and (<= (length \"hyperbook/\") (length n))
-                                                 (string= \"hyperbook/\" n :end2 (length \"hyperbook/\")))
-                                         collect n)
-                               (error () '()))
-                             :test #'string=)
-                            #'string<)))
-                     (dolist (n names)
-                       (unless (string= n \"hyperbook/server\")
-                         (maybe-load (intern (string-upcase n) :keyword))))))
-                 (let* ((pkg (or (find-package :hyperbook/server)
-                                 (error \"Package HYPERBOOK/SERVER not found\")))
-                        (preferred '(\"SERVE-CATALOG\" \"SERVE\")))
-                   (setf entry
-                         (or
-                          (loop for name in preferred
-                                for sym = (find-symbol name pkg)
-                                when (and sym (fboundp sym))
-                                return sym)
-                          (let* ((candidates
-                                  (loop for sym being the symbols of pkg
-                                        for sname = (symbol-name sym)
-                                        when (and (fboundp sym)
-                                                  (<= 6 (length sname))
-                                                  (string= \"SERVE-\" sname :end2 6))
-                                        collect sym))
-                                 (sorted (sort candidates #'string< :key #'symbol-name)))
-                            (or (first sorted)
-                                (error \"No SERVE-* entrypoint found in ~A\" (package-name pkg)))))))
-                 (format t \"~&[dev] entrypoint=~S port=~D~%\" entry port)
-                 (finish-output)
-                 (funcall entry :port port))
-             (error (c)
-               (format *error-output* \"~&[dev] ERROR ~A~%~A~%\"
-                       (type-of c) c)
-               (finish-output *error-output*)
-               (uiop:quit 1))))" \
-  --eval '(format t "~&HyperDoc up.~%")' \
-  --eval '(handler-bind ((sb-sys:interactive-interrupt
-                          (lambda (c)
-                            (declare (ignore c))
-                            (format t "~&Stopping HyperDoc dev server (Ctrl-C).~%")
-                            (sb-ext:exit :code 130 :abort t))))
-            (loop (sleep 3600)))' &
+  --eval '(let ((system (uiop:getenv "HYPERDOC_LISP_SERVER_SYSTEM")))
+            (unless (asdf:find-system system nil)
+              (format *error-output*
+                      "~&[dev] ERROR: ASDF system ~S not found.~%~
+                         If LISP_IDE=sly, add Slynk to the Nix Common Lisp inputs, or run LISP_IDE=slime ./dev.sh.~%"
+                      system)
+              (finish-output *error-output*)
+              (uiop:quit 2)))' \
+  --eval '(let* ((system (uiop:getenv "HYPERDOC_LISP_SERVER_SYSTEM"))
+                 (package-name (uiop:getenv "HYPERDOC_LISP_SERVER_PACKAGE"))
+                 (label (uiop:getenv "HYPERDOC_LISP_SERVER_LABEL"))
+                 (interface (uiop:getenv "HYPERDOC_LISP_SERVER_INTERFACE"))
+                 (port (parse-integer (uiop:getenv "HYPERDOC_LISP_SERVER_PORT"))))
+            (asdf:load-system system)
+            (let* ((pkg (or (find-package (string-upcase package-name))
+                            (error "Package ~A not found after loading ~A."
+                                   package-name system)))
+                   (create-server (find-symbol "CREATE-SERVER" pkg)))
+              (unless (and create-server (fboundp create-server))
+                (error "CREATE-SERVER not found in package ~A." pkg))
+              (funcall create-server
+                       :port port
+                       :interface interface
+                       :dont-close t)
+              (format t "~&~A listening.~%" label)
+              (finish-output)))' \
+  --eval '(let ((port (parse-integer (uiop:getenv "HYPERDOC_PORT"))))
+            (format t "~&[dev] preflight port=~D development=~S debug=~S~%"
+                    port
+                    (uiop:getenv "HYPERDOC_DEVELOPMENT")
+                    (uiop:getenv "HYPERDOC_DEBUG"))
+            (finish-output))' \
+  --eval '(handler-case
+              (let ((port (parse-integer (uiop:getenv "HYPERDOC_PORT"))))
+                (asdf:load-system :hyperdoc/server)
+                (let* ((pkg (or (find-package "HYPERBOOK/SERVER")
+                                (error "Package HYPERBOOK/SERVER not found.")))
+                       (entry (find-symbol "SERVE-CATALOG" pkg)))
+                  (unless (and entry (fboundp entry))
+                    (error "SERVE-CATALOG not found in HYPERBOOK/SERVER."))
+                  (format t "~&[dev] entrypoint=~S port=~D~%" entry port)
+                  (finish-output)
+                  (funcall entry :port port)
+                  (format t "~&HyperDoc up.~%")
+                  (finish-output)))
+            (error (c)
+              (format *error-output* "~&[dev] ERROR ~A~%~A~%"
+                      (type-of c) c)
+              (finish-output *error-output*)
+              (uiop:quit 1)))' \
+  --eval '(loop (sleep 3600))' &
 child_pid=$!
-wait "${child_pid}"
-status=$?
+
+if wait "${child_pid}"; then
+  status=0
+else
+  status=$?
+fi
+
 trap - INT TERM
 exit "${status}"
 
-# Minimal reproduction template (copy/paste):
-# sbcl --no-userinit --disable-debugger --non-interactive \
-#   --eval '(require :asdf)' \
-#   --eval '(handler-case
-#              (progn
-#                (asdf:load-system :hyperbook/server)
-#                (format t "~&MR: load ok~%")
-#                (uiop:quit 0))
-#            (error (c)
-#              (format *error-output* "~&MR ERROR ~A~%~A~%"
-#                      (type-of c) c)
-#              (uiop:quit 1)))'
+# Examples:
 #
-# Bounded startup check (startup witness, teardown ignored):
-# timeout --signal=TERM --kill-after=2s 45s ./dev.sh |& rg '^\[dev\] (preflight|entrypoint=|terminated)'
+#   ./dev.sh
+#   LISP_IDE=slime ./dev.sh
+#   LISP_IDE=sly ./dev.sh
+#
+# Bounded startup check:
+#
+#   timeout --signal=TERM --kill-after=2s 45s ./dev.sh |& rg "^\[dev\] (preflight|entrypoint=|terminated)"
