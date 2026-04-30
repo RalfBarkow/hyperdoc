@@ -2245,18 +2245,56 @@
 (defun workspace-annotation-dashboard-bool-label (value)
   (if value "yes" "no"))
 
-(defun workspace-annotation-dashboard-action-plans
-    (run &key mapped-from-scxml-p)
-  (remove-if-not (lambda (plan)
-                   (eq mapped-from-scxml-p
-                       (dmx-annotation-workspace-view-action-plan-mapped-from-scxml-p
-                        plan)))
-                 (or (dmx-annotation-workspace-view-run-enabled-action-plans-of
-                      run)
-                     '())))
+(defun include-scxml-architect-assets ()
+  (views:add-asset-path "/hyperdoc/"
+                        (asdf:system-relative-pathname
+                         :hyperdoc
+                         "assets/hyperdoc/"))
+  (views:include-css "/hyperdoc/css/scxml-architect.css")
+  (views:include-js "/hyperdoc/js/scxml-architect.js")
+  (views:include-script
+   "(function initHyperdocScxmlArchitect(attempt) {
+      if (window.hyperdocScxmlArchitect &&
+          typeof window.hyperdocScxmlArchitect.initCurrentView === 'function') {
+        window.hyperdocScxmlArchitect.initCurrentView();
+        return;
+      }
+      if ((attempt || 0) >= 40) {
+        return;
+      }
+      window.setTimeout(function () {
+        initHyperdocScxmlArchitect((attempt || 0) + 1);
+      }, 50);
+    }(0));"))
+
+(defun workspace-annotation-architect-event-groups (architect-session)
+  (let ((view-model
+          (scxml-architect-session-presentation-binding-of architect-session)))
+    (or (and view-model
+             (dmx-annotation-workspace-architect-view-model-event-groups-of
+              view-model))
+        '())))
+
+(defun workspace-annotation-architect-primary-plan (architect-session)
+  (let ((view-model
+          (scxml-architect-session-presentation-binding-of architect-session)))
+    (and view-model
+         (dmx-annotation-workspace-architect-view-model-primary-event-plan-of
+          view-model))))
+
+(defun workspace-annotation-architect-refresh-object
+    (object workspace-topicmap-id workspace-id client)
+  (if (typep object 'dock-annotation)
+      (make-dmx-annotation-workspace-architect-session
+       object
+       :workspace-topicmap-id workspace-topicmap-id
+       :workspace-id workspace-id
+       :client client)
+      object))
 
 (defun execute-dmx-annotation-workspace-dashboard-action
-    (annotation run action-plan workspace-topicmap-id workspace-id client)
+    (annotation run action-plan workspace-topicmap-id workspace-id client
+     &key architect-session)
   (let* ((event (dmx-annotation-workspace-view-action-plan-event action-plan))
          (executor
            (dmx-annotation-workspace-view-action-plan-function action-plan))
@@ -2265,14 +2303,18 @@
                (workspace-annotation-continuation-topic-id-or-nil annotation))))
     (cond
       ((eq executor 'persist-dock-annotation-local-first)
-       (persist-dock-annotation-local-first
-        annotation
-        :workspace-topicmap-id workspace-topicmap-id
-        :workspace-id workspace-id
-        :client client
-        :materialize-to-dmx-p
-        (or (string= event "SAVE_LOCAL_AND_MATERIALIZE")
-            (string= event "MATERIALIZE_DMX"))))
+       (workspace-annotation-architect-refresh-object
+        (persist-dock-annotation-local-first
+         annotation
+         :workspace-topicmap-id workspace-topicmap-id
+         :workspace-id workspace-id
+         :client client
+         :materialize-to-dmx-p
+         (or (string= event "SAVE_LOCAL_AND_MATERIALIZE")
+             (string= event "MATERIALIZE_DMX")))
+        workspace-topicmap-id
+        workspace-id
+        client))
       ((eq executor 'continue-workspace-annotation-persistence-with-client)
        (let* ((continuation-subject
                 (or (and (workspace-dock-annotation-p annotation)
@@ -2297,16 +2339,24 @@
                  continuation-topic-id
                  workspace-topicmap-id
                  client)))
-         (continue-workspace-annotation-persistence-with-client
-          continuation-report
+         (workspace-annotation-architect-refresh-object
+          (continue-workspace-annotation-persistence-with-client
+           continuation-report
+           client)
+          workspace-topicmap-id
+          workspace-id
           client)))
       ((eq executor 'read-dmx-workspace-annotation)
-       (read-dmx-workspace-annotation
-        :topic-id continuation-topic-id
-        :workspace-topicmap-id workspace-topicmap-id
-        :client client))
+       (workspace-annotation-architect-refresh-object
+        (read-dmx-workspace-annotation
+         :topic-id continuation-topic-id
+         :workspace-topicmap-id workspace-topicmap-id
+         :client client)
+        workspace-topicmap-id
+        workspace-id
+        client))
       ((eq executor 'make-dmx-annotation-workspace-view-run)
-       run)
+       (or architect-session run))
       ((eq executor 'trace-dock-annotation-workspace-persistence-path)
        (trace-dock-annotation-workspace-persistence-path
         annotation
@@ -2343,10 +2393,13 @@
 
 (views:defview 👀workspace (annotation dock-annotation)
   (views:html-view :title "Workspace" :priority 4
+    (include-scxml-architect-assets)
     (let* ((default-client
              (resolve-dmx-workspace-annotation-client
-              :dry-run nil
+              :dry-run t
               :verbose nil))
+           (planning-client
+             (make-instance 'null-dmx-import-client))
            (destination
              (resolve-dmx-workspace-annotation-destination
               annotation
@@ -2356,238 +2409,369 @@
            (workspace-topicmap-id
              (dmx-workspace-annotation-destination-workspace-topicmap-id
               destination))
-           (workspace-view-run
-             (make-dmx-annotation-workspace-view-run
+           (architect-session
+             (make-dmx-annotation-workspace-architect-session
               annotation
               :workspace-topicmap-id workspace-topicmap-id
               :workspace-id workspace-id
-              :client default-client))
-           (mapped-actions
-             (workspace-annotation-dashboard-action-plans
-              workspace-view-run
-              :mapped-from-scxml-p t))
-           (diagnostic-actions
-             (workspace-annotation-dashboard-action-plans
-              workspace-view-run
-              :mapped-from-scxml-p nil))
+              :client planning-client))
+           (workspace-view-run
+             (scxml-architect-session-source-object-of architect-session))
+           (view-model
+             (scxml-architect-session-presentation-binding-of architect-session))
+           (local-lane
+             (and view-model
+                  (dmx-annotation-workspace-architect-view-model-local-lane-of
+                   view-model)))
+           (dmx-lane
+             (and view-model
+                  (dmx-annotation-workspace-architect-view-model-dmx-lane-of
+                   view-model)))
+           (event-groups
+             (workspace-annotation-architect-event-groups architect-session))
            (primary-action
-             (find-if #'dmx-annotation-workspace-view-action-plan-primary-p
-                      mapped-actions))
-           (chart-summary
-             (dmx-annotation-workspace-view-run-chart-path-summary-of
-              workspace-view-run)))
+             (workspace-annotation-architect-primary-plan architect-session))
+           (scxml-source
+             (handler-case
+                 (uiop:read-file-string
+                  (scxml-architect-session-scxml-path-of architect-session))
+               (condition (condition)
+                 (format nil "Could not read SCXML source: ~A" condition))))
+           (next-event
+             (and view-model
+                  (dmx-annotation-workspace-architect-view-model-next-legal-event-of
+                   view-model))))
       (views:html
-        (:h4 "Local journal lane")
-        (:table :class "inspector-table"
-                (:tr (:th "Local state")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-local-lane-state-of
-                                 workspace-view-run)))))
-                (:tr (:th "Local journal event id")
-                     (:td (:tt (views:esc
-                                (or (let ((id
-                                            (dmx-annotation-workspace-view-run-local-journal-event-id-of
-                                             workspace-view-run)))
-                                      (and id (format nil "~A" id)))
-                                    "-")))))
-                (:tr (:th "Local journal event count")
-                     (:td (:tt (views:esc
-                                (format nil "~D"
-                                        (dmx-annotation-workspace-view-run-local-journal-event-count-of
-                                         workspace-view-run))))))
-                (:tr (:th "Local save authoritative")
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (dmx-annotation-workspace-view-run-local-save-authoritative-p-of
-                                  workspace-view-run))))))
-                (:tr (:th "Local object class")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-local-object-class-of
-                                 workspace-view-run))))))
-        (:h4 "DMX context-window lane")
-        (:table :class "inspector-table"
-                (:tr (:th "Workspace")
-                     (:td (:tt (views:esc
-                                (format nil "~A" workspace-id)))))
-                (:tr (:th "Topicmap")
-                     (:td (:tt (views:esc
-                                (format nil "~A" workspace-topicmap-id)))))
-                (:tr (:th "Carrier topic id")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-carrier-topic-label-of
-                                 workspace-view-run)))))
-                (:tr (:th "Assignment status")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-assignment-status-label-of
-                                 workspace-view-run)))))
-                (:tr (:th "Topicmap placement status")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-topicmap-placement-status-label-of
-                                 workspace-view-run)))))
-                (:tr (:th "Reopen target")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-reopen-target-class-of
-                                 workspace-view-run)))))
-                (:tr (:th "Projection visible after success")
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-run-projection-visibility-target-of
-                                 workspace-view-run))))))
-        (when (string= (dmx-annotation-workspace-view-run-current-state-of
-                        workspace-view-run)
-                       "draftLocal")
-          (views:html
-            (:p (views:esc
-                 "Workspace projection is not entered yet. Record local annotation first, then materialize or continue later."))))
-        (:h4 "SCXML chart visualization")
-        (views:graphviz-snippet
-         (dmx-annotation-workspace-view-run-chart-dot-text-of workspace-view-run))
-        (:table :class "inspector-table"
-                (:tr (:th "Current SCXML state")
-                     (:td (:tt (views:esc
-                                (or (getf chart-summary :current-state)
-                                    "-")))))
-                (:tr (:th "Selected preview event")
-                     (:td (:tt (views:esc
-                                (or (getf chart-summary :selected-event)
-                                    "-")))))
-                (:tr (:th "Expected next path")
-                     (:td (:tt (views:esc
-                                (format nil "~{~A~^, ~}"
-                                        (or (getf chart-summary
-                                                  :expected-next-states)
-                                            '()))))))
-                (:tr (:th "Next event mutates local journal")
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (getf chart-summary
-                                       :mutates-local-journal))))))
-                (:tr (:th "Next event mutates DMX")
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (getf chart-summary :mutates-dmx)))))))
-        (:details
-         (:summary (views:esc "Derived DOT source"))
-         (:pre :style "white-space: pre-wrap;"
-               (views:esc
-                (dmx-annotation-workspace-view-run-chart-dot-text-of
-                 workspace-view-run))))
-        (:h4 "Next action panel")
-        (when primary-action
-          (views:html
-            (:p
-             (views:eval-button
-              (dmx-annotation-workspace-view-action-plan-label primary-action)
-              (views:thunk
-                (execute-dmx-annotation-workspace-dashboard-action
-                 annotation
-                 workspace-view-run
-                 primary-action
-                 workspace-topicmap-id
-                 workspace-id
-                 default-client))
-              "Dispatch the SCXML-selected primary action for the current state."))))
-        (:table :class "inspector-table"
-                (:tr (:th "Event")
-                     (:th "Action")
-                     (:th "Function")
-                     (:th "Expected next state")
-                     (:th "Local mutation")
-                     (:th "DMX mutation")
-                     (:th "Auth required")
-                     (:th "TOPIC_UPSERT")
-                     (:th "Run"))
-                (dolist (plan mapped-actions)
-                  (views:html
-                    (:tr
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-action-plan-event
-                                 plan))))
-                     (:td (views:esc
-                           (dmx-annotation-workspace-view-action-plan-label
-                            plan)))
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (dmx-annotation-workspace-view-action-plan-function
-                                         plan)))))
-                     (:td (:tt (views:esc
-                                (or (dmx-annotation-workspace-view-action-plan-expected-next-state
-                                     plan)
-                                    "-"))))
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (dmx-annotation-workspace-view-action-plan-local-mutation-p
-                                  plan)))))
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (dmx-annotation-workspace-view-action-plan-dmx-mutation-p
-                                  plan)))))
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (dmx-annotation-workspace-view-action-plan-auth-required-p
-                                  plan)))))
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (dmx-annotation-workspace-view-action-plan-topic-upsert-p
-                                  plan)))))
-                     (:td
-                      (views:eval-button
-                       "Run"
-                       (views:thunk
-                         (execute-dmx-annotation-workspace-dashboard-action
-                          annotation
-                          workspace-view-run
-                          plan
-                          workspace-topicmap-id
-                          workspace-id
-                          default-client))
-                       "Dispatch this SCXML transition action."))))))
-        (:h4 "Secondary diagnostics")
-        (:table :class "inspector-table"
-                (:tr (:th "Action")
-                     (:th "Event")
-                     (:th "Function")
-                     (:th "Advanced")
-                     (:th "Run"))
-                (dolist (plan diagnostic-actions)
-                  (views:html
-                    (:tr
-                     (:td (views:esc
-                           (dmx-annotation-workspace-view-action-plan-label
-                            plan)))
-                     (:td (:tt (views:esc
-                                (dmx-annotation-workspace-view-action-plan-event
-                                 plan))))
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (dmx-annotation-workspace-view-action-plan-function
-                                         plan)))))
-                     (:td (:tt (views:esc
-                                (workspace-annotation-dashboard-bool-label
-                                 (dmx-annotation-workspace-view-action-plan-advanced-only-p
-                                  plan)))))
-                     (:td
-                      (views:eval-button
-                       "Run"
-                       (views:thunk
-                         (execute-dmx-annotation-workspace-dashboard-action
-                          annotation
-                          workspace-view-run
-                          plan
-                          workspace-topicmap-id
-                          workspace-id
-                          default-client))
-                       "Dispatch this mapped diagnostic action."))))))
-        (:p
-         (views:object-ref
-          workspace-view-run
-          :display "Inspect workspace write plan"))
-        (when (dmx-annotation-workspace-view-run-auth-session-submachine-run-of
-               workspace-view-run)
-          (views:html
-            (:p (views:object-ref
-                 (dmx-annotation-workspace-view-run-auth-session-submachine-run-of
-                  workspace-view-run)
-                 :display "Inspect continuation auth/session submachine run"))))))))
+        (:div :class "scxml-architect"
+              (:div :class "scxml-architect-region"
+                    (:h4 "Workspace")
+                    (:p :class "scxml-architect-subtle"
+                        (views:esc
+                         "Domain dashboard: local lane, DMX projection lane, active path, and next legal semantic event."))
+                    (:div :class "scxml-architect-lanes"
+                          (:div
+                           (:h5 "Local journal lane")
+                           (:table :class "inspector-table"
+                                   (:tr (:th "Local state")
+                                        (:td (:tt (views:esc
+                                                   (or (getf local-lane :state)
+                                                       "-")))))
+                                   (:tr (:th "Local journal event id")
+                                        (:td (:tt (views:esc
+                                                   (format nil "~A"
+                                                           (or (getf local-lane :event-id)
+                                                               "-"))))))
+                                   (:tr (:th "Local journal event count")
+                                        (:td (:tt (views:esc
+                                                   (format nil "~A"
+                                                           (or (getf local-lane :event-count)
+                                                               0))))))
+                                   (:tr (:th "Local object class")
+                                        (:td (:tt (views:esc
+                                                   (or (getf local-lane :object-class)
+                                                       "-")))))
+                                   (:tr (:th "Local save authoritative")
+                                        (:td (:tt (views:esc
+                                                   (workspace-annotation-dashboard-bool-label
+                                                    (getf local-lane :authoritative-p)))))))
+                          (:div
+                           (:h5 "DMX context-window lane")
+                           (:table :class "inspector-table"
+                                   (:tr (:th "Workspace")
+                                        (:td (:tt (views:esc
+                                                   (format nil "~A"
+                                                           workspace-id)))))
+                                   (:tr (:th "Topicmap")
+                                        (:td (:tt (views:esc
+                                                   (format nil "~A"
+                                                           workspace-topicmap-id)))))
+                                   (:tr (:th "Carrier topic id")
+                                        (:td (:tt (views:esc
+                                                   (or (getf dmx-lane :carrier-topic)
+                                                       "-")))))
+                                   (:tr (:th "Assignment status")
+                                        (:td (:tt (views:esc
+                                                   (or (getf dmx-lane :assignment-status)
+                                                       "-")))))
+                                   (:tr (:th "Topicmap placement status")
+                                        (:td (:tt (views:esc
+                                                   (or (getf dmx-lane :topicmap-placement-status)
+                                                       "-")))))
+                                   (:tr (:th "Reopen target")
+                                        (:td (:tt (views:esc
+                                                   (or (getf dmx-lane :reopen-target)
+                                                       "-")))))
+                                   (:tr (:th "Visible after success")
+                                        (:td (:tt (views:esc
+                                                   (or (getf dmx-lane :projection-surface)
+                                                       "workspace 919815, topicmap 919822"))))))))
+                    (:table :class "inspector-table"
+                            (:tr (:th "Active state path")
+                                 (:td (:tt (views:esc
+                                            (format nil "~{~A~^ -> ~}"
+                                                    (scxml-architect-session-active-state-path-of
+                                                     architect-session))))))
+                            (:tr (:th "Next legal event")
+                                 (:td (:tt (views:esc (or next-event "-")))))
+                            (:tr (:th "Preview path")
+                                 (:td (:tt (views:esc
+                                            (format nil "~{~A~^ -> ~}"
+                                                    (or (scxml-architect-session-preview-path-of
+                                                         architect-session)
+                                                        '())))))))
+                    (when primary-action
+                      (views:html
+                        (:p
+                         (views:eval-button
+                          (dmx-annotation-workspace-view-action-plan-label
+                           primary-action)
+                          (views:thunk
+                            (execute-dmx-annotation-workspace-dashboard-action
+                             annotation
+                             workspace-view-run
+                             primary-action
+                             workspace-topicmap-id
+                             workspace-id
+                             nil
+                             :architect-session architect-session))
+                          "Dispatch the primary semantic event from the active SCXML state.")))))
+              (:div :class "scxml-architect-region"
+                    (:h4 "Statechart")
+                    (:p :class "scxml-architect-subtle"
+                        (views:esc
+                         "Architect-style statechart view with highlighted active path, selected event, and preview path."))
+                    (:div :class "scxml-architect-chart-shell"
+                          :data-scxml-architect-shell "workspace"
+                          (:div :class "scxml-architect-chart-toolbar"
+                                (:button :type "button"
+                                         :data-scxml-architect-zoom "reset"
+                                         "Fit")
+                                (:button :type "button"
+                                         :data-scxml-architect-zoom "in"
+                                         "Zoom in")
+                                (:button :type "button"
+                                         :data-scxml-architect-zoom "out"
+                                         "Zoom out"))
+                          (:div :class "scxml-architect-chart"
+                                :data-scxml-architect-chart "workspace"
+                                (views:graphviz-snippet
+                                 (scxml-architect-session-graphviz-dot-of
+                                  architect-session)
+                                 :fallback-title
+                                 "Statechart fallback graph text"))))
+              (:div :class "scxml-architect-region"
+                    (:h4 "Events")
+                    (:p :class "scxml-architect-subtle"
+                        (views:esc
+                         "Semantic events grouped by state hierarchy. Workflow events are separate from advanced diagnostics."))
+                    (dolist (group event-groups)
+                      (let ((group-label (getf group :group-label))
+                            (plans (getf group :plans)))
+                        (if (string= group-label "Advanced diagnostics")
+                            (views:html
+                              (:details :class "scxml-architect-diagnostics"
+                                        (:summary (views:esc group-label))
+                                        (:div :class "scxml-architect-event-group"
+                                              (:table :class "inspector-table"
+                                                      (:tr (:th "Event")
+                                                           (:th "Label")
+                                                           (:th "Function")
+                                                           (:th "Local mutation")
+                                                           (:th "DMX mutation")
+                                                           (:th "Auth required")
+                                                           (:th "TOPIC_UPSERT")
+                                                           (:th "Run"))
+                                                      (dolist (plan plans)
+                                                        (views:html
+                                                          (:tr
+                                                           (:td (:tt (views:esc
+                                                                      (dmx-annotation-workspace-view-action-plan-event
+                                                                       plan))))
+                                                           (:td (views:esc
+                                                                 (dmx-annotation-workspace-view-action-plan-label
+                                                                  plan)))
+                                                           (:td (:tt (views:esc
+                                                                      (format nil "~A"
+                                                                              (dmx-annotation-workspace-view-action-plan-function
+                                                                               plan)))))
+                                                           (:td (:tt (views:esc
+                                                                      (workspace-annotation-dashboard-bool-label
+                                                                       (dmx-annotation-workspace-view-action-plan-local-mutation-p
+                                                                        plan)))))
+                                                           (:td (:tt (views:esc
+                                                                      (workspace-annotation-dashboard-bool-label
+                                                                       (dmx-annotation-workspace-view-action-plan-dmx-mutation-p
+                                                                        plan)))))
+                                                           (:td (:tt (views:esc
+                                                                      (workspace-annotation-dashboard-bool-label
+                                                                       (dmx-annotation-workspace-view-action-plan-auth-required-p
+                                                                        plan)))))
+                                                           (:td (:tt (views:esc
+                                                                      (workspace-annotation-dashboard-bool-label
+                                                                       (dmx-annotation-workspace-view-action-plan-topic-upsert-p
+                                                                        plan)))))
+                                                           (:td
+                                                            (views:eval-button
+                                                             "Run"
+                                                             (views:thunk
+                                                               (execute-dmx-annotation-workspace-dashboard-action
+                                                                annotation
+                                                                workspace-view-run
+                                                                plan
+                                                                workspace-topicmap-id
+                                                                workspace-id
+                                                                nil
+                                                                :architect-session architect-session))
+                                                             "Dispatch this advanced diagnostic event."))))))))))
+                            (views:html
+                              (:div :class "scxml-architect-event-group"
+                                    (:h5 (views:esc group-label))
+                                    (:table :class "inspector-table"
+                                            (:tr (:th "Event")
+                                                 (:th "Label")
+                                                 (:th "Function")
+                                                 (:th "Expected next state")
+                                                 (:th "Local mutation")
+                                                 (:th "DMX mutation")
+                                                 (:th "Auth required")
+                                                 (:th "TOPIC_UPSERT")
+                                                 (:th "Run"))
+                                            (dolist (plan plans)
+                                              (views:html
+                                                (:tr
+                                                 (:td (:tt (views:esc
+                                                            (dmx-annotation-workspace-view-action-plan-event
+                                                             plan))))
+                                                 (:td (views:esc
+                                                       (dmx-annotation-workspace-view-action-plan-label
+                                                        plan)))
+                                                 (:td (:tt (views:esc
+                                                            (format nil "~A"
+                                                                    (dmx-annotation-workspace-view-action-plan-function
+                                                                     plan)))))
+                                                 (:td (:tt (views:esc
+                                                            (or (dmx-annotation-workspace-view-action-plan-expected-next-state
+                                                                 plan)
+                                                                "-"))))
+                                                 (:td (:tt (views:esc
+                                                            (workspace-annotation-dashboard-bool-label
+                                                             (dmx-annotation-workspace-view-action-plan-local-mutation-p
+                                                              plan)))))
+                                                 (:td (:tt (views:esc
+                                                            (workspace-annotation-dashboard-bool-label
+                                                             (dmx-annotation-workspace-view-action-plan-dmx-mutation-p
+                                                              plan)))))
+                                                 (:td (:tt (views:esc
+                                                            (workspace-annotation-dashboard-bool-label
+                                                             (dmx-annotation-workspace-view-action-plan-auth-required-p
+                                                              plan)))))
+                                                 (:td (:tt (views:esc
+                                                            (workspace-annotation-dashboard-bool-label
+                                                             (dmx-annotation-workspace-view-action-plan-topic-upsert-p
+                                                              plan)))))
+                                                 (:td
+                                                  (views:eval-button
+                                                   "Run"
+                                                   (views:thunk
+                                                     (execute-dmx-annotation-workspace-dashboard-action
+                                                      annotation
+                                                      workspace-view-run
+                                                      plan
+                                                      workspace-topicmap-id
+                                                      workspace-id
+                                                      nil
+                                                      :architect-session architect-session))
+                                                   "Dispatch this semantic event.")))))))))))
+              (:div :class "scxml-architect-region"
+                    (:h4 "Differences")
+                    (:p :class "scxml-architect-subtle"
+                        (views:esc
+                         "Programming-by-differences: inherited behavior from parent states and leaf-state overrides."))
+                    (:table :class "inspector-table"
+                            (:tr (:th "State")
+                                 (:th "Role")
+                                 (:th "Inherited events")
+                                 (:th "Leaf events")
+                                 (:th "Differences"))
+                            (dolist (entry
+                                     (or (scxml-architect-session-state-metadata-of
+                                          architect-session)
+                                         '()))
+                              (views:html
+                                (:tr
+                                 (:td (:tt (views:esc (or (getf entry :state-id) "-"))))
+                                 (:td (:tt (views:esc
+                                            (format nil "~A"
+                                                    (or (getf entry :role) "-")))))
+                                 (:td (:tt (views:esc
+                                            (format nil "~{~A~^, ~}"
+                                                    (or (getf entry :inherited-events)
+                                                        '())))))
+                                 (:td (:tt (views:esc
+                                            (format nil "~{~A~^, ~}"
+                                                    (or (getf entry :leaf-events)
+                                                        '())))))
+                                 (:td (:tt (views:esc
+                                            (format nil "~{~A~^, ~}"
+                                                    (or (getf entry :differences)
+                                                        '()))))))))))
+              (:div :class "scxml-architect-region"
+                    (:h4 "Plan")
+                    (:p :class "scxml-architect-subtle"
+                        (views:esc
+                         "Inspect the typed write/projection plan and target objects. No live mutation occurs in this panel unless an event is explicitly dispatched."))
+                    (:table :class "inspector-table"
+                            (:tr (:th "Current state")
+                                 (:td (:tt (views:esc
+                                            (dmx-annotation-workspace-view-run-current-state-of
+                                             workspace-view-run)))))
+                            (:tr (:th "Selected event")
+                                 (:td (:tt (views:esc
+                                            (or (scxml-architect-session-selected-event-of
+                                                 architect-session)
+                                                "-")))))
+                            (:tr (:th "Preview path")
+                                 (:td (:tt (views:esc
+                                            (format nil "~{~A~^ -> ~}"
+                                                    (or (scxml-architect-session-preview-path-of
+                                                         architect-session)
+                                                        '()))))))
+                            (:tr (:th "Mutation boundary")
+                                 (:td (:tt (views:esc
+                                            (or (dmx-annotation-workspace-view-run-mutation-boundary-of
+                                                 workspace-view-run)
+                                                "-"))))))
+                    (:p
+                     (views:object-ref
+                      architect-session
+                      :display "Inspect workspace write plan"))
+                    (when (dmx-annotation-workspace-view-run-workspace-write-plan-of
+                           workspace-view-run)
+                      (views:html
+                        (:p (views:object-ref
+                             (dmx-annotation-workspace-view-run-workspace-write-plan-of
+                              workspace-view-run)
+                             :display "Typed workspace write/projection plan"))))
+                    (when (dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+                           workspace-view-run)
+                      (views:html
+                        (:p (views:object-ref
+                             (dmx-annotation-workspace-view-run-auth-session-submachine-run-of
+                              workspace-view-run)
+                             :display "Auth/session submachine run")))))
+              (:div :class "scxml-architect-region"
+                    (:h4 "Raw")
+                    (:details
+                     (:summary (views:esc "SCXML source"))
+                     (:pre :style "white-space: pre-wrap;"
+                           (views:esc scxml-source)))
+                    (:details
+                     (:summary (views:esc "DOT source"))
+                     (:pre :style "white-space: pre-wrap;"
+                           (views:esc
+                            (or (scxml-architect-session-graphviz-dot-of
+                                 architect-session)
+                                "")))))))))))
 
 (views:defview 👀overview (debug workspace-annotation-persistence-debug)
   (views:html-view :title "Overview" :priority 1

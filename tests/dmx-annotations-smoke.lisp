@@ -428,6 +428,19 @@
     (clog-moldable-inspector::load-views pane)
     (slot-value pane 'clog-moldable-inspector::views)))
 
+(defun dmx-annotation-smoke-string-occurrence-count (needle haystack)
+  (if (or (not (stringp needle))
+          (zerop (length needle))
+          (not (stringp haystack)))
+      0
+      (loop with start = 0
+            for pos = (search needle haystack
+                              :start2 start
+                              :test #'char-equal)
+            while pos
+            do (setf start (+ pos (length needle)))
+            count 1)))
+
 (defun workspace-annotation-consequence-kinds (comparison)
   (mapcar #'hyperdoc::workspace-annotation-path-consequence-kind-of
           (hyperdoc::workspace-annotation-path-diff-consequences-of
@@ -955,11 +968,12 @@
      (search "DMX context-window lane" workspace-html :test #'char-equal)
      "Workspace annotation inspector must render the DMX context-window lane in the Workspace dashboard")
     (assert-true
-     (search "SCXML chart visualization" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must render the Workspace-view SCXML chart visualization")
+     (search "Architect-style statechart view" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must render the Architect Statechart region for the Workspace-view SCXML chart")
     (assert-true
-     (search "Next action panel" workspace-html :test #'char-equal)
-     "Workspace annotation inspector must render SCXML-backed next actions")
+     (search "Semantic events grouped by state hierarchy" workspace-html
+             :test #'char-equal)
+     "Workspace annotation inspector must render SCXML-backed event grouping instead of an undifferentiated action bag")
     (assert-true
      (search "Inspect workspace write plan" workspace-html :test #'char-equal)
      "Workspace annotation inspector must expose the SCXML-backed Inspect workspace write plan action")
@@ -974,6 +988,13 @@
      (search "Probe native DMX create-topic boundary" workspace-html
              :test #'char-equal)
      "Workspace annotation inspector must expose the advanced native create-topic boundary probe")
+    (assert-true
+     (search "Advanced diagnostics" workspace-html :test #'char-equal)
+     "Workspace annotation inspector must group advanced probes as Advanced diagnostics")
+    (assert-true
+     (<= (dmx-annotation-smoke-string-occurrence-count "DOT source" workspace-html)
+         1)
+     "Workspace annotation inspector must expose at most one DOT source disclosure")
     (assert-true
      (null (search "Compare with guarded workspace path"
                    workspace-html
@@ -5787,10 +5808,10 @@
              :test #'char-equal)
      "Draft workspace view must expose Record local annotation as the primary action")
     (assert-true
-     (search "Current SCXML state"
+     (search "Active state path"
              draft-html
              :test #'char-equal)
-     "Draft workspace view must expose SCXML current state in the preview table")
+     "Draft workspace view must expose the active SCXML path in the Workspace dashboard")
     (assert-true
      (search "draftLocal"
              draft-html
@@ -5802,10 +5823,10 @@
              :test #'char-equal)
      "Draft workspace preview must show SAVE_LOCAL as the selected event")
     (assert-true
-     (search "Next event mutates DMX"
+     (search "DMX mutation"
              draft-html
              :test #'char-equal)
-     "Draft workspace preview must expose whether the selected event mutates DMX")
+     "Draft workspace preview must expose DMX mutation effect flags in the event table")
     (assert-true
      (search "TOPIC_UPSERT"
              draft-html
@@ -5867,6 +5888,70 @@
                    :test #'char-equal))
      "Topic-backed annotations must not route through raw Persist to workspace action")))
 
+(defun run-dmx-workspace-annotation-workspace-view-render-dry-run-no-live-http-smoke-test ()
+  (asdf:load-system :hyperdoc/scxml)
+  (let* ((topic-backed-draft
+           (make-test-dock-annotation
+            :note "Workspace architect render stays dry-run"))
+         (_set-topic-id
+           (setf (slot-value topic-backed-draft 'hyperdoc::target-object)
+                 936040))
+         (captured-http-calls '())
+         (original-request (symbol-function 'drakma:http-request)))
+    (declare (ignore _set-topic-id))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'drakma:http-request)
+                 (lambda (url &rest args)
+                   (declare (ignore args))
+                   (push url captured-http-calls)
+                   (error "Unexpected live DMX HTTP during workspace architect dry-run render ~S"
+                          url)))
+           (let* ((client (make-instance 'hyperdoc::null-dmx-import-client))
+                  (architect-session
+                    (hyperdoc::make-dmx-annotation-workspace-architect-session
+                     topic-backed-draft
+                     :workspace-topicmap-id
+                     *dmx-annotations-smoke-workspace-topicmap-id*
+                     :workspace-id
+                     *dmx-annotations-smoke-workspace-id*
+                     :client client))
+                  (workspace-view-run
+                    (hyperdoc::scxml-architect-session-source-object-of
+                     architect-session)))
+             (assert-equal
+              "Continue DMX projection"
+              (hyperdoc::dmx-annotation-workspace-view-run-primary-action-label-of
+               workspace-view-run)
+              "Topic-backed Workspace preview must keep guarded continuation as primary action")
+             (assert-true
+              (equal '("workspaceView" "dmxProjection" "projectionPending")
+                     (hyperdoc::scxml-architect-session-active-state-path-of
+                      architect-session))
+              "Architect session must preserve the projectionPending active-state path")
+             (assert-equal
+              0
+              (length captured-http-calls)
+              "Workspace architect dashboard/preview render must not issue live DMX HTTP requests")))
+      (setf (symbol-function 'drakma:http-request) original-request))))
+
+(defun run-dmx-workspace-annotation-architect-targeted-smoke-tests ()
+  (format t "~&[architect] scxml contract...~%")
+  (finish-output)
+  (run-dmx-workspace-annotation-workspace-view-scxml-contract-smoke-test)
+
+  (format t "~&[architect] local-first workspace UX...~%")
+  (finish-output)
+  (run-dmx-workspace-annotation-workspace-view-local-first-ux-smoke-test)
+
+  (format t "~&[architect] dry-run no-live HTTP...~%")
+  (finish-output)
+  (run-dmx-workspace-annotation-workspace-view-render-dry-run-no-live-http-smoke-test)
+
+  (format t "~&DMX workspace architect targeted smoke tests passed.~%")
+  (finish-output)
+  t)
+
 (defun run-dmx-annotations-smoke-tests ()
   (run-dmx-workspace-annotation-plan-smoke-test)
   (run-dmx-workspace-annotation-compatibility-plan-smoke-test)
@@ -5914,5 +5999,6 @@
   (run-dmx-workspace-annotation-local-first-pending-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-workspace-view-scxml-contract-smoke-test)
   (run-dmx-workspace-annotation-workspace-view-local-first-ux-smoke-test)
+  (run-dmx-workspace-annotation-workspace-view-render-dry-run-no-live-http-smoke-test)
   (format t "~&DMX workspace annotation smoke tests passed.~%")
   t)

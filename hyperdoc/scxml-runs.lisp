@@ -552,8 +552,12 @@
                        :stderr stderr
                        :exit-code exit-code)))))
 
+(defvar *hyperdoc-scxml-system-loaded-p* nil)
+
 (defun ensure-hyperdoc-scxml-system-loaded ()
-  (asdf:load-system :hyperdoc/scxml))
+  (unless *hyperdoc-scxml-system-loaded-p*
+    (asdf:load-system :hyperdoc/scxml)
+    (setf *hyperdoc-scxml-system-loaded-p* t)))
 
 (defun call-hyperdoc-scxml (function &rest arguments)
   (ensure-hyperdoc-scxml-system-loaded)
@@ -1822,6 +1826,8 @@
                  (and (getf action-spec :local-journal-mutation-p) t)
                  :mutates-dmx
                  (and (getf action-spec :dmx-mutation-p) t)))
+         (planning-client
+           (make-instance 'null-dmx-import-client))
          (workspace-write-plan nil)
          (workspace-write-plan-error nil))
     (multiple-value-setq (workspace-write-plan workspace-write-plan-error)
@@ -1829,7 +1835,7 @@
        annotation
        resolved-workspace-topicmap-id
        resolved-workspace-id
-       client))
+       planning-client))
     (let ((auth-submachine-needed-p
             (dmx-annotation-workspace-view-auth-submachine-needed-p
              current-state))
