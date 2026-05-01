@@ -115,6 +115,7 @@
           jzon
           ps.str
           ps.swank
+          ps.slynk
           ps."trivial-clipboard"
           ps."trivial-package-local-nicknames"
           ps.usocket
@@ -124,6 +125,29 @@
           ps."clog-ace"
           ps."eclector-concrete-syntax-tree"
         ]);
+
+        hyperdocEmacs = pkgs.emacs.pkgs.withPackages (epkgs: with epkgs; [
+          slime
+          sly
+          paredit
+          rainbow-delimiters
+          magit
+        ]);
+
+        hyperdocSlimeConnect = pkgs.writeShellScriptBin "hyperdoc-slime-connect" ''
+          host="''${1:-127.0.0.1}"
+          port="''${2:-''${SWANK_PORT:-4005}}"
+          exec ${hyperdocEmacs}/bin/emacs -Q \
+            --eval "(progn (require 'slime) (setq slime-net-coding-system 'utf-8-unix) (slime-connect \"$host\" $port))"
+        '';
+
+        hyperdocSlyConnect = pkgs.writeShellScriptBin "hyperdoc-sly-connect" ''
+          host="''${1:-127.0.0.1}"
+          port="''${2:-''${SLYNK_PORT:-''${SWANK_PORT:-4006}}}"
+          exec ${hyperdocEmacs}/bin/emacs -Q \
+            --eval "(progn (require 'sly) (sly-connect \"$host\" $port))"
+        '';
+
         releaseRevision =
           if self ? dirtyShortRev then self.dirtyShortRev
           else if self ? shortRev then self.shortRev
@@ -153,6 +177,9 @@
           packages = [
             sbclEnv
             namedClosurePkg
+            hyperdocEmacs
+            hyperdocSlimeConnect
+            hyperdocSlyConnect
             pkgs.python3
             pkgs.git
             pkgs.rlwrap
