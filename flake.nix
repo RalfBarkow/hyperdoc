@@ -245,7 +245,7 @@
             cat <<'EOF'
 HyperDoc Nix dev shell ready.
 
-Quick checks:
+Check system:
   sbcl --no-userinit --non-interactive \
     --eval '(require :asdf)' \
     --eval '(asdf:find-system :hyperbook/server)' \
@@ -253,10 +253,12 @@ Quick checks:
     --eval '(uiop:quit 0)'
 
 Start server:
-  sbcl --no-userinit \
-    --eval '(require :asdf)' \
-    --eval '(asdf:load-system :hyperbook/server)' \
-    --eval '(hyperbook/server:serve-catalog)'
+  LISP_IDE=slime ./dev.sh
+  LISP_IDE=sly   ./dev.sh
+
+Matching editor clients:
+  hyperdoc-slime-connect 127.0.0.1 <printed-swank-port>
+  hyperdoc-sly-connect   127.0.0.1 <printed-slynk-port>
 
 URL:
   http://localhost:8080/boot.html
