@@ -1,0 +1,135 @@
+<h1>DMX workspace assignment 401 diagnosis</h1>
+
+<p>
+  This page records the first diagnostic layer for topic <tt>936040</tt>.
+  It does not perform live DMX mutation.  The topic is kept as the durable
+  annotation carrier because the deterministic URI resolves correctly, the
+  write plan is <tt>:UPDATE</tt>, and topicmap <tt>919822</tt> already contains
+  the topic.
+</p>
+
+<h2>Current state</h2>
+
+<pre><code class="language-lisp">(:STATE :SINGLE-LIVE-ASSIGNMENT/AUTH-BLOCKED
+ :TOPIC-ID 936040
+ :WORKSPACE-ID NIL
+ :EXPECTED-WORKSPACE-ID 919815
+ :TOPICMAP-ID 919822
+ :TOPICMAP-PRESENT-P T
+ :ATTEMPTED-METHOD :PUT
+ :ATTEMPTED-PATH "/workspaces/919815/object/936040"
+ :HTTP-STATUS 401
+ :REMAINING-ACTION :ASSIGN-WORKSPACE
+ :SAFE-INVARIANTS
+ (:NO-TOPIC-UPSERT :NO-TOPICMAP-PLACEMENT :NO-DMX-JOURNAL-WRITE))</code></pre>
+
+<h2>Reference comparison</h2>
+
+<p>
+  py4dmx authenticates by posting to <tt>/access-control/login</tt>, capturing
+  a <tt>JSESSIONID</tt> session material, and using session plus workspace
+  cookie shape for non-GET writes.  It does not need a second authorization
+  credential on the later write once the session exists.
+</p>
+
+<p>
+  HyperDoc's guarded workspace-assignment request now matches the important
+  py4dmx non-GET pattern: method <tt>PUT</tt>, session-only auth, session plus
+  workspace cookie shape, JSON accept header, and a zero-length body.  The one
+  documented divergence is content type: py4dmx sends JSON content type for
+  PUTs, while HyperDoc leaves content type unset on the zero-length assignment
+  PUT to avoid an implicit form-media request.  That divergence explains prior
+  media-type failures, not the current <tt>401</tt>.
+</p>
+
+<h2>dmx-platform route semantics</h2>
+
+<p>
+  dmx-platform exposes the REST route
+  <tt>PUT /workspaces/{workspaceId}/object/{objectId}</tt> in
+  <tt>WorkspacesPlugin.assignToWorkspace</tt>.  The route calls
+  <tt>checkAssignmentArgs(object, workspaceId)</tt>.  That checks both target
+  workspace write access and object write access before assigning the workspace
+  facet.
+</p>
+
+<p>
+  dmx-platform also has a private helper for initial assignment that deliberately
+  skips the object write check, because initial assignment is what creates the
+  permission context.  The public REST route does not use that helper.  For an
+  object with no workspace assignment, core permission logic grants READ but
+  refuses WRITE.  dmx-platform maps nested access-control exceptions to HTTP
+  <tt>401</tt>.
+</p>
+
+<h2>Diagnosis object</h2>
+
+<pre><code class="language-lisp">(:STATE :WORKSPACE-ASSIGNMENT-AUTH-DIAGNOSIS
+ :TOPIC-ID 936040
+ :WORKSPACE-ID 919815
+ :TOPICMAP-ID 919822
+ :ENDPOINT "/workspaces/919815/object/936040"
+ :CLASSIFICATION
+ (:ONE-OF :REQUEST-SHAPE-MATCHES-PY4DMX-BUT-PERMISSION-DENIED
+  :POINTS-TO :PERMISSION-BOUNDARY)
+ :RECOMMENDATION :KEEP-TOPIC-936040
+ :DELETE-AND-RECREATE-DEFAULT-P NIL
+ :SAFE-INVARIANTS
+ (:NO-LIVE-MUTATION
+  :NO-TOPIC-UPSERT
+  :NO-TOPICMAP-PLACEMENT
+  :NO-FULL-CONTINUATION
+  :NO-DMX-JOURNAL-WRITE
+  :BOUNDED-EVIDENCE))</code></pre>
+
+<h2>Why this is not a reconstruction failure</h2>
+
+<ul>
+  <li>The existing URI resolves to topic <tt>936040</tt>.</li>
+  <li>The planned topic action is <tt>:UPDATE</tt>, not <tt>:CREATE</tt>.</li>
+  <li>Topicmap placement in <tt>919822</tt> is present.</li>
+  <li>The remaining operation is only workspace assignment.</li>
+  <li>Deleting would risk associations and references while still requiring a new workspace assignment.</li>
+</ul>
+
+<h2>Delete/recreate boundary</h2>
+
+<p>
+  Delete/recreate is not the default repair path.  It is a last-resort migration
+  only after a full reference audit, hard-delete permission, verified absence of
+  foreign references, replacement topic creation, workspace assignment, topicmap
+  placement, duplicate-URI checks, and explicit operator approval.
+</p>
+
+<h2>Dormant live gate</h2>
+
+<p>
+  The dormant live helper is <tt>run-live-dmx-workspace-assignment-936040-once</tt>.
+  It is skipped unless <tt>HYPERDOC_RUN_LIVE_DMX_WORKSPACE_ASSIGNMENT_936040</tt>
+  is explicitly set to <tt>1</tt> outside this task.  When skipped, it performs
+  no network write.
+</p>
+
+<p>
+  If armed later by an operator, the helper must recheck that topic
+  <tt>936040</tt> still has no workspace, expected workspace <tt>919815</tt>,
+  topicmap <tt>919822</tt> still contains the topic, the journal sink is local,
+  and DMX workspace-journal writes remain disabled.  The only permitted live
+  mutation is <tt>PUT /workspaces/919815/object/936040</tt>.  It must classify
+  <tt>401</tt> as auth-blocked without retry loops.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::make-dmx-workspace-assignment-auth-diagnosis)">make-dmx-workspace-assignment-auth-diagnosis</a></li>
+  <li><a expr="(hyperdoc::run-live-dmx-workspace-assignment-936040-once)">run-live-dmx-workspace-assignment-936040-once</a></li>
+</ul>
+
+<h2>Related runbooks</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="DMX session bootstrap and JSESSIONID">DMX session bootstrap and JSESSIONID</a></li>
+  <li><a hyperbook="hyperdoc" page="Inspectable authentication-path traces for repair console">Inspectable authentication-path traces for repair console</a></li>
+  <li><a hyperbook="hyperdoc" page="Reconstruct topic 936040 annotation projection path">Reconstruct topic 936040 annotation projection path</a></li>
+</ul>

@@ -19,6 +19,11 @@
   "hyperdoc.workspace_assignment_repair_snapshot")
 (defparameter *http-dmx-import-evidence-body-prefix-limit* 2048)
 (defparameter *http-dmx-import-debug-event-limit* 32)
+(defparameter *dmx-workspace-assignment-936040-topic-id* 936040)
+(defparameter *dmx-workspace-assignment-936040-workspace-id* 919815)
+(defparameter *dmx-workspace-assignment-936040-topicmap-id* 919822)
+(defparameter *dmx-workspace-assignment-936040-live-gate*
+  "HYPERDOC_RUN_LIVE_DMX_WORKSPACE_ASSIGNMENT_936040")
 
 ;; The journal implementation file is loaded after several guarded write
 ;; helpers. Declare the dynamic boundary variables here so those helpers compile
@@ -2144,6 +2149,433 @@
                  '("1" "true" "yes" "on")
                  :test #'string=)
          t)))
+
+(defun dmx-workspace-assignment-936040-terminal-card-fixture ()
+  (list :title "Topic 936040 workspace assignment is auth-blocked"
+        :state :single-live-assignment/auth-blocked
+        :topic-id *dmx-workspace-assignment-936040-topic-id*
+        :workspace-id nil
+        :expected-workspace-id
+        *dmx-workspace-assignment-936040-workspace-id*
+        :topicmap-id *dmx-workspace-assignment-936040-topicmap-id*
+        :topicmap-present-p t
+        :attempted-method :put
+        :attempted-path
+        (dmx-workspace-assign-object-path
+         *dmx-workspace-assignment-936040-workspace-id*
+         *dmx-workspace-assignment-936040-topic-id*)
+        :http-status 401
+        :remaining-action :assign-workspace
+        :safe-invariants
+        '(:no-topic-upsert
+          :no-topicmap-placement
+          :no-dmx-journal-write)
+        :demo-message
+        "The repair workflow is safe and narrowed: topicmap placement is present, DMX journal writes stayed disabled, and only workspace assignment remains blocked by HTTP 401."))
+
+(defun read-dmx-workspace-assignment-936040-terminal-card
+    (&optional
+       (pathname
+        (asdf:system-relative-pathname
+         :hyperdoc
+         "annotation-936040-demo-auth-blocked-card.sexp")))
+  (if (probe-file pathname)
+      (with-open-file (stream pathname :direction :input)
+        (read stream nil (dmx-workspace-assignment-936040-terminal-card-fixture)))
+      (dmx-workspace-assignment-936040-terminal-card-fixture)))
+
+(defun dmx-workspace-assignment-auth-safe-invariants ()
+  '(:no-live-mutation
+    :no-topic-upsert
+    :no-topicmap-placement
+    :no-full-continuation
+    :no-dmx-journal-write
+    :bounded-evidence))
+
+(defun hyperdoc-workspace-assignment-request-shape
+    (&key (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+       (topic-id *dmx-workspace-assignment-936040-topic-id*)
+       (bootstrap-status 204))
+  (list :method :put
+        :endpoint (dmx-workspace-assign-object-path workspace-id topic-id)
+        :auth-mode "session-only"
+        :cookie-shape "JSESSIONID + dmx_workspace_id"
+        :bootstrap-ran-p t
+        :bootstrap-status bootstrap-status
+        :authorization-scheme nil
+        :accept "application/json"
+        :content-length 0
+        :content-type nil
+        :raw-body-present-p nil
+        :reference "hyperdoc/dmx-import.lisp::dmx-import-assign-topic-to-workspace"))
+
+(defun py4dmx-workspace-assignment-request-shape
+    (&key (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+       (topic-id *dmx-workspace-assignment-936040-topic-id*))
+  (declare (ignore workspace-id topic-id))
+  (list :login
+        (list :method :post
+              :endpoint "/access-control/login"
+              :authorization-source
+              "Authorization header from explicit config or AUTHTYPE + base64(username:password)"
+              :default-derived-auth-scheme "DMX"
+              :payload-shape "{}"
+              :accept "application/json, text/plain, */*"
+              :content-type "application/json; charset=UTF-8"
+              :captures-cookie "JSESSIONID"
+              :reference "../py4dmx/dmx.py:188-219")
+        :write
+        (list :method :put
+              :auth-mode "session-only"
+              :cookie-shape "JSESSIONID + dmx_workspace_id"
+              :workspace-cookie-shape "dmx_workspace_id=<workspace-id>"
+              :authorization-scheme-after-bootstrap nil
+              :accept "application/json, text/plain, */*"
+              :content-type "application/json"
+              :content-length 0
+              :reference "../py4dmx/dmx.py:222-245")
+        :workspace-assignment-helper-present-p nil
+        :comparison-note
+        "py4dmx exposes the login/session/write convention; it does not provide a dedicated initial workspace-assignment helper."))
+
+(defun dmx-platform-workspace-assignment-route-inventory ()
+  (list :workspace-assignment-route
+        (list :method :put
+              :path-template "/workspaces/{workspaceId}/object/{objectId}"
+              :endpoint-present-p t
+              :implementation
+              "../dmx-platform/modules/dmx-workspaces/src/main/java/systems/dmx/workspaces/WorkspacesPlugin.java:177-190")
+        :assignment-checks
+        (list :workspace-write-access-required-p t
+              :object-write-access-required-p t
+              :initial-assignment-private-helper-skips-object-check-p t
+              :rest-route-skips-object-check-p nil
+              :implementation
+              "../dmx-platform/modules/dmx-workspaces/src/main/java/systems/dmx/workspaces/WorkspacesPlugin.java:486-540")
+        :unassigned-object-policy
+        (list :read-permission-granted-p t
+              :write-permission-refused-p t
+              :implementation
+              "../dmx-platform/modules/dmx-core/src/main/java/systems/dmx/core/impl/PrivilegedAccessImpl.java:100-118,587-596")
+        :permission-status-mapping
+        (list :nested-access-control-exception-status 401
+              :implementation
+              "../dmx-platform/modules/dmx-core/src/main/java/systems/dmx/core/util/UniversalExceptionMapper.java:80-86,105-111")
+        :read-only-probe-routes
+        '("/access-control/user"
+          "/access-control/workspace/919815/owner"
+          "/access-control/user/mcp/memberships"
+          "/access-control/workspace/919815/memberships"
+          "/access-control/object/936040"
+          "/workspaces/object/936040"
+          "/topicmaps/object/936040"
+          "/core/topic/936040?children=true&assocChildren=true")
+        :permission-route-found-p t))
+
+(defun dmx-workspace-assignment-auth-shape-match-p
+    (hyperdoc-shape py4dmx-shape)
+  (let ((py4dmx-write (getf py4dmx-shape :write)))
+    (and (getf hyperdoc-shape :bootstrap-ran-p)
+         (equal (getf hyperdoc-shape :method)
+                (getf py4dmx-write :method))
+         (string= (getf hyperdoc-shape :auth-mode)
+                  (getf py4dmx-write :auth-mode))
+         (string= (getf hyperdoc-shape :cookie-shape)
+                  (getf py4dmx-write :cookie-shape))
+         (null (getf hyperdoc-shape :authorization-scheme))
+         (null (getf py4dmx-write :authorization-scheme-after-bootstrap))
+         (eql 0 (getf hyperdoc-shape :content-length))
+         (eql 0 (getf py4dmx-write :content-length)))))
+
+(defun dmx-workspace-assignment-request-shape-differences
+    (hyperdoc-shape py4dmx-shape)
+  (let ((py4dmx-write (getf py4dmx-shape :write))
+        (differences '()))
+    (flet ((check (key py4dmx-key label)
+             (unless (equal (getf hyperdoc-shape key)
+                            (getf py4dmx-write py4dmx-key))
+               (push (list :field label
+                           :hyperdoc (getf hyperdoc-shape key)
+                           :py4dmx (getf py4dmx-write py4dmx-key))
+                     differences))))
+      (unless (getf hyperdoc-shape :bootstrap-ran-p)
+        (push (list :field :bootstrap-ran-p
+                    :hyperdoc nil
+                    :py4dmx t)
+              differences))
+      (check :method :method :method)
+      (check :auth-mode :auth-mode :auth-mode)
+      (check :cookie-shape :cookie-shape :cookie-shape)
+      (check :authorization-scheme
+             :authorization-scheme-after-bootstrap
+             :authorization-scheme-after-bootstrap)
+      (check :content-length :content-length :content-length)
+      ;; py4dmx uses application/json for all PUTs while HyperDoc forces no
+      ;; Content-Type on this zero-length PUT to avoid Drakma's implicit form
+      ;; media type. This is recorded as a known non-blocking divergence, not a
+      ;; shape mismatch by itself.
+      (unless (equal (getf hyperdoc-shape :content-type)
+                     (getf py4dmx-write :content-type))
+        (push (list :field :content-type
+                    :hyperdoc (getf hyperdoc-shape :content-type)
+                    :py4dmx (getf py4dmx-write :content-type)
+                    :severity :known-non-blocking-divergence)
+              differences)))
+    (nreverse differences)))
+
+(defun classify-dmx-workspace-assignment-auth-401
+    (hyperdoc-shape py4dmx-shape platform-shape terminal-card)
+  (let ((shape-match-p
+          (dmx-workspace-assignment-auth-shape-match-p
+           hyperdoc-shape
+           py4dmx-shape)))
+    (cond
+      ((not (getf (getf platform-shape :workspace-assignment-route)
+                  :endpoint-present-p))
+       :workspace-assignment-route-semantics-mismatch)
+      ((not (getf platform-shape :permission-route-found-p))
+       :permission-route-not-found)
+      ((not shape-match-p)
+       :request-shape-differs-from-py4dmx)
+      ((and (eql 401 (getf terminal-card :http-status))
+            shape-match-p
+            (getf (getf platform-shape :assignment-checks)
+                  :workspace-write-access-required-p)
+            (getf (getf platform-shape :assignment-checks)
+                  :object-write-access-required-p))
+       :request-shape-matches-py4dmx-but-permission-denied)
+      ((eql 401 (getf terminal-card :http-status))
+       :unknown-with-bounded-evidence)
+      (t
+       :unknown-with-bounded-evidence))))
+
+(defun make-dmx-workspace-assignment-auth-diagnosis
+    (&key
+       (topic-id *dmx-workspace-assignment-936040-topic-id*)
+       (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+       (topicmap-id *dmx-workspace-assignment-936040-topicmap-id*)
+       (terminal-card
+        (read-dmx-workspace-assignment-936040-terminal-card)))
+  (let* ((endpoint (dmx-workspace-assign-object-path workspace-id topic-id))
+         (hyperdoc-shape
+           (hyperdoc-workspace-assignment-request-shape
+            :workspace-id workspace-id
+            :topic-id topic-id))
+         (py4dmx-shape
+           (py4dmx-workspace-assignment-request-shape
+            :workspace-id workspace-id
+            :topic-id topic-id))
+         (platform-shape
+           (dmx-platform-workspace-assignment-route-inventory))
+         (shape-match-p
+           (dmx-workspace-assignment-auth-shape-match-p
+            hyperdoc-shape
+            py4dmx-shape))
+         (shape-differences
+           (dmx-workspace-assignment-request-shape-differences
+            hyperdoc-shape
+            py4dmx-shape))
+         (classification
+           (classify-dmx-workspace-assignment-auth-401
+            hyperdoc-shape
+            py4dmx-shape
+            platform-shape
+            terminal-card)))
+    (list :state :workspace-assignment-auth-diagnosis
+          :topic-id topic-id
+          :workspace-id workspace-id
+          :topicmap-id topicmap-id
+          :endpoint endpoint
+          :terminal-card-state (getf terminal-card :state)
+          :terminal-http-status (getf terminal-card :http-status)
+          :terminal-current-workspace-id (getf terminal-card :workspace-id)
+          :topicmap-present-p (getf terminal-card :topicmap-present-p)
+          :remaining-action (getf terminal-card :remaining-action)
+          :hyperdoc-request-shape hyperdoc-shape
+          :py4dmx-request-shape py4dmx-shape
+          :dmx-platform-expected-shape platform-shape
+          :request-shape-match-p shape-match-p
+          :request-shape-differences shape-differences
+          :classification
+          (list :one-of classification
+                :points-to
+                (case classification
+                  (:request-shape-matches-py4dmx-but-permission-denied
+                   :permission-boundary)
+                  (:request-shape-differs-from-py4dmx
+                   :request-shape-mismatch)
+                  (:workspace-assignment-route-semantics-mismatch
+                   :route-semantics)
+                  (:permission-route-not-found
+                   :permission-route-missing)
+                  (otherwise
+                   :unknown))
+                :specific-platform-risks
+                '(:target-workspace-write-access-required
+                  :unassigned-object-write-access-refused-by-rest-route)
+                :confidence
+                (if (eq classification
+                        :request-shape-matches-py4dmx-but-permission-denied)
+                    :high-for-permission-boundary
+                    :medium))
+          :read-only-probe-plan
+          (getf platform-shape :read-only-probe-routes)
+          :recommendation :keep-topic-936040
+          :delete-and-recreate-default-p nil
+          :delete-and-recreate-last-resort-requirements
+          '(:full-reference-audit
+            :hard-delete-permission
+            :verified-no-foreign-references
+            :replacement-topic-creation
+            :workspace-assignment
+            :topicmap-placement
+            :no-duplicate-uri
+            :operator-approval)
+          :safe-invariants
+          (dmx-workspace-assignment-auth-safe-invariants))))
+
+(defun dmx-workspace-assignment-live-gate-enabled-p ()
+  (dmx-import-env-true-p *dmx-workspace-assignment-936040-live-gate*))
+
+(defun dmx-workspace-assignment-live-preflight-state
+    (client &key
+       (topic-id *dmx-workspace-assignment-936040-topic-id*)
+       (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+       (topicmap-id *dmx-workspace-assignment-936040-topicmap-id*))
+  (let* ((topicmap-present-p
+           (and client
+                (dmx-import-topic-in-topicmap-p client topicmap-id topic-id)))
+         (workspace (and client
+                         (dmx-import-read-topic-workspace client topic-id)))
+         (current-workspace-id (dmx-import-object-id workspace))
+         (journal-local-p (eq *workspace-journal-sink* :hyperdoc-local))
+         (journal-disabled-p (not *allow-dmx-workspace-journal-writes*))
+         (workspace-still-missing-p (null current-workspace-id))
+         (ready-p
+           (and topicmap-present-p
+                workspace-still-missing-p
+                journal-local-p
+                journal-disabled-p)))
+    (list :state :single-live-assignment/preflight-recheck
+          :gate *dmx-workspace-assignment-936040-live-gate*
+          :ready-p ready-p
+          :topic-id topic-id
+          :current-workspace-id current-workspace-id
+          :expected-workspace-id workspace-id
+          :workspace-still-missing-p workspace-still-missing-p
+          :topicmap-id topicmap-id
+          :topicmap-present-p (and topicmap-present-p t)
+          :journal-sink *workspace-journal-sink*
+          :allow-dmx-workspace-journal-writes
+          *allow-dmx-workspace-journal-writes*
+          :go-p ready-p)))
+
+(defun bounded-dmx-workspace-assignment-http-error-summary
+    (condition &key
+       (topic-id *dmx-workspace-assignment-936040-topic-id*)
+       (workspace-id *dmx-workspace-assignment-936040-workspace-id*))
+  (list :state
+        (if (eql 401 (dmx-import-http-status-code-of condition))
+            :single-live-assignment/auth-blocked
+            :single-live-assignment/failed)
+        :condition-type (type-of condition)
+        :method :put
+        :path (dmx-workspace-assign-object-path workspace-id topic-id)
+        :status (dmx-import-http-status-code-of condition)
+        :http-evidence (dmx-import-http-evidence-of condition)))
+
+(defun run-live-dmx-workspace-assignment-936040-once
+    (&key client
+       (topic-id *dmx-workspace-assignment-936040-topic-id*)
+       (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+       (topicmap-id *dmx-workspace-assignment-936040-topicmap-id*))
+  (unless (dmx-workspace-assignment-live-gate-enabled-p)
+    (return-from run-live-dmx-workspace-assignment-936040-once
+      (list :state :single-live-assignment/skipped
+            :gate *dmx-workspace-assignment-936040-live-gate*
+            :required-value "1"
+            :safe-invariants
+            (dmx-workspace-assignment-auth-safe-invariants))))
+  (let ((resolved-client (or client
+                             (make-http-dmx-import-client-from-environment
+                              :verbose nil))))
+    (unless (typep resolved-client 'http-dmx-import-client)
+      (error 'dmx-import-config-error
+             :message "Live workspace assignment requires an HTTP DMX client"
+             :missing-keys
+             '("HYPERDOC_DMX_IMPORT_BASE_URL"
+               "HYPERDOC_DMX_IMPORT_AUTH_HEADER or username/password"
+               "HYPERDOC_DMX_IMPORT_WORKSPACE_ID")))
+    (let ((preflight
+            (dmx-workspace-assignment-live-preflight-state
+             resolved-client
+             :topic-id topic-id
+             :workspace-id workspace-id
+             :topicmap-id topicmap-id)))
+      (unless (getf preflight :ready-p)
+        (return-from run-live-dmx-workspace-assignment-936040-once
+          (list :state :single-live-assignment/preflight-blocked
+                :preflight preflight
+                :safe-invariants
+                (dmx-workspace-assignment-auth-safe-invariants))))
+      (let ((attempt
+              (handler-case
+                  (progn
+                    (dmx-import-assign-topic-to-workspace
+                     resolved-client
+                     workspace-id
+                     topic-id)
+                    (list :state :single-live-assignment/put-accepted
+                          :method :put
+                          :path (dmx-workspace-assign-object-path
+                                 workspace-id
+                                 topic-id)
+                          :status
+                          (getf (dmx-import-last-http-transaction-evidence-of
+                                 resolved-client)
+                                :response-status-code)
+                          :http-evidence
+                          (dmx-import-last-http-transaction-evidence-of
+                           resolved-client)))
+                (dmx-import-http-error (condition)
+                  (bounded-dmx-workspace-assignment-http-error-summary
+                   condition
+                   :topic-id topic-id
+                   :workspace-id workspace-id)))))
+        (let* ((workspace-readback
+                 (ignore-errors
+                   (dmx-import-read-topic-workspace resolved-client topic-id)))
+               (readback-workspace-id
+                 (dmx-import-object-id workspace-readback))
+               (topicmap-present-p
+                 (ignore-errors
+                   (dmx-import-topic-in-topicmap-p
+                    resolved-client
+                    topicmap-id
+                    topic-id))))
+          (list :state
+                (cond
+                  ((eql readback-workspace-id workspace-id)
+                   :workspace-annotation-936040/fully-repaired)
+                  ((eql 401 (getf attempt :status))
+                   :single-live-assignment/auth-blocked)
+                  (t
+                   :single-live-assignment/failed))
+                :preflight preflight
+                :attempt attempt
+                :post-readback
+                (list :state :post-single-live-assignment-readback
+                      :topic-id topic-id
+                      :workspace-id readback-workspace-id
+                      :expected-workspace-id workspace-id
+                      :workspace-ok-p
+                      (eql readback-workspace-id workspace-id)
+                      :topicmap-id topicmap-id
+                      :topicmap-present-p (and topicmap-present-p t)
+                      :dmx-journal-writes-enabled-p
+                      *allow-dmx-workspace-journal-writes*)
+                :safe-invariants
+                (dmx-workspace-assignment-auth-safe-invariants)))))))
 
 (defun normalize-http-dmx-import-string (value field boundary &key required?)
   (let ((string (and value

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       version="1.0"
+       initial="current-auth-blocked"
+       name="dmx-workspace-assignment-401-diagnosis">
+  <state id="current-auth-blocked">
+    <onentry>
+      <log label="Current state: topic 936040 kept, topicmap 919822 present, workspace nil, remaining action assign-workspace"/>
+    </onentry>
+    <transition event="DIAGNOSE.REQUEST_SHAPE" target="request-shape-compared"/>
+  </state>
+
+  <state id="request-shape-compared">
+    <onentry>
+      <log label="HyperDoc guarded PUT is compared with py4dmx login/session/write convention without live mutation"/>
+    </onentry>
+    <transition event="SHAPE.MATCHES_PY4DMX" target="dmx-platform-route-inspected"/>
+    <transition event="SHAPE.DIFFERS_FROM_PY4DMX" target="request-shape-differs-from-py4dmx"/>
+  </state>
+
+  <state id="dmx-platform-route-inspected">
+    <onentry>
+      <log label="dmx-platform route PUT /workspaces/{workspaceId}/object/{objectId} requires workspace write and object write permission"/>
+    </onentry>
+    <transition event="ROUTE.SEMANTICS_MATCH" target="permission-semantics-inspected"/>
+    <transition event="ROUTE.SEMANTICS_MISMATCH" target="workspace-assignment-route-semantics-mismatch"/>
+  </state>
+
+  <state id="permission-semantics-inspected">
+    <onentry>
+      <log label="Unassigned object WRITE is refused by dmx-platform; nested access-control exceptions map to HTTP 401"/>
+    </onentry>
+    <transition event="PERMISSION.ROUTES_FOUND" target="permission-denied-terminal"/>
+    <transition event="PERMISSION.ROUTE_NOT_FOUND" target="permission-route-not-found"/>
+  </state>
+
+  <final id="permission-denied-terminal">
+    <onentry>
+      <log label="Classification: REQUEST-SHAPE-MATCHES-PY4DMX-BUT-PERMISSION-DENIED"/>
+    </onentry>
+  </final>
+
+  <final id="request-shape-differs-from-py4dmx">
+    <onentry>
+      <log label="Classification: REQUEST-SHAPE-DIFFERS-FROM-PY4DMX; exact bounded differences required before patching"/>
+    </onentry>
+  </final>
+
+  <final id="workspace-assignment-route-semantics-mismatch">
+    <onentry>
+      <log label="Classification: WORKSPACE-ASSIGNMENT-ROUTE-SEMANTICS-MISMATCH"/>
+    </onentry>
+  </final>
+
+  <final id="permission-route-not-found">
+    <onentry>
+      <log label="Classification: PERMISSION-ROUTE-NOT-FOUND"/>
+    </onentry>
+  </final>
+
+  <final id="unknown-with-bounded-evidence">
+    <onentry>
+      <log label="Classification: UNKNOWN-WITH-BOUNDED-EVIDENCE"/>
+    </onentry>
+  </final>
+
+  <state id="live-gated-single-put-dormant">
+    <onentry>
+      <log label="Dormant live gate: HYPERDOC_RUN_LIVE_DMX_WORKSPACE_ASSIGNMENT_936040=1 is required before the only permitted live PUT"/>
+    </onentry>
+  </state>
+</scxml>

@@ -329,6 +329,7 @@
                              (:file "dmx-auth-session-boundary-smoke")
                              (:file "dmx-annotation-936040-regression-smoke")
                              (:file "sly-evidence-bounds-smoke")
+                             (:file "dmx-workspace-assignment-auth-diagnosis-smoke")
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")
