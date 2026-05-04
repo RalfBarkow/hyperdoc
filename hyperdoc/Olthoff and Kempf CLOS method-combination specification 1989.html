@@ -1,0 +1,114 @@
+<h1>Olthoff and Kempf CLOS method-combination specification 1989</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Walter Olthoff and James Kempf's 1989 paper belongs in HyperDoc as a
+  bridge between Common Lisp object-system pedagogy, formal language-design
+  practice, and inspectable runtime semantics. The paper is not just another
+  CLOS citation: it shows how an executable algebraic specification can act as
+  a second view of a proposed language feature before implementation hardens
+  the design.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Olthoff and Kempf CLOS method-combination specification (1989)"><tt>Olthoff and Kempf CLOS method-combination specification (1989)</tt></a></li>
+  <li><a hyperbook="topics" page="CLOS method combination"><tt>CLOS method combination</tt></a></li>
+  <li><a hyperbook="topics" page="Applicable methods"><tt>Applicable methods</tt></a></li>
+  <li><a hyperbook="topics" page="Effective method"><tt>Effective method</tt></a></li>
+  <li><a hyperbook="topics" page="CLOS metaobject protocol bridge"><tt>CLOS metaobject protocol bridge</tt></a></li>
+  <li><a hyperbook="topics" page="Executable algebraic specification"><tt>Executable algebraic specification</tt></a></li>
+  <li><a hyperbook="topics" page="Specification as second view"><tt>Specification as second view</tt></a></li>
+  <li><a hyperbook="topics" page="Axis specification language"><tt>Axis specification language</tt></a></li>
+  <li><a hyperbook="topics" page="Class precedence list"><tt>Class precedence list</tt></a></li>
+  <li><a hyperbook="topics" page="Generic function"><tt>Generic function</tt></a></li>
+  <li><a hyperbook="topics" page="Classes and Generic Functions"><tt>Classes and Generic Functions</tt></a></li>
+</ul>
+
+<h2>Why this source matters here</h2>
+
+<p>
+  HyperDoc already treats Common Lisp as a durable software-knowledge medium
+  and keeps distinct surfaces for pages, topic objects, and inspectable runtime
+  objects. This paper adds a sharper historical precedent: a formal artifact
+  can accompany a semi-natural-language standard draft, reveal ambiguities, and
+  suggest the shape of the implementation protocol. That makes it a reference
+  for HyperDoc's own preference for explicit, inspectable, reconstructable
+  documentation objects.
+</p>
+
+<h2>Core assimilation</h2>
+
+<p>
+  The paper specifies the method-combination and method-application component
+  of CLOS using Axis, an executable typed functional specification language. In
+  HyperDoc terms, it promotes CLOS dispatch from prose-only explanation into an
+  inspectable model with named sorts, operations, and algorithmic steps.
+</p>
+
+<ul>
+  <li><b>Applicable methods:</b> the intermediate set selected by matching actual arguments against method parameter specializers and inherited classes.</li>
+  <li><b>Effective method:</b> the actual composed method body produced from the applicable methods and the selected method-combination discipline.</li>
+  <li><b>Standard method combination:</b> the before/after/around/primary protocol treated as the paper's formalization target.</li>
+  <li><b>Class precedence:</b> the class-linearization dependency that orders applicable methods and therefore affects the effective method.</li>
+  <li><b>MOP mapping:</b> the algebraic sorts and operations suggest CLOS kernel objects and operations for method combination.</li>
+</ul>
+
+<h2>Relation to existing HyperDoc Common Lisp pages</h2>
+
+<ul>
+  <li>
+    <a hyperbook="hyperdoc" page="Definitive Common Lisp Books">Definitive Common Lisp Books</a>
+    keeps CLOS and MOP references as an advanced object-system neighborhood.
+    Olthoff and Kempf should sit beside Keene and AMOP as a design-semantics
+    source, not as a beginner tutorial.
+  </li>
+  <li>
+    <a hyperbook="hyperdoc" page="Winston and Horn Lisp 1989">Winston and Horn Lisp 1989</a>
+    gives the teaching arc for classes, generic functions, and class precedence.
+    Olthoff and Kempf gives the formal method-combination bridge behind that
+    object-system surface.
+  </li>
+  <li>
+    <a hyperbook="hyperdoc" page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a>
+    is the long-lived software-environment side of the same question. Olthoff
+    and Kempf add the language-design side: executable specifications can keep
+    semantics inspectable before they become runtime convention.
+  </li>
+  <li>
+    <a hyperbook="hyperdoc" page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a>
+    is a later image-coherence counterpart. McDermott asks how a running Lisp
+    image stays coherent as code changes; Olthoff and Kempf ask how a language
+    feature's semantics stay coherent while the standard itself is still moving.
+  </li>
+</ul>
+
+<h2>Assimilation boundary</h2>
+
+<p>
+  Treat this source as a historical and conceptual bridge, not as the final ANSI
+  CLOS definition and not as a complete specification of Common Lisp. Its
+  formalization targets the CLOS method-combination/application component of a
+  draft standard, deliberately omitting user-defined method combination and
+  parts of Common Lisp outside the modeled component.
+</p>
+
+<h2>Suggested reading path</h2>
+
+<ol>
+  <li>Start with <a hyperbook="topics" page="Classes and Generic Functions"><tt>Classes and Generic Functions</tt></a> and <a hyperbook="topics" page="Generic function"><tt>Generic function</tt></a>.</li>
+  <li>Then read <a hyperbook="topics" page="Class precedence list"><tt>Class precedence list</tt></a> to understand ordering pressure.</li>
+  <li>Use this page to connect CLOS dispatch to <a hyperbook="topics" page="CLOS method combination"><tt>CLOS method combination</tt></a>, <a hyperbook="topics" page="Applicable methods"><tt>Applicable methods</tt></a>, and <a hyperbook="topics" page="Effective method"><tt>Effective method</tt></a>.</li>
+  <li>Finally, follow <a hyperbook="topics" page="Executable algebraic specification"><tt>Executable algebraic specification</tt></a> and <a hyperbook="topics" page="Specification as second view"><tt>Specification as second view</tt></a> into the HyperDoc design analogy.</li>
+</ol>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="Definitive Common Lisp Books">Definitive Common Lisp Books</a></li>
+  <li><a hyperbook="hyperdoc" page="Winston and Horn Lisp 1989">Winston and Horn Lisp 1989</a></li>
+  <li><a hyperbook="hyperdoc" page="Winston and Horn Lisp topic arrangement">Winston and Horn Lisp topic arrangement</a></li>
+  <li><a hyperbook="topics" page="Topic arrangement in HyperDoc"><tt>Topic arrangement in HyperDoc</tt></a></li>
+</ul>
