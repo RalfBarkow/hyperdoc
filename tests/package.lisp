@@ -19,6 +19,10 @@
    :run-dock-annotation-smoke-tests
    :run-dmx-annotations-smoke-tests
    :run-dmx-workspace-annotation-live-smoke-tests
+   :run-dmx-workspace-journal-sink-smoke-tests
+   :run-dmx-auth-session-boundary-smoke-tests
+   :run-dmx-annotation-936040-regression-smoke-tests
+   :run-sly-evidence-bounds-smoke-tests
    :run-zotero-optional-smoke-tests
    :run-article-allegation-slice-smoke-tests
    :run-fedwiki-materialization-smoke-tests

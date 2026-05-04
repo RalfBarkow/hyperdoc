@@ -1371,25 +1371,37 @@
             (:tr (:th "Response reason")
                  (:td (:tt (views:esc
                             (workspace-annotation-render-value
-                             (getf evidence :response-reason-phrase)))))))
+                             (getf evidence :response-reason-phrase))))))
+            (:tr (:th "Request body length")
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :request-body-length))))))
+            (:tr (:th "Response body length")
+                 (:td (:tt (views:esc
+                            (workspace-annotation-render-value
+                             (getf evidence :response-body-length)))))))
     (when payload-json
       (views:html
         (:h4 "Request payload JSON")
         (:pre :style "white-space: pre-wrap"
               (views:esc
                (workspace-annotation-render-value payload-json :default "")))))
-    (when-let (request-body (getf evidence :request-body))
+    (when-let (request-body-prefix (getf evidence :request-body-prefix))
       (views:html
-        (:h4 "Request body sent")
+        (:h4 "Request body prefix")
         (:pre :style "white-space: pre-wrap"
               (views:esc
-               (workspace-annotation-render-value request-body :default "")))))
-    (when-let (response-body (getf evidence :response-body))
+               (workspace-annotation-render-value
+                request-body-prefix
+                :default "")))))
+    (when-let (response-body-prefix (getf evidence :response-body-prefix))
       (views:html
-        (:h4 "Response body")
+        (:h4 "Response body prefix")
         (:pre :style "white-space: pre-wrap"
               (views:esc
-               (workspace-annotation-render-value response-body :default "")))))
+               (workspace-annotation-render-value
+                response-body-prefix
+                :default "")))))
     (:h4 "Relevant response headers")
     (render-workspace-annotation-http-response-headers
      (getf evidence :response-headers))))

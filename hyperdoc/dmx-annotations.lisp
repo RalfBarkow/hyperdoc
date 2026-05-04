@@ -1700,7 +1700,7 @@
         :kind kind
         :supported-p (and topic t)
         :topic-id (dmx-import-object-id topic)
-        :http-evidence evidence))
+        :http-evidence (sanitize-dmx-import-http-evidence evidence)))
 
 (defun probe-workspace-annotation-live-type-family
     (client type-uris kind-prefix)
@@ -1752,12 +1752,12 @@
 
 (defun dmx-import-http-evidence (condition)
   (and (typep condition 'dmx-import-http-error)
-       (or (dmx-import-http-evidence-of condition)
-           (list :url (dmx-import-http-url-of condition)
-                 :response-status-code
-                 (dmx-import-http-status-code-of condition)
-                 :response-body
-                 (dmx-import-http-response-body-of condition)))))
+         (let ((evidence
+               (or (dmx-import-http-evidence-of condition)
+                   (list :url (dmx-import-http-url-of condition)
+                         :response-status-code
+                         (dmx-import-http-status-code-of condition)))))
+         (sanitize-dmx-import-http-evidence evidence))))
 
 (defun workspace-annotation-topic-upsert-evidence (plan condition)
   (when-let (http-evidence (dmx-import-http-evidence condition))
@@ -1771,8 +1771,14 @@
            :planned-topicmap-action
            (and plan
                 (dmx-workspace-annotation-write-plan-topicmap-action plan))
-           :payload-json
-           (workspace-annotation-write-plan-payload-json-string plan))
+           :payload-json-length
+           (length (or (workspace-annotation-write-plan-payload-json-string
+                        plan)
+                       ""))
+           :payload-json-prefix
+           (bounded-http-evidence-string
+            (or (workspace-annotation-write-plan-payload-json-string plan)
+                "")))
      http-evidence)))
 
 (defun workspace-annotation-auth-mode-options ()
@@ -1872,7 +1878,6 @@
            (list :method :put
                  :path path
                  :request-content-type "application/json; charset=utf-8"
-                 :request-body payload-json
                  :auth-mode-summary "anonymous"
                  :authorization-scheme nil
                  :bootstrap-ran-p nil
@@ -1886,7 +1891,12 @@
                       t)
                  :response-status-code 401
                  :response-reason-phrase "AUTH-BOUNDARY"
-                 :response-body
+                 :request-body-length (length payload-json)
+                 :request-body-prefix
+                 (bounded-http-evidence-string payload-json)
+                 :response-body-length
+                 (length "{\"error\":\"AUTH-BOUNDARY\",\"reason\":\"anonymous-topic-upsert-blocked-before-http\"}")
+                 :response-body-prefix
                  "{\"error\":\"AUTH-BOUNDARY\",\"reason\":\"anonymous-topic-upsert-blocked-before-http\"}"
                  :blocked-before-http-p t
                  :auth-boundary-classification
@@ -2300,7 +2310,8 @@
   (when http-evidence
     (let* ((parsed
              (parse-http-response-body-json
-              (getf http-evidence :response-body)))
+              (or (getf http-evidence :response-body-prefix)
+                  (getf http-evidence :response-body))))
            (cause
              (or (workspace-annotation-json-field-value parsed "cause")
                  (workspace-annotation-json-field-value parsed "message")
@@ -5253,12 +5264,13 @@
             after-topic
             (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)))
          (journal-events
-           (dmx-workspace-journal-record-transition
-            client
+           (record-workspace-transition
+            *workspace-journal-sink*
             previous-state
             after-state
             (dmx-workspace-annotation-write-plan-workspace-topicmap-id
-             plan))))
+             plan)
+            :client client)))
     (values after-topic after-state journal-events)))
 
 (defun execute-dmx-workspace-annotation-write
@@ -5681,11 +5693,12 @@
                    :journal-transition
                    "Recorded the workspace journal transition for the live annotation write."
                    (lambda ()
-                     (dmx-workspace-journal-record-transition
-                      resolved-client
+                     (record-workspace-transition
+                      *workspace-journal-sink*
                       previous-state
                       after-state
-                      resolved-topicmap-id))))
+                      resolved-topicmap-id
+                      :client resolved-client))))
             (setf raw-result
                   (append (dmx-workspace-annotation-plan-summary plan)
                           (list :dry-run nil

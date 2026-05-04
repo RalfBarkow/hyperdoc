@@ -15,10 +15,10 @@
 <p>
   The stronger durable model is explicit about authority. The authoritative
   append-only journal belongs to each HyperDoc instance. The DMX workspace
-  companion note is the current projection, replica, and repair surface for
-  that journaled state. The Common workspace is the shared projection that can
-  be rebuilt from authoritative journals when the boundary conditions are
-  satisfied.
+  companion note is now a legacy projection and repair surface, not the
+  default sink for new run traces. The Common workspace is the shared
+  projection that can be rebuilt from authoritative journals when the boundary
+  conditions are satisfied.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -58,6 +58,24 @@
 </p>
 
 <p>
+  The runtime boundary is now first class. <tt>record-workspace-transition</tt>
+  dispatches to <tt>:hyperdoc-local</tt>, <tt>:none</tt>, or explicitly gated
+  <tt>:dmx</tt>. The default <tt>*workspace-journal-sink*</tt> is
+  <tt>:hyperdoc-local</tt>. The default
+  <tt>*allow-dmx-workspace-journal-writes*</tt> is <tt>nil</tt>. Local journal
+  run records are bounded and written under
+  <tt>var/hyperdoc-local-journal/</tt> when file persistence is enabled.
+</p>
+
+<p>
+  A hard recursion guard rejects journal-of-journal attempts before any DMX
+  write can be reached. Subjects whose kind is <tt>workspace-journal</tt>, or
+  whose subject key or URI starts with
+  <tt>hyperdoc:mcp/workspace-journal/</tt>, are diagnostic-only inputs and do
+  not produce another workspace-journal event.
+</p>
+
+<p>
   Journal ownership attaches to the stable HyperDoc-managed subject key. When
   a preserved URI exists, that URI becomes the subject key. Otherwise HyperDoc
   falls back to a stable synthetic key such as <tt>dmx:topic/&lt;id&gt;</tt>.
@@ -72,10 +90,11 @@
 </ul>
 
 <p>
-  This page therefore describes two truths at once: the current runtime still
-  persists and replays companion notes in DMX, and the durable architectural
-  direction is that those notes are projections of instance-authoritative
-  journals rather than the final journal authority themselves.
+  This page therefore describes two truths at once: legacy DMX companion notes
+  still exist and remain inspectable, while current run traces default to the
+  HyperDoc-local sink. Writing a DMX companion journal is no longer an
+  implicit side effect of annotation, topic, note, or workspace repair paths;
+  it requires an explicit non-default opt-in.
 </p>
 
 <h2>Architecture invariants</h2>
@@ -83,6 +102,8 @@
 <ul>
   <li>Every owned subject needs a stable immutable subject key.</li>
   <li>Every authoritative mutation must be represented first as a local journal event on that stable key.</li>
+  <li>DMX workspace-journal writes are opt-in only; the default sink is HyperDoc-local or none, never DMX.</li>
+  <li>Workspace-journal subjects never generate another workspace-journal event.</li>
   <li>DMX state is derived by replay or materialization from journaled state rather than outranking it.</li>
   <li>DMX-only drift is foreign or synthesized history and is not promoted to primary truth merely because it is visible in the backend.</li>
   <li>Rebuild of the Common workspace is trustworthy only for journaled boundaries whose replay order and conflict policy are explicit.</li>

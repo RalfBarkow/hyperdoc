@@ -571,11 +571,13 @@
 (defun make-dmx-repair-auth-state-machine-run
     (&key result auth-context client debug-events)
   (let* ((machine (make-dmx-repair-auth-state-machine-definition))
-         (events (or debug-events
-                     (and client
-                          (typep client 'hyperdoc::http-dmx-import-client)
-                          (copy-list (hyperdoc::dmx-import-debug-events-of client)))
-                     '()))
+         (events (hyperdoc::bounded-http-dmx-import-debug-events
+                  (or debug-events
+                      (and client
+                           (typep client 'hyperdoc::http-dmx-import-client)
+                           (copy-list
+                            (hyperdoc::dmx-import-debug-events-of client)))
+                      '())))
          (transition-trace
            (remove nil (mapcar #'repair-auth-debug-event->transition-trace-entry
                                events)))
@@ -709,7 +711,7 @@
 (defun dmx-repair-debug-response-summary (event)
   (when event
     (format nil
-            "~@[status ~D~]~@[; Set-Cookie JSESSIONID=~A~]~@[; session-captured=~A~]"
+            "~@[status ~D~]~@[; JSESSIONID-cookie-observed=~A~]~@[; session-captured=~A~]"
             (getf event :status-code)
             (and (member :set-cookie-jsessionid-p event)
                  (yes/no-label (getf event :set-cookie-jsessionid-p)))
@@ -893,7 +895,9 @@
 
 (defun build-dmx-repair-debug-report (client auth-context result success-p)
   (let* ((events (and (typep client 'hyperdoc::http-dmx-import-client)
-                      (copy-tree (hyperdoc::dmx-import-debug-events-of client))))
+                      (hyperdoc::bounded-http-dmx-import-debug-events
+                       (copy-tree (hyperdoc::dmx-import-debug-events-of
+                                   client)))))
          (bootstrap-response
            (find-dmx-repair-debug-event events :s6-bootstrap-response-received))
          (session-extracted

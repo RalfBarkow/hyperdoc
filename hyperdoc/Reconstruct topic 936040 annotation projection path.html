@@ -1,0 +1,622 @@
+<h1>Reconstruct topic 936040 annotation projection path</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page records the reconstruction path for DMX topic <tt>936040</tt>,
+  the workspace annotation titled
+  <tt>Annotation: An active/alive pair is two agents connected by principal ports.</tt>
+  The goal of the next iteration is to prove that MCP writes for the same
+  DOM relation resolve to the same deterministic URI instead of creating a
+  duplicate carrier topic.
+</p>
+
+<h2>Target invariant</h2>
+
+<pre><code class="language-lisp">(:STATE :WORKSPACE-ANNOTATION-936040-RECONSTRUCTION-CONFIRMED
+ :TOPIC-ID 936040
+ :URI "hyperdoc:mcp/workspace-annotation/dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation"
+ :TOPIC-ACTION :UPDATE
+ :WORKSPACE-ACTION :UNCHANGED
+ :TOPICMAP-ACTION :ALREADY-PRESENT
+ :MUTATION-PERFORMED NIL
+ :MUTATION-ALLOWED NIL)</code></pre>
+
+<h2>Reconstruction narrative</h2>
+
+<p>
+  The source side of the relation is the third list item under
+  <tt>Lafont 1990 Interaction Nets</tt> /
+  <tt>Core concepts from Lafont 1990</tt>.  The DOM anchor strategy turns
+  this into a list-item anchor with the path
+  <tt>h1-lafont-1990-interaction-nets / h2-core-concepts-from-lafont-1990 / ul-2 / item-3</tt>
+  and the slugified label
+  <tt>an-active-alive-pair-is-two-agents-connected-by-principal-ports</tt>.
+  The target side is the Dock synthetic annotation target,
+  <tt>dock-annotation</tt>.  The relation key is therefore the source path plus
+  <tt>to-dock-annotation</tt>.
+</p>
+
+<p>
+  The DMX workspace annotation URI is the workspace-annotation prefix plus
+  that deterministic key.  The repair rule is lookup-before-create: a write
+  adapter must normalize <tt>annotationKey</tt> or <tt>runtimeRelationId</tt>,
+  derive the URI, look up an existing topic by URI, then plan
+  <tt>:UPDATE</tt> for topic <tt>936040</tt>.  Workspace assignment and topicmap
+  placement remain separate checks.
+</p>
+
+<h2>Step-by-step SLY MREPL snippets</h2>
+
+
+<h3>1. Load the HyperDoc DMX runtime</h3>
+
+<p>Evaluate this first in <tt>*sly-mrepl for sbcl*</tt> after connecting SLY to the Nix-managed SBCL image.</p>
+
+<pre><code class="language-lisp">(require :asdf)
+(asdf:load-system :hyperdoc/dmx-import)
+(in-package :cl-user)
+</code></pre>
+
+
+<h3>2. Confirm the runtime surface</h3>
+
+<pre><code class="language-lisp">(list
+ :implementation (lisp-implementation-type)
+ :version (lisp-implementation-version)
+ :directory (uiop:getcwd)
+ :dmx-import-system (asdf:component-pathname (asdf:find-system :hyperdoc/dmx-import)))
+</code></pre>
+
+
+<h3>3. Define the durable reconstruction coordinates</h3>
+
+<pre><code class="language-lisp">(defparameter *annotation-topic-id* 936040)
+(defparameter *workspace-id* 919815)
+(defparameter *topicmap-id* 919822)
+
+(defparameter *expected-title*
+  &quot;Annotation: An active/alive pair is two agents connected by principal ports.&quot;)
+
+(defparameter *annotation-key*
+  &quot;dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation&quot;)
+
+(defparameter *annotation-uri*
+  (hyperdoc::dmx-workspace-annotation-uri *annotation-key*))
+
+(defparameter *expected-annotation-uri*
+  &quot;hyperdoc:mcp/workspace-annotation/dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation&quot;)
+
+(assert (string= *annotation-uri* *expected-annotation-uri*))
+
+(list
+ :state :annotation-reconstruction-coordinates-ready
+ :topic-id *annotation-topic-id*
+ :workspace-id *workspace-id*
+ :topicmap-id *topicmap-id*
+ :annotation-key *annotation-key*
+ :annotation-uri *annotation-uri*)
+</code></pre>
+
+
+<h3>4. Reconstruct the DOM route as data</h3>
+
+<pre><code class="language-lisp">(defun active-alive-pair-dom-route ()
+  (list
+   :page &quot;Lafont 1990 Interaction Nets&quot;
+   :heading-path &#x27;(&quot;Lafont 1990 Interaction Nets&quot;
+                   &quot;Core concepts from Lafont 1990&quot;)
+   :source-anchor-kind &quot;list-item-anchor&quot;
+   :source-anchor-provider-kind &quot;dom-v1&quot;
+   :list-container &quot;ul[2]&quot;
+   :item-index 3
+   :source-label &quot;An active/alive pair is two agents connected by principal ports.&quot;
+   :target-anchor-provider-kind &quot;dock-v1&quot;
+   :target-anchor-strategy &quot;annotation-topic&quot;
+   :target-anchor-value &quot;dock-annotation&quot;
+   :target-anchor-label &quot;Annotation&quot;
+   :annotation-key *annotation-key*
+   :uri *annotation-uri*))
+
+(active-alive-pair-dom-route)
+</code></pre>
+
+
+<h3>5. Build an explicit authenticated DMX client</h3>
+
+<p>Use <tt>:auth-mode :header</tt> for the custom <tt>DMX ...</tt> authorization scheme. Do not paste secrets into a committed page.</p>
+
+<pre><code class="language-lisp">(defparameter *dmx-base-url*
+  (or (uiop:getenv &quot;HYPERDOC_DMX_IMPORT_BASE_URL&quot;)
+      &quot;https://dmx.ralfbarkow.ch&quot;))
+
+(defparameter *dmx-authorization-header*
+  (or (uiop:getenv &quot;HYPERDOC_DMX_IMPORT_AUTH_HEADER&quot;)
+      &quot;DMX PASTE_BASE64_USER_COLON_TOKEN_HERE&quot;))
+
+(when (search &quot;PASTE_&quot; *dmx-authorization-header*)
+  (error &quot;Set HYPERDOC_DMX_IMPORT_AUTH_HEADER or replace the placeholder authorization header.&quot;))
+
+(defparameter *dmx-client*
+  (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+   :base-url *dmx-base-url*
+   :workspace-id *workspace-id*
+   :auth-mode :header
+   :authorization-header *dmx-authorization-header*
+   :verbose nil))
+
+(list
+ :state :dmx-explicit-auth-client-ready
+ :base-url (hyperdoc::dmx-import-base-url-of *dmx-client*)
+ :workspace-id (hyperdoc::dmx-import-workspace-id-of *dmx-client*)
+ :authorization-scheme
+ (and (hyperdoc::dmx-import-authorization-header-of *dmx-client*)
+      (subseq (hyperdoc::dmx-import-authorization-header-of *dmx-client*)
+              0
+              (position #\Space (hyperdoc::dmx-import-authorization-header-of *dmx-client*)))))
+</code></pre>
+
+
+<h3>6. Small MREPL helpers for readable proof objects</h3>
+
+<pre><code class="language-lisp">(defun reconstruction-topic-id (topic)
+  (and topic (hyperdoc::dmx-import-object-id topic)))
+
+(defun reconstruction-topic-uri (topic)
+  (and topic (hyperdoc::dmx-json-object-value topic &quot;uri&quot;)))
+
+(defun reconstruction-topic-value (topic)
+  (and topic (hyperdoc::dmx-json-object-value topic &quot;value&quot;)))
+
+(defun reconstruction-topic-type-uri (topic)
+  (and topic (hyperdoc::dmx-json-object-value topic &quot;typeUri&quot;)))
+
+(defun reconstruction-required-string (value fallback)
+  (let ((text (cond
+                ((stringp value) value)
+                ((null value) nil)
+                (t (princ-to-string value)))))
+    (if (and text (plusp (length (string-trim &#x27;(#\Space #\Tab #\Newline #\Return) text))))
+        text
+        fallback)))
+</code></pre>
+
+
+<h3>7. Read topic 936040 and the same topic by deterministic URI</h3>
+
+<pre><code class="language-lisp">(defparameter *annotation-topic-by-id*
+  (hyperdoc::dmx-import-read-topic *dmx-client* *annotation-topic-id*))
+
+(defparameter *annotation-topic-by-uri*
+  (hyperdoc::dmx-import-find-existing-topic *dmx-client* *annotation-uri*))
+
+(assert (= *annotation-topic-id* (reconstruction-topic-id *annotation-topic-by-id*)))
+(assert (= *annotation-topic-id* (reconstruction-topic-id *annotation-topic-by-uri*)))
+(assert (string= *annotation-uri* (reconstruction-topic-uri *annotation-topic-by-uri*)))
+(assert (string= *expected-title* (reconstruction-topic-value *annotation-topic-by-id*)))
+
+(list
+ :state :annotation-topic-readback-confirmed
+ :topic-id (reconstruction-topic-id *annotation-topic-by-uri*)
+ :uri (reconstruction-topic-uri *annotation-topic-by-uri*)
+ :title (reconstruction-topic-value *annotation-topic-by-uri*)
+ :type-uri (reconstruction-topic-type-uri *annotation-topic-by-uri*))
+</code></pre>
+
+
+<h3>8. Check workspace assignment and topicmap placement independently</h3>
+
+<pre><code class="language-lisp">(defparameter *annotation-topic-workspace*
+  (hyperdoc::dmx-import-read-topic-workspace *dmx-client* *annotation-topic-id*))
+
+(defparameter *annotation-in-topicmap-p*
+  (hyperdoc::dmx-import-topic-in-topicmap-p
+   *dmx-client*
+   *topicmap-id*
+   *annotation-topic-id*))
+
+(list
+ :state :workspace-and-topicmap-readback
+ :topic-id *annotation-topic-id*
+ :workspace-id (reconstruction-topic-id *annotation-topic-workspace*)
+ :expected-workspace-id *workspace-id*
+ :workspace-ok-p (eql (reconstruction-topic-id *annotation-topic-workspace*) *workspace-id*)
+ :topicmap-id *topicmap-id*
+ :in-topicmap-p *annotation-in-topicmap-p*)
+</code></pre>
+
+
+<h3>9. Reopen the topic as a workspace-dock-annotation</h3>
+
+<pre><code class="language-lisp">(defparameter *workspace-annotation*
+  (hyperdoc::read-dmx-workspace-annotation
+   :topic-id *annotation-topic-id*
+   :workspace-topicmap-id *topicmap-id*
+   :client *dmx-client*))
+
+(assert (typep *workspace-annotation* &#x27;hyperdoc::workspace-dock-annotation))
+(assert (string= *annotation-uri*
+                 (hyperdoc::workspace-annotation-topic-uri-of *workspace-annotation*)))
+(assert (string= *annotation-key*
+                 (hyperdoc::workspace-annotation-key-of *workspace-annotation*)))
+
+(list
+ :state :workspace-annotation-reopened
+ :class (class-name (class-of *workspace-annotation*))
+ :title (hyperdoc::title-of *workspace-annotation*)
+ :annotation-key (hyperdoc::workspace-annotation-key-of *workspace-annotation*)
+ :runtime-relation-id
+ (hyperdoc::workspace-annotation-runtime-relation-id-of *workspace-annotation*)
+ :topic-id (hyperdoc::workspace-annotation-topic-id-of *workspace-annotation*)
+ :topic-uri (hyperdoc::workspace-annotation-topic-uri-of *workspace-annotation*)
+ :workspace-id (hyperdoc::workspace-annotation-workspace-id-of *workspace-annotation*)
+ :topicmap-id (hyperdoc::workspace-annotation-topicmap-id-of *workspace-annotation*)
+ :storage-mode (hyperdoc::workspace-annotation-storage-mode-of *workspace-annotation*))
+</code></pre>
+
+
+<h3>10. Rebuild the typed annotation write plan from the reopened object</h3>
+
+<pre><code class="language-lisp">(defparameter *annotation-write-plan*
+  (hyperdoc::plan-dmx-workspace-annotation-write-from-object
+   *workspace-annotation*
+   :workspace-topicmap-id *topicmap-id*
+   :workspace-id *workspace-id*
+   :client *dmx-client*
+   :annotation-key *annotation-key*))
+
+(defparameter *annotation-plan-summary*
+  (hyperdoc::dmx-workspace-annotation-plan-summary *annotation-write-plan*))
+
+(assert (= *annotation-topic-id* (getf *annotation-plan-summary* :existing-topic-id)))
+(assert (eq :update (getf *annotation-plan-summary* :topic-action)))
+
+*annotation-plan-summary*
+</code></pre>
+
+
+<h3>11. Preview the guarded continuation stages without mutation</h3>
+
+<pre><code class="language-lisp">(defun guarded-continuation-dry-run-preview (plan client topic-id topicmap-id)
+  (let ((workspace-action
+          (hyperdoc::dmx-workspace-annotation-write-plan-workspace-action plan))
+        (topicmap-action
+          (hyperdoc::dmx-workspace-annotation-write-plan-topicmap-action plan)))
+    (list
+     :state :guarded-continuation-dry-run-preview
+     :topic-id topic-id
+     :workspace-action workspace-action
+     :workspace-preview
+     (if (eq workspace-action :assign)
+         (hyperdoc::continue-workspace-annotation-with-guarded-assignment
+          plan client topic-id topicmap-id :dry-run t)
+         :skipped-already-current)
+     :topicmap-action topicmap-action
+     :topicmap-preview
+     (if (eq topicmap-action :add)
+         (hyperdoc::continue-workspace-annotation-with-guarded-topicmap-placement
+          plan client topic-id topicmap-id :dry-run t)
+         :skipped-already-present))))
+
+(defparameter *guarded-continuation-preview*
+  (guarded-continuation-dry-run-preview
+   *annotation-write-plan*
+   *dmx-client*
+   *annotation-topic-id*
+   *topicmap-id*))
+
+*guarded-continuation-preview*
+</code></pre>
+
+
+<h3>12. Build a saved-topic continuation report</h3>
+
+<pre><code class="language-lisp">(defparameter *annotation-continuation-report*
+  (hyperdoc::make-workspace-annotation-continuation-report
+   *workspace-annotation*
+   *annotation-write-plan*
+   *annotation-topic-id*
+   *topicmap-id*
+   *dmx-client*))
+
+(list
+ :state :workspace-annotation-continuation-report-ready
+ :report-status
+ (hyperdoc::workspace-annotation-persistence-report-status-of
+  *annotation-continuation-report*)
+ :persisted-topic-id
+ (hyperdoc::workspace-annotation-persistence-report-persisted-topic-id-of
+  *annotation-continuation-report*)
+ :subject-key
+ (hyperdoc::workspace-annotation-persistence-report-subject-key-of
+  *annotation-continuation-report*)
+ :raw-result
+ (hyperdoc::workspace-annotation-persistence-report-raw-result-of
+  *annotation-continuation-report*))
+</code></pre>
+
+
+<h3>13. Optional live repair guarded by a local flag</h3>
+
+<p>This is the only snippet that can perform assignment/topicmap mutations, and only after <tt>*mutation-allowed*</tt> is set to <tt>T</tt> in the MREPL.</p>
+
+<pre><code class="language-lisp">(defparameter *mutation-allowed* nil)
+(defvar *annotation-live-continuation-result* nil)
+
+(when *mutation-allowed*
+  (setf *annotation-live-continuation-result*
+        (hyperdoc::continue-workspace-annotation-persistence-with-client
+         *annotation-continuation-report*
+         *dmx-client*)))
+
+(if *mutation-allowed*
+    (list
+     :state :live-continuation-executed
+     :report-status
+     (hyperdoc::workspace-annotation-persistence-report-status-of
+      *annotation-live-continuation-result*)
+     :raw-result
+     (hyperdoc::workspace-annotation-persistence-report-raw-result-of
+      *annotation-live-continuation-result*))
+    (list
+     :state :live-continuation-blocked-by-local-operator-guard
+     :instruction &quot;Set *mutation-allowed* to T only after inspecting the dry-run preview.&quot;))
+</code></pre>
+
+
+<h3>14. Reconstruct the MCP-equivalent write plan from the opened annotation</h3>
+
+<pre><code class="language-lisp">(defparameter *mcp-equivalent-write-plan*
+  (hyperdoc::plan-dmx-workspace-annotation-write
+   :title *expected-title*
+   :summary (reconstruction-required-string
+             (hyperdoc::summary-of *workspace-annotation*)
+             &quot;Reconstructed workspace annotation for the active/alive pair DOM relation.&quot;)
+   :text (reconstruction-required-string
+          (hyperdoc::note-of *workspace-annotation*)
+          &quot;Reconstructed from topic 936040.&quot;)
+   :relation-kind (reconstruction-required-string
+                   (hyperdoc::relation-kind-of *workspace-annotation*)
+                   &quot;dom-relation&quot;)
+   :status (reconstruction-required-string
+            (hyperdoc::workspace-annotation-status-of *workspace-annotation*)
+            &quot;persisted&quot;)
+   :source-anchor-json
+   (reconstruction-required-string
+    (hyperdoc::workspace-annotation-source-anchor-json-of *workspace-annotation*)
+    &quot;{}&quot;)
+   :target-anchor-json
+   (reconstruction-required-string
+    (hyperdoc::workspace-annotation-target-anchor-json-of *workspace-annotation*)
+    &quot;{}&quot;)
+   :context-object-id
+   (reconstruction-required-string
+    (hyperdoc::context-object-of *workspace-annotation*)
+    &quot;reconstructed-context&quot;)
+   :context-view-title
+   (reconstruction-required-string
+    (hyperdoc::context-view-title-of *workspace-annotation*)
+    &quot;Reconstructed context&quot;)
+   :source-object-ref
+   (reconstruction-required-string
+    (hyperdoc::workspace-annotation-source-object-ref-of *workspace-annotation*)
+    &quot;reconstructed-source&quot;)
+   :target-object-ref
+   (reconstruction-required-string
+    (hyperdoc::workspace-annotation-target-object-ref-of *workspace-annotation*)
+    &quot;dock-annotation&quot;)
+   :runtime-relation-id *annotation-key*
+   :provenance-json
+   (reconstruction-required-string
+    (hyperdoc::workspace-annotation-provenance-json-of *workspace-annotation*)
+    &quot;{}&quot;)
+   :workspace-topicmap-id *topicmap-id*
+   :workspace-id *workspace-id*
+   :client *dmx-client*
+   :annotation-key *annotation-key*
+   :uri *annotation-uri*))
+
+(defparameter *mcp-equivalent-summary*
+  (hyperdoc::dmx-workspace-annotation-plan-summary
+   *mcp-equivalent-write-plan*))
+
+(assert (= *annotation-topic-id* (getf *mcp-equivalent-summary* :existing-topic-id)))
+(assert (string= *annotation-uri* (getf *mcp-equivalent-summary* :uri)))
+(assert (eq :update (getf *mcp-equivalent-summary* :topic-action)))
+
+*mcp-equivalent-summary*
+</code></pre>
+
+
+<h3>15. Terminal proof expression</h3>
+
+<pre><code class="language-lisp">(defun annotation-936040-reconstruction-proof ()
+  (let* ((topic (hyperdoc::dmx-import-find-existing-topic
+                 *dmx-client*
+                 *annotation-uri*))
+         (workspace (hyperdoc::dmx-import-read-topic-workspace
+                     *dmx-client*
+                     *annotation-topic-id*))
+         (in-topicmap-p (hyperdoc::dmx-import-topic-in-topicmap-p
+                         *dmx-client*
+                         *topicmap-id*
+                         *annotation-topic-id*))
+         (summary *mcp-equivalent-summary*))
+    (list
+     :state :workspace-annotation-936040-reconstruction-confirmed
+     :topic-id (reconstruction-topic-id topic)
+     :uri (reconstruction-topic-uri topic)
+     :title (reconstruction-topic-value topic)
+     :expected-title *expected-title*
+     :workspace-id (reconstruction-topic-id workspace)
+     :topicmap-id *topicmap-id*
+     :in-topicmap-p in-topicmap-p
+     :topic-action (getf summary :topic-action)
+     :workspace-action (getf summary :workspace-action)
+     :topicmap-action (getf summary :topicmap-action)
+     :existing-topic-id (getf summary :existing-topic-id)
+     :mutation-performed nil
+     :mutation-allowed nil)))
+
+(annotation-936040-reconstruction-proof)
+</code></pre>
+
+
+<h2>Repair interpretation</h2>
+
+<ul>
+  <li>If <tt>:TOPIC-ACTION</tt> is <tt>:UPDATE</tt> and <tt>:EXISTING-TOPIC-ID</tt> is <tt>936040</tt>, the deterministic URI resolver is working.</li>
+  <li>If <tt>:WORKSPACE-ACTION</tt> is <tt>:UNCHANGED</tt>, no workspace assignment repair is needed.</li>
+  <li>If <tt>:WORKSPACE-ACTION</tt> is <tt>:ASSIGN</tt>, run only the guarded workspace-assignment continuation after explicit operator approval.</li>
+  <li>If <tt>:TOPICMAP-ACTION</tt> is <tt>:ALREADY-PRESENT</tt>, no topicmap placement repair is needed.</li>
+  <li>If <tt>:TOPICMAP-ACTION</tt> is <tt>:ADD</tt>, run only the guarded topicmap placement continuation after explicit operator approval.</li>
+</ul>
+
+<h2>MCP write-side patch target</h2>
+
+<p>
+  The MCP write adapter should preserve this sequence: normalize
+  <tt>annotationKey</tt> or <tt>runtimeRelationId</tt>, derive
+  <tt>hyperdoc:mcp/workspace-annotation/&lt;key&gt;</tt>, resolve the existing topic
+  with <tt>dmx-import-find-existing-topic</tt>, plan <tt>:UPDATE</tt> rather
+  than <tt>:CREATE</tt>, then evaluate workspace assignment and topicmap
+  placement independently.  Do not generate a fresh key from the title, a
+  timestamp, or another local label for this route.
+</p>
+
+<h2>Patched-and-inspectable repair target</h2>
+
+<p>
+  The current repair target is intentionally not the fully repaired live
+  state. The repository and tests must make the safe partial state
+  inspectable without running another topic upsert, topicmap placement, full
+  annotation continuation, or DMX workspace-journal write.
+</p>
+
+<pre><code class="language-lisp">(:STATE :PATCHED-AND-INSPECTABLE
+ :REPO
+ (:JOURNAL-SINK-DEFAULT :HYPERDOC-LOCAL
+  :DMX-JOURNAL-WRITE-DEFAULT-P NIL
+  :WORKSPACE-JOURNAL-RECURSION-GUARD-P T
+  :AUTH-SESSION-BOUNDARY-EXPLICIT-P T
+  :EVIDENCE-BOUNDED-P T)
+
+ :DMX-936040
+ (:TOPIC-ID 936040
+  :TOPIC-ACTION :UPDATE
+  :TOPICMAP-ID 919822
+  :TOPICMAP-PRESENT-P T
+  :WORKSPACE-ID NIL
+  :REMAINING-ACTION :ASSIGN-WORKSPACE)
+
+ :NEXT-LIVE-ACTION
+ (:ONLY "PUT /workspaces/919815/object/936040"
+  :FORBIDDEN ("topic upsert"
+              "topicmap placement"
+              "dmx-workspace-journal-record-transition"
+              "full annotation continuation")))
+</code></pre>
+
+<h3>Inspectable repo states</h3>
+
+<ul>
+  <li><tt>repo-loaded</tt>: this HyperDoc checkout contains the patch surface.</li>
+  <li><tt>patch-branch</tt>: local replay does not perform live DMX mutation.</li>
+  <li><tt>journal-local-first</tt>: <tt>record-workspace-transition</tt> defaults to the HyperDoc-local journal sink.</li>
+  <li><tt>journal-recursion-guarded</tt>: workspace-journal subjects are blocked before any DMX write.</li>
+  <li><tt>auth-boundary-inspectable</tt>: username/password bootstrap and guarded assignment request shape are testable without real credentials.</li>
+  <li><tt>safe-evidence</tt>: HTTP/report evidence is bounded and redacted.</li>
+  <li><tt>patch-ready-for-single-live-assignment</tt>: the only future live mutation is the single workspace assignment PUT.</li>
+</ul>
+
+<h3>Inspectable Lisp image states</h3>
+
+<ul>
+  <li><tt>fresh-image</tt>: start from a clean SBCL image.</li>
+  <li><tt>dmx-import-loaded</tt>: <tt>:hyperdoc/dmx-import</tt> is loaded.</li>
+  <li><tt>authenticated-client-ready</tt>: an explicit request-scoped client shape exists; secrets are not persisted.</li>
+  <li><tt>prewrite-readback-confirmed</tt>: topic <tt>936040</tt> resolves by URI, plans <tt>:UPDATE</tt>, is present in topicmap <tt>919822</tt>, and still lacks workspace assignment.</li>
+  <li><tt>patched-image-ready</tt>: the patched local functions and tests are loaded.</li>
+  <li><tt>single-live-assignment-armed</tt>: only after explicit live gate and operator-provided credentials outside repository/chat.</li>
+  <li><tt>verified</tt>: local smokes prove the patched-and-inspectable target.</li>
+  <li><tt>auth-blocked-terminal</tt>: if the explicitly gated assignment reaches DMX and returns <tt>401</tt>, classify once and stop retrying.</li>
+</ul>
+
+<h3>Inspectable build/test states</h3>
+
+<ul>
+  <li><tt>enter-dev-shell</tt>: enter the Nix development shell.</li>
+  <li><tt>sbcl-started</tt>: run SBCL through <tt>nix develop -c</tt>.</li>
+  <li><tt>asdf-ready</tt>: ASDF is available.</li>
+  <li><tt>tests-loaded</tt>: <tt>:hyperdoc/tests</tt> is loaded.</li>
+  <li><tt>focused-smokes</tt>: the journal sink, auth boundary, 936040 regression, and SLY evidence bounds smokes have run.</li>
+  <li><tt>full-suite</tt>: the requested DMX annotation/MCP/SCXML/docs smoke cluster has run.</li>
+  <li><tt>patch-verifiable</tt>: all non-live validations pass.</li>
+  <li><tt>patch-failed</tt>: any failed local validation requires rework before a live operator run.</li>
+</ul>
+
+<h2>Narrow future live runbook</h2>
+
+<p>
+  This section is a future operator runbook only. It must not be executed as
+  part of local replay or default tests.
+</p>
+
+<h3>Only allowed live operation</h3>
+
+<pre><code>PUT /workspaces/919815/object/936040
+</code></pre>
+
+<h3>Forbidden during the future single-assignment run</h3>
+
+<ul>
+  <li>topic upsert</li>
+  <li>topicmap placement</li>
+  <li>full annotation continuation</li>
+  <li><tt>dmx-workspace-journal-record-transition</tt></li>
+</ul>
+
+<h3>Required preconditions</h3>
+
+<ul>
+  <li>journal sink is HyperDoc-local or none, not DMX</li>
+  <li>evidence is bounded and redacted</li>
+  <li>topicmap placement in topicmap <tt>919822</tt> is still present</li>
+  <li>workspace assignment is still missing</li>
+  <li>operator provides credentials outside the repository and chat</li>
+  <li>explicit live environment gate is set for the single assignment path only</li>
+</ul>
+
+<h3>Required postconditions</h3>
+
+<ul>
+  <li>workspace id is <tt>919815</tt></li>
+  <li>topicmap <tt>919822</tt> is still present</li>
+  <li>no DMX workspace-journal write occurred</li>
+  <li>no duplicate topic was created</li>
+</ul>
+
+<pre><code class="language-lisp">(:STATE :WORKSPACE-ANNOTATION-936040/FULLY-REPAIRED
+ :TOPIC-ID 936040
+ :URI-SAME-P T
+ :DUPLICATE-TOPIC-CREATED-P NIL
+ :TOPIC-ACTION :UPDATE
+ :WORKSPACE-ID 919815
+ :WORKSPACE-OK-P T
+ :TOPICMAP-ID 919822
+ :TOPICMAP-PRESENT-P T
+ :DMX-JOURNAL-WRITE-P NIL
+ :JOURNAL-SINK :HYPERDOC-LOCAL
+ :RAW-DMX-BODY-CROSSED-SLY-P NIL)
+</code></pre>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="DMX Projection Idempotency Confirmed">DMX Projection Idempotency Confirmed</a></li>
+  <li><a page="Workspace-native annotations in a DMX workspace">Workspace-native annotations in a DMX workspace</a></li>
+  <li><a page="Using guarded workspace topic lifecycle tools">Using guarded workspace topic lifecycle tools</a></li>
+  <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
+  <li><a page="How to work safely in topicmap context-window (919822)">How to work safely in topicmap context-window (919822)</a></li>
+  <li><a page="Lafont 1990 Interaction Nets">Lafont 1990 Interaction Nets</a></li>
+</ul>

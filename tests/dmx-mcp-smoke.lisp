@@ -48,7 +48,24 @@
     (t body)))
 
 (defun mcp-test-port ()
-  (+ 19000 (random 2000)))
+  (loop repeat 100
+        for port = (+ 19000 (random 2000))
+        for socket = (handler-case
+                         (usocket:socket-listen
+                          "127.0.0.1"
+                          port
+                          :reuseaddress t
+                          :element-type '(unsigned-byte 8))
+                       (usocket:address-in-use-error ()
+                         nil)
+                       (error ()
+                         nil))
+        when socket
+          do (progn
+               (ignore-errors (usocket:socket-close socket))
+               (return port))
+        finally
+           (error "Could not allocate a free localhost port for DMX MCP smoke tests")))
 
 (defun mcp-test-view-props (&key (x 160) (y 120) (visibility t) (pinned nil))
   (hyperdoc::make-dmx-topicmap-view-props-json-object
@@ -658,12 +675,9 @@
             :client create-client
             :dry-run nil))
          (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
-         (journal-summary
-           (workspace-annotation-smoke-journal-summary create-client persisted))
-         (journal-topic-id (getf journal-summary :existing-topic-id))
          (blocked-client
            (make-instance
-            'journal-preflight-auth-blocked-compatibility-storage-http-dmx-import-client
+            'pending-auth-compatibility-storage-http-dmx-import-client
             :base-url "https://dmx.ralfbarkow.ch"
             :workspace-id *dmx-annotations-smoke-workspace-id*
             :topics-by-external-key topics
@@ -682,8 +696,7 @@
       :live-writes-enabled-p t
       :sessions (make-hash-table :test #'equal)
       :log-stream nil)
-     topic-id
-     journal-topic-id)))
+     topic-id)))
 
 (defun make-dmx-mcp-live-server ()
   (let ((client (or (hyperdoc::make-http-dmx-import-client-from-environment
@@ -3016,21 +3029,16 @@
                                      (gethash "topicId" saved-carrier-topic)
                                      "Annotation continuation live must expose the saved carrier topic")
                    (mcp-assert-true
-                    (integerp (gethash "topicId" journal-topic))
-                    "Annotation continuation live must expose the journal companion topic")
-                   (mcp-assert-true
-                    (/= (gethash "topicId" journal-topic) topic-id)
-                    "Journal companion topic must remain distinct from the saved annotation carrier topic")))))
+                    (mcp-json-null-p journal-topic)
+                    "Annotation continuation live must not expose a DMX journal companion topic by default")))))
         (hyperdoc::stop-dmx-mcp-server)))
     t))
 
 (defun run-dmx-mcp-workspace-annotation-continuation-auth-blocked-smoke-test ()
-  (multiple-value-bind (server topic-id journal-topic-id)
+  (multiple-value-bind (server topic-id)
       (make-dmx-mcp-annotation-auth-blocked-server)
     (let* ((port (mcp-test-port))
-           (url (format nil "http://127.0.0.1:~D/mcp" port))
-           (original
-             (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)))
+           (url (format nil "http://127.0.0.1:~D/mcp" port)))
       (unwind-protect
            (progn
              (hyperdoc::serve-dmx-mcp-server
@@ -3038,19 +3046,6 @@
               :address "127.0.0.1"
               :server server)
              (sleep 0.2)
-             (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
-                   (lambda (client subject-key lookup-kind lookup-value
-                            workspace-topicmap-id
-                            &rest args
-                            &key subject-uri subject-kind ownership-class
-                              note-key note-kind
-                            &allow-other-keys)
-                     (declare (ignore client subject-key lookup-kind lookup-value
-                                      workspace-topicmap-id args subject-uri
-                                      subject-kind ownership-class note-key
-                                      note-kind))
-                     (mcp-signal-journal-preflight-http-401-with-header-evidence
-                      journal-topic-id)))
              (let ((session-id (mcp-test-open-session url :id 451)))
                (multiple-value-bind (blocked-body blocked-status _)
                    (mcp-test-call-tool
@@ -3077,27 +3072,16 @@
                         (journal-topic
                           (gethash "journalCompanionTopic" structured))
                         (assignment-auth-context
-                          (gethash "assignmentAuthContext" structured))
-                        (http-evidence
-                          (and assignment-auth-context
-                               (gethash "http-evidence" assignment-auth-context)))
-                        (response-headers
-                          (and http-evidence
-                               (gethash "response-headers" http-evidence)))
-                        (content-type-header
-                          (and response-headers
-                               (mcp-json-array-find-keyed-object
-                                response-headers
-                                "Content-Type"))))
+                          (gethash "assignmentAuthContext" structured)))
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "continue_workspace_annotation auth-blocked reports must stay in structured content")
-                  (mcp-assert-equal "workspace_annotation_persistence_report"
+                   (mcp-assert-equal "workspace_annotation_persistence_report"
                                      (gethash "resultKind" structured)
                                      "Annotation continuation auth-blocked result kind")
-                   (mcp-assert-equal "failed"
+                   (mcp-assert-equal "pending-auth"
                                      (gethash "reportStatus" structured)
-                                     "Annotation continuation auth-blocked reports must stay failed")
+                                     "Annotation continuation auth-blocked reports must stay at the explicit auth boundary")
                    (mcp-assert-equal "workspace-assignment"
                                      (gethash "failureStage" structured)
                                      "Annotation continuation auth-blocked reports must fail at the guarded workspace-assignment stage")
@@ -3107,17 +3091,18 @@
                    (mcp-assert-equal topic-id
                                      (gethash "topicId" saved-carrier-topic)
                                      "Annotation continuation auth-blocked reports must expose the saved carrier topic")
-                   (mcp-assert-equal journal-topic-id
-                                     (gethash "topicId" journal-topic)
-                                     "Annotation continuation auth-blocked reports must expose the journal companion topic")
                    (mcp-assert-true
-                    response-headers
-                    "Annotation continuation auth-blocked reports must preserve guarded-assignment HTTP response header evidence")
-                   (mcp-assert-equal "application/json; charset=utf-8"
-                                     (gethash "value" content-type-header)
-                                     "Annotation continuation auth-blocked reports must normalize dotted-pair response headers")))))
-        (setf (symbol-function 'hyperdoc::dmx-workspace-journal-prepare-transition)
-              original)
+                    (mcp-json-null-p journal-topic)
+                    "Annotation continuation auth-blocked reports must not expose a DMX journal companion topic by default")
+                   (mcp-assert-true
+                    assignment-auth-context
+                    "Annotation continuation auth-blocked reports must expose bounded assignment auth context")
+                   (mcp-assert-equal
+                    (hyperdoc::dmx-workspace-assign-object-path
+                     *dmx-annotations-smoke-workspace-id*
+                     topic-id)
+                    (gethash "assignment-endpoint-path" assignment-auth-context)
+                    "Annotation continuation auth-blocked reports must expose only the guarded workspace assignment endpoint")))))
         (hyperdoc::stop-dmx-mcp-server)))
     t))
 

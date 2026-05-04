@@ -17,6 +17,14 @@
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
 (defparameter *dmx-workspace-assignment-rehearsal-snapshot-kind*
   "hyperdoc.workspace_assignment_repair_snapshot")
+(defparameter *http-dmx-import-evidence-body-prefix-limit* 2048)
+(defparameter *http-dmx-import-debug-event-limit* 32)
+
+;; The journal implementation file is loaded after several guarded write
+;; helpers. Declare the dynamic boundary variables here so those helpers compile
+;; cleanly while the later implementation remains the authority for defaults.
+(defvar *workspace-journal-sink* :hyperdoc-local)
+(defvar *allow-dmx-workspace-journal-writes* nil)
 
 (define-condition fedwiki-dmx-import-error (error)
   ((message :reader fedwiki-dmx-import-message-of :initarg :message))
@@ -150,6 +158,14 @@
    (session-login-required-p
     :reader dmx-import-session-login-required-p-of
     :initarg :session-login-required-p
+    :initform nil)
+   (bootstrap-session-p
+    :reader dmx-import-bootstrap-session-p-of
+    :initarg :bootstrap-session-p
+    :initform nil)
+   (derived-auth-scheme
+    :reader dmx-import-derived-auth-scheme-of
+    :initarg :derived-auth-scheme
     :initform nil)
    (debug-events
     :accessor dmx-import-debug-events-of
@@ -1343,6 +1359,63 @@
     (t
      (format nil "~S" content))))
 
+(defun bounded-http-evidence-string (string)
+  (let ((value (or string "")))
+    (subseq value
+            0
+            (min (length value)
+                 *http-dmx-import-evidence-body-prefix-limit*))))
+
+(defun http-body-evidence (prefix body)
+  (let* ((string (or (http-request-content-string body) ""))
+         (length (length string))
+         (prefix-name (intern (format nil "~A-BODY-PREFIX" prefix) :keyword))
+         (length-name (intern (format nil "~A-BODY-LENGTH" prefix) :keyword))
+         (truncated-name
+           (intern (format nil "~A-BODY-TRUNCATED-P" prefix) :keyword)))
+    (list length-name length
+          prefix-name (bounded-http-evidence-string string)
+          truncated-name
+          (> length *http-dmx-import-evidence-body-prefix-limit*))))
+
+(defun plist-without-http-body-fields (plist)
+  (loop for (key value) on plist by #'cddr
+        unless (member key '(:request-body :response-body) :test #'eq)
+          append (list key value)))
+
+(defun sanitize-dmx-import-http-evidence (evidence)
+  (when evidence
+    (append
+     (plist-without-http-body-fields evidence)
+     (when (getf evidence :request-body)
+       (http-body-evidence "REQUEST" (getf evidence :request-body)))
+     (when (getf evidence :response-body)
+       (http-body-evidence "RESPONSE" (getf evidence :response-body))))))
+
+(defun sanitize-http-dmx-import-debug-value (key value)
+  (cond
+    ((member key
+             '(:authorization-header :cookie :cookie-header :auth-token
+               :password :token :session-cookie :headers :additional-headers)
+             :test #'eq)
+     "<redacted>")
+    ((and (stringp value)
+          (> (length value) *http-dmx-import-evidence-body-prefix-limit*))
+     (bounded-http-evidence-string value))
+    (t
+     value)))
+
+(defun sanitize-http-dmx-import-debug-event (event)
+  (loop for (key value) on event by #'cddr
+        append (list key
+                     (sanitize-http-dmx-import-debug-value key value))))
+
+(defun bounded-http-dmx-import-debug-events (events)
+  (let ((length (length events)))
+    (if (> length *http-dmx-import-debug-event-limit*)
+        (last events *http-dmx-import-debug-event-limit*)
+        events)))
+
 (defun http-request-relative-path (client normalized-url)
   (let ((base-url (dmx-import-base-url-of client)))
     (if (and base-url
@@ -1363,6 +1436,11 @@
     (t
      "Custom")))
 
+(defun http-dmx-import-session-bootstrap-required-p (client)
+  (and (typep client 'http-dmx-import-client)
+       (or (dmx-import-session-login-required-p-of client)
+           (dmx-import-bootstrap-session-p-of client))))
+
 (defun effective-http-dmx-import-authorization-header
     (client &key bootstrap-request-p)
   (let ((authorization-header (dmx-import-authorization-header-of client)))
@@ -1370,8 +1448,7 @@
       ((null authorization-header)
        nil)
       ((and (not bootstrap-request-p)
-            (typep client 'http-dmx-import-client)
-            (dmx-import-session-login-required-p-of client)
+            (http-dmx-import-session-bootstrap-required-p client)
             (dmx-import-session-cookie-of client))
        nil)
       (t
@@ -1429,8 +1506,11 @@
 (defun append-http-dmx-import-debug-event (client state &rest fields)
   (when (typep client 'http-dmx-import-client)
     (setf (dmx-import-debug-events-of client)
-          (append (dmx-import-debug-events-of client)
-                  (list (append (list :state state) fields)))))
+          (bounded-http-dmx-import-debug-events
+           (append (dmx-import-debug-events-of client)
+                   (list
+                    (sanitize-http-dmx-import-debug-event
+                     (append (list :state state) fields)))))))
   client)
 
 (defun reset-http-dmx-import-debug-evidence (client)
@@ -1527,14 +1607,19 @@
            :path relative-path
            :request-content-type actual-content-type
            :request-content-length actual-content-length
-           :request-body (http-request-content-string request-content)
            :accept-header (http-response-header-value headers "Accept")
            :authorization-scheme authorization-scheme
-           :auth-mode-summary
-           (summarize-http-request-auth-mode authorization-header cookie-header)
-           :session-login-required-p
-           (and (typep client 'http-dmx-import-client)
-                (dmx-import-session-login-required-p-of client))
+          :auth-mode-summary
+          (summarize-http-request-auth-mode authorization-header cookie-header)
+          :session-login-required-p
+          (and (typep client 'http-dmx-import-client)
+               (dmx-import-session-login-required-p-of client))
+          :bootstrap-session-p
+          (and (typep client 'http-dmx-import-client)
+               (dmx-import-bootstrap-session-p-of client))
+          :derived-auth-scheme
+          (and (typep client 'http-dmx-import-client)
+               (dmx-import-derived-auth-scheme-of client))
            :cookie-shape cookie-shape
            :jsessionid-cookie-p
            (and (cookie-contains-token-p cookie-header "JSESSIONID=") t)
@@ -1542,9 +1627,10 @@
            (and (cookie-contains-token-p cookie-header "dmx_workspace_id=") t)
            :response-status-code response-status-code
            :response-reason-phrase reason-phrase
-           :response-body response-body
            :response-headers
            (http-dmx-import-response-header-evidence response-headers))
+     (http-body-evidence "REQUEST" request-content)
+     (http-body-evidence "RESPONSE" response-body)
      (dmx-import-bootstrap-evidence client))))
 
 (defun classify-http-dmx-debug-request (method relative-path)
@@ -1650,7 +1736,7 @@
                             :message "DMX login succeeded without a JSESSIONID cookie"
                             :url normalized-url
                             :status-code status-code
-                            :response-body body
+                            :response-body (bounded-http-evidence-string body)
                             :evidence
                             (dmx-import-last-http-transaction-evidence-of
                              client)))
@@ -1666,7 +1752,7 @@
                                      "DMX login request failed")
                         :url normalized-url
                         :status-code status-code
-                        :response-body body
+                        :response-body (bounded-http-evidence-string body)
                         :evidence
                         (dmx-import-last-http-transaction-evidence-of
                          client))))
@@ -1827,7 +1913,7 @@
                                     "DMX import request failed")
                        :url normalized-url
                        :status-code status-code
-                       :response-body body
+                       :response-body (bounded-http-evidence-string body)
                        :evidence
                        (and (typep client 'http-dmx-import-client)
                             (dmx-import-last-http-transaction-evidence-of
@@ -1856,7 +1942,7 @@
                            "HYPERDOC_DMX_IMPORT_USERNAME"
                            "HYPERDOC_DMX_IMPORT_PASSWORD"
                            "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
-  (when (and (dmx-import-session-login-required-p-of client)
+  (when (and (http-dmx-import-session-bootstrap-required-p client)
              (null (dmx-import-session-cookie-of client)))
     (append-http-dmx-import-debug-event
      client
@@ -1872,7 +1958,7 @@
 (defun ensure-http-dmx-import-session-cookie-for-protected-mutation
     (client operation)
   (when (and (typep client 'http-dmx-import-client)
-             (dmx-import-session-login-required-p-of client)
+             (http-dmx-import-session-bootstrap-required-p client)
              (null (dmx-import-session-cookie-of client)))
     (ensure-http-dmx-import-authenticated-operation client operation)))
 
@@ -2051,6 +2137,14 @@
          (> (length value) 0)
          value)))
 
+(defun dmx-import-env-true-p (name)
+  (let ((value (getenv-non-empty name)))
+    (and value
+         (member (string-downcase value)
+                 '("1" "true" "yes" "on")
+                 :test #'string=)
+         t)))
+
 (defun normalize-http-dmx-import-string (value field boundary &key required?)
   (let ((string (and value
                      (string-trim '(#\Space #\Tab #\Newline #\Return)
@@ -2115,12 +2209,42 @@
                                                boundary
                                                :required? t)))))
 
+(defun normalize-http-dmx-import-derived-auth-scheme
+    (value auth-mode boundary)
+  (cond
+    ((null value)
+     (if (eq auth-mode :basic) :basic :dmx))
+    ((or (eq value :basic)
+         (string-equal value "basic"))
+     :basic)
+    ((or (eq value :dmx)
+         (string-equal value "dmx"))
+     :dmx)
+    (t
+     (error 'dmx-import-config-error
+            :message (format nil
+                             "Invalid explicit DMX derived auth scheme ~S at ~A"
+                             value
+                             boundary)
+            :missing-keys '("derived-auth-scheme")))))
+
 (defun make-http-dmx-import-client-from-explicit-auth
     (&key base-url workspace-id topic-type-uri verbose auth-mode
-       authorization-header auth-token username password)
+       authorization-header auth-token username password
+       (bootstrap-session-p nil bootstrap-session-supplied-p)
+       derived-auth-scheme)
   (let* ((boundary 'make-http-dmx-import-client-from-explicit-auth)
          (resolved-auth-mode
            (normalize-http-dmx-import-auth-mode auth-mode boundary))
+         (resolved-bootstrap-session-p
+           (if bootstrap-session-supplied-p
+               (and bootstrap-session-p t)
+               (eq resolved-auth-mode :basic)))
+         (resolved-derived-auth-scheme
+           (normalize-http-dmx-import-derived-auth-scheme
+            derived-auth-scheme
+            resolved-auth-mode
+            boundary))
          (resolved-base-url
            (or (normalize-http-dmx-import-string base-url :base-url boundary)
                (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL")))
@@ -2156,7 +2280,11 @@
             (make-instance 'http-dmx-import-client
                            :base-url resolved-base-url
                            :authorization-header resolved-auth-header
-                           :session-login-required-p (eq resolved-auth-mode :basic)
+                           :session-login-required-p
+                           resolved-bootstrap-session-p
+                           :bootstrap-session-p resolved-bootstrap-session-p
+                           :derived-auth-scheme
+                           resolved-derived-auth-scheme
                            :workspace-id resolved-workspace-id
                            :topic-type-uri resolved-topic-type-uri
                            :verbose verbose)))
@@ -2175,7 +2303,9 @@
        :auth-token-present-p
        (and (dmx-non-empty-string-p auth-token) t)
        :session-login-required-p
-       (and (eq resolved-auth-mode :basic) t)
+       resolved-bootstrap-session-p
+       :bootstrap-session-p resolved-bootstrap-session-p
+       :derived-auth-scheme resolved-derived-auth-scheme
        :workspace-id resolved-workspace-id)
       client)))
 
@@ -2207,6 +2337,12 @@
            (and auth-header
                 (string= (summarize-http-authorization-scheme auth-header)
                          "Basic")))
+         (bootstrap-session-p
+           (or session-login-required-p
+               (dmx-import-env-true-p
+                "HYPERDOC_DMX_IMPORT_BOOTSTRAP_SESSION")))
+         (derived-auth-scheme
+           (if session-login-required-p :basic :dmx))
          (legacy-auth-token
            (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
     (when (or base-url topic-type-uri auth-header legacy-auth-token)
@@ -2214,9 +2350,11 @@
                      :base-url base-url
                      :authorization-header (or auth-header
                                                (and legacy-auth-token
-                                                    (format nil "Bearer ~A"
-                                                            legacy-auth-token)))
-                     :session-login-required-p session-login-required-p
+                                                   (format nil "Bearer ~A"
+                                                           legacy-auth-token)))
+                     :session-login-required-p bootstrap-session-p
+                     :bootstrap-session-p bootstrap-session-p
+                     :derived-auth-scheme derived-auth-scheme
                      :workspace-id workspace-id
                      :topic-type-uri (or topic-type-uri
                                          *dmx-fedwiki-page-type-uri*)

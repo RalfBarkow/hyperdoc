@@ -9,6 +9,8 @@
   smoke tests that already lock parts of the path down.
   The current canary remains topic <tt>922464</tt> in topicmap <tt>919822</tt>,
   with workspace-assignment target <tt>919815</tt>.
+  Annotation topic <tt>936040</tt> now uses the same auth/session boundary but
+  has a narrower future runbook: only the workspace-assignment PUT is allowed.
   The page documents the authentication path itself.
   It does not widen HyperDoc into a general DMX login system.
 </p>
@@ -94,12 +96,12 @@
   <tr>
     <td><tt>S6 bootstrap response received</tt></td>
     <td>DMX has responded to the login bootstrap.</td>
-    <td>Expected success shape: <tt>204 No Content</tt> plus <tt>Set-Cookie: JSESSIONID=...</tt>.</td>
+    <td>Expected success shape: <tt>204 No Content</tt> plus a redacted session-cookie receipt.</td>
   </tr>
   <tr>
     <td><tt>S7 session material extracted</tt></td>
-    <td>HyperDoc has extracted <tt>JSESSIONID</tt> ephemerally from the bootstrap response.</td>
-    <td>Next guarded request should carry <tt>Cookie: JSESSIONID=...; dmx_workspace_id=919815</tt>.</td>
+    <td>HyperDoc has extracted the session material ephemerally from the bootstrap response.</td>
+    <td>Next guarded request should carry redacted session-cookie shape plus workspace cookie <tt>dmx_workspace_id=919815</tt>.</td>
   </tr>
   <tr>
     <td><tt>S8 guarded repair request prepared</tt></td>
@@ -182,7 +184,7 @@
     <td><tt>S5 -&gt; S6</tt></td>
     <td>DMX answers the bootstrap request.</td>
     <td><tt>bootstrap-http-dmx-import-session</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
-    <td>Expected success: <tt>204 No Content</tt> with <tt>Set-Cookie: JSESSIONID=...</tt>.</td>
+    <td>Expected success: <tt>204 No Content</tt> with redacted session-cookie receipt.</td>
     <td>No UI change yet unless the bootstrap fails.</td>
   </tr>
   <tr>
@@ -203,7 +205,7 @@
     <td><tt>S8 -&gt; S9</tt></td>
     <td>The live repair call is executed.</td>
     <td><tt>dmx-import-assign-topic-to-workspace</tt> and <tt>http-request-json</tt> in <tt>hyperdoc/dmx-import.lisp</tt>.</td>
-    <td><tt>PUT /workspaces/919815/object/&lt;topic-id&gt;</tt> with empty body, <tt>Accept: application/json</tt>, and cookie <tt>dmx_workspace_id=919815</tt>; in username/password mode the cookie must also include <tt>JSESSIONID=...</tt>.</td>
+    <td><tt>PUT /workspaces/919815/object/&lt;topic-id&gt;</tt> with empty body, <tt>Accept: application/json</tt>, and cookie <tt>dmx_workspace_id=919815</tt>; in username/password mode the request must also include redacted session-cookie shape.</td>
     <td>No result table update yet.</td>
   </tr>
   <tr>
@@ -263,7 +265,7 @@ Content-Length: 0
 
 <pre>
 HTTP/1.1 204 No Content
-Set-Cookie: JSESSIONID=&lt;session-id&gt;;Path=/;SameSite=Strict
+Set-Cookie: &lt;session cookie redacted&gt;
 </pre>
 
 <p>
@@ -279,7 +281,7 @@ Set-Cookie: JSESSIONID=&lt;session-id&gt;;Path=/;SameSite=Strict
 <pre>
 PUT /workspaces/919815/object/922464 HTTP/1.1
 Authorization: Basic &lt;base64(username:password)&gt;
-Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
+Cookie: &lt;session cookie redacted&gt;; dmx_workspace_id=919815
 Accept: application/json
 Content-Length: 0
 
@@ -434,13 +436,14 @@ Content-Length: 0
   <li>Click <tt>Repair selected topic</tt> and inspect the browser network panel.</li>
   <li>Did <tt>POST /access-control/login</tt> run at all?
     If not, the runtime is stale or the mode was not normalized to <tt>:basic</tt>.</li>
-  <li>Did the bootstrap response return success with <tt>Set-Cookie: JSESSIONID=...</tt>?
+  <li>Did the bootstrap response return success with a redacted session-cookie receipt?
     If not, the credentials or login policy failed before the guarded <tt>PUT</tt>.</li>
-  <li>Was <tt>JSESSIONID</tt> actually captured and attached to the guarded <tt>PUT</tt>?
-    The <tt>Cookie</tt> header must be <tt>JSESSIONID=...; dmx_workspace_id=919815</tt>.</li>
-  <li>If the <tt>PUT</tt> still returns <tt>401</tt>, inspect the response body.
-    A body that still reports user <tt>&lt;anonymous&gt;</tt> points to missing or ignored session state.
-    A body that names <tt>rgb</tt> points to an authorization or ownership boundary instead.</li>
+  <li>Was session material actually captured and attached to the guarded <tt>PUT</tt>?
+    Inspect only the redacted header-shape evidence, not raw cookie values.</li>
+  <li>If the <tt>PUT</tt> still returns <tt>401</tt>, inspect the bounded response evidence:
+    <tt>:status-code</tt>, <tt>:path</tt>, <tt>:response-body-length</tt>,
+    <tt>:response-body-prefix</tt>, and redacted auth/session shape.
+    Do not paste or serialize the raw response body.</li>
   <li>Did the same credentials succeed anywhere else?
     The minimum proof is that the login bootstrap itself succeeds.
     If needed, compare against the DMX webclient login trace, which also uses <tt>POST /access-control/login</tt> with Basic auth.</li>
@@ -460,15 +463,33 @@ Content-Length: 0
 
 <ol>
   <li>the <tt>POST /access-control/login</tt> request and response headers</li>
-  <li>the <tt>PUT /workspaces/919815/object/922464</tt> request headers and response body</li>
+  <li>the <tt>PUT /workspaces/919815/object/922464</tt> bounded request/response evidence</li>
   <li>the refreshed readback for <tt>/workspaces/object/922464</tt> and <tt>/topicmaps/object/922464</tt></li>
 </ol>
 
 <p>
   If the login bootstrap is <tt>204</tt> and the <tt>PUT</tt> still fails, the
   next distinction is no longer about the request contract.
-  It is whether DMX still sees the request as anonymous or sees <tt>rgb</tt>
-  but denies the write.
+  It is whether the bounded diagnostic shape indicates an ignored session or
+  an authorization/ownership boundary.
+</p>
+
+<h2>Annotation 936040 future assignment boundary</h2>
+
+<p>
+  For annotation topic <tt>936040</tt>, this authentication path must be used
+  only after the local patched-and-inspectable target has been verified. The
+  allowed future live operation is exactly
+  <tt>PUT /workspaces/919815/object/936040</tt>. It must not run topic upsert,
+  topicmap placement, full annotation continuation, or
+  <tt>dmx-workspace-journal-record-transition</tt>.
+</p>
+
+<p>
+  If the explicitly gated assignment reaches the guarded PUT and returns
+  <tt>401</tt>, classify the run as <tt>auth-blocked-terminal</tt> and stop.
+  Do not retry loops. Preserve only bounded evidence: status, method, path,
+  body length/prefix, and redacted auth/session shape.
 </p>
 
 <h2>Related</h2>

@@ -231,7 +231,12 @@
 (defun run-dmx-action-auth-session-scxml-mode-path-smoke-tests ()
   (run-dmx-action-auth-session-scxml-mode-smoke-test
    :username-password
-   :expected-state "guarded-request-shaped")
+   :expected-state "guarded-put-prepared")
+  (run-dmx-action-auth-session-scxml-mode-smoke-test
+   :username-password
+   :bootstrap-status :put-401
+   :expected-state "auth-blocked-terminal"
+   :expected-failure-boundary :auth-blocked)
   (run-dmx-action-auth-session-scxml-mode-smoke-test
    :anonymous
    :expected-state "anonymous-blocked"
@@ -297,17 +302,27 @@
      (hyperdoc::dmx-annotation-acceptance-scxml-run-accepted-commits-of run)
      "Runbook replay must record accepted commit set")
     (dolist (state-id
-             '("preflightCleanTree"
-               "recordAcceptedCommits"
-               "localFirstSaveWithoutCredentials"
-               "optionalDmxMaterialization"
-               "createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"
-               "guardedContinuationForExistingTopic936040"
-               "workspaceAssignmentReadback919815"
-               "topicmapReadbackIncludes919822"
-               "reopenReconstructsWorkspaceDockAnnotation"
-               "secretLeakageAudit"
-               "liveSmokeReplay"
+             '("repo-loaded"
+               "patch-branch"
+               "journal-local-first"
+               "journal-recursion-guarded"
+               "auth-boundary-inspectable"
+               "safe-evidence"
+               "fresh-image"
+               "dmx-import-loaded"
+               "authenticated-client-ready"
+               "prewrite-readback-confirmed"
+               "patched-image-ready"
+               "enter-dev-shell"
+               "sbcl-started"
+               "asdf-ready"
+               "tests-loaded"
+               "focused-smokes"
+               "full-suite"
+               "patch-verifiable"
+               "patch-ready-for-single-live-assignment"
+               "single-live-assignment-armed"
+               "verified"
                "accepted"))
       (dmx-annotation-runbook-assert-substring
        (format nil "Entering: ~A" state-id)
@@ -324,6 +339,23 @@
     (dmx-annotation-runbook-assert-true
      (null (search "PUT /core/topic/936040" trace-text :test #'char-equal))
      "Runbook trace must not include raw topic upsert for preserved topic 936040")
+    (dmx-annotation-runbook-assert-true
+     (null (search "dmx-workspace-journal-record-transition"
+                   trace-text
+                   :test #'char-equal))
+     "Runbook trace must not include DMX workspace-journal writes")
+    (dmx-annotation-runbook-assert-substring
+     ":PATCHED-AND-INSPECTABLE"
+     facts-text
+     "Runbook facts must expose the patched-and-inspectable target state")
+    (dmx-annotation-runbook-assert-substring
+     ":WORKSPACE-ID NIL"
+     facts-text
+     "Runbook facts must preserve the missing workspace assignment")
+    (dmx-annotation-runbook-assert-substring
+     ":REMAINING-ACTION :ASSIGN-WORKSPACE"
+     facts-text
+     "Runbook facts must expose the only remaining action")
     (dmx-annotation-runbook-assert-true
      overview
      "Runbook object must expose an overview inspector view")

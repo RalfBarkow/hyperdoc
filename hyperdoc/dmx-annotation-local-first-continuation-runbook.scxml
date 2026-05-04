@@ -3,104 +3,200 @@
     xmlns="http://www.w3.org/2005/07/scxml"
     version="1.0"
     name="dmx-annotation-local-first-continuation-runbook"
-    initial="preflightCleanTree">
+    initial="repo-loaded">
   <!-- Auth/session transition reference:
        hyperdoc/dmx-action-auth-session.scxml -->
 
-  <state id="preflightCleanTree">
+  <state id="repo-loaded">
     <onentry>
-      <log label="Preflight confirmed clean tree for DMX annotation acceptance replay"/>
+      <log label="Repo state: repo-loaded for the HyperDoc DMX annotation 936040 repair target"/>
     </onentry>
 
-    <transition event="PRECHECK.CLEAN_TREE" target="recordAcceptedCommits"/>
+    <transition event="REPO.LOADED" target="patch-branch"/>
   </state>
 
-  <state id="recordAcceptedCommits">
+  <state id="patch-branch">
     <onentry>
-      <log label="Recorded accepted commits: 0c2673e, 242410c, 9f489ab"/>
-      <log label="Linked request-scoped auth/session submachine: dmx-action-auth-session.scxml"/>
+      <log label="Repo state: patch-branch, no live DMX mutation is part of local replay"/>
     </onentry>
 
-    <transition event="COMMITS.ACCEPTED" target="localFirstSaveWithoutCredentials"/>
+    <transition event="PATCH.BRANCH" target="journal-local-first"/>
   </state>
 
-  <state id="localFirstSaveWithoutCredentials">
+  <state id="journal-local-first">
     <onentry>
-      <log label="Verified local-first DOM connect annotation save succeeds without credentialed DMX client"/>
+      <log label="Repo state: journal-local-first; workspace transition traces default to HyperDoc-local storage"/>
     </onentry>
 
-    <transition event="LOCAL_FIRST_SAVE.WITHOUT_CREDENTIALS" target="optionalDmxMaterialization"/>
+    <transition event="JOURNAL.LOCAL_FIRST" target="journal-recursion-guarded"/>
   </state>
 
-  <state id="optionalDmxMaterialization">
+  <state id="journal-recursion-guarded">
     <onentry>
-      <log label="Verified optional DMX materialization uses one carrier lane and does not gate local save"/>
+      <log label="Repo state: journal-recursion-guarded; workspace-journal subjects cannot journal another workspace-journal"/>
     </onentry>
 
-    <transition event="DMX.MATERIALIZATION.ONE_CARRIER_LANE" target="createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"/>
-    <transition event="CREATE_TOPIC_FAILURE_EVIDENCE.SKIPPED_PRE_TOPIC_UPSERT" target="createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"/>
+    <transition event="JOURNAL.RECURSION_GUARDED" target="auth-boundary-inspectable"/>
   </state>
 
-  <state id="createTopicFailureEvidenceSmokeSkippedPreTopicUpsert">
+  <state id="auth-boundary-inspectable">
     <onentry>
-      <log label="Recorded designed skip: create-topic failure evidence smoke skipped at pre-topic-upsert preconditions"/>
+      <log label="Repo state: auth-boundary-inspectable; username/password bootstrap and guarded assignment request shape are testable without credentials"/>
     </onentry>
 
-    <transition event="CREATE_TOPIC_FAILURE_EVIDENCE.SKIP_RECORDED" target="guardedContinuationForExistingTopic936040"/>
+    <transition event="AUTH.BOUNDARY_INSPECTABLE" target="safe-evidence"/>
   </state>
 
-  <state id="guardedContinuationForExistingTopic936040">
+  <state id="safe-evidence">
     <onentry>
-      <log label="Verified existing topic-backed annotation 936040 routes to guarded continuation and skips raw topic upsert"/>
+      <log label="Repo state: safe-evidence; HTTP evidence stores bounded prefixes, lengths, status, path, and redacted auth shape"/>
     </onentry>
 
-    <transition event="CONTINUATION.GUARDED_PATH" target="workspaceAssignmentReadback919815"/>
+    <transition event="EVIDENCE.SAFE" target="fresh-image"/>
   </state>
 
-  <state id="workspaceAssignmentReadback919815">
+  <state id="fresh-image">
     <onentry>
-      <log label="Verified workspace assignment readback equals 919815"/>
+      <log label="Lisp image state: fresh-image"/>
     </onentry>
 
-    <transition event="WORKSPACE_ASSIGNMENT.READBACK_919815" target="topicmapReadbackIncludes919822"/>
+    <transition event="IMAGE.FRESH" target="dmx-import-loaded"/>
   </state>
 
-  <state id="topicmapReadbackIncludes919822">
+  <state id="dmx-import-loaded">
     <onentry>
-      <log label="Verified topicmap readback includes 919822"/>
+      <log label="Lisp image state: dmx-import-loaded"/>
     </onentry>
 
-    <transition event="TOPICMAP.READBACK_INCLUDES_919822" target="reopenReconstructsWorkspaceDockAnnotation"/>
+    <transition event="DMX_IMPORT.LOADED" target="authenticated-client-ready"/>
   </state>
 
-  <state id="reopenReconstructsWorkspaceDockAnnotation">
+  <state id="authenticated-client-ready">
     <onentry>
-      <log label="Verified reopen reconstructs workspace-dock-annotation and preserves topic id"/>
+      <log label="Lisp image state: authenticated-client-ready means explicit auth/session request shape is inspectable; no real credentials are stored"/>
     </onentry>
 
-    <transition event="REOPEN.WORKSPACE_DOCK_ANNOTATION" target="secretLeakageAudit"/>
+    <transition event="AUTH.CLIENT_READY_SHAPE" target="prewrite-readback-confirmed"/>
   </state>
 
-  <state id="secretLeakageAudit">
+  <state id="prewrite-readback-confirmed">
     <onentry>
-      <log label="Verified no credential or session leakage into journal state, carrier JSON, SCXML trace, or runbook views"/>
+      <log label="Lisp image state: prewrite-readback-confirmed; topic 936040 resolves by URI as UPDATE, topicmap 919822 is present, workspace assignment is absent"/>
     </onentry>
 
-    <transition event="SECRET_LEAKAGE_AUDIT.PASSED" target="liveSmokeReplay"/>
+    <transition event="PREWRITE.READBACK_CONFIRMED" target="patched-image-ready"/>
   </state>
 
-  <state id="liveSmokeReplay">
+  <state id="patched-image-ready">
     <onentry>
-      <log label="Live smoke replay branch: explicit opt-in only, otherwise skipped-precondition"/>
+      <log label="Lisp image state: patched-image-ready for inspectable local smokes"/>
     </onentry>
 
-    <transition event="LIVE_SMOKE.SKIPPED_PRECONDITION" target="accepted"/>
-    <transition event="LIVE_SMOKE.EXIT_0_EXPECTED_PASSES" target="accepted"/>
+    <transition event="IMAGE.PATCHED_READY" target="enter-dev-shell"/>
+  </state>
+
+  <state id="enter-dev-shell">
+    <onentry>
+      <log label="Build/test state: enter-dev-shell"/>
+    </onentry>
+
+    <transition event="DEV_SHELL.ENTERED" target="sbcl-started"/>
+  </state>
+
+  <state id="sbcl-started">
+    <onentry>
+      <log label="Build/test state: sbcl-started"/>
+    </onentry>
+
+    <transition event="SBCL.STARTED" target="asdf-ready"/>
+  </state>
+
+  <state id="asdf-ready">
+    <onentry>
+      <log label="Build/test state: asdf-ready"/>
+    </onentry>
+
+    <transition event="ASDF.READY" target="tests-loaded"/>
+  </state>
+
+  <state id="tests-loaded">
+    <onentry>
+      <log label="Build/test state: tests-loaded"/>
+    </onentry>
+
+    <transition event="TESTS.LOADED" target="focused-smokes"/>
+  </state>
+
+  <state id="focused-smokes">
+    <onentry>
+      <log label="Build/test state: focused-smokes"/>
+    </onentry>
+
+    <transition event="SMOKES.FOCUSED" target="full-suite"/>
+  </state>
+
+  <state id="full-suite">
+    <onentry>
+      <log label="Build/test state: full-suite for the requested DMX smoke cluster"/>
+    </onentry>
+
+    <transition event="SUITE.REQUESTED_CLUSTER" target="patch-verifiable"/>
+    <transition event="SUITE.FAILED" target="patch-failed"/>
+  </state>
+
+  <state id="patch-verifiable">
+    <onentry>
+      <log label="Build/test state: patch-verifiable"/>
+    </onentry>
+
+    <transition event="PATCH.VERIFIABLE" target="patch-ready-for-single-live-assignment"/>
+  </state>
+
+  <state id="patch-failed">
+    <onentry>
+      <log label="Build/test state: patch-failed"/>
+    </onentry>
+
+    <transition event="PATCH.REWORK_REQUIRED" target="accepted"/>
+  </state>
+
+  <state id="patch-ready-for-single-live-assignment">
+    <onentry>
+      <log label="Repo state: patch-ready-for-single-live-assignment; future live branch allows only PUT /workspaces/919815/object/936040"/>
+    </onentry>
+
+    <transition event="LIVE_ASSIGNMENT.READY" target="single-live-assignment-armed"/>
+  </state>
+
+  <state id="single-live-assignment-armed">
+    <onentry>
+      <log label="Lisp image state: single-live-assignment-armed only after explicit live gate and operator credentials outside repo/chat"/>
+    </onentry>
+
+    <transition event="LIVE_ASSIGNMENT.SKIPPED_LOCAL_REPLAY" target="verified"/>
+    <transition event="LIVE_ASSIGNMENT.AUTH_BLOCKED_401" target="auth-blocked-terminal"/>
+  </state>
+
+  <state id="verified">
+    <onentry>
+      <log label="Lisp image state: verified for patched-and-inspectable local target"/>
+      <log label="Target state: PATCHED-AND-INSPECTABLE; topic 936040 UPDATE, topicmap 919822 present, workspace nil, remaining action assign-workspace"/>
+    </onentry>
+
+    <transition event="LOCAL_TARGET.VERIFIED" target="accepted"/>
+  </state>
+
+  <state id="auth-blocked-terminal">
+    <onentry>
+      <log label="Lisp image state: auth-blocked-terminal if the explicitly gated single assignment reaches DMX and returns 401"/>
+    </onentry>
+
+    <transition event="AUTH_BLOCKED.CLASSIFIED" target="accepted"/>
   </state>
 
   <final id="accepted">
     <onentry>
-      <log label="DMX annotation local-first and guarded-continuation acceptance checkpoint accepted"/>
+      <log label="DMX annotation 936040 patched-and-inspectable checkpoint accepted"/>
     </onentry>
   </final>
 

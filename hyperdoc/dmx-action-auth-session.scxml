@@ -24,7 +24,7 @@
       <log label="Normalized auth mode for request-scoped transition"/>
     </onentry>
     <transition event="AUTH.MODE.ANONYMOUS" target="anonymous-blocked"/>
-    <transition event="AUTH.MODE.USERPASS" target="bootstrap-required"/>
+    <transition event="AUTH.MODE.USERPASS" target="bootstrap-prepared"/>
     <transition event="AUTH.MODE.AUTHORIZATION_HEADER" target="request-shaped"/>
     <transition event="AUTH.MODE.BEARER_TOKEN" target="request-shaped"/>
   </state>
@@ -38,26 +38,48 @@
     <transition event="AUTH.REQUEST.BEARER_SHAPED" target="bearer-request-shaped"/>
   </state>
 
-  <state id="bootstrap-required">
+  <state id="bootstrap-prepared">
     <onentry>
-      <log label="Username/password mode requires bootstrap via POST /access-control/login"/>
+      <log label="Username/password mode prepared a login bootstrap before guarded assignment"/>
     </onentry>
-    <transition event="AUTH.BOOTSTRAP_ATTEMPTED" target="bootstrap-attempted"/>
+    <transition event="AUTH.BOOTSTRAP_PREPARED" target="bootstrap-response-received"/>
   </state>
 
-  <state id="bootstrap-attempted">
+  <state id="bootstrap-response-received">
     <onentry>
-      <log label="Bootstrap/login attempted for request-scoped session establishment"/>
+      <log label="Bootstrap response received with bounded redacted evidence"/>
     </onentry>
-    <transition event="AUTH.BOOTSTRAP.SUCCEEDED" target="session-established"/>
+    <transition event="AUTH.BOOTSTRAP.SUCCEEDED" target="session-material-extracted"/>
     <transition event="AUTH.BOOTSTRAP.FAILED" target="auth-failed"/>
   </state>
 
-  <state id="session-established">
+  <state id="session-material-extracted">
     <onentry>
-      <log label="Session established; session-cookie presence is represented as redacted shape only"/>
+      <log label="Session material extracted in memory; only redacted shape is inspectable"/>
     </onentry>
-    <transition event="AUTH.REQUEST_SHAPED" target="request-shaped"/>
+    <transition event="AUTH.SESSION_MATERIAL_EXTRACTED" target="guarded-put-prepared"/>
+  </state>
+
+  <state id="guarded-put-prepared">
+    <onentry>
+      <log label="Guarded assignment PUT prepared with empty body, JSON accept header, and redacted session/workspace cookie shape"/>
+    </onentry>
+    <transition event="AUTH.CONTINUATION_READY" target="continuation-ready"/>
+    <transition event="AUTH.GUARDED_PUT_401" target="guarded-put-401"/>
+  </state>
+
+  <state id="guarded-put-401">
+    <onentry>
+      <log label="Guarded assignment PUT returned 401; classify once as auth blocked and do not retry loops"/>
+    </onentry>
+    <transition event="AUTH.BLOCKED" target="auth-blocked-terminal"/>
+  </state>
+
+  <state id="auth-blocked-terminal">
+    <onentry>
+      <log label="Terminal auth-blocked state with bounded evidence only"/>
+    </onentry>
+    <transition event="AUTH.DONE" target="done"/>
   </state>
 
   <state id="guarded-request-shaped">

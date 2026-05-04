@@ -574,11 +574,12 @@
                   after-topic
                   (dmx-workspace-topicmap-membership-plan-topicmap-id plan)))
                (journal-events
-                 (dmx-workspace-journal-record-transition
-                  resolved-client
+                 (record-workspace-transition
+                  *workspace-journal-sink*
                   previous-state
                   after-state
-                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan))))
+                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+                  :client resolved-client)))
           (return-from execute-dmx-workspace-topicmap-context-upsert
             (append (dmx-workspace-topicmap-membership-plan-summary plan)
                     (list :dry-run dry-run
@@ -711,11 +712,12 @@
                   after-topic
                   (dmx-workspace-topicmap-membership-plan-topicmap-id plan)))
                (journal-events
-                 (dmx-workspace-journal-record-transition
-                  resolved-client
+                 (record-workspace-transition
+                  *workspace-journal-sink*
                   previous-state
                   after-state
-                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan))))
+                  (dmx-workspace-topicmap-membership-plan-topicmap-id plan)
+                  :client resolved-client)))
           (return-from execute-dmx-workspace-topicmap-context-remove
             (append (dmx-workspace-topicmap-membership-plan-summary plan)
                     (list :dry-run dry-run
@@ -895,13 +897,14 @@
                       plan)
                      *dmx-context-window-topicmap-id*))))
           (unless suppress-journal-maintenance-p
-            (dmx-workspace-journal-record-transition
-             resolved-client
+            (record-workspace-transition
+             *workspace-journal-sink*
              previous-state
              after-state
              (or (dmx-workspace-topic-workspace-assignment-plan-workspace-topicmap-id
                   plan)
-                 *dmx-context-window-topicmap-id*))))))
+                 *dmx-context-window-topicmap-id*)
+             :client resolved-client)))))
     (let* ((result-workspace
              (dmx-import-read-topic-workspace
               resolved-client
@@ -1032,12 +1035,13 @@
         (dmx-import-delete-topic resolved-client
                                  (dmx-workspace-topic-delete-plan-topic-id plan))
         (let ((journal-events
-                (dmx-workspace-journal-record-transition
-                 resolved-client
+                (record-workspace-transition
+                 *workspace-journal-sink*
                  previous-state
                  next-preview
                  (or (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
-                     *dmx-context-window-topicmap-id*))))
+                     *dmx-context-window-topicmap-id*)
+                 :client resolved-client)))
           (return-from execute-dmx-workspace-topic-delete
             (append (dmx-workspace-topic-delete-plan-summary plan)
                     (list :dry-run dry-run
@@ -1159,11 +1163,12 @@
         (dmx-import-delete-topic resolved-client
                                  (dmx-workspace-topic-delete-plan-topic-id plan))
         (let ((journal-events
-                (dmx-workspace-journal-record-transition
-                 resolved-client
+                (record-workspace-transition
+                 *workspace-journal-sink*
                  previous-state
                  next-preview
-                 (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan))))
+                 (dmx-workspace-topic-delete-plan-workspace-topicmap-id plan)
+                 :client resolved-client)))
           (return-from execute-dmx-workspace-note-delete
             (append (dmx-workspace-topic-delete-plan-summary plan)
                     (list :dry-run dry-run
@@ -1310,12 +1315,13 @@
                     (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id
                      plan)))
                  (journal-events
-                   (dmx-workspace-journal-record-transition
-                    resolved-client
+                   (record-workspace-transition
+                    *workspace-journal-sink*
                     previous-state
                     after-state
                     (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id
-                     plan))))
+                     plan)
+                    :client resolved-client)))
             (append summary
                     (list :journal-subject-key subject-key
                           :journal-event-count (length journal-events))))))))

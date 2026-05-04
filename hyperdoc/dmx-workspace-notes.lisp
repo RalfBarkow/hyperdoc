@@ -412,11 +412,12 @@
                     after-topic
                     (dmx-workspace-note-write-plan-workspace-topicmap-id plan)))
                  (journal-events
-                   (dmx-workspace-journal-record-transition
-                    resolved-client
+                   (record-workspace-transition
+                    *workspace-journal-sink*
                     previous-state
                     after-state
-                    (dmx-workspace-note-write-plan-workspace-topicmap-id plan))))
+                    (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+                    :client resolved-client)))
           (append (dmx-workspace-note-plan-summary plan)
                   (list :dry-run nil
                         :topic-id topic-id
@@ -550,11 +551,12 @@
                                          (dmx-import-object-id topic))
                   (dmx-workspace-note-write-plan-workspace-topicmap-id plan)))
                (journal-events
-                 (dmx-workspace-journal-record-transition
-                  resolved-client
+                 (record-workspace-transition
+                  *workspace-journal-sink*
                   previous-state
                   after-state
-                  (dmx-workspace-note-write-plan-workspace-topicmap-id plan))))
+                  (dmx-workspace-note-write-plan-workspace-topicmap-id plan)
+                  :client resolved-client)))
           (append (dmx-workspace-note-plan-summary plan)
                   (list :dry-run nil
                         :topic-id (dmx-import-object-id topic)

@@ -40,7 +40,8 @@ Content-Length: 0
 
 <p>
   A successful backend reply is expected to return a
-  <tt>Set-Cookie: JSESSIONID=...</tt> header.
+  <tt>Set-Cookie</tt> header containing <tt>JSESSIONID</tt>. HyperDoc
+  evidence records only the redacted cookie shape, not the raw cookie value.
 </p>
 
 <h2>Later guarded request shape</h2>
@@ -51,7 +52,7 @@ Content-Length: 0
 </p>
 
 <pre>
-Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815
+Cookie: &lt;session cookie redacted&gt;; dmx_workspace_id=919815
 </pre>
 
 <p>

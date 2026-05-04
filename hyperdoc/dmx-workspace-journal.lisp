@@ -19,12 +19,18 @@
 (defparameter *dmx-workspace-journal-diff-actor*
   "hyperdoc-snapshot-diff-reconciler")
 (defparameter *dmx-unix-epoch-universal-time-offset* 2208988800)
+(defparameter *workspace-journal-sink* :hyperdoc-local)
+(defparameter *allow-dmx-workspace-journal-writes* nil)
 (defvar *dmx-workspace-journal-suppressed-p* nil)
 (defparameter *hyperdoc-local-workspace-journal-schema-version* 1)
 (defparameter *hyperdoc-local-workspace-journal-storage-model*
   "hyperdoc-local-workspace-journal")
 (defvar *hyperdoc-local-workspace-journal-streams*
   (make-hash-table :test #'equal))
+(defparameter *hyperdoc-local-workspace-journal-directory*
+  (merge-pathnames #p"var/hyperdoc-local-journal/"
+                   (asdf:system-source-directory :hyperdoc)))
+(defparameter *hyperdoc-local-workspace-journal-write-files-p* t)
 
 (define-condition dmx-workspace-journal-unassigned-companion-topic-error
     (fedwiki-dmx-import-error)
@@ -100,6 +106,52 @@
   (format nil "~A~A"
           *hyperdoc-workspace-journal-uri-prefix*
           (dmx-workspace-journal-subject-key->note-key subject-key)))
+
+(defun dmx-workspace-journal-snapshot-field (snapshot key)
+  (and (hash-table-p snapshot)
+       (gethash key snapshot)))
+
+(defun workspace-journal-subject-p
+    (&key subject-key subject-uri subject-kind subject previous-state
+       after-state)
+  (let ((resolved-kind
+          (or subject-kind
+              (dmx-workspace-journal-snapshot-field subject "subjectKind")
+              (dmx-workspace-journal-snapshot-field after-state "subjectKind")
+              (dmx-workspace-journal-snapshot-field previous-state
+                                                    "subjectKind")))
+        (resolved-key
+          (or subject-key
+              (dmx-workspace-journal-snapshot-field subject "subjectKey")
+              (dmx-workspace-journal-snapshot-field after-state "subjectKey")
+              (dmx-workspace-journal-snapshot-field previous-state
+                                                    "subjectKey")))
+        (resolved-uri
+          (or subject-uri
+              (dmx-workspace-journal-snapshot-field subject "subjectUri")
+              (dmx-workspace-journal-snapshot-field after-state "subjectUri")
+              (dmx-workspace-journal-snapshot-field previous-state
+                                                    "subjectUri"))))
+    (or (and (stringp resolved-kind)
+             (string= resolved-kind "workspace-journal"))
+        (dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix*
+                             resolved-key)
+        (dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix*
+                             resolved-uri))))
+
+(defun assert-not-journaling-workspace-journal
+    (&key subject-key subject-uri subject-kind subject previous-state
+       after-state)
+  (when (workspace-journal-subject-p
+         :subject-key subject-key
+         :subject-uri subject-uri
+         :subject-kind subject-kind
+         :subject subject
+         :previous-state previous-state
+         :after-state after-state)
+    (error 'fedwiki-dmx-import-error
+           :message
+           "Workspace-journal subjects must not generate workspace-journal events")))
 
 (defun dmx-workspace-journal-replacement-note-uri (subject-key stale-topic-id)
   (format nil "~A~A/replacement-~D-~D"
@@ -1689,7 +1741,9 @@
     (client subject-key lookup-kind lookup-value workspace-topicmap-id
      &key subject-uri subject-kind ownership-class note-key note-kind
        workspace-id)
-  (if *dmx-workspace-journal-suppressed-p*
+  (if (or *dmx-workspace-journal-suppressed-p*
+          (not (and (eq *workspace-journal-sink* :dmx)
+                    *allow-dmx-workspace-journal-writes*)))
       (dmx-workspace-journal-absent-snapshot
        subject-key
        lookup-kind
@@ -1825,6 +1879,184 @@
                                                workspace-topicmap-id
                                                events))
         events))))
+
+(defun hyperdoc-local-workspace-journal-pathname (subject-key)
+  (merge-pathnames
+   (format nil "~A.json"
+           (dmx-workspace-journal-subject-key->note-key subject-key))
+   *hyperdoc-local-workspace-journal-directory*))
+
+(defun write-hyperdoc-local-workspace-journal-stream (subject-key stream)
+  (when *hyperdoc-local-workspace-journal-write-files-p*
+    (let ((pathname (hyperdoc-local-workspace-journal-pathname subject-key)))
+      (ensure-directories-exist pathname)
+      (with-open-file (file-stream pathname
+                                   :direction :output
+                                   :if-exists :supersede
+                                   :if-does-not-exist :create
+                                   :external-format :utf-8)
+        (write-string (encode-json-string stream) file-stream))
+      pathname)))
+
+(defun hyperdoc-local-workspace-journal-record-transition
+    (previous-state next-state workspace-topicmap-id)
+  (let* ((subject-key
+           (or (dmx-workspace-journal-snapshot-field next-state "subjectKey")
+               (dmx-workspace-journal-snapshot-field previous-state
+                                                     "subjectKey")
+               (error 'fedwiki-dmx-import-error
+                      :message
+                      "HyperDoc-local workspace journal transition requires a subject key")))
+         (lookup (or (dmx-workspace-journal-snapshot-field next-state
+                                                           "subjectLookup")
+                     (dmx-workspace-journal-snapshot-field previous-state
+                                                           "subjectLookup")))
+         (stream
+           (or (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+               (setf (gethash subject-key
+                              *hyperdoc-local-workspace-journal-streams*)
+                     (dmx-workspace-journal-make-base-stream
+                      subject-key
+                      (or (and (hash-table-p lookup)
+                               (gethash "kind" lookup))
+                          "uri")
+                      (or (and (hash-table-p lookup)
+                               (gethash "value" lookup))
+                          subject-key)
+                      workspace-topicmap-id
+                      :subject-uri
+                      (or (dmx-workspace-journal-snapshot-field
+                           next-state
+                           "subjectUri")
+                          (dmx-workspace-journal-snapshot-field
+                           previous-state
+                           "subjectUri"))
+                      :subject-kind
+                      (or (dmx-workspace-journal-snapshot-field
+                           next-state
+                           "subjectKind")
+                          (dmx-workspace-journal-snapshot-field
+                           previous-state
+                           "subjectKind"))
+                      :ownership-class
+                      (or (dmx-workspace-journal-snapshot-field
+                           next-state
+                           "ownershipClass")
+                          (dmx-workspace-journal-snapshot-field
+                           previous-state
+                           "ownershipClass"))
+                      :note-key
+                      (or (dmx-workspace-journal-snapshot-field
+                           next-state
+                           "noteKey")
+                          (dmx-workspace-journal-snapshot-field
+                           previous-state
+                           "noteKey"))
+                      :note-kind
+                      (or (dmx-workspace-journal-snapshot-field
+                           next-state
+                           "noteKind")
+                          (dmx-workspace-journal-snapshot-field
+                           previous-state
+                           "noteKind"))))))
+         (effective-previous-state
+           (or (dmx-workspace-journal-current-snapshot stream)
+               previous-state))
+         (events
+           (dmx-workspace-journal-transition-events
+            effective-previous-state
+            next-state
+            *dmx-workspace-journal-in-band-observation-kind*
+            "hyperdoc-local-workspace-journal-sink"))
+         (pathname nil))
+    (when events
+      (dmx-workspace-journal-apply-events-to-stream stream events))
+    (setf (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+          stream
+          pathname
+          (write-hyperdoc-local-workspace-journal-stream subject-key stream))
+    (values events stream pathname)))
+
+(defun workspace-transition-diagnostic
+    (&key sink status reason subject-key event-count local-path message)
+  (remove nil
+          (list :journal-sink sink
+                :journal-status status
+                :reason reason
+                :journal-subject-key subject-key
+                :journal-event-count (or event-count 0)
+                :local-path (and local-path (namestring local-path))
+                :message message)))
+
+(defun record-workspace-transition
+    (sink previous-state after-state workspace-topicmap-id
+     &key client subject-key subject-kind subject-uri)
+  (let ((resolved-sink (or sink *workspace-journal-sink*))
+        (resolved-subject-key
+          (or subject-key
+              (dmx-workspace-journal-snapshot-field after-state "subjectKey")
+              (dmx-workspace-journal-snapshot-field previous-state
+                                                    "subjectKey"))))
+    (handler-case
+        (progn
+          (assert-not-journaling-workspace-journal
+           :subject-key resolved-subject-key
+           :subject-kind subject-kind
+           :subject-uri subject-uri
+           :previous-state previous-state
+           :after-state after-state)
+          (ecase resolved-sink
+            (:hyperdoc-local
+             (multiple-value-bind (events _stream pathname)
+                 (hyperdoc-local-workspace-journal-record-transition
+                  previous-state
+                  after-state
+                  workspace-topicmap-id)
+               (declare (ignore _stream))
+               (values events
+                       (workspace-transition-diagnostic
+                        :sink :hyperdoc-local
+                        :status :recorded
+                        :subject-key resolved-subject-key
+                        :event-count (length events)
+                        :local-path pathname))))
+            (:dmx
+             (if *allow-dmx-workspace-journal-writes*
+                 (let ((events
+                         (dmx-workspace-journal-record-transition
+                          client
+                          previous-state
+                          after-state
+                          workspace-topicmap-id)))
+                   (values events
+                           (workspace-transition-diagnostic
+                            :sink :dmx
+                            :status :recorded
+                            :subject-key resolved-subject-key
+                            :event-count (length events))))
+                 (values nil
+                         (workspace-transition-diagnostic
+                          :sink :dmx
+                          :status :blocked
+                          :reason :dmx-journal-write-disabled
+                          :subject-key resolved-subject-key
+                          :message
+                          "DMX workspace-journal writes require explicit opt-in"))))
+            (:none
+             (values nil
+                     (workspace-transition-diagnostic
+                      :sink :none
+                      :status :skipped
+                      :reason :journal-sink-none
+                      :subject-key resolved-subject-key)))))
+      (fedwiki-dmx-import-error (condition)
+        (values nil
+                (workspace-transition-diagnostic
+                 :sink resolved-sink
+                 :status :blocked
+                 :reason :workspace-journal-recursion
+                 :subject-key resolved-subject-key
+                 :message (fedwiki-dmx-import-message-of condition)))))))
 
 (defun dmx-workspace-journal-locate-live-subject
     (client topic-id workspace-topicmap-id)

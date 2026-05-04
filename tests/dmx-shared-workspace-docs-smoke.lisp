@@ -415,7 +415,7 @@
    '("POST /access-control/login"
      "dmx-auth-path-example"
      "JSESSIONID"
-     "Cookie: JSESSIONID=&lt;session-id&gt;; dmx_workspace_id=919815"
+     "Cookie: &lt;session cookie redacted&gt;; dmx_workspace_id=919815"
      "not a fourth input mode"
      "HyperDoc three-mode DMX auth crosswalk"))
   (assert-shared-workspace-page-contains-all

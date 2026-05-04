@@ -25,6 +25,7 @@
 node_modules/
 test-results/
 repomix-output-hyperdoc.md
+var/hyperdoc-local-journal/*.json
 
 # ---> Local release/deploy artifacts
 .release-verifications/

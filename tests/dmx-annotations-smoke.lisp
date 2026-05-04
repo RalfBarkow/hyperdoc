@@ -1634,10 +1634,10 @@
                            (getf probe-evidence :response-reason-phrase)
                            "Create-topic probe evidence must preserve the reason phrase")
              (assert-true
-              (search "\"validation failed\""
-                      (or (getf probe-evidence :response-body) "")
-                      :test #'char-equal)
-              "Create-topic probe evidence must preserve the response body")
+             (search "\"validation failed\""
+                     (or (getf probe-evidence :response-body-prefix) "")
+                     :test #'char-equal)
+              "Create-topic probe evidence must preserve a bounded response body prefix")
              (assert-true
               (search "\"hyperdoc.annotation.text\""
                       (or (hyperdoc::workspace-annotation-create-topic-probe-payload-json-of
@@ -1669,10 +1669,10 @@
                            (getf report-evidence :response-status-code)
                            "Persistence report must preserve the failing create-topic status")
              (assert-true
-              (search "\"field\":\"children\""
-                      (or (getf report-evidence :response-body) "")
-                      :test #'char-equal)
-              "Persistence report must preserve the backend response body for topic-upsert failures")))
+             (search "\"field\":\"children\""
+                     (or (getf report-evidence :response-body-prefix) "")
+                     :test #'char-equal)
+              "Persistence report must preserve a bounded backend response body prefix for topic-upsert failures")))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-dmx-workspace-annotation-create-topic-probe-render-smoke-test ()
@@ -1737,9 +1737,9 @@
              (assert-true
               (search "/core/topic" html :test #'char-equal)
               "Rendered create-topic probe Overview must preserve the endpoint path")
-             (assert-true
+            (assert-true
               (search "validation failed" html :test #'char-equal)
-              "Rendered create-topic probe Overview must preserve the response body")))
+              "Rendered create-topic probe Overview must render the bounded response body prefix")))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-dmx-workspace-annotation-default-live-client-resolution-smoke-test ()
@@ -5985,12 +5985,14 @@
   (run-dmx-workspace-annotation-simple-success-readback-example-smoke-test)
   (run-dmx-workspace-annotation-auth-blocked-saved-topic-resolution-smoke-test)
   (run-dmx-workspace-annotation-preserved-topic-936040-continuation-smoke-test)
-  (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
-  (run-dmx-workspace-annotation-journal-preflight-unassigned-companion-smoke-test)
-  (run-dmx-workspace-annotation-journal-preflight-repair-failure-smoke-test)
-  (run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test)
-  (run-dmx-workspace-annotation-journal-preflight-explicit-auth-bootstrap-failure-smoke-test)
-  (run-dmx-workspace-annotation-journal-preflight-explicit-auth-failure-evidence-smoke-test)
+  (let ((hyperdoc::*workspace-journal-sink* :dmx)
+        (hyperdoc::*allow-dmx-workspace-journal-writes* t))
+    (run-dmx-workspace-annotation-journal-preflight-failure-smoke-test)
+    (run-dmx-workspace-annotation-journal-preflight-unassigned-companion-smoke-test)
+    (run-dmx-workspace-annotation-journal-preflight-repair-failure-smoke-test)
+    (run-dmx-workspace-annotation-journal-preflight-explicit-auth-continuation-smoke-test)
+    (run-dmx-workspace-annotation-journal-preflight-explicit-auth-bootstrap-failure-smoke-test)
+    (run-dmx-workspace-annotation-journal-preflight-explicit-auth-failure-evidence-smoke-test))
   (run-dmx-workspace-annotation-explicit-auth-continuation-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-via-compatibility-carrier-smoke-test)
   (run-dmx-workspace-annotation-preflighted-persist-blocked-smoke-test)

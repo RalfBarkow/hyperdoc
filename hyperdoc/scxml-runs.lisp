@@ -1983,18 +1983,25 @@
     ((and (eq mode :username-password)
           (eq bootstrap-status :failed))
      :auth-failed)
+    ((and (eq mode :username-password)
+          (eq bootstrap-status :put-401))
+     :auth-blocked)
     (t :none)))
 
 (defun dmx-action-auth-session-continuation-readiness (mode bootstrap-status)
-  (if (or (member mode '(:authorization-header :bearer-token) :test #'eq)
-          (and (eq mode :username-password)
-               (eq bootstrap-status :succeeded)))
-      :continuation-ready
-      :blocked))
+  (cond
+    ((and (eq mode :username-password)
+          (eq bootstrap-status :put-401))
+     :auth-blocked)
+    ((or (member mode '(:authorization-header :bearer-token) :test #'eq)
+         (and (eq mode :username-password)
+              (eq bootstrap-status :succeeded)))
+     :continuation-ready)
+    (t :blocked)))
 
 (defun dmx-action-auth-session-session-cookie-present-p (mode bootstrap-status)
   (and (eq mode :username-password)
-       (eq bootstrap-status :succeeded)))
+       (member bootstrap-status '(:succeeded :put-401) :test #'eq)))
 
 (defun dmx-action-auth-session-session-cookie-shape (session-cookie-present-p)
   (if session-cookie-present-p
@@ -2032,16 +2039,20 @@
      (:username-password
       (if (eq bootstrap-status :failed)
           '("AUTH.MODE.USERPASS"
-            "AUTH.BOOTSTRAP_ATTEMPTED"
+            "AUTH.BOOTSTRAP_PREPARED"
             "AUTH.BOOTSTRAP.FAILED"
             "AUTH.FAILED")
-          '("AUTH.MODE.USERPASS"
-            "AUTH.BOOTSTRAP_ATTEMPTED"
-            "AUTH.BOOTSTRAP.SUCCEEDED"
-            "AUTH.REQUEST_SHAPED"
-            "AUTH.REQUEST.GUARDED_SHAPED"
-            "AUTH.CONTINUATION_READY"
-            "AUTH.DONE")))
+          (append
+           '("AUTH.MODE.USERPASS"
+             "AUTH.BOOTSTRAP_PREPARED"
+             "AUTH.BOOTSTRAP.SUCCEEDED"
+             "AUTH.SESSION_MATERIAL_EXTRACTED")
+           (if (eq bootstrap-status :put-401)
+               '("AUTH.GUARDED_PUT_401"
+                 "AUTH.BLOCKED"
+                 "AUTH.DONE")
+               '("AUTH.CONTINUATION_READY"
+                 "AUTH.DONE")))))
      (otherwise
       (error "Unsupported DMX action auth/session mode for events: ~S" mode)))))
 
@@ -2221,38 +2232,36 @@
             (write-line line stream))))))
 
 (defun dmx-annotation-acceptance-live-command ()
-  (list "env"
-        "HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS=1"
-        "nix"
-        "develop"
-        "-c"
-        "sbcl"
-        "--no-userinit"
-        "--non-interactive"
-        "--eval"
-        "(require :asdf)"
-        "--eval"
-        "(asdf:load-system :hyperdoc/tests)"
-        "--eval"
-        "(uiop:symbol-call :hyperdoc/tests :run-dmx-annotations-smoke-tests)"
-        "--eval"
-        "(uiop:quit 0)"))
+  (list "echo"
+        "No default live command is defined for annotation 936040. The only later live action is the explicitly gated single workspace assignment PUT."))
 
 (defun dmx-annotation-acceptance-runbook-events (live-run-enabled-p)
   (append
-   '("PRECHECK.CLEAN_TREE"
-     "COMMITS.ACCEPTED"
-     "LOCAL_FIRST_SAVE.WITHOUT_CREDENTIALS"
-     "DMX.MATERIALIZATION.ONE_CARRIER_LANE"
-     "CREATE_TOPIC_FAILURE_EVIDENCE.SKIP_RECORDED"
-     "CONTINUATION.GUARDED_PATH"
-     "WORKSPACE_ASSIGNMENT.READBACK_919815"
-     "TOPICMAP.READBACK_INCLUDES_919822"
-     "REOPEN.WORKSPACE_DOCK_ANNOTATION"
-     "SECRET_LEAKAGE_AUDIT.PASSED")
+   '("REPO.LOADED"
+     "PATCH.BRANCH"
+     "JOURNAL.LOCAL_FIRST"
+     "JOURNAL.RECURSION_GUARDED"
+     "AUTH.BOUNDARY_INSPECTABLE"
+     "EVIDENCE.SAFE"
+     "IMAGE.FRESH"
+     "DMX_IMPORT.LOADED"
+     "AUTH.CLIENT_READY_SHAPE"
+     "PREWRITE.READBACK_CONFIRMED"
+     "IMAGE.PATCHED_READY"
+     "DEV_SHELL.ENTERED"
+     "SBCL.STARTED"
+     "ASDF.READY"
+     "TESTS.LOADED"
+     "SMOKES.FOCUSED"
+     "SUITE.REQUESTED_CLUSTER"
+     "PATCH.VERIFIABLE"
+     "LIVE_ASSIGNMENT.READY")
    (list (if live-run-enabled-p
-             "LIVE_SMOKE.EXIT_0_EXPECTED_PASSES"
-             "LIVE_SMOKE.SKIPPED_PRECONDITION"))))
+             "LIVE_ASSIGNMENT.AUTH_BLOCKED_401"
+             "LIVE_ASSIGNMENT.SKIPPED_LOCAL_REPLAY"))
+   (list (if live-run-enabled-p
+             "AUTH_BLOCKED.CLASSIFIED"
+             "LOCAL_TARGET.VERIFIED"))))
 
 (defun dmx-annotation-acceptance-runbook-semantic-facts
     (&key live-run-enabled-p live-exit-code live-pass-lines-observed-p)
@@ -2264,13 +2273,45 @@
         :workspace-id 919815
         :workspace-topicmap-id 919822
         :preserved-topic-id 936040
+        :state :patched-and-inspectable
+        :repo
+        (list :journal-sink-default :hyperdoc-local
+              :dmx-journal-write-default-p nil
+              :workspace-journal-recursion-guard-p t
+              :auth-session-boundary-explicit-p t
+              :evidence-bounded-p t)
+        :dmx-936040
+        (list :topic-id 936040
+              :topic-action :update
+              :topicmap-id 919822
+              :topicmap-present-p t
+              :workspace-id nil
+              :remaining-action :assign-workspace)
+        :next-live-action
+        (list :only "PUT /workspaces/919815/object/936040"
+              :forbidden
+              '("topic upsert"
+                "topicmap placement"
+                "dmx-workspace-journal-record-transition"
+                "full annotation continuation"))
+        :later-single-live-assignment-target
+        (list :state :workspace-annotation-936040/fully-repaired
+              :topic-id 936040
+              :uri-same-p t
+              :duplicate-topic-created-p nil
+              :topic-action :update
+              :workspace-id 919815
+              :workspace-ok-p t
+              :topicmap-id 919822
+              :topicmap-present-p t
+              :dmx-journal-write-p nil
+              :journal-sink :hyperdoc-local
+              :raw-dmx-body-crossed-sly-p nil)
         :local-first-save-no-credentials-p t
         :local-journal-reconstructable-p t
-        :optional-materialization-one-carrier-lane-p t
         :continuation-guarded-no-raw-topic-upsert-p t
-        :workspace-assignment-readback-id 919815
+        :workspace-assignment-readback-id nil
         :topicmap-readback-includes-919822-p t
-        :reopen-reconstructs-workspace-dock-annotation-p t
         :reopen-preserves-topic-id-p t
         :secret-leakage-audit-passed-p t
         :create-topic-failure-evidence-smoke-status :skipped-pre-topic-upsert
@@ -2288,13 +2329,18 @@
                "create-topic failure evidence smoke"
                :status :skipped
                :reason
-               "Skipped at pre-topic-upsert preconditions by design."))
+               "Skipped at pre-topic-upsert preconditions by design.")
+         (list :check
+               "full annotation continuation"
+               :status :skipped
+               :reason
+               "Forbidden for annotation 936040 until the single workspace assignment boundary is explicitly armed."))
    (unless live-run-enabled-p
      (list (list :check
-                 "live smoke replay"
+                 "single live workspace assignment"
                  :status :skipped
                  :reason
-                 "Set HYPERDOC_RUN_LIVE_DMX_ANNOTATION_TESTS=1 and call with :live? T.")))))
+                 "Local replay does not perform PUT /workspaces/919815/object/936040.")))))
 
 (defun dmx-annotation-acceptance-trace-contains-state-p (trace state-id)
   (find-if (lambda (line)
@@ -2395,17 +2441,27 @@
                          "accepted"
                          final-state)))
                  (critical-state-ids
-                   '("preflightCleanTree"
-                     "recordAcceptedCommits"
-                     "localFirstSaveWithoutCredentials"
-                     "optionalDmxMaterialization"
-                     "createTopicFailureEvidenceSmokeSkippedPreTopicUpsert"
-                     "guardedContinuationForExistingTopic936040"
-                     "workspaceAssignmentReadback919815"
-                     "topicmapReadbackIncludes919822"
-                     "reopenReconstructsWorkspaceDockAnnotation"
-                     "secretLeakageAudit"
-                     "liveSmokeReplay"
+                   '("repo-loaded"
+                     "patch-branch"
+                     "journal-local-first"
+                     "journal-recursion-guarded"
+                     "auth-boundary-inspectable"
+                     "safe-evidence"
+                     "fresh-image"
+                     "dmx-import-loaded"
+                     "authenticated-client-ready"
+                     "prewrite-readback-confirmed"
+                     "patched-image-ready"
+                     "enter-dev-shell"
+                     "sbcl-started"
+                     "asdf-ready"
+                     "tests-loaded"
+                     "focused-smokes"
+                     "full-suite"
+                     "patch-verifiable"
+                     "patch-ready-for-single-live-assignment"
+                     "single-live-assignment-armed"
+                     "verified"
                      "accepted"))
                  (critical-trace-present-p
                    (every (lambda (state-id)
