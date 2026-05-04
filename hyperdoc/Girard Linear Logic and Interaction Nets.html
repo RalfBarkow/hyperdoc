@@ -1,0 +1,93 @@
+<h1>Girard Linear Logic and Interaction Nets</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page assimilates Jean-Yves Girard's 1987 paper <i>Linear Logic</i> as a
+  source station for the Interaction nets neighborhood. The paper should not be
+  flattened into an Interaction nets page: its direct objects are linear logic,
+  phase semantics, coherent spaces, proof-nets, trips, cut elimination, and the
+  logical treatment of parallel communication. Interaction nets belong downstream
+  in the same neighborhood through proof-net normalization and local interaction.
+</p>
+
+<h2>Bibliographic source</h2>
+
+<p>
+  GIRARD, Jean-Yves, 1987. <i>Linear logic</i>. Theoretical Computer Science.
+  1 January 1987. Vol. 50, no. 1, p. 1-101. DOI 10.1016/0304-3975(87)90045-4.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Girard 1987 Linear Logic source"><tt>Girard 1987 Linear Logic source</tt></a></li>
+  <li><a hyperbook="topics" page="Linear logic"><tt>Linear logic</tt></a></li>
+  <li><a hyperbook="topics" page="Linear negation"><tt>Linear negation</tt></a></li>
+  <li><a hyperbook="topics" page="Exponential modality"><tt>Exponential modality</tt></a></li>
+  <li><a hyperbook="topics" page="Multiplicative connectives"><tt>Multiplicative connectives</tt></a></li>
+  <li><a hyperbook="topics" page="Additive connectives"><tt>Additive connectives</tt></a></li>
+  <li><a hyperbook="topics" page="Phase semantics"><tt>Phase semantics</tt></a></li>
+  <li><a hyperbook="topics" page="Coherent spaces"><tt>Coherent spaces</tt></a></li>
+  <li><a hyperbook="topics" page="Proof-net"><tt>Proof-net</tt></a></li>
+  <li><a hyperbook="topics" page="Trip in a proof-net"><tt>Trip in a proof-net</tt></a></li>
+  <li><a hyperbook="topics" page="Cut elimination as execution"><tt>Cut elimination as execution</tt></a></li>
+  <li><a hyperbook="topics" page="Resource-sensitive proof"><tt>Resource-sensitive proof</tt></a></li>
+  <li><a hyperbook="topics" page="Parallelism at the logical level"><tt>Parallelism at the logical level</tt></a></li>
+  <li><a hyperbook="topics" page="Proof-box synchronization boundary"><tt>Proof-box synchronization boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Functional type decomposition"><tt>Functional type decomposition</tt></a></li>
+  <li><a hyperbook="topics" page="Interaction-net precursor"><tt>Interaction-net precursor</tt></a></li>
+</ul>
+
+<h2>Assimilation verdict</h2>
+
+<p>
+  Treat Girard 1987 as the root source for the linear-logic layer of the
+  Interaction nets neighborhood. The durable title for this page is deliberately
+  relational: it keeps the interaction-net use case visible while preserving the
+  narrower source truth that the paper itself introduces linear logic and proof-nets.
+</p>
+
+<h2>Topic neighborhood</h2>
+
+<ul>
+  <li><b>Linear logic</b> is the umbrella concept.</li>
+  <li><b>Linear negation</b> and <b>exponential modality</b> split ordinary negation/reuse into inspectable operations.</li>
+  <li><b>Multiplicative connectives</b> carry the communication/parallelism interpretation.</li>
+  <li><b>Additive connectives</b> and <b>proof-box synchronization boundary</b> mark where synchronization enters.</li>
+  <li><b>Phase semantics</b> and <b>coherent spaces</b> are two semantic stations.</li>
+  <li><b>Proof-net</b>, <b>trip in a proof-net</b>, and <b>cut elimination as execution</b> form the operational bridge toward interaction-net-style computation.</li>
+</ul>
+
+<h2>Operations and review seams</h2>
+
+<ol>
+  <li>Import the bibliographic source as a Zotero-backed or local bibliography entry.</li>
+  <li>Append the reviewed topic factories to <tt>hyperdoc/topics.lisp</tt> only after exact-title collision checks.</li>
+  <li>Create this page as <tt>hyperdoc/Girard Linear Logic and Interaction Nets.html</tt>.</li>
+  <li>Create or update a separate <tt>Interaction nets</tt> page so that it links back through <tt>Interaction-net precursor</tt>, not directly through a false equivalence.</li>
+  <li>Add a future operation for proof-net/proof-structure visualization: input a small proof-net, inspect switches/trips, then inspect cut-elimination steps as execution evidence objects.</li>
+</ol>
+
+<h2>HyperDoc crosswalk</h2>
+
+<p>
+  Girard's resource sensitivity belongs near HyperDoc's chunk/coherence work:
+  no implicit weakening or contraction maps well to making dependencies,
+  duplication, and disposal visible. Proof-net normalization belongs near
+  HyperDoc's evaluation/inspection model: the operation is not just a theorem but
+  a candidate inspectable run trace. The parallelism claim belongs near the
+  synchronization and state-machine pages because it distinguishes local
+  communication from proof-box synchronization.
+</p>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="Literate Tracing">Literate Tracing</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="Synchronization as a Visualization Problem">Synchronization as a Visualization Problem</a></li>
+  <li><a page="Boundary">Boundary</a></li>
+  <li><a page="Bibliography subcollections in HyperDoc">Bibliography subcollections in HyperDoc</a></li>
+</ul>
