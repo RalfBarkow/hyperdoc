@@ -330,6 +330,7 @@
                              (:file "dmx-annotation-936040-regression-smoke")
                              (:file "sly-evidence-bounds-smoke")
                              (:file "dmx-workspace-assignment-auth-diagnosis-smoke")
+                             (:file "dmx-platform-workspace-assignment-semantics-smoke")
                              (:file "zotero-optional-smoke")
                              (:file "article-allegation-slice-smoke")
                              (:file "fedwiki-materialization-smoke")

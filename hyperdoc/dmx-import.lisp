@@ -2434,6 +2434,69 @@
           :safe-invariants
           (dmx-workspace-assignment-auth-safe-invariants))))
 
+(defun dmx-platform-workspace-assignment-semantics
+    (&key
+       (topic-id *dmx-workspace-assignment-936040-topic-id*)
+       (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+       (topicmap-id *dmx-workspace-assignment-936040-topicmap-id*))
+  (declare (ignore topicmap-id))
+  (list
+   :state :dmx-platform-workspace-assignment-semantics
+   :public-route
+   (list :method :put
+         :path-template "/workspaces/{workspaceId}/object/{objectId}"
+         :blocked-endpoint
+         (dmx-workspace-assign-object-path workspace-id topic-id)
+         :entrypoint "WorkspacesPlugin.assignToWorkspace"
+         :source
+         "../dmx-platform/modules/dmx-workspaces/src/main/java/systems/dmx/workspaces/WorkspacesPlugin.java:177-190")
+   :public-route-checks
+   (list :target-workspace-write-required-p t
+         :object-write-required-p t
+         :rest-route-skips-object-check-p nil
+         :source
+         "../dmx-platform/modules/dmx-workspaces/src/main/java/systems/dmx/workspaces/WorkspacesPlugin.java:534-540")
+   :initial-assignment-helper
+   (list :exists-p t
+         :skips-object-write-check-p t
+         :public-rest-route-p nil
+         :entrypoint "WorkspacesPlugin._assignToWorkspace"
+         :rationale "initial assignment creates permission context"
+         :source
+         "../dmx-platform/modules/dmx-workspaces/src/main/java/systems/dmx/workspaces/WorkspacesPlugin.java:486-495")
+   :unassigned-object-policy
+   (list :read-permitted-p t
+         :write-refused-p t
+         :source
+         "../dmx-platform/modules/dmx-core/src/main/java/systems/dmx/core/impl/PrivilegedAccessImpl.java:587-596")
+   :permission-model
+   (list :workspace-owner "WRITE is allowed for the workspace owner."
+         :workspace-member "WRITE is allowed for collaborative/public workspace members, but not for private/confidential workspaces unless owner."
+         :common-workspace "WRITE is allowed by sharing mode."
+         :principal-requirement
+         "The authenticated principal must have WRITE permission for workspace 919815 and must pass object WRITE access for topic 936040 on the public REST route.")
+   :http-mapping
+   (list :access-control-failure-status 401
+         :source
+         "../dmx-platform/modules/dmx-core/src/main/java/systems/dmx/core/util/UniversalExceptionMapper.java:80-86,105-111")
+   :implication-for-936040
+   (list :topic-id topic-id
+         :expected-workspace-id workspace-id
+         :request-shape-matches-py4dmx t
+         :failure-class :dmx-permission-semantics
+         :recommendation :keep-topic-936040
+         :delete-and-recreate-default-p nil
+         :next-operation-outside-hyperdoc-write-loop :permission-repair)
+   :unsafe-for-hyperdoc
+   '(:delete-or-recreate-topic-936040
+     :topic-upsert
+     :topicmap-placement
+     :full-annotation-continuation
+     :dmx-workspace-journal-write
+     :permission-bypass-from-hyperdoc-write-loop
+     :raw-sql-or-db-mutation)
+   :bounded-evidence-p t))
+
 (defun dmx-workspace-assignment-live-gate-enabled-p ()
   (dmx-import-env-true-p *dmx-workspace-assignment-936040-live-gate*))
 

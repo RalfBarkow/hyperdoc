@@ -1,0 +1,63 @@
+<h1>DMX workspace assignment permission repair runbook</h1>
+
+<p>
+  This is an operator/admin runbook.  It is not a HyperDoc write-loop runbook and
+  it does not perform the repair.  Its purpose is to define the safe permission
+  repair outside the HyperDoc write loop for topic <tt>936040</tt>.
+</p>
+
+<h2>Preconditions</h2>
+
+<ul>
+  <li>keep topic 936040</li>
+  <li>topicmap <tt>919822</tt> contains topic <tt>936040</tt></li>
+  <li>workspace assignment is missing</li>
+  <li>request shape matches py4dmx</li>
+  <li>DMX journal writes are disabled</li>
+  <li>bounded evidence is preserved</li>
+</ul>
+
+<h2>Possible fixes</h2>
+
+<ul>
+  <li>grant <tt>mcp</tt> the needed workspace/object write permission if that is the intended operating principal</li>
+  <li>use an existing principal that already has the required permission</li>
+  <li>use DMX admin/operator tooling to assign topic <tt>936040</tt> to workspace <tt>919815</tt></li>
+  <li>consider a DMX-side admin repair endpoint only if dmx-platform supports it safely and explicitly</li>
+</ul>
+
+<h2>Forbidden</h2>
+
+<ul>
+  <li>delete or recreate topic <tt>936040</tt></li>
+  <li>topic upsert</li>
+  <li>topicmap placement</li>
+  <li>full annotation continuation</li>
+  <li>DMX journal writes</li>
+  <li>raw SQL or database mutation unless explicitly treated as emergency admin maintenance outside HyperDoc</li>
+</ul>
+
+<h2>Post-repair verification</h2>
+
+<ul>
+  <li><tt>GET /workspaces/object/936040</tt> returns workspace <tt>919815</tt></li>
+  <li><tt>GET /topicmaps/object/936040</tt> still confirms topicmap <tt>919822</tt></li>
+  <li>the deterministic URI still resolves topic <tt>936040</tt></li>
+  <li>no duplicate topic exists</li>
+  <li>no DMX journal write occurred</li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  The next operational action is permission repair outside the HyperDoc write
+  loop.  HyperDoc may document, inspect, and verify the boundary with bounded
+  evidence.  HyperDoc must not bypass dmx-platform permission semantics.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="DMX platform workspace assignment semantics">DMX platform workspace assignment semantics</a></li>
+  <li><a hyperbook="hyperdoc" page="DMX workspace assignment 401 diagnosis">DMX workspace assignment 401 diagnosis</a></li>
+</ul>

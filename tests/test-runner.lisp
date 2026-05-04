@@ -21,6 +21,7 @@
   (run-dmx-annotation-936040-regression-smoke-tests)
   (run-sly-evidence-bounds-smoke-tests)
   (run-dmx-workspace-assignment-auth-diagnosis-smoke-tests)
+  (run-dmx-platform-workspace-assignment-semantics-smoke-tests)
   (run-zotero-optional-smoke-tests)
   (run-article-allegation-slice-smoke-tests)
   (run-fedwiki-materialization-smoke-tests)

@@ -1,0 +1,161 @@
+<h1>DMX platform workspace assignment semantics</h1>
+
+<p>
+  This page documents the dmx-platform permission semantics behind the current
+  workspace-assignment failure for topic <tt>936040</tt>.  It is a semantics
+  reference, not a repair execution page.  It does not report a completed workspace
+  assignment.
+</p>
+
+<h2>Current diagnosed state</h2>
+
+<pre><code class="language-lisp">(:STATE :WORKSPACE-ASSIGNMENT-401-DIAGNOSED
+ :TOPIC-ID 936040
+ :WORKSPACE-ID NIL
+ :EXPECTED-WORKSPACE-ID 919815
+ :TOPICMAP-ID 919822
+ :TOPICMAP-PRESENT-P T
+ :REQUEST-SHAPE :MATCHES-PY4DMX
+ :CLASSIFICATION :REQUEST-SHAPE-MATCHES-PY4DMX-BUT-PERMISSION-DENIED
+ :REMAINING-ACTION :ASSIGN-WORKSPACE
+ :BLOCKED-ENDPOINT "/workspaces/919815/object/936040"
+ :HTTP-STATUS 401)</code></pre>
+
+<h2>Public REST route</h2>
+
+<p>
+  The public REST route is <tt>PUT /workspaces/{workspaceId}/object/{objectId}</tt>.
+  In dmx-platform it enters <tt>WorkspacesPlugin.assignToWorkspace</tt>.  The
+  route loads the target object, checks assignment arguments, and then writes the
+  workspace facet and workspace-id property.
+</p>
+
+<p>
+  The route is the correct endpoint for normal workspace assignment on this DMX
+  version.  The current failure is not an endpoint mismatch and not a py4dmx
+  request-shape mismatch.
+</p>
+
+<h2>Permission checks</h2>
+
+<p>
+  The public REST route performs two checks before assignment:
+</p>
+
+<ul>
+  <li>target workspace WRITE required</li>
+  <li>object write access required</li>
+</ul>
+
+<p>
+  The important point is that object write access is checked by the public REST
+  route even for an initial assignment.  That is why this route can fail before
+  it creates the very workspace context that would later grant write access.
+</p>
+
+<h2>Unassigned object policy</h2>
+
+<p>
+  dmx-platform has an explicit unassigned object policy.  For an unassigned
+  object, READ is permitted and WRITE is refused.  Topic <tt>936040</tt>
+  currently has no workspace assignment, so it has no object write context for
+  the public route to use.
+</p>
+
+<p>
+  For topic <tt>936040</tt>, the request reaches the public route with a request
+  shape that matches py4dmx's authenticated non-GET pattern.  The route then
+  checks object write access, the unassigned object write check is refused, a
+  nested access-control exception is produced, and the exception mapper returns
+  HTTP 401.
+</p>
+
+<h2>Initial assignment helper</h2>
+
+<p>
+  dmx-platform also has a private initial assignment helper path.  The helper is
+  used from internal creation/listener paths when initial assignment must create
+  the permission context.  It deliberately skips the object write check but still
+  checks the target workspace.  This helper is different from the public REST
+  route and must not be treated as if HyperDoc can call it directly.
+</p>
+
+<p>
+  The helper exists because initial assignment is the operation that makes object
+  permission meaningful.  Requiring object write access before initial assignment
+  can be a circular requirement for objects that were created without a
+  workspace.
+</p>
+
+<h2>Ownership, membership, and write permission</h2>
+
+<p>
+  dmx-platform derives write permission from workspace sharing semantics,
+  ownership, and membership.  Private and confidential workspaces are owner-write
+  in the relevant code path.  Collaborative and public workspaces allow write for
+  owner or member.  Common workspaces allow write by sharing mode.  The exact
+  principal used for topic <tt>936040</tt> must therefore be able to write the
+  target workspace <tt>919815</tt>, and it must pass the public route's object
+  write check for topic <tt>936040</tt>.
+</p>
+
+<h2>Implication for topic 936040</h2>
+
+<p>
+  The current classification is <tt>:REQUEST-SHAPE-MATCHES-PY4DMX-BUT-PERMISSION-DENIED</tt>.
+  In platform terms, the failure class is <tt>:DMX-PERMISSION-SEMANTICS</tt>.
+  The repair is permission repair outside the HyperDoc write loop, not a HyperDoc
+  reconstruction fix.
+</p>
+
+<p>
+  The operational choices are administrative: grant the intended principal the
+  needed permission, use an existing principal that already has permission, use
+  DMX admin/operator tooling to assign topic <tt>936040</tt> to workspace
+  <tt>919815</tt>, or add a DMX-side admin repair route only if the platform
+  supports that safely.
+</p>
+
+<h2>Why keep topic 936040</h2>
+
+<p>
+  The correct recommendation is to keep topic 936040.  The deterministic URI
+  already resolves to it, the write plan is <tt>:UPDATE</tt>, topicmap
+  <tt>919822</tt> already contains it, and deleting it would turn a single
+  permission problem into a destructive migration with association/reference
+  risks.  Recreating the topic would still require workspace assignment.
+</p>
+
+<h2>Unsafe for HyperDoc</h2>
+
+<ul>
+  <li>delete or recreate topic <tt>936040</tt></li>
+  <li>topic upsert</li>
+  <li>topicmap placement</li>
+  <li>full annotation continuation</li>
+  <li>DMX workspace-journal writes</li>
+  <li>bypassing DMX permissions from the HyperDoc write loop</li>
+  <li>raw SQL or database mutation from HyperDoc</li>
+</ul>
+
+<h2>Unknowns</h2>
+
+<p>
+  The remaining unknown is operational, not reconstructive: which existing or
+  operator-provided principal has the required DMX permission to perform the
+  assignment safely.  HyperDoc should inspect and report this boundary, not
+  bypass it.
+</p>
+
+<h2>Inspectable object</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::dmx-platform-workspace-assignment-semantics)">dmx-platform-workspace-assignment-semantics</a></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="hyperdoc" page="DMX workspace assignment 401 diagnosis">DMX workspace assignment 401 diagnosis</a></li>
+  <li><a hyperbook="hyperdoc" page="DMX workspace assignment permission repair runbook">DMX workspace assignment permission repair runbook</a></li>
+</ul>

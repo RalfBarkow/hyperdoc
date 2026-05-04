@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       version="1.0"
+       initial="public-route-entered"
+       name="dmx-platform-workspace-assignment-semantics">
+  <state id="public-route-entered">
+    <onentry>
+      <log label="Public REST route entered: PUT /workspaces/{workspaceId}/object/{objectId}"/>
+    </onentry>
+    <transition event="PUBLIC_ROUTE.CHECK_TARGET_WORKSPACE" target="target-workspace-write-check"/>
+    <transition event="INTERNAL_PATH.INITIAL_ASSIGNMENT" target="private-initial-assignment-helper"/>
+  </state>
+
+  <state id="target-workspace-write-check">
+    <onentry>
+      <log label="Public route checks target workspace WRITE permission"/>
+    </onentry>
+    <transition event="TARGET_WORKSPACE.WRITE_GRANTED" target="object-write-check"/>
+    <transition event="TARGET_WORKSPACE.WRITE_REFUSED" target="access-control-exception"/>
+  </state>
+
+  <state id="object-write-check">
+    <onentry>
+      <log label="Public route checks object WRITE permission before assignment"/>
+    </onentry>
+    <transition event="OBJECT.WRITE_GRANTED" target="assignment-permitted"/>
+    <transition event="OBJECT.UNASSIGNED" target="unassigned-object-write-refused"/>
+    <transition event="OBJECT.WRITE_REFUSED" target="access-control-exception"/>
+  </state>
+
+  <state id="unassigned-object-write-refused">
+    <onentry>
+      <log label="Unassigned object policy permits READ and refuses WRITE"/>
+    </onentry>
+    <transition event="UNASSIGNED.WRITE_REFUSED" target="access-control-exception"/>
+  </state>
+
+  <state id="access-control-exception">
+    <onentry>
+      <log label="Access-control exception raised by workspace or object write check"/>
+    </onentry>
+    <transition event="EXCEPTION.MAPPED" target="http-401"/>
+  </state>
+
+  <final id="http-401">
+    <onentry>
+      <log label="HTTP 401: workspace assignment blocked by dmx-platform permission semantics"/>
+    </onentry>
+  </final>
+
+  <state id="private-initial-assignment-helper">
+    <onentry>
+      <log label="Private helper path skips object write check because initial assignment creates permission context"/>
+    </onentry>
+    <transition event="HELPER.TARGET_WORKSPACE_WRITE_GRANTED" target="assignment-permitted"/>
+    <transition event="HELPER.NOT_EXPOSED_TO_HYPERDOC" target="permission-repair-required"/>
+  </state>
+
+  <state id="permission-repair-required">
+    <onentry>
+      <log label="Permission repair required outside the HyperDoc write loop"/>
+    </onentry>
+    <transition event="ADMIN.PERMISSION_REPAIRED" target="assignment-permitted"/>
+  </state>
+
+  <final id="assignment-permitted">
+    <onentry>
+      <log label="Assignment permitted only after required platform permissions are satisfied"/>
+    </onentry>
+  </final>
+</scxml>
