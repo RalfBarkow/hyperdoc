@@ -33,3 +33,6 @@ result
 
 # Local REPL/run records for one-off annotation diagnosis
 /annotation-*.sexp
+
+# Local HyperDoc journal/run records
+/var/hyperdoc-local-journal/
