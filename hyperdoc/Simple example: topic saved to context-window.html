@@ -1,0 +1,49 @@
+<h1>Simple example: topic saved to context-window</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This example shows one already-saved topic read back through the existing
+  success-readback surface: topic <tt>922586</tt>, workspace <tt>919815</tt>,
+  and topicmap <tt>919822</tt>.
+</p>
+
+<h5>Success readback</h5>
+
+<p>
+  Open this first. It is the intended high-level view for this example.
+</p>
+
+<ul>
+  <li><a expr="(simple-context-window-saved-topic-success-readback)" view="Overview"><tt>(simple-context-window-saved-topic-success-readback)</tt> Overview</a></li>
+</ul>
+
+<h5>Saved topic</h5>
+
+<p>
+  Optional lower-level readback.
+</p>
+
+<ul>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 922586)" view="Overview"><tt>Topic 922586</tt> Overview</a></li>
+</ul>
+
+<h5>Workspace readback</h5>
+
+<p>
+  Optional lower-level readback.
+</p>
+
+<ul>
+  <li><a expr="(make-dmx-shared-workspace-topic-proxy 919815)" view="Overview"><tt>Workspace context-window workspace (919815)</tt> Overview</a></li>
+</ul>
+
+<h5>Topicmap readback</h5>
+
+<p>
+  Optional lower-level readback.
+</p>
+
+<ul>
+  <li><a expr="(make-dmx-topicmap-proxy 919822)" view="Overview"><tt>Topicmap context-window topicmap (919822)</tt> Overview</a></li>
+</ul>
