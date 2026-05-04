@@ -30,3 +30,6 @@ var/hyperdoc-local-journal/*.json
 # ---> Local release/deploy artifacts
 .release-verifications/
 result
+
+# Local REPL/run records for one-off annotation diagnosis
+/annotation-*.sexp
