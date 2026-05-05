@@ -50,6 +50,7 @@
    :run-dmx-incident-arc-smoke-tests
    :run-dmx-shared-workspace-docs-smoke-tests
    :run-neo4j-duplicate-username-repair-smoke-tests
+   :run-hyperdoc-neo4j-topic-delete-tool-operation-ir-smoke-tests
    :run-fedwiki-site-dmx-import-tests
    :run-check-runner-smoke-tests
    :run-fedwiki-story-items-smoke-tests

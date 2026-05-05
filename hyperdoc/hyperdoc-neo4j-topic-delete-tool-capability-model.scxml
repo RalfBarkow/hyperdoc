@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       version="1.0"
+       initial="receiving-command"
+       name="hyperdoc-neo4j-topic-delete-tool-capability-model">
+  <state id="receiving-command">
+    <onentry>
+      <log label="Receive a HyperdocNeo4jTopicDeleteTool command name and argument vector; model metadata only"/>
+    </onentry>
+    <transition event="COMMAND.REPORT_TOPIC" target="report-topic"/>
+    <transition event="COMMAND.PLAN_DELETE_TOPIC" target="plan-delete-topic"/>
+    <transition event="COMMAND.DELETE_TOPIC" target="delete-planned-closure"/>
+    <transition event="COMMAND.FORCE_DETACH_DELETE_TOPIC" target="emergency-force-detach-delete-topic"/>
+    <transition event="COMMAND.PLAN_FORCE_DELETE_ORPHAN_ASSOC_NODES" target="plan-orphan-association-cleanup"/>
+    <transition event="COMMAND.FORCE_DELETE_ORPHAN_ASSOC_NODES" target="emergency-orphan-association-cleanup"/>
+    <transition event="COMMAND.REPORT_WORKSPACE_NA_CANDIDATES" target="report-workspace-na-candidates"/>
+    <transition event="COMMAND.DELETE_MANIFEST" target="delete-manifest"/>
+    <transition event="COMMAND.UNSUPPORTED" target="final-refusal"/>
+  </state>
+
+  <state id="report-topic">
+    <onentry>
+      <log label="Read-only report-topic capability: inspect one topic and its workspace/topicmap status"/>
+    </onentry>
+    <transition event="TOPIC.FOUND" target="final-success"/>
+    <transition event="TOPIC.MISSING" target="final-missing"/>
+  </state>
+
+  <state id="plan-delete-topic">
+    <onentry>
+      <log label="Read-only plan-delete-topic capability: reconstruct the hand-audited deletion closure"/>
+    </onentry>
+    <transition event="PLAN.DELETABLE" target="final-success"/>
+    <transition event="PLAN.REFUSED" target="final-refusal"/>
+    <transition event="TOPIC.MISSING" target="final-missing"/>
+  </state>
+
+  <state id="delete-planned-closure">
+    <onentry>
+      <log label="Destructive delete-topic capability: Java builds the plan internally and deletes only a deletable closure"/>
+    </onentry>
+    <transition event="PLAN.DELETABLE" target="final-success"/>
+    <transition event="PLAN.REFUSED" target="final-refusal"/>
+    <transition event="TOPIC.MISSING" target="final-missing"/>
+  </state>
+
+  <state id="emergency-force-detach-delete-topic">
+    <onentry>
+      <log label="Emergency force-detach-delete-topic capability: confirmation token gates primary-topic-only detach deletion"/>
+    </onentry>
+    <transition event="CONFIRMATION.MATCHED" target="final-success"/>
+    <transition event="CONFIRMATION.MISMATCH" target="final-refusal"/>
+    <transition event="TOPIC.MISSING" target="final-missing"/>
+  </state>
+
+  <state id="plan-orphan-association-cleanup">
+    <onentry>
+      <log label="Read-only plan-force-delete-orphan-assoc-nodes capability for association-like orphan cleanup"/>
+    </onentry>
+    <transition event="PLAN.DELETABLE" target="final-success"/>
+    <transition event="PLAN.REFUSED" target="final-refusal"/>
+  </state>
+
+  <state id="emergency-orphan-association-cleanup">
+    <onentry>
+      <log label="Emergency force-delete-orphan-assoc-nodes capability: confirmation token gates listed association-like node deletion"/>
+    </onentry>
+    <transition event="CONFIRMATION.MATCHED" target="final-success"/>
+    <transition event="CONFIRMATION.MISMATCH" target="final-refusal"/>
+    <transition event="PLAN.REFUSED" target="final-refusal"/>
+  </state>
+
+  <state id="report-workspace-na-candidates">
+    <onentry>
+      <log label="Read-only report-workspace-na-candidates capability for supported workspace n/a annotation candidates"/>
+    </onentry>
+    <transition event="CANDIDATES.REPORTED" target="final-success"/>
+  </state>
+
+  <state id="delete-manifest">
+    <onentry>
+      <log label="Destructive delete-manifest capability: all rows are planned before any row mutates"/>
+    </onentry>
+    <transition event="MANIFEST.ALL_PLANNED" target="final-success"/>
+    <transition event="MANIFEST.REFUSED" target="final-refusal"/>
+    <transition event="MANIFEST.ROW_MISSING" target="final-missing"/>
+  </state>
+
+  <final id="final-success">
+    <onentry>
+      <log label="Capability finished successfully according to the Java command status surface"/>
+    </onentry>
+  </final>
+
+  <final id="final-refusal">
+    <onentry>
+      <log label="Capability refused because command, arity, confirmation, shape, or plan precondition failed"/>
+    </onentry>
+  </final>
+
+  <final id="final-missing">
+    <onentry>
+      <log label="Capability found that the requested topic or node was missing"/>
+    </onentry>
+  </final>
+</scxml>

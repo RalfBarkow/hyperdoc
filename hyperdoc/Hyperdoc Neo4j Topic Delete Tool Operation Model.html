@@ -1,0 +1,95 @@
+<h1>Hyperdoc Neo4j Topic Delete Tool Operation Model</h1>
+
+<p>
+  This page records the first safe modeling milestone for
+  <tt>tools/HyperdocNeo4jTopicDeleteTool.java</tt>. The milestone is
+  source parity: HyperDoc can inspect the Java tool command surface as data,
+  but it does not change deletion behavior and does not execute the tool. This
+  first milestone is source parity, not behavioral change.
+</p>
+
+<h2>Why model the tool as operations?</h2>
+
+<p>
+  The Java helper is a hand-audited offline Neo4j repair tool. It was used in
+  the reconstruction of the <tt>936040</tt> incident, where a workspace
+  <tt>n/a</tt> annotation topic was removed from an offline local DMX Neo4j
+  store and then second-order orphan association/context nodes had to be
+  cleaned up so topicmap fetches would work again.
+</p>
+
+<p>
+  Modeling the command surface as operation IR makes the boundary inspectable:
+  readers can see command names, arities, confirmation tokens, read/write
+  classification, known statuses, and warnings without opening a database or
+  running Java. This is useful because the tool is intentionally not a generic
+  node deleter. Its supported scope is HyperDoc-owned workspace annotation
+  cleanup in an offline store.
+</p>
+
+<h2>What is intentionally not generated?</h2>
+
+<p>
+  HyperDoc does not generate low-level Neo4j graph mutation logic from SCXML in
+  this milestone. The deletion closure remains in
+  <tt>HyperdocNeo4jTopicDeleteTool.java</tt>, where it is still hand-audited.
+  The generated/reconstructed model covers only command names, arities,
+  confirmation tokens, usage metadata, safety classification, inspector
+  descriptions, and state-machine capability structure.
+</p>
+
+<h2>SCXML capability model</h2>
+
+<p>
+  The SCXML file
+  <tt>hyperdoc/hyperdoc-neo4j-topic-delete-tool-capability-model.scxml</tt>
+  models the generic capability state machine for the tool. It routes a
+  received command to read-only reporting/planning states, planned destructive
+  states, emergency destructive states, or terminal success/refusal/missing
+  states.
+</p>
+
+<p>
+  This model is deliberately generic and not specific to topic <tt>936040</tt>.
+  The <tt>936040</tt> reconstruction explains why these capabilities must be
+  visible as operations, but the SCXML model describes the Java tool command
+  surface rather than the single incident.
+</p>
+
+<h2>Safety boundary</h2>
+
+<ul>
+  <li>The operation IR is read by Lisp as static data.</li>
+  <li>The inspector exposes metadata and command previews only.</li>
+  <li>No inspector action executes a Java command.</li>
+  <li>No test opens or mutates a Neo4j database.</li>
+  <li>The hand-audited Java deletion closure remains authoritative.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::make-hyperdoc-neo4j-topic-delete-tool-operation-model)">HyperdocNeo4jTopicDeleteTool operation model</a></li>
+  <li><a expr="(hyperdoc::hyperdoc-neo4j-topic-delete-tool-operation-ir)">operation IR plist</a></li>
+  <li><a expr="(hyperdoc::hyperdoc-neo4j-topic-delete-tool-operation-metadata)">operation metadata rows</a></li>
+</ul>
+
+<h2>Source artifacts</h2>
+
+<ul>
+  <li><tt>tools/hyperdoc-neo4j-topic-delete-tool.operations.sexp</tt></li>
+  <li><tt>hyperdoc/hyperdoc-neo4j-topic-delete-tool-capability-model.scxml</tt></li>
+  <li><tt>hyperdoc/neo4j-topic-delete-tool-operations.lisp</tt></li>
+  <li><tt>hyperdoc-inspector/neo4j-topic-delete-tool-operations.lisp</tt></li>
+</ul>
+
+<h2>Milestone classification</h2>
+
+<pre>
+(:STATE :NEO4J-TOPIC-DELETE-TOOL-OPERATION-MODEL/SOURCE-PARITY
+ :JAVA-DELETION-SEMANTICS-CHANGED-P NIL
+ :GENERATED-GRAPH-MUTATION-P NIL
+ :INSPECTOR-EXECUTION-P NIL
+ :SCXML-CAPABILITY-MODEL-P T
+ :OPERATION-IR-P T)
+</pre>
