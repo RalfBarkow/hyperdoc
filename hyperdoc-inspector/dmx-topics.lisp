@@ -104,6 +104,306 @@
                                              selected-topicmap-id))))))))))
         (views:html (:span :style "opacity: 0.55;" "none"))))))
 
+(defun dmx-meta-na ()
+  "n/a")
+
+(defun dmx-meta-present-string (value)
+  (cond
+    ((null value) nil)
+    ((and (stringp value)
+          (string= value ""))
+     nil)
+    (t
+     (format nil "~A" value))))
+
+(defun dmx-meta-field (object key)
+  (and (hash-table-p object)
+       (gethash key object)))
+
+(defun dmx-meta-seq (value)
+  (cond
+    ((null value) '())
+    ((vectorp value) (coerce value 'list))
+    ((listp value) value)
+    (t (list value))))
+
+(defun dmx-meta-child-topic (topic-data type-uri)
+  (let ((children (dmx-meta-field topic-data "children")))
+    (cond
+      ((hash-table-p children)
+       (or (gethash type-uri children)
+           (loop for child being the hash-values of children
+                 when (and (hash-table-p child)
+                           (string= type-uri
+                                    (or (dmx-meta-field child "typeUri") "")))
+                   return child)))
+      ((or (vectorp children)
+           (listp children))
+       (find type-uri
+             (dmx-meta-seq children)
+             :key (lambda (child)
+                    (and (hash-table-p child)
+                         (dmx-meta-field child "typeUri")))
+             :test #'string=)))))
+
+(defun dmx-meta-child-value (topic-data type-uri)
+  (let ((child (dmx-meta-child-topic topic-data type-uri)))
+    (cond
+      ((hash-table-p child)
+       (dmx-meta-field child "value"))
+      (child child)
+      (t nil))))
+
+(defun dmx-meta-topic-title (topic-data)
+  (or (dmx-meta-field topic-data "value")
+      (dmx-meta-child-value topic-data "dmx.notes.title")))
+
+(defun dmx-meta-known-topic-type-label (type-uri)
+  (cond
+    ((string= (or type-uri "") "dmx.notes.note")
+     "Note")
+    ((string= (or type-uri "") "dmx.workspaces.workspace")
+     "Workspace")
+    ((string= (or type-uri "") "dmx.topicmaps.topicmap")
+     "Topicmap")
+    (t nil)))
+
+(defun dmx-meta-instantiation-type-topics (page)
+  (let ((type-uri (and (hyperdoc::dmx-topic-data-of page)
+                       (dmx-meta-field (hyperdoc::dmx-topic-data-of page)
+                                       "typeUri"))))
+    (loop for topic in (dmx-meta-seq (hyperdoc::dmx-related-topics-of page))
+          when (and (hash-table-p topic)
+                    (or (equal type-uri (dmx-meta-field topic "uri"))
+                        (equal type-uri (dmx-meta-field topic "topicUri"))
+                        (equal "dmx.core.topic_type"
+                               (dmx-meta-field topic "typeUri"))))
+            collect topic)))
+
+(defun dmx-meta-topic-type-label (page type-uri)
+  (or (loop for topic in (dmx-meta-instantiation-type-topics page)
+            for value = (dmx-meta-field topic "value")
+            when value
+              return value)
+      (dmx-meta-known-topic-type-label type-uri)
+      type-uri
+      (dmx-meta-na)))
+
+(defun dmx-meta-timestamp-raw (topic-data field-name child-type-uri)
+  (or (dmx-meta-field topic-data field-name)
+      (dmx-meta-child-value topic-data child-type-uri)))
+
+(defun dmx-meta-unix-millis->universal-time (millis)
+  (+ (floor millis 1000) 2208988800))
+
+(defun dmx-meta-parse-integer (value)
+  (cond
+    ((integerp value) value)
+    ((stringp value)
+     (ignore-errors (parse-integer value :junk-allowed t)))
+    (t nil)))
+
+(defun dmx-meta-format-timestamp (raw)
+  (let ((millis (dmx-meta-parse-integer raw)))
+    (if millis
+        (multiple-value-bind (second minute hour day month year)
+            (decode-universal-time
+             (dmx-meta-unix-millis->universal-time millis))
+          (format nil "~4,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+                  year month day hour minute second))
+        (dmx-meta-present-string raw))))
+
+(defun dmx-meta-note-text (topic-data)
+  (or (dmx-meta-child-value topic-data "dmx.notes.text")
+      (dmx-meta-field topic-data "dmx.notes.text")))
+
+(defun dmx-meta-parse-json-text (text)
+  (when (and (stringp text)
+             (plusp (length (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                         text))))
+    (handler-case
+        (shasht:read-json text)
+      (error ()
+        nil))))
+
+(defun dmx-meta-hyperdoc-annotation-carrier (topic-data)
+  (let ((carrier (dmx-meta-parse-json-text (dmx-meta-note-text topic-data))))
+    (when (and (hash-table-p carrier)
+               (or (equal "hyperdoc.annotation"
+                          (dmx-meta-field carrier "nativeTypeUri"))
+                   (dmx-meta-field carrier "annotationKey")))
+      carrier)))
+
+(defun dmx-meta-json-list-label (value)
+  (cond
+    ((null value)
+     nil)
+    ((or (vectorp value)
+         (listp value))
+     (format nil "~{~A~^ -> ~}" (dmx-meta-seq value)))
+    (t
+     (format nil "~A" value))))
+
+(defun dmx-meta-source-anchor (native-payload)
+  (or (dmx-meta-field native-payload "sourceAnchor")
+      (dmx-meta-field native-payload "source")
+      (dmx-meta-field native-payload "sourceRef")))
+
+(defun dmx-meta-target-anchor (native-payload)
+  (or (dmx-meta-field native-payload "targetAnchor")
+      (dmx-meta-field native-payload "target")
+      (dmx-meta-field native-payload "targetRef")))
+
+(defun dmx-meta-anchor-field (anchor &rest keys)
+  (loop for key in keys
+        for value = (dmx-meta-field anchor key)
+        when value
+          return value))
+
+(defun dmx-meta-table-row (label value &key code raw)
+  (views:html
+    (:tr (:td (views:esc label))
+         (:td (cond
+                (raw
+                 (views:object-ref value))
+                (code
+                 (render-maybe-code value))
+                (t
+                 (views:esc (or (dmx-meta-present-string value)
+                                (dmx-meta-na)))))))))
+
+(defun render-dmx-meta-identity-block (page topic-data)
+  (let* ((type-uri (dmx-meta-field topic-data "typeUri"))
+         (type-label (dmx-meta-topic-type-label page type-uri)))
+    (views:html
+      (:h4 "Identity")
+      (:table :class "inspector-table"
+              (dmx-meta-table-row "ID" (hyperdoc::dmx-topic-id-of page)
+                                  :code t)
+              (dmx-meta-table-row "URI" (dmx-meta-field topic-data "uri")
+                                  :code t)
+              (dmx-meta-table-row "Topic value/title"
+                                  (dmx-meta-topic-title topic-data))
+              (dmx-meta-table-row "Type" type-label)
+              (dmx-meta-table-row "Type URI" type-uri :code t)))))
+
+(defun render-dmx-meta-timestamps-block (topic-data)
+  (let ((created (dmx-meta-timestamp-raw topic-data
+                                         "created"
+                                         "dmx.timestamps.created"))
+        (modified (dmx-meta-timestamp-raw topic-data
+                                          "modified"
+                                          "dmx.timestamps.modified")))
+    (views:html
+      (:h4 "Timestamps")
+      (:table :class "inspector-table"
+              (dmx-meta-table-row "Created"
+                                  (dmx-meta-format-timestamp created))
+              (dmx-meta-table-row "Created raw" created :code t)
+              (dmx-meta-table-row "Modified"
+                                  (dmx-meta-format-timestamp modified))
+              (dmx-meta-table-row "Modified raw" modified :code t)))))
+
+(defun render-dmx-meta-ownership-block (page diagnostics)
+  (views:html
+    (:h4 "Ownership / workspace")
+    (:table :class "inspector-table"
+            (dmx-meta-table-row "Created user"
+                                (or (and (hyperdoc::dmx-topic-data-of page)
+                                         (dmx-meta-field
+                                          (hyperdoc::dmx-topic-data-of page)
+                                          "creator"))
+                                    (and (hyperdoc::dmx-topic-data-of page)
+                                         (dmx-meta-child-value
+                                          (hyperdoc::dmx-topic-data-of page)
+                                          "dmx.accesscontrol.creator"))))
+            (dmx-meta-table-row "Modified user"
+                                (or (and (hyperdoc::dmx-topic-data-of page)
+                                         (dmx-meta-field
+                                          (hyperdoc::dmx-topic-data-of page)
+                                          "modifier"))
+                                    (and (hyperdoc::dmx-topic-data-of page)
+                                         (dmx-meta-child-value
+                                          (hyperdoc::dmx-topic-data-of page)
+                                          "dmx.accesscontrol.modifier"))))
+            (:tr (:td (views:esc "Workspace"))
+                 (:td (if diagnostics
+                          (render-workspace-reference page diagnostics)
+                          (views:esc (dmx-meta-na)))))
+            (dmx-meta-table-row "Owner"
+                                (and diagnostics
+                                     (hyperdoc::dmx-topic-diagnostics-workspace-owner
+                                      diagnostics))
+                                :code t)
+            (:tr (:td (views:esc "Topicmap membership"))
+                 (:td (if diagnostics
+                          (render-topicmap-memberships page diagnostics)
+                          (views:esc (dmx-meta-na))))))))
+
+(defun render-dmx-meta-topic-type-block (page topic-data)
+  (let* ((type-uri (dmx-meta-field topic-data "typeUri"))
+         (type-label (dmx-meta-topic-type-label page type-uri))
+         (type-topics (dmx-meta-instantiation-type-topics page)))
+    (views:html
+      (:h4 "Topic type")
+      (:table :class "inspector-table"
+              (dmx-meta-table-row "Resolved label" type-label)
+              (dmx-meta-table-row "Machine-readable type URI"
+                                  type-uri
+                                  :code t)
+              (:tr (:td (views:esc "Instantiation association"))
+                   (:td (if type-topics
+                            (views:object-ref type-topics)
+                            (views:esc (dmx-meta-na)))))))))
+
+(defun render-dmx-meta-annotation-block (carrier)
+  (let* ((native-payload (dmx-meta-field carrier "nativePayload"))
+         (source (dmx-meta-source-anchor native-payload))
+         (target (dmx-meta-target-anchor native-payload)))
+    (views:html
+      (:h4 "HyperDoc annotation carrier")
+      (:table :class "inspector-table"
+              (dmx-meta-table-row "annotationKey"
+                                  (dmx-meta-field carrier "annotationKey")
+                                  :code t)
+              (dmx-meta-table-row "runtimeRelationId"
+                                  (dmx-meta-field carrier "runtimeRelationId")
+                                  :code t)
+              (dmx-meta-table-row "workspaceTopicmapId"
+                                  (dmx-meta-field carrier "workspaceTopicmapId")
+                                  :code t)
+              (dmx-meta-table-row "Native payload type URI"
+                                  (dmx-meta-field carrier "nativeTypeUri")
+                                  :code t)
+              (dmx-meta-table-row "Source page"
+                                  (dmx-meta-anchor-field source
+                                                         "page"
+                                                         "pageTitle"))
+              (dmx-meta-table-row "Source heading path"
+                                  (dmx-meta-json-list-label
+                                   (dmx-meta-anchor-field source
+                                                          "headingPath"
+                                                          "headings")))
+              (dmx-meta-table-row "Source list container"
+                                  (dmx-meta-anchor-field source
+                                                         "listContainer"
+                                                         "listSelector"))
+              (dmx-meta-table-row "Source item index"
+                                  (dmx-meta-anchor-field source
+                                                         "itemIndex"
+                                                         "index")
+                                  :code t)
+              (dmx-meta-table-row "Target"
+                                  (dmx-meta-anchor-field target
+                                                         "target"
+                                                         "id"
+                                                         "key")
+                                  :code t)
+              (dmx-meta-table-row "Target label"
+                                  (dmx-meta-anchor-field target
+                                                         "label"
+                                                         "title"))))))
+
 (defun find-dmx-repair-result-for-topic (page topic-id)
   (find topic-id
         (hyperdoc::dmx-repair-results-of page)
@@ -2131,6 +2431,31 @@
 (defmethod views:title-bar-action-buttons
     ((page hyperdoc::dmx-shared-topicmap-object))
   (render-dmx-topicmap-backed-title-bar-buttons page))
+
+(views:defview 👀meta (page hyperdoc::dmx-topic-proxy)
+  (hyperdoc::ensure-dmx-topic-diagnostics page)
+  (hyperdoc::ensure-dmx-related-topics page)
+  (views:html-view :title "Meta" :priority 2
+    (let* ((topic-data (hyperdoc::dmx-topic-data-of page))
+           (diagnostics (hyperdoc::dmx-diagnostics-of page))
+           (carrier (and topic-data
+                         (dmx-meta-hyperdoc-annotation-carrier topic-data))))
+      (if topic-data
+          (views:html
+            (:p (views:esc
+                 "Read-only DMX-inspired metadata view. The field groups mirror the DMX webclient Meta tab while preserving HyperDoc-specific annotation carrier evidence."))
+            (render-dmx-meta-identity-block page topic-data)
+            (render-dmx-meta-timestamps-block topic-data)
+            (render-dmx-meta-ownership-block page diagnostics)
+            (render-dmx-meta-topic-type-block page topic-data)
+            (when carrier
+              (render-dmx-meta-annotation-block carrier)))
+          (views:html
+            (:p (views:esc
+                 "No fetched DMX topic data is available for the Meta view."))
+            (if-let (condition (hyperdoc::dmx-load-error-of page))
+              (views:object-ref condition)
+              (views:html (:span :style "opacity: 0.55;" "n/a"))))))))
 
 (views:defview 👀overview (page hyperdoc::dmx-topic-proxy)
   (hyperdoc::ensure-dmx-topic-diagnostics page)
