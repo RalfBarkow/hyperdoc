@@ -55,6 +55,11 @@
     (clog-moldable-inspector::load-views pane)
     (slot-value pane 'clog-moldable-inspector::views)))
 
+(defun dmx-topic-proxy-smoke-rendered-html (value)
+  (or (ignore-errors
+        (html-inspector-views:view-html value))
+      value))
+
 (defun run-one-wrapper-smoke-test (spec)
   (destructuring-bind (wrapper topic-id topicmap-id) spec
     (let ((proxy (funcall (symbol-function wrapper))))
@@ -1834,6 +1839,12 @@
 (defparameter *dmx-topic-936040-title*
   "Annotation: An active/alive pair is two agents connected by principal ports.")
 
+(defparameter *dmx-topic-936040-annotation-key*
+  "dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation")
+
+(defparameter *dmx-topic-936040-runtime-relation-id*
+  "dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3")
+
 (defun make-dmx-topic-proxy-meta-json-object (&rest key-values)
   (let ((object (make-hash-table :test #'equal)))
     (loop for (key value) on key-values by #'cddr
@@ -1852,9 +1863,9 @@
     "storageMode" "compatibility-note-carrier"
     "nativeTypeUri" "hyperdoc.annotation"
     "annotationKey"
-    "dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation"
+    *dmx-topic-936040-annotation-key*
     "runtimeRelationId"
-    "dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3"
+    *dmx-topic-936040-runtime-relation-id*
     "workspaceTopicmapId" 919822
     "nativePayload"
     (make-dmx-topic-proxy-meta-json-object
@@ -1907,6 +1918,84 @@
     "typeUri" "dmx.core.topic_type"
     "value" "Note")))
 
+(defun seed-dmx-topic-936040-proxy-fixture (proxy)
+  (setf (hyperdoc::dmx-topic-data-of proxy) (make-dmx-topic-936040-topic-json)
+        (hyperdoc::dmx-workspace-data-of proxy) nil
+        (hyperdoc::dmx-workspace-owner-of proxy) nil
+        (hyperdoc::dmx-topicmap-memberships-of proxy)
+        (make-dmx-topic-936040-memberships-json)
+        (hyperdoc::dmx-topicmap-data-of proxy) (make-smoke-json "context-window")
+        (hyperdoc::dmx-related-topics-of proxy)
+        (make-dmx-topic-936040-type-topics-json)
+        (hyperdoc::dmx-load-error-of proxy) nil
+        (hyperdoc::dmx-diagnostics-of proxy)
+        (hyperdoc::make-dmx-topic-diagnostics
+         :topic-id 936040
+         :topicmap-id 919822
+         :topic-uri *dmx-topic-936040-uri*
+         :topic-type-uri "dmx.notes.note"
+         :topic-title *dmx-topic-936040-title*
+         :workspace-id nil
+         :workspace-title nil
+         :workspace-owner nil
+         :topicmap-memberships
+         (coerce (make-dmx-topic-936040-memberships-json) 'list)
+         :selected-topicmap-membership-p t
+         :ownership-class :hyperdoc-workspace-annotation
+         :ownership-reason "936040 smoke fixture"
+         :hyperdoc-owned-p t
+         :source-endpoints nil
+         :status :in-topicmap-but-unassigned
+         :status-reason "Topicmap placement present; workspace assignment missing."
+         :repair-needed-p t))
+  proxy)
+
+(defun make-dmx-topic-936040-dock-annotation-fixture ()
+  (let ((source-anchor
+          (make-instance
+           'hyperdoc::dom-annotation-anchor
+           :provider-kind "dom-v1"
+           :view-kind "content"
+           :view-title "Main page"
+           :context-object-id "lafont-1990-interaction-nets"
+           :strategy "list-item-anchor"
+           :value "list-item:h1/lafont-1990-interaction-nets/h2/core-concepts-from-lafont-1990/ul[2]/item[3]"
+           :label "An active/alive pair is two agents connected by principal ports."
+           :section-path
+           '("Lafont 1990 Interaction Nets"
+             "Core concepts from Lafont 1990")
+           :object-id "lafont-active-alive-pair-item"))
+        (target-anchor
+          (make-instance
+           'hyperdoc::dom-annotation-anchor
+           :provider-kind "dock-v1"
+           :view-kind "dock-target"
+           :view-title "Main page"
+           :context-object-id "lafont-1990-interaction-nets"
+           :strategy "annotation-topic"
+           :value "dock-annotation"
+           :label "Annotation"
+           :object-id "dock-annotation")))
+    (make-instance
+     'hyperdoc::workspace-dock-annotation
+     :id *dmx-topic-936040-runtime-relation-id*
+     :title *dmx-topic-936040-title*
+     :summary "HyperDoc workspace annotation carrier fixture for the Lafont active/alive pair relation."
+     :context-view-title "Main page"
+     :source-anchor source-anchor
+     :target-anchor target-anchor
+     :target-object (hyperdoc::annotation-topic)
+     :relation-kind "annotation"
+     :note "Preserved compatibility carrier topic"
+     :workspace-topic-id 936040
+     :workspace-topic-uri *dmx-topic-936040-uri*
+     :workspace-topicmap-id 919822
+     :workspace-id nil
+     :storage-mode hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*
+     :carrier-type-uri "dmx.notes.note"
+     :annotation-key *dmx-topic-936040-annotation-key*
+     :runtime-relation-id *dmx-topic-936040-runtime-relation-id*)))
+
 (defun run-dmx-topic-proxy-meta-view-936040-smoke-test ()
   (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
          (original-ensure-diagnostics
@@ -1914,35 +2003,7 @@
          (original-ensure-related
            (symbol-function 'hyperdoc::ensure-dmx-related-topics))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
-    (setf (hyperdoc::dmx-topic-data-of proxy) (make-dmx-topic-936040-topic-json)
-          (hyperdoc::dmx-workspace-data-of proxy) nil
-          (hyperdoc::dmx-workspace-owner-of proxy) nil
-          (hyperdoc::dmx-topicmap-memberships-of proxy)
-          (make-dmx-topic-936040-memberships-json)
-          (hyperdoc::dmx-topicmap-data-of proxy) (make-smoke-json "context-window")
-          (hyperdoc::dmx-related-topics-of proxy)
-          (make-dmx-topic-936040-type-topics-json)
-          (hyperdoc::dmx-load-error-of proxy) nil
-          (hyperdoc::dmx-diagnostics-of proxy)
-          (hyperdoc::make-dmx-topic-diagnostics
-           :topic-id 936040
-           :topicmap-id 919822
-           :topic-uri *dmx-topic-936040-uri*
-           :topic-type-uri "dmx.notes.note"
-           :topic-title *dmx-topic-936040-title*
-           :workspace-id nil
-           :workspace-title nil
-           :workspace-owner nil
-           :topicmap-memberships
-           (coerce (make-dmx-topic-936040-memberships-json) 'list)
-           :selected-topicmap-membership-p t
-           :ownership-class :hyperdoc-workspace-annotation
-           :ownership-reason "936040 smoke fixture"
-           :hyperdoc-owned-p t
-           :source-endpoints nil
-           :status :in-topicmap-but-unassigned
-           :status-reason "Topicmap placement present; workspace assignment missing."
-           :repair-needed-p t))
+    (seed-dmx-topic-936040-proxy-fixture proxy)
     (unwind-protect
          (progn
            (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
@@ -2008,6 +2069,74 @@
             (symbol-function 'hyperdoc::dmx-http-request-body)
             original-http))))
 
+(defun run-dock-annotation-open-dmx-meta-action-smoke-test ()
+  (let* ((annotation (make-dmx-topic-936040-dock-annotation-fixture))
+         (original-ensure-diagnostics
+           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+         (original-ensure-related
+           (symbol-function 'hyperdoc::ensure-dmx-related-topics))
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
+         (proxy nil)
+         (buttons-html nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page)
+                 (symbol-function 'hyperdoc::ensure-dmx-related-topics)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page)
+                 (symbol-function 'hyperdoc::dmx-http-request-body)
+                 (lambda (&rest args)
+                   (declare (ignore args))
+                   (error "The dock annotation DMX Meta bridge must not issue HTTP calls in this fixture")))
+           (setf proxy (hyperdoc::dock-annotation-dmx-topic-proxy annotation)
+                 buttons-html
+                 (dmx-topic-proxy-smoke-rendered-html
+                  (html-inspector-views:title-bar-action-buttons annotation)))
+           (assert-type 'hyperdoc::dmx-topic-proxy
+                        proxy
+                        "Dock annotation DMX Meta action must resolve a DMX topic proxy")
+           (assert-equal 936040
+                         (hyperdoc::dmx-topic-id-of proxy)
+                         "Dock annotation DMX Meta action must target topic 936040")
+           (assert-equal 919822
+                         (hyperdoc::dmx-topicmap-id-of proxy)
+                         "Dock annotation DMX Meta action must preserve topicmap 919822")
+           (assert-true
+            (search "Open DMX Meta" buttons-html :test #'char=)
+            "Dock annotation title-bar actions must expose Open DMX Meta")
+           (seed-dmx-topic-936040-proxy-fixture proxy)
+           (let* ((views (dmx-topic-proxy-smoke-load-inspector-views-for-object
+                          proxy))
+                  (meta (dmx-topic-proxy-smoke-find-view-by-title
+                         views
+                         "Meta"))
+                  (html (and meta
+                             (html-inspector-views:view-html meta))))
+             (assert-true meta
+                          "Opened DMX topic proxy must expose the existing Meta view")
+             (dolist (needle (list "936040"
+                                   *dmx-topic-936040-uri*
+                                   *dmx-topic-936040-title*
+                                   "Note"
+                                   "dmx.notes.note"
+                                   "annotationKey"
+                                   "runtimeRelationId"
+                                   "workspaceTopicmapId"))
+               (assert-true
+                (search needle html :test #'char=)
+                (format nil "Dock annotation DMX Meta bridge must render ~S"
+                        needle)))))
+      (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
+            original-ensure-diagnostics
+            (symbol-function 'hyperdoc::ensure-dmx-related-topics)
+            original-ensure-related
+            (symbol-function 'hyperdoc::dmx-http-request-body)
+            original-http))))
+
 (defun run-operational-definition-launcher-helper-test ()
   (let ((proxy (hyperdoc::make-operational-definition-note-proxy)))
     (assert-type 'hyperdoc::dmx-topic-proxy
@@ -2050,7 +2179,8 @@
   (run-repair-results-table-page-aware-state-smoke-test)
   (run-shared-workspace-inspectable-object-smoke-test)
   (run-dmx-topic-proxy-meta-view-936040-smoke-test)
+  (run-dock-annotation-open-dmx-meta-action-smoke-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace operational-state page-awareness smoke + repair-auth state-machine run-status smoke + shared-workspace nondefault-id rendering smoke + repair-results table page-aware-state smoke + shared-workspace inspectable-object smoke + 936040 Meta view smoke + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace operational-state page-awareness smoke + repair-auth state-machine run-status smoke + shared-workspace nondefault-id rendering smoke + repair-results table page-aware-state smoke + shared-workspace inspectable-object smoke + 936040 Meta view smoke + dock-annotation Open DMX Meta bridge smoke + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)

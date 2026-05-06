@@ -50,6 +50,25 @@
           :base-url
           (workspace-annotation-destination-proxy-base-url client)))))
 
+(defun dock-annotation-dmx-topicmap-id-or-default (annotation)
+  (or (and (workspace-dock-annotation-p annotation)
+           (ignore-errors
+             (workspace-annotation-topicmap-id-of annotation)))
+      *dmx-context-window-topicmap-id*))
+
+(defun dock-annotation-dmx-topic-proxy
+    (annotation &key (base-url *dmx-base-url*))
+  (let ((topic-id (workspace-annotation-continuation-topic-id-or-nil
+                   annotation))
+        (topicmap-id (dock-annotation-dmx-topicmap-id-or-default
+                      annotation)))
+    (and topic-id
+         topicmap-id
+         (ignore-errors
+           (make-dmx-topic-proxy :topic-id topic-id
+                                 :topicmap-id topicmap-id
+                                 :base-url base-url)))))
+
 (defun render-workspace-annotation-inspectable-targets (targets)
   (if targets
       (views:html
@@ -2186,17 +2205,25 @@
       (:p (views:object-ref (promote-relation-to-topic-proposal annotation))))))
 
 (defmethod views:title-bar-action-buttons ((annotation dock-annotation))
-  (views:html
-    (when (source-object-of annotation)
-      (views:html
-        (views:eval-button
-         "Open source object"
-         (views:thunk (source-object-of annotation))
-         "Open the current inspectable object that this annotation relation annotates.")))
-    (views:eval-button
-     "Open Annotation topic"
-     (views:thunk (target-object-of annotation))
-     "Open the generic Annotation topic that classifies this relation.")))
+  (let ((dmx-topic-proxy (dock-annotation-dmx-topic-proxy annotation)))
+    (views:html
+      (when (source-object-of annotation)
+        (views:html
+          (views:eval-button
+           "Open source object"
+           (views:thunk (source-object-of annotation))
+           "Open the current inspectable object that this annotation relation annotates.")))
+      (views:eval-button
+       "Open Annotation topic"
+       (views:thunk (target-object-of annotation))
+       "Open the generic Annotation topic that classifies this relation.")
+      (when dmx-topic-proxy
+        (views:html
+          " "
+          (views:eval-button
+           "Open DMX Meta"
+           (views:thunk dmx-topic-proxy)
+           "Open the read-only DMX topic proxy for this annotation carrier."))))))
 
 (views:defview 👀overview (annotation dock-annotation)
   (views:html-view :title "Overview" :priority 1
