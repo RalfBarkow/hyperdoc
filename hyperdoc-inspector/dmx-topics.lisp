@@ -77,6 +77,38 @@
                           (or workspace-title "workspace")))
         (views:html (:span :style "opacity: 0.55;" "n/a")))))
 
+(defun dmx-topic-proxy-workspace-assignment-repairable-p (diagnostics)
+  (and diagnostics
+       (hyperdoc::dmx-topic-diagnostics-repair-needed-p diagnostics)
+       (hyperdoc::dmx-topic-diagnostics-hyperdoc-owned-p diagnostics)
+       (hyperdoc::dmx-topic-diagnostics-selected-topicmap-membership-p
+        diagnostics)
+       (null (hyperdoc::dmx-topic-diagnostics-workspace-id diagnostics))))
+
+(defun render-workspace-reference-with-repair-link (page diagnostics)
+  (views:html
+    (render-workspace-reference page diagnostics)
+    (when (dmx-topic-proxy-workspace-assignment-repairable-p diagnostics)
+      (views:html
+        " "
+        (views:object-ref page
+                          :display "[Repair assignment...]"
+                          :select "Workspace diagnostics")))))
+
+(defun dmx-topic-proxy-assignment-target-label (workspace-id)
+  (format nil "context-window / ~D" workspace-id))
+
+(defun dmx-topic-proxy-assignment-path (page workspace-id)
+  (hyperdoc::dmx-workspace-assign-object-path
+   workspace-id
+   (hyperdoc::dmx-topic-id-of page)))
+
+(defun dmx-topic-proxy-launch-expression (page)
+  (format nil
+          "(make-dmx-topic-proxy :topic-id ~D :topicmap-id ~D)"
+          (hyperdoc::dmx-topic-id-of page)
+          (hyperdoc::dmx-topicmap-id-of page)))
+
 (defun render-topicmap-memberships (page diagnostics)
   (let ((memberships (hyperdoc::dmx-topic-diagnostics-topicmap-memberships diagnostics))
         (selected-topicmap-id (hyperdoc::dmx-topicmap-id-of page)))
@@ -328,7 +360,9 @@
                                           "dmx.accesscontrol.modifier"))))
             (:tr (:td (views:esc "Workspace"))
                  (:td (if diagnostics
-                          (render-workspace-reference page diagnostics)
+                          (render-workspace-reference-with-repair-link
+                           page
+                           diagnostics)
                           (views:esc (dmx-meta-na)))))
             (dmx-meta-table-row "Owner"
                                 (and diagnostics
@@ -415,6 +449,13 @@
     (or (member (getf debug-report :bootstrap-status-code) '(401 403))
         (member (getf debug-report :guarded-put-status-code) '(401 403)))))
 
+(defun dmx-repair-result-permission-denied-p (result)
+  (let ((debug-report (getf result :debug-report)))
+    (and (member (getf debug-report :guarded-put-status-code) '(401 403))
+         (or (getf debug-report :bootstrap-ran-p)
+             (getf debug-report :session-cookie-captured-p)
+             (getf debug-report :guarded-put-jsessionid-cookie-p)))))
+
 (defun dmx-repair-result-operational-state-label (page result)
   (cond
     ((null result)
@@ -428,6 +469,9 @@
      (if (eql (getf result :workspace-action) :already-assigned)
          "healthy"
          "repair-succeeded"))
+    ((and (not (getf result :success-p))
+          (dmx-repair-result-permission-denied-p result))
+     "permission-denied")
     ((and (not (getf result :success-p))
           (dmx-repair-result-auth-boundary-failed-p result))
      "credentials-pending")
@@ -1302,17 +1346,53 @@
   (hyperdoc::ensure-dmx-topic-diagnostics page :force? t)
   page)
 
-(defun make-explicit-dmx-repair-client (page &key auth-mode username password
-                                               authorization-header auth-token)
+(defun make-explicit-dmx-repair-client
+    (page &key auth-mode username password authorization-header auth-token
+       (workspace-id hyperdoc::*dmx-context-window-workspace-id*))
   (hyperdoc::make-http-dmx-import-client-from-explicit-auth
    :base-url (hyperdoc::dmx-base-url-of (hyperbook:hyperbook-of page))
-   :workspace-id hyperdoc::*dmx-context-window-workspace-id*
+   :workspace-id workspace-id
    :auth-mode auth-mode
    :username username
    :password password
    :authorization-header authorization-header
    :auth-token auth-token
    :verbose nil))
+
+(defun dmx-topic-proxy-assignment-topicmap-json (page workspace-topicmap-id)
+  (let ((candidate (hyperdoc::dmx-topicmap-data-of page)))
+    (if (and (hash-table-p candidate)
+             (hyperdoc::dmx-import-object-id candidate))
+        candidate
+        (let ((topicmap (make-hash-table :test #'equal)))
+          (setf (gethash "id" topicmap) workspace-topicmap-id
+                (gethash "uri" topicmap) ""
+                (gethash "typeUri" topicmap) "dmx.topicmaps.topicmap"
+                (gethash "value" topicmap) "context-window"
+                (gethash "children" topicmap) (make-hash-table :test #'equal)
+                (gethash "topics" topicmap) #()
+                (gethash "assocs" topicmap) #())
+          topicmap))))
+
+(defun make-dmx-topic-proxy-assignment-dry-run-client
+    (page &key workspace-id workspace-topicmap-id)
+  (let* ((topic (or (hyperdoc::dmx-topic-data-of page)
+                    (error "Dry-run assignment requires fetched topic JSON")))
+         (snapshot
+           (hyperdoc::make-dmx-workspace-assignment-rehearsal-snapshot
+            :topic topic
+            :workspace-id workspace-id
+            :workspace-topicmap-id workspace-topicmap-id
+            :workspace-assignment (hyperdoc::dmx-workspace-data-of page)
+            :topicmap-memberships
+            (or (hyperdoc::dmx-topicmap-memberships-of page) #())
+            :workspace-topicmap
+            (dmx-topic-proxy-assignment-topicmap-json page
+                                                      workspace-topicmap-id)
+            :workspace-owner (hyperdoc::dmx-workspace-owner-of page))))
+    (hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot
+     snapshot
+     :next-topic-id 951000)))
 
 (defun dmx-repair-result-with-overrides (result &rest overrides)
   (let ((copy (copy-list result)))
@@ -1355,8 +1435,11 @@
 
 (defun repair-topic-proxy-with-client
     (page client &key dry-run auth-mode auth-context
-       (refresh-page-p t) (record-result-p t))
-  (hyperdoc::ensure-dmx-topic-diagnostics page :force? t)
+       (workspace-id hyperdoc::*dmx-context-window-workspace-id*)
+       (workspace-topicmap-id (hyperdoc::dmx-topicmap-id-of page))
+       (refresh-page-p t) (record-result-p t) (force-diagnostics-p t))
+  (when force-diagnostics-p
+    (hyperdoc::ensure-dmx-topic-diagnostics page :force? t))
   (let* ((topic-id (hyperdoc::dmx-topic-id-of page))
          (diagnostics (hyperdoc::dmx-diagnostics-of page))
          (normalized-auth-context
@@ -1382,8 +1465,8 @@
         (setf execution
               (hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair
                topic-id
-               :workspace-id hyperdoc::*dmx-context-window-workspace-id*
-               :workspace-topicmap-id hyperdoc::*dmx-context-window-topicmap-id*
+               :workspace-id workspace-id
+               :workspace-topicmap-id workspace-topicmap-id
                :client client
                :dry-run dry-run)
               success-p t
@@ -1401,7 +1484,7 @@
     (setf readbacks
           (capture-dmx-repair-client-readbacks client
                                                topic-id
-                                               (hyperdoc::dmx-topicmap-id-of page)))
+                                               workspace-topicmap-id))
     (let* ((result-workspace
              (and (getf readbacks :workspace-read-p)
                   (getf readbacks :workspace)))
@@ -1582,7 +1665,12 @@
 (defun repair-topic-proxy-with-explicit-auth (page &key dry-run auth-mode
                                                      username password
                                                      authorization-header
-                                                     auth-token)
+                                                     auth-token
+                                                (workspace-id
+                                                 hyperdoc::*dmx-context-window-workspace-id*)
+                                                (workspace-topicmap-id
+                                                 (hyperdoc::dmx-topicmap-id-of
+                                                  page)))
   (let* ((auth-context
            (build-dmx-repair-auth-context
             :auth-mode auth-mode
@@ -1596,12 +1684,92 @@
                   :username username
                   :password password
                   :authorization-header authorization-header
-                  :auth-token auth-token)))
+                  :auth-token auth-token
+                  :workspace-id workspace-id)))
     (repair-topic-proxy-with-client page
                                     client
                                     :dry-run dry-run
                                     :auth-mode auth-mode
-                                    :auth-context auth-context)))
+                                    :auth-context auth-context
+                                    :workspace-id workspace-id
+                                    :workspace-topicmap-id
+                                    workspace-topicmap-id)))
+
+(defun repair-topic-proxy-assignment-dry-run
+    (page &key (workspace-id hyperdoc::*dmx-context-window-workspace-id*)
+       (workspace-topicmap-id (hyperdoc::dmx-topicmap-id-of page)))
+  (handler-case
+      (let ((client
+              (make-dmx-topic-proxy-assignment-dry-run-client
+               page
+               :workspace-id workspace-id
+               :workspace-topicmap-id workspace-topicmap-id)))
+        (let ((hyperdoc::*workspace-journal-sink* :hyperdoc-local)
+              (hyperdoc::*allow-dmx-workspace-journal-writes* nil))
+          (repair-topic-proxy-with-client
+           page
+           client
+           :dry-run t
+           :auth-mode :rehearsal
+           :auth-context
+           (list :auth-mode :rehearsal
+                 :credentials-captured-p nil
+                 :username-provided-p nil
+                 :password-provided-p nil
+                 :authorization-header-provided-p nil
+                 :auth-token-provided-p nil)
+           :workspace-id workspace-id
+           :workspace-topicmap-id workspace-topicmap-id
+           :refresh-page-p nil
+           :force-diagnostics-p nil)))
+    (error (condition)
+      (let* ((topic-id (hyperdoc::dmx-topic-id-of page))
+             (diagnostics (hyperdoc::dmx-diagnostics-of page))
+             (result
+               (sanitize-dmx-repair-result
+                topic-id
+                diagnostics
+                (list :workspace-action :assign
+                      :result-in-topicmap-p
+                      (and diagnostics
+                           (hyperdoc::dmx-topic-diagnostics-selected-topicmap-membership-p
+                            diagnostics)))
+                :dry-run t
+                :auth-mode :rehearsal
+                :success-p nil
+                :debug-report
+                (list :auth-mode :rehearsal
+                      :current-state-label "local-dry-run-unavailable"
+                      :failure-transition :missing-fetched-data)
+                :message
+                (format nil
+                        "Local dry-run could not be built from fetched proxy data: ~A"
+                        condition))))
+        (setf (hyperdoc::dmx-repair-results-of page) (list result))
+        result))))
+
+(defun run-dmx-topic-proxy-inline-workspace-assignment
+    (page &key dry-run auth-mode username password authorization-header
+       auth-token
+       (workspace-id hyperdoc::*dmx-context-window-workspace-id*)
+       (workspace-topicmap-id (hyperdoc::dmx-topicmap-id-of page)))
+  (if dry-run
+      (repair-topic-proxy-assignment-dry-run
+       page
+       :workspace-id workspace-id
+       :workspace-topicmap-id workspace-topicmap-id)
+      (let ((hyperdoc::*workspace-journal-sink* :hyperdoc-local)
+            (hyperdoc::*allow-dmx-workspace-journal-writes* nil))
+        (repair-topic-proxy-with-explicit-auth
+         page
+         :dry-run nil
+         :auth-mode auth-mode
+         :username username
+         :password password
+         :authorization-header authorization-header
+         :auth-token auth-token
+         :workspace-id workspace-id
+         :workspace-topicmap-id workspace-topicmap-id))))
 
 (defun repair-workspace-triage-topic-ids (page)
   (hyperdoc::ensure-dmx-workspace-repair-triage page :force? t)
@@ -2508,6 +2676,122 @@
                     (:tr (:td (views:esc "Load error"))
                          (:td (views:object-ref condition))))))))))
 
+(defun render-dmx-topic-proxy-workspace-assignment-repair-card
+    (page diagnostics)
+  (let* ((target-workspace-id hyperdoc::*dmx-context-window-workspace-id*)
+         (topicmap-id (hyperdoc::dmx-topicmap-id-of page))
+         (path (dmx-topic-proxy-assignment-path page target-workspace-id))
+         (eligible-p
+           (dmx-topic-proxy-workspace-assignment-repairable-p diagnostics)))
+    (views:html
+      (:h4 "Workspace assignment")
+      (:p (views:esc
+           "Object-local assignment control. The dry-run uses the already fetched proxy data in a memory client; the live Assign action delegates to the existing guarded explicit-auth repair executor."))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Current workspace"))
+                   (:td (if diagnostics
+                            (render-workspace-reference page diagnostics)
+                            (views:html
+                              (:span :style "opacity: 0.55;" "n/a")))))
+              (:tr (:td (views:esc "Selected topicmap"))
+                   (:td (render-maybe-code topicmap-id)))
+              (:tr (:td (views:esc "Target workspace default"))
+                   (:td (views:esc
+                         (dmx-topic-proxy-assignment-target-label
+                          target-workspace-id))))
+              (:tr (:td (views:esc "Operation preview"))
+                   (:td (:code (views:esc
+                                (format nil "PUT ~A" path)))))
+              (:tr (:td (views:esc "Body"))
+                   (:td (:code (views:esc
+                                "zero-length body (Content-Length: 0)"))))
+              (:tr (:td (views:esc "Accept"))
+                   (:td (:code (views:esc "application/json"))))
+              (:tr (:td (views:esc "Session/workspace cookie shape"))
+                   (:td (:code
+                         (views:esc
+                          (format nil
+                                  "JSESSIONID=<redacted>; dmx_workspace_id=~D"
+                                  target-workspace-id)))))
+              (:tr (:td (views:esc "Forbidden side effects"))
+                   (:td (views:esc
+                         "No topic upsert; no topicmap placement; no full annotation continuation; no DMX workspace-journal write.")))
+              (:tr (:td (views:esc "Eligible"))
+                   (:td (:tt (views:esc (yes/no-label eligible-p))))))
+      (if eligible-p
+          (let (workspace-cell mode-cell username-cell password-cell
+                header-cell token-cell)
+            (views:html (:h5 "Guarded action"))
+            (setf workspace-cell
+                  (hvr:select
+                   (list (cons (dmx-topic-proxy-assignment-target-label
+                                target-workspace-id)
+                               (format nil "~D" target-workspace-id)))
+                   :label "Target workspace: "))
+            (views:html (:br))
+            (setf mode-cell
+                  (hvr:select '(("Username + password" . "basic")
+                                ("Authorization header" . "header")
+                                ("Bearer token" . "token"))
+                              :label "Credential mode: "))
+            (views:html (:br))
+            (setf username-cell
+                  (hvr:input :label "Username: " :initial-value "" :size "24"))
+            (views:html (:br))
+            (setf password-cell
+                  (hvr:input :label "Password: "
+                             :initial-value ""
+                             :size "24"
+                             :type :password))
+            (views:html (:br))
+            (setf header-cell
+                  (hvr:input :label "Authorization header: "
+                             :initial-value ""
+                             :size "64"))
+            (views:html (:br))
+            (setf token-cell
+                  (hvr:input :label "Bearer token: "
+                             :initial-value ""
+                             :size "48"
+                             :type :password))
+            (views:html
+              (:p (views:esc
+                   "Credential fields are ephemeral UI inputs for the next action only. Raw Authorization headers, cookies, tokens, passwords, and response bodies are not rendered in the result table."))
+              (views:action-button
+               "Dry-run assignment"
+               (views:thunk
+                 (run-dmx-topic-proxy-inline-workspace-assignment
+                  page
+                  :dry-run t
+                  :auth-mode (lwcells:cell-ref mode-cell)
+                  :workspace-id
+                  (parse-integer (lwcells:cell-ref workspace-cell))
+                  :workspace-topicmap-id topicmap-id)
+                 t)
+               "Plan the workspace assignment with a local memory client; no live HTTP call is made")
+              " "
+              (views:action-button
+               "Assign workspace"
+               (views:thunk
+                 (run-dmx-topic-proxy-inline-workspace-assignment
+                  page
+                  :dry-run nil
+                  :auth-mode (lwcells:cell-ref mode-cell)
+                  :username (lwcells:cell-ref username-cell)
+                  :password (lwcells:cell-ref password-cell)
+                  :authorization-header (lwcells:cell-ref header-cell)
+                  :auth-token (lwcells:cell-ref token-cell)
+                  :workspace-id
+                  (parse-integer (lwcells:cell-ref workspace-cell))
+                  :workspace-topicmap-id topicmap-id)
+                 t)
+               (format nil
+                       "Run the guarded zero-body PUT ~A through the existing explicit-auth repair executor"
+                       path))))
+          (views:html
+            (:p (views:esc
+                 "This topic is not currently an actionable missing-assignment candidate. The control remains read-only for already assigned or foreign topics.")))))))
+
 (views:defview 👀workspace-diagnostics (page hyperdoc::dmx-topic-proxy)
   (hyperdoc::ensure-dmx-topic-diagnostics page)
   (views:html-view :title "Workspace diagnostics" :priority 2
@@ -2574,6 +2858,9 @@
                                (or (hyperdoc::dmx-topic-diagnostics-status-reason
                                     diagnostics)
                                    "n/a")))))
+            (render-dmx-topic-proxy-workspace-assignment-repair-card
+             page
+             diagnostics)
             (:h4 "Source endpoints")
             (:table :class "inspector-table"
                     (:tr (:th (views:esc "Surface"))
@@ -2718,6 +3005,25 @@
           :target "_blank"
           (views:esc "Open selected topic in DMX webclient")))))
 
+(views:defview 👀url (page hyperdoc::dmx-topic-proxy)
+  (views:html-view :title "URL" :priority 20
+    (views:html
+      (:p (views:esc
+           "Local deep links for DMX topic proxy objects are not routable yet. Use the launch expression below or the DMX webclient link instead of the generic HyperBook local route."))
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Local route"))
+                   (:td (views:esc "not routable yet")))
+              (:tr (:td (views:esc "Launch expression"))
+                   (:td (:code
+                         (views:esc
+                          (dmx-topic-proxy-launch-expression page)))))
+              (:tr (:td (views:esc "DMX webclient"))
+                   (:td (:a :href (hyperdoc::dmx-webclient-url page)
+                            :target "_blank"
+                            (:code
+                             (views:esc
+                              (hyperdoc::dmx-webclient-url page))))))))))
+
 (views:defview 👀repair-console (page hyperdoc::dmx-topic-proxy)
   (hyperdoc::ensure-dmx-topic-diagnostics page)
   (views:html-view :title "Repair console" :priority 6
@@ -2791,7 +3097,7 @@
                 (views:action-button
                  "Dry-run selected topic"
                  (views:thunk
-                   (repair-topic-proxy-with-explicit-auth
+                   (run-dmx-topic-proxy-inline-workspace-assignment
                     page
                    :dry-run t
                    :auth-mode (lwcells:cell-ref mode-cell)
@@ -2805,7 +3111,7 @@
                (views:action-button
                 "Repair selected topic"
                 (views:thunk
-                  (repair-topic-proxy-with-explicit-auth
+                  (run-dmx-topic-proxy-inline-workspace-assignment
                    page
                    :dry-run nil
                    :auth-mode (lwcells:cell-ref mode-cell)

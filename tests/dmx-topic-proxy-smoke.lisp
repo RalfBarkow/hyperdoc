@@ -2052,7 +2052,8 @@
                                    "Core concepts from Lafont 1990"
                                    "ul[2]"
                                    "dock-annotation"
-                                   "Annotation"))
+                                   "Annotation"
+                                   "Repair assignment..."))
                (assert-true
                 (search needle html :test #'char=)
                 (format nil "Meta view for topic 936040 must render ~S"
@@ -2062,6 +2063,238 @@
                       html
                       :test #'char=)
               "Meta view must state the read-only boundary")))
+      (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
+            original-ensure-diagnostics
+            (symbol-function 'hyperdoc::ensure-dmx-related-topics)
+            original-ensure-related
+            (symbol-function 'hyperdoc::dmx-http-request-body)
+            original-http))))
+
+(defun run-dmx-topic-proxy-workspace-assignment-card-936040-smoke-test ()
+  (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
+         (original-ensure-diagnostics
+           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
+    (seed-dmx-topic-936040-proxy-fixture proxy)
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page)
+                 (symbol-function 'hyperdoc::dmx-http-request-body)
+                 (lambda (&rest args)
+                   (declare (ignore args))
+                   (error "Workspace assignment repair card smoke test must not issue HTTP calls")))
+           (let* ((views (dmx-topic-proxy-smoke-load-inspector-views-for-object
+                          proxy))
+                  (diagnostics
+                    (dmx-topic-proxy-smoke-find-view-by-title
+                     views
+                     "Workspace diagnostics"))
+                  (html (and diagnostics
+                             (html-inspector-views:view-html diagnostics))))
+             (assert-true diagnostics
+                          "DMX topic proxy must expose Workspace diagnostics")
+             (dolist (needle (list "Workspace assignment"
+                                   "Current workspace"
+                                   "n/a"
+                                   "Selected topicmap"
+                                   "919822"
+                                   "Target workspace"
+                                   "context-window / 919815"
+                                   "PUT /workspaces/919815/object/936040"
+                                   "zero-length body"
+                                   "Content-Length: 0"
+                                   "application/json"
+                                   "JSESSIONID"
+                                   "redacted"
+                                   "dmx_workspace_id=919815"
+                                   "Dry-run assignment"
+                                   "Assign workspace"
+                                   "No topic upsert"
+                                   "no DMX workspace-journal write"))
+               (assert-true
+                (search needle html :test #'char=)
+                (format nil
+                        "Workspace assignment card for topic 936040 must render ~S"
+                        needle)))
+             (dolist (forbidden '("super-secret" "raw-secret" "token-secret"))
+               (assert-true
+                (not (search forbidden html :test #'char=))
+                (format nil
+                        "Workspace assignment card must not render secret-like field ~S"
+                        forbidden)))))
+      (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
+            original-ensure-diagnostics
+            (symbol-function 'hyperdoc::dmx-http-request-body)
+            original-http))))
+
+(defun run-dmx-topic-proxy-inline-assignment-dry-run-smoke-test ()
+  (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
+         (events nil)
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
+         (original-execute
+           (symbol-function
+            'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)))
+    (seed-dmx-topic-936040-proxy-fixture proxy)
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::dmx-http-request-body)
+                 (lambda (&rest args)
+                   (declare (ignore args))
+                   (error "Inline dry-run assignment must not issue live HTTP calls"))
+                 (symbol-function
+                  'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)
+                 (lambda (topic-id &rest args
+                          &key client dry-run workspace-id workspace-topicmap-id
+                          &allow-other-keys)
+                   (push (list :topic-id topic-id
+                               :client-type (type-of client)
+                               :dry-run (and dry-run t)
+                               :workspace-id workspace-id
+                               :workspace-topicmap-id workspace-topicmap-id)
+                         events)
+                   (apply original-execute topic-id args)))
+           (let ((result
+                   (hyperdoc/inspector::run-dmx-topic-proxy-inline-workspace-assignment
+                    proxy
+                    :dry-run t
+                    :auth-mode :basic
+                    :username "ignored"
+                    :password "super-secret"
+                    :authorization-header "Basic raw-secret"
+                    :auth-token "token-secret"
+                    :workspace-id 919815
+                    :workspace-topicmap-id 919822)))
+             (assert-true (getf result :success-p)
+                          "Inline dry-run assignment must return a successful local plan")
+             (assert-true (getf result :dry-run)
+                          "Inline dry-run assignment must mark the result as dry-run")
+             (assert-equal :assign
+                           (getf result :workspace-action)
+                           "Inline dry-run assignment must plan the workspace assignment")
+             (assert-equal
+              '((:topic-id 936040
+                 :client-type hyperdoc::memory-dmx-import-client
+                 :dry-run t
+                 :workspace-id 919815
+                 :workspace-topicmap-id 919822))
+              (reverse events)
+              "Inline dry-run assignment must call the existing executor with a memory client")
+             (let ((table-input
+                     (write-to-string
+                      (hyperdoc::dmx-repair-results-of proxy))))
+               (dolist (forbidden '("super-secret" "raw-secret" "token-secret"
+                                    "Authorization: " "Cookie: "))
+                 (assert-true
+                  (not (search forbidden table-input :test #'char=))
+                  (format nil
+                          "Inline dry-run result data must not retain ~S"
+                          forbidden))))))
+      (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http
+            (symbol-function
+             'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)
+            original-execute))))
+
+(defun run-dmx-topic-proxy-inline-assignment-delegates-smoke-test ()
+  (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
+         (calls nil)
+         (original-explicit
+           (symbol-function
+            'hyperdoc/inspector::repair-topic-proxy-with-explicit-auth))
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
+    (seed-dmx-topic-936040-proxy-fixture proxy)
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::dmx-http-request-body)
+                 (lambda (&rest args)
+                   (declare (ignore args))
+                   (error "Inline assignment delegation smoke test must not issue HTTP calls"))
+                 (symbol-function
+                  'hyperdoc/inspector::repair-topic-proxy-with-explicit-auth)
+                 (lambda (page &rest args
+                          &key dry-run auth-mode username password
+                          authorization-header auth-token workspace-id
+                          workspace-topicmap-id &allow-other-keys)
+                   (declare (ignore page username password authorization-header
+                                    auth-token))
+                   (push (list :dry-run (and dry-run t)
+                               :auth-mode auth-mode
+                               :workspace-id workspace-id
+                               :workspace-topicmap-id workspace-topicmap-id)
+                         calls)
+                   (list :topic-id 936040
+                         :dry-run (and dry-run t)
+                         :success-p nil
+                         :auth-mode auth-mode
+                         :message "stubbed explicit-auth repair helper")))
+           (hyperdoc/inspector::run-dmx-topic-proxy-inline-workspace-assignment
+            proxy
+            :dry-run nil
+            :auth-mode :basic
+            :username "operator"
+            :password "super-secret"
+            :authorization-header "Basic raw-secret"
+            :auth-token "token-secret"
+            :workspace-id 919815
+            :workspace-topicmap-id 919822)
+           (assert-equal
+            '((:dry-run nil
+               :auth-mode :basic
+               :workspace-id 919815
+               :workspace-topicmap-id 919822))
+            (reverse calls)
+            "Inline Assign workspace action must delegate to the existing explicit-auth repair helper"))
+      (setf (symbol-function
+             'hyperdoc/inspector::repair-topic-proxy-with-explicit-auth)
+            original-explicit
+            (symbol-function 'hyperdoc::dmx-http-request-body)
+            original-http))))
+
+(defun run-dmx-topic-proxy-url-view-936040-smoke-test ()
+  (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
+         (original-ensure-diagnostics
+           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+         (original-ensure-related
+           (symbol-function 'hyperdoc::ensure-dmx-related-topics))
+         (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
+    (seed-dmx-topic-936040-proxy-fixture proxy)
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page)
+                 (symbol-function 'hyperdoc::ensure-dmx-related-topics)
+                 (lambda (page &key force?)
+                   (declare (ignore force?))
+                   page)
+                 (symbol-function 'hyperdoc::dmx-http-request-body)
+                 (lambda (&rest args)
+                   (declare (ignore args))
+                   (error "DMX topic proxy URL view fixture must not issue HTTP calls")))
+           (let* ((views (dmx-topic-proxy-smoke-load-inspector-views-for-object
+                          proxy))
+                  (url (dmx-topic-proxy-smoke-find-view-by-title views "URL"))
+                  (html (and url (html-inspector-views:view-html url))))
+             (assert-true url
+                          "DMX topic proxy must expose a URL view")
+             (dolist (needle '("not routable yet"
+                               "(make-dmx-topic-proxy :topic-id 936040 :topicmap-id 919822)"
+                               "DMX webclient"))
+               (assert-true
+                (search needle html :test #'char=)
+                (format nil "DMX topic proxy URL view must render ~S"
+                        needle)))
+             (dolist (forbidden '("127.0.0.1"
+                                  "FF160-dmx-topicmap-919822/topic-936040"
+                                  "hyperbook-slug"))
+               (assert-true
+                (not (search forbidden html :test #'char=))
+                (format nil
+                        "DMX topic proxy URL view must not advertise broken route fragment ~S"
+                        forbidden)))))
       (setf (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics)
             original-ensure-diagnostics
             (symbol-function 'hyperdoc::ensure-dmx-related-topics)
@@ -2179,8 +2412,12 @@
   (run-repair-results-table-page-aware-state-smoke-test)
   (run-shared-workspace-inspectable-object-smoke-test)
   (run-dmx-topic-proxy-meta-view-936040-smoke-test)
+  (run-dmx-topic-proxy-workspace-assignment-card-936040-smoke-test)
+  (run-dmx-topic-proxy-inline-assignment-dry-run-smoke-test)
+  (run-dmx-topic-proxy-inline-assignment-delegates-smoke-test)
+  (run-dmx-topic-proxy-url-view-936040-smoke-test)
   (run-dock-annotation-open-dmx-meta-action-smoke-test)
   (run-unknown-wrapper-smoke-test)
-  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace operational-state page-awareness smoke + repair-auth state-machine run-status smoke + shared-workspace nondefault-id rendering smoke + repair-results table page-aware-state smoke + shared-workspace inspectable-object smoke + 936040 Meta view smoke + dock-annotation Open DMX Meta bridge smoke + unknown-wrapper condition).~%"
+  (format t "~&DMX topic proxy smoke tests passed (~D wrappers + topicmap helper + title-first launcher helper + endpoint regression + workspace diagnostics regression + workspace repair triage regression + explicit auth builder regression + repair console helper regression + repair console localhost-rehearsal bridge smoke + repair console debug trace regression + shared-workspace operational-state page-awareness smoke + repair-auth state-machine run-status smoke + shared-workspace nondefault-id rendering smoke + repair-results table page-aware-state smoke + shared-workspace inspectable-object smoke + 936040 Meta view smoke + 936040 inline workspace-assignment repair card smoke + inline dry-run smoke + inline Assign delegation smoke + DMX topic proxy URL view smoke + dock-annotation Open DMX Meta bridge smoke + unknown-wrapper condition).~%"
           (length *dmx-wrapper-smoke-specs*))
   t)
