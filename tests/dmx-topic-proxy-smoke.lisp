@@ -2053,7 +2053,7 @@
                                    "ul[2]"
                                    "dock-annotation"
                                    "Annotation"
-                                   "Repair assignment..."))
+                                   "Public assignment blocked; use privileged initial assignment repair"))
                (assert-true
                 (search needle html :test #'char=)
                 (format nil "Meta view for topic 936040 must render ~S"
@@ -2111,7 +2111,7 @@
                                    "redacted"
                                    "dmx_workspace_id=919815"
                                    "Dry-run assignment"
-                                   "Assign workspace"
+                                   "Public assignment blocked; use privileged initial assignment repair"
                                    "No topic upsert"
                                    "no DMX workspace-journal write"))
                (assert-true
@@ -2119,7 +2119,8 @@
                 (format nil
                         "Workspace assignment card for topic 936040 must render ~S"
                         needle)))
-             (dolist (forbidden '("super-secret" "raw-secret" "token-secret"))
+             (dolist (forbidden '("super-secret" "raw-secret" "token-secret"
+                                   "Assign workspace"))
                (assert-true
                 (not (search forbidden html :test #'char=))
                 (format nil

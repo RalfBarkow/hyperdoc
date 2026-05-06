@@ -26,6 +26,9 @@ node_modules/
 test-results/
 repomix-output-hyperdoc.md
 var/hyperdoc-local-journal/*.json
+target/
+*.class
+*.jar
 
 # ---> Local release/deploy artifacts
 .release-verifications/
@@ -36,3 +39,12 @@ result
 
 # Local HyperDoc journal/run records
 /var/hyperdoc-local-journal/
+/var/neo4j*/
+
+# local DMX credentials
+.dmx-admin-password
+.dmx-*.env
+tools/dmx-curl/.dmx-admin-password
+tools/dmx-curl/note.json
+topic-936040-*.json
+topic-936040-*.txt

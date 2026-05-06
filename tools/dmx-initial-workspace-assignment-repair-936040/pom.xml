@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>HyperDoc Initial Workspace Assignment Repair 936040</name>
+    <groupId>systems.dmx.hyperdoc</groupId>
+    <artifactId>hyperdoc-initial-workspace-assignment-repair-936040</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+
+    <parent>
+        <groupId>systems.dmx</groupId>
+        <artifactId>dmx-plugin</artifactId>
+        <version>5.3.5</version>
+        <relativePath>../../../dmx-platform/modules/dmx-plugin/pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>systems.dmx</groupId>
+            <artifactId>dmx-topicmaps</artifactId>
+            <version>5.3.5</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>systems.dmx.hyperdoc.repair.HyperdocInitialWorkspaceAssignmentRepair936040</Bundle-Activator>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

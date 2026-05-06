@@ -85,6 +85,12 @@
         diagnostics)
        (null (hyperdoc::dmx-topic-diagnostics-workspace-id diagnostics))))
 
+(defparameter +dmx-topic-proxy-public-assignment-blocked-message+
+  "Public assignment blocked; use privileged initial assignment repair")
+
+(defun dmx-topic-proxy-public-assignment-blocked-p (diagnostics)
+  (dmx-topic-proxy-workspace-assignment-repairable-p diagnostics))
+
 (defun render-workspace-reference-with-repair-link (page diagnostics)
   (views:html
     (render-workspace-reference page diagnostics)
@@ -92,7 +98,9 @@
       (views:html
         " "
         (views:object-ref page
-                          :display "[Repair assignment...]"
+                          :display
+                          (format nil "[~A]"
+                                  +dmx-topic-proxy-public-assignment-blocked-message+)
                           :select "Workspace diagnostics")))))
 
 (defun dmx-topic-proxy-assignment-target-label (workspace-id)
@@ -2682,11 +2690,19 @@
          (topicmap-id (hyperdoc::dmx-topicmap-id-of page))
          (path (dmx-topic-proxy-assignment-path page target-workspace-id))
          (eligible-p
-           (dmx-topic-proxy-workspace-assignment-repairable-p diagnostics)))
+           (dmx-topic-proxy-workspace-assignment-repairable-p diagnostics))
+         (public-assignment-blocked-p
+           (dmx-topic-proxy-public-assignment-blocked-p diagnostics)))
     (views:html
       (:h4 "Workspace assignment")
       (:p (views:esc
-           "Object-local assignment control. The dry-run uses the already fetched proxy data in a memory client; the live Assign action delegates to the existing guarded explicit-auth repair executor."))
+           "Object-local assignment control. The dry-run uses the already fetched proxy data in a memory client; the live public assignment action is suppressed when DMX requires privileged initial assignment."))
+      (when public-assignment-blocked-p
+        (views:html
+          (:p (:strong (views:esc
+                        +dmx-topic-proxy-public-assignment-blocked-message+))
+              (views:esc
+               ". DMX's public REST route checks object WRITE before the initial workspace assignment exists, so this case must be repaired inside the DMX runtime."))))
       (:table :class "inspector-table"
               (:tr (:td (views:esc "Current workspace"))
                    (:td (if diagnostics
@@ -2716,6 +2732,11 @@
               (:tr (:td (views:esc "Forbidden side effects"))
                    (:td (views:esc
                          "No topic upsert; no topicmap placement; no full annotation continuation; no DMX workspace-journal write.")))
+              (:tr (:td (views:esc "Repair boundary"))
+                   (:td (views:esc
+                         (if public-assignment-blocked-p
+                             +dmx-topic-proxy-public-assignment-blocked-message+
+                             "Guarded public workspace assignment path"))))
               (:tr (:td (views:esc "Eligible"))
                    (:td (:tt (views:esc (yes/no-label eligible-p))))))
       (if eligible-p
@@ -2769,25 +2790,32 @@
                   :workspace-topicmap-id topicmap-id)
                  t)
                "Plan the workspace assignment with a local memory client; no live HTTP call is made")
-              " "
-              (views:action-button
-               "Assign workspace"
-               (views:thunk
-                 (run-dmx-topic-proxy-inline-workspace-assignment
-                  page
-                  :dry-run nil
-                  :auth-mode (lwcells:cell-ref mode-cell)
-                  :username (lwcells:cell-ref username-cell)
-                  :password (lwcells:cell-ref password-cell)
-                  :authorization-header (lwcells:cell-ref header-cell)
-                  :auth-token (lwcells:cell-ref token-cell)
-                  :workspace-id
-                  (parse-integer (lwcells:cell-ref workspace-cell))
-                  :workspace-topicmap-id topicmap-id)
-                 t)
-               (format nil
-                       "Run the guarded zero-body PUT ~A through the existing explicit-auth repair executor"
-                       path))))
+              (if public-assignment-blocked-p
+                  (views:html
+                    (:p (views:esc
+                         +dmx-topic-proxy-public-assignment-blocked-message+)
+                        (views:esc
+                         ". Do not run the public PUT from this inspector for the initial-assignment case.")))
+                  (views:html
+                    " "
+                    (views:action-button
+                     "Assign workspace"
+                     (views:thunk
+                       (run-dmx-topic-proxy-inline-workspace-assignment
+                        page
+                        :dry-run nil
+                        :auth-mode (lwcells:cell-ref mode-cell)
+                        :username (lwcells:cell-ref username-cell)
+                        :password (lwcells:cell-ref password-cell)
+                        :authorization-header (lwcells:cell-ref header-cell)
+                        :auth-token (lwcells:cell-ref token-cell)
+                        :workspace-id
+                        (parse-integer (lwcells:cell-ref workspace-cell))
+                        :workspace-topicmap-id topicmap-id)
+                       t)
+                     (format nil
+                             "Run the guarded zero-body PUT ~A through the existing explicit-auth repair executor"
+                             path))))))
           (views:html
             (:p (views:esc
                  "This topic is not currently an actionable missing-assignment candidate. The control remains read-only for already assigned or foreign topics.")))))))
@@ -3107,23 +3135,31 @@
                     :auth-token (lwcells:cell-ref token-cell))
                   t)
                 "Run the guarded repair path without mutating DMX")
-               " "
-               (views:action-button
-                "Repair selected topic"
-                (views:thunk
-                  (run-dmx-topic-proxy-inline-workspace-assignment
-                   page
-                   :dry-run nil
-                   :auth-mode (lwcells:cell-ref mode-cell)
-                   :username (lwcells:cell-ref username-cell)
-                   :password (lwcells:cell-ref password-cell)
-                    :authorization-header (lwcells:cell-ref header-cell)
-                    :auth-token (lwcells:cell-ref token-cell))
-                  t)
-                (format nil
-                        "Assign workspace ~D in place while preserving topicmap ~D placement"
-                        (hyperdoc::dmx-workspace-id-of page)
-                        (hyperdoc::dmx-topicmap-id-of page)))))))
+               (if (dmx-topic-proxy-public-assignment-blocked-p diagnostics)
+                   (views:html
+                     (:p (:strong
+                          (views:esc
+                           +dmx-topic-proxy-public-assignment-blocked-message+))
+                         (views:esc
+                          ". Use the DMX-side Gogo command runbook instead of the public workspace assignment route.")))
+                   (views:html
+                     " "
+                     (views:action-button
+                      "Repair selected topic"
+                      (views:thunk
+                        (run-dmx-topic-proxy-inline-workspace-assignment
+                         page
+                         :dry-run nil
+                         :auth-mode (lwcells:cell-ref mode-cell)
+                         :username (lwcells:cell-ref username-cell)
+                         :password (lwcells:cell-ref password-cell)
+                         :authorization-header (lwcells:cell-ref header-cell)
+                         :auth-token (lwcells:cell-ref token-cell))
+                        t)
+                      (format nil
+                              "Assign workspace ~D in place while preserving topicmap ~D placement"
+                              (hyperdoc::dmx-workspace-id-of page)
+                              (hyperdoc::dmx-topicmap-id-of page)))))))))
         (:h4 "Result readback")
         (render-dmx-repair-results-table page
                                          (hyperdoc::dmx-repair-results-of page)

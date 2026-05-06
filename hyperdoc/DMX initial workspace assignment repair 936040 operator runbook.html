@@ -1,0 +1,281 @@
+<h1>DMX initial workspace assignment repair 936040 operator runbook</h1>
+
+<p>
+  This runbook records the completed DMX-side repair of topic <tt>936040</tt>.
+  HyperDoc's public workspace assignment path stayed stopped for this case
+  because the public REST route checks object WRITE before the initial
+  assignment exists.
+</p>
+
+<h2>Status</h2>
+
+<pre><code>(:STATE :DMX-INITIAL-WORKSPACE-ASSIGNMENT-936040-REPAIRED
+ :TOPIC-ID 936040
+ :WORKSPACE-ID 919815
+ :WORKSPACE-VALUE "context-window"
+ :TOPICMAP-ID 919822
+ :TOPICMAP-PRESENT-P T
+ :URI-LOOKUP-ID 936040
+ :DUPLICATE-TOPIC-CREATED-P NIL
+ :ANNOTATION-CARRIER-PRESERVED-P T
+ :PUBLIC-REST-ASSIGNMENT-USED-P NIL
+ :DIRECT-NEO4J-MUTATION-USED-P NIL
+ :MUTATION-SURFACE :PATCHED-DMX-WORKSPACES-BUNDLE-25
+ :INTERNAL-PATH "WorkspacesPlugin._assignToWorkspace(topic, 919815L)")</code></pre>
+
+<h2>Current boundary</h2>
+
+<ul>
+  <li>Public route <tt>PUT /workspaces/919815/object/936040</tt> was not used for the successful repair.</li>
+  <li>Blocked public-route reason: <tt>checkAssignmentArgs(object, workspaceId)</tt> checks object WRITE before assignment.</li>
+  <li>Successful DMX internal path: <tt>WorkspacesPlugin._assignToWorkspace(topic, 919815L)</tt>.</li>
+  <li><tt>xBasic</tt> remains only a <tt>WWW-Authenticate</tt> challenge label, not a credential method.</li>
+</ul>
+
+<h2>DMX plugin integration pattern</h2>
+
+<p>
+  The standalone helper bundle remains useful as diagnostic history, but it is
+  not the recommended repair surface. Hot deploy, startup deploy through
+  <tt>bundle-deploy/</tt>, and startup deploy through <tt>bundle/</tt> were not
+  the path that completed the repair.
+</p>
+
+<p>
+  The completed repair surface was a temporary command added inside the already
+  activated <tt>systems.dmx.workspaces.WorkspacesPlugin</tt>. That plugin is the
+  semantic owner of workspace assignment and already contains the local
+  initial-assignment helper for newly created topics and associations. The
+  one-shot command used <tt>_assignToWorkspace(topic, 919815L)</tt> rather than
+  the public REST route, ordinary reassignment path, or direct Neo4j mutation.
+</p>
+
+<p>
+  Commands were registered from <tt>WorkspacesPlugin.init()</tt>, after DMX
+  plugin activation supplied the protected <tt>dmx</tt> <tt>CoreService</tt>
+  field and injected <tt>TopicmapsService</tt>. The repair command is not a REST
+  endpoint. It is a Gogo command surface with bounded output and no credentials.
+</p>
+
+<h2>Build patched Workspaces plugin</h2>
+
+<pre><code>nix develop -c mvn \
+  -f ../dmx-platform/modules/dmx-workspaces/pom.xml \
+  -DskipTests \
+  package</code></pre>
+
+<p>
+  The broad <tt>-P all -pl modules/dmx-workspaces -am</tt> reactor may fail
+  earlier in <tt>dmx-webclient</tt> on modern Node/OpenSSL before reaching this
+  module. For this repair slice, the authoritative source check was the direct
+  <tt>dmx-workspaces</tt> bundle build above.
+</p>
+
+<h2>Final Gogo proof transcript</h2>
+
+<p>
+  The successful live mutation came from patched DMX Workspaces bundle
+  <tt>25</tt>. The transcript below is bounded to lifecycle, command gating,
+  preview, and repair result evidence. No credentials, cookies, Authorization
+  headers, or raw response bodies are present.
+</p>
+
+<pre><code>g! stop 25
+Mai 06, 2026 7:15:51 PM systems.dmx.core.osgi.PluginActivator stop
+INFORMATION: ========== Stopping plugin "DMX Workspaces" ==========
+Mai 06, 2026 7:15:51 PM systems.dmx.core.impl.PluginImpl unpublishRestResources
+INFORMATION: Unpublishing REST resources (including provider classes) of plugin "DMX Workspaces"
+Mai 06, 2026 7:15:51 PM systems.dmx.core.impl.PluginImpl unregisterListeners
+INFORMATION: Unregistering event listeners of plugin "DMX Workspaces"
+
+g! update 25 file:/Users/rgb/workspace/dmx-platform/modules/dmx-workspaces/target/dmx-workspaces-5.3.5.jar
+
+g! start 25
+Mai 06, 2026 7:16:09 PM systems.dmx.core.osgi.PluginActivator start
+INFORMATION: ========== Starting plugin "DMX Workspaces" ==========
+Mai 06, 2026 7:16:09 PM systems.dmx.core.impl.PluginImpl readConfigFile
+INFORMATION: Reading config file "/plugin.properties" for plugin "DMX Workspaces"
+Mai 06, 2026 7:16:09 PM systems.dmx.core.impl.PluginImpl pluginDependencies
+INFORMATION: Tracking 1 plugins for plugin "DMX Workspaces" [systems.dmx.webclient]
+Mai 06, 2026 7:16:09 PM systems.dmx.core.impl.PluginImpl createInjectedServiceTrackers
+INFORMATION: Tracking 3 services for plugin "DMX Workspaces" [systems.dmx.facets.FacetsService, systems.dmx.topicmaps.TopicmapsService, systems.dmx.config.ConfigService]
+Mai 06, 2026 7:16:09 PM systems.dmx.core.impl.PluginImpl activate
+INFORMATION: ----- Activating plugin "DMX Workspaces" -----
+Mai 06, 2026 7:16:09 PM systems.dmx.core.impl.PluginImpl registerProvidedService
+INFORMATION: Registering service "systems.dmx.workspaces.WorkspacesService" at OSGi framework
+Mai 06, 2026 7:16:09 PM systems.dmx.workspaces.WorkspacesPlugin registerHyperdocRepairCommands
+INFORMATION: HyperDoc repair 936040: WorkspacesPlugin commands registered; no mutation on activation
+Mai 06, 2026 7:16:09 PM systems.dmx.core.impl.PluginImpl activate
+INFORMATION: ----- Activation of plugin "DMX Workspaces" complete -----
+
+g! inspect capability service 25
+systems.dmx.workspaces [25] provides:
+-------------------------------------
+service; org.osgi.service.event.EventHandler with properties:
+   event.topics = systems/dmx/core/plugin_activated
+   service.id = 55
+service; systems.dmx.workspaces.WorkspacesService with properties:
+   service.id = 56
+service; systems.dmx.workspaces.WorkspacesPlugin with properties:
+   osgi.command.function = status936040, preview936040, repair936040
+   osgi.command.scope = hyperdoc
+   service.id = 57
+
+g! hyperdoc:repair936040 I_UNDERSTAND_THIS_ASSIGNS_TOPIC_936040_TO_WORKSPACE_919815
+gogo: IllegalStateException: preview936040 must succeed in this plugin instance before repair936040</code></pre>
+
+<p>
+  The pre-preview exact-token attempt was refused correctly. The command required
+  a successful <tt>preview936040</tt> in the same plugin instance before mutation.
+</p>
+
+<pre><code>g! hyperdoc:preview936040
+(:STATE :DMX-INITIAL-WORKSPACE-ASSIGNMENT-936040-PREVIEW
+ :TOPIC-ID 936040
+ :WORKSPACE-ID NIL
+ :EXPECTED-WORKSPACE-ID 919815
+ :WORKSPACE-VALUE "context-window"
+ :TOPICMAP-ID 919822
+ :TOPICMAP-PRESENT-P T
+ :TOPIC-URI "hyperdoc:mcp/workspace-annotation/dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation"
+ :TOPIC-TYPE-URI "dmx.notes.note"
+ :TOPIC-VALUE "Annotation: An active/alive pair is two agents connected by principal ports."
+ :URI-LOOKUP-ID 936040
+ :NO-MUTATION-P T
+ :NO-PUBLIC-REST-ASSIGNMENT-P T
+ :NO-DIRECT-NEO4J-MUTATION-P T
+ :INTERNAL-PATH "WorkspacesPlugin._assignToWorkspace(topic, 919815L)")
+
+g! hyperdoc:repair936040 I_UNDERSTAND_THIS_ASSIGNS_TOPIC_936040_TO_WORKSPACE_919815
+(:STATE :DMX-INITIAL-WORKSPACE-ASSIGNMENT-936040-REPAIRED
+ :TOPIC-ID 936040
+ :PRE-REPAIR-WORKSPACE-ID NIL
+ :POST-REPAIR-WORKSPACE-ID 919815
+ :EXPECTED-WORKSPACE-ID 919815
+ :WORKSPACE-VALUE "context-window"
+ :TOPICMAP-ID 919822
+ :TOPICMAP-PRESENT-P T
+ :TOPIC-URI "hyperdoc:mcp/workspace-annotation/dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation"
+ :TOPIC-TYPE-URI "dmx.notes.note"
+ :TOPIC-VALUE "Annotation: An active/alive pair is two agents connected by principal ports."
+ :URI-LOOKUP-ID 936040
+ :NO-PUBLIC-REST-ASSIGNMENT-P T
+ :NO-DIRECT-NEO4J-MUTATION-P T
+ :INTERNAL-PATH "WorkspacesPlugin._assignToWorkspace(topic, 919815L)")</code></pre>
+
+<h2>HTTP readback proof</h2>
+
+<h3>Workspace assignment exists</h3>
+
+<pre><code>curl -sS -i http://127.0.0.1:8080/workspaces/object/936040
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id":919815,"uri":"","typeUri":"dmx.workspaces.workspace","value":"context-window",...}</code></pre>
+
+<ul>
+  <li>Before repair this endpoint returned <tt>204 No Content</tt>.</li>
+  <li>After repair it returns workspace id <tt>919815</tt>, value <tt>context-window</tt>.</li>
+</ul>
+
+<h3>Topicmap membership is preserved</h3>
+
+<pre><code>curl -sS -i http://127.0.0.1:8080/topicmaps/object/936040
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+Result includes:
+- topicmap id 919822
+- value "context-window"
+- assoc typeUri "dmx.topicmaps.topicmap_context"
+- player1 topicId 936040 as "dmx.topicmaps.topicmap_content"
+- player2 topicId 919822 as "dmx.core.default"</code></pre>
+
+<p>
+  The readback also still includes the other prior topicmap memberships, so the
+  repair did not remove topicmap context.
+</p>
+
+<h3>Topic identity and carrier content are preserved</h3>
+
+<pre><code>curl -sS -i 'http://127.0.0.1:8080/core/topic/936040?children=true'
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+Result includes:
+- "id":936040
+- "uri":"hyperdoc:mcp/workspace-annotation/dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation"
+- "typeUri":"dmx.notes.note"
+- "value":"Annotation: An active/alive pair is two agents connected by principal ports."
+- child "dmx.notes.text" still contains the HyperDoc annotation carrier JSON
+- child "dmx.notes.title" still contains the same title</code></pre>
+
+<h3>URI lookup proves no duplicate topic</h3>
+
+<pre><code>set URI 'hyperdoc:mcp/workspace-annotation/dom-relation-list-item-h1-lafont-1990-interaction-nets-h2-core-concepts-from-lafont-1990-ul-2-item-3-an-active-alive-pair-is-two-agents-connected-by-principal-ports-to-dock-annotation'
+
+set ENCODED_URI (python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$URI")
+
+curl -sS -i "http://127.0.0.1:8080/core/topic/uri/$ENCODED_URI?children=true"
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+Result includes:
+- "id":936040
+- same URI
+- "typeUri":"dmx.notes.note"
+- same annotation value</code></pre>
+
+<p>
+  Fish shell note: use <tt>set NAME value</tt> and <tt>$ENCODED_URI</tt>. Do not
+  use POSIX shell assignment syntax such as <tt>NAME=value</tt>, and do not use
+  brace expansion syntax such as <tt>${ENCODED_URI}</tt> in this fish command.
+</p>
+
+<h2>Conclusion</h2>
+
+<ul>
+  <li>Topic <tt>936040</tt> is now assigned to workspace <tt>919815</tt> / <tt>context-window</tt>.</li>
+  <li>Topicmap membership <tt>919822</tt> is preserved.</li>
+  <li>The topic was not duplicated; URI lookup still resolves id <tt>936040</tt>.</li>
+  <li>The annotation carrier content is preserved.</li>
+  <li>The successful mutation path was <tt>WorkspacesPlugin._assignToWorkspace(topic, 919815L)</tt>.</li>
+  <li>Public REST assignment was not used.</li>
+  <li>Direct Neo4j mutation was not used.</li>
+  <li>The command correctly refused exact-token repair before preview.</li>
+  <li>The command required preview in the same plugin instance.</li>
+</ul>
+
+<h2>Cleanup</h2>
+
+<ul>
+  <li>Stop or uninstall the obsolete standalone helper bundle if it is still installed, because the proven repair surface is the patched WorkspacesPlugin command.</li>
+  <li>After this proof is committed, decide whether to revert the temporary WorkspacesPlugin command patch or isolate it behind a maintenance-only branch/build artifact.</li>
+  <li>Do not keep two bundles registering the same <tt>hyperdoc:*936040</tt> command names.</li>
+</ul>
+
+<h2>Artifact reconstruction</h2>
+
+<ul>
+  <li>No topic delete/recreate was performed.</li>
+  <li>No replacement topic was created.</li>
+  <li>No public REST mutation performed the repair.</li>
+  <li>No direct Neo4j mutation was performed.</li>
+  <li>No duplicate topic exists by deterministic URI lookup.</li>
+  <li>The durable annotation carrier remains topic <tt>936040</tt>.</li>
+</ul>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>Do not delete or recreate topic <tt>936040</tt>.</li>
+  <li>Do not run topic upsert.</li>
+  <li>Do not run topicmap placement.</li>
+  <li>Do not run HyperDoc full annotation continuation.</li>
+  <li>Do not enable DMX workspace-journal writes.</li>
+  <li>Do not use direct Neo4j mutation for this repair.</li>
+</ul>
