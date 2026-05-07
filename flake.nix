@@ -148,6 +148,38 @@
             --eval "(progn (require 'sly) (sly-connect \"$host\" $port))"
         '';
 
+        lispfmt = pkgs.writeShellApplication {
+          name = "lispfmt";
+          runtimeInputs = [ pkgs.emacs-nox pkgs.findutils ];
+          text = ''
+            set -euo pipefail
+
+            if [ "$#" -eq 0 ]; then
+              mapfile -t files < <(
+                find . \
+                  -path './.git' -prune -o \
+                  -path './.direnv' -prune -o \
+                  -type f \( -name '*.lisp' -o -name '*.asd' \) \
+                  -print
+              )
+            else
+              files=("$@")
+            fi
+
+            for file in "''${files[@]}"; do
+              emacs -Q --batch "$file" \
+                --eval "(progn
+                          (require 'cl-indent)
+                          (lisp-mode)
+                          (setq indent-tabs-mode nil)
+                          (setq lisp-indent-function 'common-lisp-indent-function)
+                          (indent-region (point-min) (point-max))
+                          (delete-trailing-whitespace)
+                          (save-buffer))"
+            done
+          '';
+        };
+
         releaseRevision =
           if self ? dirtyShortRev then self.dirtyShortRev
           else if self ? shortRev then self.shortRev
@@ -180,6 +212,7 @@
             hyperdocEmacs
             hyperdocSlimeConnect
             hyperdocSlyConnect
+            lispfmt
             pkgs.python3
             pkgs.git
             pkgs.rlwrap
@@ -267,6 +300,7 @@ EOF
         };
 
         packages = {
+          inherit lispfmt;
           hyperdoc-release = releasePackage;
           default = releasePackage;
         };
@@ -314,23 +348,11 @@ EOF
         dreyeck-ch = import ./nix/hosts/dreyeck-ch.nix;
       };
 
-      nixosConfigurations.dreyeck-ch = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = { inherit self; };
-        modules = [
-          dreyeckHardwareModule
-          ./nix/hosts/dreyeck-ch.nix
-          ({ lib, pkgs, ... }: {
-            system.stateVersion = lib.mkDefault "24.11";
-            networking.hostName = lib.mkDefault "dreyeck-ch";
-            services.hyperdoc.package = self.packages.${pkgs.system}.hyperdoc-release;
-            services.hyperdocMcp.package = self.packages.${pkgs.system}.hyperdoc-release;
-
-            environment.systemPackages = with pkgs; [
-              git
-            ];
-          })
-        ];
-      };
+      # Keep dreyeck's host wiring as reusable modules, not as a checked
+      # nixosConfiguration. The live host owns activation in /etc/nixos, and
+      # the repo-side dreyeck profile is historical rather than an activation
+      # target. Exporting it under nixosConfigurations makes `nix flake check`
+      # evaluate host-owned ACME/nginx assumptions that are intentionally not
+      # present in this repo checkout.
     };
 }
