@@ -34,6 +34,11 @@ function Guard_empty_selector() {
     }
 }
 
+function Clog_empty_selector_payload(payload) {
+    return typeof payload === 'string' &&
+        /^\s*clog\[''\]\s*=\s*\$\('#'\)\.get\(0\)\s*;?\s*$/.test(payload);
+}
+
 function Clog_set_connection_state(state) {
     clog['connection_state'] = state;
     if (document.documentElement) {
@@ -132,6 +137,13 @@ function Shutdown_ws(event) {
 function Setup_ws() {
     ws.onmessage = function (event) {
         try {
+            if (Clog_empty_selector_payload(event.data)) {
+                if (!window.__clog_ignored_empty_selector_payloads) {
+                    window.__clog_ignored_empty_selector_payloads = 0;
+                }
+                window.__clog_ignored_empty_selector_payloads += 1;
+                return;
+            }
             if (clog_debug == true) {
 		console.log ('eval data = ' + event.data);
             }

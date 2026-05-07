@@ -83,15 +83,22 @@ does not add silent retries.
 If no server is already running, the Playwright config starts one locally on `http://127.0.0.1:18080/boot.html` via `nix run .`.
 
 ```sh
-node_modules/.bin/playwright test -c tests/playwright/playwright.config.js
+nix develop --command npm ci
+nix develop --command npm run test:playwright:nor
+nix develop --command npm run test:playwright
 ```
 
 To reuse an existing local server instead:
 
 ```sh
 HYPERDOC_BASE_URL=http://127.0.0.1:56719/boot.html \
-  node_modules/.bin/playwright test -c tests/playwright/playwright.config.js
+  nix develop --command npm run test:playwright:nor
 ```
+
+The Playwright Test runner is provided by the root `@playwright/test`
+devDependency. Browser binaries come from the Nix dev shell through
+`PLAYWRIGHT_BROWSERS_PATH`, with browser downloads skipped during `npm ci`.
+Running `playwright install` should not be needed.
 
 ## Artifacts
 

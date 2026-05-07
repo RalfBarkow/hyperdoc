@@ -215,6 +215,7 @@
             lispfmt
             pkgs.python3
             pkgs.git
+            pkgs.nodejs
             pkgs.rlwrap
             pkgs.openssl
             pkgs.sqlite
@@ -224,6 +225,9 @@
           shellHook = ''
             export HYPERDOC_ROOT="$PWD"
             export HYPERDOC_DMX_IMPORT_BASE_URL="''${HYPERDOC_DMX_IMPORT_BASE_URL:-https://dmx.ralfbarkow.ch}"
+            export PLAYWRIGHT_BROWSERS_PATH="${pkgs.playwright-driver.browsers}"
+            export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
             export PATH="${sbclEnv}/bin:$PATH"
             current_registry="''${CL_SOURCE_REGISTRY:-}"
             filtered_registry=""
